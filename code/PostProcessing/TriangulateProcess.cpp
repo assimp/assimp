@@ -246,6 +246,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // emitted triangle, we use the opposite vertex which also happens to work
             // for tri-fanning a concave quad.
             // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
+
             unsigned int start_vertex = 0;
             for (unsigned int i = 0; i < 4; ++i) {
                 const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
@@ -265,12 +266,15 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                 const float angle = std::acos(left*diag) + std::acos(right*diag);
                 if (angle > AI_MATH_PI_F) {
                     // i is the concave point
-                    // ngon encoding: if the concave vertex is same as last triangle first index,
-                    // then we chose the opposite vertex.
-                    start_vertex = (face.mIndices[i] != prev_first_indice) ? i : ((i+2) % 4);
+                    start_vertex = i;
                     break;
                 }
             }
+
+            // ngon encoding: if vertex is same as last triangle first index,
+            // then we chose the opposite vertex (works for both concave & convex quad).
+            if (face.mIndices[start_vertex] == prev_first_indice)
+                start_vertex = (start_vertex+2) % 4;
 
             const unsigned int temp[] = {face.mIndices[0], face.mIndices[1], face.mIndices[2], face.mIndices[3]};
 

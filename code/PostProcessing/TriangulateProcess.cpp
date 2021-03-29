@@ -214,14 +214,14 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
         aiFace* const last_face = curOut;
 
+        // ngon encoding: making sure that triangles are not recognized as false ngons.
+        // To do so, we make sure the first indice is not the same as previous triangle emitted.
+        unsigned int prev_first_indice = (unsigned int)-1;
+        if (curOut != out) prev_first_indice = (curOut - 1)->mIndices[0];
+
         // if it's a simple point,line or triangle: just copy it
         if( face.mNumIndices <= 3)
         {
-            // ngon encoding: making sure that triangles are not recognized as false ngons.
-            // To do so, we make sure the first indice is not the same as previous triangle emitted.
-            unsigned int prev_first_indice = (unsigned int)-1;
-            if (curOut != out) prev_first_indice = (curOut - 1)->mIndices[0];
-
             aiFace& nface = *curOut++;
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
@@ -241,6 +241,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // quads can have at maximum one concave vertex. Determine
             // this vertex (if it exists) and start tri-fanning from
             // it.
+            //
+            // Due to ngon encoding, if this concave vertex is the same as the previously
+            // emitted triangle, we use the opposite vertex which also happens to work
+            // for tri-fanning a concave quad.
+            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
             unsigned int start_vertex = 0;
             for (unsigned int i = 0; i < 4; ++i) {
                 const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
@@ -259,8 +264,10 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
                 const float angle = std::acos(left*diag) + std::acos(right*diag);
                 if (angle > AI_MATH_PI_F) {
-                    // this is the concave point
-                    start_vertex = i;
+                    // i is the concave point
+                    // ngon encoding: if the concave vertex is same as last triangle first index,
+                    // then we chose the opposite vertex.
+                    start_vertex = (face.mIndices[i] != prev_first_indice) ? i : ((i+2) % 4);
                     break;
                 }
             }

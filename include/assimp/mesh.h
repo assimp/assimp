@@ -414,7 +414,7 @@ enum aiPrimitiveType {
      * @see aiProcess_Triangulate
      * @link https://github.com/KhronosGroup/glTF/pull/1620
      */
-    aiPrimitiveType_NGONEncodingFlag = 0x16,
+    aiPrimitiveType_NGONEncodingFlag = 0x10,
 
 /** This value is not used. It is just here to force the
      *  compiler to map this enum to a 32 Bit integer.

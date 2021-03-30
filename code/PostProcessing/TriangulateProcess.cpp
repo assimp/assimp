@@ -82,8 +82,7 @@ namespace {
      * @brief Helper struct used to simplify NGON encoding functions.
      */
     struct NGONEncoder {
-        NGONEncoder(const aiFace * outTriArray, size_t outTriArraySize)
-        : mOutTriArrayBeg(outTriArray), mOutTriArrayEnd(outTriArray + outTriArraySize) {}
+        NGONEncoder() : mLastNGONFirstIndex((unsigned int)-1) {}
 
         /**
          * @brief Encode the current triangle, and make sure it is recognized as a triangle.
@@ -92,10 +91,9 @@ namespace {
          * part of the previous ngon. This method is to be used whenever you want to emit a real triangle,
          * and make sure it is seen as a triangle.
          * 
-         * @param tri Current triangle, must be in bounds of the outTriArray (= be a cell within the array).
+         * @param tri Triangle to encode.
          */
-        void ngonEncodeTriangle(aiFace * tri) const {
-            ai_assert(tri >= mOutTriArrayBeg && tri < mOutTriArrayEnd);
+        void ngonEncodeTriangle(aiFace * tri) {
             ai_assert(tri->mNumIndices == 3);
 
             // Rotate indices in new triangle to avoid ngon encoding false ngons
@@ -104,6 +102,40 @@ namespace {
                 std::swap(tri->mIndices[0], tri->mIndices[2]);
                 std::swap(tri->mIndices[1], tri->mIndices[2]);
             }
+
+            mLastNGONFirstIndex = tri->mIndices[0];
+        }
+
+        /**
+         * @brief Encode a quad (2 triangles) in ngon encoding, and make sure they are seen as a single ngon.
+         * 
+         * @param tri1 First quad triangle
+         * @param tri2 Second quad triangle
+         * 
+         * @pre Triangles must be properly fanned from the most appropriate vertex.
+         */
+        void ngonEncodeQuad(aiFace *tri1, aiFace *tri2) {
+            ai_assert(tri1->mNumIndices == 3);
+            ai_assert(tri2->mNumIndices == 3);
+            ai_assert(tri1->mIndices[0] == tri2->mIndices[0]);
+
+            // If the selected fanning vertex is the same as the previously
+            // emitted ngon, we use the opposite vertex which also happens to work
+            // for tri-fanning a concave quad.
+            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
+            if (isConsideredSameAsLastNgon(tri1)) {
+                // Right-rotate indices for tri1 (index 2 becomes the new fanning vertex)
+                std::swap(tri1->mIndices[0], tri1->mIndices[2]);
+                std::swap(tri1->mIndices[1], tri1->mIndices[2]);
+
+                // Left-rotate indices for tri2 (index 2 becomes the new fanning vertex)
+                std::swap(tri2->mIndices[1], tri2->mIndices[2]);
+                std::swap(tri2->mIndices[0], tri2->mIndices[2]);
+
+                ai_assert(tri1->mIndices[0] == tri2->mIndices[0]);
+            }
+
+            mLastNGONFirstIndex = tri1->mIndices[0];
         }
 
         /**
@@ -114,26 +146,12 @@ namespace {
          * @return false If used as is, this triangle is not considered part of the last ngon.
          */
         bool isConsideredSameAsLastNgon(const aiFace * tri) const {
-            ai_assert(tri >= mOutTriArrayBeg && tri < mOutTriArrayEnd);
             ai_assert(tri->mNumIndices == 3);
-            
-            // First triangle to be emitted, so no problem here
-            if (tri == mOutTriArrayBeg) return false;
-
-            const aiFace * prevTri = tri - 1;
-            return tri->mIndices[0] == prevTri->mIndices[0];
+            return tri->mIndices[0] == mLastNGONFirstIndex;
         }
 
     private:
-        /**
-         * @brief Begining of triangulation process out triangles array
-         */
-        const aiFace * mOutTriArrayBeg;
-
-        /**
-         * @brief End of triangulation process out triangles array (out of bounds, a la C++ iterators).
-         */        
-        const aiFace * mOutTriArrayEnd;
+        unsigned int mLastNGONFirstIndex;
     };
 
 }
@@ -245,7 +263,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
     std::vector<aiVector2D> temp_verts(max_out+2);
 
-    const NGONEncoder ngonEncoder(out, numOut);
+    NGONEncoder ngonEncoder;
 
     // Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
@@ -290,7 +308,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mIndices    = face.mIndices;
             face.mIndices = nullptr;
 
+            // points and lines don't require ngon encoding (and are not supported either!)
             if (nface.mNumIndices == 3) ngonEncoder.ngonEncodeTriangle(&nface);
+
             continue;
         }
         // optimized code for quadrilaterals
@@ -333,20 +353,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mIndices[1] = temp[(start_vertex + 1) % 4];
             nface.mIndices[2] = temp[(start_vertex + 2) % 4];
 
-            // Due to NGON encoding, if the selected fanning vertex is the same as the previously
-            // emitted ngon, we use the opposite vertex which also happens to work
-            // for tri-fanning a concave quad.
-            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
-            //
-            // @warning No need to call ngonEncoder.ngonEncodeTriangle() here. We want these 2 faces to be seen as
-            //          a single quad, not 2 separate triangles. This is the whole purpose!
-            if (ngonEncoder.isConsideredSameAsLastNgon(&nface)) {
-                start_vertex = (start_vertex+2) % 4;
-                nface.mIndices[0] = temp[start_vertex];
-                nface.mIndices[1] = temp[(start_vertex + 1) % 4];
-                nface.mIndices[2] = temp[(start_vertex + 2) % 4];
-            }
-
             aiFace& sface = *curOut++;
             sface.mNumIndices = 3;
             sface.mIndices = new unsigned int[3];
@@ -357,6 +363,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
             // prevent double deletion of the indices field
             face.mIndices = nullptr;
+
+            ngonEncoder.ngonEncodeQuad(&nface, &sface);
+
             continue;
         }
         else

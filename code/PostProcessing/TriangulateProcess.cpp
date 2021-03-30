@@ -76,6 +76,69 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+namespace {
+
+    /**
+     * @brief Helper struct used to simplify NGON encoding functions.
+     */
+    struct NGONEncoder {
+        NGONEncoder(const aiFace * outTriArray, size_t outTriArraySize)
+        : mOutTriArrayBeg(outTriArray), mOutTriArrayEnd(outTriArray + outTriArraySize) {}
+
+        /**
+         * @brief Encode the current triangle, and make sure it is recognized as a triangle.
+         * 
+         * This method will rotate indices in tri if needed in order to avoid tri to be considered
+         * part of the previous ngon. This method is to be used whenever you want to emit a real triangle,
+         * and make sure it is seen as a triangle.
+         * 
+         * @param tri Current triangle, must be in bounds of the outTriArray (= be a cell within the array).
+         */
+        void ngonEncodeTriangle(aiFace * tri) const {
+            ai_assert(tri >= mOutTriArrayBeg && tri < mOutTriArrayEnd);
+            ai_assert(tri->mNumIndices == 3);
+
+            // Rotate indices in new triangle to avoid ngon encoding false ngons
+            // Otherwise, the new triangle would be considered part of the previous NGON.
+            if (isConsideredSameAsLastNgon(tri)) {
+                std::swap(tri->mIndices[0], tri->mIndices[2]);
+                std::swap(tri->mIndices[1], tri->mIndices[2]);
+            }
+        }
+
+        /**
+         * @brief Check whether this triangle would be considered part of the lastly emitted ngon or not.
+         * 
+         * @param tri Current triangle.
+         * @return true If used as is, this triangle will be part of last ngon.
+         * @return false If used as is, this triangle is not considered part of the last ngon.
+         */
+        bool isConsideredSameAsLastNgon(const aiFace * tri) const {
+            ai_assert(tri >= mOutTriArrayBeg && tri < mOutTriArrayEnd);
+            ai_assert(tri->mNumIndices == 3);
+            
+            // First triangle to be emitted, so no problem here
+            if (tri == mOutTriArrayBeg) return false;
+
+            const aiFace * prevTri = tri - 1;
+            return tri->mIndices[0] == prevTri->mIndices[0];
+        }
+
+    private:
+        /**
+         * @brief Begining of triangulation process out triangles array
+         */
+        const aiFace * mOutTriArrayBeg;
+
+        /**
+         * @brief End of triangulation process out triangles array (out of bounds, a la C++ iterators).
+         */        
+        const aiFace * mOutTriArrayEnd;
+    };
+
+}
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 TriangulateProcess::TriangulateProcess()
@@ -175,9 +238,14 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
     pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
 
+    // The mesh becomes NGON encoded now, during the triangulation process.
+    pMesh->mPrimitiveTypes |= aiPrimitiveType_NGONEncodingFlag;
+
     aiFace* out = new aiFace[numOut](), *curOut = out;
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
     std::vector<aiVector2D> temp_verts(max_out+2);
+
+    const NGONEncoder ngonEncoder(out, numOut);
 
     // Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
@@ -194,13 +262,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 #endif
 
     const aiVector3D* verts = pMesh->mVertices;
-
-    // NGON encoding note: making sure that triangles are not recognized as false ngons.
-    // To do so, we make sure the first indice of the new emitted triangle is not the same as previous one.
-    unsigned int prev_first_indice = (unsigned int)-1;
-
-    // The mesh becomes NGON encoded now, during the triangulation process.
-    pMesh->mPrimitiveTypes |= aiPrimitiveType_NGONEncodingFlag;
 
     // use std::unique_ptr to avoid slow std::vector<bool> specialiations
     std::unique_ptr<bool[]> done(new bool[max_out]);
@@ -228,6 +289,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
             face.mIndices = nullptr;
+            ngonEncoder.ngonEncodeTriangle(&nface);
             continue;
         }
         // optimized code for quadrilaterals
@@ -236,12 +298,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // quads can have at maximum one concave vertex. Determine
             // this vertex (if it exists) and start tri-fanning from
             // it.
-            //
-            // Due to NGON encoding, if this concave vertex is the same as the previously
-            // emitted triangle, we use the opposite vertex which also happens to work
-            // for tri-fanning a concave quad.
-            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
-
             unsigned int start_vertex = 0;
             for (unsigned int i = 0; i < 4; ++i) {
                 const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
@@ -266,11 +322,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                 }
             }
 
-            // ngon encoding: if vertex is same as last triangle first index,
-            // then we chose the opposite vertex (works for both concave & convex quad).
-            if (face.mIndices[start_vertex] == prev_first_indice)
-                start_vertex = (start_vertex+2) % 4;
-
             const unsigned int temp[] = {face.mIndices[0], face.mIndices[1], face.mIndices[2], face.mIndices[3]};
 
             aiFace& nface = *curOut++;
@@ -280,6 +331,20 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mIndices[0] = temp[start_vertex];
             nface.mIndices[1] = temp[(start_vertex + 1) % 4];
             nface.mIndices[2] = temp[(start_vertex + 2) % 4];
+
+            // Due to NGON encoding, if the selected fanning vertex is the same as the previously
+            // emitted ngon, we use the opposite vertex which also happens to work
+            // for tri-fanning a concave quad.
+            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
+            //
+            // @warning No need to call ngonEncoder.ngonEncodeTriangle() here. We want these 2 faces to be seen as
+            //          a single quad, not 2 separate triangles. This is the whole purpose!
+            if (ngonEncoder.isConsideredSameAsLastNgon(&nface)) {
+                start_vertex = (start_vertex+2) % 4;
+                nface.mIndices[0] = temp[start_vertex];
+                nface.mIndices[1] = temp[(start_vertex + 1) % 4];
+                nface.mIndices[2] = temp[(start_vertex + 2) % 4];
+            }
 
             aiFace& sface = *curOut++;
             sface.mNumIndices = 3;
@@ -526,16 +591,10 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             i[1] = idx[i[1]];
             i[2] = idx[i[2]];
 
-            // NGON encoding: only quads are supported. 
-            // For everything else, we make sure we don't emit 'false' ngons. We thus avoid having 
-            // 2 consecutive triangles with their first index identical.
-            if (face.mNumIndices != 4 && i[0] == prev_first_indice) {
-                // rotate indices
-                std::swap(i[0], i[2]);
-                std::swap(i[1], i[2]);
-            }
-
-            prev_first_indice = i[0];
+            // IMPROVEMENT: Polygons are not supported yet by this ngon encoding + triangulation step.
+            //              So we encode polygons as regular triangles. No way to reconstruct the original
+            //              polygon in this case.
+            ngonEncoder.ngonEncodeTriangle(f);
             ++f;
         }
 

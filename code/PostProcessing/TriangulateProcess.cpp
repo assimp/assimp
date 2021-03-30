@@ -289,7 +289,8 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
             face.mIndices = nullptr;
-            ngonEncoder.ngonEncodeTriangle(&nface);
+
+            if (nface.mNumIndices == 3) ngonEncoder.ngonEncodeTriangle(&nface);
             continue;
         }
         // optimized code for quadrilaterals

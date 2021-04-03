@@ -39,16 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/// \file AMFImporter_Geometry.cpp
-/// \brief Parsing data from geometry nodes.
-/// \date 2016
-/// \author smal.root@gmail.com
-
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
 
 #include "AMFImporter.hpp"
-//#include "AMFImporter_Macro.hpp"
-
 #include <assimp/ParsingUtils.h>
 
 namespace Assimp {

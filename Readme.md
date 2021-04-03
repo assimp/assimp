@@ -76,9 +76,6 @@ For more information, visit [our website](http://assimp.org/). Or check out the 
 
 If the docs don't solve your problem, ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
 
-For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
-  [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)
-
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
 And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
@@ -102,9 +99,6 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 #### Individuals
 
 <a href="https://opencollective.com/assimp"><img src="https://opencollective.com/assimp/individuals.svg?width=890"></a>
-
-Monthly donations via Patreon:
-<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
 
 
 #### Organizations

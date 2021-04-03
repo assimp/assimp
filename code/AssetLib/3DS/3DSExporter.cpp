@@ -444,7 +444,7 @@ void Discreet3DSExporter::WriteMeshes() {
             const uint16_t count = static_cast<uint16_t>(mesh.mNumVertices);
             writer.PutU2(count);
             for (unsigned int i = 0; i < mesh.mNumVertices; ++i) {
-                const aiVector3D &v = trafo * mesh.mVertices[i];
+                const aiVector3D &v = mesh.mVertices[i];
                 writer.PutF4(v.x);
                 writer.PutF4(v.y);
                 writer.PutF4(v.z);
@@ -506,10 +506,15 @@ void Discreet3DSExporter::WriteMeshes() {
         // Transformation matrix by which the mesh vertices have been pre-transformed with.
         {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_TRMATRIX);
-            for (unsigned int r = 0; r < 4; ++r) {
+            // Store rotation 3x3 matrix row wise
+            for (unsigned int r = 0; r < 3; ++r) {
                 for (unsigned int c = 0; c < 3; ++c) {
                     writer.PutF4(trafo[r][c]);
                 }
+            }
+            // Store translation sub vector column wise
+            for (unsigned int r = 0; r < 3; ++r) {
+                writer.PutF4(trafo[r][3]);
             }
         }
     }

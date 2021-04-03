@@ -454,7 +454,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   # If the zlib is already found outside, add an export in case assimpTargets can't find it.
   IF( ZLIB_FOUND )
-    INSTALL( TARGETS zlib
+    INSTALL( TARGETS zlib zlibstatic
         EXPORT "${TARGETS_EXPORT_NAME}")
   ENDIF()
 

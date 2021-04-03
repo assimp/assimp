@@ -185,9 +185,6 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
     if (height < 1) {
 		throw DeadlyImportError("Invalid height for texture.");
 	}
-    if (depth < 1) {
-	//	throw DeadlyImportError("Invalid depth for texture.");
-    }
     if (type != "grayscale") {
 		throw DeadlyImportError("Invalid type for texture.");
     }

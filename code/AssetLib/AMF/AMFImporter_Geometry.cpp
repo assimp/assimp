@@ -108,12 +108,6 @@ void AMFImporter::ParseNode_Vertices(XmlNode &node) {
         }
     }
     ParseHelper_Node_Exit();
-    //pugi::xml_node vertexNode = node.child("vertex");
-    //if (!vertexNode.empty()) {
-
-//    } else {
-//    } // if(!mReader->isEmptyElement()) else
-
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 

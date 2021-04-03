@@ -225,7 +225,7 @@ AI_FORCE_INLINE char_t ai_tolower(char_t in) {
 /// @param  in  The incoming string.
 /// @return The string as lowercase.
 // ---------------------------------------------------------------------------------
-AI_FORCE_INLINE std::string ai_str_tolower(const std::string &in) {
+AI_FORCE_INLINE std::string ai_tolower(const std::string &in) {
     std::string out(in);
     ai_trim_left(out);
     ai_trim_right(out);

@@ -428,7 +428,7 @@ void MDLImporter::InternReadFile_Quake1() {
     } else {
         // get the first frame in the group
         BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)pcFrames;
-        pcFirstFrame = &(pcFrames2->frames[0]);
+        pcFirstFrame = (MDL::SimpleFrame *)( &pcFrames2->time + pcFrames2->numframes );
     }
     BE_NCONST MDL::Vertex *pcVertices = (BE_NCONST MDL::Vertex *)((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char *)(pcVertices + pcHeader->num_verts));

@@ -696,6 +696,8 @@ struct GroupFrame
     //! 0 = simple frame, !0 = group frame
     int32_t type;
 
+    int32_t numframes;
+
     //! Minimum vertex for all single frames
     Vertex min;
 
@@ -703,7 +705,7 @@ struct GroupFrame
     Vertex max;
 
     //! Time for all single frames
-    float *time;
+    float time;    // float[numframes]
 
     //! List of single frames
     SimpleFrame *frames;

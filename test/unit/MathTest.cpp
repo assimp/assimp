@@ -51,6 +51,6 @@ const float AssimpMathTest::Epsilon = Math::getEpsilon<float>();
 RandomUniformFloatGenerator AssimpMathTest::RandNonZero(1.0f, 100.0f);
 
 // Initialize with an interval of [-PI,PI] inclusively.
-RandomUniformFloatGenerator AssimpMathTest::RandPI(-Math::PI<float>(), Math::PI<float>());
+RandomUniformFloatGenerator AssimpMathTest::RandPI(-Math::aiPi<float>(), Math::aiPi<float>());
 
 }

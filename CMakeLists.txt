@@ -452,16 +452,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   set(ZLIB_LIBRARIES ZLIB::zlib)
   set(ASSIMP_BUILD_MINIZIP TRUE)
 ELSE()
-  # If the zlib is already found outside, add an export in case assimpTargets can't find it.
-  IF( ZLIB_FOUND )
-    INSTALL( TARGETS zlib zlibstatic
-        EXPORT "${TARGETS_EXPORT_NAME}")
-  ENDIF()
-
-  IF ( NOT ASSIMP_BUILD_ZLIB )
-    FIND_PACKAGE(ZLIB)
-  ENDIF()
-
   IF( NOT ZLIB_FOUND )
     MESSAGE(STATUS "compiling zlib from sources")
     INCLUDE(CheckIncludeFile)
@@ -479,7 +469,7 @@ ELSE()
     # compile from sources
     ADD_SUBDIRECTORY(contrib/zlib)
     SET(ZLIB_FOUND 1)
-    SET(ZLIB_LIBRARIES zlibstatic)
+    SET(ZLIB_LIBRARIES assimp_zlibstatic)
     SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
     # need to ensure we don't link with system zlib or minizip as well.
     SET(ASSIMP_BUILD_MINIZIP 1)

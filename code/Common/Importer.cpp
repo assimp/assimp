@@ -982,7 +982,7 @@ size_t Importer::GetImporterIndex (const char* szExtension) const {
     if (ext.empty()) {
         return static_cast<size_t>(-1);
     }
-    ext = ai_str_tolower(ext);
+    ext = ai_tolower(ext);
     std::set<std::string> str;
     for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)  {
         str.clear();

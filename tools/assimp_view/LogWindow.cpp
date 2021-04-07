@@ -105,7 +105,7 @@ void CLogWindow::Init() {
 
     // setup the log text
     this->szText = AI_VIEW_RTF_LOG_HEADER;
-    ;
+
     this->szPlainText = "";
 }
 

@@ -419,7 +419,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
                 size_t posUnderscore = textureRef.find_last_of("_");
 
                 if (posSuffix != string::npos && posUnderscore != string::npos && posSuffix > posUnderscore) {
-                    string identifier = ai_str_tolower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));
+                    string identifier = ai_tolower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));
                     ASSIMP_LOG_VERBOSE_DEBUG_F("Detecting texture type from filename postfix '", identifier, "'");
 
                     if (identifier == "_n" || identifier == "_nrm" || identifier == "_nrml" || identifier == "_normal" || identifier == "_normals" || identifier == "_normalmap") {
@@ -440,7 +440,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
             // Detect from texture unit name. This cannot be too broad as
             // authors might give names like "LightSaber" or "NormalNinja".
             else {
-                string unitNameLower = ai_str_tolower(textureUnitName);
+                string unitNameLower = ai_tolower(textureUnitName);
                 if (unitNameLower.find("normalmap") != string::npos) {
                     textureType = aiTextureType_NORMALS;
                 } else if (unitNameLower.find("specularmap") != string::npos) {

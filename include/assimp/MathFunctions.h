@@ -87,7 +87,7 @@ inline IntegerType lcm( IntegerType a, IntegerType b ) {
     }
 	return a / t * b;
 }
-/// @brief  Will return the smallest epsilon-value for the requested type. 
+/// @brief  Will return the smallest epsilon-value for the requested type.
 /// @return The numercical limit epsilon depending on its type.
 template<class T>
 inline T getEpsilon() {
@@ -97,7 +97,7 @@ inline T getEpsilon() {
 /// @brief  Will return the constant PI for the requested type.
 /// @return Pi
 template<class T>
-inline T PI() {
+inline T aiPi() {
     return static_cast<T>(3.14159265358979323846);
 }
 

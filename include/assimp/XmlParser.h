@@ -89,7 +89,7 @@ public:
     }
 
     void clear() {
-        if(mData.empty() {
+        if(mData.empty()) {
             mDoc = nullptr;
             return;
         }

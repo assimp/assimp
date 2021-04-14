@@ -97,6 +97,9 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
+    // Always on as our triangulation process is aware of this type of encoding
+    mAsset->extensionsUsed.FB_ngon_encoding = true;
+
     if (isBinary) {
         mAsset->SetAsBinary();
     }
@@ -955,6 +958,7 @@ void glTF2Exporter::ExportMeshes()
         m->name = name;
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
+        p.ngonEncoded = (aim->mPrimitiveTypes & aiPrimitiveType_NGONEncodingFlag) != 0;
 
 		/******************* Vertices ********************/
 		Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);

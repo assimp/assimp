@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// @brief  Will find a node by its name.
 struct find_node_by_name_predicate {
     std::string mName;
     find_node_by_name_predicate(const std::string &name) :
@@ -88,7 +89,11 @@ public:
     }
 
     void clear() {
-        mData.resize(0);
+        if(mData.empty()) {
+            mDoc = nullptr;
+            return;
+        }
+        mData.clear();
         delete mDoc;
         mDoc = nullptr;
     }

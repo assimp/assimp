@@ -39,7 +39,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)
 * [Python](port/PyAssimp/README.md)
-* [.NET](https://github.com/assimp/assimp-net)
+* [.NET](https://bitbucket.org/Starnick/assimpnet/src/master/)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
 * [Unity 3d Plugin](https://www.assetstore.unity3d.com/en/#!/content/91777)

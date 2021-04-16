@@ -123,9 +123,9 @@ public:
     struct Object {
         Object() :
                 type(World),
-                name(""),
+                name(),
                 children(),
-                texture(""),
+                texture(),
                 texRepeat(1.f, 1.f),
                 texOffset(0.0f, 0.0f),
                 rotation(),

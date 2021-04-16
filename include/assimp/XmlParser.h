@@ -239,7 +239,7 @@ public:
     }
 
     static inline bool getValueAsString( XmlNode &node, std::string &text ) {
-        text = "";
+        text = std::string();
         if (node.empty()) {
             return false;
         }

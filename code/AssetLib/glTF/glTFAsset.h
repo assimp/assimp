@@ -1029,7 +1029,7 @@ namespace glTF
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version("")
+            , version()
         {
         }
     };

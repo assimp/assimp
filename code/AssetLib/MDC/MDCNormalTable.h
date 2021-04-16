@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MDC_NORMAL_TABLE_INCLUDED
 
 /* mdc decoding normal table */
-float mdcNormals[ 256 ][ 3 ] =
+const float mdcNormals[ 256 ][ 3 ] =
 {
     { 1.000000f, 0.000000f, 0.000000f },
     { 0.980785f, 0.195090f, 0.000000f },

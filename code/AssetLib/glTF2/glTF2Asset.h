@@ -997,7 +997,9 @@ public:
     virtual void AttachToDocument(Document &doc) = 0;
     virtual void DetachFromDocument() = 0;
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
     virtual void WriteObjects(AssetWriter &writer) = 0;
+#endif
 };
 
 template <class T>
@@ -1030,7 +1032,9 @@ class LazyDict : public LazyDictBase {
     void AttachToDocument(Document &doc);
     void DetachFromDocument();
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
     void WriteObjects(AssetWriter &writer) { WriteLazyDict<T>(*this, writer); }
+#endif
 
     Ref<T> Add(T *obj);
 

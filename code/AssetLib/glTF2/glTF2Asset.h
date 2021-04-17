@@ -98,12 +98,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
 #include <unordered_set>
-#if _MSC_VER > 1600
-#define gltf_unordered_map unordered_map
-#define gltf_unordered_set unordered_set
-#else
+#if defined(_MSC_VER) && _MSC_VER <= 1600
 #define gltf_unordered_map tr1::unordered_map
 #define gltf_unordered_set tr1::unordered_set
+#else
+#define gltf_unordered_map unordered_map
+#define gltf_unordered_set unordered_set
 #endif
 #endif
 
@@ -813,6 +813,11 @@ struct Mesh : public Object {
             AccessorList position, normal, tangent;
         };
         std::vector<Target> targets;
+
+        // extension: FB_ngon_encoding
+        bool ngonEncoded;
+
+        Primitive(): ngonEncoded(false) {}
     };
 
     std::vector<Primitive> primitives;
@@ -1108,6 +1113,7 @@ public:
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
         bool KHR_draco_mesh_compression;
+        bool FB_ngon_encoding;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

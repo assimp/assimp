@@ -156,7 +156,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert(mRootStream != nullptr);
             if (nullptr == mRootStream) {
-                throw DeadlyExportError("Cannot open root-file in archive : " + rootFile);
+                throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
             }
 
         } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {

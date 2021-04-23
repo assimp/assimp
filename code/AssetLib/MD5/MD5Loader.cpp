@@ -100,20 +100,9 @@ MD5Importer::~MD5Importer() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool MD5Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "md5anim" || extension == "md5mesh" || extension == "md5camera")
-        return true;
-    else if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        const char *tokens[] = { "MD5Version" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+bool MD5Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "MD5Version" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

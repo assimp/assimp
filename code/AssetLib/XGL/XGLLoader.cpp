@@ -105,23 +105,9 @@ XGLImporter::~XGLImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-	/* NOTE: A simple check for the file extension is not enough
-     * here. XGL and ZGL are ok, but xml is too generic
-     * and might be collada as well. So open the file and
-     * look for typical signal tokens.
-     */
-	const std::string extension = GetExtension(pFile);
-
-	if (extension == "xgl" || extension == "zgl") {
-		return true;
-	} else if (extension == "xml" || checkSig) {
-		ai_assert(pIOHandler != NULL);
-
-		const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 3);
-	}
-	return false;
+bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+	static const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

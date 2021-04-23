@@ -83,18 +83,9 @@ Q3DImporter::~Q3DImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool Q3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "q3s" || extension == "q3o")
-        return true;
-    else if (!extension.length() || checkSig) {
-        if (!pIOHandler)
-            return true;
-        const char *tokens[] = { "quick3Do", "quick3Ds" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
-    }
-    return false;
+bool Q3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "quick3Do", "quick3Ds" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

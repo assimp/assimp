@@ -141,20 +141,9 @@ STLImporter::~STLImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "stl") {
-        return true;
-    } else if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        const char *tokens[] = { "STL", "solid" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
-    }
-
-    return false;
+bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "STL", "solid" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -82,19 +82,10 @@ NDOImporter::~NDOImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-
-    if( extension == "ndo")
-        return true;
-
-    if ((checkSig || !extension.length()) && pIOHandler) {
-        const char* tokens[] = {"nendo"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,5);
-    }
-    return false;
+    static const char* tokens[] = {"nendo"};
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,std::size(tokens),5);
 }
 
 // ------------------------------------------------------------------------------------------------

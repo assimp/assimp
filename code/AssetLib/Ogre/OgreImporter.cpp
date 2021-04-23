@@ -73,17 +73,13 @@ void OgreImporter::SetupProperties(const Importer *pImp) {
     m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
-bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const {
-    if (!checkSig) {
-        return EndsWith(pFile, ".mesh.xml", false) || EndsWith(pFile, ".mesh", false);
-    }
-
+bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool /*checkSig*/) const {
     if (EndsWith(pFile, ".mesh.xml", false)) {
-        const char *tokens[] = { "<mesh>" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
+        static const char *tokens[] = { "<mesh>" };
+        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
     } else {
         /// @todo Read and validate first header chunk?
-        return EndsWith(pFile, ".mesh", false);
+        return false;
     }
 }
 

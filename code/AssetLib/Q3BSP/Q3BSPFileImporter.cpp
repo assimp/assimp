@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "pk3"
+    "bsp pk3"
 };
 
 namespace Assimp {

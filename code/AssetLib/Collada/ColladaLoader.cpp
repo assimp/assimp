@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
     3,
     1,
     5,
-    "dae zae"
+    "dae xml zae"
 };
 
 static const float kMillisecondsFromSeconds = 1000.f;

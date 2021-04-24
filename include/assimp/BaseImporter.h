@@ -385,7 +385,7 @@ public: // static utilities
 
 private:
     /* Pushes state into importer for the importer scale */
-    virtual void UpdateImporterScale(Importer *pImp);
+    void UpdateImporterScale(Importer *pImp);
 
 protected:
     /// Error description in case there was one.

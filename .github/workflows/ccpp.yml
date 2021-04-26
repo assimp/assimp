@@ -74,7 +74,7 @@ jobs:
         path: cmake/polly 
     
     - name: Install cppcov for c++
-      if: endfWith(matrix.name,'latest-gcov')
+      if: endsWith(matrix.name,'latest-gcov')
       run: |
         pip install --user cpp-coveralls
         run: echo "::set-output name=args::-ASSIMP_COVERALLS=1"

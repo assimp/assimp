@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter, ubuntu-latest-gcov]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
           - name: windows-latest-cl.exe
@@ -41,6 +41,10 @@ jobs:
           - name: windows-msvc-hunter
             os: windows-latest
             toolchain: ninja-vs-win64-cxx17
+          - name: ubuntu-latest-gcov
+            os: ubuntu-latest
+            cxx: g++
+            cc: gcc
 
     steps:
     - uses: actions/checkout@v2
@@ -67,8 +71,14 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: cpp-pm/polly
-        path: cmake/polly
-
+        path: cmake/polly 
+    
+    - name: Install cppcov for c++
+      if: endfWith(matrix.name,'latest-gcov')
+      run: |
+        pip install --user cpp-coveralls
+        run: echo "::set-output name=args::-ASSIMP_COVERALLS=1"
+      
     - name: Remove contrib directory for Hunter builds
       if: contains(matrix.name, 'hunter')
       uses: JesseTG/rm@v1.0.2

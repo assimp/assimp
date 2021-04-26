@@ -44,7 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/glTF2/glTF2Importer.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 #include "AssetLib/glTF2/glTF2Asset.h"
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
+#endif
 
 #include <assimp/CreateAnimMesh.h>
 #include <assimp/StringComparison.h>

@@ -656,7 +656,7 @@ X3DExporter::X3DExporter(const char *pFileName, IOSystem *pIOSystem, const aiSce
     attr_list.clear();
     // <head>: meta data.
     NodeHelper_OpenNode("head", 1);
-    XML_Write(mIndentationString + "<!-- All \"meta\" from this section tou will found in <Scene> node as MetadataString nodes. -->\n");
+    XML_Write(mIndentationString + "<!-- Meta Data -->\n");
     NodeHelper_CloseNode("head", 1);
     // Scene node.
     NodeHelper_OpenNode("Scene", 1);

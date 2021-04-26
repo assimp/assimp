@@ -131,6 +131,11 @@ jobs:
     - name: test
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
+      
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions/upload-artifact@v2
       if: matrix.name == 'windows-msvc'

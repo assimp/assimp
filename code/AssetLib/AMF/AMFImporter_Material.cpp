@@ -65,48 +65,45 @@ namespace Assimp {
 //   Red, Greed, Blue and Alpha (transparency) component of a color in sRGB space, values ranging from 0 to 1. The
 //   values can be specified as constants, or as a formula depending on the coordinates.
 void AMFImporter::ParseNode_Color(XmlNode &node) {
-    std::string profile = node.attribute("profile").as_string();
-    
-	// create new color object.
-	AMFNodeElementBase *ne = new AMFColor(mNodeElement_Cur);
-	AMFColor& als = *((AMFColor*)ne);// alias for convenience
+    if (node.empty()) {
+        return;
+    }
 
-	als.Profile = profile;
-	if (!node.empty()) {
-        ParseHelper_Node_Enter(ne);
-		bool read_flag[4] = { false, false, false, false };
-		for (pugi::xml_node &child : node.children()) {
-            std::string name = child.name();
-            if ( name == "r") {
-				read_flag[0] = true;
-                XmlParser::getValueAsFloat(child, als.Color.r);
-            } else if (name == "g") {
-				read_flag[1] = true;
-                XmlParser::getValueAsFloat(child, als.Color.g);
-            } else if (name == "b") {
-				read_flag[2] = true;
-                XmlParser::getValueAsFloat(child, als.Color.b);
-            } else if (name == "a") {
-			    read_flag[3] = true;
-                XmlParser::getValueAsFloat(child, als.Color.a);
-            }
-            ParseHelper_Node_Exit();
+    const std::string &profile = node.attribute("profile").as_string();
+    bool read_flag[4] = { false, false, false, false };
+    AMFNodeElementBase *ne = new AMFColor(mNodeElement_Cur);
+    AMFColor &als = *((AMFColor *)ne); // alias for convenience
+    ParseHelper_Node_Enter(ne);
+    for (pugi::xml_node &child : node.children()) {
+        // create new color object.
+        als.Profile = profile;
+
+        const std::string &name = child.name();
+        if ( name == "r") {
+			read_flag[0] = true;
+            XmlParser::getValueAsFloat(child, als.Color.r);
+        } else if (name == "g") {
+			read_flag[1] = true;
+            XmlParser::getValueAsFloat(child, als.Color.g);
+        } else if (name == "b") {
+			read_flag[2] = true;
+            XmlParser::getValueAsFloat(child, als.Color.b);
+        } else if (name == "a") {
+			read_flag[3] = true;
+            XmlParser::getValueAsFloat(child, als.Color.a);
         }
-		// check that all components was defined
-		if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
-			throw DeadlyImportError("Not all color components are defined.");
-		}
-
-		// check if <a> is absent. Then manually add "a == 1".
-		if (!read_flag[3]) {
-			als.Color.a = 1;
-		}
-	} else {
-		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
+        // check if <a> is absent. Then manually add "a == 1".
+        if (!read_flag[3]) {
+            als.Color.a = 1;
+        }
+    }
+    als.Composed = false;
+    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
+    ParseHelper_Node_Exit();
+    // check that all components was defined
+	if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
+		throw DeadlyImportError("Not all color components are defined.");
 	}
-
-	als.Composed = false;
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
 }
 
 // <material
@@ -158,11 +155,11 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
 // Multi elements - Yes.
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Texture(XmlNode &node) {
-    std::string id = node.attribute("id").as_string();
-	uint32_t width = node.attribute("width").as_uint();
-	uint32_t height = node.attribute("height").as_uint();
-	uint32_t depth = node.attribute("depth").as_uint();
-	std::string type = node.attribute("type").as_string();
+    const std::string id = node.attribute("id").as_string();
+	const uint32_t width = node.attribute("width").as_uint();
+    const uint32_t height = node.attribute("height").as_uint();
+    uint32_t depth = node.attribute("depth").as_uint();
+    const std::string type = node.attribute("type").as_string();
 	bool tiled = node.attribute("tiled").as_bool();
 
     if (node.empty()) {
@@ -174,22 +171,20 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 
 	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
 
-    std::string enc64_data = node.value();
-	// Check for child nodes
+    std::string enc64_data;
+    XmlParser::getValueAsString(node, enc64_data);
+    // Check for child nodes
 
 	// check that all components was defined
     if (id.empty()) {
 		throw DeadlyImportError("ID for texture must be defined.");
     }
     if (width < 1) {
-		throw DeadlyImportError("INvalid width for texture.");
+		throw DeadlyImportError("Invalid width for texture.");
     }
     if (height < 1) {
 		throw DeadlyImportError("Invalid height for texture.");
 	}
-    if (depth < 1) {
-		throw DeadlyImportError("Invalid depth for texture.");
-    }
     if (type != "grayscale") {
 		throw DeadlyImportError("Invalid type for texture.");
     }
@@ -203,7 +198,9 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 	als.Depth = depth;
 	als.Tiled = tiled;
 	ParseHelper_Decode_Base64(enc64_data, als.Data);
-
+    if (depth == 0) {
+        depth = (uint32_t)(als.Data.size() / (width * height));
+    }
     // check data size
     if ((width * height * depth) != als.Data.size()) {
         throw DeadlyImportError("Texture has incorrect data size.");
@@ -233,20 +230,18 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
     AMFTexMap &als = *((AMFTexMap *)ne); //
     std::string rtexid, gtexid, btexid, atexid;
     if (!node.empty()) {
-        ParseHelper_Node_Enter(ne);
-        for (XmlNode &currentNode : node.children()) {
-            const std::string &currentName = currentNode.name();
-            if (currentName == "rtexid") {
-                XmlParser::getValueAsString(node, rtexid);
-            } else if (currentName == "gtexid") {
-                XmlParser::getValueAsString(node, gtexid);
-            } else if (currentName == "btexid") {
-                XmlParser::getValueAsString(node, btexid);
-            } else if (currentName == "atexid") {
-                XmlParser::getValueAsString(node, atexid);
+        for (pugi::xml_attribute &attr : node.attributes()) {
+            const std::string &currentAttr = attr.name();
+            if (currentAttr == "rtexid") {
+                rtexid = attr.as_string();
+            } else if (currentAttr == "gtexid") {
+                gtexid = attr.as_string();
+            } else if (currentAttr == "btexid") {
+                btexid = attr.as_string();
+            } else if (currentAttr == "atexid") {
+                atexid = attr.as_string();
             }
         }
-        ParseHelper_Node_Exit();
     }
 
 	// create new texture coordinates object, alias for convenience
@@ -256,7 +251,6 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	}
 
 	// Check for children nodes
-	//XML_CheckNode_MustHaveChildren();
 	if (node.children().begin() == node.children().end()) {
 		throw DeadlyImportError("Invalid children definition.");
 	}
@@ -264,28 +258,31 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	bool read_flag[6] = { false, false, false, false, false, false };
 
 	if (!pUseOldName) {
-		for (pugi::xml_attribute &attr : node.attributes()) {
-            const std::string name = attr.name();
+        ParseHelper_Node_Enter(ne);
+        for ( XmlNode &currentNode : node.children()) {
+            const std::string &name = currentNode.name();
             if (name == "utex1") {
 				read_flag[0] = true;
-				als.TextureCoordinate[0].x = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[0].x);
             } else if (name == "utex2") {
 				read_flag[1] = true;
-				als.TextureCoordinate[1].x = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[1].x);
             } else if (name == "utex3") {
 				read_flag[2] = true;
-				als.TextureCoordinate[2].x = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[2].x);
             } else if (name == "vtex1") {
 				read_flag[3] = true;
-				als.TextureCoordinate[0].y = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[0].y);
             } else if (name == "vtex2") {
 				read_flag[4] = true;
-				als.TextureCoordinate[1].y = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[1].y);
             } else if (name == "vtex3") {
 				read_flag[5] = true;
-				als.TextureCoordinate[0].y = attr.as_float();
+                XmlParser::getValueAsFloat(node, als.TextureCoordinate[2].y);
 			}
 		}
+        ParseHelper_Node_Exit();
+
 	} else {
 		for (pugi::xml_attribute &attr : node.attributes()) {
             const std::string name = attr.name();

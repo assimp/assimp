@@ -500,7 +500,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
             }
 
-            TempTriangle& t = triangles[g.triangles[i]];
+            TempTriangle& t = triangles[g.triangles[j]];
             f.mIndices = new unsigned int[f.mNumIndices=3];
 
             for (unsigned int k = 0; k < 3; ++k,++n) {
@@ -508,7 +508,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                     throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
                 }
 
-                const TempVertex& v = vertices[t.indices[i]];
+                const TempVertex& v = vertices[t.indices[k]];
                 for(unsigned int a = 0; a < 4; ++a) {
                     if (v.bone_id[a] != UINT_MAX) {
                         if (v.bone_id[a] >= joints.size()) {
@@ -524,9 +524,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 // collect vertex components
                 m->mVertices[n] = v.pos;
 
-                m->mNormals[n] = t.normals[i];
-                m->mTextureCoords[0][n] = aiVector3D(t.uv[i].x,1.f-t.uv[i].y,0.0);
-                f.mIndices[i] = n;
+                m->mNormals[n] = t.normals[k];
+                m->mTextureCoords[0][n] = aiVector3D(t.uv[k].x,1.f-t.uv[k].y,0.0);
+                f.mIndices[k] = n;
             }
         }
 

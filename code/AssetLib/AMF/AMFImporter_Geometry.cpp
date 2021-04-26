@@ -39,16 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/// \file AMFImporter_Geometry.cpp
-/// \brief Parsing data from geometry nodes.
-/// \date 2016
-/// \author smal.root@gmail.com
-
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
 
 #include "AMFImporter.hpp"
-#include "AMFImporter_Macro.hpp"
-
 #include <assimp/ParsingUtils.h>
 
 namespace Assimp {
@@ -103,18 +96,18 @@ void AMFImporter::ParseNode_Vertices(XmlNode &node) {
     // create new mesh object.
     ne = new AMFVertices(mNodeElement_Cur);
     // Check for child nodes
-    pugi::xml_node vertexNode = node.child("vertex");
-    if (!vertexNode.empty()) {
-        ParseHelper_Node_Enter(ne);
-
-        ParseNode_Vertex(vertexNode);
-
-        ParseHelper_Node_Exit();
-
-    } else {
+    if (node.empty()) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
-    } // if(!mReader->isEmptyElement()) else
-
+        return;
+    }
+    ParseHelper_Node_Enter(ne);
+    for (XmlNode &currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "vertex") {
+            ParseNode_Vertex(currentNode);
+        }
+    }
+    ParseHelper_Node_Exit();
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
@@ -166,27 +159,25 @@ void AMFImporter::ParseNode_Vertex(XmlNode &node) {
 //   X, Y, or Z coordinate, respectively, of a vertex position in space.
 void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
     AMFNodeElementBase *ne = nullptr;
-
-    // create new color object.
-    ne = new AMFCoordinates(mNodeElement_Cur);
-
-    AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
     if (!node.empty()) {
+        ne = new AMFCoordinates(mNodeElement_Cur);
         ParseHelper_Node_Enter(ne);
         for (XmlNode &currentNode : node.children()) {
-            const std::string &currentName = currentNode.name();
-            if (currentName == "X") {
+            // create new color object.
+            AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
+            const std::string &currentName = ai_tolower(currentNode.name());
+            if (currentName == "x") {
                 XmlParser::getValueAsFloat(currentNode, als.Coordinate.x);
-            } else if (currentName == "Y") {
+            } else if (currentName == "y") {
                 XmlParser::getValueAsFloat(currentNode, als.Coordinate.y);
-            } else if (currentName == "Z") {
+            } else if (currentName == "z") {
                 XmlParser::getValueAsFloat(currentNode, als.Coordinate.z);
             }
         }
-
         ParseHelper_Node_Exit();
+
     } else {
-        mNodeElement_Cur->Child.push_back(ne);
+        mNodeElement_Cur->Child.push_back(new AMFCoordinates(mNodeElement_Cur));
     }
 
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
@@ -216,7 +207,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
     bool col_read = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        for (auto &currentNode : node.children()) {
             const std::string currentName = currentNode.name();
             if (currentName == "color") {
                 if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <volume>.");
@@ -258,7 +249,8 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
     bool col_read = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        std::string v;
+        for (auto &currentNode : node.children()) {
             const std::string currentName = currentNode.name();
             if (currentName == "color") {
                 if (col_read) Throw_MoreThanOnceDefined(currentName, "color", "Only one color can be defined for <triangle>.");
@@ -269,11 +261,14 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
             } else if (currentName == "map") {
                 ParseNode_TexMap(currentNode, true);
             } else if (currentName == "v1") {
-                als.V[0] = std::atoi(currentNode.value());
+                XmlParser::getValueAsString(currentNode, v);
+                als.V[0] = std::atoi(v.c_str());
             } else if (currentName == "v2") {
-                als.V[1] = std::atoi(currentNode.value());
+                XmlParser::getValueAsString(currentNode, v);
+                als.V[1] = std::atoi(v.c_str());
             } else if (currentName == "v3") {
-                als.V[2] = std::atoi(currentNode.value());
+                XmlParser::getValueAsString(currentNode, v);
+                als.V[2] = std::atoi(v.c_str());
             }
         }
         ParseHelper_Node_Exit();

@@ -120,7 +120,7 @@ std::string OgreXmlSerializer::ReadAttribute<std::string>(XmlNode &xmlNode, cons
 
 template <>
 bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) const {
-    std::string value = ai_str_tolower(ReadAttribute<std::string>(xmlNode, name));
+    std::string value = ai_tolower(ReadAttribute<std::string>(xmlNode, name));
     if (ASSIMP_stricmp(value, "true") == 0) {
         return true;
     } else if (ASSIMP_stricmp(value, "false") == 0) {
@@ -545,7 +545,7 @@ void OgreXmlSerializer::ReadSkeleton(XmlNode &node, Skeleton *skeleton) {
 
     // Optional blend mode from root node
     if (XmlParser::hasAttribute(node, "blendmode")) {
-        skeleton->blendMode = (ai_str_tolower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
+        skeleton->blendMode = (ai_tolower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
     }
 
     for (XmlNode &currentNode : node.children()) {

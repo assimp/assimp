@@ -64,7 +64,7 @@ static inline bool EndsWith(const std::string &s, const std::string &suffix, boo
     }
 
     if (!caseSensitive) {
-        return EndsWith(ai_str_tolower(s), ai_str_tolower(suffix), true);
+        return EndsWith(ai_tolower(s), ai_tolower(suffix), true);
     }
 
     size_t len = suffix.length();

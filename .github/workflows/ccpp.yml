@@ -77,6 +77,7 @@ jobs:
       if: endsWith(matrix.name,'latest-gcov')
       run: |
         pip install --user cpp-coveralls
+        sudo apt-get install -y lcov
         echo "::set-output name=args::-ASSIMP_COVERALLS=1"
       
     - name: Remove contrib directory for Hunter builds

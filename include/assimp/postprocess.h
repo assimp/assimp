@@ -209,9 +209,14 @@ enum aiPostProcessSteps
     /** <hr>Removes the node graph and pre-transforms all vertices with
     * the local transformation matrices of their nodes.
     *
-    * The output scene still contains nodes, however there is only a
-    * root node with children, each one referencing only one mesh,
-    * and each mesh referencing one material. For rendering, you can
+    * If the resulting scene can be reduced to a single mesh, with a single
+    * material, no lights, and no cameras, then the output scene will contain
+    * only a root node (with no children) that references the single mesh. 
+    * Otherwise, the output scene will be reduced to a root node with a single
+    * level of child nodes, each one referencing one mesh, and each mesh 
+    * referencing one material. 
+    *
+    * In either case, for rendering, you can
     * simply render all meshes in order - you don't need to pay
     * attention to local transformations and the node hierarchy.
     * Animations are removed during this step.

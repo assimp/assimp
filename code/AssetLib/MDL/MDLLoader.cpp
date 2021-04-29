@@ -708,6 +708,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
+                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -763,6 +764,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 // read the normal vector from the precalculated normal table
                 MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
+                pcMesh->mNormals[iCurrent] *= -1;
                 // pcMesh->mNormals[iCurrent].y *= -1.0f;
 
                 // read texture coordinates
@@ -1844,7 +1846,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                 for (unsigned int c = 0; c < 3; ++c) {
                     const uint32_t iIndex = oldFace.mIndices[c];
                     pcMesh->mVertices[iCurrent] = groupData.vPositions[iIndex];
-                    pcMesh->mNormals[iCurrent] = groupData.vNormals[iIndex];
+                    pcMesh->mNormals[iCurrent] = -groupData.vNormals[iIndex];
 
                     if (!groupData.vTextureCoords1.empty()) {
 

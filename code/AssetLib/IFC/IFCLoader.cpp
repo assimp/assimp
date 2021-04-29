@@ -115,7 +115,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ifc ifczip stp"
+    "ifc ifczip step stp"
 };
 
 // ------------------------------------------------------------------------------------------------

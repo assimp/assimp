@@ -44,7 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/glTF2/glTF2Importer.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 #include "AssetLib/glTF2/glTF2Asset.h"
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
+#endif
 
 #include <assimp/CreateAnimMesh.h>
 #include <assimp/StringComparison.h>
@@ -1170,7 +1172,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
 
         static const float kMillisecondsFromSeconds = 1000.f;
 
-        if (samplers.translation) {
+        if (samplers.translation && samplers.translation->input && samplers.translation->output) {
             float *times = nullptr;
             samplers.translation->input->ExtractData(times);
             aiVector3D *values = nullptr;
@@ -1194,7 +1196,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
             anim->mPositionKeys->mValue.z = node.translation.value[2];
         }
 
-        if (samplers.rotation) {
+        if (samplers.rotation && samplers.rotation->input && samplers.rotation->output) {
             float *times = nullptr;
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
@@ -1222,7 +1224,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
             anim->mRotationKeys->mValue.w = node.rotation.value[3];
         }
 
-        if (samplers.scale) {
+        if (samplers.scale && samplers.scale->input && samplers.scale->output) {
             float *times = nullptr;
             samplers.scale->input->ExtractData(times);
             aiVector3D *values = nullptr;

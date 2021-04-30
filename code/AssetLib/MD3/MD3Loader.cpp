@@ -450,6 +450,9 @@ void MD3Importer::SetupProperties(const Importer *pImp) {
     // AI_CONFIG_IMPORT_MD3_SKIN_NAME
     configSkinFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SKIN_NAME, "default"));
 
+    // AI_CONFIG_IMPORT_MD3_LOAD_SHADERS
+    configLoadShaders = (pImp->GetPropertyBool(AI_CONFIG_IMPORT_MD3_LOAD_SHADERS, true));
+
     // AI_CONFIG_IMPORT_MD3_SHADER_SRC
     configShaderFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SHADER_SRC, ""));
 
@@ -781,7 +784,9 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // And check whether we can locate a shader file for this model
     Q3Shader::ShaderData shaders;
-    ReadShader(shaders);
+    if (configLoadShaders){
+        ReadShader(shaders);
+    }
 
     // Adjust all texture paths in the shader
     const char *header_name = pcHeader->NAME;
@@ -863,7 +868,12 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         std::string convertedPath;
         if (texture_name) {
-            ConvertPath(texture_name, header_name, convertedPath);
+            if (configLoadShaders){
+                ConvertPath(texture_name, header_name, convertedPath);
+            }
+            else{
+                convertedPath = texture_name;
+            }
         }
 
         const Q3Shader::ShaderDataBlock *shader = nullptr;

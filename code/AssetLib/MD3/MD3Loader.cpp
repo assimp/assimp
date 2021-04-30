@@ -483,8 +483,9 @@ void MD3Importer::ReadShader(Q3Shader::ShaderData &fill) const {
 
     // If no specific dir or file is given, use our default search behaviour
     if (!configShaderFile.length()) {
-        if (!Q3Shader::LoadShader(fill, path + "..\\..\\..\\scripts\\" + model_file + ".shader", mIOHandler)) {
-            Q3Shader::LoadShader(fill, path + "..\\..\\..\\scripts\\" + filename + ".shader", mIOHandler);
+        const char sep = mIOHandler->getOsSeparator();
+        if (!Q3Shader::LoadShader(fill, path + ".." + sep + ".." + sep + ".." + sep + "scripts" + sep + model_file + ".shader", mIOHandler)) {
+             Q3Shader::LoadShader(fill, path + ".." + sep + ".." + sep + ".." + sep + "scripts" + sep + filename + ".shader", mIOHandler);
         }
     } else {
         // If the given string specifies a file, load this file.

@@ -155,7 +155,7 @@ std::string PeekPropertyName(const Element& element)
     ai_assert(element.KeyToken().StringContents() == "P");
     const TokenList& tok = element.Tokens();
     if(tok.size() < 4) {
-        return "";
+        return std::string();
     }
 
     return ParseTokenAsString(*tok[0]);

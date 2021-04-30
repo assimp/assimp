@@ -400,7 +400,7 @@ typedef enum {
 #ifndef MINIZ_NO_ZLIB_APIS
 
 // Heap allocation callbacks.
-// Note that mz_alloc_func parameter types purpsosely differ from zlib's:
+// Note that mz_alloc_func parameter types purposely differ from zlib's:
 // items/size is size_t, not unsigned long.
 typedef void *(*mz_alloc_func)(void *opaque, size_t items, size_t size);
 typedef void (*mz_free_func)(void *opaque, void *address);
@@ -2194,7 +2194,8 @@ tinfl_status tinfl_decompress(tinfl_decompressor *r,
             } else
               tree_cur = pTable->m_tree[-tree_cur - 1];
           }
-          tree_cur -= ((rev_code >>= 1) & 1);
+          rev_code >>= 1;
+          tree_cur -= (rev_code & 1);
           pTable->m_tree[-tree_cur - 1] = (mz_int16)sym_index;
         }
         if (r->m_type == 2) {
@@ -3970,6 +3971,7 @@ mz_uint tdefl_create_comp_flags_from_zip_params(int level, int window_bits,
 
 #ifdef _MSC_VER
 #pragma warning(push)
+#pragma warning(disable : 4121 4127 4244)
 #pragma warning(disable : 4204) // nonstandard extension used : non-constant
                                 // aggregate initializer (also supported by GNU
                                 // C and C99, so no big deal)
@@ -4098,10 +4100,6 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h,
                                                     pLen_out, 6, MZ_FALSE);
 }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
 // ------------------- .ZIP archive reading
 
 #ifndef MINIZ_NO_ARCHIVE_APIS
@@ -4112,18 +4110,39 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h,
 #include <stdio.h>
 #include <sys/stat.h>
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
+
+#include <windows.h>
+
+static wchar_t *str2wstr(const char *str) {
+  int len = (int) strlen(str) + 1;
+  wchar_t *wstr = malloc(len * sizeof(wchar_t));
+  MultiByteToWideChar(CP_UTF8, 0, str, len * sizeof(char), wstr, len);
+  return wstr;
+}
+
 static FILE *mz_fopen(const char *pFilename, const char *pMode) {
-  FILE *pFile = NULL;
-  fopen_s(&pFile, pFilename, pMode);
+  wchar_t *wFilename = str2wstr(pFilename);
+  wchar_t *wMode = str2wstr(pMode);
+  FILE *pFile = _wfopen(wFilename, wMode);
+
+  free(wFilename);
+  free(wMode);
+
   return pFile;
 }
+
 static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream) {
-  FILE *pFile = NULL;
-  if (freopen_s(&pFile, pPath, pMode, pStream))
-    return NULL;
+  wchar_t *wPath = str2wstr(pPath);
+  wchar_t *wMode = str2wstr(pMode);
+  FILE *pFile = _wfreopen(wPath, wMode, pStream);
+
+  free(wPath);
+  free(wMode);
+
   return pFile;
 }
+
 #ifndef MINIZ_NO_TIME
 #include <sys/utime.h>
 #endif
@@ -4144,7 +4163,7 @@ static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream) {
 #include <sys/utime.h>
 #endif
 #define MZ_FILE FILE
-#define MZ_FOPEN(f, m) fopen(f, m)
+#define MZ_FOPEN(f, m) mz_fopen
 #define MZ_FCLOSE fclose
 #define MZ_FREAD fread
 #define MZ_FWRITE fwrite
@@ -4153,7 +4172,7 @@ static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream) {
 #define MZ_FILE_STAT_STRUCT _stat
 #define MZ_FILE_STAT _stat
 #define MZ_FFLUSH fflush
-#define MZ_FREOPEN(f, m, s) freopen(f, m, s)
+#define MZ_FREOPEN(f, m, s) mz_freopen
 #define MZ_DELETE_FILE remove
 #elif defined(__TINYC__)
 #ifndef MINIZ_NO_TIME
@@ -5361,13 +5380,9 @@ mz_bool mz_zip_reader_extract_to_mem_no_alloc(mz_zip_archive *pZip,
   } else {
     // Temporarily allocate a read buffer.
     read_buf_size = MZ_MIN(file_stat.m_comp_size, MZ_ZIP_MAX_IO_BUF_SIZE);
-#if defined(_MSC_VER) && !defined(__clang__)
-    if (((0, sizeof(size_t) == sizeof(mz_uint32))) &&
-        (read_buf_size > 0x7FFFFFFF))
-#else
     if (((sizeof(size_t) == sizeof(mz_uint32))) && (read_buf_size > 0x7FFFFFFF))
-#endif
       return MZ_FALSE;
+
     if (NULL == (pRead_buf = pZip->m_pAlloc(pZip->m_pAlloc_opaque, 1,
                                             (size_t)read_buf_size)))
       return MZ_FALSE;
@@ -5454,11 +5469,7 @@ void *mz_zip_reader_extract_to_heap(mz_zip_archive *pZip, mz_uint file_index,
   uncomp_size = MZ_READ_LE32(p + MZ_ZIP_CDH_DECOMPRESSED_SIZE_OFS);
 
   alloc_size = (flags & MZ_ZIP_FLAG_COMPRESSED_DATA) ? comp_size : uncomp_size;
-#if defined(_MSC_VER) && !defined(__clang__)
-  if (((0, sizeof(size_t) == sizeof(mz_uint32))) && (alloc_size > 0x7FFFFFFF))
-#else
   if (((sizeof(size_t) == sizeof(mz_uint32))) && (alloc_size > 0x7FFFFFFF))
-#endif
     return NULL;
   if (NULL ==
       (pBuf = pZip->m_pAlloc(pZip->m_pAlloc_opaque, 1, (size_t)alloc_size)))
@@ -5560,14 +5571,10 @@ mz_bool mz_zip_reader_extract_to_callback(mz_zip_archive *pZip,
   if ((flags & MZ_ZIP_FLAG_COMPRESSED_DATA) || (!file_stat.m_method)) {
     // The file is stored or the caller has requested the compressed data.
     if (pZip->m_pState->m_pMem) {
-#if defined (_MSC_VER) && !defined(__clang__)
-      if (((0, sizeof(size_t) == sizeof(mz_uint32))) &&
-          (file_stat.m_comp_size > 0xFFFFFFFF))
-#else
       if (((sizeof(size_t) == sizeof(mz_uint32))) &&
           (file_stat.m_comp_size > 0xFFFFFFFF))
-#endif
         return MZ_FALSE;
+
       if (pCallback(pOpaque, out_buf_ofs, pRead_buf,
                     (size_t)file_stat.m_comp_size) != file_stat.m_comp_size)
         status = TINFL_STATUS_FAILED;
@@ -6085,7 +6092,7 @@ mz_zip_writer_compute_padding_needed_for_file_alignment(mz_zip_archive *pZip) {
   if (!pZip->m_file_offset_alignment)
     return 0;
   n = (mz_uint32)(pZip->m_archive_size & (pZip->m_file_offset_alignment - 1));
-  return (mz_uint)(pZip->m_file_offset_alignment - n) &
+  return (pZip->m_file_offset_alignment - n) &
          (pZip->m_file_offset_alignment - 1);
 }
 
@@ -6289,7 +6296,10 @@ mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
                                mz_uint32 ext_attributes) {
   mz_uint uncomp_crc32 = MZ_CRC32_INIT, level, num_alignment_padding_bytes;
   mz_uint16 method = 0, dos_time = 0, dos_date = 0;
+#ifndef MINIZ_NO_TIME
   time_t file_modified_time;
+#endif
+
   mz_uint64 local_dir_header_ofs, cur_archive_file_ofs, uncomp_size = 0,
                                                         comp_size = 0;
   size_t archive_name_size;
@@ -6326,10 +6336,12 @@ mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
         comment_size + archive_name_size) > 0xFFFFFFFF))
     return MZ_FALSE;
 
+#ifndef MINIZ_NO_TIME
   memset(&file_modified_time, 0, sizeof(file_modified_time));
   if (!mz_zip_get_file_modified_time(pSrc_filename, &file_modified_time))
     return MZ_FALSE;
   mz_zip_time_t_to_dos_time(file_modified_time, &dos_time, &dos_date);
+#endif
 
   pSrc_file = MZ_FOPEN(pSrc_filename, "rb");
   if (!pSrc_file)
@@ -6813,6 +6825,10 @@ void *mz_zip_extract_archive_file_to_heap(const char *pZip_filename,
   mz_zip_reader_end(&zip_archive);
   return p;
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif // #ifndef MINIZ_NO_STDIO
 

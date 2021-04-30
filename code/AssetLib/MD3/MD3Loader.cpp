@@ -196,11 +196,11 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
                 // 'cull' specifies culling behaviour for the model
                 else if (TokenMatchI(buff, "cull", 4)) {
                     SkipSpaces(&buff);
-                    if (!ASSIMP_strincmp(buff, "back", 4)) {
+                    if (!ASSIMP_strincmp(buff, "back", 4)) { // render face's backside, does not function in Q3 engine (bug)
                         curData->cull = Q3Shader::CULL_CCW;
-                    } else if (!ASSIMP_strincmp(buff, "front", 5)) {
+                    } else if (!ASSIMP_strincmp(buff, "front", 5)) { // is not valid keyword in Q3, but occurs in shaders
                         curData->cull = Q3Shader::CULL_CW;
-                    } else if (!ASSIMP_strincmp(buff, "none", 4) || !ASSIMP_strincmp(buff, "disable", 7)) {
+                    } else if (!ASSIMP_strincmp(buff, "none", 4) || !ASSIMP_strincmp(buff, "twosided", 8) || !ASSIMP_strincmp(buff, "disable", 7)) {
                         curData->cull = Q3Shader::CULL_NONE;
                     } else {
                         ASSIMP_LOG_ERROR("Q3Shader: Unrecognized cull mode");
@@ -986,8 +986,8 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[index].U;
                 pcMesh->mTextureCoords[0][iCurrent].y = 1.0f - pcUVs[index].V;
             }
-            // Flip face order if necessary
-            if (!shader || shader->cull == Q3Shader::CULL_CW) {
+            // Flip face order normally, unless shader is backfacing
+            if (!(shader && shader->cull == Q3Shader::CULL_CCW)) {
                 std::swap(pcMesh->mFaces[i].mIndices[2], pcMesh->mFaces[i].mIndices[1]);
             }
             ++pcTriangles;

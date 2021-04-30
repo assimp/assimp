@@ -685,7 +685,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                     // Files with 'None' as map name are produced by
                     // an Maja to ASE exporter which name I forgot ..
                     ASSIMP_LOG_WARN("ASE: Skipping invalid map entry");
-                    map.mMapName = "";
+                    map.mMapName = std::string();
                 }
 
                 continue;

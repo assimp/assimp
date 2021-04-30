@@ -88,7 +88,7 @@ struct NodeDesc {
             id(),
             number(0),
             parent(0),
-            name(""),
+            name(),
             isPivotSet(false),
             lightColor(1.f, 1.f, 1.f),
             lightIntensity(1.f),

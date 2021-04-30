@@ -1,26 +1,29 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.4)
 
 project(zip
   LANGUAGES C
-  VERSION "0.1.18")
+  VERSION "0.1.19")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 option(CMAKE_DISABLE_TESTING "Disable test creation" OFF)
-
-if (MSVC)
-  # Use secure functions by default and suppress warnings about "deprecated" functions
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_NONSTDC_NO_WARNINGS=1 /D _CRT_SECURE_NO_WARNINGS=1")
-elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR
-        "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR
-        "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -Wextra -Werror -pedantic")
-endif (MSVC)
 
 # zip
 set(SRC src/miniz.h src/zip.h src/zip.c)
-add_library(${PROJECT_NAME} ${SRC})
+
+# this is the "object library" target: compiles the sources only once
+add_library(OBJLIB OBJECT ${SRC})
+# shared libraries need PIC
+set_property(TARGET OBJLIB PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# static and shared libraries built from the same object files
+if (BUILD_SHARED_LIBS)
+  add_library(${PROJECT_NAME} SHARED $<TARGET_OBJECTS:OBJLIB>)
+  include(GenerateExportHeader)
+  generate_export_header(${PROJECT_NAME})
+else()
+  add_library(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:OBJLIB>)
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>
@@ -33,6 +36,17 @@ if (NOT CMAKE_DISABLE_TESTING)
   find_package(Sanitizers)
   add_sanitizers(${PROJECT_NAME} ${test_out})
 endif()
+
+if (MSVC)
+  # Use secure functions by default and suppress warnings about "deprecated" functions
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D _CRT_NONSTDC_NO_WARNINGS=1 /D _CRT_SECURE_NO_WARNINGS=1")
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR
+        "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR
+        "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Werror -pedantic -Wno-deprecated")
+endif (MSVC)
 
 ####
 # Installation (https://github.com/forexample/package-example) {

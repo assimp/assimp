@@ -1241,7 +1241,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     continue;
                 }
                 entry.mTargetId = entry.mTransformId;
-                entry.mTransformId = "";
+                entry.mTransformId = std::string();
             }
 
             entry.mChannel = &(*cit);

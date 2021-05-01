@@ -164,7 +164,7 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     mRootNode->mHierarchyIndex = -1;
     mRootNode->mParent = nullptr;
     mMasterScale = 1.0f;
-    mBackgroundImage = "";
+    mBackgroundImage = std::string();
     bHasBG = false;
     bIsPrj = false;
 

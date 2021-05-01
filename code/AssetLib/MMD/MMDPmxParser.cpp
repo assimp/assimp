@@ -91,7 +91,7 @@ namespace pmx
 		std::vector<char> buffer;
 		if (size == 0)
 		{
-			return std::string("");
+			return std::string();
 		}
 		buffer.reserve(size);
 		stream->read((char*) buffer.data(), size);

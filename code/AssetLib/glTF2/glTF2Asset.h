@@ -1071,7 +1071,7 @@ struct AssetMetadata {
     void Read(Document &doc);
 
     AssetMetadata() :
-            version("") {}
+            version() {}
 };
 
 //

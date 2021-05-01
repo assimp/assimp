@@ -95,11 +95,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-#ifdef M3D_ASCII
     "m3d a3d"
-#else
-    "m3d"
-#endif
 };
 
 namespace Assimp {
@@ -119,9 +115,7 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     const std::string extension = GetExtension(pFile);
 
     if (extension == "m3d"
-#ifdef M3D_ASCII
             || extension == "a3d"
-#endif
     )
         return true;
     else if (!extension.length() || checkSig) {
@@ -141,9 +135,7 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
             return false;
         }
         return !memcmp(data, "3DMO", 4) /* bin */
-#ifdef M3D_ASCII
                || !memcmp(data, "3dmo", 4) /* ASCII */
-#endif
                 ;
     }
     return false;
@@ -176,12 +168,10 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     if (!memcmp(buffer.data(), "3DMO", 4) && memcmp(buffer.data() + 4, &fileSize, 4)) {
         throw DeadlyImportError("Bad binary header in file ", file, ".");
     }
-#ifdef M3D_ASCII
     // make sure there's a terminator zero character, as input must be ASCIIZ
     if (!memcmp(buffer.data(), "3dmo", 4)) {
         buffer.push_back(0);
     }
-#endif
 
     // Get the path for external assets
     std::string folderName("./");

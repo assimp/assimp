@@ -90,10 +90,12 @@ DefaultIOStream::~DefaultIOStream() {
 size_t DefaultIOStream::Read(void *pvBuffer,
         size_t pSize,
         size_t pCount) {
+    if (0 == pCount) {
+        return 0;
+    }
     ai_assert(nullptr != pvBuffer);
     ai_assert(0 != pSize);
-    ai_assert(0 != pCount);
-
+    
     return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }
 

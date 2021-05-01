@@ -206,7 +206,7 @@ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 static void propId2StdString(Property *prop, std::string &name, std::string &key) {
-    name = key = "";
+    name = key = std::string();
     if (nullptr == prop) {
         return;
     }

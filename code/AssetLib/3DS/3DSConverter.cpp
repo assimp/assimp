@@ -212,7 +212,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
         mat.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
         // Be sure this is only done for the first material
-        mBackgroundImage = std::string("");
+        mBackgroundImage = std::string();
     }
 
     // At first add the base ambient color of the scene to the material

@@ -130,8 +130,9 @@ int SaveAsBMP(FILE *file, const aiTexel *data, unsigned int width, unsigned int 
             s[0] = t->b;
             s[1] = t->g;
             s[2] = t->r;
-            if (4 == numc)
+            if (4 == numc) {
                 s[3] = t->a;
+            }
         }
     }
 
@@ -296,7 +297,7 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
 
         // check whether the requested texture is existing
         if (texIdx >= scene->mNumTextures) {
-            ::printf("assimp extract: Texture %i requested, but there are just %i textures\n",
+            ::printf("assimp extract: Texture %u requested, but there are just %i textures\n",
                     texIdx, scene->mNumTextures);
             return AssimpCmdExtractError::TextureIndexIsOutOfRange;
         }
@@ -325,7 +326,7 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
         // if the texture is a compressed one, we'll export
         // it to its native file format
         if (!tex->mHeight) {
-            printf("assimp extract: Texture %i is compressed (%s). Writing native file format.\n",
+            printf("assimp extract: Texture %u is compressed (%s). Writing native file format.\n",
                     i, tex->achFormatHint);
 
             // modify file extension
@@ -350,7 +351,7 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
         }
         ::fclose(p);
 
-        printf("assimp extract: Wrote texture %i to %s\n", i, out_cpy.c_str());
+        printf("assimp extract: Wrote texture %u to %s\n", i, out_cpy.c_str());
         if (texIdx != 0xffffffff) {
             return m;
         }

@@ -15,19 +15,11 @@
 #include <string.h>
 #include <sys/types.h>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4127 )
-#endif //_MSC_VER
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if !defined(_SSIZE_T_DEFINED) && !defined(_SSIZE_T_DEFINED_) &&               \
-    !defined(__DEFINED_ssize_t) && !defined(__ssize_t_defined) &&              \
-    !defined(_SSIZE_T) && !defined(_SSIZE_T_) && !defined(_SSIZE_T_DECLARED)
-
+#if !defined(_POSIX_C_SOURCE) && defined(_MSC_VER)
 // 64-bit Windows is the only mainstream platform
 // where sizeof(long) != sizeof(void*)
 #ifdef _WIN64
@@ -35,15 +27,6 @@ typedef long long ssize_t; /* byte count or error */
 #else
 typedef long ssize_t; /* byte count or error */
 #endif
-
-#define _SSIZE_T_DEFINED
-#define _SSIZE_T_DEFINED_
-#define __DEFINED_ssize_t
-#define __ssize_t_defined
-#define _SSIZE_T
-#define _SSIZE_T_
-#define _SSIZE_T_DECLARED
-
 #endif
 
 #ifndef MAX_PATH
@@ -64,8 +47,48 @@ typedef long ssize_t; /* byte count or error */
 /**
  * Default zip compression level.
  */
-
 #define ZIP_DEFAULT_COMPRESSION_LEVEL 6
+
+/**
+ * Error codes
+ */
+#define ZIP_ENOINIT -1      // not initialized
+#define ZIP_EINVENTNAME -2  // invalid entry name
+#define ZIP_ENOENT -3       // entry not found
+#define ZIP_EINVMODE -4     // invalid zip mode
+#define ZIP_EINVLVL -5      // invalid compression level
+#define ZIP_ENOSUP64 -6     // no zip 64 support
+#define ZIP_EMEMSET -7      // memset error
+#define ZIP_EWRTENT -8      // cannot write data to entry
+#define ZIP_ETDEFLINIT -9   // cannot initialize tdefl compressor
+#define ZIP_EINVIDX -10     // invalid index
+#define ZIP_ENOHDR -11      // header not found
+#define ZIP_ETDEFLBUF -12   // cannot flush tdefl buffer
+#define ZIP_ECRTHDR -13     // cannot create entry header
+#define ZIP_EWRTHDR -14     // cannot write entry header
+#define ZIP_EWRTDIR -15     // cannot write to central dir
+#define ZIP_EOPNFILE -16    // cannot open file
+#define ZIP_EINVENTTYPE -17 // invalid entry type
+#define ZIP_EMEMNOALLOC -18 // extracting data using no memory allocation
+#define ZIP_ENOFILE -19     // file not found
+#define ZIP_ENOPERM -20     // no permission
+#define ZIP_EOOMEM -21      // out of memory
+#define ZIP_EINVZIPNAME -22 // invalid zip archive name
+#define ZIP_EMKDIR -23      // make dir error
+#define ZIP_ESYMLINK -24    // symlink error
+#define ZIP_ECLSZIP -25     // close archive error
+#define ZIP_ECAPSIZE -26    // capacity size too small
+#define ZIP_EFSEEK -27      // fseek error
+#define ZIP_EFREAD -28      // fread error
+#define ZIP_EFWRITE -29     // fwrite error
+
+/**
+ * Looks up the error message string coresponding to an error number.
+ * @param errnum error number
+ * @return error message string coresponding to errnum or NULL if error is not
+ * found.
+ */
+extern const char *zip_strerror(int errnum);
 
 /**
  * @struct zip_t
@@ -242,8 +265,8 @@ extern ssize_t zip_entry_read(struct zip_t *zip, void **buf, size_t *bufsize);
  *
  * @note ensure supplied output buffer is large enough.
  *       zip_entry_size function (returns uncompressed size for the current
- *       entry) can be handy to estimate how big buffer is needed. for large
- * entries, please take a look at zip_entry_extract function.
+ *       entry) can be handy to estimate how big buffer is needed.
+ *       For large entries, please take a look at zip_entry_extract function.
  *
  * @return the return code - the number of bytes actually read on success.
  *         Otherwise a -1 on error (e.g. bufsize is not large enough).
@@ -285,7 +308,71 @@ zip_entry_extract(struct zip_t *zip,
  * @return the return code - the number of entries on success, negative number
  *         (< 0) on error.
  */
-extern int zip_total_entries(struct zip_t *zip);
+extern int zip_entries_total(struct zip_t *zip);
+
+/**
+ * Deletes zip archive entries.
+ *
+ * @param zip zip archive handler.
+ * @param entries array of zip archive entries to be deleted.
+ * @param len the number of entries to be deleted.
+ * @return the number of deleted entries, or negative number (< 0) on error.
+ */
+extern int zip_entries_delete(struct zip_t *zip, char *const entries[],
+                              size_t len);
+
+/**
+ * Extracts a zip archive stream into directory.
+ *
+ * If on_extract is not NULL, the callback will be called after
+ * successfully extracted each zip entry.
+ * Returning a negative value from the callback will cause abort and return an
+ * error. The last argument (void *arg) is optional, which you can use to pass
+ * data to the on_extract callback.
+ *
+ * @param stream zip archive stream.
+ * @param size stream size.
+ * @param dir output directory.
+ * @param on_extract on extract callback.
+ * @param arg opaque pointer.
+ *
+ * @return the return code - 0 on success, negative number (< 0) on error.
+ */
+extern int zip_stream_extract(const char *stream, size_t size, const char *dir,
+                              int (*on_extract)(const char *filename,
+                                                void *arg),
+                              void *arg);
+
+/**
+ * Opens zip archive stream into memory.
+ *
+ * @param stream zip archive stream.
+ * @param size stream size.
+ *
+ * @return the zip archive handler or NULL on error
+ */
+extern struct zip_t *zip_stream_open(const char *stream, size_t size, int level,
+                                     char mode);
+
+/**
+ * Copy zip archive stream output buffer.
+ *
+ * @param zip zip archive handler.
+ * @param buf output buffer. User should free buf.
+ * @param bufsize output buffer size (in bytes).
+ *
+ * @return copy size
+ */
+extern ssize_t zip_stream_copy(struct zip_t *zip, void **buf, ssize_t *bufsize);
+
+/**
+ * Close zip archive releases resources.
+ *
+ * @param zip zip archive handler.
+ *
+ * @return
+ */
+extern void zip_stream_close(struct zip_t *zip);
 
 /**
  * Creates a new archive and puts files into a single zip archive.
@@ -319,11 +406,6 @@ extern int zip_extract(const char *zipname, const char *dir,
                        void *arg);
 
 /** @} */
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif //_MSC_VER
-
 #ifdef __cplusplus
 }
 #endif

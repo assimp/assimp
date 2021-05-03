@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <vector>
 #include <memory>
+#include <iterator>
 
 struct aiScene;
 struct aiImporterDesc;

@@ -179,8 +179,7 @@ static void UnknownChunk(StreamReaderLE * /*stream*/, const SIBChunk &chunk) {
 // Reads a UTF-16LE string and returns it at UTF-8.
 static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
     if (nullptr == stream || 0 == numWChars) {
-        static const aiString empty;
-        return empty;
+        return aiString();
     }
 
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)

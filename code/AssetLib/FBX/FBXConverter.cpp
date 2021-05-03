@@ -857,6 +857,10 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     // for (const auto &transform : chain) {
     // skip inverse chain for no preservePivots
     for (unsigned int i = TransformationComp_Translation; i < TransformationComp_MAXIMUM; i++) {
+      const TransformationComp comp = static_cast<TransformationComp>(i);
+      if (comp == TransformationComp_Rotation) {
+          continue;
+      }
       nd->mTransformation = nd->mTransformation * chain[i];
     }
     output_nodes.push_back(std::move(nd));

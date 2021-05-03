@@ -149,7 +149,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 Importer::Importer()
  : pimpl( new ImporterPimpl ) {
     pimpl->mScene = nullptr;
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
 
     // Allocate a default IO handler
     pimpl->mIOHandler = new DefaultIOSystem;
@@ -387,7 +387,7 @@ void Importer::FreeScene( ) {
     delete pimpl->mScene;
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(void);
 }
@@ -434,7 +434,7 @@ aiScene* Importer::GetOrphanedScene() {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = ""; // reset error string
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(aiScene*);
     

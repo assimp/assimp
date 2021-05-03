@@ -75,7 +75,7 @@ using namespace std;
 //  Default constructor
 MMDImporter::MMDImporter() :
         m_Buffer(),
-        m_strAbsPath("") {
+        m_strAbsPath() {
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }

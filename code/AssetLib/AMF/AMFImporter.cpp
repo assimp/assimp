@@ -504,7 +504,9 @@ void AMFImporter::ParseNode_Metadata(XmlNode &node) {
 
 bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*pCheckSig*/) const {
     static const char *tokens[] = { "<amf" };
-    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+    // hack to test the build
+    // todo: replace by a working std::size for linux
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

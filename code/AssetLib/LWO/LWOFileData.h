@@ -502,7 +502,7 @@ struct Surface {
     Surface() :
             mColor(0.78431f, 0.78431f, 0.78431f), bDoubleSided(false), mDiffuseValue(1.f), mSpecularValue(0.f), mTransparency(0.f), mGlossiness(0.4f), mLuminosity(0.f), mColorHighlights(0.f), mMaximumSmoothAngle(0.f) // 0 == not specified, no smoothing
             ,
-            mVCMap(""),
+            mVCMap(),
             mVCMapType(AI_LWO_RGBA),
             mIOR(1.f) // vakuum
             ,

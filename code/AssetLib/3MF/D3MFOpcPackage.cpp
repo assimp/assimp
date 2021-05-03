@@ -188,7 +188,7 @@ bool D3MFOpcPackage::validate() {
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
     XmlParser xmlParser;
     if (!xmlParser.parse(stream)) {
-        return "";
+        return std::string();
     }
 
     OpcPackageRelationshipReader reader(xmlParser);

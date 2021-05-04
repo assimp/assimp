@@ -249,4 +249,31 @@ AI_FORCE_INLINE std::string ai_str_toupper(const std::string &in) {
     return out;
 }
 
+// ---------------------------------------------------------------------------------
+/// @brief  Make a string printable by replacing all non-printable characters with
+///         the specified placeholder character.
+/// @param  in  The incoming string.
+/// @param  placeholder  Placeholder character, default is a question mark.
+/// @return The string, with all non-printable characters replaced.
+AI_FORCE_INLINE std::string ai_str_toprintable(const std::string &in, char placeholder = '?') {
+    std::string out(in);
+    std::transform(out.begin(), out.end(), out.begin(), [placeholder] (unsigned char c) {
+        return isprint(c) ? (char)c :  placeholder;
+    });
+    return out;
+}
+
+// ---------------------------------------------------------------------------------
+/// @brief  Make a string printable by replacing all non-printable characters with
+///         the specified placeholder character.
+/// @param  in  The incoming string.
+/// @param  len The length of the incoming string.
+/// @param  placeholder  Placeholder character, default is a question mark.
+/// @return The string, with all non-printable characters replaced. Will return an
+///         empty string if in is null or len is <= 0.
+AI_FORCE_INLINE std::string ai_str_toprintable(const char *in, int len, char placeholder = '?') {
+    return (in && len > 0) ? ai_str_toprintable(std::string(in, len), placeholder) : std::string();
+}
+
+
 #endif

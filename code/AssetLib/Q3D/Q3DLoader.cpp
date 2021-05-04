@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "Q3DLoader.h"
+#include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
@@ -115,7 +116,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     // Check the file's signature
     if (ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Do", 8) &&
             ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Ds", 8)) {
-        throw DeadlyImportError("Not a Quick3D file. Signature string is: ", std::string((const char *)stream.GetPtr(), 8));
+        throw DeadlyImportError("Not a Quick3D file. Signature string is: ", ai_str_toprintable((const char *)stream.GetPtr(), 8));
     }
 
     // Print the file format version

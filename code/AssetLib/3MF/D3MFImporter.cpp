@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 #include "D3MFImporter.h"
+#include "3MFXmlTags.h"
+#include "D3MFOpcPackage.h"
 
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
@@ -51,16 +53,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/fast_atof.h>
+
 #include <cassert>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "3MFXmlTags.h"
-#include "D3MFOpcPackage.h"
-#include <assimp/fast_atof.h>
-
 #include <iomanip>
 
 namespace Assimp {
@@ -489,7 +488,7 @@ private:
         }
 
         //format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
-        const size_t len = strlen(color);
+        const size_t len = strnlen_s(color, 9);
         if (9 != len && 7 != len) {
             return false;
         }
@@ -564,6 +563,8 @@ private:
 
 } //namespace D3MF
 
+using namespace D3MF;
+
 static const aiImporterDesc desc = {
     "3mf Importer",
     "",
@@ -613,11 +614,11 @@ const aiImporterDesc *D3MFImporter::GetInfo() const {
 }
 
 void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
-    D3MF::D3MFOpcPackage opcPackage(pIOHandler, filename);
+    D3MFOpcPackage opcPackage(pIOHandler, filename);
 
     XmlParser xmlParser;
     if (xmlParser.parse(opcPackage.RootStream())) {
-        D3MF::XmlSerializer xmlSerializer(&xmlParser);
+        XmlSerializer xmlSerializer(&xmlParser);
         xmlSerializer.ImportXml(pScene);
     }
 }

@@ -173,7 +173,6 @@ public:
             }
         }
 
-        XmlNode buildNode = node.child(XmlTag::build);
         for (auto &currentNode : resNode.children()) {
             const std::string &currentNodeName = currentNode.name();
             if (currentNodeName == XmlTag::item) {

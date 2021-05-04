@@ -676,15 +676,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
 
         if (!imp)   {
             // not so bad yet ... try format auto detection.
-            const std::string::size_type s = pFile.find_last_of('.');
-            if (s != std::string::npos) {
-                ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
-                for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
-                    if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
-                        imp = pimpl->mImporter[a];
-                        SetPropertyInteger("importerIndex", a);
-                        break;
-                    }
+            ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
+            for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
+                if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
+                    imp = pimpl->mImporter[a];
+                    SetPropertyInteger("importerIndex", a);
+                    break;
                 }
             }
             // Put a proper error message if no suitable importer was found

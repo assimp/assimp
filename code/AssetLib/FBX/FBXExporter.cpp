@@ -1789,13 +1789,13 @@ void FBXExporter::WriteObjects ()
             blendchannel_uid, blendshape_name + FBX::SEPARATOR + "SubDeformer", "BlendShapeChannel"
         );
         sdnode.AddChild("Version", int32_t(100));
-        sdnode.AddChild("DeformPercent", int32_t(100));
+        sdnode.AddChild("DeformPercent", float_t(0.0));
         FBX::Node p("Properties70");
-        p.AddP70numberA("DeformPercent", 100.);
+        p.AddP70numberA("DeformPercent", 0.0);
         sdnode.AddChild(p);
         // TODO: Normally just one weight per channel, adding stub for later development
         std::vector<float>fFullWeights;
-        fFullWeights.push_back(0.);
+        fFullWeights.push_back(100.);
         sdnode.AddChild("FullWeights", fFullWeights);
         sdnode.Dump(outstream, binary, indent);
 

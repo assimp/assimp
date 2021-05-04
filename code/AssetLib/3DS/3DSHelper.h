@@ -61,20 +61,10 @@ namespace D3DS {
 #include <assimp/Compiler/pushpack1.h>
 
 // ---------------------------------------------------------------------------
-/** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
-*  and data structures.
+/** Defines chunks and data structures.
 */
-class Discreet3DS {
-private:
-    Discreet3DS() AI_NO_EXCEPT {
-        // empty
-    }
+namespace Discreet3DS {
 
-    ~Discreet3DS() {
-        // empty
-    }
-
-public:
     //! data structure for a single chunk in a .3ds file
     struct Chunk {
         uint16_t Flag;
@@ -314,7 +304,7 @@ public:
         // camera sub-chunks
         CHUNK_CAM_RANGES = 0x4720
     };
-};
+}
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */

@@ -88,7 +88,7 @@ using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
 static const aiImporterDesc blenderDesc = {
-    "Blender 3D Importer \nhttp://www.blender3d.org",
+    "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",
     "No animation support yet",

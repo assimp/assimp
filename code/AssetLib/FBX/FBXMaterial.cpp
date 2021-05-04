@@ -82,7 +82,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     // lower-case shading because Blender (for example) writes "Phong"
     for (size_t i = 0; i < shading.length(); ++i) {
-        shading[i] = static_cast<char>(tolower(shading[i]));
+        shading[i] = static_cast<char>(tolower(static_cast<unsigned char>(shading[i])));
     }
     std::string templateName;
     if(shading == "phong") {

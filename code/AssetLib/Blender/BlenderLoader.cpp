@@ -420,9 +420,9 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
             --s;
         }
 
-        curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower(s[1]);
-        curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower(s[2]);
-        curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower(s[3]);
+        curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower((unsigned char)s[1]);
+        curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower((unsigned char)s[2]);
+        curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower((unsigned char)s[3]);
         curTex->achFormatHint[3] = '\0';
 
         // tex->mHeight = 0;

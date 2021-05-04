@@ -193,7 +193,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
         }
 
         for (size_t i = 0; i < read; ++i) {
-            buffer[i] = static_cast<char>(::tolower(buffer[i]));
+            buffer[i] = static_cast<char>(::tolower((unsigned char)buffer[i]));
         }
 
         // It is not a proper handling of unicode files here ...
@@ -214,7 +214,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
             token.clear();
             const char *ptr(tokens[i]);
             for (size_t tokIdx = 0; tokIdx < len; ++tokIdx) {
-                token.push_back(static_cast<char>(tolower(*ptr)));
+                token.push_back(static_cast<char>(tolower(static_cast<unsigned char>(*ptr))));
                 ++ptr;
             }
             const char *r = strstr(buffer, token.c_str());
@@ -223,7 +223,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
             }
             // We need to make sure that we didn't accidentially identify the end of another token as our token,
             // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
-            if (noAlphaBeforeTokens && (r != buffer && isalpha(r[-1]))) {
+            if (noAlphaBeforeTokens && (r != buffer && isalpha(static_cast<unsigned char>(r[-1])))) {
                 continue;
             }
             // We got a match, either we don't care where it is, or it happens to

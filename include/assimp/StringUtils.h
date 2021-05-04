@@ -157,7 +157,7 @@ AI_FORCE_INLINE std::string ai_decimal_to_hexa(T toConvert) {
     ss >> result;
 
     for (size_t i = 0; i < result.size(); ++i) {
-        result[i] = (char)toupper(result[i]);
+        result[i] = (char)toupper((unsigned char)result[i]);
     }
 
     return result;

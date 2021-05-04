@@ -167,10 +167,6 @@ bool X3DImporter::CanRead( const std::string &pFile, IOSystem * /*pIOHandler*/, 
     return false;
 }
 
-void X3DImporter::GetExtensionList( std::set<std::string> &extensionList ) {
-    extensionList.insert("x3d");
-}
-
 void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler ) {
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
     if (!stream) {

@@ -156,7 +156,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert(mRootStream != nullptr);
             if (nullptr == mRootStream) {
-                throw DeadlyExportError("Cannot open root-file in archive : " + rootFile);
+                throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
             }
 
         } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
@@ -188,7 +188,7 @@ bool D3MFOpcPackage::validate() {
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
     XmlParser xmlParser;
     if (!xmlParser.parse(stream)) {
-        return "";
+        return std::string();
     }
 
     OpcPackageRelationshipReader reader(xmlParser);

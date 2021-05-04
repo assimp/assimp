@@ -79,7 +79,7 @@ struct MetricInfo {
     int m_intValue;
 
     MetricInfo()
-    : m_stringValue( "" )
+    : m_stringValue( )
     , m_floatValue( 0.0f )
     , m_intValue( -1 ) {
         // empty

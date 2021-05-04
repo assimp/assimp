@@ -97,7 +97,7 @@ void BaseImporter::UpdateImporterScale(Importer *pImp) {
     // Set active scaling
     pImp->SetPropertyFloat(AI_CONFIG_APP_SCALE_KEY, static_cast<float>(activeScale));
 
-    ASSIMP_LOG_DEBUG_F("UpdateImporterScale scale set: %f", activeScale);
+    ASSIMP_LOG_DEBUG_F("UpdateImporterScale scale set: ", activeScale);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 
     // no file extension at all
     if (pos == std::string::npos) {
-        return "";
+        return std::string();
     }
 
     // thanks to Andy Maloney for the hint

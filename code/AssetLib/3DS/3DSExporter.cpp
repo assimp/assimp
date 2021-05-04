@@ -102,13 +102,14 @@ private:
 // preserves the mesh's given name if it has one. |index| is the index
 // of the mesh in |aiScene::mMeshes|.
 std::string GetMeshName(const aiMesh &mesh, unsigned int index, const aiNode &node) {
-    static const std::string underscore = "_";
+    static const char underscore = '_';
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
     std::string result = node.mName.C_Str();
     if (mesh.mName.length > 0) {
-        result += underscore + mesh.mName.C_Str();
+        result += underscore;
+        result += mesh.mName.C_Str();
     }
     return result + underscore + postfix;
 }

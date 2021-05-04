@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <string.h>
 
 namespace Assimp {
 namespace D3MF {

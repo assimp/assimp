@@ -93,7 +93,7 @@ CSMImporter::~CSMImporter()
 bool CSMImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
     static const char* tokens[] = {"$Filename"};
-    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

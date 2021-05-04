@@ -88,7 +88,7 @@ OFFImporter::~OFFImporter()
 bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
     static const char* tokens[] = { "off" };
-    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,std::size(tokens),3);
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens),3);
 }
 
 // ------------------------------------------------------------------------------------------------

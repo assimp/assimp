@@ -109,7 +109,7 @@ MD2Importer::~MD2Importer()
 bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
     static const uint32_t tokens[] = { AI_MD2_MAGIC_NUMBER_LE };
-    return CheckMagicToken(pIOHandler,pFile,tokens,std::size(tokens));
+    return CheckMagicToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -125,7 +125,7 @@ bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
     }
 
     static const char *tokens[] = { "<collada" };
-    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

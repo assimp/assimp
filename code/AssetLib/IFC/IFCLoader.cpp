@@ -134,7 +134,7 @@ bool IFCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /
     // it is only unambiguous as long as we don't support any further
     // file formats with STEP as their encoding.
     static const char *tokens[] = { "ISO-10303-21" };
-    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

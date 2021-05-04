@@ -154,7 +154,7 @@ AC3DImporter::~AC3DImporter() {
 // Returns whether the class can handle the format of the given file.
 bool AC3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const uint32_t tokens[] = { AI_MAKE_MAGIC("AC3D") };
-    return CheckMagicToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -76,7 +76,7 @@ void OgreImporter::SetupProperties(const Importer *pImp) {
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool /*checkSig*/) const {
     if (EndsWith(pFile, ".mesh.xml", false)) {
         static const char *tokens[] = { "<mesh>" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
     } else {
         /// @todo Read and validate first header chunk?
         return false;

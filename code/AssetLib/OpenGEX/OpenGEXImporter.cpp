@@ -283,7 +283,7 @@ OpenGEXImporter::~OpenGEXImporter() {
 //------------------------------------------------------------------------------------------------
 bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
-    return SearchFileHeaderForToken(pIOHandler, file, tokens, std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens));
 }
 
 //------------------------------------------------------------------------------------------------

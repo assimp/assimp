@@ -152,7 +152,7 @@ bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /
         AI_MAKE_MAGIC("LWSC"),
         AI_MAKE_MAGIC("LWMO")
     };
-    return CheckMagicToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

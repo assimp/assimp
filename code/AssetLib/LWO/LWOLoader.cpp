@@ -111,7 +111,7 @@ bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*
         AI_LWO_FOURCC_LWO2,
         AI_LWO_FOURCC_LXOB
     };
-    return CheckMagicToken(pIOHandler, file, tokens, std::size(tokens), 8);
+    return CheckMagicToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens), 8);
 }
 
 // ------------------------------------------------------------------------------------------------

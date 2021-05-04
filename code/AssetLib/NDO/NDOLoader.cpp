@@ -85,7 +85,7 @@ NDOImporter::~NDOImporter()
 bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
     static const char* tokens[] = {"nendo"};
-    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,std::size(tokens),5);
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens),5);
 }
 
 // ------------------------------------------------------------------------------------------------

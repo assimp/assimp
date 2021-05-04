@@ -94,7 +94,7 @@ BVHLoader::~BVHLoader() {}
 // Returns whether the class can handle the format of the given file.
 bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "HIERARCHY" };
-    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -92,7 +92,7 @@ bool IRRMeshImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
 	 * search for typical tokens.
 	 */
 	static const char *tokens[] = { "irrmesh" };
-	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens));
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -89,7 +89,7 @@ bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /
         AI_HMP_MAGIC_NUMBER_LE_5,
         AI_HMP_MAGIC_NUMBER_LE_7
     };
-    return CheckMagicToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

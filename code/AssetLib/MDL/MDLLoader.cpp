@@ -115,7 +115,7 @@ bool MDLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /
         AI_MDL_MAGIC_NUMBER_LE_GS3,
         AI_MDL_MAGIC_NUMBER_LE
     };
-    return CheckMagicToken(pIOHandler, pFile, tokens, std::size(tokens));
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

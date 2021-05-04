@@ -93,7 +93,7 @@ MS3DImporter::~MS3DImporter()
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
     static const char* tokens[] = { "MS3D000000" };
-    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,std::size(tokens));
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

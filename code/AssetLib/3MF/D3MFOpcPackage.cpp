@@ -103,9 +103,9 @@ public:
             std::string name = currentNode.name();
             if (name == "Relationship") {
                 OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
-                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
-                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
-                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
+                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID).as_string();
+                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE).as_string();
+                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET).as_string();
                 if (validateRels(relPtr)) {
                     m_relationShips.push_back(relPtr);
                 }

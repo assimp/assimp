@@ -488,7 +488,11 @@ private:
         }
 
         //format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
+#ifdef _WIN32
         const size_t len = strnlen_s(color, 9);
+#else
+        const size_t len = strnlen(color, 9);
+#endif
         if (9 != len && 7 != len) {
             return false;
         }

@@ -110,7 +110,6 @@ public:
 
 protected:
     const aiImporterDesc* GetInfo () const;
-    void GetExtensionList(std::set<std::string>& app);
     void SetupProperties(const Importer* pImp);
     void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
     void ParseBlendFile(Blender::FileDatabase& out, std::shared_ptr<IOStream> stream);

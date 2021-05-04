@@ -271,7 +271,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 
     // no file extension at all
     if (pos == std::string::npos) {
-        return "";
+        return std::string();
     }
 
     // thanks to Andy Maloney for the hint

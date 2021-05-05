@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -249,4 +248,4 @@ AI_FORCE_INLINE std::string ai_str_toupper(const std::string &in) {
     return out;
 }
 
-#endif
+#endif // INCLUDED_AI_STRINGUTILS_H

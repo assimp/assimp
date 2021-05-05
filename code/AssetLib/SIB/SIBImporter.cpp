@@ -804,7 +804,12 @@ static void ReadScene(SIB *sib, StreamReaderLE *stream) {
 // Imports the given file into the given scene structure.
 void SIBImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-    StreamReaderLE stream(pIOHandler->Open(pFile, "rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("SIB: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // We should have at least one chunk
     if (stream.GetRemainingSize() < 16)

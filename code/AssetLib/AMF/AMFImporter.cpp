@@ -268,7 +268,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     mXmlParser = new XmlParser();
     if (!mXmlParser->parse(file.get())) {
         delete mXmlParser;
-        throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+        throw DeadlyImportError("Failed to create XML reader for file ", pFile, ".");
     }
 
     // Start reading, search for root tag <amf>

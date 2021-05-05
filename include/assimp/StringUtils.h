@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <locale>
 #include <sstream>
+#include <iomanip>
 
 #ifdef _MSC_VER
 #define AI_SIZEFMT "%Iu"
@@ -176,7 +177,7 @@ AI_FORCE_INLINE std::string ai_rgba2hex(int r, int g, int b, int a, bool with_he
     if (with_head) {
         ss << "#";
     }
-    ss << std::hex << (r << 24 | g << 16 | b << 8 | a);
+    ss << std::hex << std::setfill('0') << std::setw(8) << (r << 24 | g << 16 | b << 8 | a);
 
     return ss.str();
 }

@@ -1,0 +1,3184 @@
+Info,  T34284: Load dae.dae
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Collada Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: Collada schema version is 1.4.n
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: START `t1`
+Debug, T34284: END   `t1`, dt= 0.0064414 s
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/spider.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_post_linear.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_xz_bezier.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_xz_stepped.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_oldformat_56.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 2
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_post_offset_repeat.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_xz_hermite.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_y_pre_ofrep_post_osc.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: aiNodeAnim::mPositionKeys[1].mTime (-72.00000) is smaller than aiAnimation::mPositionKeys[0] (which is 0.00000)
+Warn,  T34284: Validation warning: aiNodeAnim::mPositionKeys[5].mTime (-21.00000) is smaller than aiAnimation::mPositionKeys[4] (which is 0.00000)
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_oldformat_6.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 3
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_post_repeat.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_xz_linear.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_post_constant.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_x_post_reset.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWS/move_xz_spline.lws
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave Scene Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWS\'
+Debug, T34284: LWS: Skipping over plugin-specific data
+Skipping one or more lines with the same contents
+Info,  T34284: LWS file format version is 5
+Info,  T34284: %%% BEGIN EXTERNAL FILE %%%
+Info,  T34284: File: simple_cube.lwo
+Info,  T34284: Load simple_cube.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: %%% END EXTERNAL FILE %%%
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy rotation track has been generated
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/LWO/LWO2/boxuv.lwo
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWO/LWO2\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/LWO/LWO2/formatDetection
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: LightWave/Modo Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/LWO/LWO2\'
+Info,  T34284: LWO file format: LWO2 (>= LightWave 6)
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/SMD/triangle.smd
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Valve SMD Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/SMD\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/SMD/holy_grailref.smd
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Valve SMD Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/SMD\'
+Error, T34284: [SMD/VTA] Bone index overflow. The bone index will be ignored, the weight will be assigned to the vertex' parent node
+Skipping one or more lines with the same contents
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/glTF/TwoBoxes/TwoBoxes.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: glTF Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF/TwoBoxes\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF/IncorrectVertexArrays/Cube_v1.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: glTF Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF/IncorrectVertexArrays\'
+Warn,  T34284: The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the LINES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the LINES mode. Some vertices were dropped.
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: There are unreferenced vertices
+Skipping one or more lines with the same contents
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF/TwoBoxes/TwoBoxes.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: glTF Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF/TwoBoxes\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTextured-glTF/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTextured-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/2CylinderEngine-glTF-Binary\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 34 materials
+Debug, T34284: Importing 29 meshes
+Debug, T34284: Importing 1 cameras
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTextured-glTF/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTextured-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTextured-glTF-Embedded/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTextured-glTF-Embedded\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 embedded textures
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_00.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_01.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_02.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_03.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_04.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_05.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_06.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_07.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_11.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_12.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/simple_skin/simple_skin.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/simple_skin\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 1 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Debug, T34284: ScenePreprocessor: Dummy position track has been generated
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/cameras/Cameras.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/cameras\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing 2 cameras
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: 0.000000 is not a valid value for aiCamera::mHorizontalFOV
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/IncorrectVertexArrays/Cube.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/IncorrectVertexArrays\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 8 meshes
+Warn,  T34284: The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the LINES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.
+Warn,  T34284: The number of vertices was not compatible with the LINES mode. Some vertices were dropped.
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: There are unreferenced vertices
+Skipping one or more lines with the same contents
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/textureTransform/TextureTransformTest.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/textureTransform\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 9 materials
+Debug, T34284: Importing 9 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTextured-glTF/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTextured-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Mesh) | Verts in: 24 out: 24 | ~0%
+Debug, T34284: JoinVerticesProcess finished 
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 1 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Cube) | Verts in: 24 out: 24 | ~0%
+Debug, T34284: JoinVerticesProcess finished 
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/MissingBin/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites.glb
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxWithInfinites-glTF-Binary\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Mesh) | Verts in: 24 out: 10 | ~58.3333%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 24 out: 10 | ~58.3333
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Mesh) | Verts in: 24 out: 10 | ~58.3333%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 24 out: 10 | ~58.3333
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals.glb
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxBadNormals-glTF-Binary\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Mesh) | Verts in: 24 out: 24 | ~0%
+Debug, T34284: JoinVerticesProcess finished 
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxBadNormals-glTF-Binary\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Reading GLTF2 binary
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTextured-glTF/BoxTextured.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTextured-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/BoxTexcoords-glTF\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/RecursiveNodes/RecursiveNodes.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/TestNoRootNode/NoScene.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/TestNoRootNode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 0 meshes
+Error, T34284: GLTF: No scene
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/TestNoRootNode/SceneWithoutNodes.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/TestNoRootNode\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 0 materials
+Debug, T34284: Importing 0 meshes
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/issue_3269/texcoord_crash.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/IndexOutOfRange/IndexOutOfRange.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/IndexOutOfRange\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Warn,  T34284: Some faces had out-of-range indices. Those faces were dropped.
+Debug, T34284: Importing nodes
+Debug, T34284: Importing 0 animations
+Debug, T34284: Importing metadata
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: There are unreferenced vertices
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/IndexOutOfRange/AllIndicesOutOfRange.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Found a matching importer for this file format: glTF2 Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/glTF2/IndexOutOfRange\'
+Debug, T34284: Reading GLTF2 file
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Debug, T34284: Importing 1 materials
+Debug, T34284: Importing 1 meshes
+Warn,  T34284: Some faces had out-of-range indices. Those faces were dropped.
+Error, T34284: Mesh "Mesh" has no faces
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/draco/2CylinderEngine.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badArray.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badString.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badUint.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badNumber.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badObject.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/glTF2/wrongTypes/badExtension.gltf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Loading GLTF2 asset
+Debug, T34284: Parsing GLTF2 JSON
+Info,  T34284: Load D:/projects/assimp/test/models/HMP/terrain.hmp
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: 3D GameStudio Heightmap (HMP) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/HMP\'
+Debug, T34284: HMP subtype: 3D GameStudio A7, magic word is HMP7
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/IFC/AC14-FZK-Haus.ifc
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Industry Foundation Classes (IFC) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/IFC\'
+Debug, T34284: IFC: File schema is 'IFC2X3'
+Debug, T34284: STEP: got 82226 object records with 5788 inverse index entries
+Debug, T34284: IFC: got units used for lengths
+Debug, T34284: IFC: got units used for angles
+Debug, T34284: IFC: got world coordinate system
+Debug, T34284: IFC: looking at spatial structure `Gelände`
+Debug, T34284: IFC: selecting this spatial structure as root structure
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing degenerate faces
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: skipping IfcAnnotation entity due to importer settings
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: skipping IfcSpace entity due to importer settings
+Skipping one or more lines with the same contents
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Warn,  T34284: IFC: skipping unknown IfcGeometricRepresentationItem entity, type is IfcPolyline
+Debug, T34284: IFC: removing duplicate vertices
+Error, T34284: IFC: failed to generate all window caps
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: generating CSG geometry by plane clipping (IfcBooleanClippingResult)
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Warn,  T34284: IFC: failed to resolve all openings, presumably their topology is not supported by Assimp
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: removing degenerate faces
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: removing duplicate vertices
+Debug, T34284: IFC: generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)
+Debug, T34284: IFC: skipping IfcAnnotation entity due to importer settings
+Skipping one or more lines with the same contents
+Debug, T34284: IFC: skipping IfcSpace entity due to importer settings
+Debug, T34284: IFC: STEP: evaluated 70094 object records
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Found positive match for header keyword: HEADER
+Info,  T34284: Found a matching importer for this file format: Drawing Interchange Format (DXF) Importer.
+Info,  T34284: Import root directory is '.\'
+Warn,  T34284: DXF: EOF reached, but did not encounter DXF EOF marker
+Debug, T34284: DXF: Unexpanded polycount is 0, vertex count is 0
+Error, T34284: DXF: no data blocks loaded
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/spider.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing binary FBX file
+Debug, T34284: FBX version: 7400
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Debug, T34284: UpdateImporterScale scale set: 0.01
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/box.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing binary FBX file
+Debug, T34284: FBX version: 7400
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Info,  T34284: FBX: generating full transformation chain for node: root
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/cubes_nonames.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Debug, T34284: UpdateImporterScale scale set: 0.01
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/cubes_with_names.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Debug, T34284: UpdateImporterScale scale set: 0.01
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/cubes_with_mirroring_and_pivot.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Info,  T34284: FBX: generating full transformation chain for node: Cube1
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/close_to_identity_transforms.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Info,  T34284: FBX: generating full transformation chain for node: Cube1
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/phong_cube.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing binary FBX file
+Debug, T34284: FBX version: 7400
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Warn,  T34284: FBX-DOM (TOK_KEY, offset 0x4190) source object for connection does not exist
+Debug, T34284: UpdateImporterScale scale set: 0.01
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/global_settings.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing binary FBX file
+Debug, T34284: FBX version: 7400
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Error, T34284: FBX: no material assigned to mesh, setting default material
+Debug, T34284: UpdateImporterScale scale set: 5
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/embedded_ascii/box.FBX
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX/embedded_ascii\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: A specular shading model is specified but the value of the AI_MATKEY_SHININESS_STRENGTH key is 0.0
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/embedded_ascii/box_embedded_texture_fragmented.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX/embedded_ascii\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Error, T34284: FBX: ignoring additional binormal layer
+Error, T34284: FBX: ignoring additional tangent layer
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/box_orphant_embedded_texture.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Error, T34284: FBX: ignoring additional binormal layer
+Error, T34284: FBX: ignoring additional tangent layer
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/global_settings.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing binary FBX file
+Debug, T34284: FBX version: 7400
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7400
+Error, T34284: FBX: no material assigned to mesh, setting default material
+Debug, T34284: UpdateImporterScale scale set: 5
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/cubes_with_outofrange_float.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7500
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Info,  T34284: FBX: ignoring empty AnimationStack (using IK?): Take 001
+Debug, T34284: UpdateImporterScale scale set: 0.01
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/maxPbrMaterial_metalRough.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7700
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Warn,  T34284: FBX-DOM (TOK_KEY, line 679, col 13) shading mode not recognized: unknown
+Info,  T34284: FBX: generating full transformation chain for node: Box001
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/FBX/maxPbrMaterial_specGloss.fbx
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Autodesk FBX Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/FBX\'
+Debug, T34284: Reading FBX file
+Debug, T34284: Tokenizing ASCII FBX file
+Debug, T34284: Parsing FBX tokens
+Debug, T34284: Creating FBX Document
+Debug, T34284: FBX Version: 7700
+Warn,  T34284: FBX-DOM: unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013, trying to read it nevertheless
+Warn,  T34284: FBX-DOM (TOK_KEY, line 679, col 13) shading mode not recognized: unknown
+Info,  T34284: FBX: generating full transformation chain for node: Box001
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load $$$___magic___$$$.3ds
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Discreet 3DS Importer.
+Info,  T34284: Import root directory is '.\'
+Info,  T34284: 3DS file format version: 3
+Warn,  T34284: 3DS: Skipping TCB animation info
+Skipping one or more lines with the same contents
+Error, T34284: 3DS: Skipping FOV animation track. This is not supported
+Warn,  T34284: 3DS: Skipping TCB animation info
+Skipping one or more lines with the same contents
+Info,  T34284: 3DS: Generating default material
+Debug, T34284: 3DS: Converting camera roll track ...
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Debug, T34284: ScenePreprocessor: Setting animation duration
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: SplitLargeMeshesProcess_Triangle begin
+Debug, T34284: SplitLargeMeshesProcess_Triangle finished. There was nothing to do
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: CalcTangentsProcess begin
+Info,  T34284: CalcTangentsProcess finished. Tangents have been calculated
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (0) | Verts in: 36 out: 24 | ~33.3333%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 36 out: 24 | ~33.3333
+Debug, T34284: SplitLargeMeshesProcess_Vertex begin
+Debug, T34284: SplitLargeMeshesProcess_Vertex finished. There was nothing to do
+Debug, T34284: LimitBoneWeightsProcess begin
+Debug, T34284: LimitBoneWeightsProcess end
+Debug, T34284: ImproveCacheLocalityProcess begin
+Debug, T34284: Mesh %u | ACMR in: 0 out: 2 | ~20
+Info,  T34284: Cache relevant are 1 meshes (12 faces). Average output ACMR is 2
+Debug, T34284: ImproveCacheLocalityProcess finished. 
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Registering custom importer for these file extensions: applelinuxmacwindows
+Info,  T34284: Unregistering custom importer: 
+Info,  T34284: Load D:/projects/assimp/test/models/X/test.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: OptimizeGraphProcess begin
+Debug, T34284: OptimizeGraphProcess finished
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: Skipping OptimizeMeshesProcess
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (pCube1) | Verts in: 36 out: 24 | ~33.3333%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 36 out: 24 | ~33.3333
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Load D:/projects/assimp/test/models/X/Testwuson.X
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Skipping one or more lines with the same contents
+Warn,  T34284: Unknown data object in frame in x file
+Skipping one or more lines with the same contents
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: OptimizeGraphProcess begin
+Debug, T34284: OptimizeGraphProcess finished
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: Skipping OptimizeMeshesProcess
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Wuson) | Verts in: 11196 out: 3205 | ~71.3737%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 11196 out: 3205 | ~71.3737
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Load D:/projects/assimp/test/models/X/anim_test.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Length of texture file name is zero. Skipping this texture.
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: OptimizeGraphProcess begin
+Debug, T34284: OptimizeGraphProcess finished
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Warn,  T34284: Simplified dummy tracks with just one key
+Skipping one or more lines with the same contents
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: Skipping OptimizeMeshesProcess
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (pCylinder1) | Verts in: 2520 out: 485 | ~80.754%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 2520 out: 485 | ~80.754
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Load D:/projects/assimp/test/models/X/anim_test.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Length of texture file name is zero. Skipping this texture.
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: OptimizeGraphProcess begin
+Debug, T34284: OptimizeGraphProcess finished
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Warn,  T34284: Simplified dummy tracks with just one key
+Skipping one or more lines with the same contents
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: Skipping OptimizeMeshesProcess
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (pCylinder1) | Verts in: 2520 out: 485 | ~80.754%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 2520 out: 485 | ~80.754
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Load D:/projects/assimp/test/models/X/BCN_Epileptic.X
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Skipping one or more lines with the same contents
+Warn,  T34284: Unknown data object in frame in x file
+Skipping one or more lines with the same contents
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Entering post processing pipeline
+Debug, T34284: RemoveRedundantMatsProcess begin
+Debug, T34284: RemoveRedundantMatsProcess finished 
+Debug, T34284: OptimizeGraphProcess begin
+Debug, T34284: OptimizeGraphProcess finished
+Debug, T34284: GenUVCoordsProcess begin
+Debug, T34284: GenUVCoordsProcess finished
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: FindDegeneratesProcess begin
+Debug, T34284: FindDegeneratesProcess finished
+Debug, T34284: SortByPTypeProcess begin
+Info,  T34284: Points: 0, Lines: 0, Triangles: 3, Polygons: 0 (Meshes, X = removed)
+Debug, T34284: SortByPTypeProcess finished
+Debug, T34284: FindInvalidDataProcess begin
+Info,  T34284: FindInvalidDataProcess finished. Found issues ...
+Debug, T34284: OptimizeMeshesProcess begin
+Debug, T34284: OptimizeMeshesProcess finished
+Debug, T34284: Generate spatially-sorted vertex cache
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: JoinVerticesProcess begin
+Debug, T34284: Mesh 0 (Torso) | Verts in: 5898 out: 1170 | ~80.1628%
+Debug, T34284: Mesh 1 (Head) | Verts in: 6108 out: 1196 | ~80.4191%
+Debug, T34284: Mesh 2 (Legs) | Verts in: 3372 out: 648 | ~80.7829%
+Info,  T34284: JoinVerticesProcess finished | Verts in: 15378 out: 3014 | ~80.4006
+Info,  T34284: Leaving post processing pipeline
+Info,  T34284: Registering custom importer for these file extensions: fail
+Info,  T34284: Load deadlyImportError.fail
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Failing importer.
+Info,  T34284: Import root directory is './'
+Error, T34284: Deadly import error test. Details: 42 More Details: Failure
+Info,  T34284: Registering custom importer for these file extensions: fail
+Info,  T34284: Load stdException.fail
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Failing importer.
+Info,  T34284: Import root directory is './'
+Error, T34284: std::exception test
+Info,  T34284: Registering custom importer for these file extensions: fail
+Info,  T34284: Load unexpectedException.fail
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Failing importer.
+Info,  T34284: Import root directory is './'
+Info,  T34284: Load D:/projects/assimp/test/models/3D/box_a.3d
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Unreal Mesh Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3D\'
+Debug, T34284: UNREAL: data file is D:/projects/assimp/test/models/3D/box_d.3d
+Debug, T34284: UNREAL: aniv file is D:/projects/assimp/test/models/3D/box_a.3d
+Debug, T34284: UNREAL: uc file is D:/projects/assimp/test/models/3D/box.uc
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/3D/box_d.3d
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Unreal Mesh Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3D\'
+Debug, T34284: UNREAL: data file is D:/projects/assimp/test/models/3D/box_d.3d
+Debug, T34284: UNREAL: aniv file is D:/projects/assimp/test/models/3D/box_a.3d
+Debug, T34284: UNREAL: uc file is D:/projects/assimp/test/models/3D/box.uc
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/3D/box.uc
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Unreal Mesh Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3D\'
+Debug, T34284: UNREAL: data file is D:/projects/assimp/test/models/3D/box_d.3d
+Debug, T34284: UNREAL: aniv file is D:/projects/assimp/test/models/3D/box_a.3d
+Debug, T34284: UNREAL: uc file is D:/projects/assimp/test/models/3D/box.uc
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/3DS/fels.3ds
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Discreet 3DS Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3DS\'
+Info,  T34284: 3DS file format version: 3
+Warn,  T34284: No hierarchy information has been found in the file. 
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/3DS/testFormatDetection
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Discreet 3DS Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3DS\'
+Info,  T34284: 3DS file format version: 3
+Warn,  T34284: 3DS: Skipping TCB animation info
+Skipping one or more lines with the same contents
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/closedLine.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/nosurfaces.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Warn,  T34284: AC3D: No material has been found
+Info,  T34284: AC3D: No surfaces defined in object definition, a point list is returned
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/openLine.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/sample_subdiv.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Info,  T34284: AC3D: Evaluating subdivision surface: cylinder
+Debug, T34284: Catmull-Clark Subdivider: got 130 bad edges touching only one face (totally 61505 edges). 
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/SphereWithLight.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: AC3D: Light source encountered
+Info,  T34284: AC3D: Evaluating subdivision surface: sphere
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/SphereWithLight_UTF16LE.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Debug, T34284: Found UTF-16 BOM ...
+Error, T34284: AC3D: No valid AC3D file, magic sequence not found
+Info,  T34284: Load D:/projects/assimp/test/models/AC/SphereWithLight_UTF8BOM.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Debug, T34284: Found UTF-8 BOM ...
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: AC3D: Light source encountered
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/SphereWithLightUvScaling4X.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: AC3D: Light source encountered
+Info,  T34284: AC3D: Evaluating subdivision surface: sphere
+Debug, T34284: Catmull-Clark Subdivider: got 12 bad edges touching only one face (totally 17670 edges). 
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/Wuson.ac
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/Wuson.acc
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AC/TestFormatDetection
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: AC3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AC\'
+Info,  T34284: AC3D file format version: 11
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/AMF/test1.amf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Additive manufacturing file format(AMF) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AMF\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load D:/projects/assimp/test/models/AMF/test_with_mat.amf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Additive manufacturing file format(AMF) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/AMF\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load D:/projects/assimp/test/models/ASE/ThreeCubesGreen.ASE
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: ASE Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/ASE\'
+Info,  T34284: Line 1: Comment: AsciiExport-Version  2,00 - Tue May 06 17:21:38 2008
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/3MF/box.3mf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: 3mf Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3MF\'
+Warn,  T34284: Ignored file of unknown type: 3D/3dmodel.model
+Warn,  T34284: Ignored file of unsupported type CONTENT_TYPES_ARCHIVES[Content_Types].xml
+Debug, T34284: 3D/3dmodel.model
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load D:/projects/assimp/test/models/3MF/box.3mf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: 3mf Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3MF\'
+Warn,  T34284: Ignored file of unknown type: 3D/3dmodel.model
+Warn,  T34284: Ignored file of unsupported type CONTENT_TYPES_ARCHIVES[Content_Types].xml
+Debug, T34284: 3D/3dmodel.model
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load D:/projects/assimp/test/models/3MF/box.3mf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: 3mf Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/3MF\'
+Warn,  T34284: Ignored file of unknown type: 3D/3dmodel.model
+Warn,  T34284: Ignored file of unsupported type CONTENT_TYPES_ARCHIVES[Content_Types].xml
+Debug, T34284: 3D/3dmodel.model
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load test.3mf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: 3mf Importer.
+Info,  T34284: Import root directory is '.\'
+Warn,  T34284: Ignored file of unknown type: 3D/3DModel.model
+Warn,  T34284: Ignored file of unsupported type CONTENT_TYPES_ARCHIVES[Content_Types].xml
+Debug, T34284: 3D/3DModel.model
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/Q3D/earth.q3o
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Quick3D Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/Q3D\'
+Info,  T34284: Quick3D File format version: 30
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/Spider_ascii.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/Spider_ascii.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/Spider_ascii.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/formatDetection
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Found positive match for header keyword: solid
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/triangle_with_two_solids.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/STL/triangle_with_empty_solid.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Warn,  T34284: STL: mesh is empty or invalid; no data loaded
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/STL/triangle_with_empty_solid.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Warn,  T34284: STL: mesh is empty or invalid; no data loaded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Error, T34284: Validation failed: The mesh emptySolid contains no vertices
+Info,  T34284: Load D:/projects/assimp/test/models/STL/Spider_ascii.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/STL\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: PretransformVerticesProcess begin
+Debug, T34284: PretransformVerticesProcess finished
+Info,  T34284: Removed 2 nodes and 0 animation channels (1 output nodes)
+Info,  T34284: Kept 0 lights and 0 cameras.
+Info,  T34284: Moved 1 meshes to WCS (number of output meshes: 1)
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: GenFaceNormalsProcess begin
+Debug, T34284: GenFaceNormalsProcess finished. Normals are already there
+Info,  T34284: Load spiderExport.stl
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Stereolithography (STL) Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: TriangulateProcess begin
+Debug, T34284: TriangulateProcess finished. There was nothing to be done.
+Debug, T34284: GenFaceNormalsProcess begin
+Info,  T34284: Normal vectors are undefined for line and point meshes
+Debug, T34284: GenFaceNormalsProcess finished. Normals are already there
+Info,  T34284: Load D:/projects/assimp/test/models/X/test.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/OV_GetNextToken
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Info,  T34284: Successfully decompressed MSZIP-compressed file
+Error, T34284: Opening brace expected.
+Info,  T34284: Load D:/projects/assimp/test/models/X/anim_test.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Length of texture file name is zero. Skipping this texture.
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/BCN_Epileptic.X
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Skipping one or more lines with the same contents
+Warn,  T34284: Unknown data object in frame in x file
+Skipping one or more lines with the same contents
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/fromtruespace_bin32.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/kwxport_test_cubewithvcolors.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Skipping one or more lines with the same contents
+Warn,  T34284: Unknown data object in frame in x file
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/test_cube_binary.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/test_cube_compressed.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Info,  T34284: Successfully decompressed MSZIP-compressed file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/test_cube_text.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/Testwuson.X
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in animation of .x file
+Skipping one or more lines with the same contents
+Warn,  T34284: Unknown data object in frame in x file
+Skipping one or more lines with the same contents
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/X/TestFormatDetection
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X\'
+Warn,  T34284: Unknown data object in mesh in x file
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models-nonbsd/X/dwarf.x
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models-nonbsd/X\'
+Debug, T34284: MakeLeftHandedProcess begin
+Debug, T34284: MakeLeftHandedProcess finished
+Debug, T34284: FlipWindingOrderProcess begin
+Debug, T34284: FlipWindingOrderProcess finished
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: ScenePreprocessor: Dummy scaling track has been generated
+Skipping one or more lines with the same contents
+Info,  T34284: Load D:/projects/assimp/test/models/X3D/ComputerKeyboard.x3d
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Info,  T34284: Found a matching importer for this file format: Extensible 3D(X3D) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/X3D\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Error, T34284: Validation failed: aiScene::mNumMeshes is 0. At least one mesh must be there
+Info,  T34284: Load D:/projects/assimp/test/models/DXF/PinkEggFromLW.dxf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Drawing Interchange Format (DXF) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/DXF\'
+Debug, T34284: DXF: got 0 entries in BLOCKS
+Debug, T34284: DXF: got 288 polylines and 0 inserted blocks in ENTITIES
+Debug, T34284: DXF: Unexpanded polycount is 288, vertex count is 1152
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/DXF/lineTest
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Found positive match for header keyword: SECTION
+Info,  T34284: Found a matching importer for this file format: Drawing Interchange Format (DXF) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/DXF\'
+Info,  T34284: DXF Comment: VISION3D DXF
+Debug, T34284: DXF: got 0 entries in BLOCKS
+Debug, T34284: DXF: got 3 polylines and 0 inserted blocks in ENTITIES
+Debug, T34284: DXF: Unexpanded polycount is 3, vertex count is 9
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/DXF/issue_2229.dxf
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Drawing Interchange Format (DXF) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/DXF\'
+Debug, T34284: DXF: skipped over control group (273 lines)
+Debug, T34284: DXF: got 2 entries in BLOCKS
+Warn,  T34284: DXF: invalid vertex index, indices are one-based.
+Skipping one or more lines with the same contents
+Warn,  T34284: DXF: unexpected face count in polymesh: 1173, expected 1174
+Warn,  T34284: DXF: invalid vertex index, indices are one-based.
+Skipping one or more lines with the same contents
+Debug, T34284: DXF: got 4 polylines and 0 inserted blocks in ENTITIES
+Debug, T34284: DXF: skipped over control group (3 lines)
+Skipping one or more lines with the same contents
+Debug, T34284: DXF: Unexpanded polycount is 1289, vertex count is 768
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: PretransformVerticesProcess begin
+Debug, T34284: PretransformVerticesProcess finished
+Info,  T34284: Removed 1 nodes and 0 animation channels (1 output nodes)
+Info,  T34284: Kept 0 lights and 0 cameras.
+Info,  T34284: Moved 1 meshes to WCS (number of output meshes: 1)
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: (Deleting previous scene)
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube_uv.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/cube_binary.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstanceBinary() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceListsBinary() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceListsBinary() succeeded
+Debug, T34284: PLY::DOM::ParseInstanceBinary() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/float-color.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/PLY/issue623.ply
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/PLY\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Warn,  T34284: Unable to parse property instance. Skipping this element instance
+Skipping one or more lines with the same contents
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Debug, T34284: Found positive match for header keyword: ply
+Info,  T34284: Found a matching importer for this file format: Stanford Polygon Library (PLY) Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: PLY::DOM::ParseInstance() begin
+Debug, T34284: PLY::DOM::ParseHeader() begin
+Debug, T34284: PLY::DOM::ParseHeader() succeeded
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() begin
+Debug, T34284: PLY::DOM::ParseElementInstanceLists() succeeded
+Debug, T34284: PLY::DOM::ParseInstance() succeeded
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/spider.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/spider.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: usemtl
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Error, T34284: OBJ: failed to locate material Default, creating new material
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: usemtl
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/cube_with_vertexcolors.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/cube_with_vertexcolors_uni.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Debug, T34284: GenVertexNormalsProcess begin
+Debug, T34284: GenVertexNormalsProcess finished. Normals are already there
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: mtllib
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Error, T34284: OBJ: Unable to locate material file $blobfile.mtl
+Info,  T34284: OBJ: Opening fallback material file $$$___magic___$mtl
+Error, T34284: OBJ: Unable to locate fallback material file $$$___magic___$mtl
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Error, T34284: Validation failed: Mesh  contains no faces
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Error, T34284: OBJ: Invalid component in homogeneous vector (Division by zero)
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Error, T34284: OBJ: Invalid face indice
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/cube_mtllib_after_g.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Error, T34284: OBJ: Unable to locate material file cube_mtllib_after_g.mat
+Info,  T34284: OBJ: Opening fallback material file D:/projects/assimp/test/models/OBJ/cube_mtllib_after_g.mtl
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/point_cloud.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ScenePreprocessor: Adding default material 'DefaultMaterial'
+Info,  T34284: Load D:/projects/assimp/test/models/OBJ/box_without_lineending.obj
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OBJ\'
+Error, T34284: OBJ: failed to locate material Default, creating new material
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load $$$___magic___$$$.
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: File extension not known, trying signature-based detection
+Debug, T34284: Found positive match for header keyword: v 
+Info,  T34284: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T34284: Import root directory is '.\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OpenGEX/Example.ogex
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Open Game Engine Exchange.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OpenGEX\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OpenGEX/light_issue1262.ogex
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Open Game Engine Exchange.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OpenGEX\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/OpenGEX/empty_camera.ogex
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Open Game Engine Exchange.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/OpenGEX\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Info,  T34284: Load D:/projects/assimp/test/models/SIB/heffalump.sib
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Silo SIB Importer.
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/SIB\'
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/BLEND/AreaLight_269.blend
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Blender 3D Importer (http://www.blender3d.org).
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/BLEND\'
+Info,  T34284: BLEND: Blender version is 2.69 (64bit: true, little endian: true)
+Debug, T34284: REND
+Debug, T34284: TEST
+Debug, T34284: GLOB
+Debug, T34284: WM
+Debug, T34284: DATA
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SC
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: CA
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: WO
+Debug, T34284: DATA
+Debug, T34284: OB
+Skipping one or more lines with the same contents
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: OB
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: TE
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: LS
+Debug, T34284: DATA
+Debug, T34284: DNA1
+Debug, T34284: BlenderDNA: Got 551 structures with totally 6353 fields
+Info,  T34284: BlenderDNA: Dumped dna to dna.txt
+Debug, T34284: ENDB
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_const` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_lin` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_quad` in structure `Lamp`
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_const` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_lin` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_quad` in structure `Lamp`
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_const` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_lin` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_quad` in structure `Lamp`
+Info,  T34284: (Stats) Fields read: 918, pointers resolved: 23, cache hits: 3, cached objects: 19
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: aiLight::mAttenuationXXX - all are zero
+Skipping one or more lines with the same contents
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/BLEND/box.blend
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Blender 3D Importer (http://www.blender3d.org).
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/BLEND\'
+Info,  T34284: BLEND: Blender version is 2.76 (64bit: true, little endian: true)
+Debug, T34284: REND
+Debug, T34284: TEST
+Debug, T34284: GLOB
+Debug, T34284: WM
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SC
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: CA
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: WO
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: TE
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: LS
+Debug, T34284: DATA
+Debug, T34284: DNA1
+Debug, T34284: BlenderDNA: Got 604 structures with totally 6955 fields
+Info,  T34284: BlenderDNA: Dumped dna to dna.txt
+Debug, T34284: ENDB
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_const` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_lin` in structure `Lamp`
+Warn,  T34284: BlendDNA: Did not find a field named `coeff_quad` in structure `Lamp`
+Info,  T34284: (Stats) Fields read: 668, pointers resolved: 17, cache hits: 3, cached objects: 13
+Debug, T34284: UpdateImporterScale scale set: 1
+Debug, T34284: ValidateDataStructureProcess begin
+Warn,  T34284: Validation warning: aiLight::mAttenuationXXX - all are zero
+Debug, T34284: ValidateDataStructureProcess end
+Info,  T34284: Load D:/projects/assimp/test/models/BLEND/4Cubes4Mats_248.blend
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Blender 3D Importer (http://www.blender3d.org).
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/BLEND\'
+Info,  T34284: BLEND: Blender version is 2.48 (64bit: false, little endian: true)
+Debug, T34284: REND
+Debug, T34284: GLOB
+Debug, T34284: SR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SC
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: CA
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: WO
+Debug, T34284: TX
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: OB
+Skipping one or more lines with the same contents
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: TE
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: DNA1
+Debug, T34284: BlenderDNA: Got 310 structures with totally 3868 fields
+Info,  T34284: BlenderDNA: Dumped dna to dna.txt
+Debug, T34284: ENDB
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `sensor_x` in structure `Camera`
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `totloop` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `totpoly` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `*mloop` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `*mloopuv` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `*mloopcol` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `*mpoly` in structure `Mesh`
+Warn,  T34284: BlendDNA: Did not find a field named `*mtpoly` in structure `Mesh`
+Warn,  T34284: <add reason>
+Skipping one or more lines with the same contents
+Warn,  T34284: BlendDNA: Did not find a field named `rot` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `colspecfac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `mirrfac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `alphafac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `difffac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `specfac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `emitfac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `hardfac` in structure `MTex`
+Warn,  T34284: BlendDNA: Did not find a field named `material_type` in structure `Material`
+Warn,  T34284: BlendDNA: Did not find a field named `pr_texture` in structure `Material`
+Warn,  T34284: BlendDNA: Did not find a field named `shadowonly_flag` in structure `Material`
+Warn,  T34284: BlendDNA: Did not find a field named `index` in structure `Material`
+Warn,  T34284: BlendDNA: Did not find a field named `vcol_alpha` in structure `Material`
+Warn,  T34284: BlendDNA: Did not find a field named `typemap` in structure `CustomData`
+Error, T34284: Constructing BlenderDNA Structure encountered an error
+Info,  T34284: Load D:/projects/assimp/test/models/BLEND/blender_269_regress1.blend
+Debug, T34284: Assimp 5.0.3419303229 x86 msvc debug shared singlethreadedsingle : 
+Info,  T34284: Found a matching importer for this file format: Blender 3D Importer (http://www.blender3d.org).
+Info,  T34284: Import root directory is 'D:/projects/assimp/test/models/BLEND\'
+Info,  T34284: BLEND: Blender version is 2.69 (64bit: true, little endian: true)
+Debug, T34284: REND
+Debug, T34284: TEST
+Debug, T34284: GLOB
+Debug, T34284: WM
+Debug, T34284: DATA
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SN
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: SC
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: CA
+Debug, T34284: LA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: KE
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: WO
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Debug, T34284: OB
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: MA
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: TE
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: ME
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: BR
+Debug, T34284: DATA
+Skipping one or more lines with the same contents
+Debug, T34284: LS
+Debug, T34284: DATA
+Debug, T34284: DNA1
+Debug, T34284: BlenderDNA: Got 551 structures with totally 6353 fields
+Info,  T34284: BlenderDNA: Dumped dna to dna.txt

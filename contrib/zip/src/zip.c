@@ -44,7 +44,7 @@
 
 #ifdef _MSC_VER
 #include <io.h>
-#pragma warning(disable : 4706)
+#pragma warning(disable : 4706 4244 4028)
 
 #define ftruncate(fd, sz) (-(_chsize_s((fd), (sz)) != 0))
 #define fileno _fileno

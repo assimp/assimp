@@ -90,7 +90,7 @@ ObjFileImporter::~ObjFileImporter() {
 //  Returns true if file is an obj file.
 bool ObjFileImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
-    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, std::size(tokens), 200, false, true);
+    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens), 200, false, true);
 }
 
 // ------------------------------------------------------------------------------------------------

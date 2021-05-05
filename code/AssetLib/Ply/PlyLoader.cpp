@@ -172,7 +172,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
             (headerCheck[2] != 'Y' && headerCheck[2] != 'y')) {
         streamedBuffer.close();
-        throw DeadlyImportError("Invalid .ply file: Magic number \'ply\' is no there");
+        throw DeadlyImportError("Invalid .ply file: Incorrect magic number (expected 'ply' or 'PLY').");
     }
 
     std::vector<char> mBuffer2;

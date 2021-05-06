@@ -3,6 +3,7 @@
 
 #include <assimp/vector3.h>
 #include <assimp/Exceptional.h>
+#include <assimp/StringUtils.h>
 
 #include <vector>
 
@@ -203,8 +204,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors,
 
     if (pColorPerVertex) {
         if (pColors.size() < pMesh.mNumVertices) {
-            throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Vertices count(" +
-                                    to_string(pMesh.mNumVertices) + ").");
+            throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + ai_to_string(pColors.size()) + ") can not be less than Vertices count(" +
+                                    ai_to_string(pMesh.mNumVertices) + ").");
         }
 
         // copy colors to mesh
@@ -214,8 +215,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors,
     } // if(pColorPerVertex)
     else {
         if (pColors.size() < pMesh.mNumFaces) {
-            throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Faces count(" +
-                                    to_string(pMesh.mNumFaces) + ").");
+            throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + ai_to_string(pColors.size()) + ") can not be less than Faces count(" +
+                                    ai_to_string(pMesh.mNumFaces) + ").");
         }
 
         // copy colors to mesh
@@ -264,8 +265,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
         if (colorIdx.size() > 0) {
             // check indices array count.
             if (colorIdx.size() < coordIdx.size()) {
-                throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(colorIdx.size()) +
-                                        ") can not be less than Coords inidces count(" + to_string(coordIdx.size()) + ").");
+                throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + ai_to_string(colorIdx.size()) +
+                                        ") can not be less than Coords indices count(" + ai_to_string(coordIdx.size()) + ").");
             }
             // create list with colors for every vertex.
             col_tgt_arr.resize(pMesh.mNumVertices);
@@ -287,8 +288,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
             // when color indices list is absent use CoordIdx.
             // check indices array count.
             if (colors.size() < pMesh.mNumVertices) {
-                throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(colors.size()) + ") can not be less than Vertices count(" +
-                                        to_string(pMesh.mNumVertices) + ").");
+                throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + ai_to_string(colors.size()) + ") can not be less than Vertices count(" +
+                                        ai_to_string(pMesh.mNumVertices) + ").");
             }
             // create list with colors for every vertex.
             col_tgt_arr.resize(pMesh.mNumVertices);
@@ -301,8 +302,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
         if (colorIdx.size() > 0) {
             // check indices array count.
             if (colorIdx.size() < pMesh.mNumFaces) {
-                throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(colorIdx.size()) +
-                                        ") can not be less than Faces count(" + to_string(pMesh.mNumFaces) + ").");
+                throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + ai_to_string(colorIdx.size()) +
+                                        ") can not be less than Faces count(" + ai_to_string(pMesh.mNumFaces) + ").");
             }
             // create list with colors for every vertex using faces indices.
             col_tgt_arr.resize(pMesh.mNumFaces);
@@ -318,8 +319,8 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
             // when color indices list is absent use CoordIdx.
             // check indices array count.
             if (colors.size() < pMesh.mNumFaces) {
-                throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(colors.size()) + ") can not be less than Faces count(" +
-                                        to_string(pMesh.mNumFaces) + ").");
+                throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + ai_to_string(colors.size()) + ") can not be less than Faces count(" +
+                                        ai_to_string(pMesh.mNumFaces) + ").");
             }
             // create list with colors for every vertex using faces indices.
             col_tgt_arr.resize(pMesh.mNumFaces);
@@ -361,8 +362,8 @@ void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::vector<int32_t> &pCoordI
             pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
             for (size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++) {
                 if (tind[i] >= norm_arr_copy.size())
-                    throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + to_string(tind[i]) +
-                                            ") is out of range. Normals count: " + to_string(norm_arr_copy.size()) + ".");
+                    throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + ai_to_string(tind[i]) +
+                                            ") is out of range. Normals count: " + ai_to_string(norm_arr_copy.size()) + ".");
 
                 pMesh.mNormals[i] = norm_arr_copy[tind[i]];
             }
@@ -458,7 +459,7 @@ void X3DGeoHelper::add_tex_coord(aiMesh &pMesh, const std::vector<int32_t> &pCoo
     pMesh.mNumUVComponents[0] = 2;
     for (size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++) {
         if (pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
-            throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + to_string(fi) + ".");
+            throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + ai_to_string(fi) + ".");
 
         for (size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++) {
             size_t vert_idx = pMesh.mFaces[fi].mIndices[ii];

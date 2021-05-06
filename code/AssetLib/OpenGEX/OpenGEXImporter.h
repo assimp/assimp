@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -79,7 +79,7 @@ struct MetricInfo {
     int m_intValue;
 
     MetricInfo()
-    : m_stringValue( "" )
+    : m_stringValue( )
     , m_floatValue( 0.0f )
     , m_intValue( -1 ) {
         // empty

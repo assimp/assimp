@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -66,19 +66,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include "../contrib/zlib/zlib.h"
-#endif
+#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#    include <zlib.h>
+#  else
+#    include "../contrib/zlib/zlib.h"
+#  endif
 #endif
 
 namespace Assimp {
+
 template <>
 const char *LogFunctions<BlenderImporter>::Prefix() {
     static auto prefix = "BLEND: ";
     return prefix;
 }
+
 } // namespace Assimp
 
 using namespace Assimp;
@@ -86,7 +88,7 @@ using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
 static const aiImporterDesc blenderDesc = {
-    "Blender 3D Importer \nhttp://www.blender3d.org",
+    "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",
     "No animation support yet",
@@ -122,17 +124,12 @@ bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
         return true;
     }
 
-    else if ((!extension.length() || checkSig) && pIOHandler) {
+    if ((!extension.length() || checkSig) && pIOHandler) {
         // note: this won't catch compressed files
         return SearchFileHeaderForToken(pIOHandler, pFile, TokensForSearch, 1);
     }
-    return false;
-}
 
-// ------------------------------------------------------------------------------------------------
-// List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string> &app) {
-    app.insert("blend");
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -252,7 +249,7 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
 
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream> stream) {
-    out.reader = std::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream, out.little));
+    out.reader = std::make_shared<StreamReaderAny>(stream, out.little);
 
     DNAParser dna_reader(out);
     const DNA *dna = nullptr;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -115,7 +115,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ifc ifczip stp"
+    "ifc ifczip step stp"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -567,7 +567,7 @@ typedef std::map<std::string, std::string> Metadata;
 
 // ------------------------------------------------------------------------------------------------
 void ProcessMetadata(const Schema_2x3::ListOf<Schema_2x3::Lazy<Schema_2x3::IfcProperty>, 1, 0> &set, ConversionData &conv, Metadata &properties,
-        const std::string &prefix = "",
+        const std::string &prefix = std::string(),
         unsigned int nest = 0) {
     for (const Schema_2x3::IfcProperty &property : set) {
         const std::string &key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
@@ -618,7 +618,7 @@ void ProcessMetadata(const Schema_2x3::ListOf<Schema_2x3::Lazy<Schema_2x3::IfcPr
                 ProcessMetadata(complexProp->HasProperties, conv, properties, key, nest + 1);
             }
         } else {
-            properties[key] = "";
+            properties[key] = std::string();
         }
     }
 }

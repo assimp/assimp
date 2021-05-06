@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // possible as new fields are added to assimp structures.
 
 // ----------------------------------------------------------------------------
-/** 
+/**
   * @file Implements Assimp::SceneCombiner. This is a smart utility
   *       class that combines multiple scenes, meshes, ... into one. Currently
   *       these utilities are used by the IRR and LWS loaders and the
@@ -359,7 +359,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
 
     // generate the output texture list + an offset table for all texture indices
     if (dest->mNumTextures) {
-        aiTexture **pip = dest->mTextures = new aiTexture *[dest->mNumMaterials];
+        aiTexture **pip = dest->mTextures = new aiTexture *[dest->mNumTextures];
         cnt = 0;
         for (unsigned int n = 0; n < src.size(); ++n) {
             SceneHelper *cur = &src[n];
@@ -638,6 +638,8 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
         deleteMe->mMaterials = nullptr;
         delete[] deleteMe->mAnimations;
         deleteMe->mAnimations = nullptr;
+        delete[] deleteMe->mTextures;
+        deleteMe->mTextures = nullptr;
 
         deleteMe->mRootNode = nullptr;
 

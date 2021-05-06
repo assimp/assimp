@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -119,7 +119,7 @@ private:
 AI_FORCE_INLINE
 DefaultIOStream::DefaultIOStream() AI_NO_EXCEPT
 : mFile(nullptr)
-, mFilename("")
+, mFilename()
 , mCachedSize(SIZE_MAX) {
     // empty
 }

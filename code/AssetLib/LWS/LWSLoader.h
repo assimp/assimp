@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -88,7 +88,7 @@ struct NodeDesc {
             id(),
             number(0),
             parent(0),
-            name(""),
+            name(),
             isPivotSet(false),
             lightColor(1.f, 1.f, 1.f),
             lightIntensity(1.f),

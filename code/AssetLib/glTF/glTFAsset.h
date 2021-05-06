@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -92,10 +92,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#   else
+#   if defined(_MSC_VER) && _MSC_VER <= 1600
 #       define gltf_unordered_map tr1::unordered_map
+#   else
+#       define gltf_unordered_map unordered_map
 #   endif
 #endif
 
@@ -954,7 +954,9 @@ namespace glTF
         virtual void AttachToDocument(Document& doc) = 0;
         virtual void DetachFromDocument() = 0;
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
         virtual void WriteObjects(AssetWriter& writer) = 0;
+#endif
     };
 
 
@@ -986,8 +988,10 @@ namespace glTF
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
         void WriteObjects(AssetWriter& writer)
             { WriteLazyDict<T>(*this, writer); }
+#endif
 
         Ref<T> Add(T* obj);
 
@@ -1029,7 +1033,7 @@ namespace glTF
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version("")
+            , version()
         {
         }
     };

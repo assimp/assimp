@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -859,7 +859,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// Check whether we can read from the file
 	if (file.get() == nullptr) {
-		throw DeadlyImportError("Failed to open IRR file " + pFile + "");
+		throw DeadlyImportError("Failed to open IRR file " + pFile);
 	}
 
 	// Construct the irrXML parser

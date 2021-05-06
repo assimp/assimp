@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -155,7 +155,7 @@ std::string PeekPropertyName(const Element& element)
     ai_assert(element.KeyToken().StringContents() == "P");
     const TokenList& tok = element.Tokens();
     if(tok.size() < 4) {
-        return "";
+        return std::string();
     }
 
     return ParseTokenAsString(*tok[0]);

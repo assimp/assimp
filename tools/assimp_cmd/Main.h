@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -96,6 +96,7 @@ struct ImportData {
 		,	showLog (false)
 		,	verbose (false)
 		,	log	    (false)
+        ,   rot     (aiVector3D(0.f, 0.f, 0.f))
 	{}
 
 	/// Post-processing flags
@@ -112,6 +113,9 @@ struct ImportData {
 
 	// Need to log?
 	bool log;
+
+	// Export With Rotation
+	aiVector3D rot;
 };
 
 /// \enum AssimpCmdError

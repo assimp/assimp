@@ -67,7 +67,13 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: cpp-pm/polly
-        path: cmake/polly     
+        path: cmake/polly
+
+    - name: Remove contrib directory for Hunter builds
+      if: contains(matrix.name, 'hunter')
+      uses: JesseTG/rm@v1.0.2
+      with:
+        path: contrib
 
     - name: Cache DX SDK
       id: dxcache

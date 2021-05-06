@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -1006,7 +1006,7 @@ void glTFExporter::ExportAnimations()
 
             // It appears that assimp stores this type of animation as multiple animations.
             // where each aiNodeAnim in mChannels animates a specific node.
-            std::string name = nameAnim + "_" + to_string(channelIndex);
+            std::string name = nameAnim + "_" + ai_to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
 

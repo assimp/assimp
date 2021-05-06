@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -324,7 +324,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
 
-    ASSERT_EQ(scene->mNumMaterials, 1);
+    ASSERT_EQ(scene->mNumMaterials, 1u);
     const aiMaterial* mat = scene->mMaterials[0];
     aiString texture;
     ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);
@@ -377,7 +377,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
 
-    ASSERT_EQ(scene->mNumMaterials, 1);
+    ASSERT_EQ(scene->mNumMaterials, 1u);
     const aiMaterial* mat = scene->mMaterials[0];
     aiString texture;
     ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);

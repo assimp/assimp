@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -142,7 +142,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// check whether we can read from the file
 	if (stream.get() == NULL) {
-		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile + "");
+		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile);
 	}
 
 	// see if its compressed, if so uncompress it

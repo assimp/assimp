@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -844,7 +844,8 @@ void ValidateDSProcess::Validate(const aiAnimation *pAnimation,
     Validate(&pMeshMorphAnim->mName);
 
     if (!pMeshMorphAnim->mNumKeys) {
-        ReportError("Empty mesh morph animation channel");
+        ReportWarning("Empty mesh morph animation channel");
+        return;
     }
 
     // otherwise check whether one of the keys exceeds the total duration of the animation

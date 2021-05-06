@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -350,6 +350,10 @@ struct aiMetadata {
         } else if (nullptr != mValues[index].mData && AI_AIMETADATA == mValues[index].mType) {
             *static_cast<T *>(mValues[index].mData) = value;
         } else {
+            if (nullptr != mValues[index].mData) {
+                delete static_cast<T *>(mValues[index].mData);
+                mValues[index].mData = nullptr;
+            }
             mValues[index].mData = new T(value);
         }
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -178,7 +178,7 @@ struct Q3BSPModel {
         m_Textures(),
         m_Lightmaps(),
         m_EntityData(),
-        m_ModelName( "" )
+        m_ModelName()
     {
         // empty
     }

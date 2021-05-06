@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -78,6 +78,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Profiler.h>
 #include <assimp/commonMetaData.h>
 
+#include <exception>
 #include <set>
 #include <memory>
 #include <cctype>
@@ -148,7 +149,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 Importer::Importer()
  : pimpl( new ImporterPimpl ) {
     pimpl->mScene = nullptr;
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
 
     // Allocate a default IO handler
     pimpl->mIOHandler = new DefaultIOSystem;
@@ -386,7 +387,7 @@ void Importer::FreeScene( ) {
     delete pimpl->mScene;
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(void);
 }
@@ -433,7 +434,7 @@ aiScene* Importer::GetOrphanedScene() {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = ""; // reset error string
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(aiScene*);
     
@@ -974,15 +975,14 @@ size_t Importer::GetImporterIndex (const char* szExtension) const {
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
-    // skip over wildcard and dot characters at string head --
+    // skip over wild-card and dot characters at string head --
     for ( ; *szExtension == '*' || *szExtension == '.'; ++szExtension );
 
     std::string ext(szExtension);
     if (ext.empty()) {
         return static_cast<size_t>(-1);
     }
-    std::transform( ext.begin(), ext.end(), ext.begin(), ToLower<char> );
-
+    ext = ai_tolower(ext);
     std::set<std::string> str;
     for (std::vector<BaseImporter*>::const_iterator i =  pimpl->mImporter.begin();i != pimpl->mImporter.end();++i)  {
         str.clear();

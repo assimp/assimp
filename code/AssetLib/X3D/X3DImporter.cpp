@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -186,11 +186,7 @@ bool X3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, b
     return false;
 }
 
-void X3DImporter::GetExtensionList(std::set<std::string> &extensionList) {
-    extensionList.insert("x3d");
-}
-
-void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler ) {
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
     if (!stream) {
         throw DeadlyImportError("Could not open file for reading");

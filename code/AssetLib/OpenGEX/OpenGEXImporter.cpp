@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -206,7 +206,7 @@ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 static void propId2StdString(Property *prop, std::string &name, std::string &key) {
-    name = key = "";
+    name = key = std::string();
     if (nullptr == prop) {
         return;
     }

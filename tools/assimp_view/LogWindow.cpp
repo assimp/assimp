@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -105,7 +105,7 @@ void CLogWindow::Init() {
 
     // setup the log text
     this->szText = AI_VIEW_RTF_LOG_HEADER;
-    ;
+
     this->szPlainText = "";
 }
 

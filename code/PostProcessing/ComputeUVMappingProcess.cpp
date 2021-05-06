@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -122,7 +122,7 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
         const aiFace& face = mesh->mFaces[fidx];
         if (face.mNumIndices < 3) continue; // triangles and polygons only, please
 
-        unsigned int small = face.mNumIndices, large = small;
+        unsigned int smallV = face.mNumIndices, large = smallV;
         bool zero = false, one = false, round_to_zero = false;
 
         // Check whether this face lies on a UV seam. We can just guess,
@@ -133,7 +133,7 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
         {
             if (out[face.mIndices[n]].x < LOWER_LIMIT)
             {
-                small = n;
+                smallV = n;
 
                 // If we have a U value very close to 0 we can't
                 // round the others to 0, too.
@@ -151,7 +151,7 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
                     one = true;
             }
         }
-        if (small != face.mNumIndices && large != face.mNumIndices)
+        if (smallV != face.mNumIndices && large != face.mNumIndices)
         {
             for (unsigned int n = 0; n < face.mNumIndices;++n)
             {

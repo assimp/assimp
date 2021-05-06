@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -237,7 +237,7 @@ void D3MFExporter::writeBaseMaterials() {
         aiMaterial *mat = mScene->mMaterials[i];
         aiString name;
         if (mat->Get(AI_MATKEY_NAME, name) != aiReturn_SUCCESS) {
-            strName = "basemat_" + to_string(i);
+            strName = "basemat_" + ai_to_string(i);
         } else {
             strName = name.C_Str();
         }
@@ -248,7 +248,7 @@ void D3MFExporter::writeBaseMaterials() {
             // rgbs %
             if (color.r <= 1 && color.g <= 1 && color.b <= 1 && color.a <= 1) {
 
-                hexDiffuseColor = Rgba2Hex(
+                hexDiffuseColor = ai_rgba2hex(
                         (int)((ai_real)color.r) * 255,
                         (int)((ai_real)color.g) * 255,
                         (int)((ai_real)color.b) * 255,
@@ -257,13 +257,13 @@ void D3MFExporter::writeBaseMaterials() {
 
             } else {
                 hexDiffuseColor = "#";
-                tmp = DecimalToHexa((ai_real)color.r);
+                tmp = ai_decimal_to_hexa((ai_real)color.r);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.g);
+                tmp = ai_decimal_to_hexa((ai_real)color.g);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.b);
+                tmp = ai_decimal_to_hexa((ai_real)color.b);
                 hexDiffuseColor += tmp;
-                tmp = DecimalToHexa((ai_real)color.a);
+                tmp = ai_decimal_to_hexa((ai_real)color.a);
                 hexDiffuseColor += tmp;
             }
         } else {
@@ -307,18 +307,26 @@ void D3MFExporter::writeMesh(aiMesh *mesh) {
         return;
     }
 
-    mModelOutput << "<" << XmlTag::mesh << ">" << std::endl;
-    mModelOutput << "<" << XmlTag::vertices << ">" << std::endl;
+    mModelOutput << "<"
+                 << XmlTag::mesh
+                 << ">" << "\n";
+    mModelOutput << "<"
+                 << XmlTag::vertices
+                 << ">" << "\n";
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         writeVertex(mesh->mVertices[i]);
     }
-    mModelOutput << "</" << XmlTag::vertices << ">" << std::endl;
+    mModelOutput << "</"
+                 << XmlTag::vertices << ">"
+                 << "\n";
 
     const unsigned int matIdx(mesh->mMaterialIndex);
 
     writeFaces(mesh, matIdx);
 
-    mModelOutput << "</" << XmlTag::mesh << ">" << std::endl;
+    mModelOutput << "</"
+                 << XmlTag::mesh << ">"
+                 << "\n";
 }
 
 void D3MFExporter::writeVertex(const aiVector3D &pos) {
@@ -334,27 +342,34 @@ void D3MFExporter::writeFaces(aiMesh *mesh, unsigned int matIdx) {
     if (!mesh->HasFaces()) {
         return;
     }
-    mModelOutput << "<" << XmlTag::triangles << ">" << std::endl;
+    mModelOutput << "<"
+                 << XmlTag::triangles << ">"
+                 << "\n";
     for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
         aiFace &currentFace = mesh->mFaces[i];
         mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[0] << "\" v2=\""
                      << currentFace.mIndices[1] << "\" v3=\"" << currentFace.mIndices[2]
-                     << "\" pid=\"1\" p1=\"" + to_string(matIdx) + "\" />";
-        mModelOutput << std::endl;
+                     << "\" pid=\"1\" p1=\"" + ai_to_string(matIdx) + "\" />";
+        mModelOutput << "\n";
     }
-    mModelOutput << "</" << XmlTag::triangles << ">";
-    mModelOutput << std::endl;
+    mModelOutput << "</"
+                 << XmlTag::triangles
+                 << ">";
+    mModelOutput << "\n";
 }
 
 void D3MFExporter::writeBuild() {
-    mModelOutput << "<" << XmlTag::build << ">" << std::endl;
+    mModelOutput << "<"
+                 << XmlTag::build
+                 << ">"
+                 << "\n";
 
     for (size_t i = 0; i < mBuildItems.size(); ++i) {
         mModelOutput << "<" << XmlTag::item << " objectid=\"" << i + 2 << "\"/>";
-        mModelOutput << std::endl;
+        mModelOutput << "\n";
     }
     mModelOutput << "</" << XmlTag::build << ">";
-    mModelOutput << std::endl;
+    mModelOutput << "\n";
 }
 
 void D3MFExporter::zipContentType(const std::string &filename) {

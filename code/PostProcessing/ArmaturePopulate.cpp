@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -124,13 +124,13 @@ void ArmaturePopulate::BuildBoneList(aiNode *current_node,
 
             for (unsigned int boneId = 0; boneId < mesh->mNumBones; ++boneId) {
                 aiBone *bone = mesh->mBones[boneId];
-                ai_assert(bone);
+                ai_assert(nullptr != bone);
 
                 // duplicate mehes exist with the same bones sometimes :)
                 // so this must be detected
                 if (std::find(bones.begin(), bones.end(), bone) == bones.end()) {
                     // add the element once
-                    bones.push_back(bone);
+                    bones.emplace_back(bone);
                 }
             }
 
@@ -145,14 +145,14 @@ void ArmaturePopulate::BuildBoneList(aiNode *current_node,
 // Prepare flat node list which can be used for non recursive lookups later
 void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
                                      std::vector<aiNode *> &nodes) {
-    ai_assert(current_node);
+    ai_assert(nullptr != current_node);
 
     for (unsigned int nodeId = 0; nodeId < current_node->mNumChildren; ++nodeId) {
         aiNode *child = current_node->mChildren[nodeId];
         ai_assert(child);
 
         if (child->mNumMeshes == 0) {
-            nodes.push_back(child);
+            nodes.emplace_back(child);
         }
 
         BuildNodeList(child, nodes);
@@ -168,8 +168,10 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
                                       const std::vector<aiBone *> &bones,
                                       std::map<aiBone *, aiNode *> &bone_stack,
                                   std::vector<aiNode *> &node_stack) {
-    ai_assert(root_node);
-    ai_assert(!node_stack.empty());
+    if (node_stack.empty()) {
+        return;
+    }
+    ai_assert(nullptr != root_node);
 
     for (aiBone *bone : bones) {
         ai_assert(bone);
@@ -181,7 +183,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
 
             node = GetNodeFromStack(bone->mName, node_stack);
 
-            if (!node) {
+            if (nullptr == node) {
                 ASSIMP_LOG_ERROR("serious import issue node for bone was not detected");
                 continue;
             }
@@ -199,7 +201,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
 // points. (yet)
 aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
                                           std::vector<aiBone *> &bone_list) {
-    while (bone_node) {
+    while (nullptr != bone_node) {
         if (!IsBoneNode(bone_node->mName, bone_list)) {
             ASSIMP_LOG_VERBOSE_DEBUG_F("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
             return bone_node;
@@ -236,7 +238,7 @@ aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
     aiNode *found = nullptr;
     for (iter = nodes.begin(); iter < nodes.end(); ++iter) {
         aiNode *element = *iter;
-        ai_assert(element);
+        ai_assert(nullptr != element);
         // node valid and node name matches
         if (element->mName == node_name) {
             found = element;

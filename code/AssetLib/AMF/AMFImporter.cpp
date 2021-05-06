@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -39,19 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/// \file AMFImporter.cpp
-/// \brief AMF-format files importer for Assimp: main algorithm implementation.
-/// \date 2016
-/// \author smal.root@gmail.com
-
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
 
 // Header files, Assimp.
 #include "AMFImporter.hpp"
-#include "AMFImporter_Macro.hpp"
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/fast_atof.h>
+#include <assimp/StringUtils.h>
 
 // Header files, stdlib.
 #include <memory>
@@ -306,13 +301,14 @@ void AMFImporter::ParseNode_Root() {
         throw DeadlyImportError("Root node \"amf\" not found.");
     }
     XmlNode node = *root;
-    mUnit = node.attribute("unit").as_string();
+    mUnit = ai_tolower(std::string(node.attribute("unit").as_string()));
+    
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
     // Check attributes
     if (!mUnit.empty()) {
-        if ((mUnit != "inch") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) {
+        if ((mUnit != "inch") && (mUnit != "millimeters") && (mUnit != "millimeter") && (mUnit != "meter") && (mUnit != "feet") && (mUnit != "micron")) {
             Throw_IncorrectAttrValue("unit", mUnit);
         }
     }
@@ -407,20 +403,20 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
 
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        for (auto &currentNode : node.children()) {
             const std::string &currentName = currentNode.name();
             if (currentName == "deltax") {
-                als.Delta.x = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.x);
             } else if (currentName == "deltay") {
-                als.Delta.y = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.y);
             } else if (currentName == "deltaz") {
-                als.Delta.z = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.z);
             } else if (currentName == "rx") {
-                als.Delta.x = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.x);
             } else if (currentName == "ry") {
-                als.Delta.y = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.y);
             } else if (currentName == "rz") {
-                als.Delta.z = (ai_real)std::atof(currentNode.value());
+                XmlParser::getValueAsFloat(currentNode, als.Delta.z);
             }
         }
         ParseHelper_Node_Exit();
@@ -456,7 +452,7 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
     // Check for child nodes
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
+        for (auto &currentNode : node.children()) {
             const std::string &currentName = currentNode.name();
             if (currentName == "color") {
                 ParseNode_Color(currentNode);
@@ -519,10 +515,6 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     }
 
     return false;
-}
-
-void AMFImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
-    pExtensionList.insert("amf");
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

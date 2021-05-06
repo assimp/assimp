@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -91,7 +91,7 @@ namespace pmx
 		std::vector<char> buffer;
 		if (size == 0)
 		{
-			return std::string("");
+			return std::string();
 		}
 		buffer.reserve(size);
 		stream->read((char*) buffer.data(), size);
@@ -524,7 +524,7 @@ namespace pmx
 		if (version != 2.0f && version != 2.1f)
 		{
 			std::cerr << "this is not ver2.0 or ver2.1 but " << version << "." << std::endl;
-            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", to_string(version));
+            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", ai_to_string(version));
     }
 		this->setting.Read(stream);
 

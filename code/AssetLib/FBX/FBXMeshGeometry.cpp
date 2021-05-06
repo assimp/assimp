@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -330,7 +330,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         }
 
         const Element* Name = source["Name"];
-        m_uvNames[index] = "";
+        m_uvNames[index] = std::string();
         if(Name) {
             m_uvNames[index] = ParseTokenAsString(GetRequiredToken(*Name,0));
         }
@@ -507,6 +507,12 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+
+        if (uvIndices.size() > vertex_count) {
+            FBXImporter::LogWarn(Formatter::format("trimming length of input array for ByPolygonVertex mapping: ")
+                                          << uvIndices.size() << ", expected " << vertex_count);
+            uvIndices.resize(vertex_count);
+        }
 
         if (uvIndices.size() != vertex_count) {
             FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygonVertex mapping: ")

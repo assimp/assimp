@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -96,6 +96,9 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     mScene = pScene;
 
     mAsset.reset( new Asset( pIOSystem ) );
+
+    // Always on as our triangulation process is aware of this type of encoding
+    mAsset->extensionsUsed.FB_ngon_encoding = true;
 
     if (isBinary) {
         mAsset->SetAsBinary();
@@ -602,7 +605,7 @@ void glTF2Exporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
-        std::string id = "material_" + to_string(i);
+        std::string id = "material_" + ai_to_string(i);
 
         Ref<Material> m = mAsset->materials.Create(id);
 
@@ -955,6 +958,7 @@ void glTF2Exporter::ExportMeshes()
         m->name = name;
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
+        p.ngonEncoded = (aim->mPrimitiveTypes & aiPrimitiveType_NGONEncodingFlag) != 0;
 
 		/******************* Vertices ********************/
 		Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
@@ -1095,6 +1099,7 @@ void glTF2Exporter::ExportMeshes()
     //----------------------------------------
     // Finish the skin
     // Create the Accessor for skinRef->inverseBindMatrices
+    bool bAddCustomizedProperty = this->mProperties->HasPropertyBool("GLTF2_CUSTOMIZE_PROPERTY");
     if (createSkin) {
         mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
         for ( unsigned int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
@@ -1110,7 +1115,7 @@ void glTF2Exporter::ExportMeshes()
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
-        skinRef->bindShapeMatrix.isPresent = true;
+        skinRef->bindShapeMatrix.isPresent = bAddCustomizedProperty;
         IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
         // Find nodes that contain a mesh with bones and add "skeletons" and "skin" attributes to those nodes.
@@ -1131,7 +1136,8 @@ void glTF2Exporter::ExportMeshes()
             std::string meshID = mesh->id;
             FindMeshNode(rootNode, meshNode, meshID);
             Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-            meshNode->skeletons.push_back(rootJoint);
+            if(bAddCustomizedProperty)
+                meshNode->skeletons.push_back(rootJoint);
             meshNode->skin = skinRef;
         }
         delete[] invBindMatrixData;
@@ -1229,7 +1235,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
     node->name = name;
 
     if (!n->mTransformation.IsIdentity()) {
-		if (mScene->mNumAnimations > 0) {
+		if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {
 			aiQuaternion quaternion;
 			n->mTransformation.Decompose(*reinterpret_cast<aiVector3D *>(&node->scale.value), quaternion, *reinterpret_cast<aiVector3D *>(&node->translation.value));
 
@@ -1386,11 +1392,12 @@ void glTF2Exporter::ExportAnimations()
             nameAnim = anim->mName.C_Str();
         }
         Ref<Animation> animRef = mAsset->animations.Create(nameAnim);
+        animRef->name = nameAnim;
 
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
 
-            std::string name = nameAnim + "_" + to_string(channelIndex);
+            std::string name = nameAnim + "_" + ai_to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
 
             Ref<Node> animNode = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());

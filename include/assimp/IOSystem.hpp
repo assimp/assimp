@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -294,7 +294,7 @@ bool IOSystem::PushDirectory( const std::string &path ) {
 AI_FORCE_INLINE
 const std::string &IOSystem::CurrentDirectory() const {
     if ( m_pathStack.empty() ) {
-        static const std::string Dummy("");
+        static const std::string Dummy;
         return Dummy;
     }
     return m_pathStack[ m_pathStack.size()-1 ];

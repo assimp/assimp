@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -318,13 +318,13 @@ inline void Buffer::Read(Value &obj, Asset &r) {
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", ai_to_string(statedLength),
+                        " bytes, but found ", ai_to_string(dataURI.dataLength));
             }
         } else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", to_string(statedLength),
-                                        " bytes, but found ", to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", ai_to_string(statedLength),
+                        " bytes, but found ", ai_to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
@@ -927,24 +927,24 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
     size_t size_coordindex = ifs.GetNCoordIndex() * 3; // See float attributes note.
 
     if (primitives[0].indices->count != size_coordindex)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (", to_string(size_coordindex),
-                                ") not equal to uncompressed (", to_string(primitives[0].indices->count), ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (", ai_to_string(size_coordindex),
+                ") not equal to uncompressed (", ai_to_string(primitives[0].indices->count), ").");
 
     size_coordindex *= sizeof(IndicesType);
     // Coordinates
     size_t size_coord = ifs.GetNCoord(); // See float attributes note.
 
     if (primitives[0].attributes.position[0]->count != size_coord)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (", to_string(size_coord),
-                                ") not equal to uncompressed (", to_string(primitives[0].attributes.position[0]->count), ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (", ai_to_string(size_coord),
+                ") not equal to uncompressed (", ai_to_string(primitives[0].attributes.position[0]->count), ").");
 
     size_coord *= 3 * sizeof(float);
     // Normals
     size_t size_normal = ifs.GetNNormal(); // See float attributes note.
 
     if (primitives[0].attributes.normal[0]->count != size_normal)
-        throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (", to_string(size_normal),
-                                ") not equal to uncompressed (", to_string(primitives[0].attributes.normal[0]->count), ").");
+        throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (", ai_to_string(size_normal),
+                ") not equal to uncompressed (", ai_to_string(primitives[0].attributes.normal[0]->count), ").");
 
     size_normal *= 3 * sizeof(float);
     // Additional attributes.
@@ -965,8 +965,8 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
                 // Check situation when encoded data contain texture coordinates but primitive not.
                 if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
                     if (primitives[0].attributes.texcoord[idx]->count != tval)
-                        throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (", to_string(tval),
-                                                ") not equal to uncompressed (", to_string(primitives[0].attributes.texcoord[idx]->count), ").");
+                        throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (", ai_to_string(tval),
+                                ") not equal to uncompressed (", ai_to_string(primitives[0].attributes.texcoord[idx]->count), ").");
 
                     idx_texcoord++;
                 } else {
@@ -975,7 +975,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
                 break;
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real); // After checking count of objects we can get size of array.
@@ -994,7 +994,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
                 break;
 
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long); // See float attributes note.
@@ -1029,7 +1029,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
                 break;
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
@@ -1043,7 +1043,7 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
 
             // ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
             default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
@@ -1254,7 +1254,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
     }
 
     AI_SWAP4(header.version);
-    asset.version = to_string(header.version);
+    asset.version = ai_to_string(header.version);
     if (header.version != 1) {
         throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }

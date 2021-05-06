@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -181,13 +181,13 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream) {
 
     uint16_t id = serializer.ReadHeader(false);
     if (id != HEADER_CHUNK_ID) {
-        throw DeadlyExportError("Invalid Ogre Mesh file header.");
+        throw DeadlyImportError("Invalid Ogre Mesh file header.");
     }
 
     /// @todo Check what we can actually support.
     std::string version = serializer.ReadLine();
     if (version != MESH_VERSION_1_8) {
-        throw DeadlyExportError("Mesh version ", version, " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again.",
+        throw DeadlyImportError("Mesh version ", version, " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again.",
                                                     " Supported versions: ", MESH_VERSION_1_8);
     }
 
@@ -797,13 +797,13 @@ MemoryStreamReaderPtr OgreBinarySerializer::OpenReader(Assimp::IOSystem *pIOHand
 void OgreBinarySerializer::ReadSkeleton(Skeleton *skeleton) {
     uint16_t id = ReadHeader(false);
     if (id != HEADER_CHUNK_ID) {
-        throw DeadlyExportError("Invalid Ogre Skeleton file header.");
+        throw DeadlyImportError("Invalid Ogre Skeleton file header.");
     }
 
     // This deserialization supports both versions of the skeleton spec
     std::string version = ReadLine();
     if (version != SKELETON_VERSION_1_8 && version != SKELETON_VERSION_1_1) {
-        throw DeadlyExportError("Skeleton version ", version, " not supported by this importer.",
+        throw DeadlyImportError("Skeleton version ", version, " not supported by this importer.",
                                                     " Supported versions: ", SKELETON_VERSION_1_8, " and ", SKELETON_VERSION_1_1);
     }
 

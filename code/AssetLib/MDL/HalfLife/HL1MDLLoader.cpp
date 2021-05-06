@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iomanip>
 #include <sstream>
+#include <map>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER
@@ -1309,7 +1310,7 @@ void HL1MDLLoader::read_global_info() {
 */
 void HL1MDLLoader::extract_anim_value(
         const AnimValue_HL1 *panimvalue,
-        int frame, float bone_scale, float &value) {
+        int frame, float bone_scale, ai_real &value) {
     int k = frame;
 
     // find span of values that includes the frame we want

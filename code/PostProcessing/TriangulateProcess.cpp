@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -75,6 +75,87 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define POLY_OUTPUT_FILE "assimp_polygons_debug.txt"
 
 using namespace Assimp;
+
+namespace {
+
+    /**
+     * @brief Helper struct used to simplify NGON encoding functions.
+     */
+    struct NGONEncoder {
+        NGONEncoder() : mLastNGONFirstIndex((unsigned int)-1) {}
+
+        /**
+         * @brief Encode the current triangle, and make sure it is recognized as a triangle.
+         * 
+         * This method will rotate indices in tri if needed in order to avoid tri to be considered
+         * part of the previous ngon. This method is to be used whenever you want to emit a real triangle,
+         * and make sure it is seen as a triangle.
+         * 
+         * @param tri Triangle to encode.
+         */
+        void ngonEncodeTriangle(aiFace * tri) {
+            ai_assert(tri->mNumIndices == 3);
+
+            // Rotate indices in new triangle to avoid ngon encoding false ngons
+            // Otherwise, the new triangle would be considered part of the previous NGON.
+            if (isConsideredSameAsLastNgon(tri)) {
+                std::swap(tri->mIndices[0], tri->mIndices[2]);
+                std::swap(tri->mIndices[1], tri->mIndices[2]);
+            }
+
+            mLastNGONFirstIndex = tri->mIndices[0];
+        }
+
+        /**
+         * @brief Encode a quad (2 triangles) in ngon encoding, and make sure they are seen as a single ngon.
+         * 
+         * @param tri1 First quad triangle
+         * @param tri2 Second quad triangle
+         * 
+         * @pre Triangles must be properly fanned from the most appropriate vertex.
+         */
+        void ngonEncodeQuad(aiFace *tri1, aiFace *tri2) {
+            ai_assert(tri1->mNumIndices == 3);
+            ai_assert(tri2->mNumIndices == 3);
+            ai_assert(tri1->mIndices[0] == tri2->mIndices[0]);
+
+            // If the selected fanning vertex is the same as the previously
+            // emitted ngon, we use the opposite vertex which also happens to work
+            // for tri-fanning a concave quad.
+            // ref: https://github.com/assimp/assimp/pull/3695#issuecomment-805999760
+            if (isConsideredSameAsLastNgon(tri1)) {
+                // Right-rotate indices for tri1 (index 2 becomes the new fanning vertex)
+                std::swap(tri1->mIndices[0], tri1->mIndices[2]);
+                std::swap(tri1->mIndices[1], tri1->mIndices[2]);
+
+                // Left-rotate indices for tri2 (index 2 becomes the new fanning vertex)
+                std::swap(tri2->mIndices[1], tri2->mIndices[2]);
+                std::swap(tri2->mIndices[0], tri2->mIndices[2]);
+
+                ai_assert(tri1->mIndices[0] == tri2->mIndices[0]);
+            }
+
+            mLastNGONFirstIndex = tri1->mIndices[0];
+        }
+
+        /**
+         * @brief Check whether this triangle would be considered part of the lastly emitted ngon or not.
+         * 
+         * @param tri Current triangle.
+         * @return true If used as is, this triangle will be part of last ngon.
+         * @return false If used as is, this triangle is not considered part of the last ngon.
+         */
+        bool isConsideredSameAsLastNgon(const aiFace * tri) const {
+            ai_assert(tri->mNumIndices == 3);
+            return tri->mIndices[0] == mLastNGONFirstIndex;
+        }
+
+    private:
+        unsigned int mLastNGONFirstIndex;
+    };
+
+}
+
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -175,9 +256,14 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
     pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
 
+    // The mesh becomes NGON encoded now, during the triangulation process.
+    pMesh->mPrimitiveTypes |= aiPrimitiveType_NGONEncodingFlag;
+
     aiFace* out = new aiFace[numOut](), *curOut = out;
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
     std::vector<aiVector2D> temp_verts(max_out+2);
+
+    NGONEncoder ngonEncoder;
 
     // Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
@@ -220,8 +306,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             aiFace& nface = *curOut++;
             nface.mNumIndices = face.mNumIndices;
             nface.mIndices    = face.mIndices;
-
             face.mIndices = nullptr;
+
+            // points and lines don't require ngon encoding (and are not supported either!)
+            if (nface.mNumIndices == 3) ngonEncoder.ngonEncodeTriangle(&nface);
+
             continue;
         }
         // optimized code for quadrilaterals
@@ -274,6 +363,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
             // prevent double deletion of the indices field
             face.mIndices = nullptr;
+
+            ngonEncoder.ngonEncodeQuad(&nface, &sface);
+
             continue;
         }
         else
@@ -284,11 +376,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // modeling suite to make extensive use of highly concave, monster polygons ...
             // so we need to apply the full 'ear cutting' algorithm to get it right.
 
-            // RERQUIREMENT: polygon is expected to be simple and *nearly* planar.
+            // REQUIREMENT: polygon is expected to be simple and *nearly* planar.
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-           for (tmp = 0; tmp < max; ++tmp) {
+            for (tmp = 0; tmp < max; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 
@@ -508,6 +600,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             i[0] = idx[i[0]];
             i[1] = idx[i[1]];
             i[2] = idx[i[2]];
+
+            // IMPROVEMENT: Polygons are not supported yet by this ngon encoding + triangulation step.
+            //              So we encode polygons as regular triangles. No way to reconstruct the original
+            //              polygon in this case.
+            ngonEncoder.ngonEncodeTriangle(f);
             ++f;
         }
 

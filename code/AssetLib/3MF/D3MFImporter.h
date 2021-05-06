@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// @brief  The 3MF-importer class.
 class D3MFImporter : public BaseImporter {
 public:
-    // BaseImporter interface
     D3MFImporter();
     ~D3MFImporter();
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;

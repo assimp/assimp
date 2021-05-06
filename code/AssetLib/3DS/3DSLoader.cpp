@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -164,7 +164,7 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     mRootNode->mHierarchyIndex = -1;
     mRootNode->mParent = nullptr;
     mMasterScale = 1.0f;
-    mBackgroundImage = "";
+    mBackgroundImage = std::string();
     bHasBG = false;
     bIsPrj = false;
 
@@ -266,6 +266,7 @@ void Discreet3DSImporter::ParseMainChunk() {
 
     case Discreet3DS::CHUNK_PRJ:
         bIsPrj = true;
+        break;
     case Discreet3DS::CHUNK_MAIN:
         ParseEditorChunk();
         break;
@@ -323,7 +324,7 @@ void Discreet3DSImporter::ParseObjectChunk() {
     case Discreet3DS::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
-        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + to_string(mScene->mMaterials.size()))));
+        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + ai_to_string(mScene->mMaterials.size()))));
         ParseMaterialChunk();
         break;
 

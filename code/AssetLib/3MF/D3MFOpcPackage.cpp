@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -103,9 +103,9 @@ public:
             std::string name = currentNode.name();
             if (name == "Relationship") {
                 OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
-                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
-                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
-                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
+                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID).as_string();
+                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE).as_string();
+                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET).as_string();
                 if (validateRels(relPtr)) {
                     m_relationShips.push_back(relPtr);
                 }
@@ -156,7 +156,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert(mRootStream != nullptr);
             if (nullptr == mRootStream) {
-                throw DeadlyExportError("Cannot open root-file in archive : " + rootFile);
+                throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
             }
 
         } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
@@ -188,7 +188,7 @@ bool D3MFOpcPackage::validate() {
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
     XmlParser xmlParser;
     if (!xmlParser.parse(stream)) {
-        return "";
+        return std::string();
     }
 
     OpcPackageRelationshipReader reader(xmlParser);

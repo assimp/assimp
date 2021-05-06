@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -75,12 +75,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_STEP_USE_UNORDERED_MULTIMAP
 #   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define step_unordered_map unordered_map
-#       define step_unordered_multimap unordered_multimap
-#   else
+#   if defined(_MSC_VER) && _MSC_VER <= 1600
 #       define step_unordered_map tr1::unordered_map
 #       define step_unordered_multimap tr1::unordered_multimap
+#   else
+#       define step_unordered_map unordered_map
+#       define step_unordered_multimap unordered_multimap
 #   endif
 #endif
 
@@ -303,6 +303,10 @@ void StepExporter::WriteFile()
             dv31.Normalize();
             dv13.Normalize();
 
+            aiVector3D dvY = dv12;
+            aiVector3D dvX = dvY ^ dv13;
+            dvX.Normalize();
+
             int pid1 = uniqueVerts.find(v1)->second;
             int pid2 = uniqueVerts.find(v2)->second;
             int pid3 = uniqueVerts.find(v3)->second;
@@ -337,8 +341,8 @@ void StepExporter::WriteFile()
             mOutput << "#" << sid+9 << "=PLANE('',#" << sid+10 << ")" << endstr;
             mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pid1 << ", #" << sid+11 << ",#" << sid+12 << ")" << endstr;
 
-            mOutput << "#" << sid+11 << "=DIRECTION('',(" << dv12.x << "," << dv12.y << "," << dv12.z << "))" << endstr;
-            mOutput << "#" << sid+12 << "=DIRECTION('',(" << dv13.x << "," << dv13.y << "," << dv13.z << "))" << endstr;
+            mOutput << "#" << sid + 11 << "=DIRECTION('',(" << dvX.x << "," << dvX.y << "," << dvX.z << "))" << endstr;
+            mOutput << "#" << sid + 12 << "=DIRECTION('',(" << dvY.x << "," << dvY.y << "," << dvY.z << "))" << endstr;
 
             mOutput << "#" << sid+13 << "=FACE_BOUND('',#" << sid+14 << ",.T.)" << endstr;
             mOutput << "#" << sid+14 << "=EDGE_LOOP('',(#" << sid+15 << ",#" << sid+16 << ",#" << sid+17 << "))" << endstr;

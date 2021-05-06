@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -95,10 +95,9 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-#ifdef M3D_ASCII
-    "m3d a3d"
-#else
     "m3d"
+#ifdef M3D_ASCII
+    " a3d"
 #endif
 };
 

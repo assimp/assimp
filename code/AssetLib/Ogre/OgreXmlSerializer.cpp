@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -120,7 +120,7 @@ std::string OgreXmlSerializer::ReadAttribute<std::string>(XmlNode &xmlNode, cons
 
 template <>
 bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) const {
-    std::string value = Ogre::ToLower(ReadAttribute<std::string>(xmlNode, name));
+    std::string value = ai_tolower(ReadAttribute<std::string>(xmlNode, name));
     if (ASSIMP_stricmp(value, "true") == 0) {
         return true;
     } else if (ASSIMP_stricmp(value, "false") == 0) {
@@ -529,7 +529,7 @@ XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, cons
         throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 
-    XmlParserPtr xmlParser = XmlParserPtr(new XmlParser);
+    XmlParserPtr xmlParser = std::make_shared<XmlParser>();
     if (!xmlParser->parse(file.get())) {
         throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
     }
@@ -545,7 +545,7 @@ void OgreXmlSerializer::ReadSkeleton(XmlNode &node, Skeleton *skeleton) {
 
     // Optional blend mode from root node
     if (XmlParser::hasAttribute(node, "blendmode")) {
-        skeleton->blendMode = (ToLower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
+        skeleton->blendMode = (ai_tolower(ReadAttribute<std::string>(node, "blendmode")) == "cumulative" ? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
     }
 
     for (XmlNode &currentNode : node.children()) {

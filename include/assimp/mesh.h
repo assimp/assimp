@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -397,6 +397,24 @@ enum aiPrimitiveType {
      * triangles (which are much easier to handle).
      */
     aiPrimitiveType_POLYGON = 0x8,
+
+    /**
+     * A flag to determine whether this triangles only mesh is NGON encoded.
+     * 
+     * NGON encoding is a special encoding that tells whether 2 or more consecutive triangles
+     * should be considered as a triangle fan. This is identified by looking at the first vertex index.
+     * 2 consecutive triangles with the same 1st vertex index are part of the same
+     * NGON.
+     * 
+     * At the moment, only quads (concave or convex) are supported, meaning that polygons are 'seen' as 
+     * triangles, as usual after a triangulation pass.
+     * 
+     * To get an NGON encoded mesh, please use the aiProcess_Triangulate post process.
+     * 
+     * @see aiProcess_Triangulate
+     * @link https://github.com/KhronosGroup/glTF/pull/1620
+     */
+    aiPrimitiveType_NGONEncodingFlag = 0x10,
 
 /** This value is not used. It is just here to force the
      *  compiler to map this enum to a 32 Bit integer.

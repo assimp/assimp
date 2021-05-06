@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -270,11 +270,15 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
         }
 
         std::string::size_type ns = n0;
-        do ++ns; while( IsSpace(s.at(ns)));
+        do {
+            ++ns;
+        } while (IsSpace(s.at(ns)));
         std::string::size_type ne = n1;
-        do --ne; while( IsSpace(s.at(ne)));
-        std::string type = s.substr(ns,ne-ns+1);
-        std::transform( type.begin(), type.end(), type.begin(), &Assimp::ToLower<char>  );
+        do {
+            --ne;
+        } while (IsSpace(s.at(ne)));
+        std::string type = s.substr(ns, ne - ns + 1);
+        type = ai_tolower(type);
         const char* sz = scheme.GetStaticStringForToken(type);
         if(sz) {
             const std::string::size_type szLen = n2-n1+1;
@@ -317,7 +321,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
                 }
                 for(--t;IsSpace(*t);--t);
                 std::string s(cur,static_cast<size_t>(t-cur+1));
-                std::transform(s.begin(),s.end(),s.begin(),&ToLower<char> );
+                std::transform(s.begin(),s.end(),s.begin(),&ai_tolower<char> );
                 if (schema->IsKnownToken(s)) {
                     for(cur = t+1;*cur++ != '(';);
                     const std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);

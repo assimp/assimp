@@ -3,6 +3,7 @@
 #include <assimp/vector2.h>
 #include <assimp/vector3.h>
 #include <assimp/color4.h>
+#include <assimp/types.h>
 
 #include <list>
 #include <vector>

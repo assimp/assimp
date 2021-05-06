@@ -122,8 +122,8 @@ void ObjFileMtlImporter::load() {
                 {
                     ++m_DataIt;
                     getColorRGBA(&m_pModel->m_pCurrentMaterial->ambient);
-                } else if (*m_DataIt == 'd') // Diffuse color
-                {
+                } else if (*m_DataIt == 'd') {
+                    // Diffuse color
                     ++m_DataIt;
                     getColorRGBA(&m_pModel->m_pCurrentMaterial->diffuse);
                 } else if (*m_DataIt == 's') {
@@ -144,7 +144,9 @@ void ObjFileMtlImporter::load() {
                 } else if (*m_DataIt == 'r')  {
                     // Material transmission alpha value
                     ++m_DataIt;
-                    getFloatValue(m_pModel->m_pCurrentMaterial->alpha);                    
+                    ai_real d;
+                    getFloatValue(d);
+                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;                    
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;

@@ -130,7 +130,7 @@ struct Mesh {
 
     std::vector<Bone> mBones;
 
-    explicit Mesh(const std::string &pName = "") AI_NO_EXCEPT
+    explicit Mesh(const std::string &pName = std::string()) AI_NO_EXCEPT
     : mName( pName )
     , mPositions()
     , mPosFaces()

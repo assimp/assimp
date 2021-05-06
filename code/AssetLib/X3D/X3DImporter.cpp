@@ -46,16 +46,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
-#include <assimp/StringUtils.h>
 
-// Header files, Assimp.
+#include <assimp/StringUtils.h>
+#include <assimp/ParsingUtils.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/fast_atof.h>
 
 // Header files, stdlib.
 #include <iterator>
 #include <memory>
-#include <string>
 
 namespace Assimp {
 
@@ -126,7 +125,8 @@ struct WordIterator {
 const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter() :
-        mNodeElementCur(nullptr) {
+        mNodeElementCur(nullptr),
+        mScene(nullptr) {
     // empty
 }
 
@@ -153,10 +153,29 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
     if (!fileStream.get()) {
         throw DeadlyImportError("Failed to open file " + file + ".");
-	}
+    }
+
+    XmlParser theParser;
+    if (!theParser.parse(fileStream.get())) {
+        return;
+    }
+
+    XmlNode *node = theParser.findNode("X3D");
+    if (nullptr == node) {
+        return;
+    }
+
+    for (auto &currentNode : node->children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "head") {
+            readMetadata(currentNode);
+        } else if (currentName == "Scene") {
+            readScene(currentNode);
+        }
+    }
 }
 
-bool X3DImporter::CanRead( const std::string &pFile, IOSystem * /*pIOHandler*/, bool checkSig ) const {
+bool X3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool checkSig) const {
     if (checkSig) {
         std::string::size_type pos = pFile.find_last_of(".x3d");
         if (pos != std::string::npos) {
@@ -167,16 +186,17 @@ bool X3DImporter::CanRead( const std::string &pFile, IOSystem * /*pIOHandler*/, 
     return false;
 }
 
-void X3DImporter::GetExtensionList( std::set<std::string> &extensionList ) {
+void X3DImporter::GetExtensionList(std::set<std::string> &extensionList) {
     extensionList.insert("x3d");
 }
 
-void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler ) {
+void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
     if (!stream) {
         throw DeadlyImportError("Could not open file for reading");
     }
 
+    mScene = pScene;
     pScene->mRootNode = new aiNode(pFile);
 }
 
@@ -184,6 +204,147 @@ const aiImporterDesc *X3DImporter::GetInfo() const {
     return &Description;
 }
 
-} 
+struct meta_entry {
+    std::string name;
+    std::string value;
+};
+
+void X3DImporter::readMetadata(XmlNode &node) {
+    std::vector<meta_entry> metaArray;
+    for (auto currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "meta") {
+            meta_entry entry;
+            if (XmlParser::getStdStrAttribute(currentNode, "name", entry.name)) {
+                XmlParser::getStdStrAttribute(currentNode, "content", entry.value);
+                metaArray.emplace_back(entry);
+            }
+        }
+    }
+    mScene->mMetaData = aiMetadata::Alloc(static_cast<unsigned int>(metaArray.size()));
+    unsigned int i = 0;
+    for (auto currentMeta : metaArray) {
+        mScene->mMetaData->Set(i, currentMeta.name, currentMeta.value);
+        ++i;
+    }
+}
+
+void X3DImporter::readScene(XmlNode &node) {
+    for (auto currentNode : node.children()) {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "Viewpoint") {
+            readViewpoint(currentNode);
+        }
+    }
+}
+
+void X3DImporter::readViewpoint(XmlNode &node) {
+    for (auto currentNode : node.children()) {
+        //const std::string &currentName = currentNode.name();
+    }
+}
+
+void readMetadataBoolean(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaBoolean *boolean = nullptr;
+    if (XmlParser::getStdStrAttribute(node, "value", val)) {
+        std::vector<std::string> values;
+        tokenize<std::string>(val, values, " ");
+        boolean = new X3DNodeElementMetaBoolean(parent);
+        for (size_t i = 0; i < values.size(); ++i) {
+            bool current_boolean = false;
+            if (values[i] == "true") {
+                current_boolean = true;
+            }
+            boolean->Value.emplace_back(current_boolean);
+        }
+    }
+}
+
+void readMetadataDouble(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaDouble *doubleNode = nullptr;
+    if (XmlParser::getStdStrAttribute(node, "value", val)) {
+        std::vector<std::string> values;
+        tokenize<std::string>(val, values, " ");
+        doubleNode = new X3DNodeElementMetaDouble(parent);
+        for (size_t i = 0; i < values.size(); ++i) {
+            double current_double = static_cast<double>(fast_atof(values[i].c_str()));
+            doubleNode->Value.emplace_back(current_double);
+        }
+    }
+}
+
+void readMetadataFloat(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaFloat *floatNode = nullptr;
+    if (XmlParser::getStdStrAttribute(node, "value", val)) {
+        std::vector<std::string> values;
+        tokenize<std::string>(val, values, " ");
+        floatNode = new X3DNodeElementMetaFloat(parent);
+        for (size_t i = 0; i < values.size(); ++i) {
+            float current_float = static_cast<float>(fast_atof(values[i].c_str()));
+            floatNode->Value.emplace_back(current_float);
+        }
+    }
+}
+
+void readMetadataInteger(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaInt *intNode = nullptr;
+    if (XmlParser::getStdStrAttribute(node, "value", val)) {
+        std::vector<std::string> values;
+        tokenize<std::string>(val, values, " ");
+        intNode = new X3DNodeElementMetaInt(parent);
+        for (size_t i = 0; i < values.size(); ++i) {
+            int current_int = static_cast<int>(std::atoi(values[i].c_str()));
+            intNode->Value.emplace_back(current_int);
+        }
+    }
+}
+
+void readMetadataSet(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaSet *setNode = new X3DNodeElementMetaSet(parent);
+    if (XmlParser::getStdStrAttribute(node, "name", val)) {
+        setNode->Name = val;
+    }
+
+    if (XmlParser::getStdStrAttribute(node, "reference", val)) {
+        setNode->Reference = val;
+    }
+}
+
+void readMetadataString(XmlNode &node, X3DNodeElementBase *parent) {
+    std::string val;
+    X3DNodeElementMetaString *strNode = nullptr;
+    if (XmlParser::getStdStrAttribute(node, "value", val)) {
+        std::vector<std::string> values;
+        tokenize<std::string>(val, values, " ");
+        strNode = new X3DNodeElementMetaString(parent);
+        for (size_t i = 0; i < values.size(); ++i) {
+            strNode->Value.emplace_back(values[i]);
+        }
+    }
+}
+
+void X3DImporter::readMetadataObject(XmlNode &node) {
+    const std::string &name = node.name();
+    if (name == "MetadataBoolean") {
+        readMetadataBoolean(node, mNodeElementCur);
+    } else if (name == "MetadataDouble") {
+        readMetadataDouble(node, mNodeElementCur);
+    } else if (name == "MetadataFloat") {
+        readMetadataFloat(node, mNodeElementCur);
+    } else if (name == "MetadataInteger") {
+        readMetadataInteger(node, mNodeElementCur);
+    } else if (name == "MetadataSet") {
+        readMetadataSet(node, mNodeElementCur);
+    } else if (name == "MetadataString") {
+        readMetadataString(node, mNodeElementCur);
+    }
+}
+
+} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

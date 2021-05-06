@@ -798,6 +798,8 @@ ADD_ASSIMP_IMPORTER( X
 ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter.cpp
   AssetLib/X3D/X3DImporter.hpp
+  AssetLib/X3D/X3DGeoHelper.cpp
+  AssetLib/X3D/X3DGeoHelper.h
 )
 
 ADD_ASSIMP_IMPORTER( GLTF

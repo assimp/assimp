@@ -38,16 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/// \file   X3DImporter.hpp
-/// \brief  X3D-format files importer for Assimp.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
-// Thanks to acorn89 for support.
-
 #ifndef INCLUDED_AI_X3D_IMPORTER_H
 #define INCLUDED_AI_X3D_IMPORTER_H
 
-// Header files, Assimp.
+
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
@@ -56,7 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/ProgressHandler.hpp>
 
+#include <string>
 #include <list>
+#include <vector>
 
 namespace Assimp {
 
@@ -282,8 +278,90 @@ enum class X3DElemType {
 struct X3DNodeElementBase {
     X3DNodeElementBase *Parent;
     std::string ID;
-    std::list<X3DNodeElementBase *> Child;
+    std::list<X3DNodeElementBase *> Children;
     X3DElemType Type;
+
+protected:
+    X3DNodeElementBase(X3DElemType type, X3DNodeElementBase *pParent) :
+            Type(type), Parent(pParent) {
+        // empty
+    }
+};
+
+struct CX3DNodeElementGroup : X3DNodeElementBase {
+    aiMatrix4x4 Transformation; ///< Transformation matrix.
+    bool Static;
+    bool UseChoice; ///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
+    int32_t Choice; ///< Number of the child which will be kept.
+};
+
+struct X3DNodeElementMeta : X3DNodeElementBase {
+    std::string Name; ///< Name of metadata object.
+    std::string Reference;
+
+    virtual ~X3DNodeElementMeta() {
+        // empty
+    }
+
+protected:
+    X3DNodeElementMeta(X3DElemType type, X3DNodeElementBase *parent) :
+            X3DNodeElementBase(type, parent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaBoolean : X3DNodeElementMeta {
+    std::vector<bool> Value; ///< Stored value.
+
+    X3DNodeElementMetaBoolean(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaBoolean, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaDouble : X3DNodeElementMeta {
+    std::vector<double> Value; ///< Stored value.
+
+    X3DNodeElementMetaDouble(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaDouble, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaFloat : public X3DNodeElementMeta {
+    std::vector<float> Value; ///< Stored value.
+
+    X3DNodeElementMetaFloat(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaFloat, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaInt : public X3DNodeElementMeta {
+    std::vector<int32_t> Value; ///< Stored value.
+
+    X3DNodeElementMetaInt(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaInteger, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaSet : public X3DNodeElementMeta {
+    std::list<X3DNodeElementMeta> Value; ///< Stored value.
+
+    X3DNodeElementMetaSet(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaSet, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaString : public X3DNodeElementMeta {
+    std::list<std::string> Value; ///< Stored value.
+
+    X3DNodeElementMetaString(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaString, pParent) {
+        // empty
+    }
 };
 
 class X3DImporter : public BaseImporter {
@@ -311,10 +389,15 @@ public:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;
     void Clear();
+    void readMetadata(XmlNode &node);
+    void readScene(XmlNode &node);
+    void readViewpoint(XmlNode &node);
+    void readMetadataObject(XmlNode &node);
 
 private:
     static const aiImporterDesc Description;
-    X3DNodeElementBase *mNodeElementCur; ///< Current element.
+    X3DNodeElementBase *mNodeElementCur;
+    aiScene *mScene;
 }; // class X3DImporter
 
 } // namespace Assimp

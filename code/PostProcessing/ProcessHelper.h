@@ -133,12 +133,12 @@ inline ::aiQuatKey max(const ::aiQuatKey &a, const ::aiQuatKey &b) {
 
 // std::min for aiVertexWeight
 inline ::aiVertexWeight min(const ::aiVertexWeight &a, const ::aiVertexWeight &b) {
-    return ::aiVertexWeight(min(a.mVertexId, b.mVertexId), min(a.mWeight, b.mWeight));
+    return ::aiVertexWeight(min(a.mVertexId, b.mVertexId),static_cast<ai_real>(min(a.mWeight, b.mWeight)));
 }
 
 // std::max for aiVertexWeight
 inline ::aiVertexWeight max(const ::aiVertexWeight &a, const ::aiVertexWeight &b) {
-    return ::aiVertexWeight(max(a.mVertexId, b.mVertexId), max(a.mWeight, b.mWeight));
+    return ::aiVertexWeight(static_cast<ai_real>(max(a.mVertexId, b.mVertexId)), static_cast<ai_real>(max(a.mWeight, b.mWeight)));
 }
 
 } // end namespace std

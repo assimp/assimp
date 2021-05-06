@@ -48,6 +48,7 @@ corresponding preprocessor flag to selectively disable formats.
 
 #include <assimp/BaseImporter.h>
 #include <vector>
+#include <cstdlib>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -204,7 +205,17 @@ corresponding preprocessor flag to selectively disable formats.
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
+void GetImporterInstanceList(std::vector<BaseImporter *> &out) {    
+    
+    // Some importers may be unimplemented or otherwise unsuitable for general use
+    // in their current state. Devs can set ASSIMP_ENABLE_DEV_IMPORTERS in their
+    // local environment to enable them, otherwise they're left out of the registry.
+    const char *envStr = std::getenv("ASSIMP_ENABLE_DEV_IMPORTERS");
+    bool devImportersEnabled = envStr && strcmp(envStr, "0");
+
+    // Ensure no unused var warnings if all uses are #ifndef'd away below:
+    (void)devImportersEnabled;
+
     // ----------------------------------------------------------------------------
     // Add an instance of each worker class here
     // (register_new_importers_here)
@@ -354,7 +365,9 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     out.push_back(new D3MFImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
-    out.push_back(new X3DImporter());
+    if (devImportersEnabled) { // https://github.com/assimp/assimp/issues/3647
+        out.push_back(new X3DImporter());
+    }
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
     out.push_back(new MMDImporter());

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 
 aiNode::aiNode()
-: mName("")
+: mName()
 , mParent(nullptr)
 , mNumChildren(0)
 , mChildren(nullptr)

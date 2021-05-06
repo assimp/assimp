@@ -88,7 +88,7 @@ using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
 static const aiImporterDesc blenderDesc = {
-    "Blender 3D Importer \nhttp://www.blender3d.org",
+    "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",
     "No animation support yet",
@@ -130,12 +130,6 @@ bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
     }
 
     return false;
-}
-
-// ------------------------------------------------------------------------------------------------
-// List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string> &app) {
-    app.insert("blend");
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -517,10 +517,6 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     return false;
 }
 
-void AMFImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
-    pExtensionList.insert("amf");
-}
-
 const aiImporterDesc *AMFImporter::GetInfo() const {
     return &Description;
 }

@@ -277,7 +277,6 @@ public:
     void ParseHelper_Node_Enter(AMFNodeElementBase *child);
     void ParseHelper_Node_Exit();
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
-    void GetExtensionList(std::set<std::string> &pExtensionList);
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;
     bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;

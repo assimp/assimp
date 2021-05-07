@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  *TODO* Cleanup and further testing of some parts necessary
  */
 
-// internal headers
-
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
 #include "AssetLib/MDL/MDLLoader.h"
@@ -495,14 +493,12 @@ void MDLImporter::InternReadFile_Quake1() {
 
             vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
             vec.y += pcHeader->translate[1];
-            //vec.y *= -1.0f;
 
             vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
             vec.z += pcHeader->translate[2];
 
             // read the normal vector from the precalculated normal table
             MD2::LookupNormalIndex(pcVertices[iIndex].normalIndex, pcMesh->mNormals[iCurrent]);
-            //pcMesh->mNormals[iCurrent].y *= -1.0f;
 
             // read texture coordinates
             float s = (float)pcTexCoords[iIndex].s;
@@ -522,7 +518,6 @@ void MDLImporter::InternReadFile_Quake1() {
         pcMesh->mFaces[i].mIndices[2] = iTemp + 0;
         pcTriangles++;
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -757,7 +752,6 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
                 vec.y = (float)pcVertices[iIndex].v[1] * pcHeader->scale[1];
                 vec.y += pcHeader->translate[1];
-                // vec.y *= -1.0f;
 
                 vec.z = (float)pcVertices[iIndex].v[2] * pcHeader->scale[2];
                 vec.z += pcHeader->translate[2];
@@ -784,7 +778,6 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
     // basing upon the file loaded (only support one file as skin)
     if (0x5 == iGSFileVersion)
         CalculateUVCoordinates_MDL5();
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -975,24 +968,25 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
 // read bones from a MDL7 file
 MDL::IntBone_MDL7 **MDLImporter::LoadBones_3DGS_MDL7() {
     const MDL::Header_MDL7 *pcHeader = (const MDL::Header_MDL7 *)this->mBuffer;
-    if (pcHeader->bones_num) {
-        // validate the size of the bone data structure in the file
-        if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_20_CHARS != pcHeader->bone_stc_size &&
-                AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_32_CHARS != pcHeader->bone_stc_size &&
-                AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE != pcHeader->bone_stc_size) {
-            ASSIMP_LOG_WARN("Unknown size of bone data structure");
-            return nullptr;
-        }
-
-        MDL::IntBone_MDL7 **apcBonesOut = new MDL::IntBone_MDL7 *[pcHeader->bones_num];
-        for (uint32_t crank = 0; crank < pcHeader->bones_num; ++crank)
-            apcBonesOut[crank] = new MDL::IntBone_MDL7();
-
-        // and calculate absolute bone offset matrices ...
-        CalcAbsBoneMatrices_3DGS_MDL7(apcBonesOut);
-        return apcBonesOut;
+    if (!pcHeader->bones_num) {
+        return nullptr;
     }
-    return nullptr;
+
+    // validate the size of the bone data structure in the file
+    if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_20_CHARS != pcHeader->bone_stc_size &&
+            AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_32_CHARS != pcHeader->bone_stc_size &&
+            AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE != pcHeader->bone_stc_size) {
+        ASSIMP_LOG_WARN("Unknown size of bone data structure");
+        return nullptr;
+    }
+
+    MDL::IntBone_MDL7 **apcBonesOut = new MDL::IntBone_MDL7 *[pcHeader->bones_num];
+    for (uint32_t crank = 0; crank < pcHeader->bones_num; ++crank)
+        apcBonesOut[crank] = new MDL::IntBone_MDL7();
+
+    // and calculate absolute bone offset matrices ...
+    CalcAbsBoneMatrices_3DGS_MDL7(apcBonesOut);
+    return apcBonesOut;
 }
 
 // ------------------------------------------------------------------------------------------------

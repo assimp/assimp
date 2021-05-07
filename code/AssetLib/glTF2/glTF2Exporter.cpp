@@ -527,9 +527,13 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                                 mimeType += "jpeg";
                             else if(memcmp(curTex->achFormatHint, "ktx", 3) == 0) {
                                 useBasisUniversal = true;
+                                mimeType += "ktx";
+                            }
+                            else if(memcmp(curTex->achFormatHint, "kx2", 3) == 0) {
+                                useBasisUniversal = true;
                                 mimeType += "ktx2";
                             }
-                            else if(memcmp(curTex->achFormatHint, "bu", 3) == 0) {
+                            else if(memcmp(curTex->achFormatHint, "bu", 2) == 0) {
                                 useBasisUniversal = true;
                                 mimeType += "basis";
                             }
@@ -544,7 +548,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     }
                     else {
                         texture->source->uri = path;
-                        if(texture->source->uri.find(".ktx2")!=std::string::npos ||
+                        if(texture->source->uri.find(".ktx")!=std::string::npos ||
                            texture->source->uri.find(".basis")!=std::string::npos)
                         {
                             useBasisUniversal = true;

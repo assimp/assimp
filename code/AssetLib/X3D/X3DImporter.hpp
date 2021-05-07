@@ -290,9 +290,6 @@ protected:
 
 struct CX3DNodeElementGroup : X3DNodeElementBase {
     aiMatrix4x4 Transformation; ///< Transformation matrix.
-    bool Static;
-    bool UseChoice; ///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
-    int32_t Choice; ///< Number of the child which will be kept.
 };
 
 struct X3DNodeElementMeta : X3DNodeElementBase {

@@ -43,8 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/ai_assert.h>
+
 #include "BaseImporter.h"
 #include "IOStream.hpp"
+
 #include <pugixml.hpp>
 #include <vector>
 

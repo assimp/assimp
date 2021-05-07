@@ -133,12 +133,6 @@ bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
 }
 
 // ------------------------------------------------------------------------------------------------
-// List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string> &app) {
-    app.insert("blend");
-}
-
-// ------------------------------------------------------------------------------------------------
 // Loader registry entry
 const aiImporterDesc *BlenderImporter::GetInfo() const {
     return &blenderDesc;

@@ -44,63 +44,66 @@ namespace Assimp {
 namespace D3MF {
 
 namespace XmlTag {
+    // Root tag
+    const char* const RootTag = "3MF";
+
     // Meta-data
-    static const std::string meta = "metadata";
-    static const std::string meta_name = "name";
+    const char* const meta = "metadata";
+    const char* const meta_name = "name";
 
     // Model-data specific tags
-    static const std::string model = "model";
-    static const std::string model_unit = "unit";
-    static const std::string metadata = "metadata";
-    static const std::string resources = "resources";
-    static const std::string object = "object";
-    static const std::string mesh = "mesh";
-    static const std::string components = "components";
-    static const std::string component = "component";
-    static const std::string vertices = "vertices";
-    static const std::string vertex = "vertex";
-    static const std::string triangles = "triangles";
-    static const std::string triangle = "triangle";
-    static const std::string x = "x";
-    static const std::string y = "y";
-    static const std::string z = "z";
-    static const std::string v1 = "v1";
-    static const std::string v2 = "v2";
-    static const std::string v3 = "v3";
-    static const std::string id = "id";
-    static const std::string pid = "pid";
-    static const std::string pindex = "pindex";
-    static const std::string p1 = "p1";
-    static const std::string name = "name";
-    static const std::string type = "type";
-    static const std::string build = "build";
-    static const std::string item = "item";
-    static const std::string objectid = "objectid";
-    static const std::string transform = "transform";
+    const char* const model = "model";
+    const char* const model_unit = "unit";
+    const char* const metadata = "metadata";
+    const char* const resources = "resources";
+    const char* const object = "object";
+    const char* const mesh = "mesh";
+    const char* const components = "components";
+    const char* const component = "component";
+    const char* const vertices = "vertices";
+    const char* const vertex = "vertex";
+    const char* const triangles = "triangles";
+    const char* const triangle = "triangle";
+    const char* const x = "x";
+    const char* const y = "y";
+    const char* const z = "z";
+    const char* const v1 = "v1";
+    const char* const v2 = "v2";
+    const char* const v3 = "v3";
+    const char* const id = "id";
+    const char* const pid = "pid";
+    const char* const pindex = "pindex";
+    const char* const p1 = "p1";
+    const char* const name = "name";
+    const char* const type = "type";
+    const char* const build = "build";
+    const char* const item = "item";
+    const char* const objectid = "objectid";
+    const char* const transform = "transform";
 
     // Material definitions
-    static const std::string basematerials = "basematerials";
-    static const std::string basematerials_id = "id";
-    static const std::string basematerials_base = "base";
-    static const std::string basematerials_name = "name";
-    static const std::string basematerials_displaycolor = "displaycolor";
+    const char* const basematerials = "basematerials";
+    const char* const basematerials_id = "id";
+    const char* const basematerials_base = "base";
+    const char* const basematerials_name = "name";
+    const char* const basematerials_displaycolor = "displaycolor";
 
     // Meta info tags
-    static const std::string CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
-    static const std::string ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
-    static const std::string SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
-    static const std::string SCHEMA_RELATIONSHIPS = "http://schemas.openxmlformats.org/package/2006/relationships";
-    static const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
-    static const std::string RELS_RELATIONSHIP_NODE = "Relationship";
-    static const std::string RELS_ATTRIB_TARGET = "Target";
-    static const std::string RELS_ATTRIB_TYPE = "Type";
-    static const std::string RELS_ATTRIB_ID = "Id";
-    static const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
-    static const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
-    static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
-    static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
-    static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-}
+    const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
+    const char* const ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
+    const char* const SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
+    const char* const SCHEMA_RELATIONSHIPS = "http://schemas.openxmlformats.org/package/2006/relationships";
+    const char* const RELS_RELATIONSHIP_CONTAINER = "Relationships";
+    const char* const RELS_RELATIONSHIP_NODE = "Relationship";
+    const char* const RELS_ATTRIB_TARGET = "Target";
+    const char* const RELS_ATTRIB_TYPE = "Type";
+    const char* const RELS_ATTRIB_ID = "Id";
+    const char* const PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+    const char* const PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+    const char* const PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
+    const char* const PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
+    const char* const PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
+    }
 
 } // Namespace D3MF
 } // Namespace Assimp

@@ -152,18 +152,9 @@ AC3DImporter::~AC3DImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool AC3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    std::string extension = GetExtension(pFile);
-
-    // fixme: are acc and ac3d *really* used? Some sources say they are
-    if (extension == "ac" || extension == "ac3d" || extension == "acc") {
-        return true;
-    }
-    if (!extension.length() || checkSig) {
-        uint32_t token = AI_MAKE_MAGIC("AC3D");
-        return CheckMagicToken(pIOHandler, pFile, &token, 1, 0);
-    }
-    return false;
+bool AC3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = { AI_MAKE_MAGIC("AC3D") };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

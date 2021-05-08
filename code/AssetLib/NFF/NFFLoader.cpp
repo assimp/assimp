@@ -83,8 +83,8 @@ NFFImporter::~NFFImporter() {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool NFFImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return SimpleExtensionCheck(pFile, "nff", "enff");
+bool NFFImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------

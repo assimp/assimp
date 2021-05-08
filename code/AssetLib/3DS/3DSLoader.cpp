@@ -111,20 +111,9 @@ Discreet3DSImporter::~Discreet3DSImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    std::string extension = GetExtension(pFile);
-    if (extension == "3ds" || extension == "prj") {
-        return true;
-    }
-
-    if (!extension.length() || checkSig) {
-        uint16_t token[3];
-        token[0] = 0x4d4d;
-        token[1] = 0x3dc2;
-        //token[2] = 0x3daa;
-        return CheckMagicToken(pIOHandler, pFile, token, 2, 0, 2);
-    }
-    return false;
+bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };
+    return CheckMagicToken(pIOHandler, pFile, token, AI_COUNT_OF(token), 0, sizeof token[0]);
 }
 
 // ------------------------------------------------------------------------------------------------

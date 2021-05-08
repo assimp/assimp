@@ -110,20 +110,14 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
 }
 
 bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /* checkSig */) const {
-    const std::string &extension = GetExtension(pFile);
-
-    if (extension != "gltf" && extension != "glb") {
-        return false;
-    }
-
-    if (pIOHandler) {
+    try {
         glTF2::Asset asset(pIOHandler);
-        asset.Load(pFile, extension == "glb");
+        asset.Load(pFile, GetExtension(pFile) == "glb");
         std::string version = asset.asset.version;
         return !version.empty() && version[0] == '2';
+    } catch(...) {
+        return false;
     }
-
-    return false;
 }
 
 static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {

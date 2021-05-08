@@ -147,20 +147,12 @@ LWSImporter::~LWSImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "lws" || extension == "mot") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens LWSC and LWMO
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[2];
-        tokens[0] = AI_MAKE_MAGIC("LWSC");
-        tokens[1] = AI_MAKE_MAGIC("LWMO");
-        return CheckMagicToken(pIOHandler, pFile, tokens, 2);
-    }
-    return false;
+bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_MAKE_MAGIC("LWSC"),
+        AI_MAKE_MAGIC("LWMO")
+    };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

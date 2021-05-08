@@ -169,7 +169,7 @@ void Logger::debug(const char *message) {
     // sometimes importers will include data from the input file
     // (i.e. node names) in their messages.
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
-        return;
+        return OnDebug("<fixme: long message discarded>");
     }
     return OnDebug(message);
 }
@@ -181,7 +181,7 @@ void Logger::verboseDebug(const char *message) {
     // sometimes importers will include data from the input file
     // (i.e. node names) in their messages.
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
-        return;
+        return OnVerboseDebug("<fixme: long message discarded>");
     }
     return OnVerboseDebug(message);
 }
@@ -191,7 +191,7 @@ void Logger::info(const char *message) {
 
     // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
-        return;
+        return OnInfo("<fixme: long message discarded>");
     }
     return OnInfo(message);
 }
@@ -201,7 +201,7 @@ void Logger::warn(const char *message) {
 
     // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
-        return;
+        return OnWarn("<fixme: long message discarded>");
     }
     return OnWarn(message);
 }
@@ -210,7 +210,7 @@ void Logger::warn(const char *message) {
 void Logger::error(const char *message) {
     // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
-        return;
+        return OnError("<fixme: long message discarded>");
     }
     return OnError(message);
 }

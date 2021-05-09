@@ -136,7 +136,7 @@ bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         */
         std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
         unsigned char data[4];
-        if (4 != pStream->Read(data, 1, 4)) {
+        if (!pStream || 4 != pStream->Read(data, 1, 4)) {
             return false;
         }
         return !memcmp(data, "3DMO", 4) /* bin */

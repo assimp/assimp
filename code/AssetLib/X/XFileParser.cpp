@@ -1245,13 +1245,13 @@ unsigned int XFileParser::ReadInt() {
         }
 
         // at least one digit expected
-        if (!isdigit(*mP))
+        if (!isdigit((unsigned char)*mP))
             ThrowException("Number expected.");
 
         // read digits
         unsigned int number = 0;
         while (mP < mEnd) {
-            if (!isdigit(*mP))
+            if (!isdigit((unsigned char)*mP))
                 break;
             number = number * 10 + (*mP - 48);
             mP++;

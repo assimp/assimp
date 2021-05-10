@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/StringComparison.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
 #include <assimp/ai_assert.h>
@@ -224,6 +225,18 @@ static void propId2StdString(Property *prop, std::string &name, std::string &key
 }
 
 //------------------------------------------------------------------------------------------------
+static void logDDLParserMessage (LogSeverity severity, const std::string &rawmsg) {
+    std::string msg = ai_str_toprintable(rawmsg);
+    switch (severity) {
+    case ddl_debug_msg: ASSIMP_LOG_DEBUG(msg);         break;
+    case ddl_info_msg:  ASSIMP_LOG_INFO(msg);          break;
+    case ddl_warn_msg:  ASSIMP_LOG_WARN(msg);          break;
+    case ddl_error_msg: ASSIMP_LOG_ERROR(msg);         break;
+    default:            ASSIMP_LOG_VERBOSE_DEBUG(msg); break;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer() :
         m_numColors(0), m_colors(nullptr), m_numUVComps(), m_textureCoords() {
     // empty
@@ -306,6 +319,7 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
     pIOHandler->Close(file);
 
     OpenDDLParser myParser;
+    myParser.setLogCallback(&logDDLParserMessage);
     myParser.setBuffer(&buffer[0], buffer.size());
     bool success(myParser.parse());
     if (success) {

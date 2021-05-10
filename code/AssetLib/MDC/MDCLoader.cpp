@@ -465,6 +465,13 @@ void MDCImporter::InternReadFile(
             pcMat->AddProperty(&path, AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }
+
+    // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+            1.f, 0.f, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, -1.f, 0.f, 0.f,
+            0.f, 0.f, 0.f, 1.f);
 }
 
 #endif // !! ASSIMP_BUILD_NO_MDC_IMPORTER

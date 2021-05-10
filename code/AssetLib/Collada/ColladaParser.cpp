@@ -234,7 +234,7 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 #if defined(_MSC_VER)
     if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #else
-    if (ss.data[0] == '/' && isalpha(ss.data[1]) && ss.data[2] == ':') {
+    if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #endif
         --ss.length;
         ::memmove(ss.data, ss.data + 1, ss.length);

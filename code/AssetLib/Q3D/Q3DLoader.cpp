@@ -106,7 +106,12 @@ const aiImporterDesc *Q3DImporter::GetInfo() const {
 // Imports the given file into the given scene structure.
 void Q3DImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-    StreamReaderLE stream(pIOHandler->Open(pFile, "rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("Quick3D: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // The header is 22 bytes large
     if (stream.GetRemainingSize() < 22)

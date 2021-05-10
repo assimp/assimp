@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 #include "D3MFImporter.h"
+#include "3MFXmlTags.h"
+#include "D3MFOpcPackage.h"
 
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
@@ -51,17 +53,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/fast_atof.h>
+
 #include <cassert>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "3MFXmlTags.h"
-#include "D3MFOpcPackage.h"
-#include <assimp/fast_atof.h>
-
 #include <iomanip>
+#include <string.h>
 
 namespace Assimp {
 namespace D3MF {
@@ -163,7 +163,7 @@ public:
         }
         XmlNode resNode = node.child(XmlTag::resources);
         for (auto &currentNode : resNode.children()) {
-            const std::string &currentNodeName = currentNode.name();
+            const std::string currentNodeName = currentNode.name();
             if (currentNodeName == XmlTag::object) {
                 ReadObject(currentNode);
             } else if (currentNodeName == XmlTag::basematerials) {
@@ -173,8 +173,9 @@ public:
             }
         }
 
-        for (auto &currentNode : resNode.children()) {
-            const std::string &currentNodeName = currentNode.name();
+        XmlNode buildNode = node.child(XmlTag::build);
+        for (auto &currentNode : buildNode.children()) {
+            const std::string currentNodeName = currentNode.name();
             if (currentNodeName == XmlTag::item) {
                 int objectId = -1;
                 std::string transformationMatrixStr;
@@ -196,7 +197,7 @@ public:
 
         // import the metadata
         if (!mMetaData.empty()) {
-            const size_t numMeta(mMetaData.size());
+            const size_t numMeta = mMetaData.size();
             scene->mMetaData = aiMetadata::Alloc(static_cast<unsigned int>(numMeta));
             for (size_t i = 0; i < numMeta; ++i) {
                 aiString val(mMetaData[i].value);
@@ -211,6 +212,7 @@ public:
             for (auto it = mResourcesDictionnary.begin(); it != mResourcesDictionnary.end(); ++it) {
                 if (it->second->getType() == ResourceType::RT_Object) {
                     Object *obj = static_cast<Object *>(it->second);
+                    ai_assert(nullptr != obj);
                     for (unsigned int i = 0; i < obj->mMeshes.size(); ++i) {
                         scene->mMeshes[obj->mMeshIndex[i]] = obj->mMeshes[i];
                     }
@@ -352,7 +354,8 @@ private:
                 mMeshCount++;
             } else if (currentName == D3MF::XmlTag::components) {
                 for (XmlNode &currentSubNode : currentNode.children()) {
-                    if (currentSubNode.name() == D3MF::XmlTag::component) {
+                    const std::string subNodeName = currentSubNode.name();
+                    if (subNodeName == D3MF::XmlTag::component) {
                         int objectId = -1;
                         std::string componentTransformStr;
                         aiMatrix4x4 componentTransform;
@@ -360,8 +363,9 @@ private:
                             componentTransform = parseTransformMatrix(componentTransformStr);
                         }
 
-                        if (getNodeAttribute(currentSubNode, D3MF::XmlTag::objectid, objectId))
+                        if (getNodeAttribute(currentSubNode, D3MF::XmlTag::objectid, objectId)) {
                             obj->mComponents.push_back({ objectId, componentTransform });
+                        }
                     }
                 }
             }
@@ -374,7 +378,7 @@ private:
         aiMesh *mesh = new aiMesh();
 
         for (XmlNode &currentNode : node.children()) {
-            const std::string &currentName = currentNode.name();
+            const std::string currentName = currentNode.name();
             if (currentName == XmlTag::vertices) {
                 ImportVertices(currentNode, mesh);
             } else if (currentName == XmlTag::triangles) {
@@ -402,8 +406,8 @@ private:
     void ImportVertices(XmlNode &node, aiMesh *mesh) {
         std::vector<aiVector3D> vertices;
         for (XmlNode &currentNode : node.children()) {
-            const std::string &currentName = currentNode.name();
-            if (currentName == D3MF::XmlTag::vertex) {
+            const std::string currentName = currentNode.name();
+            if (currentName == XmlTag::vertex) {
                 vertices.push_back(ReadVertex(currentNode));
             }
         }
@@ -415,22 +419,22 @@ private:
 
     aiVector3D ReadVertex(XmlNode &node) {
         aiVector3D vertex;
-        vertex.x = ai_strtof(node.attribute(D3MF::XmlTag::x).as_string(), nullptr);
-        vertex.y = ai_strtof(node.attribute(D3MF::XmlTag::y).as_string(), nullptr);
-        vertex.z = ai_strtof(node.attribute(D3MF::XmlTag::z).as_string(), nullptr);
+        vertex.x = ai_strtof(node.attribute(XmlTag::x).as_string(), nullptr);
+        vertex.y = ai_strtof(node.attribute(XmlTag::y).as_string(), nullptr);
+        vertex.z = ai_strtof(node.attribute(XmlTag::z).as_string(), nullptr);
 
         return vertex;
     }
 
     void ImportTriangles(XmlNode &node, aiMesh *mesh) {
         std::vector<aiFace> faces;
-        for (XmlNode currentNode = node.first_child(); currentNode; currentNode = currentNode.next_sibling()) {
-            const std::string &currentName = currentNode.name();
-            if (currentName == D3MF::XmlTag::triangle) {
+        for (XmlNode &currentNode : node.children()) {
+            const std::string currentName = currentNode.name();
+            if (currentName == XmlTag::triangle) {
                 aiFace face = ReadTriangle(currentNode);
                 faces.push_back(face);
 
-                int pid = 0, p1;
+                int pid = 0, p1 = 0;
                 bool hasPid = getNodeAttribute(currentNode, D3MF::XmlTag::pid, pid);
                 bool hasP1 = getNodeAttribute(currentNode, D3MF::XmlTag::p1, p1);
 
@@ -472,10 +476,11 @@ private:
             BaseMaterials *baseMaterials = new BaseMaterials(id);
 
             for (XmlNode &currentNode : node.children()) {
-                if (currentNode.name() == XmlTag::basematerials_base) {
+                const std::string currentName = currentNode.name();
+                if (currentName == XmlTag::basematerials_base) {
                     baseMaterials->mMaterialIndex.push_back(mMaterialCount);
                     baseMaterials->mMaterials.push_back(readMaterialDef(currentNode, id));
-                    mMaterialCount++;
+                    ++mMaterialCount;
                 }
             }
 
@@ -564,6 +569,8 @@ private:
 
 } //namespace D3MF
 
+using namespace D3MF;
+
 static const aiImporterDesc desc = {
     "3mf Importer",
     "",
@@ -597,7 +604,7 @@ bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bo
         if (!ZipArchiveIOSystem::isZipArchive(pIOHandler, filename)) {
             return false;
         }
-        D3MF::D3MFOpcPackage opcPackage(pIOHandler, filename);
+        D3MFOpcPackage opcPackage(pIOHandler, filename);
         return opcPackage.validate();
     }
 
@@ -613,11 +620,11 @@ const aiImporterDesc *D3MFImporter::GetInfo() const {
 }
 
 void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
-    D3MF::D3MFOpcPackage opcPackage(pIOHandler, filename);
+    D3MFOpcPackage opcPackage(pIOHandler, filename);
 
     XmlParser xmlParser;
     if (xmlParser.parse(opcPackage.RootStream())) {
-        D3MF::XmlSerializer xmlSerializer(&xmlParser);
+        XmlSerializer xmlSerializer(&xmlParser);
         xmlSerializer.ImportXml(pScene);
     }
 }

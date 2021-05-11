@@ -116,7 +116,13 @@ void NDOImporter::SetupProperties(const Importer* /*pImp*/)
 void NDOImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    StreamReaderBE reader(pIOHandler->Open( pFile, "rb"));
+
+    auto file = pIOHandler->Open( pFile, "rb");
+    if (!file) {
+        throw DeadlyImportError("Nendo: Could not open ", pFile);
+    }
+
+    StreamReaderBE reader(file);
 
     // first 9 bytes are nendo file format ("nendo 1.n")
     const char* head = (const char*)reader.GetPtr();

@@ -76,11 +76,11 @@ protected:
 
         // We define the struct size because sizeof(Header) might return a wrong result because of structure padding.
         static constexpr std::size_t header_size =
-            sizeof(decltype(type)) +
-            sizeof(decltype(size)) +
-            sizeof(decltype(reserved1)) +
-            sizeof(decltype(reserved2)) +
-            sizeof(decltype(offset));
+            sizeof(type) +
+            sizeof(size) +
+            sizeof(reserved1) +
+            sizeof(reserved2) +
+            sizeof(offset);
     };
 
     struct DIB {
@@ -98,17 +98,17 @@ protected:
 
         // We define the struct size because sizeof(DIB) might return a wrong result because of structure padding.
         static constexpr std::size_t dib_size =
-            sizeof(decltype(size)) +
-            sizeof(decltype(width)) +
-            sizeof(decltype(height)) +
-            sizeof(decltype(planes)) +
-            sizeof(decltype(bits_per_pixel)) +
-            sizeof(decltype(compression)) +
-            sizeof(decltype(image_size)) +
-            sizeof(decltype(x_resolution)) +
-            sizeof(decltype(y_resolution)) +
-            sizeof(decltype(nb_colors)) +
-            sizeof(decltype(nb_important_colors));
+            sizeof(size) +
+            sizeof(width) +
+            sizeof(height) +
+            sizeof(planes) +
+            sizeof(bits_per_pixel) +
+            sizeof(compression) +
+            sizeof(image_size) +
+            sizeof(x_resolution) +
+            sizeof(y_resolution) +
+            sizeof(nb_colors) +
+            sizeof(nb_important_colors);
     };
 
     static constexpr std::size_t mBytesPerPixel = 4;

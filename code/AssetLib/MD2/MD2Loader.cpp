@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/importerdesc.h>
+#include <assimp/StringUtils.h>
 
 #include <memory>
 
@@ -148,46 +149,39 @@ void MD2Importer::ValidateHeader( )
     if (m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_BE &&
         m_pcHeader->magic != AI_MD2_MAGIC_NUMBER_LE)
     {
-        char szBuffer[5];
-        szBuffer[0] = ((char*)&m_pcHeader->magic)[0];
-        szBuffer[1] = ((char*)&m_pcHeader->magic)[1];
-        szBuffer[2] = ((char*)&m_pcHeader->magic)[2];
-        szBuffer[3] = ((char*)&m_pcHeader->magic)[3];
-        szBuffer[4] = '\0';
-
-        throw DeadlyImportError("Invalid MD2 magic word: should be IDP2, the "
-            "magic word found is " + std::string(szBuffer));
+        throw DeadlyImportError("Invalid MD2 magic word: expected IDP2, found ",
+                                ai_str_toprintable((char *)&m_pcHeader->magic, 4));
     }
 
     // check file format version
     if (m_pcHeader->version != 8)
-        ASSIMP_LOG_WARN( "Unsupported md2 file version. Continuing happily ...");
+        ASSIMP_LOG_WARN( "Unsupported MD2 file version. Continuing happily ...");
 
     // check some values whether they are valid
     if (0 == m_pcHeader->numFrames)
-        throw DeadlyImportError( "Invalid md2 file: NUM_FRAMES is 0");
+        throw DeadlyImportError( "Invalid MD2 file: NUM_FRAMES is 0");
 
     if (m_pcHeader->offsetEnd > (uint32_t)fileSize)
-        throw DeadlyImportError( "Invalid md2 file: File is too small");
+        throw DeadlyImportError( "Invalid MD2 file: File is too small");
 
     if (m_pcHeader->numSkins > AI_MAX_ALLOC(MD2::Skin)) {
-        throw DeadlyImportError("Invalid MD2 header: too many skins, would overflow");
+        throw DeadlyImportError("Invalid MD2 header: Too many skins, would overflow");
     }
 
     if (m_pcHeader->numVertices > AI_MAX_ALLOC(MD2::Vertex)) {
-        throw DeadlyImportError("Invalid MD2 header: too many vertices, would overflow");
+        throw DeadlyImportError("Invalid MD2 header: Too many vertices, would overflow");
     }
 
     if (m_pcHeader->numTexCoords > AI_MAX_ALLOC(MD2::TexCoord)) {
-        throw DeadlyImportError("Invalid MD2 header: too many texcoords, would overflow");
+        throw DeadlyImportError("Invalid MD2 header: Too many texcoords, would overflow");
     }
 
     if (m_pcHeader->numTriangles > AI_MAX_ALLOC(MD2::Triangle)) {
-        throw DeadlyImportError("Invalid MD2 header: too many triangles, would overflow");
+        throw DeadlyImportError("Invalid MD2 header: Too many triangles, would overflow");
     }
 
     if (m_pcHeader->numFrames > AI_MAX_ALLOC(MD2::Frame)) {
-        throw DeadlyImportError("Invalid MD2 header: too many frames, would overflow");
+        throw DeadlyImportError("Invalid MD2 header: Too many frames, would overflow");
     }
 
     // -1 because Frame already contains one
@@ -199,7 +193,7 @@ void MD2Importer::ValidateHeader( )
         m_pcHeader->offsetFrames    + m_pcHeader->numFrames * frameSize                 >= fileSize ||
         m_pcHeader->offsetEnd           > fileSize)
     {
-        throw DeadlyImportError("Invalid MD2 header: some offsets are outside the file");
+        throw DeadlyImportError("Invalid MD2 header: Some offsets are outside the file");
     }
 
     if (m_pcHeader->numSkins > AI_MD2_MAX_SKINS)
@@ -210,7 +204,7 @@ void MD2Importer::ValidateHeader( )
         ASSIMP_LOG_WARN("The model contains more vertices than Quake 2 supports");
 
     if (m_pcHeader->numFrames <= configFrameID )
-        throw DeadlyImportError("The requested frame is not existing the file");
+        throw DeadlyImportError("MD2: The requested frame (", configFrameID, ") does not exist in the file");
 }
 
 // ------------------------------------------------------------------------------------------------

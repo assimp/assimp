@@ -142,7 +142,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// check whether we can read from the file
 	if (stream.get() == NULL) {
-		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile + "");
+		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile);
 	}
 
 	// see if its compressed, if so uncompress it
@@ -200,7 +200,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// parse the XML file
     mXmlParser = new XmlParser;
     if (!mXmlParser->parse(stream.get())) {
-		return;
+        throw DeadlyImportError("XML parse error while loading XGL file ", pFile);
 	}
 
 	TempScope scope;

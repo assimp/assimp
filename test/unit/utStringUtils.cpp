@@ -42,9 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 
 class utStringUtils : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utStringUtils, to_string_Test ) {
+TEST_F(utStringUtils, to_string_Test ) {
     std::string res = ai_to_string( 1 );
     EXPECT_EQ( res, "1" );
 
@@ -52,7 +53,7 @@ TEST_F( utStringUtils, to_string_Test ) {
     EXPECT_EQ( res, "1" );
 }
 
-TEST_F( utStringUtils, ai_strtofTest ) {
+TEST_F(utStringUtils, ai_strtofTest ) {
     float res = ai_strtof( nullptr, nullptr );
     EXPECT_FLOAT_EQ( res, 0.0f );
 
@@ -65,4 +66,12 @@ TEST_F( utStringUtils, ai_strtofTest ) {
     const char *end( begin + 6 );
     res = ai_strtof( begin, end );
     EXPECT_FLOAT_EQ( res, 200.0f );
+}
+
+TEST_F(utStringUtils, ai_rgba2hexTest) {
+    std::string result;
+    result = ai_rgba2hex(255, 255, 255, 255, true);
+    EXPECT_EQ(result, "#ffffffff");
+    result = ai_rgba2hex(0, 0, 0, 0, false);
+    EXPECT_EQ(result, "00000000");
 }

@@ -205,7 +205,7 @@ void AMFImporter::ParseHelper_FixTruncatedFloatString(const char *pInStr, std::s
 }
 
 static bool ParseHelper_Decode_Base64_IsBase64(const char pChar) {
-    return (isalnum(pChar) || (pChar == '+') || (pChar == '/'));
+    return (isalnum((unsigned char)pChar) || (pChar == '+') || (pChar == '/'));
 }
 
 void AMFImporter::ParseHelper_Decode_Base64(const std::string &pInputBase64, std::vector<uint8_t> &pOutputData) const {
@@ -515,10 +515,6 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     }
 
     return false;
-}
-
-void AMFImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
-    pExtensionList.insert("amf");
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

@@ -178,7 +178,7 @@ struct Q3BSPModel {
         m_Textures(),
         m_Lightmaps(),
         m_EntityData(),
-        m_ModelName( "" )
+        m_ModelName()
     {
         // empty
     }

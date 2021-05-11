@@ -702,7 +702,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     filename = mFile.substr(s), path = mFile.substr(0, s);
     for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
-        *it = static_cast<char>(tolower(*it));
+        *it = static_cast<char>(tolower(static_cast<unsigned char>(*it)));
     }
 
     // Load multi-part model file, if necessary

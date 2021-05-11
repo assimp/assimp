@@ -498,6 +498,12 @@ void Parser::ParseLV1MaterialListBlock() {
                 ParseLV2MaterialBlock(sMat);
                 continue;
             }
+            if( iDepth == 1 ){
+                // CRUDE HACK: support missing brace after "Ascii Scene Exporter v2.51"
+                LogWarning("Missing closing brace in material list");
+                --filePtr;
+                return;
+            }
         }
         AI_ASE_HANDLE_TOP_LEVEL_SECTION();
     }

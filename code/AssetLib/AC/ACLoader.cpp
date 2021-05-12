@@ -690,7 +690,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
             if (object.subDiv) {
                 if (configEvalSubdivision) {
                     std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
-                    ASSIMP_LOG_INFO("AC3D: Evaluating subdivision surface: " + object.name);
+                    ASSIMP_LOG_INFO_F("AC3D: Evaluating subdivision surface: ", object.name);
 
                     std::vector<aiMesh *> cpy(meshes.size() - oldm, nullptr);
                     div->Subdivide(&meshes[oldm], cpy.size(), &cpy.front(), object.subDiv, true);
@@ -698,7 +698,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
 
                     // previous meshes are deleted vy Subdivide().
                 } else {
-                    ASSIMP_LOG_INFO("AC3D: Letting the subdivision surface untouched due to my configuration: " + object.name);
+                    ASSIMP_LOG_INFO_F("AC3D: Letting the subdivision surface untouched due to my configuration: ", object.name);
                 }
             }
         }

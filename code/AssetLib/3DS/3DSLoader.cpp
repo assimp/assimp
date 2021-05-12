@@ -305,7 +305,7 @@ void Discreet3DSImporter::ParseEditorChunk() {
         // print the version number
         char buff[10];
         ASSIMP_itoa10(buff, stream->GetI2());
-        ASSIMP_LOG_INFO_F(std::string("3DS file format version: "), buff);
+        ASSIMP_LOG_INFO_F("3DS file format version: ", buff);
     } break;
     };
     ASSIMP_3DS_END_CHUNK();

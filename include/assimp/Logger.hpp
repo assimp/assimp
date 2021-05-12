@@ -113,8 +113,10 @@ public:
     // ----------------------------------------------------------------------
     /** @brief  Writes a info message
      *  @param  message Info message*/
-    void info(const char* message);
-    void info(const std::string &message);
+    template<typename... T>
+    void info(T&&... args) {
+        infoInternal(Assimp::Formatter::format(), std::forward<T>(args)...);
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Writes a warning message
@@ -235,6 +237,13 @@ protected:
         warnInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
     }
 
+    void infoInternal(Assimp::Formatter::format f);
+
+    template<typename... T, typename U>
+    void infoInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
+        infoInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    }
+
 protected:
     LogSeverity m_Severity;
 };
@@ -293,12 +302,6 @@ void Logger::error(const std::string &message) {
     return error(message.c_str());
 }
 
-// ----------------------------------------------------------------------------------
-inline
-void Logger::info(const std::string &message) {
-    return info(message.c_str());
-}
-
 } // Namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
@@ -315,7 +318,7 @@ void Logger::info(const std::string &message) {
 	Assimp::DefaultLogger::get()->verboseDebug((Assimp::Formatter::format(string), __VA_ARGS__))
 
 #define ASSIMP_LOG_INFO_F(string, ...) \
-	Assimp::DefaultLogger::get()->info((Assimp::Formatter::format(string), __VA_ARGS__))
+	Assimp::DefaultLogger::get()->info((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_WARN(string) \
 	Assimp::DefaultLogger::get()->warn(string)

@@ -187,13 +187,14 @@ void Logger::verboseDebug(const char *message) {
 }
 
 // ----------------------------------------------------------------------------------
-void Logger::info(const char *message) {
-
+void Logger::infoInternal(Assimp::Formatter::format f) {
+    std::string message = f;
+    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
-    if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
+    if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
     }
-    return OnInfo(message);
+    return OnInfo(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------

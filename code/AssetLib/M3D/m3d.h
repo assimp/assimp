@@ -231,14 +231,9 @@ enum {
 typedef struct {
     uint8_t format;
     uint8_t id;
-#ifdef M3D_ASCII
 #define M3D_PROPERTYDEF(f, i, n) \
     { (f), (i), (char *)(n) }
     char *key;
-#else
-#define M3D_PROPERTYDEF(f, i, n) \
-    { (f), (i) }
-#endif
 } m3dpd_t;
 
 /* material property types */
@@ -376,18 +371,11 @@ enum {
 
 #define M3D_CMDMAXARG 8 /* if you increase this, add more arguments to the macro below */
 typedef struct {
-#ifdef M3D_ASCII
 #define M3D_CMDDEF(t, n, p, a, b, c, d, e, f, g, h)                  \
     {                                                                \
         (char *)(n), (p), { (a), (b), (c), (d), (e), (f), (g), (h) } \
     }
     char *key;
-#else
-#define M3D_CMDDEF(t, n, p, a, b, c, d, e, f, g, h)     \
-    {                                                   \
-        (p), { (a), (b), (c), (d), (e), (f), (g), (h) } \
-    }
-#endif
     uint8_t p;
     uint8_t a[M3D_CMDMAXARG];
 } m3dcd_t;
@@ -2059,15 +2047,13 @@ unsigned char *_m3dstbi_zlib_compress(unsigned char *data, int data_len, int *ou
 
 #define M3D_CHUNKMAGIC(m, a, b, c, d) ((m)[0] == (a) && (m)[1] == (b) && (m)[2] == (c) && (m)[3] == (d))
 
-#ifdef M3D_ASCII
 #include <locale.h> /* sprintf and strtod cares about number locale */
 #include <stdio.h> /* get sprintf */
-#endif
 #ifdef M3D_PROFILING
 #include <sys/time.h>
 #endif
 
-#if !defined(M3D_NOIMPORTER) && defined(M3D_ASCII)
+#if !defined(M3D_NOIMPORTER) 
 /* helper functions for the ASCII parser */
 static char *_m3d_findarg(char *s) {
     while (s && *s && *s != ' ' && *s != '\t' && *s != '\r' && *s != '\n')
@@ -2118,7 +2104,7 @@ static char *_m3d_getfloat(char *s, M3D_FLOAT *ret) {
     return _m3d_findarg(e);
 }
 #endif
-#if !defined(M3D_NODUP) && (!defined(M3D_NOIMPORTER) || defined(M3D_ASCII) || defined(M3D_EXPORTER))
+#if !defined(M3D_NODUP) && (!defined(M3D_NOIMPORTER) || defined(M3D_EXPORTER))
 /* helper function to create safe strings */
 char *_m3d_safestr(char *in, int morelines) {
     char *out, *o, *i = in;
@@ -2426,21 +2412,17 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
 #ifndef M3D_NOWEIGHTS
     m3ds_t *sk;
 #endif
-#ifdef M3D_ASCII
     m3ds_t s;
     M3D_INDEX bi[M3D_BONEMAXLEVEL + 1], level;
     const char *ol;
     char *ptr, *pe, *fn;
-#endif
 #ifdef M3D_PROFILING
     struct timeval tv0, tv1, tvd;
     gettimeofday(&tv0, NULL);
 #endif
 
     if (!data || (!M3D_CHUNKMAGIC(data, '3', 'D', 'M', 'O')
-#ifdef M3D_ASCII
                          && !M3D_CHUNKMAGIC(data, '3', 'd', 'm', 'o')
-#endif
                                  ))
         return NULL;
     model = (m3d_t *)M3D_MALLOC(sizeof(m3d_t));
@@ -2457,7 +2439,6 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         model->texture = mtllib->texture;
         model->flags |= M3D_FLG_MTLLIB;
     }
-#ifdef M3D_ASCII
     /* ASCII variant? */
     if (M3D_CHUNKMAGIC(data, '3', 'd', 'm', 'o')) {
         model->errcode = M3D_ERR_BADFILE;
@@ -3034,7 +3015,6 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         setlocale(LC_NUMERIC, ol);
         goto postprocess;
     }
-#endif
     /* Binary variant */
     if (!M3D_CHUNKMAGIC(data + 8, 'H', 'E', 'A', 'D')) {
         buff = (unsigned char *)stbi_zlib_decode_malloc_guesssize_headerflag((const char *)data + 8, ((m3dchunk_t *)data)->length - 8,
@@ -3698,9 +3678,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         }
     }
     /* calculate normals, normalize skin weights, create bone/vertex cross-references and calculate transform matrices */
-#ifdef M3D_ASCII
 postprocess:
-#endif
     if (model) {
         M3D_LOG("Post-process");
 #ifdef M3D_PROFILING
@@ -3989,7 +3967,6 @@ void m3d_free(m3d_t *model) {
     unsigned int i, j;
 
     if (!model) return;
-#ifdef M3D_ASCII
     /* if model imported from ASCII, we have to free all strings as well */
     if (model->flags & M3D_FLG_FREESTR) {
         if (model->name) M3D_FREE(model->name);
@@ -4047,7 +4024,6 @@ void m3d_free(m3d_t *model) {
         if (model->preview.data)
             M3D_FREE(model->preview.data);
     }
-#endif
     if (model->flags & M3D_FLG_FREERAW) M3D_FREE(model->raw);
 
     if (model->tmap) M3D_FREE(model->tmap);
@@ -4315,7 +4291,6 @@ static void _m3d_round(int quality, m3dv_t *src, m3dv_t *dst) {
     if (dst->w == (M3D_FLOAT)-0.0) dst->w = (M3D_FLOAT)0.0;
 }
 
-#ifdef M3D_ASCII
 /* add a bone to ascii output */
 static char *_m3d_prtbone(char *ptr, m3db_t *bone, M3D_INDEX numbone, M3D_INDEX parent, uint32_t level, M3D_INDEX *vrtxidx) {
     uint32_t i, j;
@@ -4334,16 +4309,13 @@ static char *_m3d_prtbone(char *ptr, m3db_t *bone, M3D_INDEX numbone, M3D_INDEX 
     }
     return ptr;
 }
-#endif
 
 /**
  * Function to encode an in-memory model into on storage Model 3D format
  */
 unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size) {
-#ifdef M3D_ASCII
     const char *ol;
     char *ptr;
-#endif
     char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s;
     char *sn = NULL, *sl = NULL, *sa = NULL, *sd = NULL;
     unsigned char *out = NULL, *z = NULL, weights[M3D_NUMBONE], *norm = NULL;
@@ -4369,9 +4341,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         return NULL;
     }
     model->errcode = M3D_SUCCESS;
-#ifdef M3D_ASCII
     if (flags & M3D_EXP_ASCII) quality = M3D_EXP_DOUBLE;
-#endif
     vrtxidx = (M3D_INDEX *)M3D_MALLOC(model->numvertex * sizeof(M3D_INDEX));
     if (!vrtxidx) goto memerr;
     memset(vrtxidx, 255, model->numvertex * sizeof(M3D_INDEX));
@@ -4800,7 +4770,6 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     }
 
     M3D_LOG("Serializing model");
-#ifdef M3D_ASCII
     if (flags & M3D_EXP_ASCII) {
         /* use CRLF to make model creators on Win happy... */
         sd = _m3d_safestr(model->desc, 1);
@@ -5073,7 +5042,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             ptr += sprintf(ptr, "\r\n");
         }
         /* mathematical shapes face */
-        if (model->numshape !(flags & M3D_EXP_NOFACE)) {
+        if (model->numshape && (!(flags & M3D_EXP_NOFACE))) {
             for (j = 0; j < model->numshape; j++) {
                 sn = _m3d_safestr(model->shape[j].name, 0);
                 if (!sn) {
@@ -5287,7 +5256,6 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         if (!out) goto memerr;
         out[len] = 0;
     } else
-#endif
     {
         /* stricly only use LF (newline) in binary */
         sd = _m3d_safestr(model->desc, 3);

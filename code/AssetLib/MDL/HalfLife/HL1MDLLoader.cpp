@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iomanip>
 #include <sstream>
+#include <map>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER
@@ -868,7 +869,7 @@ void HL1MDLLoader::read_meshes() {
                         scene_mesh->mNormals[v] = bind_pose_normals[pTrivert->normindex];
                         scene_mesh->mTextureCoords[0][v] = aiVector3D(
                                 pTrivert->s * texcoords_s_scale,
-                                pTrivert->t * texcoords_t_scale, 0);
+                                pTrivert->t * -texcoords_t_scale, 0);
                     }
 
                     // Add face and indices.
@@ -879,9 +880,9 @@ void HL1MDLLoader::read_meshes() {
                         aiFace *face = &scene_mesh->mFaces[f];
                         face->mNumIndices = 3;
                         face->mIndices = new unsigned int[3];
-                        face->mIndices[0] = mesh_faces[f].v0;
+                        face->mIndices[0] = mesh_faces[f].v2;
                         face->mIndices[1] = mesh_faces[f].v1;
-                        face->mIndices[2] = mesh_faces[f].v2;
+                        face->mIndices[2] = mesh_faces[f].v0;
                     }
 
                     // Add mesh bones.

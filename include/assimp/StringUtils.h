@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -55,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <locale>
 #include <sstream>
+#include <iomanip>
 
 #ifdef _MSC_VER
 #define AI_SIZEFMT "%Iu"
@@ -157,7 +157,7 @@ AI_FORCE_INLINE std::string ai_decimal_to_hexa(T toConvert) {
     ss >> result;
 
     for (size_t i = 0; i < result.size(); ++i) {
-        result[i] = (char)toupper(result[i]);
+        result[i] = (char)toupper((unsigned char)result[i]);
     }
 
     return result;
@@ -177,7 +177,7 @@ AI_FORCE_INLINE std::string ai_rgba2hex(int r, int g, int b, int a, bool with_he
     if (with_head) {
         ss << "#";
     }
-    ss << std::hex << (r << 24 | g << 16 | b << 8 | a);
+    ss << std::hex << std::setfill('0') << std::setw(8) << (r << 24 | g << 16 | b << 8 | a);
 
     return ss.str();
 }
@@ -249,4 +249,31 @@ AI_FORCE_INLINE std::string ai_str_toupper(const std::string &in) {
     return out;
 }
 
-#endif
+// ---------------------------------------------------------------------------------
+/// @brief  Make a string printable by replacing all non-printable characters with
+///         the specified placeholder character.
+/// @param  in  The incoming string.
+/// @param  placeholder  Placeholder character, default is a question mark.
+/// @return The string, with all non-printable characters replaced.
+AI_FORCE_INLINE std::string ai_str_toprintable(const std::string &in, char placeholder = '?') {
+    std::string out(in);
+    std::transform(out.begin(), out.end(), out.begin(), [placeholder] (unsigned char c) {
+        return isprint(c) ? (char)c :  placeholder;
+    });
+    return out;
+}
+
+// ---------------------------------------------------------------------------------
+/// @brief  Make a string printable by replacing all non-printable characters with
+///         the specified placeholder character.
+/// @param  in  The incoming string.
+/// @param  len The length of the incoming string.
+/// @param  placeholder  Placeholder character, default is a question mark.
+/// @return The string, with all non-printable characters replaced. Will return an
+///         empty string if in is null or len is <= 0.
+AI_FORCE_INLINE std::string ai_str_toprintable(const char *in, int len, char placeholder = '?') {
+    return (in && len > 0) ? ai_str_toprintable(std::string(in, len), placeholder) : std::string();
+}
+
+
+#endif // INCLUDED_AI_STRINGUTILS_H

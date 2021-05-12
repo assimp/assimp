@@ -252,7 +252,7 @@ DecoderBuffer ParseLineIntoDecoderBuffer(DecoderBuffer *buffer) {
 
 std::string ToLower(const std::string &str) {
   std::string out;
-  std::transform(str.begin(), str.end(), std::back_inserter(out), tolower);
+  std::transform(str.begin(), str.end(), std::back_inserter(out), [](unsigned char c){return tolower(c);});
   return out;
 }
 

@@ -119,8 +119,10 @@ public:
     // ----------------------------------------------------------------------
     /** @brief  Writes a warning message
      *  @param  message Warn message*/
-    void warn(const char* message);
-    void warn(const std::string &message);
+    template<typename... T>
+    void warn(T&&... args) {
+        warnInternal(Assimp::Formatter::format(), std::forward<T>(args)...);
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Writes an error message
@@ -226,6 +228,14 @@ protected:
     virtual void OnError(const char* message) = 0;
 
 protected:
+    void warnInternal(Assimp::Formatter::format f);
+
+    template<typename... T, typename U>
+    void warnInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
+        warnInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    }
+
+protected:
     LogSeverity m_Severity;
 };
 
@@ -285,12 +295,6 @@ void Logger::error(const std::string &message) {
 
 // ----------------------------------------------------------------------------------
 inline
-void Logger::warn(const std::string &message) {
-    return warn(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
-inline
 void Logger::info(const std::string &message) {
     return info(message.c_str());
 }
@@ -299,7 +303,7 @@ void Logger::info(const std::string &message) {
 
 // ------------------------------------------------------------------------------------------------
 #define ASSIMP_LOG_WARN_F(string, ...) \
-	Assimp::DefaultLogger::get()->warn((Assimp::Formatter::format(string), __VA_ARGS__))
+	Assimp::DefaultLogger::get()->warn((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_ERROR_F(string, ...) \
 	Assimp::DefaultLogger::get()->error((Assimp::Formatter::format(string), __VA_ARGS__))

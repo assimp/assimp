@@ -330,7 +330,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         }
 
         const Element* Name = source["Name"];
-        m_uvNames[index] = "";
+        m_uvNames[index] = std::string();
         if(Name) {
             m_uvNames[index] = ParseTokenAsString(GetRequiredToken(*Name,0));
         }

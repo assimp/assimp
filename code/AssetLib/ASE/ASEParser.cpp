@@ -498,6 +498,12 @@ void Parser::ParseLV1MaterialListBlock() {
                 ParseLV2MaterialBlock(sMat);
                 continue;
             }
+            if( iDepth == 1 ){
+                // CRUDE HACK: support missing brace after "Ascii Scene Exporter v2.51"
+                LogWarning("Missing closing brace in material list");
+                --filePtr;
+                return;
+            }
         }
         AI_ASE_HANDLE_TOP_LEVEL_SECTION();
     }
@@ -685,7 +691,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                     // Files with 'None' as map name are produced by
                     // an Maja to ASE exporter which name I forgot ..
                     ASSIMP_LOG_WARN("ASE: Skipping invalid map entry");
-                    map.mMapName = "";
+                    map.mMapName = std::string();
                 }
 
                 continue;

@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
     3,
     1,
     5,
-    "dae zae"
+    "dae xml zae"
 };
 
 static const float kMillisecondsFromSeconds = 1000.f;
@@ -1241,7 +1241,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     continue;
                 }
                 entry.mTargetId = entry.mTransformId;
-                entry.mTransformId = "";
+                entry.mTransformId = std::string();
             }
 
             entry.mChannel = &(*cit);

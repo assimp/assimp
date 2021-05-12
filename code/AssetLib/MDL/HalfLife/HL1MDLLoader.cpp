@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iomanip>
 #include <sstream>
+#include <map>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER

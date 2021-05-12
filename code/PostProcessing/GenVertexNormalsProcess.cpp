@@ -70,6 +70,7 @@ GenVertexNormalsProcess::~GenVertexNormalsProcess() {
 // Returns whether the processing step is present in the given flag field.
 bool GenVertexNormalsProcess::IsActive(unsigned int pFlags) const {
     force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
+    flippedWindingOrder_ = (pFlags & aiProcess_FlipWindingOrder) != 0;
     return (pFlags & aiProcess_GenSmoothNormals) != 0;
 }
 
@@ -142,6 +143,8 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals(aiMesh *pMesh, unsigned int m
         const aiVector3D *pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D *pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
+        if (flippedWindingOrder_)
+            std::swap( pV2, pV3 );
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {

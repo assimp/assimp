@@ -143,7 +143,13 @@ void Discreet3DSImporter::SetupProperties(const Importer * /*pImp*/) {
 // Imports the given file into the given scene structure.
 void Discreet3DSImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-    StreamReaderLE theStream(pIOHandler->Open(pFile, "rb"));
+
+    auto theFile = pIOHandler->Open(pFile, "rb");
+    if (!theFile) {
+        throw DeadlyImportError("3DS: Could not open ", pFile);
+    }
+
+    StreamReaderLE theStream(theFile);
 
     // We should have at least one chunk
     if (theStream.GetRemainingSize() < 16) {
@@ -981,9 +987,9 @@ void Discreet3DSImporter::ParseMeshChunk() {
         mMesh.mMat.a3 = stream->GetF4();
         mMesh.mMat.b3 = stream->GetF4();
         mMesh.mMat.c3 = stream->GetF4();
-        mMesh.mMat.d1 = stream->GetF4();
-        mMesh.mMat.d2 = stream->GetF4();
-        mMesh.mMat.d3 = stream->GetF4();
+        mMesh.mMat.a4 = stream->GetF4();
+        mMesh.mMat.b4 = stream->GetF4();
+        mMesh.mMat.c4 = stream->GetF4();
     } break;
 
     case Discreet3DS::CHUNK_MAPLIST: {

@@ -215,7 +215,12 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints, ai
 void MS3DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("MS3D: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // CanRead() should have done this already
     char head[10];

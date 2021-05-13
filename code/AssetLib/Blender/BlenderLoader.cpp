@@ -516,7 +516,7 @@ void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const
     case Tex::Type_POINTDENSITY:
     case Tex::Type_VOXELDATA:
 
-        LogWarn(std::string("Encountered a texture with an unsupported type: ") + dispnam);
+        LogWarn("Encountered a texture with an unsupported type: ", dispnam);
         AddSentinelTexture(out, mat, tex, conv_data);
         break;
 
@@ -752,7 +752,7 @@ void BlenderImporter::CheckActualType(const ElemBase *dt, const char *check) {
 
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::NotSupportedObjectType(const Object *obj, const char *type) {
-    LogWarn((format(), "Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping"));
+    LogWarn("Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping");
 }
 
 // ------------------------------------------------------------------------------------------------

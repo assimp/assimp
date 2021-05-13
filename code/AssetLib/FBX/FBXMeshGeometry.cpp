@@ -509,8 +509,8 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
         if (uvIndices.size() > vertex_count) {
-            FBXImporter::LogWarn(Formatter::format("trimming length of input array for ByPolygonVertex mapping: ")
-                                          << uvIndices.size() << ", expected " << vertex_count);
+            FBXImporter::LogWarn("trimming length of input array for ByPolygonVertex mapping: ",
+                                          uvIndices.size(), ", expected ", vertex_count);
             uvIndices.resize(vertex_count);
         }
 
@@ -645,7 +645,7 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
             FBXImporter::LogError(Formatter::format("expected material index, ignoring"));
             return;
         } else if (materials_out.size() > 1) {
-            FBXImporter::LogWarn(Formatter::format("expected only a single material index, ignoring all except the first one"));
+            FBXImporter::LogWarn("expected only a single material index, ignoring all except the first one");
             materials_out.clear();
         }
 

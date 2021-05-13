@@ -427,10 +427,6 @@ void MD2Importer::InternReadFile( const std::string& pFile,
             aiVector3D& vNormal = pcMesh->mNormals[iCurrent];
             LookupNormalIndex(pcVerts[iIndex].lightNormalIndex,vNormal);
 
-            // flip z and y to become right-handed
-            std::swap((float&)vNormal.z,(float&)vNormal.y);
-            std::swap((float&)vec.z,(float&)vec.y);
-
             if (m_pcHeader->numTexCoords)   {
                 // validate texture coordinates
                 iIndex = pcTriangles[i].textureIndices[c];
@@ -448,7 +444,15 @@ void MD2Importer::InternReadFile( const std::string& pFile,
             }
             pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
         }
+        // flip the face order
+        std::swap( pScene->mMeshes[0]->mFaces[i].mIndices[0], pScene->mMeshes[0]->mFaces[i].mIndices[2] );
     }
+    // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+            1.f, 0.f, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, -1.f, 0.f, 0.f,
+            0.f, 0.f, 0.f, 1.f);
 }
 
 #endif // !! ASSIMP_BUILD_NO_MD2_IMPORTER

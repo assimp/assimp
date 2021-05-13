@@ -99,10 +99,12 @@ public:
     virtual ~Logger();
 
     // ----------------------------------------------------------------------
-    /** @brief  Writes a debug message
-     *   @param message Debug message*/
-    void debug(const char* message);
-    void debug(const std::string &message);
+    /** @brief  Writes a info message
+     *  @param  message Info message*/
+    template<typename... T>
+    void debug(T&&... args) {
+        debugInternal(Assimp::Formatter::format(), std::forward<T>(args)...);
+    }
 
     // ----------------------------------------------------------------------
 	/** @brief  Writes a debug message
@@ -232,21 +234,26 @@ protected:
     virtual void OnError(const char* message) = 0;
 
 protected:
+
+    void debugInternal(Assimp::Formatter::format f);
     void warnInternal(Assimp::Formatter::format f);
+    void infoInternal(Assimp::Formatter::format f);
+    void errorInternal(Assimp::Formatter::format f);
+
+    template<typename... T, typename U>
+    void debugInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
+        warnInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    }
 
     template<typename... T, typename U>
     void warnInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
         warnInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
     }
 
-    void infoInternal(Assimp::Formatter::format f);
-
     template<typename... T, typename U>
     void infoInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
         infoInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
     }
-
-    void errorInternal(Assimp::Formatter::format f);
 
     template<typename... T, typename U>
     void errorInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
@@ -295,12 +302,6 @@ Logger::LogSeverity Logger::getLogSeverity() const {
 }
 
 // ----------------------------------------------------------------------------------
-inline
-void Logger::debug(const std::string &message) {
-    return debug(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
 inline void Logger::verboseDebug(const std::string &message) {
 	return verboseDebug(message.c_str());
 }
@@ -315,7 +316,7 @@ inline void Logger::verboseDebug(const std::string &message) {
 	Assimp::DefaultLogger::get()->error((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_DEBUG_F(string, ...) \
-	Assimp::DefaultLogger::get()->debug((Assimp::Formatter::format(string), __VA_ARGS__))
+	Assimp::DefaultLogger::get()->debug((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_VERBOSE_DEBUG_F(string, ...) \
 	Assimp::DefaultLogger::get()->verboseDebug((Assimp::Formatter::format(string), __VA_ARGS__))

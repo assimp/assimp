@@ -101,7 +101,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string &m) {
     if (m == "GL_ONE_MINUS_DST_COLOR") {
         return Q3Shader::BLEND_GL_ONE_MINUS_DST_COLOR;
     }
-    ASSIMP_LOG_ERROR("Q3Shader: Unknown blend function: " + m);
+    ASSIMP_LOG_ERROR("Q3Shader: Unknown blend function: ", m);
     return Q3Shader::BLEND_NONE;
 }
 
@@ -226,7 +226,7 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
     if (!file.get())
         return false; // if we can't access the file, don't worry and return
 
-    ASSIMP_LOG_INFO("Loading Quake3 skin file " + pFile);
+    ASSIMP_LOG_INFO("Loading Quake3 skin file ", pFile);
 
     // read file in memory
     const size_t s = file->FileSize();
@@ -880,9 +880,9 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             if (dit != shaders.blocks.end()) {
                 // We made it!
                 shader = &*dit;
-                ASSIMP_LOG_INFO("Found shader record for " + without_ext);
+                ASSIMP_LOG_INFO("Found shader record for ", without_ext);
             } else {
-                ASSIMP_LOG_WARN("Unable to find shader record for " + without_ext);
+                ASSIMP_LOG_WARN("Unable to find shader record for ", without_ext);
             }
         }
 

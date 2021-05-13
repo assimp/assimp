@@ -477,7 +477,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
         return false;
     }
     if (textureType == aiTextureType_NONE) {
-        ASSIMP_LOG_WARN("Failed to detect texture type for '" + textureRef + "', ignoring texture_unit.");
+        ASSIMP_LOG_WARN("Failed to detect texture type for '", textureRef, "', ignoring texture_unit.");
         return false;
     }
 

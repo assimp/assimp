@@ -711,7 +711,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size) {
             }
         }
         if (derived.size()) {
-            ASSIMP_LOG_WARN("LWO2: Unable to find source surface: " + derived);
+            ASSIMP_LOG_WARN("LWO2: Unable to find source surface: ", derived);
         }
     }
 

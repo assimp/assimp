@@ -155,7 +155,7 @@ uint16_t OgreBinarySerializer::ReadHeader(bool readLen) {
 
 #if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
     if (id != HEADER_CHUNK_ID) {
-        ASSIMP_LOG_DEBUG(Formatter::format() << (assetMode == AM_Mesh ? MeshHeaderToString(static_cast<MeshChunkId>(id)) : SkeletonHeaderToString(static_cast<SkeletonChunkId>(id))));
+        ASSIMP_LOG_DEBUG((assetMode == AM_Mesh ? MeshHeaderToString(static_cast<MeshChunkId>(id)) : SkeletonHeaderToString(static_cast<SkeletonChunkId>(id))));
     }
 #endif
 

@@ -1125,7 +1125,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
                                          "this is no spot light or target camera");
                     }
                 } else {
-                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: " + temp);
+                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: ", temp);
                     // mode = 0
                 }
                 continue;

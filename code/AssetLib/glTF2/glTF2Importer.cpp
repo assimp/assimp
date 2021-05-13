@@ -455,14 +455,14 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             if (attr.normal.size() > 0 && attr.normal[0]) {
                 if (attr.normal[0]->count != aim->mNumVertices) {
-                    DefaultLogger::get()->warn("Normal count in mesh \"" + mesh.name + "\" does not match the vertex count, normals ignored.");
+                    DefaultLogger::get()->warn("Normal count in mesh \"", mesh.name, "\" does not match the vertex count, normals ignored.");
                 } else {
                     attr.normal[0]->ExtractData(aim->mNormals);
 
                     // only extract tangents if normals are present
                     if (attr.tangent.size() > 0 && attr.tangent[0]) {
                         if (attr.tangent[0]->count != aim->mNumVertices) {
-                            DefaultLogger::get()->warn("Tangent count in mesh \"" + mesh.name + "\" does not match the vertex count, tangents ignored.");
+                            DefaultLogger::get()->warn("Tangent count in mesh \"", mesh.name, "\" does not match the vertex count, tangents ignored.");
                         } else {
                             // generate bitangents from normals and tangents according to spec
                             Tangent *tangents = nullptr;
@@ -485,7 +485,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             for (size_t c = 0; c < attr.color.size() && c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c) {
                 if (attr.color[c]->count != aim->mNumVertices) {
-                    DefaultLogger::get()->warn("Color stream size in mesh \"" + mesh.name +
+                    DefaultLogger::get()->warn("Color stream size in mesh \"", mesh.name,
                                                "\" does not match the vertex count");
                     continue;
                 }
@@ -508,7 +508,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
 
                 if (attr.texcoord[tc]->count != aim->mNumVertices) {
-                    DefaultLogger::get()->warn("Texcoord stream size in mesh \"" + mesh.name +
+                    DefaultLogger::get()->warn("Texcoord stream size in mesh \"", mesh.name,
                                                "\" does not match the vertex count");
                     continue;
                 }

@@ -243,12 +243,12 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
 
     if (!DefaultLogger::isNullLogger()) {
-        LogDebug("File schema is \'" + head.fileSchema + '\'');
+        LogDebug("File schema is \'", head.fileSchema, '\'');
         if (head.timestamp.length()) {
-            LogDebug("Timestamp \'" + head.timestamp + '\'');
+            LogDebug("Timestamp \'", head.timestamp, '\'');
         }
         if (head.app.length()) {
-            LogDebug("Application/Exporter identline is \'" + head.app + '\'');
+            LogDebug("Application/Exporter identline is \'", head.app, '\'');
         }
     }
 
@@ -403,7 +403,7 @@ void ResolveObjectPlacement(aiMatrix4x4 &m, const Schema_2x3::IfcObjectPlacement
             m = tmpM * m;
         }
     } else {
-        IFCImporter::LogWarn("skipping unknown IfcObjectPlacement entity, type is " + place.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcObjectPlacement entity, type is ", place.GetClassName());
     }
 }
 

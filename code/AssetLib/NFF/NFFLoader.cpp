@@ -132,7 +132,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
     // Check whether we can read from the file
     if (!file.get()) {
-        ASSIMP_LOG_ERROR("NFF2: Unable to open material library " + path + ".");
+        ASSIMP_LOG_ERROR("NFF2: Unable to open material library ", path, ".");
         return;
     }
 

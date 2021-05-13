@@ -665,7 +665,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
         if ( nullptr != desc ) {
             ext = desc->mName;
         }
-        ASSIMP_LOG_INFO("Found a matching importer for this file format: " + ext + "." );
+        ASSIMP_LOG_INFO("Found a matching importer for this file format: ", ext, "." );
         pimpl->mProgressHandler->UpdateFileRead( 0, fileSize );
 
         if (profiler) {

@@ -961,7 +961,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
     switch (type) {
         case AI_LWO_TXUV:
             if (dims != 2) {
-                ASSIMP_LOG_WARN("LWO2: Skipping UV channel \'" + name + "\' with !2 components");
+                ASSIMP_LOG_WARN("LWO2: Skipping UV channel \'", name, "\' with !2 components");
                 return;
             }
             base = FindEntry(mCurLayer->mUVChannels, name, perPoly);
@@ -969,7 +969,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
         case AI_LWO_WGHT:
         case AI_LWO_MNVW:
             if (dims != 1) {
-                ASSIMP_LOG_WARN("LWO2: Skipping Weight Channel \'" + name + "\' with !1 components");
+                ASSIMP_LOG_WARN("LWO2: Skipping Weight Channel \'", name, "\' with !1 components");
                 return;
             }
             base = FindEntry((type == AI_LWO_WGHT ? mCurLayer->mWeightChannels : mCurLayer->mSWeightChannels), name, perPoly);
@@ -977,7 +977,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
         case AI_LWO_RGB:
         case AI_LWO_RGBA:
             if (dims != 3 && dims != 4) {
-                ASSIMP_LOG_WARN("LWO2: Skipping Color Map \'" + name + "\' with a dimension > 4 or < 3");
+                ASSIMP_LOG_WARN("LWO2: Skipping Color Map \'", name, "\' with a dimension > 4 or < 3");
                 return;
             }
             base = FindEntry(mCurLayer->mVColorChannels, name, perPoly);

@@ -811,7 +811,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     // we need to generate a full node chain to accommodate for assimp's
     // lack to express pivots and offsets.
     if ((chainBits & chainMaskComplex) && doc.Settings().preservePivots) {
-        FBXImporter::LogInfo("generating full transformation chain for node: " + name);
+        FBXImporter::LogInfo("generating full transformation chain for node: ", name);
 
         // query the anim_chain_bits dictionary to find out which chain elements
         // have associated node animation channels. These can not be dropped
@@ -918,7 +918,7 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
         } else {
-            FBXImporter::LogWarn("ignoring unrecognized geometry: " + geo->Name());
+            FBXImporter::LogWarn("ignoring unrecognized geometry: ", geo->Name());
         }
     }
 
@@ -944,7 +944,7 @@ FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *
     const std::vector<aiVector3D> &vertices = mesh.GetVertices();
     const std::vector<unsigned int> &faces = mesh.GetFaceIndexCounts();
     if (vertices.empty() || faces.empty()) {
-        FBXImporter::LogWarn("ignoring empty geometry: " + mesh.Name());
+        FBXImporter::LogWarn("ignoring empty geometry: ", mesh.Name());
         return temp;
     }
 
@@ -971,7 +971,7 @@ std::vector<unsigned int> FBXConverter::ConvertLine(const LineGeometry &line, ai
     const std::vector<aiVector3D> &vertices = line.GetVertices();
     const std::vector<int> &indices = line.GetIndices();
     if (vertices.empty() || indices.empty()) {
-        FBXImporter::LogWarn("ignoring empty line: " + line.Name());
+        FBXImporter::LogWarn("ignoring empty line: ", line.Name());
         return temp;
     }
 
@@ -1815,14 +1815,14 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                             continue;
                         }
 
                         if (uvIndex == -1) {
                             uvIndex = index;
                         } else {
-                            FBXImporter::LogWarn("the UV channel named " + uvSet +
+                            FBXImporter::LogWarn("the UV channel named ", uvSet,
                                                  " appears at different positions in meshes, results will be wrong");
                         }
                     }
@@ -1839,7 +1839,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                         }
                     }
                     if (index == -1) {
-                        FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                        FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                     }
 
                     if (uvIndex == -1) {
@@ -1848,7 +1848,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
                 }
 
                 if (uvIndex == -1) {
-                    FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                    FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                     uvIndex = 0;
                 }
             }
@@ -1934,14 +1934,14 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                             continue;
                         }
 
                         if (uvIndex == -1) {
                             uvIndex = index;
                         } else {
-                            FBXImporter::LogWarn("the UV channel named " + uvSet +
+                            FBXImporter::LogWarn("the UV channel named ", uvSet,
                                                  " appears at different positions in meshes, results will be wrong");
                         }
                     }
@@ -1958,7 +1958,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                         }
                     }
                     if (index == -1) {
-                        FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                        FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                     }
 
                     if (uvIndex == -1) {
@@ -1967,7 +1967,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
                 }
 
                 if (uvIndex == -1) {
-                    FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                    FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                     uvIndex = 0;
                 }
             }
@@ -2319,14 +2319,14 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                                 }
                             }
                             if (index == -1) {
-                                FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                                FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                                 continue;
                             }
 
                             if (uvIndex == -1) {
                                 uvIndex = index;
                             } else {
-                                FBXImporter::LogWarn("the UV channel named " + uvSet + " appears at different positions in meshes, results will be wrong");
+                                FBXImporter::LogWarn("the UV channel named ", uvSet, " appears at different positions in meshes, results will be wrong");
                             }
                         }
                     } else {
@@ -2342,7 +2342,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                             }
                         }
                         if (index == -1) {
-                            FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+                            FBXImporter::LogWarn("did not find UV channel named ", uvSet, " in a mesh using this material");
                         }
 
                         if (uvIndex == -1) {
@@ -2351,7 +2351,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
                     }
 
                     if (uvIndex == -1) {
-                        FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+                        FBXImporter::LogWarn("failed to resolve UV channel ", uvSet, ", using first UV channel");
                         uvIndex = 0;
                     }
                 }
@@ -2574,7 +2574,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
         // empty animations would fail validation, so drop them
         delete anim;
         animations.pop_back();
-        FBXImporter::LogInfo("ignoring empty AnimationStack (using IK?): " + name);
+        FBXImporter::LogInfo("ignoring empty AnimationStack (using IK?): ", name);
         return;
     }
 
@@ -2707,13 +2707,13 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
         ai_assert(node);
 
         if (node->TargetProperty().empty()) {
-            FBXImporter::LogWarn("target property for animation curve not set: " + node->Name());
+            FBXImporter::LogWarn("target property for animation curve not set: ", node->Name());
             continue;
         }
 
         curve_node = node;
         if (node->Curves().empty()) {
-            FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: " + node->Name());
+            FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: ", node->Name());
             continue;
         }
 
@@ -2748,7 +2748,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
             if (doc.Settings().optimizeEmptyAnimationCurves &&
                     IsRedundantAnimationData(target, comp, (chain[i]->second))) {
 
-                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node " + target.Name());
+                FBXImporter::LogVerboseDebug("dropping redundant animation channel for node ", target.Name());
                 continue;
             }
 

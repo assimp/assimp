@@ -209,7 +209,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     pScene->mRootNode->mNumChildren = 0;
     mScene = pScene;
 
-    ASSIMP_LOG_DEBUG("M3D: root node " + m3d.Name());
+    ASSIMP_LOG_DEBUG("M3D: root node ", m3d.Name());
 
     // now we just have to fill up the Assimp structures in pScene
     importMaterials(m3d);

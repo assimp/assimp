@@ -235,9 +235,9 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
     stream->Read(magic, 3, 1);
     magic[3] = '\0';
 
-    LogInfo((format(), "Blender version is ", magic[0], ".", magic + 1,
+    LogInfo("Blender version is ", magic[0], ".", magic + 1,
             " (64bit: ", file.i64bit ? "true" : "false",
-            ", little endian: ", file.little ? "true" : "false", ")"));
+            ", little endian: ", file.little ? "true" : "false", ")");
 
     ParseBlendFile(file, stream);
 
@@ -434,7 +434,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
 
         curTex->pcData = reinterpret_cast<aiTexel *>(ch);
 
-        LogInfo("Reading embedded texture, original file was " + std::string(img->name));
+        LogInfo("Reading embedded texture, original file was ", img->name);
     } else {
         name = aiString(img->name);
     }

@@ -312,20 +312,20 @@ Logger::LogSeverity Logger::getLogSeverity() const {
 } // Namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-#define ASSIMP_LOG_WARN_F(string, ...) \
-	Assimp::DefaultLogger::get()->warn((string, __VA_ARGS__))
+#define ASSIMP_LOG_WARN_F(...) \
+	Assimp::DefaultLogger::get()->warn(__VA_ARGS__)
 
-#define ASSIMP_LOG_ERROR_F(string, ...) \
-	Assimp::DefaultLogger::get()->error((string, __VA_ARGS__))
+#define ASSIMP_LOG_ERROR_F(...) \
+	Assimp::DefaultLogger::get()->error(__VA_ARGS__)
 
-#define ASSIMP_LOG_DEBUG_F(string, ...) \
-	Assimp::DefaultLogger::get()->debug((string, __VA_ARGS__))
+#define ASSIMP_LOG_DEBUG_F(...) \
+	Assimp::DefaultLogger::get()->debug(__VA_ARGS__)
 
-#define ASSIMP_LOG_VERBOSE_DEBUG_F(string, ...) \
-	Assimp::DefaultLogger::get()->verboseDebug((string, __VA_ARGS__))
+#define ASSIMP_LOG_VERBOSE_DEBUG_F(...) \
+	Assimp::DefaultLogger::get()->verboseDebug(__VA_ARGS__)
 
-#define ASSIMP_LOG_INFO_F(string, ...) \
-	Assimp::DefaultLogger::get()->info((string, __VA_ARGS__))
+#define ASSIMP_LOG_INFO_F(...) \
+	Assimp::DefaultLogger::get()->info(__VA_ARGS__)
 
 #define ASSIMP_LOG_WARN(string) \
 	Assimp::DefaultLogger::get()->warn(string)

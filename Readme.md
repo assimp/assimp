@@ -66,8 +66,8 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 
 The source code is organized in the following way:
 
-	code/Common		The base implementation for importers and the infrastructure
-	code/PostProcessing	The post-processing steps
+	code/Common			The base implementation for importers and the infrastructure
+	code/PostProcessing		The post-processing steps
 	code/AssetLib/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###

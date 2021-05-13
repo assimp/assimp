@@ -68,7 +68,7 @@ The source code is organized in the following way:
 
 	code/Common		The base implementation for importers and the infrastructure
 	code/PostProcessing	The post-processing steps
-	code/<FormatName>	Implementation for import and export for the format
+	code/AssetLib/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###
 For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.

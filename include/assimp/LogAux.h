@@ -64,13 +64,14 @@ public:
     template<typename... T>
     static void ThrowException(T&&... args)
     {
-        throw DeadlyImportError(Prefix(), args...);
+        throw DeadlyImportError(Prefix(), std::forward<T>(args)...);
     }
 
     // ------------------------------------------------------------------------------------------------
-    static void LogWarn(const Formatter::format& message)   {
+    template<typename... T>
+    static void LogWarn(T&&... args) {
         if (!DefaultLogger::isNullLogger()) {
-            ASSIMP_LOG_WARN(Prefix()+(std::string)message);
+            ASSIMP_LOG_WARN(Prefix(), std::forward<T>(args)...);
         }
     }
 
@@ -103,13 +104,6 @@ public:
 
     // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
 #if !defined(__GNUC__) || !defined(__APPLE__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-
-    // ------------------------------------------------------------------------------------------------
-    static void LogWarn  (const char* message) {
-        if (!DefaultLogger::isNullLogger()) {
-            LogWarn(Formatter::format(message));
-        }
-    }
 
     // ------------------------------------------------------------------------------------------------
     static void LogError  (const char* message) {

@@ -128,9 +128,11 @@ public:
 
     // ----------------------------------------------------------------------
     /** @brief  Writes an error message
-     *  @param  message Error message*/
-    void error(const char* message);
-    void error(const std::string &message);
+     *  @param  message Info message*/
+    template<typename... T>
+    void error(T&&... args) {
+        errorInternal(Assimp::Formatter::format(), std::forward<T>(args)...);
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Set a new log severity.
@@ -244,6 +246,13 @@ protected:
         infoInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
     }
 
+    void errorInternal(Assimp::Formatter::format f);
+
+    template<typename... T, typename U>
+    void errorInternal(Assimp::Formatter::format f, U&& u, T&&... args) {
+        errorInternal(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    }
+
 protected:
     LogSeverity m_Severity;
 };
@@ -296,12 +305,6 @@ inline void Logger::verboseDebug(const std::string &message) {
 	return verboseDebug(message.c_str());
 }
 
-// ----------------------------------------------------------------------------------
-inline
-void Logger::error(const std::string &message) {
-    return error(message.c_str());
-}
-
 } // Namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
@@ -309,7 +312,7 @@ void Logger::error(const std::string &message) {
 	Assimp::DefaultLogger::get()->warn((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_ERROR_F(string, ...) \
-	Assimp::DefaultLogger::get()->error((Assimp::Formatter::format(string), __VA_ARGS__))
+	Assimp::DefaultLogger::get()->error((string, __VA_ARGS__))
 
 #define ASSIMP_LOG_DEBUG_F(string, ...) \
 	Assimp::DefaultLogger::get()->debug((Assimp::Formatter::format(string), __VA_ARGS__))

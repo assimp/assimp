@@ -176,7 +176,6 @@ void Logger::debug(const char *message) {
 
 // ----------------------------------------------------------------------------------
 void Logger::verboseDebug(const char *message) {
-
     // SECURITY FIX: otherwise it's easy to produce overruns since
     // sometimes importers will include data from the input file
     // (i.e. node names) in their messages.
@@ -209,12 +208,14 @@ void Logger::warnInternal(Assimp::Formatter::format f) {
 }
 
 // ----------------------------------------------------------------------------------
-void Logger::error(const char *message) {
+void Logger::errorInternal(Assimp::Formatter::format f) {
+    std::string message = f;
+    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
-    if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
+    if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
     }
-    return OnError(message);
+    return OnError(message.c_str());
 }
 
 // ----------------------------------------------------------------------------------

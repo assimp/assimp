@@ -312,34 +312,19 @@ Logger::LogSeverity Logger::getLogSeverity() const {
 } // Namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-#define ASSIMP_LOG_WARN_F(...) \
+#define ASSIMP_LOG_WARN(...) \
 	Assimp::DefaultLogger::get()->warn(__VA_ARGS__)
 
-#define ASSIMP_LOG_ERROR_F(...) \
+#define ASSIMP_LOG_ERROR(...) \
 	Assimp::DefaultLogger::get()->error(__VA_ARGS__)
 
-#define ASSIMP_LOG_DEBUG_F(...) \
+#define ASSIMP_LOG_DEBUG(...) \
 	Assimp::DefaultLogger::get()->debug(__VA_ARGS__)
 
-#define ASSIMP_LOG_VERBOSE_DEBUG_F(...) \
+#define ASSIMP_LOG_VERBOSE_DEBUG(...) \
 	Assimp::DefaultLogger::get()->verboseDebug(__VA_ARGS__)
 
-#define ASSIMP_LOG_INFO_F(...) \
+#define ASSIMP_LOG_INFO(...) \
 	Assimp::DefaultLogger::get()->info(__VA_ARGS__)
-
-#define ASSIMP_LOG_WARN(string) \
-	Assimp::DefaultLogger::get()->warn(string)
-
-#define ASSIMP_LOG_ERROR(string) \
-	Assimp::DefaultLogger::get()->error(string)
-
-#define ASSIMP_LOG_DEBUG(string) \
-	Assimp::DefaultLogger::get()->debug(string)
-
-#define ASSIMP_LOG_VERBOSE_DEBUG(string) \
-	Assimp::DefaultLogger::get()->verboseDebug(string)
-
-#define ASSIMP_LOG_INFO(string) \
-	Assimp::DefaultLogger::get()->info(string)
 
 #endif // !! INCLUDED_AI_LOGGER_H

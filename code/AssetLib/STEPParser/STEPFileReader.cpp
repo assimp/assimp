@@ -297,7 +297,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
     }
 
     if ( !DefaultLogger::isNullLogger()){
-        ASSIMP_LOG_DEBUG_F("STEP: got ",map.size()," object records with ",
+        ASSIMP_LOG_DEBUG("STEP: got ",map.size()," object records with ",
             db.GetRefs().size()," inverse index entries");
     }
 }

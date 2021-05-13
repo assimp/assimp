@@ -232,7 +232,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp) {
 
 #ifdef ASSIMP_BUILD_DEBUG
         if (IsExtensionSupported(*it)) {
-            ASSIMP_LOG_WARN_F("The file extension ", *it, " is already in use");
+            ASSIMP_LOG_WARN("The file extension ", *it, " is already in use");
         }
 #endif
         baked += *it;
@@ -240,7 +240,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp) {
 
     // add the loader
     pimpl->mImporter.push_back(pImp);
-    ASSIMP_LOG_INFO_F("Registering custom importer for these file extensions: ", baked);
+    ASSIMP_LOG_INFO("Registering custom importer for these file extensions: ", baked);
     ASSIMP_END_EXCEPTION_REGION(aiReturn);
     
     return AI_SUCCESS;
@@ -519,7 +519,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 // ------------------------------------------------------------------------------------------------
 void WriteLogOpening(const std::string& file) {
     
-    ASSIMP_LOG_INFO_F("Load ", file);
+    ASSIMP_LOG_INFO("Load ", file);
 
     // print a full version dump. This is nice because we don't
     // need to ask the authors of incoming bug reports for

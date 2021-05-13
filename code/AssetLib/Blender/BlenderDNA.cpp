@@ -198,7 +198,7 @@ void DNAParser::Parse() {
         s.size = offset;
     }
 
-    ASSIMP_LOG_DEBUG_F("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
+    ASSIMP_LOG_DEBUG("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
     dna.DumpToFile();

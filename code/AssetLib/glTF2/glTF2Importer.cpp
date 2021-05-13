@@ -325,7 +325,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
 void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
-    ASSIMP_LOG_DEBUG_F("Importing ", numImportedMaterials, " materials");
+    ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
@@ -402,7 +402,7 @@ aiColor4D* GetVertexColorsForType(glTF2::Ref<glTF2::Accessor> input) {
 }
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
-    ASSIMP_LOG_DEBUG_F("Importing ", r.meshes.Size(), " meshes");
+    ASSIMP_LOG_DEBUG("Importing ", r.meshes.Size(), " meshes");
     std::vector<std::unique_ptr<aiMesh>> meshes;
 
     unsigned int k = 0;
@@ -539,7 +539,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                     if (needPositions) {
                         if (target.position[0]->count != aim->mNumVertices) {
-                            ASSIMP_LOG_WARN_F("Positions of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN("Positions of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *positionDiff = nullptr;
                             target.position[0]->ExtractData(positionDiff);
@@ -551,7 +551,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     if (needNormals) {
                         if (target.normal[0]->count != aim->mNumVertices) {
-                            ASSIMP_LOG_WARN_F("Normals of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN("Normals of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *normalDiff = nullptr;
                             target.normal[0]->ExtractData(normalDiff);
@@ -563,7 +563,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     if (needTangents) {
                         if (target.tangent[0]->count != aim->mNumVertices) {
-                            ASSIMP_LOG_WARN_F("Tangents of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
+                            ASSIMP_LOG_WARN("Tangents of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             Tangent *tangent = nullptr;
                             attr.tangent[0]->ExtractData(tangent);
@@ -785,7 +785,7 @@ void glTF2Importer::ImportCameras(glTF2::Asset &r) {
     if (!r.cameras.Size()) return;
 
     const unsigned int numCameras = r.cameras.Size();
-    ASSIMP_LOG_DEBUG_F("Importing ", numCameras, " cameras");
+    ASSIMP_LOG_DEBUG("Importing ", numCameras, " cameras");
     mScene->mNumCameras = numCameras;
     mScene->mCameras = new aiCamera *[numCameras];
     std::fill(mScene->mCameras, mScene->mCameras + numCameras, nullptr);
@@ -822,7 +822,7 @@ void glTF2Importer::ImportLights(glTF2::Asset &r) {
         return;
 
     const unsigned int numLights = r.lights.Size();
-    ASSIMP_LOG_DEBUG_F("Importing ", numLights, " lights");
+    ASSIMP_LOG_DEBUG("Importing ", numLights, " lights");
     mScene->mNumLights = numLights;
     mScene->mLights = new aiLight *[numLights];
     std::fill(mScene->mLights, mScene->mLights + numLights, nullptr);
@@ -1329,7 +1329,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
     if (!r.scene) return;
 
     const unsigned numAnimations = r.animations.Size();
-    ASSIMP_LOG_DEBUG_F("Importing ", numAnimations, " animations");
+    ASSIMP_LOG_DEBUG("Importing ", numAnimations, " animations");
     mScene->mNumAnimations = numAnimations;
     if (mScene->mNumAnimations == 0) {
         return;
@@ -1445,7 +1445,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
     if (numEmbeddedTexs == 0)
         return;
 
-      ASSIMP_LOG_DEBUG_F("Importing ", numEmbeddedTexs, " embedded textures");
+      ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
     std::fill(mScene->mTextures, mScene->mTextures + numEmbeddedTexs, nullptr);

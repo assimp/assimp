@@ -1006,7 +1006,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
             if (name == "APS.Level") {
                 // XXX handle this (seems to be subdivision-related).
             }
-            ASSIMP_LOG_WARN_F("LWO2: Skipping unknown VMAP/VMAD channel \'", name, "\'");
+            ASSIMP_LOG_WARN("LWO2: Skipping unknown VMAP/VMAD channel \'", name, "\'");
             return;
     };
     base->Allocate((unsigned int)mCurLayer->mTempPoints.size());
@@ -1026,7 +1026,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
 
         unsigned int idx = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mPointIDXOfs;
         if (idx >= numPoints) {
-            ASSIMP_LOG_WARN_F("LWO2: Failure evaluating VMAP/VMAD entry \'", name, "\', vertex index is out of range");
+            ASSIMP_LOG_WARN("LWO2: Failure evaluating VMAP/VMAD entry \'", name, "\', vertex index is out of range");
             mFileBuffer += base->dims << 2u;
             continue;
         }
@@ -1036,7 +1036,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
                 // we have already a VMAP entry for this vertex - thus
                 // we need to duplicate the corresponding polygon.
                 if (polyIdx >= numFaces) {
-                    ASSIMP_LOG_WARN_F("LWO2: Failure evaluating VMAD entry \'", name, "\', polygon index is out of range");
+                    ASSIMP_LOG_WARN("LWO2: Failure evaluating VMAD entry \'", name, "\', polygon index is out of range");
                     mFileBuffer += base->dims << 2u;
                     continue;
                 }
@@ -1076,7 +1076,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
                     CreateNewEntry(mCurLayer->mNormals, srcIdx);
                 }
                 if (!had) {
-                    ASSIMP_LOG_WARN_F("LWO2: Failure evaluating VMAD entry \'", name, "\', vertex index wasn't found in that polygon");
+                    ASSIMP_LOG_WARN("LWO2: Failure evaluating VMAD entry \'", name, "\', vertex index wasn't found in that polygon");
                     ai_assert(had);
                 }
             }

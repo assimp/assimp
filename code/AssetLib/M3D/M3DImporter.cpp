@@ -193,7 +193,7 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     }
 
     //DefaultLogger::create("/dev/stderr", Logger::VERBOSE);
-    ASSIMP_LOG_DEBUG_F("M3D: loading ", file);
+    ASSIMP_LOG_DEBUG("M3D: loading ", file);
 
     // let the C SDK do the hard work for us
     M3DWrapper m3d(pIOHandler, buffer);
@@ -239,7 +239,7 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
     mScene->mNumMaterials = m3d->nummaterial + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
 
-    ASSIMP_LOG_DEBUG_F("M3D: importMaterials ", mScene->mNumMaterials);
+    ASSIMP_LOG_DEBUG("M3D: importMaterials ", mScene->mNumMaterials);
 
     // add a default material as first
     aiMaterial *mat = new aiMaterial;
@@ -334,7 +334,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
     ai_assert(m3d);
 
     mScene->mNumTextures = m3d->numtexture;
-    ASSIMP_LOG_DEBUG_F("M3D: importTextures ", mScene->mNumTextures);
+    ASSIMP_LOG_DEBUG("M3D: importTextures ", mScene->mNumTextures);
 
     if (!m3d->numtexture || !m3d->texture) {
         return;
@@ -389,7 +389,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 // individually. In assimp there're per mesh vertex and UV lists, and they must be
 // indexed simultaneously.
 void M3DImporter::importMeshes(const M3DWrapper &m3d) {
-    ASSIMP_LOG_DEBUG_F("M3D: importMeshes ", m3d->numface);
+    ASSIMP_LOG_DEBUG("M3D: importMeshes ", m3d->numface);
 
     if (!m3d->numface || !m3d->face || !m3d->numvertex || !m3d->vertex) {
         return;
@@ -508,7 +508,7 @@ void M3DImporter::importBones(const M3DWrapper &m3d, unsigned int parentid, aiNo
     ai_assert(mScene != nullptr);
     ai_assert(m3d);
 
-    ASSIMP_LOG_DEBUG_F("M3D: importBones ", m3d->numbone, " parentid ", (int)parentid);
+    ASSIMP_LOG_DEBUG("M3D: importBones ", m3d->numbone, " parentid ", (int)parentid);
 
     if (!m3d->numbone || !m3d->bone) {
         return;
@@ -549,7 +549,7 @@ void M3DImporter::importAnimations(const M3DWrapper &m3d) {
 
     mScene->mNumAnimations = m3d->numaction;
 
-    ASSIMP_LOG_DEBUG_F("M3D: importAnimations ", mScene->mNumAnimations);
+    ASSIMP_LOG_DEBUG("M3D: importAnimations ", mScene->mNumAnimations);
 
     if (!m3d->numaction || !m3d->action || !m3d->numbone || !m3d->bone || !m3d->vertex) {
         return;
@@ -712,7 +712,7 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
     ai_assert(vertexids != nullptr);
     ai_assert(m3d);
 
-    ASSIMP_LOG_DEBUG_F("M3D: populateMesh numvertices ", vertices->size(), " numfaces ", faces->size(),
+    ASSIMP_LOG_DEBUG("M3D: populateMesh numvertices ", vertices->size(), " numfaces ", faces->size(),
             " numnormals ", normals->size(), " numtexcoord ", texcoords->size(), " numbones ", m3d->numbone);
 
     if (vertices->size() && faces->size()) {

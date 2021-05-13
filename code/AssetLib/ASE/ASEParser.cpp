@@ -677,7 +677,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                 if (!ParseString(temp, "*MAP_CLASS"))
                     SkipToNextToken();
                 if (temp != "Bitmap" && temp != "Normal Bump") {
-                    ASSIMP_LOG_WARN_F("ASE: Skipping unknown map type: ", temp);
+                    ASSIMP_LOG_WARN("ASE: Skipping unknown map type: ", temp);
                     parsePath = false;
                 }
                 continue;

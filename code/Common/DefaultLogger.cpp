@@ -165,7 +165,6 @@ Logger *DefaultLogger::create(const char *name /*= "AssimpLog.txt"*/,
 // ----------------------------------------------------------------------------------
 void Logger::debugInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
@@ -176,7 +175,6 @@ void Logger::debugInternal(Assimp::Formatter::format f) {
 // ----------------------------------------------------------------------------------
 void Logger::verboseDebugInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
@@ -187,7 +185,6 @@ void Logger::verboseDebugInternal(Assimp::Formatter::format f) {
 // ----------------------------------------------------------------------------------
 void Logger::infoInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
@@ -198,7 +195,6 @@ void Logger::infoInternal(Assimp::Formatter::format f) {
 // ----------------------------------------------------------------------------------
 void Logger::warnInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
@@ -209,7 +205,6 @@ void Logger::warnInternal(Assimp::Formatter::format f) {
 // ----------------------------------------------------------------------------------
 void Logger::errorInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // TODO: Should limit sizes in the formatter.
     // SECURITY FIX: see above
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;

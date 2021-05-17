@@ -116,7 +116,7 @@ inline const char *TAcCheckedLoadFloatArray(const char *buffer, const char *name
     buffer = AcSkipToNextToken(buffer);
     if (0 != name_length) {
         if (0 != strncmp(buffer, name, name_length) || !IsSpace(buffer[name_length])) {
-            ASSIMP_LOG_ERROR("AC3D: Unexpexted token. " + std::string(name) + " was expected.");
+            ASSIMP_LOG_ERROR("AC3D: Unexpected token. ", name, " was expected.");
             return buffer;
         }
         buffer += name_length + 1;

@@ -105,7 +105,7 @@ public:
 
     template<typename... T>
     void debug(T&&... args) {
-        debugFormat(Assimp::Formatter::format(), std::forward<T>(args)...);
+        debug(formatMessage(std::forward<T>(args)...).c_str());
     }
 
     // ----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public:
     
     template<typename... T>
     void verboseDebug(T&&... args) {
-        verboseDebugFormat(Assimp::Formatter::format(), std::forward<T>(args)...);
+        verboseDebug(formatMessage(std::forward<T>(args)...).c_str());
     }
 
     // ----------------------------------------------------------------------
@@ -125,7 +125,7 @@ public:
 
     template<typename... T>
     void info(T&&... args) {
-        infoFormat(Assimp::Formatter::format(), std::forward<T>(args)...);
+        info(formatMessage(std::forward<T>(args)...).c_str());
     }
 
     // ----------------------------------------------------------------------
@@ -135,7 +135,7 @@ public:
 
     template<typename... T>
     void warn(T&&... args) {
-        warnFormat(Assimp::Formatter::format(), std::forward<T>(args)...);
+        warn(formatMessage(std::forward<T>(args)...).c_str());
     }
 
     // ----------------------------------------------------------------------
@@ -145,7 +145,7 @@ public:
 
     template<typename... T>
     void error(T&&... args) {
-        errorFormat(Assimp::Formatter::format(), std::forward<T>(args)...);
+        error(formatMessage(std::forward<T>(args)...).c_str());
     }
 
     // ----------------------------------------------------------------------
@@ -244,51 +244,14 @@ protected:
      *    the function is left.
      */
     virtual void OnError(const char* message) = 0;
-
 protected:
-    void debugFormat(Assimp::Formatter::format f) {
-        debug(std::string(f).c_str());
+    std::string formatMessage(Assimp::Formatter::format f) {
+        return f;
     }
 
     template<typename... T, typename U>
-    void debugFormat(Assimp::Formatter::format f, U&& u, T&&... args) {
-        debugFormat(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
-    }
-
-    void verboseDebugFormat(Assimp::Formatter::format f) {
-        verboseDebug(std::string(f).c_str());
-    }
-
-    template<typename... T, typename U>
-    void verboseDebugFormat(Assimp::Formatter::format f, U&& u, T&&... args) {
-        verboseDebugFormat(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
-    }
-
-    void warnFormat(Assimp::Formatter::format f) {
-        warn(std::string(f).c_str());
-    }
-
-    template<typename... T, typename U>
-    void warnFormat(Assimp::Formatter::format f, U&& u, T&&... args) {
-        warnFormat(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
-    }
-
-    void infoFormat(Assimp::Formatter::format f) {
-        info(std::string(f).c_str());
-    }
-
-    template<typename... T, typename U>
-    void infoFormat(Assimp::Formatter::format f, U&& u, T&&... args) {
-        infoFormat(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
-    }
-
-    void errorFormat(Assimp::Formatter::format f) {
-        error(std::string(f).c_str());
-    }
-
-    template<typename... T, typename U>
-    void errorFormat(Assimp::Formatter::format f, U&& u, T&&... args) {
-        errorFormat(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    std::string formatMessage(Assimp::Formatter::format f, U&& u, T&&... args) {
+        return formatMessage(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
     }
 
 protected:

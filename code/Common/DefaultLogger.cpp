@@ -165,7 +165,9 @@ Logger *DefaultLogger::create(const char *name /*= "AssimpLog.txt"*/,
 // ----------------------------------------------------------------------------------
 void Logger::debugInternal(Assimp::Formatter::format f) {
     std::string message = f;
-    // SECURITY FIX: see above
+    // SECURITY FIX: otherwise it's easy to produce overruns since
+    // sometimes importers will include data from the input file
+    // (i.e. node names) in their messages.
     if (message.length() > MAX_LOG_MESSAGE_LENGTH) {
         return;
     }

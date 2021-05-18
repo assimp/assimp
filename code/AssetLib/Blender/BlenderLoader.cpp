@@ -235,9 +235,9 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
     stream->Read(magic, 3, 1);
     magic[3] = '\0';
 
-    LogInfo((format(), "Blender version is ", magic[0], ".", magic + 1,
+    LogInfo("Blender version is ", magic[0], ".", magic + 1,
             " (64bit: ", file.i64bit ? "true" : "false",
-            ", little endian: ", file.little ? "true" : "false", ")"));
+            ", little endian: ", file.little ? "true" : "false", ")");
 
     ParseBlendFile(file, stream);
 
@@ -310,7 +310,7 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
     ss.Convert(out, file);
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
-    ASSIMP_LOG_INFO_F(
+    ASSIMP_LOG_INFO(
             "(Stats) Fields read: ", file.stats().fields_read,
             ", pointers resolved: ", file.stats().pointers_resolved,
             ", cache hits: ", file.stats().cache_hits,
@@ -434,7 +434,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
 
         curTex->pcData = reinterpret_cast<aiTexel *>(ch);
 
-        LogInfo("Reading embedded texture, original file was " + std::string(img->name));
+        LogInfo("Reading embedded texture, original file was ", img->name);
     } else {
         name = aiString(img->name);
     }
@@ -516,7 +516,7 @@ void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const
     case Tex::Type_POINTDENSITY:
     case Tex::Type_VOXELDATA:
 
-        LogWarn(std::string("Encountered a texture with an unsupported type: ") + dispnam);
+        LogWarn("Encountered a texture with an unsupported type: ", dispnam);
         AddSentinelTexture(out, mat, tex, conv_data);
         break;
 
@@ -752,7 +752,7 @@ void BlenderImporter::CheckActualType(const ElemBase *dt, const char *check) {
 
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::NotSupportedObjectType(const Object *obj, const char *type) {
-    LogWarn((format(), "Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping"));
+    LogWarn("Object `", obj->id.name, "` - type is unsupported: `", type, "`, skipping");
 }
 
 // ------------------------------------------------------------------------------------------------

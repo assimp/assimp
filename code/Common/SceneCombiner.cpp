@@ -612,7 +612,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                 }
             }
             if (!(*it).resolved) {
-                ASSIMP_LOG_ERROR_F("SceneCombiner: Failed to resolve attachment ", (*it).node->mName.data,
+                ASSIMP_LOG_ERROR("SceneCombiner: Failed to resolve attachment ", (*it).node->mName.data,
                         " ", (*it).attachToNode->mName.data);
             }
         }

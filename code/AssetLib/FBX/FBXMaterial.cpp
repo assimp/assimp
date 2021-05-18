@@ -352,7 +352,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
             }
         } catch (const runtime_error& runtimeError) {
             //we don't need the content data for contents that has already been loaded
-            ASSIMP_LOG_VERBOSE_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
+            ASSIMP_LOG_VERBOSE_DEBUG("Caught exception in FBXMaterial (likely because content was already loaded): ",
                     runtimeError.what());
         }
     }

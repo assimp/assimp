@@ -243,12 +243,12 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
 
     if (!DefaultLogger::isNullLogger()) {
-        LogDebug("File schema is \'" + head.fileSchema + '\'');
+        LogDebug("File schema is \'", head.fileSchema, '\'');
         if (head.timestamp.length()) {
-            LogDebug("Timestamp \'" + head.timestamp + '\'');
+            LogDebug("Timestamp \'", head.timestamp, '\'');
         }
         if (head.app.length()) {
-            LogDebug("Application/Exporter identline is \'" + head.app + '\'');
+            LogDebug("Application/Exporter identline is \'", head.app, '\'');
         }
     }
 
@@ -315,7 +315,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // this must be last because objects are evaluated lazily as we process them
     if (!DefaultLogger::isNullLogger()) {
-        LogDebug((Formatter::format(), "STEP: evaluated ", db->GetEvaluatedObjectCount(), " object records"));
+        LogDebug("STEP: evaluated ", db->GetEvaluatedObjectCount(), " object records");
     }
 }
 
@@ -403,7 +403,7 @@ void ResolveObjectPlacement(aiMatrix4x4 &m, const Schema_2x3::IfcObjectPlacement
             m = tmpM * m;
         }
     } else {
-        IFCImporter::LogWarn("skipping unknown IfcObjectPlacement entity, type is " + place.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcObjectPlacement entity, type is ", place.GetClassName());
     }
 }
 
@@ -438,7 +438,7 @@ bool ProcessMappedItem(const Schema_2x3::IfcMappedItem &mapped, aiNode *nd_src, 
     bool got = false;
     for (const Schema_2x3::IfcRepresentationItem &item : repr.Items) {
         if (!ProcessRepresentationItem(item, localmatid, meshes, conv)) {
-            IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
+            IFCImporter::LogWarn("skipping mapped entity of type ", item.GetClassName(), ", no representations could be generated");
         } else
             got = true;
     }
@@ -856,7 +856,7 @@ void ProcessSpatialStructures(ConversionData &conv) {
         if (!prod) {
             continue;
         }
-        IFCImporter::LogVerboseDebug("looking at spatial structure `" + (prod->Name ? prod->Name.Get() : "unnamed") + "`" + (prod->ObjectType ? " which is of type " + prod->ObjectType.Get() : ""));
+        IFCImporter::LogVerboseDebug("looking at spatial structure `", (prod->Name ? prod->Name.Get() : "unnamed"), "`", (prod->ObjectType ? " which is of type " + prod->ObjectType.Get() : ""));
 
         // the primary sites are referenced by an IFCRELAGGREGATES element which assigns them to the IFCPRODUCT
         const STEP::DB::RefMap &refs = conv.db.GetRefs();

@@ -206,7 +206,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 
         // numeric overflow, we rely on you
         if ( new_value < value ) {
-            ASSIMP_LOG_WARN_F( "Converting the string \"", in, "\" into a value resulted in overflow." );
+            ASSIMP_LOG_WARN( "Converting the string \"", in, "\" into a value resulted in overflow." );
             return 0;
         }
 

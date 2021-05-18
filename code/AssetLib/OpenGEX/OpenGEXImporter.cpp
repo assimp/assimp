@@ -726,7 +726,7 @@ void OpenGEXImporter::handleMeshNode(ODDLParser::DDLNode *node, aiScene *pScene)
             } else if ("quads" == propKey) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
-                ASSIMP_LOG_WARN_F(propKey, " is not supported primitive type.");
+                ASSIMP_LOG_WARN(propKey, " is not supported primitive type.");
             }
         }
     }

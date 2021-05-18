@@ -125,7 +125,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     }
 
     // Print the file format version
-    ASSIMP_LOG_INFO_F("Quick3D File format version: ",
+    ASSIMP_LOG_INFO("Quick3D File format version: ",
             std::string(&((const char *)stream.GetPtr())[8], 2));
 
     // ... an store it

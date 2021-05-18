@@ -71,7 +71,7 @@ static void ReportWarning(const char *msg, ...) {
     ai_assert(iLen > 0);
 
     va_end(args);
-    ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer, iLen));
+    ASSIMP_LOG_WARN("Validation warning: ", std::string(szBuffer, iLen));
 }
 
 static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
@@ -234,7 +234,7 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 #if defined(_MSC_VER)
     if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #else
-    if (ss.data[0] == '/' && isalpha(ss.data[1]) && ss.data[2] == ':') {
+    if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #endif
         --ss.length;
         ::memmove(ss.data, ss.data + 1, ss.length);
@@ -2388,7 +2388,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic(const std::string &semantic
     else if (semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    ASSIMP_LOG_WARN_F("Unknown vertex input type \"", semantic, "\". Ignoring.");
+    ASSIMP_LOG_WARN("Unknown vertex input type \"", semantic, "\". Ignoring.");
     return IT_Invalid;
 }
 

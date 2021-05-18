@@ -89,7 +89,7 @@ public:
             mBase += getOsSeparator();
         }
 
-        DefaultLogger::get()->info("Import root directory is \'" + mBase + "\'");
+        DefaultLogger::get()->info("Import root directory is \'", mBase, "\'");
     }
 
     /** Destructor. */

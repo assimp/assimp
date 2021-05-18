@@ -169,7 +169,8 @@ public:
             return true;
         } 
 
-        ASSIMP_LOG_DEBUG("Error while parse xml.");
+        ASSIMP_LOG_DEBUG("Error while parse xml.", parse_result.description() << " @ ", parse_result.offset);
+
         return false;
     }
 

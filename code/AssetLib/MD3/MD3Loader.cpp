@@ -101,7 +101,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string &m) {
     if (m == "GL_ONE_MINUS_DST_COLOR") {
         return Q3Shader::BLEND_GL_ONE_MINUS_DST_COLOR;
     }
-    ASSIMP_LOG_ERROR("Q3Shader: Unknown blend function: " + m);
+    ASSIMP_LOG_ERROR("Q3Shader: Unknown blend function: ", m);
     return Q3Shader::BLEND_NONE;
 }
 
@@ -112,7 +112,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
     if (!file.get())
         return false; // if we can't access the file, don't worry and return
 
-    ASSIMP_LOG_INFO_F("Loading Quake3 shader file ", pFile);
+    ASSIMP_LOG_INFO("Loading Quake3 shader file ", pFile);
 
     // read file in memory
     const size_t s = file->FileSize();
@@ -226,7 +226,7 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
     if (!file.get())
         return false; // if we can't access the file, don't worry and return
 
-    ASSIMP_LOG_INFO("Loading Quake3 skin file " + pFile);
+    ASSIMP_LOG_INFO("Loading Quake3 skin file ", pFile);
 
     // read file in memory
     const size_t s = file->FileSize();
@@ -702,7 +702,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     filename = mFile.substr(s), path = mFile.substr(0, s);
     for (std::string::iterator it = filename.begin(); it != filename.end(); ++it) {
-        *it = static_cast<char>(tolower(*it));
+        *it = static_cast<char>(tolower(static_cast<unsigned char>(*it)));
     }
 
     // Load multi-part model file, if necessary
@@ -851,7 +851,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         if (it != skins.textures.end()) {
             texture_name = &*(_texture_name = (*it).second).begin();
-            ASSIMP_LOG_VERBOSE_DEBUG_F("MD3: Assigning skin texture ", (*it).second, " to surface ", pcSurfaces->NAME);
+            ASSIMP_LOG_VERBOSE_DEBUG("MD3: Assigning skin texture ", (*it).second, " to surface ", pcSurfaces->NAME);
             (*it).resolved = true; // mark entry as resolved
         }
 
@@ -880,9 +880,9 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             if (dit != shaders.blocks.end()) {
                 // We made it!
                 shader = &*dit;
-                ASSIMP_LOG_INFO("Found shader record for " + without_ext);
+                ASSIMP_LOG_INFO("Found shader record for ", without_ext);
             } else {
-                ASSIMP_LOG_WARN("Unable to find shader record for " + without_ext);
+                ASSIMP_LOG_WARN("Unable to find shader record for ", without_ext);
             }
         }
 
@@ -1000,7 +1000,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (!DefaultLogger::isNullLogger()) {
         for (std::list<Q3Shader::SkinData::TextureEntry>::const_iterator it = skins.textures.begin(); it != skins.textures.end(); ++it) {
             if (!(*it).resolved) {
-                ASSIMP_LOG_ERROR_F("MD3: Failed to match skin ", (*it).first, " to surface ", (*it).second);
+                ASSIMP_LOG_ERROR("MD3: Failed to match skin ", (*it).first, " to surface ", (*it).second);
             }
         }
     }

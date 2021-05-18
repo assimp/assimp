@@ -72,13 +72,15 @@ const char *getTypeToken(Value::ValueType type) {
 }
 
 static void logInvalidTokenError(char *in, const std::string &exp, OpenDDLParser::logCallback callback) {
-    std::stringstream stream;
-    stream << "Invalid token \"" << *in << "\""
-           << " expected \"" << exp << "\"" << std::endl;
-    std::string full(in);
-    std::string part(full.substr(0, 50));
-    stream << part;
-    callback(ddl_error_msg, stream.str());
+    if (callback) {
+        std::string full(in);
+        std::string part(full.substr(0, 50));
+        std::stringstream stream;
+        stream << "Invalid token \"" << *in << "\" "
+               << "(expected \"" << exp << "\") "
+               << "in: \"" << part << "\"";
+        callback(ddl_error_msg, stream.str());
+    }
 }
 
 static bool isIntegerType(Value::ValueType integerType) {
@@ -111,26 +113,8 @@ static DDLNode *createDDLNode(Text *id, OpenDDLParser *parser) {
     return node;
 }
 
-static void logMessage(LogSeverity severity, const std::string &msg) {
-    std::string log;
-    if (ddl_debug_msg == severity) {
-        log += "Debug:";
-    } else if (ddl_info_msg == severity) {
-        log += "Info :";
-    } else if (ddl_warn_msg == severity) {
-        log += "Warn :";
-    } else if (ddl_error_msg == severity) {
-        log += "Error:";
-    } else {
-        log += "None :";
-    }
-
-    log += msg;
-    std::cout << log;
-}
-
 OpenDDLParser::OpenDDLParser() :
-        m_logCallback(logMessage),
+        m_logCallback(nullptr),
         m_buffer(),
         m_stack(),
         m_context(nullptr) {
@@ -138,7 +122,7 @@ OpenDDLParser::OpenDDLParser() :
 }
 
 OpenDDLParser::OpenDDLParser(const char *buffer, size_t len) :
-        m_logCallback(&logMessage), m_buffer(), m_context(nullptr) {
+        m_logCallback(nullptr), m_buffer(), m_context(nullptr) {
     if (0 != len) {
         setBuffer(buffer, len);
     }
@@ -149,13 +133,8 @@ OpenDDLParser::~OpenDDLParser() {
 }
 
 void OpenDDLParser::setLogCallback(logCallback callback) {
-    if (nullptr != callback) {
-        // install user-specific log callback
-        m_logCallback = callback;
-    } else {
-        // install default log callback
-        m_logCallback = &logMessage;
-    }
+    // install user-specific log callback; null = no log callback
+    m_logCallback = callback;
 }
 
 OpenDDLParser::logCallback OpenDDLParser::getLogCallback() const {

@@ -242,7 +242,7 @@ LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned i
     else
     {
         // procedural or gradient, not supported
-        ASSIMP_LOG_ERROR_F("LWOB: Unsupported legacy texture: ", type);
+        ASSIMP_LOG_ERROR("LWOB: Unsupported legacy texture: ", type);
     }
 
     return tex;

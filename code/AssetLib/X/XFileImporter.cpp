@@ -602,7 +602,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
             }
 
             if( oldMat.sceneIndex == SIZE_MAX ) {
-                ASSIMP_LOG_WARN_F( "Could not resolve global material reference \"", oldMat.mName, "\"" );
+                ASSIMP_LOG_WARN( "Could not resolve global material reference \"", oldMat.mName, "\"" );
                 oldMat.sceneIndex = 0;
             }
 
@@ -667,8 +667,8 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
                 // convert to lower case for easier comparison
                 for ( unsigned int c = 0; c < sz.length(); ++c ) {
-                    if ( isalpha( sz[ c ] ) ) {
-                        sz[ c ] = (char) tolower( sz[ c ] );
+                    if ( isalpha( (unsigned char) sz[ c ] ) ) {
+                        sz[ c ] = (char) tolower( (unsigned char) sz[ c ] );
                     }
                 }
 

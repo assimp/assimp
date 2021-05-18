@@ -71,6 +71,9 @@ protected:
  *  nullptr instead of a valid aiScene then.  */
 class ASSIMP_API DeadlyImportError : public DeadlyErrorBase {
 public:
+    DeadlyImportError(const char *message) :
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<const char*>(message)) {}
+
     /** Constructor with arguments */
     template<typename... T>
     explicit DeadlyImportError(T&&... args) :

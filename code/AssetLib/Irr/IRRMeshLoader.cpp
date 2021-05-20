@@ -135,12 +135,12 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
 	// Check whether we can read from the file
 	if (file.get() == NULL)
-		throw DeadlyImportError("Failed to open IRRMESH file " + pFile + "");
+        throw DeadlyImportError("Failed to open IRRMESH file ", pFile);
 
 	// Construct the irrXML parser
 	XmlParser parser;
     if (!parser.parse( file.get() )) {
-        return;
+        throw DeadlyImportError("XML parse error while loading IRRMESH file ", pFile);
     }
     XmlNode root = parser.getRootNode();
 

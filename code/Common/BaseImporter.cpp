@@ -65,20 +65,6 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 BaseImporter::BaseImporter() AI_NO_EXCEPT
         : m_progress() {
-    /**
-    * Assimp Importer
-    * unit conversions available
-    * if you need another measurment unit add it below.
-    * it's currently defined in assimp that we prefer meters.
-    *
-    * NOTE: Initialised here rather than in the header file
-    * to workaround a VS2013 bug with brace initialisers
-    * */
-    importerUnits[ImporterUnits::M] = 1.0;
-    importerUnits[ImporterUnits::CM] = 0.01;
-    importerUnits[ImporterUnits::MM] = 0.001;
-    importerUnits[ImporterUnits::INCHES] = 0.0254;
-    importerUnits[ImporterUnits::FEET] = 0.3048;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -97,7 +83,7 @@ void BaseImporter::UpdateImporterScale(Importer *pImp) {
     // Set active scaling
     pImp->SetPropertyFloat(AI_CONFIG_APP_SCALE_KEY, static_cast<float>(activeScale));
 
-    ASSIMP_LOG_DEBUG_F("UpdateImporterScale scale set: %f", activeScale);
+    ASSIMP_LOG_DEBUG("UpdateImporterScale scale set: ", activeScale);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -193,7 +179,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
         }
 
         for (size_t i = 0; i < read; ++i) {
-            buffer[i] = static_cast<char>(::tolower(buffer[i]));
+            buffer[i] = static_cast<char>(::tolower((unsigned char)buffer[i]));
         }
 
         // It is not a proper handling of unicode files here ...
@@ -214,7 +200,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
             token.clear();
             const char *ptr(tokens[i]);
             for (size_t tokIdx = 0; tokIdx < len; ++tokIdx) {
-                token.push_back(static_cast<char>(tolower(*ptr)));
+                token.push_back(static_cast<char>(tolower(static_cast<unsigned char>(*ptr))));
                 ++ptr;
             }
             const char *r = strstr(buffer, token.c_str());
@@ -223,13 +209,13 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
             }
             // We need to make sure that we didn't accidentially identify the end of another token as our token,
             // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
-            if (noAlphaBeforeTokens && (r != buffer && isalpha(r[-1]))) {
+            if (noAlphaBeforeTokens && (r != buffer && isalpha(static_cast<unsigned char>(r[-1])))) {
                 continue;
             }
             // We got a match, either we don't care where it is, or it happens to
             // be in the beginning of the file / line
             if (!tokensSol || r == buffer || r[-1] == '\r' || r[-1] == '\n') {
-                ASSIMP_LOG_DEBUG_F("Found positive match for header keyword: ", tokens[i]);
+                ASSIMP_LOG_DEBUG("Found positive match for header keyword: ", tokens[i]);
                 return true;
             }
         }
@@ -271,7 +257,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 
     // no file extension at all
     if (pos == std::string::npos) {
-        return "";
+        return std::string();
     }
 
     // thanks to Andy Maloney for the hint
@@ -618,7 +604,7 @@ void BatchLoader::LoadAll() {
 
         if (!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_INFO("%%% BEGIN EXTERNAL FILE %%%");
-            ASSIMP_LOG_INFO_F("File: ", (*it).file);
+            ASSIMP_LOG_INFO("File: ", (*it).file);
         }
         m_data->pImporter->ReadFile((*it).file, pp);
         (*it).scene = m_data->pImporter->GetOrphanedScene();

@@ -428,10 +428,10 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
 
                     if (pBiggerThan != nullptr) {
                         bool found = false;
-
+                        const size_t biggerThan = *pBiggerThan;
                         for (const SComplexFace &face : pFaceList) {
                             for (size_t idx_vert = 0; idx_vert < face.Face.mNumIndices; idx_vert++) {
-                                if (face.Face.mIndices[idx_vert] > *pBiggerThan) {
+                                if (face.Face.mIndices[idx_vert] > biggerThan) {
                                     rv = face.Face.mIndices[idx_vert];
                                     found = true;
                                     break;

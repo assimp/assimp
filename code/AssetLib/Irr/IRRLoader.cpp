@@ -639,7 +639,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 			// graph we're currently building
 			aiScene *localScene = batch.GetImport(root->id);
 			if (!localScene) {
-				ASSIMP_LOG_ERROR("IRR: Unable to load external file: " + root->meshPath);
+				ASSIMP_LOG_ERROR("IRR: Unable to load external file: ", root->meshPath);
 				break;
 			}
 			attach.push_back(AttachmentInfo(localScene, rootOut));
@@ -859,13 +859,13 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// Check whether we can read from the file
 	if (file.get() == nullptr) {
-		throw DeadlyImportError("Failed to open IRR file " + pFile + "");
+        throw DeadlyImportError("Failed to open IRR file ", pFile);
 	}
 
 	// Construct the irrXML parser
 	XmlParser st;
     if (!st.parse( file.get() )) {
-        return;
+        throw DeadlyImportError("XML parse error while loading IRR file ", pFile);
     }
     pugi::xml_node rootElement = st.getRootNode();
 
@@ -963,7 +963,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 						ASSIMP_LOG_ERROR("IRR: Billboards are not supported by Assimp");
 						nd = new Node(Node::DUMMY);
 					} else {
-						ASSIMP_LOG_WARN("IRR: Found unknown node: " + std::string(attrib.name()));
+						ASSIMP_LOG_WARN("IRR: Found unknown node: ", attrib.name());
 
 						/*  We skip the contents of nodes we don't know.
                          *  We parse the transformation and all animators
@@ -1181,7 +1181,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 											lights.pop_back();
 											curNode->type = Node::DUMMY;
 
-											ASSIMP_LOG_ERROR("Ignoring light of unknown type: " + prop.value);
+											ASSIMP_LOG_ERROR("Ignoring light of unknown type: ", prop.value);
 										}
 									} else if ((prop.name == "Mesh" && Node::MESH == curNode->type) ||
 											   Node::ANIMMESH == curNode->type) {
@@ -1225,7 +1225,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 										} else if (prop.value == "followSpline") {
 											curAnim->type = Animator::FOLLOW_SPLINE;
 										} else {
-											ASSIMP_LOG_WARN("IRR: Ignoring unknown animator: " + prop.value);
+											ASSIMP_LOG_WARN("IRR: Ignoring unknown animator: ", prop.value);
 
 											curAnim->type = Animator::UNKNOWN;
 										}

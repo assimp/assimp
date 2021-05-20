@@ -99,7 +99,7 @@ void ValidateDSProcess::ReportWarning(const char *msg, ...) {
     ai_assert(iLen > 0);
 
     va_end(args);
-    ASSIMP_LOG_WARN("Validation warning: " + std::string(szBuffer, iLen));
+    ASSIMP_LOG_WARN("Validation warning: ", std::string(szBuffer, iLen));
 }
 
 // ------------------------------------------------------------------------------------------------

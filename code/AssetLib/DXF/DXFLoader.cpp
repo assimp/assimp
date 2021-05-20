@@ -202,7 +202,7 @@ void DXFImporter::InternReadFile( const std::string& filename, aiScene* pScene, 
 
         // comments
         else if (reader.Is(999)) {
-            ASSIMP_LOG_INFO_F("DXF Comment: ", reader.Value());
+            ASSIMP_LOG_INFO("DXF Comment: ", reader.Value());
         }
 
         // don't read past the official EOF sign
@@ -241,7 +241,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output) {
             }
         }
 
-        ASSIMP_LOG_VERBOSE_DEBUG_F("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
+        ASSIMP_LOG_VERBOSE_DEBUG("DXF: Unexpanded polycount is ", icount, ", vertex count is ", vcount);
     }
 
     if (! output.blocks.size()  ) {
@@ -372,7 +372,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // first check if the referenced blocks exists ...
         const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
         if (it == blocks_by_name.end()) {
-            ASSIMP_LOG_ERROR_F("DXF: Failed to resolve block reference: ", insert.name,"; skipping" );
+            ASSIMP_LOG_ERROR("DXF: Failed to resolve block reference: ", insert.name,"; skipping" );
             continue;
         }
 
@@ -473,7 +473,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output) {
         ++reader;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("DXF: got ", output.blocks.size()," entries in BLOCKS" );
+    ASSIMP_LOG_VERBOSE_DEBUG("DXF: got ", output.blocks.size()," entries in BLOCKS" );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -549,7 +549,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
         ++reader;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
+    ASSIMP_LOG_VERBOSE_DEBUG( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
         " inserted blocks in ENTITIES" );
 }
 
@@ -654,7 +654,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) 
     //}
 
     if (vguess && line.positions.size() != vguess) {
-        ASSIMP_LOG_WARN_F("DXF: unexpected vertex count in polymesh: ",
+        ASSIMP_LOG_WARN("DXF: unexpected vertex count in polymesh: ",
             line.positions.size(),", expected ", vguess );
     }
 
@@ -670,7 +670,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) 
         // to set the 71 and 72 fields, respectively, to valid values.
         // So just fire a warning.
         if (iguess && line.counts.size() != iguess) {
-            ASSIMP_LOG_WARN_F( "DXF: unexpected face count in polymesh: ", line.counts.size(),", expected ", iguess );
+            ASSIMP_LOG_WARN( "DXF: unexpected face count in polymesh: ", line.counts.size(),", expected ", iguess );
         }
     }
     else if (!line.indices.size() && !line.counts.size()) {

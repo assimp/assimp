@@ -103,9 +103,9 @@ public:
             std::string name = currentNode.name();
             if (name == "Relationship") {
                 OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
-                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID.c_str()).as_string();
-                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE.c_str()).as_string();
-                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET.c_str()).as_string();
+                relPtr->id = currentNode.attribute(XmlTag::RELS_ATTRIB_ID).as_string();
+                relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE).as_string();
+                relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET).as_string();
                 if (validateRels(relPtr)) {
                     m_relationShips.push_back(relPtr);
                 }
@@ -160,9 +160,9 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
             }
 
         } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
-            ASSIMP_LOG_WARN_F("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES", file);
+            ASSIMP_LOG_WARN("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES", file);
         } else {
-            ASSIMP_LOG_WARN_F("Ignored file of unknown type: ", file);
+            ASSIMP_LOG_WARN("Ignored file of unknown type: ", file);
         }
     }
 }
@@ -188,7 +188,7 @@ bool D3MFOpcPackage::validate() {
 std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
     XmlParser xmlParser;
     if (!xmlParser.parse(stream)) {
-        return "";
+        return std::string();
     }
 
     OpcPackageRelationshipReader reader(xmlParser);

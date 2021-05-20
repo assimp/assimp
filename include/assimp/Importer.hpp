@@ -286,7 +286,7 @@ public:
      * @see GetPropertyInteger()
      */
     std::string GetPropertyString(const char *szName,
-            const std::string &sErrorReturn = "") const;
+            const std::string &sErrorReturn = std::string()) const;
 
     // -------------------------------------------------------------------
     /** Get a matrix configuration property

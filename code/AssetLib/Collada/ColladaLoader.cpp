@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
     3,
     1,
     5,
-    "dae zae"
+    "dae xml zae"
 };
 
 static const float kMillisecondsFromSeconds = 1000.f;
@@ -317,7 +317,7 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Nod
             nd = FindNode(pParser.mRootNode, nodeInst.mNode);
         }
         if (nullptr == nd) {
-            ASSIMP_LOG_ERROR_F("Collada: Unable to resolve reference to instanced node ", nodeInst.mNode);
+            ASSIMP_LOG_ERROR("Collada: Unable to resolve reference to instanced node ", nodeInst.mNode);
         } else {
             //  attach this node to the list of children
             resolved.push_back(nd);
@@ -347,7 +347,7 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Node 
         // find the referred light
         ColladaParser::LightLibrary::const_iterator srcLightIt = pParser.mLightLibrary.find(lid.mLight);
         if (srcLightIt == pParser.mLightLibrary.end()) {
-            ASSIMP_LOG_WARN_F("Collada: Unable to find light for ID \"", lid.mLight, "\". Skipping.");
+            ASSIMP_LOG_WARN("Collada: Unable to find light for ID \"", lid.mLight, "\". Skipping.");
             continue;
         }
         const Collada::Light *srcLight = &srcLightIt->second;
@@ -412,7 +412,7 @@ void ColladaLoader::BuildCamerasForNode(const ColladaParser &pParser, const Node
         // find the referred light
         ColladaParser::CameraLibrary::const_iterator srcCameraIt = pParser.mCameraLibrary.find(cid.mCamera);
         if (srcCameraIt == pParser.mCameraLibrary.end()) {
-            ASSIMP_LOG_WARN_F("Collada: Unable to find camera for ID \"", cid.mCamera, "\". Skipping.");
+            ASSIMP_LOG_WARN("Collada: Unable to find camera for ID \"", cid.mCamera, "\". Skipping.");
             continue;
         }
         const Collada::Camera *srcCamera = &srcCameraIt->second;
@@ -486,7 +486,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
             }
 
             if (nullptr == srcMesh) {
-                ASSIMP_LOG_WARN_F("Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping.");
+                ASSIMP_LOG_WARN("Collada: Unable to find geometry for ID \"", mid.mMeshOrController, "\". Skipping.");
                 continue;
             }
         } else {
@@ -511,7 +511,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
                 table = &meshMatIt->second;
                 meshMaterial = table->mMatName;
             } else {
-                ASSIMP_LOG_WARN_F("Collada: No material specified for subgroup <", submesh.mMaterial, "> in geometry <",
+                ASSIMP_LOG_WARN("Collada: No material specified for subgroup <", submesh.mMaterial, "> in geometry <",
                         mid.mMeshOrController, ">.");
                 if (!mid.mMaterials.empty()) {
                     meshMaterial = mid.mMaterials.begin()->second.mMatName;
@@ -883,7 +883,7 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
             if (nullptr != bnode) {
                 bone->mName.Set(FindNameForNode(bnode));
             } else {
-                ASSIMP_LOG_WARN_F("ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\".");
+                ASSIMP_LOG_WARN("ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\".");
             }
 
             // and insert bone
@@ -1184,7 +1184,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 else if (subElement == "Z")
                     entry.mSubElement = 2;
                 else
-                    ASSIMP_LOG_WARN_F("Unknown anim subelement <", subElement, ">. Ignoring");
+                    ASSIMP_LOG_WARN("Unknown anim subelement <", subElement, ">. Ignoring");
             } else {
                 // no sub-element following, transformId is remaining string
                 entry.mTransformId = srcChannel.mTarget.substr(slashPos + 1);
@@ -1241,7 +1241,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     continue;
                 }
                 entry.mTargetId = entry.mTransformId;
-                entry.mTransformId = "";
+                entry.mTransformId = std::string();
             }
 
             entry.mChannel = &(*cit);
@@ -1711,7 +1711,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
     // find the image referred by this name in the image library of the scene
     ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find(name);
     if (imIt == pParser.mImageLibrary.end()) {
-        ASSIMP_LOG_WARN_F("Collada: Unable to resolve effect texture entry \"", pName, "\", ended up at ID \"", name, "\".");
+        ASSIMP_LOG_WARN("Collada: Unable to resolve effect texture entry \"", pName, "\", ended up at ID \"", name, "\".");
 
         //set default texture file name
         result.Set(name + ".jpg");

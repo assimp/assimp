@@ -174,6 +174,11 @@ public:
         return false;
     }
 
+    /// @brief  Will return truem if a root node is there.
+    /// @return true in case of an existing root.
+    bool hasRoot() const {
+        return nullptr != mDoc;
+    }
     /// @brief  Will return the document pointer, is nullptr if no xml-file was parsed.
     /// @return The pointer showing to the document.
     pugi::xml_document *getDocument() const {
@@ -183,8 +188,9 @@ public:
     /// @brief  Will return the root node, const version.
     /// @return The root node.
     const TNodeType getRootNode() const {
+        static pugi::xml_node none;
         if (nullptr == mDoc) {
-            return nullptr;
+            return none;
         }
         return mDoc->root();
     }
@@ -192,8 +198,9 @@ public:
     /// @brief  Will return the root node, non-const version.
     /// @return The root node.
     TNodeType getRootNode() {
+        static pugi::xml_node none;
         if (nullptr == mDoc) {
-            return nullptr;
+            return none;
         }
         return mDoc->root();
     }

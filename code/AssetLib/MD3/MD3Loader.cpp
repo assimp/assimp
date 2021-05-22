@@ -196,11 +196,11 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
                 // 'cull' specifies culling behaviour for the model
                 else if (TokenMatchI(buff, "cull", 4)) {
                     SkipSpaces(&buff);
-                    if (!ASSIMP_strincmp(buff, "back", 4)) {
+                    if (!ASSIMP_strincmp(buff, "back", 4)) { // render face's backside, does not function in Q3 engine (bug)
                         curData->cull = Q3Shader::CULL_CCW;
-                    } else if (!ASSIMP_strincmp(buff, "front", 5)) {
+                    } else if (!ASSIMP_strincmp(buff, "front", 5)) { // is not valid keyword in Q3, but occurs in shaders
                         curData->cull = Q3Shader::CULL_CW;
-                    } else if (!ASSIMP_strincmp(buff, "none", 4) || !ASSIMP_strincmp(buff, "disable", 7)) {
+                    } else if (!ASSIMP_strincmp(buff, "none", 4) || !ASSIMP_strincmp(buff, "twosided", 8) || !ASSIMP_strincmp(buff, "disable", 7)) {
                         curData->cull = Q3Shader::CULL_NONE;
                     } else {
                         ASSIMP_LOG_ERROR("Q3Shader: Unrecognized cull mode");
@@ -450,6 +450,9 @@ void MD3Importer::SetupProperties(const Importer *pImp) {
     // AI_CONFIG_IMPORT_MD3_SKIN_NAME
     configSkinFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SKIN_NAME, "default"));
 
+    // AI_CONFIG_IMPORT_MD3_LOAD_SHADERS
+    configLoadShaders = (pImp->GetPropertyBool(AI_CONFIG_IMPORT_MD3_LOAD_SHADERS, true));
+
     // AI_CONFIG_IMPORT_MD3_SHADER_SRC
     configShaderFile = (pImp->GetPropertyString(AI_CONFIG_IMPORT_MD3_SHADER_SRC, ""));
 
@@ -483,8 +486,9 @@ void MD3Importer::ReadShader(Q3Shader::ShaderData &fill) const {
 
     // If no specific dir or file is given, use our default search behaviour
     if (!configShaderFile.length()) {
-        if (!Q3Shader::LoadShader(fill, path + "..\\..\\..\\scripts\\" + model_file + ".shader", mIOHandler)) {
-            Q3Shader::LoadShader(fill, path + "..\\..\\..\\scripts\\" + filename + ".shader", mIOHandler);
+        const char sep = mIOHandler->getOsSeparator();
+        if (!Q3Shader::LoadShader(fill, path + ".." + sep + ".." + sep + ".." + sep + "scripts" + sep + model_file + ".shader", mIOHandler)) {
+             Q3Shader::LoadShader(fill, path + ".." + sep + ".." + sep + ".." + sep + "scripts" + sep + filename + ".shader", mIOHandler);
         }
     } else {
         // If the given string specifies a file, load this file.
@@ -780,7 +784,9 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // And check whether we can locate a shader file for this model
     Q3Shader::ShaderData shaders;
-    ReadShader(shaders);
+    if (configLoadShaders){
+        ReadShader(shaders);
+    }
 
     // Adjust all texture paths in the shader
     const char *header_name = pcHeader->NAME;
@@ -862,7 +868,12 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         std::string convertedPath;
         if (texture_name) {
-            ConvertPath(texture_name, header_name, convertedPath);
+            if (configLoadShaders){
+                ConvertPath(texture_name, header_name, convertedPath);
+            }
+            else{
+                convertedPath = texture_name;
+            }
         }
 
         const Q3Shader::ShaderDataBlock *shader = nullptr;
@@ -985,8 +996,8 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[index].U;
                 pcMesh->mTextureCoords[0][iCurrent].y = 1.0f - pcUVs[index].V;
             }
-            // Flip face order if necessary
-            if (!shader || shader->cull == Q3Shader::CULL_CW) {
+            // Flip face order normally, unless shader is backfacing
+            if (!(shader && shader->cull == Q3Shader::CULL_CCW)) {
                 std::swap(pcMesh->mFaces[i].mIndices[2], pcMesh->mFaces[i].mIndices[1]);
             }
             ++pcTriangles;

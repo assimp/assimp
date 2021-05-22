@@ -2638,7 +2638,7 @@ void FBXExporter::WriteModelNodes(
             new_node.mName = mScene->mMeshes[node->mMeshes[i]]->mName;
             // write model node
             WriteModelNode(
-                outstream, binary, &new_node, new_node_uid, "Mesh", transform_chain
+                outstream, binary, &new_node, new_node_uid, "Mesh", std::vector<std::pair<std::string,aiVector3D>>()
             );
         }
     }

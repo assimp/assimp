@@ -2196,7 +2196,65 @@ void FBXExporter::WriteObjects ()
         bpnode.Dump(outstream, binary, indent);
     }*/
 
-    // TODO: cameras, lights
+    // lights
+    indent = 1;
+    lights_uids.clear();
+    for (size_t li = 0; li < mScene->mNumLights; ++li) {
+        aiLight* l = mScene->mLights[li];
+
+        int64_t uid = generate_uid();
+        const std::string lightNodeAttributeName = l->mName.C_Str() + FBX::SEPARATOR + "NodeAttribute";
+
+        FBX::Node lna("NodeAttribute");
+        lna.AddProperties(uid, lightNodeAttributeName, "Light");
+        FBX::Node lnap("Properties70");
+
+        // Light color.
+        lnap.AddP70colorA("Color", l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b);
+
+        // TODO Assimp light description is quite concise and do not handle light intensity.
+        // Default value to 1000W.
+        lnap.AddP70numberA("Intensity", 1000);
+
+        // FBXLight::EType conversion
+        switch (l->mType) {
+        case aiLightSource_POINT:
+            lnap.AddP70enum("LightType", 0);
+            break;
+        case aiLightSource_DIRECTIONAL:
+            lnap.AddP70enum("LightType", 1);
+            break;
+        case aiLightSource_SPOT:
+            lnap.AddP70enum("LightType", 2);
+            lnap.AddP70numberA("InnerAngle", AI_RAD_TO_DEG(l->mAngleInnerCone));
+            lnap.AddP70numberA("OuterAngle", AI_RAD_TO_DEG(l->mAngleOuterCone));
+            break;
+        // TODO Assimp do not handle 'area' nor 'volume' lights, but FBX does.
+        /*case aiLightSource_AREA:
+            lnap.AddP70enum("LightType", 3);
+            lnap.AddP70enum("AreaLightShape", 0); // 0=Rectangle, 1=Sphere
+            break;
+        case aiLightSource_VOLUME:
+            lnap.AddP70enum("LightType", 4);
+            break;*/
+        default:
+            break;
+        }
+
+        // Did not understood how to configure the decay so disabling attenuation.
+        lnap.AddP70enum("DecayType", 0);
+
+        // Dump to FBX stream
+        lna.AddChild(lnap);
+        lna.AddChild("TypeFlags", FBX::FBXExportProperty("Light"));
+        lna.AddChild("GeometryVersion", FBX::FBXExportProperty(int32_t(124)));
+        lna.Dump(outstream, binary, indent);
+
+        // Store name and uid (will be used later when parsing scene nodes)
+        lights_uids[l->mName.C_Str()] = uid;
+    }
+
+    // TODO: cameras
 
     // write nodes (i.e. model hierarchy)
     // start at root node
@@ -2600,10 +2658,19 @@ void FBXExporter::WriteModelNodes(
         // and connect them
         connections.emplace_back("C", "OO", node_attribute_uid, node_uid);
     } else {
-        // generate a null node so we can add children to it
-        WriteModelNode(
-            outstream, binary, node, node_uid, "Null", transform_chain
-        );
+        const auto& lightIt = lights_uids.find(node->mName.C_Str());
+        if(lightIt != lights_uids.end()) {
+            // Node has a light connected to it.
+            WriteModelNode(
+                outstream, binary, node, node_uid, "Light", transform_chain
+            );
+            connections.emplace_back("C", "OO", lightIt->second, node_uid);
+        } else {
+            // generate a null node so we can add children to it
+            WriteModelNode(
+                outstream, binary, node, node_uid, "Null", transform_chain
+            );
+        }
     }
 
     // if more than one child mesh, make nodes for each mesh

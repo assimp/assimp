@@ -131,7 +131,7 @@ Property* ReadTypedProperty(const Element& element)
             ParseTokenAsFloat(*tok[6]))
         );
     }
-    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
+    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"float") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
         checkTokenCount(tok, 5);
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
     }

@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "Q3DLoader.h"
+#include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
@@ -106,7 +107,12 @@ const aiImporterDesc *Q3DImporter::GetInfo() const {
 // Imports the given file into the given scene structure.
 void Q3DImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-    StreamReaderLE stream(pIOHandler->Open(pFile, "rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("Quick3D: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // The header is 22 bytes large
     if (stream.GetRemainingSize() < 22)
@@ -115,11 +121,11 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     // Check the file's signature
     if (ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Do", 8) &&
             ASSIMP_strincmp((const char *)stream.GetPtr(), "quick3Ds", 8)) {
-        throw DeadlyImportError("Not a Quick3D file. Signature string is: ", std::string((const char *)stream.GetPtr(), 8));
+        throw DeadlyImportError("Not a Quick3D file. Signature string is: ", ai_str_toprintable((const char *)stream.GetPtr(), 8));
     }
 
     // Print the file format version
-    ASSIMP_LOG_INFO_F("Quick3D File format version: ",
+    ASSIMP_LOG_INFO("Quick3D File format version: ",
             std::string(&((const char *)stream.GetPtr())[8], 2));
 
     // ... an store it

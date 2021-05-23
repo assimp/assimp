@@ -267,7 +267,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
 
             // write to log
             if (!DefaultLogger::isNullLogger()) {
-                ASSIMP_LOG_INFO_F( "FindInstancesProcess finished. Found ", (pScene->mNumMeshes - numMeshesOut), " instances" );
+                ASSIMP_LOG_INFO( "FindInstancesProcess finished. Found ", (pScene->mNumMeshes - numMeshesOut), " instances" );
             }
             pScene->mNumMeshes = numMeshesOut;
         } else {

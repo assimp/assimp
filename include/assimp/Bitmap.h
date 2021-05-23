@@ -75,13 +75,12 @@ protected:
         uint32_t offset;
 
         // We define the struct size because sizeof(Header) might return a wrong result because of structure padding.
-        // Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
-        static const std::size_t header_size =
-            sizeof(uint16_t) + // type
-            sizeof(uint32_t) + // size
-            sizeof(uint16_t) + // reserved1
-            sizeof(uint16_t) + // reserved2
-            sizeof(uint32_t);  // offset
+        static constexpr std::size_t header_size =
+            sizeof(type) +
+            sizeof(size) +
+            sizeof(reserved1) +
+            sizeof(reserved2) +
+            sizeof(offset);
     };
 
     struct DIB {
@@ -98,22 +97,21 @@ protected:
         uint32_t nb_important_colors;
 
         // We define the struct size because sizeof(DIB) might return a wrong result because of structure padding.
-        // Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
-        static const std::size_t dib_size =
-            sizeof(uint32_t) + // size
-            sizeof(int32_t) +  // width
-            sizeof(int32_t) +  // height
-            sizeof(uint16_t) + // planes
-            sizeof(uint16_t) + // bits_per_pixel
-            sizeof(uint32_t) + // compression
-            sizeof(uint32_t) + // image_size
-            sizeof(int32_t) +  // x_resolution
-            sizeof(int32_t) +  // y_resolution
-            sizeof(uint32_t) + // nb_colors
-            sizeof(uint32_t);  // nb_important_colors
+        static constexpr std::size_t dib_size =
+            sizeof(size) +
+            sizeof(width) +
+            sizeof(height) +
+            sizeof(planes) +
+            sizeof(bits_per_pixel) +
+            sizeof(compression) +
+            sizeof(image_size) +
+            sizeof(x_resolution) +
+            sizeof(y_resolution) +
+            sizeof(nb_colors) +
+            sizeof(nb_important_colors);
     };
 
-    static const std::size_t mBytesPerPixel = 4;
+    static constexpr std::size_t mBytesPerPixel = 4;
 
 public:
     static void Save(aiTexture* texture, IOStream* file);

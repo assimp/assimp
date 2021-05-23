@@ -177,9 +177,7 @@ void Logger::debug(const char *message) {
 // ----------------------------------------------------------------------------------
 void Logger::verboseDebug(const char *message) {
 
-    // SECURITY FIX: otherwise it's easy to produce overruns since
-    // sometimes importers will include data from the input file
-    // (i.e. node names) in their messages.
+    // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return;
     }

@@ -77,12 +77,12 @@ void ArmaturePopulate::Execute(aiScene *out) {
 
     BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
 
-    ASSIMP_LOG_DEBUG_F("Bone stack size: ", bone_stack.size());
+    ASSIMP_LOG_DEBUG("Bone stack size: ", bone_stack.size());
 
     for (std::pair<aiBone *, aiNode *> kvp : bone_stack) {
         aiBone *bone = kvp.first;
         aiNode *bone_node = kvp.second;
-        ASSIMP_LOG_VERBOSE_DEBUG_F("active node lookup: ", bone->mName.C_Str());
+        ASSIMP_LOG_VERBOSE_DEBUG("active node lookup: ", bone->mName.C_Str());
         // lcl transform grab - done in generate_nodes :)
 
         // bone->mOffsetMatrix = bone_node->mTransformation;
@@ -179,7 +179,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
         if (node == nullptr) {
             node_stack.clear();
             BuildNodeList(root_node, node_stack);
-            ASSIMP_LOG_VERBOSE_DEBUG_F("Resetting bone stack: nullptr element ", bone->mName.C_Str());
+            ASSIMP_LOG_VERBOSE_DEBUG("Resetting bone stack: nullptr element ", bone->mName.C_Str());
 
             node = GetNodeFromStack(bone->mName, node_stack);
 
@@ -189,7 +189,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
             }
         }
 
-        ASSIMP_LOG_VERBOSE_DEBUG_F("Successfully added bone[", bone->mName.C_Str(), "] to stack and bone node is: ", node->mName.C_Str());
+        ASSIMP_LOG_VERBOSE_DEBUG("Successfully added bone[", bone->mName.C_Str(), "] to stack and bone node is: ", node->mName.C_Str());
 
         bone_stack.insert(std::pair<aiBone *, aiNode *>(bone, node));
     }
@@ -203,7 +203,7 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
                                           std::vector<aiBone *> &bone_list) {
     while (nullptr != bone_node) {
         if (!IsBoneNode(bone_node->mName, bone_list)) {
-            ASSIMP_LOG_VERBOSE_DEBUG_F("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
+            ASSIMP_LOG_VERBOSE_DEBUG("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());
             return bone_node;
         }
 
@@ -247,7 +247,7 @@ aiNode *ArmaturePopulate::GetNodeFromStack(const aiString &node_name,
     }
 
     if (found != nullptr) {
-        ASSIMP_LOG_INFO_F("Removed node from stack: ", found->mName.C_Str());
+        ASSIMP_LOG_INFO("Removed node from stack: ", found->mName.C_Str());
         // now pop the element from the node list
         nodes.erase(iter);
 

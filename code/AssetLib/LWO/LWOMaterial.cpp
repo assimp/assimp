@@ -335,7 +335,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface &surf, aiMaterial *pcMat) {
             m = aiShadingMode_Fresnel;
             break;
         } else {
-            ASSIMP_LOG_WARN_F("LWO2: Unknown surface shader: ", shader.functionName);
+            ASSIMP_LOG_WARN("LWO2: Unknown surface shader: ", shader.functionName);
         }
     }
     if (surf.mMaximumSmoothAngle <= 0.0)
@@ -711,7 +711,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size) {
             }
         }
         if (derived.size()) {
-            ASSIMP_LOG_WARN("LWO2: Unable to find source surface: " + derived);
+            ASSIMP_LOG_WARN("LWO2: Unable to find source surface: ", derived);
         }
     }
 

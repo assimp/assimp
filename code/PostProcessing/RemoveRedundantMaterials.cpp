@@ -122,7 +122,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 
                         // Keep this material even if no mesh references it
                         abReferenced[i] = true;
-                        ASSIMP_LOG_VERBOSE_DEBUG_F( "Found positive match in exclusion list: \'", name.data, "\'");
+                        ASSIMP_LOG_VERBOSE_DEBUG( "Found positive match in exclusion list: \'", name.data, "\'");
                     }
                 }
             }
@@ -215,7 +215,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
     }
     else
     {
-        ASSIMP_LOG_INFO_F("RemoveRedundantMatsProcess finished. Removed ", redundantRemoved, " redundant and ", 
+        ASSIMP_LOG_INFO("RemoveRedundantMatsProcess finished. Removed ", redundantRemoved, " redundant and ", 
             unreferencedRemoved, " unused materials.");
     }
 }

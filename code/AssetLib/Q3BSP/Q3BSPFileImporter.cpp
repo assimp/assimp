@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "pk3"
+    "bsp pk3"
 };
 
 namespace Assimp {
@@ -446,7 +446,7 @@ void Q3BSPFileImporter::createMaterials(const Q3BSP::Q3BSPModel *pModel, aiScene
                 normalizePathName(tmp, texName);
 
                 if (!importTextureFromArchive(pModel, pArchive, pScene, pMatHelper, textureId)) {
-                    ASSIMP_LOG_ERROR("Cannot import texture from archive " + texName);
+                    ASSIMP_LOG_ERROR("Cannot import texture from archive ", texName);
                 }
             }
         }

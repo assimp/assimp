@@ -1476,6 +1476,12 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                 if (strcmp(ext, "jpeg") == 0) {
                     ext = "jpg";
                 }
+                else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
+                    ext = "kx2";
+                }
+                else if(strcmp(ext, "basis") == 0) { //basisu
+                    ext = "bu";
+                }
 
                 size_t len = strlen(ext);
                 if (len <= 3) {

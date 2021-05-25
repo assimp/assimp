@@ -256,7 +256,7 @@ void OgreXmlSerializer::ReadMesh(MeshXml *mesh) {
 
 void OgreXmlSerializer::ReadGeometry(XmlNode &node, VertexDataXml *dest) {
     dest->count = ReadAttribute<uint32_t>(node, "vertexcount");
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Reading geometry of ", dest->count, " vertices");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Reading geometry of ", dest->count, " vertices");
 
     for (XmlNode currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
@@ -290,7 +290,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *d
         dest->tangents.reserve(dest->count);
     }
     if (uvs > 0) {
-        ASSIMP_LOG_VERBOSE_DEBUG_F("    - Contains ", uvs, " texture coords");
+        ASSIMP_LOG_VERBOSE_DEBUG("    - Contains ", uvs, " texture coords");
         dest->uvs.resize(uvs);
         for (size_t i = 0, len = dest->uvs.size(); i < len; ++i) {
             dest->uvs[i].reserve(dest->count);
@@ -365,9 +365,9 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
         submesh->usesSharedVertexData = ReadAttribute<bool>(node, anUseSharedVertices);
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Material: '", submesh->materialRef, "'");
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Uses shared geometry: ", (submesh->usesSharedVertexData ? "true" : "false"));
+    ASSIMP_LOG_VERBOSE_DEBUG("Reading SubMesh ", mesh->subMeshes.size());
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Material: '", submesh->materialRef, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Uses shared geometry: ", (submesh->usesSharedVertexData ? "true" : "false"));
 
     // TODO: maybe we have always just 1 faces and 1 geometry and always in this order. this loop will only work correct, when the order
     // of faces and geometry changed, and not if we have more than one of one
@@ -398,7 +398,7 @@ void OgreXmlSerializer::ReadSubMesh(XmlNode &node, MeshXml *mesh) {
                 }
             }
             if (submesh->indexData->faces.size() == submesh->indexData->faceCount) {
-                ASSIMP_LOG_VERBOSE_DEBUG_F("  - Faces ", submesh->indexData->faceCount);
+                ASSIMP_LOG_VERBOSE_DEBUG("  - Faces ", submesh->indexData->faceCount);
             } else {
                 throw DeadlyImportError("Read only ", submesh->indexData->faces.size(), " faces when should have read ", submesh->indexData->faceCount);
             }
@@ -459,7 +459,7 @@ void OgreXmlSerializer::ReadBoneAssignments(XmlNode &node, VertexDataXml *dest) 
         }
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - ", dest->boneAssignments.size(), " bone assignments");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - ", dest->boneAssignments.size(), " bone assignments");
 }
 
 // Skeleton
@@ -515,12 +515,12 @@ bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
 
 XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, const std::string &filename) {
     if (!EndsWith(filename, ".skeleton.xml", false)) {
-        ASSIMP_LOG_ERROR_F("Imported Mesh is referencing to unsupported '", filename, "' skeleton file.");
+        ASSIMP_LOG_ERROR("Imported Mesh is referencing to unsupported '", filename, "' skeleton file.");
         return XmlParserPtr();
     }
 
     if (!pIOHandler->Exists(filename)) {
-        ASSIMP_LOG_ERROR_F("Failed to find skeleton file '", filename, "' that is referenced by imported Mesh.");
+        ASSIMP_LOG_ERROR("Failed to find skeleton file '", filename, "' that is referenced by imported Mesh.");
         return XmlParserPtr();
     }
 
@@ -631,7 +631,7 @@ void OgreXmlSerializer::ReadAnimationKeyFrames(XmlNode &node, Animation *anim, V
                             if (axis.Equal(zeroVec)) {
                                 axis.x = 1.0f;
                                 if (angle != 0) {
-                                    ASSIMP_LOG_WARN_F("Found invalid a key frame with a zero rotation axis in animation: ", anim->name);
+                                    ASSIMP_LOG_WARN("Found invalid a key frame with a zero rotation axis in animation: ", anim->name);
                                 }
                             }
                             keyframe.rotation = aiQuaternion(axis, angle);
@@ -741,7 +741,7 @@ void OgreXmlSerializer::ReadBones(XmlNode &node, Skeleton *skeleton) {
         as per the Ogre skeleton spec. It might be more that other (later) code in this imported does not break. */
     for (size_t i = 0, len = skeleton->bones.size(); i < len; ++i) {
         Bone *b = skeleton->bones[i];
-        ASSIMP_LOG_VERBOSE_DEBUG_F("    ", b->id, " ", b->name);
+        ASSIMP_LOG_VERBOSE_DEBUG("    ", b->id, " ", b->name);
 
         if (b->id != static_cast<uint16_t>(i)) {
             throw DeadlyImportError("Bone ids are not in sequence starting from 0. Missing index ", i);

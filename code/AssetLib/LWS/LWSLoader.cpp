@@ -346,7 +346,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
         if (src.path.length()) {
             obj = batch.GetImport(src.id);
             if (!obj) {
-                ASSIMP_LOG_ERROR("LWS: Failed to read external file " + src.path);
+                ASSIMP_LOG_ERROR("LWS: Failed to read external file ", src.path);
             } else {
                 if (obj->mRootNode->mNumChildren == 1) {
 
@@ -538,7 +538,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // get file format version and print to log
     ++it;
     unsigned int version = strtoul10((*it).tokens[0].c_str());
-    ASSIMP_LOG_INFO("LWS file format version is " + (*it).tokens[0]);
+    ASSIMP_LOG_INFO("LWS file format version is ", (*it).tokens[0]);
     first = 0.;
     last = 60.;
     fps = 25.; // seems to be a good default frame rate

@@ -1263,7 +1263,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSampler
 
         static const float kMillisecondsFromSeconds = 1000.f;
 
-        if (nullptr != samplers.weight) {
+        if (samplers.weight && samplers.weight->input && samplers.weight->output) {
             float *times = nullptr;
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;

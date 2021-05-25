@@ -604,7 +604,7 @@ void glTFExporter::ExportMeshes()
 			else
 				msg = "mesh must has vertices and faces.";
 
-            ASSIMP_LOG_WARN_F("GLTF: can not use Open3DGC-compression: ", msg);
+            ASSIMP_LOG_WARN("GLTF: can not use Open3DGC-compression: ", msg);
             comp_allow = false;
 		}
 

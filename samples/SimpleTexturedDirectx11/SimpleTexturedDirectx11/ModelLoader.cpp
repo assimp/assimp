@@ -42,21 +42,11 @@ void ModelLoader::Draw(ID3D11DeviceContext * devcon) {
 	}
 }
 
-std::string textype;
-
 Mesh ModelLoader::processMesh(aiMesh * mesh, const aiScene * scene) {
 	// Data to fill
 	std::vector<VERTEX> vertices;
 	std::vector<UINT> indices;
 	std::vector<Texture> textures;
-
-	if (mesh->mMaterialIndex >= 0) {
-		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-
-		if (textype.empty()) {
-            textype = determineTextureType(scene, mat);
-        }
-	}
 
 	// Walk through each of the mesh's vertices
 	for (UINT i = 0; i < mesh->mNumVertices; i++) {
@@ -108,9 +98,10 @@ std::vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial * mat, aiTextu
 		if (!skip) {   // If texture hasn't been loaded already, load it
 			HRESULT hr;
 			Texture texture;
-			if (textype == "embedded compressed texture") {
-				int textureindex = getTextureIndex(&str);
-				texture.texture = getTextureFromModel(scene, textureindex);
+
+			const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(str.C_Str());
+			if (embeddedTexture != nullptr) {
+				texture.texture = loadEmbeddedTexture(embeddedTexture);
 			} else {
 				std::string filename = std::string(str.C_Str());
 				filename = directory_ + '/' + filename;
@@ -148,38 +139,46 @@ void ModelLoader::processNode(aiNode * node, const aiScene * scene) {
 	}
 }
 
-std::string ModelLoader::determineTextureType(const aiScene * scene, aiMaterial * mat) {
-	aiString textypeStr;
-	mat->GetTexture(aiTextureType_DIFFUSE, 0, &textypeStr);
-	std::string textypeteststr = textypeStr.C_Str();
-	if (textypeteststr == "*0" || textypeteststr == "*1" || textypeteststr == "*2" || textypeteststr == "*3" || textypeteststr == "*4" || textypeteststr == "*5") {
-		if (scene->mTextures[0]->mHeight == 0) {
-			return "embedded compressed texture";
-		} else {
-			return "embedded non-compressed texture";
-		}
-	}
-	if (textypeteststr.find('.') != std::string::npos) {
-		return "textures are on disk";
-	}
-
-    return ".";
-}
-
-int ModelLoader::getTextureIndex(aiString * str) {
-	std::string tistr;
-	tistr = str->C_Str();
-	tistr = tistr.substr(1);
-	return stoi(tistr);
-}
-
-ID3D11ShaderResourceView * ModelLoader::getTextureFromModel(const aiScene * scene, int textureindex) {
+ID3D11ShaderResourceView * ModelLoader::loadEmbeddedTexture(const aiTexture* embeddedTexture) {
 	HRESULT hr;
-	ID3D11ShaderResourceView *texture;
+	ID3D11ShaderResourceView *texture = nullptr;
 
-	int* size = reinterpret_cast<int*>(&scene->mTextures[textureindex]->mWidth);
+	if (embeddedTexture->mHeight != 0) {
+		// Load an uncompressed ARGB8888 embedded texture
+		D3D11_TEXTURE2D_DESC desc;
+		desc.Width = embeddedTexture->mWidth;
+		desc.Height = embeddedTexture->mHeight;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
 
-	hr = CreateWICTextureFromMemory(dev_, devcon_, reinterpret_cast<unsigned char*>(scene->mTextures[textureindex]->pcData), *size, nullptr, &texture);
+		D3D11_SUBRESOURCE_DATA subresourceData;
+		subresourceData.pSysMem = embeddedTexture->pcData;
+		subresourceData.SysMemPitch = embeddedTexture->mWidth * 4;
+		subresourceData.SysMemSlicePitch = embeddedTexture->mWidth * embeddedTexture->mHeight * 4;
+
+		ID3D11Texture2D *texture2D = nullptr;
+		hr = dev_->CreateTexture2D(&desc, &subresourceData, &texture2D);
+		if (FAILED(hr))
+			MessageBox(hwnd_, "CreateTexture2D failed!", "Error!", MB_ICONERROR | MB_OK);
+
+		hr = dev_->CreateShaderResourceView(texture2D, nullptr, &texture);
+		if (FAILED(hr))
+			MessageBox(hwnd_, "CreateShaderResourceView failed!", "Error!", MB_ICONERROR | MB_OK);
+
+		return texture;
+	}
+
+	// mHeight is 0, so try to load a compressed texture of mWidth bytes
+	const size_t size = embeddedTexture->mWidth;
+
+	hr = CreateWICTextureFromMemory(dev_, devcon_, reinterpret_cast<const unsigned char*>(embeddedTexture->pcData), size, nullptr, &texture);
 	if (FAILED(hr))
 		MessageBox(hwnd_, "Texture couldn't be created from memory!", "Error!", MB_ICONERROR | MB_OK);
 

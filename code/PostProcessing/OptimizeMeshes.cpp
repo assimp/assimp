@@ -151,7 +151,7 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
     std::copy(output.begin(),output.end(),mScene->mMeshes);
 
     if (output.size() != num_old) {
-        ASSIMP_LOG_DEBUG_F("OptimizeMeshesProcess finished. Input meshes: ", num_old, ", Output meshes: ", pScene->mNumMeshes);
+        ASSIMP_LOG_DEBUG("OptimizeMeshesProcess finished. Input meshes: ", num_old, ", Output meshes: ", pScene->mNumMeshes);
     } else {
         ASSIMP_LOG_DEBUG( "OptimizeMeshesProcess finished" );
     }

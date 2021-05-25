@@ -565,7 +565,7 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
         // this might happen if DNA::RegisterConverters hasn't been called so far
         // or if the target type is not contained in `our` DNA.
         out.reset();
-        ASSIMP_LOG_WARN_F( "Failed to find a converter for the `",s.name,"` structure" );
+        ASSIMP_LOG_WARN( "Failed to find a converter for the `",s.name,"` structure" );
         return false;
     }
 

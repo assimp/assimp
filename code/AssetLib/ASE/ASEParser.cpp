@@ -677,7 +677,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                 if (!ParseString(temp, "*MAP_CLASS"))
                     SkipToNextToken();
                 if (temp != "Bitmap" && temp != "Normal Bump") {
-                    ASSIMP_LOG_WARN_F("ASE: Skipping unknown map type: ", temp);
+                    ASSIMP_LOG_WARN("ASE: Skipping unknown map type: ", temp);
                     parsePath = false;
                 }
                 continue;
@@ -1125,7 +1125,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
                                          "this is no spot light or target camera");
                     }
                 } else {
-                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: " + temp);
+                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: ", temp);
                     // mode = 0
                 }
                 continue;

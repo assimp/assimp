@@ -726,7 +726,7 @@ void OpenGEXImporter::handleMeshNode(ODDLParser::DDLNode *node, aiScene *pScene)
             } else if ("quads" == propKey) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
-                ASSIMP_LOG_WARN_F(propKey, " is not supported primitive type.");
+                ASSIMP_LOG_WARN(propKey, " is not supported primitive type.");
             }
         }
     }
@@ -749,22 +749,22 @@ enum MeshAttribute {
     TexCoord
 };
 
-static const std::string PosToken = "position";
-static const std::string ColToken = "color";
-static const std::string NormalToken = "normal";
-static const std::string TexCoordToken = "texcoord";
+constexpr auto PosToken = "position";
+constexpr auto ColToken = "color";
+constexpr auto NormalToken = "normal";
+constexpr auto TexCoordToken = "texcoord";
 
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName(const char *attribName) {
     ai_assert(nullptr != attribName);
 
-    if (0 == strncmp(PosToken.c_str(), attribName, PosToken.size())) {
+    if (0 == strcmp(PosToken, attribName)) {
         return Position;
-    } else if (0 == strncmp(ColToken.c_str(), attribName, ColToken.size())) {
+    } else if (0 == strcmp(ColToken, attribName)) {
         return Color;
-    } else if (0 == strncmp(NormalToken.c_str(), attribName, NormalToken.size())) {
+    } else if (0 == strcmp(NormalToken, attribName)) {
         return Normal;
-    } else if (0 == strncmp(TexCoordToken.c_str(), attribName, TexCoordToken.size())) {
+    } else if (0 == strcmp(TexCoordToken, attribName)) {
         return TexCoord;
     }
 

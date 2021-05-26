@@ -71,7 +71,7 @@ static void ReportWarning(const char *msg, ...) {
     ai_assert(iLen > 0);
 
     va_end(args);
-    ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer, iLen));
+    ASSIMP_LOG_WARN("Validation warning: ", std::string(szBuffer, iLen));
 }
 
 static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
@@ -623,8 +623,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
     controller.mType = Skin;
     controller.mMethod = Normalized;
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
 
@@ -929,8 +928,7 @@ void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
 // ------------------------------------------------------------------------------------------------
 // Reads a light entry into the given light
 void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -991,10 +989,8 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
 // ------------------------------------------------------------------------------------------------
 // Reads a camera entry into the given light
 void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
-
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "orthographic") {
@@ -1050,11 +1046,10 @@ void ColladaParser::ReadEffect(XmlNode &node, Collada::Effect &pEffect) {
 // ------------------------------------------------------------------------------------------------
 // Reads an COMMON effect profile
 void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEffect) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
-        const std::string &currentName = currentNode.name();
+        const std::string currentName = currentNode.name();
         if (currentName == "newparam") {
             // save ID
             std::string sid = currentNode.attribute("sid").as_string();
@@ -1145,10 +1140,9 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
     if (node.empty()) {
         return;
     }
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
 
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
+    XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         // MAYA extensions
@@ -1208,10 +1202,9 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
     if (node.empty()) {
         return;
     }
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
 
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
+    XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "color") {
@@ -1273,8 +1266,7 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1360,8 +1352,7 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1386,8 +1377,7 @@ void ColladaParser::ReadSource(XmlNode &node) {
 
     std::string sourceID;
     XmlParser::getStdStrAttribute(node, "id", sourceID);
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1490,8 +1480,7 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
     acc.mSource = source.c_str() + 1; // ignore the leading '#'
     acc.mSize = 0; // gets incremented with every param
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1608,8 +1597,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     ai_assert(primType != Prim_Invalid);
 
     // also a number of <input> elements, but in addition a <p> primitive collection and probably index counts for all primitives
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -2400,7 +2388,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic(const std::string &semantic
     else if (semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    ASSIMP_LOG_WARN_F("Unknown vertex input type \"", semantic, "\". Ignoring.");
+    ASSIMP_LOG_WARN("Unknown vertex input type \"", semantic, "\". Ignoring.");
     return IT_Invalid;
 }
 

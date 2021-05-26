@@ -669,7 +669,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief  Set wether the importer shall not remove empty bones.
- *  
+ *
  *  Empty bone are often used to define connections for other models.
  */
 #define AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES \
@@ -853,6 +853,15 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_MD3_SKIN_NAME \
     "IMPORT_MD3_SKIN_NAME"
+
+// ---------------------------------------------------------------------------
+/** @brief  Specify if to try load Quake 3 shader files. This also controls
+ *  original surface name handling: when disabled it will be used unchanged.
+ *
+ * Property type: bool. Default value: true.
+ */
+#define AI_CONFIG_IMPORT_MD3_LOAD_SHADERS \
+    "IMPORT_MD3_LOAD_SHADERS"
 
 // ---------------------------------------------------------------------------
 /** @brief  Specify the Quake 3 shader file to be used for a particular
@@ -1058,7 +1067,7 @@ enum aiComponent
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
 
 /** @brief Specifies whether the assimp export shall be able to export point clouds
- * 
+ *
  *  When this flag is not defined the render data has to contain valid faces.
  *  Point clouds are only a collection of vertices which have nor spatial organization
  *  by a face and the validation process will remove them. Enabling this feature will

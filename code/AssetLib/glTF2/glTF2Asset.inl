@@ -1144,6 +1144,7 @@ inline Image::Image() :
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
+    //basisu: no need to handle .ktx2, .basis, load as is
     if (!mDataLength) {
         Value *curUri = FindString(obj, "uri");
         if (nullptr != curUri) {
@@ -2124,6 +2125,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_draco_mesh_compression);
+    CHECK_EXT(KHR_texture_basisu);
 
 #undef CHECK_EXT
 }

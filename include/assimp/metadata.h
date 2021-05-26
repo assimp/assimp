@@ -202,17 +202,17 @@ struct aiMetadata {
             } break;
             case AI_AISTRING: {
                 aiString v;
-                rhs.Get<aiString>(mKeys[i], v);
+                rhs.Get<aiString>(i, v);
                 mValues[i].mData = new aiString(v);
             } break;
             case AI_AIVECTOR3D: {
                 aiVector3D v;
-                rhs.Get<aiVector3D>(mKeys[i], v);
+                rhs.Get<aiVector3D>(i, v);
                 mValues[i].mData = new aiVector3D(v);
             } break;
             case AI_AIMETADATA: {
                 aiMetadata v;
-                rhs.Get<aiMetadata>(mKeys[i], v);
+                rhs.Get<aiMetadata>(i, v);
                 mValues[i].mData = new aiMetadata(v);
             } break;
 #ifndef SWIG

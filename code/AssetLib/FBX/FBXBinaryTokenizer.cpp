@@ -459,7 +459,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
 	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	/*Result ignored*/ ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
-	ASSIMP_LOG_DEBUG_F("FBX version: ", version);
+	ASSIMP_LOG_DEBUG("FBX version: ", version);
 	const bool is64bits = version >= 7500;
     const char *end = input + length;
     try

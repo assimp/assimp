@@ -197,7 +197,7 @@ class BlobIOSystem : public IOSystem {
 
 public:
     BlobIOSystem() :
-            baseName{} {
+            baseName{AI_BLOBIO_MAGIC} {
     }
 
     BlobIOSystem(const std::string &baseName) :
@@ -213,13 +213,13 @@ public:
 public:
     // -------------------------------------------------------------------
     const char *GetMagicFileName() const {
-        return baseName.empty() ? AI_BLOBIO_MAGIC : baseName.c_str();
+        return baseName.c_str();
     }
 
     // -------------------------------------------------------------------
     aiExportDataBlob *GetBlobChain() {
         const auto magicName = std::string(this->GetMagicFileName());
-        const bool hasBaseName = baseName.empty();
+        const bool hasBaseName = baseName != AI_BLOBIO_MAGIC;
 
         // one must be the master
         aiExportDataBlob *master = nullptr, *cur;
@@ -249,8 +249,7 @@ public:
 
             if (hasBaseName) {
                 cur->name.Set(blobby.first);
-            }
-            else {
+            } else {
                 // extract the file extension from the file written
                 const std::string::size_type s = blobby.first.find_first_of('.');
                 cur->name.Set(s == std::string::npos ? blobby.first : blobby.first.substr(s + 1));

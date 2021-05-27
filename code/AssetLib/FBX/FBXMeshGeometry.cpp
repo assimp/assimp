@@ -604,15 +604,15 @@ void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out,
 }
 
 // ------------------------------------------------------------------------------------------------
-static const std::string BinormalIndexToken = "BinormalIndex";
-static const std::string BinormalsIndexToken = "BinormalsIndex";
+static const char * BinormalIndexToken = "BinormalIndex";
+static const char * BinormalsIndexToken = "BinormalsIndex";
 
 void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source,
     const std::string& MappingInformationType,
     const std::string& ReferenceInformationType)
 {
     const char * str = source.Elements().count( "Binormals" ) > 0 ? "Binormals" : "Binormal";
-    const char * strIdx = source.Elements().count( "Binormals" ) > 0 ? BinormalsIndexToken.c_str() : BinormalIndexToken.c_str();
+    const char * strIdx = source.Elements().count( "Binormals" ) > 0 ? BinormalsIndexToken : BinormalIndexToken;
     ResolveVertexDataArray(binormals_out,source,MappingInformationType,ReferenceInformationType,
         str,
         strIdx,

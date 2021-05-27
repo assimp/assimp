@@ -88,9 +88,17 @@ public:
         underlying << sin;
     }
 
+    // Same problem as the copy constructor below, but with root cause is that stream move
+    // is not permitted on older GCC versions. Small performance impact on those platforms.
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+    basic_formatter(basic_formatter&& other) {
+        underlying << (string)other;
+    }
+#else
     basic_formatter(basic_formatter&& other)
         : underlying(std::move(other.underlying)) {
     }
+#endif
 
     // The problem described here:
     // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462

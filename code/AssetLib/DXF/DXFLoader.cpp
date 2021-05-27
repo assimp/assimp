@@ -63,11 +63,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // AutoCAD Binary DXF<CR><LF><SUB><NULL>
-const std::string AI_DXF_BINARY_IDENT = std::string("AutoCAD Binary DXF\r\n\x1a\0");
-const size_t AI_DXF_BINARY_IDENT_LEN = 24u;
+static constexpr char AI_DXF_BINARY_IDENT[] = "AutoCAD Binary DXF\r\n\x1a";
+static constexpr size_t AI_DXF_BINARY_IDENT_LEN = sizeof AI_DXF_BINARY_IDENT;
 
 // default vertex color that all uncolored vertices will receive
-const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
+static const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
 
 // color indices for DXF - 16 are supported, the table is
 // taken directly from the DXF spec.
@@ -156,10 +156,10 @@ void DXFImporter::InternReadFile( const std::string& filename, aiScene* pScene, 
     }
 
     // Check whether this is a binary DXF file - we can't read binary DXF files :-(
-    char buff[AI_DXF_BINARY_IDENT_LEN+1] = {0};
+    char buff[AI_DXF_BINARY_IDENT_LEN] = {0};
     file->Read(buff,AI_DXF_BINARY_IDENT_LEN,1);
 
-    if (0 == strncmp(AI_DXF_BINARY_IDENT.c_str(),buff,AI_DXF_BINARY_IDENT_LEN)) {
+    if (0 == memcmp(AI_DXF_BINARY_IDENT,buff,AI_DXF_BINARY_IDENT_LEN)) {
         throw DeadlyImportError("DXF: Binary files are not supported at the moment");
     }
 

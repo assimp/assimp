@@ -674,6 +674,10 @@ struct aiMesh {
     */
     C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
+    /** Vertex stream names.
+     */
+    C_STRUCT aiString mTextureCoordsNames[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+
     /** Specifies the number of components for a given UV channel.
     * Up to three channels are supported (UVW, for accessing volume
     * or cube maps). If the value is 2 for a given channel n, the

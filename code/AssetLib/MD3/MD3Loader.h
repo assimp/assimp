@@ -297,6 +297,9 @@ protected:
     /** Configuration option: name of skin file to be read */
     std::string configSkinFile;
 
+    /** Configuration option: whether to load shaders */
+    bool configLoadShaders;
+
     /** Configuration option: name or path of shader */
     std::string configShaderFile;
 

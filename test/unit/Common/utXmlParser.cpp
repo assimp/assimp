@@ -73,9 +73,7 @@ TEST_F(utXmlParser, parse_xml_and_traverse_test) {
     EXPECT_TRUE(result);
     XmlNode root = parser.getRootNode();
 
-    XmlNodeIterator nodeIt(root);
-    EXPECT_TRUE(nodeIt.isEmpty());
-    nodeIt.collectChildrenPreOrder(root);
+    XmlNodeIterator nodeIt(root, XmlNodeIterator::PreOrderMode);
     const size_t numNodes = nodeIt.size();
     bool empty = nodeIt.isEmpty();
     EXPECT_FALSE(empty);

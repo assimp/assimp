@@ -2,7 +2,7 @@
 name: Technical debt
 about: Create a report to help us to fix and detect tech debts
 title: ''
-labels: ''
+labels: 'Techdebt'
 assignees: ''
 
 ---

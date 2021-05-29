@@ -183,8 +183,9 @@ public:
     /// @brief  Will return the root node, const version.
     /// @return The root node.
     const TNodeType getRootNode() const {
+        TNodeType emptyNode;
         if (nullptr == mDoc) {
-            return nullptr;
+            return emptyNode;
         }
         return mDoc->root();
     }
@@ -192,8 +193,9 @@ public:
     /// @brief  Will return the root node, non-const version.
     /// @return The root node.
     TNodeType getRootNode() {
+        TNodeType emptyNode;
         if (nullptr == mDoc) {
-            return nullptr;
+            return emptyNode;
         }
         return mDoc->root();
     }

@@ -494,7 +494,6 @@ void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, float& prop, const char
 
 void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)
 {
-
     if (mat->GetTextureCount(tt) > 0) {
         aiString tex;
 
@@ -507,6 +506,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     texture = mAsset->textures.Get(it->second);
                 }
 
+                bool useBasisUniversal = false;
                 if (!texture) {
                     std::string texId = mAsset->FindUniqueID("", "texture");
                     texture = mAsset->textures.Create(texId);
@@ -519,18 +519,46 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                         aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
 
                         texture->source->name = curTex->mFilename.C_Str();
-
-                        // The asset has its own buffer, see Image::SetData
-                        texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
-
+                        
+                        //basisu: embedded ktx2, bu
                         if (curTex->achFormatHint[0]) {
                             std::string mimeType = "image/";
-                            mimeType += (memcmp(curTex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : curTex->achFormatHint;
+                            if(memcmp(curTex->achFormatHint, "jpg", 3) == 0)
+                                mimeType += "jpeg";
+                            else if(memcmp(curTex->achFormatHint, "ktx", 3) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "ktx";
+                            }
+                            else if(memcmp(curTex->achFormatHint, "kx2", 3) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "ktx2";
+                            }
+                            else if(memcmp(curTex->achFormatHint, "bu", 2) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "basis";
+                            }
+                            else
+                                mimeType += curTex->achFormatHint;
                             texture->source->mimeType = mimeType;
                         }
+                        
+                        // The asset has its own buffer, see Image::SetData
+                        //basisu: "image/ktx2", "image/basis" as is
+                        texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                     }
                     else {
                         texture->source->uri = path;
+                        if(texture->source->uri.find(".ktx")!=std::string::npos ||
+                           texture->source->uri.find(".basis")!=std::string::npos)
+                        {
+                            useBasisUniversal = true;
+                        }
+                    }
+                    
+                    //basisu
+                    if(useBasisUniversal) {
+                        mAsset->extensionsUsed.KHR_texture_basisu = true;
+                        mAsset->extensionsRequired.KHR_texture_basisu = true;
                     }
 
                     GetTexSampler(mat, texture, tt, slot);

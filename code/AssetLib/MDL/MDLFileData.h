@@ -704,8 +704,8 @@ struct GroupFrame
     //! Maximum vertex for all single frames
     Vertex max;
 
-    //! Time for all single frames
-    float time;    // float[numframes]
+    //! List of times for all single frames
+    float *times;
 
     //! List of single frames
     SimpleFrame *frames;

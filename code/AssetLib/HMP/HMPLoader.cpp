@@ -157,7 +157,10 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         szBuffer[2] = ((char *)&iMagic)[2];
         szBuffer[3] = ((char *)&iMagic)[3];
         szBuffer[4] = '\0';
-
+    
+        delete[] mBuffer;
+        mBuffer = nullptr;
+        
         // We're definitely unable to load this file
         throw DeadlyImportError("Unknown HMP subformat ", pFile,
                                 ". Magic word (", szBuffer, ") is not known");

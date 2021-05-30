@@ -813,6 +813,11 @@ struct Mesh : public Object {
             AccessorList position, normal, tangent;
         };
         std::vector<Target> targets;
+
+        // extension: FB_ngon_encoding
+        bool ngonEncoded;
+
+        Primitive(): ngonEncoded(false) {}
     };
 
     std::vector<Primitive> primitives;
@@ -1108,6 +1113,7 @@ public:
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
         bool KHR_draco_mesh_compression;
+        bool FB_ngon_encoding;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

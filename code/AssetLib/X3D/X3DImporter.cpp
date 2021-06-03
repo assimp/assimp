@@ -124,6 +124,103 @@ struct WordIterator {
 
 const char *WordIterator::whitespace = ", \t\r\n";
 
+void skipUnsupportedNode(const std::string &pParentNodeName, XmlNode &node) {
+    static const size_t Uns_Skip_Len = 192;
+    static const char *Uns_Skip[Uns_Skip_Len] = {
+        // CAD geometry component
+        "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
+        // Core
+        "ROUTE", "ExternProtoDeclare", "ProtoDeclare", "ProtoInstance", "ProtoInterface", "WorldInfo",
+        // Distributed interactive simulation (DIS) component
+        "DISEntityManager", "DISEntityTypeMapping", "EspduTransform", "ReceiverPdu", "SignalPdu", "TransmitterPdu",
+        // Cube map environmental texturing component
+        "ComposedCubeMapTexture", "GeneratedCubeMapTexture", "ImageCubeMapTexture",
+        // Environmental effects component
+        "Background", "Fog", "FogCoordinate", "LocalFog", "TextureBackground",
+        // Environmental sensor component
+        "ProximitySensor", "TransformSensor", "VisibilitySensor",
+        // Followers component
+        "ColorChaser", "ColorDamper", "CoordinateChaser", "CoordinateDamper", "OrientationChaser", "OrientationDamper", "PositionChaser", "PositionChaser2D",
+        "PositionDamper", "PositionDamper2D", "ScalarChaser", "ScalarDamper", "TexCoordChaser2D", "TexCoordDamper2D",
+        // Geospatial component
+        "GeoCoordinate", "GeoElevationGrid", "GeoLocation", "GeoLOD", "GeoMetadata", "GeoOrigin", "GeoPositionInterpolator", "GeoProximitySensor",
+        "GeoTouchSensor", "GeoTransform", "GeoViewpoint",
+        // Humanoid Animation (H-Anim) component
+        "HAnimDisplacer", "HAnimHumanoid", "HAnimJoint", "HAnimSegment", "HAnimSite",
+        // Interpolation component
+        "ColorInterpolator", "CoordinateInterpolator", "CoordinateInterpolator2D", "EaseInEaseOut", "NormalInterpolator", "OrientationInterpolator",
+        "PositionInterpolator", "PositionInterpolator2D", "ScalarInterpolator", "SplinePositionInterpolator", "SplinePositionInterpolator2D",
+        "SplineScalarInterpolator", "SquadOrientationInterpolator",
+        // Key device sensor component
+        "KeySensor", "StringSensor",
+        // Layering component
+        "Layer", "LayerSet", "Viewport",
+        // Layout component
+        "Layout", "LayoutGroup", "LayoutLayer", "ScreenFontStyle", "ScreenGroup",
+        // Navigation component
+        "Billboard", "Collision", "LOD", "NavigationInfo", "OrthoViewpoint", "Viewpoint", "ViewpointGroup",
+        // Networking component
+        "EXPORT", "IMPORT", "Anchor", "LoadSensor",
+        // NURBS component
+        "Contour2D", "ContourPolyline2D", "CoordinateDouble", "NurbsCurve", "NurbsCurve2D", "NurbsOrientationInterpolator", "NurbsPatchSurface",
+        "NurbsPositionInterpolator", "NurbsSet", "NurbsSurfaceInterpolator", "NurbsSweptSurface", "NurbsSwungSurface", "NurbsTextureCoordinate",
+        "NurbsTrimmedSurface",
+        // Particle systems component
+        "BoundedPhysicsModel", "ConeEmitter", "ExplosionEmitter", "ForcePhysicsModel", "ParticleSystem", "PointEmitter", "PolylineEmitter", "SurfaceEmitter",
+        "VolumeEmitter", "WindPhysicsModel",
+        // Picking component
+        "LinePickSensor", "PickableGroup", "PointPickSensor", "PrimitivePickSensor", "VolumePickSensor",
+        // Pointing device sensor component
+        "CylinderSensor", "PlaneSensor", "SphereSensor", "TouchSensor",
+        // Rendering component
+        "ClipPlane",
+        // Rigid body physics
+        "BallJoint", "CollidableOffset", "CollidableShape", "CollisionCollection", "CollisionSensor", "CollisionSpace", "Contact", "DoubleAxisHingeJoint",
+        "MotorJoint", "RigidBody", "RigidBodyCollection", "SingleAxisHingeJoint", "SliderJoint", "UniversalJoint",
+        // Scripting component
+        "Script",
+        // Programmable shaders component
+        "ComposedShader", "FloatVertexAttribute", "Matrix3VertexAttribute", "Matrix4VertexAttribute", "PackagedShader", "ProgramShader", "ShaderPart",
+        "ShaderProgram",
+        // Shape component
+        "FillProperties", "LineProperties", "TwoSidedMaterial",
+        // Sound component
+        "AudioClip", "Sound",
+        // Text component
+        "FontStyle", "Text",
+        // Texturing3D Component
+        "ComposedTexture3D", "ImageTexture3D", "PixelTexture3D", "TextureCoordinate3D", "TextureCoordinate4D", "TextureTransformMatrix3D", "TextureTransform3D",
+        // Texturing component
+        "MovieTexture", "MultiTexture", "MultiTextureCoordinate", "MultiTextureTransform", "PixelTexture", "TextureCoordinateGenerator", "TextureProperties",
+        // Time component
+        "TimeSensor",
+        // Event Utilities component
+        "BooleanFilter", "BooleanSequencer", "BooleanToggle", "BooleanTrigger", "IntegerSequencer", "IntegerTrigger", "TimeTrigger",
+        // Volume rendering component
+        "BlendedVolumeStyle", "BoundaryEnhancementVolumeStyle", "CartoonVolumeStyle", "ComposedVolumeStyle", "EdgeEnhancementVolumeStyle", "IsoSurfaceVolumeData",
+        "OpacityMapVolumeStyle", "ProjectionVolumeStyle", "SegmentedVolumeData", "ShadedVolumeStyle", "SilhouetteEnhancementVolumeStyle", "ToneMappedVolumeStyle",
+        "VolumeData"
+    };
+
+    const std::string nn = node.name();
+    bool found = false;
+    bool close_found = false;
+
+    for (size_t i = 0; i < Uns_Skip_Len; i++) {
+        if (nn == Uns_Skip[i]) {
+            found = true;
+            if (node.empty()) {
+                close_found = true;
+                break;
+            }
+        }
+    }
+
+    if (!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
+
+    LogInfo("Skipping node \"" + nn + "\" in " + pParentNodeName + ".");
+}
+
 X3DImporter::X3DImporter() :
         mNodeElementCur(nullptr),
         mScene(nullptr) {

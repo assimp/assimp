@@ -1263,7 +1263,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSampler
 
         static const float kMillisecondsFromSeconds = 1000.f;
 
-        if (nullptr != samplers.weight) {
+        if (samplers.weight && samplers.weight->input && samplers.weight->output) {
             float *times = nullptr;
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;
@@ -1475,6 +1475,12 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
             if (ext) {
                 if (strcmp(ext, "jpeg") == 0) {
                     ext = "jpg";
+                }
+                else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
+                    ext = "kx2";
+                }
+                else if(strcmp(ext, "basis") == 0) { //basisu
+                    ext = "bu";
                 }
 
                 size_t len = strlen(ext);

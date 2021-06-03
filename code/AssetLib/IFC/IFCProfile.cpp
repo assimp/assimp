@@ -68,7 +68,7 @@ bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  TempMesh& meshout, Convers
 {
     std::unique_ptr<const Curve> cv(Curve::Convert(curve,conv));
     if (!cv) {
-        IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + curve.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is ", curve.GetClassName());
         return false;
     }
 
@@ -78,7 +78,7 @@ bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  TempMesh& meshout, Convers
             bc->SampleDiscrete(meshout);
         }
         catch(const  CurveError& cv) {
-            IFCImporter::LogError(cv.mStr + " (error occurred while processing curve)");
+            IFCImporter::LogError(cv.mStr, " (error occurred while processing curve)");
             return false;
         }
         meshout.mVertcnt.push_back(static_cast<unsigned int>(meshout.mVerts.size()));
@@ -152,7 +152,7 @@ void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& de
         meshout.mVertcnt.push_back(12);
     }
     else {
-        IFCImporter::LogWarn("skipping unknown IfcParameterizedProfileDef entity, type is " + def.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcParameterizedProfileDef entity, type is ", def.GetClassName());
         return;
     }
 
@@ -174,7 +174,7 @@ bool ProcessProfile(const Schema_2x3::IfcProfileDef& prof, TempMesh& meshout, Co
         ProcessParametrizedProfile(*cparam,meshout,conv);
     }
     else {
-        IFCImporter::LogWarn("skipping unknown IfcProfileDef entity, type is " + prof.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcProfileDef entity, type is ", prof.GetClassName());
         return false;
     }
     meshout.RemoveAdjacentDuplicates();

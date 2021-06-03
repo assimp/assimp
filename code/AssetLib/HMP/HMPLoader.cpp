@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/HMP/HMPLoader.h"
 #include "AssetLib/MD2/MD2FileData.h"
 
+#include <assimp/StringUtils.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -151,12 +152,7 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         InternReadFile_HMP7();
     } else {
         // Print the magic word to the logger
-        char szBuffer[5];
-        szBuffer[0] = ((char *)&iMagic)[0];
-        szBuffer[1] = ((char *)&iMagic)[1];
-        szBuffer[2] = ((char *)&iMagic)[2];
-        szBuffer[3] = ((char *)&iMagic)[3];
-        szBuffer[4] = '\0';
+        std::string szBuffer = ai_str_toprintable((const char *)&iMagic, sizeof(iMagic));
     
         delete[] mBuffer;
         mBuffer = nullptr;

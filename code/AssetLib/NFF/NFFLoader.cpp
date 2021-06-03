@@ -132,7 +132,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
     // Check whether we can read from the file
     if (!file.get()) {
-        ASSIMP_LOG_ERROR("NFF2: Unable to open material library " + path + ".");
+        ASSIMP_LOG_ERROR("NFF2: Unable to open material library ", path, ".");
         return;
     }
 
@@ -150,7 +150,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
     // The file should start with the magic sequence "mat"
     if (!TokenMatch(buffer, "mat", 3)) {
-        ASSIMP_LOG_ERROR_F("NFF2: Not a valid material library ", path, ".");
+        ASSIMP_LOG_ERROR("NFF2: Not a valid material library ", path, ".");
         return;
     }
 
@@ -164,7 +164,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
         // 'version' defines the version of the file format
         if (TokenMatch(sz, "version", 7)) {
-            ASSIMP_LOG_INFO_F("NFF (Sense8) material library file format: ", std::string(sz));
+            ASSIMP_LOG_INFO("NFF (Sense8) material library file format: ", std::string(sz));
         }
         // 'matdef' starts a new material in the file
         else if (TokenMatch(sz, "matdef", 6)) {
@@ -177,7 +177,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
             // check whether we have an active material at the moment
             if (!IsLineEnd(*sz)) {
                 if (!curShader) {
-                    ASSIMP_LOG_ERROR_F("NFF2 material library: Found element ", sz, "but there is no active material");
+                    ASSIMP_LOG_ERROR("NFF2 material library: Found element ", sz, "but there is no active material");
                     continue;
                 }
             } else
@@ -277,7 +277,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
         while (GetNextLine(buffer, line)) {
             SkipSpaces(line, &sz);
             if (TokenMatch(sz, "version", 7)) {
-                ASSIMP_LOG_INFO_F("NFF (Sense8) file format: ", sz);
+                ASSIMP_LOG_INFO("NFF (Sense8) file format: ", sz);
             } else if (TokenMatch(sz, "viewpos", 7)) {
                 AI_NFF_PARSE_TRIPLE(camPos);
                 hasCam = true;

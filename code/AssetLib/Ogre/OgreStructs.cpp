@@ -545,7 +545,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent) {
             dest->mNumUVComponents[0] = static_cast<unsigned int>(uv1Element->ComponentCount());
             dest->mTextureCoords[0] = new aiVector3D[dest->mNumVertices];
         } else {
-            ASSIMP_LOG_WARN(Formatter::format() << "Ogre imported UV0 type " << uv1Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
+            ASSIMP_LOG_WARN("Ogre imported UV0 type ", uv1Element->TypeToString(), " is not compatible with Assimp. Ignoring UV.");
             uv1 = 0;
         }
     }
@@ -554,7 +554,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent) {
             dest->mNumUVComponents[1] = static_cast<unsigned int>(uv2Element->ComponentCount());
             dest->mTextureCoords[1] = new aiVector3D[dest->mNumVertices];
         } else {
-            ASSIMP_LOG_WARN(Formatter::format() << "Ogre imported UV0 type " << uv2Element->TypeToString() << " is not compatible with Assimp. Ignoring UV.");
+            ASSIMP_LOG_WARN("Ogre imported UV0 type ", uv2Element->TypeToString(), " is not compatible with Assimp. Ignoring UV.");
             uv2 = 0;
         }
     }

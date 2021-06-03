@@ -1029,12 +1029,12 @@ ELSE ()
 ENDIF ()
 
 # RapidJSON
-INCLUDE_DIRECTORIES( "../contrib" )
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
   INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+  INCLUDE_DIRECTORIES( "../contrib" )
   INCLUDE_DIRECTORIES("../contrib/pugixml/src")
   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )

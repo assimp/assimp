@@ -290,9 +290,6 @@ protected:
 
 struct CX3DNodeElementGroup : X3DNodeElementBase {
     aiMatrix4x4 Transformation; ///< Transformation matrix.
-    bool Static;
-    bool UseChoice; ///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
-    int32_t Choice; ///< Number of the child which will be kept.
 };
 
 struct X3DNodeElementMeta : X3DNodeElementBase {
@@ -313,7 +310,7 @@ protected:
 struct X3DNodeElementMetaBoolean : X3DNodeElementMeta {
     std::vector<bool> Value; ///< Stored value.
 
-    X3DNodeElementMetaBoolean(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaBoolean(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaBoolean, pParent) {
         // empty
     }
@@ -322,7 +319,7 @@ struct X3DNodeElementMetaBoolean : X3DNodeElementMeta {
 struct X3DNodeElementMetaDouble : X3DNodeElementMeta {
     std::vector<double> Value; ///< Stored value.
 
-    X3DNodeElementMetaDouble(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaDouble(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaDouble, pParent) {
         // empty
     }
@@ -331,7 +328,7 @@ struct X3DNodeElementMetaDouble : X3DNodeElementMeta {
 struct X3DNodeElementMetaFloat : public X3DNodeElementMeta {
     std::vector<float> Value; ///< Stored value.
 
-    X3DNodeElementMetaFloat(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaFloat(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaFloat, pParent) {
         // empty
     }
@@ -340,7 +337,7 @@ struct X3DNodeElementMetaFloat : public X3DNodeElementMeta {
 struct X3DNodeElementMetaInt : public X3DNodeElementMeta {
     std::vector<int32_t> Value; ///< Stored value.
 
-    X3DNodeElementMetaInt(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaInt(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaInteger, pParent) {
         // empty
     }
@@ -349,7 +346,7 @@ struct X3DNodeElementMetaInt : public X3DNodeElementMeta {
 struct X3DNodeElementMetaSet : public X3DNodeElementMeta {
     std::list<X3DNodeElementMeta> Value; ///< Stored value.
 
-    X3DNodeElementMetaSet(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaSet(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaSet, pParent) {
         // empty
     }
@@ -358,7 +355,7 @@ struct X3DNodeElementMetaSet : public X3DNodeElementMeta {
 struct X3DNodeElementMetaString : public X3DNodeElementMeta {
     std::list<std::string> Value; ///< Stored value.
 
-    X3DNodeElementMetaString(X3DNodeElementBase *pParent) :
+    explicit X3DNodeElementMetaString(X3DNodeElementBase *pParent) :
             X3DNodeElementMeta(X3DElemType::ENET_MetaString, pParent) {
         // empty
     }

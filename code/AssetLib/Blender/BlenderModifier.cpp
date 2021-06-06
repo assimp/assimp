@@ -90,7 +90,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
 
         const Structure *s = conv_data.db.dna.Get(cur->dna_type);
         if (!s) {
-            ASSIMP_LOG_WARN_F("BlendModifier: could not resolve DNA name: ", cur->dna_type);
+            ASSIMP_LOG_WARN("BlendModifier: could not resolve DNA name: ", cur->dna_type);
             continue;
         }
 
@@ -132,7 +132,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
             }
         }
         if (curgod) {
-            ASSIMP_LOG_WARN_F("Couldn't find a handler for modifier: ", dat.name);
+            ASSIMP_LOG_WARN("Couldn't find a handler for modifier: ", dat.name);
         }
     }
 
@@ -140,7 +140,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
     // object, we still can't say whether our modifier implementations were
     // able to fully do their job.
     if (ful) {
-        ASSIMP_LOG_DEBUG_F("BlendModifier: found handlers for ", cnt, " of ", ful, " modifiers on `", orig_object.id.name,
+        ASSIMP_LOG_DEBUG("BlendModifier: found handlers for ", cnt, " of ", ful, " modifiers on `", orig_object.id.name,
                 "`, check log messages above for errors");
     }
 }
@@ -248,7 +248,7 @@ void BlenderModifier_Mirror ::DoIt(aiNode &out, ConversionData &conv_data, const
     out.mMeshes = nind;
     out.mNumMeshes *= 2;
 
-    ASSIMP_LOG_INFO_F("BlendModifier: Applied the `Mirror` modifier to `",
+    ASSIMP_LOG_INFO("BlendModifier: Applied the `Mirror` modifier to `",
             orig_object.id.name, "`");
 }
 
@@ -277,7 +277,7 @@ void BlenderModifier_Subdivision ::DoIt(aiNode &out, ConversionData &conv_data, 
         break;
 
     default:
-        ASSIMP_LOG_WARN_F("BlendModifier: Unrecognized subdivision algorithm: ", mir.subdivType);
+        ASSIMP_LOG_WARN("BlendModifier: Unrecognized subdivision algorithm: ", mir.subdivType);
         return;
     };
 
@@ -292,7 +292,7 @@ void BlenderModifier_Subdivision ::DoIt(aiNode &out, ConversionData &conv_data, 
     subd->Subdivide(meshes, out.mNumMeshes, tempmeshes.get(), std::max(mir.renderLevels, mir.levels), true);
     std::copy(tempmeshes.get(), tempmeshes.get() + out.mNumMeshes, meshes);
 
-    ASSIMP_LOG_INFO_F("BlendModifier: Applied the `Subdivision` modifier to `",
+    ASSIMP_LOG_INFO("BlendModifier: Applied the `Subdivision` modifier to `",
             orig_object.id.name, "`");
 }
 

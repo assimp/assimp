@@ -176,7 +176,7 @@ inline static std::string MakeAbsolutePath(const char *in) {
     if (!ret) {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
-        ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
+        ASSIMP_LOG_WARN("Invalid path: ", std::string(in));
         out = in;
     }
     return out;

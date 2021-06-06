@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Ogre {
 
-const std::string MESH_VERSION_1_8 = "[MeshSerializer_v1.8]";
-const std::string SKELETON_VERSION_1_8 = "[Serializer_v1.80]";
-const std::string SKELETON_VERSION_1_1 = "[Serializer_v1.10]";
+static constexpr auto MESH_VERSION_1_8 = "[MeshSerializer_v1.8]";
+static constexpr auto SKELETON_VERSION_1_8 = "[Serializer_v1.80]";
+static constexpr auto SKELETON_VERSION_1_1 = "[Serializer_v1.10]";
 
 const unsigned short HEADER_CHUNK_ID = 0x1000;
 
@@ -155,7 +155,7 @@ uint16_t OgreBinarySerializer::ReadHeader(bool readLen) {
 
 #if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
     if (id != HEADER_CHUNK_ID) {
-        ASSIMP_LOG_DEBUG(Formatter::format() << (assetMode == AM_Mesh ? MeshHeaderToString(static_cast<MeshChunkId>(id)) : SkeletonHeaderToString(static_cast<SkeletonChunkId>(id))));
+        ASSIMP_LOG_DEBUG((assetMode == AM_Mesh ? MeshHeaderToString(static_cast<MeshChunkId>(id)) : SkeletonHeaderToString(static_cast<SkeletonChunkId>(id))));
     }
 #endif
 
@@ -168,7 +168,7 @@ void OgreBinarySerializer::RollbackHeader() {
 
 void OgreBinarySerializer::SkipBytes(size_t numBytes) {
 #if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
-    ASSIMP_LOG_VERBOSE_DEBUG_F("Skipping ", numBytes, " bytes");
+    ASSIMP_LOG_VERBOSE_DEBUG("Skipping ", numBytes, " bytes");
 #endif
 
     m_reader->IncPtr(numBytes);
@@ -208,7 +208,7 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh) {
     mesh->hasSkeletalAnimations = Read<bool>();
 
     ASSIMP_LOG_VERBOSE_DEBUG("Reading Mesh");
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Skeletal animations: ", mesh->hasSkeletalAnimations ? "true" : "false");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Skeletal animations: ", mesh->hasSkeletalAnimations ? "true" : "false");
 
     if (!AtEnd()) {
         uint16_t id = ReadHeader();
@@ -364,9 +364,9 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     submesh->indexData->faceCount = static_cast<uint32_t>(submesh->indexData->count / 3);
     submesh->indexData->is32bit = Read<bool>();
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("Reading SubMesh ", mesh->subMeshes.size());
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Material: '", submesh->materialRef, "'");
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Uses shared geometry: ", submesh->usesSharedVertexData ? "true" : "false");
+    ASSIMP_LOG_VERBOSE_DEBUG("Reading SubMesh ", mesh->subMeshes.size());
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Material: '", submesh->materialRef, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Uses shared geometry: ", submesh->usesSharedVertexData ? "true" : "false");
 
     // Index buffer
     if (submesh->indexData->count > 0) {
@@ -374,7 +374,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
         uint8_t *indexBuffer = ReadBytes(numBytes);
         submesh->indexData->buffer = MemoryStreamPtr(new Assimp::MemoryIOStream(indexBuffer, numBytes, true));
 
-        ASSIMP_LOG_VERBOSE_DEBUG_F("  - ", submesh->indexData->faceCount,
+        ASSIMP_LOG_VERBOSE_DEBUG("  - ", submesh->indexData->faceCount,
                 " faces from ", submesh->indexData->count, (submesh->indexData->is32bit ? " 32bit" : " 16bit"),
                 " indexes of ", numBytes, " bytes");
     }
@@ -475,7 +475,7 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh) {
             }
 
             submesh->name = ReadLine();
-            ASSIMP_LOG_VERBOSE_DEBUG_F("  - SubMesh ", submesh->index, " name '", submesh->name, "'");
+            ASSIMP_LOG_VERBOSE_DEBUG("  - SubMesh ", submesh->index, " name '", submesh->name, "'");
 
             if (!AtEnd())
                 id = ReadHeader();
@@ -488,7 +488,7 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh) {
 void OgreBinarySerializer::ReadGeometry(VertexData *dest) {
     dest->count = Read<uint32_t>();
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  - Reading geometry of ", dest->count, " vertices");
+    ASSIMP_LOG_VERBOSE_DEBUG("  - Reading geometry of ", dest->count, " vertices");
 
     if (!AtEnd()) {
         uint16_t id = ReadHeader();
@@ -536,7 +536,7 @@ void OgreBinarySerializer::ReadGeometryVertexElement(VertexData *dest) {
     element.offset = Read<uint16_t>();
     element.index = Read<uint16_t>();
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("    - Vertex element ", element.SemanticToString(), " of type ",
+    ASSIMP_LOG_VERBOSE_DEBUG("    - Vertex element ", element.SemanticToString(), " of type ",
             element.TypeToString(), " index=", element.index, " source=", element.source);
 
     dest->vertexElements.push_back(element);
@@ -557,7 +557,7 @@ void OgreBinarySerializer::ReadGeometryVertexBuffer(VertexData *dest) {
     uint8_t *vertexBuffer = ReadBytes(numBytes);
     dest->vertexBindings[bindIndex] = MemoryStreamPtr(new Assimp::MemoryIOStream(vertexBuffer, numBytes, true));
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("    - Read vertex buffer for source ", bindIndex, " of ", numBytes, " bytes");
+    ASSIMP_LOG_VERBOSE_DEBUG("    - Read vertex buffer for source ", bindIndex, " of ", numBytes, " bytes");
 }
 
 void OgreBinarySerializer::ReadEdgeList(Mesh * /*mesh*/) {
@@ -777,12 +777,12 @@ bool OgreBinarySerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml 
 
 MemoryStreamReaderPtr OgreBinarySerializer::OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename) {
     if (!EndsWith(filename, ".skeleton", false)) {
-        ASSIMP_LOG_ERROR_F("Imported Mesh is referencing to unsupported '", filename, "' skeleton file.");
+        ASSIMP_LOG_ERROR("Imported Mesh is referencing to unsupported '", filename, "' skeleton file.");
         return MemoryStreamReaderPtr();
     }
 
     if (!pIOHandler->Exists(filename)) {
-        ASSIMP_LOG_ERROR_F("Failed to find skeleton file '", filename, "' that is referenced by imported Mesh.");
+        ASSIMP_LOG_ERROR("Failed to find skeleton file '", filename, "' that is referenced by imported Mesh.");
         return MemoryStreamReaderPtr();
     }
 
@@ -874,7 +874,7 @@ void OgreBinarySerializer::ReadBone(Skeleton *skeleton) {
         throw DeadlyImportError("Ogre Skeleton bone indexes not contiguous. Error at bone index ", bone->id);
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("    ", bone->id, " ", bone->name);
+    ASSIMP_LOG_VERBOSE_DEBUG("    ", bone->id, " ", bone->name);
 
     skeleton->bones.push_back(bone);
 }
@@ -919,7 +919,7 @@ void OgreBinarySerializer::ReadSkeletonAnimation(Skeleton *skeleton) {
 
     skeleton->animations.push_back(anim);
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("    ", anim->name, " (", anim->length, " sec, ", anim->tracks.size(), " tracks)");
+    ASSIMP_LOG_VERBOSE_DEBUG("    ", anim->name, " (", anim->length, " sec, ", anim->tracks.size(), " tracks)");
 }
 
 void OgreBinarySerializer::ReadSkeletonAnimationTrack(Skeleton * /*skeleton*/, Animation *dest) {

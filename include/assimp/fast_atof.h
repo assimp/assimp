@@ -29,6 +29,7 @@
 #include "StringComparison.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Exceptional.h>
+#include <assimp/StringUtils.h>
 
 #ifdef _MSC_VER
 #  include <stdint.h>
@@ -193,7 +194,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 
     if ( *in < '0' || *in > '9' ) {
         // The string is known to be bad, so don't risk printing the whole thing.
-        throw ExceptionType("The string \"", std::string(in).substr(0, 100), "\" cannot be converted into a value." );
+        throw ExceptionType("The string \"", ai_str_toprintable(in, 30), "\" cannot be converted into a value." );
     }
 
     for ( ;; ) {
@@ -205,7 +206,7 @@ uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* max_ino
 
         // numeric overflow, we rely on you
         if ( new_value < value ) {
-            ASSIMP_LOG_WARN_F( "Converting the string \"", in, "\" into a value resulted in overflow." );
+            ASSIMP_LOG_WARN( "Converting the string \"", in, "\" into a value resulted in overflow." );
             return 0;
         }
 
@@ -293,7 +294,7 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
     if (!(c[0] >= '0' && c[0] <= '9') &&
             !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')) {
         // The string is known to be bad, so don't risk printing the whole thing.
-        throw ExceptionType("Cannot parse string \"", std::string(c).substr(0, 100), 
+        throw ExceptionType("Cannot parse string \"", ai_str_toprintable(c, 30),
                                     "\" as a real number: does not start with digit "
                                     "or decimal point followed by digit.");
     }

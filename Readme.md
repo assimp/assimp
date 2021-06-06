@@ -42,7 +42,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 * [.NET](https://bitbucket.org/Starnick/assimpnet/src/master/)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
-* [Unity 3d Plugin](https://www.assetstore.unity3d.com/en/#!/content/91777)
+* [Unity 3d Plugin](https://ricardoreis.net/trilib-2/)
 * [JVM](https://github.com/kotlin-graphics/assimp) Full jvm port (current [status](https://github.com/kotlin-graphics/assimp/wiki/Status))
 * [HAXE-Port](https://github.com/longde123/assimp-haxe) The Assimp-HAXE-port.
 * [Rust](https://github.com/jkvargas/russimp)
@@ -66,9 +66,9 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 
 The source code is organized in the following way:
 
-	code/Common		The base implementation for importers and the infrastructure
-	code/PostProcessing	The post-processing steps
-	code/<FormatName>	Implementation for import and export for the format
+	code/Common			The base implementation for importers and the infrastructure
+	code/PostProcessing		The post-processing steps
+	code/AssetLib/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###
 For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.

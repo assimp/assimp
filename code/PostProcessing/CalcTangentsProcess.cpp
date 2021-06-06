@@ -129,7 +129,7 @@ bool CalcTangentsProcess::ProcessMesh(aiMesh *pMesh, unsigned int meshIndex) {
         return false;
     }
     if (configSourceUV >= AI_MAX_NUMBER_OF_TEXTURECOORDS || !pMesh->mTextureCoords[configSourceUV]) {
-        ASSIMP_LOG_ERROR((Formatter::format("Failed to compute tangents; need UV data in channel"), configSourceUV));
+        ASSIMP_LOG_ERROR("Failed to compute tangents; need UV data in channel", configSourceUV);
         return false;
     }
 

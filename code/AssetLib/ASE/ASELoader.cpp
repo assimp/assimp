@@ -614,7 +614,7 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
             node->mNumChildren++;
 
             // What we did is so great, it is at least worth a debug message
-            ASSIMP_LOG_VERBOSE_DEBUG("ASE: Generating separate target node (" + snode->mName + ")");
+            ASSIMP_LOG_VERBOSE_DEBUG("ASE: Generating separate target node (", snode->mName, ")");
         }
     }
 

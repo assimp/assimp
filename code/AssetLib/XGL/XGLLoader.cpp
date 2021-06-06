@@ -200,7 +200,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// parse the XML file
     mXmlParser = new XmlParser;
     if (!mXmlParser->parse(stream.get())) {
-		return;
+        throw DeadlyImportError("XML parse error while loading XGL file ", pFile);
 	}
 
 	TempScope scope;

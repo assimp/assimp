@@ -103,7 +103,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 
     if( !isNecessary )
     {
-        ASSIMP_LOG_DEBUG( format() << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones." );
+        ASSIMP_LOG_DEBUG("SplitByBoneCountProcess early-out: no meshes with more than ", mMaxBoneCount, " bones." );
         return;
     }
 
@@ -151,7 +151,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
     // recurse through all nodes and translate the node's mesh indices to fit the new mesh array
     UpdateNode( pScene->mRootNode);
 
-    ASSIMP_LOG_DEBUG( format() << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size() << " submeshes." );
+    ASSIMP_LOG_DEBUG( "SplitByBoneCountProcess end: split ", mSubMeshIndices.size(), " meshes into ", meshes.size(), " submeshes." );
 }
 
 // ------------------------------------------------------------------------------------------------

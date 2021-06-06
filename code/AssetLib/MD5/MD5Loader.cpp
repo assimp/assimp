@@ -345,7 +345,7 @@ void MD5Importer::LoadMD5MeshFile() {
 
     // Check whether we can read from the file
     if (file.get() == nullptr || !file->FileSize()) {
-        ASSIMP_LOG_WARN("Failed to access MD5MESH file: " + filename);
+        ASSIMP_LOG_WARN("Failed to access MD5MESH file: ", filename);
         return;
     }
     mHadMD5Mesh = true;
@@ -567,7 +567,7 @@ void MD5Importer::LoadMD5AnimFile() {
 
     // Check whether we can read from the file
     if (!file.get() || !file->FileSize()) {
-        ASSIMP_LOG_WARN("Failed to read MD5ANIM file: " + pFile);
+        ASSIMP_LOG_WARN("Failed to read MD5ANIM file: ", pFile);
         return;
     }
 

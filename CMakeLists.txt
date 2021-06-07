@@ -336,9 +336,9 @@ INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # Set Assimp project output directory variables.
-SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
+SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
+SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for archive output files")
 
 # Macro used to set the output directories of a target to the
 # respective Assimp output directories.
@@ -529,12 +529,12 @@ ENDIF()
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 
 SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
-  "Build the C4D importer, which relies on the non-free Melange SDK."
+  "Build the C4D importer, which relies on the non-free Cineware SDK."
 )
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   IF ( MSVC )
-    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/includes")
+    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/includes")
 
     # pick the correct prebuilt library
     IF(MSVC15)
@@ -553,22 +553,23 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
       )
     ENDIF()
 
-    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/libraries/win")
+    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/libraries/win")
 
     SET(C4D_DEBUG_LIBRARIES
-      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_debug.lib"
+      "${C4D_LIB_BASE_PATH}/cinewarelib${C4D_LIB_POSTFIX}/cinewarelib_debug.lib"
       "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_debug.lib"
     )
     SET(C4D_RELEASE_LIBRARIES
-      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_release.lib"
+      "${C4D_LIB_BASE_PATH}/cinewarelib${C4D_LIB_POSTFIX}/cinewarelib_release.lib"
       "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_release.lib"
     )
 
-    # winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
+    # winsock and winmm are necessary (and undocumented) dependencies of Cineware SDK because
+    # it can be used to communicate with a running Cinema 4D instance
     SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
   ELSE ()
     MESSAGE( FATAL_ERROR
-      "C4D is currently only available on Windows with melange SDK installed in contrib/Melange"
+      "C4D is currently only available on Windows with Cineware SDK installed in contrib/Cineware"
     )
   ENDIF ()
 ELSE ()

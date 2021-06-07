@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/StringComparison.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
 #include <assimp/ai_assert.h>
@@ -206,7 +207,7 @@ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 static void propId2StdString(Property *prop, std::string &name, std::string &key) {
-    name = key = "";
+    name = key = std::string();
     if (nullptr == prop) {
         return;
     }
@@ -220,6 +221,18 @@ static void propId2StdString(Property *prop, std::string &name, std::string &key
         if (Value::ValueType::ddl_string == prop->m_value->m_type) {
             key = prop->m_value->getString();
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+static void logDDLParserMessage (LogSeverity severity, const std::string &rawmsg) {
+    std::string msg = ai_str_toprintable(rawmsg);
+    switch (severity) {
+    case ddl_debug_msg: ASSIMP_LOG_DEBUG(msg);         break;
+    case ddl_info_msg:  ASSIMP_LOG_INFO(msg);          break;
+    case ddl_warn_msg:  ASSIMP_LOG_WARN(msg);          break;
+    case ddl_error_msg: ASSIMP_LOG_ERROR(msg);         break;
+    default:            ASSIMP_LOG_VERBOSE_DEBUG(msg); break;
     }
 }
 
@@ -306,6 +319,7 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
     pIOHandler->Close(file);
 
     OpenDDLParser myParser;
+    myParser.setLogCallback(&logDDLParserMessage);
     myParser.setBuffer(&buffer[0], buffer.size());
     bool success(myParser.parse());
     if (success) {
@@ -712,7 +726,7 @@ void OpenGEXImporter::handleMeshNode(ODDLParser::DDLNode *node, aiScene *pScene)
             } else if ("quads" == propKey) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
-                ASSIMP_LOG_WARN_F(propKey, " is not supported primitive type.");
+                ASSIMP_LOG_WARN(propKey, " is not supported primitive type.");
             }
         }
     }
@@ -735,22 +749,22 @@ enum MeshAttribute {
     TexCoord
 };
 
-static const std::string PosToken = "position";
-static const std::string ColToken = "color";
-static const std::string NormalToken = "normal";
-static const std::string TexCoordToken = "texcoord";
+constexpr auto PosToken = "position";
+constexpr auto ColToken = "color";
+constexpr auto NormalToken = "normal";
+constexpr auto TexCoordToken = "texcoord";
 
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName(const char *attribName) {
     ai_assert(nullptr != attribName);
 
-    if (0 == strncmp(PosToken.c_str(), attribName, PosToken.size())) {
+    if (0 == strcmp(PosToken, attribName)) {
         return Position;
-    } else if (0 == strncmp(ColToken.c_str(), attribName, ColToken.size())) {
+    } else if (0 == strcmp(ColToken, attribName)) {
         return Color;
-    } else if (0 == strncmp(NormalToken.c_str(), attribName, NormalToken.size())) {
+    } else if (0 == strcmp(NormalToken, attribName)) {
         return Normal;
-    } else if (0 == strncmp(TexCoordToken.c_str(), attribName, TexCoordToken.size())) {
+    } else if (0 == strcmp(TexCoordToken, attribName)) {
         return TexCoord;
     }
 

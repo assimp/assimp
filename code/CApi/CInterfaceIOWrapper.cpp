@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-CIOStreamWrapper::~CIOStreamWrapper(void) {
+CIOStreamWrapper::~CIOStreamWrapper() {
     /* Various places depend on this destructor to close the file */
     if (mFile) {
         mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
@@ -78,7 +78,7 @@ aiReturn CIOStreamWrapper::Seek(size_t pOffset,
 }
 
 // ...................................................................
-size_t CIOStreamWrapper::Tell(void) const {
+size_t CIOStreamWrapper::Tell() const {
     return mFile->TellProc(mFile);
 }
 

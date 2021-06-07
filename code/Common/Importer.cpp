@@ -149,7 +149,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 Importer::Importer()
  : pimpl( new ImporterPimpl ) {
     pimpl->mScene = nullptr;
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
 
     // Allocate a default IO handler
     pimpl->mIOHandler = new DefaultIOSystem;
@@ -232,7 +232,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp) {
 
 #ifdef ASSIMP_BUILD_DEBUG
         if (IsExtensionSupported(*it)) {
-            ASSIMP_LOG_WARN_F("The file extension ", *it, " is already in use");
+            ASSIMP_LOG_WARN("The file extension ", *it, " is already in use");
         }
 #endif
         baked += *it;
@@ -240,7 +240,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp) {
 
     // add the loader
     pimpl->mImporter.push_back(pImp);
-    ASSIMP_LOG_INFO_F("Registering custom importer for these file extensions: ", baked);
+    ASSIMP_LOG_INFO("Registering custom importer for these file extensions: ", baked);
     ASSIMP_END_EXCEPTION_REGION(aiReturn);
     
     return AI_SUCCESS;
@@ -387,7 +387,7 @@ void Importer::FreeScene( ) {
     delete pimpl->mScene;
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = "";
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(void);
 }
@@ -434,7 +434,7 @@ aiScene* Importer::GetOrphanedScene() {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     pimpl->mScene = nullptr;
 
-    pimpl->mErrorString = ""; // reset error string
+    pimpl->mErrorString = std::string();
     pimpl->mException = std::exception_ptr();
     ASSIMP_END_EXCEPTION_REGION(aiScene*);
     
@@ -519,7 +519,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
 // ------------------------------------------------------------------------------------------------
 void WriteLogOpening(const std::string& file) {
     
-    ASSIMP_LOG_INFO_F("Load ", file);
+    ASSIMP_LOG_INFO("Load ", file);
 
     // print a full version dump. This is nice because we don't
     // need to ask the authors of incoming bug reports for
@@ -665,7 +665,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
         if ( nullptr != desc ) {
             ext = desc->mName;
         }
-        ASSIMP_LOG_INFO("Found a matching importer for this file format: " + ext + "." );
+        ASSIMP_LOG_INFO("Found a matching importer for this file format: ", ext, "." );
         pimpl->mProgressHandler->UpdateFileRead( 0, fileSize );
 
         if (profiler) {

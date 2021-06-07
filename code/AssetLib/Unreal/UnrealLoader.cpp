@@ -228,9 +228,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     a_path = extension + "_a.3d";
     uc_path = extension + ".uc";
 
-    ASSIMP_LOG_DEBUG_F("UNREAL: data file is ", d_path);
-    ASSIMP_LOG_DEBUG_F("UNREAL: aniv file is ", a_path);
-    ASSIMP_LOG_DEBUG_F("UNREAL: uc file is ", uc_path);
+    ASSIMP_LOG_DEBUG("UNREAL: data file is ", d_path);
+    ASSIMP_LOG_DEBUG("UNREAL: aniv file is ", a_path);
+    ASSIMP_LOG_DEBUG("UNREAL: uc file is ", uc_path);
 
     // and open the files ... we can't live without them
     std::unique_ptr<IOStream> p(pIOHandler->Open(d_path));

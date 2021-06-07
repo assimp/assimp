@@ -69,7 +69,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     for (unsigned int i = 0; i < mScene->mMaterials.size(); ++i) {
         std::string s = mScene->mMaterials[i].mName;
         for (std::string::iterator it = s.begin(); it != s.end(); ++it) {
-            *it = static_cast<char>(::tolower(*it));
+            *it = static_cast<char>(::tolower(static_cast<unsigned char>(*it)));
         }
 
         if (std::string::npos == s.find("default")) continue;
@@ -212,7 +212,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
         mat.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
         // Be sure this is only done for the first material
-        mBackgroundImage = std::string("");
+        mBackgroundImage = std::string();
     }
 
     // At first add the base ambient color of the scene to the material

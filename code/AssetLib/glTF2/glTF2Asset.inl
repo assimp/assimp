@@ -58,7 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma clang diagnostic ignored "-Wsign-compare"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
+#if (__GNUC__ > 4)
 #pragma GCC diagnostic ignored "-Wbool-compare"
+#endif
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
@@ -162,6 +164,9 @@ inline static bool ReadValue(Value &val, T &out) {
 
 template <class T>
 inline static bool ReadMember(Value &obj, const char *id, T &out) {
+    if (!obj.IsObject()) {
+        return false;
+    }
     Value::MemberIterator it = obj.FindMember(id);
     if (it != obj.MemberEnd()) {
         return ReadHelper<T>::Read(it->value, out);
@@ -176,6 +181,9 @@ inline static T MemberOrDefault(Value &obj, const char *id, T defaultValue) {
 }
 
 inline Value *FindMember(Value &val, const char *id) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(id);
     return (it != val.MemberEnd()) ? &it->value : nullptr;
 }
@@ -193,6 +201,9 @@ inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const ch
 // Look-up functions with type checks. Context and extra context help the user identify the problem if there's an error.
 
 inline Value *FindStringInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(memberId);
     if (it == val.MemberEnd()) {
         return nullptr;
@@ -204,6 +215,9 @@ inline Value *FindStringInContext(Value &val, const char *memberId, const char* 
 }
 
 inline Value *FindNumberInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(memberId);
     if (it == val.MemberEnd()) {
         return nullptr;
@@ -215,6 +229,9 @@ inline Value *FindNumberInContext(Value &val, const char *memberId, const char* 
 }
 
 inline Value *FindUIntInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(memberId);
     if (it == val.MemberEnd()) {
         return nullptr;
@@ -226,6 +243,9 @@ inline Value *FindUIntInContext(Value &val, const char *memberId, const char* co
 }
 
 inline Value *FindArrayInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(memberId);
     if (it == val.MemberEnd()) {
         return nullptr;
@@ -237,6 +257,9 @@ inline Value *FindArrayInContext(Value &val, const char *memberId, const char* c
 }
 
 inline Value *FindObjectInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
     Value::MemberIterator it = val.FindMember(memberId);
     if (it == val.MemberEnd()) {
         return nullptr;
@@ -886,7 +909,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     {
         const Value* countValue = FindUInt(obj, "count");
-        if (!countValue || countValue->GetInt() < 1)
+        if (!countValue || countValue->GetUint() < 1)
         {
             throw DeadlyImportError("A strictly positive count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
         }
@@ -1105,7 +1128,9 @@ inline Accessor::Indexer::Indexer(Accessor &acc) :
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
-    ai_assert(i * stride < accessor.GetMaxByteSize());
+    if (i * stride >= accessor.GetMaxByteSize()) {
+        throw DeadlyImportError("GLTF: Invalid index ", i, ", count out of range for buffer with stride ", stride, " and size ", accessor.GetMaxByteSize(), ".");
+    }
     // Ensure that the memcpy doesn't overwrite the local.
     const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
@@ -1121,6 +1146,7 @@ inline Image::Image() :
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
+    //basisu: no need to handle .ktx2, .basis, load as is
     if (!mDataLength) {
         Value *curUri = FindString(obj, "uri");
         if (nullptr != curUri) {
@@ -2101,6 +2127,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_draco_mesh_compression);
+    CHECK_EXT(KHR_texture_basisu);
 
 #undef CHECK_EXT
 }

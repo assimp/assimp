@@ -108,7 +108,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
         if (rounded)
         {
             out -= rounded * static_cast<float>(AI_MATH_PI);
-            ASSIMP_LOG_INFO_F("Texture coordinate rotation ", info.mRotation, " can be simplified to ", out);
+            ASSIMP_LOG_INFO("Texture coordinate rotation ", info.mRotation, " can be simplified to ", out);
         }
 
         // Next step - convert negative rotation angles to positives
@@ -448,7 +448,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
         if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
             if (!DefaultLogger::isNullLogger()) {
-                ASSIMP_LOG_ERROR_F(static_cast<unsigned int>(trafo.size()), " UV channels required but just ", 
+                ASSIMP_LOG_ERROR(static_cast<unsigned int>(trafo.size()), " UV channels required but just ", 
                     AI_MAX_NUMBER_OF_TEXTURECOORDS, " available");
             }
             size = AI_MAX_NUMBER_OF_TEXTURECOORDS;
@@ -557,7 +557,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
     if (!DefaultLogger::isNullLogger()) {
 
         if (transformedChannels)    {
-            ASSIMP_LOG_INFO_F("TransformUVCoordsProcess end: ", outChannels, " output channels (in: ", inChannels, ", modified: ", transformedChannels,")");
+            ASSIMP_LOG_INFO("TransformUVCoordsProcess end: ", outChannels, " output channels (in: ", inChannels, ", modified: ", transformedChannels,")");
         } else {
             ASSIMP_LOG_DEBUG("TransformUVCoordsProcess finished");
         }

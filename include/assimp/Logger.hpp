@@ -99,34 +99,54 @@ public:
     virtual ~Logger();
 
     // ----------------------------------------------------------------------
-    /** @brief  Writes a debug message
-     *   @param message Debug message*/
+    /** @brief  Writes a info message
+     *  @param  message Info message*/
     void debug(const char* message);
-    void debug(const std::string &message);
+
+    template<typename... T>
+    void debug(T&&... args) {
+        debug(formatMessage(std::forward<T>(args)...).c_str());
+    }
 
     // ----------------------------------------------------------------------
 	/** @brief  Writes a debug message
      *   @param message Debug message*/
-	void verboseDebug(const char *message);
-	void verboseDebug(const std::string &message);
+    void verboseDebug(const char* message);
+    
+    template<typename... T>
+    void verboseDebug(T&&... args) {
+        verboseDebug(formatMessage(std::forward<T>(args)...).c_str());
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Writes a info message
      *  @param  message Info message*/
     void info(const char* message);
-    void info(const std::string &message);
+
+    template<typename... T>
+    void info(T&&... args) {
+        info(formatMessage(std::forward<T>(args)...).c_str());
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Writes a warning message
      *  @param  message Warn message*/
     void warn(const char* message);
-    void warn(const std::string &message);
+
+    template<typename... T>
+    void warn(T&&... args) {
+        warn(formatMessage(std::forward<T>(args)...).c_str());
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Writes an error message
-     *  @param  message Error message*/
+     *  @param  message Info message*/
     void error(const char* message);
-    void error(const std::string &message);
+
+    template<typename... T>
+    void error(T&&... args) {
+        error(formatMessage(std::forward<T>(args)...).c_str());
+    }
 
     // ----------------------------------------------------------------------
     /** @brief  Set a new log severity.
@@ -224,6 +244,15 @@ protected:
      *    the function is left.
      */
     virtual void OnError(const char* message) = 0;
+protected:
+    std::string formatMessage(Assimp::Formatter::format f) {
+        return f;
+    }
+
+    template<typename... T, typename U>
+    std::string formatMessage(Assimp::Formatter::format f, U&& u, T&&... args) {
+        return formatMessage(std::move(f << std::forward<U>(u)), std::forward<T>(args)...);
+    }
 
 protected:
     LogSeverity m_Severity;
@@ -266,66 +295,22 @@ Logger::LogSeverity Logger::getLogSeverity() const {
     return m_Severity;
 }
 
-// ----------------------------------------------------------------------------------
-inline
-void Logger::debug(const std::string &message) {
-    return debug(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
-inline void Logger::verboseDebug(const std::string &message) {
-	return verboseDebug(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
-inline
-void Logger::error(const std::string &message) {
-    return error(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
-inline
-void Logger::warn(const std::string &message) {
-    return warn(message.c_str());
-}
-
-// ----------------------------------------------------------------------------------
-inline
-void Logger::info(const std::string &message) {
-    return info(message.c_str());
-}
-
 } // Namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-#define ASSIMP_LOG_WARN_F(string, ...) \
-	Assimp::DefaultLogger::get()->warn((Assimp::Formatter::format(string), __VA_ARGS__))
+#define ASSIMP_LOG_WARN(...) \
+	Assimp::DefaultLogger::get()->warn(__VA_ARGS__)
 
-#define ASSIMP_LOG_ERROR_F(string, ...) \
-	Assimp::DefaultLogger::get()->error((Assimp::Formatter::format(string), __VA_ARGS__))
+#define ASSIMP_LOG_ERROR(...) \
+	Assimp::DefaultLogger::get()->error(__VA_ARGS__)
 
-#define ASSIMP_LOG_DEBUG_F(string, ...) \
-	Assimp::DefaultLogger::get()->debug((Assimp::Formatter::format(string), __VA_ARGS__))
+#define ASSIMP_LOG_DEBUG(...) \
+	Assimp::DefaultLogger::get()->debug(__VA_ARGS__)
 
-#define ASSIMP_LOG_VERBOSE_DEBUG_F(string, ...) \
-	Assimp::DefaultLogger::get()->verboseDebug((Assimp::Formatter::format(string), __VA_ARGS__))
+#define ASSIMP_LOG_VERBOSE_DEBUG(...) \
+	Assimp::DefaultLogger::get()->verboseDebug(__VA_ARGS__)
 
-#define ASSIMP_LOG_INFO_F(string, ...) \
-	Assimp::DefaultLogger::get()->info((Assimp::Formatter::format(string), __VA_ARGS__))
-
-#define ASSIMP_LOG_WARN(string) \
-	Assimp::DefaultLogger::get()->warn(string)
-
-#define ASSIMP_LOG_ERROR(string) \
-	Assimp::DefaultLogger::get()->error(string)
-
-#define ASSIMP_LOG_DEBUG(string) \
-	Assimp::DefaultLogger::get()->debug(string)
-
-#define ASSIMP_LOG_VERBOSE_DEBUG(string) \
-	Assimp::DefaultLogger::get()->verboseDebug(string)
-
-#define ASSIMP_LOG_INFO(string) \
-	Assimp::DefaultLogger::get()->info(string)
+#define ASSIMP_LOG_INFO(...) \
+	Assimp::DefaultLogger::get()->info(__VA_ARGS__)
 
 #endif // !! INCLUDED_AI_LOGGER_H

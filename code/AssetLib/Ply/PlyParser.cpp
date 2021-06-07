@@ -419,7 +419,8 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
         if (PLY::Element::ParseElement(streamBuffer, buffer, &out)) {
             // add the element to the list of elements
             alElements.push_back(out);
-        } else if (TokenMatch(buffer, "end_header", 10)) {
+        } else if ( TokenMatch(buffer, "end_header\r", 11) || //checks for header end with /r/n ending
+                    TokenMatch(buffer, "end_header", 10)) { //checks for /n ending, if it doesn't end with /r/n
             // we have reached the end of the header
             break;
         } else {

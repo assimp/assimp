@@ -1071,7 +1071,7 @@ struct AssetMetadata {
     void Read(Document &doc);
 
     AssetMetadata() :
-            version("") {}
+            version() {}
 };
 
 //
@@ -1118,11 +1118,13 @@ public:
         bool KHR_materials_transmission;
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
+        bool KHR_texture_basisu;
     } extensionsUsed;
 
     //! Keeps info about the required extensions
     struct RequiredExtensions {
         bool KHR_draco_mesh_compression;
+        bool KHR_texture_basisu;
     } extensionsRequired;
 
     AssetMetadata asset;

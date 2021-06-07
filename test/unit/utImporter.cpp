@@ -280,104 +280,84 @@ TEST_F(ImporterTest, SearchFileHeaderForTokenTest) {
     //    BaseImporter::SearchFileHeaderForToken( &ioSystem, assetPath, Token, 2 )
 }
 
+namespace {
+// Description for an importer which fails in specific ways.
+aiImporterDesc s_failingImporterDescription = {
+    "Failing importer",
+    "assimp team",
+    "",
+    "",
+    0,
+    1,
+    0,
+    1,
+    0,
+    "fail"
+};
 
-namespace
-{
-    // Description for an importer which fails in specific ways.
-    aiImporterDesc s_failingImporterDescription = {
-        "Failing importer",
-        "assimp team",
-        "",
-        "",
-        0,
-        1,
-        0,
-        1,
-        0,
-        "fail"
-    };
+// This importer fails in specific ways.
+class FailingImporter : public Assimp::BaseImporter {
+public:
+    virtual ~FailingImporter() = default;
+    virtual bool CanRead(const std::string &, Assimp::IOSystem *, bool) const override {
+        return true;
+    }
 
-    // This importer fails in specific ways.
-    class FailingImporter : public Assimp::BaseImporter {
-    public:
-        virtual ~FailingImporter() = default;
-        virtual bool CanRead( const std::string&, Assimp::IOSystem*, bool ) const override
-        {
-            return true;
+protected:
+    const aiImporterDesc *GetInfo() const override {
+        return &s_failingImporterDescription;
+    }
+
+    void InternReadFile(const std::string &pFile, aiScene *, Assimp::IOSystem *) override {
+        if (pFile == "deadlyImportError.fail") {
+            throw DeadlyImportError("Deadly import error test. Details: ", 42, " More Details: ", "Failure");
+        } else if (pFile == "stdException.fail") {
+            throw std::runtime_error("std::exception test");
+        } else if (pFile == "unexpectedException.fail") {
+            throw 5;
         }
+    }
+};
+} // namespace
 
-    protected:
-        virtual const aiImporterDesc* GetInfo() const override { return &s_failingImporterDescription; }
-
-        virtual void InternReadFile( const std::string& pFile, aiScene*, Assimp::IOSystem* ) override
-        {
-            if (pFile == "deadlyImportError.fail")
-            {
-                throw DeadlyImportError("Deadly import error test. Details: ", 42, " More Details: ", "Failure");
-            }
-            else if (pFile == "stdException.fail")
-            {
-                throw std::runtime_error("std::exception test");
-            }
-            else if (pFile == "unexpectedException.fail")
-            {
-                throw 5;
-            }
-        }
-    };
-}
-
-TEST_F(ImporterTest, deadlyImportError)
-{
+TEST_F(ImporterTest, deadlyImportError) {
     pImp->RegisterLoader(new FailingImporter);
     pImp->SetIOHandler(new TestIOSystem);
-    const aiScene* scene = pImp->ReadFile("deadlyImportError.fail", 0);
+    const aiScene *scene = pImp->ReadFile("deadlyImportError.fail", 0);
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "Deadly import error test. Details: 42 More Details: Failure");
     EXPECT_NE(pImp->GetException(), std::exception_ptr());
 }
 
-TEST_F(ImporterTest, stdException)
-{
+TEST_F(ImporterTest, stdException) {
     pImp->RegisterLoader(new FailingImporter);
     pImp->SetIOHandler(new TestIOSystem);
-    const aiScene* scene = pImp->ReadFile("stdException.fail", 0);
+    const aiScene *scene = pImp->ReadFile("stdException.fail", 0);
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "std::exception test");
     EXPECT_NE(pImp->GetException(), std::exception_ptr());
-    try
-    {
+    try {
         std::rethrow_exception(pImp->GetException());
-    }
-    catch(const std::exception& e)
-    {
+    } catch (const std::exception &e) {
         EXPECT_STREQ(e.what(), "std::exception test");
-    }
-    catch(...)
-    {
+    } catch (...) {
         EXPECT_TRUE(false);
     }
 }
 
-TEST_F(ImporterTest, unexpectedException)
-{
+TEST_F(ImporterTest, unexpectedException) {
     pImp->RegisterLoader(new FailingImporter);
     pImp->SetIOHandler(new TestIOSystem);
-    const aiScene* scene = pImp->ReadFile("unexpectedException.fail", 0);
+    const aiScene *scene = pImp->ReadFile("unexpectedException.fail", 0);
 
     EXPECT_EQ(scene, nullptr);
     EXPECT_STREQ(pImp->GetErrorString(), "Unknown exception");
     ASSERT_NE(pImp->GetException(), std::exception_ptr());
-    try
-    {
+    try {
         std::rethrow_exception(pImp->GetException());
-    }
-    catch(int x)
-    {
+    } catch (int x) {
         EXPECT_EQ(x, 5);
-    }
-    catch(...)
-    {
+    } catch (...) {
         EXPECT_TRUE(false);
     }
 }

@@ -81,6 +81,7 @@ __Exporters__:
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
 - STEP
+- [PBRTv4](https://github.com/mmp/pbrt-v4)
 - glTF 1.0 (partial)
 - glTF 2.0 (partial)
 - 3MF ( experimental )

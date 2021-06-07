@@ -541,10 +541,17 @@ void FBXExporter::WriteReferences ()
 // (before any actual data is written)
 // ---------------------------------------------------------------
 
-size_t count_nodes(const aiNode* n) {
-    size_t count = 1;
+size_t count_nodes(const aiNode* n, const aiNode* root) {
+    size_t count;
+    if (n == root) {
+        count = n->mNumMeshes; // (not counting root node)
+    } else if (n->mNumMeshes > 1) {
+        count = n->mNumMeshes + 1;
+    } else {
+        count = 1;
+    }
     for (size_t i = 0; i < n->mNumChildren; ++i) {
-        count += count_nodes(n->mChildren[i]);
+        count += count_nodes(n->mChildren[i], root);
     }
     return count;
 }
@@ -714,7 +721,7 @@ void FBXExporter::WriteDefinitions ()
 
     // Model / FbxNode
     // <~~ node hierarchy
-    count = int32_t(count_nodes(mScene->mRootNode)) - 1; // (not counting root node)
+    count = int32_t(count_nodes(mScene->mRootNode, mScene->mRootNode));
     if (count) {
         n = FBX::Node("ObjectType", "Model");
         n.AddChild("Count", count);
@@ -1789,13 +1796,13 @@ void FBXExporter::WriteObjects ()
             blendchannel_uid, blendshape_name + FBX::SEPARATOR + "SubDeformer", "BlendShapeChannel"
         );
         sdnode.AddChild("Version", int32_t(100));
-        sdnode.AddChild("DeformPercent", int32_t(100));
+        sdnode.AddChild("DeformPercent", float_t(0.0));
         FBX::Node p("Properties70");
-        p.AddP70numberA("DeformPercent", 100.);
+        p.AddP70numberA("DeformPercent", 0.0);
         sdnode.AddChild(p);
         // TODO: Normally just one weight per channel, adding stub for later development
         std::vector<float>fFullWeights;
-        fFullWeights.push_back(0.);
+        fFullWeights.push_back(100.);
         sdnode.AddChild("FullWeights", fFullWeights);
         sdnode.Dump(outstream, binary, indent);
 
@@ -2625,17 +2632,14 @@ void FBXExporter::WriteModelNodes(
                 ],
                 new_node_uid
             );
-            // write model node
-            FBX::Node m("Model");
+
+            aiNode new_node;
             // take name from mesh name, if it exists
-            std::string name = mScene->mMeshes[node->mMeshes[i]]->mName.C_Str();
-            name += FBX::SEPARATOR + "Model";
-            m.AddProperties(new_node_uid, name, "Mesh");
-            m.AddChild("Version", int32_t(232));
-            FBX::Node p("Properties70");
-            p.AddP70enum("InheritType", 1);
-            m.AddChild(p);
-            m.Dump(outstream, binary, 1);
+            new_node.mName = mScene->mMeshes[node->mMeshes[i]]->mName;
+            // write model node
+            WriteModelNode(
+                outstream, binary, &new_node, new_node_uid, "Mesh", std::vector<std::pair<std::string,aiVector3D>>()
+            );
         }
     }
 

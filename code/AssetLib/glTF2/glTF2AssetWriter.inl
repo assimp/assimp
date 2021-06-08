@@ -250,6 +250,7 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
+        //basisu: no need to handle .ktx2, .basis, write as is
         if (img.bufferView) {
             obj.AddMember("bufferView", img.bufferView->index, w.mAl);
             obj.AddMember("mimeType", Value(img.mimeType, w.mAl).Move(), w.mAl);
@@ -892,10 +893,22 @@ namespace glTF2 {
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {
                 exts.PushBack(StringRef("FB_ngon_encoding"), mAl);
             }
+            
+            if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
+                exts.PushBack(StringRef("KHR_texture_basisu"), mAl);
+            }
         }
 
         if (!exts.Empty())
             mDoc.AddMember("extensionsUsed", exts, mAl);
+            
+        //basisu extensionRequired
+        Value extsReq;
+        extsReq.SetArray();
+        if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
+            extsReq.PushBack(StringRef("KHR_texture_basisu"), mAl);
+            mDoc.AddMember("extensionsRequired", extsReq, mAl);
+        }
     }
 
     template<class T>

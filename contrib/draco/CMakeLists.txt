@@ -804,7 +804,7 @@ else()
       draco_points_enc)
 
   # Library targets that consume the object collections.
-  if(MSVC OR WIN32)
+  if(MSVC)
     # In order to produce a DLL and import library the Windows tools require
     # that the exported symbols are part of the DLL target. The unfortunate side
     # effect of this is that a single configuration cannot output both the
@@ -889,9 +889,6 @@ else()
     # For Mac, we need to build a .bundle for the unity plugin.
     if(APPLE)
       set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
-    elseif(NOT unity_decoder_lib_type STREQUAL STATIC)
-      set_target_properties(dracodec_unity
-                            PROPERTIES SOVERSION ${DRACO_SOVERSION})
     endif()
   endif()
 
@@ -916,9 +913,6 @@ else()
     # For Mac, we need to build a .bundle for the plugin.
     if(APPLE)
       set_target_properties(draco_maya_wrapper PROPERTIES BUNDLE true)
-    else()
-      set_target_properties(draco_maya_wrapper
-                            PROPERTIES SOVERSION ${DRACO_SOVERSION})
     endif()
   endif()
 

@@ -57,10 +57,9 @@ using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    virtual bool importerMatTest(const char *file, bool spec_gloss, std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap }) {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
-                aiProcess_ValidateDataStructure);
+        const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
         EXPECT_NE(scene, nullptr);
         if (!scene) {
             return false;
@@ -72,13 +71,49 @@ public:
         }
         const aiMaterial *material = scene->mMaterials[0];
 
+        // This Material should be a PBR
+        aiShadingMode shadingMode;
+        EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_SHADING_MODEL, shadingMode));
+        EXPECT_EQ(aiShadingMode_PBR_BRDF, shadingMode);
+
+        // Should import the texture as diffuse and as base color
         aiString path;
-        aiTextureMapMode modes[2];
+        std::array<aiTextureMapMode,2> modes;
         EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
-                                            nullptr, nullptr, modes));
+                                            nullptr, nullptr, modes.data()));
         EXPECT_STREQ(path.C_Str(), "CesiumLogoFlat.png");
-        EXPECT_EQ(modes[0], aiTextureMapMode_Mirror);
-        EXPECT_EQ(modes[1], aiTextureMapMode_Clamp);
+        EXPECT_EQ(exp_modes, modes);
+
+        // Also as Base Color
+        EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_BASE_COLOR, 0, &path, nullptr, nullptr,
+                                            nullptr, nullptr, modes.data()));
+        EXPECT_STREQ(path.C_Str(), "CesiumLogoFlat.png");
+        EXPECT_EQ(exp_modes, modes);
+
+        // Should have a MetallicFactor (default is 1.0)
+        ai_real metal_factor = ai_real(0.5);
+        EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_METALLIC_FACTOR, metal_factor));
+        EXPECT_EQ(ai_real(0.0), metal_factor);
+
+        // And a roughness factor (default is 1.0)
+        ai_real roughness_factor = ai_real(0.5);
+        EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness_factor));
+        EXPECT_EQ(ai_real(1.0), roughness_factor);
+
+        aiColor3D spec_color = { 0, 0, 0 };
+        ai_real glossiness = ai_real(0.5);
+        if (spec_gloss) {
+            EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_COLOR_SPECULAR, spec_color));
+            constexpr ai_real spec_val(0.20000000298023225); // From the file
+            EXPECT_EQ(spec_val, spec_color.r);
+            EXPECT_EQ(spec_val, spec_color.g);
+            EXPECT_EQ(spec_val, spec_color.b);
+            EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_GLOSSINESS_FACTOR, glossiness));
+            EXPECT_EQ(ai_real(1.0), glossiness);
+        } else {
+            EXPECT_EQ(aiReturn_FAILURE, material->Get(AI_MATKEY_COLOR_SPECULAR, spec_color));
+            EXPECT_EQ(aiReturn_FAILURE, material->Get(AI_MATKEY_GLOSSINESS_FACTOR, glossiness));
+        }
 
         return true;
     }
@@ -105,11 +140,15 @@ public:
 };
 
 TEST_F(utglTF2ImportExport, importglTF2FromFileTest) {
-    EXPECT_TRUE(importerTest());
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", false, {aiTextureMapMode_Mirror, aiTextureMapMode_Clamp}));
 }
 
 TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
     EXPECT_TRUE(binaryImporterTest());
+}
+
+TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured.gltf", true));
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

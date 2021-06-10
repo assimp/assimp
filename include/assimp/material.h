@@ -202,11 +202,15 @@ enum aiTextureType {
 
     /** The texture is combined with the result of the diffuse
      *  lighting equation.
+     *  OR
+     *  PBR Specular/Glossiness
      */
     aiTextureType_DIFFUSE = 1,
 
     /** The texture is combined with the result of the specular
      *  lighting equation.
+     *  OR
+     *  PBR Specular/Glossiness
      */
     aiTextureType_SPECULAR = 2,
 
@@ -309,7 +313,9 @@ ASSIMP_API const char *TextureTypeToString(enum aiTextureType in);
 
 // ---------------------------------------------------------------------------
 /** @brief Defines all shading models supported by the library
- *
+ * 
+ *  #AI_MATKEY_SHADING_MODEL
+ * 
  *  The list of shading modes has been taken from Blender.
  *  See Blender documentation for more information. The API does
  *  not distinguish between "specular" and "diffuse" shaders (thus the
@@ -364,12 +370,26 @@ enum aiShadingMode {
     aiShadingMode_CookTorrance = 0x8,
 
     /** No shading at all. Constant light influence of 1.0.
+    * Also known as "Unlit"
     */
     aiShadingMode_NoShading = 0x9,
+    aiShadingMode_Unlit = aiShadingMode_NoShading, // Alias
 
     /** Fresnel shading
      */
     aiShadingMode_Fresnel = 0xa,
+
+    /** Physically-Based Rendering (PBR) shading using
+    * Bidirectional scattering/reflectance distribution function (BSDF/BRDF)
+    * There are multiple methods under this banner, and model files may provide
+    * data for more than one PBR-BRDF method.
+    * Applications should use the set of provided properties to determine which
+    * of their preferred PBDR methods are available
+    * eg:
+    * - If AI_MATKEY_METALLIC_FACTOR is set, then a Metallic/Roughness is available
+    * - If AI_MATKEY_COLOR_SPECULAR is set, then a Specular/Glossiness is available
+    */
+    aiShadingMode_PBR_BRDF = 0xb,
 
 #ifndef SWIG
     _aiShadingMode_Force32Bit = INT_MAX
@@ -923,11 +943,29 @@ extern "C" {
 // ---------------------------------------------------------------------------
 // PBR material support
 #define AI_MATKEY_USE_COLOR_MAP "$mat.useColorMap", 0, 0
+
+// Metallic/Roughness Workflow
+// ---------------------------
+// Base color factor. Will be multiplied by final base color texture values if extant
 #define AI_MATKEY_BASE_COLOR "$clr.base", 0, 0
 #define AI_MATKEY_USE_METALLIC_MAP "$mat.useMetallicMap", 0, 0
+// Metallic factor. 0.0 = Full Dielectric, 1.0 = Full Metal
 #define AI_MATKEY_METALLIC_FACTOR "$mat.metallicFactor", 0, 0
 #define AI_MATKEY_USE_ROUGHNESS_MAP "$mat.useRoughnessMap", 0, 0
+// Roughness factor. 0.0 = Perfectly Smooth, 1.0 = Completely Rough
 #define AI_MATKEY_ROUGHNESS_FACTOR "$mat.roughnessFactor", 0, 0
+
+// Specular/Glossiness Workflow
+// ---------------------------
+// Diffuse/Albedo Color. Note: Pure Metals have a diffuse of {0,0,0}
+// AI_MATKEY_COLOR_DIFFUSE
+// Specular Color
+// AI_MATKEY_COLOR_SPECULAR
+// Glossiness factor. 0.0 = Completely Rough, 1.0 = Perfectly Smooth
+#define AI_MATKEY_GLOSSINESS_FACTOR "$mat.glossinessFactor", 0, 0
+
+// Emissive
+// --------
 #define AI_MATKEY_USE_EMISSIVE_MAP "$mat.useEmissiveMap", 0, 0
 #define AI_MATKEY_EMISSIVE_INTENSITY "$mat.emissiveIntensity", 0, 0
 #define AI_MATKEY_USE_AO_MAP "$mat.useAOMap", 0, 0

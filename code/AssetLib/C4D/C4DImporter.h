@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,8 +56,8 @@ struct aiMaterial;
 
 struct aiImporterDesc;
 
-namespace melange {
-    class BaseObject; // c4d_file.h
+namespace cineware {
+    class BaseObject;
     class PolygonObject;
     class BaseMaterial;
     class BaseShader;
@@ -71,43 +71,34 @@ namespace Assimp  {
     }
 
 // -------------------------------------------------------------------------------------------
-/** Importer class to load Cinema4D files using the Melange library to be obtained from
- *  www.plugincafe.com
+/** Importer class to load Cinema4D files using the Cineware library to be obtained from
+ *  https://developers.maxon.net
  *
- *  Note that Melange is not free software. */
+ *  Note that Cineware is not free software. */
 // -------------------------------------------------------------------------------------------
 class C4DImporter : public BaseImporter, public LogFunctions<C4DImporter> {
 public:
-    C4DImporter();
-    ~C4DImporter();
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead( const std::string& pFile, IOSystem*, bool checkSig) const override;
 
 protected:
 
-    // --------------------
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo () const override;
 
-    // --------------------
-    void SetupProperties(const Importer* pImp);
-
-    // --------------------
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile( const std::string& pFile, aiScene*, IOSystem* ) override;
 
 private:
 
-    void ReadMaterials(melange::BaseMaterial* mat);
-    void RecurseHierarchy(melange::BaseObject* object, aiNode* parent);
-    aiMesh* ReadMesh(melange::BaseObject* object);
-    unsigned int ResolveMaterial(melange::PolygonObject* obj);
+    void ReadMaterials(cineware::BaseMaterial* mat);
+    void RecurseHierarchy(cineware::BaseObject* object, aiNode* parent);
+    aiMesh* ReadMesh(cineware::BaseObject* object);
+    unsigned int ResolveMaterial(cineware::PolygonObject* obj);
 
-    bool ReadShader(aiMaterial* out, melange::BaseShader* shader);
+    bool ReadShader(aiMaterial* out, cineware::BaseShader* shader);
 
     std::vector<aiMesh*> meshes;
     std::vector<aiMaterial*> materials;
 
-    typedef std::map<melange::BaseMaterial*, unsigned int> MaterialMap;
+    typedef std::map<cineware::BaseMaterial*, unsigned int> MaterialMap;
     MaterialMap material_mapping;
 
 }; // !class C4DImporter

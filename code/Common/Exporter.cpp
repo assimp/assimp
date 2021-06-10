@@ -343,9 +343,11 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
         delete pimpl->blob;
         pimpl->blob = nullptr;
     }
+    
+    auto baseName = pProperties ? pProperties->GetPropertyString(AI_CONFIG_EXPORT_BLOB_NAME, AI_BLOBIO_MAGIC) : AI_BLOBIO_MAGIC;
 
     std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
-    BlobIOSystem* blobio = new BlobIOSystem();
+    BlobIOSystem *blobio = new BlobIOSystem(baseName);
     pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
     if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName(), pPreprocessing, pProperties)) {

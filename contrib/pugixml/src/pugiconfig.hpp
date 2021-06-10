@@ -1,8 +1,8 @@
 /**
- * pugixml parser - version 1.9
+ * pugixml parser - version 1.11
  * --------------------------------------------------------
- * Copyright (C) 2006-2018, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
- * Report bugs and download new versions at http://pugixml.org/
+ * Copyright (C) 2006-2020, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * Report bugs and download new versions at https://pugixml.org/
  *
  * This library is distributed under the MIT License. See notice at the end
  * of this file.
@@ -30,10 +30,8 @@
 // #define PUGIXML_NO_EXCEPTIONS
 
 // Set this to control attributes for public classes/functions, i.e.:
-//#ifdef _WIN32
-//#define PUGIXML_API __declspec(dllexport) // to export all public symbols from DLL
-//#define PUGIXML_CLASS __declspec(dllimport) // to import all classes from DLL
-//#endif
+// #define PUGIXML_API __declspec(dllexport) // to export all public symbols from DLL
+// #define PUGIXML_CLASS __declspec(dllimport) // to import all classes from DLL
 // #define PUGIXML_FUNCTION __fastcall // to set calling conventions to all public functions to fastcall
 // In absence of PUGIXML_CLASS/PUGIXML_FUNCTION definitions PUGIXML_API is used instead
 
@@ -42,16 +40,19 @@
 // #define PUGIXML_MEMORY_OUTPUT_STACK 10240
 // #define PUGIXML_MEMORY_XPATH_PAGE_SIZE 4096
 
+// Tune this constant to adjust max nesting for XPath queries
+// #define PUGIXML_XPATH_DEPTH_LIMIT 1024
+
 // Uncomment this to switch to header-only version
 #define PUGIXML_HEADER_ONLY
 
 // Uncomment this to enable long long support
-//#define PUGIXML_HAS_LONG_LONG
+// #define PUGIXML_HAS_LONG_LONG
 
 #endif
 
 /**
- * Copyright (c) 2006-2018 Arseny Kapoulkine
+ * Copyright (c) 2006-2020 Arseny Kapoulkine
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation

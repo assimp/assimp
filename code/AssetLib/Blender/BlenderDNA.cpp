@@ -198,9 +198,9 @@ void DNAParser::Parse() {
         s.size = offset;
     }
 
-    ASSIMP_LOG_DEBUG_F("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
+    ASSIMP_LOG_DEBUG("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
     dna.DumpToFile();
 #endif
 
@@ -208,7 +208,7 @@ void DNAParser::Parse() {
     dna.RegisterConverters();
 }
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
 
 #include <fstream>
 // ------------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ void DNA ::DumpToFile() {
 
     ASSIMP_LOG_INFO("BlenderDNA: Dumped dna to dna.txt");
 }
-#endif
+#endif // ASSIMP_BUILD_BLENDER_DEBUG_DNA
 
 // ------------------------------------------------------------------------------------------------
 /*static*/ void DNA ::ExtractArraySize(

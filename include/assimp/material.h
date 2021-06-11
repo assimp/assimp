@@ -1014,7 +1014,8 @@ extern "C" {
 
 // Clearcoat
 // ---------
-#define AI_MATKEY_CLEARCOAT_FACTOR "$clr.clearcoat.factor", 0, 0
+// Clearcoat layer intensity. 0.0 = none (disabled)
+#define AI_MATKEY_CLEARCOAT_FACTOR "$mat.clearcoat.factor", 0, 0
 #define AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR "$mat.clearcoat.roughnessFactor", 0, 0
 #define AI_MATKEY_CLEARCOAT_TEXTURE aiTextureType_CLEARCOAT, 0
 #define AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE aiTextureType_CLEARCOAT, 1

@@ -144,7 +144,9 @@ enum aiTextureMapMode {
 enum aiTextureMapping {
     /** The mapping coordinates are taken from an UV channel.
      *
-     *  The #AI_MATKEY_UVWSRC key specifies from which UV channel
+     *  #AI_MATKEY_UVWSRC property
+     * 
+     *  Specifies from which UV channel
      *  the texture coordinates are to be taken from (remember,
      *  meshes can have more than one UV channel).
     */
@@ -292,6 +294,32 @@ enum aiTextureType {
     aiTextureType_DIFFUSE_ROUGHNESS = 16,
     aiTextureType_AMBIENT_OCCLUSION = 17,
 
+    /** PBR Material Modifiers
+    * Some modern renderers have further PBR modifiers that may be overlaid
+    * on top of the 'base' PBR materials for additional realism.
+    * These use multiple texture maps, so only the base type is directly defined
+    */
+
+    /** Sheen
+    * Generally used to simulate textiles that are covered in a layer of microfibers
+    * eg velvet
+    * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_sheen
+    */
+    aiTextureType_SHEEN = 19,
+
+    /** Clearcoat
+    * Simulates a layer of 'polish' or 'laquer' layered on top of a PBR substrate
+    * https://autodesk.github.io/standard-surface/#closures/coating
+    * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
+    */
+    aiTextureType_CLEARCOAT = 20,
+
+    /** Transmission
+    * Simulates transmission through the surface
+    * May include further information such as wall thickness
+    */
+    aiTextureType_TRANSMISSION = 21,
+
     /** Unknown texture
      *
      *  A texture reference that does not match any of the definitions
@@ -314,7 +342,7 @@ ASSIMP_API const char *TextureTypeToString(enum aiTextureType in);
 // ---------------------------------------------------------------------------
 /** @brief Defines all shading models supported by the library
  * 
- *  #AI_MATKEY_SHADING_MODEL
+ *  Property: #AI_MATKEY_SHADING_MODEL
  * 
  *  The list of shading modes has been taken from Blender.
  *  See Blender documentation for more information. The API does
@@ -324,6 +352,7 @@ ASSIMP_API const char *TextureTypeToString(enum aiTextureType in);
  *  Again, this value is just a hint. Assimp tries to select the shader whose
  *  most common implementation matches the original rendering results of the
  *  3D modeler which wrote a particular model as closely as possible.
+ *
  */
 enum aiShadingMode {
     /** Flat shading. Shading is done on per-face base,
@@ -384,10 +413,11 @@ enum aiShadingMode {
     * There are multiple methods under this banner, and model files may provide
     * data for more than one PBR-BRDF method.
     * Applications should use the set of provided properties to determine which
-    * of their preferred PBDR methods are available
+    * of their preferred PBR rendering methods are likely to be available
     * eg:
     * - If AI_MATKEY_METALLIC_FACTOR is set, then a Metallic/Roughness is available
-    * - If AI_MATKEY_COLOR_SPECULAR is set, then a Specular/Glossiness is available
+    * - If AI_MATKEY_GLOSSINESS_FACTOR is set, then a Specular/Glossiness is available
+    * Note that some PBR methods allow layering of techniques
     */
     aiShadingMode_PBR_BRDF = 0xb,
 
@@ -942,27 +972,62 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 // PBR material support
+// --------------------
+// Properties defining PBR rendering techniques
 #define AI_MATKEY_USE_COLOR_MAP "$mat.useColorMap", 0, 0
 
 // Metallic/Roughness Workflow
 // ---------------------------
-// Base color factor. Will be multiplied by final base color texture values if extant
+// Base RGBA color factor. Will be multiplied by final base color texture values if extant
+// Note: Importers may choose to copy this into AI_MATKEY_COLOR_DIFFUSE for compatibility
+// with renderers and formats that do not support Metallic/Roughness PBR
 #define AI_MATKEY_BASE_COLOR "$clr.base", 0, 0
+#define AI_MATKEY_BASE_COLOR_TEXTURE aiTextureType_BASE_COLOR, 0
 #define AI_MATKEY_USE_METALLIC_MAP "$mat.useMetallicMap", 0, 0
 // Metallic factor. 0.0 = Full Dielectric, 1.0 = Full Metal
 #define AI_MATKEY_METALLIC_FACTOR "$mat.metallicFactor", 0, 0
+#define AI_MATKEY_METALLIC_TEXTURE aiTextureType_METALNESS, 0
 #define AI_MATKEY_USE_ROUGHNESS_MAP "$mat.useRoughnessMap", 0, 0
 // Roughness factor. 0.0 = Perfectly Smooth, 1.0 = Completely Rough
 #define AI_MATKEY_ROUGHNESS_FACTOR "$mat.roughnessFactor", 0, 0
+#define AI_MATKEY_ROUGHNESS_TEXTURE aiTextureType_DIFFUSE_ROUGHNESS, 0
 
 // Specular/Glossiness Workflow
 // ---------------------------
 // Diffuse/Albedo Color. Note: Pure Metals have a diffuse of {0,0,0}
 // AI_MATKEY_COLOR_DIFFUSE
-// Specular Color
+// Specular Color.
+// Note: Metallic/Roughness may also have a Specular Color
 // AI_MATKEY_COLOR_SPECULAR
+#define AI_MATKEY_SPECULAR_FACTOR "$mat.specularFactor", 0, 0
 // Glossiness factor. 0.0 = Completely Rough, 1.0 = Perfectly Smooth
 #define AI_MATKEY_GLOSSINESS_FACTOR "$mat.glossinessFactor", 0, 0
+
+// Sheen
+// -----
+// Sheen base RGB color. Default {0,0,0}
+#define AI_MATKEY_SHEEN_COLOR_FACTOR "$clr.sheen.factor", 0, 0
+// Sheen Roughness Factor.
+#define AI_MATKEY_SHEEN_ROUGHNESS_FACTOR "$mat.sheen.roughnessFactor", 0, 0
+#define AI_MATKEY_SHEEN_COLOR_TEXTURE aiTextureType_SHEEN, 0
+#define AI_MATKEY_SHEEN_ROUGHNESS_TEXTURE aiTextureType_SHEEN, 1
+
+// Clearcoat
+// ---------
+#define AI_MATKEY_CLEARCOAT_FACTOR "$clr.clearcoat.factor", 0, 0
+#define AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR "$mat.clearcoat.roughnessFactor", 0, 0
+#define AI_MATKEY_CLEARCOAT_TEXTURE aiTextureType_CLEARCOAT, 0
+#define AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE aiTextureType_CLEARCOAT, 1
+#define AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE aiTextureType_CLEARCOAT, 2
+
+// Transmission
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
+// Base percentage of light transmitted through the surface. 0.0 = Opaque, 1.0 = Fully transparent
+#define AI_MATKEY_TRANSMISSION_FACTOR "$mat.transmission.factor", 0, 0
+// Texture defining percentage of light transmitted through the surface.
+// Multiplied by AI_MATKEY_TRANSMISSION_FACTOR
+#define AI_MATKEY_TRANSMISSION_TEXTURE aiTextureType_TRANSMISSION, 0
 
 // Emissive
 // --------

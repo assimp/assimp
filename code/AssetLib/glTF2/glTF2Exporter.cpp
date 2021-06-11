@@ -655,7 +655,7 @@ bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlo
     // Add any appropriate textures
     GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
 
-    result == result || pbrSG.specularGlossinessTexture.texture;
+    result = result || pbrSG.specularGlossinessTexture.texture;
 
     if (result) {
         // Likely to always have diffuse

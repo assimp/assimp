@@ -208,6 +208,11 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             if (sampler->minFilter != SamplerMinFilter::UNSET) {
                 mat->AddProperty(&sampler->minFilter, 1, AI_MATKEY_GLTF_MAPPINGFILTER_MIN(texType, texSlot));
             }
+        } else {
+            // Use glTFv2 default sampler
+            const aiTextureMapMode default_wrap = aiTextureMapMode_Wrap;
+            mat->AddProperty(&default_wrap, 1, AI_MATKEY_MAPPINGMODE_U(texType, texSlot));
+            mat->AddProperty(&default_wrap, 1, AI_MATKEY_MAPPINGMODE_V(texType, texSlot));
         }
     }
 }

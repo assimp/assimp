@@ -151,7 +151,64 @@ TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {
     EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured.gltf", true));
 }
 
+void VerifyClearCoatScene(const aiScene *scene) {
+        ASSERT_NE(nullptr, scene);
+
+    ASSERT_TRUE(scene->HasMaterials());
+
+    // Find a specific Clearcoat material and check the values
+    const aiString partial_coated("Partial_Coated");
+    bool found_partial_coat = false;
+    for (size_t i = 0; i < scene->mNumMaterials; ++i) {
+        const aiMaterial *material = scene->mMaterials[i];
+        ASSERT_NE(nullptr, material);
+        if (material->GetName() == partial_coated) {
+            found_partial_coat = true;
+
+            ai_real clearcoat_factor(0.0f);
+            EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_CLEARCOAT_FACTOR, clearcoat_factor));
+            EXPECT_EQ(ai_real(1.0f), clearcoat_factor);
+
+            ai_real clearcoat_rough_factor(0.0f);
+            EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, clearcoat_rough_factor));
+            EXPECT_EQ(ai_real(0.03f), clearcoat_rough_factor);
+
+            // Should import the texture as diffuse and as base color
+            aiString path;
+            std::array<aiTextureMapMode, 2> modes;
+            static const std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap };
+            EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_CLEARCOAT_TEXTURE, &path, nullptr, nullptr,
+                                                nullptr, nullptr, modes.data()));
+            EXPECT_STREQ(path.C_Str(), "PartialCoating.png");
+            EXPECT_EQ(exp_modes, modes);
+        }
+    }
+    EXPECT_TRUE(found_partial_coat);
+}
+
+TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_clearcoat) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/ClearCoat-glTF/ClearCoatTest.gltf", aiProcess_ValidateDataStructure);
+    VerifyClearCoatScene(scene);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_clearcoat) {
+    {
+        Assimp::Importer importer;
+        Assimp::Exporter exporter;
+        const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/ClearCoat-glTF/ClearCoatTest.gltf", aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        // Export
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/ClearCoat-glTF/ClearCoatTest_out.glb"));
+    }
+
+    // And re-import
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/ClearCoat-glTF/ClearCoatTest_out.glb", aiProcess_ValidateDataStructure);
+    VerifyClearCoatScene(scene);
+}
 
 TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_pbrSpecularGlossiness) {
     Assimp::Importer importer;

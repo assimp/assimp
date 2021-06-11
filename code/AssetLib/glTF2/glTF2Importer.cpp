@@ -291,36 +291,37 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         aimat->AddProperty(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
 
 
-        //KHR_materials_sheen
+        // KHR_materials_sheen
         if (mat.materialSheen.isPresent) {
             MaterialSheen &sheen = mat.materialSheen.value;
-
-            aimat->AddProperty(&mat.materialSheen.isPresent, 1, AI_MATKEY_GLTF_MATERIAL_SHEEN);
-            SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_FACTOR);
-            aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_TEXTURE);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_TEXTURE);
+            // Default value {0,0,0} disables Sheen
+            if (sheen.sheenColorFactor != defaultSheenFactor) {
+                SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_SHEEN_COLOR_FACTOR);
+                aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_SHEEN_COLOR_TEXTURE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, AI_MATKEY_SHEEN_ROUGHNESS_TEXTURE);
+            }
         }
 
-        //KHR_materials_clearcoat
+        // KHR_materials_clearcoat
         if (mat.materialClearcoat.isPresent) {
             MaterialClearcoat &clearcoat = mat.materialClearcoat.value;
-
-            aimat->AddProperty(&mat.materialClearcoat.isPresent, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT);
-            aimat->AddProperty(&clearcoat.clearcoatFactor, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_FACTOR);
-            aimat->AddProperty(&clearcoat.clearcoatRoughnessFactor, 1, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_TEXTURE);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_TEXTURE);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_NORMAL_TEXTURE);
+            // Default value 0.0 disables clearcoat
+            if (clearcoat.clearcoatFactor != 0.0f) {
+                aimat->AddProperty(&clearcoat.clearcoatFactor, 1, AI_MATKEY_CLEARCOAT_FACTOR);
+                aimat->AddProperty(&clearcoat.clearcoatRoughnessFactor, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, AI_MATKEY_CLEARCOAT_TEXTURE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE);
+            }
         }
 
-        //KHR_materials_transmission
+        // KHR_materials_transmission
         if (mat.materialTransmission.isPresent) {
             MaterialTransmission &transmission = mat.materialTransmission.value;
 
-            aimat->AddProperty(&mat.materialTransmission.isPresent, 1, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION);
-            aimat->AddProperty(&transmission.transmissionFactor, 1, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_TEXTURE);
+            aimat->AddProperty(&transmission.transmissionFactor, 1, AI_MATKEY_TRANSMISSION_FACTOR);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
         }
 
         return aimat;

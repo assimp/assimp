@@ -603,32 +603,58 @@ TEST_F(utglTF2ImportExport, sceneMetadata) {
 }
 
 TEST_F(utglTF2ImportExport, texcoords) {
+
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf",
-            aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_TRUE(scene->HasMaterials());
+    const aiMaterial *material = scene->mMaterials[0];
+
+    aiString path;
+    unsigned int uvIndex = 255;
+    aiTextureMapMode modes[2];
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
+    EXPECT_STREQ(path.C_Str(), "texture.png");
+    EXPECT_EQ(uvIndex, 0);
+
+    uvIndex = 255;
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
+    EXPECT_STREQ(path.C_Str(), "texture.png");
+    EXPECT_EQ(uvIndex, 1);
+}
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utglTF2ImportExport, texcoords_export) {
+    {
+        Assimp::Importer importer;
+        Assimp::Exporter exporter;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf", aiProcess_ValidateDataStructure);
+        ASSERT_NE(scene, nullptr);
+        ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf_out.glb"));
+    }
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
 
     ASSERT_TRUE(scene->HasMaterials());
     const aiMaterial *material = scene->mMaterials[0];
 
     aiString path;
+    unsigned int uvIndex = 255;
     aiTextureMapMode modes[2];
-    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path, nullptr, nullptr,
-                                        nullptr, nullptr, modes));
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-
-    int uvIndex = -1;
-    EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_DIFFUSE, 0), &uvIndex), aiReturn_SUCCESS);
     EXPECT_EQ(uvIndex, 0);
 
-    // Using manual macro expansion of AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE here.
-    // The following works with some but not all compilers:
-    // #define APPLY(X, Y) X(Y)
-    // ..., APPLY(AI_MATKEY_GLTF_TEXTURE_TEXCOORD, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE), ...
-    EXPECT_EQ(aiGetMaterialInteger(material, AI_MATKEY_GLTF_TEXTURE_TEXCOORD(aiTextureType_UNKNOWN, 0), &uvIndex), aiReturn_SUCCESS);
+    uvIndex = 255;
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
+    EXPECT_STREQ(path.C_Str(), "texture.png");
     EXPECT_EQ(uvIndex, 1);
 }
 
+#endif // ASSIMP_BUILD_NO_EXPORT
 TEST_F(utglTF2ImportExport, recursive_nodes) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/RecursiveNodes/RecursiveNodes.gltf", aiProcess_ValidateDataStructure);

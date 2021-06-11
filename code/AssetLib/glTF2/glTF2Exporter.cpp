@@ -492,10 +492,13 @@ void glTF2Exporter::GetMatTexProp(const aiMaterial& mat, float& prop, const char
     mat.Get(textureKey.c_str(), tt, slot, prop);
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial& mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)
+void glTF2Exporter::GetMatTex(const aiMaterial& mat, Ref<Texture>& texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot = 0)
 {
     if (mat.GetTextureCount(tt) > 0) {
         aiString tex;
+
+        // Read texcoord (UV map index)
+        mat.Get(AI_MATKEY_UVWSRC(tt, slot), texCoord);
 
         if (mat.Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
             std::string path = tex.C_Str();
@@ -572,21 +575,21 @@ void glTF2Exporter::GetMatTex(const aiMaterial& mat, TextureInfo& prop, aiTextur
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
-    if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
-    }
+    //if (texture) {
+    //    GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+    //}
 }
 
 void glTF2Exporter::GetMatTex(const aiMaterial& mat, NormalTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
     if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        //GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
         GetMatTexProp(mat, prop.scale, "scale", tt, slot);
     }
 }
@@ -595,10 +598,10 @@ void glTF2Exporter::GetMatTex(const aiMaterial& mat, OcclusionTextureInfo& prop,
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
     if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        //GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
         GetMatTexProp(mat, prop.strength, "strength", tt, slot);
     }
 }

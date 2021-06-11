@@ -144,9 +144,7 @@ enum aiTextureMapMode {
 enum aiTextureMapping {
     /** The mapping coordinates are taken from an UV channel.
      *
-     *  #AI_MATKEY_UVWSRC property
-     * 
-     *  Specifies from which UV channel
+     *  #AI_MATKEY_UVWSRC property specifies from which UV channel
      *  the texture coordinates are to be taken from (remember,
      *  meshes can have more than one UV channel).
     */

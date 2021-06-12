@@ -1498,7 +1498,8 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
     const bool hasCopyright = !a.asset.copyright.empty();
-    if (hasVersion || hasGenerator || hasCopyright) {
+    const bool hasSceneMetadata = a.scene->extensions;
+    if (hasVersion || hasGenerator || hasCopyright || hasSceneMetadata) {
         mScene->mMetaData = new aiMetadata;
         if (hasVersion) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(a.asset.version));
@@ -1508,6 +1509,9 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
         }
         if (hasCopyright) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
+        }
+        if (hasSceneMetadata) {
+            ParseExtensions(mScene->mMetaData, a.scene->extensions);
         }
     }
 }

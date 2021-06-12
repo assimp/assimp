@@ -1803,6 +1803,9 @@ inline void Scene::Read(Value &obj, Asset &r) {
                 this->nodes.push_back(node);
         }
     }
+    if (Value *extensions = FindObject(obj, "extensions")) {
+        this->extensions = ReadExtensions("extensions", *extensions);
+    }
 }
 
 inline void Skin::Read(Value &obj, Asset &r) {

@@ -922,6 +922,8 @@ struct Scene : public Object {
     std::string name;
     std::vector<Ref<Node>> nodes;
 
+    CustomExtension extensions;
+
     Scene() {}
     void Read(Value &obj, Asset &r);
 };

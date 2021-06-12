@@ -368,8 +368,8 @@ inline Value *Object::FindExtension(Value &val, const char *extensionId) {
 }
 
 inline void Object::ReadExtensions(Value &val) {
-    if (Value *extensions = FindObject(val, "extensions")) {
-        this->extensions = glTF2::ReadExtensions("extensions", *extensions);
+    if (Value *curExtensions = FindObject(val, "extensions")) {
+        this->extensions = glTF2::ReadExtensions("extensions", *curExtensions);
     }
 }
 

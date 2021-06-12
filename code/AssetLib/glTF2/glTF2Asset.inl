@@ -58,7 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma clang diagnostic ignored "-Wsign-compare"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
+#if (__GNUC__ > 4)
 #pragma GCC diagnostic ignored "-Wbool-compare"
+#endif
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 

@@ -489,7 +489,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                                                "\" does not match the vertex count");
                     continue;
                 }
-                
+
                 auto componentType = attr.color[c]->componentType;
                 if (componentType == glTF2::ComponentType_FLOAT) {
                     attr.color[c]->ExtractData(aim->mColors[c]);
@@ -1002,9 +1002,9 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             }
         }
 
-        if (node.extensions) {
+        if (node.customExtensions) {
             ainode->mMetaData = new aiMetadata;
-            ParseExtensions(ainode->mMetaData, node.extensions);
+            ParseExtensions(ainode->mMetaData, node.customExtensions);
         }
 
         GetNodeTransform(ainode->mTransformation, node);
@@ -1498,7 +1498,7 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
     const bool hasVersion = !a.asset.version.empty();
     const bool hasGenerator = !a.asset.generator.empty();
     const bool hasCopyright = !a.asset.copyright.empty();
-    const bool hasSceneMetadata = a.scene->extensions;
+    const bool hasSceneMetadata = a.scene->customExtensions;
     if (hasVersion || hasGenerator || hasCopyright || hasSceneMetadata) {
         mScene->mMetaData = new aiMetadata;
         if (hasVersion) {
@@ -1511,7 +1511,7 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
             mScene->mMetaData->Add(AI_METADATA_SOURCE_COPYRIGHT, aiString(a.asset.copyright));
         }
         if (hasSceneMetadata) {
-            ParseExtensions(mScene->mMetaData, a.scene->extensions);
+            ParseExtensions(mScene->mMetaData, a.scene->customExtensions);
         }
     }
 }

@@ -408,7 +408,7 @@ struct Object {
     std::string id; //!< The globally unique ID used to reference this object
     std::string name; //!< The user-defined name of this object
 
-    CustomExtension extensions;
+    CustomExtension customExtensions;
 
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }

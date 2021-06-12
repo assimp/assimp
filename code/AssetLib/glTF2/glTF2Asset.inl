@@ -304,6 +304,43 @@ inline Value *FindObject(Document &doc, const char *memberId) {
 inline Value *FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, "the document");
 }
+
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
+    CustomExtension ret;
+    ret.name = name;
+    if (obj.IsObject()) {
+        ret.mValues.isPresent = true;
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+            auto &val = it->value;
+            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
+        }
+    } else if (obj.IsArray()) {
+        ret.mValues.value.reserve(obj.Size());
+        ret.mValues.isPresent = true;
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
+            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
+        }
+    } else if (obj.IsNumber()) {
+        if (obj.IsUint64()) {
+            ret.mUint64Value.value = obj.GetUint64();
+            ret.mUint64Value.isPresent = true;
+        } else if (obj.IsInt64()) {
+            ret.mInt64Value.value = obj.GetInt64();
+            ret.mInt64Value.isPresent = true;
+        } else if (obj.IsDouble()) {
+            ret.mDoubleValue.value = obj.GetDouble();
+            ret.mDoubleValue.isPresent = true;
+        }
+    } else if (obj.IsString()) {
+        ReadValue(obj, ret.mStringValue);
+        ret.mStringValue.isPresent = true;
+    } else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
+    }
+    return ret;
+}
+
 } // namespace
 
 inline Value *Object::FindString(Value &val, const char *memberId) {
@@ -328,6 +365,12 @@ inline Value *Object::FindObject(Value &val, const char *memberId) {
 
 inline Value *Object::FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, id.c_str(), name.c_str());
+}
+
+inline void Object::ReadExtensions(Value &val) {
+    if (Value *extensions = FindObject(val, "extensions")) {
+        this->extensions = glTF2::ReadExtensions("extensions", *extensions);
+    }
 }
 
 #ifdef ASSIMP_ENABLE_DRACO
@@ -569,6 +612,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
+    inst->ReadExtensions(obj);
 
     Ref<T> result = Add(inst.release());
     mRecursiveReferenceCheck.erase(i);
@@ -1683,42 +1727,6 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value &obj) {
-    CustomExtension ret;
-    ret.name = name;
-    if (obj.IsObject()) {
-        ret.mValues.isPresent = true;
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto &val = it->value;
-            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
-        }
-    } else if (obj.IsArray()) {
-        ret.mValues.value.reserve(obj.Size());
-        ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i) {
-            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
-        }
-    } else if (obj.IsNumber()) {
-        if (obj.IsUint64()) {
-            ret.mUint64Value.value = obj.GetUint64();
-            ret.mUint64Value.isPresent = true;
-        } else if (obj.IsInt64()) {
-            ret.mInt64Value.value = obj.GetInt64();
-            ret.mInt64Value.isPresent = true;
-        } else if (obj.IsDouble()) {
-            ret.mDoubleValue.value = obj.GetDouble();
-            ret.mDoubleValue.isPresent = true;
-        }
-    } else if (obj.IsString()) {
-        ReadValue(obj, ret.mStringValue);
-        ret.mStringValue.isPresent = true;
-    } else if (obj.IsBool()) {
-        ret.mBoolValue.value = obj.GetBool();
-        ret.mBoolValue.isPresent = true;
-    }
-    return ret;
-}
-
 inline void Node::Read(Value &obj, Asset &r) {
     if (name.empty()) {
         name = id;
@@ -1775,8 +1783,6 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curExtensions = FindObject(obj, "extensions");
     if (nullptr != curExtensions) {
-        this->extensions = ReadExtensions("extensions", *curExtensions);
-
         if (r.extensionsUsed.KHR_lights_punctual) {
             if (Value *ext = FindObject(*curExtensions, "KHR_lights_punctual")) {
                 Value *curLight = FindUInt(*ext, "light");
@@ -1804,9 +1810,6 @@ inline void Scene::Read(Value &obj, Asset &r) {
             if (node)
                 this->nodes.push_back(node);
         }
-    }
-    if (Value *extensions = FindObject(obj, "extensions")) {
-        this->extensions = ReadExtensions("extensions", *extensions);
     }
 }
 

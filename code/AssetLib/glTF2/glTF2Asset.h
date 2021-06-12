@@ -424,6 +424,8 @@ struct Object {
     inline Value *FindArray(Value &val, const char *id);
     inline Value *FindObject(Value &val, const char *id);
     inline Value *FindExtension(Value &val, const char *extensionId);
+
+    inline void ReadExtensions(Value &val);
 };
 
 //

@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiScene;
 struct aiNode;
+struct aiLight;
 //struct aiMaterial;
 
 namespace Assimp
@@ -95,6 +96,7 @@ namespace Assimp
         std::vector<int64_t> mesh_uids;
         std::vector<int64_t> material_uids;
         std::map<const aiNode*,int64_t> node_uids;
+        std::map<std::string,int64_t> lights_uids;
 
         // this crude unique-ID system is actually fine
         int64_t last_uid = 999999;

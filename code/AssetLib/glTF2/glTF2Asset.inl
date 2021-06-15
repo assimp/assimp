@@ -790,8 +790,10 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
     size_t offset = this->byteLength;
     // Force alignment to 4 bits
-    Grow((length + 3) & ~3);
+    size_t paddedLength = (length + 3) & ~3;
+    Grow(paddedLength);
     memcpy(mData.get() + offset, data, length);
+    memset(mData.get() + offset + length, 0, paddedLength - length);
     return offset;
 }
 

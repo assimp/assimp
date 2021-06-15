@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "EmbedTexturesProcess.h"
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
 #include <assimp/ParsingUtils.h>
 #include "ProcessHelper.h"
 
@@ -62,6 +64,7 @@ bool EmbedTexturesProcess::IsActive(unsigned int pFlags) const {
 void EmbedTexturesProcess::SetupProperties(const Importer* pImp) {
     mRootPath = pImp->GetPropertyString("sourceFilePath");
     mRootPath = mRootPath.substr(0, mRootPath.find_last_of("\\/") + 1u);
+    mIOHandler = pImp->GetIOHandler();
 }
 
 void EmbedTexturesProcess::Execute(aiScene* pScene) {
@@ -101,27 +104,31 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     std::string    imagePath = path;
 
     // Test path directly
-    std::ifstream file(imagePath, std::ios::binary | std::ios::ate);
-    if ((imageSize = file.tellg()) == std::streampos(-1)) {
+    if (!mIOHandler->Exists(imagePath)) {
         ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
 
         // Test path in root path
         imagePath = mRootPath + path;
-        file.open(imagePath, std::ios::binary | std::ios::ate);
-        if ((imageSize = file.tellg()) == std::streampos(-1)) {
+        if (!mIOHandler->Exists(imagePath)) {
             // Test path basename in root path
             imagePath = mRootPath + path.substr(path.find_last_of("\\/") + 1u);
-            file.open(imagePath, std::ios::binary | std::ios::ate);
-            if ((imageSize = file.tellg()) == std::streampos(-1)) {
+            if (!mIOHandler->Exists(imagePath)) {
                 ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");
                 return false;
             }
         }
     }
+    IOStream* pFile = mIOHandler->Open(imagePath);
+    if (pFile == nullptr) {
+        ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");
+        return false;
+    }
+    imageSize = pFile->FileSize();
 
     aiTexel* imageContent = new aiTexel[ 1ul + static_cast<unsigned long>( imageSize ) / sizeof(aiTexel)];
-    file.seekg(0, std::ios::beg);
-    file.read(reinterpret_cast<char*>(imageContent), imageSize);
+    pFile->Seek(0, aiOrigin_SET);
+    pFile->Read(reinterpret_cast<char*>(imageContent), imageSize, 1);
+    mIOHandler->Close(pFile);
 
     // Enlarging the textures table
     unsigned int textureId = pScene->mNumTextures++;

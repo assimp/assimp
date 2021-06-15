@@ -406,11 +406,25 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                             // Check whether this texture is an embedded texture.
                             // In this case the property looks like this: *<n>,
                             // where n is the index of the texture.
-                            aiString &s = *((aiString *)prop->mData);
+                            // Copy here because we overwrite the string data in-place and the buffer inside of aiString
+                            // will be a lie if we just reinterpret from prop->mData. The size of mData is not guaranteed to be
+                            // MAXLEN in size.
+                            aiString s(*(aiString *)prop->mData);
                             if ('*' == s.data[0]) {
                                 // Offset the index and write it back ..
                                 const unsigned int idx = strtoul10(&s.data[1]) + offset[n];
-                                ASSIMP_itoa10(&s.data[1], sizeof(s.data) - 1, idx);
+                                const unsigned int oldLen = s.length;
+
+                                s.length = 1 + ASSIMP_itoa10(&s.data[1], sizeof(s.data) - 1, idx);
+
+                                // The string changed in size so we need to reallocate the buffer for the property.
+                                if (oldLen < s.length) {
+                                    prop->mDataLength += s.length - oldLen;
+                                    delete[] prop->mData;
+                                    prop->mData = new char[prop->mDataLength];
+                                }
+
+                                memcpy(prop->mData, static_cast<void*>(&s), prop->mDataLength);
                             }
                         }
 

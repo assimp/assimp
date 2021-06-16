@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,11 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-EmbedTexturesProcess::EmbedTexturesProcess()
-: BaseProcess() {
+EmbedTexturesProcess::EmbedTexturesProcess() :
+        BaseProcess() {
+    // empty
 }
 
 EmbedTexturesProcess::~EmbedTexturesProcess() {
+    // empty
 }
 
 bool EmbedTexturesProcess::IsActive(unsigned int pFlags) const {
@@ -68,12 +69,12 @@ void EmbedTexturesProcess::SetupProperties(const Importer* pImp) {
 }
 
 void EmbedTexturesProcess::Execute(aiScene* pScene) {
-    if (pScene == nullptr || pScene->mRootNode == nullptr) return;
+    if (pScene == nullptr || pScene->mRootNode == nullptr || mIOHandler == nullptr){
+        return;
+    }
 
     aiString path;
-
     uint32_t embeddedTexturesCount = 0u;
-
     for (auto matId = 0u; matId < pScene->mNumMaterials; ++matId) {
         auto material = pScene->mMaterials[matId];
 

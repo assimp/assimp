@@ -18,6 +18,7 @@
 #include <cctype>
 #include <cmath>
 #include <iterator>
+#include <limits>
 
 namespace draco {
 namespace parser {
@@ -252,7 +253,7 @@ DecoderBuffer ParseLineIntoDecoderBuffer(DecoderBuffer *buffer) {
 
 std::string ToLower(const std::string &str) {
   std::string out;
-  std::transform(str.begin(), str.end(), std::back_inserter(out), [](unsigned char c){return tolower(c);});
+  std::transform(str.begin(), str.end(), std::back_inserter(out), tolower);
   return out;
 }
 

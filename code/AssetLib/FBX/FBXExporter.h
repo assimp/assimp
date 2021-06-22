@@ -64,10 +64,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiScene;
 struct aiNode;
 struct aiLight;
-//struct aiMaterial;
 
-namespace Assimp
-{
+namespace Assimp {
     class IOSystem;
     class IOStream;
     class ExportProperties;

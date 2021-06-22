@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
+class IOSystem;
+
 namespace Assimp {
 
 /**
@@ -80,6 +82,7 @@ private:
 
 private:
     std::string mRootPath;
+    IOSystem* mIOHandler = nullptr;
 };
 
 } // namespace Assimp

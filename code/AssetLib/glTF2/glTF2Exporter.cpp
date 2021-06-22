@@ -118,14 +118,14 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     ExportScene();
 
     ExportAnimations();
-    
+
     // export extras
     if(mProperties->HasPropertyCallback("extras"))
     {
         std::function<void*(void*)> ExportExtras = mProperties->GetPropertyCallback("extras");
         mAsset->extras = (rapidjson::Value*)ExportExtras(0);
     }
-    
+
     AssetWriter writer(*mAsset);
 
     if (isBinary) {
@@ -515,11 +515,10 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     std::string imgId = mAsset->FindUniqueID("", "image");
                     texture->source = mAsset->images.Create(imgId);
 
-                    if (path[0] == '*') { // embedded
-                        aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
-
+                    const aiTexture* curTex = mScene->GetEmbeddedTexture(path.c_str());
+                    if (curTex != nullptr) { // embedded
                         texture->source->name = curTex->mFilename.C_Str();
-                        
+
                         //basisu: embedded ktx2, bu
                         if (curTex->achFormatHint[0]) {
                             std::string mimeType = "image/";
@@ -541,7 +540,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                                 mimeType += curTex->achFormatHint;
                             texture->source->mimeType = mimeType;
                         }
-                        
+
                         // The asset has its own buffer, see Image::SetData
                         //basisu: "image/ktx2", "image/basis" as is
                         texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
@@ -554,7 +553,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                             useBasisUniversal = true;
                         }
                     }
-                    
+
                     //basisu
                     if(useBasisUniversal) {
                         mAsset->extensionsUsed.KHR_texture_basisu = true;

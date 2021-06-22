@@ -56,8 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
-#include <utility>
-
 struct aiNode;
 
 namespace Assimp {

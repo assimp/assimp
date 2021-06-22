@@ -156,14 +156,13 @@ namespace Assimp
             FBX::TransformInheritance ti_type=FBX::TransformInheritance_RSrs
         );
         void WriteAnimationCurveNode(
-            StreamWriterLE& outstream,
-            int64_t uid,
-            const std::string& name, // "T", "R", or "S"
-            aiVector3D default_value,
-            std::string property_name, // "Lcl Translation" etc
-            int64_t animation_layer_uid,
-            int64_t node_uid
-        );
+                StreamWriterLE &outstream,
+                int64_t uid,
+                const std::string &name, // "T", "R", or "S"
+                aiVector3D default_value,
+                const std::string &property_name, // "Lcl Translation" etc
+                int64_t animation_layer_uid,
+                int64_t node_uid);
         void WriteAnimationCurve(
             StreamWriterLE& outstream,
             double default_value,

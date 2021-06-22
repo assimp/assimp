@@ -415,8 +415,8 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 
             // User defined Assimp config property to detect texture type from filename.
             if (m_detectTextureTypeFromFilename) {
-                size_t posSuffix = textureRef.find_last_of(".");
-                size_t posUnderscore = textureRef.find_last_of("_");
+                size_t posSuffix = textureRef.find_last_of('.');
+                size_t posUnderscore = textureRef.find_last_of('_');
 
                 if (posSuffix != string::npos && posUnderscore != string::npos && posSuffix > posUnderscore) {
                     string identifier = ai_tolower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));

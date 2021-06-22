@@ -530,8 +530,8 @@ void XFileExporter::writePath(const aiString &path)
     while( str.find( "\\\\") != std::string::npos)
         str.replace( str.find( "\\\\"), 2, "\\");
 
-    while( str.find( "\\") != std::string::npos)
-        str.replace( str.find( "\\"), 1, "/");
+    while (str.find('\\') != std::string::npos)
+        str.replace(str.find('\\'), 1, "/");
 
     mOutput << str;
 

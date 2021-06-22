@@ -95,8 +95,8 @@ struct Material : public D3DS::Material {
     Material(Material &&other) AI_NO_EXCEPT
             : D3DS::Material(std::move(other)),
               avSubMaterials(std::move(other.avSubMaterials)),
-              pcInstance(std::move(other.pcInstance)),
-              bNeed(std::move(other.bNeed)) {
+              pcInstance(other.pcInstance),
+              bNeed(other.bNeed) {
         other.pcInstance = nullptr;
     }
 
@@ -108,8 +108,8 @@ struct Material : public D3DS::Material {
         //D3DS::Material::operator=(std::move(other));
 
         avSubMaterials = std::move(other.avSubMaterials);
-        pcInstance = std::move(other.pcInstance);
-        bNeed = std::move(other.bNeed);
+        pcInstance = other.pcInstance;
+        bNeed = other.bNeed;
 
         other.pcInstance = nullptr;
 

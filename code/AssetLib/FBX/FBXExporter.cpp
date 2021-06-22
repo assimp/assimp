@@ -2718,16 +2718,14 @@ void FBXExporter::WriteModelNodes(
     }
 }
 
-
 void FBXExporter::WriteAnimationCurveNode(
-    StreamWriterLE& outstream,
-    int64_t uid,
-    const std::string& name, // "T", "R", or "S"
-    aiVector3D default_value,
-    std::string property_name, // "Lcl Translation" etc
-    int64_t layer_uid,
-    int64_t node_uid
-) {
+        StreamWriterLE &outstream,
+        int64_t uid,
+        const std::string &name, // "T", "R", or "S"
+        aiVector3D default_value,
+        const std::string &property_name, // "Lcl Translation" etc
+        int64_t layer_uid,
+        int64_t node_uid) {
     FBX::Node n("AnimationCurveNode");
     n.AddProperties(uid, name + FBX::SEPARATOR + "AnimCurveNode", "");
     FBX::Node p("Properties70");
@@ -2741,7 +2739,6 @@ void FBXExporter::WriteAnimationCurveNode(
     // connect to bone
     this->connections.emplace_back("C", "OP", uid, node_uid, property_name);
 }
-
 
 void FBXExporter::WriteAnimationCurve(
     StreamWriterLE& outstream,

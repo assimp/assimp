@@ -63,7 +63,7 @@ class X3DExporter {
             // empty
         }
 
-        SAttribute(SAttribute &&rhs) noexcept :
+        SAttribute(SAttribute &&rhs) AI_NO_EXCEPT :
                 Name(rhs.Name),
                 Value(rhs.Value) {
             // empty

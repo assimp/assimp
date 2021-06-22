@@ -142,7 +142,7 @@ struct TempOpening
     TempOpening(const IFC::Schema_2x3::IfcSolidModel *solid, IfcVector3 extrusionDir,
             std::shared_ptr<TempMesh> profileMesh,
             std::shared_ptr<TempMesh> profileMesh2D) :
-            solid(solid), extrusionDir(extrusionDir), profileMesh(std::move(std::move(profileMesh))), profileMesh2D(std::move(std::move(profileMesh2D))) {
+            solid(solid), extrusionDir(extrusionDir), profileMesh(std::move(profileMesh)), profileMesh2D(std::move(profileMesh2D)) {
     }
 
     // ------------------------------------------------------------------------------

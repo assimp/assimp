@@ -1499,7 +1499,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         ai_real *pOut,
         unsigned int *pMax);
 
-#ifdef __cplusplus
+#if 1 //def __cplusplus
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a single float property with a specific key from the material.
@@ -1520,7 +1520,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 * @return Specifies whether the key has been found. If not, the output
 *   float remains unmodified.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialFloat(const aiMaterial *pMat,
+inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
@@ -1530,8 +1530,8 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial *pMat,
 
 #else
 
-// Use our friend, the C preprocessor
-#define aiGetMaterialFloat (pMat, type, index, pKey, pOut) \
+// Use our friend, the C preprocessor   // The macro does not work with e.g. AI_MATKEY_OPACITY expanding into 3 args
+#define aiGetMaterialFloat(pMat, type, index, pKey, pOut) \
         aiGetMaterialFloatArray(pMat, type, index, pKey, pOut, NULL)
 
 #endif //!__cplusplus
@@ -1548,7 +1548,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial *
         int *pOut,
         unsigned int *pMax);
 
-#ifdef __cplusplus
+#if 1 //def __cplusplus
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an integer property with a specific key from a material
@@ -1566,7 +1566,7 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
 #else
 
 // use our friend, the C preprocessor
-#define aiGetMaterialInteger (pMat, type, index, pKey, pOut) \
+#define aiGetMaterialInteger(pMat, type, index, pKey, pOut) \
         aiGetMaterialIntegerArray(pMat, type, index, pKey, pOut, NULL)
 
 #endif //!__cplusplus

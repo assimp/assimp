@@ -388,16 +388,18 @@ struct CustomExtension {
     }
 
     CustomExtension() = default;
-
-    CustomExtension(const CustomExtension &other)
-        : name(other.name)
-        , mStringValue(other.mStringValue)
-        , mDoubleValue(other.mDoubleValue)
-        , mUint64Value(other.mUint64Value)
-        , mInt64Value(other.mInt64Value)
-        , mBoolValue(other.mBoolValue)
-        , mValues(other.mValues)
-    {
+    
+    ~CustomExtension() = default;
+    
+    CustomExtension(const CustomExtension &other) :
+            name(other.name),
+            mStringValue(other.mStringValue),
+            mDoubleValue(other.mDoubleValue),
+            mUint64Value(other.mUint64Value),
+            mInt64Value(other.mInt64Value),
+            mBoolValue(other.mBoolValue),
+            mValues(other.mValues) {
+        // empty
     }
 };
 

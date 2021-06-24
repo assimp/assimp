@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -777,12 +776,13 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 }
 
 inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
-    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) {
+        return;
+    }
 
     for (SEncodedRegion *reg : EncodedRegion_List) {
         if (reg->ID == pID) {
             EncodedRegion_Current = reg;
-
             return;
         }
     }
@@ -832,10 +832,13 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 }
 
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
-    size_t offset = this->byteLength;
+    const size_t offset = this->byteLength;
+    
     // Force alignment to 4 bits
-    Grow((length + 3) & ~3);
+    const size_t paddedLength = (length + 3) & ~3;
+    Grow(paddedLength);
     memcpy(mData.get() + offset, data, length);
+    memset(mData.get() + offset + length, 0, paddedLength - length);
     return offset;
 }
 
@@ -864,9 +867,7 @@ inline void Buffer::Grow(size_t amount) {
 //
 // struct BufferView
 //
-
 inline void BufferView::Read(Value &obj, Asset &r) {
-
     if (Value *bufferVal = FindUInt(obj, "buffer")) {
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
@@ -886,16 +887,21 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return nullptr;
+    if (!buffer) {
+        return nullptr;
+    }
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return nullptr;
+    if (!basePtr) {
+        return nullptr;
+    }
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
         const size_t begin = buffer->EncodedRegion_Current->Offset;
         const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
-        if ((offset >= begin) && (offset < end))
+        if ((offset >= begin) && (offset < end)) {
             return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+        }
     }
 
     return basePtr + offset;
@@ -921,18 +927,18 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     while (pIndices != indicesEnd) {
         size_t offset;
         switch (indicesType) {
-        case ComponentType_UNSIGNED_BYTE:
-            offset = *pIndices;
-            break;
-        case ComponentType_UNSIGNED_SHORT:
-            offset = *reinterpret_cast<uint16_t *>(pIndices);
-            break;
-        case ComponentType_UNSIGNED_INT:
-            offset = *reinterpret_cast<uint32_t *>(pIndices);
-            break;
-        default:
-            // have fun with float and negative values from signed types as indices.
-            throw DeadlyImportError("Unsupported component type in index.");
+            case ComponentType_UNSIGNED_BYTE:
+                offset = *pIndices;
+                break;
+            case ComponentType_UNSIGNED_SHORT:
+                offset = *reinterpret_cast<uint16_t *>(pIndices);
+                break;
+            case ComponentType_UNSIGNED_INT:
+                offset = *reinterpret_cast<uint32_t *>(pIndices);
+                break;
+            default:
+                // have fun with float and negative values from signed types as indices.
+                throw DeadlyImportError("Unsupported component type in index.");
         }
 
         offset *= elementSize;
@@ -944,7 +950,6 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 }
 
 inline void Accessor::Read(Value &obj, Asset &r) {
-
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }

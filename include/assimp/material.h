@@ -1499,8 +1499,6 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         ai_real *pOut,
         unsigned int *pMax);
 
-#ifdef __cplusplus
-
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a single float property with a specific key from the material.
 *
@@ -1520,21 +1518,13 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 * @return Specifies whether the key has been found. If not, the output
 *   float remains unmodified.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialFloat(const aiMaterial *pMat,
+inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
         ai_real *pOut) {
     return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
 }
-
-#else
-
-// Use our friend, the C preprocessor
-#define aiGetMaterialFloat (pMat, type, index, pKey, pOut) \
-        aiGetMaterialFloatArray(pMat, type, index, pKey, pOut, NULL)
-
-#endif //!__cplusplus
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an array of integer values with a specific key
@@ -1548,8 +1538,6 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial *
         int *pOut,
         unsigned int *pMax);
 
-#ifdef __cplusplus
-
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an integer property with a specific key from a material
  *
@@ -1562,14 +1550,6 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
         int *pOut) {
     return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
 }
-
-#else
-
-// use our friend, the C preprocessor
-#define aiGetMaterialInteger (pMat, type, index, pKey, pOut) \
-        aiGetMaterialIntegerArray(pMat, type, index, pKey, pOut, NULL)
-
-#endif //!__cplusplus
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a color value from the material property table

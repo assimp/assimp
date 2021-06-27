@@ -372,6 +372,12 @@ inline void Object::ReadExtensions(Value &val) {
     }
 }
 
+inline void Object::ReadExtras(Value &val) {
+    if (Value *curExtras = FindObject(val, "extras")) {
+        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+    }
+}
+
 #ifdef ASSIMP_ENABLE_DRACO
 
 template <typename T>
@@ -612,6 +618,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
     inst->ReadExtensions(obj);
+    inst->ReadExtras(obj);
 
     Ref<T> result = Add(inst.release());
     mRecursiveReferenceCheck.erase(i);
@@ -1661,9 +1668,9 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
         }
     }
 
-    Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras) {
-        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
+    Value *curExtras = FindObject(pJSON_Object, "extras");
+    if (nullptr != curExtras) {
+        if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
                 Value &targetNameValue = (*curTargetNames)[i];

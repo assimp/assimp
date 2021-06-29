@@ -655,7 +655,7 @@ void M3DImporter::convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned in
 
 // ------------------------------------------------------------------------------------------------
 // find a node by name
-aiNode *M3DImporter::findNode(aiNode *pNode, aiString name) {
+aiNode *M3DImporter::findNode(aiNode *pNode, const aiString &name) {
     ai_assert(pNode != nullptr);
     ai_assert(mScene != nullptr);
 

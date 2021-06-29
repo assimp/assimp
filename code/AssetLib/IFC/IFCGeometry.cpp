@@ -740,7 +740,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
     bool fix_orientation = false;
     std::shared_ptr< TempMesh > meshtmp = std::make_shared<TempMesh>();
     if(const Schema_2x3::IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<Schema_2x3::IfcShellBasedSurfaceModel>()) {
-        for(std::shared_ptr<const Schema_2x3::IfcShell> shell :shellmod->SbsmBoundary) {
+        for (const std::shared_ptr<const Schema_2x3::IfcShell> &shell : shellmod->SbsmBoundary) {
             try {
                 const ::Assimp::STEP::EXPRESS::ENTITY& e = shell->To<::Assimp::STEP::EXPRESS::ENTITY>();
                 const Schema_2x3::IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<Schema_2x3::IfcConnectedFaceSet>();

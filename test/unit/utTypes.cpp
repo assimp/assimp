@@ -53,8 +53,8 @@ class utTypes : public ::testing::Test {
 TEST_F( utTypes, Color3dCpmpareOpTest ) {
     aiColor3D col1( 1, 2, 3 );
     aiColor3D col2( 4, 5, 6 );
-    aiColor3D col3( col1 );
-    
+    const aiColor3D &col3(col1);
+
     EXPECT_FALSE( col1 == col2 );
     EXPECT_FALSE( col2 == col3 );
     EXPECT_TRUE( col1 == col3 );

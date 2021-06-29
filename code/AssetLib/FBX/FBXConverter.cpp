@@ -2602,7 +2602,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
             anim->mMorphMeshChannels = new aiMeshMorphAnim *[numMorphMeshChannels];
             anim->mNumMorphMeshChannels = numMorphMeshChannels;
             unsigned int i = 0;
-            for (auto morphAnimIt : morphAnimDatas) {
+            for (const auto &morphAnimIt : morphAnimDatas) {
                 morphAnimData *animData = morphAnimIt.second;
                 unsigned int numKeys = static_cast<unsigned int>(animData->size());
                 aiMeshMorphAnim *meshMorphAnim = new aiMeshMorphAnim();

@@ -74,8 +74,8 @@ class PbrtExporter
 {
 public:
     /// Constructor for a specific scene to export
-    PbrtExporter(const aiScene* pScene, IOSystem* pIOSystem,
-        const std::string path, const std::string file);
+    PbrtExporter(const aiScene *pScene, IOSystem *pIOSystem,
+            const std::string &path, const std::string &file);
 
     /// Destructor
     virtual ~PbrtExporter();

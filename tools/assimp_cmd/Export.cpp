@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 #include <assimp/ParsingUtils.h>
+#include <assimp/StringUtils.h>
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
@@ -107,7 +108,7 @@ int Assimp_Export(const char *const *params, unsigned int num) {
         }
     }
 
-    std::transform(outf.begin(), outf.end(), outf.begin(), Assimp::ToLower<char>);
+    std::transform(outf.begin(), outf.end(), outf.begin(), ai_tolower<char>);
 
     // convert the output format to a format id
     size_t outfi = GetMatchingFormat(outf);

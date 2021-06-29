@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2020, assimp team
+# Copyright (c) 2006-2021, assimp team
 #
 # All rights reserved.
 #
@@ -43,7 +43,7 @@
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.10 )
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -137,7 +137,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/XMLTools.h
   ${HEADER_PATH}/IOStreamBuffer.h
   ${HEADER_PATH}/CreateAnimMesh.h
-  ${HEADER_PATH}/irrXMLWrapper.h
+  ${HEADER_PATH}/XmlParser.h
   ${HEADER_PATH}/BlobIOSystem.h
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
@@ -298,7 +298,6 @@ SET(ASSIMP_EXPORTERS_DISABLED "") # disabled exporters list (used to print)
 
 ADD_ASSIMP_IMPORTER( AMF
   AssetLib/AMF/AMFImporter.hpp
-  AssetLib/AMF/AMFImporter_Macro.hpp
   AssetLib/AMF/AMFImporter_Node.hpp
   AssetLib/AMF/AMFImporter.cpp
   AssetLib/AMF/AMFImporter_Geometry.cpp
@@ -665,6 +664,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/3MF/D3MFExporter.h
     AssetLib/3MF/D3MFExporter.cpp)
 
+  ADD_ASSIMP_EXPORTER( PBRT
+    Pbrt/PbrtExporter.h
+    Pbrt/PbrtExporter.cpp)
+
   ADD_ASSIMP_EXPORTER( ASSJSON
     AssetLib/Assjson/cencode.c
     AssetLib/Assjson/cencode.h
@@ -744,9 +747,6 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( IrrXML_SRCS ${HEADER_PATH}/irrXMLWrapper.h )
-SOURCE_GROUP( IrrXML FILES ${IrrXML_SRCS})
-
 ADD_ASSIMP_IMPORTER( Q3D
   AssetLib/Q3D/Q3DLoader.cpp
   AssetLib/Q3D/Q3DLoader.h
@@ -801,21 +801,6 @@ ADD_ASSIMP_IMPORTER( X
 ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter.cpp
   AssetLib/X3D/X3DImporter.hpp
-  AssetLib/X3D/X3DImporter_Geometry2D.cpp
-  AssetLib/X3D/X3DImporter_Geometry3D.cpp
-  AssetLib/X3D/X3DImporter_Group.cpp
-  AssetLib/X3D/X3DImporter_Light.cpp
-  AssetLib/X3D/X3DImporter_Macro.hpp
-  AssetLib/X3D/X3DImporter_Metadata.cpp
-  AssetLib/X3D/X3DImporter_Networking.cpp
-  AssetLib/X3D/X3DImporter_Node.hpp
-  AssetLib/X3D/X3DImporter_Postprocess.cpp
-  AssetLib/X3D/X3DImporter_Rendering.cpp
-  AssetLib/X3D/X3DImporter_Shape.cpp
-  AssetLib/X3D/X3DImporter_Texturing.cpp
-  AssetLib/X3D/FIReader.hpp
-  AssetLib/X3D/FIReader.cpp
-  AssetLib/X3D/X3DVocabulary.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -865,16 +850,6 @@ if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES STATIC_LIBRARY_FLAGS -Os )
 endif()
 
-#ADD_ASSIMP_IMPORTER( STEP
-#    Step/STEPFile.h
-#    Importer/StepFile/StepFileImporter.h
-#    Importer/StepFile/StepFileImporter.cpp
-#    Importer/StepFile/StepFileGen1.cpp
-#    Importer/StepFile/StepFileGen2.cpp
-#    Importer/StepFile/StepFileGen3.cpp
-#    Importer/StepFile/StepReaderGen.h
-#)
-
 if ((NOT ASSIMP_NO_EXPORT) OR (NOT ASSIMP_EXPORTERS_ENABLED STREQUAL ""))
 	SET( Exporter_SRCS
 	  Common/Exporter.cpp
@@ -889,12 +864,16 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# irrXML
+# pugixml
 IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(irrXML)
-  find_package(irrXML CONFIG REQUIRED)
+  hunter_add_package(pugixml)
+  find_package(pugixml CONFIG REQUIRED)
 ELSE()
-  # irrXML already included in contrib directory by parent CMakeLists.txt.
+  SET( Pugixml_SRCS
+    ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.hpp
+  )
+  SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
 # utf8
@@ -944,6 +923,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   SET( unzip_SRCS
+    ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
     ../contrib/unzip/ioapi.h
@@ -1039,7 +1019,7 @@ ENDIF()
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
 FIND_PACKAGE(RT QUIET)
-IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR MSVC))
+IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
 ELSE ()
@@ -1055,6 +1035,12 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSE()
   INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
   INCLUDE_DIRECTORIES( "../contrib" )
+  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
+  if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
+    ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
+  endif()
 ENDIF()
 
 # VC2010 fixes
@@ -1108,13 +1094,13 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   # Third-party libraries
-  ${IrrXML_SRCS}
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Pugixml_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1134,6 +1120,11 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   INCLUDE_DIRECTORIES(${C4D_INCLUDES})
 ENDIF ()
 
+IF (ASSIMP_BUILD_DRACO)
+  INCLUDE_DIRECTORIES(${draco_INCLUDE_DIRS})
+  ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
+ENDIF()
+
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
@@ -1146,6 +1137,9 @@ ELSE()
   TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
 ENDIF()
 
+# adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
+TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
+
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
@@ -1156,7 +1150,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
       polyclipping::polyclipping
-      irrXML::irrXML
       openddlparser::openddl_parser
       poly2tri::poly2tri
       minizip::minizip
@@ -1164,9 +1157,17 @@ IF(ASSIMP_HUNTER_ENABLED)
       RapidJSON::rapidjson
       utf8cpp
       zip::zip
+      pugixml
   )
+  
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+  endif()
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} ${IRRXML_LIBRARY} )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1259,23 +1260,16 @@ IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
 ENDIF ()
 
-IF(ASSIMP_HUNTER_ENABLED)
-  INSTALL( TARGETS assimp
-    EXPORT "${TARGETS_EXPORT_NAME}"
-    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    COMPONENT ${LIBASSIMP_COMPONENT}
-    INCLUDES DESTINATION "include")
-ELSE()
+
 INSTALL( TARGETS assimp
-    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-    COMPONENT ${LIBASSIMP_COMPONENT})
-ENDIF()
+  EXPORT "${TARGETS_EXPORT_NAME}"
+  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  COMPONENT ${LIBASSIMP_COMPONENT}
+  INCLUDES DESTINATION include
+)
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
 

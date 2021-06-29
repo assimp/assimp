@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -671,7 +671,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     IOStream *stream = pIOHandler->Open(pFile, "rb");
     if (nullptr == stream) {
-        return;
+        throw DeadlyImportError("ASSBIN: Could not open ", pFile);
     }
 
     // signature

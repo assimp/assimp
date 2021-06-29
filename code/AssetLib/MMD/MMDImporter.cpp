@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -75,7 +75,7 @@ using namespace std;
 //  Default constructor
 MMDImporter::MMDImporter() :
         m_Buffer(),
-        m_strAbsPath("") {
+        m_strAbsPath() {
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -62,19 +60,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 #ifdef _WIN32
+
+const std::wstring wdummy;
+
 static std::wstring Utf8ToWide(const char *in) {
+    if (nullptr == in) {
+        return wdummy;
+    }
     int size = MultiByteToWideChar(CP_UTF8, 0, in, -1, nullptr, 0);
     // size includes terminating null; std::wstring adds null automatically
     std::wstring out(static_cast<size_t>(size) - 1, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, in, -1, &out[0], size);
+    
     return out;
 }
 
+const std::string dummy;
+
 static std::string WideToUtf8(const wchar_t *in) {
+    if (nullptr == in) {
+        return dummy;
+    }
     int size = WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);
     // size includes terminating null; std::string adds null automatically
     std::string out(static_cast<size_t>(size) - 1, '\0');
     WideCharToMultiByte(CP_UTF8, 0, in, -1, &out[0], size, nullptr, nullptr);
+    
     return out;
 }
 #endif
@@ -106,7 +117,12 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
     ai_assert(strMode != nullptr);
     FILE *file;
 #ifdef _WIN32
-    file = ::_wfopen(Utf8ToWide(strFile).c_str(), Utf8ToWide(strMode).c_str());
+    std::wstring name = Utf8ToWide(strFile);
+    if (name.empty()) {
+        return nullptr;
+    }
+    
+    file = ::_wfopen(name.c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
 #endif
@@ -160,7 +176,7 @@ inline static std::string MakeAbsolutePath(const char *in) {
     if (!ret) {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
-        ASSIMP_LOG_WARN_F("Invalid path: ", std::string(in));
+        ASSIMP_LOG_WARN("Invalid path: ", std::string(in));
         out = in;
     }
     return out;

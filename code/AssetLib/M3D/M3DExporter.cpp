@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -197,12 +197,15 @@ M3D_INDEX addMaterial(const Assimp::M3DWrapper &m3d, const aiMaterial *mat) {
                         break;
                     case m3dpf_float:
                         if (mat->Get(aiProps[k].pKey, aiProps[k].type,
-                                    aiProps[k].index, f) == AI_SUCCESS)
+                                    aiProps[k].index, f) == AI_SUCCESS) {
+                            uint32_t f_uint32;
+                            memcpy(&f_uint32, &f, sizeof(uint32_t));
                             addProp(&m3d->material[mi],
                                     m3d_propertytypes[k].id,
                                     /* not (uint32_t)f, because we don't want to convert
                                          * it, we want to see it as 32 bits of memory */
-                                    *((uint32_t *)&f));
+                                    f_uint32);
+                        }
                         break;
                     case m3dpf_uint8:
                         if (mat->Get(aiProps[k].pKey, aiProps[k].type,
@@ -291,21 +294,17 @@ void ExportSceneM3D(
 // Worker function for exporting a scene to ASCII A3D.
 // Prototyped and registered in Exporter.cpp
 void ExportSceneM3DA(
-        const char *,
-        IOSystem *,
-        const aiScene *,
-        const ExportProperties *
+        const char *pFile,
+        IOSystem *pIOSystem,
+        const aiScene *pScene,
+        const ExportProperties *pProperties
 
 ) {
-#ifdef M3D_ASCII
     // initialize the exporter
     M3DExporter exporter(pScene, pProperties);
 
     // perform ascii export
     exporter.doExport(pFile, pIOSystem, true);
-#else
-    throw DeadlyExportError("Assimp configured without M3D_ASCII support");
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------

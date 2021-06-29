@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -325,6 +325,14 @@ bool ExportModel(const aiScene* pOut,
 		PrintHorBar();
 	}
 
+	aiMatrix4x4 rx, ry, rz;
+    aiMatrix4x4::RotationX(imp.rot.x, rx);
+    aiMatrix4x4::RotationY(imp.rot.y, ry);
+    aiMatrix4x4::RotationZ(imp.rot.z, rz);
+	pOut->mRootNode->mTransformation *= rx;
+    pOut->mRootNode->mTransformation *= ry;
+    pOut->mRootNode->mTransformation *= rz;
+
 	// do the actual export, measure time
 	const clock_t first = clock();
 	const aiReturn res = globalExporter->Export(pOut,pID,path);
@@ -493,6 +501,18 @@ int ProcessStandardArguments(
 		else if (! strcmp( param, "-v") || ! strcmp( param, "--verbose")) {
 			fill.verbose = true;
 		}
+		else if (!strncmp(params[i], "-rx=", 4) || !strncmp(params[i], "--rotation-x=", 13)) {
+            std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
+            fill.rot.x = std::stof(value);
+		} 
+		else if (!strncmp(params[i], "-ry=", 4) || !strncmp(params[i], "--rotation-y=", 13)) {
+            std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
+            fill.rot.y = std::stof(value);
+        } 
+		else if (!strncmp(params[i], "-rz=", 4) || !strncmp(params[i], "--rotation-z=", 13)) {
+            std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
+            fill.rot.z = std::stof(value);
+        }
 		else if (! strncmp( param, "--log-out=",10) || ! strncmp( param, "-lo",3)) {
 			fill.logFile = std::string(params[i]+(params[i][1] == '-' ? 10 : 3));
 			if (!fill.logFile.length()) {

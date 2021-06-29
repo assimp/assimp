@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -50,9 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", aiProcess_ValidateDataStructure);
+        if (nullptr == scene) {
+            return false;
+        }
+
         EXPECT_EQ(1u, scene->mNumMeshes);
         aiMesh *mesh = scene->mMeshes[0];
         EXPECT_NE(nullptr, mesh);
@@ -64,7 +68,7 @@ public:
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-    virtual bool exporterTest() {
+    bool exporterTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0);
 

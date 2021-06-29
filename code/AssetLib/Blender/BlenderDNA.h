@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -59,6 +59,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_BUILD_BLENDER_DEBUG
 #endif
 
+// set this to non-zero to dump BlenderDNA stuff to dna.txt.
+// you could set it on the assimp build command line too without touching it here.
+// !!! please make sure this is set to 0 in the repo !!!
+#ifndef ASSIMP_BUILD_BLENDER_DEBUG_DNA
+#define ASSIMP_BUILD_BLENDER_DEBUG_DNA 0
+#endif
+
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
 
 namespace Assimp {
@@ -83,10 +90,9 @@ class ObjectCache;
  *  ancestry. */
 // -------------------------------------------------------------------------------
 struct Error : DeadlyImportError {
-    template<typename... T>
-    explicit Error(T&&... args)
-        : DeadlyImportError(args...)
-    {
+    template <typename... T>
+    explicit Error(T &&...args) :
+            DeadlyImportError(args...) {
     }
 };
 
@@ -187,7 +193,7 @@ struct Field {
 };
 
 // -------------------------------------------------------------------------------
-/** Range of possible behaviours for fields absend in the input file. Some are
+/** Range of possible behaviors for fields absence in the input file. Some are
  *  mission critical so we need them, while others can silently be default
  *  initialized and no animations are harmed. */
 // -------------------------------------------------------------------------------
@@ -395,7 +401,7 @@ private:
 
 // --------------------------------------------------------
 template <>
-struct Structure ::_defaultInitializer<ErrorPolicy_Warn> {
+struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
 
     template <typename T>
     void operator()(T &out, const char *reason = "<add reason>") {
@@ -407,7 +413,7 @@ struct Structure ::_defaultInitializer<ErrorPolicy_Warn> {
 };
 
 template <>
-struct Structure ::_defaultInitializer<ErrorPolicy_Fail> {
+struct Structure::_defaultInitializer<ErrorPolicy_Fail> {
 
     template <typename T>
     void operator()(T & /*out*/, const char * = "") {
@@ -496,7 +502,7 @@ public:
             const Structure &structure,
             const FileDatabase &db) const;
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
     // --------------------------------------------------------
     /** Dump the DNA to a text file. This is for debugging purposes.
      *  The output file is `dna.txt` in the current working folder*/

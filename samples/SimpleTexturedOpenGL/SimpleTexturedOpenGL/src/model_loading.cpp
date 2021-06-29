@@ -18,10 +18,16 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4100) // Disable warning 'unreferenced formal parameter'
+#endif // _MSC_VER
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "contrib/stb_image/stb_image.h"
+
+#ifdef _MSC_VER
 #pragma warning(default: 4100) // Enable warning 'unreferenced formal parameter'
+#endif // _MSC_VER
 
 #include <fstream>
 
@@ -757,7 +763,7 @@ void cleanup()
 
 	if (g_hWnd)
 		KillGLWindow();
-};
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 						 UINT uMsg,				// Message for this Window

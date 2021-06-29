@@ -31,10 +31,16 @@
 #include <dxgiformat.h>
 #include <assert.h>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4005)
+#endif // _MSC_VER
+
 #include <wincodec.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER
 
 #include <memory>
 

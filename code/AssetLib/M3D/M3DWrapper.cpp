@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -133,6 +133,9 @@ unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
     saved_output_ = m3d_save(m3d_, quality, flags, &size);
     return saved_output_;
 #else
+    (void)quality;
+    (void)flags;
+    (void)size;
     return nullptr;
 #endif
 }

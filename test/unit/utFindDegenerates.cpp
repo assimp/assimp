@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -40,7 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
+#include "../../include/assimp/scene.h"
 #include "PostProcessing/FindDegenerates.h"
+
+#include <memory>
 
 using namespace std;
 using namespace Assimp;
@@ -146,4 +149,60 @@ TEST_F(FindDegeneratesProcessTest, testDegeneratesRemovalWithAreaCheck) {
     mProcess->ExecuteOnMesh(mMesh);
 
     EXPECT_EQ(mMesh->mNumUVComponents[1] - 100, mMesh->mNumFaces);
+}
+
+namespace
+{
+    std::unique_ptr<aiMesh> getDegenerateMesh()
+    {
+        std::unique_ptr<aiMesh> mesh(new aiMesh);
+        mesh->mNumVertices = 2;
+        mesh->mVertices = new aiVector3D[2];
+        mesh->mVertices[0] = aiVector3D{ 0.0f, 0.0f, 0.0f };
+        mesh->mVertices[1] = aiVector3D{ 1.0f, 0.0f, 0.0f };
+        mesh->mNumFaces = 1;
+        mesh->mFaces = new aiFace[1];
+        mesh->mFaces[0].mNumIndices = 3;
+        mesh->mFaces[0].mIndices = new unsigned int[3];
+        mesh->mFaces[0].mIndices[0] = 0;
+        mesh->mFaces[0].mIndices[1] = 1;
+        mesh->mFaces[0].mIndices[2] = 0;
+        return mesh;
+    }
+}
+
+TEST_F(FindDegeneratesProcessTest, meshRemoval) {
+    mProcess->EnableAreaCheck(true);
+    mProcess->EnableInstantRemoval(true);
+    mProcess->ExecuteOnMesh(mMesh);
+
+    std::unique_ptr<aiScene> scene(new aiScene);
+    scene->mNumMeshes = 5;
+    scene->mMeshes = new aiMesh*[5];
+
+    /// Use the mesh which doesn't get completely stripped of faces from the main test.
+    aiMesh* meshWhichSurvives = mMesh;
+    mMesh = nullptr;
+
+    scene->mMeshes[0] = getDegenerateMesh().release();
+    scene->mMeshes[1] = getDegenerateMesh().release();
+    scene->mMeshes[2] = meshWhichSurvives;
+    scene->mMeshes[3] = getDegenerateMesh().release();
+    scene->mMeshes[4] = getDegenerateMesh().release();
+
+    scene->mRootNode = new aiNode;
+    scene->mRootNode->mNumMeshes = 5;
+    scene->mRootNode->mMeshes = new unsigned int[5];
+    scene->mRootNode->mMeshes[0] = 0;
+    scene->mRootNode->mMeshes[1] = 1;
+    scene->mRootNode->mMeshes[2] = 2;
+    scene->mRootNode->mMeshes[3] = 3;
+    scene->mRootNode->mMeshes[4] = 4;
+
+    mProcess->Execute(scene.get());    
+
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0], meshWhichSurvives);
+    EXPECT_EQ(scene->mRootNode->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mRootNode->mMeshes[0], 0u);    
 }

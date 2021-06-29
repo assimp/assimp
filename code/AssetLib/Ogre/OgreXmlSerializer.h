@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -46,73 +46,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "OgreStructs.h"
-#include <assimp/irrXMLWrapper.h>
+#include <assimp/XmlParser.h>
 
-namespace Assimp
-{
-namespace Ogre
-{
+namespace Assimp {
 
-typedef irr::io::IrrXMLReader XmlReader;
-typedef std::shared_ptr<XmlReader> XmlReaderPtr;
+namespace Ogre {
 
-class OgreXmlSerializer
-{
+using XmlParserPtr = std::shared_ptr<::Assimp::XmlParser> ;
+
+class OgreXmlSerializer {
 public:
     /// Imports mesh and returns the result.
-    /** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
-    static MeshXml *ImportMesh(XmlReader *reader);
+    /// @note Fatal unrecoverable errors will throw a DeadlyImportError.
+    static MeshXml *ImportMesh(XmlParser *parser);
 
     /// Imports skeleton to @c mesh.
-    /** If mesh does not have a skeleton reference or the skeleton file
-        cannot be found it is not a fatal DeadlyImportError.
-        @return If skeleton import was successful. */
-    static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
-    static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
+    /// If mesh does not have a skeleton reference or the skeleton file
+    /// cannot be found it is not a fatal DeadlyImportError.
+    /// @return If skeleton import was successful.
+    static bool ImportSkeleton(IOSystem *pIOHandler, MeshXml *mesh);
+    static bool ImportSkeleton(IOSystem *pIOHandler, Mesh *mesh);
 
 private:
-    explicit OgreXmlSerializer(XmlReader *reader) :
-        m_reader(reader)
-    {
-    }
+    explicit OgreXmlSerializer(XmlParser *xmlParser);
 
-    static XmlReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
+    static XmlParserPtr OpenXmlParser(Assimp::IOSystem *pIOHandler, const std::string &filename);
 
     // Mesh
     void ReadMesh(MeshXml *mesh);
-    void ReadSubMesh(MeshXml *mesh);
-
-    void ReadGeometry(VertexDataXml *dest);
-    void ReadGeometryVertexBuffer(VertexDataXml *dest);
-
-    void ReadBoneAssignments(VertexDataXml *dest);
+    void ReadSubMesh(XmlNode &node, MeshXml *mesh);
+    void ReadGeometry(XmlNode &node, VertexDataXml *dest);
+    void ReadGeometryVertexBuffer(XmlNode &node, VertexDataXml *dest);
+    void ReadBoneAssignments(XmlNode &node, VertexDataXml *dest);
 
     // Skeleton
-    void ReadSkeleton(Skeleton *skeleton);
+    void ReadSkeleton(XmlNode &node, Skeleton *skeleton);
+    void ReadBones(XmlNode &node, Skeleton *skeleton);
+    void ReadBoneHierarchy(XmlNode &node, Skeleton *skeleton);
+    void ReadAnimations(XmlNode &node, Skeleton *skeleton);
+    void ReadAnimationTracks(XmlNode &node, Animation *dest);
+    void ReadAnimationKeyFrames(XmlNode &node, Animation *anim, VertexAnimationTrack *dest);
 
-    void ReadBones(Skeleton *skeleton);
-    void ReadBoneHierarchy(Skeleton *skeleton);
+    template <typename T>
+    T ReadAttribute(XmlNode &xmlNode, const char *name) const;
 
-    void ReadAnimations(Skeleton *skeleton);
-    void ReadAnimationTracks(Animation *dest);
-    void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
-
-    template<typename T>
-    T ReadAttribute(const char *name) const;
-    bool HasAttribute(const char *name) const;
-
-    std::string &NextNode();
-    std::string &SkipCurrentNode();
-
-    bool CurrentNodeNameEquals(const std::string &name) const;
-    std::string CurrentNodeName(bool forceRead = false);
-
-    XmlReader *m_reader;
-    std::string m_currentNodeName;
+private:
+    XmlParser *mParser;
 };
 
-} // Ogre
-} // Assimp
+
+} // namespace Ogre
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
 #endif // AI_OGREXMLSERIALIZER_H_INC

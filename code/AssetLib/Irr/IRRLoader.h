@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -39,7 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
 
 /** @file IRRLoader.h
  *  @brief Declaration of the .irrMesh (Irrlight Engine Mesh Format)
@@ -83,7 +81,7 @@ protected:
 
 private:
 
-    /** Data structure for a scenegraph node animator
+    /** Data structure for a scene-graph node animator
      */
     struct Animator {
         // Type of the animator
@@ -129,7 +127,7 @@ private:
         int timeForWay;
     };
 
-    /** Data structure for a scenegraph node in an IRR file
+    /** Data structure for a scene-graph node in an IRR file
      */
     struct Node
     {
@@ -227,8 +225,7 @@ private:
 
 
     // -------------------------------------------------------------------
-    /** Fill the scenegraph recursively
-     */
+    /// Fill the scene-graph recursively
     void GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
         BatchLoader& batch,
         std::vector<aiMesh*>& meshes,
@@ -237,26 +234,21 @@ private:
         std::vector<aiMaterial*>& materials,
         unsigned int& defaultMatIdx);
 
-
     // -------------------------------------------------------------------
-    /** Generate a mesh that consists of just a single quad
-     */
+    /// Generate a mesh that consists of just a single quad
     aiMesh* BuildSingleQuadMesh(const SkyboxVertex& v1,
         const SkyboxVertex& v2,
         const SkyboxVertex& v3,
         const SkyboxVertex& v4);
 
-
     // -------------------------------------------------------------------
-    /** Build a skybox
-     *
-     *  @param meshes Receives 6 output meshes
-     *  @param materials The last 6 materials are assigned to the newly
-     *    created meshes. The names of the materials are adjusted.
-     */
+    /// Build a sky-box
+    ///
+    /// @param meshes Receives 6 output meshes
+    /// @param materials The last 6 materials are assigned to the newly
+    ///                  created meshes. The names of the materials are adjusted.
     void BuildSkybox(std::vector<aiMesh*>& meshes,
         std::vector<aiMaterial*> materials);
-
 
     // -------------------------------------------------------------------
     /** Copy a material for a mesh to the output material list
@@ -271,7 +263,6 @@ private:
         unsigned int& defMatIdx,
         aiMesh* mesh);
 
-
     // -------------------------------------------------------------------
     /** Compute animations for a specific node
      *
@@ -281,13 +272,11 @@ private:
     void ComputeAnimations(Node* root, aiNode* real,
         std::vector<aiNodeAnim*>& anims);
 
-
 private:
-
-    /** Configuration option: desired output FPS */
+    /// Configuration option: desired output FPS 
     double fps;
 
-    /** Configuration option: speed flag was set? */
+    /// Configuration option: speed flag was set?
     bool configSpeedFlag;
 };
 

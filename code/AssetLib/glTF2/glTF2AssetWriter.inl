@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -110,19 +110,18 @@ namespace glTF2 {
         if (a.bufferView) {
             obj.AddMember("bufferView", a.bufferView->index, w.mAl);
             obj.AddMember("byteOffset", (unsigned int)a.byteOffset, w.mAl);
-            Value vTmpMax, vTmpMin;
-            if (a.componentType == ComponentType_FLOAT) {
-                obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
-            } else {
-                obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
-                obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
-            }
         }
-
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", (unsigned int)a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+        Value vTmpMax, vTmpMin;
+        if (a.componentType == ComponentType_FLOAT) {
+            obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+        } else {
+            obj.AddMember("max", MakeValueCast<int64_t>(vTmpMax, a.max, w.mAl), w.mAl);
+            obj.AddMember("min", MakeValueCast<int64_t>(vTmpMin, a.min, w.mAl), w.mAl);
+        }
 
         if (a.sparse) {
             Value sparseValue;
@@ -251,6 +250,7 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
+        //basisu: no need to handle .ktx2, .basis, write as is
         if (img.bufferView) {
             obj.AddMember("bufferView", img.bufferView->index, w.mAl);
             obj.AddMember("mimeType", Value(img.mimeType, w.mAl).Move(), w.mAl);
@@ -417,6 +417,63 @@ namespace glTF2 {
           exts.AddMember("KHR_materials_unlit", unlit, w.mAl);
         }
 
+        if (m.materialSheen.isPresent) {
+            Value materialSheen(rapidjson::Type::kObjectType);
+
+            MaterialSheen &sheen = m.materialSheen.value;
+
+            WriteVec(materialSheen, sheen.sheenColorFactor, "sheenColorFactor", defaultSheenFactor, w.mAl);
+
+            if (sheen.sheenRoughnessFactor != 0.f) {
+                WriteFloat(materialSheen, sheen.sheenRoughnessFactor, "sheenRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialSheen, sheen.sheenColorTexture, "sheenColorTexture", w.mAl);
+            WriteTex(materialSheen, sheen.sheenRoughnessTexture, "sheenRoughnessTexture", w.mAl);
+
+            if (!materialSheen.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_sheen", materialSheen, w.mAl);
+            }
+        }
+
+        if (m.materialClearcoat.isPresent) {
+            Value materialClearcoat(rapidjson::Type::kObjectType);
+
+            MaterialClearcoat &clearcoat = m.materialClearcoat.value;
+
+            if (clearcoat.clearcoatFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatFactor, "clearcoatFactor", w.mAl);
+            }
+
+            if (clearcoat.clearcoatRoughnessFactor != 0.f) {
+                WriteFloat(materialClearcoat, clearcoat.clearcoatRoughnessFactor, "clearcoatRoughnessFactor", w.mAl);
+            }
+
+            WriteTex(materialClearcoat, clearcoat.clearcoatTexture, "clearcoatTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatRoughnessTexture, "clearcoatRoughnessTexture", w.mAl);
+            WriteTex(materialClearcoat, clearcoat.clearcoatNormalTexture, "clearcoatNormalTexture", w.mAl);
+                        
+            if (!materialClearcoat.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_clearcoat", materialClearcoat, w.mAl);
+            }
+        }
+
+        if (m.materialTransmission.isPresent) {
+            Value materialTransmission(rapidjson::Type::kObjectType);
+
+            MaterialTransmission &transmission = m.materialTransmission.value;
+
+            if (transmission.transmissionFactor != 0.f) {
+                WriteFloat(materialTransmission, transmission.transmissionFactor, "transmissionFactor", w.mAl);
+            }
+
+            WriteTex(materialTransmission, transmission.transmissionTexture, "transmissionTexture", w.mAl);
+                                   
+            if (!materialTransmission.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_transmission", materialTransmission, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -451,6 +508,20 @@ namespace glTF2 {
             Mesh::Primitive& p = m.primitives[i];
             Value prim;
             prim.SetObject();
+
+            // Extensions
+            if (p.ngonEncoded)
+            {
+                Value exts;
+                exts.SetObject();
+
+                Value FB_ngon_encoding;
+                FB_ngon_encoding.SetObject();
+
+                exts.AddMember(StringRef("FB_ngon_encoding"), FB_ngon_encoding, w.mAl);
+                prim.AddMember("extensions", exts, w.mAl);
+            }
+
             {
                 prim.AddMember("mode", Value(int(p.mode)).Move(), w.mAl);
 
@@ -514,7 +585,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Node& n, AssetWriter& w)
     {
-
         if (n.matrix.isPresent) {
             Value val;
             obj.AddMember("matrix", MakeValue(val, n.matrix.value, w.mAl).Move(), w.mAl);
@@ -540,14 +610,13 @@ namespace glTF2 {
             obj.AddMember("mesh", n.meshes[0]->index, w.mAl);
         }
 
-        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
-
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
         }
-
-        if (!n.jointName.empty()) {
-          obj.AddMember("jointName", n.jointName, w.mAl);
+        
+        //gltf2 spec does not support "skeletons" under node
+        if(n.skeletons.size()) {
+            AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
         }
     }
 
@@ -808,10 +877,38 @@ namespace glTF2 {
             if (this->mAsset.extensionsUsed.KHR_materials_unlit) {
               exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
             }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
+                exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
+            }
+                        
+            if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
+                exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_transmission) {
+                exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.FB_ngon_encoding) {
+                exts.PushBack(StringRef("FB_ngon_encoding"), mAl);
+            }
+            
+            if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
+                exts.PushBack(StringRef("KHR_texture_basisu"), mAl);
+            }
         }
 
         if (!exts.Empty())
             mDoc.AddMember("extensionsUsed", exts, mAl);
+            
+        //basisu extensionRequired
+        Value extsReq;
+        extsReq.SetArray();
+        if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
+            extsReq.PushBack(StringRef("KHR_texture_basisu"), mAl);
+            mDoc.AddMember("extensionsRequired", extsReq, mAl);
+        }
     }
 
     template<class T>
@@ -820,6 +917,7 @@ namespace glTF2 {
         if (d.mObjs.empty()) return;
 
         Value* container = &mDoc;
+		const char* context = "Document";
 
         if (d.mExtId) {
             Value* exts = FindObject(mDoc, "extensions");
@@ -828,17 +926,18 @@ namespace glTF2 {
                 exts = FindObject(mDoc, "extensions");
             }
 
-            container = FindObject(*exts, d.mExtId);
+            container = FindObjectInContext(*exts, d.mExtId, "extensions");
             if (nullptr != container) {
                 exts->AddMember(StringRef(d.mExtId), Value().SetObject().Move(), mDoc.GetAllocator());
-                container = FindObject(*exts, d.mExtId);
+                container = FindObjectInContext(*exts, d.mExtId, "extensions");
+                context = d.mExtId;
             }
         }
 
-        Value *dict = FindArray(*container, d.mDictId);
+        Value *dict = FindArrayInContext(*container, d.mDictId, context);
         if (nullptr == dict) {
             container->AddMember(StringRef(d.mDictId), Value().SetArray().Move(), mDoc.GetAllocator());
-            dict = FindArray(*container, d.mDictId);
+            dict = FindArrayInContext(*container, d.mDictId, context);
             if (nullptr == dict) {
                 return;
             }

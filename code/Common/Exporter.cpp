@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -138,6 +138,9 @@ void ExportSceneM3DA(const char*, IOSystem*, const aiScene*, const ExportPropert
 #ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
 void ExportAssimp2Json(const char* , IOSystem*, const aiScene* , const Assimp::ExportProperties*);
 #endif
+#ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
+void ExportScenePbrt(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+#endif
 
 static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporters) {
 	(void)exporters;
@@ -219,6 +222,10 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
 	exporters.push_back(Exporter::ExportFormatEntry("3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0));
+#endif
+
+#ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
+	exporters.push_back(Exporter::ExportFormatEntry("pbrt", "pbrt-v4 scene description file", "pbrt", &ExportScenePbrt, aiProcess_Triangulate | aiProcess_SortByPType));
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
@@ -336,9 +343,11 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
         delete pimpl->blob;
         pimpl->blob = nullptr;
     }
+    
+    auto baseName = pProperties ? pProperties->GetPropertyString(AI_CONFIG_EXPORT_BLOB_NAME, AI_BLOBIO_MAGIC) : AI_BLOBIO_MAGIC;
 
     std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
-    BlobIOSystem* blobio = new BlobIOSystem();
+    BlobIOSystem *blobio = new BlobIOSystem(baseName);
     pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
     if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName(), pPreprocessing, pProperties)) {

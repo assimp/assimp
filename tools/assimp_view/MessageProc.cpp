@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -2143,7 +2143,7 @@ INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
         }
     return FALSE;
     }
-};
+}
 
 using namespace AssimpView;
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -316,4 +316,110 @@ TEST_F(utFBXImporterExporter, importCubesWithOutOfRangeFloat) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/cubes_with_outofrange_float.fbx", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
+}
+
+TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/maxPbrMaterial_metalRough.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_TRUE(scene->mRootNode);
+
+    ASSERT_EQ(scene->mNumMaterials, 1u);
+    const aiMaterial* mat = scene->mMaterials[0];
+    aiString texture;
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\albedo.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_METALNESS, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\metalness.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSION_COLOR, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\emission.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_NORMAL_CAMERA, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\normal.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE_ROUGHNESS, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\roughness.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\occlusion.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_OPACITY, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\opacity.png"));
+
+    // The material contains values for standard properties (e.g. SpecularColor), where 3ds Max has presumably
+    // used formulas to map the Pbr values into the standard material model. However, the pbr values themselves
+    // are available in the material as untyped "raw" properties. We check that these are correctly parsed:
+
+    aiColor4D baseColor;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|basecolor", aiTextureType_NONE, 0, baseColor), aiReturn_SUCCESS);
+    EXPECT_EQ(baseColor, aiColor4D(0, 1, 1, 1));
+
+    float metalness;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|metalness", aiTextureType_NONE, 0, metalness), aiReturn_SUCCESS);
+    EXPECT_EQ(metalness, 0.25f);
+
+    float roughness;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|roughness", aiTextureType_NONE, 0, roughness), aiReturn_SUCCESS);
+    EXPECT_EQ(roughness, 0.5f);
+
+    int useGlossiness;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness), aiReturn_SUCCESS);
+    EXPECT_EQ(useGlossiness, 2); // 1 = Roughness map is glossiness, 2 = Roughness map is roughness.
+
+    float bumpMapAmt; // Presumably amount.
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
+    EXPECT_EQ(bumpMapAmt, 0.75f);
+    
+    aiColor4D emitColor;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
+    EXPECT_EQ(emitColor, aiColor4D(1, 1, 0, 1));
+}
+
+TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/maxPbrMaterial_specGloss.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_TRUE(scene->mRootNode);
+
+    ASSERT_EQ(scene->mNumMaterials, 1u);
+    const aiMaterial* mat = scene->mMaterials[0];
+    aiString texture;
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\albedo.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\specular.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSION_COLOR, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\emission.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_NORMAL_CAMERA, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\normal.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\glossiness.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\occlusion.png"));
+    ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_OPACITY, 0), texture), AI_SUCCESS);
+    EXPECT_EQ(texture, aiString("Textures\\opacity.png"));
+
+    // The material contains values for standard properties (e.g. SpecularColor), where 3ds Max has presumably
+    // used formulas to map the Pbr values into the standard material model. However, the pbr values themselves
+    // are available in the material as untyped "raw" properties. We check that these are correctly parsed:
+
+    aiColor4D baseColor;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|basecolor", aiTextureType_NONE, 0, baseColor), aiReturn_SUCCESS);
+    EXPECT_EQ(baseColor, aiColor4D(0, 1, 1, 1));
+
+    aiColor4D specular;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|Specular", aiTextureType_NONE, 0, specular), aiReturn_SUCCESS);
+    EXPECT_EQ(specular, aiColor4D(1, 1, 0, 1));
+
+    float glossiness;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|glossiness", aiTextureType_NONE, 0, glossiness), aiReturn_SUCCESS);
+    EXPECT_EQ(glossiness, 0.33f);
+
+    int useGlossiness;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|useGlossiness", aiTextureType_NONE, 0, useGlossiness), aiReturn_SUCCESS);
+    EXPECT_EQ(useGlossiness, 1); // 1 = Glossiness map is glossiness, 2 = Glossiness map is roughness.
+
+    float bumpMapAmt; // Presumably amount.
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
+    EXPECT_EQ(bumpMapAmt, 0.66f);
+    
+    aiColor4D emitColor;
+    ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
+    EXPECT_EQ(emitColor, aiColor4D(1, 0, 1, 1));
 }

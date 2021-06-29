@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -52,8 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#define RAPIDJSON_HAS_STDSTRING 1
-#define RAPIDJSON_NOMEMBERITERATORCLASS
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
@@ -76,10 +74,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
-#if _MSC_VER > 1600
-#define gltf_unordered_map unordered_map
-#else
+#if defined(_MSC_VER) && _MSC_VER <= 1600
 #define gltf_unordered_map tr1::unordered_map
+#else
+#define gltf_unordered_map unordered_map
 #endif
 #endif
 
@@ -109,7 +107,6 @@ public:
             f(file) {}
     ~IOStream() {
         fclose(f);
-        f = 0;
     }
 
     size_t Read(void *b, size_t sz, size_t n) { return fread(b, sz, n, f); }
@@ -251,7 +248,10 @@ inline char EncodeCharBase64(uint8_t b) {
 }
 
 inline uint8_t DecodeCharBase64(char c) {
-    return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
+    if (c & 0x80) {
+        throw DeadlyImportError("Invalid base64 char value: ", size_t(c));
+    }
+    return DATA<true>::tableDecodeBase64[size_t(c & 0x7F)]; // TODO faster with lookup table or ifs?
 }
 
 size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out);

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -216,7 +216,7 @@ void ProcessConnectedFaceSet(const Schema_2x3::IfcConnectedFaceSet& fset, TempMe
                 }
             }
             else {
-                IFCImporter::LogWarn("skipping unknown IfcFaceBound entity, type is " + bound.Bound->GetClassName());
+                IFCImporter::LogWarn("skipping unknown IfcFaceBound entity, type is ", bound.Bound->GetClassName());
                 continue;
             }
 
@@ -656,7 +656,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         }
     }
 
-    if( openings && ((sides_with_openings == 1 && sides_with_openings) || (sides_with_v_openings == 2 && sides_with_v_openings)) ) {
+    if( openings && (sides_with_openings == 1 || sides_with_v_openings == 2 ) ) {
         IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
     }
 
@@ -729,7 +729,7 @@ void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, TempMesh&
         ProcessRevolvedAreaSolid(*rev,meshout,conv);
     }
     else {
-        IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is " + swept.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is ", swept.GetClassName());
     }
 }
 
@@ -781,7 +781,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         return false;
     }
     else {
-        IFCImporter::LogWarn("skipping unknown IfcGeometricRepresentationItem entity, type is " + geo.GetClassName());
+        IFCImporter::LogWarn("skipping unknown IfcGeometricRepresentationItem entity, type is ", geo.GetClassName());
         return false;
     }
 

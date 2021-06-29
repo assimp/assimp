@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -46,14 +44,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 class AssimpAPITest : public ::testing::Test {
-
+    // empty
 };
 
 TEST_F( AssimpAPITest, aiGetImporterDescTest ) {
-    const aiImporterDesc *desc( NULL );
-    desc = aiGetImporterDesc( NULL );
-    EXPECT_EQ( NULL, desc );
+    const aiImporterDesc *desc( nullptr );
+    desc = aiGetImporterDesc(nullptr);
+    EXPECT_EQ(nullptr, desc);
 
     desc = aiGetImporterDesc( "obj" );
-    EXPECT_TRUE( NULL != desc );
+    EXPECT_TRUE(nullptr != desc);
+}
+
+TEST_F( AssimpAPITest, aiGetLastErrorTest ) {
+    const char *error = aiGetErrorString();
+    EXPECT_NE(nullptr, error);
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -81,7 +81,7 @@ public:
     /** @brief Set list of fixed (inmutable) materials
      *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
      */
-    void SetFixedMaterialsString(const std::string& fixed = "") {
+    void SetFixedMaterialsString(const std::string& fixed = std::string()) {
         mConfigFixedMaterials = fixed;
     }
 

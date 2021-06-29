@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -335,12 +333,15 @@ struct aiScene
     /**
      *  @brief  The global metadata assigned to the scene itself.
      *
-     *  This data contains global metadata which belongs to the scene like 
-     *  unit-conversions, versions, vendors or other model-specific data. This 
+     *  This data contains global metadata which belongs to the scene like
+     *  unit-conversions, versions, vendors or other model-specific data. This
      *  can be used to store format-specific metadata as well.
      */
     C_STRUCT aiMetadata* mMetaData;
 
+    /** The name of the scene itself.
+     */
+    C_STRUCT aiString mName;
 
 #ifdef __cplusplus
 
@@ -394,22 +395,35 @@ struct aiScene
 
     //! Returns an embedded texture
     const aiTexture* GetEmbeddedTexture(const char* filename) const {
+        return GetEmbeddedTextureAndIndex(filename).first;
+    }
+
+    //! Returns an embedded texture and its index
+    std::pair<const aiTexture*, int> GetEmbeddedTextureAndIndex(const char* filename) const {
+        if(nullptr==filename) {
+            return std::make_pair(nullptr, -1);
+        }
         // lookup using texture ID (if referenced like: "*1", "*2", etc.)
         if ('*' == *filename) {
             int index = std::atoi(filename + 1);
-            if (0 > index || mNumTextures <= static_cast<unsigned>(index))
-                return nullptr;
-            return mTextures[index];
+            if (0 > index || mNumTextures <= static_cast<unsigned>(index)) {
+                return std::make_pair(nullptr, -1);
+            }
+            return std::make_pair(mTextures[index], index);
         }
         // lookup using filename
         const char* shortFilename = GetShortFilename(filename);
+        if (nullptr == shortFilename) {
+            return std::make_pair(nullptr, -1);
+        }
+
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());
             if (strcmp(shortTextureFilename, shortFilename) == 0) {
-                return mTextures[i];
+                return std::make_pair(mTextures[i], i);
             }
         }
-        return nullptr;
+        return std::make_pair(nullptr, -1);
     }
 #endif // __cplusplus
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -155,7 +155,7 @@ struct World : ElemBase {
 // -------------------------------------------------------------------------------
 struct MVert : ElemBase {
     float co[3] FAIL;
-    float no[3] FAIL; // readed as short and divided through / 32767.f
+    float no[3] FAIL; // read as short and divided through / 32767.f
     char flag;
     int mat_nr WARN;
     int bweight;
@@ -228,7 +228,10 @@ struct TFace : ElemBase {
 // -------------------------------------------------------------------------------
 struct MTFace : ElemBase {
     MTFace() :
-            flag(0), mode(0), tile(0), unwrap(0) {
+            flag(0),
+            mode(0),
+            tile(0),
+            unwrap(0) {
     }
 
     float uv[4][2] FAIL;

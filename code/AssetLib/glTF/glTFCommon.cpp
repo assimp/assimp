@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -49,10 +49,12 @@ using namespace glTFCommon::Util;
 namespace Util {
 
 size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out) {
-    ai_assert(inLength % 4 == 0);
+    if (inLength % 4 != 0) {
+        throw DeadlyImportError("Invalid base64 encoded data: \"", std::string(in, std::min(size_t(32), inLength)), "\", length:", inLength);
+    }
 
     if (inLength < 4) {
-        out = 0;
+        out = nullptr;
         return 0;
     }
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -91,7 +91,7 @@ namespace pmx
 		std::vector<char> buffer;
 		if (size == 0)
 		{
-			return std::string("");
+			return std::string();
 		}
 		buffer.reserve(size);
 		stream->read((char*) buffer.data(), size);
@@ -478,8 +478,7 @@ namespace pmx
 
     void PmxSoftBody::Read(std::istream * /*stream*/, PmxSetting * /*setting*/)
 	{
-		std::cerr << "Not Implemented Exception" << std::endl;
-        throw DeadlyImportError("MMD: Not Implemented Exception");
+        throw DeadlyImportError("MMD: Soft Body support is not implemented.");
     }
 
 	void PmxModel::Init()
@@ -516,15 +515,13 @@ namespace pmx
 		char magic[4];
 		stream->read((char*) magic, sizeof(char) * 4);
 		if (magic[0] != 0x50 || magic[1] != 0x4d || magic[2] != 0x58 || magic[3] != 0x20)
-		{
-			std::cerr << "invalid magic number." << std::endl;
-      throw DeadlyImportError("MMD: invalid magic number.");
+        {
+      throw DeadlyImportError("MMD: Invalid magic number.");
     }
 		stream->read((char*) &version, sizeof(float));
 		if (version != 2.0f && version != 2.1f)
 		{
-			std::cerr << "this is not ver2.0 or ver2.1 but " << version << "." << std::endl;
-            throw DeadlyImportError("MMD: this is not ver2.0 or ver2.1 but ", to_string(version));
+            throw DeadlyImportError("MMD: Unsupported version (must be 2.0 or 2.1): ", ai_to_string(version));
     }
 		this->setting.Read(stream);
 

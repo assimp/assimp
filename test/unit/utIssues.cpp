@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 class utIssues : public ::testing::Test {
-
+    // empty
 };
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -64,12 +64,13 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     Assimp::Exporter exporter;
                 
     std::string path = "dae";
-    const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( 0 ) );
+    const aiExportFormatDesc *desc = exporter.GetExportFormatDescription( 0 );
     EXPECT_NE( desc, nullptr );
+    path.append(".");
     path.append( desc->fileExtension );
     EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
     const aiScene *newScene( importer.ReadFile( path, aiProcess_ValidateDataStructure ) );
-    EXPECT_TRUE( NULL != newScene );
+    ASSERT_NE( nullptr, newScene );
     float newOpacity;
     if ( newScene->mNumMaterials > 0 ) {
         std::cout << "Desc = " << desc->description << "\n";

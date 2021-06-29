@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -49,7 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_IMPORTER_DESC_H_INC
 
 #ifdef __GNUC__
-#pragma GCC system_header
+#   pragma GCC system_header
+#endif
+
+#include <assimp/types.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /** Mixed set of flags for #aiImporterDesc, indicating some features
@@ -142,5 +146,9 @@ Will return a nullptr if no assigned importer desc. was found for the given exte
     \return A pointer showing to the ImporterDesc, \see aiImporterDesc.
 */
 ASSIMP_API const C_STRUCT aiImporterDesc *aiGetImporterDesc(const char *extension);
+
+#ifdef __cplusplus
+} // end of extern "C"
+#endif
 
 #endif // AI_IMPORTER_DESC_H_INC

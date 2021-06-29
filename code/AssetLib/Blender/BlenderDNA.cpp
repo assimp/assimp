@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -139,7 +139,6 @@ void DNAParser::Parse() {
         dna.structures.push_back(Structure());
         Structure &s = dna.structures.back();
         s.name = types[n].name;
-        //s.index = dna.structures.size()-1;
 
         n = stream.GetI2();
         s.fields.reserve(n);
@@ -199,9 +198,9 @@ void DNAParser::Parse() {
         s.size = offset;
     }
 
-    ASSIMP_LOG_DEBUG_F("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
+    ASSIMP_LOG_DEBUG("BlenderDNA: Got ", dna.structures.size(), " structures with totally ", fields, " fields");
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
     dna.DumpToFile();
 #endif
 
@@ -209,7 +208,7 @@ void DNAParser::Parse() {
     dna.RegisterConverters();
 }
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
 
 #include <fstream>
 // ------------------------------------------------------------------------------------------------
@@ -238,7 +237,7 @@ void DNA ::DumpToFile() {
 
     ASSIMP_LOG_INFO("BlenderDNA: Dumped dna to dna.txt");
 }
-#endif
+#endif // ASSIMP_BUILD_BLENDER_DEBUG_DNA
 
 // ------------------------------------------------------------------------------------------------
 /*static*/ void DNA ::ExtractArraySize(

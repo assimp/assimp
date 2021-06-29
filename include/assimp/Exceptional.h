@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -71,10 +71,17 @@ protected:
  *  nullptr instead of a valid aiScene then.  */
 class ASSIMP_API DeadlyImportError : public DeadlyErrorBase {
 public:
+    DeadlyImportError(const char *message) :
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<const char*>(message)) {}
+
     /** Constructor with arguments */
     template<typename... T>
     explicit DeadlyImportError(T&&... args) :
             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
+
+#if defined(_MSC_VER) && defined(__clang__)
+    DeadlyImportError(DeadlyImportError& other) = delete;
+#endif
 };
 
 class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
@@ -83,6 +90,10 @@ public:
     template<typename... T>
     explicit DeadlyExportError(T&&... args) :
             DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
+
+#if defined(_MSC_VER) && defined(__clang__)
+    DeadlyExportError(DeadlyExportError& other) = delete;
+#endif
 };
 
 #ifdef _MSC_VER

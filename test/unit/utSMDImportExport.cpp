@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -72,6 +72,6 @@ TEST_F(utSMDImporter, importTest) {
 
 TEST_F(utSMDImporter, issue_899_Texture_garbage_at_end_of_string_Test) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/SMD/holy_grailref.smd", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR"/SMD/holy_grailref.smd", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 }

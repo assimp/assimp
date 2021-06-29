@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -272,7 +272,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                             szExtFound - 1 - info.cFileName);
 
                         for (unsigned int i = 0; i < iSizeFound;++i)
-                            info.cFileName[i] = (CHAR)tolower(info.cFileName[i]);
+                            info.cFileName[i] = (CHAR)tolower((unsigned char)info.cFileName[i]);
 
                         if (0 == memcmp(info.cFileName,szFile2, std::min(iSizeFound,iSize)))
                         {
@@ -354,7 +354,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
             for (unsigned int i = 0;;++i)
             {
                 if ('\0' == szTemp[i])break;
-                szTemp[i] = (char)tolower(szTemp[i]);
+                szTemp[i] = (char)tolower((unsigned char)szTemp[i]);
             }
 
             if(TryLongerPath(szTemp,p_szString))return 1;

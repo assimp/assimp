@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -64,7 +64,7 @@ static int ConvertShadingMode(const std::string& name) {
     else if (name == "PHONG") {
         return aiShadingMode_Phong;
     }
-    IFCImporter::LogWarn("shading mode "+name+" not recognized by Assimp, using Phong instead");
+    IFCImporter::LogWarn("shading mode ", name, " not recognized by Assimp, using Phong instead");
     return aiShadingMode_Phong;
 }
 
@@ -145,7 +145,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
                         // not found, create new material
                         const std::string side = static_cast<std::string>(surf->Side);
                         if( side != "BOTH" ) {
-                            IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
+                            IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: ", side);
                         }
 
                         std::unique_ptr<aiMaterial> mat(new aiMaterial());

@@ -1,10 +1,8 @@
-/** Helper structures for the Collada loader */
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -40,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+/** Helper structures for the Collada loader */
 
 #include "ColladaHelper.h"
 
@@ -54,7 +53,7 @@ const MetaKeyPairVector MakeColladaAssimpMetaKeys() {
     result.emplace_back("authoring_tool", AI_METADATA_SOURCE_GENERATOR);
     result.emplace_back("copyright", AI_METADATA_SOURCE_COPYRIGHT);
     return result;
-};
+}
 
 const MetaKeyPairVector &GetColladaAssimpMetaKeys() {
     static const MetaKeyPairVector result = MakeColladaAssimpMetaKeys();
@@ -67,7 +66,7 @@ const MetaKeyPairVector MakeColladaAssimpMetaKeysCamelCase() {
         ToCamelCase(val.first);
     }
     return result;
-};
+}
 
 const MetaKeyPairVector &GetColladaAssimpMetaKeysCamelCase() {
     static const MetaKeyPairVector result = MakeColladaAssimpMetaKeysCamelCase();
@@ -81,16 +80,16 @@ void ToCamelCase(std::string &text) {
         return;
     // Capitalise first character
     auto it = text.begin();
-    (*it) = ToUpper(*it);
+    (*it) = ai_toupper(*it);
     ++it;
     for (/*started above*/; it != text.end(); /*iterated below*/) {
         if ((*it) == '_') {
             it = text.erase(it);
             if (it != text.end())
-                (*it) = ToUpper(*it);
+                (*it) = ai_toupper(*it);
         } else {
             // Make lower case
-            (*it) = ToLower(*it);
+            (*it) = ai_tolower(*it);
             ++it;
         }
     }

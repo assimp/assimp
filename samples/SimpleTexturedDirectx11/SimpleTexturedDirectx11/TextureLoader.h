@@ -31,10 +31,16 @@
 
 #include <d3d11.h>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4005)
+#endif // _MSC_VER
+
 #include <stdint.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER
 
 HRESULT CreateWICTextureFromMemory(_In_ ID3D11Device* d3dDevice,
 	_In_opt_ ID3D11DeviceContext* d3dContext,

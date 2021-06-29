@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -48,16 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreStructs.h"
 #include <assimp/StreamReader.h>
 
-namespace Assimp
-{
-namespace Ogre
-{
+namespace Assimp {
+namespace Ogre {
 
 typedef Assimp::StreamReaderLE MemoryStreamReader;
 typedef std::shared_ptr<MemoryStreamReader> MemoryStreamReaderPtr;
 
-class OgreBinarySerializer
-{
+class OgreBinarySerializer {
 public:
     /// Imports mesh and returns the result.
     /** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
@@ -71,17 +67,15 @@ public:
     static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
 
 private:
-    enum AssetMode
-    {
+    enum AssetMode {
         AM_Mesh,
         AM_Skeleton
     };
 
     OgreBinarySerializer(MemoryStreamReader *reader, AssetMode mode) :
-        m_currentLen(0),
-        m_reader(reader),
-        assetMode(mode)
-    {
+            m_currentLen(0),
+            m_reader(reader),
+            assetMode(mode) {
     }
 
     static MemoryStreamReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
@@ -136,7 +130,7 @@ private:
     // Reader utils
     bool AtEnd() const;
 
-    template<typename T>
+    template <typename T>
     inline T Read();
 
     void ReadBytes(char *dest, size_t numBytes);
@@ -158,155 +152,154 @@ private:
     AssetMode assetMode;
 };
 
-enum MeshChunkId
-{
+enum MeshChunkId {
     M_HEADER = 0x1000,
-        // char*          version          : Version number check
-    M_MESH   = 0x3000,
-        // bool skeletallyAnimated   // important flag which affects h/w buffer policies
-        // Optional M_GEOMETRY chunk
-        M_SUBMESH            = 0x4000,
-            // char* materialName
-            // bool useSharedVertices
-            // unsigned int indexCount
-            // bool indexes32Bit
-            // unsigned int* faceVertexIndices (indexCount)
-            // OR
-            // unsigned short* faceVertexIndices (indexCount)
-            // M_GEOMETRY chunk (Optional: present only if useSharedVertices = false)
-            M_SUBMESH_OPERATION = 0x4010, // optional, trilist assumed if missing
-                // unsigned short operationType
-            M_SUBMESH_BONE_ASSIGNMENT = 0x4100,
-                // Optional bone weights (repeating section)
-                // unsigned int vertexIndex;
-                // unsigned short boneIndex;
-                // float weight;
-            // Optional chunk that matches a texture name to an alias
-            // a texture alias is sent to the submesh material to use this texture name
-            // instead of the one in the texture unit with a matching alias name
-            M_SUBMESH_TEXTURE_ALIAS = 0x4200, // Repeating section
-                // char* aliasName;
-                // char* textureName;
+    // char*          version          : Version number check
+    M_MESH = 0x3000,
+    // bool skeletallyAnimated   // important flag which affects h/w buffer policies
+    // Optional M_GEOMETRY chunk
+    M_SUBMESH = 0x4000,
+    // char* materialName
+    // bool useSharedVertices
+    // unsigned int indexCount
+    // bool indexes32Bit
+    // unsigned int* faceVertexIndices (indexCount)
+    // OR
+    // unsigned short* faceVertexIndices (indexCount)
+    // M_GEOMETRY chunk (Optional: present only if useSharedVertices = false)
+    M_SUBMESH_OPERATION = 0x4010, // optional, trilist assumed if missing
+    // unsigned short operationType
+    M_SUBMESH_BONE_ASSIGNMENT = 0x4100,
+    // Optional bone weights (repeating section)
+    // unsigned int vertexIndex;
+    // unsigned short boneIndex;
+    // float weight;
+    // Optional chunk that matches a texture name to an alias
+    // a texture alias is sent to the submesh material to use this texture name
+    // instead of the one in the texture unit with a matching alias name
+    M_SUBMESH_TEXTURE_ALIAS = 0x4200, // Repeating section
+    // char* aliasName;
+    // char* textureName;
 
-        M_GEOMETRY        = 0x5000, // NB this chunk is embedded within M_MESH and M_SUBMESH
-            // unsigned int vertexCount
-            M_GEOMETRY_VERTEX_DECLARATION = 0x5100,
-                M_GEOMETRY_VERTEX_ELEMENT = 0x5110, // Repeating section
-                    // unsigned short source;   // buffer bind source
-                    // unsigned short type;     // VertexElementType
-                    // unsigned short semantic; // VertexElementSemantic
-                    // unsigned short offset;   // start offset in buffer in bytes
-                    // unsigned short index;    // index of the semantic (for colours and texture coords)
-            M_GEOMETRY_VERTEX_BUFFER = 0x5200, // Repeating section
-                // unsigned short bindIndex;    // Index to bind this buffer to
-                // unsigned short vertexSize;   // Per-vertex size, must agree with declaration at this index
-                M_GEOMETRY_VERTEX_BUFFER_DATA = 0x5210,
-                    // raw buffer data
-        M_MESH_SKELETON_LINK = 0x6000,
-            // Optional link to skeleton
-            // char* skeletonName          : name of .skeleton to use
-        M_MESH_BONE_ASSIGNMENT = 0x7000,
-            // Optional bone weights (repeating section)
-            // unsigned int vertexIndex;
-            // unsigned short boneIndex;
-            // float weight;
-        M_MESH_LOD = 0x8000,
-            // Optional LOD information
-            // string strategyName;
-            // unsigned short numLevels;
-            // bool manual;  (true for manual alternate meshes, false for generated)
-            M_MESH_LOD_USAGE = 0x8100,
-            // Repeating section, ordered in increasing depth
-            // NB LOD 0 (full detail from 0 depth) is omitted
-            // LOD value - this is a distance, a pixel count etc, based on strategy
-            // float lodValue;
-                M_MESH_LOD_MANUAL = 0x8110,
-                // Required if M_MESH_LOD section manual = true
-                // String manualMeshName;
-                M_MESH_LOD_GENERATED = 0x8120,
-                // Required if M_MESH_LOD section manual = false
-                // Repeating section (1 per submesh)
-                // unsigned int indexCount;
-                // bool indexes32Bit
-                // unsigned short* faceIndexes;  (indexCount)
-                // OR
-                // unsigned int* faceIndexes;  (indexCount)
-        M_MESH_BOUNDS = 0x9000,
-            // float minx, miny, minz
-            // float maxx, maxy, maxz
-            // float radius
+    M_GEOMETRY = 0x5000, // NB this chunk is embedded within M_MESH and M_SUBMESH
+    // unsigned int vertexCount
+    M_GEOMETRY_VERTEX_DECLARATION = 0x5100,
+    M_GEOMETRY_VERTEX_ELEMENT = 0x5110, // Repeating section
+    // unsigned short source;   // buffer bind source
+    // unsigned short type;     // VertexElementType
+    // unsigned short semantic; // VertexElementSemantic
+    // unsigned short offset;   // start offset in buffer in bytes
+    // unsigned short index;    // index of the semantic (for colours and texture coords)
+    M_GEOMETRY_VERTEX_BUFFER = 0x5200, // Repeating section
+    // unsigned short bindIndex;    // Index to bind this buffer to
+    // unsigned short vertexSize;   // Per-vertex size, must agree with declaration at this index
+    M_GEOMETRY_VERTEX_BUFFER_DATA = 0x5210,
+    // raw buffer data
+    M_MESH_SKELETON_LINK = 0x6000,
+    // Optional link to skeleton
+    // char* skeletonName          : name of .skeleton to use
+    M_MESH_BONE_ASSIGNMENT = 0x7000,
+    // Optional bone weights (repeating section)
+    // unsigned int vertexIndex;
+    // unsigned short boneIndex;
+    // float weight;
+    M_MESH_LOD = 0x8000,
+    // Optional LOD information
+    // string strategyName;
+    // unsigned short numLevels;
+    // bool manual;  (true for manual alternate meshes, false for generated)
+    M_MESH_LOD_USAGE = 0x8100,
+    // Repeating section, ordered in increasing depth
+    // NB LOD 0 (full detail from 0 depth) is omitted
+    // LOD value - this is a distance, a pixel count etc, based on strategy
+    // float lodValue;
+    M_MESH_LOD_MANUAL = 0x8110,
+    // Required if M_MESH_LOD section manual = true
+    // String manualMeshName;
+    M_MESH_LOD_GENERATED = 0x8120,
+    // Required if M_MESH_LOD section manual = false
+    // Repeating section (1 per submesh)
+    // unsigned int indexCount;
+    // bool indexes32Bit
+    // unsigned short* faceIndexes;  (indexCount)
+    // OR
+    // unsigned int* faceIndexes;  (indexCount)
+    M_MESH_BOUNDS = 0x9000,
+    // float minx, miny, minz
+    // float maxx, maxy, maxz
+    // float radius
 
-        // Added By DrEvil
-        // optional chunk that contains a table of submesh indexes and the names of
-        // the sub-meshes.
-        M_SUBMESH_NAME_TABLE = 0xA000,
-            // Subchunks of the name table. Each chunk contains an index & string
-            M_SUBMESH_NAME_TABLE_ELEMENT = 0xA100,
-                // short index
-                // char* name
-        // Optional chunk which stores precomputed edge data
-        M_EDGE_LISTS = 0xB000,
-            // Each LOD has a separate edge list
-            M_EDGE_LIST_LOD = 0xB100,
-                // unsigned short lodIndex
-                // bool isManual            // If manual, no edge data here, loaded from manual mesh
-                    // bool isClosed
-                    // unsigned long numTriangles
-                    // unsigned long numEdgeGroups
-                    // Triangle* triangleList
-                        // unsigned long indexSet
-                        // unsigned long vertexSet
-                        // unsigned long vertIndex[3]
-                        // unsigned long sharedVertIndex[3]
-                        // float normal[4]
+    // Added By DrEvil
+    // optional chunk that contains a table of submesh indexes and the names of
+    // the sub-meshes.
+    M_SUBMESH_NAME_TABLE = 0xA000,
+    // Subchunks of the name table. Each chunk contains an index & string
+    M_SUBMESH_NAME_TABLE_ELEMENT = 0xA100,
+    // short index
+    // char* name
+    // Optional chunk which stores precomputed edge data
+    M_EDGE_LISTS = 0xB000,
+    // Each LOD has a separate edge list
+    M_EDGE_LIST_LOD = 0xB100,
+    // unsigned short lodIndex
+    // bool isManual            // If manual, no edge data here, loaded from manual mesh
+    // bool isClosed
+    // unsigned long numTriangles
+    // unsigned long numEdgeGroups
+    // Triangle* triangleList
+    // unsigned long indexSet
+    // unsigned long vertexSet
+    // unsigned long vertIndex[3]
+    // unsigned long sharedVertIndex[3]
+    // float normal[4]
 
-                    M_EDGE_GROUP = 0xB110,
-                        // unsigned long vertexSet
-                        // unsigned long triStart
-                        // unsigned long triCount
-                        // unsigned long numEdges
-                        // Edge* edgeList
-                            // unsigned long  triIndex[2]
-                            // unsigned long  vertIndex[2]
-                            // unsigned long  sharedVertIndex[2]
-                            // bool degenerate
-        // Optional poses section, referred to by pose keyframes
-        M_POSES = 0xC000,
-            M_POSE = 0xC100,
-                // char* name (may be blank)
-                // unsigned short target    // 0 for shared geometry,
-                                            // 1+ for submesh index + 1
-                // bool includesNormals [1.8+]
-                M_POSE_VERTEX = 0xC111,
-                    // unsigned long vertexIndex
-                    // float xoffset, yoffset, zoffset
-                    // float xnormal, ynormal, znormal (optional, 1.8+)
-        // Optional vertex animation chunk
-        M_ANIMATIONS = 0xD000,
-            M_ANIMATION = 0xD100,
-            // char* name
-            // float length
-            M_ANIMATION_BASEINFO = 0xD105,
-            // [Optional] base keyframe information (pose animation only)
-            // char* baseAnimationName (blank for self)
-            // float baseKeyFrameTime
-            M_ANIMATION_TRACK = 0xD110,
-                // unsigned short type          // 1 == morph, 2 == pose
-                // unsigned short target        // 0 for shared geometry,
-                                                // 1+ for submesh index + 1
-                M_ANIMATION_MORPH_KEYFRAME = 0xD111,
-                    // float time
-                    // bool includesNormals [1.8+]
-                    // float x,y,z          // repeat by number of vertices in original geometry
-                M_ANIMATION_POSE_KEYFRAME = 0xD112,
-                    // float time
-                    M_ANIMATION_POSE_REF = 0xD113, // repeat for number of referenced poses
-                        // unsigned short poseIndex
-                        // float influence
-        // Optional submesh extreme vertex list chink
-        M_TABLE_EXTREMES = 0xE000
-        // unsigned short submesh_index;
-        // float extremes [n_extremes][3];
+    M_EDGE_GROUP = 0xB110,
+    // unsigned long vertexSet
+    // unsigned long triStart
+    // unsigned long triCount
+    // unsigned long numEdges
+    // Edge* edgeList
+    // unsigned long  triIndex[2]
+    // unsigned long  vertIndex[2]
+    // unsigned long  sharedVertIndex[2]
+    // bool degenerate
+    // Optional poses section, referred to by pose keyframes
+    M_POSES = 0xC000,
+    M_POSE = 0xC100,
+    // char* name (may be blank)
+    // unsigned short target    // 0 for shared geometry,
+    // 1+ for submesh index + 1
+    // bool includesNormals [1.8+]
+    M_POSE_VERTEX = 0xC111,
+    // unsigned long vertexIndex
+    // float xoffset, yoffset, zoffset
+    // float xnormal, ynormal, znormal (optional, 1.8+)
+    // Optional vertex animation chunk
+    M_ANIMATIONS = 0xD000,
+    M_ANIMATION = 0xD100,
+    // char* name
+    // float length
+    M_ANIMATION_BASEINFO = 0xD105,
+    // [Optional] base keyframe information (pose animation only)
+    // char* baseAnimationName (blank for self)
+    // float baseKeyFrameTime
+    M_ANIMATION_TRACK = 0xD110,
+    // unsigned short type          // 1 == morph, 2 == pose
+    // unsigned short target        // 0 for shared geometry,
+    // 1+ for submesh index + 1
+    M_ANIMATION_MORPH_KEYFRAME = 0xD111,
+    // float time
+    // bool includesNormals [1.8+]
+    // float x,y,z          // repeat by number of vertices in original geometry
+    M_ANIMATION_POSE_KEYFRAME = 0xD112,
+    // float time
+    M_ANIMATION_POSE_REF = 0xD113, // repeat for number of referenced poses
+    // unsigned short poseIndex
+    // float influence
+    // Optional submesh extreme vertex list chink
+    M_TABLE_EXTREMES = 0xE000
+    // unsigned short submesh_index;
+    // float extremes [n_extremes][3];
 };
 
 /*
@@ -353,49 +346,48 @@ static std::string MeshHeaderToString(MeshChunkId id)
 }
 */
 
-enum SkeletonChunkId
-{
-    SKELETON_HEADER             = 0x1000,
-        // char* version           : Version number check
-        SKELETON_BLENDMODE      = 0x1010, // optional
-            // unsigned short blendmode     : SkeletonAnimationBlendMode
-    SKELETON_BONE               = 0x2000,
+enum SkeletonChunkId {
+    SKELETON_HEADER = 0x1000,
+    // char* version           : Version number check
+    SKELETON_BLENDMODE = 0x1010, // optional
+    // unsigned short blendmode     : SkeletonAnimationBlendMode
+    SKELETON_BONE = 0x2000,
     // Repeating section defining each bone in the system.
     // Bones are assigned indexes automatically based on their order of declaration
     // starting with 0.
-        // char* name                      : name of the bone
-        // unsigned short handle            : handle of the bone, should be contiguous & start at 0
-        // Vector3 position              : position of this bone relative to parent
-        // Quaternion orientation          : orientation of this bone relative to parent
-        // Vector3 scale                    : scale of this bone relative to parent
-    SKELETON_BONE_PARENT        = 0x3000,
+    // char* name                      : name of the bone
+    // unsigned short handle            : handle of the bone, should be contiguous & start at 0
+    // Vector3 position              : position of this bone relative to parent
+    // Quaternion orientation          : orientation of this bone relative to parent
+    // Vector3 scale                    : scale of this bone relative to parent
+    SKELETON_BONE_PARENT = 0x3000,
     // Record of the parent of a single bone, used to build the node tree
     // Repeating section, listed in Bone Index order, one per Bone
-        // unsigned short handle             : child bone
-        // unsigned short parentHandle   : parent bone
-    SKELETON_ANIMATION          = 0x4000,
+    // unsigned short handle             : child bone
+    // unsigned short parentHandle   : parent bone
+    SKELETON_ANIMATION = 0x4000,
     // A single animation for this skeleton
-        // char* name                      : Name of the animation
-        // float length                   : Length of the animation in seconds
-        SKELETON_ANIMATION_BASEINFO = 0x4010,
-        // [Optional] base keyframe information
-        // char* baseAnimationName (blank for self)
-        // float baseKeyFrameTime
-        SKELETON_ANIMATION_TRACK    = 0x4100,
-        // A single animation track (relates to a single bone)
-        // Repeating section (within SKELETON_ANIMATION)
-            // unsigned short boneIndex  : Index of bone to apply to
-            SKELETON_ANIMATION_TRACK_KEYFRAME = 0x4110,
-            // A single keyframe within the track
-            // Repeating section
-                // float time                   : The time position (seconds)
-                // Quaternion rotate            : Rotation to apply at this keyframe
-                // Vector3 translate            : Translation to apply at this keyframe
-                // Vector3 scale                : Scale to apply at this keyframe
-    SKELETON_ANIMATION_LINK     = 0x5000
+    // char* name                      : Name of the animation
+    // float length                   : Length of the animation in seconds
+    SKELETON_ANIMATION_BASEINFO = 0x4010,
+    // [Optional] base keyframe information
+    // char* baseAnimationName (blank for self)
+    // float baseKeyFrameTime
+    SKELETON_ANIMATION_TRACK = 0x4100,
+    // A single animation track (relates to a single bone)
+    // Repeating section (within SKELETON_ANIMATION)
+    // unsigned short boneIndex  : Index of bone to apply to
+    SKELETON_ANIMATION_TRACK_KEYFRAME = 0x4110,
+    // A single keyframe within the track
+    // Repeating section
+    // float time                   : The time position (seconds)
+    // Quaternion rotate            : Rotation to apply at this keyframe
+    // Vector3 translate            : Translation to apply at this keyframe
+    // Vector3 scale                : Scale to apply at this keyframe
+    SKELETON_ANIMATION_LINK = 0x5000
     // Link to another skeleton, to re-use its animations
-        // char* skeletonName                   : name of skeleton to get animations from
-        // float scale                          : scale to apply to trans/scale keys
+    // char* skeletonName                   : name of skeleton to get animations from
+    // float scale                          : scale to apply to trans/scale keys
 };
 
 /*
@@ -416,8 +408,8 @@ static std::string SkeletonHeaderToString(SkeletonChunkId id)
     return "Unknown_SkeletonChunkId";
 }
 */
-} // Ogre
-} // Assimp
+} // namespace Ogre
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
 #endif // AI_OGREBINARYSERIALIZER_H_INC

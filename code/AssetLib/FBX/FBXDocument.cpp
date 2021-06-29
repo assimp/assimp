@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -312,7 +312,7 @@ void Document::ReadHeader() {
 
     const Scope& shead = *ehead->Compound();
     fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
-	ASSIMP_LOG_DEBUG_F("FBX Version: ", fbxVersion);
+	ASSIMP_LOG_DEBUG("FBX Version: ", fbxVersion);
 
     // While we may have some success with newer files, we don't support
     // the older 6.n fbx format

@@ -1688,6 +1688,10 @@ void FBXExporter::WriteObjects ()
             // link the image data to the texture
             connections.emplace_back("C", "OO", image_uid, texture_uid);
 
+            aiUVTransform trafo;
+            unsigned int max = sizeof(aiUVTransform);
+            aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), (float *)&trafo, &max);
+
             // now write the actual texture node
             FBX::Node tnode("Texture");
             // TODO: some way to determine texture name?
@@ -1698,6 +1702,9 @@ void FBXExporter::WriteObjects ()
             tnode.AddChild("Version", int32_t(202));
             tnode.AddChild("TextureName", texture_name);
             FBX::Node p("Properties70");
+            p.AddP70vectorA("Translation", trafo.mTranslation[0], trafo.mTranslation[1], 0.0);
+            p.AddP70vectorA("Rotation", 0, 0, trafo.mRotation);
+            p.AddP70vectorA("Scaling", trafo.mScaling[0], trafo.mScaling[1], 0.0);
             p.AddP70enum("CurrentTextureBlendMode", 0); // TODO: verify
             //p.AddP70string("UVSet", ""); // TODO: how should this work?
             p.AddP70bool("UseMaterial", 1);
@@ -2718,16 +2725,14 @@ void FBXExporter::WriteModelNodes(
     }
 }
 
-
 void FBXExporter::WriteAnimationCurveNode(
-    StreamWriterLE& outstream,
-    int64_t uid,
-    const std::string& name, // "T", "R", or "S"
-    aiVector3D default_value,
-    std::string property_name, // "Lcl Translation" etc
-    int64_t layer_uid,
-    int64_t node_uid
-) {
+        StreamWriterLE &outstream,
+        int64_t uid,
+        const std::string &name, // "T", "R", or "S"
+        aiVector3D default_value,
+        const std::string &property_name, // "Lcl Translation" etc
+        int64_t layer_uid,
+        int64_t node_uid) {
     FBX::Node n("AnimationCurveNode");
     n.AddProperties(uid, name + FBX::SEPARATOR + "AnimCurveNode", "");
     FBX::Node p("Properties70");
@@ -2741,7 +2746,6 @@ void FBXExporter::WriteAnimationCurveNode(
     // connect to bone
     this->connections.emplace_back("C", "OP", uid, node_uid, property_name);
 }
-
 
 void FBXExporter::WriteAnimationCurve(
     StreamWriterLE& outstream,

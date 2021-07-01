@@ -456,11 +456,10 @@ namespace glTF
 			/// \param [in] pDecodedData - pointer to decoded data array.
 			/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
 			/// \param [in] pID - ID of the region.
-			SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
-				: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
-			{}
+            SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID) :
+                    Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
 
-			/// \fn ~SEncodedRegion()
+            /// \fn ~SEncodedRegion()
 			/// Destructor.
 			~SEncodedRegion() { delete [] DecodedData; }
 		};
@@ -1149,8 +1148,7 @@ namespace glTF
 
         void ReadExtensionsUsed(Document& doc);
 
-
-        IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
+        IOStream *OpenFile(const std::string &path, const char *mode, bool absolute = false);
     };
 
 }

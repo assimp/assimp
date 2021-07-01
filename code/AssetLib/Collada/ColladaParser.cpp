@@ -453,7 +453,7 @@ void ColladaParser::PostProcessRootAnimations() {
 
         temp.mSubAnims.push_back(clip);
 
-        for (std::string animationID : it.second) {
+        for (const std::string &animationID : it.second) {
             AnimationLibrary::iterator animation = mAnimationLibrary.find(animationID);
 
             if (animation != mAnimationLibrary.end()) {

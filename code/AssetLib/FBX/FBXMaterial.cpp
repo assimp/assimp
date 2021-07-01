@@ -210,6 +210,11 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
         uvTrans.y = trans.y;
     }
 
+    const aiVector3D &rotation = PropertyGet<aiVector3D>(*props, "Rotation", ok);
+    if (ok) {
+        uvRotation = rotation.z;
+    }
+
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());

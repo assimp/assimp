@@ -42,8 +42,8 @@ substituted by assertions ...):
 
 ```python
 
-from pyassimp import load
-with load('hello.3ds') as scene:
+from pyassimp import load_scopedz
+with load_scoped('hello.3ds') as scene:
 
   assert len(scene.meshes)
   mesh = scene.meshes[0]
@@ -58,8 +58,8 @@ scene:
 
 ```python
 
-from pyassimp import load
-with load('hello.3ds') as scene:
+from pyassimp import load_scoped
+with load_scoped('hello.3ds') as scene:
 
   for c in scene.rootnode.children:
       print(str(c))

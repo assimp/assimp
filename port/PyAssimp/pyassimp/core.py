@@ -281,7 +281,6 @@ def release(scene):
     '''
     _assimp_lib.release(ctypes.pointer(scene))
 
-@contextmanager
 def load(filename,
          file_type  = None,
          processing = postprocess.aiProcess_Triangulate):
@@ -329,10 +328,19 @@ def load(filename,
         raise AssimpError('Could not import file!')
     scene = _init(model.contents)
     recur_pythonize(scene.rootnode, scene)
+    return scene
+
+@contextmanager
+def load_scoped(filename,
+                file_type  = None,
+                processing = postprocess.aiProcess_Triangulate):
+    scene = None
     try:
+        scene = load(filename=filename, file_type=file_type, processing=processing)
         yield scene
     finally:
-        release(scene)
+        if scene is not None:
+            release(scene)
 
 def export(scene,
            filename,

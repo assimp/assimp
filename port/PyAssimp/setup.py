@@ -1,7 +1,7 @@
  #!/usr/bin/env python
  # -*- coding: utf-8 -*-
 import os
-from distutils.core import setup
+from setuptools import setup
 
 def readme():
     with open('README.rst') as f:
@@ -22,5 +22,6 @@ setup(name='pyassimp',
                   ('share/pyassimp', ['README.rst']),
                   ('share/examples/pyassimp', ['scripts/' + f for f in os.listdir('scripts/')])
                  ],
-      requires=['numpy']
+      requires=['numpy'],
+      test_suite='tests',
       )

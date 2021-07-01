@@ -42,7 +42,7 @@ substituted by assertions ...):
 
 ```python
 
-from pyassimp import load_scopedz
+from pyassimp import load_scoped
 with load_scoped('hello.3ds') as scene:
 
   assert len(scene.meshes)

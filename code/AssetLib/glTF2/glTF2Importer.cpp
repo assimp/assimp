@@ -267,6 +267,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         SetMaterialColorProperty(r, mat.emissiveFactor, aimat, AI_MATKEY_COLOR_EMISSIVE);
 
         aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
+        aimat->AddProperty(&mat.pbrMetallicRoughness.baseColorFactor[3], 1, AI_MATKEY_OPACITY);
 
         aiString alphaMode(mat.alphaMode);
         aimat->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);

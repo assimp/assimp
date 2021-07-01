@@ -211,7 +211,7 @@ def _init(self, target = None, parent = None):
 
 
             else: # starts with 'm' but not iterable
-                setattr(target, m, obj)
+                setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
 
                 if _is_init_type(obj):

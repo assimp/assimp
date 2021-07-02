@@ -461,7 +461,7 @@ public:
         /// \param [in] pDecodedData - pointer to decoded data array.
         /// \param [in] pDecodedData_Length - size of encoded region, in bytes.
         /// \param [in] pID - ID of the region.
-        SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string pID) :
+        SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID) :
                 Offset(pOffset),
                 EncodedData_Length(pEncodedData_Length),
                 DecodedData(pDecodedData),
@@ -1195,7 +1195,7 @@ private:
     void ReadExtensionsUsed(Document &doc);
     void ReadExtensionsRequired(Document &doc);
 
-    IOStream *OpenFile(std::string path, const char *mode, bool absolute = false);
+    IOStream *OpenFile(const std::string &path, const char *mode, bool absolute = false);
 };
 
 inline std::string getContextForErrorMessages(const std::string &id, const std::string &name) {

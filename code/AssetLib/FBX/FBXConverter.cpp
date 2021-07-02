@@ -1766,6 +1766,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const TextureMap
         // XXX handle all kinds of UV transformations
         uvTrafo.mScaling = tex->UVScaling();
         uvTrafo.mTranslation = tex->UVTranslation();
+        uvTrafo.mRotation = tex->UVRotation();
         out_mat->AddProperty(&uvTrafo, 1, _AI_MATKEY_UVTRANSFORM_BASE, target, 0);
 
         const PropertyTable &props = tex->Props();
@@ -1885,6 +1886,7 @@ void FBXConverter::TrySetTextureProperties(aiMaterial *out_mat, const LayeredTex
         // XXX handle all kinds of UV transformations
         uvTrafo.mScaling = tex->UVScaling();
         uvTrafo.mTranslation = tex->UVTranslation();
+        uvTrafo.mRotation = tex->UVRotation();
         out_mat->AddProperty(&uvTrafo, 1, _AI_MATKEY_UVTRANSFORM_BASE, target, texIndex);
 
         const PropertyTable &props = tex->Props();
@@ -2324,6 +2326,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
             // XXX handle all kinds of UV transformations
             uvTrafo.mScaling = tex->UVScaling();
             uvTrafo.mTranslation = tex->UVTranslation();
+            uvTrafo.mRotation = tex->UVRotation();
             out_mat->AddProperty(&uvTrafo, 1, (name + "|uvtrafo").c_str(), aiTextureType_UNKNOWN, 0);
 
             int uvIndex = 0;
@@ -2599,7 +2602,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
             anim->mMorphMeshChannels = new aiMeshMorphAnim *[numMorphMeshChannels];
             anim->mNumMorphMeshChannels = numMorphMeshChannels;
             unsigned int i = 0;
-            for (auto morphAnimIt : morphAnimDatas) {
+            for (const auto &morphAnimIt : morphAnimDatas) {
                 morphAnimData *animData = morphAnimIt.second;
                 unsigned int numKeys = static_cast<unsigned int>(animData->size());
                 aiMeshMorphAnim *meshMorphAnim = new aiMeshMorphAnim();

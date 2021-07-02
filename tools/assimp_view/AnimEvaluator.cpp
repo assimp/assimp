@@ -39,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "assimp_view.h"
+#include "AnimEvaluator.h"
 
-#include <tuple>
+#include <assimp/anim.h>
+#include <assimp/ai_assert.h>
 
 using namespace AssimpView;
 

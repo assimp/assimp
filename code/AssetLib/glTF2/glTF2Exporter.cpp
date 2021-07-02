@@ -778,19 +778,17 @@ void glTF2Exporter::ExportMaterials()
         mat.Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat.Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
 
+        float opacity;
         aiString alphaMode;
 
+        if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+            if (opacity < 1) {
+                m->alphaMode = "BLEND";
+                m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
+            }
+        }
         if (mat.Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
             m->alphaMode = alphaMode.C_Str();
-        } else {
-            float opacity;
-
-            if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-                if (opacity < 1) {
-                    m->alphaMode = "BLEND";
-                    m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
-                }
-            }
         }
 
         {
@@ -839,8 +837,7 @@ void glTF2Exporter::ExportMaterials()
  * Search through node hierarchy and find the node containing the given meshID.
  * Returns true on success, and false otherwise.
  */
-bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
-{
+bool FindMeshNode(Ref<Node> &nodeIn, Ref<Node> &meshNode, const std::string &meshID) {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
             meshNode = nodeIn;

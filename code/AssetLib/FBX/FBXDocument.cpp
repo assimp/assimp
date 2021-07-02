@@ -57,9 +57,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#include <memory>
 #include <functional>
 #include <map>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 namespace FBX {
@@ -248,10 +249,8 @@ Object::~Object()
 }
 
 // ------------------------------------------------------------------------------------------------
-FileGlobalSettings::FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props)
-: props(props)
-, doc(doc)
-{
+FileGlobalSettings::FileGlobalSettings(const Document &doc, std::shared_ptr<const PropertyTable> props) :
+        props(std::move(props)), doc(doc) {
     // empty
 }
 

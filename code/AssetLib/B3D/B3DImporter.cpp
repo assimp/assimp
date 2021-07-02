@@ -143,7 +143,7 @@ AI_WONT_RETURN void B3DImporter::Oops() {
 }
 
 // ------------------------------------------------------------------------------------------------
-AI_WONT_RETURN void B3DImporter::Fail(string str) {
+AI_WONT_RETURN void B3DImporter::Fail(const string &str) {
 #ifdef DEBUG_B3D
     ASSIMP_LOG_ERROR("Error in B3D file data: ", str);
 #endif

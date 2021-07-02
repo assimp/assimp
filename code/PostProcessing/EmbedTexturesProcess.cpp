@@ -100,7 +100,7 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
     ASSIMP_LOG_INFO("EmbedTexturesProcess finished. Embedded ", embeddedTexturesCount, " textures." );
 }
 
-bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
+bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) const {
     std::streampos imageSize = 0;
     std::string    imagePath = path;
 

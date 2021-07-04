@@ -411,6 +411,7 @@ struct Object {
     std::string name; //!< The user-defined name of this object
 
     CustomExtension customExtensions;
+    CustomExtension extras;
 
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }
@@ -428,6 +429,7 @@ struct Object {
     inline Value *FindExtension(Value &val, const char *extensionId);
 
     inline void ReadExtensions(Value &val);
+    inline void ReadExtras(Value &val);
 };
 
 //

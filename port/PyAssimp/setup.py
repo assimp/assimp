@@ -22,6 +22,6 @@ setup(name='pyassimp',
                   ('share/pyassimp', ['README.rst']),
                   ('share/examples/pyassimp', ['scripts/' + f for f in os.listdir('scripts/')])
                  ],
-      requires=['numpy'],
+      install_requires=['numpy'],
       test_suite='tests',
       )

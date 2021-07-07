@@ -500,6 +500,10 @@ public:
         return uvScaling;
     }
 
+    const ai_real &UVRotation() const {
+        return uvRotation;
+    }
+
     const PropertyTable& Props() const {
         ai_assert(props.get());
         return *props.get();
@@ -517,6 +521,7 @@ public:
 private:
     aiVector2D uvTrans;
     aiVector2D uvScaling;
+    ai_real    uvRotation;
 
     std::string type;
     std::string relativeFileName;

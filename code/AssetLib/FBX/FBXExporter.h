@@ -63,10 +63,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiScene;
 struct aiNode;
-//struct aiMaterial;
+struct aiLight;
 
-namespace Assimp
-{
+namespace Assimp {
     class IOSystem;
     class IOStream;
     class ExportProperties;
@@ -95,6 +94,7 @@ namespace Assimp
         std::vector<int64_t> mesh_uids;
         std::vector<int64_t> material_uids;
         std::map<const aiNode*,int64_t> node_uids;
+        std::map<std::string,int64_t> lights_uids;
 
         // this crude unique-ID system is actually fine
         int64_t last_uid = 999999;
@@ -154,14 +154,13 @@ namespace Assimp
             FBX::TransformInheritance ti_type=FBX::TransformInheritance_RSrs
         );
         void WriteAnimationCurveNode(
-            StreamWriterLE& outstream,
-            int64_t uid,
-            const std::string& name, // "T", "R", or "S"
-            aiVector3D default_value,
-            std::string property_name, // "Lcl Translation" etc
-            int64_t animation_layer_uid,
-            int64_t node_uid
-        );
+                StreamWriterLE &outstream,
+                int64_t uid,
+                const std::string &name, // "T", "R", or "S"
+                aiVector3D default_value,
+                const std::string &property_name, // "Lcl Translation" etc
+                int64_t animation_layer_uid,
+                int64_t node_uid);
         void WriteAnimationCurve(
             StreamWriterLE& outstream,
             double default_value,

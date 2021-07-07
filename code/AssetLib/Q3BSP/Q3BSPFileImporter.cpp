@@ -99,7 +99,7 @@ static void extractIds(const std::string &key, int &id1, int &id2) {
         return;
     }
 
-    const std::string::size_type pos = key.find(".");
+    const std::string::size_type pos = key.find('.');
     if (std::string::npos == pos) {
         return;
     }
@@ -208,7 +208,7 @@ void Q3BSPFileImporter::separateMapName(const std::string &importName, std::stri
         return;
     }
 
-    const std::string::size_type pos = importName.rfind(",");
+    const std::string::size_type pos = importName.rfind(',');
     if (std::string::npos == pos) {
         archiveName = importName;
         return;

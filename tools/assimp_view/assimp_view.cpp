@@ -489,7 +489,7 @@ int CreateAssetData() {
             nidx = 3;
             break;
         default:
-            ai_assert(false);
+            CLogWindow::Instance().WriteLine("Unknown primitiv type");
             break;
         };
 
@@ -500,8 +500,7 @@ int CreateAssetData() {
         // check whether we can use 16 bit indices
         if (numIndices >= 65536) {
             // create 32 bit index buffer
-            if (FAILED(g_piDevice->CreateIndexBuffer(4 *
-                                                             numIndices,
+            if (FAILED(g_piDevice->CreateIndexBuffer(4 * numIndices,
                         D3DUSAGE_WRITEONLY | dwUsage,
                         D3DFMT_INDEX32,
                         D3DPOOL_DEFAULT,
@@ -523,7 +522,7 @@ int CreateAssetData() {
         } else {
             // create 16 bit index buffer
             if (FAILED(g_piDevice->CreateIndexBuffer(2 *
-                                                             numIndices,
+numIndices,
                         D3DUSAGE_WRITEONLY | dwUsage,
                         D3DFMT_INDEX16,
                         D3DPOOL_DEFAULT,

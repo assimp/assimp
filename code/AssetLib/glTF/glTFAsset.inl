@@ -1377,7 +1377,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool absolute) {
+inline IOStream *Asset::OpenFile(const std::string& path, const char *mode, bool absolute) {
 #ifdef ASSIMP_API
     (void)absolute;
     return mIOSystem->Open(path, mode);

@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
+class IOSystem;
+
 namespace Assimp {
 
 /**
@@ -76,10 +78,11 @@ public:
 
 private:
     // Resolve the path and add the file content to the scene as a texture.
-    bool addTexture(aiScene* pScene, std::string path) const;
+    bool addTexture(aiScene *pScene, const std::string &path) const;
 
 private:
     std::string mRootPath;
+    IOSystem* mIOHandler = nullptr;
 };
 
 } // namespace Assimp

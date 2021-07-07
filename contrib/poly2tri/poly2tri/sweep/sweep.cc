@@ -129,7 +129,7 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       EdgeEvent( tcx, ep, *p1, triangle, *p1 );
     } else {
 	  // ASSIMP_CHANGE (aramis_acg)
-      std::runtime_error("EdgeEvent - collinear points not supported");
+      throw std::runtime_error("EdgeEvent - collinear points not supported");
     }
     return;
   }

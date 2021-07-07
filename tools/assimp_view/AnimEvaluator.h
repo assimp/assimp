@@ -1,4 +1,3 @@
-/** Calculates a pose for a given time of an animation */
 /*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
@@ -40,11 +39,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
+#pragma once
 #ifndef AV_ANIMEVALUATOR_H_INCLUDED
 #define AV_ANIMEVALUATOR_H_INCLUDED
 
+/** Calculates a pose for a given time of an animation */
+
 #include <tuple>
 #include <vector>
+#include <assimp/matrix4x4.h>
+
+struct aiAnimation;
 
 namespace AssimpView {
 
@@ -63,18 +68,19 @@ public:
     /// @brief  The class destructor.
     ~AnimEvaluator();
 
-    /** Evaluates the animation tracks for a given time stamp. The calculated pose can be retrieved as a
-     * array of transformation matrices afterwards by calling GetTransformations().
-     * @param pTime The time for which you want to evaluate the animation, in seconds. Will be mapped into the animation cycle, so
-     *   it can be an arbitrary value. Best use with ever-increasing time stamps.
-     */
+    /// @brief Evaluates the animation tracks for a given time stamp. 
+    /// The calculated pose can be retrieved as an array of transformation 
+    /// matrices afterwards by calling GetTransformations().
+    /// @param pTime    The time for which you want to evaluate the animation, in seconds. 
+    ///                 Will be mapped into the animation cycle, so it can get an arbitrary 
+    ///                 value. Best use with ever-increasing time stamps.
     void Evaluate(double pTime);
 
-    /** Returns the transform matrices calculated at the last Evaluate() call. The array matches the mChannels array of
-     * the aiAnimation. */
+    /// @brief  Returns the transform matrices calculated at the last Evaluate() call. 
+    ///         The array matches the mChannels array of the aiAnimation.
     const std::vector<aiMatrix4x4> &GetTransformations() const { return mTransforms; }
 
-protected:
+private:
     const aiAnimation *mAnim;
     double mLastTime;
     std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> mLastPositions;

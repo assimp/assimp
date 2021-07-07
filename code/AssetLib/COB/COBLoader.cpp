@@ -230,7 +230,7 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTexture(std::shared_ptr<Texture> tex, aiMaterial *out, aiTextureType type) {
+void ConvertTexture(const std::shared_ptr<Texture> &tex, aiMaterial *out, aiTextureType type) {
     const aiString path(tex->path);
     out->AddProperty(&path, AI_MATKEY_TEXTURE(type, 0));
     out->AddProperty(&tex->transform, 1, AI_MATKEY_UVTRANSFORM(type, 0));

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -304,6 +303,43 @@ inline Value *FindObject(Document &doc, const char *memberId) {
 inline Value *FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, "the document");
 }
+
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
+    CustomExtension ret;
+    ret.name = name;
+    if (obj.IsObject()) {
+        ret.mValues.isPresent = true;
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+            auto &val = it->value;
+            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
+        }
+    } else if (obj.IsArray()) {
+        ret.mValues.value.reserve(obj.Size());
+        ret.mValues.isPresent = true;
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
+            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
+        }
+    } else if (obj.IsNumber()) {
+        if (obj.IsUint64()) {
+            ret.mUint64Value.value = obj.GetUint64();
+            ret.mUint64Value.isPresent = true;
+        } else if (obj.IsInt64()) {
+            ret.mInt64Value.value = obj.GetInt64();
+            ret.mInt64Value.isPresent = true;
+        } else if (obj.IsDouble()) {
+            ret.mDoubleValue.value = obj.GetDouble();
+            ret.mDoubleValue.isPresent = true;
+        }
+    } else if (obj.IsString()) {
+        ReadValue(obj, ret.mStringValue);
+        ret.mStringValue.isPresent = true;
+    } else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
+    }
+    return ret;
+}
+
 } // namespace
 
 inline Value *Object::FindString(Value &val, const char *memberId) {
@@ -328,6 +364,18 @@ inline Value *Object::FindObject(Value &val, const char *memberId) {
 
 inline Value *Object::FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, id.c_str(), name.c_str());
+}
+
+inline void Object::ReadExtensions(Value &val) {
+    if (Value *curExtensions = FindObject(val, "extensions")) {
+        this->customExtensions = glTF2::ReadExtensions("extensions", *curExtensions);
+    }
+}
+
+inline void Object::ReadExtras(Value &val) {
+    if (Value *curExtras = FindObject(val, "extras")) {
+        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+    }
 }
 
 #ifdef ASSIMP_ENABLE_DRACO
@@ -569,6 +617,8 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
+    inst->ReadExtensions(obj);
+    inst->ReadExtras(obj);
 
     Ref<T> result = Add(inst.release());
     mRecursiveReferenceCheck.erase(i);
@@ -733,12 +783,13 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 }
 
 inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
-    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) {
+        return;
+    }
 
     for (SEncodedRegion *reg : EncodedRegion_List) {
         if (reg->ID == pID) {
             EncodedRegion_Current = reg;
-
             return;
         }
     }
@@ -788,10 +839,13 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 }
 
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
-    size_t offset = this->byteLength;
+    const size_t offset = this->byteLength;
+    
     // Force alignment to 4 bits
-    Grow((length + 3) & ~3);
+    const size_t paddedLength = (length + 3) & ~3;
+    Grow(paddedLength);
     memcpy(mData.get() + offset, data, length);
+    memset(mData.get() + offset + length, 0, paddedLength - length);
     return offset;
 }
 
@@ -820,9 +874,7 @@ inline void Buffer::Grow(size_t amount) {
 //
 // struct BufferView
 //
-
 inline void BufferView::Read(Value &obj, Asset &r) {
-
     if (Value *bufferVal = FindUInt(obj, "buffer")) {
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
@@ -842,16 +894,21 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return nullptr;
+    if (!buffer) {
+        return nullptr;
+    }
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return nullptr;
+    if (!basePtr) {
+        return nullptr;
+    }
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
         const size_t begin = buffer->EncodedRegion_Current->Offset;
         const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
-        if ((offset >= begin) && (offset < end))
+        if ((offset >= begin) && (offset < end)) {
             return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+        }
     }
 
     return basePtr + offset;
@@ -877,18 +934,18 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     while (pIndices != indicesEnd) {
         size_t offset;
         switch (indicesType) {
-        case ComponentType_UNSIGNED_BYTE:
-            offset = *pIndices;
-            break;
-        case ComponentType_UNSIGNED_SHORT:
-            offset = *reinterpret_cast<uint16_t *>(pIndices);
-            break;
-        case ComponentType_UNSIGNED_INT:
-            offset = *reinterpret_cast<uint32_t *>(pIndices);
-            break;
-        default:
-            // have fun with float and negative values from signed types as indices.
-            throw DeadlyImportError("Unsupported component type in index.");
+            case ComponentType_UNSIGNED_BYTE:
+                offset = *pIndices;
+                break;
+            case ComponentType_UNSIGNED_SHORT:
+                offset = *reinterpret_cast<uint16_t *>(pIndices);
+                break;
+            case ComponentType_UNSIGNED_INT:
+                offset = *reinterpret_cast<uint32_t *>(pIndices);
+                break;
+            default:
+                // have fun with float and negative values from signed types as indices.
+                throw DeadlyImportError("Unsupported component type in index.");
         }
 
         offset *= elementSize;
@@ -900,7 +957,6 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 }
 
 inline void Accessor::Read(Value &obj, Asset &r) {
-
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
@@ -1612,9 +1668,9 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
         }
     }
 
-    Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras) {
-        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
+    Value *curExtras = FindObject(pJSON_Object, "extras");
+    if (nullptr != curExtras) {
+        if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
                 Value &targetNameValue = (*curTargetNames)[i];
@@ -1683,42 +1739,6 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value &obj) {
-    CustomExtension ret;
-    ret.name = name;
-    if (obj.IsObject()) {
-        ret.mValues.isPresent = true;
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto &val = it->value;
-            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
-        }
-    } else if (obj.IsArray()) {
-        ret.mValues.value.reserve(obj.Size());
-        ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i) {
-            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
-        }
-    } else if (obj.IsNumber()) {
-        if (obj.IsUint64()) {
-            ret.mUint64Value.value = obj.GetUint64();
-            ret.mUint64Value.isPresent = true;
-        } else if (obj.IsInt64()) {
-            ret.mInt64Value.value = obj.GetInt64();
-            ret.mInt64Value.isPresent = true;
-        } else if (obj.IsDouble()) {
-            ret.mDoubleValue.value = obj.GetDouble();
-            ret.mDoubleValue.isPresent = true;
-        }
-    } else if (obj.IsString()) {
-        ReadValue(obj, ret.mStringValue);
-        ret.mStringValue.isPresent = true;
-    } else if (obj.IsBool()) {
-        ret.mBoolValue.value = obj.GetBool();
-        ret.mBoolValue.isPresent = true;
-    }
-    return ret;
-}
-
 inline void Node::Read(Value &obj, Asset &r) {
     if (name.empty()) {
         name = id;
@@ -1775,8 +1795,6 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curExtensions = FindObject(obj, "extensions");
     if (nullptr != curExtensions) {
-        this->extensions = ReadExtensions("extensions", *curExtensions);
-
         if (r.extensionsUsed.KHR_lights_punctual) {
             if (Value *ext = FindObject(*curExtensions, "KHR_lights_punctual")) {
                 Value *curLight = FindUInt(*ext, "light");
@@ -2132,7 +2150,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool /*absolute*/) {
+inline IOStream *Asset::OpenFile(const std::string& path, const char *mode, bool /*absolute*/) {
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else

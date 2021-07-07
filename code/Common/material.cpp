@@ -47,10 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 
 // -------------------------------------------------------------------------------
-const char* TextureTypeToString(aiTextureType in)
-{
-    switch (in)
-    {
+const char *TextureTypeToString(aiTextureType in) {
+    switch (in) {
     case aiTextureType_NONE:
         return "n/a";
     case aiTextureType_DIFFUSE:
@@ -87,6 +85,12 @@ const char* TextureTypeToString(aiTextureType in)
         return "DiffuseRoughness";
     case aiTextureType_AMBIENT_OCCLUSION:
         return "AmbientOcclusion";
+    case aiTextureType_SHEEN:
+        return "Sheen";
+    case aiTextureType_CLEARCOAT:
+        return "Clearcoat";
+    case aiTextureType_TRANSMISSION:
+        return "Transmission";
     case aiTextureType_UNKNOWN:
         return "Unknown";
     default:

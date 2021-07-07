@@ -83,7 +83,7 @@ Other:
 #include <sstream>
 #include <string>
 
-#include "../contrib/stb_image/stb_image.h"
+#include "stb/stb_image.h"
 
 using namespace Assimp;
 

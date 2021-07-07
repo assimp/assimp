@@ -46,8 +46,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.293.tar.gz"
-    SHA1 "e8e5470652db77149d9b38656db2a6c0b7642693"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.311.tar.gz"
+    SHA1 "1a82b9b73055879181cb1466b2ab5d48ee8ae410"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -227,7 +227,6 @@ INCLUDE_DIRECTORIES( BEFORE
   include
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/include
-  contrib/
 )
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules" )

@@ -992,7 +992,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         // get material by index
         const std::shared_ptr<Material> pMat = mesh->mat[m];
         if (!pMat) {
-          ASSIMP_LOG_WARN_F("Failed to read material of a mesh '", mesh->id.name + 2, "'");
+          LogWarn("Failed to read material of a mesh '", mesh->id.name + 2, "'");
           continue;
         }
         

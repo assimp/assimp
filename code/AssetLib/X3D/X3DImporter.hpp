@@ -38,16 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/// \file   X3DImporter.hpp
-/// \brief  X3D-format files importer for Assimp.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
-// Thanks to acorn89 for support.
-
 #ifndef INCLUDED_AI_X3D_IMPORTER_H
 #define INCLUDED_AI_X3D_IMPORTER_H
 
-// Header files, Assimp.
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
@@ -57,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ProgressHandler.hpp>
 
 #include <list>
+#include <string>
+#include <vector>
 
 namespace Assimp {
 
@@ -282,9 +277,358 @@ enum class X3DElemType {
 struct X3DNodeElementBase {
     X3DNodeElementBase *Parent;
     std::string ID;
-    std::list<X3DNodeElementBase *> Child;
+    std::list<X3DNodeElementBase *> Children;
     X3DElemType Type;
+
+protected:
+    X3DNodeElementBase(X3DElemType type, X3DNodeElementBase *pParent) :
+            Type(type), Parent(pParent) {
+        // empty
+    }
 };
+
+/// This struct hold <Color> value.
+struct CX3DImporter_NodeElement_Color : X3DNodeElementBase {
+    std::list<aiColor3D> Value; ///< Stored value.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_Color(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Color, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_Color
+
+/// This struct hold <ColorRGBA> value.
+struct CX3DImporter_NodeElement_ColorRGBA : X3DNodeElementBase {
+    std::list<aiColor4D> Value; ///< Stored value.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_ColorRGBA(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_ColorRGBA, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_ColorRGBA
+
+/// This struct hold <Coordinate> value.
+struct CX3DImporter_NodeElement_Coordinate : public X3DNodeElementBase {
+    std::list<aiVector3D> Value; ///< Stored value.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_Coordinate(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Coordinate, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_Coordinate
+
+/// This struct hold <Normal> value.
+struct CX3DImporter_NodeElement_Normal : X3DNodeElementBase {
+    std::list<aiVector3D> Value; ///< Stored value.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_Normal(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Normal, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_Normal
+
+/// This struct hold <TextureCoordinate> value.
+struct CX3DImporter_NodeElement_TextureCoordinate : X3DNodeElementBase {
+    std::list<aiVector2D> Value; ///< Stored value.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_TextureCoordinate(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_TextureCoordinate, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_TextureCoordinate
+
+/// Two-dimensional figure.
+struct CX3DImporter_NodeElement_Geometry2D : X3DNodeElementBase {
+    std::list<aiVector3D> Vertices; ///< Vertices list.
+    size_t NumIndices; ///< Number of indices in one face.
+    bool Solid; ///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_Geometry2D(X3DElemType pType, X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(pType, pParent), Solid(true) {}
+
+}; // class CX3DImporter_NodeElement_Geometry2D
+
+/// Three-dimensional body.
+struct CX3DImporter_NodeElement_Geometry3D : X3DNodeElementBase {
+    std::list<aiVector3D> Vertices; ///< Vertices list.
+    size_t NumIndices; ///< Number of indices in one face.
+    bool Solid; ///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_Geometry3D(X3DElemType pType, X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(pType, pParent), Vertices(), NumIndices(0), Solid(true) {
+        // empty
+    }
+}; // class CX3DImporter_NodeElement_Geometry3D
+
+/// Uniform rectangular grid of varying height.
+struct CX3DImporter_NodeElement_ElevationGrid : CX3DImporter_NodeElement_Geometry3D {
+    bool NormalPerVertex; ///< If true then normals are defined for every vertex, else for every face(line).
+    bool ColorPerVertex; ///< If true then colors are defined for every vertex, else for every face(line).
+    /// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
+    /// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
+    float CreaseAngle;
+    std::vector<int32_t> CoordIdx; ///< Coordinates list by faces. In X3D format: "-1" - delimiter for faces.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_ElevationGrid(X3DElemType pType, X3DNodeElementBase *pParent) :
+            CX3DImporter_NodeElement_Geometry3D(pType, pParent) {}
+}; // class CX3DImporter_NodeElement_IndexedSet
+
+/// Shape with indexed vertices.
+struct CX3DImporter_NodeElement_IndexedSet : public CX3DImporter_NodeElement_Geometry3D {
+    /// The ccw field defines the ordering of the vertex coordinates of the geometry with respect to user-given or automatically generated normal vectors
+    /// used in the lighting model equations. If ccw is TRUE, the normals shall follow the right hand rule; the orientation of each normal with respect to
+    /// the vertices (taken in order) shall be such that the vertices appear to be oriented in a counterclockwise order when the vertices are viewed (in the
+    /// local coordinate system of the Shape) from the opposite direction as the normal. If ccw is FALSE, the normals shall be oriented in the opposite
+    /// direction. If normals are not generated but are supplied using a Normal node, and the orientation of the normals does not match the setting of the
+    /// ccw field, results are undefined.
+    bool CCW;
+    std::vector<int32_t> ColorIndex; ///< Field to specify the polygonal faces by indexing into the <Color> or <ColorRGBA>.
+    bool ColorPerVertex; ///< If true then colors are defined for every vertex, else for every face(line).
+    /// The convex field indicates whether all polygons in the shape are convex (TRUE). A polygon is convex if it is planar, does not intersect itself,
+    /// and all of the interior angles at its vertices are less than 180 degrees. Non planar and self intersecting polygons may produce undefined results
+    /// even if the convex field is FALSE.
+    bool Convex;
+    std::vector<int32_t> CoordIndex; ///< Field to specify the polygonal faces by indexing into the <Coordinate>.
+    /// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
+    /// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
+    float CreaseAngle;
+    std::vector<int32_t> NormalIndex; ///< Field to specify the polygonal faces by indexing into the <Normal>.
+    bool NormalPerVertex; ///< If true then normals are defined for every vertex, else for every face(line).
+    std::vector<int32_t> TexCoordIndex; ///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_IndexedSet(X3DElemType pType, X3DNodeElementBase *pParent) :
+            CX3DImporter_NodeElement_Geometry3D(pType, pParent) {}
+}; // class CX3DImporter_NodeElement_IndexedSet
+
+/// Shape with set of vertices.
+struct CX3DImporter_NodeElement_Set : CX3DImporter_NodeElement_Geometry3D {
+    /// The ccw field defines the ordering of the vertex coordinates of the geometry with respect to user-given or automatically generated normal vectors
+    /// used in the lighting model equations. If ccw is TRUE, the normals shall follow the right hand rule; the orientation of each normal with respect to
+    /// the vertices (taken in order) shall be such that the vertices appear to be oriented in a counterclockwise order when the vertices are viewed (in the
+    /// local coordinate system of the Shape) from the opposite direction as the normal. If ccw is FALSE, the normals shall be oriented in the opposite
+    /// direction. If normals are not generated but are supplied using a Normal node, and the orientation of the normals does not match the setting of the
+    /// ccw field, results are undefined.
+    bool CCW;
+    bool ColorPerVertex; ///< If true then colors are defined for every vertex, else for every face(line).
+    bool NormalPerVertex; ///< If true then normals are defined for every vertex, else for every face(line).
+    std::vector<int32_t> CoordIndex; ///< Field to specify the polygonal faces by indexing into the <Coordinate>.
+    std::vector<int32_t> NormalIndex; ///< Field to specify the polygonal faces by indexing into the <Normal>.
+    std::vector<int32_t> TexCoordIndex; ///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
+    std::vector<int32_t> VertexCount; ///< Field describes how many vertices are to be used in each polyline(polygon) from the <Coordinate> field.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_Set(X3DElemType type, X3DNodeElementBase *pParent) :
+            CX3DImporter_NodeElement_Geometry3D(type, pParent) {}
+
+}; // class CX3DImporter_NodeElement_Set
+
+/// This struct hold <Shape> value.
+struct CX3DImporter_NodeElement_Shape : X3DNodeElementBase {
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_Shape(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Shape, pParent) {}
+}; // struct CX3DImporter_NodeElement_Shape
+
+/// This struct hold <Appearance> value.
+struct CX3DImporter_NodeElement_Appearance : public X3DNodeElementBase {
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_Appearance(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Appearance, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_Appearance
+
+struct CX3DImporter_NodeElement_Material : public X3DNodeElementBase {
+    float AmbientIntensity; ///< Specifies how much ambient light from light sources this surface shall reflect.
+    aiColor3D DiffuseColor; ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
+    aiColor3D EmissiveColor; ///< Models "glowing" objects. This can be useful for displaying pre-lit models.
+    float Shininess; ///< Lower shininess values produce soft glows, while higher values result in sharper, smaller highlights.
+    aiColor3D SpecularColor; ///< The specularColor and shininess fields determine the specular highlights.
+    float Transparency; ///< Specifies how "clear" an object is, with 1.0 being completely transparent, and 0.0 completely opaque.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pType - type of geometry object.
+    CX3DImporter_NodeElement_Material(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Material, pParent),
+            AmbientIntensity(0.0f),
+            DiffuseColor(),
+            EmissiveColor(),
+            Shininess(0.0f),
+            SpecularColor(),
+            Transparency(1.0f) {
+        // empty
+    }
+}; // class CX3DImporter_NodeElement_Material
+
+/// This struct hold <ImageTexture> value.
+struct CX3DImporter_NodeElement_ImageTexture : X3DNodeElementBase {
+    /// RepeatS and RepeatT, that specify how the texture wraps in the S and T directions. If repeatS is TRUE (the default), the texture map is repeated
+    /// outside the [0.0, 1.0] texture coordinate range in the S direction so that it fills the shape. If repeatS is FALSE, the texture coordinates are
+    /// clamped in the S direction to lie within the [0.0, 1.0] range. The repeatT field is analogous to the repeatS field.
+    bool RepeatS;
+    bool RepeatT; ///< See \ref RepeatS.
+    std::string URL; ///< URL of the texture.
+
+                     /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_ImageTexture(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_ImageTexture, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_ImageTexture
+
+/// This struct hold <TextureTransform> value.
+struct CX3DImporter_NodeElement_TextureTransform : X3DNodeElementBase {
+    aiVector2D Center; ///< Specifies a translation offset in texture coordinate space about which the rotation and scale fields are applied.
+    float Rotation; ///< Specifies a rotation in angle base units of the texture coordinates about the center point after the scale has been applied.
+    aiVector2D Scale; ///< Specifies a scaling factor in S and T of the texture coordinates about the center point.
+    aiVector2D Translation; ///<  Specifies a translation of the texture coordinates.
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    CX3DImporter_NodeElement_TextureTransform(X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_TextureTransform, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_TextureTransform
+
+struct CX3DNodeElementGroup : X3DNodeElementBase {
+    aiMatrix4x4 Transformation; ///< Transformation matrix.
+
+    /// As you know node elements can use already defined node elements when attribute "USE" is defined.
+    /// Standard search when looking for an element in the whole scene graph, existing at this moment.
+    /// If a node is marked as static, the children(or lower) can not search for elements in the nodes upper then static.
+    bool Static;
+
+    bool UseChoice; ///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
+    int32_t Choice; ///< Number of the child which will be kept.
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pStatic - static node flag.
+    CX3DNodeElementGroup(X3DNodeElementBase *pParent, const bool pStatic = false) :
+            X3DNodeElementBase(X3DElemType::ENET_Group, pParent), Static(pStatic), UseChoice(false) {}
+};
+
+struct X3DNodeElementMeta : X3DNodeElementBase {
+    std::string Name; ///< Name of metadata object.
+    std::string Reference;
+
+    virtual ~X3DNodeElementMeta() {
+        // empty
+    }
+
+protected:
+    X3DNodeElementMeta(X3DElemType type, X3DNodeElementBase *parent) :
+            X3DNodeElementBase(type, parent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaBoolean : X3DNodeElementMeta {
+    std::vector<bool> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaBoolean(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaBoolean, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaDouble : X3DNodeElementMeta {
+    std::vector<double> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaDouble(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaDouble, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaFloat : public X3DNodeElementMeta {
+    std::vector<float> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaFloat(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaFloat, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaInt : public X3DNodeElementMeta {
+    std::vector<int32_t> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaInt(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaInteger, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaSet : public X3DNodeElementMeta {
+    std::list<X3DNodeElementMeta> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaSet(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaSet, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaString : X3DNodeElementMeta {
+    std::list<std::string> Value; ///< Stored value.
+
+    explicit X3DNodeElementMetaString(X3DNodeElementBase *pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaString, pParent) {
+        // empty
+    }
+};
+
+/// \struct CX3DImporter_NodeElement_Light
+/// This struct hold <TextureTransform> value.
+struct X3DNodeNodeElementLight : X3DNodeElementBase {
+    float AmbientIntensity; ///< Specifies the intensity of the ambient emission from the light.
+    aiColor3D Color; ///< specifies the spectral colour properties of both the direct and ambient light emission as an RGB value.
+    aiVector3D Direction; ///< Specifies the direction vector of the illumination emanating from the light source in the local coordinate system.
+    /// \var Global
+    /// Field that determines whether the light is global or scoped. Global lights illuminate all objects that fall within their volume of lighting influence.
+    /// Scoped lights only illuminate objects that are in the same transformation hierarchy as the light.
+    bool Global;
+    float Intensity; ///< Specifies the brightness of the direct emission from the light.
+    /// \var Attenuation
+    /// PointLight node's illumination falls off with distance as specified by three attenuation coefficients. The attenuation factor
+    /// is: "1 / max(attenuation[0] + attenuation[1] * r + attenuation[2] * r2, 1)", where r is the distance from the light to the surface being illuminated.
+    aiVector3D Attenuation;
+    aiVector3D Location; ///< Specifies a translation offset of the centre point of the light source from the light's local coordinate system origin.
+    float Radius; ///< Specifies the radial extent of the solid angle and the maximum distance from location that may be illuminated by the light source.
+    float BeamWidth; ///< Specifies an inner solid angle in which the light source emits light at uniform full intensity.
+    float CutOffAngle; ///< The light source's emission intensity drops off from the inner solid angle (beamWidth) to the outer solid angle (cutOffAngle).
+
+    /// Constructor
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pLightType - type of the light source.
+    X3DNodeNodeElementLight(X3DElemType pLightType, X3DNodeElementBase *pParent) :
+            X3DNodeElementBase(pLightType, pParent) {}
+
+}; // struct CX3DImporter_NodeElement_Light
+
+using X3DElementList = std::list<X3DNodeElementBase*>;
 
 class X3DImporter : public BaseImporter {
 public:
@@ -310,10 +654,18 @@ public:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;
     void Clear();
+    void readMetadata(XmlNode &node);
+    void readScene(XmlNode &node);
+    void readViewpoint(XmlNode &node);
+    void readMetadataObject(XmlNode &node);
+    void ParseDirectionalLight(XmlNode &node);
+    void Postprocess_BuildNode(const X3DNodeElementBase &pNodeElement, aiNode &pSceneNode, std::list<aiMesh *> &pSceneMeshList,
+            std::list<aiMaterial *> &pSceneMaterialList, std::list<aiLight *> &pSceneLightList) const;
 
 private:
     static const aiImporterDesc Description;
-    X3DNodeElementBase *mNodeElementCur; ///< Current element.
+    X3DNodeElementBase *mNodeElementCur;
+    aiScene *mScene;
 }; // class X3DImporter
 
 } // namespace Assimp

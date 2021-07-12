@@ -22,7 +22,7 @@ BUILD_TYPE=Release
 ################################################
 # 		 Minimum iOS deployment target version
 ################################################
-MIN_IOS_VERSION="10.0"
+MIN_IOS_VERSION="11.0"
 
 IOS_SDK_TARGET=$MIN_IOS_VERSION
 XCODE_ROOT_DIR=$(xcode-select  --print-path)
@@ -31,7 +31,7 @@ TOOLCHAIN=$XCODE_ROOT_DIR/Toolchains/XcodeDefault.xctoolchain
 CMAKE_C_COMPILER=$(xcrun -find cc)
 CMAKE_CXX_COMPILER=$(xcrun -find c++)
 
-BUILD_ARCHS_DEVICE="arm64e arm64 armv7s armv7"
+BUILD_ARCHS_DEVICE="arm64 armv7s armv7"
 BUILD_ARCHS_SIMULATOR="x86_64 i386"
 BUILD_ARCHS_ALL=($BUILD_ARCHS_DEVICE $BUILD_ARCHS_SIMULATOR)
 
@@ -60,8 +60,8 @@ build_arch()
 
     unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS CMAKE_CLI_INPUT
            
-	export CC="$(xcrun -sdk iphoneos -find clang)"
-    export CPP="$CC -E"
+	#export CC="$(xcrun -sdk iphoneos -find clang)"
+    #export CPP="$CC -E"
     export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"

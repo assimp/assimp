@@ -778,19 +778,17 @@ void glTF2Exporter::ExportMaterials()
         mat.Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat.Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
 
+        float opacity;
         aiString alphaMode;
 
+        if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+            if (opacity < 1) {
+                m->alphaMode = "BLEND";
+                m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
+            }
+        }
         if (mat.Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
             m->alphaMode = alphaMode.C_Str();
-        } else {
-            float opacity;
-
-            if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-                if (opacity < 1) {
-                    m->alphaMode = "BLEND";
-                    m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
-                }
-            }
         }
 
         {

@@ -529,7 +529,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
                 // have it read into a channel
                 ChannelMap::iterator newChannel = channels.insert(std::make_pair(id, AnimationChannel())).first;
                 ReadAnimationSampler(currentNode, newChannel->second);
-            } 
+            }
         } else if (currentName == "channel") {
             std::string source_name, target;
             XmlParser::getStdStrAttribute(currentNode, "source", source_name);
@@ -627,7 +627,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
 
-    //for (XmlNode &currentNode : node.children()) {
+        //for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "morph") {
             controller.mType = Morph;
@@ -907,7 +907,7 @@ void ColladaParser::ReadCameraLibrary(XmlNode &node) {
             if (!name.empty()) {
                 cam.mName = name;
             }
-            ReadCamera(currentNode, cam);            
+            ReadCamera(currentNode, cam);
         }
     }
 }
@@ -1361,8 +1361,8 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
         } else if (currentName == "vertices") {
             ReadVertexData(currentNode, pMesh);
         } else if (currentName == "triangles" || currentName == "lines" || currentName == "linestrips" ||
-                currentName == "polygons" || currentName == "polylist" || currentName == "trifans" ||
-                currentName == "tristrips") {
+                   currentName == "polygons" || currentName == "polylist" || currentName == "trifans" ||
+                   currentName == "tristrips") {
             ReadIndexData(currentNode, pMesh);
         }
     }
@@ -1674,12 +1674,9 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
 
     // read set if texture coordinates
     if (channel.mType == IT_Texcoord || channel.mType == IT_Color) {
-        int attrSet = -1;
-        if (XmlParser::hasAttribute(node, "set")) {
-            XmlParser::getIntAttribute(node, "set", attrSet);
-        }
-
-        channel.mIndex = attrSet;
+        unsigned int attrSet = 0;
+        if (XmlParser::getUIntAttribute(node, "set", attrSet))
+            channel.mIndex = attrSet;
     }
 
     // store, if valid type
@@ -1704,20 +1701,20 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
     // determine the expected number of indices
     size_t expectedPointCount = 0;
     switch (pPrimType) {
-        case Prim_Polylist: {
-            for (size_t i : pVCount)
-                expectedPointCount += i;
-            break;
-        }
-        case Prim_Lines:
-            expectedPointCount = 2 * pNumPrimitives;
-            break;
-        case Prim_Triangles:
-            expectedPointCount = 3 * pNumPrimitives;
-            break;
-        default:
-            // other primitive types don't state the index count upfront... we need to guess
-            break;
+    case Prim_Polylist: {
+        for (size_t i : pVCount)
+            expectedPointCount += i;
+        break;
+    }
+    case Prim_Lines:
+        expectedPointCount = 2 * pNumPrimitives;
+        break;
+    case Prim_Triangles:
+        expectedPointCount = 3 * pNumPrimitives;
+        break;
+    default:
+        // other primitive types don't state the index count upfront... we need to guess
+        break;
     }
 
     // and read all indices into a temporary array
@@ -1925,87 +1922,87 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
 
     // now we reinterpret it according to the type we're reading here
     switch (pInput.mType) {
-        case IT_Position: // ignore all position streams except 0 - there can be only one position
-            if (pInput.mIndex == 0) {
-                pMesh.mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
-            }
-            break;
-        case IT_Normal:
+    case IT_Position: // ignore all position streams except 0 - there can be only one position
+        if (pInput.mIndex == 0) {
+            pMesh.mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
+        }
+        break;
+    case IT_Normal:
+        // pad to current vertex count if necessary
+        if (pMesh.mNormals.size() < pMesh.mPositions.size() - 1)
+            pMesh.mNormals.insert(pMesh.mNormals.end(), pMesh.mPositions.size() - pMesh.mNormals.size() - 1, aiVector3D(0, 1, 0));
+
+        // ignore all normal streams except 0 - there can be only one normal
+        if (pInput.mIndex == 0) {
+            pMesh.mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
+        }
+        break;
+    case IT_Tangent:
+        // pad to current vertex count if necessary
+        if (pMesh.mTangents.size() < pMesh.mPositions.size() - 1)
+            pMesh.mTangents.insert(pMesh.mTangents.end(), pMesh.mPositions.size() - pMesh.mTangents.size() - 1, aiVector3D(1, 0, 0));
+
+        // ignore all tangent streams except 0 - there can be only one tangent
+        if (pInput.mIndex == 0) {
+            pMesh.mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
+        }
+        break;
+    case IT_Bitangent:
+        // pad to current vertex count if necessary
+        if (pMesh.mBitangents.size() < pMesh.mPositions.size() - 1) {
+            pMesh.mBitangents.insert(pMesh.mBitangents.end(), pMesh.mPositions.size() - pMesh.mBitangents.size() - 1, aiVector3D(0, 0, 1));
+        }
+
+        // ignore all bitangent streams except 0 - there can be only one bitangent
+        if (pInput.mIndex == 0) {
+            pMesh.mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
+        }
+        break;
+    case IT_Texcoord:
+        // up to 4 texture coord sets are fine, ignore the others
+        if (pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             // pad to current vertex count if necessary
-            if (pMesh.mNormals.size() < pMesh.mPositions.size() - 1)
-                pMesh.mNormals.insert(pMesh.mNormals.end(), pMesh.mPositions.size() - pMesh.mNormals.size() - 1, aiVector3D(0, 1, 0));
+            if (pMesh.mTexCoords[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mTexCoords[pInput.mIndex].insert(pMesh.mTexCoords[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
 
-            // ignore all normal streams except 0 - there can be only one normal
-            if (pInput.mIndex == 0) {
-                pMesh.mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
+            pMesh.mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) {
+                pMesh.mNumUVComponents[pInput.mIndex] = 3;
             }
-            break;
-        case IT_Tangent:
+        } else {
+            ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
+        }
+        break;
+    case IT_Color:
+        // up to 4 color sets are fine, ignore the others
+        if (pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS) {
             // pad to current vertex count if necessary
-            if (pMesh.mTangents.size() < pMesh.mPositions.size() - 1)
-                pMesh.mTangents.insert(pMesh.mTangents.end(), pMesh.mPositions.size() - pMesh.mTangents.size() - 1, aiVector3D(1, 0, 0));
+            if (pMesh.mColors[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mColors[pInput.mIndex].insert(pMesh.mColors[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
 
-            // ignore all tangent streams except 0 - there can be only one tangent
-            if (pInput.mIndex == 0) {
-                pMesh.mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
+            aiColor4D result(0, 0, 0, 1);
+            for (size_t i = 0; i < pInput.mResolved->mSize; ++i) {
+                result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
             }
-            break;
-        case IT_Bitangent:
-            // pad to current vertex count if necessary
-            if (pMesh.mBitangents.size() < pMesh.mPositions.size() - 1) {
-                pMesh.mBitangents.insert(pMesh.mBitangents.end(), pMesh.mPositions.size() - pMesh.mBitangents.size() - 1, aiVector3D(0, 0, 1));
-            }
+            pMesh.mColors[pInput.mIndex].push_back(result);
+        } else {
+            ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
+        }
 
-            // ignore all bitangent streams except 0 - there can be only one bitangent
-            if (pInput.mIndex == 0) {
-                pMesh.mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
-            }
-            break;
-        case IT_Texcoord:
-            // up to 4 texture coord sets are fine, ignore the others
-            if (pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-                // pad to current vertex count if necessary
-                if (pMesh.mTexCoords[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
-                    pMesh.mTexCoords[pInput.mIndex].insert(pMesh.mTexCoords[pInput.mIndex].end(),
-                            pMesh.mPositions.size() - pMesh.mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
-
-                pMesh.mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
-                if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) {
-                    pMesh.mNumUVComponents[pInput.mIndex] = 3;
-                }
-            } else {
-                ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
-            }
-            break;
-        case IT_Color:
-            // up to 4 color sets are fine, ignore the others
-            if (pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS) {
-                // pad to current vertex count if necessary
-                if (pMesh.mColors[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
-                    pMesh.mColors[pInput.mIndex].insert(pMesh.mColors[pInput.mIndex].end(),
-                            pMesh.mPositions.size() - pMesh.mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
-
-                aiColor4D result(0, 0, 0, 1);
-                for (size_t i = 0; i < pInput.mResolved->mSize; ++i) {
-                    result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
-                }
-                pMesh.mColors[pInput.mIndex].push_back(result);
-            } else {
-                ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
-            }
-
-            break;
-        default:
-            // IT_Invalid and IT_Vertex
-            ai_assert(false && "shouldn't ever get here");
+        break;
+    default:
+        // IT_Invalid and IT_Vertex
+        ai_assert(false && "shouldn't ever get here");
     }
 }
 
@@ -2170,10 +2167,10 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
 
     // read as many parameters and store in the transformation
     for (unsigned int a = 0; a < sNumParameters[pType]; a++) {
+        // skip whitespace before the number
+        SkipSpacesAndLineEnd(&content);
         // read a number
         content = fast_atoreal_move<ai_real>(content, tf.f[a]);
-        // skip whitespace after it
-        SkipSpacesAndLineEnd(&content);
     }
 
     // place the transformation at the queue of the node

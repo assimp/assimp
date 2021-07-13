@@ -170,10 +170,10 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaParser::~ColladaParser() {
-    for (auto & it : mNodeLibrary) {
+    for (auto &it : mNodeLibrary) {
         delete it.second;
     }
-    for (auto & it : mMeshLibrary) {
+    for (auto &it : mMeshLibrary) {
         delete it.second;
     }
 }
@@ -396,7 +396,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
 
     std::string animName;
     if (!XmlParser::getStdStrAttribute(node, "name", animName)) {
-        if (!XmlParser::getStdStrAttribute( node, "id", animName )) {
+        if (!XmlParser::getStdStrAttribute(node, "id", animName)) {
             animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
         }
     }
@@ -420,7 +420,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
 
 void ColladaParser::PostProcessControllers() {
     std::string meshId;
-    for (auto & it : mControllerLibrary) {
+    for (auto &it : mControllerLibrary) {
         meshId = it.second.mMeshId;
         if (meshId.empty()) {
             continue;
@@ -445,7 +445,7 @@ void ColladaParser::PostProcessRootAnimations() {
     }
 
     Animation temp;
-    for (auto & it : mAnimationClipLibrary) {
+    for (auto &it : mAnimationClipLibrary) {
         std::string clipName = it.first;
 
         Animation *clip = new Animation();
@@ -552,7 +552,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             pParent->mSubAnims.push_back(anim);
         }
 
-        for (const auto & channel : channels) {
+        for (const auto &channel : channels) {
             anim->mChannels.push_back(channel.second);
         }
 
@@ -644,7 +644,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
         } else if (currentName == "skin") {
             std::string id;
             if (XmlParser::getStdStrAttribute(currentNode, "source", id)) {
-                controller.mMeshId = id.substr(1, id.size()-1);
+                controller.mMeshId = id.substr(1, id.size() - 1);
             }
         } else if (currentName == "bind_shape_matrix") {
             std::string v;
@@ -698,7 +698,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
             } else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0) {
                 pController.mJointOffsetMatrixSource = attrSource;
             } else {
-                throw DeadlyImportError("Unknown semantic \"" , attrSemantic , "\" in <joints> data <input> element");
+                throw DeadlyImportError("Unknown semantic \"", attrSemantic, "\" in <joints> data <input> element");
             }
         }
     }
@@ -708,7 +708,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
-    int vertexCount=0;
+    int vertexCount = 0;
     XmlParser::getIntAttribute(node, "count", vertexCount);
     pController.mWeightCounts.resize(vertexCount);
 
@@ -723,7 +723,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
 
             // local URLS always start with a '#'. We don't support global URLs
             if (attrSource[0] != '#') {
-                throw DeadlyImportError( "Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
+                throw DeadlyImportError("Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
             }
             channel.mAccessor = attrSource + 1;
 
@@ -777,7 +777,7 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
         const std::string &currentName = currentNode.name();
         if (currentName == "image") {
             std::string id;
-            if (XmlParser::getStdStrAttribute( currentNode, "id", id )) {
+            if (XmlParser::getStdStrAttribute(currentNode, "id", id)) {
                 mImageLibrary[id] = Image();
                 // read on from there
                 ReadImage(currentNode, mImageLibrary[id]);
@@ -1727,7 +1727,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
     }
 
     // It is possible to not contain any indices
-    if (pNumPrimitives > 0)  {
+    if (pNumPrimitives > 0) {
         std::string v;
         XmlParser::getValueAsString(node, v);
         const char *content = v.c_str();

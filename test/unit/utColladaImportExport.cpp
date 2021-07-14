@@ -382,3 +382,25 @@ public:
 TEST_F(utColladaZaeImportExport, importBlenFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utColladaZaeImportExport, importMakeHumanTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/human.zae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+
+    // Expected number of items
+    EXPECT_EQ(scene->mNumMeshes, 2u);
+    EXPECT_EQ(scene->mNumMaterials, 2u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 2u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    // Expected common metadata
+    aiString value;
+    EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, value)) << "No importer format metadata";
+    EXPECT_STREQ("Collada Importer", value.C_Str());
+
+    EXPECT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, value)) << "No format version metadata";
+    EXPECT_STREQ("1.4.1", value.C_Str());
+}

@@ -88,15 +88,13 @@ namespace Assimp {
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool isBinary)
+    const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
+    , mScene(pScene)
     , mProperties(pProperties)
+    , mAsset(new Asset(pIOSystem))
 {
-    mScene = pScene;
-
-    mAsset.reset( new Asset( pIOSystem ) );
-
     // Always on as our triangulation process is aware of this type of encoding
     mAsset->extensionsUsed.FB_ngon_encoding = true;
 
@@ -1338,8 +1336,11 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 
 void glTF2Exporter::ExportScene()
 {
-    const char* sceneName = "defaultScene";
-    Ref<Scene> scene = mAsset->scenes.Create(sceneName);
+    // Use the name of the scene if specified
+    const std::string sceneName = (mScene->mName.length > 0) ? mScene->mName.C_Str() : "defaultScene";
+
+    // Ensure unique
+    Ref<Scene> scene = mAsset->scenes.Create(mAsset->FindUniqueID(sceneName, ""));
 
     // root node will be the first one exported (idx 0)
     if (mAsset->nodes.Size() > 0) {

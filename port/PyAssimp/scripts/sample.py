@@ -5,6 +5,8 @@
 This module demonstrates the functionality of PyAssimp.
 """
 
+from __future__ import print_function
+
 import sys
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -24,19 +26,19 @@ def main(filename=None):
     
     #the model we load
     print("MODEL:" + filename)
-    print
+    print("")
     
     #write some statistics
     print("SCENE:")
     print("  meshes:" + str(len(scene.meshes)))
     print("  materials:" + str(len(scene.materials)))
     print("  textures:" + str(len(scene.textures)))
-    print
+    print("")
     
     print("NODES:")
     recur_node(scene.rootnode)
 
-    print
+    print("")
     print("MESHES:")
     for index, mesh in enumerate(scene.meshes):
         print("  MESH" + str(index+1))
@@ -58,14 +60,14 @@ def main(filename=None):
         print("    uv-component-count:" + str(len(mesh.numuvcomponents)))
         print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str(mesh.faces[:3]))
         print("    bones:" + str(len(mesh.bones)) + " -> first:" + str([str(b) for b in mesh.bones[:3]]))
-        print
+        print("")
 
     print("MATERIALS:")
     for index, material in enumerate(scene.materials):
         print("  MATERIAL (id:" + str(index+1) + ")")
         for key, value in material.properties.items():
             print("    %s: %s" % (key, value))
-    print
+    print("")
     
     print("TEXTURES:")
     for index, texture in enumerate(scene.textures):

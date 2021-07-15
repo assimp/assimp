@@ -1690,7 +1690,7 @@ void FBXExporter::WriteObjects ()
 
             aiUVTransform trafo;
             unsigned int max = sizeof(aiUVTransform);
-            aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), (float *)&trafo, &max);
+            aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), (ai_real *)&trafo, &max);
 
             // now write the actual texture node
             FBX::Node tnode("Texture");

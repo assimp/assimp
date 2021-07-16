@@ -626,8 +626,6 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
     XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
-
-        //for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "morph") {
             controller.mType = Morph;
@@ -1439,9 +1437,8 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
                     throw DeadlyImportError("Expected more values while reading float_array contents.");
                 }
 
-                ai_real value;
                 // read a number
-                //SkipSpacesAndLineEnd(&content);
+                ai_real value;
                 content = fast_atoreal_move<ai_real>(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it
@@ -1489,11 +1486,10 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
             std::string name;
             if (XmlParser::hasAttribute(currentNode, "name")) {
                 XmlParser::getStdStrAttribute(currentNode, "name", name);
-                //name = mReader->getAttributeValue(attrName);
 
                 // analyse for common type components and store it's sub-offset in the corresponding field
 
-                /* Cartesian coordinates */
+                // Cartesian coordinates
                 if (name == "X")
                     acc.mSubOffset[0] = acc.mParams.size();
                 else if (name == "Y")

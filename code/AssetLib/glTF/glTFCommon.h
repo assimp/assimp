@@ -194,12 +194,11 @@ inline void CopyValue(const glTFCommon::mat4 &v, aiMatrix4x4 &o) {
 
 inline std::string getCurrentAssetDir(const std::string &pFile) {
     std::string path = pFile;
-    int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) {
-        path = pFile.substr(0, pos + 1);
+    if (pos == int(std::string::npos)) {
+        return "";
     }
 
-    return path;
+    return pFile.substr(0, pos + 1);
 }
 #if _MSC_VER
 #    pragma warning(pop)

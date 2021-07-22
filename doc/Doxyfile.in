@@ -688,6 +688,7 @@ FILE_PATTERNS          = *.c \
                          *.c++ \
                          *.inl \
                          *.h \
+                         *.hpp \
                          *.dox
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories 

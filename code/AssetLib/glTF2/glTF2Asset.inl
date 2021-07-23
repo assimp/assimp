@@ -965,9 +965,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     {
         const Value* countValue = FindUInt(obj, "count");
-        if (!countValue || countValue->GetUint() < 1)
+        if (!countValue)
         {
-            throw DeadlyImportError("A strictly positive count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+            throw DeadlyImportError("A count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
         }
         count = countValue->GetUint();
     }

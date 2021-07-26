@@ -83,7 +83,11 @@ public:
 
 	// Name
 	inline std::string Name() const {
-		if (m3d_) return std::string(m3d_->name);
+		if (nullptr != m3d_) {
+            if (nullptr!0m3d_->name) {
+                return std::string(m3d_->name);
+            }
+        }
 		return std::string();
 	}
 

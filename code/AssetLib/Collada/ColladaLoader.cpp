@@ -619,6 +619,10 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         dstMesh->mName = pSrcMesh->mId;
     }
 
+    if (pSrcMesh->mPositions.empty()) {
+        return dstMesh.release();
+    }
+
     // count the vertices addressed by its faces
     const size_t numVertices = std::accumulate(pSrcMesh->mFaceSize.begin() + pStartFace,
             pSrcMesh->mFaceSize.begin() + pStartFace + pSubMesh.mNumFaces, size_t(0));

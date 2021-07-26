@@ -113,7 +113,7 @@ inline std::string M3DWrapper::Name() const {
     return std::string();
 }
 
-inline explicit operator M3DWrapper::bool() const { 
+inline M3DWrapper::operator bool() const { 
     return m3d_ != nullptr; 
 }
 

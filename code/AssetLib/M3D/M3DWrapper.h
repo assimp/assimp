@@ -96,7 +96,7 @@ public:
 	explicit operator bool() const;
 
 	// Allow direct access to M3D API
-	m3d_t *operator->();
+	m3d_t *operator->() const;
 	m3d_t *M3D() const;
 
 private:

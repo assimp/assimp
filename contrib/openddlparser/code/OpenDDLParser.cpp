@@ -132,6 +132,24 @@ OpenDDLParser::~OpenDDLParser() {
     clear();
 }
 
+void OpenDDLParser::logToStream(FILE *f, LogSeverity severity, const std::string &message) {
+    if (f) {
+        const char *tag = "none";
+        switch (severity) {
+        case ddl_debug_msg: tag = "debug"; break;
+        case ddl_info_msg:  tag = "info";  break;
+        case ddl_warn_msg:  tag = "warn";  break;
+        case ddl_error_msg: tag = "error"; break;
+        }
+        fprintf(f, "OpenDDLParser: (%5s) %s\n", tag, message.c_str());
+    }
+}
+
+OpenDDLParser::logCallback OpenDDLParser::StdLogCallback (FILE *destination) {
+    using namespace std::placeholders;
+    return std::bind(logToStream, destination ? destination : stderr, _1, _2);
+}
+
 void OpenDDLParser::setLogCallback(logCallback callback) {
     // install user-specific log callback; null = no log callback
     m_logCallback = callback;
@@ -171,12 +189,8 @@ size_t OpenDDLParser::getBufferSize() const {
 
 void OpenDDLParser::clear() {
     m_buffer.resize(0);
-    if (nullptr != m_context) {
-        delete m_context;
-        m_context = nullptr;
-    }
-
-    //    DDLNode::releaseNodes();
+    delete m_context;
+    m_context = nullptr;
 }
 
 bool OpenDDLParser::validate() {
@@ -506,7 +520,9 @@ char *OpenDDLParser::parseName(char *in, char *end, Name **name) {
     in = parseIdentifier(in, end, &id);
     if (id) {
         currentName = new Name(ntype, id);
-        *name = currentName;
+        if (currentName) {
+            *name = currentName;
+        }
     }
 
     return in;

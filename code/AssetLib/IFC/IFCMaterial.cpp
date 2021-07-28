@@ -64,7 +64,7 @@ static int ConvertShadingMode(const std::string& name) {
     else if (name == "PHONG") {
         return aiShadingMode_Phong;
     }
-    IFCImporter::LogWarn("shading mode "+name+" not recognized by Assimp, using Phong instead");
+    IFCImporter::LogWarn("shading mode ", name, " not recognized by Assimp, using Phong instead");
     return aiShadingMode_Phong;
 }
 
@@ -75,7 +75,7 @@ static void FillMaterial(aiMaterial* mat,const IFC::Schema_2x3::IfcSurfaceStyle*
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     // now see which kinds of surface information are present
-    for(std::shared_ptr< const IFC::Schema_2x3::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
+    for (const std::shared_ptr<const IFC::Schema_2x3::IfcSurfaceStyleElementSelect> &sel2 : surf->Styles) {
         if (const IFC::Schema_2x3::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::Schema_2x3::IfcSurfaceStyleShading>(conv.db)) {
             aiColor4D col_base,col;
 
@@ -124,7 +124,7 @@ static void FillMaterial(aiMaterial* mat,const IFC::Schema_2x3::IfcSurfaceStyle*
                     }
                 }
             }
-        } 
+        }
     }
 }
 
@@ -134,7 +134,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
     for(;range.first != range.second; ++range.first) {
         if(const IFC::Schema_2x3::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::Schema_2x3::IfcStyledItem>()) {
             for(const IFC::Schema_2x3::IfcPresentationStyleAssignment& as : styled->Styles) {
-                for(std::shared_ptr<const IFC::Schema_2x3::IfcPresentationStyleSelect> sel : as.Styles) {
+                for (const std::shared_ptr<const IFC::Schema_2x3::IfcPresentationStyleSelect> &sel : as.Styles) {
 
                     if( const IFC::Schema_2x3::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::Schema_2x3::IfcSurfaceStyle>(conv.db) ) {
                         // try to satisfy from cache
@@ -145,7 +145,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
                         // not found, create new material
                         const std::string side = static_cast<std::string>(surf->Side);
                         if( side != "BOTH" ) {
-                            IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
+                            IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: ", side);
                         }
 
                         std::unique_ptr<aiMaterial> mat(new aiMaterial());

@@ -82,7 +82,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     // lower-case shading because Blender (for example) writes "Phong"
     for (size_t i = 0; i < shading.length(); ++i) {
-        shading[i] = static_cast<char>(tolower(shading[i]));
+        shading[i] = static_cast<char>(tolower(static_cast<unsigned char>(shading[i])));
     }
     std::string templateName;
     if(shading == "phong") {
@@ -208,6 +208,11 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
     if (ok) {
         uvTrans.x = trans.x;
         uvTrans.y = trans.y;
+    }
+
+    const aiVector3D &rotation = PropertyGet<aiVector3D>(*props, "Rotation", ok);
+    if (ok) {
+        uvRotation = rotation.z;
     }
 
     // resolve video links
@@ -352,7 +357,7 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
             }
         } catch (const runtime_error& runtimeError) {
             //we don't need the content data for contents that has already been loaded
-            ASSIMP_LOG_VERBOSE_DEBUG_F("Caught exception in FBXMaterial (likely because content was already loaded): ",
+            ASSIMP_LOG_VERBOSE_DEBUG("Caught exception in FBXMaterial (likely because content was already loaded): ",
                     runtimeError.what());
         }
     }

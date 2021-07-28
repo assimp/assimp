@@ -71,7 +71,7 @@ static void ReportWarning(const char *msg, ...) {
     ai_assert(iLen > 0);
 
     va_end(args);
-    ASSIMP_LOG_WARN_F("Validation warning: ", std::string(szBuffer, iLen));
+    ASSIMP_LOG_WARN("Validation warning: ", std::string(szBuffer, iLen));
 }
 
 static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
@@ -170,10 +170,10 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaParser::~ColladaParser() {
-    for (auto & it : mNodeLibrary) {
+    for (auto &it : mNodeLibrary) {
         delete it.second;
     }
-    for (auto & it : mMeshLibrary) {
+    for (auto &it : mMeshLibrary) {
         delete it.second;
     }
 }
@@ -234,7 +234,7 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 #if defined(_MSC_VER)
     if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #else
-    if (ss.data[0] == '/' && isalpha(ss.data[1]) && ss.data[2] == ':') {
+    if (ss.data[0] == '/' && isalpha((unsigned char)ss.data[1]) && ss.data[2] == ':') {
 #endif
         --ss.length;
         ::memmove(ss.data, ss.data + 1, ss.length);
@@ -396,7 +396,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
 
     std::string animName;
     if (!XmlParser::getStdStrAttribute(node, "name", animName)) {
-        if (!XmlParser::getStdStrAttribute( node, "id", animName )) {
+        if (!XmlParser::getStdStrAttribute(node, "id", animName)) {
             animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
         }
     }
@@ -420,7 +420,7 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
 
 void ColladaParser::PostProcessControllers() {
     std::string meshId;
-    for (auto & it : mControllerLibrary) {
+    for (auto &it : mControllerLibrary) {
         meshId = it.second.mMeshId;
         if (meshId.empty()) {
             continue;
@@ -445,7 +445,7 @@ void ColladaParser::PostProcessRootAnimations() {
     }
 
     Animation temp;
-    for (auto & it : mAnimationClipLibrary) {
+    for (auto &it : mAnimationClipLibrary) {
         std::string clipName = it.first;
 
         Animation *clip = new Animation();
@@ -453,7 +453,7 @@ void ColladaParser::PostProcessRootAnimations() {
 
         temp.mSubAnims.push_back(clip);
 
-        for (std::string animationID : it.second) {
+        for (const std::string &animationID : it.second) {
             AnimationLibrary::iterator animation = mAnimationLibrary.find(animationID);
 
             if (animation != mAnimationLibrary.end()) {
@@ -529,7 +529,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
                 // have it read into a channel
                 ChannelMap::iterator newChannel = channels.insert(std::make_pair(id, AnimationChannel())).first;
                 ReadAnimationSampler(currentNode, newChannel->second);
-            } 
+            }
         } else if (currentName == "channel") {
             std::string source_name, target;
             XmlParser::getStdStrAttribute(currentNode, "source", source_name);
@@ -552,7 +552,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             pParent->mSubAnims.push_back(anim);
         }
 
-        for (const auto & channel : channels) {
+        for (const auto &channel : channels) {
             anim->mChannels.push_back(channel.second);
         }
 
@@ -623,12 +623,9 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
     controller.mType = Skin;
     controller.mMethod = Normalized;
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
-
-    //for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "morph") {
             controller.mType = Morph;
@@ -645,7 +642,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
         } else if (currentName == "skin") {
             std::string id;
             if (XmlParser::getStdStrAttribute(currentNode, "source", id)) {
-                controller.mMeshId = id.substr(1, id.size()-1);
+                controller.mMeshId = id.substr(1, id.size() - 1);
             }
         } else if (currentName == "bind_shape_matrix") {
             std::string v;
@@ -699,7 +696,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
             } else if (strcmp(attrSemantic, "INV_BIND_MATRIX") == 0) {
                 pController.mJointOffsetMatrixSource = attrSource;
             } else {
-                throw DeadlyImportError("Unknown semantic \"" , attrSemantic , "\" in <joints> data <input> element");
+                throw DeadlyImportError("Unknown semantic \"", attrSemantic, "\" in <joints> data <input> element");
             }
         }
     }
@@ -709,7 +706,7 @@ void ColladaParser::ReadControllerJoints(XmlNode &node, Collada::Controller &pCo
 // Reads the joint weights for the given controller
 void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
-    int vertexCount=0;
+    int vertexCount = 0;
     XmlParser::getIntAttribute(node, "count", vertexCount);
     pController.mWeightCounts.resize(vertexCount);
 
@@ -724,7 +721,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
 
             // local URLS always start with a '#'. We don't support global URLs
             if (attrSource[0] != '#') {
-                throw DeadlyImportError( "Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
+                throw DeadlyImportError("Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
             }
             channel.mAccessor = attrSource + 1;
 
@@ -778,7 +775,7 @@ void ColladaParser::ReadImageLibrary(XmlNode &node) {
         const std::string &currentName = currentNode.name();
         if (currentName == "image") {
             std::string id;
-            if (XmlParser::getStdStrAttribute( currentNode, "id", id )) {
+            if (XmlParser::getStdStrAttribute(currentNode, "id", id)) {
                 mImageLibrary[id] = Image();
                 // read on from there
                 ReadImage(currentNode, mImageLibrary[id]);
@@ -908,7 +905,7 @@ void ColladaParser::ReadCameraLibrary(XmlNode &node) {
             if (!name.empty()) {
                 cam.mName = name;
             }
-            ReadCamera(currentNode, cam);            
+            ReadCamera(currentNode, cam);
         }
     }
 }
@@ -929,8 +926,7 @@ void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
 // ------------------------------------------------------------------------------------------------
 // Reads a light entry into the given light
 void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -991,10 +987,8 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
 // ------------------------------------------------------------------------------------------------
 // Reads a camera entry into the given light
 void ColladaParser::ReadCamera(XmlNode &node, Collada::Camera &camera) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
-
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "orthographic") {
@@ -1050,11 +1044,10 @@ void ColladaParser::ReadEffect(XmlNode &node, Collada::Effect &pEffect) {
 // ------------------------------------------------------------------------------------------------
 // Reads an COMMON effect profile
 void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEffect) {
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
-        const std::string &currentName = currentNode.name();
+        const std::string currentName = currentNode.name();
         if (currentName == "newparam") {
             // save ID
             std::string sid = currentNode.attribute("sid").as_string();
@@ -1145,10 +1138,9 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
     if (node.empty()) {
         return;
     }
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
 
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
+    XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         // MAYA extensions
@@ -1208,10 +1200,9 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
     if (node.empty()) {
         return;
     }
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
-    XmlNode currentNode;
 
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
+    XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "color") {
@@ -1273,8 +1264,7 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1360,8 +1350,7 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
         return;
     }
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1370,8 +1359,8 @@ void ColladaParser::ReadMesh(XmlNode &node, Mesh &pMesh) {
         } else if (currentName == "vertices") {
             ReadVertexData(currentNode, pMesh);
         } else if (currentName == "triangles" || currentName == "lines" || currentName == "linestrips" ||
-                currentName == "polygons" || currentName == "polylist" || currentName == "trifans" ||
-                currentName == "tristrips") {
+                   currentName == "polygons" || currentName == "polylist" || currentName == "trifans" ||
+                   currentName == "tristrips") {
             ReadIndexData(currentNode, pMesh);
         }
     }
@@ -1386,8 +1375,7 @@ void ColladaParser::ReadSource(XmlNode &node) {
 
     std::string sourceID;
     XmlParser::getStdStrAttribute(node, "id", sourceID);
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1449,9 +1437,8 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
                     throw DeadlyImportError("Expected more values while reading float_array contents.");
                 }
 
-                ai_real value;
                 // read a number
-                //SkipSpacesAndLineEnd(&content);
+                ai_real value;
                 content = fast_atoreal_move<ai_real>(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it
@@ -1490,8 +1477,7 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
     acc.mSource = source.c_str() + 1; // ignore the leading '#'
     acc.mSize = 0; // gets incremented with every param
 
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1500,11 +1486,10 @@ void ColladaParser::ReadAccessor(XmlNode &node, const std::string &pID) {
             std::string name;
             if (XmlParser::hasAttribute(currentNode, "name")) {
                 XmlParser::getStdStrAttribute(currentNode, "name", name);
-                //name = mReader->getAttributeValue(attrName);
 
                 // analyse for common type components and store it's sub-offset in the corresponding field
 
-                /* Cartesian coordinates */
+                // Cartesian coordinates
                 if (name == "X")
                     acc.mSubOffset[0] = acc.mParams.size();
                 else if (name == "Y")
@@ -1608,8 +1593,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
     ai_assert(primType != Prim_Invalid);
 
     // also a number of <input> elements, but in addition a <p> primitive collection and probably index counts for all primitives
-    XmlNodeIterator xmlIt(node);
-    xmlIt.collectChildrenPreOrder(node);
+    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
@@ -1686,12 +1670,9 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
 
     // read set if texture coordinates
     if (channel.mType == IT_Texcoord || channel.mType == IT_Color) {
-        int attrSet = -1;
-        if (XmlParser::hasAttribute(node, "set")) {
-            XmlParser::getIntAttribute(node, "set", attrSet);
-        }
-
-        channel.mIndex = attrSet;
+        unsigned int attrSet = 0;
+        if (XmlParser::getUIntAttribute(node, "set", attrSet))
+            channel.mIndex = attrSet;
     }
 
     // store, if valid type
@@ -1716,20 +1697,20 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
     // determine the expected number of indices
     size_t expectedPointCount = 0;
     switch (pPrimType) {
-        case Prim_Polylist: {
-            for (size_t i : pVCount)
-                expectedPointCount += i;
-            break;
-        }
-        case Prim_Lines:
-            expectedPointCount = 2 * pNumPrimitives;
-            break;
-        case Prim_Triangles:
-            expectedPointCount = 3 * pNumPrimitives;
-            break;
-        default:
-            // other primitive types don't state the index count upfront... we need to guess
-            break;
+    case Prim_Polylist: {
+        for (size_t i : pVCount)
+            expectedPointCount += i;
+        break;
+    }
+    case Prim_Lines:
+        expectedPointCount = 2 * pNumPrimitives;
+        break;
+    case Prim_Triangles:
+        expectedPointCount = 3 * pNumPrimitives;
+        break;
+    default:
+        // other primitive types don't state the index count upfront... we need to guess
+        break;
     }
 
     // and read all indices into a temporary array
@@ -1739,7 +1720,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
     }
 
     // It is possible to not contain any indices
-    if (pNumPrimitives > 0)  {
+    if (pNumPrimitives > 0) {
         std::string v;
         XmlParser::getValueAsString(node, v);
         const char *content = v.c_str();
@@ -1937,87 +1918,87 @@ void ColladaParser::ExtractDataObjectFromChannel(const InputChannel &pInput, siz
 
     // now we reinterpret it according to the type we're reading here
     switch (pInput.mType) {
-        case IT_Position: // ignore all position streams except 0 - there can be only one position
-            if (pInput.mIndex == 0) {
-                pMesh.mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
-            }
-            break;
-        case IT_Normal:
+    case IT_Position: // ignore all position streams except 0 - there can be only one position
+        if (pInput.mIndex == 0) {
+            pMesh.mPositions.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex position stream supported");
+        }
+        break;
+    case IT_Normal:
+        // pad to current vertex count if necessary
+        if (pMesh.mNormals.size() < pMesh.mPositions.size() - 1)
+            pMesh.mNormals.insert(pMesh.mNormals.end(), pMesh.mPositions.size() - pMesh.mNormals.size() - 1, aiVector3D(0, 1, 0));
+
+        // ignore all normal streams except 0 - there can be only one normal
+        if (pInput.mIndex == 0) {
+            pMesh.mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
+        }
+        break;
+    case IT_Tangent:
+        // pad to current vertex count if necessary
+        if (pMesh.mTangents.size() < pMesh.mPositions.size() - 1)
+            pMesh.mTangents.insert(pMesh.mTangents.end(), pMesh.mPositions.size() - pMesh.mTangents.size() - 1, aiVector3D(1, 0, 0));
+
+        // ignore all tangent streams except 0 - there can be only one tangent
+        if (pInput.mIndex == 0) {
+            pMesh.mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
+        }
+        break;
+    case IT_Bitangent:
+        // pad to current vertex count if necessary
+        if (pMesh.mBitangents.size() < pMesh.mPositions.size() - 1) {
+            pMesh.mBitangents.insert(pMesh.mBitangents.end(), pMesh.mPositions.size() - pMesh.mBitangents.size() - 1, aiVector3D(0, 0, 1));
+        }
+
+        // ignore all bitangent streams except 0 - there can be only one bitangent
+        if (pInput.mIndex == 0) {
+            pMesh.mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
+        } else {
+            ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
+        }
+        break;
+    case IT_Texcoord:
+        // up to 4 texture coord sets are fine, ignore the others
+        if (pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             // pad to current vertex count if necessary
-            if (pMesh.mNormals.size() < pMesh.mPositions.size() - 1)
-                pMesh.mNormals.insert(pMesh.mNormals.end(), pMesh.mPositions.size() - pMesh.mNormals.size() - 1, aiVector3D(0, 1, 0));
+            if (pMesh.mTexCoords[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mTexCoords[pInput.mIndex].insert(pMesh.mTexCoords[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
 
-            // ignore all normal streams except 0 - there can be only one normal
-            if (pInput.mIndex == 0) {
-                pMesh.mNormals.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex normal stream supported");
+            pMesh.mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
+            if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) {
+                pMesh.mNumUVComponents[pInput.mIndex] = 3;
             }
-            break;
-        case IT_Tangent:
+        } else {
+            ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
+        }
+        break;
+    case IT_Color:
+        // up to 4 color sets are fine, ignore the others
+        if (pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS) {
             // pad to current vertex count if necessary
-            if (pMesh.mTangents.size() < pMesh.mPositions.size() - 1)
-                pMesh.mTangents.insert(pMesh.mTangents.end(), pMesh.mPositions.size() - pMesh.mTangents.size() - 1, aiVector3D(1, 0, 0));
+            if (pMesh.mColors[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
+                pMesh.mColors[pInput.mIndex].insert(pMesh.mColors[pInput.mIndex].end(),
+                        pMesh.mPositions.size() - pMesh.mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
 
-            // ignore all tangent streams except 0 - there can be only one tangent
-            if (pInput.mIndex == 0) {
-                pMesh.mTangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex tangent stream supported");
+            aiColor4D result(0, 0, 0, 1);
+            for (size_t i = 0; i < pInput.mResolved->mSize; ++i) {
+                result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
             }
-            break;
-        case IT_Bitangent:
-            // pad to current vertex count if necessary
-            if (pMesh.mBitangents.size() < pMesh.mPositions.size() - 1) {
-                pMesh.mBitangents.insert(pMesh.mBitangents.end(), pMesh.mPositions.size() - pMesh.mBitangents.size() - 1, aiVector3D(0, 0, 1));
-            }
+            pMesh.mColors[pInput.mIndex].push_back(result);
+        } else {
+            ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
+        }
 
-            // ignore all bitangent streams except 0 - there can be only one bitangent
-            if (pInput.mIndex == 0) {
-                pMesh.mBitangents.push_back(aiVector3D(obj[0], obj[1], obj[2]));
-            } else {
-                ASSIMP_LOG_ERROR("Collada: just one vertex bitangent stream supported");
-            }
-            break;
-        case IT_Texcoord:
-            // up to 4 texture coord sets are fine, ignore the others
-            if (pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-                // pad to current vertex count if necessary
-                if (pMesh.mTexCoords[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
-                    pMesh.mTexCoords[pInput.mIndex].insert(pMesh.mTexCoords[pInput.mIndex].end(),
-                            pMesh.mPositions.size() - pMesh.mTexCoords[pInput.mIndex].size() - 1, aiVector3D(0, 0, 0));
-
-                pMesh.mTexCoords[pInput.mIndex].push_back(aiVector3D(obj[0], obj[1], obj[2]));
-                if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) {
-                    pMesh.mNumUVComponents[pInput.mIndex] = 3;
-                }
-            } else {
-                ASSIMP_LOG_ERROR("Collada: too many texture coordinate sets. Skipping.");
-            }
-            break;
-        case IT_Color:
-            // up to 4 color sets are fine, ignore the others
-            if (pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS) {
-                // pad to current vertex count if necessary
-                if (pMesh.mColors[pInput.mIndex].size() < pMesh.mPositions.size() - 1)
-                    pMesh.mColors[pInput.mIndex].insert(pMesh.mColors[pInput.mIndex].end(),
-                            pMesh.mPositions.size() - pMesh.mColors[pInput.mIndex].size() - 1, aiColor4D(0, 0, 0, 1));
-
-                aiColor4D result(0, 0, 0, 1);
-                for (size_t i = 0; i < pInput.mResolved->mSize; ++i) {
-                    result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
-                }
-                pMesh.mColors[pInput.mIndex].push_back(result);
-            } else {
-                ASSIMP_LOG_ERROR("Collada: too many vertex color sets. Skipping.");
-            }
-
-            break;
-        default:
-            // IT_Invalid and IT_Vertex
-            ai_assert(false && "shouldn't ever get here");
+        break;
+    default:
+        // IT_Invalid and IT_Vertex
+        ai_assert(false && "shouldn't ever get here");
     }
 }
 
@@ -2182,10 +2163,10 @@ void ColladaParser::ReadNodeTransformation(XmlNode &node, Node *pNode, Transform
 
     // read as many parameters and store in the transformation
     for (unsigned int a = 0; a < sNumParameters[pType]; a++) {
+        // skip whitespace before the number
+        SkipSpacesAndLineEnd(&content);
         // read a number
         content = fast_atoreal_move<ai_real>(content, tf.f[a]);
-        // skip whitespace after it
-        SkipSpacesAndLineEnd(&content);
     }
 
     // place the transformation at the queue of the node
@@ -2400,7 +2381,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic(const std::string &semantic
     else if (semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    ASSIMP_LOG_WARN_F("Unknown vertex input type \"", semantic, "\". Ignoring.");
+    ASSIMP_LOG_WARN("Unknown vertex input type \"", semantic, "\". Ignoring.");
     return IT_Invalid;
 }
 

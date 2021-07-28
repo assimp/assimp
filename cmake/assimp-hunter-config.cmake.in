@@ -9,6 +9,7 @@ find_package(poly2tri CONFIG REQUIRED)
 find_package(polyclipping CONFIG REQUIRED)
 find_package(zip CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
+find_package(stb CONFIG REQUIRED)
 
 if(@ASSIMP_BUILD_DRACO@)
   find_package(draco CONFIG REQUIRED)

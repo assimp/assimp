@@ -61,20 +61,10 @@ namespace D3DS {
 #include <assimp/Compiler/pushpack1.h>
 
 // ---------------------------------------------------------------------------
-/** Discreet3DS class: Helper class for loading 3ds files. Defines chunks
-*  and data structures.
+/** Defines chunks and data structures.
 */
-class Discreet3DS {
-private:
-    Discreet3DS() AI_NO_EXCEPT {
-        // empty
-    }
+namespace Discreet3DS {
 
-    ~Discreet3DS() {
-        // empty
-    }
-
-public:
     //! data structure for a single chunk in a .3ds file
     struct Chunk {
         uint16_t Flag;
@@ -314,7 +304,7 @@ public:
         // camera sub-chunks
         CHUNK_CAM_RANGES = 0x4720
     };
-};
+}
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds mesh face */
@@ -358,16 +348,16 @@ struct Texture {
         // empty
     }
 
-    Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(std::move(other.mTextureBlend)),
+    Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(other.mTextureBlend),
                                             mMapName(std::move(other.mMapName)),
-                                            mOffsetU(std::move(other.mOffsetU)),
-                                            mOffsetV(std::move(other.mOffsetV)),
-                                            mScaleU(std::move(other.mScaleU)),
-                                            mScaleV(std::move(other.mScaleV)),
-                                            mRotation(std::move(other.mRotation)),
-                                            mMapMode(std::move(other.mMapMode)),
-                                            bPrivate(std::move(other.bPrivate)),
-                                            iUVSrc(std::move(other.iUVSrc)) {
+                                            mOffsetU(other.mOffsetU),
+                                            mOffsetV(other.mOffsetV),
+                                            mScaleU(other.mScaleU),
+                                            mScaleV(other.mScaleV),
+                                            mRotation(other.mRotation),
+                                            mMapMode(other.mMapMode),
+                                            bPrivate(other.bPrivate),
+                                            iUVSrc(other.iUVSrc) {
         // empty
     }
 
@@ -376,16 +366,16 @@ struct Texture {
             return *this;
         }
 
-        mTextureBlend = std::move(other.mTextureBlend);
+        mTextureBlend = other.mTextureBlend;
         mMapName = std::move(other.mMapName);
-        mOffsetU = std::move(other.mOffsetU);
-        mOffsetV = std::move(other.mOffsetV);
-        mScaleU = std::move(other.mScaleU);
-        mScaleV = std::move(other.mScaleV);
-        mRotation = std::move(other.mRotation);
-        mMapMode = std::move(other.mMapMode);
-        bPrivate = std::move(other.bPrivate);
-        iUVSrc = std::move(other.iUVSrc);
+        mOffsetU = other.mOffsetU;
+        mOffsetV = other.mOffsetV;
+        mScaleU = other.mScaleU;
+        mScaleV = other.mScaleV;
+        mRotation = other.mRotation;
+        mMapMode = other.mMapMode;
+        bPrivate = other.bPrivate;
+        iUVSrc = other.iUVSrc;
 
         return *this;
     }
@@ -471,13 +461,13 @@ struct Material {
 
     //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
     Material(Material &&other) AI_NO_EXCEPT : mName(std::move(other.mName)),
-                                              mDiffuse(std::move(other.mDiffuse)),
-                                              mSpecularExponent(std::move(other.mSpecularExponent)),
-                                              mShininessStrength(std::move(other.mShininessStrength)),
-                                              mSpecular(std::move(other.mSpecular)),
-                                              mAmbient(std::move(other.mAmbient)),
-                                              mShading(std::move(other.mShading)),
-                                              mTransparency(std::move(other.mTransparency)),
+                                              mDiffuse(other.mDiffuse),
+                                              mSpecularExponent(other.mSpecularExponent),
+                                              mShininessStrength(other.mShininessStrength),
+                                              mSpecular(other.mSpecular),
+                                              mAmbient(other.mAmbient),
+                                              mShading(other.mShading),
+                                              mTransparency(other.mTransparency),
                                               sTexDiffuse(std::move(other.sTexDiffuse)),
                                               sTexOpacity(std::move(other.sTexOpacity)),
                                               sTexSpecular(std::move(other.sTexSpecular)),
@@ -485,10 +475,10 @@ struct Material {
                                               sTexBump(std::move(other.sTexBump)),
                                               sTexEmissive(std::move(other.sTexEmissive)),
                                               sTexShininess(std::move(other.sTexShininess)),
-                                              mBumpHeight(std::move(other.mBumpHeight)),
-                                              mEmissive(std::move(other.mEmissive)),
+                                              mBumpHeight(other.mBumpHeight),
+                                              mEmissive(other.mEmissive),
                                               sTexAmbient(std::move(other.sTexAmbient)),
-                                              mTwoSided(std::move(other.mTwoSided)) {
+                                              mTwoSided(other.mTwoSided) {
         // empty
     }
 
@@ -498,13 +488,13 @@ struct Material {
         }
 
         mName = std::move(other.mName);
-        mDiffuse = std::move(other.mDiffuse);
-        mSpecularExponent = std::move(other.mSpecularExponent);
-        mShininessStrength = std::move(other.mShininessStrength),
-        mSpecular = std::move(other.mSpecular);
-        mAmbient = std::move(other.mAmbient);
-        mShading = std::move(other.mShading);
-        mTransparency = std::move(other.mTransparency);
+        mDiffuse = other.mDiffuse;
+        mSpecularExponent = other.mSpecularExponent;
+        mShininessStrength = other.mShininessStrength,
+        mSpecular = other.mSpecular;
+        mAmbient = other.mAmbient;
+        mShading = other.mShading;
+        mTransparency = other.mTransparency;
         sTexDiffuse = std::move(other.sTexDiffuse);
         sTexOpacity = std::move(other.sTexOpacity);
         sTexSpecular = std::move(other.sTexSpecular);
@@ -512,10 +502,10 @@ struct Material {
         sTexBump = std::move(other.sTexBump);
         sTexEmissive = std::move(other.sTexEmissive);
         sTexShininess = std::move(other.sTexShininess);
-        mBumpHeight = std::move(other.mBumpHeight);
-        mEmissive = std::move(other.mEmissive);
+        mBumpHeight = other.mBumpHeight;
+        mEmissive = other.mEmissive;
         sTexAmbient = std::move(other.sTexAmbient);
-        mTwoSided = std::move(other.mTwoSided);
+        mTwoSided = other.mTwoSided;
 
         return *this;
     }

@@ -92,10 +92,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#   else
+#   if defined(_MSC_VER) && _MSC_VER <= 1600
 #       define gltf_unordered_map tr1::unordered_map
+#   else
+#       define gltf_unordered_map unordered_map
 #   endif
 #endif
 
@@ -456,11 +456,10 @@ namespace glTF
 			/// \param [in] pDecodedData - pointer to decoded data array.
 			/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
 			/// \param [in] pID - ID of the region.
-			SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
-				: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
-			{}
+            SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID) :
+                    Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
 
-			/// \fn ~SEncodedRegion()
+            /// \fn ~SEncodedRegion()
 			/// Destructor.
 			~SEncodedRegion() { delete [] DecodedData; }
 		};
@@ -954,7 +953,9 @@ namespace glTF
         virtual void AttachToDocument(Document& doc) = 0;
         virtual void DetachFromDocument() = 0;
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
         virtual void WriteObjects(AssetWriter& writer) = 0;
+#endif
     };
 
 
@@ -986,8 +987,10 @@ namespace glTF
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
         void WriteObjects(AssetWriter& writer)
             { WriteLazyDict<T>(*this, writer); }
+#endif
 
         Ref<T> Add(T* obj);
 
@@ -1029,7 +1032,7 @@ namespace glTF
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version("")
+            , version()
         {
         }
     };
@@ -1145,8 +1148,7 @@ namespace glTF
 
         void ReadExtensionsUsed(Document& doc);
 
-
-        IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
+        IOStream *OpenFile(const std::string &path, const char *mode, bool absolute = false);
     };
 
 }

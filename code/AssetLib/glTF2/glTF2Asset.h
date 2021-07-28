@@ -98,12 +98,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
 #include <unordered_set>
-#if _MSC_VER > 1600
-#define gltf_unordered_map unordered_map
-#define gltf_unordered_set unordered_set
-#else
+#if defined(_MSC_VER) && _MSC_VER <= 1600
 #define gltf_unordered_map tr1::unordered_map
 #define gltf_unordered_set tr1::unordered_set
+#else
+#define gltf_unordered_map unordered_map
+#define gltf_unordered_set unordered_set
 #endif
 #endif
 
@@ -356,12 +356,62 @@ struct Nullable {
             isPresent(true) {}
 };
 
+struct CustomExtension {
+    //
+    // A struct containing custom extension data added to a glTF2 file
+    // Has to contain Object, Array, String, Double, Uint64, and Int64 at a minimum
+    // String, Double, Uint64, and Int64 are stored in the Nullables
+    // Object and Array are stored in the std::vector
+    //
+    std::string name;
+
+    Nullable<std::string> mStringValue;
+    Nullable<double> mDoubleValue;
+    Nullable<uint64_t> mUint64Value;
+    Nullable<int64_t> mInt64Value;
+    Nullable<bool> mBoolValue;
+
+    // std::vector<CustomExtension> handles both Object and Array
+    Nullable<std::vector<CustomExtension>> mValues;
+
+    operator bool() const {
+        return Size() != 0;
+    }
+
+    size_t Size() const {
+        if (mValues.isPresent) {
+            return mValues.value.size();
+        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent || mBoolValue.isPresent) {
+            return 1;
+        }
+        return 0;
+    }
+
+    CustomExtension() = default;
+    
+    ~CustomExtension() = default;
+    
+    CustomExtension(const CustomExtension &other) :
+            name(other.name),
+            mStringValue(other.mStringValue),
+            mDoubleValue(other.mDoubleValue),
+            mUint64Value(other.mUint64Value),
+            mInt64Value(other.mInt64Value),
+            mBoolValue(other.mBoolValue),
+            mValues(other.mValues) {
+        // empty
+    }
+};
+
 //! Base class for all glTF top-level objects
 struct Object {
     int index; //!< The index of this object within its property container
     int oIndex; //!< The original index of this object defined in the JSON
     std::string id; //!< The globally unique ID used to reference this object
     std::string name; //!< The user-defined name of this object
+
+    CustomExtension customExtensions;
+    CustomExtension extras;
 
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }
@@ -370,6 +420,16 @@ struct Object {
 
     //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
     static const char *TranslateId(Asset & /*r*/, const char *id) { return id; }
+
+    inline Value *FindString(Value &val, const char *id);
+    inline Value *FindNumber(Value &val, const char *id);
+    inline Value *FindUInt(Value &val, const char *id);
+    inline Value *FindArray(Value &val, const char *id);
+    inline Value *FindObject(Value &val, const char *id);
+    inline Value *FindExtension(Value &val, const char *extensionId);
+
+    inline void ReadExtensions(Value &val);
+    inline void ReadExtras(Value &val);
 };
 
 //
@@ -401,7 +461,7 @@ public:
         /// \param [in] pDecodedData - pointer to decoded data array.
         /// \param [in] pDecodedData_Length - size of encoded region, in bytes.
         /// \param [in] pID - ID of the region.
-        SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string pID) :
+        SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID) :
                 Offset(pOffset),
                 EncodedData_Length(pEncodedData_Length),
                 DecodedData(pDecodedData),
@@ -780,6 +840,11 @@ struct Material : public Object {
     Material() { SetDefaults(); }
     void Read(Value &obj, Asset &r);
     void SetDefaults();
+
+    inline void SetTextureProperties(Asset &r, Value *prop, TextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, TextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, NormalTextureInfo &out);
+    inline void ReadTextureProperty(Asset &r, Value &vals, const char *propName, OcclusionTextureInfo &out);
 };
 
 //! A set of primitives to be rendered. A node can contain one or more meshes. A node's transform places the mesh in the scene.
@@ -801,6 +866,11 @@ struct Mesh : public Object {
             AccessorList position, normal, tangent;
         };
         std::vector<Target> targets;
+
+        // extension: FB_ngon_encoding
+        bool ngonEncoded;
+
+        Primitive(): ngonEncoded(false) {}
     };
 
     std::vector<Primitive> primitives;
@@ -815,50 +885,6 @@ struct Mesh : public Object {
     /// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
     /// \param [out] pAsset_Root - reference to root asset where data will be stored.
     void Read(Value &pJSON_Object, Asset &pAsset_Root);
-};
-
-struct CustomExtension : public Object {
-    //
-    // A struct containing custom extension data added to a glTF2 file
-    // Has to contain Object, Array, String, Double, Uint64, and Int64 at a minimum
-    // String, Double, Uint64, and Int64 are stored in the Nullables
-    // Object and Array are stored in the std::vector
-    //
-
-    Nullable<std::string> mStringValue;
-    Nullable<double> mDoubleValue;
-    Nullable<uint64_t> mUint64Value;
-    Nullable<int64_t> mInt64Value;
-    Nullable<bool> mBoolValue;
-
-    // std::vector<CustomExtension> handles both Object and Array
-    Nullable<std::vector<CustomExtension>> mValues;
-
-    operator bool() const {
-        return Size() != 0;
-    }
-
-    size_t Size() const {
-        if (mValues.isPresent) {
-            return mValues.value.size();
-        } else if (mStringValue.isPresent || mDoubleValue.isPresent || mUint64Value.isPresent || mInt64Value.isPresent || mBoolValue.isPresent) {
-            return 1;
-        }
-        return 0;
-    }
-
-    CustomExtension() = default;
-
-    CustomExtension(const CustomExtension &other)
-        : Object(other)
-        , mStringValue(other.mStringValue)
-        , mDoubleValue(other.mDoubleValue)
-        , mUint64Value(other.mUint64Value)
-        , mInt64Value(other.mInt64Value)
-        , mBoolValue(other.mBoolValue)
-        , mValues(other.mValues)
-    {
-    }
 };
 
 struct Node : public Object {
@@ -878,8 +904,6 @@ struct Node : public Object {
     std::string jointName; //!< Name used when this node is a joint in a skin.
 
     Ref<Node> parent; //!< This is not part of the glTF specification. Used as a helper.
-
-    CustomExtension extensions;
 
     Node() {}
     void Read(Value &obj, Asset &r);
@@ -980,7 +1004,9 @@ public:
     virtual void AttachToDocument(Document &doc) = 0;
     virtual void DetachFromDocument() = 0;
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
     virtual void WriteObjects(AssetWriter &writer) = 0;
+#endif
 };
 
 template <class T>
@@ -1013,7 +1039,9 @@ class LazyDict : public LazyDictBase {
     void AttachToDocument(Document &doc);
     void DetachFromDocument();
 
+#if !defined(ASSIMP_BUILD_NO_EXPORT)
     void WriteObjects(AssetWriter &writer) { WriteLazyDict<T>(*this, writer); }
+#endif
 
     Ref<T> Add(T *obj);
 
@@ -1050,7 +1078,7 @@ struct AssetMetadata {
     void Read(Document &doc);
 
     AssetMetadata() :
-            version("") {}
+            version() {}
 };
 
 //
@@ -1096,11 +1124,14 @@ public:
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
         bool KHR_draco_mesh_compression;
+        bool FB_ngon_encoding;
+        bool KHR_texture_basisu;
     } extensionsUsed;
 
     //! Keeps info about the required extensions
     struct RequiredExtensions {
         bool KHR_draco_mesh_compression;
+        bool KHR_texture_basisu;
     } extensionsRequired;
 
     AssetMetadata asset;
@@ -1164,7 +1195,7 @@ private:
     void ReadExtensionsUsed(Document &doc);
     void ReadExtensionsRequired(Document &doc);
 
-    IOStream *OpenFile(std::string path, const char *mode, bool absolute = false);
+    IOStream *OpenFile(const std::string &path, const char *mode, bool absolute = false);
 };
 
 inline std::string getContextForErrorMessages(const std::string &id, const std::string &name) {

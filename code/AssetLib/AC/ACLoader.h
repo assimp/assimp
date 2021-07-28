@@ -116,16 +116,16 @@ public:
             Mask = 0xf,
         };
 
-        inline const uint8_t GetType() const { return (flags & Mask); }
+        inline uint8_t GetType() const { return (flags & Mask); }
     };
 
     // Represents an AC3D object
     struct Object {
         Object() :
                 type(World),
-                name(""),
+                name(),
                 children(),
-                texture(""),
+                texture(),
                 texRepeat(1.f, 1.f),
                 texOffset(0.0f, 0.0f),
                 rotation(),

@@ -556,7 +556,7 @@ void ObjFileParser::getMaterialDesc() {
             // This may be the case if the material library is missing. We don't want to lose all
             // materials if that happens, so create a new named material instead of discarding it
             // completely.
-            ASSIMP_LOG_ERROR("OBJ: failed to locate material " + strName + ", creating new material");
+            ASSIMP_LOG_ERROR("OBJ: failed to locate material ", strName, ", creating new material");
             m_pModel->m_pCurrentMaterial = new ObjFile::Material();
             m_pModel->m_pCurrentMaterial->MaterialName.Set(strName);
             m_pModel->m_MaterialLib.push_back(strName);
@@ -620,12 +620,12 @@ void ObjFileParser::getMaterialLib() {
 
     IOStream *pFile = m_pIO->Open(absName);
     if (nullptr == pFile) {
-        ASSIMP_LOG_ERROR("OBJ: Unable to locate material file " + strMatName);
+        ASSIMP_LOG_ERROR("OBJ: Unable to locate material file ", strMatName);
         std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
-        ASSIMP_LOG_INFO("OBJ: Opening fallback material file " + strMatFallbackName);
+        ASSIMP_LOG_INFO("OBJ: Opening fallback material file ", strMatFallbackName);
         pFile = m_pIO->Open(strMatFallbackName);
         if (!pFile) {
-            ASSIMP_LOG_ERROR("OBJ: Unable to locate fallback material file " + strMatFallbackName);
+            ASSIMP_LOG_ERROR("OBJ: Unable to locate fallback material file ", strMatFallbackName);
             m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             return;
         }
@@ -660,7 +660,7 @@ void ObjFileParser::getNewMaterial() {
     std::map<std::string, ObjFile::Material *>::iterator it = m_pModel->m_MaterialMap.find(strMat);
     if (it == m_pModel->m_MaterialMap.end()) {
         // Show a warning, if material was not found
-        ASSIMP_LOG_WARN("OBJ: Unsupported material requested: " + strMat);
+        ASSIMP_LOG_WARN("OBJ: Unsupported material requested: ", strMat);
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
     } else {
         // Set new material

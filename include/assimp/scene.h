@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -397,22 +395,35 @@ struct aiScene
 
     //! Returns an embedded texture
     const aiTexture* GetEmbeddedTexture(const char* filename) const {
+        return GetEmbeddedTextureAndIndex(filename).first;
+    }
+
+    //! Returns an embedded texture and its index
+    std::pair<const aiTexture*, int> GetEmbeddedTextureAndIndex(const char* filename) const {
+        if(nullptr==filename) {
+            return std::make_pair(nullptr, -1);
+        }
         // lookup using texture ID (if referenced like: "*1", "*2", etc.)
         if ('*' == *filename) {
             int index = std::atoi(filename + 1);
-            if (0 > index || mNumTextures <= static_cast<unsigned>(index))
-                return nullptr;
-            return mTextures[index];
+            if (0 > index || mNumTextures <= static_cast<unsigned>(index)) {
+                return std::make_pair(nullptr, -1);
+            }
+            return std::make_pair(mTextures[index], index);
         }
         // lookup using filename
         const char* shortFilename = GetShortFilename(filename);
+        if (nullptr == shortFilename) {
+            return std::make_pair(nullptr, -1);
+        }
+
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());
             if (strcmp(shortTextureFilename, shortFilename) == 0) {
-                return mTextures[i];
+                return std::make_pair(mTextures[i], i);
             }
         }
-        return nullptr;
+        return std::make_pair(nullptr, -1);
     }
 #endif // __cplusplus
 

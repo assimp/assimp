@@ -62,12 +62,14 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     // Check if stored data are supported.
     if (!Composition.empty()) {
         throw DeadlyImportError("IME. GetColor for composition");
-    } else if (Color->Composed) {
-        throw DeadlyImportError("IME. GetColor, composed color");
-    } else {
-        tcol = Color->Color;
     }
 
+    if (Color->Composed) {
+        throw DeadlyImportError("IME. GetColor, composed color");
+    }
+
+    tcol = Color->Color;
+    
     // Check if default color must be used
     if ((tcol.r == 0) && (tcol.g == 0) && (tcol.b == 0) && (tcol.a == 0)) {
         tcol.r = 0.5f;
@@ -79,13 +81,13 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     return tcol;
 }
 
-void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElement, std::vector<aiVector3D> &pVertexCoordinateArray,
+void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &nodeElement, std::vector<aiVector3D> &vertexCoordinateArray,
         std::vector<AMFColor *> &pVertexColorArray) const {
     AMFVertices  *vn = nullptr;
     size_t col_idx;
 
     // All data stored in "vertices", search for it.
-    for (AMFNodeElementBase *ne_child : pNodeElement.Child) {
+    for (AMFNodeElementBase *ne_child : nodeElement.Child) {
         if (ne_child->Type == AMFNodeElementBase::ENET_Vertices) {
             vn = (AMFVertices*)ne_child;
         }
@@ -97,7 +99,7 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElem
     }
 
     // all coordinates stored as child and we need to reserve space for future push_back's.
-    pVertexCoordinateArray.reserve(vn->Child.size()); 
+    vertexCoordinateArray.reserve(vn->Child.size()); 
 
     // colors count equal vertices count.
     pVertexColorArray.resize(vn->Child.size()); 
@@ -112,7 +114,7 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &pNodeElem
 
             for (AMFNodeElementBase *vtx : vn_child->Child) {
                 if (vtx->Type == AMFNodeElementBase::ENET_Coordinates) {
-                    pVertexCoordinateArray.push_back(((AMFCoordinates *)vtx)->Coordinate);
+                    vertexCoordinateArray.push_back(((AMFCoordinates *)vtx)->Coordinate);
                     continue;
                 }
 
@@ -426,10 +428,10 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
 
                     if (pBiggerThan != nullptr) {
                         bool found = false;
-
+                        const size_t biggerThan = *pBiggerThan;
                         for (const SComplexFace &face : pFaceList) {
                             for (size_t idx_vert = 0; idx_vert < face.Face.mNumIndices; idx_vert++) {
-                                if (face.Face.mIndices[idx_vert] > *pBiggerThan) {
+                                if (face.Face.mIndices[idx_vert] > biggerThan) {
                                     rv = face.Face.mIndices[idx_vert];
                                     found = true;
                                     break;

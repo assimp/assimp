@@ -215,7 +215,12 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints, ai
 void MS3DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("MS3D: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // CanRead() should have done this already
     char head[10];
@@ -382,7 +387,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 }
 
                 const std::string& s = std::string(reinterpret_cast<char*>(stream.GetPtr()),len);
-                ASSIMP_LOG_DEBUG_F("MS3D: Model comment: ", s);
+                ASSIMP_LOG_DEBUG("MS3D: Model comment: ", s);
             }
 
             if(stream.GetRemainingSize() > 4 && inrange((stream >> subversion,subversion),1u,3u)) {
@@ -500,7 +505,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
             }
 
-            TempTriangle& t = triangles[g.triangles[i]];
+            TempTriangle& t = triangles[g.triangles[j]];
             f.mIndices = new unsigned int[f.mNumIndices=3];
 
             for (unsigned int k = 0; k < 3; ++k,++n) {
@@ -508,7 +513,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                     throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
                 }
 
-                const TempVertex& v = vertices[t.indices[i]];
+                const TempVertex& v = vertices[t.indices[k]];
                 for(unsigned int a = 0; a < 4; ++a) {
                     if (v.bone_id[a] != UINT_MAX) {
                         if (v.bone_id[a] >= joints.size()) {
@@ -524,9 +529,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 // collect vertex components
                 m->mVertices[n] = v.pos;
 
-                m->mNormals[n] = t.normals[i];
-                m->mTextureCoords[0][n] = aiVector3D(t.uv[i].x,1.f-t.uv[i].y,0.0);
-                f.mIndices[i] = n;
+                m->mNormals[n] = t.normals[k];
+                m->mTextureCoords[0][n] = aiVector3D(t.uv[k].x,1.f-t.uv[k].y,0.0);
+                f.mIndices[k] = n;
             }
         }
 

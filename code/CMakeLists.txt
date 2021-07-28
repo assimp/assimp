@@ -298,7 +298,6 @@ SET(ASSIMP_EXPORTERS_DISABLED "") # disabled exporters list (used to print)
 
 ADD_ASSIMP_IMPORTER( AMF
   AssetLib/AMF/AMFImporter.hpp
-  AssetLib/AMF/AMFImporter_Macro.hpp
   AssetLib/AMF/AMFImporter_Node.hpp
   AssetLib/AMF/AMFImporter.cpp
   AssetLib/AMF/AMFImporter_Geometry.cpp
@@ -874,6 +873,7 @@ ELSE()
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
   )
+  INCLUDE_DIRECTORIES("../contrib/pugixml/src")
   SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
@@ -1034,14 +1034,24 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
-  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
-  INCLUDE_DIRECTORIES( "../contrib" )
-  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
-  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
     ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
   endif()
+ENDIF()
+
+# stb
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(stb)
+  find_package(stb CONFIG REQUIRED)
+ELSE()
+  SET( stb_SRCS
+    ../contrib/stb/stb_image.h
+  )
+  INCLUDE_DIRECTORIES("../contrib")
+  SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
 ENDIF()
 
 # VC2010 fixes
@@ -1102,6 +1112,7 @@ SET( assimp_src
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
   ${Pugixml_SRCS}
+  ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1138,6 +1149,9 @@ ELSE()
   TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
 ENDIF()
 
+# adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
+TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
+
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
@@ -1156,8 +1170,9 @@ IF(ASSIMP_HUNTER_ENABLED)
       utf8cpp
       zip::zip
       pugixml
+      stb::stb
   )
-  
+
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
   endif()

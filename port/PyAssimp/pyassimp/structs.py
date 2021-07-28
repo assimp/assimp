@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from ctypes import POINTER, c_void_p, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte, c_size_t, c_uint32
+from ctypes import POINTER, c_void_p, c_uint, c_char, c_float, Structure, c_double, c_ubyte, c_size_t, c_uint32
 
 
 class Vector2D(Structure):
@@ -1121,7 +1121,7 @@ class Scene(Structure):
             ("mMetadata", POINTER(Metadata)),
 
             # Internal data, do not touch
-            ("mPrivate", c_char_p),
+            ("mPrivate", POINTER(c_char)),
         ]
 
 assimp_structs_as_tuple = (Matrix4x4,

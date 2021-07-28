@@ -8,10 +8,10 @@ A library to import and export various 3d-model-formats including scene-post-pro
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Average time to resolve an issue")
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5be56faac64f46fc941ac890fb4febef)](https://www.codacy.com/app/kimkulling/assimp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/assimp/assimp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/assimp/assimp/alerts/)
 <br>
 
@@ -39,10 +39,10 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)
 * [Python](port/PyAssimp/README.md)
-* [.NET](https://github.com/assimp/assimp-net)
+* [.NET](https://bitbucket.org/Starnick/assimpnet/src/master/)
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
-* [Unity 3d Plugin](https://www.assetstore.unity3d.com/en/#!/content/91777)
+* [Unity 3d Plugin](https://ricardoreis.net/trilib-2/)
 * [JVM](https://github.com/kotlin-graphics/assimp) Full jvm port (current [status](https://github.com/kotlin-graphics/assimp/wiki/Status))
 * [HAXE-Port](https://github.com/longde123/assimp-haxe) The Assimp-HAXE-port.
 * [Rust](https://github.com/jkvargas/russimp)
@@ -66,18 +66,15 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 
 The source code is organized in the following way:
 
-	code/Common		The base implementation for importers and the infrastructure
-	code/PostProcessing	The post-processing steps
-	code/<FormatName>	Implementation for import and export for the format
+	code/Common			The base implementation for importers and the infrastructure
+	code/PostProcessing		The post-processing steps
+	code/AssetLib/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###
 For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
 (CHMs for Windows are included in some release packages and should be located right here in the root folder).
 
 If the docs don't solve your problem, ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
-
-For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
-  [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)
 
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
@@ -102,9 +99,6 @@ Become a financial contributor and help us sustain our community. [[Contribute](
 #### Individuals
 
 <a href="https://opencollective.com/assimp"><img src="https://opencollective.com/assimp/individuals.svg?width=890"></a>
-
-Monthly donations via Patreon:
-<br>[![Patreon](https://cloud.githubusercontent.com/assets/8225057/5990484/70413560-a9ab-11e4-8942-1a63607c0b00.png)](http://www.patreon.com/assimp)
 
 
 #### Organizations

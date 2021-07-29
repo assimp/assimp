@@ -365,7 +365,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
     EXPECT_EQ(bumpMapAmt, 0.75f);
-    
+
     aiColor4D emitColor;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
     EXPECT_EQ(emitColor, aiColor4D(1, 1, 0, 1));
@@ -418,7 +418,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
     EXPECT_EQ(bumpMapAmt, 0.66f);
-    
+
     aiColor4D emitColor;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
     EXPECT_EQ(emitColor, aiColor4D(1, 0, 1, 1));

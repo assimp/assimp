@@ -110,7 +110,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 	// we need to split this mesh into sub meshes. Estimate submesh size
 	const unsigned int sub_meshes = (in_mesh->mNumVertices / LIMIT) + 1;
 
-	// create a std::vector<unsigned int> to remember which vertices have already 
+	// create a std::vector<unsigned int> to remember which vertices have already
 	// been copied and to which position (i.e. output index)
 	std::vector<unsigned int> was_copied_to;
 	was_copied_to.resize(in_mesh->mNumVertices,WAS_NOT_COPIED);
@@ -125,7 +125,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 	while (true) {
 		const unsigned int out_vertex_index = LIMIT;
 
-		aiMesh* out_mesh = new aiMesh();			
+		aiMesh* out_mesh = new aiMesh();
 		out_mesh->mNumVertices = 0;
 		out_mesh->mMaterialIndex = in_mesh->mMaterialIndex;
 
@@ -179,7 +179,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 
 				// check whether we do already have this vertex
 				if (WAS_NOT_COPIED == was_copied_to[index])	{
-					iNeed++; 
+					iNeed++;
 				}
 			}
 			if (out_mesh->mNumVertices + iNeed > out_vertex_index)	{
@@ -240,7 +240,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 						out_mesh->mTextureCoords[c][out_mesh->mNumVertices] = in_mesh->mTextureCoords[c][index];
 					}
 				}
-				// vertex colors 
+				// vertex colors
 				for (unsigned int c = 0;  c < AI_MAX_NUMBER_OF_COLOR_SETS;++c) {
 					if (in_mesh->HasVertexColors( c)) {
 						out_mesh->mColors[c][out_mesh->mNumVertices] = in_mesh->mColors[c][index];

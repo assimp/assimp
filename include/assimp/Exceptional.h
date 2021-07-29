@@ -59,7 +59,7 @@ using std::runtime_error;
 class ASSIMP_API DeadlyErrorBase : public runtime_error {
 protected:
     DeadlyErrorBase(Assimp::Formatter::format f);
-    
+
     template<typename... T, typename U>
     DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args) :
             DeadlyErrorBase(std::move(f << std::forward<U>(u)), std::forward<T>(args)...) {}

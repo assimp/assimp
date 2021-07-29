@@ -579,7 +579,7 @@ void KillGLWindow()			// Properly Kill The Window
 		if (!DestroyWindow(g_hWnd)) // Are We Able To Destroy The Window
 			MessageBox(nullptr, TEXT("Could Not Release hWnd."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		g_hWnd = nullptr;
-	} 
+	}
 
 	if (g_hInstance)
 	{
@@ -727,7 +727,7 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		return FALSE;
 	}
 
-	if (nullptr == (hRC=wglCreateContext(hDC))) 
+	if (nullptr == (hRC=wglCreateContext(hDC)))
 	{
 		abortGLInit("Can't Create A GL Rendering Context.");
 		return FALSE;

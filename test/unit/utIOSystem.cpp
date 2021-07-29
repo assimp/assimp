@@ -50,12 +50,12 @@ using namespace Assimp;
 
 class IOSystemTest : public ::testing::Test {
 public:
-    virtual void SetUp() { 
-        pImp = new TestIOSystem(); 
+    virtual void SetUp() {
+        pImp = new TestIOSystem();
     }
-    
-    virtual void TearDown() { 
-        delete pImp; 
+
+    virtual void TearDown() {
+        delete pImp;
     }
 
 protected:

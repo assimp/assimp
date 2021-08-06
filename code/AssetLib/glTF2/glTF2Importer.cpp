@@ -992,8 +992,8 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
         metadata->Add(extension.name.c_str(), extension.mBoolValue.value);
     } else if (extension.mValues.isPresent) {
         aiMetadata val;
-        for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
-            ParseExtensions(&val, extension.mValues.value[i]);
+        for (auto const & subExtension : extension.mValues.value) {
+            ParseExtensions(&val, subExtension);
         }
         metadata->Add(extension.name.c_str(), val);
     }
@@ -1001,8 +1001,8 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
 
 void ParseExtras(aiMetadata *metadata, const CustomExtension &extension) {
     if (extension.mValues.isPresent) {
-        for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
-            ParseExtensions(metadata, extension.mValues.value[i]);
+        for (auto const & subExtension : extension.mValues.value) {
+            ParseExtensions(metadata, subExtension);
         }
     }
 }

@@ -667,9 +667,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
                 // convert to lower case for easier comparison
                 for ( unsigned int c = 0; c < sz.length(); ++c ) {
-                    if ( isalpha( (unsigned char) sz[ c ] ) ) {
-                        sz[ c ] = (char) tolower( (unsigned char) sz[ c ] );
-                    }
+                    sz[ c ] = (char) tolower( (unsigned char) sz[ c ] );
                 }
 
                 // Place texture filename property under the corresponding name

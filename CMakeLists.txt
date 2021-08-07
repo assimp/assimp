@@ -55,6 +55,10 @@ ENDIF()
 
 PROJECT( Assimp VERSION 5.0.1 )
 
+if (POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif ()
+
 # All supported options ###############################################
 
 OPTION( BUILD_SHARED_LIBS

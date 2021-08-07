@@ -59,7 +59,6 @@ ENDIF()
 
 PROJECT( Assimp VERSION 5.0.1 )
 
-
 # All supported options ###############################################
 
 OPTION( BUILD_SHARED_LIBS

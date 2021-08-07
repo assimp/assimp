@@ -40,6 +40,10 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
+if (POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif ()
+
 # Toggles the use of the hunter package manager
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
@@ -55,9 +59,6 @@ ENDIF()
 
 PROJECT( Assimp VERSION 5.0.1 )
 
-if (POLICY CMP0077)
-    cmake_policy(SET CMP0077 NEW)
-endif ()
 
 # All supported options ###############################################
 

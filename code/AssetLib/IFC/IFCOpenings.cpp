@@ -911,14 +911,14 @@ size_t CloseWindows(ContourVector& contours,
             // compare base poly normal and contour normal to detect if we need to reverse the face winding
 			if(curmesh.mVertcnt.size() > 0) {
 				IfcVector3 basePolyNormal = TempMesh::ComputePolygonNormal(curmesh.mVerts.data(), curmesh.mVertcnt.front());
-				
+
 				std::vector<IfcVector3> worldSpaceContourVtx(it->contour.size());
-				
+
 				for(size_t a = 0; a < it->contour.size(); ++a)
 					worldSpaceContourVtx[a] = minv * IfcVector3(it->contour[a].x, it->contour[a].y, 0.0);
-				
+
 				IfcVector3 contourNormal = TempMesh::ComputePolygonNormal(worldSpaceContourVtx.data(), worldSpaceContourVtx.size());
-				
+
 				reverseCountourFaces = (contourNormal * basePolyNormal) > 0.0;
 			}
 

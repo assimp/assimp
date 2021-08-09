@@ -19,7 +19,7 @@ Viewer
 Troubleshooting
 ===============
 
-1. Missing d3dx9_42.dll? 
+1. Missing d3dx9_42.dll?
 Install the latest DirectX runtime or grab the file from somewhere (that's evil but mostly fine).
 
 2. Application configuration not correct / missing msv*** DLLs?

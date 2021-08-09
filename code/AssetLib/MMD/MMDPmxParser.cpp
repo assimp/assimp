@@ -102,7 +102,7 @@ namespace pmx
 			const unsigned int targetSize = size * 3; // enough to encode
 			char *targetStart = new char[targetSize];
             std::memset(targetStart, 0, targetSize * sizeof(char));
-            
+
             utf8::utf16to8( sourceStart, sourceStart + size/2, targetStart );
 
 			std::string result(targetStart);

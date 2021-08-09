@@ -635,7 +635,7 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, 
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source,
         const char* const* classnames, size_t count) const
 {
     return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);

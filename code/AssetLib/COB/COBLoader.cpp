@@ -884,7 +884,7 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
         std::string type;
         type += reader->GetI1();
         type += reader->GetI1();
-        type += reader->GetI1(); 
+        type += reader->GetI1();
         type += reader->GetI1();
 
         ChunkInfo nfo;

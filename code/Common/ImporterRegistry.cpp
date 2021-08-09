@@ -205,8 +205,8 @@ corresponding preprocessor flag to selectively disable formats.
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-void GetImporterInstanceList(std::vector<BaseImporter *> &out) {    
-    
+void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
+
     // Some importers may be unimplemented or otherwise unsuitable for general use
     // in their current state. Devs can set ASSIMP_ENABLE_DEV_IMPORTERS in their
     // local environment to enable them, otherwise they're left out of the registry.

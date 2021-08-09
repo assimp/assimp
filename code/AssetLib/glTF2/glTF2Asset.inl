@@ -410,14 +410,14 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
     // Not same size, convert
     switch (componentBytes) {
-        case sizeof(uint32_t): 
-            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint32_t):
+            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh);
             break;
-        case sizeof(uint16_t): 
-            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint16_t):
+            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh);
             break;
-        case sizeof(uint8_t): 
-            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint8_t):
+            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh);
             break;
         default:
             ai_assert(false);
@@ -460,23 +460,23 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch (accessor.componentType) {
-        case ComponentType_BYTE: 
-            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_BYTE:
+            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         case ComponentType_UNSIGNED_BYTE:
-            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         case ComponentType_SHORT:
             GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_UNSIGNED_SHORT: 
-            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_UNSIGNED_SHORT:
+            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_UNSIGNED_INT: 
-            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_UNSIGNED_INT:
+            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_FLOAT: 
-            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_FLOAT:
+            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         default:
             ai_assert(false);
@@ -840,7 +840,7 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
     const size_t offset = this->byteLength;
-    
+
     // Force alignment to 4 bits
     const size_t paddedLength = (length + 3) & ~3;
     Grow(paddedLength);

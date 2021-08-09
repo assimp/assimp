@@ -22,13 +22,13 @@ struct aiNode;
 
 // ---------------------------------------------------------------------------
 /** Splits meshes of unique vertices into meshes with no more vertices than
- *  a given, configurable threshold value. 
+ *  a given, configurable threshold value.
  */
-class MeshSplitter 
+class MeshSplitter
 {
 
 public:
-	
+
 	void SetLimit(unsigned int l) {
 		LIMIT = l;
 	}

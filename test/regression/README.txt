@@ -8,7 +8,7 @@ against a regression database provided with assimp (db.zip). A few failures
 are totally fine (see sections 7+). You need to worry if a huge
 majority of all files in a particular format (or post-processing configuration)
 fails as this might be a sign of a recent regression in assimp's codebase or
-gross incompatibility with your system or compiler. 
+gross incompatibility with your system or compiler.
 
 2) What do I need?
 ---------------------------------------------------------------------------------
@@ -53,8 +53,8 @@ Edit the reg_settings.py file and add the path to your repository to
 The regression database includes mini dumps of the aiScene data structure, i.e.
 the scene hierarchy plus the sizes of all data arrays MUST match. Floating-point
 data buffers, such as vertex positions are handled less strictly: min, max and
-average values are stored with low precision. This takes hardware- or 
-compiler-specific differences in floating-point computations into account. 
+average values are stored with low precision. This takes hardware- or
+compiler-specific differences in floating-point computations into account.
 Generally, almost all significant regressions will be detected while the
 number of false positives is relatively low.
 

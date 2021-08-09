@@ -1,9 +1,9 @@
 From kwxport
 http://www.kwxport.org/
 
->> 
-The kW Xport plug-in source is released under the MIT license. 
-Basically, it means "feel free to use it; credit the source; don't sue me 
+>>
+The kW Xport plug-in source is released under the MIT license.
+Basically, it means "feel free to use it; credit the source; don't sue me
 if something goes wrong."
 >>
 

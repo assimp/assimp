@@ -60,7 +60,7 @@ namespace FBX {
 }
 
 class FBX::Node {
-public: 
+public:
     // TODO: accessors
     std::string name; // node name
     std::vector<FBX::FBXExportProperty> properties; // node properties

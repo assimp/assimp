@@ -77,7 +77,7 @@ class COBImporter : public BaseImporter
 public:
     COBImporter();
     ~COBImporter();
-    
+
     // --------------------
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
         bool checkSig) const;

@@ -7,8 +7,8 @@ Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -144,7 +144,7 @@ enum AssimpCmdError {
  *  @param params Command line parameters to be processed
  *  @param num NUmber of params
  *  @return An #AssimpCmdError value. */
-int ProcessStandardArguments(ImportData& fill, 
+int ProcessStandardArguments(ImportData& fill,
 	const char* const* params,
 	unsigned int num);
 
@@ -153,7 +153,7 @@ int ProcessStandardArguments(ImportData& fill,
  *  @param imp Import configuration to be used
  *  @param path Path to the file to be read */
 const aiScene* ImportModel(
-	const ImportData& imp, 
+	const ImportData& imp,
 	const std::string& path);
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -163,8 +163,8 @@ const aiScene* ImportModel(
  *  @param imp Import configuration to be used
  *  @param path Path to the file to be written
  *  @param format Format id*/
-bool ExportModel(const aiScene* pOut, 
-	const ImportData& imp, 
+bool ExportModel(const aiScene* pOut,
+	const ImportData& imp,
 	const std::string& path,
 	const char* pID);
 
@@ -176,7 +176,7 @@ bool ExportModel(const aiScene* pOut,
  *  @param Number of params
  *  @return An #AssimpCmdError value.*/
 int Assimp_Dump (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 /// \enum AssimpCmdExportError
@@ -186,7 +186,7 @@ enum AssimpCmdExportError {
 	FailedToExportModel,
 
 	// Add new error codes here...
-	
+
 	LastAssimpCmdExportError, // Must be last.
 };
 
@@ -196,7 +196,7 @@ enum AssimpCmdExportError {
  *  @param Number of params
  *  @return Either an #AssimpCmdError or #AssimpCmdExportError value. */
 int Assimp_Export (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 /// \enum AssimpCmdExtractError
@@ -217,7 +217,7 @@ enum AssimpCmdExtractError {
  *  @param Number of params
  *  @return Either an #AssimpCmdError or #AssimpCmdExtractError value. */
 int Assimp_Extract (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 /// \enum AssimpCmdCompareDumpError
@@ -238,7 +238,7 @@ enum AssimpCmdCompareDumpError {
  *  @param Number of params
  *  @return Either an #AssimpCmdError or #AssimpCmdCompareDumpError. */
 int Assimp_CompareDump (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 /// \enum AssimpCmdInfoError
@@ -257,7 +257,7 @@ enum AssimpCmdInfoError {
  *  @param Number of params
  *  @return Either an #AssimpCmdError or #AssimpCmdInfoError value. */
 int Assimp_Info (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 // ------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ int Assimp_Info (
  *  @param Number of params
  *  @return An #AssimpCmdError value. */
 int Assimp_TestBatchLoad (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num);
 
 

@@ -69,7 +69,7 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     if (exporter.mOutput.fail()) {
         throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
     }
-    
+
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if (outfile == nullptr) {
@@ -88,7 +88,7 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
     if (exporter.mOutput.fail()) {
         throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
     }
-    
+
     // we're still here - export successfully completed. Write the file.
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wb"));
     if (outfile == nullptr) {
@@ -139,9 +139,9 @@ STLExporter::STLExporter(const char* _filename, const aiScene* pScene, bool expo
         if (exportPointClouds) {
             WritePointCloud("Assimp_Pointcloud", pScene );
             return;
-        } 
+        }
 
-        // Export the assimp mesh 
+        // Export the assimp mesh
         const std::string name = "AssimpScene";
         mOutput << SolidToken << " " << name << endl;
         for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {

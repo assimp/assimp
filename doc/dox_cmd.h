@@ -12,7 +12,7 @@
 
 @section intro Introduction
 
-This document describes the usage of assimp's command line tools. 
+This document describes the usage of assimp's command line tools.
 This is *not* the SDK reference and programming-related stuff is not covered here.
 <br><br>
 <b>NOTE</b>: For simplicity, the following sections are written with Windows in mind. However
@@ -29,7 +29,7 @@ assimp [command] [parameters]
 The following commands are available:
 
 <table border="1">
- 
+
   <tr>
     <td><b>@link version version @endlink</b></td>
     <td>Retrieve the current version of assimp</td>
@@ -184,7 +184,7 @@ Generate a text or binary dump of a model. This is the core component of Assimp'
 regression test suite but it could also be useful for other developers to quickly
 examine the contents of a model. Note that text dumps are not intended to be used as
 intermediate format, Assimp is not able to read them again, nor is the file format
-stable or well-defined. It may change with every revision without notice. 
+stable or well-defined. It may change with every revision without notice.
 Binary dumps (*.assbin) are backwards- and forwards-compatible.
 
 <h3>Syntax:</h3>
@@ -199,7 +199,7 @@ assimp dump <model> [<out>] [-b] [-s] [common parameters]
 <p>
 <tt>
 model<br></tt><br>
-Required. Relative or absolute path to the input model. 
+Required. Relative or absolute path to the input model.
 </p>
 <p>
 <tt>
@@ -220,7 +220,7 @@ The long form of this parameter is <tt>--binary</tt>.
 </tt><br>
 Optional. If this switch is specified, the dump is shortened to include only
 min/max values for all vertex components and animation channels. The resulting
-file is much smaller, but the original model can't be reconstructed from it. This is 
+file is much smaller, but the original model can't be reconstructed from it. This is
 used by Assimp's regression test suite, comparing those minidumps provides
 a fast way to verify whether a loader works correctly or not.
 The long form of this parameter is <tt>--short</tt>.
@@ -229,7 +229,7 @@ The long form of this parameter is <tt>--short</tt>.
 <p>
 <tt>
 common parameters<br></tt><br>
-Optional. Import configuration & postprocessing. 
+Optional. Import configuration & postprocessing.
 See the @link common common parameters page @endlink for more information.
 </p>
 
@@ -248,7 +248,7 @@ The log output is included with the dump.
 
 @code
 assimp dump files\*.*
-assimp dump files\*.* 
+assimp dump files\*.*
 @endcode
 
 Dumps all loadable model files in the 'files' subdir. The output dumps are named
@@ -275,14 +275,14 @@ assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]
 <p>
 <tt>
 model<br></tt><br>
-Required. Relative or absolute path to the input model. 
+Required. Relative or absolute path to the input model.
 </p>
 <p>
 <tt>
 out<br></tt><br>
 Optional. Relative or absolute path to write the output images to. If the file name is
 omitted the output images are named <tt><model-filename></tt><br>
-The suffix <tt>_img&lt;n&gt;</tt> is appended to the file name if the -s switch is not specified 
+The suffix <tt>_img&lt;n&gt;</tt> is appended to the file name if the -s switch is not specified
 (where <tt>&lt;n&gt;</tt> is the zero-based index of the texture in the model file).<br>
 
 The output file format is determined from the given file extension. Supported
@@ -296,7 +296,7 @@ written in their native file format (e.g. jpg).
 <p>
 <tt>-t&lt;n&gt;<br>
 </tt><br>
-Optional. Specifies the (zero-based) index of the embedded texture to be extracted from 
+Optional. Specifies the (zero-based) index of the embedded texture to be extracted from
 the model. If this option is *not* specified all textures found are exported.
 The long form of this parameter is <tt>--texture=&lt;n&gt;</tt>.
 </p>
@@ -348,8 +348,8 @@ imported data structure and writes it to <tt>test_img0.bmp</tt>.
 
 
 @code
-assimp extract files\*.mdl *.bmp 
-assimp extract files\*.mdl *.bmp 
+assimp extract files\*.mdl *.bmp
+assimp extract files\*.mdl *.bmp
 @endcode
 
 Extracts all embedded textures from all loadable .mdl files in the 'files' subdirectory
@@ -361,10 +361,10 @@ and writes them to bitmaps which are named <tt><model-file>_img<image-index>.bmp
 /**
 @page common Common parameters
 
-The parameters described on this page are commonly used by almost every assimp command. They 
+The parameters described on this page are commonly used by almost every assimp command. They
 specify how the library will postprocess the imported data. This is done by several
 configurable pipeline stages, called 'post processing steps'. Below you can find a list
-of all supported steps along with short descriptions of what they're doing. <br><b>Programmers</b>: 
+of all supported steps along with short descriptions of what they're doing. <br><b>Programmers</b>:
 more information can be found in the <tt>aiPostProcess.h</tt> header.
 
 <table border="1">
@@ -376,7 +376,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
   <tr>
     <td><tt>-ptv</tt></td>
     <td><tt>--pretransform-vertices</tt></td>
-	<td>Move all vertices into worldspace and collapse the scene graph. Animation data is lost. 
+	<td>Move all vertices into worldspace and collapse the scene graph. Animation data is lost.
 	This is intended for applications which don't support scenegraph-oriented rendering.</td>
   </tr>
   <tr>
@@ -428,7 +428,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
    <tr>
     <td><tt>-icl</tt></td>
     <td><tt>--improve-cache-locality</tt></td>
-	<td>Improve the cache locality of the vertex buffer by reordering the index buffer 
+	<td>Improve the cache locality of the vertex buffer by reordering the index buffer
 	to achieve a lower ACMR (average post-transform vertex cache miss ratio)</td>
   </tr>
   <tr>
@@ -515,7 +515,7 @@ For convenience some default postprocessing configurations are provided.
 The corresponding command line parameter is <tt>-c&lt;name&gt;</tt> (or <tt>--config=&lt;name&gt;</tt>).
 
 <table border="1">
- 
+
   <tr>
     <th>Name</th>
     <th>Description</th>
@@ -543,7 +543,7 @@ The corresponding command line parameter is <tt>-c&lt;name&gt;</tt> (or <tt>--co
 There are also some common flags to customize Assimp's logging behaviour:
 
 <table border="1">
- 
+
   <tr>
     <th>Name</th>
     <th>Description</th>
@@ -558,7 +558,7 @@ There are also some common flags to customize Assimp's logging behaviour:
   </tr>
     <tr>
     <td><tt>-v</tt> or <tt>--verbose</tt></td>
-    <td>Enables verbose logging. Debug messages will be produced too. This might 
+    <td>Enables verbose logging. Debug messages will be produced too. This might
 	decrease loading performance and result in *very* long logs ... use with caution if you experience strange issues.</td>
   </tr>
  </table>

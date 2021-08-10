@@ -161,7 +161,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #pragma warning(disable : 4251)
   #endif
   /* Force the compiler to inline a function, if possible */
-  #define AI_FORCE_INLINE inline 
+  #define AI_FORCE_INLINE inline
 
   /* Tells the compiler that a function never returns. Used in code analysis
    * to skip dead paths (e.g. after an assertion evaluated to false). */

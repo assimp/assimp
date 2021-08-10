@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** 
+/**
   * @file   anim.h
   * @brief  Defines the data structures in which the imported animations
   *         are returned.
@@ -478,11 +478,11 @@ struct aiAnimation {
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** 
+/**
   * @brief CPP-API: Utility class to simplify interpolations of various data types.
   *
   *  The type of interpolation is chosen automatically depending on the
-  *  types of the arguments. 
+  *  types of the arguments.
   */
 template <typename T>
 struct Interpolator {

@@ -61,7 +61,7 @@ public:
     virtual ~TestIOSystem() {
         // empty
     }
-    
+
     virtual bool Exists( const char* ) const {
         return true;
     }

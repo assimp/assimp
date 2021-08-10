@@ -146,7 +146,7 @@ void ObjFileMtlImporter::load() {
                     ++m_DataIt;
                     ai_real d;
                     getFloatValue(d);
-                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;                    
+                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;

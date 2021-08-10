@@ -692,7 +692,7 @@ TEST_F(utglTF2ImportExport, indexOutOfRange) {
         }
     };
     LogObserver logObserver;
-    
+
     DefaultLogger::get()->attachStream(&logObserver);
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);

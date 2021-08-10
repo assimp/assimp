@@ -153,10 +153,10 @@ void HMPImporter::InternReadFile(const std::string &pFile,
     } else {
         // Print the magic word to the logger
         std::string szBuffer = ai_str_toprintable((const char *)&iMagic, sizeof(iMagic));
-    
+
         delete[] mBuffer;
         mBuffer = nullptr;
-        
+
         // We're definitely unable to load this file
         throw DeadlyImportError("Unknown HMP subformat ", pFile,
                                 ". Magic word (", szBuffer, ") is not known");

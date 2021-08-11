@@ -438,7 +438,7 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent) {
             pc->mTransformation = bone.sAnim.asKeys[0].matrix;
         }
 
-        if (bone.iParent == static_cast<uint32_t>(-1)) { 
+        if (bone.iParent == static_cast<uint32_t>(-1)) {
             bone.mOffsetMatrix = pc->mTransformation;
         } else {
             bone.mOffsetMatrix = asBones[bone.iParent].mOffsetMatrix * pc->mTransformation;

@@ -215,7 +215,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
     }
     else
     {
-        ASSIMP_LOG_INFO("RemoveRedundantMatsProcess finished. Removed ", redundantRemoved, " redundant and ", 
+        ASSIMP_LOG_INFO("RemoveRedundantMatsProcess finished. Removed ", redundantRemoved, " redundant and ",
             unreferencedRemoved, " unused materials.");
     }
 }

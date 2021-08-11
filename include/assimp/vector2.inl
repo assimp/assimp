@@ -190,7 +190,7 @@ aiVector2t<TReal> operator + (const aiVector2t<TReal>& v1, const aiVector2t<TRea
 // ------------------------------------------------------------------------------------------------
 // symmetric subtraction
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator - (const aiVector2t<TReal>& v1, const aiVector2t<TReal>& v2) {
     return aiVector2t<TReal>( v1.x - v2.x, v1.y - v2.y);
 }
@@ -198,7 +198,7 @@ aiVector2t<TReal> operator - (const aiVector2t<TReal>& v1, const aiVector2t<TRea
 // ------------------------------------------------------------------------------------------------
 // scalar product
 template <typename TReal>
-inline 
+inline
 TReal operator * (const aiVector2t<TReal>& v1, const aiVector2t<TReal>& v2) {
     return v1.x*v2.x + v1.y*v2.y;
 }
@@ -206,7 +206,7 @@ TReal operator * (const aiVector2t<TReal>& v1, const aiVector2t<TReal>& v2) {
 // ------------------------------------------------------------------------------------------------
 // scalar multiplication
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator * ( TReal f, const aiVector2t<TReal>& v) {
     return aiVector2t<TReal>( f*v.x, f*v.y);
 }
@@ -214,7 +214,7 @@ aiVector2t<TReal> operator * ( TReal f, const aiVector2t<TReal>& v) {
 // ------------------------------------------------------------------------------------------------
 // and the other way around
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator * ( const aiVector2t<TReal>& v, TReal f) {
     return aiVector2t<TReal>( f*v.x, f*v.y);
 }
@@ -222,7 +222,7 @@ aiVector2t<TReal> operator * ( const aiVector2t<TReal>& v, TReal f) {
 // ------------------------------------------------------------------------------------------------
 // scalar division
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator / ( const aiVector2t<TReal>& v, TReal f) {
     return v * (1/f);
 }
@@ -230,7 +230,7 @@ aiVector2t<TReal> operator / ( const aiVector2t<TReal>& v, TReal f) {
 // ------------------------------------------------------------------------------------------------
 // vector division
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator / ( const aiVector2t<TReal>& v, const aiVector2t<TReal>& v2) {
     return aiVector2t<TReal>(v.x / v2.x,v.y / v2.y);
 }
@@ -238,7 +238,7 @@ aiVector2t<TReal> operator / ( const aiVector2t<TReal>& v, const aiVector2t<TRea
 // ------------------------------------------------------------------------------------------------
 // vector negation
 template <typename TReal>
-inline 
+inline
 aiVector2t<TReal> operator - ( const aiVector2t<TReal>& v) {
     return aiVector2t<TReal>( -v.x, -v.y);
 }

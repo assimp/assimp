@@ -194,8 +194,8 @@ enum aiTextureType {
      */
     aiTextureType_NONE = 0,
 
-    /** LEGACY API MATERIALS 
-     * Legacy refers to materials which 
+    /** LEGACY API MATERIALS
+     * Legacy refers to materials which
      * Were originally implemented in the specifications around 2000.
      * These must never be removed, as most engines support them.
      */
@@ -339,9 +339,9 @@ ASSIMP_API const char *TextureTypeToString(enum aiTextureType in);
 
 // ---------------------------------------------------------------------------
 /** @brief Defines all shading models supported by the library
- * 
+ *
  *  Property: #AI_MATKEY_SHADING_MODEL
- * 
+ *
  *  The list of shading modes has been taken from Blender.
  *  See Blender documentation for more information. The API does
  *  not distinguish between "specular" and "diffuse" shaders (thus the

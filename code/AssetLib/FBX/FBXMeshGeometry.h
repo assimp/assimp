@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-/** 
- *  DOM base class for all kinds of FBX geometry 
+/**
+ *  DOM base class for all kinds of FBX geometry
  */
 class Geometry : public Object
 {
@@ -76,7 +76,7 @@ private:
 typedef std::vector<int> MatIndexArray;
 
 
-/** 
+/**
  *  DOM class for FBX geometry of type "Mesh"
  */
 class MeshGeometry : public Geometry
@@ -84,7 +84,7 @@ class MeshGeometry : public Geometry
 public:
     /** The class constructor */
     MeshGeometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
-    
+
     /** The class destructor */
     virtual ~MeshGeometry();
 

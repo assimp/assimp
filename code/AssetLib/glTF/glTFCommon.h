@@ -196,7 +196,7 @@ inline std::string getCurrentAssetDir(const std::string &pFile) {
     std::string path = pFile;
     int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos == int(std::string::npos)) {
-        return "";
+        return std::string();
     }
 
     return pFile.substr(0, pos + 1);

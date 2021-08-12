@@ -162,7 +162,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
 // ------------------------------------------------------------------------------------------------
 //  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene) {
-    if (0L == pModel) {
+    if (nullptr == pModel) {
         return;
     }
 

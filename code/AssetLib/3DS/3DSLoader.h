@@ -208,6 +208,15 @@ protected:
     */
     void ReplaceDefaultMaterial();
 
+    bool ContainsTextures(unsigned int i) const {
+        return mScene->mMaterials[i].sTexDiffuse.mMapName.length() != 0 ||
+               mScene->mMaterials[i].sTexBump.mMapName.length() != 0 ||
+               mScene->mMaterials[i].sTexOpacity.mMapName.length() != 0 ||
+               mScene->mMaterials[i].sTexEmissive.mMapName.length() != 0 ||
+               mScene->mMaterials[i].sTexSpecular.mMapName.length() != 0 ||
+               mScene->mMaterials[i].sTexShininess.mMapName.length() != 0;
+    }
+
     // -------------------------------------------------------------------
     /** Convert the whole scene
     */

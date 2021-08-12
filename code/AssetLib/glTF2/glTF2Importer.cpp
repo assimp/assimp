@@ -1470,10 +1470,11 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         }
     }
 
-    if (numEmbeddedTexs == 0)
+    if (numEmbeddedTexs == 0) {
         return;
+    }
 
-      ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
+    ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
     std::fill(mScene->mTextures, mScene->mTextures + numEmbeddedTexs, nullptr);

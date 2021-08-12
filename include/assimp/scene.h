@@ -400,7 +400,7 @@ struct aiScene
 
     //! Returns an embedded texture and its index
     std::pair<const aiTexture*, int> GetEmbeddedTextureAndIndex(const char* filename) const {
-        if(nullptr==filename) {
+        if (nullptr==filename) {
             return std::make_pair(nullptr, -1);
         }
         // lookup using texture ID (if referenced like: "*1", "*2", etc.)

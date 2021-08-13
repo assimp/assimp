@@ -1522,7 +1522,7 @@ inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, con
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     Value *curName = FindMember(pJSON_Object, "name");
-    if (nullptr != curName) {
+    if (nullptr != curName && curName->IsString()) {
         name = curName->GetString();
     }
 

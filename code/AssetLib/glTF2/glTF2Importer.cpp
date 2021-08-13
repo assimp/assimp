@@ -1337,8 +1337,8 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         auto& animsampler = anim.samplers[channel.sampler];
-        if (animsampler.input->count != animsampler.output->count) {
-            ASSIMP_LOG_WARN("Animation ", anim.name, ": Sampler input size ", animsampler.input->count, " doesn't match output size ", animsampler.output->count);
+        if (animsampler.input->count > animsampler.output->count) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
         }
 

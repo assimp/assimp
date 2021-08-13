@@ -112,7 +112,7 @@ public:
 	/** @brief  Writes a debug message
      *   @param message Debug message*/
     void verboseDebug(const char* message);
-    
+
     template<typename... T>
     void verboseDebug(T&&... args) {
         verboseDebug(formatMessage(std::forward<T>(args)...).c_str());

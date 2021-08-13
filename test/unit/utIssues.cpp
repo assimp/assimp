@@ -62,7 +62,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     aiScene *scene( TestModelFacttory::createDefaultTestModel( opacity ) );
     Assimp::Importer importer;
     Assimp::Exporter exporter;
-                
+
     std::string path = "dae";
     const aiExportFormatDesc *desc = exporter.GetExportFormatDescription( 0 );
     EXPECT_NE( desc, nullptr );

@@ -63,7 +63,7 @@ namespace DXF {
 }
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief  DXF importer implementation.
  */
 class DXFImporter : public BaseImporter {

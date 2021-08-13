@@ -71,19 +71,19 @@ public:
 };
 
 // ---------------------------------------------------------------------------
-inline 
-Win32DebugLogStream::Win32DebugLogStream(){ 
+inline
+Win32DebugLogStream::Win32DebugLogStream(){
     // empty
 }
 
 // ---------------------------------------------------------------------------
-inline 
+inline
 Win32DebugLogStream::~Win32DebugLogStream(){
     // empty
 }
 
 // ---------------------------------------------------------------------------
-inline 
+inline
 void Win32DebugLogStream::write(const char* message) {
     ::OutputDebugStringA( message);
 }

@@ -137,7 +137,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
             aiMesh* inst = pScene->mMeshes[i];
             hashes[i] = GetMeshHash(inst);
 
-            // Find an appropriate epsilon 
+            // Find an appropriate epsilon
             // to compare position differences against
             float epsilon = ComputePositionEpsilon(inst);
             epsilon *= epsilon;

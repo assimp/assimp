@@ -862,7 +862,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     output_nodes.push_back(std::move(nd));
     return false;
 }
-  
+
 void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     const PropertyTable &props = model.Props();
     DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();
@@ -3572,7 +3572,7 @@ void FBXConverter::ConvertOrphanedEmbeddedTextures() {
                         if (texture->Media() && texture->Media()->ContentLength() > 0) {
                             realTexture = texture;
                         }
-                    }    
+                    }
                 }
             } catch (...) {
                 // do nothing

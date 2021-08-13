@@ -485,7 +485,7 @@ void MD5Importer::LoadMD5MeshFile() {
                     }
 
                     MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
-                    if (weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON) { 
+                    if (weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON) {
                         continue;
                     }
 

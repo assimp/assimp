@@ -829,7 +829,7 @@ unsigned char *_m3dstbi_zlib_compress(unsigned char *data, int data_len, int *ou
 #include <sys/time.h>
 #endif
 
-#if !defined(M3D_NOIMPORTER) 
+#if !defined(M3D_NOIMPORTER)
 /* helper functions for the ASCII parser */
 static char *_m3d_findarg(char *s) {
     while (s && *s && *s != ' ' && *s != '\t' && *s != '\r' && *s != '\n')
@@ -4516,7 +4516,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             }
             if (length) {
                 uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                memcpy( length, &v, sizeof(uint32_t));                
+                memcpy( length, &v, sizeof(uint32_t));
                 len += v;
             }
             out = NULL;
@@ -4548,7 +4548,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     }
                 }
                 uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-                memcpy( length, &v, sizeof(uint32_t));                
+                memcpy( length, &v, sizeof(uint32_t));
                 len += v;
                 out = NULL;
             }

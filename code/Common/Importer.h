@@ -183,7 +183,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Construct a batch loader from a given IO system to be used
-     *  to access external files 
+     *  to access external files
      */
     explicit BatchLoader(IOSystem* pIO, bool validate = false );
 
@@ -197,13 +197,13 @@ public:
      *  @param  enable  True for validation.
      */
     void setValidation( bool enabled );
-    
+
     // -------------------------------------------------------------------
     /** Returns the current validation step.
      *  @return The current validation step.
      */
     bool getValidation() const;
-    
+
     // -------------------------------------------------------------------
     /** Add a new file to the list of files to be loaded.
      *  @param file File to be loaded

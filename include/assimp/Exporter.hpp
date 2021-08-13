@@ -390,7 +390,7 @@ public:
      * @see SetPropertyInteger()
      */
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
-    
+
     bool SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f);
 
     // -------------------------------------------------------------------

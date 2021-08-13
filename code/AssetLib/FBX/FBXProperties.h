@@ -98,7 +98,7 @@ typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPro
 typedef std::fbx_unordered_map<std::string,const Property*>            PropertyMap;
 typedef std::fbx_unordered_map<std::string,const Element*>             LazyPropertyMap;
 
-/** 
+/**
  *  Represents a property table as can be found in the newer FBX files (Properties60, Properties70)
  */
 class PropertyTable {
@@ -130,7 +130,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline 
+inline
 T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
     const Property* const prop = in.Get(name);
     if( nullptr == prop) {
@@ -148,7 +148,7 @@ T PropertyGet(const PropertyTable& in, const std::string& name, const T& default
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline 
+inline
 T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bool useTemplate=false ) {
     const Property* prop = in.Get(name);
     if( nullptr == prop) {

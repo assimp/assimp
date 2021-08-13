@@ -52,9 +52,9 @@ namespace Assimp {
 namespace Blender {
 
 // -------------------------------------------------------------------------------------------
-/** 
+/**
  *  Dummy base class for all blender modifiers. Modifiers are reused between imports, so
- *  they should be stateless and not try to cache model data. 
+ *  they should be stateless and not try to cache model data.
  */
 // -------------------------------------------------------------------------------------------
 class BlenderModifier {
@@ -67,7 +67,7 @@ public:
     }
 
     // --------------------
-    /** 
+    /**
      *  Check if *this* modifier is active, given a ModifierData& block.
      */
     virtual bool IsActive( const ModifierData& /*modin*/) {
@@ -75,10 +75,10 @@ public:
     }
 
     // --------------------
-    /** 
+    /**
      *  Apply the modifier to a given output node. The original data used
      *  to construct the node is given as well. Not called unless IsActive()
-     *  was called and gave positive response. 
+     *  was called and gave positive response.
      */
     virtual void DoIt(aiNode& /*out*/,
         ConversionData& /*conv_data*/,
@@ -92,8 +92,8 @@ public:
 };
 
 // -------------------------------------------------------------------------------------------
-/** 
- *  Manage all known modifiers and instance and apply them if necessary 
+/**
+ *  Manage all known modifiers and instance and apply them if necessary
  */
 // -------------------------------------------------------------------------------------------
 class BlenderModifierShowcase {
@@ -113,8 +113,8 @@ private:
 // MODIFIERS /////////////////////////////////////////////////////////////////////////////////
 
 // -------------------------------------------------------------------------------------------
-/** 
- *  Mirror modifier. Status: implemented. 
+/**
+ *  Mirror modifier. Status: implemented.
  */
 // -------------------------------------------------------------------------------------------
 class BlenderModifier_Mirror : public BlenderModifier {

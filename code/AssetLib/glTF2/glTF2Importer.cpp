@@ -1336,6 +1336,12 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
             continue;
         }
 
+        auto& animsampler = anim.samplers[channel.sampler];
+        if (animsampler.input->count > animsampler.output->count) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
+            continue;
+        }
+
         const unsigned int node_index = channel.target.node.GetIndex();
 
         AnimationSamplers &sampler = samplers[node_index];

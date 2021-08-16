@@ -94,7 +94,7 @@ using XmlAttribute = pugi::xml_attribute;
 ///     }
 /// }
 /// @endcode
-/// @tparam TNodeType 
+/// @tparam TNodeType
 template <class TNodeType>
 class TXmlParser {
 public:
@@ -123,7 +123,7 @@ public:
 
     ///	@brief  Will search for a child-node by its name
     /// @param  name     [in] The name of the child-node.
-    /// @return The node instance or nullptr, if nothing was found.   
+    /// @return The node instance or nullptr, if nothing was found.
     TNodeType *findNode(const std::string &name) {
         if (name.empty()) {
             return nullptr;
@@ -162,12 +162,12 @@ public:
         mData.resize(len + 1);
         memset(&mData[0], '\0', len + 1);
         stream->Read(&mData[0], 1, len);
-        
+
         mDoc = new pugi::xml_document();
         pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
         if (parse_result.status == pugi::status_ok) {
             return true;
-        } 
+        }
 
         ASSIMP_LOG_DEBUG("Error while parse xml.", std::string(parse_result.description()), " @ ", parse_result.offset);
 
@@ -457,7 +457,7 @@ public:
     }
 
 private:
-    XmlNode &mParent; 
+    XmlNode &mParent;
     std::vector<XmlNode> mNodes;
     size_t mIndex;
 };

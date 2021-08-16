@@ -83,7 +83,7 @@ namespace Assimp {
 void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 
 // ------------------------------------------------------------------------------------------------
-// Exporter worker function prototypes. Do not use const, because some exporter need to convert 
+// Exporter worker function prototypes. Do not use const, because some exporter need to convert
 // the scene temporary
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportProperties*);
@@ -343,7 +343,7 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
         delete pimpl->blob;
         pimpl->blob = nullptr;
     }
-    
+
     auto baseName = pProperties ? pProperties->GetPropertyString(AI_CONFIG_EXPORT_BLOB_NAME, AI_BLOBIO_MAGIC) : AI_BLOBIO_MAGIC;
 
     std::shared_ptr<IOSystem> old = pimpl->mIOSystem;

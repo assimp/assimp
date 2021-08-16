@@ -230,7 +230,7 @@ public:
      *  @param out Receives the output matrix
      *  @return Reference to the output matrix
      */
-    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, 
+    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v,
             aiMatrix4x4t& out);
 
     // -------------------------------------------------------------------

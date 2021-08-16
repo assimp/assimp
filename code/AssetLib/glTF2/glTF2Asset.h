@@ -388,9 +388,9 @@ struct CustomExtension {
     }
 
     CustomExtension() = default;
-    
+
     ~CustomExtension() = default;
-    
+
     CustomExtension(const CustomExtension &other) :
             name(other.name),
             mStringValue(other.mStringValue),

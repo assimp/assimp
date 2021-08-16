@@ -99,8 +99,8 @@ public:
     virtual ~Logger();
 
     // ----------------------------------------------------------------------
-    /** @brief  Writes a info message
-     *  @param  message Info message*/
+    /** @brief  Writes a debug message
+     *  @param  message Debug message*/
     void debug(const char* message);
 
     template<typename... T>
@@ -109,7 +109,7 @@ public:
     }
 
     // ----------------------------------------------------------------------
-	/** @brief  Writes a debug message
+    /** @brief  Writes a debug message
      *   @param message Debug message*/
     void verboseDebug(const char* message);
 
@@ -140,7 +140,7 @@ public:
 
     // ----------------------------------------------------------------------
     /** @brief  Writes an error message
-     *  @param  message Info message*/
+     *  @param  message Error message*/
     void error(const char* message);
 
     template<typename... T>

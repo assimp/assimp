@@ -615,12 +615,12 @@ TEST_F(utglTF2ImportExport, texcoords) {
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 0);
+    EXPECT_EQ(uvIndex, 0u);
 
     uvIndex = 255;
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 1);
+    EXPECT_EQ(uvIndex, 1u);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -646,12 +646,12 @@ TEST_F(utglTF2ImportExport, texcoords_export) {
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 0);
+    EXPECT_EQ(uvIndex, 0u);
 
     uvIndex = 255;
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 1);
+    EXPECT_EQ(uvIndex, 1u);
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

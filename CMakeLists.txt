@@ -397,7 +397,7 @@ set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-mocules/assimp-hunter-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-hunter-config.cmake.in")
   set(NAMESPACE "${PROJECT_NAME}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")

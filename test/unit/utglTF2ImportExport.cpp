@@ -748,7 +748,8 @@ TEST_F(utglTF2ImportExport, import_dracoEncoded) {
 
 TEST_F(utglTF2ImportExport, wrongTypes) {
     // Deliberately broken version of the BoxTextured.gltf asset.
-    std::vector<std::tuple<std::string, std::string, std::string, std::string>> wrongTypes = {
+    using tup_T = std::tuple<std::string, std::string, std::string, std::string>;
+    std::vector<tup_T> wrongTypes = {
         { "/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]" },
         { "/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]" },
         { "/glTF2/wrongTypes/badUint.gltf", "uint", "index", "materials[0]" },

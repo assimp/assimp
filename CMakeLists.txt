@@ -135,11 +135,11 @@ IF ( WIN32 )
   # Use subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
-  OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
-    "If the Assimp view tool is built. (requires DirectX)"
-    OFF )
-
   IF(MSVC)
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
+      "If the Assimp view tool is built. (requires DirectX)"
+      OFF )
+
     OPTION( ASSIMP_INSTALL_PDB
       "Install MSVC debug files."
       ON )

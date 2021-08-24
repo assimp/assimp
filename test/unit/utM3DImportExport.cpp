@@ -50,35 +50,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-class utM3DImportExport : public AbstractImportExportBase {
-public:
-	bool importerTest() override  {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
+TEST(utM3DImportExport, import_cube_normals) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-		return nullptr != scene;
+    ASSERT_NE(nullptr, scene);
 #else
-        return nullptr == scene;
+    ASSERT_EQ(nullptr, scene);
 #endif // ASSIMP_BUILD_NO_M3D_IMPORTER
-    }
+}
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-    bool exporterTest() override {
-		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
-		Exporter exporter;
-		aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
-		return ret == AI_SUCCESS;
-    }
-#endif
-};
-
-TEST_F(utM3DImportExport, importM3DFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST(utM3DImportExport, import_cube_usemtl) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_usemtl.m3d", aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
+    ASSERT_NE(nullptr, scene);
+#else
+    ASSERT_EQ(nullptr, scene);
+#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-TEST_F(utM3DImportExport, exportM3DFromFileTest) {
-	EXPECT_TRUE(exporterTest());
+TEST(utM3DImportExport, export_cube_normals) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals.m3d", aiProcess_ValidateDataStructure);
+    Exporter exporter;
+    aiReturn ret = exporter.Export(scene, "m3d", ASSIMP_TEST_MODELS_DIR "/M3D/cube_normals_out.m3d");
+    ASSERT_EQ(AI_SUCCESS, ret);
 }
 #endif //  ASSIMP_BUILD_NO_EXPORT

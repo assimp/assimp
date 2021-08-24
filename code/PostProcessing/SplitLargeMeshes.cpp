@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** 
+/**
  *  @file Implementation of the SplitLargeMeshes postprocessing step
  */
 
@@ -353,7 +353,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene) {
 
     std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
-    //Check for point cloud first, 
+    //Check for point cloud first,
     //Do not process point cloud, splitMesh works only with faces data
     for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
         if ( pScene->mMeshes[a]->mPrimitiveTypes == aiPrimitiveType_POINT ) {

@@ -48,7 +48,7 @@ endif ()
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake")
+  include("cmake-modules/HunterGate.cmake")
   HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.311.tar.gz"
     SHA1 "1a82b9b73055879181cb1466b2ab5d48ee8ae410"
@@ -401,14 +401,14 @@ set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-hunter-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-hunter-config.cmake.in")
   set(NAMESPACE "${PROJECT_NAME}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
   set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 ELSE()
   set(CONFIG_INSTALL_DIR "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-plain-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-plain-config.cmake.in")
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
   set(NAMESPACE "${PROJECT_NAME_LOWERCASE}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME_LOWERCASE}Targets")

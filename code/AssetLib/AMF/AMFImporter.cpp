@@ -303,7 +303,7 @@ void AMFImporter::ParseNode_Root() {
     }
     XmlNode node = *root;
     mUnit = ai_tolower(std::string(node.attribute("unit").as_string()));
-    
+
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.

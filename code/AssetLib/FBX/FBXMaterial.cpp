@@ -142,8 +142,8 @@ Material::~Material() {
 
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
-        Object(id,element,name), 
-        uvScaling(1.0f,1.0f), 
+        Object(id,element,name),
+        uvScaling(1.0f,1.0f),
         media(0) {
     const Scope& sc = GetRequiredScope(element);
 
@@ -278,8 +278,8 @@ void LayeredTexture::fillTexture(const Document& doc) {
 
 // ------------------------------------------------------------------------------------------------
 Video::Video(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
-        Object(id,element,name), 
-        contentLength(0), 
+        Object(id,element,name),
+        contentLength(0),
         content(0) {
     const Scope& sc = GetRequiredScope(element);
 

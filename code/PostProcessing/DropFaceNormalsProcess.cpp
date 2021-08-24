@@ -104,7 +104,7 @@ bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* mesh) {
     if (nullptr == mesh->mNormals) {
         return false;
     }
-    
+
     delete[] mesh->mNormals;
     mesh->mNormals = nullptr;
     return true;

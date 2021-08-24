@@ -53,7 +53,7 @@ struct aiAnimation;
 
 namespace AssimpView {
 
-/** 
+/**
  *  @brief  Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
  *          better use the AnimPlayer class.
  */
@@ -68,15 +68,15 @@ public:
     /// @brief  The class destructor.
     ~AnimEvaluator();
 
-    /// @brief Evaluates the animation tracks for a given time stamp. 
-    /// The calculated pose can be retrieved as an array of transformation 
+    /// @brief Evaluates the animation tracks for a given time stamp.
+    /// The calculated pose can be retrieved as an array of transformation
     /// matrices afterwards by calling GetTransformations().
-    /// @param pTime    The time for which you want to evaluate the animation, in seconds. 
-    ///                 Will be mapped into the animation cycle, so it can get an arbitrary 
+    /// @param pTime    The time for which you want to evaluate the animation, in seconds.
+    ///                 Will be mapped into the animation cycle, so it can get an arbitrary
     ///                 value. Best use with ever-increasing time stamps.
     void Evaluate(double pTime);
 
-    /// @brief  Returns the transform matrices calculated at the last Evaluate() call. 
+    /// @brief  Returns the transform matrices calculated at the last Evaluate() call.
     ///         The array matches the mChannels array of the aiAnimation.
     const std::vector<aiMatrix4x4> &GetTransformations() const { return mTransforms; }
 

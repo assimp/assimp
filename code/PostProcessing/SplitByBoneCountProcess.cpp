@@ -209,7 +209,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             // a small local set of new bones for the current face. State of all used bones for that face
             // can only be updated AFTER the face is completely analysed. Thanks to imre for the fix.
             std::set<unsigned int> newBonesAtCurrentFace;
-          
+
             const aiFace& face = pMesh->mFaces[a];
             // check every vertex if its bones would still fit into the current submesh
             for( unsigned int b = 0; b < face.mNumIndices; ++b )
@@ -221,7 +221,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
                 if( !isBoneUsed[boneIndex] )
                 {
                   newBonesAtCurrentFace.insert(boneIndex);
-                }   
+                }
               }
             }
 
@@ -412,7 +412,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         if (pMesh->mNumAnimMeshes > 0) {
             newMesh->mNumAnimMeshes = pMesh->mNumAnimMeshes;
             newMesh->mAnimMeshes = new aiAnimMesh*[newMesh->mNumAnimMeshes];
-            
+
             for (unsigned int morphIdx = 0; morphIdx < newMesh->mNumAnimMeshes; ++morphIdx) {
                 aiAnimMesh* origTarget = pMesh->mAnimMeshes[morphIdx];
                 aiAnimMesh* newTarget = new aiAnimMesh;
@@ -421,16 +421,16 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
                 newTarget->mNumVertices = numSubMeshVertices;
                 newTarget->mVertices = new aiVector3D[numSubMeshVertices];
                 newMesh->mAnimMeshes[morphIdx] = newTarget;
-                
+
                 if (origTarget->HasNormals()) {
                     newTarget->mNormals = new aiVector3D[numSubMeshVertices];
                 }
-                
+
                 if (origTarget->HasTangentsAndBitangents()) {
                     newTarget->mTangents = new aiVector3D[numSubMeshVertices];
                     newTarget->mBitangents = new aiVector3D[numSubMeshVertices];
                 }
-                
+
                 for( unsigned int vi = 0; vi < numSubMeshVertices; ++vi) {
                     // find the source vertex for it in the source mesh
                     unsigned int previousIndex = previousVertexIndices[vi];

@@ -372,7 +372,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mVertices[i].x = positionBuffer[i].x;
-                pMesh->mVertices[i].y = positionBuffer[i].y;                
+                pMesh->mVertices[i].y = positionBuffer[i].y;
                 pMesh->mVertices[i].z = positionBuffer[i].z;
             }
             positionBuffer.clear();
@@ -382,7 +382,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mNormals[i].x = normalBuffer[i].x;
-                pMesh->mNormals[i].y = normalBuffer[i].y;                
+                pMesh->mNormals[i].y = normalBuffer[i].y;
                 pMesh->mNormals[i].z = normalBuffer[i].z;
             }
             normalBuffer.clear();

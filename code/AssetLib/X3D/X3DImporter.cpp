@@ -180,6 +180,6 @@ const aiImporterDesc *X3DImporter::GetInfo() const {
     return &Description;
 }
 
-} 
+}
 
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

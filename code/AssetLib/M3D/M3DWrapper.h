@@ -84,11 +84,11 @@ public:
     void reset();
 
 	// The Name access, empty string returned when no m3d instance.
-	std::string Name() const; 
+	std::string Name() const;
 
 	/// Executes a save.
 	unsigned char *Save(int quality, int flags, unsigned int &size);
-    
+
     /// Clearer
 	void ClearSave();
 
@@ -113,16 +113,16 @@ inline std::string M3DWrapper::Name() const {
     return std::string();
 }
 
-inline M3DWrapper::operator bool() const { 
-    return m3d_ != nullptr; 
+inline M3DWrapper::operator bool() const {
+    return m3d_ != nullptr;
 }
 
 inline m3d_t *M3DWrapper::operator->() const {
-    return m3d_; 
+    return m3d_;
 }
 
 inline m3d_t *M3DWrapper::M3D() const {
-    return m3d_; 
+    return m3d_;
 }
 
 } // namespace Assimp

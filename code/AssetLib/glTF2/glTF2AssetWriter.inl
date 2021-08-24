@@ -452,7 +452,7 @@ namespace glTF2 {
             WriteTex(materialClearcoat, clearcoat.clearcoatTexture, "clearcoatTexture", w.mAl);
             WriteTex(materialClearcoat, clearcoat.clearcoatRoughnessTexture, "clearcoatRoughnessTexture", w.mAl);
             WriteTex(materialClearcoat, clearcoat.clearcoatNormalTexture, "clearcoatNormalTexture", w.mAl);
-                        
+
             if (!materialClearcoat.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_clearcoat", materialClearcoat, w.mAl);
             }
@@ -468,7 +468,7 @@ namespace glTF2 {
             }
 
             WriteTex(materialTransmission, transmission.transmissionTexture, "transmissionTexture", w.mAl);
-                                   
+
             if (!materialTransmission.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_transmission", materialTransmission, w.mAl);
             }
@@ -613,7 +613,7 @@ namespace glTF2 {
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
         }
-        
+
         //gltf2 spec does not support "skeletons" under node
         if(n.skeletons.size()) {
             AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
@@ -711,7 +711,7 @@ namespace glTF2 {
         if (mAsset.scene) {
             mDoc.AddMember("scene", mAsset.scene->index, mAl);
         }
-        
+
         if(mAsset.extras) {
             mDoc.AddMember("extras", *mAsset.extras, mAl);
         }
@@ -812,7 +812,7 @@ namespace glTF2 {
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
             binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
-            
+
             auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
             ++GLB_Chunk_count;
 
@@ -881,7 +881,7 @@ namespace glTF2 {
             if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
                 exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
             }
-                        
+
             if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
                 exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
             }
@@ -893,7 +893,7 @@ namespace glTF2 {
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {
                 exts.PushBack(StringRef("FB_ngon_encoding"), mAl);
             }
-            
+
             if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
                 exts.PushBack(StringRef("KHR_texture_basisu"), mAl);
             }
@@ -901,7 +901,7 @@ namespace glTF2 {
 
         if (!exts.Empty())
             mDoc.AddMember("extensionsUsed", exts, mAl);
-            
+
         //basisu extensionRequired
         Value extsReq;
         extsReq.SetArray();

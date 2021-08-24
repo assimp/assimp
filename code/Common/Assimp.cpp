@@ -72,12 +72,25 @@ namespace Assimp {
 // underlying structure for aiPropertyStore
 typedef BatchLoader::PropertyMap PropertyMap;
 
+#if defined(__has_warning)
+#if __has_warning("-Wordered-compare-function-pointers")
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
+#endif
+#endif
+
 /** Stores the LogStream objects for all active C log streams */
 struct mpred {
     bool operator()(const aiLogStream &s0, const aiLogStream &s1) const {
         return s0.callback < s1.callback && s0.user < s1.user;
     }
 };
+
+#if defined(__has_warning)
+#if __has_warning("-Wordered-compare-function-pointers")
+#pragma GCC diagnostic pop
+#endif
+#endif
 typedef std::map<aiLogStream, Assimp::LogStream *, mpred> LogStreamMap;
 
 /** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */

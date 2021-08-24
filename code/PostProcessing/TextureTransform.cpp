@@ -448,7 +448,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
         if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
             if (!DefaultLogger::isNullLogger()) {
-                ASSIMP_LOG_ERROR(static_cast<unsigned int>(trafo.size()), " UV channels required but just ", 
+                ASSIMP_LOG_ERROR(static_cast<unsigned int>(trafo.size()), " UV channels required but just ",
                     AI_MAX_NUMBER_OF_TEXTURECOORDS, " available");
             }
             size = AI_MAX_NUMBER_OF_TEXTURECOORDS;

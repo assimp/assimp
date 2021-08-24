@@ -274,7 +274,7 @@ private:
         if (ret) {
             value = std::atoi(strValue.c_str());
             return true;
-        } 
+        }
 
         return false;
     }

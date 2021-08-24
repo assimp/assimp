@@ -291,7 +291,7 @@ void Discreet3DSExporter::WriteMaterials() {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_SPECULAR);
             WriteColor(color);
         }
-                
+
         if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_AMBIENT);
             WriteColor(color);

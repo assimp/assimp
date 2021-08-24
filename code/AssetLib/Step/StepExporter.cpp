@@ -175,12 +175,11 @@ void StepExporter::WriteFile()
     fColor.b = 0.8f;
 
     int ind = 100; // the start index to be used
-    int faceEntryLen = 30; // number of entries for a triangle/face
+    std::vector<int> faceEntryLen; // numbers of entries for a triangle/face
     // prepare unique (count triangles and vertices)
 
     VectorIndexUMap uniqueVerts; // use a map to reduce find complexity to log(n)
     VectorIndexUMap::iterator it;
-    int countFace = 0;
 
     for (unsigned int i=0; i<mScene->mNumMeshes; ++i)
     {
@@ -189,7 +188,7 @@ void StepExporter::WriteFile()
         {
             aiFace* face = &(mesh->mFaces[j]);
 
-            if (face->mNumIndices == 3) countFace++;
+            if (face->mNumIndices >= 3) faceEntryLen.push_back(15 + 5 * face->mNumIndices);
         }
         for (unsigned int j=0; j<mesh->mNumVertices; ++j)
         {
@@ -218,10 +217,13 @@ void StepExporter::WriteFile()
     // write the top of data
     mOutput << "DATA" << endstr;
     mOutput << "#1=MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION(' ',(";
-    for (int i=0; i<countFace; ++i)
+    size_t countFace = faceEntryLen.size();
+    size_t faceLenIndex = ind + 2 * uniqueVerts.size();
+    for (size_t i=0; i<countFace; ++i)
     {
-        mOutput << "#" << i*faceEntryLen + ind + 2*uniqueVerts.size();
+        mOutput << "#" << faceLenIndex;
         if (i!=countFace-1) mOutput << ",";
+        faceLenIndex += faceEntryLen[i];
     }
     mOutput << "),#6)" << endstr;
 
@@ -253,10 +255,12 @@ void StepExporter::WriteFile()
     mOutput << "#27=DIRECTION('',(1.0,0.0,0.0))" << endstr;
     mOutput << "#28= (NAMED_UNIT(#21)LENGTH_UNIT()SI_UNIT(.MILLI.,.METRE.))" << endstr;
     mOutput << "#29=CLOSED_SHELL('',(";
-    for (int i=0; i<countFace; ++i)
+    faceLenIndex = ind + 2 * uniqueVerts.size() + 8;
+    for (size_t i=0; i<countFace; ++i)
     {
-        mOutput << "#" << i*faceEntryLen + ind + 2*uniqueVerts.size() + 8;
+        mOutput << "#" << faceLenIndex;
         if (i!=countFace-1) mOutput << ",";
+        faceLenIndex += faceEntryLen[i];
     }
     mOutput << "))" << endstr;
 
@@ -289,27 +293,28 @@ void StepExporter::WriteFile()
         {
             aiFace* face = &(mesh->mFaces[j]);
 
-            if (face->mNumIndices != 3) continue;
+            const int numIndices = face->mNumIndices;
+            if (numIndices < 3) continue;
 
-            aiVector3D* v1 = &(mesh->mVertices[face->mIndices[0]]);
-            aiVector3D* v2 = &(mesh->mVertices[face->mIndices[1]]);
-            aiVector3D* v3 = &(mesh->mVertices[face->mIndices[2]]);
-            aiVector3D dv12 = *v2 - *v1;
-            aiVector3D dv23 = *v3 - *v2;
-            aiVector3D dv31 = *v1 - *v3;
-            aiVector3D dv13 = *v3 - *v1;
-            dv12.Normalize();
-            dv23.Normalize();
-            dv31.Normalize();
-            dv13.Normalize();
+            std::vector<int> pidArray(numIndices, -1); // vertex id
+            std::vector<aiVector3D> dvArray(numIndices); // edge dir
+            for (int k = 0; k < numIndices; ++k)
+            {
+                aiVector3D *v1 = &(mesh->mVertices[face->mIndices[k]]);
+                pidArray[k] = uniqueVerts.find(v1)->second;
 
-            aiVector3D dvY = dv12;
-            aiVector3D dvX = dvY ^ dv13;
+                aiVector3D *v2 = nullptr;
+                if (k + 1 == numIndices)
+                    v2 = &(mesh->mVertices[face->mIndices[0]]);
+                else
+                    v2 = &(mesh->mVertices[face->mIndices[k + 1]]);
+                dvArray[k] = *v2 - *v1;
+                dvArray[k].Normalize();
+            }
+
+            aiVector3D dvY = dvArray[1];
+            aiVector3D dvX = dvY ^ dvArray[0];
             dvX.Normalize();
-
-            int pid1 = uniqueVerts.find(v1)->second;
-            int pid2 = uniqueVerts.find(v2)->second;
-            int pid3 = uniqueVerts.find(v3)->second;
 
             // mean vertex color for the face if available
             if (mesh->HasVertexColors(0))
@@ -339,35 +344,62 @@ void StepExporter::WriteFile()
 
             /* 2 directions of the plane */
             mOutput << "#" << sid+9 << "=PLANE('',#" << sid+10 << ")" << endstr;
-            mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pid1 << ", #" << sid+11 << ",#" << sid+12 << ")" << endstr;
+            mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pidArray[0] << ",#" << sid+11 << ",#" << sid+12 << ")" << endstr;
 
             mOutput << "#" << sid + 11 << "=DIRECTION('',(" << dvX.x << "," << dvX.y << "," << dvX.z << "))" << endstr;
             mOutput << "#" << sid + 12 << "=DIRECTION('',(" << dvY.x << "," << dvY.y << "," << dvY.z << "))" << endstr;
 
             mOutput << "#" << sid+13 << "=FACE_BOUND('',#" << sid+14 << ",.T.)" << endstr;
-            mOutput << "#" << sid+14 << "=EDGE_LOOP('',(#" << sid+15 << ",#" << sid+16 << ",#" << sid+17 << "))" << endstr;
+            mOutput << "#" << sid+14 << "=EDGE_LOOP('',(";
+            int edgeLoopStart = sid + 15;
+            for (int k = 0; k < numIndices; ++k)
+            {
+                if (k == 0)
+                    mOutput << "#";
+                else
+                    mOutput << ",#";
+                mOutput << edgeLoopStart + k;
+            }
+            mOutput << "))" << endstr;
 
             /* edge loop  */
-            mOutput << "#" << sid+15 << "=ORIENTED_EDGE('',*,*,#" << sid+18 << ",.T.)" << endstr;
-            mOutput << "#" << sid+16 << "=ORIENTED_EDGE('',*,*,#" << sid+19 << ",.T.)" << endstr;
-            mOutput << "#" << sid+17 << "=ORIENTED_EDGE('',*,*,#" << sid+20 << ",.T.)" << endstr;
+            int orientedEdgesStart = edgeLoopStart + numIndices;
+            for (int k=0; k < numIndices; k++)
+            {
+                mOutput << "#" << edgeLoopStart+k << "=ORIENTED_EDGE('',*,*,#" << orientedEdgesStart + k << ",.T.)" << endstr;
+            }
 
             /* oriented edges */
-            mOutput << "#" << sid+18 << "=EDGE_CURVE('',#" << pid1+1 << ",#" << pid2+1 << ",#" << sid+21 << ",.F.)" << endstr;
-            mOutput << "#" << sid+19 << "=EDGE_CURVE('',#" << pid2+1 << ",#" << pid3+1 << ",#" << sid+22 << ",.T.)" << endstr;
-            mOutput << "#" << sid+20 << "=EDGE_CURVE('',#" << pid3+1 << ",#" << pid1+1 << ",#" << sid+23 << ",.T.)" << endstr;
+            int lineStart = orientedEdgesStart + numIndices;
+            for (int k=0; k < numIndices; ++k)
+            {
+                if (k == 0)
+                    mOutput << "#" << orientedEdgesStart+k << "=EDGE_CURVE('',#" << pidArray[k]+1 << ",#" << pidArray[k+1]+1 << ",#" << lineStart+k << ",.F.)" << endstr;
+                else if (k+1 == numIndices)
+                    mOutput << "#" << orientedEdgesStart+k << "=EDGE_CURVE('',#" << pidArray[k]+1 << ",#" << pidArray[0]+1 << ",#" << lineStart+k << ",.T.)" << endstr;
+                else
+                    mOutput << "#" << orientedEdgesStart+k << "=EDGE_CURVE('',#" << pidArray[k]+1 << ",#" << pidArray[k+1]+1 << ",#" << lineStart+k << ",.T.)" << endstr;
+            }
 
-            /* 3 lines and 3 vectors for the lines for the 3 edge curves */
-            mOutput << "#" << sid+21 << "=LINE('',#" << pid1 << ",#" << sid+24 << ")" << endstr;
-            mOutput << "#" << sid+22 << "=LINE('',#" << pid2 << ",#" << sid+25 << ")" << endstr;
-            mOutput << "#" << sid+23 << "=LINE('',#" << pid3 << ",#" << sid+26 << ")" << endstr;
-            mOutput << "#" << sid+24 << "=VECTOR('',#" << sid+27 << ",1.0)" << endstr;
-            mOutput << "#" << sid+25 << "=VECTOR('',#" << sid+28 << ",1.0)" << endstr;
-            mOutput << "#" << sid+26 << "=VECTOR('',#" << sid+29 << ",1.0)" << endstr;
-            mOutput << "#" << sid+27 << "=DIRECTION('',(" << dv12.x << "," << dv12.y << "," << dv12.z << "))" << endstr;
-            mOutput << "#" << sid+28 << "=DIRECTION('',(" << dv23.x << "," << dv23.y << "," << dv23.z << "))" << endstr;
-            mOutput << "#" << sid+29 << "=DIRECTION('',(" << dv31.x << "," << dv31.y << "," << dv31.z << "))" << endstr;
-            ind += faceEntryLen; // increase counter
+            /* n lines and n vectors for the lines for the n edge curves */
+            int vectorStart = lineStart + numIndices;
+            for (int k=0; k < numIndices; ++k)
+            {
+                mOutput << "#" << lineStart+k << "=LINE('',#" << pidArray[k] << ",#" << vectorStart+k << ")" << endstr;
+            }
+
+            int directionStart = vectorStart + numIndices;
+            for (int k=0; k < numIndices; ++k)
+            {
+                mOutput << "#" << vectorStart+k << "=VECTOR('',#" << directionStart+k << ",1.0)" << endstr;
+            }
+
+            for (int k=0; k < numIndices; ++k)
+            {
+                const aiVector3D &dv = dvArray[k];
+                mOutput << "#" << directionStart + k << "=DIRECTION('',(" << dv.x << "," << dv.y << "," << dv.z << "))" << endstr;
+            }
+            ind += 15 + 5*numIndices; // increase counter
         }
     }
 

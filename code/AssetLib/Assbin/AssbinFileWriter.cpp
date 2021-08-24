@@ -172,7 +172,7 @@ inline size_t Write<aiQuaternion>(IOStream *stream, const aiQuaternion &v) {
     t += Write<float>(stream, v.z);
     ai_assert(t == 16);
 
-    return 16;
+    return t;
 }
 
 // -----------------------------------------------------------------------------------

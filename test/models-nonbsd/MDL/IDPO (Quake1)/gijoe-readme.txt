@@ -4,9 +4,9 @@ Version  : 1
 Date     : 11/05/97
 Author   : Kenneth Whelan
 Email    : JWHELAN@pop.prodigy.net
-Credits  : id software, Larry Hama, Steven Polge, and Rene Post for making Quake ME 
-					
-	
+Credits  : id software, Larry Hama, Steven Polge, and Rene Post for making Quake ME
+
+
 
 Build time: ??? Time???
 
@@ -14,7 +14,7 @@ Type of Mod
 -----------
 Quake C  : no
 Sound    : no
-MDL      : Yes  
+MDL      : Yes
 
 
 Format of QuakeC (if a Quake C Mod)
@@ -29,8 +29,8 @@ Description of the Modification
 -------------------------------
 
 This is a new player.mdl for quake. It's main use is for bots. The Skins are Snake Eyes v4, Duke v3, Low-Light,
-Storm Shadow v2, Shockwave, Repeater, Gung-Ho, Shipwreck, Dusty v3, and 
-Tunnel Rat v2. 
+Storm Shadow v2, Shockwave, Repeater, Gung-Ho, Shipwreck, Dusty v3, and
+Tunnel Rat v2.
 
 
 
@@ -40,7 +40,7 @@ None that I know of.
 How to Install the Modification
 -------------------------------
 
-First back up the current player.mdl(copy player.mdl player.bak). Just put 
+First back up the current player.mdl(copy player.mdl player.bak). Just put
 it in the progs dir in the hack your using, if any.
 
 Technical Details

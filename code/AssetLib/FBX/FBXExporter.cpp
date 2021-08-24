@@ -498,7 +498,7 @@ void FBXExporter::WriteDocuments ()
     if (!binary) {
         WriteAsciiSectionHeader("Documents Description");
     }
-    
+
     // not sure what the use of multiple documents would be,
     // or whether any end-application supports it
     FBX::Node docs("Documents");
@@ -1258,7 +1258,7 @@ void FBXExporter::WriteObjects ()
             indent = 2;
             vertexcolors.End(outstream, binary, indent, true);
         }
-        
+
         // uvs, if any
         for (size_t uvi = 0; uvi < m->GetNumUVChannels(); ++uvi) {
             if (m->mNumUVComponents[uvi] > 2) {
@@ -1751,7 +1751,7 @@ void FBXExporter::WriteObjects ()
         bsnode.AddProperty(blendshape_uid);
         bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Blendshape");
         bsnode.AddProperty("Shape");
-        bsnode.AddChild("Version", int32_t(100));        
+        bsnode.AddChild("Version", int32_t(100));
         bsnode.Begin(outstream, binary, indent);
         bsnode.DumpProperties(outstream, binary, indent);
         bsnode.EndProperties(outstream, binary, indent);
@@ -1877,7 +1877,7 @@ void FBXExporter::WriteObjects ()
     // at the same time we can build a list of all the skeleton nodes,
     // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
-    
+
     //actual bone nodes in fbx, without parenting-up
     std::unordered_set<std::string> setAllBoneNamesInScene;
     for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m)
@@ -1887,7 +1887,7 @@ void FBXExporter::WriteObjects ()
             setAllBoneNamesInScene.insert(pMesh->mBones[b]->mName.data);
     }
     aiMatrix4x4 mxTransIdentity;
-    
+
     // and a map of nodes by bone name, as finding them is annoying.
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
@@ -1956,7 +1956,7 @@ void FBXExporter::WriteObjects ()
                     }
                     if (end) { break; }
                 }
-                
+
                 // if it was the skeleton root we can finish here
                 if (end) { break; }
             }

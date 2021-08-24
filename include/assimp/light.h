@@ -257,7 +257,7 @@ struct aiLight
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 
 #endif // !! AI_LIGHT_H_INC

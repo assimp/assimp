@@ -546,7 +546,6 @@ struct Shader {
 
 typedef std::list<Texture> TextureList;
 typedef std::list<Shader> ShaderList;
-//typedef std::list<Node> NodeList;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file surface (= material)

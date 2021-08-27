@@ -192,6 +192,10 @@ Scope::Scope(Parser& parser,bool topLevel)
         }
 
         const std::string& str = n->StringContents();
+        if (str.empty()) {
+            ParseError("unexpected content: empty string.");
+        }
+        
         elements.insert(ElementMap::value_type(str,new_Element(*n,parser)));
 
         // Element() should stop at the next Key token (or right after a Close token)

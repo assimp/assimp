@@ -58,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <vector>
 
+#include "contrib/stb/stb_image.h"
+
 namespace Assimp {
 
 namespace D3MF {
@@ -119,8 +121,11 @@ public:
 
 static bool IsEmbeddedTexture( const std::string &filename ) {
     const std::string extension = BaseImporter::GetExtension(filename);
-
     if (extension == "jpg" || extension == "png") {
+        std::string::size_type pos = filename.find("thumbnail");
+        if (pos == std::string::npos) {
+            return false;
+        }
         return true;
     }
 
@@ -232,12 +237,17 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
         return;
     }
 
-    char *data = new char[size];
+    unsigned char *data = new unsigned char[size];
     fileStream->Read(data, 1, size);
     aiTexture *texture = new aiTexture;
-    texture->mFilename.Set(filename.c_str());
+    std::string embName = "*" + filename;
+    texture->mFilename.Set(embName.c_str());
     texture->mWidth = static_cast<unsigned int>(size);
     texture->mHeight = 0;
+    texture->achFormatHint[0] = 'p';
+    texture->achFormatHint[1] = 'n';
+    texture->achFormatHint[2] = 'g';
+    texture->achFormatHint[3] = '\0';
     texture->pcData = (aiTexel*) data;
     mEmbeddedTextures.emplace_back(texture);
 }

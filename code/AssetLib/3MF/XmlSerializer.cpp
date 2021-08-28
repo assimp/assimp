@@ -493,7 +493,8 @@ void XmlSerializer::StoreEmbeddedTexture(EmbeddedTexture *tex) {
     aiString s;
     s.Set(ai_to_string(tex->mId).c_str());
     mat->AddProperty(&s, AI_MATKEY_NAME);
-    s.Set(tex->mPath);
+    const std::string name = "*" + tex->mPath;
+    s.Set(name);
     mat->AddProperty(&s, AI_MATKEY_TEXTURE_DIFFUSE(0));
 
     aiColor3D col;

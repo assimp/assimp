@@ -49,6 +49,150 @@ namespace D3MF {
 
 static const int IdNotSet = -1;
 
+namespace {
+
+static const size_t ColRGBA_Len = 9;
+static const size_t ColRGB_Len = 7;
+
+// format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
+bool validateColorString(const char *color) {
+    const size_t len = strlen(color);
+    if (ColRGBA_Len != len && ColRGB_Len != len) {
+        return false;
+    }
+
+    return true;
+}
+
+aiFace ReadTriangle(XmlNode &node) {
+    aiFace face;
+
+    face.mNumIndices = 3;
+    face.mIndices = new unsigned int[face.mNumIndices];
+    face.mIndices[0] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v1).as_string()));
+    face.mIndices[1] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v2).as_string()));
+    face.mIndices[2] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v3).as_string()));
+
+    return face;
+}
+
+aiVector3D ReadVertex(XmlNode &node) {
+    aiVector3D vertex;
+    vertex.x = ai_strtof(node.attribute(XmlTag::x).as_string(), nullptr);
+    vertex.y = ai_strtof(node.attribute(XmlTag::y).as_string(), nullptr);
+    vertex.z = ai_strtof(node.attribute(XmlTag::z).as_string(), nullptr);
+
+    return vertex;
+}
+
+bool getNodeAttribute(const XmlNode &node, const std::string &attribute, std::string &value) {
+    pugi::xml_attribute objectAttribute = node.attribute(attribute.c_str());
+    if (!objectAttribute.empty()) {
+        value = objectAttribute.as_string();
+        return true;
+    }
+
+    return false;
+}
+
+bool getNodeAttribute(const XmlNode &node, const std::string &attribute, int &value) {
+    std::string strValue;
+    const bool ret = getNodeAttribute(node, attribute, strValue);
+    if (ret) {
+        value = std::atoi(strValue.c_str());
+        return true;
+    }
+
+    return false;
+}
+
+aiMatrix4x4 parseTransformMatrix(std::string matrixStr) {
+    // split the string
+    std::vector<float> numbers;
+    std::string currentNumber;
+    for (char c : matrixStr) {
+        if (c == ' ') {
+            if (!currentNumber.empty()) {
+                float f = std::stof(currentNumber);
+                numbers.push_back(f);
+                currentNumber.clear();
+            }
+        } else {
+            currentNumber.push_back(c);
+        }
+    }
+    if (!currentNumber.empty()) {
+        const float f = std::stof(currentNumber);
+        numbers.push_back(f);
+    }
+
+    aiMatrix4x4 transformMatrix;
+    transformMatrix.a1 = numbers[0];
+    transformMatrix.b1 = numbers[1];
+    transformMatrix.c1 = numbers[2];
+    transformMatrix.d1 = 0;
+
+    transformMatrix.a2 = numbers[3];
+    transformMatrix.b2 = numbers[4];
+    transformMatrix.c2 = numbers[5];
+    transformMatrix.d2 = 0;
+
+    transformMatrix.a3 = numbers[6];
+    transformMatrix.b3 = numbers[7];
+    transformMatrix.c3 = numbers[8];
+    transformMatrix.d3 = 0;
+
+    transformMatrix.a4 = numbers[9];
+    transformMatrix.b4 = numbers[10];
+    transformMatrix.c4 = numbers[11];
+    transformMatrix.d4 = 1;
+
+    return transformMatrix;
+}
+
+bool parseColor(const char *color, aiColor4D &diffuse) {
+    if (nullptr == color) {
+        return false;
+    }
+
+    if (!validateColorString(color)) {
+        return false;
+    }
+
+    //const char *buf(color);
+    if ('#' != color[0]) {
+        return false;
+    }
+
+    char r[3] = { color[1], color[2], '\0' };
+    diffuse.r = static_cast<ai_real>(strtol(r, nullptr, 16)) / ai_real(255.0);
+
+    char g[3] = { color[3], color[4], '\0' };
+    diffuse.g = static_cast<ai_real>(strtol(g, nullptr, 16)) / ai_real(255.0);
+
+    char b[3] = { color[5], color[6], '\0' };
+    diffuse.b = static_cast<ai_real>(strtol(b, nullptr, 16)) / ai_real(255.0);
+    const size_t len = strlen(color);
+    if (ColRGB_Len == len) {
+        return true;
+    }
+
+    char a[3] = { color[7], color[8], '\0' };
+    diffuse.a = static_cast<ai_real>(strtol(a, nullptr, 16)) / ai_real(255.0);
+
+    return true;
+}
+
+void assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
+    const char *color = node.attribute(XmlTag::basematerials_displaycolor).as_string();
+    aiColor4D diffuse;
+    if (parseColor(color, diffuse)) {
+        mat->AddProperty<aiColor4D>(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+    }
+}
+
+} // namespace
+
 XmlSerializer::XmlSerializer(XmlParser *xmlParser, D3MFOpcPackage *archive) :
         mResourcesDictionnary(),
         mMeshCount(0),
@@ -164,71 +308,6 @@ void XmlSerializer::addObjectToNode(aiNode *parent, Object *obj, aiMatrix4x4 nod
     }
 }
 
-bool XmlSerializer::getNodeAttribute(const XmlNode &node, const std::string &attribute, std::string &value) {
-    pugi::xml_attribute objectAttribute = node.attribute(attribute.c_str());
-    if (!objectAttribute.empty()) {
-        value = objectAttribute.as_string();
-        return true;
-    }
-
-    return false;
-}
-
-bool XmlSerializer::getNodeAttribute(const XmlNode &node, const std::string &attribute, int &value) {
-    std::string strValue;
-    bool ret = getNodeAttribute(node, attribute, strValue);
-    if (ret) {
-        value = std::atoi(strValue.c_str());
-        return true;
-    }
-
-    return false;
-}
-
-aiMatrix4x4 XmlSerializer::parseTransformMatrix(std::string matrixStr) {
-    // split the string
-    std::vector<float> numbers;
-    std::string currentNumber;
-    for (char c : matrixStr) {
-        if (c == ' ') {
-            if (!currentNumber.empty()) {
-                float f = std::stof(currentNumber);
-                numbers.push_back(f);
-                currentNumber.clear();
-            }
-        } else {
-            currentNumber.push_back(c);
-        }
-    }
-    if (!currentNumber.empty()) {
-        const float f = std::stof(currentNumber);
-        numbers.push_back(f);
-    }
-
-    aiMatrix4x4 transformMatrix;
-    transformMatrix.a1 = numbers[0];
-    transformMatrix.b1 = numbers[1];
-    transformMatrix.c1 = numbers[2];
-    transformMatrix.d1 = 0;
-
-    transformMatrix.a2 = numbers[3];
-    transformMatrix.b2 = numbers[4];
-    transformMatrix.c2 = numbers[5];
-    transformMatrix.d2 = 0;
-
-    transformMatrix.a3 = numbers[6];
-    transformMatrix.b3 = numbers[7];
-    transformMatrix.c3 = numbers[8];
-    transformMatrix.d3 = 0;
-
-    transformMatrix.a4 = numbers[9];
-    transformMatrix.b4 = numbers[10];
-    transformMatrix.c4 = numbers[11];
-    transformMatrix.d4 = 1;
-
-    return transformMatrix;
-}
-
 void XmlSerializer::ReadObject(XmlNode &node) {
     int id = IdNotSet, pid = IdNotSet, pindex = IdNotSet;
     bool hasId = getNodeAttribute(node, XmlTag::id, id);
@@ -327,19 +406,8 @@ void XmlSerializer::ImportVertices(XmlNode &node, aiMesh *mesh) {
     std::copy(vertices.begin(), vertices.end(), mesh->mVertices);
 }
 
-aiVector3D XmlSerializer::ReadVertex(XmlNode &node) {
-    aiVector3D vertex;
-    vertex.x = ai_strtof(node.attribute(XmlTag::x).as_string(), nullptr);
-    vertex.y = ai_strtof(node.attribute(XmlTag::y).as_string(), nullptr);
-    vertex.z = ai_strtof(node.attribute(XmlTag::z).as_string(), nullptr);
-
-    return vertex;
-}
-
 void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
     std::vector<aiFace> faces;
-
-    const size_t numTriangles = std::distance(node.children(XmlTag::triangle).begin(), node.children(XmlTag::triangle).end());
     for (XmlNode &currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == XmlTag::triangle) {
@@ -383,18 +451,6 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
     std::copy(faces.begin(), faces.end(), mesh->mFaces);
 }
 
-aiFace XmlSerializer::ReadTriangle(XmlNode &node) {
-    aiFace face;
-
-    face.mNumIndices = 3;
-    face.mIndices = new unsigned int[face.mNumIndices];
-    face.mIndices[0] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v1).as_string()));
-    face.mIndices[1] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v2).as_string()));
-    face.mIndices[2] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v3).as_string()));
-
-    return face;
-}
-
 void XmlSerializer::ReadBaseMaterials(XmlNode &node) {
     int id = IdNotSet;
     if (getNodeAttribute(node, D3MF::XmlTag::id, id)) {
@@ -410,52 +466,6 @@ void XmlSerializer::ReadBaseMaterials(XmlNode &node) {
 
         mResourcesDictionnary.insert(std::make_pair(id, baseMaterials));
     }
-}
-
-static const size_t ColRGBA_Len = 9;
-static const size_t ColRGB_Len = 7;
-
-// format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
-static bool validateColorString(const char *color) {
-    const size_t len = strlen(color);
-    if (ColRGBA_Len != len && ColRGB_Len != len) {
-        return false;
-    }
-
-    return true;
-}
-
-bool XmlSerializer::parseColor(const char *color, aiColor4D &diffuse) {
-    if (nullptr == color) {
-        return false;
-    }
-
-    if (!validateColorString(color)) {
-        return false;
-    }
-
-    //const char *buf(color);
-    if ('#' != color[0]) {
-        return false;
-    }
-
-    char r[3] = { color[1], color[2], '\0' };
-    diffuse.r = static_cast<ai_real>(strtol(r, nullptr, 16)) / ai_real(255.0);
-
-    char g[3] = { color[3], color[4], '\0' };
-    diffuse.g = static_cast<ai_real>(strtol(g, nullptr, 16)) / ai_real(255.0);
-
-    char b[3] = { color[5], color[6], '\0' };
-    diffuse.b = static_cast<ai_real>(strtol(b, nullptr, 16)) / ai_real(255.0);
-    const size_t len = strlen(color);
-    if (ColRGB_Len == len) {
-        return true;
-    }
-
-    char a[3] = { color[7], color[8], '\0' };
-    diffuse.a = static_cast<ai_real>(strtol(a, nullptr, 16)) / ai_real(255.0);
-
-    return true;
 }
 
 void XmlSerializer::ReadEmbeddecTexture(XmlNode &node) {
@@ -509,11 +519,13 @@ void XmlSerializer::ReadTextureCoords2D(XmlNode &node, Texture2DGroup *tex2DGrou
     if (node.empty() || nullptr == tex2DGroup) {
         return;
     }
+
     int id = IdNotSet;
     if (XmlParser::getIntAttribute(node, "texid", id)) {
         tex2DGroup->mTexId = id;
     }
-    double value;
+
+    double value = 0.0;
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         aiVector2D texCoord;
@@ -542,14 +554,6 @@ void XmlSerializer::ReadTextureGroup(XmlNode &node) {
     mResourcesDictionnary.insert(std::make_pair(id, group));
 }
 
-void XmlSerializer::assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
-    const char *color = node.attribute(XmlTag::basematerials_displaycolor).as_string();
-    aiColor4D diffuse;
-    if (parseColor(color, diffuse)) {
-        mat->AddProperty<aiColor4D>(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-    }
-}
-
 aiMaterial *XmlSerializer::readMaterialDef(XmlNode &node, unsigned int basematerialsId) {
     aiMaterial *material = new aiMaterial();
     material->mNumProperties = 0;
@@ -576,16 +580,17 @@ aiMaterial *XmlSerializer::readMaterialDef(XmlNode &node, unsigned int basemater
     return material;
 }
 
-void XmlSerializer::StoreMaterialsInScene( aiScene *scene ) {
+void XmlSerializer::StoreMaterialsInScene(aiScene *scene) {
     if (nullptr == scene || mMaterials.empty()) {
         return;
     }
 
     scene->mNumMaterials = static_cast<unsigned int>(mMaterials.size());
-    scene->mMaterials = new aiMaterial*[scene->mNumMaterials];
+    scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
     for (size_t i = 0; i < mMaterials.size(); ++i) {
         scene->mMaterials[i] = mMaterials[i];
     }
 }
+
 } // namespace D3MF
 } // namespace Assimp

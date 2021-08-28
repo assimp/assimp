@@ -66,23 +66,16 @@ public:
 
 private:
     void addObjectToNode(aiNode *parent, Object *obj, aiMatrix4x4 nodeTransform);
-    bool getNodeAttribute(const XmlNode &node, const std::string &attribute, std::string &value);
-    bool getNodeAttribute(const XmlNode &node, const std::string &attribute, int &value);
-    aiMatrix4x4 parseTransformMatrix(std::string matrixStr);
     void ReadObject(XmlNode &node);
     aiMesh *ReadMesh(XmlNode &node);
     void ReadMetadata(XmlNode &node);
     void ImportVertices(XmlNode &node, aiMesh *mesh);
-    aiVector3D ReadVertex(XmlNode &node);
     void ImportTriangles(XmlNode &node, aiMesh *mesh);
-    aiFace ReadTriangle(XmlNode &node);
     void ReadBaseMaterials(XmlNode &node);
-    bool parseColor(const char *color, aiColor4D &diffuse);
     void ReadEmbeddecTexture(XmlNode &node);
     void StoreEmbeddedTexture(EmbeddedTexture *tex);
     void ReadTextureCoords2D(XmlNode &node, Texture2DGroup *tex2DGroup);
     void ReadTextureGroup(XmlNode &node);
-    void assignDiffuseColor(XmlNode &node, aiMaterial *mat);
     aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId);
     void StoreMaterialsInScene(aiScene *scene);
 

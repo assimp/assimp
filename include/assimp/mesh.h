@@ -400,17 +400,17 @@ enum aiPrimitiveType {
 
     /**
      * A flag to determine whether this triangles only mesh is NGON encoded.
-     * 
+     *
      * NGON encoding is a special encoding that tells whether 2 or more consecutive triangles
      * should be considered as a triangle fan. This is identified by looking at the first vertex index.
      * 2 consecutive triangles with the same 1st vertex index are part of the same
      * NGON.
-     * 
-     * At the moment, only quads (concave or convex) are supported, meaning that polygons are 'seen' as 
+     *
+     * At the moment, only quads (concave or convex) are supported, meaning that polygons are 'seen' as
      * triangles, as usual after a triangulation pass.
-     * 
+     *
      * To get an NGON encoded mesh, please use the aiProcess_Triangulate post process.
-     * 
+     *
      * @see aiProcess_Triangulate
      * @link https://github.com/KhronosGroup/glTF/pull/1620
      */

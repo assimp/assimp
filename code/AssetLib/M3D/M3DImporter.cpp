@@ -233,12 +233,12 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
     ASSIMP_LOG_DEBUG("M3D: importMaterials ", mScene->mNumMaterials);
 
     // add a default material as first
-    aiMaterial *mat = new aiMaterial;
-    mat->AddProperty(&name, AI_MATKEY_NAME);
+    aiMaterial *defaultMat = new aiMaterial;
+    defaultMat->AddProperty(&name, AI_MATKEY_NAME);
     c.a = 1.0f;
     c.b = c.g = c.r = 0.6f;
-    mat->AddProperty(&c, 1, AI_MATKEY_COLOR_DIFFUSE);
-    mScene->mMaterials[0] = mat;
+    defaultMat->AddProperty(&c, 1, AI_MATKEY_COLOR_DIFFUSE);
+    mScene->mMaterials[0] = defaultMat;
 
     if (!m3d->nummaterial || !m3d->material) {
         return;
@@ -300,12 +300,12 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
                     m->prop[j].value.textureid < m3d->numtexture &&
                     m3d->texture[m->prop[j].value.textureid].name) {
                 name.Set(std::string(std::string(m3d->texture[m->prop[j].value.textureid].name) + ".png"));
-                mat->AddProperty(&name, aiTxProps[k].pKey, aiTxProps[k].type, aiTxProps[k].index);
+                newMat->AddProperty(&name, aiTxProps[k].pKey, aiTxProps[k].type, aiTxProps[k].index);
                 n = 0;
-                mat->AddProperty(&n, 1, _AI_MATKEY_UVWSRC_BASE, aiProps[k].type, aiProps[k].index);
+                newMat->AddProperty(&n, 1, _AI_MATKEY_UVWSRC_BASE, aiProps[k].type, aiProps[k].index);
             }
         }
-        mScene->mMaterials[i + 1] = mat;
+        mScene->mMaterials[i + 1] = newMat;
     }
 }
 

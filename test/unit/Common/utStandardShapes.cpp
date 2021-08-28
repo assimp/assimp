@@ -51,7 +51,7 @@ TEST_F( utStandardShapes, testMakeMesh ) {
 
     // The mNumIndices member of the second face is now incorrect
     const auto& face = aiMeshPtr->mFaces[0];
-    EXPECT_EQ(face.mNumIndices, numIndicesPerPrimitive); 
+    EXPECT_EQ(face.mNumIndices, numIndicesPerPrimitive);
     delete aiMeshPtr;
 }
 

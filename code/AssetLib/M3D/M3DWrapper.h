@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #ifndef AI_M3DWRAPPER_H_INC
 #define AI_M3DWRAPPER_H_INC
+
 #if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER
 
 #include <memory>
@@ -62,41 +63,68 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "m3d.h"
 
 namespace Assimp {
+
 class IOSystem;
 
+/// brief   The M3D-Wrapper, provudes c++ access to the data.
 class M3DWrapper {
-	m3d_t *m3d_ = nullptr;
-	unsigned char *saved_output_ = nullptr;
-
 public:
-	// Construct an empty M3D model
+	/// Construct an empty M3D model
 	explicit M3DWrapper();
 
-	// Construct an M3D model from provided buffer
-	// NOTE: The m3d.h SDK function does not mark the data as const. Have assumed it does not write.
-	// BUG: SECURITY: The m3d.h SDK cannot be informed of the buffer size. BUFFER OVERFLOW IS CERTAIN
+	/// Construct an M3D model from provided buffer
+	/// @note The m3d.h SDK function does not mark the data as const. Have assumed it does not write.
+	/// BUG: SECURITY: The m3d.h SDK cannot be informed of the buffer size. BUFFER OVERFLOW IS CERTAIN
 	explicit M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer);
 
-	~M3DWrapper();
+	/// Theclasss destructor.
+    ~M3DWrapper();
 
-	void reset();
+	/// Will reset the wrapper, all data will become nullptr.
+    void reset();
 
-	// Name
-	inline std::string Name() const {
-		if (m3d_) return std::string(m3d_->name);
-		return std::string();
-	}
+	// The Name access, empty string returned when no m3d instance.
+	std::string Name() const;
 
-	// Execute a save
+	/// Executes a save.
 	unsigned char *Save(int quality, int flags, unsigned int &size);
+
+    /// Clearer
 	void ClearSave();
 
-	inline explicit operator bool() const { return m3d_ != nullptr; }
+    /// True for m3d instance exists.
+	explicit operator bool() const;
 
 	// Allow direct access to M3D API
-	inline m3d_t *operator->() const { return m3d_; }
-	inline m3d_t *M3D() const { return m3d_; }
+	m3d_t *operator->() const;
+	m3d_t *M3D() const;
+
+private:
+	m3d_t *m3d_ = nullptr;
+	unsigned char *saved_output_ = nullptr;
 };
+
+inline std::string M3DWrapper::Name() const {
+    if (nullptr != m3d_) {
+        if (nullptr != m3d_->name) {
+            return std::string(m3d_->name);
+        }
+    }
+    return std::string();
+}
+
+inline M3DWrapper::operator bool() const {
+    return m3d_ != nullptr;
+}
+
+inline m3d_t *M3DWrapper::operator->() const {
+    return m3d_;
+}
+
+inline m3d_t *M3DWrapper::M3D() const {
+    return m3d_;
+}
+
 } // namespace Assimp
 
 #endif

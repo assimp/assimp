@@ -4,9 +4,9 @@ GENERAL
 *********************************************************
 
 
-The files in this directory are invalid ... some of them are empty, 
+The files in this directory are invalid ... some of them are empty,
 others have invalid vertices or faces, others are prepared to make
- assimp allocate a few hundreds gigs of memory ... most are 
+ assimp allocate a few hundreds gigs of memory ... most are
 actually regression tests, i.e. there was once a bugfix that
 fixed the respective loaders.
 
@@ -18,8 +18,8 @@ crash.
 FILES
 *********************************************************
 
-OutOfMemory.off - the number of faces is invalid. There won't be 
-  enough memory so std::vector::reserve() will most likely fail. 
+OutOfMemory.off - the number of faces is invalid. There won't be
+  enough memory so std::vector::reserve() will most likely fail.
   The exception should be caught in Importer.cpp.
 
 empty.<x> - These files are completely empty. The corresponding

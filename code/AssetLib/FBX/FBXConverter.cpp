@@ -862,7 +862,7 @@ bool FBXConverter::GenerateTransformationNodeChain(const Model &model, const std
     output_nodes.push_back(std::move(nd));
     return false;
 }
-  
+
 void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     const PropertyTable &props = model.Props();
     DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();
@@ -2131,7 +2131,7 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     if (ok) {
         out_mat->AddProperty(&Emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
     } else {
-        const aiColor3D &emissiveColor = GetColorPropertyFromMaterial(props, "Maya|emissive", ok);
+        const aiColor3D &emissiveColor = GetColorProperty(props, "Maya|emissive", ok);
         if (ok) {
             out_mat->AddProperty(&emissiveColor, 1, AI_MATKEY_COLOR_EMISSIVE);
         }
@@ -2218,7 +2218,7 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     }
 
     // PBR material information
-    const aiColor3D &baseColor = GetColorPropertyFromMaterial(props, "Maya|base_color", ok);
+    const aiColor3D &baseColor = GetColorProperty(props, "Maya|base_color", ok);
     if (ok) {
         out_mat->AddProperty(&baseColor, 1, AI_MATKEY_BASE_COLOR);
     }
@@ -3572,7 +3572,7 @@ void FBXConverter::ConvertOrphanedEmbeddedTextures() {
                         if (texture->Media() && texture->Media()->ContentLength() > 0) {
                             realTexture = texture;
                         }
-                    }    
+                    }
                 }
             } catch (...) {
                 // do nothing

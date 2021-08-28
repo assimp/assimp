@@ -105,7 +105,7 @@ void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
-    
+
     return 1;
 }
 
@@ -171,7 +171,7 @@ int CDisplay::AddNodeToDisplayList(
         {
             iIndex += iDepth  * 100;
         }
-        else 
+        else
 			iIndex += iDepth  * 10;
         ai_snprintf(chTemp, MAXLEN,"Node %u",iIndex);
     }
@@ -1053,7 +1053,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         case aiTextureOp_SmoothAdd:
             szOp = "addsmooth";
             break;
-        default: 
+        default:
             szOp = "mul";
             break;
         };

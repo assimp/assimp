@@ -992,8 +992,8 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
         metadata->Add(extension.name.c_str(), extension.mBoolValue.value);
     } else if (extension.mValues.isPresent) {
         aiMetadata val;
-        for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
-            ParseExtensions(&val, extension.mValues.value[i]);
+        for (auto const & subExtension : extension.mValues.value) {
+            ParseExtensions(&val, subExtension);
         }
         metadata->Add(extension.name.c_str(), val);
     }
@@ -1001,8 +1001,8 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
 
 void ParseExtras(aiMetadata *metadata, const CustomExtension &extension) {
     if (extension.mValues.isPresent) {
-        for (size_t i = 0; i < extension.mValues.value.size(); ++i) {
-            ParseExtensions(metadata, extension.mValues.value[i]);
+        for (auto const & subExtension : extension.mValues.value) {
+            ParseExtensions(metadata, subExtension);
         }
     }
 }
@@ -1333,6 +1333,12 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
     for (unsigned int c = 0; c < anim.channels.size(); ++c) {
         Animation::Channel &channel = anim.channels[c];
         if (channel.sampler < 0 || channel.sampler >= static_cast<int>(anim.samplers.size())) {
+            continue;
+        }
+
+        auto& animsampler = anim.samplers[channel.sampler];
+        if (animsampler.input->count > animsampler.output->count) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
         }
 

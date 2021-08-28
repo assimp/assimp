@@ -273,7 +273,7 @@ private:
         std::vector<aiNodeAnim*>& anims);
 
 private:
-    /// Configuration option: desired output FPS 
+    /// Configuration option: desired output FPS
     double fps;
 
     /// Configuration option: speed flag was set?

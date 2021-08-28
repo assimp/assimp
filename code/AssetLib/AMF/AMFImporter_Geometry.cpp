@@ -75,7 +75,7 @@ void AMFImporter::ParseNode_Mesh(XmlNode &node) {
             found_volumes = true;
         }
         ParseHelper_Node_Exit();
-    } 
+    }
 
     if (!found_verts && !found_volumes) {
         mNodeElement_Cur->Child.push_back(ne);
@@ -199,9 +199,9 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
 
     // Read attributes for node <color>.
     // and assign read data
-   
+
     ((AMFVolume *)ne)->MaterialID = node.attribute("materialid").as_string();
-     
+
     ((AMFVolume *)ne)->Type = type;
     // Check for child nodes
     bool col_read = false;

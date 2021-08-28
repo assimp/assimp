@@ -67,7 +67,7 @@ bool AbstractImportExportBase::importerTest() {
     return true;
 }
 
-inline 
+inline
 bool AbstractImportExportBase::exporterTest() {
     return true;
 }

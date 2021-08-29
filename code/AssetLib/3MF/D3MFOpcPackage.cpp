@@ -133,7 +133,7 @@ static bool IsEmbeddedTexture( const std::string &filename ) {
 D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
         mRootStream(nullptr),
         mZipArchive() {
-    mZipArchive = std::make_unique<ZipArchiveIOSystem>(pIOHandler, rFile);
+    mZipArchive = new ZipArchiveIOSystem(pIOHandler, rFile);
     if (!mZipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file ", rFile, ".");
     }
@@ -185,6 +185,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 
 D3MFOpcPackage::~D3MFOpcPackage() {
     mZipArchive->Close(mRootStream);
+    delete mZipArchive;
     mZipArchive = nullptr;
 }
 

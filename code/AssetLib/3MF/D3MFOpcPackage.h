@@ -74,7 +74,7 @@ protected:
 
 private:
     IOStream* mRootStream;
-    std::unique_ptr<ZipArchiveIOSystem> mZipArchive;
+    ZipArchiveIOSystem *mZipArchive;
     std::vector<aiTexture *> mEmbeddedTextures;
 };
 

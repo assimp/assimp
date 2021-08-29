@@ -193,13 +193,11 @@ void assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
 
 } // namespace
 
-XmlSerializer::XmlSerializer(XmlParser *xmlParser, D3MFOpcPackage *archive) :
+XmlSerializer::XmlSerializer(XmlParser *xmlParser) :
         mResourcesDictionnary(),
         mMeshCount(0),
-        mXmlParser(xmlParser),
-        mD3MFOpcPackage(archive) {
+        mXmlParser(xmlParser) {
     ai_assert(nullptr != xmlParser);
-    ai_assert(nullptr != archive);
 }
 
 XmlSerializer::~XmlSerializer() {

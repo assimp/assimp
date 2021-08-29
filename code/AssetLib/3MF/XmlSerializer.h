@@ -60,7 +60,7 @@ class EmbeddedTexture;
 
 class XmlSerializer {
 public:
-    XmlSerializer(XmlParser *xmlParser, D3MFOpcPackage *archive);
+    XmlSerializer(XmlParser *xmlParser);
     ~XmlSerializer();
     void ImportXml(aiScene *scene);
 
@@ -90,7 +90,6 @@ private:
     std::map<unsigned int, Resource *> mResourcesDictionnary;
     unsigned int mMeshCount;
     XmlParser *mXmlParser;
-    D3MFOpcPackage *mD3MFOpcPackage;
 };
 
 } // namespace D3MF

@@ -123,7 +123,7 @@ void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, 
 
     XmlParser xmlParser;
     if (xmlParser.parse(opcPackage.RootStream())) {
-        XmlSerializer xmlSerializer(&xmlParser, &opcPackage);
+        XmlSerializer xmlSerializer(&xmlParser);
         xmlSerializer.ImportXml(pScene);
 
         const std::vector<aiTexture*> &tex =  opcPackage.GetEmbeddedTextures();

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/mesh.h>
 
-#include <stdint.h>
+#include <cstdint>
 #include <map>
 #include <set>
 #include <vector>
@@ -206,7 +206,8 @@ struct SemanticMappingTable {
     std::string mMatName;
 
     /// List of semantic map commands, grouped by effect semantic name
-    std::map<std::string, InputSemanticMapEntry> mMap;
+    using InputSemanticMap = std::map<std::string, InputSemanticMapEntry>;
+    InputSemanticMap mMap;
 
     /// For std::find
     bool operator==(const std::string &s) const {

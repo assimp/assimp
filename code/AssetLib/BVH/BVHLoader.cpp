@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -359,7 +359,7 @@ void BVHLoader::ReadMotion(aiScene * /*pScene*/) {
 std::string BVHLoader::GetNextToken() {
     // skip any preceding whitespace
     while (mReader != mBuffer.end()) {
-        if (!isspace(*mReader))
+        if (!isspace((unsigned char)*mReader))
             break;
 
         // count lines
@@ -372,7 +372,7 @@ std::string BVHLoader::GetNextToken() {
     // collect all chars till the next whitespace. BVH is easy in respect to that.
     std::string token;
     while (mReader != mBuffer.end()) {
-        if (isspace(*mReader))
+        if (isspace((unsigned char)*mReader))
             break;
 
         token.push_back(*mReader);

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -59,13 +59,16 @@ void CommentRemover::RemoveLineComments(const char* szComment,
     ai_assert(nullptr != szBuffer);
     ai_assert(*szComment);
 
-    const size_t len = strlen(szComment);
+    size_t len = strlen(szComment);
+    const size_t lenBuffer = strlen(szBuffer);
+    if (len > lenBuffer) {
+        len = lenBuffer;
+    }
     while (*szBuffer)   {
 
         // skip over quotes
         if (*szBuffer == '\"' || *szBuffer == '\'')
             while (*szBuffer++ && *szBuffer != '\"' && *szBuffer != '\'');
-
         if (!strncmp(szBuffer,szComment,len)) {
             while (!IsLineEnd(*szBuffer))
                 *szBuffer++ = chReplacement;

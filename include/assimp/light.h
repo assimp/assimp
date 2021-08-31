@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -257,7 +257,7 @@ struct aiLight
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 
 #endif // !! AI_LIGHT_H_INC

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -59,7 +59,7 @@ TEST_F(AssimpAPITest_aiQuaternion, aiCreateQuaternionFromMatrixTest) {
     // to prevent running into division by zero.
     aiMatrix3x3 m, r;
     aiMatrix3x3::Translation(aiVector2D(14,-25), m);
-    aiMatrix3x3::RotationZ(Math::PI<float>() / 4.0f, r);
+    aiMatrix3x3::RotationZ(Math::aiPi<float>() / 4.0f, r);
     m = m * r;
 
     result_cpp = aiQuaternion(m);
@@ -127,8 +127,8 @@ TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionInterpolateTest) {
     // Use predetermined quaternions to prevent division by zero
     // during slerp calculations.
     const float INTERPOLATION(0.5f);
-    const auto q1 = aiQuaternion(aiVector3D(-1,1,1).Normalize(), Math::PI<float>() / 4.0f);
-    const auto q2 = aiQuaternion(aiVector3D(1,2,1).Normalize(), Math::PI<float>() / 2.0f);
+    const auto q1 = aiQuaternion(aiVector3D(-1,1,1).Normalize(), Math::aiPi<float>() / 4.0f);
+    const auto q2 = aiQuaternion(aiVector3D(1,2,1).Normalize(), Math::aiPi<float>() / 2.0f);
     aiQuaternion::Interpolate(result_cpp, q1, q2, INTERPOLATION);
     aiQuaternionInterpolate(&result_c, &q1, &q2, INTERPOLATION);
     EXPECT_EQ(result_cpp, result_c);

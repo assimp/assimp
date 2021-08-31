@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -294,21 +294,17 @@ void ExportSceneM3D(
 // Worker function for exporting a scene to ASCII A3D.
 // Prototyped and registered in Exporter.cpp
 void ExportSceneM3DA(
-        const char *,
-        IOSystem *,
-        const aiScene *,
-        const ExportProperties *
+        const char *pFile,
+        IOSystem *pIOSystem,
+        const aiScene *pScene,
+        const ExportProperties *pProperties
 
 ) {
-#ifdef M3D_ASCII
     // initialize the exporter
     M3DExporter exporter(pScene, pProperties);
 
     // perform ascii export
     exporter.doExport(pFile, pIOSystem, true);
-#else
-    throw DeadlyExportError("Assimp configured without M3D_ASCII support");
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------

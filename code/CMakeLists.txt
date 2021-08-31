@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2020, assimp team
+# Copyright (c) 2006-2021, assimp team
 #
 # All rights reserved.
 #
@@ -43,7 +43,7 @@
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.10 )
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -298,7 +298,6 @@ SET(ASSIMP_EXPORTERS_DISABLED "") # disabled exporters list (used to print)
 
 ADD_ASSIMP_IMPORTER( AMF
   AssetLib/AMF/AMFImporter.hpp
-  AssetLib/AMF/AMFImporter_Macro.hpp
   AssetLib/AMF/AMFImporter_Node.hpp
   AssetLib/AMF/AMFImporter.cpp
   AssetLib/AMF/AMFImporter_Geometry.cpp
@@ -665,6 +664,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/3MF/D3MFExporter.h
     AssetLib/3MF/D3MFExporter.cpp)
 
+  ADD_ASSIMP_EXPORTER( PBRT
+    Pbrt/PbrtExporter.h
+    Pbrt/PbrtExporter.cpp)
+
   ADD_ASSIMP_EXPORTER( ASSJSON
     AssetLib/Assjson/cencode.c
     AssetLib/Assjson/cencode.h
@@ -817,7 +820,10 @@ ADD_ASSIMP_IMPORTER( GLTF
   AssetLib/glTF2/glTF2Importer.h
 )
 
-ADD_ASSIMP_IMPORTER( 3MF
+ADD_ASSIMP_IMPORTER(3MF
+  AssetLib/3MF/3MFTypes.h
+  AssetLib/3MF/XmlSerializer.h
+  AssetLib/3MF/XmlSerializer.cpp
   AssetLib/3MF/D3MFImporter.h
   AssetLib/3MF/D3MFImporter.cpp
   AssetLib/3MF/D3MFOpcPackage.h
@@ -870,6 +876,7 @@ ELSE()
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
   )
+  INCLUDE_DIRECTORIES("../contrib/pugixml/src")
   SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
@@ -1030,14 +1037,24 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
-  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
-  INCLUDE_DIRECTORIES( "../contrib" )
-  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
-  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
     ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
   endif()
+ENDIF()
+
+# stb
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(stb)
+  find_package(stb CONFIG REQUIRED)
+ELSE()
+  SET( stb_SRCS
+    ../contrib/stb/stb_image.h
+  )
+  INCLUDE_DIRECTORIES("../contrib")
+  SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
 ENDIF()
 
 # VC2010 fixes
@@ -1098,6 +1115,7 @@ SET( assimp_src
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
   ${Pugixml_SRCS}
+  ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1117,6 +1135,11 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   INCLUDE_DIRECTORIES(${C4D_INCLUDES})
 ENDIF ()
 
+IF (ASSIMP_BUILD_DRACO)
+  INCLUDE_DIRECTORIES(${draco_INCLUDE_DIRS})
+  ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
+ENDIF()
+
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
@@ -1128,6 +1151,9 @@ IF (MSVC)
 ELSE()
   TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
 ENDIF()
+
+# adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
+TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
 
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
@@ -1147,9 +1173,17 @@ IF(ASSIMP_HUNTER_ENABLED)
       utf8cpp
       zip::zip
       pugixml
+      stb::stb
   )
+
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+  endif()
 ELSE()
-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
+  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
+  if (ASSIMP_BUILD_DRACO)
+    target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
 ENDIF()
 
 if(ASSIMP_ANDROID_JNIIOSYSTEM)

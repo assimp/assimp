@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -63,7 +63,7 @@ namespace DXF {
 }
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief  DXF importer implementation.
  */
 class DXFImporter : public BaseImporter {

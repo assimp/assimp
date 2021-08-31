@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -137,7 +137,7 @@ struct aiCamera
      */
     C_STRUCT aiVector3D mLookAt;
 
-    /** Half horizontal field of view angle, in radians.
+    /** Horizontal field of view angle, in radians.
      *
      *  The field of view angle is the angle between the center
      *  line of the screen and the left or right border.

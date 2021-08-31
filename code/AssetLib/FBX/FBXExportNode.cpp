@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -144,9 +144,8 @@ void FBX::Node::AddP70time(
 // public member functions for writing nodes to stream
 
 void FBX::Node::Dump(
-    std::shared_ptr<Assimp::IOStream> outfile,
-    bool binary, int indent
-) {
+        const std::shared_ptr<Assimp::IOStream> &outfile,
+        bool binary, int indent) {
     if (binary) {
         Assimp::StreamWriterLE outstream(outfile);
         DumpBinary(outstream);
@@ -426,7 +425,7 @@ void FBX::Node::WritePropertyNodeAscii(
     char buffer[32];
     FBX::Node node(name);
     node.Begin(s, false, indent);
-    std::string vsize = to_string(v.size());
+    std::string vsize = ai_to_string(v.size());
     // *<size> {
     s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
     // indent + 1
@@ -462,7 +461,7 @@ void FBX::Node::WritePropertyNodeAscii(
     char buffer[32];
     FBX::Node node(name);
     node.Begin(s, false, indent);
-    std::string vsize = to_string(v.size());
+    std::string vsize = ai_to_string(v.size());
     // *<size> {
     s.PutChar('*'); s.PutString(vsize); s.PutString(" {\n");
     // indent + 1

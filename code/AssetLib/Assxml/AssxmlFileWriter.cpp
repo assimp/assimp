@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -598,8 +598,11 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
                 if (!mesh->mTextureCoords[a])
                     break;
 
-                ioprintf(io, "\t\t<TextureCoords num=\"%u\" set=\"%u\" num_components=\"%u\"> \n", mesh->mNumVertices,
-                        a, mesh->mNumUVComponents[a]);
+                ioprintf(io, "\t\t<TextureCoords num=\"%u\" set=\"%u\" name=\"%s\" num_components=\"%u\"> \n",
+                         mesh->mNumVertices,
+                         a,
+                         mesh->mTextureCoordsNames[a].C_Str(),
+                         mesh->mNumUVComponents[a]);
 
                 if (!shortened) {
                     if (mesh->mNumUVComponents[a] == 3) {

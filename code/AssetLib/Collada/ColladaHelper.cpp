@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -80,16 +80,16 @@ void ToCamelCase(std::string &text) {
         return;
     // Capitalise first character
     auto it = text.begin();
-    (*it) = ToUpper(*it);
+    (*it) = ai_toupper(*it);
     ++it;
     for (/*started above*/; it != text.end(); /*iterated below*/) {
         if ((*it) == '_') {
             it = text.erase(it);
             if (it != text.end())
-                (*it) = ToUpper(*it);
+                (*it) = ai_toupper(*it);
         } else {
             // Make lower case
-            (*it) = ToLower(*it);
+            (*it) = ai_tolower(*it);
             ++it;
         }
     }

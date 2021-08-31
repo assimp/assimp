@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -148,7 +148,7 @@ void DeboneProcess::Execute( aiScene* pScene)
                 }
 
                 if(!DefaultLogger::isNullLogger()) {
-                    ASSIMP_LOG_INFO_F("Removed %u bones. Input bones:", in - out, ". Output bones: ", out);
+                    ASSIMP_LOG_INFO("Removed %u bones. Input bones:", in - out, ". Output bones: ", out);
                 }
 
                 // and destroy the source mesh. It should be completely contained inside the new submeshes

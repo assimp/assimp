@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -2206,7 +2206,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             "ASSIMP ModelViewer",MB_OK);
         return -4;
     }
-    
+
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window

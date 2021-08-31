@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -207,6 +207,15 @@ protected:
     /** Replace the default material in the scene
     */
     void ReplaceDefaultMaterial();
+
+    bool ContainsTextures(unsigned int i) const {
+        return !mScene->mMaterials[i].sTexDiffuse.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexBump.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexOpacity.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexEmissive.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexSpecular.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexShininess.mMapName.empty() ;
+    }
 
     // -------------------------------------------------------------------
     /** Convert the whole scene

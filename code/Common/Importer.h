@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IMPORTER_H
 #define INCLUDED_AI_IMPORTER_H
 
+#include <exception>
 #include <map>
 #include <vector>
 #include <string>
@@ -182,7 +183,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Construct a batch loader from a given IO system to be used
-     *  to access external files 
+     *  to access external files
      */
     explicit BatchLoader(IOSystem* pIO, bool validate = false );
 
@@ -196,13 +197,13 @@ public:
      *  @param  enable  True for validation.
      */
     void setValidation( bool enabled );
-    
+
     // -------------------------------------------------------------------
     /** Returns the current validation step.
      *  @return The current validation step.
      */
     bool getValidation() const;
-    
+
     // -------------------------------------------------------------------
     /** Add a new file to the list of files to be loaded.
      *  @param file File to be loaded

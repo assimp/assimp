@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -96,7 +96,7 @@ private:
     };
 
     AI_WONT_RETURN void Oops() AI_WONT_RETURN_SUFFIX;
-    AI_WONT_RETURN void Fail( std::string str ) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Fail(const std::string &str) AI_WONT_RETURN_SUFFIX;
 
     void ReadTEXS();
     void ReadBRUS();

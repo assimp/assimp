@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -324,7 +324,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
 
-    ASSERT_EQ(scene->mNumMaterials, 1);
+    ASSERT_EQ(scene->mNumMaterials, 1u);
     const aiMaterial* mat = scene->mMaterials[0];
     aiString texture;
     ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);
@@ -365,7 +365,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsMetalRoughness) {
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
     EXPECT_EQ(bumpMapAmt, 0.75f);
-    
+
     aiColor4D emitColor;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
     EXPECT_EQ(emitColor, aiColor4D(1, 1, 0, 1));
@@ -377,7 +377,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
 
-    ASSERT_EQ(scene->mNumMaterials, 1);
+    ASSERT_EQ(scene->mNumMaterials, 1u);
     const aiMaterial* mat = scene->mMaterials[0];
     aiString texture;
     ASSERT_EQ(mat->Get(AI_MATKEY_TEXTURE(aiTextureType_BASE_COLOR, 0), texture), AI_SUCCESS);
@@ -418,7 +418,7 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
     float bumpMapAmt; // Presumably amount.
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|bump_map_amt", aiTextureType_NONE, 0, bumpMapAmt), aiReturn_SUCCESS);
     EXPECT_EQ(bumpMapAmt, 0.66f);
-    
+
     aiColor4D emitColor;
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
     EXPECT_EQ(emitColor, aiColor4D(1, 0, 1, 1));

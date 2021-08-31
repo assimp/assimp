@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MDL_NORMALTABLE_H_INC
 
 
-float g_avNormals[162][3] = {
+const float g_avNormals[162][3] = {
 { -0.525731f,  0.000000f,  0.850651f },
 { -0.442863f,  0.238856f,  0.864188f },
 { -0.295242f,  0.000000f,  0.955423f },

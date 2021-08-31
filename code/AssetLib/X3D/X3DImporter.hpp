@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -307,7 +307,6 @@ public:
     /// \param [in] pIOHandler - pointer to IO helper object.
     void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
-    void GetExtensionList(std::set<std::string> &pExtensionList);
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;
     void Clear();

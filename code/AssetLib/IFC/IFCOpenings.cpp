@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -911,14 +911,14 @@ size_t CloseWindows(ContourVector& contours,
             // compare base poly normal and contour normal to detect if we need to reverse the face winding
 			if(curmesh.mVertcnt.size() > 0) {
 				IfcVector3 basePolyNormal = TempMesh::ComputePolygonNormal(curmesh.mVerts.data(), curmesh.mVertcnt.front());
-				
+
 				std::vector<IfcVector3> worldSpaceContourVtx(it->contour.size());
-				
+
 				for(size_t a = 0; a < it->contour.size(); ++a)
 					worldSpaceContourVtx[a] = minv * IfcVector3(it->contour[a].x, it->contour[a].y, 0.0);
-				
+
 				IfcVector3 contourNormal = TempMesh::ComputePolygonNormal(worldSpaceContourVtx.data(), worldSpaceContourVtx.size());
-				
+
 				reverseCountourFaces = (contourNormal * basePolyNormal) > 0.0;
 			}
 
@@ -1189,20 +1189,9 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
         TempMesh* profile_data =  opening.profileMesh.get();
         bool is_2d_source = false;
         if (opening.profileMesh2D && norm_extrusion_dir.SquareLength() > 0) {
-
-            if(std::fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
-                // horizontal extrusion
-                if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
-                    profile_data = opening.profileMesh2D.get();
-                    is_2d_source = true;
-                }
-            }
-            else {
-                // vertical extrusion
-                if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
-                    profile_data = opening.profileMesh2D.get();
-                    is_2d_source = true;
-                }
+            if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
+                profile_data = opening.profileMesh2D.get();
+                is_2d_source = true;
             }
         }
         std::vector<IfcVector3> profile_verts = profile_data->mVerts;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -53,7 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
 #include <assimp/defs.h>
+
 #include <vector>
+#include <algorithm>
 
 namespace Assimp {
 
@@ -68,17 +70,6 @@ namespace Assimp {
 
 static const unsigned int BufferSize = 4096;
 
-// ---------------------------------------------------------------------------------
-template <class char_t>
-AI_FORCE_INLINE char_t ToLower(char_t in) {
-    return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in + 0x20) : in;
-}
-
-// ---------------------------------------------------------------------------------
-template <class char_t>
-AI_FORCE_INLINE char_t ToUpper(char_t in) {
-    return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in - 0x20) : in;
-}
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
@@ -271,7 +262,7 @@ AI_FORCE_INLINE unsigned int tokenize(const string_type &str, std::vector<string
 inline std::string ai_stdStrToLower(const std::string &str) {
     std::string out(str);
     for (size_t i = 0; i < str.size(); ++i) {
-        out[i] = (char) tolower(out[i]);
+        out[i] = (char) tolower((unsigned char)out[i]);
     }
     return out;
 }

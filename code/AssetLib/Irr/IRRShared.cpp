@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -260,7 +260,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags) {
 							   prop.value == "parallaxmap_trans_add") {
 						matFlags = AI_IRRMESH_MAT_normalmap_ta;
 					} else {
-						ASSIMP_LOG_WARN("IRRMat: Unrecognized material type: " + prop.value);
+						ASSIMP_LOG_WARN("IRRMat: Unrecognized material type: ", prop.value);
 					}
 				}
 

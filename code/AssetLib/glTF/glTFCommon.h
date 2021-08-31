@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -74,10 +74,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #include <unordered_map>
-#if _MSC_VER > 1600
-#define gltf_unordered_map unordered_map
-#else
+#if defined(_MSC_VER) && _MSC_VER <= 1600
 #define gltf_unordered_map tr1::unordered_map
+#else
+#define gltf_unordered_map unordered_map
 #endif
 #endif
 
@@ -107,7 +107,6 @@ public:
             f(file) {}
     ~IOStream() {
         fclose(f);
-        f = 0;
     }
 
     size_t Read(void *b, size_t sz, size_t n) { return fread(b, sz, n, f); }
@@ -196,11 +195,11 @@ inline void CopyValue(const glTFCommon::mat4 &v, aiMatrix4x4 &o) {
 inline std::string getCurrentAssetDir(const std::string &pFile) {
     std::string path = pFile;
     int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) {
-        path = pFile.substr(0, pos + 1);
+    if (pos == int(std::string::npos)) {
+        return std::string();
     }
 
-    return path;
+    return pFile.substr(0, pos + 1);
 }
 #if _MSC_VER
 #    pragma warning(pop)

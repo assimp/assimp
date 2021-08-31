@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -506,7 +506,7 @@ IfcFloat ConvertSIPrefix(const std::string& prefix)
         return 1e-18f;
     }
     else {
-        IFCImporter::LogError("Unrecognized SI prefix: " + prefix);
+        IFCImporter::LogError("Unrecognized SI prefix: ", prefix);
         return 1;
     }
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -89,8 +89,8 @@ private:
 	// helper functions
 	aiColor4D mkColor(uint32_t c);
 	void convertPose(const M3DWrapper &m3d, aiMatrix4x4 *m, unsigned int posid, unsigned int orientid);
-	aiNode *findNode(aiNode *pNode, aiString name);
-	void calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m);
+    aiNode *findNode(aiNode *pNode, const aiString &name);
+    void calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m);
 	void populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *verteces,
 			std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
 			std::vector<unsigned int> *vertexids);

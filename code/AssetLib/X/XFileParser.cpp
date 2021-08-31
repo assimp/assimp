@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -693,7 +693,7 @@ void XFileParser::ParseDataObjectMaterial(Material *pMaterial) {
     std::string matName;
     readHeadOfDataObject(&matName);
     if (matName.empty())
-        matName = std::string("material") + to_string(mLineNumber);
+        matName = std::string("material") + ai_to_string(mLineNumber);
     pMaterial->mName = matName;
     pMaterial->mIsReference = false;
 
@@ -1245,13 +1245,13 @@ unsigned int XFileParser::ReadInt() {
         }
 
         // at least one digit expected
-        if (!isdigit(*mP))
+        if (!isdigit((unsigned char)*mP))
             ThrowException("Number expected.");
 
         // read digits
         unsigned int number = 0;
         while (mP < mEnd) {
-            if (!isdigit(*mP))
+            if (!isdigit((unsigned char)*mP))
                 break;
             number = number * 10 + (*mP - 48);
             mP++;

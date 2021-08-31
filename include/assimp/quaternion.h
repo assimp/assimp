@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -73,7 +73,7 @@ public:
     explicit aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
 
     /** Construct from euler angles */
-    aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
+    aiQuaterniont( TReal roty, TReal rotz, TReal rotx);
 
     /** Construct from an axis-angle pair */
     aiQuaterniont( aiVector3t<TReal> axis, TReal angle);

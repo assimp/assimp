@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -57,7 +57,7 @@ namespace Assimp
 
 #else
 #   define  ai_assert(expression)
-#   define  ai_assert_entry() 
+#   define  ai_assert_entry()
 #endif // ASSIMP_BUILD_DEBUG
 
 #endif // AI_ASSERT_H_INC

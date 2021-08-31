@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -88,14 +88,15 @@ namespace Assimp {
 } // end of namespace Assimp
 
 glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-                           const ExportProperties* pProperties, bool isBinary)
+    const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
+    , mScene(pScene)
     , mProperties(pProperties)
+    , mAsset(new Asset(pIOSystem))
 {
-    mScene = pScene;
-
-    mAsset.reset( new Asset( pIOSystem ) );
+    // Always on as our triangulation process is aware of this type of encoding
+    mAsset->extensionsUsed.FB_ngon_encoding = true;
 
     if (isBinary) {
         mAsset->SetAsBinary();
@@ -115,14 +116,14 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     ExportScene();
 
     ExportAnimations();
-    
+
     // export extras
     if(mProperties->HasPropertyCallback("extras"))
     {
         std::function<void*(void*)> ExportExtras = mProperties->GetPropertyCallback("extras");
         mAsset->extras = (rapidjson::Value*)ExportExtras(0);
     }
-    
+
     AssetWriter writer(*mAsset);
 
     if (isBinary) {
@@ -433,11 +434,11 @@ inline void SetSamplerWrap(SamplerWrap& wrap, aiTextureMapMode map)
     };
 }
 
-void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, aiTextureType tt, unsigned int slot)
+void glTF2Exporter::GetTexSampler(const aiMaterial& mat, Ref<Texture> texture, aiTextureType tt, unsigned int slot)
 {
     aiString aId;
     std::string id;
-    if (aiGetMaterialString(mat, AI_MATKEY_GLTF_MAPPINGID(tt, slot), &aId) == AI_SUCCESS) {
+    if (aiGetMaterialString(&mat, AI_MATKEY_GLTF_MAPPINGID(tt, slot), &aId) == AI_SUCCESS) {
         id = aId.C_Str();
     }
 
@@ -452,50 +453,52 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, a
         SamplerMagFilter filterMag;
         SamplerMinFilter filterMin;
 
-        if (aiGetMaterialInteger(mat, AI_MATKEY_MAPPINGMODE_U(tt, slot), (int*)&mapU) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(&mat, AI_MATKEY_MAPPINGMODE_U(tt, slot), (int*)&mapU) == AI_SUCCESS) {
             SetSamplerWrap(texture->sampler->wrapS, mapU);
         }
 
-        if (aiGetMaterialInteger(mat, AI_MATKEY_MAPPINGMODE_V(tt, slot), (int*)&mapV) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(&mat, AI_MATKEY_MAPPINGMODE_V(tt, slot), (int*)&mapV) == AI_SUCCESS) {
             SetSamplerWrap(texture->sampler->wrapT, mapV);
         }
 
-        if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_MAPPINGFILTER_MAG(tt, slot), (int*)&filterMag) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(&mat, AI_MATKEY_GLTF_MAPPINGFILTER_MAG(tt, slot), (int*)&filterMag) == AI_SUCCESS) {
             texture->sampler->magFilter = filterMag;
         }
 
-        if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_MAPPINGFILTER_MIN(tt, slot), (int*)&filterMin) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(&mat, AI_MATKEY_GLTF_MAPPINGFILTER_MIN(tt, slot), (int*)&filterMin) == AI_SUCCESS) {
             texture->sampler->minFilter = filterMin;
         }
 
         aiString name;
-        if (aiGetMaterialString(mat, AI_MATKEY_GLTF_MAPPINGNAME(tt, slot), &name) == AI_SUCCESS) {
+        if (aiGetMaterialString(&mat, AI_MATKEY_GLTF_MAPPINGNAME(tt, slot), &name) == AI_SUCCESS) {
             texture->sampler->name = name.C_Str();
         }
     }
 }
 
-void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int slot)
+void glTF2Exporter::GetMatTexProp(const aiMaterial& mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int slot)
 {
     std::string textureKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName;
 
-    mat->Get(textureKey.c_str(), tt, slot, prop);
+    mat.Get(textureKey.c_str(), tt, slot, prop);
 }
 
-void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int slot)
+void glTF2Exporter::GetMatTexProp(const aiMaterial& mat, float& prop, const char* propName, aiTextureType tt, unsigned int slot)
 {
     std::string textureKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName;
 
-    mat->Get(textureKey.c_str(), tt, slot, prop);
+    mat.Get(textureKey.c_str(), tt, slot, prop);
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)
+void glTF2Exporter::GetMatTex(const aiMaterial& mat, Ref<Texture>& texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot = 0)
 {
-
-    if (mat->GetTextureCount(tt) > 0) {
+    if (mat.GetTextureCount(tt) > 0) {
         aiString tex;
 
-        if (mat->Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
+        // Read texcoord (UV map index)
+        mat.Get(AI_MATKEY_UVWSRC(tt, slot), texCoord);
+
+        if (mat.Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
             std::string path = tex.C_Str();
 
             if (path.size() > 0) {
@@ -504,6 +507,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     texture = mAsset->textures.Get(it->second);
                 }
 
+                bool useBasisUniversal = false;
                 if (!texture) {
                     std::string texId = mAsset->FindUniqueID("", "texture");
                     texture = mAsset->textures.Create(texId);
@@ -512,22 +516,49 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                     std::string imgId = mAsset->FindUniqueID("", "image");
                     texture->source = mAsset->images.Create(imgId);
 
-                    if (path[0] == '*') { // embedded
-                        aiTexture* curTex = mScene->mTextures[atoi(&path[1])];
-
+                    const aiTexture* curTex = mScene->GetEmbeddedTexture(path.c_str());
+                    if (curTex != nullptr) { // embedded
                         texture->source->name = curTex->mFilename.C_Str();
 
-                        // The asset has its own buffer, see Image::SetData
-                        texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
-
+                        //basisu: embedded ktx2, bu
                         if (curTex->achFormatHint[0]) {
                             std::string mimeType = "image/";
-                            mimeType += (memcmp(curTex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : curTex->achFormatHint;
+                            if(memcmp(curTex->achFormatHint, "jpg", 3) == 0)
+                                mimeType += "jpeg";
+                            else if(memcmp(curTex->achFormatHint, "ktx", 3) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "ktx";
+                            }
+                            else if(memcmp(curTex->achFormatHint, "kx2", 3) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "ktx2";
+                            }
+                            else if(memcmp(curTex->achFormatHint, "bu", 2) == 0) {
+                                useBasisUniversal = true;
+                                mimeType += "basis";
+                            }
+                            else
+                                mimeType += curTex->achFormatHint;
                             texture->source->mimeType = mimeType;
                         }
+
+                        // The asset has its own buffer, see Image::SetData
+                        //basisu: "image/ktx2", "image/basis" as is
+                        texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                     }
                     else {
                         texture->source->uri = path;
+                        if(texture->source->uri.find(".ktx")!=std::string::npos ||
+                           texture->source->uri.find(".basis")!=std::string::npos)
+                        {
+                            useBasisUniversal = true;
+                        }
+                    }
+
+                    //basisu
+                    if(useBasisUniversal) {
+                        mAsset->extensionsUsed.KHR_texture_basisu = true;
+                        mAsset->extensionsRequired.KHR_texture_basisu = true;
                     }
 
                     GetTexSampler(mat, texture, tt, slot);
@@ -537,45 +568,45 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
     }
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial* mat, TextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+void glTF2Exporter::GetMatTex(const aiMaterial& mat, TextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
-    if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
-    }
+    //if (texture) {
+    //    GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+    //}
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial* mat, NormalTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+void glTF2Exporter::GetMatTex(const aiMaterial& mat, NormalTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
     if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        //GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
         GetMatTexProp(mat, prop.scale, "scale", tt, slot);
     }
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial* mat, OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+void glTF2Exporter::GetMatTex(const aiMaterial& mat, OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
 {
     Ref<Texture>& texture = prop.texture;
 
-    GetMatTex(mat, texture, tt, slot);
+    GetMatTex(mat, texture, prop.texCoord, tt, slot);
 
     if (texture) {
-        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        //GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
         GetMatTexProp(mat, prop.strength, "strength", tt, slot);
     }
 }
 
-aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial& mat, vec4& prop, const char* propName, int type, int idx) const
 {
     aiColor4D col;
-    aiReturn result = mat->Get(propName, type, idx, col);
+    aiReturn result = mat.Get(propName, type, idx, col);
 
     if (result == AI_SUCCESS) {
         prop[0] = col.r; prop[1] = col.g; prop[2] = col.b; prop[3] = col.a;
@@ -584,37 +615,116 @@ aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const cha
     return result;
 }
 
-aiReturn glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
+aiReturn glTF2Exporter::GetMatColor(const aiMaterial& mat, vec3& prop, const char* propName, int type, int idx) const
 {
     aiColor3D col;
-    aiReturn result = mat->Get(propName, type, idx, col);
+    aiReturn result = mat.Get(propName, type, idx, col);
 
     if (result == AI_SUCCESS) {
-        prop[0] = col.r; prop[1] = col.g; prop[2] = col.b;
+        prop[0] = col.r;
+        prop[1] = col.g;
+        prop[2] = col.b;
     }
 
     return result;
+}
+
+bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG) {
+    bool result = false;
+    // If has Glossiness, a Specular Color or Specular Texture, use the KHR_materials_pbrSpecularGlossiness extension
+    // NOTE: This extension is being considered for deprecation (Dec 2020), may be replaced by KHR_material_specular
+
+    if (mat.Get(AI_MATKEY_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) == AI_SUCCESS) {
+        result = true;
+    } else {
+        // Don't have explicit glossiness, convert from pbr roughness or legacy shininess
+        float shininess;
+        if (mat.Get(AI_MATKEY_ROUGHNESS_FACTOR, shininess) == AI_SUCCESS) {
+            pbrSG.glossinessFactor = 1.0f - shininess; // Extension defines this way
+        } else if (mat.Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
+            pbrSG.glossinessFactor = shininess / 1000;
+        }
+    }
+
+    if (GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR) == AI_SUCCESS) {
+        result = true;
+    }
+    // Add any appropriate textures
+    GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
+
+    result = result || pbrSG.specularGlossinessTexture.texture;
+
+    if (result) {
+        // Likely to always have diffuse
+        GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
+        GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
+    }
+
+    return result;
+}
+
+bool glTF2Exporter::GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen) {
+    // Return true if got any valid Sheen properties or textures
+    if (GetMatColor(mat, sheen.sheenColorFactor, AI_MATKEY_SHEEN_COLOR_FACTOR) != aiReturn_SUCCESS)
+        return false;
+
+    // Default Sheen color factor {0,0,0} disables Sheen, so do not export
+    if (sheen.sheenColorFactor == defaultSheenFactor)
+        return false;
+
+    mat.Get(AI_MATKEY_SHEEN_ROUGHNESS_FACTOR, sheen.sheenRoughnessFactor);
+
+    GetMatTex(mat, sheen.sheenColorTexture, AI_MATKEY_SHEEN_COLOR_TEXTURE);
+    GetMatTex(mat, sheen.sheenRoughnessTexture, AI_MATKEY_SHEEN_ROUGHNESS_TEXTURE);
+
+    return true;
+}
+
+bool glTF2Exporter::GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearcoat &clearcoat) {
+    if (mat.Get(AI_MATKEY_CLEARCOAT_FACTOR, clearcoat.clearcoatFactor) != aiReturn_SUCCESS) {
+        return false;
+    }
+
+    // Clearcoat factor of zero disables Clearcoat, so do not export
+    if (clearcoat.clearcoatFactor == 0.0f)
+        return false;
+
+    mat.Get(AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, clearcoat.clearcoatRoughnessFactor);
+
+    GetMatTex(mat, clearcoat.clearcoatTexture, AI_MATKEY_CLEARCOAT_TEXTURE);
+    GetMatTex(mat, clearcoat.clearcoatRoughnessTexture, AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE);
+    GetMatTex(mat, clearcoat.clearcoatNormalTexture, AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE);
+
+    return true;
+}
+
+bool glTF2Exporter::GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission) {
+    bool result = mat.Get(AI_MATKEY_TRANSMISSION_FACTOR, transmission.transmissionFactor) == aiReturn_SUCCESS;
+    GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_TRANSMISSION_TEXTURE);
+    return result || transmission.transmissionTexture.texture;
 }
 
 void glTF2Exporter::ExportMaterials()
 {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
-        const aiMaterial* mat = mScene->mMaterials[i];
+        ai_assert(mScene->mMaterials[i] != nullptr);
 
-        std::string id = "material_" + to_string(i);
+        const aiMaterial & mat = *(mScene->mMaterials[i]);
+
+        std::string id = "material_" + ai_to_string(i);
 
         Ref<Material> m = mAsset->materials.Create(id);
 
         std::string name;
-        if (mat->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
+        if (mat.Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
             name = aiName.C_Str();
         }
         name = mAsset->FindUniqueID(name, "material");
 
         m->name = name;
 
-        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE);
+        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_BASE_COLOR);
 
         if (!m->pbrMetallicRoughness.baseColorTexture.texture) {
             //if there wasn't a baseColorTexture defined in the source, fallback to any diffuse texture
@@ -623,26 +733,26 @@ void glTF2Exporter::ExportMaterials()
 
         GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
 
-        if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR) != AI_SUCCESS) {
+        if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_BASE_COLOR) != AI_SUCCESS) {
             // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
             //a fallback to any diffuse color should be used instead
             GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
         }
 
-        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
+        if (mat.Get(AI_MATKEY_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor) != AI_SUCCESS) {
             //if metallicFactor wasn't defined, then the source is likely not a PBR file, and the metallicFactor should be 0
             m->pbrMetallicRoughness.metallicFactor = 0;
         }
 
         // get roughness if source is gltf2 file
-        if (mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
+        if (mat.Get(AI_MATKEY_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor) != AI_SUCCESS) {
             // otherwise, try to derive and convert from specular + shininess values
             aiColor4D specularColor;
             ai_real shininess;
 
             if (
-                mat->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
-                mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
+                mat.Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS &&
+                mat.Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS
             ) {
                 // convert specular color to luminance
                 float specularIntensity = specularColor[0] * 0.2125f + specularColor[1] * 0.7154f + specularColor[2] * 0.0721f;
@@ -663,103 +773,60 @@ void glTF2Exporter::ExportMaterials()
         GetMatTex(mat, m->emissiveTexture, aiTextureType_EMISSIVE);
         GetMatColor(mat, m->emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
 
-        mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
-        mat->Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
+        mat.Get(AI_MATKEY_TWOSIDED, m->doubleSided);
+        mat.Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
 
+        float opacity;
         aiString alphaMode;
 
-        if (mat->Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
+        if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+            if (opacity < 1) {
+                m->alphaMode = "BLEND";
+                m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
+            }
+        }
+        if (mat.Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
             m->alphaMode = alphaMode.C_Str();
-        } else {
-            float opacity;
-
-            if (mat->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-                if (opacity < 1) {
-                    m->alphaMode = "BLEND";
-                    m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
-                }
-            }
         }
 
-        bool hasPbrSpecularGlossiness = false;
-        mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, hasPbrSpecularGlossiness);
-
-        if (hasPbrSpecularGlossiness) {
-
-            if (!mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
-                mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;
-            }
-
+        {
+            // KHR_materials_pbrSpecularGlossiness extension
+            // NOTE: This extension is being considered for deprecation (Dec 2020)
             PbrSpecularGlossiness pbrSG;
-
-            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_COLOR_DIFFUSE);
-            GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_COLOR_SPECULAR);
-
-            if (mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) != AI_SUCCESS) {
-				float shininess;
-
-				if (mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
-                    pbrSG.glossinessFactor = shininess / 1000;
-                }
+            if (GetMatSpecGloss(mat, pbrSG)) {
+                mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;
+                m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
-
-            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE);
-            GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_SPECULAR);
-
-            m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }
 
-        bool unlit;
-        if (mat->Get(AI_MATKEY_GLTF_UNLIT, unlit) == AI_SUCCESS && unlit) {
+        // glTFv2 is either PBR or Unlit
+        aiShadingMode shadingMode = aiShadingMode_PBR_BRDF;
+        mat.Get(AI_MATKEY_SHADING_MODEL, shadingMode);
+        if (shadingMode == aiShadingMode_Unlit) {
             mAsset->extensionsUsed.KHR_materials_unlit = true;
             m->unlit = true;
-        }
+        } else {
+            // These extensions are not compatible with KHR_materials_unlit or KHR_materials_pbrSpecularGlossiness
+            if (!m->pbrSpecularGlossiness.isPresent) {
+                // Sheen
+                MaterialSheen sheen;
+                if (GetMatSheen(mat, sheen)) {
+                    mAsset->extensionsUsed.KHR_materials_sheen = true;
+                    m->materialSheen = Nullable<MaterialSheen>(sheen);
+                }
 
-        bool hasMaterialSheen = false;
-        mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN, hasMaterialSheen);
+                MaterialClearcoat clearcoat;
+                if (GetMatClearcoat(mat, clearcoat)) {
+                    mAsset->extensionsUsed.KHR_materials_clearcoat = true;
+                    m->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
+                }
 
-        if (hasMaterialSheen) {
-            mAsset->extensionsUsed.KHR_materials_sheen = true;
-
-            MaterialSheen sheen;
-
-            GetMatColor(mat, sheen.sheenColorFactor, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_FACTOR);
-            mat->Get(AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_FACTOR, sheen.sheenRoughnessFactor);
-            GetMatTex(mat, sheen.sheenColorTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_COLOR_TEXTURE);
-            GetMatTex(mat, sheen.sheenRoughnessTexture, AI_MATKEY_GLTF_MATERIAL_SHEEN_ROUGHNESS_TEXTURE);
-
-            m->materialSheen = Nullable<MaterialSheen>(sheen);
-        }
-
-        bool hasMaterialClearcoat = false;
-        mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT, hasMaterialClearcoat);
-
-        if (hasMaterialClearcoat) {
-            mAsset->extensionsUsed.KHR_materials_clearcoat= true;
-
-            MaterialClearcoat clearcoat;
-
-            mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_FACTOR, clearcoat.clearcoatFactor);
-            mat->Get(AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_FACTOR, clearcoat.clearcoatRoughnessFactor);
-            GetMatTex(mat, clearcoat.clearcoatTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_TEXTURE);
-            GetMatTex(mat, clearcoat.clearcoatRoughnessTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_ROUGHNESS_TEXTURE);
-            GetMatTex(mat, clearcoat.clearcoatNormalTexture, AI_MATKEY_GLTF_MATERIAL_CLEARCOAT_NORMAL_TEXTURE);
-
-            m->materialClearcoat = Nullable<MaterialClearcoat>(clearcoat);
-        }
-
-        bool hasMaterialTransmission = false;
-        mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION, hasMaterialTransmission);
-
-        if (hasMaterialTransmission) {
-            mAsset->extensionsUsed.KHR_materials_transmission = true;
-
-            MaterialTransmission transmission;
-
-            mat->Get(AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_FACTOR, transmission.transmissionFactor);
-            GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_GLTF_MATERIAL_TRANSMISSION_TEXTURE);
-
-            m->materialTransmission = Nullable<MaterialTransmission>(transmission);
+                MaterialTransmission transmission;
+                if (GetMatTransmission(mat, transmission)) {
+                    mAsset->extensionsUsed.KHR_materials_transmission = true;
+                    m->materialTransmission = Nullable<MaterialTransmission>(transmission);
+                }
+            }
         }
     }
 }
@@ -768,8 +835,7 @@ void glTF2Exporter::ExportMaterials()
  * Search through node hierarchy and find the node containing the given meshID.
  * Returns true on success, and false otherwise.
  */
-bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
-{
+bool FindMeshNode(Ref<Node> &nodeIn, Ref<Node> &meshNode, const std::string &meshID) {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
             meshNode = nodeIn;
@@ -955,6 +1021,7 @@ void glTF2Exporter::ExportMeshes()
         m->name = name;
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
+        p.ngonEncoded = (aim->mPrimitiveTypes & aiPrimitiveType_NGONEncodingFlag) != 0;
 
 		/******************* Vertices ********************/
 		Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
@@ -1095,6 +1162,7 @@ void glTF2Exporter::ExportMeshes()
     //----------------------------------------
     // Finish the skin
     // Create the Accessor for skinRef->inverseBindMatrices
+    bool bAddCustomizedProperty = this->mProperties->HasPropertyBool("GLTF2_CUSTOMIZE_PROPERTY");
     if (createSkin) {
         mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
         for ( unsigned int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
@@ -1110,7 +1178,7 @@ void glTF2Exporter::ExportMeshes()
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
-        skinRef->bindShapeMatrix.isPresent = true;
+        skinRef->bindShapeMatrix.isPresent = bAddCustomizedProperty;
         IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
         // Find nodes that contain a mesh with bones and add "skeletons" and "skin" attributes to those nodes.
@@ -1131,7 +1199,8 @@ void glTF2Exporter::ExportMeshes()
             std::string meshID = mesh->id;
             FindMeshNode(rootNode, meshNode, meshID);
             Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-            meshNode->skeletons.push_back(rootJoint);
+            if(bAddCustomizedProperty)
+                meshNode->skeletons.push_back(rootJoint);
             meshNode->skin = skinRef;
         }
         delete[] invBindMatrixData;
@@ -1229,7 +1298,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
     node->name = name;
 
     if (!n->mTransformation.IsIdentity()) {
-		if (mScene->mNumAnimations > 0) {
+		if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {
 			aiQuaternion quaternion;
 			n->mTransformation.Decompose(*reinterpret_cast<aiVector3D *>(&node->scale.value), quaternion, *reinterpret_cast<aiVector3D *>(&node->translation.value));
 
@@ -1267,8 +1336,11 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 
 void glTF2Exporter::ExportScene()
 {
-    const char* sceneName = "defaultScene";
-    Ref<Scene> scene = mAsset->scenes.Create(sceneName);
+    // Use the name of the scene if specified
+    const std::string sceneName = (mScene->mName.length > 0) ? mScene->mName.C_Str() : "defaultScene";
+
+    // Ensure unique
+    Ref<Scene> scene = mAsset->scenes.Create(mAsset->FindUniqueID(sceneName, ""));
 
     // root node will be the first one exported (idx 0)
     if (mAsset->nodes.Size() > 0) {
@@ -1386,11 +1458,12 @@ void glTF2Exporter::ExportAnimations()
             nameAnim = anim->mName.C_Str();
         }
         Ref<Animation> animRef = mAsset->animations.Create(nameAnim);
+        animRef->name = nameAnim;
 
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
 
-            std::string name = nameAnim + "_" + to_string(channelIndex);
+            std::string name = nameAnim + "_" + ai_to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
 
             Ref<Node> animNode = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -142,7 +142,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// check whether we can read from the file
 	if (stream.get() == NULL) {
-		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile + "");
+		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile);
 	}
 
 	// see if its compressed, if so uncompress it
@@ -200,7 +200,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// parse the XML file
     mXmlParser = new XmlParser;
     if (!mXmlParser->parse(stream.get())) {
-		return;
+        throw DeadlyImportError("XML parse error while loading XGL file ", pFile);
 	}
 
 	TempScope scope;
@@ -240,7 +240,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &s = ai_stdStrToLower(currentNode.name());
-        
+
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
 		if (s == "lighting") {

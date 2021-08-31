@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -273,7 +273,7 @@ private:
         std::vector<aiNodeAnim*>& anims);
 
 private:
-    /// Configuration option: desired output FPS 
+    /// Configuration option: desired output FPS
     double fps;
 
     /// Configuration option: speed flag was set?

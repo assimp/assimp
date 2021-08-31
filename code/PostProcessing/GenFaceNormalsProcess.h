@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -80,6 +80,7 @@ public:
 private:
     bool GenMeshFaceNormals(aiMesh* pcMesh);
     mutable bool force_ = false;
+    mutable bool flippedWindingOrder_ = false;
 };
 
 } // end of namespace Assimp

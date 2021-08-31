@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -117,16 +116,16 @@ public:
             Mask = 0xf,
         };
 
-        inline constexpr uint8_t GetType() const { return (flags & Mask); }
+        inline uint8_t GetType() const { return (flags & Mask); }
     };
 
     // Represents an AC3D object
     struct Object {
         Object() :
                 type(World),
-                name(""),
+                name(),
                 children(),
-                texture(""),
+                texture(),
                 texRepeat(1.f, 1.f),
                 texOffset(0.0f, 0.0f),
                 rotation(),

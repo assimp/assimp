@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _MSC_VER
 #    pragma warning(push)
 #    pragma warning(disable : 4127 4456 4245 4512 )
-#endif // _MSC_VER 
+#endif // _MSC_VER
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
@@ -69,12 +69,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_STEP_USE_UNORDERED_MULTIMAP
 #    include <unordered_map>
-#    if _MSC_VER > 1600
-#        define step_unordered_map unordered_map
-#        define step_unordered_multimap unordered_multimap
-#    else
+#    if defined(_MSC_VER) && _MSC_VER <= 1600
 #        define step_unordered_map tr1::unordered_map
 #        define step_unordered_multimap tr1::unordered_multimap
+#    else
+#        define step_unordered_map unordered_map
+#        define step_unordered_multimap unordered_multimap
 #    endif
 #endif
 
@@ -634,7 +634,7 @@ private:
 };
 
 template <typename T>
-inline bool operator==(std::shared_ptr<LazyObject> lo, T whatever) {
+inline bool operator==(const std::shared_ptr<LazyObject> &lo, T whatever) {
     return *lo == whatever; // XXX use std::forward if we have 0x
 }
 
@@ -816,7 +816,7 @@ public:
     typedef std::pair<RefMap::const_iterator, RefMap::const_iterator> RefMapRange;
 
 private:
-    DB(std::shared_ptr<StreamReaderLE> reader) :
+    DB(const std::shared_ptr<StreamReaderLE> &reader) :
             reader(reader), splitter(*reader, true, true), evaluated_count(), schema(nullptr) {}
 
 public:

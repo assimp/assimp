@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -296,6 +296,9 @@ protected:
 
     /** Configuration option: name of skin file to be read */
     std::string configSkinFile;
+
+    /** Configuration option: whether to load shaders */
+    bool configLoadShaders;
 
     /** Configuration option: name or path of shader */
     std::string configShaderFile;

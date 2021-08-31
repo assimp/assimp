@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -130,7 +130,7 @@ struct Mesh {
 
     std::vector<Bone> mBones;
 
-    explicit Mesh(const std::string &pName = "") AI_NO_EXCEPT
+    explicit Mesh(const std::string &pName = std::string()) AI_NO_EXCEPT
     : mName( pName )
     , mPositions()
     , mPosFaces()

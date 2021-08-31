@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 All rights reserved.
@@ -77,7 +77,7 @@ class COBImporter : public BaseImporter
 public:
     COBImporter();
     ~COBImporter();
-    
+
     // --------------------
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
         bool checkSig) const;

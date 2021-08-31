@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 
 
@@ -51,11 +51,11 @@ class utMetadata: public ::testing::Test {
 protected:
     aiMetadata *m_data;
 
-    virtual void SetUp() {
+    void SetUp() override {
         m_data = nullptr;
     }
 
-    virtual void TearDown() {
+    void TearDown() override {
         aiMetadata::Dealloc( m_data );
     }
 
@@ -260,4 +260,13 @@ TEST_F( utMetadata, copy_test ) {
         EXPECT_TRUE( copy.Get( "aiMetadata", v ) );
         EXPECT_EQ( metaVal, v );
     }
+}
+
+TEST_F( utMetadata, set_test ) {
+    aiMetadata v;
+    const std::string key_bool = "test_bool";
+    v.Set(1, key_bool, true);
+    v.Set(1, key_bool, true);
+    v.Set(1, key_bool, true);
+    v.Set(1, key_bool, true);
 }

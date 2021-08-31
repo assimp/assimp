@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -73,7 +73,7 @@ public:
         "Bone_3"       |
         ""        <----+
         "Bone_2"       |
-        "Bone_5"       | 
+        "Bone_5"       |
         ""        <----+
         ""        <----+
     */
@@ -139,7 +139,7 @@ public:
         $body "Bodypart_1" <--+  |
         $body "Bodypart_2"    |  |
         $body "Bodypart1"     |  |
-        $body "Bodypart"   ---|--+ 
+        $body "Bodypart"   ---|--+
         $body "Bodypart_1" ---+  |
         $body "Bodypart2"        |
         $body "Bodypart"   ------+

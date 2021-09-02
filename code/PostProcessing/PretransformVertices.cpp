@@ -481,7 +481,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 			pScene->mMeshes[i]->mNumBones = 0;
 		}
 	} else {
-		apcOutMeshes.reserve(pScene->mNumMaterials << 1u);
+		apcOutMeshes.reserve(static_cast<size_t>(pScene->mNumMaterials) << 1u);
 		std::list<unsigned int> aiVFormats;
 
 		std::vector<unsigned int> s(pScene->mNumMeshes, 0);

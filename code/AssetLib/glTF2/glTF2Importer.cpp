@@ -1337,6 +1337,17 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         auto& animsampler = anim.samplers[channel.sampler];
+
+        if (!animsampler.input) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler input. Skipping.");
+            continue;
+        }
+
+        if (!animsampler.output) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler output. Skipping.");
+            continue;
+        }
+
         if (animsampler.input->count > animsampler.output->count) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;

@@ -1338,12 +1338,12 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
 
         auto& animsampler = anim.samplers[channel.sampler];
 
-        if (animsampler.input) {
+        if (!animsampler.input) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler input. Skipping.");
             continue;
         }
 
-        if (animsampler.output) {
+        if (!animsampler.output) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler output. Skipping.");
             continue;
         }

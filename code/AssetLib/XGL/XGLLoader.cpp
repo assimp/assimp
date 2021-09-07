@@ -240,7 +240,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &s = ai_stdStrToLower(currentNode.name());
-        
+
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
 		if (s == "lighting") {
@@ -250,7 +250,7 @@ void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
 		}
 	}
 
-	aiNode *const nd = ReadObject(node, scope, true);
+	aiNode *const nd = ReadObject(node, scope);
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
@@ -296,16 +296,13 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope, bool skipFirst/*, const char *closetag */) {
+aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 	aiNode *nd = new aiNode;
 	std::vector<aiNode *> children;
 	std::vector<unsigned int> meshes;
 
 	try {
 		for (XmlNode &child : node.children()) {
-
-			skipFirst = false;
-
 			const std::string &s = ai_stdStrToLower(child.name());
 			if (s == "mesh") {
 				const size_t prev = scope.meshes_linear.size();

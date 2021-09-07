@@ -1,5 +1,5 @@
-All 'mirror' files are not absolutely correct. That's mainly 
-because it's difficult convert Max' handling of mirroring to 
+All 'mirror' files are not absolutely correct. That's mainly
+because it's difficult convert Max' handling of mirroring to
 our's.
 
 In other words: TO DO, but only if someone REALLY needs it.

@@ -52,24 +52,11 @@ namespace AssimpView {
     */
 //-------------------------------------------------------------------------------
 class CMaterialManager {
-private:
     friend class CDisplay;
-
-    // default constructor
-    CMaterialManager() :
-            m_iShaderCount(0), sDefaultTexture() {}
-
-    ~CMaterialManager() {
-        if (sDefaultTexture) {
-            sDefaultTexture->Release();
-        }
-        Reset();
-    }
 
 public:
     //------------------------------------------------------------------
     // Singleton accessors
-    static CMaterialManager s_cInstance;
     inline static CMaterialManager &Instance() {
         return s_cInstance;
     }
@@ -80,24 +67,20 @@ public:
     // Must be called before CreateMaterial() to prevent memory leaking
     void DeleteMaterial(AssetHelper::MeshHelper *pcIn);
 
-    //------------------------------------------------------------------
-    // Create the material for a mesh.
-    //
-    // The function checks whether an identical shader is already in use.
-    // A shader is considered to be identical if it has the same input
-    // signature and takes the same number of texture channels.
-    int CreateMaterial(AssetHelper::MeshHelper *pcMesh,
-            const aiMesh *pcSource);
-
-    //------------------------------------------------------------------
-    // Setup the material for a given mesh
-    // pcMesh Mesh to be rendered
-    // pcProj Projection matrix
-    // aiMe Current world matrix
-    // pcCam Camera matrix
-    // vPos Position of the camera
-    // TODO: Extract camera position from matrix ...
-    //
+    /// @brief  Create the material for a mesh.
+    ///
+    /// The function checks whether an identical shader is already in use.
+    /// A shader is considered to be identical if it has the same input
+    /// signature and takes the same number of texture channels.
+    int CreateMaterial(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
+    
+    ///	@brief  Setup the material for a given mesh.
+    /// @param  pcMesh   Mesh to be rendered
+    /// @param  pcProj   Projection matrix
+    /// @param  aiMe     Current world matrix
+    /// @param  pcCam    Camera matrix
+    /// @param  vPos     Position of the camera
+    /// @return 0 if successful.
     int SetupMaterial(AssetHelper::MeshHelper *pcMesh,
             const aiMatrix4x4 &pcProj,
             const aiMatrix4x4 &aiMe,
@@ -143,14 +126,29 @@ public:
     // Reset the state of the class
     // Called whenever a new asset is loaded
     inline void Reset() {
-        this->m_iShaderCount = 0;
-        for (TextureCache::iterator it = sCachedTextures.begin(); it != sCachedTextures.end(); ++it) {
-            (*it).second->Release();
+        m_iShaderCount = 0;
+        for (auto & sCachedTexture : sCachedTextures) {
+            sCachedTexture.second->Release();
         }
         sCachedTextures.clear();
     }
 
 private:
+    // The default constructor
+    CMaterialManager() :
+            m_iShaderCount(0),
+            sDefaultTexture() {
+        // empty
+    }
+
+    // Destructor, private.
+    ~CMaterialManager() {
+        if (sDefaultTexture) {
+            sDefaultTexture->Release();
+        }
+        Reset();
+    }
+
     //------------------------------------------------------------------
     // find a valid path to a texture file
     //
@@ -183,15 +181,14 @@ private:
     bool HasAlphaPixels(IDirect3DTexture9 *piTexture);
 
 private:
-    //
+    static CMaterialManager s_cInstance;
+
     // Specifies the number of different shaders generated for
     // the current asset. This number is incremented by CreateMaterial()
     // each time a shader isn't found in cache and needs to be created
-    //
     unsigned int m_iShaderCount;
     IDirect3DTexture9 *sDefaultTexture;
-
-    typedef std::map<std::string, IDirect3DTexture9 *> TextureCache;
+    using TextureCache = std::map<std::string, IDirect3DTexture9 *>;
     TextureCache sCachedTextures;
 };
 

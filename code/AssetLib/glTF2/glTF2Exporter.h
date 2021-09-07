@@ -72,6 +72,10 @@ namespace glTF2
     struct OcclusionTextureInfo;
     struct Node;
     struct Texture;
+    struct PbrSpecularGlossiness;
+    struct MaterialSheen;
+    struct MaterialClearcoat;
+    struct MaterialTransmission;
 
     // Vec/matrix types, as raw float arrays
 	typedef float (vec2)[2];
@@ -97,15 +101,19 @@ namespace Assimp
 
     protected:
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
-        void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
-        void GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int idx);
-        void GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int idx);
-        void GetMatTex(const aiMaterial* mat, glTF2::Ref<glTF2::Texture>& texture, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::TextureInfo& prop, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::NormalTextureInfo& prop, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot);
-        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec4& prop, const char* propName, int type, int idx);
-        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec3& prop, const char* propName, int type, int idx);
+        void GetTexSampler(const aiMaterial& mat, glTF2::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
+        void GetMatTexProp(const aiMaterial& mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int idx);
+        void GetMatTexProp(const aiMaterial& mat, float& prop, const char* propName, aiTextureType tt, unsigned int idx);
+        void GetMatTex(const aiMaterial& mat, glTF2::Ref<glTF2::Texture>& texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial& mat, glTF2::TextureInfo& prop, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial& mat, glTF2::NormalTextureInfo& prop, aiTextureType tt, unsigned int slot);
+        void GetMatTex(const aiMaterial& mat, glTF2::OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot);
+        aiReturn GetMatColor(const aiMaterial& mat, glTF2::vec4& prop, const char* propName, int type, int idx) const;
+        aiReturn GetMatColor(const aiMaterial& mat, glTF2::vec3& prop, const char* propName, int type, int idx) const;
+        bool GetMatSpecGloss(const aiMaterial& mat, glTF2::PbrSpecularGlossiness& pbrSG);
+        bool GetMatSheen(const aiMaterial& mat, glTF2::MaterialSheen& sheen);
+        bool GetMatClearcoat(const aiMaterial& mat, glTF2::MaterialClearcoat& clearcoat);
+        bool GetMatTransmission(const aiMaterial& mat, glTF2::MaterialTransmission& transmission);
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();

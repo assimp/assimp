@@ -2206,7 +2206,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             "ASSIMP ModelViewer",MB_OK);
         return -4;
     }
-    
+
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window

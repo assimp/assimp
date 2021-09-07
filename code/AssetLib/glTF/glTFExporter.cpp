@@ -408,8 +408,7 @@ void glTFExporter::ExportMaterials()
  * Search through node hierarchy and find the node containing the given meshID.
  * Returns true on success, and false otherwise.
  */
-bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
-{
+bool FindMeshNode(Ref<Node> &nodeIn, Ref<Node> &meshNode, const std::string &meshID) {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
           meshNode = nodeIn;
@@ -530,6 +529,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
 
 #if defined(__has_warning)
 #if __has_warning("-Wunused-but-set-variable")
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #endif

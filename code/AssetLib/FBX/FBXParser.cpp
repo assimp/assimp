@@ -192,6 +192,10 @@ Scope::Scope(Parser& parser,bool topLevel)
         }
 
         const std::string& str = n->StringContents();
+        if (str.empty()) {
+            ParseError("unexpected content: empty string.");
+        }
+        
         elements.insert(ElementMap::value_type(str,new_Element(*n,parser)));
 
         // Element() should stop at the next Key token (or right after a Close token)
@@ -642,8 +646,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -733,8 +736,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -816,8 +818,7 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -892,8 +893,7 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * 4;
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -954,8 +954,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * (type == 'd' ? 8 : 4);
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -1019,8 +1018,7 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * 4;
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -1088,8 +1086,7 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * 8;
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 
@@ -1150,8 +1147,7 @@ void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el)
 
         ai_assert(data == end);
         uint64_t dataToRead = static_cast<uint64_t>(count) * 8;
-        ai_assert(buff.size() == dataToRead);
-        if (dataToRead > buff.size()) {
+        if (dataToRead != buff.size()) {
             ParseError("Invalid read size (binary)",&el);
         }
 

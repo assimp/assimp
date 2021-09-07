@@ -87,6 +87,7 @@ macro(draco_add_executable)
   endif()
 
   add_executable(${exe_NAME} ${exe_SOURCES})
+  set_target_properties(${exe_NAME} PROPERTIES VERSION ${DRACO_VERSION})
 
   if(exe_OUTPUT_NAME)
     set_target_properties(${exe_NAME} PROPERTIES OUTPUT_NAME ${exe_OUTPUT_NAME})
@@ -109,10 +110,11 @@ macro(draco_add_executable)
 
   if(exe_LINK_FLAGS OR DRACO_EXE_LINKER_FLAGS)
     if(${CMAKE_VERSION} VERSION_LESS "3.13")
-      set(link_flags ${exe_LINK_FLAGS} ${DRACO_EXE_LINKER_FLAGS})
+      list(APPEND exe_LINK_FLAGS "${DRACO_EXE_LINKER_FLAGS}")
+      # LINK_FLAGS is managed as a string.
+      draco_set_and_stringify(SOURCE "${exe_LINK_FLAGS}" DEST exe_LINK_FLAGS)
       set_target_properties(${exe_NAME}
-                            PROPERTIES LINK_FLAGS ${exe_LINK_FLAGS}
-                                       ${DRACO_EXE_LINKER_FLAGS})
+                            PROPERTIES LINK_FLAGS "${exe_LINK_FLAGS}")
     else()
       target_link_options(${exe_NAME} PRIVATE ${exe_LINK_FLAGS}
                           ${DRACO_EXE_LINKER_FLAGS})
@@ -130,7 +132,7 @@ macro(draco_add_executable)
   endif()
 
   if(BUILD_SHARED_LIBS AND (MSVC OR WIN32))
-    target_compile_definitions(${lib_NAME} PRIVATE "DRACO_BUILDING_DLL=0")
+    target_compile_definitions(${exe_NAME} PRIVATE "DRACO_BUILDING_DLL=0")
   endif()
 
   if(exe_LIB_DEPS)
@@ -163,8 +165,8 @@ endmacro()
 # cmake-format: off
 #   - OUTPUT_NAME: Override output file basename. Target basename defaults to
 #     NAME. OUTPUT_NAME is ignored when BUILD_SHARED_LIBS is enabled and CMake
-#     is generating a build for which MSVC or WIN32 are true. This is to avoid
-#     output basename collisions with DLL import libraries.
+#     is generating a build for which MSVC is true. This is to avoid output
+#     basename collisions with DLL import libraries.
 #   - TEST: Flag. Presence means treat library as a test.
 #   - DEFINES: List of preprocessor macro definitions.
 #   - INCLUDES: list of include directories for the target.
@@ -259,7 +261,7 @@ macro(draco_add_library)
   endif()
 
   if(lib_OUTPUT_NAME)
-    if(NOT (BUILD_SHARED_LIBS AND (MSVC OR WIN32)))
+    if(NOT (BUILD_SHARED_LIBS AND MSVC))
       set_target_properties(${lib_NAME}
                             PROPERTIES OUTPUT_NAME ${lib_OUTPUT_NAME})
     endif()
@@ -318,8 +320,12 @@ macro(draco_add_library)
     set_target_properties(${lib_NAME} PROPERTIES PREFIX "")
   endif()
 
-  if(lib_TYPE STREQUAL SHARED AND NOT MSVC)
-    set_target_properties(${lib_NAME} PROPERTIES SOVERSION ${DRACO_SOVERSION})
+  # VERSION and SOVERSION as necessary
+  if(NOT lib_TYPE STREQUAL STATIC AND NOT lib_TYPE STREQUAL MODULE)
+    set_target_properties(${lib_NAME} PROPERTIES VERSION ${DRACO_VERSION})
+    if(NOT MSVC)
+      set_target_properties(${lib_NAME} PROPERTIES SOVERSION ${DRACO_SOVERSION})
+    endif()
   endif()
 
   if(BUILD_SHARED_LIBS AND (MSVC OR WIN32))

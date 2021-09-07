@@ -200,7 +200,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
     // reserve enough storage
     std::list<LWS::Element>::const_iterator it = dad.children.begin();
-    
+
     fill.keys.reserve(strtoul10(it->tokens[1].c_str()));
 
     for (++it; it != dad.children.end(); ++it) {
@@ -318,7 +318,7 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
             } else {
                 ++s;
             }
-            std::string::size_type t = src.path.substr(s).find_last_of(".");
+            std::string::size_type t = src.path.substr(s).find_last_of('.');
 
             nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
             return;
@@ -466,7 +466,7 @@ std::string LWSImporter::FindLWOFile(const std::string &in) {
     std::string tmp(in);
     if (in.length() > 3 && in[1] == ':' && in[2] != '\\' && in[2] != '/') {
         tmp = in[0] + (std::string(":\\") + in.substr(2));
-    } 
+    }
 
     if (io->Exists(tmp)) {
         return in;

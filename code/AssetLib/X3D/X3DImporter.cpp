@@ -2890,7 +2890,6 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement &pN
     } // if( !meta_list.empty() )
 }
 
-
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER
 
 } // namespace Assimp

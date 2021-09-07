@@ -822,7 +822,10 @@ ADD_ASSIMP_IMPORTER( GLTF
   AssetLib/glTF2/glTF2Importer.h
 )
 
-ADD_ASSIMP_IMPORTER( 3MF
+ADD_ASSIMP_IMPORTER(3MF
+  AssetLib/3MF/3MFTypes.h
+  AssetLib/3MF/XmlSerializer.h
+  AssetLib/3MF/XmlSerializer.cpp
   AssetLib/3MF/D3MFImporter.h
   AssetLib/3MF/D3MFImporter.cpp
   AssetLib/3MF/D3MFOpcPackage.h
@@ -875,6 +878,7 @@ ELSE()
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
   )
+  INCLUDE_DIRECTORIES("../contrib/pugixml/src")
   SOURCE_GROUP( Contrib\\Pugixml FILES ${Pugixml_SRCS})
 ENDIF()
 
@@ -1035,14 +1039,24 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
 ELSE()
-  INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
-  INCLUDE_DIRECTORIES( "../contrib" )
-  INCLUDE_DIRECTORIES( "../contrib/pugixml/src" )
-  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1 )
+  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
     ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
   endif()
+ENDIF()
+
+# stb
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(stb)
+  find_package(stb CONFIG REQUIRED)
+ELSE()
+  SET( stb_SRCS
+    ../contrib/stb/stb_image.h
+  )
+  INCLUDE_DIRECTORIES("../contrib")
+  SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
 ENDIF()
 
 # VC2010 fixes
@@ -1103,6 +1117,7 @@ SET( assimp_src
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
   ${Pugixml_SRCS}
+  ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}
@@ -1160,8 +1175,9 @@ IF(ASSIMP_HUNTER_ENABLED)
       utf8cpp
       zip::zip
       pugixml
+      stb::stb
   )
-  
+
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
   endif()

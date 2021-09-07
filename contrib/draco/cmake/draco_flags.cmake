@@ -80,6 +80,12 @@ macro(draco_test_cxx_flag)
   # Run the actual compile test.
   unset(draco_all_cxx_flags_pass CACHE)
   message("--- Running combined CXX flags test, flags: ${all_cxx_flags}")
+
+  # check_cxx_compiler_flag() requires that the flags are a string. When flags
+  # are passed as a list it will remove the list separators, and attempt to run
+  # a compile command using list entries concatenated together as a single
+  # argument. Avoid the problem by forcing the argument to be a string.
+  draco_set_and_stringify(SOURCE_VARS all_cxx_flags DEST all_cxx_flags)
   check_cxx_compiler_flag("${all_cxx_flags}" draco_all_cxx_flags_pass)
 
   if(cxx_test_FLAG_REQUIRED AND NOT draco_all_cxx_flags_pass)
@@ -194,6 +200,9 @@ macro(draco_test_exe_linker_flag)
   else()
     unset(CMAKE_EXE_LINKER_FLAGS)
   endif()
+
+  list(APPEND DRACO_EXE_LINKER_FLAGS ${${link_FLAG_LIST_VAR_NAME}})
+  list(REMOVE_DUPLICATES DRACO_EXE_LINKER_FLAGS)
 endmacro()
 
 # Runs the draco compiler tests. This macro builds up the list of list var(s)

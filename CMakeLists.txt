@@ -44,7 +44,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake")
+  include("cmake-modules/HunterGate.cmake")
   HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.311.tar.gz"
     SHA1 "1a82b9b73055879181cb1466b2ab5d48ee8ae410"
@@ -135,11 +135,11 @@ IF ( WIN32 )
   # Use subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
-  OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
-    "If the Assimp view tool is built. (requires DirectX)"
-    OFF )
-
   IF(MSVC)
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
+      "If the Assimp view tool is built. (requires DirectX)"
+      OFF )
+
     OPTION( ASSIMP_INSTALL_PDB
       "Install MSVC debug files."
       ON )
@@ -265,8 +265,9 @@ ELSEIF(MSVC)
   ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
-    ADD_COMPILE_OPTIONS(/wd4351)
+    ADD_COMPILE_OPTIONS(/wd4351)	
   ENDIF()
+  ADD_COMPILE_OPTIONS(/wd4244) #supress warning for double to float conversion if Double precission is activated
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
@@ -397,14 +398,14 @@ set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-hunter-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-hunter-config.cmake.in")
   set(NAMESPACE "${PROJECT_NAME}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
   set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 ELSE()
   set(CONFIG_INSTALL_DIR "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-plain-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-plain-config.cmake.in")
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
   set(NAMESPACE "${PROJECT_NAME_LOWERCASE}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME_LOWERCASE}Targets")

@@ -917,8 +917,10 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
         } else if (line) {
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
-        } else {
+        } else if (geo) {
             FBXImporter::LogWarn("ignoring unrecognized geometry: ", geo->Name());
+        } else {
+            FBXImporter::LogWarn("skipping null geometry");
         }
     }
 
@@ -2131,7 +2133,7 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     if (ok) {
         out_mat->AddProperty(&Emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
     } else {
-        const aiColor3D &emissiveColor = GetColorPropertyFromMaterial(props, "Maya|emissive", ok);
+        const aiColor3D &emissiveColor = GetColorProperty(props, "Maya|emissive", ok);
         if (ok) {
             out_mat->AddProperty(&emissiveColor, 1, AI_MATKEY_COLOR_EMISSIVE);
         }
@@ -2218,7 +2220,7 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     }
 
     // PBR material information
-    const aiColor3D &baseColor = GetColorPropertyFromMaterial(props, "Maya|base_color", ok);
+    const aiColor3D &baseColor = GetColorProperty(props, "Maya|base_color", ok);
     if (ok) {
         out_mat->AddProperty(&baseColor, 1, AI_MATKEY_BASE_COLOR);
     }

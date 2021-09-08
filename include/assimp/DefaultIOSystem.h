@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -59,23 +58,23 @@ class ASSIMP_API DefaultIOSystem : public IOSystem {
 public:
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
-    bool Exists( const char* pFile) const;
+    bool Exists( const char* pFile) const override;
 
     // -------------------------------------------------------------------
     /** Returns the directory separator. */
-    char getOsSeparator() const;
+    char getOsSeparator() const override;
 
     // -------------------------------------------------------------------
     /** Open a new file with a given path. */
-    IOStream* Open( const char* pFile, const char* pMode = "rb");
+    IOStream* Open( const char* pFile, const char* pMode = "rb") override;
 
     // -------------------------------------------------------------------
     /** Closes the given file and releases all resources associated with it. */
-    void Close( IOStream* pFile);
+    void Close( IOStream* pFile) override;
 
     // -------------------------------------------------------------------
     /** Compare two paths */
-    bool ComparePaths (const char* one, const char* second) const;
+    bool ComparePaths (const char* one, const char* second) const override;
 
     /** @brief get the file name of a full filepath
      * example: /tmp/archive.tar.gz -> archive.tar.gz

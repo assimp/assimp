@@ -44,8 +44,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Dummy logger
 */
 
+#pragma once
 #ifndef INCLUDED_AI_NULLLOGGER_H
 #define INCLUDED_AI_NULLLOGGER_H
+
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
 
 #include "Logger.hpp"
 

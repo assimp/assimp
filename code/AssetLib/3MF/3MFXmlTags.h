@@ -80,13 +80,21 @@ namespace XmlTag {
     const char* const item = "item";
     const char* const objectid = "objectid";
     const char* const transform = "transform";
+    const char *const path = "path";
 
     // Material definitions
     const char* const basematerials = "basematerials";
-    const char* const basematerials_id = "id";
     const char* const basematerials_base = "base";
     const char* const basematerials_name = "name";
     const char* const basematerials_displaycolor = "displaycolor";
+    const char* const texture_2d = "m:texture2d";
+    const char *const texture_group = "m:texture2dgroup";
+    const char *const texture_content_type = "contenttype";
+    const char *const texture_tilestyleu = "tilestyleu";
+    const char *const texture_tilestylev = "tilestylev";
+    const char *const texture_2d_coord = "m:tex2coord";
+    const char *const texture_cuurd_u = "u";
+    const char *const texture_cuurd_v = "v";
 
     // Meta info tags
     const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";

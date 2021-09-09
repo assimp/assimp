@@ -89,6 +89,9 @@ void ScenePreprocessor::ProcessScene() {
         ASSIMP_LOG_DEBUG("ScenePreprocessor: Adding default material \'" AI_DEFAULT_MATERIAL_NAME "\'");
 
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+            if (nullptr == scene->mMeshes[i]) {
+                continue;
+            }
             scene->mMeshes[i]->mMaterialIndex = scene->mNumMaterials;
         }
 

@@ -135,14 +135,15 @@ bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
 
     // XML - too generic, we need to open the file and search for typical keywords
     if (extension == "xml" || !extension.length() || checkSig) {
-        /*  If CanRead() is called in order to check whether we
-         *  support a specific file extension in general pIOHandler
-         *  might be nullptr and it's our duty to return true here.
-         */
-        if (!pIOHandler) {
+        //  If CanRead() is called in order to check whether we
+        //  support a specific file extension in general pIOHandler
+        //  might be nullptr and it's our duty to return true here.
+        if (nullptr == pIOHandler) {
             return true;
         }
-        static const char *tokens[] = { "<collada" };
+        static const char* tokens[] = {
+            "<collada"
+        };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 
@@ -573,7 +574,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
 
     // now place all mesh references we gathered in the target node
     pTarget->mNumMeshes = static_cast<unsigned int>(newMeshRefs.size());
-    if (newMeshRefs.size()) {
+    if (!newMeshRefs.empty()) {
         struct UIntTypeConverter {
             unsigned int operator()(const size_t &v) const {
                 return static_cast<unsigned int>(v);
@@ -1544,7 +1545,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));
+                map = strtoul10(&(*it));        
                 break;
             }
         }
@@ -1686,7 +1687,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
 
         // store the material
         mMaterialIndexByName[matIt->first] = newMats.size();
-        newMats.push_back(std::pair<Effect *, aiMaterial *>(&effect, mat));
+        newMats.emplace_back(&effect, mat);
     }
     // ScenePreprocessor generates a default material automatically if none is there.
     // All further code here in this loader works well without a valid material so

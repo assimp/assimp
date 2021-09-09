@@ -917,8 +917,10 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
         } else if (line) {
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
-        } else {
+        } else if (geo) {
             FBXImporter::LogWarn("ignoring unrecognized geometry: ", geo->Name());
+        } else {
+            FBXImporter::LogWarn("skipping null geometry");
         }
     }
 

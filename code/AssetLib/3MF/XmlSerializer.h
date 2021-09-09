@@ -38,50 +38,59 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#pragma once
 
-#ifndef AI_D3MFLOADER_H_INCLUDED
-#define AI_D3MFLOADER_H_INCLUDED
+#include <assimp/XmlParser.h>
+#include <assimp/mesh.h>
+#include <vector>
+#include <map>
 
-#include <assimp/BaseImporter.h>
+struct aiNode;
+struct aiMesh;
+struct aiMaterial;
 
 namespace Assimp {
+namespace D3MF {
 
-// ---------------------------------------------------------------------------
-/// @brief  The 3MF-importer class.
-///
-/// Implements the basic topology import and embedded textures.
-// ---------------------------------------------------------------------------
-class D3MFImporter : public BaseImporter {
+class Resource;
+class D3MFOpcPackage;
+class Object;
+class Texture2DGroup;
+class EmbeddedTexture;
+
+class XmlSerializer {
 public:
-    /// @brief The default class constructor.
-    D3MFImporter();
+    XmlSerializer(XmlParser *xmlParser);
+    ~XmlSerializer();
+    void ImportXml(aiScene *scene);
 
-    ///	@brief  The class destructor.
-    ~D3MFImporter() override;
+private:
+    void addObjectToNode(aiNode *parent, Object *obj, aiMatrix4x4 nodeTransform);
+    void ReadObject(XmlNode &node);
+    aiMesh *ReadMesh(XmlNode &node);
+    void ReadMetadata(XmlNode &node);
+    void ImportVertices(XmlNode &node, aiMesh *mesh);
+    void ImportTriangles(XmlNode &node, aiMesh *mesh);
+    void ReadBaseMaterials(XmlNode &node);
+    void ReadEmbeddecTexture(XmlNode &node);
+    void StoreEmbeddedTexture(EmbeddedTexture *tex);
+    void ReadTextureCoords2D(XmlNode &node, Texture2DGroup *tex2DGroup);
+    void ReadTextureGroup(XmlNode &node);
+    aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId);
+    void StoreMaterialsInScene(aiScene *scene);
 
-    /// @brief Performs the data format detection.
-    /// @param pFile        The filename to check.
-    /// @param pIOHandler   The used IO-System.
-    /// @param checkSig     true for signature checking.
-    /// @return true for can be loaded, false for not.
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
-
-    /// @brief  Not used
-    /// @param pImp Not used
-    void SetupProperties(const Importer *pImp) override;
-
-    /// @brief The importer description getter.
-    /// @return The info
-    const aiImporterDesc *GetInfo() const override;
-
-protected:
-    /// @brief Internal read function, performs the file parsing.
-    /// @param pFile        The filename
-    /// @param pScene       The scene to load in.
-    /// @param pIOHandler   The io-system
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+private:
+    struct MetaEntry {
+        std::string name;
+        std::string value;
+    };
+    std::vector<MetaEntry> mMetaData;
+    std::vector<EmbeddedTexture *> mEmbeddedTextures;
+    std::vector<aiMaterial *> mMaterials;
+    std::map<unsigned int, Resource *> mResourcesDictionnary;
+    unsigned int mMeshCount;
+    XmlParser *mXmlParser;
 };
 
-} // Namespace Assimp
-
-#endif // AI_D3MFLOADER_H_INCLUDED
+} // namespace D3MF
+} // namespace Assimp

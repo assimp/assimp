@@ -1337,6 +1337,17 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         auto& animsampler = anim.samplers[channel.sampler];
+
+        if (!animsampler.input) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler input. Skipping.");
+            continue;
+        }
+
+        if (!animsampler.output) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler output. Skipping.");
+            continue;
+        }
+
         if (animsampler.input->count > animsampler.output->count) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
@@ -1476,10 +1487,11 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         }
     }
 
-    if (numEmbeddedTexs == 0)
+    if (numEmbeddedTexs == 0) {
         return;
+    }
 
-      ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
+    ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
     std::fill(mScene->mTextures, mScene->mTextures + numEmbeddedTexs, nullptr);

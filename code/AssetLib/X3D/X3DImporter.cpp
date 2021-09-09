@@ -599,6 +599,7 @@ void X3DImporter::ParseNode_Lighting_PointLight(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
+        mNodeElementCur->Children.push_back(ne);
         //MACRO_USE_CHECKANDAPPLY(def, use, ENET_PointLight, ne);
     } else {
         if (on) {
@@ -702,7 +703,8 @@ void X3DImporter::ParseNode_Lighting_SpotLight(XmlNode & node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(def, use, ENET_SpotLight, ne);
+        mNodeElementCur->Children.push_back(ne);
+        //MACRO_USE_CHECKANDAPPLY(def, use, ENET_SpotLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.
@@ -725,17 +727,19 @@ void X3DImporter::ParseNode_Lighting_SpotLight(XmlNode & node) {
             ((X3DNodeNodeElementLight *)ne)->Radius = radius;
 
             // Assimp want a node with name similar to a light. "Why? I don't no." )
-            ParseHelper_Group_Begin(false);
+//            ParseHelper_Group_Begin(false);
             // make random name
-            if (ne->ID.empty()) ne->ID = "SpotLight_" + to_string((size_t)ne);
+            if (ne->ID.empty()) ne->ID = "SpotLight_" + ai_to_string((size_t)ne);
 
             mNodeElementCur->ID = ne->ID; // assign name to node and return to light element.
-            ParseHelper_Node_Exit();
+            //ParseHelper_Node_Exit();
             // check for child nodes
-            if (!mReader->isEmptyElement())
-                ParseNode_Metadata(ne, "SpotLight");
-            else
-                mNodeElementCur->Child.push_back(ne); // add made object as child to current element
+//            if (!mReader->isEmptyElement())
+                readMetadata(node);
+
+  //              ParseNode_Metadata(ne, "SpotLight");
+    //        else
+                mNodeElementCur->Children.push_back(ne); // add made object as child to current element
 
             NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
         } // if(on)

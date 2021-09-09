@@ -659,6 +659,8 @@ public:
     void readViewpoint(XmlNode &node);
     void readMetadataObject(XmlNode &node);
     void ParseDirectionalLight(XmlNode &node);
+    void ParseNode_Lighting_PointLight(XmlNode &node);
+    void ParseNode_Lighting_SpotLight(XmlNode &node);
     void Postprocess_BuildNode(const X3DNodeElementBase &pNodeElement, aiNode &pSceneNode, std::list<aiMesh *> &pSceneMeshList,
             std::list<aiMaterial *> &pSceneMaterialList, std::list<aiLight *> &pSceneLightList) const;
 

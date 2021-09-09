@@ -300,8 +300,7 @@ void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOS
     pScene->mRootNode->mParent = nullptr;
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 
-    //search for root node element
-
+    // search for root node element
     mNodeElementCur = NodeElement_List.front();
     while (mNodeElementCur->Parent != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
@@ -342,7 +341,6 @@ void X3DImporter::InternReadFile( const std::string &pFile, aiScene *pScene, IOS
                 pScene->mLights[i] = *it++;
         }
     }
-
 }
 
 const aiImporterDesc *X3DImporter::GetInfo() const {
@@ -473,8 +471,29 @@ void readMetadataString(XmlNode &node, X3DNodeElementBase *parent) {
     }
 }
 
+static void parseColor(const std::string &value, aiColor3D &color) {
+    std::vector<std::string> values;
+    tokenize<std::string>(value, values, " ");
+    for (unsigned int i = 0; i < values.size(); ++i) {
+        color[i] = static_cast<ai_real>(atof(values[i].c_str()));
+    }
+}
+
+static void parseVector3(const std::string &value, aiVector3D &vector) {
+    std::vector<std::string> values;
+    tokenize<std::string>(value, values, " ");
+    for (unsigned int i = 0; i < values.size(); ++i) {
+        vector[i] = static_cast<ai_real>(atof(values[i].c_str()));
+    }
+}
+
+static void getUseAndDef(XmlNode &node, std::string &use, std::string &def) {
+    XmlParser::getStdStrAttribute(node, "use", use);
+    XmlParser::getStdStrAttribute(node, "def", def);
+}
+
 void X3DImporter::ParseDirectionalLight(XmlNode &node) {
-    std::string def, use;
+    std::string def, use, id, value;
     float ambientIntensity = 0;
     aiColor3D color(1, 1, 1);
     aiVector3D direction(0, 0, -1);
@@ -483,45 +502,42 @@ void X3DImporter::ParseDirectionalLight(XmlNode &node) {
     bool on = true;
     X3DNodeElementBase *ne = nullptr;
 
-    //MACRO_ATTRREAD_LOOPBEG;
-    MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
+    getUseAndDef(node, use, def);
+    XmlParser::getStdStrAttribute(node, "id", id);
+    if (XmlParser::getStdStrAttribute(node, "color", value)) {
+        parseColor(value, color);
+    }
+
+    if (XmlParser::getStdStrAttribute(node, "direction", value)) {
+        parseVector3(value, direction);
+    }
+
     XmlParser::getFloatAttribute(node, "ambientIntensity", ambientIntensity);
-    //MACRO_ATTRREAD_CHECK_RET("ambientIntensity", ambientIntensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("color", color, XML_ReadNode_GetAttrVal_AsCol3f);
-    MACRO_ATTRREAD_CHECK_REF("direction", direction, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_RET("global", global, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_CHECK_RET("intensity", intensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_RET("on", on, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_LOOPEND;
+    XmlParser::getBoolAttribute(node, "global", global);
+    XmlParser::getFloatAttribute(node, "intensity", intensity);
+    XmlParser::getBoolAttribute(node, "on", on);
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(def, use, ENET_DirectionalLight, ne);
+        //MACRO_USE_CHECKANDAPPLY(def, use, ENET_DirectionalLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.
-            ne = new X3DNodeNodeElementLight(CX3DImporter_NodeElement::ENET_DirectionalLight, NodeElement_Cur);
+            ne = new X3DNodeNodeElementLight(X3DElemType::ENET_DirectionalLight, mNodeElementCur);
             if (!def.empty())
                 ne->ID = def;
             else
-                ne->ID = "DirectionalLight_" + to_string((size_t)ne); // make random name
+                ne->ID = "DirectionalLight_" + ai_to_string((size_t)ne); // make random name
 
             ((X3DNodeNodeElementLight *)ne)->AmbientIntensity = ambientIntensity;
             ((X3DNodeNodeElementLight *)ne)->Color = color;
             ((X3DNodeNodeElementLight *)ne)->Direction = direction;
             ((X3DNodeNodeElementLight *)ne)->Global = global;
             ((X3DNodeNodeElementLight *)ne)->Intensity = intensity;
-            // Assimp want a node with name similar to a light. "Why? I don't no." )
-            ParseHelper_Group_Begin(false);
 
             mNodeElementCur->ID = ne->ID; // assign name to node and return to light element.
-            ParseHelper_Node_Exit();
-            // check for child nodes
-            if (!mReader->isEmptyElement())
-                ParseNode_Metadata(ne, "DirectionalLight");
-            else
-                mNodeElementCur->Child.push_back(ne); // add made object as child to current element
-
+            mNodeElementCur->Children.push_back(ne); // add made object as child to current element
+            readMetadata(node);
             NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
         } // if(on)
     } // if(!use.empty()) else
@@ -539,9 +555,12 @@ void X3DImporter::ParseDirectionalLight(XmlNode &node) {
 // on="true"            SFBool  [inputOutput]
 // radius="100"         SFFloat [inputOutput]
 // />
-void X3DImporter::ParseNode_Lighting_PointLight() {
-    std::string def, use;
+void X3DImporter::ParseNode_Lighting_PointLight(XmlNode &node) {
+    std::string def, use, value;
+    getUseAndDef(node, use, def);
+
     float ambientIntensity = 0;
+    aiVector3D attenuation(1, 0, 0);
     aiVector3D attenuation(1, 0, 0);
     aiColor3D color(1, 1, 1);
     bool global = true;
@@ -551,21 +570,36 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
     float radius = 100;
     X3DNodeElementBase *ne = nullptr;
 
-    MACRO_ATTRREAD_LOOPBEG;
-    MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-    MACRO_ATTRREAD_CHECK_RET("ambientIntensity", ambientIntensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("attenuation", attenuation, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_REF("color", color, XML_ReadNode_GetAttrVal_AsCol3f);
-    MACRO_ATTRREAD_CHECK_RET("global", global, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_CHECK_RET("intensity", intensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("location", location, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_RET("on", on, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_CHECK_RET("radius", radius, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_LOOPEND;
+    //MACRO_ATTRREAD_LOOPBEG;
+    //MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
+    XmlParser::getFloatAttribute(node, "ambientIntensity", ambientIntensity);
+    if (XmlParser::getStdStrAttribute(node, "attenuation", value)) {
+        parseVector3(value, attenuation);
+    }
+    if (XmlParser::getStdStrAttribute(node, "color", value)) {
+        parseColor(value, color);
+    }
+    XmlParser::getBoolAttribute(node, "global", global);
+    XmlParser::getFloatAttribute(node, "intensity", intensity);
+    if (XmlParser::getStdStrAttribute(node, "location", value)) {
+        parseVector3(value, location);
+    }
+    XmlParser::getBoolAttribute(node, "on", on);
+    XmlParser::getFloatAttribute(node, "radius", radius);
+    //MACRO_ATTRREAD_CHECK_RET("ambientIntensity", ambientIntensity, XML_ReadNode_GetAttrVal_AsFloat);
+    
+    //MACRO_ATTRREAD_CHECK_REF("attenuation", attenuation, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_CHECK_REF("color", color, XML_ReadNode_GetAttrVal_AsCol3f);
+    //MACRO_ATTRREAD_CHECK_RET("global", global, XML_ReadNode_GetAttrVal_AsBool);
+    //MACRO_ATTRREAD_CHECK_RET("intensity", intensity, XML_ReadNode_GetAttrVal_AsFloat);
+    //MACRO_ATTRREAD_CHECK_REF("location", location, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_CHECK_RET("on", on, XML_ReadNode_GetAttrVal_AsBool);
+    //MACRO_ATTRREAD_CHECK_RET("radius", radius, XML_ReadNode_GetAttrVal_AsFloat);
+    //MACRO_ATTRREAD_LOOPEND;
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(def, use, ENET_PointLight, ne);
+        //MACRO_USE_CHECKANDAPPLY(def, use, ENET_PointLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.
@@ -580,17 +614,20 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
             ((X3DNodeNodeElementLight *)ne)->Location = location;
             ((X3DNodeNodeElementLight *)ne)->Radius = radius;
             // Assimp want a node with name similar to a light. "Why? I don't no." )
-            ParseHelper_Group_Begin(false);
+          //  ParseHelper_Group_Begin(false);
             // make random name
-            if (ne->ID.empty()) ne->ID = "PointLight_" + to_string((size_t)ne);
+            if (ne->ID.empty()) {
+                ne->ID = "PointLight_" + ai_to_string((size_t)ne);
+            }
 
             mNodeElementCur->ID = ne->ID; // assign name to node and return to light element.
-            ParseHelper_Node_Exit();
+            //ParseHelper_Node_Exit();
             // check for child nodes
-            if (!mReader->isEmptyElement())
-                ParseNode_Metadata(ne, "PointLight");
-            else
-                mNodeElementCur->Child.push_back(ne); // add made object as child to current element
+            //if (!mReader->isEmptyElement())
+            readMetadata(node);
+                //ParseNode_Metadata(ne, "PointLight");
+            //else
+                mNodeElementCur->Children.push_back(ne); // add made object as child to current element
 
             NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
         } // if(on)
@@ -612,8 +649,10 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 // on="true"              SFBool  [inputOutput]
 // radius="100"           SFFloat [inputOutput]
 // />
-void X3DImporter::ParseNode_Lighting_SpotLight() {
-    std::string def, use;
+void X3DImporter::ParseNode_Lighting_SpotLight(XmlNode & node) {
+    std::string def, use, value;
+    getUseAndDef(node, use, def);
+
     float ambientIntensity = 0;
     aiVector3D attenuation(1, 0, 0);
     float beamWidth = 0.7854f;
@@ -627,20 +666,39 @@ void X3DImporter::ParseNode_Lighting_SpotLight() {
     float radius = 100;
     X3DNodeElementBase *ne = nullptr;
 
-    MACRO_ATTRREAD_LOOPBEG;
-    MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
-    MACRO_ATTRREAD_CHECK_RET("ambientIntensity", ambientIntensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("attenuation", attenuation, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_RET("beamWidth", beamWidth, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("color", color, XML_ReadNode_GetAttrVal_AsCol3f);
-    MACRO_ATTRREAD_CHECK_RET("cutOffAngle", cutOffAngle, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("direction", direction, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_RET("global", global, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_CHECK_RET("intensity", intensity, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_CHECK_REF("location", location, XML_ReadNode_GetAttrVal_AsVec3f);
-    MACRO_ATTRREAD_CHECK_RET("on", on, XML_ReadNode_GetAttrVal_AsBool);
-    MACRO_ATTRREAD_CHECK_RET("radius", radius, XML_ReadNode_GetAttrVal_AsFloat);
-    MACRO_ATTRREAD_LOOPEND;
+    //MACRO_ATTRREAD_LOOPBEG;
+    //MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
+    XmlParser::getFloatAttribute(node, "ambientIntensity", ambientIntensity);
+    //MACRO_ATTRREAD_CHECK_RET("ambientIntensity", ambientIntensity, XML_ReadNode_GetAttrVal_AsFloat);
+    if (XmlParser::getStdStrAttribute(node, "attenuation", value)) {
+        parseVector3(value, attenuation);
+    }
+    XmlParser::getFloatAttribute(node, "beamWidth", beamWidth);
+    //MACRO_ATTRREAD_CHECK_REF("attenuation", attenuation, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_CHECK_RET("beamWidth", beamWidth, XML_ReadNode_GetAttrVal_AsFloat);
+    if (XmlParser::getStdStrAttribute(node, "color", value)) {
+        parseColor(value, color);
+    }
+    XmlParser::getFloatAttribute(node, "cutOffAngle", cutOffAngle);
+    if (XmlParser::getStdStrAttribute(node, "direction", value)) {
+        parseVector3(value, direction);
+    }
+    XmlParser::getBoolAttribute(node, "global", global);
+    XmlParser::getFloatAttribute(node, "intensity", intensity);
+    if (XmlParser::getStdStrAttribute(node, "location", value)) {
+        parseVector3(value, location);
+    }
+    XmlParser::getBoolAttribute(node, "on", on);
+    XmlParser::getFloatAttribute(node, "radius", radius);
+    //    MACRO_ATTRREAD_CHECK_REF("color", color, XML_ReadNode_GetAttrVal_AsCol3f);
+    //MACRO_ATTRREAD_CHECK_RET("cutOffAngle", cutOffAngle, XML_ReadNode_GetAttrVal_AsFloat);
+    //MACRO_ATTRREAD_CHECK_REF("direction", direction, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_CHECK_RET("global", global, XML_ReadNode_GetAttrVal_AsBool);
+    //MACRO_ATTRREAD_CHECK_RET("intensity", intensity, XML_ReadNode_GetAttrVal_AsFloat);
+    //MACRO_ATTRREAD_CHECK_REF("location", location, XML_ReadNode_GetAttrVal_AsVec3f);
+    //MACRO_ATTRREAD_CHECK_RET("on", on, XML_ReadNode_GetAttrVal_AsBool);
+    //MACRO_ATTRREAD_CHECK_RET("radius", radius, XML_ReadNode_GetAttrVal_AsFloat);
+    //MACRO_ATTRREAD_LOOPEND;
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {

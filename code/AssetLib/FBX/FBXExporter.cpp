@@ -1803,7 +1803,7 @@ void FBXExporter::WriteObjects ()
             blendchannel_uid, blendshape_name + FBX::SEPARATOR + "SubDeformer", "BlendShapeChannel"
         );
         sdnode.AddChild("Version", int32_t(100));
-        sdnode.AddChild("DeformPercent", float_t(0.0));
+        sdnode.AddChild("DeformPercent", float(0.0));
         FBX::Node p("Properties70");
         p.AddP70numberA("DeformPercent", 0.0);
         sdnode.AddChild(p);

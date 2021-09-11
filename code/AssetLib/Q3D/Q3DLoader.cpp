@@ -92,7 +92,7 @@ bool Q3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     else if (!extension.length() || checkSig) {
         if (!pIOHandler)
             return true;
-        const char *tokens[] = { "quick3Do", "quick3Ds" };
+        static const char * const tokens[] = { "quick3Do", "quick3Ds" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
     }
     return false;

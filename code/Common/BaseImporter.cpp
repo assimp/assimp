@@ -155,7 +155,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 // ------------------------------------------------------------------------------------------------
 /*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
         const std::string &pFile,
-        const char **tokens,
+        const char * const *tokens,
         unsigned int numTokens,
         unsigned int searchBytes /* = 200 */,
         bool tokensSol /* false */,

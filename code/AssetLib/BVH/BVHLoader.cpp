@@ -100,7 +100,7 @@ bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs)
         return true;
 
     if ((!extension.length() || cs) && pIOHandler) {
-        const char *tokens[] = { "HIERARCHY" };
+        static const char * const tokens[] = { "HIERARCHY" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;

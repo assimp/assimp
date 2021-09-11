@@ -109,7 +109,7 @@ bool MD5Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        const char *tokens[] = { "MD5Version" };
+        static const char * const tokens[] = { "MD5Version" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

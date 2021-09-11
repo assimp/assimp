@@ -150,7 +150,7 @@ bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        const char *tokens[] = { "STL", "solid" };
+        static const char * const tokens[] = { "STL", "solid" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
     }
 

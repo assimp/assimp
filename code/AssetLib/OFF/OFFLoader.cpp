@@ -94,7 +94,7 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
     else if (!extension.length() || checkSig)
     {
         if (!pIOHandler)return true;
-        const char* tokens[] = {"off"};
+        static const char * const tokens[] = {"off"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,3);
     }
     return false;

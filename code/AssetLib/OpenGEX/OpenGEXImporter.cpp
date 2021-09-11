@@ -299,8 +299,8 @@ bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, boo
     if (!checkSig) {
         canRead = SimpleExtensionCheck(file, "ogex");
     } else {
-        static const char *token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
-        canRead = BaseImporter::SearchFileHeaderForToken(pIOHandler, file, token, 4);
+        static const char * const token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
+        canRead = SearchFileHeaderForToken(pIOHandler, file, token, 4);
     }
 
     return canRead;

@@ -93,7 +93,7 @@ bool TerragenImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, b
             return true;
         }
 
-        const char *tokens[] = { "terragen" };
+        static const char * const tokens[] = { "terragen" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

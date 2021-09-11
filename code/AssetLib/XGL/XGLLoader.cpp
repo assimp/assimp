@@ -118,7 +118,7 @@ bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 	} else if (extension == "xml" || checkSig) {
 		ai_assert(pIOHandler != NULL);
 
-		const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
+		static const char * const tokens[] = { "<world>", "<World>", "<WORLD>" };
 		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 3);
 	}
 	return false;

@@ -19,7 +19,7 @@ public:
     static void make_arc2D(float pStartAngle, float pEndAngle, float pRadius, size_t numSegments, std::list<aiVector3D> &pVertices);
     static void extend_point_to_line(const std::list<aiVector3D> &pPoint, std::list<aiVector3D> &pLine);
     static void polylineIdx_to_lineIdx(const std::list<int32_t> &pPolylineCoordIdx, std::list<int32_t> &pLineCoordIdx);
-    static void rect_parallele_piped(const aiVector3D &pSize, std::list<aiVector3D> &pVertices);
+    static void rect_parallel_epiped(const aiVector3D &pSize, std::list<aiVector3D> &pVertices);
     static void coordIdx_str2faces_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces, unsigned int &pPrimitiveTypes);
     static void add_color(aiMesh &pMesh, const std::list<aiColor3D> &pColors, const bool pColorPerVertex);
     static void add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors, const bool pColorPerVertex);

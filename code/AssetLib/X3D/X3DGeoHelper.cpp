@@ -116,7 +116,7 @@ void X3DGeoHelper::polylineIdx_to_lineIdx(const std::list<int32_t> &pPolylineCoo
     vert_set[6].Set(x1, y2, z1);            \
     vert_set[7].Set(x1, y1, z1)
 
-void X3DGeoHelper::rect_parallele_piped(const aiVector3D &pSize, std::list<aiVector3D> &pVertices) {
+void X3DGeoHelper::rect_parallel_epiped(const aiVector3D &pSize, std::list<aiVector3D> &pVertices) {
     MESH_RectParallelepiped_CREATE_VERT;
     MACRO_FACE_ADD_QUAD_FA(true, pVertices, vert_set, 3, 2, 1, 0); // front
     MACRO_FACE_ADD_QUAD_FA(true, pVertices, vert_set, 6, 7, 4, 5); // back

@@ -46,6 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BLOBIOSYSTEM_H_INCLUDED
 #define AI_BLOBIOSYSTEM_H_INCLUDED
 
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
+
 #include <assimp/cexport.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOStream.hpp>

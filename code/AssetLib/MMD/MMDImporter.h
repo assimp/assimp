@@ -68,10 +68,10 @@ public:
 
 private:
     //! \brief  Appends the supported extension.
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo() const override;
 
     //! \brief  File import implementation.
-    void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
 
     //! \brief  Create the data from imported content.
     void CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene);

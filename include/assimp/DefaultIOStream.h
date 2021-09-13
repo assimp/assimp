@@ -39,7 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Default file I/O using fXXX()-family of functions */
+/**
+ *  @file
+ *  @brief Default file I/O using fXXX()-family of functions
+ */
 #pragma once
 #ifndef AI_DEFAULTIOSTREAM_H_INC
 #define AI_DEFAULTIOSTREAM_H_INC
@@ -48,10 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   pragma GCC system_header
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <assimp/IOStream.hpp>
 #include <assimp/importerdesc.h>
-#include <assimp/Defines.h>
 
 namespace Assimp {
 
@@ -72,7 +74,12 @@ class ASSIMP_API DefaultIOStream : public IOStream {
 #endif // __ANDROID__
 
 protected:
+    /// @brief 
     DefaultIOStream() AI_NO_EXCEPT;
+
+    /// @brief The class constructor with the file name and the stream.
+    /// @param pFile        The file-streaam
+    /// @param strFilename  The file name
     DefaultIOStream(FILE* pFile, const std::string &strFilename);
 
 public:

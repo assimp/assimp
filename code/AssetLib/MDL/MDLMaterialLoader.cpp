@@ -43,10 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-// internal headers
 #include "MDLDefaultColorMap.h"
 #include "MDLLoader.h"
-#include <assimp/Defines.h>
+
 #include <assimp/StringUtils.h>
 #include <assimp/qnan.h>
 #include <assimp/scene.h>

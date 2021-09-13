@@ -47,11 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STREAMREADER_H_INCLUDED
 
 #ifdef __GNUC__
-#pragma GCC system_header
+#   pragma GCC system_header
 #endif
 
 #include <assimp/ByteSwapper.h>
-#include <assimp/Defines.h>
 #include <assimp/Exceptional.h>
 #include <assimp/IOStream.hpp>
 

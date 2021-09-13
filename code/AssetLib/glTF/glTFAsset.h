@@ -101,8 +101,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/glTF/glTFCommon.h"
 
-namespace glTF
-{
+namespace glTF {
     using glTFCommon::shared_ptr;
     using glTFCommon::IOSystem;
     using glTFCommon::IOStream;
@@ -131,8 +130,7 @@ namespace glTF
 
     //! For the KHR_binary_glTF extension (binary .glb file)
     //! 20-byte header (+ the JSON + a "body" data section)
-    struct GLB_Header
-    {
+    struct GLB_Header {
         uint8_t magic[4];     //!< Magic number: "glTF"
         uint32_t version;     //!< Version number (always 1 as of the last update)
         uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
@@ -146,14 +144,12 @@ namespace glTF
 
 
     //! Values for the GLB_Header::sceneFormat field
-    enum SceneFormat
-    {
+    enum SceneFormat {
         SceneFormat_JSON = 0
     };
 
     //! Values for the mesh primitive modes
-    enum PrimitiveMode
-    {
+    enum PrimitiveMode {
         PrimitiveMode_POINTS = 0,
         PrimitiveMode_LINES = 1,
         PrimitiveMode_LINE_LOOP = 2,
@@ -164,8 +160,7 @@ namespace glTF
     };
 
     //! Values for the Accessor::componentType field
-    enum ComponentType
-    {
+    enum ComponentType {
         ComponentType_BYTE = 5120,
         ComponentType_UNSIGNED_BYTE = 5121,
         ComponentType_SHORT = 5122,
@@ -174,8 +169,7 @@ namespace glTF
         ComponentType_FLOAT = 5126
     };
 
-    inline unsigned int ComponentTypeSize(ComponentType t)
-    {
+    inline unsigned int ComponentTypeSize(ComponentType t) {
         switch (t) {
             case ComponentType_SHORT:
             case ComponentType_UNSIGNED_SHORT:
@@ -196,23 +190,20 @@ namespace glTF
     }
 
     //! Values for the BufferView::target field
-    enum BufferViewTarget
-    {
+    enum BufferViewTarget {
         BufferViewTarget_NONE = 0,
         BufferViewTarget_ARRAY_BUFFER = 34962,
         BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963
     };
 
     //! Values for the Sampler::magFilter field
-    enum SamplerMagFilter
-    {
+    enum SamplerMagFilter {
         SamplerMagFilter_Nearest = 9728,
         SamplerMagFilter_Linear = 9729
     };
 
     //! Values for the Sampler::minFilter field
-    enum SamplerMinFilter
-    {
+    enum SamplerMinFilter {
         SamplerMinFilter_Nearest = 9728,
         SamplerMinFilter_Linear = 9729,
         SamplerMinFilter_Nearest_Mipmap_Nearest = 9984,
@@ -222,8 +213,7 @@ namespace glTF
     };
 
     //! Values for the Sampler::wrapS and Sampler::wrapT field
-    enum SamplerWrap
-    {
+    enum SamplerWrap {
         SamplerWrap_Clamp_To_Edge = 33071,
         SamplerWrap_Mirrored_Repeat = 33648,
         SamplerWrap_Repeat = 10497

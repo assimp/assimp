@@ -46,6 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COMMONMETADATA_H_INC
 #define AI_COMMONMETADATA_H_INC
 
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
+
 /// Scene metadata holding the name of the importer which loaded the source asset.
 /// This is always present if the scene was created from an imported asset.
 #define AI_METADATA_SOURCE_FORMAT "SourceAsset_Format"

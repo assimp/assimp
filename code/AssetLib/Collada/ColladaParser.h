@@ -43,6 +43,7 @@
  *  @brief Defines the parser helper class for the collada loader
  */
 
+#pragma once
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -39,64 +38,61 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
+#pragma once
 #ifndef AI_OGREIMPORTER_H_INC
 #define AI_OGREIMPORTER_H_INC
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include <assimp/BaseImporter.h>
-
-#include "OgreStructs.h"
-#include "OgreParsingUtils.h"
-
 #include <assimp/material.h>
 
-namespace Assimp
-{
-namespace Ogre
-{
+#include "OgreParsingUtils.h"
+#include "OgreStructs.h"
+
+namespace Assimp {
+namespace Ogre {
 
 /** Importer for Ogre mesh, skeleton and material formats.
     @todo Support vertex colors.
     @todo Support poses/animations from the mesh file.
     Currently only skeleton file animations are supported. */
-class OgreImporter : public BaseImporter
-{
+class OgreImporter : public BaseImporter {
 public:
     /// BaseImporter override.
-    virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+    virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
+
+protected:
+    /// BaseImporter override.
+    virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     /// BaseImporter override.
-    virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    virtual const aiImporterDesc *GetInfo() const override;
 
     /// BaseImporter override.
-    virtual const aiImporterDesc *GetInfo() const;
-
-    /// BaseImporter override.
-    virtual void SetupProperties(const Importer *pImp);
+    virtual void SetupProperties(const Importer *pImp) override;
 
 private:
     /// Read materials referenced by the @c mesh to @c pScene.
     void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh);
     void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh);
-    void AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials);
+    void AssignMaterials(aiScene *pScene, std::vector<aiMaterial *> &materials);
 
     /// Reads material
-    aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &MaterialName);
+    aiMaterial *ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &MaterialName);
 
     // These functions parse blocks from a material file from @c ss. Starting parsing from "{" and ending it to "}".
     bool ReadTechnique(const std::string &techniqueName, std::stringstream &ss, aiMaterial *material);
     bool ReadPass(const std::string &passName, std::stringstream &ss, aiMaterial *material);
     bool ReadTextureUnit(const std::string &textureUnitName, std::stringstream &ss, aiMaterial *material);
 
+private:
     std::string m_userDefinedMaterialLibFile;
     bool m_detectTextureTypeFromFilename;
-
     std::map<aiTextureType, unsigned int> m_textures;
 };
-} // Ogre
-} // Assimp
+} // namespace Ogre
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
 #endif // AI_OGREIMPORTER_H_INC

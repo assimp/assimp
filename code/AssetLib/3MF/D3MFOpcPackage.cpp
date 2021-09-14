@@ -51,11 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/texture.h>
 #include "3MFXmlTags.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <map>
-#include <memory>
 #include <vector>
 
 namespace Assimp {

@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#pragma once
 #ifndef AI_OPENGEX_IMPORTER_H
 #define AI_OPENGEX_IMPORTER_H
 
@@ -96,21 +97,21 @@ public:
     OpenGEXImporter();
 
     /// The class destructor.
-    virtual ~OpenGEXImporter();
+    ~OpenGEXImporter() override;
 
     /// BaseImporter override.
-    virtual bool CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const;
-
-    /// BaseImporter override.
-    virtual void InternReadFile( const std::string &file, aiScene *pScene, IOSystem *pIOHandler );
-
-    /// BaseImporter override.
-    virtual const aiImporterDesc *GetInfo() const;
-
-    /// BaseImporter override.
-    virtual void SetupProperties( const Importer *pImp );
+    bool CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const override;
 
 protected:
+    /// BaseImporter override.
+    void InternReadFile( const std::string &file, aiScene *pScene, IOSystem *pIOHandler ) override;
+
+    /// BaseImporter override.
+    virtual const aiImporterDesc *GetInfo() const override;
+
+    /// BaseImporter override.
+    virtual void SetupProperties( const Importer *pImp ) override;
+
     void handleNodes( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene );
@@ -176,15 +177,15 @@ private:
     };
 
     struct ChildInfo {
-        typedef std::list<aiNode*> NodeList;
+        using NodeList = std::list<aiNode*>;
         std::list<aiNode*> m_children;
     };
     ChildInfo *m_root;
-    typedef std::map<aiNode*, std::unique_ptr<ChildInfo> > NodeChildMap;
+    using NodeChildMap = std::map<aiNode*, std::unique_ptr<ChildInfo> >;
     NodeChildMap m_nodeChildMap;
 
     std::vector<std::unique_ptr<aiMesh> > m_meshCache;
-    typedef std::map<std::string, size_t> ReferenceMap;
+    using ReferenceMap = std::map<std::string, size_t>;
     std::map<std::string, size_t> m_mesh2refMap;
     std::map<std::string, size_t> m_material2refMap;
 

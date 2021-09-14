@@ -50,8 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** @brief Importer class to load UNREAL files (*.3d)
-*/
+/**
+ *  @brief Importer class to load UNREAL files (*.3d)
+ */
 class UnrealImporter : public BaseImporter {
 public:
     UnrealImporter();
@@ -62,23 +63,22 @@ public:
      *
      *  See BaseImporter::CanRead() for details.
      **/
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
     /** @brief Called by Importer::GetExtensionList()
      *
-     * See #BaseImporter::GetInfo for the details
+     * @see #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** @brief Setup properties for the importer
      *
      * See BaseImporter::SetupProperties() for details
      */
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
     // -------------------------------------------------------------------
     /** @brief Imports the given file into the given scene structure.
@@ -86,7 +86,7 @@ protected:
      * See BaseImporter::InternReadFile() for details
      */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
 private:
     //! frame to be loaded

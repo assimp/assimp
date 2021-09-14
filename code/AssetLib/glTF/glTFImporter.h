@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 
 namespace glTF {
-class Asset;
+    class Asset;
 
 }
 

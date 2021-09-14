@@ -43,12 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_GLTF2IMPORTER_H_INC
 
 #include <assimp/BaseImporter.h>
-#include <assimp/DefaultIOSystem.h>
 
 struct aiNode;
 
 namespace glTF2 {
-class Asset;
+    class Asset;
 }
 
 namespace Assimp {

@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 
 // Header files, standard library.
-#include <inttypes.h>
+#include <cinttypes>
 #include <limits>
 #include <memory>
 

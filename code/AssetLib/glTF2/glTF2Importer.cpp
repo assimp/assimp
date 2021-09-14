@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/glTF2/glTF2Importer.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 #include "AssetLib/glTF2/glTF2Asset.h"
+
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif
@@ -57,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/commonMetaData.h>
+#include <assimp/DefaultIOSystem.h>
 
 #include <memory>
 #include <unordered_map>
@@ -1536,11 +1538,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
             if (ext) {
                 if (strcmp(ext, "jpeg") == 0) {
                     ext = "jpg";
-                }
-                else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
+                } else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
                     ext = "kx2";
-                }
-                else if(strcmp(ext, "basis") == 0) { //basisu
+                } else if(strcmp(ext, "basis") == 0) { //basisu
                     ext = "bu";
                 }
 

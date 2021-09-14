@@ -73,7 +73,6 @@ public:
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
-public:
     /// @brief  The default constructor.
     ObjFileParser();
     /// @brief  Constructor with data array.

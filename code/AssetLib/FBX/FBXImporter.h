@@ -70,28 +70,29 @@ typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>
 class FBXImporter : public BaseImporter, public LogFunctions<FBXImporter> {
 public:
     FBXImporter();
-    virtual ~FBXImporter();
+    ~FBXImporter() override;
 
     // --------------------
     bool CanRead(const std::string &pFile,
             IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
 protected:
     // --------------------
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // --------------------
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
     // --------------------
     void InternReadFile(const std::string &pFile,
             aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
 private:
     FBX::ImportSettings settings;
 }; // !class FBXImporter
 
 } // end of namespace Assimp
+
 #endif // !INCLUDED_AI_FBX_IMPORTER_H

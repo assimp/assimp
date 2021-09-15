@@ -69,11 +69,15 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 TerragenImporter::TerragenImporter() :
-        configComputeUVs(false) {}
+        configComputeUVs(false) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-TerragenImporter::~TerragenImporter() {}
+TerragenImporter::~TerragenImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

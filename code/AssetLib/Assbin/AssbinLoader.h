@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,17 +73,11 @@ private:
     bool compressed;
 
 public:
-    virtual bool CanRead(
-        const std::string& pFile,
-        IOSystem* pIOHandler,
-        bool checkSig
-    ) const;
-    virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile(
-    const std::string& pFile,
-        aiScene* pScene,
-        IOSystem* pIOHandler
-    );
+    bool CanRead(const std::string& pFile,
+        IOSystem* pIOHandler, bool checkSig) const override;
+    const aiImporterDesc* GetInfo() const override;
+    void InternReadFile(
+    const std::string& pFile,aiScene* pScene,IOSystem* pIOHandler) override;
     void ReadHeader();
     void ReadBinaryScene( IOStream * stream, aiScene* pScene );
     void ReadBinaryNode( IOStream * stream, aiNode** mRootNode, aiNode* parent );

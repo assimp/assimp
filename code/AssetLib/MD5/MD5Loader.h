@@ -43,12 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Definition of the .MD5 importer class.
  *  http://www.modwiki.net/wiki/MD5_(file_format)
 */
+#pragma once
 #ifndef AI_MD5LOADER_H_INCLUDED
 #define AI_MD5LOADER_H_INCLUDED
 
 #include "MD5Parser.h"
 #include <assimp/BaseImporter.h>
-
 #include <assimp/types.h>
 
 struct aiNode;
@@ -65,35 +65,35 @@ using namespace Assimp::MD5;
 class MD5Importer : public BaseImporter {
 public:
     MD5Importer();
-    ~MD5Importer();
+    ~MD5Importer() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
      * basing on the Importer's configuration property list.
      */
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Load a *.MD5MESH file.

@@ -146,9 +146,6 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPFileImporter::~Q3BSPFileImporter() {
-    m_pCurrentMesh = nullptr;
-    m_pCurrentFace = nullptr;
-
     // Clear face-to-material map
     for (FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it) {
         const std::string &matName = it->first;
@@ -156,7 +153,6 @@ Q3BSPFileImporter::~Q3BSPFileImporter() {
             delete it->second;
         }
     }
-    m_MaterialLookupMap.clear();
 }
 
 // ------------------------------------------------------------------------------------------------

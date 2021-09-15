@@ -48,14 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_AMF_IMPORTER_NODE_H
 #define INCLUDED_AI_AMF_IMPORTER_NODE_H
 
-// Header files, stdlib.
+// Header files, Assimp.
+#include <assimp/scene.h>
+#include <assimp/types.h>
+
 #include <list>
 #include <string>
 #include <vector>
-
-// Header files, Assimp.
-#include "assimp/scene.h"
-#include "assimp/types.h"
 
 /// \class CAMFImporter_NodeElement
 /// Base class for elements of nodes.

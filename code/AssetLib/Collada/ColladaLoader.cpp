@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include <assimp/ColladaMetaData.h>
 #include <assimp/CreateAnimMesh.h>
-#include <assimp/Defines.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/ZipArchiveIOSystem.h>

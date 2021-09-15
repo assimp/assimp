@@ -100,7 +100,6 @@ XGLImporter::XGLImporter() :
 // Destructor, private as well
 XGLImporter::~XGLImporter() {
 	delete mXmlParser;
-    mXmlParser = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -115,13 +114,15 @@ bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 
 	if (extension == "xgl" || extension == "zgl") {
 		return true;
-	} else if (extension == "xml" || checkSig) {
-		ai_assert(pIOHandler != NULL);
+	}
 
+  if (extension == "xml" || checkSig) {
+		ai_assert(pIOHandler != nullptr);
 		static const char * const tokens[] = { "<world>", "<World>", "<WORLD>" };
 		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 3);
 	}
-	return false;
+
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -454,12 +455,12 @@ aiMesh *XGLImporter::ToOutputMesh(const TempMaterialMesh &m) {
 	mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 	std::copy(m.positions.begin(), m.positions.end(), mesh->mVertices);
 
-	if (m.normals.size()) {
+	if (!m.normals.empty()) {
 		mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 		std::copy(m.normals.begin(), m.normals.end(), mesh->mNormals);
 	}
 
-	if (m.uvs.size()) {
+	if (!m.uvs.empty()) {
 		mesh->mNumUVComponents[0] = 2;
 		mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
 
@@ -595,7 +596,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 	}
 
 	// finally extract output meshes and add them to the scope
-	typedef std::pair<const unsigned int, TempMaterialMesh> pairt;
+	using pairt = std::pair<const unsigned int, TempMaterialMesh>;
 	for (const pairt &p : bymat) {
 		aiMesh *const m = ToOutputMesh(p.second);
 		scope.meshes_linear.push_back(m);
@@ -620,7 +621,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 
 	const int id = ReadIndexFromText(node);
 
-	std::map<unsigned int, aiMaterial *>::iterator it = scope.materials.find(id), end = scope.materials.end();
+	auto it = scope.materials.find(id), end = scope.materials.end();
 	if (it == end) {
 		ThrowException("<matref> index out of range");
 	}
@@ -644,7 +645,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
     const unsigned int mat_id = ReadIDAttr(node);
 
-	aiMaterial *mat(new aiMaterial);
+	auto *mat(new aiMaterial);
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "amb") {

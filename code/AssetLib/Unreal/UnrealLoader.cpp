@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 
 using namespace Assimp;

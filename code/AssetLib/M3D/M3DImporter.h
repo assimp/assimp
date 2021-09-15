@@ -65,21 +65,20 @@ class M3DImporter : public BaseImporter {
 public:
 	/// \brief  Default constructor
 	M3DImporter();
+    ~M3DImporter() override {}
 
-public:
 	/// \brief  Returns whether the class can handle the format of the given file.
 	/// \remark See BaseImporter::CanRead() for details.
-	bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+	bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
+
+protected:
+    //! \brief  Appends the supported extension.
+    const aiImporterDesc *GetInfo() const override;
+
+    //! \brief  File import implementation.
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
 private:
-	aiScene *mScene = nullptr; // the scene to import to
-
-	//! \brief  Appends the supported extension.
-	const aiImporterDesc *GetInfo() const;
-
-	//! \brief  File import implementation.
-	void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
-
 	void importMaterials(const M3DWrapper &m3d);
 	void importTextures(const M3DWrapper &m3d);
 	void importMeshes(const M3DWrapper &m3d);
@@ -94,6 +93,9 @@ private:
 	void populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *verteces,
 			std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,
 			std::vector<unsigned int> *vertexids);
+
+private:
+    aiScene *mScene = nullptr; // the scene to import to
 };
 
 } // Namespace Assimp

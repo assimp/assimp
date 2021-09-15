@@ -61,9 +61,9 @@ struct Material;
 class ObjFileMtlImporter {
 public:
     static const size_t BUFFERSIZE = 2048;
-    typedef std::vector<char> DataArray;
-    typedef std::vector<char>::iterator DataArrayIt;
-    typedef std::vector<char>::const_iterator ConstDataArrayIt;
+    using DataArray = std::vector<char>;
+    using DataArrayIt = std::vector<char>::iterator;
+    using ConstDataArrayIt = std::vector<char>::const_iterator;
 
     //! \brief  The class default constructor
     ObjFileMtlImporter(std::vector<char> &buffer, const std::string &strAbsPath,

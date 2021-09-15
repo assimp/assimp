@@ -352,7 +352,6 @@ ZipArchiveIOSystem::Implement::Implement(IOSystem *pIOHandler, const char *pFile
 ZipArchiveIOSystem::Implement::~Implement() {
     if (m_ZipFileHandle != nullptr) {
         unzClose(m_ZipFileHandle);
-        m_ZipFileHandle = nullptr;
     }
 }
 

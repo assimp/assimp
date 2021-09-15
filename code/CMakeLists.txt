@@ -69,7 +69,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/ColladaMetaData.h
   ${HEADER_PATH}/commonMetaData.h
   ${HEADER_PATH}/defs.h
-  ${HEADER_PATH}/Defines.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
   ${HEADER_PATH}/material.h

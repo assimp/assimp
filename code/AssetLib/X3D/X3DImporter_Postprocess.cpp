@@ -703,7 +703,7 @@ void X3DImporter::Postprocess_CollectMetadata(const X3DNodeElementBase &pNodeEle
             // Add an element according to its type.
             if ((*it)->Type == X3DElemType::ENET_MetaBoolean) {
                 if (((X3DNodeElementMetaBoolean *)cur_meta)->Value.size() > 0)
-                    pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((X3DNodeElementMetaBoolean *)cur_meta)->Value.begin()));
+                    pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((X3DNodeElementMetaBoolean *)cur_meta)->Value.begin()) == true);
             } else if ((*it)->Type == X3DElemType::ENET_MetaDouble) {
                 if (((X3DNodeElementMetaDouble *)cur_meta)->Value.size() > 0)
                     pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, (float)*(((X3DNodeElementMetaDouble *)cur_meta)->Value.begin()));

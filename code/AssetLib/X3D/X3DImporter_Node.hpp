@@ -110,7 +110,7 @@ struct X3DNodeElementBase {
 
 protected:
     X3DNodeElementBase(X3DElemType type, X3DNodeElementBase *pParent) :
-            Type(type), Parent(pParent) {
+            Parent(pParent), Type(type) {
         // empty
     }
 };

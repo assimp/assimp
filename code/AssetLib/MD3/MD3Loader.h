@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MD3LOADER_H_INCLUDED
 #define AI_MD3LOADER_H_INCLUDED
 
+#include "MD3FileData.h"
 #include <assimp/BaseImporter.h>
 #include <assimp/ByteSwapper.h>
-#include "MD3FileData.h"
 #include <assimp/StringComparison.h>
 #include <assimp/types.h>
 
@@ -56,8 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
-
+namespace Assimp {
 
 using namespace MD3;
 namespace Q3Shader {
@@ -65,16 +63,14 @@ namespace Q3Shader {
 // ---------------------------------------------------------------------------
 /** @brief Tiny utility data structure to hold the data of a .skin file
  */
-struct SkinData
-{
-    //! A single entryin texture list
-    struct TextureEntry : public std::pair<std::string,std::string>
-    {
+struct SkinData {
+    //! A single entry in texture list
+    struct TextureEntry : public std::pair<std::string, std::string> {
         // did we resolve this texture entry?
         bool resolved;
 
         // for std::find()
-        bool operator == (const std::string& f) const {
+        bool operator==(const std::string &f) const {
             return f == first;
         }
     };
@@ -88,8 +84,7 @@ struct SkinData
 // ---------------------------------------------------------------------------
 /** @brief Specifies cull modi for Quake shader files.
  */
-enum ShaderCullMode
-{
+enum ShaderCullMode {
     CULL_NONE,
     CULL_CW,
     CULL_CCW
@@ -98,8 +93,7 @@ enum ShaderCullMode
 // ---------------------------------------------------------------------------
 /** @brief Specifies alpha blend modi (src + dest) for Quake shader files
  */
-enum BlendFunc
-{
+enum BlendFunc {
     BLEND_NONE,
     BLEND_GL_ONE,
     BLEND_GL_ZERO,
@@ -112,8 +106,7 @@ enum BlendFunc
 // ---------------------------------------------------------------------------
 /** @brief Specifies alpha test modi for Quake texture maps
  */
-enum AlphaTestFunc
-{
+enum AlphaTestFunc {
     AT_NONE,
     AT_GT0,
     AT_LT128,
@@ -123,36 +116,31 @@ enum AlphaTestFunc
 // ---------------------------------------------------------------------------
 /** @brief Tiny utility data structure to hold a .shader map data block
  */
-struct ShaderMapBlock
-{
+struct ShaderMapBlock {
     ShaderMapBlock() AI_NO_EXCEPT
-         :  blend_src   (BLEND_NONE)
-         ,  blend_dest  (BLEND_NONE)
-         ,  alpha_test  (AT_NONE)
-    {}
+            : blend_src(BLEND_NONE),
+              blend_dest(BLEND_NONE),
+              alpha_test(AT_NONE) {}
 
     //! Name of referenced map
     std::string name;
 
     //! Blend and alpha test settings for texture
-    BlendFunc blend_src,blend_dest;
+    BlendFunc blend_src, blend_dest;
     AlphaTestFunc alpha_test;
 
-
     //! For std::find()
-    bool operator== (const std::string& o) const {
-        return !ASSIMP_stricmp(o,name);
+    bool operator==(const std::string &o) const {
+        return !ASSIMP_stricmp(o, name);
     }
 };
 
 // ---------------------------------------------------------------------------
 /** @brief Tiny utility data structure to hold a .shader data block
  */
-struct ShaderDataBlock
-{
+struct ShaderDataBlock {
     ShaderDataBlock() AI_NO_EXCEPT
-        :   cull    (CULL_CW)
-    {}
+            : cull(CULL_CW) {}
 
     //! Name of referenced data element
     std::string name;
@@ -163,18 +151,16 @@ struct ShaderDataBlock
     //! Maps defined in the shader
     std::list<ShaderMapBlock> maps;
 
-
     //! For std::find()
-    bool operator== (const std::string& o) const {
-        return !ASSIMP_stricmp(o,name);
+    bool operator==(const std::string &o) const {
+        return !ASSIMP_stricmp(o, name);
     }
 };
 
 // ---------------------------------------------------------------------------
 /** @brief Tiny utility data structure to hold the data of a .shader file
  */
-struct ShaderData
-{
+struct ShaderData {
     //! Shader data blocks
     std::list<ShaderDataBlock> blocks;
 };
@@ -188,8 +174,7 @@ struct ShaderData
  *  @param io IOSystem to be used for reading
  *  @return false if file is not accessible
  */
-bool LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
-
+bool LoadShader(ShaderData &fill, const std::string &file, IOSystem *io);
 
 // ---------------------------------------------------------------------------
 /** @brief Convert a Q3Shader to an aiMaterial
@@ -197,7 +182,7 @@ bool LoadShader(ShaderData& fill, const std::string& file,IOSystem* io);
  *  @param[out] out Material structure to be filled.
  *  @param[in] shader Input shader
  */
-void ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& shader);
+void ConvertShaderToMaterial(aiMaterial *out, const ShaderDataBlock &shader);
 
 // ---------------------------------------------------------------------------
 /** @brief Load a skin file
@@ -208,56 +193,50 @@ void ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& shader);
  *  @param io IOSystem to be used for reading
  *  @return false if file is not accessible
  */
-bool LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
+bool LoadSkin(SkinData &fill, const std::string &file, IOSystem *io);
 
-} // ! namespace Q3SHader
+} // namespace Q3Shader
 
 // ---------------------------------------------------------------------------
 /** @brief Importer class to load MD3 files
 */
-class MD3Importer : public BaseImporter
-{
+class MD3Importer : public BaseImporter {
 public:
     MD3Importer();
-    ~MD3Importer();
-
-
-public:
+    ~MD3Importer() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
-
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
     * The function is a request to the importer to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Validate offsets in the header
      */
     void ValidateHeaderOffsets();
-    void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
+    void ValidateSurfaceHeaderOffsets(const MD3::Surface *pcSurfHeader);
 
     // -------------------------------------------------------------------
     /** Read a Q3 multipart file
@@ -269,13 +248,13 @@ protected:
     /** Try to read the skin for a MD3 file
      *  @param fill Receives output information
      */
-    void ReadSkin(Q3Shader::SkinData& fill) const;
+    void ReadSkin(Q3Shader::SkinData &fill) const;
 
     // -------------------------------------------------------------------
     /** Try to read the shader for a MD3 file
      *  @param fill Receives output information
      */
-    void ReadShader(Q3Shader::ShaderData& fill) const;
+    void ReadShader(Q3Shader::ShaderData &fill) const;
 
     // -------------------------------------------------------------------
     /** Convert a texture path in a MD3 file to a proper value
@@ -283,11 +262,10 @@ protected:
      *  @param[in] header_path Base path specified in MD3 header
      *  @param[out] out Receives the converted output string
      */
-    void ConvertPath(const char* texture_name, const char* header_path,
-        std::string& out) const;
+    void ConvertPath(const char *texture_name, const char *header_path,
+            std::string &out) const;
 
 protected:
-
     /** Configuration option: frame to be loaded */
     unsigned int configFrameID;
 
@@ -307,10 +285,10 @@ protected:
     bool configSpeedFlag;
 
     /** Header of the MD3 file */
-    BE_NCONST MD3::Header* pcHeader;
+    BE_NCONST MD3::Header *pcHeader;
 
     /** File buffer  */
-    BE_NCONST unsigned char* mBuffer;
+    BE_NCONST unsigned char *mBuffer;
 
     /** Size of the file, in bytes */
     unsigned int fileSize;
@@ -325,11 +303,11 @@ protected:
     std::string filename;
 
     /** Output scene to be filled */
-    aiScene* mScene;
+    aiScene *mScene;
 
     /** IO system to be used to access the data*/
-    IOSystem* mIOHandler;
-    };
+    IOSystem *mIOHandler;
+};
 
 } // end of namespace Assimp
 

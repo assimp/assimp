@@ -65,6 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+// clang-format off
 #if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
@@ -75,37 +76,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/rapidjson.h>
 
 #if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
-#pragma GCC diagnostic pop
+#   pragma GCC diagnostic pop
 #endif
 
 #ifdef ASSIMP_API
-#include <assimp/ByteSwapper.h>
-#include <assimp/DefaultIOSystem.h>
-#include <memory>
+#   include <assimp/ByteSwapper.h>
+#   include <assimp/DefaultIOSystem.h>
+#   include <memory>
 #else
-#include <memory>
-#define AI_SWAP4(p)
-#define ai_assert
+#   include <memory>
+#   define AI_SWAP4(p)
+#   define ai_assert
 #endif
 
 #if _MSC_VER > 1500 || (defined __GNUC___)
-#define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
+#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
-#define gltf_unordered_map map
-#define gltf_unordered_set set
+#   define gltf_unordered_map map
+#   define gltf_unordered_set set
 #endif
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#include <unordered_map>
-#include <unordered_set>
-#if defined(_MSC_VER) && _MSC_VER <= 1600
-#define gltf_unordered_map tr1::unordered_map
-#define gltf_unordered_set tr1::unordered_set
-#else
-#define gltf_unordered_map unordered_map
-#define gltf_unordered_set unordered_set
+#   include <unordered_map>
+#   include <unordered_set>
+#   if defined(_MSC_VER) && _MSC_VER <= 1600
+#       define gltf_unordered_map tr1::unordered_map
+#       define gltf_unordered_set tr1::unordered_set
+#   else
+#      define gltf_unordered_map unordered_map
+#       define gltf_unordered_set unordered_set
+#   endif
 #endif
-#endif
+// clang-format on
 
 #include <assimp/StringUtils.h>
 
@@ -113,6 +115,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace glTF2 {
 
+using glTFCommon::Nullable;
+using glTFCommon::Ref;
 using glTFCommon::IOStream;
 using glTFCommon::IOSystem;
 using glTFCommon::shared_ptr;
@@ -319,44 +323,9 @@ const AttribType::Info
             { "SCALAR", 1 }, { "VEC2", 2 }, { "VEC3", 3 }, { "VEC4", 4 }, { "MAT2", 4 }, { "MAT3", 9 }, { "MAT4", 16 }
         };
 
-//! A reference to one top-level object, which is valid
-//! until the Asset instance is destroyed
-template <class T>
-class Ref {
-    std::vector<T *> *vector;
-    unsigned int index;
-
-public:
-    Ref() :
-            vector(0),
-            index(0) {}
-    Ref(std::vector<T *> &vec, unsigned int idx) :
-            vector(&vec),
-            index(idx) {}
-
-    inline unsigned int GetIndex() const { return index; }
-
-    operator bool() const { return vector != 0; }
-
-    T *operator->() { return (*vector)[index]; }
-
-    T &operator*() { return *((*vector)[index]); }
-};
-
-//! Helper struct to represent values that might not be present
-template <class T>
-struct Nullable {
-    T value;
-    bool isPresent;
-
-    Nullable() :
-            isPresent(false) {}
-    Nullable(T &val) :
-            value(val),
-            isPresent(true) {}
-};
 
 struct CustomExtension {
+
     //
     // A struct containing custom extension data added to a glTF2 file
     // Has to contain Object, Array, String, Double, Uint64, and Int64 at a minimum
@@ -553,7 +522,7 @@ public:
 
     void MarkAsSpecial() { mIsSpecial = true; }
 
-    bool IsSpecial() const { return mIsSpecial; }
+    bool IsSpecial() const override { return mIsSpecial; }
 
     std::string GetURI() { return std::string(this->id) + ".bin"; }
 
@@ -849,7 +818,7 @@ struct Material : public Object {
 
 //! A set of primitives to be rendered. A node can contain one or more meshes. A node's transform places the mesh in the scene.
 struct Mesh : public Object {
-    typedef std::vector<Ref<Accessor>> AccessorList;
+    using AccessorList = std::vector<Ref<Accessor>>;
 
     struct Primitive {
         PrimitiveMode mode;
@@ -880,7 +849,6 @@ struct Mesh : public Object {
 
     Mesh() {}
 
-    /// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
     /// Get mesh data from JSON-object and place them to root asset.
     /// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
     /// \param [out] pAsset_Root - reference to root asset where data will be stored.
@@ -1023,8 +991,8 @@ class LazyDict : public LazyDictBase {
     friend class Asset;
     friend class AssetWriter;
 
-    typedef typename std::gltf_unordered_map<unsigned int, unsigned int> Dict;
-    typedef typename std::gltf_unordered_map<std::string, unsigned int> IdDict;
+    using Dict = typename std::gltf_unordered_map<unsigned int, unsigned int>;
+    using IdDict = typename std::gltf_unordered_map<std::string, unsigned int>;
 
     std::vector<T *> mObjs; //! The read objects
     Dict mObjsByOIndex; //! The read objects accessible by original index
@@ -1087,7 +1055,7 @@ struct AssetMetadata {
 
 //! Root object for a glTF asset
 class Asset {
-    typedef std::gltf_unordered_map<std::string, int> IdMap;
+    using IdMap = std::gltf_unordered_map<std::string, int>;
 
     template <class T>
     friend class LazyDict;

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  LWSLoader.h
  *  @brief Declaration of the LightWave scene importer class.
  */
+#pragma once
 #ifndef AI_LWSLOADER_H_INCLUDED
 #define AI_LWSLOADER_H_INCLUDED
 
@@ -53,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiImporterDesc;
 
 namespace Assimp {
+
 class BatchLoader;
 class Importer;
 class IOSystem;
@@ -172,26 +174,26 @@ struct NodeDesc {
 class LWSImporter : public BaseImporter {
 public:
     LWSImporter();
-    ~LWSImporter();
+    ~LWSImporter() override;
 
     // -------------------------------------------------------------------
     // Check whether we can read a specific file
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
     // Get list of supported extensions
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     // Import file into given scene data structure
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     // Setup import properties
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 private:
     // -------------------------------------------------------------------
@@ -226,9 +228,7 @@ private:
 private:
     bool configSpeedFlag;
     IOSystem *io;
-
     double first, last, fps;
-
     bool noSkeletonMesh;
 };
 

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -54,33 +52,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-void Bitmap::Save(aiTexture *texture, IOStream *file) {
-    if (file != nullptr) {
-        Header header;
-        DIB dib;
-
-        dib.size = DIB::dib_size;
-        dib.width = texture->mWidth;
-        dib.height = texture->mHeight;
-        dib.planes = 1;
-        dib.bits_per_pixel = 8 * mBytesPerPixel;
-        dib.compression = 0;
-        dib.image_size = (((dib.width * mBytesPerPixel) + 3) & 0x0000FFFC) * dib.height;
-        dib.x_resolution = 0;
-        dib.y_resolution = 0;
-        dib.nb_colors = 0;
-        dib.nb_important_colors = 0;
-
-        header.type = 0x4D42; // 'BM'
-        header.offset = Header::header_size + DIB::dib_size;
-        header.size = header.offset + dib.image_size;
-        header.reserved1 = 0;
-        header.reserved2 = 0;
-
-        WriteHeader(header, file);
-        WriteDIB(dib, file);
-        WriteData(texture, file);
+bool Bitmap::Save(aiTexture *texture, IOStream *file) {
+    if (file == nullptr) {
+        return false;
     }
+
+    Header header;
+    DIB dib;
+    dib.size = DIB::dib_size;
+    dib.width = texture->mWidth;
+    dib.height = texture->mHeight;
+    dib.planes = 1;
+    dib.bits_per_pixel = 8 * mBytesPerPixel;
+    dib.compression = 0;
+    dib.image_size = (((dib.width * mBytesPerPixel) + 3) & 0x0000FFFC) * dib.height;
+    dib.x_resolution = 0;
+    dib.y_resolution = 0;
+    dib.nb_colors = 0;
+    dib.nb_important_colors = 0;
+
+    header.type = 0x4D42; // 'BM'
+    header.offset = Header::header_size + DIB::dib_size;
+    header.size = header.offset + dib.image_size;
+    header.reserved1 = 0;
+    header.reserved2 = 0;
+
+    WriteHeader(header, file);
+    WriteDIB(dib, file);
+    WriteData(texture, file);
+
+    return true;
 }
 
 template <typename T>

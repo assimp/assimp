@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -578,7 +577,7 @@ enum aiMorphingMethod {
 * referencing the vertices. In addition there might be a series of bones, each
 * of them addressing a number of vertices with a certain weight. Vertex data
 * is presented in channels with each channel containing a single per-vertex
-* information such as a set of texture coords or a normal vector.
+* information such as a set of texture coordinates or a normal vector.
 * If a data pointer is non-null, the corresponding data stream is present.
 * From C++-programs you can also use the comfort functions Has*() to
 * test for the presence of various data streams.
@@ -668,7 +667,7 @@ struct aiMesh {
     */
     C_STRUCT aiColor4D *mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
-    /** Vertex texture coords, also known as UV channels.
+    /** Vertex texture coordinates, also known as UV channels.
     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
     * vertex. nullptr if not present. The array is mNumVertices in size.
     */
@@ -683,7 +682,7 @@ struct aiMesh {
     * or cube maps). If the value is 2 for a given channel n, the
     * component p.z of mTextureCoords[n][p] is set to 0.0f.
     * If the value is 1 for a given channel, p.y is set to 0.0f, too.
-    * @note 4D coords are not supported
+    * @note 4D coordinates are not supported
     */
     unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
@@ -736,12 +735,12 @@ struct aiMesh {
     C_STRUCT aiAnimMesh **mAnimMeshes;
 
     /**
-     *  Method of morphing when animeshes are specified.
+     *  Method of morphing when anim-meshes are specified.
      */
     unsigned int mMethod;
 
     /**
-     *
+     *  The bounding box.
      */
     C_STRUCT aiAABB mAABB;
 

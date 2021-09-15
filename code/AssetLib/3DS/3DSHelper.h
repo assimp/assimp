@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/light.h>
 #include <assimp/material.h>
 #include <assimp/qnan.h>
-#include <stdio.h> //sprintf
+#include <cstdio> //sprintf
 
 namespace Assimp {
 namespace D3DS {

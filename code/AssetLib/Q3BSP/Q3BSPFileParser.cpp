@@ -77,7 +77,6 @@ Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, ZipArchiveIOSystem
 // ------------------------------------------------------------------------------------------------
 Q3BSPFileParser::~Q3BSPFileParser() {
     delete m_pModel;
-    m_pModel = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

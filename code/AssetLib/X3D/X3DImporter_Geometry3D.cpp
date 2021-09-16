@@ -812,7 +812,7 @@ void X3DImporter::readExtrusion(XmlNode &node) {
 			{
 				for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; cri++)
 				{
-					ext_alias.Vertices.push_back(pointset_arr[spi][cri]);
+					ext_alias.Vertices.emplace_back(pointset_arr[spi][cri]);
 				}
 			}
 		}// END: 4. Create vertices list.

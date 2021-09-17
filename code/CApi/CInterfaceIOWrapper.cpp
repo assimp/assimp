@@ -51,7 +51,6 @@ CIOStreamWrapper::~CIOStreamWrapper() {
     /* Various places depend on this destructor to close the file */
     if (mFile) {
         mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
-        mFile = nullptr;
     }
 }
 

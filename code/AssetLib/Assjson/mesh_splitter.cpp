@@ -69,13 +69,12 @@ void MeshSplitter::UpdateNode(aiNode* pcNode, const std::vector<std::pair<aiMesh
 	for (unsigned int i = 0, end = pcNode->mNumChildren; i < end;++i)	{
 		UpdateNode ( pcNode->mChildren[i], source_mesh_map );
 	}
-	return;
 }
 
-#define WAS_NOT_COPIED 0xffffffff
+static const unsigned int WAS_NOT_COPIED = 0xffffffff;
 
-typedef std::pair <unsigned int,float> PerVertexWeight;
-typedef std::vector	<PerVertexWeight> VertexWeightTable;
+using PerVertexWeight = std::pair <unsigned int,float>;
+using VertexWeightTable = std::vector	<PerVertexWeight>;
 
 // ------------------------------------------------------------------------------------------------
 VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh) {
@@ -89,7 +88,7 @@ VertexWeightTable* ComputeVertexBoneWeightTable(const aiMesh* pMesh) {
 		aiBone* bone = pMesh->mBones[i];
 		for (unsigned int a = 0; a < bone->mNumWeights;++a)	{
 			const aiVertexWeight& weight = bone->mWeights[a];
-			avPerVertexWeights[weight.mVertexId].push_back( std::make_pair(i,weight.mWeight) );
+			avPerVertexWeights[weight.mVertexId].emplace_back(i,weight.mWeight);
 		}
 	}
 	return avPerVertexWeights;
@@ -100,7 +99,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 	// TODO: should better use std::(multi)set for source_mesh_map.
 
 	if (in_mesh->mNumVertices <= LIMIT)	{
-		source_mesh_map.push_back(std::make_pair(in_mesh,a));
+		source_mesh_map.emplace_back(in_mesh,a);
 		return;
 	}
 
@@ -187,7 +186,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 				break;
 			}
 
-			vFaces.push_back(aiFace());
+			vFaces.emplace_back();
 			aiFace& rFace = vFaces.back();
 
 			// setup face type and number of indices

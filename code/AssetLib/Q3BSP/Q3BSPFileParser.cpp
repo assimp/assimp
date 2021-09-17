@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -78,7 +77,6 @@ Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, ZipArchiveIOSystem
 // ------------------------------------------------------------------------------------------------
 Q3BSPFileParser::~Q3BSPFileParser() {
     delete m_pModel;
-    m_pModel = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

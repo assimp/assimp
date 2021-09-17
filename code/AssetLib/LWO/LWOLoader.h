@@ -41,15 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Declaration of the LWO importer class. */
+#pragma once
 #ifndef AI_LWOLOADER_H_INCLUDED
 #define AI_LWOLOADER_H_INCLUDED
 
-#include <assimp/types.h>
-#include <assimp/material.h>
-#include <assimp/DefaultLogger.hpp>
-
 #include "LWOFileData.h"
 #include <assimp/BaseImporter.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include <map>
 
@@ -57,7 +56,7 @@ struct aiTexture;
 struct aiNode;
 struct aiMaterial;
 
-namespace Assimp    {
+namespace Assimp {
 using namespace LWO;
 
 // ---------------------------------------------------------------------------
@@ -70,41 +69,38 @@ using namespace LWO;
  *         they aren't specific to one format version
 */
 // ---------------------------------------------------------------------------
-class LWOImporter : public BaseImporter
-{
+class LWOImporter : public BaseImporter {
 public:
     LWOImporter();
-    ~LWOImporter();
+    ~LWOImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
     * The function is a request to the importer to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 protected:
-
     // -------------------------------------------------------------------
     // Get list of supported extensions
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
 private:
-
     // -------------------------------------------------------------------
     /** Loads a LWO file in the older LWOB format (LW < 6)
      */
@@ -115,16 +111,14 @@ private:
      */
     void LoadLWO2File();
 
-
     // -------------------------------------------------------------------
     /** Parsing functions used for all file format versions
     */
-    inline void GetS0(std::string& out,unsigned int max);
+    inline void GetS0(std::string &out, unsigned int max);
     inline float GetF4();
     inline uint32_t GetU4();
     inline uint16_t GetU2();
-    inline uint8_t  GetU1();
-
+    inline uint8_t GetU1();
 
     // -------------------------------------------------------------------
     /** Loads a surface chunk from an LWOB file
@@ -143,28 +137,28 @@ private:
      *  @param size Maximum size to be read, in bytes.
      *  @param head Header of the SUF.BLOK header
      */
-    void LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head,
-        unsigned int size );
+    void LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader *head,
+            unsigned int size);
 
     // -------------------------------------------------------------------
     /** Loads a shader block from a LWO2 file.
      *  @param size Maximum size to be read, in bytes.
      *  @param head Header of the SUF.BLOK header
      */
-    void LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head,
-        unsigned int size );
+    void LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader *head,
+            unsigned int size);
 
     // -------------------------------------------------------------------
     /** Loads an image map from a LWO2 file
      *  @param size Maximum size to be read, in bytes.
      *  @param tex Texture object to be filled
      */
-    void LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex );
-    void LoadLWO2Gradient(unsigned int size, LWO::Texture& tex );
-    void LoadLWO2Procedural(unsigned int size, LWO::Texture& tex );
+    void LoadLWO2ImageMap(unsigned int size, LWO::Texture &tex);
+    void LoadLWO2Gradient(unsigned int size, LWO::Texture &tex);
+    void LoadLWO2Procedural(unsigned int size, LWO::Texture &tex);
 
     // loads the header - used by thethree functions above
-    void LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex );
+    void LoadLWO2TextureHeader(unsigned int size, LWO::Texture &tex);
 
     // -------------------------------------------------------------------
     /** Loads the LWO tag list from the file
@@ -213,30 +207,30 @@ private:
     // -------------------------------------------------------------------
     /** Count vertices and faces in a LWOB/LWO2 file
     */
-    void CountVertsAndFacesLWO2(unsigned int& verts,
-        unsigned int& faces,
-        uint16_t*& cursor,
-        const uint16_t* const end,
-        unsigned int max = UINT_MAX);
+    void CountVertsAndFacesLWO2(unsigned int &verts,
+            unsigned int &faces,
+            uint16_t *&cursor,
+            const uint16_t *const end,
+            unsigned int max = UINT_MAX);
 
-    void CountVertsAndFacesLWOB(unsigned int& verts,
-        unsigned int& faces,
-        LE_NCONST uint16_t*& cursor,
-        const uint16_t* const end,
-        unsigned int max = UINT_MAX);
+    void CountVertsAndFacesLWOB(unsigned int &verts,
+            unsigned int &faces,
+            LE_NCONST uint16_t *&cursor,
+            const uint16_t *const end,
+            unsigned int max = UINT_MAX);
 
     // -------------------------------------------------------------------
     /** Read vertices and faces in a LWOB/LWO2 file
     */
-    void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
-        uint16_t*& cursor,
-        const uint16_t* const end);
+    void CopyFaceIndicesLWO2(LWO::FaceList::iterator &it,
+            uint16_t *&cursor,
+            const uint16_t *const end);
 
     // -------------------------------------------------------------------
-    void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
-        LE_NCONST uint16_t*& cursor,
-        const uint16_t* const end,
-        unsigned int max = UINT_MAX);
+    void CopyFaceIndicesLWOB(LWO::FaceList::iterator &it,
+            LE_NCONST uint16_t *&cursor,
+            const uint16_t *const end,
+            unsigned int max = UINT_MAX);
 
     // -------------------------------------------------------------------
     /** Resolve the tag and surface lists that have been loaded.
@@ -257,19 +251,18 @@ private:
      *  @param in Input texture list
      *  @param type Type identifier of the texture list
     */
-    bool HandleTextures(aiMaterial* pcMat, const TextureList& in,
-        aiTextureType type);
+    bool HandleTextures(aiMaterial *pcMat, const TextureList &in,
+            aiTextureType type);
 
     // -------------------------------------------------------------------
     /** Adjust a texture path
     */
-    void AdjustTexturePath(std::string& out);
+    void AdjustTexturePath(std::string &out);
 
     // -------------------------------------------------------------------
     /** Convert a LWO surface description to an ASSIMP material
     */
-    void ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat);
-
+    void ConvertMaterial(const LWO::Surface &surf, aiMaterial *pcMat);
 
     // -------------------------------------------------------------------
     /** Get a list of all UV/VC channels required by a specific surface.
@@ -279,27 +272,27 @@ private:
      *  @param out Output list. The members are indices into the
      *    UV/VC channel lists of the layer
     */
-    void FindUVChannels(/*const*/ LWO::Surface& surf,
-        LWO::SortedRep& sorted,
-        /*const*/ LWO::Layer& layer,
-        unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
+    void FindUVChannels(/*const*/ LWO::Surface &surf,
+            LWO::SortedRep &sorted,
+            /*const*/ LWO::Layer &layer,
+            unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
 
     // -------------------------------------------------------------------
-    char FindUVChannels(LWO::TextureList& list,
-        LWO::Layer& layer,LWO::UVChannel& uv, unsigned int next);
+    char FindUVChannels(LWO::TextureList &list,
+            LWO::Layer &layer, LWO::UVChannel &uv, unsigned int next);
 
     // -------------------------------------------------------------------
-    void FindVCChannels(const LWO::Surface& surf,
-        LWO::SortedRep& sorted,
-        const LWO::Layer& layer,
-        unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
+    void FindVCChannels(const LWO::Surface &surf,
+            LWO::SortedRep &sorted,
+            const LWO::Layer &layer,
+            unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
 
     // -------------------------------------------------------------------
     /** Generate the final node graph
      *  Unused nodes are deleted.
      *  @param apcNodes Flat list of nodes
     */
-    void GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes);
+    void GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes);
 
     // -------------------------------------------------------------------
     /** Add children to a node
@@ -307,14 +300,14 @@ private:
      *  @param parent Index of the node
      *  @param apcNodes Flat list of nodes - used nodes are set to nullptr.
     */
-    void AddChildren(aiNode* node, uint16_t parent,
-        std::vector<aiNode*>& apcNodes);
+    void AddChildren(aiNode *node, uint16_t parent,
+            std::vector<aiNode *> &apcNodes);
 
     // -------------------------------------------------------------------
     /** Read a variable sized integer
      *  @param inout Input and output buffer
     */
-    int ReadVSizedIntLWO2(uint8_t*& inout);
+    int ReadVSizedIntLWO2(uint8_t *&inout);
 
     // -------------------------------------------------------------------
     /** Assign a value from a VMAP to a vertex and all vertices
@@ -325,8 +318,8 @@ private:
      *  @param data Value of the VMAP to be assigned - read numRead
      *    floats from this array.
     */
-    void DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead,
-        unsigned int idx, float* data);
+    void DoRecursiveVMAPAssignment(VMapEntry *base, unsigned int numRead,
+            unsigned int idx, float *data);
 
     // -------------------------------------------------------------------
     /** Compute normal vectors for a mesh
@@ -334,9 +327,8 @@ private:
      *  @param smoothingGroups Smoothing-groups-per-face array
      *  @param surface Surface for the mesh
     */
-    void ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& smoothingGroups,
-        const LWO::Surface& surface);
-
+    void ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &smoothingGroups,
+            const LWO::Surface &surface);
 
     // -------------------------------------------------------------------
     /** Setup a new texture after the corresponding chunk was
@@ -345,11 +337,10 @@ private:
      *  @param size Maximum number of bytes to be read
      *  @return Pointer to new texture
     */
-    LWO::Texture* SetupNewTextureLWOB(LWO::TextureList& list,
-        unsigned int size);
+    LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list,
+            unsigned int size);
 
 protected:
-
     /** true if the file is a LWO2 file*/
     bool mIsLWO2;
 
@@ -357,20 +348,20 @@ protected:
     bool mIsLXOB;
 
     /** Temporary list of layers from the file */
-    LayerList* mLayers;
+    LayerList *mLayers;
 
     /** Pointer to the current layer */
-    LWO::Layer* mCurLayer;
+    LWO::Layer *mCurLayer;
 
     /** Temporary tag list from the file */
-    TagList* mTags;
+    TagList *mTags;
 
     /** Mapping table to convert from tag to surface indices.
         UINT_MAX indicates that a no corresponding surface is available */
-    TagMappingTable* mMapping;
+    TagMappingTable *mMapping;
 
     /** Temporary surface list from the file */
-    SurfaceList* mSurfaces;
+    SurfaceList *mSurfaces;
 
     /** Temporary clip list from the file */
     ClipList mClips;
@@ -379,13 +370,13 @@ protected:
     EnvelopeList mEnvelopes;
 
     /** file buffer */
-    uint8_t* mFileBuffer;
+    uint8_t *mFileBuffer;
 
     /** Size of the file, in bytes */
     unsigned int fileSize;
 
     /** Output scene */
-    aiScene* mScene;
+    aiScene *mScene;
 
     /** Configuration option: speed flag set? */
     bool configSpeedFlag;
@@ -394,16 +385,14 @@ protected:
     unsigned int configLayerIndex;
 
     /** Configuration option: name of layer to be loaded */
-    std::string  configLayerName;
+    std::string configLayerName;
 
     /** True if we have a named layer */
     bool hasNamedLayer;
 };
 
-
 // ------------------------------------------------------------------------------------------------
-inline
-float LWOImporter::GetF4() {
+inline float LWOImporter::GetF4() {
     float f;
     ::memcpy(&f, mFileBuffer, 4);
     mFileBuffer += 4;
@@ -412,8 +401,7 @@ float LWOImporter::GetF4() {
 }
 
 // ------------------------------------------------------------------------------------------------
-inline uint32_t LWOImporter::GetU4()
-{
+inline uint32_t LWOImporter::GetU4() {
     uint32_t f;
     ::memcpy(&f, mFileBuffer, 4);
     mFileBuffer += 4;
@@ -422,8 +410,7 @@ inline uint32_t LWOImporter::GetU4()
 }
 
 // ------------------------------------------------------------------------------------------------
-inline uint16_t LWOImporter::GetU2()
-{
+inline uint16_t LWOImporter::GetU2() {
     uint16_t f;
     ::memcpy(&f, mFileBuffer, 2);
     mFileBuffer += 2;
@@ -432,54 +419,49 @@ inline uint16_t LWOImporter::GetU2()
 }
 
 // ------------------------------------------------------------------------------------------------
-inline uint8_t LWOImporter::GetU1()
-{
+inline uint8_t LWOImporter::GetU1() {
     return *mFileBuffer++;
 }
 
 // ------------------------------------------------------------------------------------------------
-inline int LWOImporter::ReadVSizedIntLWO2(uint8_t*& inout)
-{
+inline int LWOImporter::ReadVSizedIntLWO2(uint8_t *&inout) {
     int i;
-    int c = *inout;inout++;
-    if(c != 0xFF)
-    {
+    int c = *inout;
+    inout++;
+    if (c != 0xFF) {
         i = c << 8;
-        c = *inout;inout++;
+        c = *inout;
+        inout++;
         i |= c;
-    }
-    else
-    {
-        c = *inout;inout++;
+    } else {
+        c = *inout;
+        inout++;
         i = c << 16;
-        c = *inout;inout++;
+        c = *inout;
+        inout++;
         i |= c << 8;
-        c = *inout;inout++;
+        c = *inout;
+        inout++;
         i |= c;
     }
     return i;
 }
 
 // ------------------------------------------------------------------------------------------------
-inline void LWOImporter::GetS0(std::string& out,unsigned int max)
-{
+inline void LWOImporter::GetS0(std::string &out, unsigned int max) {
     unsigned int iCursor = 0;
-    const char*sz = (const char*)mFileBuffer;
-    while (*mFileBuffer)
-    {
-        if (++iCursor > max)
-        {
+    const char *sz = (const char *)mFileBuffer;
+    while (*mFileBuffer) {
+        if (++iCursor > max) {
             ASSIMP_LOG_WARN("LWO: Invalid file, string is is too long");
             break;
         }
         ++mFileBuffer;
     }
-    size_t len = (size_t) ((const char*)mFileBuffer-sz);
-    out = std::string(sz,len);
-    mFileBuffer += (len&0x1 ? 1 : 2);
+    size_t len = (size_t)((const char *)mFileBuffer - sz);
+    out = std::string(sz, len);
+    mFileBuffer += (len & 0x1 ? 1 : 2);
 }
-
-
 
 } // end of namespace Assimp
 

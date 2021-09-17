@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  OFFLoader.h
  *  @brief Declaration of the OFF importer class.
  */
+#pragma once
 #ifndef AI_OFFLOADER_H_INCLUDED
 #define AI_OFFLOADER_H_INCLUDED
 
@@ -50,43 +50,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <vector>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the Object File Format (.off)
 */
-class OFFImporter : public BaseImporter
-{
+class OFFImporter : public BaseImporter {
 public:
     OFFImporter();
-    ~OFFImporter();
-
-
-public:
+    ~OFFImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
-private:
-
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 };
 
 } // end of namespace Assimp

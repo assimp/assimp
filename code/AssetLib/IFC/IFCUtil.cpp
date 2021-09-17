@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/IFC/IFCUtil.h"
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
-#include <assimp/Defines.h>
 
 namespace Assimp {
 namespace IFC {

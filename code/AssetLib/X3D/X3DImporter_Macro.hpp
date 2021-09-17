@@ -69,8 +69,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// \param [out] pUSE_Var - output variable name for "USE" value.
 #define MACRO_ATTRREAD_CHECKUSEDEF_RET(pNode, pDEF_Var, pUSE_Var) \
     do {                                                          \
-    XmlParser::getStdStrAttribute(pNode, "def", pDEF_Var);        \
-    XmlParser::getStdStrAttribute(pNode, "use", pUSE_Var);        \
+    XmlParser::getStdStrAttribute(pNode, "DEF", pDEF_Var);        \
+    XmlParser::getStdStrAttribute(pNode, "USE", pUSE_Var);        \
     } while (false)
 
 /// \def MACRO_FACE_ADD_QUAD_FA(pCCW, pOut, pIn, pP1, pP2, pP3, pP4)

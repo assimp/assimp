@@ -40,6 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
+
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -58,8 +61,6 @@ class IOStream;
 
 namespace D3MF {
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
 
 struct OpcPackageRelationship;
 

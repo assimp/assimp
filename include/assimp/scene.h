@@ -70,7 +70,7 @@ extern "C" {
 #endif
 
 // -------------------------------------------------------------------------------
-/** 
+/**
  * A node in the imported hierarchy.
  *
  * Each node has name, a parent node (except for the root node),
@@ -149,12 +149,12 @@ struct ASSIMP_API aiNode
      *  @param name Name to search for
      *  @return nullptr or a valid Node if the search was successful.
      */
-    inline 
+    inline
     const aiNode* FindNode(const aiString& name) const {
         return FindNode(name.data);
     }
 
-    inline 
+    inline
     aiNode* FindNode(const aiString& name) {
         return FindNode(name.data);
     }
@@ -353,34 +353,34 @@ struct aiScene
 
     //! Check whether the scene contains meshes
     //! Unless no special scene flags are set this will always be true.
-    inline bool HasMeshes() const { 
-        return mMeshes != nullptr && mNumMeshes > 0; 
+    inline bool HasMeshes() const {
+        return mMeshes != nullptr && mNumMeshes > 0;
     }
 
     //! Check whether the scene contains materials
     //! Unless no special scene flags are set this will always be true.
-    inline bool HasMaterials() const { 
-        return mMaterials != nullptr && mNumMaterials > 0; 
+    inline bool HasMaterials() const {
+        return mMaterials != nullptr && mNumMaterials > 0;
     }
 
     //! Check whether the scene contains lights
-    inline bool HasLights() const { 
-        return mLights != nullptr && mNumLights > 0; 
+    inline bool HasLights() const {
+        return mLights != nullptr && mNumLights > 0;
     }
 
     //! Check whether the scene contains textures
     inline bool HasTextures() const {
-        return mTextures != nullptr && mNumTextures > 0; 
+        return mTextures != nullptr && mNumTextures > 0;
     }
 
     //! Check whether the scene contains cameras
     inline bool HasCameras() const {
-        return mCameras != nullptr && mNumCameras > 0; 
+        return mCameras != nullptr && mNumCameras > 0;
     }
 
     //! Check whether the scene contains animations
-    inline bool HasAnimations() const { 
-        return mAnimations != nullptr && mNumAnimations > 0; 
+    inline bool HasAnimations() const {
+        return mAnimations != nullptr && mNumAnimations > 0;
     }
 
     //! Returns a short filename from a full path
@@ -400,7 +400,7 @@ struct aiScene
 
     //! Returns an embedded texture and its index
     std::pair<const aiTexture*, int> GetEmbeddedTextureAndIndex(const char* filename) const {
-        if(nullptr==filename) {
+        if (nullptr==filename) {
             return std::make_pair(nullptr, -1);
         }
         // lookup using texture ID (if referenced like: "*1", "*2", etc.)
@@ -437,7 +437,7 @@ struct aiScene
 };
 
 #ifdef __cplusplus
-} //! namespace Assimp
-#endif
+} 
+#endif //! extern "C"
 
 #endif // AI_SCENE_H_INC

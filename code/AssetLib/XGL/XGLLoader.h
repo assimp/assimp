@@ -70,25 +70,25 @@ namespace Assimp {
 class XGLImporter : public BaseImporter, public LogFunctions<XGLImporter> {
 public:
     XGLImporter();
-    ~XGLImporter();
+    ~XGLImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      *  See BaseImporter::CanRead() for details.    */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details  */
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
 private:
     struct TempScope {
@@ -185,7 +185,7 @@ private:
     void ReadWorld(XmlNode &node, TempScope &scope);
     void ReadLighting(XmlNode &node, TempScope &scope);
     aiLight *ReadDirectionalLight(XmlNode &node);
-    aiNode *ReadObject(XmlNode &node, TempScope &scope, bool skipFirst = false/*, const char *closetag = "object"*/);
+    aiNode *ReadObject(XmlNode &node, TempScope &scope);
     bool ReadMesh(XmlNode &node, TempScope &scope);
     void ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);

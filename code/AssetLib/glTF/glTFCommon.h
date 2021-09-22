@@ -56,32 +56,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
 
+// clang-format off
+
 #ifdef ASSIMP_API
-#include <assimp/ByteSwapper.h>
-#include <assimp/DefaultIOSystem.h>
-#include <memory>
+#   include <assimp/ByteSwapper.h>
+#   include <assimp/DefaultIOSystem.h>
+#   include <memory>
 #else
-#include <memory>
-#define AI_SWAP4(p)
-#define ai_assert
+#   include <memory>
+#   define AI_SWAP4(p)
+#   define ai_assert
 #endif
 
 #if _MSC_VER > 1500 || (defined __GNUC___)
-#define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
+#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
-#define gltf_unordered_map map
+#   define gltf_unordered_map map
 #endif
 
 #ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#include <unordered_map>
-#if defined(_MSC_VER) && _MSC_VER <= 1600
-#define gltf_unordered_map tr1::unordered_map
-#else
-#define gltf_unordered_map unordered_map
+#   include <unordered_map>
+#   if defined(_MSC_VER) && _MSC_VER <= 1600
+#       define gltf_unordered_map tr1::unordered_map
+#   else
+#       define gltf_unordered_map unordered_map
+#   endif
 #endif
-#endif
+// clang-format on
+
 
 namespace glTFCommon {
+
+using rapidjson::Document;
+using rapidjson::Value;
 
 #ifdef ASSIMP_API
 using Assimp::IOStream;
@@ -193,13 +200,12 @@ inline void CopyValue(const glTFCommon::mat4 &v, aiMatrix4x4 &o) {
 #endif // _MSC_VER
 
 inline std::string getCurrentAssetDir(const std::string &pFile) {
-    std::string path = pFile;
     int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) {
-        path = pFile.substr(0, pos + 1);
+    if (pos == int(std::string::npos)) {
+        return std::string();
     }
 
-    return path;
+    return pFile.substr(0, pos + 1);
 }
 #if _MSC_VER
 #    pragma warning(pop)
@@ -261,6 +267,284 @@ void EncodeBase64(const uint8_t *in, size_t inLength, std::string &out);
 
 #define CHECK_EXT(EXT) \
     if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
+
+
+
+//! Helper struct to represent values that might not be present
+template <class T>
+struct Nullable {
+    T value;
+    bool isPresent;
+
+    Nullable() :
+            isPresent(false) {}
+    Nullable(T &val) :
+            value(val),
+            isPresent(true) {}
+};
+
+//! A reference to one top-level object, which is valid
+//! until the Asset instance is destroyed
+template <class T>
+class Ref {
+    std::vector<T *> *vector;
+    unsigned int index;
+
+public:
+    Ref() :
+            vector(0),
+            index(0) {}
+    Ref(std::vector<T *> &vec, unsigned int idx) :
+            vector(&vec),
+            index(idx) {}
+
+    inline unsigned int GetIndex() const { return index; }
+
+    operator bool() const { return vector != 0; }
+
+    T *operator->() { return (*vector)[index]; }
+
+    T &operator*() { return *((*vector)[index]); }
+};
+
+//
+// JSON Value reading helpers
+//
+
+template <class T>
+struct ReadHelper {
+    static bool Read(Value &val, T &out) {
+        return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
+    }
+};
+
+template <>
+struct ReadHelper<bool> {
+    static bool Read(Value &val, bool &out) {
+        return val.IsBool() ? out = val.GetBool(), true : false;
+    }
+};
+
+template <>
+struct ReadHelper<float> {
+    static bool Read(Value &val, float &out) {
+        return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
+    }
+};
+
+template <unsigned int N>
+struct ReadHelper<float[N]> {
+    static bool Read(Value &val, float (&out)[N]) {
+        if (!val.IsArray() || val.Size() != N) return false;
+        for (unsigned int i = 0; i < N; ++i) {
+            if (val[i].IsNumber())
+                out[i] = static_cast<float>(val[i].GetDouble());
+        }
+        return true;
+    }
+};
+
+template <>
+struct ReadHelper<const char *> {
+    static bool Read(Value &val, const char *&out) {
+        return val.IsString() ? (out = val.GetString(), true) : false;
+    }
+};
+
+template <>
+struct ReadHelper<std::string> {
+    static bool Read(Value &val, std::string &out) {
+        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
+    }
+};
+
+template <class T>
+struct ReadHelper<Nullable<T>> {
+    static bool Read(Value &val, Nullable<T> &out) {
+        return out.isPresent = ReadHelper<T>::Read(val, out.value);
+    }
+};
+
+template <>
+struct ReadHelper<uint64_t> {
+    static bool Read(Value &val, uint64_t &out) {
+        return val.IsUint64() ? out = val.GetUint64(), true : false;
+    }
+};
+
+template <>
+struct ReadHelper<int64_t> {
+    static bool Read(Value &val, int64_t &out) {
+        return val.IsInt64() ? out = val.GetInt64(), true : false;
+    }
+};
+
+template <class T>
+inline static bool ReadValue(Value &val, T &out) {
+    return ReadHelper<T>::Read(val, out);
+}
+
+template <class T>
+inline static bool ReadMember(Value &obj, const char *id, T &out) {
+    if (!obj.IsObject()) {
+        return false;
+    }
+    Value::MemberIterator it = obj.FindMember(id);
+    if (it != obj.MemberEnd()) {
+        return ReadHelper<T>::Read(it->value, out);
+    }
+    return false;
+}
+
+template <class T>
+inline static T MemberOrDefault(Value &obj, const char *id, T defaultValue) {
+    T out;
+    return ReadMember(obj, id, out) ? out : defaultValue;
+}
+
+inline Value *FindMember(Value &val, const char *id) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(id);
+    return (it != val.MemberEnd()) ? &it->value : nullptr;
+}
+
+template <int N>
+inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const char *memberId, const char *context, const char *extraContext) {
+    std::string fullContext = context;
+    if (extraContext && (strlen(extraContext) > 0)) {
+        fullContext = fullContext + " (" + extraContext + ")";
+    }
+    throw DeadlyImportError("Member \"", memberId, "\" was not of type \"", expectedTypeName, "\" when reading ", fullContext);
+}
+
+// Look-up functions with type checks. Context and extra context help the user identify the problem if there's an error.
+
+inline Value *FindStringInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsString()) {
+        throwUnexpectedTypeError("string", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindNumberInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsNumber()) {
+        throwUnexpectedTypeError("number", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindUIntInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsUint()) {
+        throwUnexpectedTypeError("uint", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindArrayInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsArray()) {
+        throwUnexpectedTypeError("array", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindObjectInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+    if (!val.IsObject()) {
+        return nullptr;
+    }
+    Value::MemberIterator it = val.FindMember(memberId);
+    if (it == val.MemberEnd()) {
+        return nullptr;
+    }
+    if (!it->value.IsObject()) {
+        throwUnexpectedTypeError("object", memberId, context, extraContext);
+    }
+    return &it->value;
+}
+
+inline Value *FindExtensionInContext(Value &val, const char *extensionId, const char *context, const char *extraContext = nullptr) {
+    if (Value *extensionList = FindObjectInContext(val, "extensions", context, extraContext)) {
+        if (Value *extension = FindObjectInContext(*extensionList, extensionId, context, extraContext)) {
+            return extension;
+        }
+    }
+    return nullptr;
+}
+
+// Overloads when the value is the document.
+
+inline Value *FindString(Document &doc, const char *memberId) {
+    return FindStringInContext(doc, memberId, "the document");
+}
+
+inline Value *FindNumber(Document &doc, const char *memberId) {
+    return FindNumberInContext(doc, memberId, "the document");
+}
+
+inline Value *FindUInt(Document &doc, const char *memberId) {
+    return FindUIntInContext(doc, memberId, "the document");
+}
+
+inline Value *FindArray(Document &val, const char *memberId) {
+    return FindArrayInContext(val, memberId, "the document");
+}
+
+inline Value *FindObject(Document &doc, const char *memberId) {
+    return FindObjectInContext(doc, memberId, "the document");
+}
+
+inline Value *FindExtension(Value &val, const char *extensionId) {
+    return FindExtensionInContext(val, extensionId, "the document");
+}
+
+inline Value *FindString(Value &val, const char *id) {
+    Value::MemberIterator it = val.FindMember(id);
+    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+}
+
+inline Value *FindObject(Value &val, const char *id) {
+    Value::MemberIterator it = val.FindMember(id);
+    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
+}
+
+inline Value *FindArray(Value &val, const char *id) {
+    Value::MemberIterator it = val.FindMember(id);
+    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : 0;
+}
+
+inline Value *FindNumber(Value &val, const char *id) {
+    Value::MemberIterator it = val.FindMember(id);
+    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+}
 
 } // namespace glTFCommon
 

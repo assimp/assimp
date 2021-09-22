@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -36,80 +35,66 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
 /** @file  Q3DLoader.h
  *  @brief Declaration of the Q3D importer class.
  */
+#pragma once
 #ifndef AI_Q3DLOADER_H_INCLUDED
 #define AI_Q3DLOADER_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
 #include <assimp/types.h>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the Quick3D Object and Scene formats.
 */
-class Q3DImporter : public BaseImporter
-{
+class Q3DImporter : public BaseImporter {
 public:
     Q3DImporter();
-    ~Q3DImporter();
-
-
-public:
+    ~Q3DImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+        bool checkSig) const override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo () const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
     void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+        IOSystem* pIOHandler) override;
 
 private:
-
-    struct Material
-    {
-        Material()
-            :   diffuse         (0.6f,0.6f,0.6f)
-            ,   transparency    (0.f)
-            ,   texIdx          (UINT_MAX)
-        {}
+    struct Material {
+        Material() : diffuse(0.6f,0.6f,0.6f), transparency(0.f), texIdx(UINT_MAX) {
+            // empty
+        }
 
         aiString name;
         aiColor3D ambient, diffuse, specular;
         float transparency;
-
         unsigned int texIdx;
     };
 
-    struct Face
-    {
-        explicit Face(unsigned int s)
-            :   indices   (s)
-            ,   uvindices (s)
-            ,   mat       (0)
-        {
+    struct Face {
+        explicit Face(unsigned int s) : indices(s), uvindices(s), mat(0) {
+            // empty
         }
 
         std::vector<unsigned int> indices;
@@ -117,14 +102,11 @@ private:
         unsigned int mat;
     };
 
-    struct Mesh
-    {
-
+    struct Mesh {
         std::vector<aiVector3D> verts;
         std::vector<aiVector3D> normals;
         std::vector<aiVector3D> uv;
         std::vector<Face>       faces;
-
         uint32_t prevUVIdx;
     };
 };

@@ -71,7 +71,7 @@ static std::wstring Utf8ToWide(const char *in) {
     // size includes terminating null; std::wstring adds null automatically
     std::wstring out(static_cast<size_t>(size) - 1, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, in, -1, &out[0], size);
-    
+
     return out;
 }
 
@@ -85,7 +85,7 @@ static std::string WideToUtf8(const wchar_t *in) {
     // size includes terminating null; std::string adds null automatically
     std::string out(static_cast<size_t>(size) - 1, '\0');
     WideCharToMultiByte(CP_UTF8, 0, in, -1, &out[0], size, nullptr, nullptr);
-    
+
     return out;
 }
 #endif
@@ -121,7 +121,7 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
     if (name.empty()) {
         return nullptr;
     }
-    
+
     file = ::_wfopen(name.c_str(), Utf8ToWide(strMode).c_str());
 #else
     file = ::fopen(strFile, strMode);
@@ -173,7 +173,7 @@ inline static std::string MakeAbsolutePath(const char *in) {
         free(ret);
     }
 #endif
-    if (!ret) {
+    else {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
         ASSIMP_LOG_WARN("Invalid path: ", std::string(in));

@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 
-// internal headers
 #include "STLLoader.h"
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
@@ -146,7 +145,9 @@ bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 
     if (extension == "stl") {
         return true;
-    } else if (!extension.length() || checkSig) {
+    }
+
+    if (!extension.length() || checkSig) {
         if (!pIOHandler) {
             return true;
         }
@@ -372,7 +373,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mVertices[i].x = positionBuffer[i].x;
-                pMesh->mVertices[i].y = positionBuffer[i].y;                
+                pMesh->mVertices[i].y = positionBuffer[i].y;
                 pMesh->mVertices[i].z = positionBuffer[i].z;
             }
             positionBuffer.clear();
@@ -382,7 +383,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mNormals[i].x = normalBuffer[i].x;
-                pMesh->mNormals[i].y = normalBuffer[i].y;                
+                pMesh->mNormals[i].y = normalBuffer[i].y;
                 pMesh->mNormals[i].z = normalBuffer[i].z;
             }
             normalBuffer.clear();

@@ -100,7 +100,7 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
     ASSIMP_LOG_INFO("EmbedTexturesProcess finished. Embedded ", embeddedTexturesCount, " textures." );
 }
 
-bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
+bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) const {
     std::streampos imageSize = 0;
     std::string    imagePath = path;
 
@@ -137,7 +137,7 @@ bool EmbedTexturesProcess::addTexture(aiScene* pScene, std::string path) const {
     pScene->mTextures = new aiTexture*[pScene->mNumTextures];
     ::memmove(pScene->mTextures, oldTextures, sizeof(aiTexture*) * (pScene->mNumTextures - 1u));
     delete [] oldTextures;
-    
+
     // Add the new texture
     auto pTexture = new aiTexture;
     pTexture->mHeight = 0; // Means that this is still compressed

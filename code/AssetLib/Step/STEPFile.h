@@ -634,7 +634,7 @@ private:
 };
 
 template <typename T>
-inline bool operator==(std::shared_ptr<LazyObject> lo, T whatever) {
+inline bool operator==(const std::shared_ptr<LazyObject> &lo, T whatever) {
     return *lo == whatever; // XXX use std::forward if we have 0x
 }
 
@@ -816,7 +816,7 @@ public:
     typedef std::pair<RefMap::const_iterator, RefMap::const_iterator> RefMapRange;
 
 private:
-    DB(std::shared_ptr<StreamReaderLE> reader) :
+    DB(const std::shared_ptr<StreamReaderLE> &reader) :
             reader(reader), splitter(*reader, true, true), evaluated_count(), schema(nullptr) {}
 
 public:

@@ -47,13 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
-
 #include <assimp/ai_assert.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
-
-#include <vector>
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -290,7 +287,6 @@ OpenGEXImporter::OpenGEXImporter() :
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::~OpenGEXImporter() {
-    m_ctx = nullptr;
 }
 
 //------------------------------------------------------------------------------------------------

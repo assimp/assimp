@@ -615,12 +615,12 @@ TEST_F(utglTF2ImportExport, texcoords) {
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 0);
+    EXPECT_EQ(uvIndex, 0u);
 
     uvIndex = 255;
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 1);
+    EXPECT_EQ(uvIndex, 1u);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -646,12 +646,12 @@ TEST_F(utglTF2ImportExport, texcoords_export) {
     aiTextureMapMode modes[2];
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 0);
+    EXPECT_EQ(uvIndex, 0u);
 
     uvIndex = 255;
     EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &path, nullptr, &uvIndex, nullptr, nullptr, modes));
     EXPECT_STREQ(path.C_Str(), "texture.png");
-    EXPECT_EQ(uvIndex, 1);
+    EXPECT_EQ(uvIndex, 1u);
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT
@@ -692,7 +692,7 @@ TEST_F(utglTF2ImportExport, indexOutOfRange) {
         }
     };
     LogObserver logObserver;
-    
+
     DefaultLogger::get()->attachStream(&logObserver);
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/IndexOutOfRange/IndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
@@ -748,7 +748,8 @@ TEST_F(utglTF2ImportExport, import_dracoEncoded) {
 
 TEST_F(utglTF2ImportExport, wrongTypes) {
     // Deliberately broken version of the BoxTextured.gltf asset.
-    std::vector<std::tuple<std::string, std::string, std::string, std::string>> wrongTypes = {
+    using tup_T = std::tuple<std::string, std::string, std::string, std::string>;
+    std::vector<tup_T> wrongTypes = {
         { "/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]" },
         { "/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]" },
         { "/glTF2/wrongTypes/badUint.gltf", "uint", "index", "materials[0]" },

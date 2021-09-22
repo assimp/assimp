@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file STLExporter.h
  * Declares the exporter class to write a scene to a Stereolithography (STL) file
  */
+#pragma once
 #ifndef AI_STLEXPORTER_H_INC
 #define AI_STLEXPORTER_H_INC
 
@@ -57,28 +58,24 @@ namespace Assimp {
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to a STL file. */
 // ------------------------------------------------------------------------------------------------
-class STLExporter
-{
+class STLExporter {
 public:
     /// Constructor for a specific scene to export
-    STLExporter(const char* filename, const aiScene* pScene, bool exportPOintClouds, bool binary = false);
+    STLExporter(const char *filename, const aiScene *pScene, bool exportPOintClouds, bool binary = false);
 
-    /// public stringstreams to write all output into
+    /// public string-streams to write all output into
     std::ostringstream mOutput;
 
 private:
-    void WritePointCloud(const std::string &name, const aiScene* pScene);
-    void WriteMesh(const aiMesh* m);
-    void WriteMeshBinary(const aiMesh* m);
+    void WritePointCloud(const std::string &name, const aiScene *pScene);
+    void WriteMesh(const aiMesh *m);
+    void WriteMeshBinary(const aiMesh *m);
 
 private:
-
     const std::string filename;
-
-    // this endl() doesn't flush() the stream
     const std::string endl;
 };
 
-}
+} // namespace Assimp
 
 #endif

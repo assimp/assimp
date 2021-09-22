@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CAMERA_H_INC
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 #include "types.h"
@@ -100,8 +100,7 @@ extern "C" {
  * camera already look in the right direction.
  *
 */
-struct aiCamera
-{
+struct aiCamera {
     /** The name of the camera.
      *
      *  There must be a node in the scenegraph with the same name.
@@ -126,7 +125,6 @@ struct aiCamera
      *  may be normalized, but it needn't.
      */
     C_STRUCT aiVector3D mUp;
-
 
     /** 'LookAt' - vector of the camera coordinate system relative to
      *  the coordinate space defined by the corresponding node.
@@ -184,26 +182,27 @@ struct aiCamera
 #ifdef __cplusplus
 
     aiCamera() AI_NO_EXCEPT
-        : mUp                (0.f,1.f,0.f)
-        , mLookAt            (0.f,0.f,1.f)
-        , mHorizontalFOV     (0.25f * (float)AI_MATH_PI)
-        , mClipPlaneNear     (0.1f)
-        , mClipPlaneFar      (1000.f)
-        , mAspect            (0.f)
-        , mOrthographicWidth (0.f)
-    {}
+            : mUp(0.f, 1.f, 0.f),
+              mLookAt(0.f, 0.f, 1.f),
+              mHorizontalFOV(0.25f * (float)AI_MATH_PI),
+              mClipPlaneNear(0.1f),
+              mClipPlaneFar(1000.f),
+              mAspect(0.f),
+              mOrthographicWidth(0.f) {}
 
     /** @brief Get a *right-handed* camera matrix from me
      *  @param out Camera matrix to be filled
      */
-    void GetCameraMatrix (aiMatrix4x4& out) const
-    {
+    void GetCameraMatrix(aiMatrix4x4 &out) const {
         /** todo: test ... should work, but i'm not absolutely sure */
 
         /** We don't know whether these vectors are already normalized ...*/
-        aiVector3D zaxis = mLookAt;     zaxis.Normalize();
-        aiVector3D yaxis = mUp;         yaxis.Normalize();
-        aiVector3D xaxis = mUp^mLookAt; xaxis.Normalize();
+        aiVector3D zaxis = mLookAt;
+        zaxis.Normalize();
+        aiVector3D yaxis = mUp;
+        yaxis.Normalize();
+        aiVector3D xaxis = mUp ^ mLookAt;
+        xaxis.Normalize();
 
         out.a4 = -(xaxis * mPosition);
         out.b4 = -(yaxis * mPosition);
@@ -227,7 +226,6 @@ struct aiCamera
 
 #endif
 };
-
 
 #ifdef __cplusplus
 }

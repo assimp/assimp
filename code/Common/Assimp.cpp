@@ -72,12 +72,25 @@ namespace Assimp {
 // underlying structure for aiPropertyStore
 typedef BatchLoader::PropertyMap PropertyMap;
 
+#if defined(__has_warning)
+#if __has_warning("-Wordered-compare-function-pointers")
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
+#endif
+#endif
+
 /** Stores the LogStream objects for all active C log streams */
 struct mpred {
     bool operator()(const aiLogStream &s0, const aiLogStream &s1) const {
         return s0.callback < s1.callback && s0.user < s1.user;
     }
 };
+
+#if defined(__has_warning)
+#if __has_warning("-Wordered-compare-function-pointers")
+#pragma GCC diagnostic pop
+#endif
+#endif
 typedef std::map<aiLogStream, Assimp::LogStream *, mpred> LogStreamMap;
 
 /** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
@@ -1251,3 +1264,36 @@ ASSIMP_API void aiQuaternionInterpolate(
     ai_assert(nullptr != end);
     aiQuaternion::Interpolate(*dst, *start, *end, factor);
 }
+
+
+// stb_image is a lightweight image loader. It is shared by:
+//  - M3D import
+//  - PBRT export
+// Since it's a header-only library, its implementation must be instantiated in some cpp file.
+// Don't scatter this task over multiple importers/exporters. Maintain it in a central place (here!).
+
+#define ASSIMP_HAS_PBRT_EXPORT (!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_PBRT_EXPORTER)
+#define ASSIMP_HAS_M3D ((!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER)
+
+#if ASSIMP_HAS_PBRT_EXPORT
+#   define ASSIMP_NEEDS_STB_IMAGE 1
+#elif ASSIMP_HAS_M3D
+#   define ASSIMP_NEEDS_STB_IMAGE 1
+#   define STBI_ONLY_PNG
+#endif
+
+#if ASSIMP_NEEDS_STB_IMAGE
+
+#   if _MSC_VER // "unreferenced function has been removed" (SSE2 detection routine in x64 builds)
+#       pragma warning(push)
+#       pragma warning(disable: 4505)
+#   endif
+
+#   define STB_IMAGE_IMPLEMENTATION
+#   include "stb/stb_image.h"
+
+#   if _MSC_VER
+#       pragma warning(pop)
+#   endif
+
+#endif

@@ -511,7 +511,7 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     }
 
     if (extension.empty() || pCheckSig) {
-        const char *tokens[] = { "<amf" };
+        static const char * const tokens[] = { "<amf" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

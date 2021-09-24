@@ -113,8 +113,8 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char *Tokens[] = { "BLENDER" };
-static const char *TokensForSearch[] = { "blender" };
+static const char * const Tokens[] = { "BLENDER" };
+static const char * const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

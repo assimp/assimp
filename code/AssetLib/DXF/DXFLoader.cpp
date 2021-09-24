@@ -130,8 +130,8 @@ bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bo
     }
 
     if ( extension.empty() || checkSig ) {
-        const char *pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, filename, pTokens, 4, 32 );
+        static const char * const pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
+        return SearchFileHeaderForToken(pIOHandler, filename, pTokens, 4, 32 );
     }
 
     return false;

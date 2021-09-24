@@ -259,7 +259,7 @@ public: // static utilities
     static bool SearchFileHeaderForToken(
             IOSystem *pIOSystem,
             const std::string &file,
-            const char **tokens,
+            const char * const *tokens,
             unsigned int numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,

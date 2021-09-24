@@ -110,7 +110,7 @@ bool COBImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     }
 
     else if ((!extension.length() || checkSig) && pIOHandler) {
-        const char *tokens[] = { "Caligary" };
+        static const char * const tokens[] = { "Caligary" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;

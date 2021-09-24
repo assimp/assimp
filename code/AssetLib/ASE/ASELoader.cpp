@@ -104,7 +104,7 @@ bool ASEImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     }
 
     if ((!extension.length() || cs) && pIOHandler) {
-        const char *tokens[] = { "*3dsmax_asciiexport" };
+        static const char * const tokens[] = { "*3dsmax_asciiexport" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;

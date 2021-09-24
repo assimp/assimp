@@ -91,7 +91,7 @@ bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
         return true;
 
     if ((checkSig || !extension.length()) && pIOHandler) {
-        const char* tokens[] = {"nendo"};
+        static const char * const tokens[] = {"nendo"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,5);
     }
     return false;

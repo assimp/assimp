@@ -137,9 +137,8 @@ bool IFCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         // note: this is the common identification for STEP-encoded files, so
         // it is only unambiguous as long as we don't support any further
         // file formats with STEP as their encoding.
-        const char *tokens[] = { "ISO-10303-21" };
-        const bool found(SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1));
-        return found;
+        static const char * const tokens[] = { "ISO-10303-21" };
+        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;
 }

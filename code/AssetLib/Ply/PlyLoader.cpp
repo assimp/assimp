@@ -111,7 +111,7 @@ bool PLYImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        static const char *tokens[] = {
+        static const char * const tokens[] = {
             "ply"
         };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);

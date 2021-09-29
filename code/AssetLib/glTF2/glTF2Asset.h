@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_sheen full
  *   KHR_materials_clearcoat full
  *   KHR_materials_transmission full
+ *   KHR_materials_volume full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -713,6 +714,7 @@ const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
+const vec3 defaultAttenuationColor = { 1, 1, 1 };
 
 struct TextureInfo {
     Ref<Texture> texture;
@@ -777,6 +779,16 @@ struct MaterialTransmission {
     float transmissionFactor = 0.f;
 };
 
+struct MaterialVolume {
+    float thicknessFactor = 0.f;
+    TextureInfo thicknessTexture;
+    float attenuationDistance = 0.f;
+    vec3 attenuationColor;
+
+    MaterialVolume() { SetDefaults(); }
+    void SetDefaults();
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -803,6 +815,9 @@ struct Material : public Object {
     //extension: KHR_materials_transmission
     Nullable<MaterialTransmission> materialTransmission;
 
+    //extension: KHR_materials_volume
+    Nullable<MaterialVolume> materialVolume;
+    
     //extension: KHR_materials_unlit
     bool unlit;
 
@@ -1091,6 +1106,7 @@ public:
         bool KHR_materials_sheen;
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
+        bool KHR_materials_volume;
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;

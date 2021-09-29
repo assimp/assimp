@@ -318,6 +318,12 @@ enum aiTextureType {
     */
     aiTextureType_TRANSMISSION = 21,
 
+    /** Volume
+    * Simulates transmission through the surface
+    * May include further information such as wall thickness
+    */
+    aiTextureType_VOLUME = 22,
+
     /** Unknown texture
      *
      *  A texture reference that does not match any of the definitions
@@ -1027,6 +1033,17 @@ extern "C" {
 // Texture defining percentage of light transmitted through the surface.
 // Multiplied by AI_MATKEY_TRANSMISSION_FACTOR
 #define AI_MATKEY_TRANSMISSION_TEXTURE aiTextureType_TRANSMISSION, 0
+
+// Volume
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_volume
+// Base percentage of light transmitted through the surface. 0.0 = Opaque, 1.0 = Fully transparent
+#define AI_MATKEY_VOLUME_THICKNESS_FACTOR "$mat.volume.thicknessFactor", 0, 0
+// Texture defining percentage of light transmitted through the surface.
+// Multiplied by AI_MATKEY_THICKNESS_FACTOR
+#define AI_MATKEY_VOLUME_THICKNESS_TEXTURE aiTextureType_VOLUME, 0
+#define AI_MATKEY_VOLUME_ATTENUATION_DISTANCE "$mat.volume.attenuationDistance", 0, 0
+#define AI_MATKEY_VOLUME_ATTENUATION_COLOR "$mat.volume.attenuationColor", 0, 0
 
 // Emissive
 // --------

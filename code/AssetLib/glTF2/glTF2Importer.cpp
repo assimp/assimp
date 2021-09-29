@@ -341,6 +341,16 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
         }
 
+        // KHR_materials_volume
+        if (mat.materialVolume.isPresent) {
+            MaterialVolume &volume = mat.materialVolume.value;
+
+            aimat->AddProperty(&volume.thicknessFactor, 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+            aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+            SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+        }
+
         return aimat;
     } catch (...) {
         delete aimat;

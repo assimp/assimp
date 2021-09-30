@@ -318,12 +318,6 @@ enum aiTextureType {
     */
     aiTextureType_TRANSMISSION = 21,
 
-    /** Volume
-    * Simulates transmission through the surface
-    * May include further information such as wall thickness
-    */
-    aiTextureType_VOLUME = 22,
-
     /** Unknown texture
      *
      *  A texture reference that does not match any of the definitions
@@ -1041,7 +1035,7 @@ extern "C" {
 #define AI_MATKEY_VOLUME_THICKNESS_FACTOR "$mat.volume.thicknessFactor", 0, 0
 // Texture that defines the thickness.
 // Multiplied by AI_MATKEY_THICKNESS_FACTOR
-#define AI_MATKEY_VOLUME_THICKNESS_TEXTURE aiTextureType_VOLUME, 0
+#define AI_MATKEY_VOLUME_THICKNESS_TEXTURE aiTextureType_TRANSMISSION, 1
 // Density of the medium given as the average distance that light travels in the medium before interacting with a particle.
 #define AI_MATKEY_VOLUME_ATTENUATION_DISTANCE "$mat.volume.attenuationDistance", 0, 0
 // The color that white light turns into due to absorption when reaching the attenuation distance.

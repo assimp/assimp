@@ -496,6 +496,20 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialIOR.isPresent) {
+            Value materialIOR(rapidjson::Type::kObjectType);
+
+            MaterialIOR &ior = m.materialIOR.value;
+
+            if (ior.ior != 1.5f) {
+                WriteFloat(materialIOR, ior.ior, "ior", w.mAl);
+            }
+
+            if (!materialIOR.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_ior", materialIOR, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -914,6 +928,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_volume) {
                 exts.PushBack(StringRef("KHR_materials_volume"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_ior) {
+                exts.PushBack(StringRef("KHR_materials_ior"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {

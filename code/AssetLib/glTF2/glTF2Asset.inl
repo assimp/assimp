@@ -1228,6 +1228,16 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_ior) {
+            if (Value *curMaterialIOR = FindObject(*extensions, "KHR_materials_ior")) {
+                MaterialIOR ior;
+
+                ReadMember(*curMaterialIOR, "ior", ior.ior);
+          
+                this->materialIOR = Nullable<MaterialIOR>(ior);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1278,6 +1288,11 @@ inline void MaterialVolume::SetDefaults() {
     thicknessFactor = 0.f;
     attenuationDistance = INFINITY;
     SetVector(attenuationColor, defaultAttenuationColor);
+}
+
+inline void MaterialIOR::SetDefaults() {
+    //KHR_materials_ior properties
+    ior = 1.5f;
 }
 
 namespace {
@@ -1952,6 +1967,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_materials_volume);
+    CHECK_EXT(KHR_materials_ior);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
 

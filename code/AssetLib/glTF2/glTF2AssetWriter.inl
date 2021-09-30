@@ -474,6 +474,28 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialVolume.isPresent) {
+            Value materialVolume(rapidjson::Type::kObjectType);
+
+            MaterialVolume &volume = m.materialVolume.value;
+
+            if (volume.thicknessFactor != 0.f) {
+                WriteFloat(materialVolume, volume.thicknessFactor, "thicknessFactor", w.mAl);
+            }
+
+            WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
+
+            if (volume.attenuationDistance != INFINITY) {
+                WriteFloat(materialVolume, volume.attenuationDistance, "attenuationDistance", w.mAl);
+            }
+
+            WriteVec(materialVolume, volume.attenuationColor, "attenuationColor", defaultAttenuationColor, w.mAl);
+
+            if (!materialVolume.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_volume", materialVolume, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -888,6 +910,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_transmission) {
                 exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_volume) {
+                exts.PushBack(StringRef("KHR_materials_volume"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {

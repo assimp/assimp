@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,14 +42,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Provides cheat implementations for IOSystem and IOStream to
  *  redirect exporter output to a blob chain.*/
 
+#pragma once
 #ifndef AI_BLOBIOSYSTEM_H_INCLUDED
 #define AI_BLOBIOSYSTEM_H_INCLUDED
 
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
+
 #include <assimp/cexport.h>
-#include <stdint.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <cstdint>
 #include <set>
 #include <vector>
 
@@ -63,6 +66,10 @@ class BlobIOSystem;
 // --------------------------------------------------------------------------------------------
 class BlobIOStream : public IOStream {
 public:
+    /// @brief The class constructor with all needed parameters
+    /// @param creator  Pointer to the creator instance
+    /// @param file     The filename
+    /// @param initial  The initial size
     BlobIOStream(BlobIOSystem *creator, const std::string &file, size_t initial = 4096) :
             buffer(),
             cur_size(),
@@ -74,7 +81,8 @@ public:
         // empty
     }
 
-    virtual ~BlobIOStream();
+    ///	@brief  The class destructor.
+    ~BlobIOStream() override;
 
 public:
     // -------------------------------------------------------------------
@@ -89,16 +97,12 @@ public:
     }
 
     // -------------------------------------------------------------------
-    virtual size_t Read(void *,
-            size_t,
-            size_t) {
+    size_t Read(void *, size_t, size_t) override {
         return 0;
     }
 
     // -------------------------------------------------------------------
-    virtual size_t Write(const void *pvBuffer,
-            size_t pSize,
-            size_t pCount) {
+    size_t Write(const void *pvBuffer, size_t pSize, size_t pCount) override {
         pSize *= pCount;
         if (cursor + pSize > cur_size) {
             Grow(cursor + pSize);
@@ -112,23 +116,22 @@ public:
     }
 
     // -------------------------------------------------------------------
-    virtual aiReturn Seek(size_t pOffset,
-            aiOrigin pOrigin) {
+    aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override {
         switch (pOrigin) {
-        case aiOrigin_CUR:
-            cursor += pOffset;
-            break;
+            case aiOrigin_CUR:
+                cursor += pOffset;
+                break;
 
-        case aiOrigin_END:
-            cursor = file_size - pOffset;
-            break;
+            case aiOrigin_END:
+                cursor = file_size - pOffset;
+                break;
 
-        case aiOrigin_SET:
-            cursor = pOffset;
-            break;
+            case aiOrigin_SET:
+                cursor = pOffset;
+                break;
 
-        default:
-            return AI_FAILURE;
+            default:
+                return AI_FAILURE;
         }
 
         if (cursor > file_size) {
@@ -136,21 +139,22 @@ public:
         }
 
         file_size = std::max(cursor, file_size);
+
         return AI_SUCCESS;
     }
 
     // -------------------------------------------------------------------
-    virtual size_t Tell() const {
+    size_t Tell() const override {
         return cursor;
     }
 
     // -------------------------------------------------------------------
-    virtual size_t FileSize() const {
+    size_t FileSize() const override {
         return file_size;
     }
 
     // -------------------------------------------------------------------
-    virtual void Flush() {
+    void Flush() override {
         // ignore
     }
 
@@ -194,11 +198,21 @@ class BlobIOSystem : public IOSystem {
     friend class BlobIOStream;
     typedef std::pair<std::string, aiExportDataBlob *> BlobEntry;
 
+
 public:
-    BlobIOSystem() {
+    /// @brief The default class constructor.
+    BlobIOSystem() :
+            baseName{AI_BLOBIO_MAGIC} {
     }
 
-    virtual ~BlobIOSystem() {
+    ///	@brief  The class constructor with the base name.
+    /// @param baseName     The base name.
+    BlobIOSystem(const std::string &baseName) :
+            baseName(baseName) {
+        // empty
+    }
+
+    ~BlobIOSystem() override {
         for (BlobEntry &blobby : blobs) {
             delete blobby.second;
         }
@@ -207,27 +221,32 @@ public:
 public:
     // -------------------------------------------------------------------
     const char *GetMagicFileName() const {
-        return AI_BLOBIO_MAGIC;
+        return baseName.c_str();
     }
 
     // -------------------------------------------------------------------
     aiExportDataBlob *GetBlobChain() {
+        const auto magicName = std::string(this->GetMagicFileName());
+        const bool hasBaseName = baseName != AI_BLOBIO_MAGIC;
+
         // one must be the master
         aiExportDataBlob *master = nullptr, *cur;
+
         for (const BlobEntry &blobby : blobs) {
-            if (blobby.first == AI_BLOBIO_MAGIC) {
+            if (blobby.first == magicName) {
                 master = blobby.second;
+                master->name.Set(hasBaseName ? blobby.first : "");
                 break;
             }
         }
+
         if (!master) {
             ASSIMP_LOG_ERROR("BlobIOSystem: no data written or master file was not closed properly.");
             return nullptr;
         }
 
-        master->name.Set("");
-
         cur = master;
+
         for (const BlobEntry &blobby : blobs) {
             if (blobby.second == master) {
                 continue;
@@ -236,9 +255,13 @@ public:
             cur->next = blobby.second;
             cur = cur->next;
 
-            // extract the file extension from the file written
-            const std::string::size_type s = blobby.first.find_first_of('.');
-            cur->name.Set(s == std::string::npos ? blobby.first : blobby.first.substr(s + 1));
+            if (hasBaseName) {
+                cur->name.Set(blobby.first);
+            } else {
+                // extract the file extension from the file written
+                const std::string::size_type s = blobby.first.find_first_of('.');
+                cur->name.Set(s == std::string::npos ? blobby.first : blobby.first.substr(s + 1));
+            }
         }
 
         // give up blob ownership
@@ -248,18 +271,17 @@ public:
 
 public:
     // -------------------------------------------------------------------
-    virtual bool Exists(const char *pFile) const {
+    bool Exists(const char *pFile) const override {
         return created.find(std::string(pFile)) != created.end();
     }
 
     // -------------------------------------------------------------------
-    virtual char getOsSeparator() const {
+    char getOsSeparator() const override {
         return '/';
     }
 
     // -------------------------------------------------------------------
-    virtual IOStream *Open(const char *pFile,
-            const char *pMode) {
+    IOStream *Open(const char *pFile, const char *pMode) override {
         if (pMode[0] != 'w') {
             return nullptr;
         }
@@ -269,7 +291,7 @@ public:
     }
 
     // -------------------------------------------------------------------
-    virtual void Close(IOStream *pFile) {
+    void Close(IOStream *pFile) override {
         delete pFile;
     }
 
@@ -279,17 +301,20 @@ private:
         // we don't know in which the files are closed, so we
         // can't reliably say that the first must be the master
         // file ...
-        blobs.push_back(BlobEntry(filename, child->GetBlob()));
+        blobs.emplace_back(filename, child->GetBlob());
     }
 
 private:
+    std::string baseName;
     std::set<std::string> created;
     std::vector<BlobEntry> blobs;
 };
 
 // --------------------------------------------------------------------------------------------
-BlobIOStream ::~BlobIOStream() {
-    creator->OnDestruct(file, this);
+BlobIOStream::~BlobIOStream() {
+    if (nullptr != creator) {
+        creator->OnDestruct(file, this);
+    }
     delete[] buffer;
 }
 

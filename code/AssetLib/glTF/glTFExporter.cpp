@@ -405,8 +405,7 @@ void glTFExporter::ExportMaterials()
  * Search through node hierarchy and find the node containing the given meshID.
  * Returns true on success, and false otherwise.
  */
-bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
-{
+bool FindMeshNode(Ref<Node> &nodeIn, Ref<Node> &meshNode, const std::string &meshID) {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
           meshNode = nodeIn;
@@ -527,6 +526,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
 
 #if defined(__has_warning)
 #if __has_warning("-Wunused-but-set-variable")
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #endif
@@ -604,7 +604,7 @@ void glTFExporter::ExportMeshes()
 			else
 				msg = "mesh must has vertices and faces.";
 
-            ASSIMP_LOG_WARN_F("GLTF: can not use Open3DGC-compression: ", msg);
+            ASSIMP_LOG_WARN("GLTF: can not use Open3DGC-compression: ", msg);
             comp_allow = false;
 		}
 

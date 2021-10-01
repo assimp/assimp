@@ -156,7 +156,7 @@ struct aiMetadata {
 
 #ifdef __cplusplus
 
-    /** 
+    /**
      *  @brief  The default constructor, set all members to zero by default.
      */
     aiMetadata() AI_NO_EXCEPT
@@ -202,17 +202,17 @@ struct aiMetadata {
             } break;
             case AI_AISTRING: {
                 aiString v;
-                rhs.Get<aiString>(mKeys[i], v);
+                rhs.Get<aiString>(static_cast<unsigned int>(i), v);
                 mValues[i].mData = new aiString(v);
             } break;
             case AI_AIVECTOR3D: {
                 aiVector3D v;
-                rhs.Get<aiVector3D>(mKeys[i], v);
+                rhs.Get<aiVector3D>(static_cast<unsigned int>(i), v);
                 mValues[i].mData = new aiVector3D(v);
             } break;
             case AI_AIMETADATA: {
                 aiMetadata v;
-                rhs.Get<aiMetadata>(mKeys[i], v);
+                rhs.Get<aiMetadata>(static_cast<unsigned int>(i), v);
                 mValues[i].mData = new aiMetadata(v);
             } break;
 #ifndef SWIG
@@ -432,7 +432,7 @@ struct aiMetadata {
 
     /// Check whether there is a metadata entry for the given key.
     /// \param [in] Key - the key value value to check for.
-    inline bool HasKey(const char *key) {
+    inline bool HasKey(const char *key) const {
         if (nullptr == key) {
             return false;
         }

@@ -56,7 +56,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 CalcTangentsProcess::CalcTangentsProcess() :
-        configMaxAngle(AI_DEG_TO_RAD(45.f)), configSourceUV(0) {
+        configMaxAngle(float(AI_DEG_TO_RAD(45.f))), configSourceUV(0) {
     // nothing to do here
 }
 
@@ -129,7 +129,7 @@ bool CalcTangentsProcess::ProcessMesh(aiMesh *pMesh, unsigned int meshIndex) {
         return false;
     }
     if (configSourceUV >= AI_MAX_NUMBER_OF_TEXTURECOORDS || !pMesh->mTextureCoords[configSourceUV]) {
-        ASSIMP_LOG_ERROR((Formatter::format("Failed to compute tangents; need UV data in channel"), configSourceUV));
+        ASSIMP_LOG_ERROR("Failed to compute tangents; need UV data in channel", configSourceUV);
         return false;
     }
 

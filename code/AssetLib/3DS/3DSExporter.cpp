@@ -56,8 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-using namespace Assimp;
 namespace Assimp {
+
 using namespace D3DS;
 
 namespace {
@@ -102,13 +102,14 @@ private:
 // preserves the mesh's given name if it has one. |index| is the index
 // of the mesh in |aiScene::mMeshes|.
 std::string GetMeshName(const aiMesh &mesh, unsigned int index, const aiNode &node) {
-    static const std::string underscore = "_";
+    static const char underscore = '_';
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
     std::string result = node.mName.C_Str();
     if (mesh.mName.length > 0) {
-        result += underscore + mesh.mName.C_Str();
+        result += underscore;
+        result += mesh.mName.C_Str();
     }
     return result + underscore + postfix;
 }
@@ -290,7 +291,7 @@ void Discreet3DSExporter::WriteMaterials() {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_SPECULAR);
             WriteColor(color);
         }
-                
+
         if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_AMBIENT);
             WriteColor(color);
@@ -378,7 +379,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type
 
     // TODO: handle embedded textures properly
     if (path.data[0] == '*') {
-        ASSIMP_LOG_ERROR("Ignoring embedded texture for export: " + std::string(path.C_Str()));
+        ASSIMP_LOG_ERROR("Ignoring embedded texture for export: ", path.C_Str());
         return;
     }
 

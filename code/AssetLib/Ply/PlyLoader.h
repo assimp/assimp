@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  PLYLoader.h
  *  @brief Declaration of the .ply importer class.
  */
+#pragma once
 #ifndef AI_PLYLOADER_H_INCLUDED
 #define AI_PLYLOADER_H_INCLUDED
 
@@ -64,14 +65,14 @@ using namespace PLY;
 class PLYImporter : public BaseImporter {
 public:
     PLYImporter();
-    ~PLYImporter();
+    ~PLYImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Extract a vertex from the DOM
@@ -88,14 +89,14 @@ protected:
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Extract a material list from the DOM

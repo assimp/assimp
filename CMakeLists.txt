@@ -44,10 +44,10 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake")
+  include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.293.tar.gz"
-    SHA1 "e8e5470652db77149d9b38656db2a6c0b7642693"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.311.tar.gz"
+    SHA1 "1a82b9b73055879181cb1466b2ab5d48ee8ae410"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -135,11 +135,11 @@ IF ( WIN32 )
   # Use subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
-  OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
-    "If the Assimp view tool is built. (requires DirectX)"
-    OFF )
-
   IF(MSVC)
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
+      "If the Assimp view tool is built. (requires DirectX)"
+      OFF )
+
     OPTION( ASSIMP_INSTALL_PDB
       "Install MSVC debug files."
       ON )
@@ -265,9 +265,12 @@ ELSEIF(MSVC)
   ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
-    ADD_COMPILE_OPTIONS(/wd4351)
+    ADD_COMPILE_OPTIONS(/wd4351)	
   ENDIF()
+  ADD_COMPILE_OPTIONS(/wd4244) #supress warning for double to float conversion if Double precission is activated
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
+  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+  SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
 ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_STANDARD 11)
@@ -334,9 +337,9 @@ INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # Set Assimp project output directory variables.
-SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
-SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
+SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
+SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for archive output files")
 
 # Macro used to set the output directories of a target to the
 # respective Assimp output directories.
@@ -395,14 +398,14 @@ set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-hunter-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-hunter-config.cmake.in")
   set(NAMESPACE "${PROJECT_NAME}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
   set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 ELSE()
   set(CONFIG_INSTALL_DIR "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-plain-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-plain-config.cmake.in")
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
   set(NAMESPACE "${PROJECT_NAME_LOWERCASE}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME_LOWERCASE}Targets")
@@ -527,12 +530,12 @@ ENDIF()
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 
 SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
-  "Build the C4D importer, which relies on the non-free Melange SDK."
+  "Build the C4D importer, which relies on the non-free Cineware SDK."
 )
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   IF ( MSVC )
-    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/includes")
+    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/includes")
 
     # pick the correct prebuilt library
     IF(MSVC15)
@@ -551,22 +554,23 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
       )
     ENDIF()
 
-    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/libraries/win")
+    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/libraries/win")
 
     SET(C4D_DEBUG_LIBRARIES
-      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_debug.lib"
+      "${C4D_LIB_BASE_PATH}/cinewarelib${C4D_LIB_POSTFIX}/cinewarelib_debug.lib"
       "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_debug.lib"
     )
     SET(C4D_RELEASE_LIBRARIES
-      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_release.lib"
+      "${C4D_LIB_BASE_PATH}/cinewarelib${C4D_LIB_POSTFIX}/cinewarelib_release.lib"
       "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_release.lib"
     )
 
-    # winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
+    # winsock and winmm are necessary (and undocumented) dependencies of Cineware SDK because
+    # it can be used to communicate with a running Cinema 4D instance
     SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
   ELSE ()
     MESSAGE( FATAL_ERROR
-      "C4D is currently only available on Windows with melange SDK installed in contrib/Melange"
+      "C4D is currently only available on Windows with Cineware SDK installed in contrib/Cineware"
     )
   ENDIF ()
 ELSE ()

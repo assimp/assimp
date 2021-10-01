@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // possible as new fields are added to assimp structures.
 
 // ----------------------------------------------------------------------------
-/** 
+/**
   * @file Implements Assimp::SceneCombiner. This is a smart utility
   *       class that combines multiple scenes, meshes, ... into one. Currently
   *       these utilities are used by the IRR and LWS loaders and the
@@ -359,7 +359,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
 
     // generate the output texture list + an offset table for all texture indices
     if (dest->mNumTextures) {
-        aiTexture **pip = dest->mTextures = new aiTexture *[dest->mNumMaterials];
+        aiTexture **pip = dest->mTextures = new aiTexture *[dest->mNumTextures];
         cnt = 0;
         for (unsigned int n = 0; n < src.size(); ++n) {
             SceneHelper *cur = &src[n];
@@ -406,11 +406,25 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                             // Check whether this texture is an embedded texture.
                             // In this case the property looks like this: *<n>,
                             // where n is the index of the texture.
-                            aiString &s = *((aiString *)prop->mData);
+                            // Copy here because we overwrite the string data in-place and the buffer inside of aiString
+                            // will be a lie if we just reinterpret from prop->mData. The size of mData is not guaranteed to be
+                            // MAXLEN in size.
+                            aiString s(*(aiString *)prop->mData);
                             if ('*' == s.data[0]) {
                                 // Offset the index and write it back ..
                                 const unsigned int idx = strtoul10(&s.data[1]) + offset[n];
-                                ASSIMP_itoa10(&s.data[1], sizeof(s.data) - 1, idx);
+                                const unsigned int oldLen = s.length;
+
+                                s.length = 1 + ASSIMP_itoa10(&s.data[1], sizeof(s.data) - 1, idx);
+
+                                // The string changed in size so we need to reallocate the buffer for the property.
+                                if (oldLen < s.length) {
+                                    prop->mDataLength += s.length - oldLen;
+                                    delete[] prop->mData;
+                                    prop->mData = new char[prop->mDataLength];
+                                }
+
+                                memcpy(prop->mData, static_cast<void*>(&s), prop->mDataLength);
                             }
                         }
 
@@ -612,7 +626,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                 }
             }
             if (!(*it).resolved) {
-                ASSIMP_LOG_ERROR_F("SceneCombiner: Failed to resolve attachment ", (*it).node->mName.data,
+                ASSIMP_LOG_ERROR("SceneCombiner: Failed to resolve attachment ", (*it).node->mName.data,
                         " ", (*it).attachToNode->mName.data);
             }
         }
@@ -638,6 +652,8 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
         deleteMe->mMaterials = nullptr;
         delete[] deleteMe->mAnimations;
         deleteMe->mAnimations = nullptr;
+        delete[] deleteMe->mTextures;
+        deleteMe->mTextures = nullptr;
 
         deleteMe->mRootNode = nullptr;
 

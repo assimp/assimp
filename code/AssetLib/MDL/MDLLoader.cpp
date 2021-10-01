@@ -199,6 +199,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         const uint32_t iMagicWord = *((uint32_t *)mBuffer);
 
         // Determine the file subtype and call the appropriate member function
+        bool is_half_life = false;
 
         // Original Quake1 format
         if (AI_MDL_MAGIC_NUMBER_BE == iMagicWord || AI_MDL_MAGIC_NUMBER_LE == iMagicWord) {
@@ -240,6 +241,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         else if (AI_MDL_MAGIC_NUMBER_BE_HL2a == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2a == iMagicWord ||
                  AI_MDL_MAGIC_NUMBER_BE_HL2b == iMagicWord || AI_MDL_MAGIC_NUMBER_LE_HL2b == iMagicWord) {
             iGSFileVersion = 0;
+            is_half_life = true;
 
             HalfLife::HalfLifeMDLBaseHeader *pHeader = (HalfLife::HalfLifeMDLBaseHeader *)mBuffer;
             if (pHeader->version == AI_MDL_HL1_VERSION) {
@@ -252,12 +254,22 @@ void MDLImporter::InternReadFile(const std::string &pFile,
         } else {
             // print the magic word to the log file
             throw DeadlyImportError("Unknown MDL subformat ", pFile,
-                                    ". Magic word (", std::string((char *)&iMagicWord, 4), ") is not known");
+                                    ". Magic word (", ai_str_toprintable((const char *)&iMagicWord, sizeof(iMagicWord)), ") is not known");
         }
 
-        // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-        pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
-                0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+        if (is_half_life){
+            // Now rotate the whole scene 90 degrees around the z and x axes to convert to internal coordinate system
+            pScene->mRootNode->mTransformation = aiMatrix4x4(
+                    0.f, -1.f, 0.f, 0.f,
+                    0.f, 0.f, 1.f, 0.f,
+                    -1.f, 0.f, 0.f, 0.f,
+                    0.f, 0.f, 0.f, 1.f);
+        }
+        else {
+            // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
+            pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
+                    0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+        }
 
         DeleteBufferAndCleanup();
     } catch (...) {

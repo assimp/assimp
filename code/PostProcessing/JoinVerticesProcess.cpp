@@ -100,7 +100,7 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
         if (iNumOldVertices == iNumVertices) {
             ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
         } else {
-            ASSIMP_LOG_INFO_F("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
+            ASSIMP_LOG_INFO("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
                 " out: ", iNumVertices, " | ~",
                 ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
         }
@@ -373,7 +373,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)    {
-        ASSIMP_LOG_VERBOSE_DEBUG_F(
+        ASSIMP_LOG_VERBOSE_DEBUG(
             "Mesh ",meshIndex,
             " (",
             (pMesh->mName.length ? pMesh->mName.data : "unnamed"),

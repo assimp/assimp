@@ -59,19 +59,19 @@ public:
     MMDImporter();
 
     /// \brief  Destructor
-    ~MMDImporter();
+    ~MMDImporter() override;
 
 public:
     /// \brief  Returns whether the class can handle the format of the given file.
     /// \remark See BaseImporter::CanRead() for details.
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 private:
     //! \brief  Appends the supported extension.
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo() const override;
 
     //! \brief  File import implementation.
-    void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
 
     //! \brief  Create the data from imported content.
     void CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene);

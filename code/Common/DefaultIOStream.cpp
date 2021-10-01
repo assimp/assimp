@@ -62,7 +62,7 @@ inline int select_fseek(FILE *file, int64_t offset, int origin) {
 }
 
 
-    
+
 #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
 template <>
 inline size_t select_ftell<8>(FILE *file) {
@@ -75,14 +75,13 @@ inline int select_fseek<8>(FILE *file, int64_t offset, int origin) {
 }
 
 #endif // #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
-    
+
 } // namespace
 
 // ----------------------------------------------------------------------------------
 DefaultIOStream::~DefaultIOStream() {
     if (mFile) {
         ::fclose(mFile);
-        mFile = nullptr;
     }
 }
 
@@ -90,9 +89,11 @@ DefaultIOStream::~DefaultIOStream() {
 size_t DefaultIOStream::Read(void *pvBuffer,
         size_t pSize,
         size_t pCount) {
+    if (0 == pCount) {
+        return 0;
+    }
     ai_assert(nullptr != pvBuffer);
     ai_assert(0 != pSize);
-    ai_assert(0 != pCount);
 
     return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }

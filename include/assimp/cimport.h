@@ -894,7 +894,7 @@ ASSIMP_API float aiMatrix3Determinant(
 
 // --------------------------------------------------------------------------------
 /** Get a 3x3 rotation matrix around the Z axis.
- *  @param mat Receives the output matrix 
+ *  @param mat Receives the output matrix
  *  @param angle Rotation angle, in radians
  */
 ASSIMP_API void aiMatrix3RotationZ(
@@ -903,7 +903,7 @@ ASSIMP_API void aiMatrix3RotationZ(
 
 // --------------------------------------------------------------------------------
 /** Returns a 3x3 rotation matrix for a rotation around an arbitrary axis.
- *  @param mat Receives the output matrix 
+ *  @param mat Receives the output matrix
  *  @param axis Rotation axis, should be a normalized vector
  *  @param angle Rotation angle, in radians
  */
@@ -914,7 +914,7 @@ ASSIMP_API void aiMatrix3FromRotationAroundAxis(
 
 // --------------------------------------------------------------------------------
 /** Get a 3x3 translation matrix.
- *  @param mat Receives the output matrix 
+ *  @param mat Receives the output matrix
  *  @param translation The translation vector
  */
 ASSIMP_API void aiMatrix3Translation(
@@ -923,7 +923,7 @@ ASSIMP_API void aiMatrix3Translation(
 
 // --------------------------------------------------------------------------------
 /** Create a 3x3 matrix that rotates one vector to another vector.
- *  @param mat Receives the output matrix 
+ *  @param mat Receives the output matrix
  *  @param from Vector to rotate from
  *  @param to Vector to rotate to
  */
@@ -1059,7 +1059,7 @@ ASSIMP_API void aiMatrix4DecomposeNoScaling(
 
 // --------------------------------------------------------------------------------
 /** Creates a 4x4 matrix from a set of euler angles.
- *  @param mat Receives the output matrix 
+ *  @param mat Receives the output matrix
  *  @param x Rotation angle for the x-axis, in radians
  *  @param y Rotation angle for the y-axis, in radians
  *  @param z Rotation angle for the z-axis, in radians
@@ -1137,7 +1137,7 @@ ASSIMP_API void aiMatrix4FromTo(
 
 // --------------------------------------------------------------------------------
 /** Create a Quaternion from euler angles.
- *  @param q Receives the output quaternion 
+ *  @param q Receives the output quaternion
  *  @param x Rotation angle for the x-axis, in radians
  *  @param y Rotation angle for the y-axis, in radians
  *  @param z Rotation angle for the z-axis, in radians

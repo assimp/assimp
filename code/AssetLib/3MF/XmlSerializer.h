@@ -3,6 +3,7 @@ Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2021, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -37,22 +38,59 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
 #pragma once
-#ifndef AI_DEFINES_H_INC
-#define AI_DEFINES_H_INC
 
-#ifdef __GNUC__
-#   pragma GCC system_header
-#endif
+#include <assimp/XmlParser.h>
+#include <assimp/mesh.h>
+#include <vector>
+#include <map>
 
-// We need those constants, workaround for any platforms where nobody defined them yet
-#if (!defined SIZE_MAX)
-#   define SIZE_MAX (~((size_t)0))
-#endif
+struct aiNode;
+struct aiMesh;
+struct aiMaterial;
 
-#if (!defined UINT_MAX)
-#   define UINT_MAX (~((unsigned int)0))
-#endif
+namespace Assimp {
+namespace D3MF {
 
-#endif // AI_DEINES_H_INC
+class Resource;
+class D3MFOpcPackage;
+class Object;
+class Texture2DGroup;
+class EmbeddedTexture;
+
+class XmlSerializer {
+public:
+    XmlSerializer(XmlParser *xmlParser);
+    ~XmlSerializer();
+    void ImportXml(aiScene *scene);
+
+private:
+    void addObjectToNode(aiNode *parent, Object *obj, aiMatrix4x4 nodeTransform);
+    void ReadObject(XmlNode &node);
+    aiMesh *ReadMesh(XmlNode &node);
+    void ReadMetadata(XmlNode &node);
+    void ImportVertices(XmlNode &node, aiMesh *mesh);
+    void ImportTriangles(XmlNode &node, aiMesh *mesh);
+    void ReadBaseMaterials(XmlNode &node);
+    void ReadEmbeddecTexture(XmlNode &node);
+    void StoreEmbeddedTexture(EmbeddedTexture *tex);
+    void ReadTextureCoords2D(XmlNode &node, Texture2DGroup *tex2DGroup);
+    void ReadTextureGroup(XmlNode &node);
+    aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId);
+    void StoreMaterialsInScene(aiScene *scene);
+
+private:
+    struct MetaEntry {
+        std::string name;
+        std::string value;
+    };
+    std::vector<MetaEntry> mMetaData;
+    std::vector<EmbeddedTexture *> mEmbeddedTextures;
+    std::vector<aiMaterial *> mMaterials;
+    std::map<unsigned int, Resource *> mResourcesDictionnary;
+    unsigned int mMeshCount;
+    XmlParser *mXmlParser;
+};
+
+} // namespace D3MF
+} // namespace Assimp

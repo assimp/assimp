@@ -146,7 +146,7 @@ void ObjFileMtlImporter::load() {
                     ++m_DataIt;
                     ai_real d;
                     getFloatValue(d);
-                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;                    
+                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -232,6 +232,12 @@ void ObjFileMtlImporter::getIlluminationModel(int &illum_model) {
 //  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue(ai_real &value) {
     m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    size_t len = std::strlen(&m_buffer[0]);
+    if (0 == len) {
+        value = 0.0f;
+        return;
+    }
+    
     value = (ai_real)fast_atof(&m_buffer[0]);
 }
 

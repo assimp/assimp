@@ -61,11 +61,14 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
     D3DPRIMITIVETYPE type = D3DPT_POINTLIST;
     switch (g_pcAsset->pcScene->mMeshes[iIndex]->mPrimitiveTypes) {
         case aiPrimitiveType_POINT:
-            type = D3DPT_POINTLIST;break;
+            type = D3DPT_POINTLIST;
+            break;
         case aiPrimitiveType_LINE:
-            type = D3DPT_LINELIST;break;
+            type = D3DPT_LINELIST;
+            break;
         case aiPrimitiveType_TRIANGLE:
-            type = D3DPT_TRIANGLELIST;break;
+            type = D3DPT_TRIANGLELIST;
+            break;
     }
     // and draw the mesh
     g_piDevice->DrawIndexedPrimitive(type,

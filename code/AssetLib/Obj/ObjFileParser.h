@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_FILEPARSER_H_INC
 
 #include <assimp/IOStreamBuffer.h>
+#include <assimp/material.h>
 #include <assimp/mesh.h>
 #include <assimp/vector2.h>
 #include <assimp/vector3.h>
@@ -73,7 +74,6 @@ public:
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
-public:
     /// @brief  The default constructor.
     ObjFileParser();
     /// @brief  Constructor with data array.
@@ -141,7 +141,7 @@ private:
     // because the class contains pointer to allocated memory
 
     /// Default material name
-    static const std::string DEFAULT_MATERIAL;
+    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
     DataArrayIt m_DataIt;
     //! Iterator to end position of buffer

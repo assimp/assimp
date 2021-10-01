@@ -42,10 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  TerragenLoader.h
  *  @brief Declaration of the .ter importer class.
  */
+#pragma once
 #ifndef INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 #define INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 
 #include <assimp/BaseImporter.h>
+
 namespace Assimp {
 
 // Magic strings
@@ -71,23 +73,22 @@ namespace Assimp {
 class TerragenImporter : public BaseImporter {
 public:
     TerragenImporter();
-    ~TerragenImporter();
+    ~TerragenImporter() override;
 
-public:
     // -------------------------------------------------------------------
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const;
+            bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler);
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 private:
     bool configComputeUVs;

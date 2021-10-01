@@ -127,7 +127,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
     unsigned int aiNumMeshesPerPType[4] = { 0, 0, 0, 0 };
 
     std::vector<aiMesh *> outMeshes;
-    outMeshes.reserve(pScene->mNumMeshes << 1u);
+    outMeshes.reserve(static_cast<size_t>(pScene->mNumMeshes) << 1u);
 
     bool bAnyChanges = false;
 
@@ -135,7 +135,9 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
     std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         aiMesh *const mesh = pScene->mMeshes[i];
-        ai_assert(0 != mesh->mPrimitiveTypes);
+        if (mesh->mPrimitiveTypes == 0) {
+            throw DeadlyImportError("Mesh with invalid primitive type: ", mesh->mName.C_Str());
+        }
 
         // if there's just one primitive type in the mesh there's nothing to do for us
         unsigned int num = 0;

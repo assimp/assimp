@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,38 +45,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
+// clang-format off
 #ifdef ASSIMP_ENABLE_DRACO
 
 // Google draco library headers spew many warnings. Bad Google, no cookie
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4018) // Signed/unsigned mismatch
-#pragma warning(disable : 4804) // Unsafe use of type 'bool'
-#elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-compare"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbool-compare"
-#pragma GCC diagnostic ignored "-Wsign-compare"
+#   if _MSC_VER
+#       pragma warning(push)
+#       pragma warning(disable : 4018) // Signed/unsigned mismatch
+#       pragma warning(disable : 4804) // Unsafe use of type 'bool'
+#   elif defined(__clang__)
+#       pragma clang diagnostic push
+#       pragma clang diagnostic ignored "-Wsign-compare"
+#   elif defined(__GNUC__)
+#       pragma GCC diagnostic push
+#       if (__GNUC__ > 4)
+#           pragma GCC diagnostic ignored "-Wbool-compare"
+#       endif
+#   pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
 
 #if _MSC_VER
-#pragma warning(pop)
+#   pragma warning(pop)
 #elif defined(__clang__)
-#pragma clang diagnostic pop
+#   pragma clang diagnostic pop
 #elif defined(__GNUC__)
-#pragma GCC diagnostic pop
+#   pragma GCC diagnostic pop
 #endif
 #ifndef DRACO_MESH_COMPRESSION_SUPPORTED
-#error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
+#   error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
 #endif
 #endif
+// clang-format on
 
 using namespace Assimp;
+using namespace glTFCommon;
 
 namespace glTF2 {
 
@@ -87,200 +91,42 @@ namespace {
 // JSON Value reading helpers
 //
 
-template <class T>
-struct ReadHelper {
-    static bool Read(Value &val, T &out) {
-        return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<bool> {
-    static bool Read(Value &val, bool &out) {
-        return val.IsBool() ? out = val.GetBool(), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<float> {
-    static bool Read(Value &val, float &out) {
-        return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
-    }
-};
-
-template <unsigned int N>
-struct ReadHelper<float[N]> {
-    static bool Read(Value &val, float (&out)[N]) {
-        if (!val.IsArray() || val.Size() != N) return false;
-        for (unsigned int i = 0; i < N; ++i) {
-            if (val[i].IsNumber())
-                out[i] = static_cast<float>(val[i].GetDouble());
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
+    CustomExtension ret;
+    ret.name = name;
+    if (obj.IsObject()) {
+        ret.mValues.isPresent = true;
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+            auto &val = it->value;
+            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
         }
-        return true;
-    }
-};
-
-template <>
-struct ReadHelper<const char *> {
-    static bool Read(Value &val, const char *&out) {
-        return val.IsString() ? (out = val.GetString(), true) : false;
-    }
-};
-
-template <>
-struct ReadHelper<std::string> {
-    static bool Read(Value &val, std::string &out) {
-        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
-    }
-};
-
-template <>
-struct ReadHelper<uint64_t> {
-    static bool Read(Value &val, uint64_t &out) {
-        return val.IsUint64() ? out = val.GetUint64(), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<int64_t> {
-    static bool Read(Value &val, int64_t &out) {
-        return val.IsInt64() ? out = val.GetInt64(), true : false;
-    }
-};
-
-template <class T>
-struct ReadHelper<Nullable<T>> {
-    static bool Read(Value &val, Nullable<T> &out) {
-        return out.isPresent = ReadHelper<T>::Read(val, out.value);
-    }
-};
-
-template <class T>
-inline static bool ReadValue(Value &val, T &out) {
-    return ReadHelper<T>::Read(val, out);
-}
-
-template <class T>
-inline static bool ReadMember(Value &obj, const char *id, T &out) {
-    Value::MemberIterator it = obj.FindMember(id);
-    if (it != obj.MemberEnd()) {
-        return ReadHelper<T>::Read(it->value, out);
-    }
-    return false;
-}
-
-template <class T>
-inline static T MemberOrDefault(Value &obj, const char *id, T defaultValue) {
-    T out;
-    return ReadMember(obj, id, out) ? out : defaultValue;
-}
-
-inline Value *FindMember(Value &val, const char *id) {
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd()) ? &it->value : nullptr;
-}
-
-template<int N>
-inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const char* memberId, const char* context, const char* extraContext) {
-    std::string fullContext = context;
-    if (extraContext && (strlen(extraContext) > 0))
-    {
-        fullContext = fullContext + " (" + extraContext + ")";
-    }
-    throw DeadlyImportError("Member \"", memberId, "\" was not of type \"", expectedTypeName, "\" when reading ", fullContext);
-}
-
-// Look-up functions with type checks. Context and extra context help the user identify the problem if there's an error.
-
-inline Value *FindStringInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsString()) {
-        throwUnexpectedTypeError("string", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindNumberInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsNumber()) {
-        throwUnexpectedTypeError("number", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindUIntInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsUint()) {
-        throwUnexpectedTypeError("uint", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindArrayInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsArray()) {
-        throwUnexpectedTypeError("array", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindObjectInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsObject()) {
-        throwUnexpectedTypeError("object", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindExtensionInContext(Value &val, const char *extensionId, const char* context, const char* extraContext = nullptr) {
-    if (Value *extensionList = FindObjectInContext(val, "extensions", context, extraContext)) {
-        if (Value *extension = FindObjectInContext(*extensionList, extensionId, context, extraContext)) {
-            return extension;
+    } else if (obj.IsArray()) {
+        ret.mValues.value.reserve(obj.Size());
+        ret.mValues.isPresent = true;
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
+            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
         }
+    } else if (obj.IsNumber()) {
+        if (obj.IsUint64()) {
+            ret.mUint64Value.value = obj.GetUint64();
+            ret.mUint64Value.isPresent = true;
+        } else if (obj.IsInt64()) {
+            ret.mInt64Value.value = obj.GetInt64();
+            ret.mInt64Value.isPresent = true;
+        } else if (obj.IsDouble()) {
+            ret.mDoubleValue.value = obj.GetDouble();
+            ret.mDoubleValue.isPresent = true;
+        }
+    } else if (obj.IsString()) {
+        ReadValue(obj, ret.mStringValue);
+        ret.mStringValue.isPresent = true;
+    } else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
     }
-    return nullptr;
+    return ret;
 }
 
-// Overloads when the value is the document.
-
-inline Value *FindString(Document &doc, const char *memberId) {
-    return FindStringInContext(doc, memberId, "the document");
-}
-
-inline Value *FindNumber(Document &doc, const char *memberId) {
-    return FindNumberInContext(doc, memberId, "the document");
-}
-
-inline Value *FindUInt(Document &doc, const char *memberId) {
-    return FindUIntInContext(doc, memberId, "the document");
-}
-
-inline Value *FindArray(Document &val, const char *memberId) {
-    return FindArrayInContext(val, memberId, "the document");
-}
-
-inline Value *FindObject(Document &doc, const char *memberId) {
-    return FindObjectInContext(doc, memberId, "the document");
-}
-
-inline Value *FindExtension(Value &val, const char *extensionId) {
-    return FindExtensionInContext(val, extensionId, "the document");
-}
 } // namespace
 
 inline Value *Object::FindString(Value &val, const char *memberId) {
@@ -305,6 +151,18 @@ inline Value *Object::FindObject(Value &val, const char *memberId) {
 
 inline Value *Object::FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, id.c_str(), name.c_str());
+}
+
+inline void Object::ReadExtensions(Value &val) {
+    if (Value *curExtensions = FindObject(val, "extensions")) {
+        this->customExtensions = glTF2::ReadExtensions("extensions", *curExtensions);
+    }
+}
+
+inline void Object::ReadExtras(Value &val) {
+    if (Value *curExtras = FindObject(val, "extras")) {
+        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+    }
 }
 
 #ifdef ASSIMP_ENABLE_DRACO
@@ -339,14 +197,14 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
     // Not same size, convert
     switch (componentBytes) {
-        case sizeof(uint32_t): 
-            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint32_t):
+            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh);
             break;
-        case sizeof(uint16_t): 
-            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint16_t):
+            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh);
             break;
-        case sizeof(uint8_t): 
-            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); 
+        case sizeof(uint8_t):
+            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh);
             break;
         default:
             ai_assert(false);
@@ -389,23 +247,23 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch (accessor.componentType) {
-        case ComponentType_BYTE: 
-            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_BYTE:
+            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         case ComponentType_UNSIGNED_BYTE:
-            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         case ComponentType_SHORT:
             GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_UNSIGNED_SHORT: 
-            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_UNSIGNED_SHORT:
+            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_UNSIGNED_INT: 
-            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_UNSIGNED_INT:
+            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
-        case ComponentType_FLOAT: 
-            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
+        case ComponentType_FLOAT:
+            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
             break;
         default:
             ai_assert(false);
@@ -546,6 +404,8 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
+    inst->ReadExtensions(obj);
+    inst->ReadExtras(obj);
 
     Ref<T> result = Add(inst.release());
     mRecursiveReferenceCheck.erase(i);
@@ -710,12 +570,13 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 }
 
 inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
-    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) {
+        return;
+    }
 
     for (SEncodedRegion *reg : EncodedRegion_List) {
         if (reg->ID == pID) {
             EncodedRegion_Current = reg;
-
             return;
         }
     }
@@ -765,10 +626,13 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 }
 
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
-    size_t offset = this->byteLength;
+    const size_t offset = this->byteLength;
+
     // Force alignment to 4 bits
-    Grow((length + 3) & ~3);
+    const size_t paddedLength = (length + 3) & ~3;
+    Grow(paddedLength);
     memcpy(mData.get() + offset, data, length);
+    memset(mData.get() + offset + length, 0, paddedLength - length);
     return offset;
 }
 
@@ -797,9 +661,7 @@ inline void Buffer::Grow(size_t amount) {
 //
 // struct BufferView
 //
-
 inline void BufferView::Read(Value &obj, Asset &r) {
-
     if (Value *bufferVal = FindUInt(obj, "buffer")) {
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
@@ -819,16 +681,21 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return nullptr;
+    if (!buffer) {
+        return nullptr;
+    }
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return nullptr;
+    if (!basePtr) {
+        return nullptr;
+    }
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
         const size_t begin = buffer->EncodedRegion_Current->Offset;
         const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
-        if ((offset >= begin) && (offset < end))
+        if ((offset >= begin) && (offset < end)) {
             return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+        }
     }
 
     return basePtr + offset;
@@ -854,18 +721,18 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     while (pIndices != indicesEnd) {
         size_t offset;
         switch (indicesType) {
-        case ComponentType_UNSIGNED_BYTE:
-            offset = *pIndices;
-            break;
-        case ComponentType_UNSIGNED_SHORT:
-            offset = *reinterpret_cast<uint16_t *>(pIndices);
-            break;
-        case ComponentType_UNSIGNED_INT:
-            offset = *reinterpret_cast<uint32_t *>(pIndices);
-            break;
-        default:
-            // have fun with float and negative values from signed types as indices.
-            throw DeadlyImportError("Unsupported component type in index.");
+            case ComponentType_UNSIGNED_BYTE:
+                offset = *pIndices;
+                break;
+            case ComponentType_UNSIGNED_SHORT:
+                offset = *reinterpret_cast<uint16_t *>(pIndices);
+                break;
+            case ComponentType_UNSIGNED_INT:
+                offset = *reinterpret_cast<uint32_t *>(pIndices);
+                break;
+            default:
+                // have fun with float and negative values from signed types as indices.
+                throw DeadlyImportError("Unsupported component type in index.");
         }
 
         offset *= elementSize;
@@ -877,7 +744,6 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 }
 
 inline void Accessor::Read(Value &obj, Asset &r) {
-
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
@@ -886,9 +752,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     {
         const Value* countValue = FindUInt(obj, "count");
-        if (!countValue || countValue->GetInt() < 1)
+        if (!countValue)
         {
-            throw DeadlyImportError("A strictly positive count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+            throw DeadlyImportError("A count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
         }
         count = countValue->GetUint();
     }
@@ -1105,7 +971,9 @@ inline Accessor::Indexer::Indexer(Accessor &acc) :
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
-    ai_assert(i * stride < accessor.GetMaxByteSize());
+    if (i * stride >= accessor.GetMaxByteSize()) {
+        throw DeadlyImportError("GLTF: Invalid index ", i, ", count out of range for buffer with stride ", stride, " and size ", accessor.GetMaxByteSize(), ".");
+    }
     // Ensure that the memcpy doesn't overwrite the local.
     const size_t sizeToCopy = std::min(elemSize, sizeof(T));
     T value = T();
@@ -1121,6 +989,7 @@ inline Image::Image() :
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
+    //basisu: no need to handle .ktx2, .basis, load as is
     if (!mDataLength) {
         Value *curUri = FindString(obj, "uri");
         if (nullptr != curUri) {
@@ -1440,7 +1309,7 @@ inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, con
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     Value *curName = FindMember(pJSON_Object, "name");
-    if (nullptr != curName) {
+    if (nullptr != curName && curName->IsString()) {
         name = curName->GetString();
     }
 
@@ -1586,9 +1455,9 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
         }
     }
 
-    Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras) {
-        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
+    Value *curExtras = FindObject(pJSON_Object, "extras");
+    if (nullptr != curExtras) {
+        if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
                 Value &targetNameValue = (*curTargetNames)[i];
@@ -1657,42 +1526,6 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value &obj) {
-    CustomExtension ret;
-    ret.name = name;
-    if (obj.IsObject()) {
-        ret.mValues.isPresent = true;
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto &val = it->value;
-            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
-        }
-    } else if (obj.IsArray()) {
-        ret.mValues.value.reserve(obj.Size());
-        ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i) {
-            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
-        }
-    } else if (obj.IsNumber()) {
-        if (obj.IsUint64()) {
-            ret.mUint64Value.value = obj.GetUint64();
-            ret.mUint64Value.isPresent = true;
-        } else if (obj.IsInt64()) {
-            ret.mInt64Value.value = obj.GetInt64();
-            ret.mInt64Value.isPresent = true;
-        } else if (obj.IsDouble()) {
-            ret.mDoubleValue.value = obj.GetDouble();
-            ret.mDoubleValue.isPresent = true;
-        }
-    } else if (obj.IsString()) {
-        ReadValue(obj, ret.mStringValue);
-        ret.mStringValue.isPresent = true;
-    } else if (obj.IsBool()) {
-        ret.mBoolValue.value = obj.GetBool();
-        ret.mBoolValue.isPresent = true;
-    }
-    return ret;
-}
-
 inline void Node::Read(Value &obj, Asset &r) {
     if (name.empty()) {
         name = id;
@@ -1749,8 +1582,6 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curExtensions = FindObject(obj, "extensions");
     if (nullptr != curExtensions) {
-        this->extensions = ReadExtensions("extensions", *curExtensions);
-
         if (r.extensionsUsed.KHR_lights_punctual) {
             if (Value *ext = FindObject(*curExtensions, "KHR_lights_punctual")) {
                 Value *curLight = FindUInt(*ext, "light");
@@ -2101,11 +1932,12 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_draco_mesh_compression);
+    CHECK_EXT(KHR_texture_basisu);
 
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool /*absolute*/) {
+inline IOStream *Asset::OpenFile(const std::string& path, const char *mode, bool /*absolute*/) {
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else

@@ -57,9 +57,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#include <memory>
 #include <functional>
 #include <map>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 namespace FBX {
@@ -248,10 +249,8 @@ Object::~Object()
 }
 
 // ------------------------------------------------------------------------------------------------
-FileGlobalSettings::FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props)
-: props(props)
-, doc(doc)
-{
+FileGlobalSettings::FileGlobalSettings(const Document &doc, std::shared_ptr<const PropertyTable> props) :
+        props(std::move(props)), doc(doc) {
     // empty
 }
 
@@ -312,7 +311,7 @@ void Document::ReadHeader() {
 
     const Scope& shead = *ehead->Compound();
     fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
-	ASSIMP_LOG_DEBUG_F("FBX Version: ", fbxVersion);
+	ASSIMP_LOG_DEBUG("FBX Version: ", fbxVersion);
 
     // While we may have some success with newer files, we don't support
     // the older 6.n fbx format
@@ -636,7 +635,7 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, 
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source,
         const char* const* classnames, size_t count) const
 {
     return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);

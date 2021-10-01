@@ -101,7 +101,7 @@ std::string GetLineAndColumnText(unsigned int line, unsigned int column)
 std::string GetTokenText(const Token* tok)
 {
     if(tok->IsBinary()) {
-        return static_cast<std::string>( Formatter::format() << 
+        return static_cast<std::string>( Formatter::format() <<
             " (" << TokenTypeString(tok->Type()) <<
             ", offset 0x" << std::hex << tok->Offset() << ") " );
     }

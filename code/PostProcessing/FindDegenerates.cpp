@@ -90,7 +90,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene) {
     if ( nullptr == pScene) {
         return;
     }
-    
+
     std::unordered_map<unsigned int, unsigned int> meshMap;
     meshMap.reserve(pScene->mNumMeshes);
 
@@ -291,7 +291,7 @@ evil_jump_outside:
     }
 
     if (deg && !DefaultLogger::isNullLogger()) {
-        ASSIMP_LOG_WARN_F( "Found ", deg, " degenerated primitives");
+        ASSIMP_LOG_WARN( "Found ", deg, " degenerated primitives");
     }
     return false;
 }

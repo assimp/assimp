@@ -10,7 +10,7 @@ http://assimp.sf.net
 Troubleshooting
 ===============
 
-1. Missing d3dx9_(some-number).dll? 
+1. Missing d3dx9_(some-number).dll?
 Install the latest DirectX runtime or grab the file from somewhere (that's evil but mostly fine).
 
 2. Application configuration not correct / missing msvcr***.dll?

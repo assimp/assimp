@@ -170,7 +170,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode *nd, std::list<aiNode *> &n
 			++it;
 		}
 		if (join_master && !join.empty()) {
-			join_master->mName.length = ::ai_snprintf(join_master->mName.data, MAXLEN, "$MergedNode_%i", count_merged++);
+			join_master->mName.length = ::ai_snprintf(join_master->mName.data, MAXLEN, "$MergedNode_%u", count_merged++);
 
 			unsigned int out_meshes = 0;
 			for (std::list<aiNode *>::const_iterator it = join.cbegin(); it != join.cend(); ++it) {
@@ -335,7 +335,7 @@ void OptimizeGraphProcess::Execute(aiScene *pScene) {
 	pScene->mRootNode->mParent = nullptr;
 	if (!DefaultLogger::isNullLogger()) {
 		if (nodes_in != nodes_out) {
-			ASSIMP_LOG_INFO_F("OptimizeGraphProcess finished; Input nodes: ", nodes_in, ", Output nodes: ", nodes_out);
+			ASSIMP_LOG_INFO("OptimizeGraphProcess finished; Input nodes: ", nodes_in, ", Output nodes: ", nodes_out);
 		} else {
 			ASSIMP_LOG_DEBUG("OptimizeGraphProcess finished");
 		}

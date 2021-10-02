@@ -1215,6 +1215,16 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+		if (r.extensionsUsed.KHR_materials_ior) {
+            if (Value *currentIOR = FindObject(*extensions, "KHR_materials_ior")) {
+                MaterialIOR ior;
+
+                ReadMember(*currentIOR, "ior", ior.ior);
+
+                this->materialIOR = Nullable<MaterialIOR>(ior);
+            }
+		}
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1933,6 +1943,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
+    CHECK_EXT(KHR_materials_ior);
 
 #undef CHECK_EXT
 }

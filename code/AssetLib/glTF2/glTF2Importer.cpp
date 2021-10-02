@@ -341,6 +341,13 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
         }
 
+        // KHR_materials_ior
+        if (mat.materialIOR.isPresent) {
+            MaterialIOR &ior = mat.materialIOR.value;
+
+            aimat->AddProperty(&ior.ior, 1, AI_MATKEY_REFRACTI);
+        }
+
         return aimat;
     } catch (...) {
         delete aimat;

@@ -777,6 +777,10 @@ struct MaterialTransmission {
     float transmissionFactor = 0.f;
 };
 
+struct MaterialIOR {
+    float ior = 1.0f;
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -805,6 +809,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_unlit
     bool unlit;
+
+    //extension: KHR_materials_ior
+    Nullable<MaterialIOR> materialIOR;
 
     Material() { SetDefaults(); }
     void Read(Value &obj, Asset &r);
@@ -1094,6 +1101,7 @@ public:
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;
+        bool KHR_materials_ior;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

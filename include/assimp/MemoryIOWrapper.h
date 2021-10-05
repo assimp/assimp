@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file MemoryIOWrapper.h
- *  Handy IOStream/IOSystem implemetation to read directly from a memory buffer */
+ *  Handy IOStream/IOSystem implementation to read directly from a memory buffer */
 #pragma once
 #ifndef AI_MEMORYIOSTREAM_H_INC
 #define AI_MEMORYIOSTREAM_H_INC

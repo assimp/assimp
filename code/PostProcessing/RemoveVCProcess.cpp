@@ -67,7 +67,7 @@ bool RemoveVCProcess::IsActive(unsigned int pFlags) const {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Small helper function to delete all elements in a T** aray using delete
+// Small helper function to delete all elements in a T** array using delete
 template <typename T>
 inline void ArrayDelete(T **&in, unsigned int &num) {
     for (unsigned int i = 0; i < num; ++i)

@@ -74,6 +74,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/rapidjson.h>
+#include <rapidjson/schema.h>
 
 #if (__GNUC__ == 8 && __GNUC_MINOR__ >= 0)
 #   pragma GCC diagnostic pop
@@ -1066,6 +1067,7 @@ class Asset {
 
 private:
     IOSystem *mIOSystem;
+    rapidjson::IRemoteSchemaDocumentProvider *mSchemaDocumentProvider;
 
     std::string mCurrentAssetDir;
 
@@ -1125,8 +1127,9 @@ public:
     Ref<Scene> scene;
 
 public:
-    Asset(IOSystem *io = nullptr) :
+    Asset(IOSystem *io = nullptr, rapidjson::IRemoteSchemaDocumentProvider *schemaDocumentProvider = nullptr) : 
             mIOSystem(io),
+            mSchemaDocumentProvider(schemaDocumentProvider),
             asset(),
             accessors(*this, "accessors"),
             animations(*this, "animations"),
@@ -1149,6 +1152,9 @@ public:
     //! Main function
     void Load(const std::string &file, bool isBinary = false);
 
+    //! Parse the AssetMetadata and check that the version is 2.
+    bool CanRead(const std::string &pFile, bool isBinary = false);
+
     //! Enables binary encoding on the asset
     void SetAsBinary();
 
@@ -1159,6 +1165,11 @@ public:
 
 private:
     void ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneData);
+
+    //! Obtain a JSON document from the stream.
+    // \param second argument is a buffer used by the document. It must be kept
+    // alive while the document is in use.
+    Document ReadDocument(IOStream& stream, bool isBinary, std::vector<char>& sceneData);
 
     void ReadExtensionsUsed(Document &doc);
     void ReadExtensionsRequired(Document &doc);

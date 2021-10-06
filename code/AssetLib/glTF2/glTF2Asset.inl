@@ -1777,28 +1777,16 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 }
 
-inline void Asset::Load(const std::string &pFile, bool isBinary) {
+inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, std::vector<char> &sceneData)
+{
     ASSIMP_LOG_DEBUG("Loading GLTF2 asset");
-    mCurrentAssetDir.clear();
-    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) */
-
-    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
-    }
-
-    shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
-    if (!stream) {
-        throw DeadlyImportError("GLTF: Could not open file for reading");
-    }
 
     // is binary? then read the header
-    std::vector<char> sceneData;
     if (isBinary) {
         SetAsBinary(); // also creates the body buffer
-        ReadBinaryHeader(*stream, sceneData);
+        ReadBinaryHeader(stream, sceneData);
     } else {
-        mSceneLength = stream->FileSize();
+        mSceneLength = stream.FileSize();
         mBodyLength = 0;
 
         // read the scene data
@@ -1806,7 +1794,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         sceneData.resize(mSceneLength + 1);
         sceneData[mSceneLength] = '\0';
 
-        if (stream->Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
+        if (stream.Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
             throw DeadlyImportError("GLTF: Could not read the file contents");
         }
     }
@@ -1824,6 +1812,42 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
 
     if (!doc.IsObject()) {
         throw DeadlyImportError("GLTF: JSON document root must be a JSON object");
+    }
+
+    return doc;
+}
+
+inline void Asset::Load(const std::string &pFile, bool isBinary)
+{
+    mCurrentAssetDir.clear();
+    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
+    if (pos != int(std::string::npos)) */
+
+    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
+    }
+
+    shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
+    if (!stream) {
+        throw DeadlyImportError("GLTF: Could not open file for reading");
+    }
+
+    std::vector<char> sceneData;
+    rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
+
+    // If a schemaDocumentProvider is available, see if the glTF schema is present. 
+    // If so, use it to validate the document.
+    if (mSchemaDocumentProvider) {
+        if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {
+            rapidjson::SchemaValidator validator(*gltfSchema);
+            if (!doc.Accept(validator)) {
+                rapidjson::StringBuffer pathBuffer;
+                validator.GetInvalidSchemaPointer().StringifyUriFragment(pathBuffer);
+                rapidjson::StringBuffer argumentBuffer;
+                validator.GetInvalidDocumentPointer().StringifyUriFragment(argumentBuffer);
+                throw DeadlyImportError("GLTF: The JSON document did not satisfy the glTF2 schema. Schema keyword: ", validator.GetInvalidSchemaKeyword(), ", document path: ", pathBuffer.GetString(), ", argument: ", argumentBuffer.GetString());
+            }
+        }
     }
 
     // Fill the buffer instance for the current file embedded contents
@@ -1880,6 +1904,25 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     for (size_t i = 0; i < mDicts.size(); ++i) {
         mDicts[i]->DetachFromDocument();
     }
+}
+
+inline bool Asset::CanRead(const std::string &pFile, bool isBinary)
+{
+    try
+    {
+        shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
+        if (!stream) {
+            return false;
+        }
+        std::vector<char> sceneData;
+        rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
+        asset.Read(doc);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
 }
 
 inline void Asset::SetAsBinary() {

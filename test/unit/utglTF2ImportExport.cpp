@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
+#include <rapidjson/schema.h>
 
 #include <array>
 
@@ -772,3 +773,60 @@ TEST_F(utglTF2ImportExport, wrongTypes) {
     }
 }
 
+namespace {
+    /// This class provides a fake schema to the GLTF importer.
+    /// It just checks that the file has a top-level "scene" property which is an integer.
+    class FakeSchemaProvider : public rapidjson::IRemoteSchemaDocumentProvider
+    {
+    public:
+        FakeSchemaProvider(const char* schemaName) :
+            m_schemaName(schemaName)
+        {
+            rapidjson::Document schemaDoc;
+            schemaDoc.Parse(R"==({"properties":{"scene" : { "type" : "integer" }}, "required": [ "scene" ]})==");
+            EXPECT_FALSE(schemaDoc.HasParseError());
+        	m_schema = std::make_unique<const rapidjson::SchemaDocument>(schemaDoc, m_schemaName.c_str(), static_cast<rapidjson::SizeType>(m_schemaName.size()), this);
+        }
+
+        const rapidjson::SchemaDocument* GetRemoteDocument(const char* uri, rapidjson::SizeType) override {
+            if (m_schemaName == uri) {
+                return m_schema.get();
+            }
+            return nullptr;
+        }
+
+    private:
+        std::string m_schemaName;
+        std::unique_ptr<const rapidjson::SchemaDocument> m_schema;
+    };
+}
+
+TEST_F(utglTF2ImportExport, schemaCheckPass) {
+    FakeSchemaProvider schemaProvider("glTF.schema.json");
+    Assimp::Importer importer;
+    importer.SetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER, &schemaProvider);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/gltf2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(scene, nullptr);
+    EXPECT_STREQ(importer.GetErrorString(), "");
+}
+
+TEST_F(utglTF2ImportExport, schemaCheckFail) {
+    FakeSchemaProvider schemaProvider("glTF.schema.json");
+    Assimp::Importer importer;
+    importer.SetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER, &schemaProvider);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/gltf2/SchemaFailures/sceneWrongType.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(scene, nullptr);
+    const std::string errorString = importer.GetErrorString();
+    EXPECT_NE(errorString.find("The JSON document did not satisfy the glTF2 schema"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, noSchemaFound) {
+    // More than one importer might make use the provider, but not all schemas might be present.
+    // Check that the glTF importer handles the case when an non-null provider returns null when asked for schemas.
+    FakeSchemaProvider schemaProvider("missingSchema.json");
+    Assimp::Importer importer;
+    importer.SetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER, &schemaProvider);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/gltf2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(scene, nullptr);
+    EXPECT_STREQ(importer.GetErrorString(), "");
+}

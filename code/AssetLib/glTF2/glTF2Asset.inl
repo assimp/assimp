@@ -1839,6 +1839,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     // If so, use it to validate the document.
     if (mSchemaDocumentProvider) {
         if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {
+            // The schemas are found here: https://github.com/KhronosGroup/glTF/tree/main/specification/2.0/schema
             rapidjson::SchemaValidator validator(*gltfSchema);
             if (!doc.Accept(validator)) {
                 rapidjson::StringBuffer pathBuffer;

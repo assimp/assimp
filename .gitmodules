@@ -1,3 +1,6 @@
 [submodule "contrib/zip"]
 	path = contrib/zip
 	url = https://github.com/kuba--/zip.git
+[submodule "contrib/utf8cpp"]
+	path = contrib/utf8cpp
+	url = https://github.com/nemtrif/utfcpp.git

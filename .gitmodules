@@ -8,3 +8,6 @@
 	path = contrib/unzip
 	url = https://chromium.googlesource.com/external/github.com/nmoinvaz/minizip
 	branch = 1.2
+[submodule "contrib/rapidjson"]
+	path = contrib/rapidjson
+	url = https://github.com/Tencent/rapidjson.git

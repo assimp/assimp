@@ -716,6 +716,10 @@ bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &v
     return result || volume.thicknessTexture.texture;
 }
 
+bool glTF2Exporter::GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior) {
+    return mat.Get(AI_MATKEY_IOR, ior.ior) == aiReturn_SUCCESS;
+}
+
 void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -841,6 +845,12 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatVolume(mat, volume)) {
                     mAsset->extensionsUsed.KHR_materials_volume = true;
                     m->materialVolume = Nullable<MaterialVolume>(volume);
+                }
+                                
+                MaterialIOR ior;
+                if (GetMatIOR(mat, ior)) {
+                    mAsset->extensionsUsed.KHR_materials_ior = true;
+                    m->materialIOR = Nullable<MaterialIOR>(ior);
                 }
             }
         }

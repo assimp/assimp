@@ -1041,6 +1041,12 @@ extern "C" {
 // The color that white light turns into due to absorption when reaching the attenuation distance.
 #define AI_MATKEY_VOLUME_ATTENUATION_COLOR "$mat.volume.attenuationColor", 0, 0
 
+// IOR
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_ior
+// Index of Refraction.
+#define AI_MATKEY_IOR "$mat.ior", 0, 0
+
 // Emissive
 // --------
 #define AI_MATKEY_USE_EMISSIVE_MAP "$mat.useEmissiveMap", 0, 0

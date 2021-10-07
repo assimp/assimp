@@ -14,3 +14,6 @@
 [submodule "contrib/poly2tri"]
 	path = contrib/poly2tri
 	url = https://github.com/jhasse/poly2tri.git
+[submodule "contrib/openddlparser"]
+	path = contrib/openddlparser
+	url = https://github.com/kimkulling/openddl-parser

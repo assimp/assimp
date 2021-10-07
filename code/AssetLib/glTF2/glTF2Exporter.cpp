@@ -717,7 +717,7 @@ bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &v
 }
 
 bool glTF2Exporter::GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior) {
-    return mat.Get(AI_MATKEY_IOR, ior.ior) == aiReturn_SUCCESS;
+    return mat.Get(AI_MATKEY_REFRACTI, ior.ior) == aiReturn_SUCCESS;
 }
 
 void glTF2Exporter::ExportMaterials() {

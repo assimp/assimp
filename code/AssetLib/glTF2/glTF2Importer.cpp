@@ -355,7 +355,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialIOR.isPresent) {
             MaterialIOR &ior = mat.materialIOR.value;
 
-            aimat->AddProperty(&ior.ior, 1, AI_MATKEY_IOR);
+            aimat->AddProperty(&ior.ior, 1, AI_MATKEY_REFRACTI);
         }
 
         return aimat;

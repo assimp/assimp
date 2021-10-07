@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_clearcoat full
  *   KHR_materials_transmission full
  *   KHR_materials_volume full
- *   KHR_materials_ior full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -790,13 +789,6 @@ struct MaterialVolume {
     void SetDefaults();
 };
 
-struct MaterialIOR {
-    float ior = 0.f;
-
-    MaterialIOR() { SetDefaults(); }
-    void SetDefaults();
-};
-
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -826,9 +818,6 @@ struct Material : public Object {
     //extension: KHR_materials_volume
     Nullable<MaterialVolume> materialVolume;
 
-    //extension: KHR_materials_ior
-    Nullable<MaterialIOR> materialIOR;
-    
     //extension: KHR_materials_unlit
     bool unlit;
 
@@ -1118,7 +1107,6 @@ public:
         bool KHR_materials_clearcoat;
         bool KHR_materials_transmission;
         bool KHR_materials_volume;
-        bool KHR_materials_ior;
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;

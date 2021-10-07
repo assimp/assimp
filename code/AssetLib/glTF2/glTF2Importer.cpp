@@ -351,13 +351,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
         }
 
-        // KHR_materials_ior
-        if (mat.materialIOR.isPresent) {
-            MaterialIOR &ior = mat.materialIOR.value;
-
-            aimat->AddProperty(&ior.ior, 1, AI_MATKEY_IOR);
-        }
-
         return aimat;
     } catch (...) {
         delete aimat;

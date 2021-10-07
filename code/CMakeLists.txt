@@ -925,6 +925,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(minizip)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
+  add_definitions(-DNOCRYPT=1) # unresolved symbol 'arc4random_buf' with BSD
   SET( unzip_SRCS
     ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h

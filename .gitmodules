@@ -4,3 +4,7 @@
 [submodule "contrib/utf8cpp"]
 	path = contrib/utf8cpp
 	url = https://github.com/nemtrif/utfcpp.git
+[submodule "contrib/unzip"]
+	path = contrib/unzip
+	url = https://chromium.googlesource.com/external/github.com/nmoinvaz/minizip
+	branch = 1.2

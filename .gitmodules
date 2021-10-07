@@ -11,3 +11,6 @@
 [submodule "contrib/rapidjson"]
 	path = contrib/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
+[submodule "contrib/poly2tri"]
+	path = contrib/poly2tri
+	url = https://github.com/jhasse/poly2tri.git

@@ -56,8 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-using namespace Assimp;
 namespace Assimp {
+
 using namespace D3DS;
 
 namespace {
@@ -291,7 +291,7 @@ void Discreet3DSExporter::WriteMaterials() {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_SPECULAR);
             WriteColor(color);
         }
-                
+
         if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_AMBIENT);
             WriteColor(color);
@@ -379,7 +379,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type
 
     // TODO: handle embedded textures properly
     if (path.data[0] == '*') {
-        ASSIMP_LOG_ERROR("Ignoring embedded texture for export: " + std::string(path.C_Str()));
+        ASSIMP_LOG_ERROR("Ignoring embedded texture for export: ", path.C_Str());
         return;
     }
 

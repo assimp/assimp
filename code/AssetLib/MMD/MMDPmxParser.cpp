@@ -102,7 +102,7 @@ namespace pmx
 			const unsigned int targetSize = size * 3; // enough to encode
 			char *targetStart = new char[targetSize];
             std::memset(targetStart, 0, targetSize * sizeof(char));
-            
+
             utf8::utf16to8( sourceStart, sourceStart + size/2, targetStart );
 
 			std::string result(targetStart);
@@ -516,13 +516,13 @@ namespace pmx
 		stream->read((char*) magic, sizeof(char) * 4);
 		if (magic[0] != 0x50 || magic[1] != 0x4d || magic[2] != 0x58 || magic[3] != 0x20)
         {
-      throw DeadlyImportError("MMD: Invalid magic number.");
-    }
+            throw DeadlyImportError("MMD: Invalid magic number.");
+        }
 		stream->read((char*) &version, sizeof(float));
 		if (version != 2.0f && version != 2.1f)
 		{
             throw DeadlyImportError("MMD: Unsupported version (must be 2.0 or 2.1): ", ai_to_string(version));
-    }
+        }
 		this->setting.Read(stream);
 
 		this->model_name = ReadString(stream, setting.encoding);

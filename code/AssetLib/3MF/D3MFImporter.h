@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,23 +42,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_D3MFLOADER_H_INCLUDED
 #define AI_D3MFLOADER_H_INCLUDED
 
+#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+
 #include <assimp/BaseImporter.h>
 
 namespace Assimp {
 
+// ---------------------------------------------------------------------------
 /// @brief  The 3MF-importer class.
+///
+/// Implements the basic topology import and embedded textures.
+// ---------------------------------------------------------------------------
 class D3MFImporter : public BaseImporter {
 public:
+    /// @brief The default class constructor.
     D3MFImporter();
-    ~D3MFImporter();
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
-    void SetupProperties(const Importer *pImp);
-    const aiImporterDesc *GetInfo() const;
+
+    ///	@brief  The class destructor.
+    ~D3MFImporter() override;
+
+    /// @brief Performs the data format detection.
+    /// @param pFile        The filename to check.
+    /// @param pIOHandler   The used IO-System.
+    /// @param checkSig     true for signature checking.
+    /// @return true for can be loaded, false for not.
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
+
+    /// @brief  Not used
+    /// @param pImp Not used
+    void SetupProperties(const Importer *pImp) override;
+
+    /// @brief The importer description getter.
+    /// @return The info
+    const aiImporterDesc *GetInfo() const override;
 
 protected:
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    /// @brief Internal read function, performs the file parsing.
+    /// @param pFile        The filename
+    /// @param pScene       The scene to load in.
+    /// @param pIOHandler   The io-system
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 };
 
 } // Namespace Assimp
+
+#endif // #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 #endif // AI_D3MFLOADER_H_INCLUDED

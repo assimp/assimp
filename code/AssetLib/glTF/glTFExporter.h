@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,78 +40,78 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file GltfExporter.h
-* Declares the exporter class to write a scene to a gltf/glb file
-*/
+ * Declares the exporter class to write a scene to a gltf/glb file
+ */
+#pragma once
 #ifndef AI_GLTFEXPORTER_H_INC
 #define AI_GLTFEXPORTER_H_INC
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_EXPORTER)
 
-#include <assimp/types.h>
 #include <assimp/material.h>
+#include <assimp/types.h>
 
-#include <sstream>
-#include <vector>
 #include <map>
 #include <memory>
+#include <sstream>
+#include <vector>
 
 struct aiScene;
 struct aiNode;
-struct aiMaterial;
 
-namespace glTF
-{
-    template<class T>
-    class Ref;
-
-    class Asset;
-    struct TexProperty;
-    struct Node;
-}
-
-namespace Assimp
-{
-    class IOSystem;
-    class IOStream;
-    class ExportProperties;
-
-    // ------------------------------------------------------------------------------------------------
-    /** Helper class to export a given scene to an glTF file. */
-    // ------------------------------------------------------------------------------------------------
-    class glTFExporter
-    {
-    public:
-        /// Constructor for a specific scene to export
-        glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-            const ExportProperties* pProperties, bool binary);
-
-    private:
-
-        const char* mFilename;
-        IOSystem* mIOSystem;
-        std::shared_ptr<const aiScene> mScene;
-        const ExportProperties* mProperties;
-
-        std::map<std::string, unsigned int> mTexturesByPath;
-
-        std::shared_ptr<glTF::Asset> mAsset;
-
-        std::vector<unsigned char> mBodyData;
-
-        void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
-
-        void GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop);
-        void GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
-        void ExportMetadata();
-        void ExportMaterials();
-        void ExportMeshes();
-        unsigned int ExportNodeHierarchy(const aiNode* n);
-        unsigned int ExportNode(const aiNode* node, glTF::Ref<glTF::Node>& parent);
-        void ExportScene();
-        void ExportAnimations();
-    };
+namespace glTFCommon {
+template <class T>
+class Ref;
 
 }
+
+namespace glTF {
+class Asset;
+struct TexProperty;
+struct Node;
+
+} // namespace glTF
+
+namespace Assimp {
+class IOSystem;
+class IOStream;
+class ExportProperties;
+
+// ------------------------------------------------------------------------------------------------
+/** Helper class to export a given scene to an glTF file. */
+// ------------------------------------------------------------------------------------------------
+class glTFExporter {
+public:
+    /// Constructor for a specific scene to export
+    glTFExporter(const char *filename, IOSystem *pIOSystem, const aiScene *pScene,
+            const ExportProperties *pProperties, bool binary);
+
+private:
+    const char *mFilename;
+    IOSystem *mIOSystem;
+    std::shared_ptr<const aiScene> mScene;
+    const ExportProperties *mProperties;
+
+    std::map<std::string, unsigned int> mTexturesByPath;
+
+    std::shared_ptr<glTF::Asset> mAsset;
+
+    std::vector<unsigned char> mBodyData;
+
+    void WriteBinaryData(IOStream *outfile, std::size_t sceneLength);
+
+    void GetTexSampler(const aiMaterial *mat, glTF::TexProperty &prop);
+    void GetMatColorOrTex(const aiMaterial *mat, glTF::TexProperty &prop, const char *propName, int type, int idx, aiTextureType tt);
+    void ExportMetadata();
+    void ExportMaterials();
+    void ExportMeshes();
+    unsigned int ExportNodeHierarchy(const aiNode *n);
+    unsigned int ExportNode(const aiNode *node, glTFCommon::Ref<glTF::Node> & parent);
+    void ExportScene();
+    void ExportAnimations();
+};
+
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_GLTF_EXPORTER
 

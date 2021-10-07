@@ -55,8 +55,8 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /** ScaleProcess: Class to rescale the whole model.
  * Now rescales animations, bones, and blend shapes properly.
- * Please note this will not write to 'scale' transform it will rewrite mesh 
- * and matrixes so that your scale values 
+ * Please note this will not write to 'scale' transform it will rewrite mesh
+ * and matrixes so that your scale values
  * from your model package are preserved, so this is completely intentional
  * bugs should be reported as soon as they are found.
 */

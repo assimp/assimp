@@ -629,7 +629,7 @@ void HL1MDLLoader::read_meshes() {
             +-- bodypart --+-- model -- [mesh index, mesh index, ...]
             |              |
             |              +-- model -- [mesh index, mesh index, ...]
-            |              |           
+            |              |
             |              ...
             |
             |-- bodypart -- ...
@@ -1298,7 +1298,7 @@ void HL1MDLLoader::read_global_info() {
 *   @note The structure of this method is taken from HL2 source code.
 *   Although this is from HL2, it's implementation is almost identical
 *   to code found in HL1 SDK. See HL1 and HL2 SDKs for more info.
-*   
+*
 *   source:
 *       HL1 source code.
 *           file: studio_render.cpp
@@ -1343,7 +1343,7 @@ bool HL1MDLLoader::get_num_blend_controllers(const int num_blend_animations, int
             return true;
         default:
             num_blend_controllers = 0;
-            ASSIMP_LOG_WARN(MDL_HALFLIFE_LOG_HEADER "Unsupported number of blend animations (" + std::to_string(num_blend_animations) + ")");
+            ASSIMP_LOG_WARN(MDL_HALFLIFE_LOG_HEADER "Unsupported number of blend animations (", num_blend_animations, ")");
             return false;
     }
 }

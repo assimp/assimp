@@ -80,13 +80,21 @@ namespace XmlTag {
     const char* const item = "item";
     const char* const objectid = "objectid";
     const char* const transform = "transform";
+    const char *const path = "path";
 
     // Material definitions
     const char* const basematerials = "basematerials";
-    const char* const basematerials_id = "id";
     const char* const basematerials_base = "base";
     const char* const basematerials_name = "name";
     const char* const basematerials_displaycolor = "displaycolor";
+    const char* const texture_2d = "m:texture2d";
+    const char *const texture_group = "m:texture2dgroup";
+    const char *const texture_content_type = "contenttype";
+    const char *const texture_tilestyleu = "tilestyleu";
+    const char *const texture_tilestylev = "tilestylev";
+    const char *const texture_2d_coord = "m:tex2coord";
+    const char *const texture_cuurd_u = "u";
+    const char *const texture_cuurd_v = "v";
 
     // Meta info tags
     const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
@@ -103,7 +111,7 @@ namespace XmlTag {
     const char* const PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
     const char* const PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
     const char* const PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-    }
+}
 
 } // Namespace D3MF
 } // Namespace Assimp

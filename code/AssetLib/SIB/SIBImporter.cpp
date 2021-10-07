@@ -174,14 +174,13 @@ static void UnknownChunk(StreamReaderLE * /*stream*/, const SIBChunk &chunk) {
         static_cast<char>(chunk.Tag & 0xff)
     };
 
-    ASSIMP_LOG_WARN((Formatter::format(), "SIB: Skipping unknown '", ai_str_toprintable(temp, 4), "' chunk."));
+    ASSIMP_LOG_WARN("SIB: Skipping unknown '", ai_str_toprintable(temp, 4), "' chunk.");
 }
 
 // Reads a UTF-16LE string and returns it at UTF-8.
 static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
     if (nullptr == stream || 0 == numWChars) {
-        static const aiString empty;
-        return empty;
+        return aiString();
     }
 
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)

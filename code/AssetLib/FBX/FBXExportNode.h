@@ -60,7 +60,7 @@ namespace FBX {
 }
 
 class FBX::Node {
-public: 
+public:
     // TODO: accessors
     std::string name; // node name
     std::vector<FBX::FBXExportProperty> properties; // node properties
@@ -157,9 +157,8 @@ public: // member functions for writing data to a file or stream
 
     // write the full node to the given file or stream
     void Dump(
-        std::shared_ptr<Assimp::IOStream> outfile,
-        bool binary, int indent
-    );
+            const std::shared_ptr<Assimp::IOStream> &outfile,
+            bool binary, int indent);
     void Dump(Assimp::StreamWriterLE &s, bool binary, int indent);
 
     // these other functions are for writing data piece by piece.

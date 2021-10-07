@@ -146,7 +146,13 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         ThrowException("failed to read document " + pFile);
     }
 
+    // Generate the root-node
     pScene->mRootNode = new aiNode("<C4DRoot>");
+
+    // convert left-handed to right-handed
+    pScene->mRootNode->mTransformation.a1 = 0.01f;
+    pScene->mRootNode->mTransformation.b2 = 0.01f;
+    pScene->mRootNode->mTransformation.c3 = -0.01f;
 
     // first convert all materials
     ReadMaterials(doc->GetFirstMaterial());
@@ -238,7 +244,7 @@ bool C4DImporter::ReadShader(aiMaterial* out, BaseShader* shader) {
             out->AddProperty(&path, AI_MATKEY_TEXTURE_DIFFUSE(0));
             return true;
         } else {
-            LogWarn("ignoring shader type: " + std::string(GetObjectTypeName(shader->GetType())));
+            LogWarn("ignoring shader type: ", GetObjectTypeName(shader->GetType()));
         }
         shader = shader->GetNext();
     }
@@ -281,7 +287,7 @@ void C4DImporter::ReadMaterials(BaseMaterial* mat) {
                 ReadShader(out, shader);
             }
         } else {
-            LogWarn("ignoring plugin material: " + std::string(GetObjectTypeName(mat->GetType())));
+            LogWarn("ignoring plugin material: ", GetObjectTypeName(mat->GetType()));
         }
         mat = mat->GetNext();
     }
@@ -335,7 +341,7 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent) {
                 meshes.push_back(mesh);
             }
         } else {
-            LogWarn("ignoring object: " + std::string(GetObjectTypeName(type)));
+            LogWarn("ignoring object: ", GetObjectTypeName(type));
         }
 
         RecurseHierarchy(object->GetDown(), nd);

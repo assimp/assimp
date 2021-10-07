@@ -90,8 +90,8 @@ but not all of them are *open-source*. If there's an accompagning '<file>\source
 @section main_install Installation
 
 assimp can be used in two ways: linking against the pre-built libraries or building the library on your own. The former
-option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017. 
-For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but 
+option is the easiest, but the assimp distribution contains pre-built libraries only for Visual C++ 2013, 2015 and 2017.
+For other compilers you'll have to build assimp for yourself. Which is hopefully as hassle-free as the other way, but
 needs a bit more work. Both ways are described at the @link install Installation page. @endlink
 If you want to use assimp on Ubuntu you can install it via the following command:
 
@@ -145,7 +145,7 @@ to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&g
 and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
 This is necessary only once to setup all paths inside you IDE.
 
-To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder 
+To use the library in your C++ project you can simply generate a project file via cmake. One way is to add the assimp-folder
 as a subdirectory via the cmake-command
 
 @code
@@ -158,7 +158,7 @@ Now just add the assimp-dependency to your application:
 TARGET_LINK_LIBRARIES(my_game assimp)
 @endcode
 
-If done correctly you should now be able to compile, link, run and use the application. 
+If done correctly you should now be able to compile, link, run and use the application.
 
 
 @section install_own Building the library from scratch
@@ -170,7 +170,7 @@ to build the library just open a command-prompt / bash, navigate into the repo-f
 cmake CMakeLists.txt
 @endcode
 
-A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated. 
+A project-file of your default make-system ( like gnu-make on linux or Visual-Studio on Windows ) will be generated.
 Run the build and you are done. You can find the libs at assimp/lib and the dll's / so's at bin.
 
 @section assimp_dll Windows DLL Build
@@ -496,10 +496,10 @@ X3  Y3  Z3  T3
 @endcode
 with <tt>(X1, X2, X3)</tt> being the local X base vector, <tt>(Y1, Y2, Y3)</tt> being the local
 Y base vector, <tt>(Z1, Z2, Z3)</tt> being the local Z base vector and <tt>(T1, T2, T3)</tt> being the
-offset of the local origin (the translational part). 
+offset of the local origin (the translational part).
 All matrices in the library use row-major storage order. That means that the matrix elements are
-stored row-by-row, i.e. they end up like this in memory: 
-<tt>[X1, Y1, Z1, T1, X2, Y2, Z2, T2, X3, Y3, Z3, T3, 0, 0, 0, 1]</tt>. 
+stored row-by-row, i.e. they end up like this in memory:
+<tt>[X1, Y1, Z1, T1, X2, Y2, Z2, T2, X3, Y3, Z3, T3, 0, 0, 0, 1]</tt>.
 
 Note that this is neither the OpenGL format nor the DirectX format, because both of them specify the
 matrix layout such that the translational part occupies three consecutive addresses in memory (so those
@@ -1498,7 +1498,7 @@ Just copy'n'paste the template from Appendix A and adapt it for your needs.
 with DefaultLogger::get()->[error, warn, debug, info].
 </li>
 <li>
-Make sure that your loader compiles against all build configurations on all supported platforms. You can use our CI-build to check several platforms 
+Make sure that your loader compiles against all build configurations on all supported platforms. You can use our CI-build to check several platforms
 like Windows and Linux ( 32 bit and 64 bit ).
 </li>
 <li>

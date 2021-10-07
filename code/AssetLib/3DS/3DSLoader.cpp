@@ -305,7 +305,7 @@ void Discreet3DSImporter::ParseEditorChunk() {
         // print the version number
         char buff[10];
         ASSIMP_itoa10(buff, stream->GetI2());
-        ASSIMP_LOG_INFO_F(std::string("3DS file format version: "), buff);
+        ASSIMP_LOG_INFO("3DS file format version: ", buff);
     } break;
     };
     ASSIMP_3DS_END_CHUNK();
@@ -449,7 +449,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num) {
         // Read the lense angle
         camera->mHorizontalFOV = AI_DEG_TO_RAD(stream->GetF4());
         if (camera->mHorizontalFOV < 0.001f) {
-            camera->mHorizontalFOV = AI_DEG_TO_RAD(45.f);
+            camera->mHorizontalFOV = float(AI_DEG_TO_RAD(45.f));
         }
 
         // Now check for further subchunks
@@ -934,7 +934,7 @@ void Discreet3DSImporter::ParseFaceChunk() {
             }
         }
         if (0xcdcdcdcd == idx) {
-            ASSIMP_LOG_ERROR_F("3DS: Unknown material: ", sz);
+            ASSIMP_LOG_ERROR("3DS: Unknown material: ", sz);
         }
 
         // Now continue and read all material indices

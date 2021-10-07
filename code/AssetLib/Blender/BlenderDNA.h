@@ -59,6 +59,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_BUILD_BLENDER_DEBUG
 #endif
 
+// set this to non-zero to dump BlenderDNA stuff to dna.txt.
+// you could set it on the assimp build command line too without touching it here.
+// !!! please make sure this is set to 0 in the repo !!!
+#ifndef ASSIMP_BUILD_BLENDER_DEBUG_DNA
+#define ASSIMP_BUILD_BLENDER_DEBUG_DNA 0
+#endif
+
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
 
 namespace Assimp {
@@ -495,7 +502,7 @@ public:
             const Structure &structure,
             const FileDatabase &db) const;
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
+#if ASSIMP_BUILD_BLENDER_DEBUG_DNA
     // --------------------------------------------------------
     /** Dump the DNA to a text file. This is for debugging purposes.
      *  The output file is `dna.txt` in the current working folder*/

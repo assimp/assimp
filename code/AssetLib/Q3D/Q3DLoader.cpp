@@ -92,7 +92,7 @@ bool Q3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     else if (!extension.length() || checkSig) {
         if (!pIOHandler)
             return true;
-        const char *tokens[] = { "quick3Do", "quick3Ds" };
+        static const char * const tokens[] = { "quick3Do", "quick3Ds" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
     }
     return false;
@@ -125,7 +125,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     }
 
     // Print the file format version
-    ASSIMP_LOG_INFO_F("Quick3D File format version: ",
+    ASSIMP_LOG_INFO("Quick3D File format version: ",
             std::string(&((const char *)stream.GetPtr())[8], 2));
 
     // ... an store it

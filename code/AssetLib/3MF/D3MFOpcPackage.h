@@ -42,12 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef D3MFOPCPACKAGE_H
 #define D3MFOPCPACKAGE_H
 
+#include <assimp/IOSystem.hpp>
 #include <memory>
 #include <string>
-#include <assimp/IOSystem.hpp>
+
+struct aiTexture;
 
 namespace Assimp {
-    class ZipArchiveIOSystem;
+
+class ZipArchiveIOSystem;
 
 namespace D3MF {
 
@@ -63,16 +66,19 @@ public:
     ~D3MFOpcPackage();
     IOStream* RootStream() const;
     bool validate();
+    const std::vector<aiTexture*> &GetEmbeddedTextures() const;
 
 protected:
     std::string ReadPackageRootRelationship(IOStream* stream);
+    void LoadEmbeddedTextures(IOStream *fileStream, const std::string &filename);
 
 private:
     IOStream* mRootStream;
-    std::unique_ptr<ZipArchiveIOSystem> mZipArchive;
+    ZipArchiveIOSystem *mZipArchive;
+    std::vector<aiTexture *> mEmbeddedTextures;
 };
 
-} // Namespace D3MF
-} // Namespace Assimp
+} // namespace D3MF
+} // namespace Assimp
 
 #endif // D3MFOPCPACKAGE_H

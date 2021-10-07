@@ -79,7 +79,7 @@ void DOMError(const std::string& message, const Element* element /*= nullptr*/)
 void DOMWarning(const std::string& message, const Token& token)
 {
     if(DefaultLogger::get()) {
-        ASSIMP_LOG_WARN_F("FBX-DOM", Util::GetTokenText(&token), message);
+        ASSIMP_LOG_WARN("FBX-DOM", Util::GetTokenText(&token), message);
     }
 }
 
@@ -91,7 +91,7 @@ void DOMWarning(const std::string& message, const Element* element /*= nullptr*/
         return;
     }
     if(DefaultLogger::get()) {
-        ASSIMP_LOG_WARN("FBX-DOM: " + message);
+        ASSIMP_LOG_WARN("FBX-DOM: ", message);
     }
 }
 

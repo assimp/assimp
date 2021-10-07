@@ -104,7 +104,7 @@ bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
         if (!pIOHandler) {
             return true;
         }
-        const char* tokens[] = {"MS3D000000"};
+        static const char * const tokens[] = {"MS3D000000"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;
@@ -387,7 +387,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
                 }
 
                 const std::string& s = std::string(reinterpret_cast<char*>(stream.GetPtr()),len);
-                ASSIMP_LOG_DEBUG_F("MS3D: Model comment: ", s);
+                ASSIMP_LOG_DEBUG("MS3D: Model comment: ", s);
             }
 
             if(stream.GetRemainingSize() > 4 && inrange((stream >> subversion,subversion),1u,3u)) {

@@ -160,16 +160,16 @@ aiMaterial *OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
             if (materialFile) {
                 break;
             }
-            ASSIMP_LOG_VERBOSE_DEBUG_F("Source file for material '", materialName, "' ", potentialFiles[i], " does not exist");
+            ASSIMP_LOG_VERBOSE_DEBUG("Source file for material '", materialName, "' ", potentialFiles[i], " does not exist");
         }
         if (!materialFile) {
-            ASSIMP_LOG_ERROR_F("Failed to find source file for material '", materialName, "'");
+            ASSIMP_LOG_ERROR("Failed to find source file for material '", materialName, "'");
             return 0;
         }
 
         std::unique_ptr<IOStream> stream(materialFile);
         if (stream->FileSize() == 0) {
-            ASSIMP_LOG_WARN_F("Source file for material '", materialName, "' is empty (size is 0 bytes)");
+            ASSIMP_LOG_WARN("Source file for material '", materialName, "' is empty (size is 0 bytes)");
             return 0;
         }
 
@@ -184,7 +184,7 @@ aiMaterial *OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
         ss << &data[0];
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("Reading material '", materialName, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG("Reading material '", materialName, "'");
 
     aiMaterial *material = new aiMaterial();
     m_textures.clear();
@@ -219,11 +219,11 @@ aiMaterial *OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 
         NextAfterNewLine(ss, linePart);
         if (linePart != partBlockStart) {
-            ASSIMP_LOG_ERROR_F("Invalid material: block start missing near index ", ss.tellg());
+            ASSIMP_LOG_ERROR("Invalid material: block start missing near index ", ss.tellg());
             return material;
         }
 
-        ASSIMP_LOG_VERBOSE_DEBUG_F("material '", materialName, "'");
+        ASSIMP_LOG_VERBOSE_DEBUG("material '", materialName, "'");
 
         while (linePart != partBlockEnd) {
             // Proceed to the first technique
@@ -303,11 +303,11 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
     ss >> linePart;
 
     if (linePart != partBlockStart) {
-        ASSIMP_LOG_ERROR_F("Invalid material: Technique block start missing near index ", ss.tellg());
+        ASSIMP_LOG_ERROR("Invalid material: Technique block start missing near index ", ss.tellg());
         return false;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F(" technique '", techniqueName, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG(" technique '", techniqueName, "'");
 
     const string partPass = "pass";
 
@@ -334,11 +334,11 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
     ss >> linePart;
 
     if (linePart != partBlockStart) {
-        ASSIMP_LOG_ERROR_F("Invalid material: Pass block start missing near index ", ss.tellg());
+        ASSIMP_LOG_ERROR("Invalid material: Pass block start missing near index ", ss.tellg());
         return false;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("  pass '", passName, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG("  pass '", passName, "'");
 
     const string partAmbient = "ambient";
     const string partDiffuse = "diffuse";
@@ -362,7 +362,7 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
             ss >> r >> g >> b;
             const aiColor3D color(r, g, b);
 
-            ASSIMP_LOG_VERBOSE_DEBUG_F("   ", linePart, " ", r, " ", g, " ", b);
+            ASSIMP_LOG_VERBOSE_DEBUG("   ", linePart, " ", r, " ", g, " ", b);
 
             if (linePart == partAmbient) {
                 material->AddProperty(&color, 1, AI_MATKEY_COLOR_AMBIENT);
@@ -386,11 +386,11 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
     ss >> linePart;
 
     if (linePart != partBlockStart) {
-        ASSIMP_LOG_ERROR_F("Invalid material: Texture unit block start missing near index ", ss.tellg());
+        ASSIMP_LOG_ERROR("Invalid material: Texture unit block start missing near index ", ss.tellg());
         return false;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("   texture_unit '", textureUnitName, "'");
+    ASSIMP_LOG_VERBOSE_DEBUG("   texture_unit '", textureUnitName, "'");
 
     const string partTexture = "texture";
     const string partTextCoordSet = "tex_coord_set";
@@ -415,12 +415,12 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 
             // User defined Assimp config property to detect texture type from filename.
             if (m_detectTextureTypeFromFilename) {
-                size_t posSuffix = textureRef.find_last_of(".");
-                size_t posUnderscore = textureRef.find_last_of("_");
+                size_t posSuffix = textureRef.find_last_of('.');
+                size_t posUnderscore = textureRef.find_last_of('_');
 
                 if (posSuffix != string::npos && posUnderscore != string::npos && posSuffix > posUnderscore) {
                     string identifier = ai_tolower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));
-                    ASSIMP_LOG_VERBOSE_DEBUG_F("Detecting texture type from filename postfix '", identifier, "'");
+                    ASSIMP_LOG_VERBOSE_DEBUG("Detecting texture type from filename postfix '", identifier, "'");
 
                     if (identifier == "_n" || identifier == "_nrm" || identifier == "_nrml" || identifier == "_normal" || identifier == "_normals" || identifier == "_normalmap") {
                         textureType = aiTextureType_NORMALS;
@@ -477,14 +477,14 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
         return false;
     }
     if (textureType == aiTextureType_NONE) {
-        ASSIMP_LOG_WARN("Failed to detect texture type for '" + textureRef + "', ignoring texture_unit.");
+        ASSIMP_LOG_WARN("Failed to detect texture type for '", textureRef, "', ignoring texture_unit.");
         return false;
     }
 
     unsigned int textureTypeIndex = m_textures[textureType];
     m_textures[textureType]++;
 
-    ASSIMP_LOG_VERBOSE_DEBUG_F("    texture '", textureRef, "' type ", textureType,
+    ASSIMP_LOG_VERBOSE_DEBUG("    texture '", textureRef, "' type ", textureType,
             " index ", textureTypeIndex, " UV ", uvCoord);
 
     aiString assimpTextureRef(textureRef);

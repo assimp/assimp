@@ -2,16 +2,16 @@
 <img width="350px" src="docs/artwork/draco3d-vert.svg" />
 </p>
 
-![Build Status: master](https://travis-ci.org/google/draco.svg?branch=master)
+[![Build Status](https://github.com/google/draco/workflows/Build/badge.svg)](https://github.com/google/draco/actions?query=workflow%3ABuild)
 
 News
 =======
 ### Version 1.4.1 release
-* Using the versioned gstatic.com WASM and Javascript decoders is now
+* Using the versioned www.gstatic.com WASM and Javascript decoders is now
   recommended. To use v1.4.1, use this URL:
   * https://www.gstatic.com/draco/versioned/decoders/1.4.1/*
     * Replace the * with the files to load. E.g.
-    * https://gstatic.com/draco/versioned/decoders/1.4.1/draco_decoder.js
+    * https://www.gstatic.com/draco/versioned/decoders/1.4.1/draco_decoder.js
   * This works with the v1.3.6 and v1.4.0 releases, and will work with future
     Draco releases.
 * Bug fixes

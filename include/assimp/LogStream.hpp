@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,8 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file LogStream.hpp
  *  @brief Abstract base class 'LogStream', representing an output log stream.
  */
+#pragma once
 #ifndef INCLUDED_AI_LOGSTREAM_H
 #define INCLUDED_AI_LOGSTREAM_H
+
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
 
 #include "types.h"
 
@@ -103,7 +107,6 @@ inline LogStream::~LogStream() {
     // empty
 }
 
-// ------------------------------------------------------------------------------------
 } // Namespace Assimp
 
-#endif
+#endif // INCLUDED_AI_LOGSTREAM_H

@@ -9,7 +9,7 @@
 
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
-#include <stdint.h>
+#include <cstdint>
 
 struct aiMaterial;
 

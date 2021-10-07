@@ -65,22 +65,21 @@ namespace Assimp    {
 class IRRImporter : public BaseImporter, public IrrlichtBase {
 public:
     IRRImporter();
-    ~IRRImporter();
+    ~IRRImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      *  See BaseImporter::CanRead() for details.
      */
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+        bool checkSig) const override;
 
 protected:
-    const aiImporterDesc* GetInfo () const;
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
-    void SetupProperties(const Importer* pImp);
+    const aiImporterDesc* GetInfo () const override;
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
+    void SetupProperties(const Importer* pImp) override;
 
 private:
-
     /** Data structure for a scene-graph node animator
      */
     struct Animator {
@@ -273,7 +272,7 @@ private:
         std::vector<aiNodeAnim*>& anims);
 
 private:
-    /// Configuration option: desired output FPS 
+    /// Configuration option: desired output FPS
     double fps;
 
     /// Configuration option: speed flag was set?

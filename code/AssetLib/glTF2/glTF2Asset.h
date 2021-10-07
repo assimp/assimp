@@ -778,7 +778,7 @@ struct MaterialTransmission {
 };
 
 struct MaterialIOR {
-    float ior = 1.0f;
+    float ior = 1.5f;
 };
 
 //! The material appearance of a primitive.

@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # 3rd-party dependencies are placed in git submodules
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"  # the .gitmodules file must be placed at the top-level directory of a git working tree
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 15  # Assimp has 15 dependencies

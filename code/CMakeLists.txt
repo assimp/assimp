@@ -871,6 +871,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
 ELSE()
+  ADD_DEFINITIONS(-DPUGIXML_HEADER_ONLY)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp

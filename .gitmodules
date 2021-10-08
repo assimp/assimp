@@ -26,3 +26,6 @@
 [submodule "contrib/googletest"]
 	path = contrib/googletest
 	url = https://github.com/google/googletest.git
+[submodule "contrib/pugixml"]
+	path = contrib/pugixml
+	url = https://github.com/zeux/pugixml.git

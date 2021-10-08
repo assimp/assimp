@@ -45,6 +45,7 @@ INCLUDE_DIRECTORIES(
 )
 
 if(NOT ASSIMP_HUNTER_ENABLED)
+  ADD_DEFINITIONS(-DPUGIXML_HEADER_ONLY)
   INCLUDE_DIRECTORIES(
     ${Assimp_SOURCE_DIR}/contrib/googletest/googletest/include
     ${Assimp_SOURCE_DIR}/contrib/googletest/googletest

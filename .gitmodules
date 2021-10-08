@@ -23,3 +23,6 @@
 [submodule "contrib/android-cmake"]
 	path = contrib/android-cmake
 	url = https://github.com/taka-no-me/android-cmake.git
+[submodule "contrib/googletest"]
+	path = contrib/googletest
+	url = https://github.com/google/googletest.git

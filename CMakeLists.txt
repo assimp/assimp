@@ -732,7 +732,7 @@ IF ( ASSIMP_INSTALL )
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS  "${CPACK_COMPONENTS_ALL}")
     SET(CPACK_DEBIAN_PACKAGE_SUGGESTS)
     SET(cPACK_DEBIAN_PACKAGE_NAME     "assimp")
-    SET(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES contrib/gtest contrib/zlib workspaces test doc obj samples packaging)
+    SET(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES contrib/googletest contrib/zlib workspaces test doc obj samples packaging)
     SET(CPACK_DEBIAN_PACKAGE_SOURCE_COPY svn export --force)
     SET(CPACK_DEBIAN_CHANGELOG)
     execute_process(COMMAND lsb_release -is

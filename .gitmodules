@@ -17,3 +17,6 @@
 [submodule "contrib/openddlparser"]
 	path = contrib/openddlparser
 	url = https://github.com/kimkulling/openddl-parser
+[submodule "contrib/draco"]
+	path = contrib/draco
+	url = https://github.com/google/draco.git

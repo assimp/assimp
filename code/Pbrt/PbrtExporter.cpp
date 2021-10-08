@@ -614,7 +614,7 @@ void PbrtExporter::WriteMaterial(int m) {
                         eta != 1);
 
     mOutput << "#    - Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
-        " transprency " << constantTransparency << " opacity " << constantOpacity <<
+        " transparency " << constantTransparency << " opacity " << constantOpacity <<
         " shininess " << constantShininess << " shininess strength " << constantShininessStrength <<
         " eta " << constantEta << "\n";
 

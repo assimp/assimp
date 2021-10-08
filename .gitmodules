@@ -20,3 +20,6 @@
 [submodule "contrib/draco"]
 	path = contrib/draco
 	url = https://github.com/google/draco.git
+[submodule "contrib/android-cmake"]
+	path = contrib/android-cmake
+	url = https://github.com/taka-no-me/android-cmake.git

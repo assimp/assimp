@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:
@@ -36,6 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:

@@ -106,7 +106,7 @@ bool IRRImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 		if (nullptr == pIOHandler) {
 			return true;
 		}
-		const char *tokens[] = { "irr_scene" };
+		static const char * const tokens[] = { "irr_scene" };
 		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 	}
 

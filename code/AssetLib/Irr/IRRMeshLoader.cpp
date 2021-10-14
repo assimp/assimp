@@ -101,7 +101,7 @@ bool IRRMeshImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bo
          *  must return true here.
          */
 		if (!pIOHandler) return true;
-		const char *tokens[] = { "irrmesh" };
+		static const char * const tokens[] = { "irrmesh" };
 		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 	}
 	return false;

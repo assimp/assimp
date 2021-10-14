@@ -104,7 +104,7 @@ bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool
         if (!pIOHandler) {
             return true;
         }
-        const char* tokens[] = {"MS3D000000"};
+        static const char * const tokens[] = {"MS3D000000"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;

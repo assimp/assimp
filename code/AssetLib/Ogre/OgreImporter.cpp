@@ -79,7 +79,7 @@ bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandle
     }
 
     if (EndsWith(pFile, ".mesh.xml", false)) {
-        const char *tokens[] = { "<mesh>" };
+        static const char * const tokens[] = { "<mesh>" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

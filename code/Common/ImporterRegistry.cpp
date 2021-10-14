@@ -46,6 +46,7 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
+#include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
 #include <vector>
 #include <cstdlib>

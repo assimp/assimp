@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 class TestProgressHandler : public ProgressHandler {
 public:
     TestProgressHandler() :
@@ -101,3 +103,5 @@ TEST_F(ExporterTest, ExporterIdTest) {
     const aiExportFormatDesc *desc = exporter.GetExportFormatDescription(exportFormatCount);
     EXPECT_EQ(nullptr, desc) << "More exporters than claimed";
 }
+
+#endif

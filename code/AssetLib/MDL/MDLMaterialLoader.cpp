@@ -387,7 +387,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
     // this should not occur - at least the docs say it shouldn't.
     // however, one can easily try out what MED does if you have
     // a model with a DDS texture and export it to MDL5 ...
-    // yeah, it embedds the DDS file.
+    // yeah, it embeds the DDS file.
     if (6 == iType) {
         // this is a compressed texture in DDS format
         *piSkip = pcNew->mWidth;
@@ -524,7 +524,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
 
     // sometimes there are MDL7 files which have a monochrome
-    // texture instead of material colors ... posssible they have
+    // texture instead of material colors ... possible they have
     // been converted to MDL7 from other formats, such as MDL5
     aiColor4D clrTexture;
     if (pcNew)

@@ -168,6 +168,9 @@ protected:
 
     // all positions, sorted by distance to the sorting plane
     std::vector<Entry> mPositions;
+
+    // False until the Finalize method is called.
+    bool mFinalized;
 };
 
 } // end of namespace Assimp

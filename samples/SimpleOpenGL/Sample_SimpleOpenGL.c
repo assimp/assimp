@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 	C_STRUCT aiLogStream stream;
 
 	if (argc < 2) {
-		print_error("No input model file specifed.");
+		print_error("No input model file specified.");
 		print_run_command(COMMAND_USAGE);
 		return EXIT_FAILURE;
 	}

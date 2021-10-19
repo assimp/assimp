@@ -85,7 +85,7 @@ as long as you retain the license information and take own responsibility for wh
 the LICENSE file.
 
 You can find test models for almost all formats in the <assimp_root>/test/models directory. Beware, they're *free*,
-but not all of them are *open-source*. If there's an accompagning '<file>\source.txt' file don't forget to read it.
+but not all of them are *open-source*. If there's an accompanying '<file>\source.txt' file don't forget to read it.
 
 @section main_install Installation
 
@@ -687,7 +687,7 @@ There are two cases:
    format such as DDS or PNG. The term "compressed" does not mean that the texture data must
    actually be compressed, however the texture was found in the model file as if it was stored in a
    separate file on the harddisk. Appropriate decoders (such as libjpeg, libpng, D3DX, DevIL) are
-   required to load theses textures.  aiTexture::mWidth specifies the size of the texture data in
+   required to load these textures.  aiTexture::mWidth specifies the size of the texture data in
    bytes, aiTexture::pcData is a pointer to the raw image data and aiTexture::achFormatHint is
    either zeroed or contains the most common file extension of the embedded texture's format. This
    value is only set if assimp is able to determine the file format.
@@ -1181,7 +1181,7 @@ You can get assigned shader sources by using the following material keys:
 <li>AI_MATKEY_SHADER_VERTEX</li> Assigned vertex shader code stored as a string.
 <li>AI_MATKEY_SHADER_FRAGMENT</li> Assigned fragment shader code stored as a string.
 <li>AI_MATKEY_SHADER_GEO</li> Assigned geometry shader code stored as a string.
-<li>AI_MATKEY_SHADER_TESSELATION</li> Assigned tesselation shader code stored as a string.
+<li>AI_MATKEY_SHADER_TESSELATION</li> Assigned tessellation shader code stored as a string.
 <li>AI_MATKEY_SHADER_PRIMITIVE</li> Assigned primitive shader code stored as a string.
 <li>AI_MATKEY_SHADER_COMPUTE</li> Assigned compute shader code stored as a string.
 
@@ -1359,7 +1359,7 @@ When filing bugs on the Blender loader, always give the Blender version (or, eve
 This section contains implementation notes on the IFC-STEP importer.
 @subsection ifc_overview Overview
 
-The library provides a partial implementation of the IFC2x3 industry standard for automatized exchange of CAE/architectural
+The library provides a partial implementation of the IFC2x3 industry standard for automated exchange of CAE/architectural
 data sets. See http://en.wikipedia.org/wiki/Industry_Foundation_Classes for more information on the format. We aim
 at getting as much 3D data out of the files as possible.
 
@@ -1503,7 +1503,7 @@ like Windows and Linux ( 32 bit and 64 bit ).
 </li>
 <li>
 Provide some _free_ test models in <tt>&lt;root&gt;/test/models/&lt;FormatName&gt;/</tt> and credit their authors.
-Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetive. Try to cover all format features with test data.
+Test files for a file format shouldn't be too large (<i>~500 KiB in total</i>), and not too repetitive. Try to cover all format features with test data.
 </li>
 <li>
 Done! Please, share your loader that everyone can profit from it!

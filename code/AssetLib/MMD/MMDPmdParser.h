@@ -195,7 +195,7 @@ namespace pmd
 	public:
 		uint16_t ik_bone_index;
 		uint16_t target_bone_index;
-		uint16_t interations;
+		uint16_t iterations;
 		float angle_limit;
 		std::vector<uint16_t> ik_child_bone_index;
 
@@ -205,7 +205,7 @@ namespace pmd
 			stream->read((char *) &target_bone_index, sizeof(uint16_t));
 			uint8_t ik_chain_length;
 			stream->read((char*) &ik_chain_length, sizeof(uint8_t));
-			stream->read((char *) &interations, sizeof(uint16_t));
+			stream->read((char *) &iterations, sizeof(uint16_t));
 			stream->read((char *) &angle_limit, sizeof(float));
 			ik_child_bone_index.resize(ik_chain_length);
 			for (int i = 0; i < ik_chain_length; i++)

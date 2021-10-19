@@ -312,7 +312,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialSheen.isPresent) {
             MaterialSheen &sheen = mat.materialSheen.value;
             // Default value {0,0,0} disables Sheen
-            if (sheen.sheenColorFactor != defaultSheenFactor) {
+            if (std::memcmp(sheen.sheenColorFactor, defaultSheenFactor, sizeof(glTFCommon::vec3)) != 0) {
                 SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_SHEEN_COLOR_FACTOR);
                 aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_SHEEN_COLOR_TEXTURE);

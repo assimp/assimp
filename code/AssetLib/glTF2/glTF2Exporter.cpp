@@ -704,6 +704,22 @@ bool glTF2Exporter::GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTra
     return result || transmission.transmissionTexture.texture;
 }
 
+bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume) {
+    bool result = mat.Get(AI_MATKEY_VOLUME_THICKNESS_FACTOR, volume.thicknessFactor) != aiReturn_SUCCESS;
+
+    GetMatTex(mat, volume.thicknessTexture, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+
+    result = result || mat.Get(AI_MATKEY_VOLUME_ATTENUATION_DISTANCE, volume.attenuationDistance);
+    result = result || GetMatColor(mat, volume.attenuationColor, AI_MATKEY_VOLUME_ATTENUATION_COLOR) != aiReturn_SUCCESS;
+
+    // Valid if any of these properties are available
+    return result || volume.thicknessTexture.texture;
+}
+
+bool glTF2Exporter::GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior) {
+    return mat.Get(AI_MATKEY_REFRACTI, ior.ior) == aiReturn_SUCCESS;
+}
+
 void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -823,6 +839,18 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatTransmission(mat, transmission)) {
                     mAsset->extensionsUsed.KHR_materials_transmission = true;
                     m->materialTransmission = Nullable<MaterialTransmission>(transmission);
+                }
+                
+                MaterialVolume volume;
+                if (GetMatVolume(mat, volume)) {
+                    mAsset->extensionsUsed.KHR_materials_volume = true;
+                    m->materialVolume = Nullable<MaterialVolume>(volume);
+                }
+                                
+                MaterialIOR ior;
+                if (GetMatIOR(mat, ior)) {
+                    mAsset->extensionsUsed.KHR_materials_ior = true;
+                    m->materialIOR = Nullable<MaterialIOR>(ior);
                 }
             }
         }

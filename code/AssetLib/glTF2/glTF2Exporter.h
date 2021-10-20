@@ -77,6 +77,8 @@ struct PbrSpecularGlossiness;
 struct MaterialSheen;
 struct MaterialClearcoat;
 struct MaterialTransmission;
+struct MaterialVolume;
+struct MaterialIOR;
 
 // Vec/matrix types, as raw float arrays
 typedef float(vec2)[2];
@@ -114,6 +116,8 @@ protected:
     bool GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen);
     bool GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearcoat &clearcoat);
     bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
+    bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
+    bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
     void ExportMetadata();
     void ExportMaterials();
     void ExportMeshes();

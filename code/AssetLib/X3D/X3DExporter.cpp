@@ -279,7 +279,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
     const char *NodeName_Shape = "Shape";
 
     list<SAttribute> attr_list;
-    aiMesh &mesh = *mScene->mMeshes[pIdxMesh]; // create alias for conveniance.
+    aiMesh &mesh = *mScene->mMeshes[pIdxMesh]; // create alias for convenience.
 
     // Check if mesh already defined early.
     if (mDEF_Map_Mesh.find(pIdxMesh) != mDEF_Map_Mesh.end()) {
@@ -375,7 +375,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
     const char *NodeName_A = "Appearance";
 
     list<SAttribute> attr_list;
-    aiMaterial &material = *mScene->mMaterials[pIdxMaterial]; // create alias for conveniance.
+    aiMaterial &material = *mScene->mMaterials[pIdxMaterial]; // create alias for convenience.
 
     // Check if material already defined early.
     if (mDEF_Map_Material.find(pIdxMaterial) != mDEF_Map_Material.end()) {
@@ -586,7 +586,7 @@ bool X3DExporter::CheckAndExport_Light(const aiNode &pNode, const size_t pTabLev
     if (!found) return false;
 
     // Light source is found.
-    const aiLight &light = *mScene->mLights[idx_light]; // Alias for conveniance.
+    const aiLight &light = *mScene->mLights[idx_light]; // Alias for convenience.
 
     aiMatrix4x4 trafo_mat = Matrix_GlobalToCurrent(pNode).Inverse();
 

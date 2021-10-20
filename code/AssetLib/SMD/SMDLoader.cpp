@@ -868,7 +868,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent, const char** szCurrentOut
 
     bool bQuota = true;
     if ('\"' != *szCurrent) {
-        LogWarning("Bone name is expcted to be enclosed in "
+        LogWarning("Bone name is expected to be enclosed in "
             "double quotation marks. ");
         bQuota = false;
     } else {

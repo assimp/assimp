@@ -1028,6 +1028,19 @@ extern "C" {
 // Multiplied by AI_MATKEY_TRANSMISSION_FACTOR
 #define AI_MATKEY_TRANSMISSION_TEXTURE aiTextureType_TRANSMISSION, 0
 
+// Volume
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_volume
+// The thickness of the volume beneath the surface. If the value is 0 the material is thin-walled. Otherwise the material is a volume boundary.
+#define AI_MATKEY_VOLUME_THICKNESS_FACTOR "$mat.volume.thicknessFactor", 0, 0
+// Texture that defines the thickness.
+// Multiplied by AI_MATKEY_THICKNESS_FACTOR
+#define AI_MATKEY_VOLUME_THICKNESS_TEXTURE aiTextureType_TRANSMISSION, 1
+// Density of the medium given as the average distance that light travels in the medium before interacting with a particle.
+#define AI_MATKEY_VOLUME_ATTENUATION_DISTANCE "$mat.volume.attenuationDistance", 0, 0
+// The color that white light turns into due to absorption when reaching the attenuation distance.
+#define AI_MATKEY_VOLUME_ATTENUATION_COLOR "$mat.volume.attenuationColor", 0, 0
+
 // Emissive
 // --------
 #define AI_MATKEY_USE_EMISSIVE_MAP "$mat.useEmissiveMap", 0, 0

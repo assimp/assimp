@@ -82,3 +82,37 @@ TEST_F(utSpatialSort, findPositionsTest) {
     sSort.FindPositions(vecs[0], 0.01f, indices);
     EXPECT_EQ(1u, indices.size());
 }
+
+TEST_F(utSpatialSort, highlyDisplacedPositionsTest) {
+    constexpr unsigned int verticesPerAxis = 10;
+    constexpr ai_real step = 0.001f;
+    constexpr ai_real offset = 5000.0f - (0.5f * verticesPerAxis * step);
+    constexpr unsigned int totalNumPositions = verticesPerAxis * verticesPerAxis * verticesPerAxis;
+    aiVector3D* positions = new aiVector3D[totalNumPositions];
+    for (unsigned int x = 0; x < verticesPerAxis; ++x) {
+        for (unsigned int y = 0; y < verticesPerAxis; ++y) {
+            for (unsigned int z = 0; z < verticesPerAxis; ++z) {
+                const unsigned int index = (x * verticesPerAxis * verticesPerAxis) + (y * verticesPerAxis) + z;
+                positions[index] = aiVector3D(offset + (x * step), offset + (y * step), offset + (z * step));
+            }
+        }
+    }
+
+    SpatialSort sSort;
+    sSort.Fill(positions, totalNumPositions, sizeof(aiVector3D));
+
+    // Enough to pick up the neighboring vertices, but not the neighbors' neighbors.
+    const ai_real epsilon = 1.1f * step;
+    std::vector<unsigned int> indices;
+    // Iterate through the interior points of the cube.
+    for (unsigned int x = 1; x < verticesPerAxis - 1; ++x) {
+        for (unsigned int y = 1; y < verticesPerAxis - 1; ++y) {
+            for (unsigned int z = 1; z < verticesPerAxis - 1; ++z) {
+                const unsigned int index = (x * verticesPerAxis * verticesPerAxis) + (y * verticesPerAxis) + z;
+                sSort.FindPositions(positions[index], epsilon, indices);
+                ASSERT_EQ(7u, indices.size());
+            }
+        }
+    }
+    delete[] positions;
+}

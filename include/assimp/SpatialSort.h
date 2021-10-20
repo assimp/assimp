@@ -143,7 +143,7 @@ public:
             ai_real pRadius) const;
 
 protected:
-    /** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
+    /** Normal of the sorting plane, normalized. */
     aiVector3D mPlaneNormal;
 
     /** An entry in a spatially sorted position array. Consists of a vertex index,
@@ -171,8 +171,11 @@ protected:
     // all positions, sorted by distance to the sorting plane
     std::vector<Entry> mPositions;
 
-    // False until the Finalize method is called.
+    /// false until the Finalize method is called.
     bool mFinalized;
+
+    /// The centroid of the positions. Calculated in Finalize.
+    aiVector3D mCentroid;
 };
 
 } // end of namespace Assimp

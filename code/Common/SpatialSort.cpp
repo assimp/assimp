@@ -89,6 +89,9 @@ void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Finalize() {
+    for (unsigned int i = 0; i < mPositions.size(); i++) {
+        mPositions[i].mDistance = mPositions[i].mPosition * mPlaneNormal;
+    }
     std::sort(mPositions.begin(), mPositions.end());
     mFinalized = true;
 }
@@ -104,10 +107,7 @@ void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPosition
     for (unsigned int a = 0; a < pNumPositions; a++) {
         const char *tempPointer = reinterpret_cast<const char *>(pPositions);
         const aiVector3D *vec = reinterpret_cast<const aiVector3D *>(tempPointer + a * pElementOffset);
-
-        // store position by index and distance
-        ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec, distance));
+        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec));
     }
 
     if (pFinalize) {

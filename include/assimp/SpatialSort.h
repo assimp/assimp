@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <vector>
+#include <limits>
 
 namespace Assimp {
 
@@ -150,16 +151,17 @@ protected:
     struct Entry {
         unsigned int mIndex; ///< The vertex referred by this entry
         aiVector3D mPosition; ///< Position
-        ai_real mDistance; ///< Distance of this vertex to the sorting plane
+        /// Distance of this vertex to the sorting plane. This is set by Finalize.
+        ai_real mDistance; 
 
         Entry() AI_NO_EXCEPT
-                : mIndex(999999999),
+                : mIndex(std::numeric_limits<unsigned int>::max()),
                   mPosition(),
-                  mDistance(99999.) {
+                  mDistance(std::numeric_limits<ai_real>::max()) {
             // empty
         }
-        Entry(unsigned int pIndex, const aiVector3D &pPosition, ai_real pDistance) :
-                mIndex(pIndex), mPosition(pPosition), mDistance(pDistance) {
+        Entry(unsigned int pIndex, const aiVector3D &pPosition) :
+                mIndex(pIndex), mPosition(pPosition) {
             // empty
         }
 

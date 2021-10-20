@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-/// @brief Logger class, which will exten the class by log-functions.
+/// @brief Logger class, which will extend the class by log-functions.
 /// @tparam TDeriving 
 template<class TDeriving>
 class LogFunctions {

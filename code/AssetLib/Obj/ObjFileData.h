@@ -233,7 +233,7 @@ struct Mesh {
 
 // ------------------------------------------------------------------------------------------------
 //! \struct Model
-//! \brief  Data structure to store all obj-specific model datas
+//! \brief  Data structure to store all obj-specific model data
 // ------------------------------------------------------------------------------------------------
 struct Model {
     using GroupMap = std::map<std::string, std::vector<unsigned int> *>;

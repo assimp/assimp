@@ -440,7 +440,7 @@ enum aiPostProcessSteps
      *
      * @note UV transformations are usually implemented in real-time apps by
      * transforming texture coordinates at vertex shader stage with a 3x3
-     * (homogenous) transformation matrix.
+     * (homogeneous) transformation matrix.
     */
     aiProcess_TransformUVCoords = 0x80000,
 

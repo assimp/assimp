@@ -118,7 +118,7 @@ void ScaleProcess::Execute( aiScene* pScene ) {
     {
         aiMesh *mesh = pScene->mMeshes[meshID];
 
-        // Reconstruct mesh vertexes to the new unit system
+        // Reconstruct mesh vertices to the new unit system
         for( unsigned int vertexID = 0; vertexID < mesh->mNumVertices; vertexID++)
         {
             aiVector3D& vertex = mesh->mVertices[vertexID];

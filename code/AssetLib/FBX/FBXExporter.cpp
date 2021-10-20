@@ -1709,7 +1709,7 @@ void FBXExporter::WriteObjects ()
             //p.AddP70string("UVSet", ""); // TODO: how should this work?
             p.AddP70bool("UseMaterial", 1);
             tnode.AddChild(p);
-            // can't easily detrmine which texture path will be correct,
+            // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
             // these being incorrect is a common problem with FBX anyway.
             tnode.AddChild("FileName", texture_path);
@@ -1915,7 +1915,7 @@ void FBXExporter::WriteObjects ()
             // mark all parent nodes as skeleton as well,
             // up until we find the root node,
             // or else the node containing the mesh,
-            // or else the parent of a node containig the mesh.
+            // or else the parent of a node containing the mesh.
             for (
                 const aiNode* parent = n->mParent;
                 parent && parent != mScene->mRootNode;

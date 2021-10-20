@@ -690,7 +690,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
         if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
-        // create alias for conveniance
+        // create alias for convenience
         AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
         if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);

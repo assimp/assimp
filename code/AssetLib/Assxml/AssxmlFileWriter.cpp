@@ -168,7 +168,7 @@ static void WriteNode(const aiNode *node, IOStream *io, unsigned int depth) {
 }
 
 // -----------------------------------------------------------------------------------
-// Some chuncks of text will need to be encoded for XML
+// Some chunks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
 static std::string encodeXML(const std::string &data) {
     std::string buffer;

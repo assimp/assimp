@@ -84,8 +84,10 @@ TEST_F(utSpatialSort, findPositionsTest) {
 }
 
 TEST_F(utSpatialSort, highlyDisplacedPositionsTest) {
+    // Make a cube of positions, and then query it using the SpatialSort object.
     constexpr unsigned int verticesPerAxis = 10;
     constexpr ai_real step = 0.001f;
+    // Note the large constant offset here.
     constexpr ai_real offset = 5000.0f - (0.5f * verticesPerAxis * step);
     constexpr unsigned int totalNumPositions = verticesPerAxis * verticesPerAxis * verticesPerAxis;
     aiVector3D* positions = new aiVector3D[totalNumPositions];
@@ -101,10 +103,10 @@ TEST_F(utSpatialSort, highlyDisplacedPositionsTest) {
     SpatialSort sSort;
     sSort.Fill(positions, totalNumPositions, sizeof(aiVector3D));
 
-    // Enough to pick up the neighboring vertices, but not the neighbors' neighbors.
+    // Enough to pick up a point and its 6 immediate neighbors, but not any other point.
     const ai_real epsilon = 1.1f * step;
     std::vector<unsigned int> indices;
-    // Iterate through the interior points of the cube.
+    // Iterate through the _interior_ points of the cube.
     for (unsigned int x = 1; x < verticesPerAxis - 1; ++x) {
         for (unsigned int y = 1; y < verticesPerAxis - 1; ++y) {
             for (unsigned int z = 1; z < verticesPerAxis - 1; ++z) {

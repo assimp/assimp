@@ -143,8 +143,18 @@ public:
             ai_real pRadius) const;
 
 protected:
-    /** Normal of the sorting plane, normalized. */
+    /** Return the distance to the sorting plane. */
+    ai_real CalculateDistance(const aiVector3D &pPosition) const;
+
+protected:
+    /** Normal of the sorting plane, normalized.
+     */
     aiVector3D mPlaneNormal;
+
+    /** The centroid of the positions, which is used as a point on the sorting plane
+     * when calculating distance. This value is calculated in Finalize.
+    */
+    aiVector3D mCentroid;
 
     /** An entry in a spatially sorted position array. Consists of a vertex index,
      * its position and its pre-calculated distance from the reference plane */
@@ -161,7 +171,7 @@ protected:
             // empty
         }
         Entry(unsigned int pIndex, const aiVector3D &pPosition) :
-                mIndex(pIndex), mPosition(pPosition) {
+                mIndex(pIndex), mPosition(pPosition), mDistance(std::numeric_limits<ai_real>::max()) {
             // empty
         }
 
@@ -173,9 +183,6 @@ protected:
 
     /// false until the Finalize method is called.
     bool mFinalized;
-
-    /// The centroid of the positions. Calculated in Finalize.
-    aiVector3D mCentroid;
 };
 
 } // end of namespace Assimp

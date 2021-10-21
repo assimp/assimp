@@ -103,7 +103,7 @@ TEST_F(utSpatialSort, highlyDisplacedPositionsTest) {
     SpatialSort sSort;
     sSort.Fill(positions, totalNumPositions, sizeof(aiVector3D));
 
-    // Enough to pick up a point and its 6 immediate neighbors, but not any other point.
+    // Enough to find a point and its 6 immediate neighbors, but not any other point.
     const ai_real epsilon = 1.1f * step;
     std::vector<unsigned int> indices;
     // Iterate through the _interior_ points of the cube.

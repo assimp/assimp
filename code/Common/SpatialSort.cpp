@@ -88,13 +88,18 @@ void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,
 }
 
 // ------------------------------------------------------------------------------------------------
+ai_real SpatialSort::CalculateDistance(const aiVector3D &pPosition) const {
+    return (pPosition - mCentroid) * mPlaneNormal;
+}
+
+// ------------------------------------------------------------------------------------------------
 void SpatialSort::Finalize() {
     const ai_real scale = 1.0f / mPositions.size();
     for (unsigned int i = 0; i < mPositions.size(); i++) {
         mCentroid += scale * mPositions[i].mPosition; 
     }
     for (unsigned int i = 0; i < mPositions.size(); i++) {
-        mPositions[i].mDistance = (mPositions[i].mPosition - mCentroid) * mPlaneNormal;
+        mPositions[i].mDistance = CalculateDistance(mPositions[i].mPosition);
     }
     std::sort(mPositions.begin(), mPositions.end());
     mFinalized = true;
@@ -125,7 +130,7 @@ void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPosition
 void SpatialSort::FindPositions(const aiVector3D &pPosition,
         ai_real pRadius, std::vector<unsigned int> &poResults) const {
     ai_assert(mFinalized && "The SpatialSort object must be finalized before FindPositions can be called.");
-    const ai_real dist = (pPosition - mCentroid) * mPlaneNormal;
+    const ai_real dist = CalculateDistance(pPosition);
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
     // clear the array
@@ -266,7 +271,7 @@ void SpatialSort::FindIdenticalPositions(const aiVector3D &pPosition, std::vecto
 
     // Convert the plane distance to its signed integer representation so the ULPs tolerance can be
     //  applied. For some reason, VC won't optimize two calls of the bit pattern conversion.
-    const BinFloat minDistBinary = ToBinary((pPosition - mCentroid) * mPlaneNormal) - distanceToleranceInULPs;
+    const BinFloat minDistBinary = ToBinary(CalculateDistance(pPosition)) - distanceToleranceInULPs;
     const BinFloat maxDistBinary = minDistBinary + 2 * distanceToleranceInULPs;
 
     // clear the array in this strange fashion because a simple clear() would also deallocate

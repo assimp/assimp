@@ -1483,7 +1483,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     pcMesh->piEffect->EndPass();
     pcMesh->piEffect->End();
 
-    // reenable culling if necessary
+    // re-enable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
     }

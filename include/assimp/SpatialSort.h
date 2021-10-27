@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <vector>
+#include <limits>
 
 namespace Assimp {
 
@@ -142,24 +143,35 @@ public:
             ai_real pRadius) const;
 
 protected:
-    /** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
+    /** Return the distance to the sorting plane. */
+    ai_real CalculateDistance(const aiVector3D &pPosition) const;
+
+protected:
+    /** Normal of the sorting plane, normalized.
+     */
     aiVector3D mPlaneNormal;
+
+    /** The centroid of the positions, which is used as a point on the sorting plane
+     * when calculating distance. This value is calculated in Finalize.
+    */
+    aiVector3D mCentroid;
 
     /** An entry in a spatially sorted position array. Consists of a vertex index,
      * its position and its pre-calculated distance from the reference plane */
     struct Entry {
         unsigned int mIndex; ///< The vertex referred by this entry
         aiVector3D mPosition; ///< Position
-        ai_real mDistance; ///< Distance of this vertex to the sorting plane
+        /// Distance of this vertex to the sorting plane. This is set by Finalize.
+        ai_real mDistance; 
 
         Entry() AI_NO_EXCEPT
-                : mIndex(999999999),
+                : mIndex(std::numeric_limits<unsigned int>::max()),
                   mPosition(),
-                  mDistance(99999.) {
+                  mDistance(std::numeric_limits<ai_real>::max()) {
             // empty
         }
-        Entry(unsigned int pIndex, const aiVector3D &pPosition, ai_real pDistance) :
-                mIndex(pIndex), mPosition(pPosition), mDistance(pDistance) {
+        Entry(unsigned int pIndex, const aiVector3D &pPosition) :
+                mIndex(pIndex), mPosition(pPosition), mDistance(std::numeric_limits<ai_real>::max()) {
             // empty
         }
 
@@ -168,6 +180,9 @@ protected:
 
     // all positions, sorted by distance to the sorting plane
     std::vector<Entry> mPositions;
+
+    /// false until the Finalize method is called.
+    bool mFinalized;
 };
 
 } // end of namespace Assimp

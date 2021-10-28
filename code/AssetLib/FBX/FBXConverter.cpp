@@ -1595,7 +1595,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         bone_map.insert(std::pair<const std::string, aiBone *>(deformer_name, bone));
     }
 
-    ASSIMP_LOG_DEBUG("bone research: Indicies size: ", out_indices.size());
+    ASSIMP_LOG_DEBUG("bone research: Indices size: ", out_indices.size());
 
     // lookup must be populated in case something goes wrong
     // this also allocates bones to mesh instance outside

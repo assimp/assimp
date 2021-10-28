@@ -159,7 +159,6 @@ bool parseColor(const char *color, aiColor4D &diffuse) {
         return false;
     }
 
-    //const char *buf(color);
     if ('#' != color[0]) {
         return false;
     }

@@ -667,7 +667,7 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		dwStyle=WS_OVERLAPPEDWINDOW;					// Windows style
 	}
 
-	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requestes Size
+	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
 	if (nullptr == (g_hWnd=CreateWindowEx(dwExStyle,			// Extended Style For The Window
 								TEXT("OpenGL"),						// Class Name

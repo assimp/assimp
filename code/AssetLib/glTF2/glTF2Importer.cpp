@@ -312,7 +312,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialSheen.isPresent) {
             MaterialSheen &sheen = mat.materialSheen.value;
             // Default value {0,0,0} disables Sheen
-            if (sheen.sheenColorFactor != defaultSheenFactor) {
+            if (std::memcmp(sheen.sheenColorFactor, defaultSheenFactor, sizeof(glTFCommon::vec3)) != 0) {
                 SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_SHEEN_COLOR_FACTOR);
                 aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_SHEEN_COLOR_TEXTURE);
@@ -339,6 +339,16 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
             aimat->AddProperty(&transmission.transmissionFactor, 1, AI_MATKEY_TRANSMISSION_FACTOR);
             SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
+        }
+
+        // KHR_materials_volume
+        if (mat.materialVolume.isPresent) {
+            MaterialVolume &volume = mat.materialVolume.value;
+
+            aimat->AddProperty(&volume.thicknessFactor, 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+            aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+            SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
         }
 
         // KHR_materials_ior

@@ -555,7 +555,7 @@ public:
         should be 0 after this reset. */
     void Reset();
 
-    /// Covert to Assimp mesh.
+    /// Convert to Assimp mesh.
     aiMesh *ConvertToAssimpMesh(Mesh *parent);
 
     /// Vertex data.

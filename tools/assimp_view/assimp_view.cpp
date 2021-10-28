@@ -489,7 +489,7 @@ int CreateAssetData() {
             nidx = 3;
             break;
         default:
-            CLogWindow::Instance().WriteLine("Unknown primitiv type");
+            CLogWindow::Instance().WriteLine("Unknown primitive type");
             break;
         };
 

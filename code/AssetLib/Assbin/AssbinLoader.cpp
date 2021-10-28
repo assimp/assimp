@@ -406,7 +406,7 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
             f.mIndices = new unsigned int[f.mNumIndices];
 
             for (unsigned int a = 0; a < f.mNumIndices; ++a) {
-                // Check if unsigned  short ( 16 bit  ) are big enought for the indices
+                // Check if unsigned  short ( 16 bit  ) are big enough for the indices
                 if (fitsIntoUI16(mesh->mNumVertices)) {
                     f.mIndices[a] = Read<uint16_t>(stream);
                 } else {

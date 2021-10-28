@@ -76,7 +76,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Currently supports static meshes, vertex colors, materials, textures
  *
  * For animation, it would require the following conversions:
- *  - aiNode (bones) -> m3d_t.bone (with parent id, position vector and oriantation quaternion)
+ *  - aiNode (bones) -> m3d_t.bone (with parent id, position vector and orientation quaternion)
  *  - aiMesh.aiBone -> m3d_t.skin (per vertex, with bone id, weight pairs)
  *  - aiAnimation -> m3d_action (frame with timestamp and list of bone id, position, orientation
  *      triplets, instead of per bone timestamp + lists)

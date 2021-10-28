@@ -681,7 +681,7 @@ void ASEImporter::BuildNodes(std::vector<BaseNode *> &nodes) {
         }
     }
 
-    // Are there ane orphaned nodes?
+    // Are there any orphaned nodes?
     if (!aiList.empty()) {
         std::vector<aiNode *> apcNodes;
         apcNodes.reserve(aiList.size() + pcScene->mRootNode->mNumChildren);

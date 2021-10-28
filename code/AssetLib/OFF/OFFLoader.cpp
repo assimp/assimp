@@ -233,7 +233,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	    sz = fast_atoreal_move<ai_real>(sz, *vec[dim]);
 	}
 
-	// if has homogenous coordinate, divide others by this one
+	// if has homogeneous coordinate, divide others by this one
 	if (hasHomogenous) {
 	    SkipSpaces(&sz);
 	    ai_real w = 1.;

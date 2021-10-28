@@ -476,7 +476,7 @@ public:
      *  in BlenderScene.cpp and is machine-generated.
      *  Converters are used to quickly handle objects whose
      *  exact data type is a runtime-property and not yet
-     *  known at compile time (consier Object::data).*/
+     *  known at compile time (consider Object::data).*/
     void RegisterConverters();
 
     // --------------------------------------------------------

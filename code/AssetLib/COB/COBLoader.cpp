@@ -586,7 +586,7 @@ void COBImporter::ReadUnit_Ascii(Scene &out, LineSplitter &splitter, const Chunk
         return;
     }
 
-    // parent chunks preceede their childs, so we should have the
+    // parent chunks preceede their children, so we should have the
     // corresponding chunk already.
     for (std::shared_ptr<Node> &nd : out.nodes) {
         if (nd->id == nfo.parent_id) {
@@ -668,7 +668,7 @@ void COBImporter::ReadCame_Ascii(Scene &out, LineSplitter &splitter, const Chunk
 
     ReadBasicNodeInfo_Ascii(msh, ++splitter, nfo);
 
-    // skip the next line, we don't know this differenciation between a
+    // skip the next line, we don't know this differentiation between a
     // standard camera and a panoramic camera.
     ++splitter;
 }
@@ -1169,7 +1169,7 @@ void COBImporter::ReadUnit_Binary(COB::Scene &out, StreamReaderLE &reader, const
 
     const chunk_guard cn(nfo, reader);
 
-    // parent chunks preceede their childs, so we should have the
+    // parent chunks preceede their children, so we should have the
     // corresponding chunk already.
     for (std::shared_ptr<Node> &nd : out.nodes) {
         if (nd->id == nfo.parent_id) {

@@ -52,7 +52,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 SGSpatialSort::SGSpatialSort()
 {
-    // define the reference plane. We choose some arbitrary vector away from all basic axises
+    // define the reference plane. We choose some arbitrary vector away from all basic axes
     // in the hope that no model spreads all its vertices along this plane.
     mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
     mPlaneNormal.Normalize();
@@ -121,7 +121,7 @@ void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
         index++;
 
     // Mow start iterating from there until the first position lays outside of the distance range.
-    // Add all positions inside the distance range within the given radius to the result aray
+    // Add all positions inside the distance range within the given radius to the result array
 
     float squareEpsilon = pRadius * pRadius;
     std::vector<Entry>::const_iterator it  = mPositions.begin() + index;

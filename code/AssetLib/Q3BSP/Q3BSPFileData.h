@@ -95,7 +95,7 @@ struct sQ3BSPVertex {
     vec3f vPosition;    ///< Position of vertex
     vec2f vTexCoord;    ///< (u,v) Texturecoordinate of detailtexture
     vec2f vLightmap;    ///< (u,v) Texturecoordinate of lightmap
-    vec3f vNormal;      ///< vertex normale
+    vec3f vNormal;      ///< vertex normal
     unsigned char bColor[ 4 ];          ///< Color in RGBA
 };
 

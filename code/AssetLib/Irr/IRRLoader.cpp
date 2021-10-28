@@ -132,7 +132,7 @@ void IRRImporter::SetupProperties(const Importer *pImp) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Build a mesh tha consists of a single squad (a side of a skybox)
+// Build a mesh that consists of a single squad (a side of a skybox)
 aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 		const SkyboxVertex &v2,
 		const SkyboxVertex &v3,

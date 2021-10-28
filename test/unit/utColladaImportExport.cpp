@@ -233,6 +233,8 @@ unsigned int GetMeshUseCount(const aiNode *rootNode) {
     return result;
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 TEST_F(utColladaImportExport, exportRootNodeMeshTest) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;
@@ -341,6 +343,8 @@ TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
     ImportAndCheckIds(outFileNamed, scene);
     ImportAsNames(outFileNamed, scene);
 }
+
+#endif
 
 class utColladaZaeImportExport : public AbstractImportExportBase {
 public:

@@ -64,7 +64,7 @@ public:
 	AndroidJNIIOSystem(ANativeActivity* activity);
 
     /// Class constructor with past and asset manager.
-	AndroidJNIIOSystem(const char *internalPath, AAssetManager assetManager);
+	AndroidJNIIOSystem(const char *internalPath, AAssetManager* assetManager);
 
 	/// Destructor.
 	~AndroidJNIIOSystem();

@@ -292,12 +292,15 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
 
         Property *first(nullptr);
         in = lookForNextToken(in, end);
-        if (*in == Grammar::OpenPropertyToken[0]) {
+        if (in != end && *in == Grammar::OpenPropertyToken[0]) {
             in++;
             Property *prop(nullptr), *prev(nullptr);
-            while (*in != Grammar::ClosePropertyToken[0] && in != end) {
+            while (in != end && *in != Grammar::ClosePropertyToken[0]) {
                 in = OpenDDLParser::parseProperty(in, end, &prop);
                 in = lookForNextToken(in, end);
+                if(in == end) {
+                    break;
+                }
 
                 if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
                     logInvalidTokenError(in, Grammar::ClosePropertyToken, m_logCallback);
@@ -314,7 +317,9 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
                     prev = prop;
                 }
             }
-            ++in;
+            if(in != end) {
+                ++in;
+            }
         }
 
         // set the properties
@@ -479,7 +484,7 @@ void OpenDDLParser::normalizeBuffer(std::vector<char> &buffer) {
         // check for a comment
         if (isCommentOpenTag(c, end)) {
             ++readIdx;
-            while (!isCommentCloseTag(&buffer[readIdx], end)) {
+            while (readIdx < len && !isCommentCloseTag(&buffer[readIdx], end)) {
                 ++readIdx;
             }
             ++readIdx;
@@ -489,7 +494,7 @@ void OpenDDLParser::normalizeBuffer(std::vector<char> &buffer) {
             if (isComment<char>(c, end)) {
                 ++readIdx;
                 // skip the comment and the rest of the line
-                while (!isEndofLine(buffer[readIdx])) {
+                while (readIdx < len && !isEndofLine(buffer[readIdx])) {
                     ++readIdx;
                 }
             }
@@ -548,8 +553,7 @@ char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
     // get size of id
     size_t idLen(0);
     char *start(in);
-    while (!isSeparator(*in) &&
-            !isNewLine(*in) && (in != end) &&
+    while ((in != end) && !isSeparator(*in) && !isNewLine(*in) &&
             *in != Grammar::OpenPropertyToken[0] &&
             *in != Grammar::ClosePropertyToken[0] &&
             *in != '$') {
@@ -861,7 +865,7 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
     in = parseIdentifier(in, end, &id);
     if (nullptr != id) {
         in = lookForNextToken(in, end);
-        if (*in == '=') {
+        if (in != end && *in == '=') {
             ++in;
             in = getNextToken(in, end);
             Value *primData(nullptr);

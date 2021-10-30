@@ -65,27 +65,19 @@ void CommentRemover::RemoveLineComments(const char* szComment,
         len = lenBuffer;
     }
 
-    char *szCurrent = szBuffer;
-    while (*szCurrent)   {
-
+    for(size_t i = 0; i < lenBuffer; i++) {
         // skip over quotes
-        if (*szCurrent == '\"' || *szCurrent == '\'')
-            while (*szCurrent++ && *szCurrent != '\"' && *szCurrent != '\'');
+        if (szBuffer[i] == '\"' || szBuffer[i] == '\'')
+            while (++i < lenBuffer && szBuffer[i] != '\"' && szBuffer[i] != '\'');
 
-        size_t lenRemaining = lenBuffer - (szCurrent - szBuffer);
-        if(lenRemaining < len) {
+        if(lenBuffer - i < len) {
             break;
         }
 
-        if (!strncmp(szCurrent,szComment,len)) {
-            while (!IsLineEnd(*szCurrent))
-                *szCurrent++ = chReplacement;
-
-            if (!*szCurrent) {
-                break;
-            }
+        if (!strncmp(szBuffer + i,szComment,len)) {
+            while (i < lenBuffer && !IsLineEnd(szBuffer[i]))
+                szBuffer[i++] = chReplacement;
         }
-        ++szCurrent;
     }
 }
 

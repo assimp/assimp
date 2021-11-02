@@ -149,7 +149,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 
             IOStream *fileStream = mZipArchive->Open(file.c_str());
             if (nullptr == fileStream) {
-                ai_assert(fileStream != nullptr);
+                ASSIMP_LOG_ERROR("Filestream is nullptr.");
                 continue;
             }
 

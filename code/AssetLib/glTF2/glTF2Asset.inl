@@ -1777,7 +1777,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 
     // read the scene data, ensure null termination
-
+    static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
     mSceneLength = chunk.chunkLength; // Can't be larger than 4GB (max. uint32_t)
     sceneData.resize(mSceneLength + 1);
     sceneData[mSceneLength] = '\0';
@@ -1836,7 +1836,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         mBodyLength = 0;
 
         // Binary format only supports up to 4GB of JSON, use that as a maximum
-        if (mSceneLength > std::numeric_limits<uint32_t>::max()) {
+        if (mSceneLength >= std::numeric_limits<uint32_t>::max()) {
             throw DeadlyImportError("GLTF: JSON size greater than 4GB");
         }
 

@@ -1147,6 +1147,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
     AI_SWAP4(header.length);
     AI_SWAP4(header.sceneLength);
 
+    static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
     mSceneLength = static_cast<size_t>(header.sceneLength); // Can't be larger than 4GB (max. uint32_t)
 
     mBodyOffset = sizeof(header) + mSceneLength;
@@ -1184,7 +1185,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     }
 
     // Binary format only supports up to 4GB of JSON so limit it there to avoid extreme memory allocation
-    if (mSceneLength > std::numeric_limits<uint32_t>::max()) {
+    if (mSceneLength >= std::numeric_limits<uint32_t>::max()) {
         throw DeadlyImportError("GLTF: JSON size greater than 4GB");
     }
 

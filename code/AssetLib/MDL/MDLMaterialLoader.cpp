@@ -132,6 +132,9 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     pcNew->mWidth = pcHeader->skinwidth;
     pcNew->mHeight = pcHeader->skinheight;
 
+    if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
+        throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+    }
     pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
 
     const unsigned char *szColorMap;
@@ -217,6 +220,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 
     // allocate storage for the texture image
     if (do_read) {
+        if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
+            throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+        }
         pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
     }
 

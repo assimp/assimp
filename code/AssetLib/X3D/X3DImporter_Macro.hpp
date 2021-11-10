@@ -63,15 +63,12 @@ inline X3DNodeElementBase *X3DImporter::MACRO_USE_CHECKANDAPPLY(XmlNode &node, s
     if (nullptr == mNodeElementCur) {
         printf("here\n");
     }
-
-    //do {
-        checkNodeMustBeEmpty(node);
-        if (!pDEF.empty())
-            Assimp::Throw_DEF_And_USE(node.name());
-        if (!FindNodeElement(pUSE, pType, &pNE))
-            Assimp::Throw_USE_NotFound(node.name(), pUSE);
-        mNodeElementCur->Children.push_back(pNE); /* add found object as child to current element */
-    //} while (false);
+    checkNodeMustBeEmpty(node);
+    if (!pDEF.empty())
+        Assimp::Throw_DEF_And_USE(node.name());
+    if (!FindNodeElement(pUSE, pType, &pNE))
+        Assimp::Throw_USE_NotFound(node.name(), pUSE);
+    mNodeElementCur->Children.push_back(pNE); /* add found object as child to current element */
 
     return pNE;
 }

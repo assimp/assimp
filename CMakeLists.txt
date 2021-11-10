@@ -53,7 +53,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT( Assimp VERSION 5.0.1 )
+PROJECT(Assimp VERSION 5.1.0)
 
 # All supported options ###############################################
 

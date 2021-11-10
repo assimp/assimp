@@ -47,20 +47,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef X3DIMPORTER_MACRO_HPP_INCLUDED
 #define X3DIMPORTER_MACRO_HPP_INCLUDED
 
-/// \def MACRO_USE_CHECKANDAPPLY(pDEF, pUSE, pNE)
+#include <assimp/XmlParser.h>
+#include "X3DImporter.hpp"
+#include <string>
+
+namespace Assimp {
+
 /// Used for regular checking while attribute "USE" is defined.
 /// \param [in] pNode - pugi xml node to read.
 /// \param [in] pDEF - string holding "DEF" value.
 /// \param [in] pUSE - string holding "USE" value.
 /// \param [in] pType - type of element to find.
 /// \param [out] pNE - pointer to found node element.
-#define MACRO_USE_CHECKANDAPPLY(pNode, pDEF, pUSE, pType, pNE)                                    \
-    do {                                                                                          \
-    checkNodeMustBeEmpty(pNode);                                                                  \
-    if (!pDEF.empty()) Throw_DEF_And_USE(pNode.name());                                           \
-    if (!FindNodeElement(pUSE, X3DElemType::pType, &pNE)) Throw_USE_NotFound(pNode.name(), pUSE); \
-    mNodeElementCur->Children.push_back(pNE); /* add found object as child to current element */  \
-    } while (false)
+inline X3DNodeElementBase *X3DImporter::MACRO_USE_CHECKANDAPPLY(XmlNode &node, std::string pDEF, std::string pUSE, X3DElemType pType, X3DNodeElementBase *pNE) {
+    if (nullptr == mNodeElementCur) {
+        printf("here\n");
+    }
+
+    //do {
+        checkNodeMustBeEmpty(node);
+        if (!pDEF.empty())
+            Assimp::Throw_DEF_And_USE(node.name());
+        if (!FindNodeElement(pUSE, pType, &pNE))
+            Assimp::Throw_USE_NotFound(node.name(), pUSE);
+        mNodeElementCur->Children.push_back(pNE); /* add found object as child to current element */
+    //} while (false);
+
+    return pNE;
+}
+
+} // namespace Assimp
 
 /// \def MACRO_ATTRREAD_CHECKUSEDEF_RET
 /// Compact variant for checking "USE" and "DEF".

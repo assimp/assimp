@@ -78,7 +78,7 @@ void X3DImporter::readArc2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Arc2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Arc2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Arc2D, mNodeElementCur);
@@ -138,7 +138,7 @@ void X3DImporter::readArcClose2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ArcClose2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ArcClose2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_ArcClose2D, mNodeElementCur);
@@ -185,7 +185,7 @@ void X3DImporter::readCircle2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Circle2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Circle2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Circle2D, mNodeElementCur);
@@ -234,7 +234,7 @@ void X3DImporter::readDisk2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Disk2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Disk2D, ne);
     } else {
         std::list<aiVector3D> tlist_o, tlist_i;
 
@@ -308,7 +308,7 @@ void X3DImporter::readPolyline2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Polyline2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Polyline2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Polyline2D, mNodeElementCur);
@@ -351,7 +351,7 @@ void X3DImporter::readPolypoint2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Polypoint2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Polypoint2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Polypoint2D, mNodeElementCur);
@@ -391,7 +391,7 @@ void X3DImporter::readRectangle2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Rectangle2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Rectangle2D, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Rectangle2D, mNodeElementCur);
@@ -437,7 +437,7 @@ void X3DImporter::readTriangleSet2D(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleSet2D, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleSet2D, ne);
     } else {
         if (vertices.size() % 3) throw DeadlyImportError("TriangleSet2D. Not enough points for defining triangle.");
 

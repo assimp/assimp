@@ -72,9 +72,8 @@ void X3DImporter::startReadGroup(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne;
-
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        X3DNodeElementBase *ne = nullptr;
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.
@@ -111,9 +110,9 @@ void X3DImporter::startReadStaticGroup(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne;
+        X3DNodeElementBase *ne = nullptr;
 
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(true); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.
@@ -154,9 +153,9 @@ void X3DImporter::startReadSwitch(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne;
+        X3DNodeElementBase *ne=nullptr;
 
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.
@@ -228,7 +227,7 @@ void X3DImporter::startReadTransform(XmlNode &node) {
     if (!use.empty()) {
         X3DNodeElementBase *ne(nullptr);
 
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.

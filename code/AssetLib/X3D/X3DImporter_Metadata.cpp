@@ -93,7 +93,7 @@ void X3DImporter::childrenReadMetadata(XmlNode &node, X3DNodeElementBase *pParen
 #define MACRO_METADATA_FINDCREATE(pNode, pDEF_Var, pUSE_Var, pReference, pValue, pNE, pMetaClass, pMetaName, pType)                            \
     /* if "USE" defined then find already defined element. */                                                                                  \
     if (!pUSE_Var.empty()) {                                                                                                                   \
-        MACRO_USE_CHECKANDAPPLY(pNode, pDEF_Var, pUSE_Var, pType, pNE);                                                                        \
+        ne = MACRO_USE_CHECKANDAPPLY(pNode, pDEF_Var, pUSE_Var, pType, pNE);                                                                        \
     } else {                                                                                                                                   \
         pNE = new pMetaClass(mNodeElementCur);                                                                                                 \
         if (!pDEF_Var.empty()) pNE->ID = pDEF_Var;                                                                                             \
@@ -213,13 +213,13 @@ void X3DImporter::readMetadataSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_MetaSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_MetaSet, ne);
     } else {
         ne = new X3DNodeElementMetaSet(mNodeElementCur);
         if (!def.empty()) ne->ID = def;
 
         ((X3DNodeElementMetaSet *)ne)->Reference = reference;
-        // also metadata node can contain childs
+        // also metadata node can contain children
         if (!isNodeEmpty(node))
             childrenReadMetadata(node, ne, "MetadataSet");
         else

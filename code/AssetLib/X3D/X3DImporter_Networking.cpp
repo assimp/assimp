@@ -78,10 +78,9 @@ void X3DImporter::readInline(XmlNode &node) {
     X3DXmlHelper::getStringListAttribute(node, "url", url);
 
     // if "USE" defined then find already defined element.
+    X3DNodeElementBase *ne = nullptr;
     if (!use.empty()) {
-        X3DNodeElementBase *ne;
-
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(true); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.

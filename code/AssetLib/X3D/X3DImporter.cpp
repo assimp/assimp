@@ -75,7 +75,7 @@ bool X3DImporter::isNodeEmpty(XmlNode &node) {
 }
 
 void X3DImporter::checkNodeMustBeEmpty(XmlNode &node) {
-    if (isNodeEmpty(node)) throw DeadlyImportError(std::string("Node <") + node.name() + "> must be empty.");
+    if (!isNodeEmpty(node)) throw DeadlyImportError(std::string("Node <") + node.name() + "> must be empty.");
 }
 
 void X3DImporter::skipUnsupportedNode(const std::string &pParentNodeName, XmlNode &node) {
@@ -321,7 +321,7 @@ void X3DImporter::readHead(XmlNode &node) {
     for (auto currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "meta") {
-            checkNodeMustBeEmpty(node);
+            //checkNodeMustBeEmpty(node);
             meta_entry entry;
             if (XmlParser::getStdStrAttribute(currentNode, "name", entry.name)) {
                 XmlParser::getStdStrAttribute(currentNode, "content", entry.value);
@@ -339,6 +339,9 @@ void X3DImporter::readHead(XmlNode &node) {
 }
 
 void X3DImporter::readChildNodes(XmlNode &node, const std::string &pParentNodeName) {
+    if (node.empty()) {
+        return;
+    }
     for (auto currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "Shape")
@@ -463,6 +466,8 @@ void X3DImporter::ParseHelper_Group_Begin(const bool pStatic) {
 }
 
 void X3DImporter::ParseHelper_Node_Enter(X3DNodeElementBase *pNode) {
+    ai_assert(nullptr != pNode);
+
     mNodeElementCur->Children.push_back(pNode); // add new element to current element child list.
     mNodeElementCur = pNode; // switch current element to new one.
 }    
@@ -471,6 +476,9 @@ void X3DImporter::ParseHelper_Node_Exit() {
     // check if we can walk up.
     if (mNodeElementCur != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
+    } else {
+        int i = 0;
+        ++i;
     }
 }
 

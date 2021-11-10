@@ -83,7 +83,7 @@ void X3DImporter::readDirectionalLight(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_DirectionalLight, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_DirectionalLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.
@@ -150,7 +150,7 @@ void X3DImporter::readPointLight(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_PointLight, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_PointLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.
@@ -227,7 +227,7 @@ void X3DImporter::readSpotLight(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_SpotLight, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_SpotLight, ne);
     } else {
         if (on) {
             // create and if needed - define new geometry object.

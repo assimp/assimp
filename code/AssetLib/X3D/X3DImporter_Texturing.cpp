@@ -74,7 +74,7 @@ void X3DImporter::readImageTexture(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ImageTexture, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ImageTexture, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementImageTexture(mNodeElementCur);
@@ -113,7 +113,7 @@ void X3DImporter::readTextureCoordinate(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TextureCoordinate, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TextureCoordinate, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementTextureCoordinate(mNodeElementCur);
@@ -154,7 +154,7 @@ void X3DImporter::readTextureTransform(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TextureTransform, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TextureTransform, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementTextureTransform(mNodeElementCur);

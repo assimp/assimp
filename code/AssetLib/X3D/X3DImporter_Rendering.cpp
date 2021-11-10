@@ -67,7 +67,7 @@ void X3DImporter::readColor(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Color, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Color, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementColor(mNodeElementCur);
@@ -99,7 +99,7 @@ void X3DImporter::readColorRGBA(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ColorRGBA, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_ColorRGBA, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementColorRGBA(mNodeElementCur);
@@ -131,7 +131,7 @@ void X3DImporter::readCoordinate(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Coordinate, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Coordinate, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementCoordinate(mNodeElementCur);
@@ -174,7 +174,7 @@ void X3DImporter::readIndexedLineSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedLineSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedLineSet, ne);
     } else {
         // check data
         if ((coordIndex.size() < 2) || ((coordIndex.back() == (-1)) && (coordIndex.size() < 3)))
@@ -248,7 +248,7 @@ void X3DImporter::readIndexedTriangleFanSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleFanSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleFanSet, ne);
     } else {
         // check data
         if (index.size() == 0) throw DeadlyImportError("IndexedTriangleFanSet must contain not empty \"index\" attribute.");
@@ -354,7 +354,7 @@ void X3DImporter::readIndexedTriangleSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleSet, ne);
     } else {
         // check data
         if (index.size() == 0) throw DeadlyImportError("IndexedTriangleSet must contain not empty \"index\" attribute.");
@@ -453,10 +453,12 @@ void X3DImporter::readIndexedTriangleStripSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleStripSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_IndexedTriangleStripSet, ne);
     } else {
         // check data
-        if (index.size() == 0) throw DeadlyImportError("IndexedTriangleStripSet must contain not empty \"index\" attribute.");
+        if (index.empty()) {
+            throw DeadlyImportError("IndexedTriangleStripSet must contain not empty \"index\" attribute.");
+        }
 
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_IndexedTriangleStripSet, mNodeElementCur);
@@ -544,10 +546,12 @@ void X3DImporter::readLineSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_LineSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_LineSet, ne);
     } else {
         // check data
-        if (vertexCount.size() == 0) throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
+        if (vertexCount.empty()) {
+            throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
+        }
 
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementSet(X3DElemType::ENET_LineSet, mNodeElementCur);
@@ -612,7 +616,7 @@ void X3DImporter::readPointSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_PointSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_PointSet, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_PointSet, mNodeElementCur);
@@ -677,10 +681,12 @@ void X3DImporter::readTriangleFanSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleFanSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleFanSet, ne);
     } else {
         // check data
-        if (fanCount.size() == 0) throw DeadlyImportError("TriangleFanSet must contain not empty \"fanCount\" attribute.");
+        if (fanCount.empty()) {
+            throw DeadlyImportError("TriangleFanSet must contain not empty \"fanCount\" attribute.");
+        }
 
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementSet(X3DElemType::ENET_TriangleFanSet, mNodeElementCur);
@@ -784,7 +790,7 @@ void X3DImporter::readTriangleSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleSet, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_TriangleSet, mNodeElementCur);
@@ -859,7 +865,7 @@ void X3DImporter::readTriangleStripSet(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleStripSet, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_TriangleStripSet, ne);
     } else {
         // check data
         if (stripCount.size() == 0) throw DeadlyImportError("TriangleStripSet must contain not empty \"stripCount\" attribute.");
@@ -958,14 +964,14 @@ void X3DImporter::readTriangleStripSet(XmlNode &node) {
 void X3DImporter::readNormal(XmlNode &node) {
     std::string use, def;
     std::list<aiVector3D> vector;
-    X3DNodeElementBase *ne;
+    X3DNodeElementBase *ne=nullptr;
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
     X3DXmlHelper::getVector3DListAttribute(node, "vector", vector);
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Normal, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Normal, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementNormal(mNodeElementCur);

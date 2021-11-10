@@ -60,7 +60,7 @@ void X3DImporter::readShape(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Shape, ne);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Shape, ne);
     } else {
         // create and if needed - define new geometry object.
         ne = new X3DNodeElementShape(mNodeElementCur);
@@ -74,31 +74,55 @@ void X3DImporter::readShape(XmlNode &node) {
                 // check for appearance node
                 if (currentChildName == "Appearance") readAppearance(currentChildNode);
                 // check for X3DGeometryNodes
-                else if (currentChildName == "Arc2D") readArc2D(currentChildNode);
-                else if (currentChildName == "ArcClose2D") readArcClose2D(currentChildNode);
-                else if (currentChildName == "Circle2D") readCircle2D(currentChildNode);
-                else if (currentChildName == "Disk2D") readDisk2D(currentChildNode);
-                else if (currentChildName == "Polyline2D") readPolyline2D(currentChildNode);
-                else if (currentChildName == "Polypoint2D") readPolypoint2D(currentChildNode);
-                else if (currentChildName == "Rectangle2D") readRectangle2D(currentChildNode);
-                else if (currentChildName == "TriangleSet2D") readTriangleSet2D(currentChildNode);
-                else if (currentChildName == "Box") readBox(currentChildNode);
-                else if (currentChildName == "Cone") readCone(currentChildNode);
-                else if (currentChildName == "Cylinder") readCylinder(currentChildNode);
-                else if (currentChildName == "ElevationGrid") readElevationGrid(currentChildNode);
-                else if (currentChildName == "Extrusion") readExtrusion(currentChildNode);
-                else if (currentChildName == "IndexedFaceSet") readIndexedFaceSet(currentChildNode);
-                else if (currentChildName == "Sphere") readSphere(currentChildNode);
-                else if (currentChildName == "IndexedLineSet") readIndexedLineSet(currentChildNode);
-                else if (currentChildName == "LineSet") readLineSet(currentChildNode);
-                else if (currentChildName == "PointSet") readPointSet(currentChildNode);
-                else if (currentChildName == "IndexedTriangleFanSet") readIndexedTriangleFanSet(currentChildNode);
-                else if (currentChildName == "IndexedTriangleSet") readIndexedTriangleSet(currentChildNode);
-                else if (currentChildName == "IndexedTriangleStripSet") readIndexedTriangleStripSet(currentChildNode);
-                else if (currentChildName == "TriangleFanSet") readTriangleFanSet(currentChildNode);
-                else if (currentChildName == "TriangleSet") readTriangleSet(currentChildNode);
+                else if (currentChildName == "Arc2D")
+                    readArc2D(currentChildNode);
+                else if (currentChildName == "ArcClose2D")
+                    readArcClose2D(currentChildNode);
+                else if (currentChildName == "Circle2D")
+                    readCircle2D(currentChildNode);
+                else if (currentChildName == "Disk2D")
+                    readDisk2D(currentChildNode);
+                else if (currentChildName == "Polyline2D")
+                    readPolyline2D(currentChildNode);
+                else if (currentChildName == "Polypoint2D")
+                    readPolypoint2D(currentChildNode);
+                else if (currentChildName == "Rectangle2D")
+                    readRectangle2D(currentChildNode);
+                else if (currentChildName == "TriangleSet2D")
+                    readTriangleSet2D(currentChildNode);
+                else if (currentChildName == "Box")
+                    readBox(currentChildNode);
+                else if (currentChildName == "Cone")
+                    readCone(currentChildNode);
+                else if (currentChildName == "Cylinder")
+                    readCylinder(currentChildNode);
+                else if (currentChildName == "ElevationGrid")
+                    readElevationGrid(currentChildNode);
+                else if (currentChildName == "Extrusion")
+                    readExtrusion(currentChildNode);
+                else if (currentChildName == "IndexedFaceSet")
+                    readIndexedFaceSet(currentChildNode);
+                else if (currentChildName == "Sphere")
+                    readSphere(currentChildNode);
+                else if (currentChildName == "IndexedLineSet")
+                    readIndexedLineSet(currentChildNode);
+                else if (currentChildName == "LineSet")
+                    readLineSet(currentChildNode);
+                else if (currentChildName == "PointSet")
+                    readPointSet(currentChildNode);
+                else if (currentChildName == "IndexedTriangleFanSet")
+                    readIndexedTriangleFanSet(currentChildNode);
+                else if (currentChildName == "IndexedTriangleSet")
+                    readIndexedTriangleSet(currentChildNode);
+                else if (currentChildName == "IndexedTriangleStripSet")
+                    readIndexedTriangleStripSet(currentChildNode);
+                else if (currentChildName == "TriangleFanSet")
+                    readTriangleFanSet(currentChildNode);
+                else if (currentChildName == "TriangleSet")
+                    readTriangleSet(currentChildNode);
                 // check for X3DMetadataObject
-                else if (!checkForMetadataNode(currentChildNode)) skipUnsupportedNode("Shape", currentChildNode);
+                else if (!checkForMetadataNode(currentChildNode))
+                    skipUnsupportedNode("Shape", currentChildNode);
             }
 
             ParseHelper_Node_Exit();
@@ -123,42 +147,41 @@ void X3DImporter::readShape(XmlNode &node) {
 // </Appearance>
 void X3DImporter::readAppearance(XmlNode &node) {
     std::string use, def;
-    X3DNodeElementBase* ne( nullptr );
+    X3DNodeElementBase *ne(nullptr);
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
 
-	// if "USE" defined then find already defined element.
-    if (!use.empty())
-	{
-		MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Appearance, ne);
-	}
-	else
-	{
-		// create and if needed - define new geometry object.
-		ne = new X3DNodeElementAppearance(mNodeElementCur);
-		if(!def.empty()) ne->ID = def;
+    // if "USE" defined then find already defined element.
+    if (!use.empty()) {
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Appearance, ne);
+    } else {
+        // create and if needed - define new geometry object.
+        ne = new X3DNodeElementAppearance(mNodeElementCur);
+        if (!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if(!isNodeEmpty(node))
-        {
-			ParseHelper_Node_Enter(ne);
+        if (!isNodeEmpty(node)) {
+            ParseHelper_Node_Enter(ne);
             for (auto currentChildNode : node.children()) {
                 const std::string &currentChildName = currentChildNode.name();
-                if (currentChildName == "Material") readMaterial(currentChildNode);
-                else if (currentChildName == "ImageTexture") readImageTexture(currentChildNode);
-                else if (currentChildName == "TextureTransform") readTextureTransform(currentChildNode);
+                if (currentChildName == "Material")
+                    readMaterial(currentChildNode);
+                else if (currentChildName == "ImageTexture")
+                    readImageTexture(currentChildNode);
+                else if (currentChildName == "TextureTransform")
+                    readTextureTransform(currentChildNode);
                 // check for X3DMetadataObject
-                else if (!checkForMetadataNode(currentChildNode)) skipUnsupportedNode("Appearance", currentChildNode);
+                else if (!checkForMetadataNode(currentChildNode))
+                    skipUnsupportedNode("Appearance", currentChildNode);
             }
-			ParseHelper_Node_Exit();
-		}// if(!isNodeEmpty(node))
-		else
-		{
-			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
-		}
+            ParseHelper_Node_Exit();
+        } // if(!isNodeEmpty(node))
+        else {
+            mNodeElementCur->Children.push_back(ne); // add made object as child to current element
+        }
 
-		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
-	}// if(!use.empty()) else
+        NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
+    } // if(!use.empty()) else
 }
 
 // <Material
@@ -179,7 +202,7 @@ void X3DImporter::readMaterial(XmlNode &node) {
     aiColor3D diffuseColor(0.8f, 0.8f, 0.8f);
     aiColor3D emissiveColor(0, 0, 0);
     aiColor3D specularColor(0, 0, 0);
-    X3DNodeElementBase* ne( nullptr );
+    X3DNodeElementBase *ne(nullptr);
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
     XmlParser::getFloatAttribute(node, "ambientIntensity", ambientIntensity);
@@ -189,33 +212,30 @@ void X3DImporter::readMaterial(XmlNode &node) {
     X3DXmlHelper::getColor3DAttribute(node, "emissiveColor", emissiveColor);
     X3DXmlHelper::getColor3DAttribute(node, "specularColor", specularColor);
 
-	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
-		MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Material, ne);
-	}
-	else
-	{
-		// create and if needed - define new geometry object.
-		ne = new X3DNodeElementMaterial(mNodeElementCur);
-		if(!def.empty()) ne->ID = def;
+    // if "USE" defined then find already defined element.
+    if (!use.empty()) {
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Material, ne);
+    } else {
+        // create and if needed - define new geometry object.
+        ne = new X3DNodeElementMaterial(mNodeElementCur);
+        if (!def.empty()) ne->ID = def;
 
-		((X3DNodeElementMaterial *)ne)->AmbientIntensity = ambientIntensity;
+        ((X3DNodeElementMaterial *)ne)->AmbientIntensity = ambientIntensity;
         ((X3DNodeElementMaterial *)ne)->Shininess = shininess;
         ((X3DNodeElementMaterial *)ne)->Transparency = transparency;
         ((X3DNodeElementMaterial *)ne)->DiffuseColor = diffuseColor;
         ((X3DNodeElementMaterial *)ne)->EmissiveColor = emissiveColor;
         ((X3DNodeElementMaterial *)ne)->SpecularColor = specularColor;
         // check for child nodes
-		if(!isNodeEmpty(node))
-			childrenReadMetadata(node, ne, "Material");
-		else
+        if (!isNodeEmpty(node))
+            childrenReadMetadata(node, ne, "Material");
+        else
             mNodeElementCur->Children.push_back(ne); // add made object as child to current element
 
-		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
-	}// if(!use.empty()) else
+        NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
+    } // if(!use.empty()) else
 }
 
-}// namespace Assimp
+} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

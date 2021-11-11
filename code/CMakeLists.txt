@@ -394,14 +394,15 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+# Disabled for 5.1
+#ADD_ASSIMP_IMPORTER( M3D
+#  AssetLib/M3D/M3DMaterials.h
+#  AssetLib/M3D/M3DImporter.h
+#  AssetLib/M3D/M3DImporter.cpp
+#  AssetLib/M3D/M3DWrapper.h
+#  AssetLib/M3D/M3DWrapper.cpp
+#  AssetLib/M3D/m3d.h
+#)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h

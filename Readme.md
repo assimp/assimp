@@ -43,6 +43,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 * [Pascal](port/AssimpPascal/Readme.md)
 * [Javascript (Alpha)](https://github.com/makc/assimp2json)
 * [Unity 3d Plugin](https://ricardoreis.net/trilib-2/)
+* [Unreal Engine Plugin](https://github.com/irajsb/UE4_Assimp/)
 * [JVM](https://github.com/kotlin-graphics/assimp) Full jvm port (current [status](https://github.com/kotlin-graphics/assimp/wiki/Status))
 * [HAXE-Port](https://github.com/longde123/assimp-haxe) The Assimp-HAXE-port.
 * [Rust](https://github.com/jkvargas/russimp)

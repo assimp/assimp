@@ -451,6 +451,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
 
     // now we need to skip any other skins ...
     for (unsigned int i = 1; i < iNumSkins; ++i) {
+        SizeCheck(szCursor + 3 * sizeof(uint32_t));
         iType = *((uint32_t *)szCursor);
         szCursor += sizeof(uint32_t);
         iWidth = *((uint32_t *)szCursor);

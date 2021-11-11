@@ -896,7 +896,7 @@ char *_m3d_safestr(char *in, int morelines) {
         if (!out) return NULL;
         while (*i == ' ' || *i == '\t' || *i == '\r' || (morelines && *i == '\n'))
             i++;
-        for (; *i && (morelines || (*i != '\r' && *i != '\n')); i++) {
+        for (; *i && (morelines || (*i != '\r' && *i != '\n')) && o - out < l; i++) {
             if (*i == '\r') continue;
             if (*i == '\n') {
                 if (morelines >= 3 && o > out && *(o - 1) == '\n') break;

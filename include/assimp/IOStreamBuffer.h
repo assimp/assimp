@@ -261,6 +261,11 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextDataLine(std::vector<T> &buffer, 
         buffer[i] = m_cache[m_cachePos];
         ++m_cachePos;
         ++i;
+
+        if(i == buffer.size()) {
+            buffer.resize(buffer.size() * 2);
+        }
+
         if (m_cachePos >= size()) {
             break;
         }
@@ -308,6 +313,11 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         buffer[i] = m_cache[m_cachePos];
         ++m_cachePos;
         ++i;
+
+        if(i == buffer.size()) {
+            buffer.resize(buffer.size() * 2);
+        }
+
         if (m_cachePos >= m_cacheSize) {
             if (!readNextBlock()) {
                 return false;

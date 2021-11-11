@@ -601,7 +601,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
                 ioprintf(io, "\t\t<TextureCoords num=\"%u\" set=\"%u\" name=\"%s\" num_components=\"%u\"> \n",
                          mesh->mNumVertices,
                          a,
-                         mesh->mTextureCoordsNames[a].C_Str(),
+                         (mesh->HasTextureCoordsName(a) ? mesh->GetTextureCoordsName(a)->C_Str() : ""),
                          mesh->mNumUVComponents[a]);
 
                 if (!shortened) {

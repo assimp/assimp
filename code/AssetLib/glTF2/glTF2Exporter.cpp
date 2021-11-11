@@ -1395,15 +1395,15 @@ inline Ref<Accessor> GetSamplerInputRef(Asset &asset, std::string &animId, Ref<B
 inline void ExtractTranslationSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumPositionKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 3);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey &key = nodeChannel->mPositionKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 3) + 0] = key.mValue.x;
-        values[(i * 3) + 1] = key.mValue.y;
-        values[(i * 3) + 2] = key.mValue.z;
+        values[(i * 3) + 0] = (ai_real) key.mValue.x;
+        values[(i * 3) + 1] = (ai_real) key.mValue.y;
+        values[(i * 3) + 2] = (ai_real) key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1414,15 +1414,15 @@ inline void ExtractTranslationSampler(Asset &asset, std::string &animId, Ref<Buf
 inline void ExtractScaleSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumScalingKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 3);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey &key = nodeChannel->mScalingKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 3) + 0] = key.mValue.x;
-        values[(i * 3) + 1] = key.mValue.y;
-        values[(i * 3) + 2] = key.mValue.z;
+        values[(i * 3) + 0] = (ai_real) key.mValue.x;
+        values[(i * 3) + 1] = (ai_real) key.mValue.y;
+        values[(i * 3) + 2] = (ai_real) key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1433,16 +1433,16 @@ inline void ExtractScaleSampler(Asset &asset, std::string &animId, Ref<Buffer> &
 inline void ExtractRotationSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumRotationKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 4);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 4);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiQuatKey &key = nodeChannel->mRotationKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 4) + 0] = key.mValue.x;
-        values[(i * 4) + 1] = key.mValue.y;
-        values[(i * 4) + 2] = key.mValue.z;
-        values[(i * 4) + 3] = key.mValue.w;
+        values[(i * 4) + 0] = (ai_real) key.mValue.x;
+        values[(i * 4) + 1] = (ai_real) key.mValue.y;
+        values[(i * 4) + 2] = (ai_real) key.mValue.z;
+        values[(i * 4) + 3] = (ai_real) key.mValue.w;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1500,7 +1500,7 @@ void glTF2Exporter::ExportAnimations() {
             }
         }
 
-        // Assimp documentation staes this is not used (not implemented)
+        // Assimp documentation states this is not used (not implemented)
         // for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
         //     const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
         // }

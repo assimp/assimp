@@ -300,6 +300,10 @@ struct aiBone {
     aiBone() AI_NO_EXCEPT
             : mName(),
               mNumWeights(0),
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
+              mArmature(nullptr),
+              mNode(nullptr),
+#endif
               mWeights(nullptr),
               mOffsetMatrix() {
         // empty
@@ -309,6 +313,10 @@ struct aiBone {
     aiBone(const aiBone &other) :
             mName(other.mName),
             mNumWeights(other.mNumWeights),
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
+              mArmature(nullptr),
+              mNode(nullptr),
+#endif
             mWeights(nullptr),
             mOffsetMatrix(other.mOffsetMatrix) {
         if (other.mWeights && other.mNumWeights) {

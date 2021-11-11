@@ -897,7 +897,8 @@ void X3DImporter::readSphere(XmlNode &node) {
         StandardShapes::MakeSphere(tess, tlist);
         // copy data from temp array and apply scale
         for (std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it) {
-            ((X3DNodeElementGeometry3D *)ne)->Vertices.push_back(*it * radius);
+            aiVector3D v = *it;
+            ((X3DNodeElementGeometry3D *)ne)->Vertices.emplace_back(v * radius);
         }
 
         ((X3DNodeElementGeometry3D *)ne)->Solid = solid;

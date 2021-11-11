@@ -108,6 +108,10 @@ struct X3DNodeElementBase {
     std::list<X3DNodeElementBase *> Children;
     X3DElemType Type;
 
+    virtual ~X3DNodeElementBase() {
+        // empty
+    }
+
 protected:
     X3DNodeElementBase(X3DElemType type, X3DNodeElementBase *pParent) :
             Parent(pParent), Type(type) {

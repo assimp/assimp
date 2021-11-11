@@ -38,16 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/// \file   X3DImporter.hpp
-/// \brief  X3D-format files importer for Assimp.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
-// Thanks to acorn89 for support.
-
 #ifndef INCLUDED_AI_X3D_IMPORTER_H
 #define INCLUDED_AI_X3D_IMPORTER_H
 
-// Header files, Assimp.
+#include "X3DImporter_Node.hpp"
+
 #include <assimp/BaseImporter.h>
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
@@ -57,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ProgressHandler.hpp>
 
 #include <list>
+#include <string>
 
 namespace Assimp {
 
@@ -71,6 +67,21 @@ inline void Throw_CloseNotFound(const std::string &node) {
 inline void Throw_ConvertFail_Str2ArrF(const std::string &nodeName, const std::string &pAttrValue) {
     throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
                             "\" from string to array of floats.");
+}
+
+inline void Throw_ConvertFail_Str2ArrD(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
+                            "\" from string to array of doubles.");
+}
+
+inline void Throw_ConvertFail_Str2ArrB(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
+                            "\" from string to array of booleans.");
+}
+
+inline void Throw_ConvertFail_Str2ArrI(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
+                            "\" from string to array of integers.");
 }
 
 inline void Throw_DEF_And_USE(const std::string &nodeName) {
@@ -230,61 +241,8 @@ inline void LogInfo(const std::string &message) {
 ///
 ///	That's all for now. Enjoy
 ///
-enum class X3DElemType {
-    ENET_Group, ///< Element has type "Group".
-    ENET_MetaBoolean, ///< Element has type "Metadata boolean".
-    ENET_MetaDouble, ///< Element has type "Metadata double".
-    ENET_MetaFloat, ///< Element has type "Metadata float".
-    ENET_MetaInteger, ///< Element has type "Metadata integer".
-    ENET_MetaSet, ///< Element has type "Metadata set".
-    ENET_MetaString, ///< Element has type "Metadata string".
-    ENET_Arc2D, ///< Element has type "Arc2D".
-    ENET_ArcClose2D, ///< Element has type "ArcClose2D".
-    ENET_Circle2D, ///< Element has type "Circle2D".
-    ENET_Disk2D, ///< Element has type "Disk2D".
-    ENET_Polyline2D, ///< Element has type "Polyline2D".
-    ENET_Polypoint2D, ///< Element has type "Polypoint2D".
-    ENET_Rectangle2D, ///< Element has type "Rectangle2D".
-    ENET_TriangleSet2D, ///< Element has type "TriangleSet2D".
-    ENET_Box, ///< Element has type "Box".
-    ENET_Cone, ///< Element has type "Cone".
-    ENET_Cylinder, ///< Element has type "Cylinder".
-    ENET_Sphere, ///< Element has type "Sphere".
-    ENET_ElevationGrid, ///< Element has type "ElevationGrid".
-    ENET_Extrusion, ///< Element has type "Extrusion".
-    ENET_Coordinate, ///< Element has type "Coordinate".
-    ENET_Normal, ///< Element has type "Normal".
-    ENET_TextureCoordinate, ///< Element has type "TextureCoordinate".
-    ENET_IndexedFaceSet, ///< Element has type "IndexedFaceSet".
-    ENET_IndexedLineSet, ///< Element has type "IndexedLineSet".
-    ENET_IndexedTriangleSet, ///< Element has type "IndexedTriangleSet".
-    ENET_IndexedTriangleFanSet, ///< Element has type "IndexedTriangleFanSet".
-    ENET_IndexedTriangleStripSet, ///< Element has type "IndexedTriangleStripSet".
-    ENET_LineSet, ///< Element has type "LineSet".
-    ENET_PointSet, ///< Element has type "PointSet".
-    ENET_TriangleSet, ///< Element has type "TriangleSet".
-    ENET_TriangleFanSet, ///< Element has type "TriangleFanSet".
-    ENET_TriangleStripSet, ///< Element has type "TriangleStripSet".
-    ENET_Color, ///< Element has type "Color".
-    ENET_ColorRGBA, ///< Element has type "ColorRGBA".
-    ENET_Shape, ///< Element has type "Shape".
-    ENET_Appearance, ///< Element has type "Appearance".
-    ENET_Material, ///< Element has type "Material".
-    ENET_ImageTexture, ///< Element has type "ImageTexture".
-    ENET_TextureTransform, ///< Element has type "TextureTransform".
-    ENET_DirectionalLight, ///< Element has type "DirectionalLight".
-    ENET_PointLight, ///< Element has type "PointLight".
-    ENET_SpotLight, ///< Element has type "SpotLight".
 
-    ENET_Invalid ///< Element has invalid type and possible contain invalid data.
-};
-
-struct X3DNodeElementBase {
-    X3DNodeElementBase *Parent;
-    std::string ID;
-    std::list<X3DNodeElementBase *> Child;
-    X3DElemType Type;
-};
+using X3DElementList = std::list<X3DNodeElementBase *>;
 
 class X3DImporter : public BaseImporter {
 public:
@@ -312,8 +270,112 @@ public:
     void Clear();
 
 private:
+    X3DNodeElementBase *MACRO_USE_CHECKANDAPPLY(XmlNode &node, std::string pDEF, std::string pUSE, X3DElemType pType, X3DNodeElementBase *pNE);
+    bool isNodeEmpty(XmlNode &node);
+    void checkNodeMustBeEmpty(XmlNode &node);
+    void skipUnsupportedNode(const std::string &pParentNodeName, XmlNode &node);
+    void readHead(XmlNode &node);
+    void readChildNodes(XmlNode &node, const std::string &pParentNodeName);
+    void readScene(XmlNode &node);
+
+    bool FindNodeElement_FromRoot(const std::string &pID, const X3DElemType pType, X3DNodeElementBase **pElement);
+    bool FindNodeElement_FromNode(X3DNodeElementBase *pStartNode, const std::string &pID,
+            const X3DElemType pType, X3DNodeElementBase **pElement);
+    bool FindNodeElement(const std::string &pID, const X3DElemType pType, X3DNodeElementBase **pElement);
+    void ParseHelper_Group_Begin(const bool pStatic = false);
+    void ParseHelper_Node_Enter(X3DNodeElementBase *pNode);
+    void ParseHelper_Node_Exit();
+
+    // 2D geometry
+    void readArc2D(XmlNode &node);
+    void readArcClose2D(XmlNode &node);
+    void readCircle2D(XmlNode &node);
+    void readDisk2D(XmlNode &node);
+    void readPolyline2D(XmlNode &node);
+    void readPolypoint2D(XmlNode &node);
+    void readRectangle2D(XmlNode &node);
+    void readTriangleSet2D(XmlNode &node);
+
+    // 3D geometry
+    void readBox(XmlNode &node);
+    void readCone(XmlNode &node);
+    void readCylinder(XmlNode &node);
+    void readElevationGrid(XmlNode &node);
+    void readExtrusion(XmlNode &node);
+    void readIndexedFaceSet(XmlNode &node);
+    void readSphere(XmlNode &node);
+
+    // group
+    void startReadGroup(XmlNode &node);
+    void endReadGroup();
+    void startReadStaticGroup(XmlNode &node);
+    void endReadStaticGroup();
+    void startReadSwitch(XmlNode &node);
+    void endReadSwitch();
+    void startReadTransform(XmlNode &node);
+    void endReadTransform();
+
+    // light
+    void readDirectionalLight(XmlNode &node);
+    void readPointLight(XmlNode &node);
+    void readSpotLight(XmlNode &node);
+
+    // metadata
+    bool checkForMetadataNode(XmlNode &node);
+    void childrenReadMetadata(XmlNode &node, X3DNodeElementBase *pParentElement, const std::string &pNodeName);
+    void readMetadataBoolean(XmlNode &node);
+    void readMetadataDouble(XmlNode &node);
+    void readMetadataFloat(XmlNode &node);
+    void readMetadataInteger(XmlNode &node);
+    void readMetadataSet(XmlNode &node);
+    void readMetadataString(XmlNode &node);
+
+    // networking
+    void readInline(XmlNode &node);
+
+    // postprocessing
+    aiMatrix4x4 PostprocessHelper_Matrix_GlobalToCurrent() const;
+    void PostprocessHelper_CollectMetadata(const X3DNodeElementBase &pNodeElement, std::list<X3DNodeElementBase *> &pList) const;
+    bool PostprocessHelper_ElementIsMetadata(const X3DElemType pType) const;
+    bool PostprocessHelper_ElementIsMesh(const X3DElemType pType) const;
+    void Postprocess_BuildLight(const X3DNodeElementBase &pNodeElement, std::list<aiLight *> &pSceneLightList) const;
+    void Postprocess_BuildMaterial(const X3DNodeElementBase &pNodeElement, aiMaterial **pMaterial) const;
+    void Postprocess_BuildMesh(const X3DNodeElementBase &pNodeElement, aiMesh **pMesh) const;
+    void Postprocess_BuildNode(const X3DNodeElementBase &pNodeElement, aiNode &pSceneNode, std::list<aiMesh *> &pSceneMeshList,
+            std::list<aiMaterial *> &pSceneMaterialList, std::list<aiLight *> &pSceneLightList) const;
+    void Postprocess_BuildShape(const X3DNodeElementShape &pShapeNodeElement, std::list<unsigned int> &pNodeMeshInd,
+            std::list<aiMesh *> &pSceneMeshList, std::list<aiMaterial *> &pSceneMaterialList) const;
+    void Postprocess_CollectMetadata(const X3DNodeElementBase &pNodeElement, aiNode &pSceneNode) const;
+
+    // rendering
+    void readColor(XmlNode &node);
+    void readColorRGBA(XmlNode &node);
+    void readCoordinate(XmlNode &node);
+    void readIndexedLineSet(XmlNode &node);
+    void readIndexedTriangleFanSet(XmlNode &node);
+    void readIndexedTriangleSet(XmlNode &node);
+    void readIndexedTriangleStripSet(XmlNode &node);
+    void readLineSet(XmlNode &node);
+    void readPointSet(XmlNode &node);
+    void readTriangleFanSet(XmlNode &node);
+    void readTriangleSet(XmlNode &node);
+    void readTriangleStripSet(XmlNode &node);
+    void readNormal(XmlNode &node);
+
+    // shape
+    void readShape(XmlNode &node);
+    void readAppearance(XmlNode &node);
+    void readMaterial(XmlNode &node);
+
+    // texturing
+    void readImageTexture(XmlNode &node);
+    void readTextureCoordinate(XmlNode &node);
+    void readTextureTransform(XmlNode &node);
+
     static const aiImporterDesc Description;
-    X3DNodeElementBase *mNodeElementCur; ///< Current element.
+    X3DNodeElementBase *mNodeElementCur;
+    aiScene *mScene;
+    IOSystem *mpIOHandler;
 }; // class X3DImporter
 
 } // namespace Assimp

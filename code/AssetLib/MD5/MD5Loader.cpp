@@ -109,7 +109,7 @@ bool MD5Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        const char *tokens[] = { "MD5Version" };
+        static const char * const tokens[] = { "MD5Version" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 
@@ -485,7 +485,7 @@ void MD5Importer::LoadMD5MeshFile() {
                     }
 
                     MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
-                    if (weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON) { 
+                    if (weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON) {
                         continue;
                     }
 

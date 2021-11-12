@@ -116,7 +116,7 @@ void MakeFileAssociations() {
     RegSetValueEx(hRegistry,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
     RegCloseKey(hRegistry);
 
-    CLogDisplay::Instance().AddEntry("[OK] File assocations have been registered",
+    CLogDisplay::Instance().AddEntry("[OK] File associations have been registered",
         D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
     CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
@@ -1508,7 +1508,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sRect.right -= sRect.left;
             sRect.bottom -= sRect.top;
 
-            // if the mouse klick was inside the viewer panel
+            // if the mouse click was inside the viewer panel
             // give the focus to it
             if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom)
                 {
@@ -2206,7 +2206,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             "ASSIMP ModelViewer",MB_OK);
         return -4;
     }
-    
+
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
     // create the log window

@@ -90,7 +90,7 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 
 
 //-------------------------------------------------------------------------------
-// Recursivly count the number of nodes in an asset's node graph
+// Recursively count the number of nodes in an asset's node graph
 // Used by LoadAsset()
 //-------------------------------------------------------------------------------
 void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
@@ -105,7 +105,7 @@ void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
-    
+
     return 1;
 }
 
@@ -171,7 +171,7 @@ int CDisplay::AddNodeToDisplayList(
         {
             iIndex += iDepth  * 100;
         }
-        else 
+        else
 			iIndex += iDepth  * 10;
         ai_snprintf(chTemp, MAXLEN,"Node %u",iIndex);
     }
@@ -1053,7 +1053,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         case aiTextureOp_SmoothAdd:
             szOp = "addsmooth";
             break;
-        default: 
+        default:
             szOp = "mul";
             break;
         };
@@ -1535,7 +1535,7 @@ int CDisplay::RenderStereoView(const aiMatrix4x4& m)
         // (move back to the original position)
         g_sCamera.vPos -= g_sCamera.vRight * 0.03f;
 
-        // reenable all channels
+        // re-enable all channels
         g_piDevice->SetRenderState(D3DRS_COLORWRITEENABLE,
             D3DCOLORWRITEENABLE_RED |
             D3DCOLORWRITEENABLE_GREEN |

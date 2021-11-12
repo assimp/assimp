@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -301,6 +300,10 @@ struct aiBone {
     aiBone() AI_NO_EXCEPT
             : mName(),
               mNumWeights(0),
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
+              mArmature(nullptr),
+              mNode(nullptr),
+#endif
               mWeights(nullptr),
               mOffsetMatrix() {
         // empty
@@ -310,6 +313,10 @@ struct aiBone {
     aiBone(const aiBone &other) :
             mName(other.mName),
             mNumWeights(other.mNumWeights),
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
+              mArmature(nullptr),
+              mNode(nullptr),
+#endif
             mWeights(nullptr),
             mOffsetMatrix(other.mOffsetMatrix) {
         if (other.mWeights && other.mNumWeights) {
@@ -400,17 +407,17 @@ enum aiPrimitiveType {
 
     /**
      * A flag to determine whether this triangles only mesh is NGON encoded.
-     * 
+     *
      * NGON encoding is a special encoding that tells whether 2 or more consecutive triangles
      * should be considered as a triangle fan. This is identified by looking at the first vertex index.
      * 2 consecutive triangles with the same 1st vertex index are part of the same
      * NGON.
-     * 
-     * At the moment, only quads (concave or convex) are supported, meaning that polygons are 'seen' as 
+     *
+     * At the moment, only quads (concave or convex) are supported, meaning that polygons are 'seen' as
      * triangles, as usual after a triangulation pass.
-     * 
+     *
      * To get an NGON encoded mesh, please use the aiProcess_Triangulate post process.
-     * 
+     *
      * @see aiProcess_Triangulate
      * @link https://github.com/KhronosGroup/glTF/pull/1620
      */
@@ -578,7 +585,7 @@ enum aiMorphingMethod {
 * referencing the vertices. In addition there might be a series of bones, each
 * of them addressing a number of vertices with a certain weight. Vertex data
 * is presented in channels with each channel containing a single per-vertex
-* information such as a set of texture coords or a normal vector.
+* information such as a set of texture coordinates or a normal vector.
 * If a data pointer is non-null, the corresponding data stream is present.
 * From C++-programs you can also use the comfort functions Has*() to
 * test for the presence of various data streams.
@@ -668,22 +675,18 @@ struct aiMesh {
     */
     C_STRUCT aiColor4D *mColors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
-    /** Vertex texture coords, also known as UV channels.
+    /** Vertex texture coordinates, also known as UV channels.
     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
     * vertex. nullptr if not present. The array is mNumVertices in size.
     */
     C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-
-    /** Vertex stream names.
-     */
-    C_STRUCT aiString mTextureCoordsNames[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
     /** Specifies the number of components for a given UV channel.
     * Up to three channels are supported (UVW, for accessing volume
     * or cube maps). If the value is 2 for a given channel n, the
     * component p.z of mTextureCoords[n][p] is set to 0.0f.
     * If the value is 1 for a given channel, p.y is set to 0.0f, too.
-    * @note 4D coords are not supported
+    * @note 4D coordinates are not supported
     */
     unsigned int mNumUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
@@ -736,14 +739,18 @@ struct aiMesh {
     C_STRUCT aiAnimMesh **mAnimMeshes;
 
     /**
-     *  Method of morphing when animeshes are specified.
+     *  Method of morphing when anim-meshes are specified.
      */
     unsigned int mMethod;
 
     /**
-     *
+     *  The bounding box.
      */
     C_STRUCT aiAABB mAABB;
+
+    /** Vertex UV stream names. Pointer to array of size AI_MAX_NUMBER_OF_TEXTURECOORDS
+     */
+    C_STRUCT aiString **mTextureCoordsNames;
 
 #ifdef __cplusplus
 
@@ -766,7 +773,8 @@ struct aiMesh {
               mNumAnimMeshes(0),
               mAnimMeshes(nullptr),
               mMethod(0),
-              mAABB() {
+              mAABB(),
+              mTextureCoordsNames(nullptr) {
         for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
             mNumUVComponents[a] = 0;
             mTextureCoords[a] = nullptr;
@@ -786,6 +794,14 @@ struct aiMesh {
         for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
             delete[] mTextureCoords[a];
         }
+
+        if (mTextureCoordsNames) {
+            for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
+                delete mTextureCoordsNames[a];
+            }
+            delete[] mTextureCoordsNames;
+        }
+
         for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++) {
             delete[] mColors[a];
         }
@@ -869,6 +885,52 @@ struct aiMesh {
     //! Check whether the mesh contains bones
     bool HasBones() const {
         return mBones != nullptr && mNumBones > 0;
+    }
+
+    //! Check whether the mesh contains a texture coordinate set name
+    //! \param pIndex Index of the texture coordinates set
+    bool HasTextureCoordsName(unsigned int pIndex) const {
+        if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+            return false;
+        }
+        return mTextureCoordsNames[pIndex] != nullptr;
+    }
+
+    //! Set a texture coordinate set name
+    //! \param pIndex Index of the texture coordinates set
+    //! \param texCoordsName name of the texture coordinate set
+    void SetTextureCoordsName(unsigned int pIndex, const aiString &texCoordsName) {
+        if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+            return;
+        }
+
+        if (mTextureCoordsNames == nullptr) {
+            // Construct and null-init array
+            mTextureCoordsNames = new aiString *[AI_MAX_NUMBER_OF_TEXTURECOORDS] {};
+        }
+
+        if (texCoordsName.length == 0) {
+            delete mTextureCoordsNames[pIndex];
+            mTextureCoordsNames[pIndex] = nullptr;
+            return;
+        }
+
+        if (mTextureCoordsNames[pIndex] == nullptr) {
+            mTextureCoordsNames[pIndex] = new aiString(texCoordsName);
+            return;
+        }
+
+        *mTextureCoordsNames[pIndex] = texCoordsName;
+    }
+
+    //! Get a texture coordinate set name
+    //! \param pIndex Index of the texture coordinates set
+    const aiString *GetTextureCoordsName(unsigned int pIndex) const {
+        if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+            return nullptr;
+        }
+
+        return mTextureCoordsNames[pIndex];
     }
 
 #endif // __cplusplus

@@ -358,7 +358,7 @@ namespace vmd
 				light_frames[i].Write(stream);
 			}
 
-			// self shadow datas
+			// self shadow data
 			const int self_shadow_num = 0;
 			stream->write(reinterpret_cast<const char*>(&self_shadow_num), sizeof(int));
 

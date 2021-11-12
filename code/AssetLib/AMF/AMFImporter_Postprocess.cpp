@@ -69,7 +69,7 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
     }
 
     tcol = Color->Color;
-    
+
     // Check if default color must be used
     if ((tcol.r == 0) && (tcol.g == 0) && (tcol.b == 0) && (tcol.a == 0)) {
         tcol.r = 0.5f;
@@ -99,10 +99,10 @@ void AMFImporter::PostprocessHelper_CreateMeshDataArray(const AMFMesh &nodeEleme
     }
 
     // all coordinates stored as child and we need to reserve space for future push_back's.
-    vertexCoordinateArray.reserve(vn->Child.size()); 
+    vertexCoordinateArray.reserve(vn->Child.size());
 
     // colors count equal vertices count.
-    pVertexColorArray.resize(vn->Child.size()); 
+    pVertexColorArray.resize(vn->Child.size());
     col_idx = 0;
 
     // Inside vertices collect all data and place to arrays
@@ -690,7 +690,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
         if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
-        // create alias for conveniance
+        // create alias for convenience
         AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
         if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);

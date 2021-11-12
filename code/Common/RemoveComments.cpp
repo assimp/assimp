@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,50 +39,52 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  RemoveComments.cpp
+/** 
+ *  @file  RemoveComments.cpp
  *  @brief Defines the CommentRemover utility class
  */
 
 #include <assimp/RemoveComments.h>
 #include <assimp/ParsingUtils.h>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Remove line comments from a file
-void CommentRemover::RemoveLineComments(const char* szComment,
-    char* szBuffer, char chReplacement /* = ' ' */)
-{
+void CommentRemover::RemoveLineComments(const char* szComment, char* szBuffer, char chReplacement /* = ' ' */) {
     // validate parameters
     ai_assert(nullptr != szComment);
     ai_assert(nullptr != szBuffer);
     ai_assert(*szComment);
 
-    const size_t len = strlen(szComment);
-    while (*szBuffer)   {
+    size_t len = strlen(szComment);
+    const size_t lenBuffer = strlen(szBuffer);
+    if (len > lenBuffer) {
+        len = lenBuffer;
+    }
 
+    for(size_t i = 0; i < lenBuffer; i++) {
         // skip over quotes
-        if (*szBuffer == '\"' || *szBuffer == '\'')
-            while (*szBuffer++ && *szBuffer != '\"' && *szBuffer != '\'');
+        if (szBuffer[i] == '\"' || szBuffer[i] == '\'')
+            while (++i < lenBuffer && szBuffer[i] != '\"' && szBuffer[i] != '\'');
 
-        if (!strncmp(szBuffer,szComment,len)) {
-            while (!IsLineEnd(*szBuffer))
-                *szBuffer++ = chReplacement;
+        if(lenBuffer - i < len) {
+            break;
+        }
 
-            if (!*szBuffer) {
-                break;
+        if (!strncmp(szBuffer + i,szComment,len)) {
+            while (i < lenBuffer && !IsLineEnd(szBuffer[i])) {
+                szBuffer[i++] = chReplacement;
             }
         }
-        ++szBuffer;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Remove multi-line comments from a file
 void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
-    const char* szCommentEnd,char* szBuffer,
-    char chReplacement)
-{
+        const char* szCommentEnd,char* szBuffer,
+        char chReplacement) {
     // validate parameters
     ai_assert(nullptr != szCommentStart);
     ai_assert(nullptr != szCommentEnd);
@@ -96,18 +97,20 @@ void CommentRemover::RemoveMultiLineComments(const char* szCommentStart,
 
     while (*szBuffer)   {
         // skip over quotes
-        if (*szBuffer == '\"' || *szBuffer == '\'')
+        if (*szBuffer == '\"' || *szBuffer == '\'') {
             while (*szBuffer++ && *szBuffer != '\"' && *szBuffer != '\'');
+        }
 
         if (!strncmp(szBuffer,szCommentStart,len2))  {
             while (*szBuffer) {
                 if (!::strncmp(szBuffer,szCommentEnd,len)) {
-                    for (unsigned int i = 0; i < len;++i)
+                    for (unsigned int i = 0; i < len;++i) {
                         *szBuffer++ = chReplacement;
+                    }
 
                     break;
                 }
-            *szBuffer++ = chReplacement;
+                *szBuffer++ = chReplacement;
             }
             continue;
         }

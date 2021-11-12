@@ -47,13 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
-
 #include <assimp/ai_assert.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
-
-#include <vector>
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -290,7 +287,6 @@ OpenGEXImporter::OpenGEXImporter() :
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::~OpenGEXImporter() {
-    m_ctx = nullptr;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -299,8 +295,8 @@ bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, boo
     if (!checkSig) {
         canRead = SimpleExtensionCheck(file, "ogex");
     } else {
-        static const char *token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
-        canRead = BaseImporter::SearchFileHeaderForToken(pIOHandler, file, token, 4);
+        static const char * const token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
+        canRead = SearchFileHeaderForToken(pIOHandler, file, token, 4);
     }
 
     return canRead;
@@ -355,8 +351,8 @@ void OpenGEXImporter::handleNodes(DDLNode *node, aiScene *pScene) {
         return;
     }
 
-    DDLNode::DllNodeList childs = node->getChildNodeList();
-    for (DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); ++it) {
+    DDLNode::DllNodeList children = node->getChildNodeList();
+    for (DDLNode::DllNodeList::iterator it = children.begin(); it != children.end(); ++it) {
         Grammar::TokenType tokenType(Grammar::matchTokenType((*it)->getType().c_str()));
         switch (tokenType) {
         case Grammar::MetricToken:
@@ -749,22 +745,22 @@ enum MeshAttribute {
     TexCoord
 };
 
-static const std::string PosToken = "position";
-static const std::string ColToken = "color";
-static const std::string NormalToken = "normal";
-static const std::string TexCoordToken = "texcoord";
+constexpr auto PosToken = "position";
+constexpr auto ColToken = "color";
+constexpr auto NormalToken = "normal";
+constexpr auto TexCoordToken = "texcoord";
 
 //------------------------------------------------------------------------------------------------
 static MeshAttribute getAttributeByName(const char *attribName) {
     ai_assert(nullptr != attribName);
 
-    if (0 == strncmp(PosToken.c_str(), attribName, PosToken.size())) {
+    if (0 == strcmp(PosToken, attribName)) {
         return Position;
-    } else if (0 == strncmp(ColToken.c_str(), attribName, ColToken.size())) {
+    } else if (0 == strcmp(ColToken, attribName)) {
         return Color;
-    } else if (0 == strncmp(NormalToken.c_str(), attribName, NormalToken.size())) {
+    } else if (0 == strcmp(NormalToken, attribName)) {
         return Normal;
-    } else if (0 == strncmp(TexCoordToken.c_str(), attribName, TexCoordToken.size())) {
+    } else if (0 == strcmp(TexCoordToken, attribName)) {
         return TexCoord;
     }
 

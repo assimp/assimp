@@ -43,13 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssbinFileWriter.h"
-
 #include "Common/assbin_chunks.h"
 #include "PostProcessing/ProcessHelper.h"
 
 #include <assimp/Exceptional.h>
 #include <assimp/version.h>
-#include <assimp/Exporter.hpp>
 #include <assimp/IOStream.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
@@ -58,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../contrib/zlib/zlib.h"
 #endif
 
-#include <time.h>
+#include <ctime>
 
 #if _MSC_VER
 #pragma warning(push)
@@ -172,7 +170,7 @@ inline size_t Write<aiQuaternion>(IOStream *stream, const aiQuaternion &v) {
     t += Write<float>(stream, v.z);
     ai_assert(t == 16);
 
-    return 16;
+    return t;
 }
 
 // -----------------------------------------------------------------------------------
@@ -277,7 +275,7 @@ public:
         // empty
     }
 
-    virtual ~AssbinChunkWriter() {
+    ~AssbinChunkWriter() override {
         if (container) {
             container->Write(&magic, sizeof(uint32_t), 1);
             container->Write(&cursor, sizeof(uint32_t), 1);
@@ -288,26 +286,27 @@ public:
 
     void *GetBufferPointer() { return buffer; }
 
-    // -------------------------------------------------------------------
-    virtual size_t Read(void * /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) {
+    size_t Read(void * /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) override {
         return 0;
     }
-    virtual aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) {
+    
+    aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) override {
         return aiReturn_FAILURE;
     }
-    virtual size_t Tell() const {
+    
+    size_t Tell() const override {
         return cursor;
     }
-    virtual void Flush() {
+    
+    void Flush() override {
         // not implemented
     }
 
-    virtual size_t FileSize() const {
+    size_t FileSize() const override {
         return cursor;
     }
 
-    // -------------------------------------------------------------------
-    virtual size_t Write(const void *pvBuffer, size_t pSize, size_t pCount) {
+    size_t Write(const void *pvBuffer, size_t pSize, size_t pCount) override {
         pSize *= pCount;
         if (cursor + pSize > cur_size) {
             Grow(cursor + pSize);

@@ -211,10 +211,10 @@ enum aiPostProcessSteps
     *
     * If the resulting scene can be reduced to a single mesh, with a single
     * material, no lights, and no cameras, then the output scene will contain
-    * only a root node (with no children) that references the single mesh. 
+    * only a root node (with no children) that references the single mesh.
     * Otherwise, the output scene will be reduced to a root node with a single
-    * level of child nodes, each one referencing one mesh, and each mesh 
-    * referencing one material. 
+    * level of child nodes, each one referencing one mesh, and each mesh
+    * referencing one material.
     *
     * In either case, for rendering, you can
     * simply render all meshes in order - you don't need to pay
@@ -328,12 +328,12 @@ enum aiPostProcessSteps
 
 
     // -------------------------------------------------------------------------
-    /** 
+    /**
      * This step generically populates aiBone->mArmature and aiBone->mNode generically
      * The point of these is it saves you later having to calculate these elements
      * This is useful when handling rest information or skin information
-     * If you have multiple armatures on your models we strongly recommend enabling this 
-     * Instead of writing your own multi-root, multi-armature lookups we have done the 
+     * If you have multiple armatures on your models we strongly recommend enabling this
+     * Instead of writing your own multi-root, multi-armature lookups we have done the
      * hard work for you :)
    */
     aiProcess_PopulateArmatureData = 0x4000,
@@ -440,7 +440,7 @@ enum aiPostProcessSteps
      *
      * @note UV transformations are usually implemented in real-time apps by
      * transforming texture coordinates at vertex shader stage with a 3x3
-     * (homogenous) transformation matrix.
+     * (homogeneous) transformation matrix.
     */
     aiProcess_TransformUVCoords = 0x80000,
 
@@ -579,7 +579,7 @@ enum aiPostProcessSteps
      *  of the imported model. And if so, it uses that.
      */
     aiProcess_EmbedTextures  = 0x10000000,
-        
+
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000
     // aiProcess_FixTexturePaths = 0x200000

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -55,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "defs.h"
-#include <stdint.h>
+#include <cstdint>
 #include <cstddef>
 
 struct aiTexture;
@@ -64,6 +62,10 @@ namespace Assimp {
 
 class IOStream;
 
+// ---------------------------------------------------------------------------
+/** 
+ *  This class is used to store and write bitmap information.
+ */
 class ASSIMP_API Bitmap {
 protected:
 
@@ -114,7 +116,11 @@ protected:
     static constexpr std::size_t mBytesPerPixel = 4;
 
 public:
-    static void Save(aiTexture* texture, IOStream* file);
+    /// @brief  Will save an aiTexture instance as a bitmap.
+    /// @param texture  The pointer to the texture instance
+    /// @param file     The filename to save into.
+    /// @return true if successfully saved, false if not.
+    static bool Save(aiTexture* texture, IOStream* file);
 
 protected:
     static void WriteHeader(Header& header, IOStream* file);

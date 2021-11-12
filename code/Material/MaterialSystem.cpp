@@ -555,17 +555,23 @@ uint32_t Assimp::ComputeMaterialHash(const aiMaterial *mat, bool includeMatName 
 }
 
 // ------------------------------------------------------------------------------------------------
-void aiMaterial::CopyPropertyList(aiMaterial *pcDest,
+void aiMaterial::CopyPropertyList(aiMaterial *const pcDest,
         const aiMaterial *pcSrc) {
     ai_assert(nullptr != pcDest);
     ai_assert(nullptr != pcSrc);
+    ai_assert(pcDest->mNumProperties <= pcDest->mNumAllocated);
+    ai_assert(pcSrc->mNumProperties <= pcSrc->mNumAllocated);
 
-    unsigned int iOldNum = pcDest->mNumProperties;
+    const unsigned int iOldNum = pcDest->mNumProperties;
     pcDest->mNumAllocated += pcSrc->mNumAllocated;
     pcDest->mNumProperties += pcSrc->mNumProperties;
 
+    const unsigned int numAllocated = pcDest->mNumAllocated;
     aiMaterialProperty **pcOld = pcDest->mProperties;
-    pcDest->mProperties = new aiMaterialProperty *[pcDest->mNumAllocated];
+    pcDest->mProperties = new aiMaterialProperty *[numAllocated];
+
+    ai_assert(!iOldNum || pcOld);
+    ai_assert(iOldNum < numAllocated);
 
     if (iOldNum && pcOld) {
         for (unsigned int i = 0; i < iOldNum; ++i) {

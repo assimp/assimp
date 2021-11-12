@@ -449,7 +449,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num) {
         // Read the lense angle
         camera->mHorizontalFOV = AI_DEG_TO_RAD(stream->GetF4());
         if (camera->mHorizontalFOV < 0.001f) {
-            camera->mHorizontalFOV = AI_DEG_TO_RAD(45.f);
+            camera->mHorizontalFOV = float(AI_DEG_TO_RAD(45.f));
         }
 
         // Now check for further subchunks

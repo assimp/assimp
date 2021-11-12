@@ -267,7 +267,7 @@ public:
     AMFImporter() AI_NO_EXCEPT;
 
     /// Default destructor.
-    ~AMFImporter();
+    ~AMFImporter() override;
 
     /// Parse AMF file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
     /// Also exception can be thrown if trouble will found.
@@ -276,9 +276,9 @@ public:
     void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
     void ParseHelper_Node_Enter(AMFNodeElementBase *child);
     void ParseHelper_Node_Exit();
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
-    const aiImporterDesc *GetInfo() const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+    const aiImporterDesc *GetInfo() const override;
     bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
     bool Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const;
     bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;

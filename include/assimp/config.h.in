@@ -547,6 +547,15 @@ enum aiComponent
 // Various stuff to fine-tune the behaviour of specific importer plugins.
 // ###########################################################################
 
+// ---------------------------------------------------------------------------
+/** @brief Importers which parse JSON may use this to obtain a pointer to a
+ * rapidjson::IRemoteSchemaDocumentProvider.
+ *
+ * The default value is nullptr
+ * Property type: void*
+ */
+#define AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER \
+    "IMPORT_SCHEMA_DOCUMENT_PROVIDER"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will merge all geometry layers present
@@ -1074,6 +1083,23 @@ enum aiComponent
  *  switch off the flag and enable the functionality to export pure point clouds.
  */
 #define AI_CONFIG_EXPORT_POINT_CLOUDS "EXPORT_POINT_CLOUDS"
+
+/**
+ * @brief Specifies the blob name, assimp uses for exporting.
+ * 
+ * Some formats require auxiliary files to be written, that need to be linked back into 
+ * the original file. For example, OBJ files export materials to a separate MTL file and
+ * use the `mtllib` keyword to reference this file.
+ * 
+ * When exporting blobs using #ExportToBlob, assimp does not know the name of the blob
+ * file and thus outputs `mtllib $blobfile.mtl`, which might not be desired, since the 
+ * MTL file might be called differently. 
+ * 
+ * This property can be used to give the exporter a hint on how to use the magic 
+ * `$blobfile` keyword. If the exporter detects the keyword and is provided with a name
+ * for the blob, it instead uses this name.
+ */
+#define AI_CONFIG_EXPORT_BLOB_NAME "EXPORT_BLOB_NAME"
 
 /**
  *  @brief  Specifies a gobal key factor for scale, float value

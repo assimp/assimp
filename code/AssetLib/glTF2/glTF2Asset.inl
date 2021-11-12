@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,38 +45,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
+// clang-format off
 #ifdef ASSIMP_ENABLE_DRACO
 
 // Google draco library headers spew many warnings. Bad Google, no cookie
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4018) // Signed/unsigned mismatch
-#pragma warning(disable : 4804) // Unsafe use of type 'bool'
-#elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-compare"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbool-compare"
-#pragma GCC diagnostic ignored "-Wsign-compare"
+#   if _MSC_VER
+#       pragma warning(push)
+#       pragma warning(disable : 4018) // Signed/unsigned mismatch
+#       pragma warning(disable : 4804) // Unsafe use of type 'bool'
+#   elif defined(__clang__)
+#       pragma clang diagnostic push
+#       pragma clang diagnostic ignored "-Wsign-compare"
+#   elif defined(__GNUC__)
+#       pragma GCC diagnostic push
+#       if (__GNUC__ > 4)
+#           pragma GCC diagnostic ignored "-Wbool-compare"
+#       endif
+#   pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
 #include "draco/compression/decode.h"
 #include "draco/core/decoder_buffer.h"
 
 #if _MSC_VER
-#pragma warning(pop)
+#   pragma warning(pop)
 #elif defined(__clang__)
-#pragma clang diagnostic pop
+#   pragma clang diagnostic pop
 #elif defined(__GNUC__)
-#pragma GCC diagnostic pop
+#   pragma GCC diagnostic pop
 #endif
 #ifndef DRACO_MESH_COMPRESSION_SUPPORTED
-#error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
+#   error glTF: KHR_draco_mesh_compression: draco library must have DRACO_MESH_COMPRESSION_SUPPORTED
 #endif
 #endif
+// clang-format on
 
 using namespace Assimp;
+using namespace glTFCommon;
 
 namespace glTF2 {
 
@@ -86,222 +90,117 @@ namespace {
 //
 // JSON Value reading helpers
 //
-
-template <class T>
-struct ReadHelper {
-    static bool Read(Value &val, T &out) {
-        return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<bool> {
-    static bool Read(Value &val, bool &out) {
-        return val.IsBool() ? out = val.GetBool(), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<float> {
-    static bool Read(Value &val, float &out) {
-        return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
-    }
-};
-
-template <unsigned int N>
-struct ReadHelper<float[N]> {
-    static bool Read(Value &val, float (&out)[N]) {
-        if (!val.IsArray() || val.Size() != N) return false;
-        for (unsigned int i = 0; i < N; ++i) {
-            if (val[i].IsNumber())
-                out[i] = static_cast<float>(val[i].GetDouble());
+inline CustomExtension ReadExtensions(const char *name, Value &obj) {
+    CustomExtension ret;
+    ret.name = name;
+    if (obj.IsObject()) {
+        ret.mValues.isPresent = true;
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+            auto &val = it->value;
+            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
         }
-        return true;
+    } else if (obj.IsArray()) {
+        ret.mValues.value.reserve(obj.Size());
+        ret.mValues.isPresent = true;
+        for (unsigned int i = 0; i < obj.Size(); ++i) {
+            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
+        }
+    } else if (obj.IsNumber()) {
+        if (obj.IsUint64()) {
+            ret.mUint64Value.value = obj.GetUint64();
+            ret.mUint64Value.isPresent = true;
+        } else if (obj.IsInt64()) {
+            ret.mInt64Value.value = obj.GetInt64();
+            ret.mInt64Value.isPresent = true;
+        } else if (obj.IsDouble()) {
+            ret.mDoubleValue.value = obj.GetDouble();
+            ret.mDoubleValue.isPresent = true;
+        }
+    } else if (obj.IsString()) {
+        ReadValue(obj, ret.mStringValue);
+        ret.mStringValue.isPresent = true;
+    } else if (obj.IsBool()) {
+        ret.mBoolValue.value = obj.GetBool();
+        ret.mBoolValue.isPresent = true;
     }
-};
-
-template <>
-struct ReadHelper<const char *> {
-    static bool Read(Value &val, const char *&out) {
-        return val.IsString() ? (out = val.GetString(), true) : false;
-    }
-};
-
-template <>
-struct ReadHelper<std::string> {
-    static bool Read(Value &val, std::string &out) {
-        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
-    }
-};
-
-template <>
-struct ReadHelper<uint64_t> {
-    static bool Read(Value &val, uint64_t &out) {
-        return val.IsUint64() ? out = val.GetUint64(), true : false;
-    }
-};
-
-template <>
-struct ReadHelper<int64_t> {
-    static bool Read(Value &val, int64_t &out) {
-        return val.IsInt64() ? out = val.GetInt64(), true : false;
-    }
-};
-
-template <class T>
-struct ReadHelper<Nullable<T>> {
-    static bool Read(Value &val, Nullable<T> &out) {
-        return out.isPresent = ReadHelper<T>::Read(val, out.value);
-    }
-};
-
-template <class T>
-inline static bool ReadValue(Value &val, T &out) {
-    return ReadHelper<T>::Read(val, out);
+    return ret;
 }
 
-template <class T>
-inline static bool ReadMember(Value &obj, const char *id, T &out) {
-    if (!obj.IsObject()) {
+inline void CopyData(size_t count, const uint8_t *src, size_t src_stride,
+        uint8_t *dst, size_t dst_stride) {
+    if (src_stride == dst_stride) {
+        memcpy(dst, src, count * src_stride);
+        return;
+    }
+
+    size_t sz = std::min(src_stride, dst_stride);
+    for (size_t i = 0; i < count; ++i) {
+        memcpy(dst, src, sz);
+        if (sz < dst_stride) {
+            memset(dst + sz, 0, dst_stride - sz);
+        }
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+
+void SetVector(vec4 &v, const float (&in)[4]) {
+    v[0] = in[0];
+    v[1] = in[1];
+    v[2] = in[2];
+    v[3] = in[3];
+}
+
+void SetVector(vec3 &v, const float (&in)[3]) {
+    v[0] = in[0];
+    v[1] = in[1];
+    v[2] = in[2];
+}
+
+template <int N>
+inline int Compare(const char *attr, const char (&str)[N]) {
+    return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
+}
+
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4706)
+#endif // _MSC_VER
+
+inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
+    if ((pos = Compare(attr, "POSITION"))) {
+        v = &(p.attributes.position);
+    } else if ((pos = Compare(attr, "NORMAL"))) {
+        v = &(p.attributes.normal);
+    } else if ((pos = Compare(attr, "TANGENT"))) {
+        v = &(p.attributes.tangent);
+    } else if ((pos = Compare(attr, "TEXCOORD"))) {
+        v = &(p.attributes.texcoord);
+    } else if ((pos = Compare(attr, "COLOR"))) {
+        v = &(p.attributes.color);
+    } else if ((pos = Compare(attr, "JOINT"))) {
+        v = &(p.attributes.joint);
+    } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
+        v = &(p.attributes.jointmatrix);
+    } else if ((pos = Compare(attr, "WEIGHT"))) {
+        v = &(p.attributes.weight);
+    } else
         return false;
-    }
-    Value::MemberIterator it = obj.FindMember(id);
-    if (it != obj.MemberEnd()) {
-        return ReadHelper<T>::Read(it->value, out);
-    }
-    return false;
+    return true;
 }
 
-template <class T>
-inline static T MemberOrDefault(Value &obj, const char *id, T defaultValue) {
-    T out;
-    return ReadMember(obj, id, out) ? out : defaultValue;
+inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, const char *attr, Mesh::AccessorList *&v, int &pos) {
+    if ((pos = Compare(attr, "POSITION"))) {
+        v = &(p.targets[targetIndex].position);
+    } else if ((pos = Compare(attr, "NORMAL"))) {
+        v = &(p.targets[targetIndex].normal);
+    } else if ((pos = Compare(attr, "TANGENT"))) {
+        v = &(p.targets[targetIndex].tangent);
+    } else
+        return false;
+    return true;
 }
 
-inline Value *FindMember(Value &val, const char *id) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd()) ? &it->value : nullptr;
-}
-
-template<int N>
-inline void throwUnexpectedTypeError(const char (&expectedTypeName)[N], const char* memberId, const char* context, const char* extraContext) {
-    std::string fullContext = context;
-    if (extraContext && (strlen(extraContext) > 0))
-    {
-        fullContext = fullContext + " (" + extraContext + ")";
-    }
-    throw DeadlyImportError("Member \"", memberId, "\" was not of type \"", expectedTypeName, "\" when reading ", fullContext);
-}
-
-// Look-up functions with type checks. Context and extra context help the user identify the problem if there's an error.
-
-inline Value *FindStringInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsString()) {
-        throwUnexpectedTypeError("string", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindNumberInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsNumber()) {
-        throwUnexpectedTypeError("number", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindUIntInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsUint()) {
-        throwUnexpectedTypeError("uint", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindArrayInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsArray()) {
-        throwUnexpectedTypeError("array", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindObjectInContext(Value &val, const char *memberId, const char* context, const char* extraContext = nullptr) {
-    if (!val.IsObject()) {
-        return nullptr;
-    }
-    Value::MemberIterator it = val.FindMember(memberId);
-    if (it == val.MemberEnd()) {
-        return nullptr;
-    }
-    if (!it->value.IsObject()) {
-        throwUnexpectedTypeError("object", memberId, context, extraContext);
-    }
-    return &it->value;
-}
-
-inline Value *FindExtensionInContext(Value &val, const char *extensionId, const char* context, const char* extraContext = nullptr) {
-    if (Value *extensionList = FindObjectInContext(val, "extensions", context, extraContext)) {
-        if (Value *extension = FindObjectInContext(*extensionList, extensionId, context, extraContext)) {
-            return extension;
-        }
-    }
-    return nullptr;
-}
-
-// Overloads when the value is the document.
-
-inline Value *FindString(Document &doc, const char *memberId) {
-    return FindStringInContext(doc, memberId, "the document");
-}
-
-inline Value *FindNumber(Document &doc, const char *memberId) {
-    return FindNumberInContext(doc, memberId, "the document");
-}
-
-inline Value *FindUInt(Document &doc, const char *memberId) {
-    return FindUIntInContext(doc, memberId, "the document");
-}
-
-inline Value *FindArray(Document &val, const char *memberId) {
-    return FindArrayInContext(val, memberId, "the document");
-}
-
-inline Value *FindObject(Document &doc, const char *memberId) {
-    return FindObjectInContext(doc, memberId, "the document");
-}
-
-inline Value *FindExtension(Value &val, const char *extensionId) {
-    return FindExtensionInContext(val, extensionId, "the document");
-}
 } // namespace
 
 inline Value *Object::FindString(Value &val, const char *memberId) {
@@ -326,6 +225,18 @@ inline Value *Object::FindObject(Value &val, const char *memberId) {
 
 inline Value *Object::FindExtension(Value &val, const char *extensionId) {
     return FindExtensionInContext(val, extensionId, id.c_str(), name.c_str());
+}
+
+inline void Object::ReadExtensions(Value &val) {
+    if (Value *curExtensions = FindObject(val, "extensions")) {
+        this->customExtensions = glTF2::ReadExtensions("extensions", *curExtensions);
+    }
+}
+
+inline void Object::ReadExtras(Value &val) {
+    if (Value *curExtras = FindObject(val, "extras")) {
+        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+    }
 }
 
 #ifdef ASSIMP_ENABLE_DRACO
@@ -360,18 +271,18 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
     // Not same size, convert
     switch (componentBytes) {
-        case sizeof(uint32_t): 
-            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh); 
-            break;
-        case sizeof(uint16_t): 
-            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh); 
-            break;
-        case sizeof(uint8_t): 
-            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh); 
-            break;
-        default:
-            ai_assert(false);
-            break;
+    case sizeof(uint32_t):
+        CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    case sizeof(uint16_t):
+        CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    case sizeof(uint8_t):
+        CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    default:
+        ai_assert(false);
+        break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -410,27 +321,27 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch (accessor.componentType) {
-        case ComponentType_BYTE: 
-            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
-            break;
-        case ComponentType_UNSIGNED_BYTE:
-            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
-            break;
-        case ComponentType_SHORT:
-            GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_UNSIGNED_SHORT: 
-            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
-            break;
-        case ComponentType_UNSIGNED_INT: 
-            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
-            break;
-        case ComponentType_FLOAT: 
-            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer); 
-            break;
-        default:
-            ai_assert(false);
-            break;
+    case ComponentType_BYTE:
+        GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_BYTE:
+        GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_SHORT:
+        GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_SHORT:
+        GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_INT:
+        GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_FLOAT:
+        GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    default:
+        ai_assert(false);
+        break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -462,7 +373,7 @@ inline LazyDict<T>::~LazyDict() {
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
     Value *container = nullptr;
-    const char* context = nullptr;
+    const char *context = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -567,6 +478,8 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
+    inst->ReadExtensions(obj);
+    inst->ReadExtras(obj);
 
     Ref<T> result = Add(inst.release());
     mRecursiveReferenceCheck.erase(i);
@@ -617,7 +530,6 @@ Ref<T> LazyDict<T>::Create(const char *id) {
 //
 // glTF dictionary objects methods
 //
-
 inline Buffer::Buffer() :
         byteLength(0),
         type(Type_arraybuffer),
@@ -731,12 +643,13 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 }
 
 inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
-    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+    if ((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) {
+        return;
+    }
 
     for (SEncodedRegion *reg : EncodedRegion_List) {
         if (reg->ID == pID) {
             EncodedRegion_Current = reg;
-
             return;
         }
     }
@@ -786,10 +699,13 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
 }
 
 inline size_t Buffer::AppendData(uint8_t *data, size_t length) {
-    size_t offset = this->byteLength;
+    const size_t offset = this->byteLength;
+
     // Force alignment to 4 bits
-    Grow((length + 3) & ~3);
+    const size_t paddedLength = (length + 3) & ~3;
+    Grow(paddedLength);
     memcpy(mData.get() + offset, data, length);
+    memset(mData.get() + offset + length, 0, paddedLength - length);
     return offset;
 }
 
@@ -818,9 +734,7 @@ inline void Buffer::Grow(size_t amount) {
 //
 // struct BufferView
 //
-
 inline void BufferView::Read(Value &obj, Asset &r) {
-
     if (Value *bufferVal = FindUInt(obj, "buffer")) {
         buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
@@ -840,16 +754,21 @@ inline void BufferView::Read(Value &obj, Asset &r) {
 }
 
 inline uint8_t *BufferView::GetPointer(size_t accOffset) {
-    if (!buffer) return nullptr;
+    if (!buffer) {
+        return nullptr;
+    }
     uint8_t *basePtr = buffer->GetPointer();
-    if (!basePtr) return nullptr;
+    if (!basePtr) {
+        return nullptr;
+    }
 
     size_t offset = accOffset + byteOffset;
     if (buffer->EncodedRegion_Current != nullptr) {
         const size_t begin = buffer->EncodedRegion_Current->Offset;
         const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
-        if ((offset >= begin) && (offset < end))
+        if ((offset >= begin) && (offset < end)) {
             return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
+        }
     }
 
     return basePtr + offset;
@@ -898,7 +817,6 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 }
 
 inline void Accessor::Read(Value &obj, Asset &r) {
-
     if (Value *bufferViewVal = FindUInt(obj, "bufferView")) {
         bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
@@ -906,10 +824,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     {
-        const Value* countValue = FindUInt(obj, "count");
-        if (!countValue || countValue->GetUint() < 1)
-        {
-            throw DeadlyImportError("A strictly positive count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+        const Value *countValue = FindUInt(obj, "count");
+        if (!countValue) {
+            throw DeadlyImportError("A count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
         }
         count = countValue->GetUint();
     }
@@ -1021,27 +938,6 @@ inline size_t Accessor::GetMaxByteSize() {
     return (bufferView ? bufferView->byteLength : sparse->data.size());
 }
 
-namespace {
-inline void CopyData(size_t count,
-        const uint8_t *src, size_t src_stride,
-        uint8_t *dst, size_t dst_stride) {
-    if (src_stride == dst_stride) {
-        memcpy(dst, src, count * src_stride);
-    } else {
-        size_t sz = std::min(src_stride, dst_stride);
-        for (size_t i = 0; i < count; ++i) {
-            memcpy(dst, src, sz);
-            if (sz < dst_stride) {
-                memset(dst + sz, 0, dst_stride - sz);
-            }
-            src += src_stride;
-            dst += dst_stride;
-        }
-    }
-}
-
-} // namespace
-
 template <class T>
 void Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
@@ -1115,11 +1011,12 @@ inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, siz
     ai_assert(indices_dst + _count * indices_dst_stride <= indices_buffer_ptr + sparse->indices->buffer->byteLength);
     CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
 }
+
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc),
-        data(acc.GetPointer()),
-        elemSize(acc.GetElementSize()),
-        stride(acc.GetStride()) {
+    accessor(acc),
+    data(acc.GetPointer()),
+    elemSize(acc.GetElementSize()),
+    stride(acc.GetStride()) {
 }
 
 //! Accesses the i-th value as defined by the accessor
@@ -1144,6 +1041,7 @@ inline Image::Image() :
 }
 
 inline void Image::Read(Value &obj, Asset &r) {
+    //basisu: no need to handle .ktx2, .basis, load as is
     if (!mDataLength) {
         Value *curUri = FindString(obj, "uri");
         if (nullptr != curUri) {
@@ -1369,24 +1267,32 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_volume) {
+            if (Value *curMaterialVolume = FindObject(*extensions, "KHR_materials_volume")) {
+                MaterialVolume volume;
+
+                ReadMember(*curMaterialVolume, "thicknessFactor", volume.thicknessFactor);
+                ReadTextureProperty(r, *curMaterialVolume, "thicknessTexture", volume.thicknessTexture);
+                ReadMember(*curMaterialVolume, "attenuationDistance", volume.attenuationDistance);
+                ReadMember(*curMaterialVolume, "attenuationColor", volume.attenuationColor);
+
+                this->materialVolume = Nullable<MaterialVolume>(volume);
+            }
+        }
+
+        if (r.extensionsUsed.KHR_materials_ior) {
+            if (Value *curMaterialIOR = FindObject(*extensions, "KHR_materials_ior")) {
+                MaterialIOR ior;
+
+                ReadMember(*curMaterialIOR, "ior", ior.ior);
+
+                this->materialIOR = Nullable<MaterialIOR>(ior);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
-
-namespace {
-void SetVector(vec4 &v, const float (&in)[4]) {
-    v[0] = in[0];
-    v[1] = in[1];
-    v[2] = in[2];
-    v[3] = in[3];
-}
-
-void SetVector(vec3 &v, const float (&in)[3]) {
-    v[0] = in[0];
-    v[1] = in[1];
-    v[2] = in[2];
-}
-} // namespace
 
 inline void Material::SetDefaults() {
     //pbr materials
@@ -1414,56 +1320,21 @@ inline void MaterialSheen::SetDefaults() {
     sheenRoughnessFactor = 0.f;
 }
 
-namespace {
-
-template <int N>
-inline int Compare(const char *attr, const char (&str)[N]) {
-    return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
+inline void MaterialVolume::SetDefaults() {
+    //KHR_materials_volume properties
+    thicknessFactor = 0.f;
+    attenuationDistance = INFINITY;
+    SetVector(attenuationColor, defaultAttenuationColor);
 }
 
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#endif // _MSC_VER
-
-inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
-    if ((pos = Compare(attr, "POSITION"))) {
-        v = &(p.attributes.position);
-    } else if ((pos = Compare(attr, "NORMAL"))) {
-        v = &(p.attributes.normal);
-    } else if ((pos = Compare(attr, "TANGENT"))) {
-        v = &(p.attributes.tangent);
-    } else if ((pos = Compare(attr, "TEXCOORD"))) {
-        v = &(p.attributes.texcoord);
-    } else if ((pos = Compare(attr, "COLOR"))) {
-        v = &(p.attributes.color);
-    } else if ((pos = Compare(attr, "JOINT"))) {
-        v = &(p.attributes.joint);
-    } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
-        v = &(p.attributes.jointmatrix);
-    } else if ((pos = Compare(attr, "WEIGHT"))) {
-        v = &(p.attributes.weight);
-    } else
-        return false;
-    return true;
+inline void MaterialIOR::SetDefaults() {
+    //KHR_materials_ior properties
+    ior = 1.5f;
 }
-
-inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, const char *attr, Mesh::AccessorList *&v, int &pos) {
-    if ((pos = Compare(attr, "POSITION"))) {
-        v = &(p.targets[targetIndex].position);
-    } else if ((pos = Compare(attr, "NORMAL"))) {
-        v = &(p.targets[targetIndex].normal);
-    } else if ((pos = Compare(attr, "TANGENT"))) {
-        v = &(p.targets[targetIndex].tangent);
-    } else
-        return false;
-    return true;
-}
-} // namespace
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     Value *curName = FindMember(pJSON_Object, "name");
-    if (nullptr != curName) {
+    if (nullptr != curName && curName->IsString()) {
         name = curName->GetString();
     }
 
@@ -1609,9 +1480,9 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
         }
     }
 
-    Value *extras = FindObject(pJSON_Object, "extras");
-    if (nullptr != extras) {
-        if (Value *curTargetNames = FindArray(*extras, "targetNames")) {
+    Value *curExtras = FindObject(pJSON_Object, "extras");
+    if (nullptr != curExtras) {
+        if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
             this->targetNames.resize(curTargetNames->Size());
             for (unsigned int i = 0; i < curTargetNames->Size(); ++i) {
                 Value &targetNameValue = (*curTargetNames)[i];
@@ -1680,42 +1551,6 @@ inline void Light::Read(Value &obj, Asset & /*r*/) {
     }
 }
 
-inline CustomExtension ReadExtensions(const char *name, Value &obj) {
-    CustomExtension ret;
-    ret.name = name;
-    if (obj.IsObject()) {
-        ret.mValues.isPresent = true;
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto &val = it->value;
-            ret.mValues.value.push_back(ReadExtensions(it->name.GetString(), val));
-        }
-    } else if (obj.IsArray()) {
-        ret.mValues.value.reserve(obj.Size());
-        ret.mValues.isPresent = true;
-        for (unsigned int i = 0; i < obj.Size(); ++i) {
-            ret.mValues.value.push_back(ReadExtensions(name, obj[i]));
-        }
-    } else if (obj.IsNumber()) {
-        if (obj.IsUint64()) {
-            ret.mUint64Value.value = obj.GetUint64();
-            ret.mUint64Value.isPresent = true;
-        } else if (obj.IsInt64()) {
-            ret.mInt64Value.value = obj.GetInt64();
-            ret.mInt64Value.isPresent = true;
-        } else if (obj.IsDouble()) {
-            ret.mDoubleValue.value = obj.GetDouble();
-            ret.mDoubleValue.isPresent = true;
-        }
-    } else if (obj.IsString()) {
-        ReadValue(obj, ret.mStringValue);
-        ret.mStringValue.isPresent = true;
-    } else if (obj.IsBool()) {
-        ret.mBoolValue.value = obj.GetBool();
-        ret.mBoolValue.isPresent = true;
-    }
-    return ret;
-}
-
 inline void Node::Read(Value &obj, Asset &r) {
     if (name.empty()) {
         name = id;
@@ -1772,8 +1607,6 @@ inline void Node::Read(Value &obj, Asset &r) {
 
     Value *curExtensions = FindObject(obj, "extensions");
     if (nullptr != curExtensions) {
-        this->extensions = ReadExtensions("extensions", *curExtensions);
-
         if (r.extensionsUsed.KHR_lights_punctual) {
             if (Value *ext = FindObject(*curExtensions, "KHR_lights_punctual")) {
                 Value *curLight = FindUInt(*ext, "light");
@@ -1934,9 +1767,9 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
         throw DeadlyImportError("GLTF: JSON chunk missing");
     }
 
-    // read the scene data
-
-    mSceneLength = chunk.chunkLength;
+    // read the scene data, ensure null termination
+    static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
+    mSceneLength = chunk.chunkLength; // Can't be larger than 4GB (max. uint32_t)
     sceneData.resize(mSceneLength + 1);
     sceneData[mSceneLength] = '\0';
 
@@ -1969,38 +1802,34 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 }
 
-inline void Asset::Load(const std::string &pFile, bool isBinary) {
+inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, std::vector<char> &sceneData) {
     ASSIMP_LOG_DEBUG("Loading GLTF2 asset");
-    mCurrentAssetDir.clear();
-    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) */
-
-    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
-    }
-
-    shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
-    if (!stream) {
-        throw DeadlyImportError("GLTF: Could not open file for reading");
-    }
 
     // is binary? then read the header
-    std::vector<char> sceneData;
     if (isBinary) {
         SetAsBinary(); // also creates the body buffer
-        ReadBinaryHeader(*stream, sceneData);
+        ReadBinaryHeader(stream, sceneData);
     } else {
-        mSceneLength = stream->FileSize();
+        mSceneLength = stream.FileSize();
         mBodyLength = 0;
 
-        // read the scene data
+        // Binary format only supports up to 4GB of JSON, use that as a maximum
+        if (mSceneLength >= std::numeric_limits<uint32_t>::max()) {
+            throw DeadlyImportError("GLTF: JSON size greater than 4GB");
+        }
 
+        // read the scene data, ensure null termination
         sceneData.resize(mSceneLength + 1);
         sceneData[mSceneLength] = '\0';
 
-        if (stream->Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
+        if (stream.Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
             throw DeadlyImportError("GLTF: Could not read the file contents");
         }
+    }
+
+    // Smallest legal JSON file is "{}" Smallest loadable glTF file is larger than that but catch it later
+    if (mSceneLength < 2) {
+        throw DeadlyImportError("GLTF: No JSON file contents");
     }
 
     // parse the JSON document
@@ -2016,6 +1845,40 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
 
     if (!doc.IsObject()) {
         throw DeadlyImportError("GLTF: JSON document root must be a JSON object");
+    }
+
+    return doc;
+}
+
+inline void Asset::Load(const std::string &pFile, bool isBinary)
+{
+    mCurrentAssetDir.clear();
+    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+        mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
+    }
+
+    shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
+    if (!stream) {
+        throw DeadlyImportError("GLTF: Could not open file for reading");
+    }
+
+    std::vector<char> sceneData;
+    rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
+
+    // If a schemaDocumentProvider is available, see if the glTF schema is present. 
+    // If so, use it to validate the document.
+    if (mSchemaDocumentProvider) {
+        if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {
+            // The schemas are found here: https://github.com/KhronosGroup/glTF/tree/main/specification/2.0/schema
+            rapidjson::SchemaValidator validator(*gltfSchema);
+            if (!doc.Accept(validator)) {
+                rapidjson::StringBuffer pathBuffer;
+                validator.GetInvalidSchemaPointer().StringifyUriFragment(pathBuffer);
+                rapidjson::StringBuffer argumentBuffer;
+                validator.GetInvalidDocumentPointer().StringifyUriFragment(argumentBuffer);
+                throw DeadlyImportError("GLTF: The JSON document did not satisfy the glTF2 schema. Schema keyword: ", validator.GetInvalidSchemaKeyword(), ", document path: ", pathBuffer.GetString(), ", argument: ", argumentBuffer.GetString());
+            }
+        }
     }
 
     // Fill the buffer instance for the current file embedded contents
@@ -2074,6 +1937,21 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     }
 }
 
+inline bool Asset::CanRead(const std::string &pFile, bool isBinary) {
+    try {
+        shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
+        if (!stream) {
+            return false;
+        }
+        std::vector<char> sceneData;
+        rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
+        asset.Read(doc);
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
 inline void Asset::SetAsBinary() {
     if (!mBodyBuffer) {
         mBodyBuffer = buffers.Create("binary_glTF");
@@ -2123,12 +2001,15 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_sheen);
     CHECK_EXT(KHR_materials_clearcoat);
     CHECK_EXT(KHR_materials_transmission);
+    CHECK_EXT(KHR_materials_volume);
+    CHECK_EXT(KHR_materials_ior);
     CHECK_EXT(KHR_draco_mesh_compression);
+    CHECK_EXT(KHR_texture_basisu);
 
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(std::string path, const char *mode, bool /*absolute*/) {
+inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool /*absolute*/) {
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else
@@ -2171,7 +2052,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #if _MSC_VER
-#pragma warning(pop)
+#   pragma warning(pop)
 #endif // _MSC_VER
 
 } // namespace glTF2

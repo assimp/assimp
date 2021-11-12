@@ -113,8 +113,8 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char *Tokens[] = { "BLENDER" };
-static const char *TokensForSearch[] = { "blender" };
+static const char * const Tokens[] = { "BLENDER" };
+static const char * const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -679,7 +679,7 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
 
     BuildDefaultMaterial(conv_data);
 
-    for (std::shared_ptr<Material> mat : conv_data.materials_raw) {
+    for (const std::shared_ptr<Material> &mat : conv_data.materials_raw) {
 
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {

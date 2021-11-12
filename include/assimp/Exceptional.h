@@ -56,10 +56,22 @@ using std::runtime_error;
 #pragma warning(disable : 4275)
 #endif
 
+// ---------------------------------------------------------------------------
+/**
+ *  The base-class for all other exceptions
+ */
 class ASSIMP_API DeadlyErrorBase : public runtime_error {
 protected:
+    /// @brief The class constructor with the formatter.
+    /// @param f    The formatter.
     DeadlyErrorBase(Assimp::Formatter::format f);
-    
+
+    /// @brief The class constructor with the parameter ellipse.
+    /// @tparam ...T    The type for the ellipse
+    /// @tparam U       The other type
+    /// @param f        The formatter
+    /// @param u        One parameter
+    /// @param ...args  The rest
     template<typename... T, typename U>
     DeadlyErrorBase(Assimp::Formatter::format f, U&& u, T&&... args) :
             DeadlyErrorBase(std::move(f << std::forward<U>(u)), std::forward<T>(args)...) {}
@@ -71,19 +83,31 @@ protected:
  *  nullptr instead of a valid aiScene then.  */
 class ASSIMP_API DeadlyImportError : public DeadlyErrorBase {
 public:
+    /// @brief The class constructor with the message.
+    /// @param message  The message
     DeadlyImportError(const char *message) :
-            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<const char*>(message)) {}
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<const char*>(message)) {
+        // empty
+    }
 
-    /** Constructor with arguments */
+    /// @brief The class constructor with the parameter ellipse.
+    /// @tparam ...T    The type for the ellipse
+    /// @param ...args  The args
     template<typename... T>
     explicit DeadlyImportError(T&&... args) :
-            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {}
+            DeadlyErrorBase(Assimp::Formatter::format(), std::forward<T>(args)...) {
+        // empty
+    }
 
 #if defined(_MSC_VER) && defined(__clang__)
     DeadlyImportError(DeadlyImportError& other) = delete;
 #endif
 };
 
+// ---------------------------------------------------------------------------
+/** FOR EXPORTER PLUGINS ONLY: Simple exception class to be thrown if an
+ *  unrecoverable error occurs while exporting. Exporting APIs return
+ *  nullptr instead of a valid aiScene then.  */
 class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */

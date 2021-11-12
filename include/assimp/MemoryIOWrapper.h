@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file MemoryIOWrapper.h
- *  Handy IOStream/IOSystem implemetation to read directly from a memory buffer */
+ *  Handy IOStream/IOSystem implementation to read directly from a memory buffer */
 #pragma once
 #ifndef AI_MEMORYIOSTREAM_H_INC
 #define AI_MEMORYIOSTREAM_H_INC
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 
 namespace Assimp    {
-    
+
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"
 #define AI_MEMORYIO_MAGIC_FILENAME_LENGTH 17
 
@@ -85,7 +85,7 @@ public:
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount)    {
         ai_assert(nullptr != pvBuffer);
         ai_assert(0 != pSize);
-        
+
         const size_t cnt = std::min( pCount, (length-pos) / pSize);
         const size_t ofs = pSize * cnt;
 
@@ -209,7 +209,7 @@ public:
         return existing_io ? existing_io->ComparePaths(one, second) : false;
     }
 
-    bool PushDirectory( const std::string &path ) override { 
+    bool PushDirectory( const std::string &path ) override {
         return existing_io ? existing_io->PushDirectory(path) : false;
     }
 

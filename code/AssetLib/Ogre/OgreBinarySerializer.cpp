@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Ogre {
 
-const std::string MESH_VERSION_1_8 = "[MeshSerializer_v1.8]";
-const std::string SKELETON_VERSION_1_8 = "[Serializer_v1.80]";
-const std::string SKELETON_VERSION_1_1 = "[Serializer_v1.10]";
+static constexpr auto MESH_VERSION_1_8 = "[MeshSerializer_v1.8]";
+static constexpr auto SKELETON_VERSION_1_8 = "[Serializer_v1.80]";
+static constexpr auto SKELETON_VERSION_1_1 = "[Serializer_v1.10]";
 
 const unsigned short HEADER_CHUNK_ID = 0x1000;
 

@@ -99,7 +99,7 @@ bool CSMImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
         return true;
 
     if ((checkSig || !extension.length()) && pIOHandler) {
-        const char* tokens[] = {"$Filename"};
+        static const char * const tokens[] = {"$Filename"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;

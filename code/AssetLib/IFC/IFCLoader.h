@@ -49,18 +49,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/LogAux.h>
 
-namespace Assimp    {
+namespace Assimp {
 
-    // TinyFormatter.h
-    namespace Formatter {
-        template <typename T,typename TR, typename A> class basic_formatter;
-        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-    }
+// TinyFormatter.h
+namespace Formatter {
 
-    namespace STEP {
-        class DB;
-    }
+template <typename T, typename TR, typename A>
+class basic_formatter;
+typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>> format;
 
+} // namespace Formatter
+
+namespace STEP {
+
+class DB;
+
+}
 
 // -------------------------------------------------------------------------------------------
 /** Load the IFC format, which is an open specification to describe building and construction
@@ -69,63 +73,41 @@ namespace Assimp    {
  See http://en.wikipedia.org/wiki/Industry_Foundation_Classes
 */
 // -------------------------------------------------------------------------------------------
-class IFCImporter : public BaseImporter, public LogFunctions<IFCImporter>
-{
+class IFCImporter : public BaseImporter, public LogFunctions<IFCImporter> {
 public:
-    IFCImporter();
-    ~IFCImporter();
-
-
-public:
-
-    // --------------------
-    bool CanRead( const std::string& pFile,
-        IOSystem* pIOHandler,
-        bool checkSig
-    ) const;
-
-protected:
-
-    // --------------------
-    const aiImporterDesc* GetInfo () const;
-
-    // --------------------
-    void SetupProperties(const Importer* pImp);
-
-    // --------------------
-    void InternReadFile( const std::string& pFile,
-        aiScene* pScene,
-        IOSystem* pIOHandler
-    );
-
-private:
-
-
-public:
-
-
     // loader settings, publicly accessible via their corresponding AI_CONFIG constants
-    struct Settings
-    {
-        Settings()
-            : skipSpaceRepresentations()
-            , useCustomTriangulation()
-            , skipAnnotations()
-            , conicSamplingAngle(10.f)
-			, cylindricalTessellation(32)
-        {}
-
+    struct Settings {
+        Settings() :
+                skipSpaceRepresentations(), useCustomTriangulation(), skipAnnotations(), conicSamplingAngle(10.f), cylindricalTessellation(32) {}
 
         bool skipSpaceRepresentations;
         bool useCustomTriangulation;
         bool skipAnnotations;
         float conicSamplingAngle;
-		int cylindricalTessellation;
+        int cylindricalTessellation;
     };
 
+    IFCImporter();
+    ~IFCImporter() override;
+
+    // --------------------
+    bool CanRead(const std::string &pFile,
+            IOSystem *pIOHandler,
+            bool checkSig) const override;
+
+protected:
+    // --------------------
+    const aiImporterDesc *GetInfo() const override;
+
+    // --------------------
+    void SetupProperties(const Importer *pImp) override;
+
+    // --------------------
+    void InternReadFile(const std::string &pFile,
+            aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
 private:
-
     Settings settings;
 
 }; // !class IFCImporter

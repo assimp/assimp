@@ -303,7 +303,7 @@ void AMFImporter::ParseNode_Root() {
     }
     XmlNode node = *root;
     mUnit = ai_tolower(std::string(node.attribute("unit").as_string()));
-    
+
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
@@ -511,7 +511,7 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     }
 
     if (extension.empty() || pCheckSig) {
-        const char *tokens[] = { "<amf" };
+        static const char * const tokens[] = { "<amf" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 

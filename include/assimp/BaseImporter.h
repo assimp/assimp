@@ -154,7 +154,7 @@ public:
     /** Returns the exception of the last exception that occurred.
      * Note: Exceptions are not the only source of error details, so GetErrorText
      * should be consulted too.
-     * @return The last exception that occurred. 
+     * @return The last exception that occurred.
      */
     const std::exception_ptr& GetException() const {
         return m_Exception;
@@ -259,7 +259,7 @@ public: // static utilities
     static bool SearchFileHeaderForToken(
             IOSystem *pIOSystem,
             const std::string &file,
-            const char **tokens,
+            const char * const *tokens,
             unsigned int numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,

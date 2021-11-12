@@ -155,7 +155,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 // ------------------------------------------------------------------------------------------------
 /*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
         const std::string &pFile,
-        const char **tokens,
+        const char * const *tokens,
         unsigned int numTokens,
         unsigned int searchBytes /* = 200 */,
         bool tokensSol /* false */,
@@ -207,7 +207,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
             if (!r) {
                 continue;
             }
-            // We need to make sure that we didn't accidentially identify the end of another token as our token,
+            // We need to make sure that we didn't accidentally identify the end of another token as our token,
             // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
             if (noAlphaBeforeTokens && (r != buffer && isalpha(static_cast<unsigned char>(r[-1])))) {
                 continue;

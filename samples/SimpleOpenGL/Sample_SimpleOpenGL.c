@@ -29,7 +29,7 @@
 
 /* ---------------------------------------------------------------------------- */
 inline static void print_run_command(const char* command_name) {
-	printf("Run '%s %s' for more information.\n", 
+	printf("Run '%s %s' for more information.\n",
 		PROJECT_NAME, command_name);
 }
 
@@ -43,7 +43,7 @@ inline static void print_error(const char* msg) {
 
 /* ---------------------------------------------------------------------------- */
 inline static void print_usage() {
-	static const char* usage_format = 
+	static const char* usage_format =
 		"Usage: "
 		PROJECT_NAME
 		" <file>"	 DOUBLE_NEW_LINE
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 	C_STRUCT aiLogStream stream;
 
 	if (argc < 2) {
-		print_error("No input model file specifed.");
+		print_error("No input model file specified.");
 		print_run_command(COMMAND_USAGE);
 		return EXIT_FAILURE;
 	}

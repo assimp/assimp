@@ -56,7 +56,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 CalcTangentsProcess::CalcTangentsProcess() :
-        configMaxAngle(AI_DEG_TO_RAD(45.f)), configSourceUV(0) {
+        configMaxAngle(float(AI_DEG_TO_RAD(45.f))), configSourceUV(0) {
     // nothing to do here
 }
 

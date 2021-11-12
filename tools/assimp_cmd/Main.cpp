@@ -9,8 +9,8 @@ Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -27,16 +27,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
-const char* AICMD_MSG_ABOUT = 
+const char* AICMD_MSG_ABOUT =
 "------------------------------------------------------ \n"
 "Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
 " -- Commandline toolchain --\n"
@@ -55,7 +55,7 @@ const char* AICMD_MSG_ABOUT =
 
 "Version %i.%i %s%s%s%s%s(GIT commit %x)\n\n";
 
-const char* AICMD_MSG_HELP = 
+const char* AICMD_MSG_HELP =
 "assimp <verb> <parameters>\n\n"
 " verbs:\n"
 " \tinfo       - Quick file stats\n"
@@ -106,7 +106,7 @@ int main (int argc, char* argv[])
 	}
 
 	// assimp help
-	// Display some basic help (--help and -h work as well 
+	// Display some basic help (--help and -h work as well
 	// because people could try them intuitively)
 	if (!strcmp(argv[1], "help") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
 		printf("%s",AICMD_MSG_HELP);
@@ -114,7 +114,7 @@ int main (int argc, char* argv[])
 	}
 
 	// assimp cmpdump
-	// Compare two mini model dumps (regression suite) 
+	// Compare two mini model dumps (regression suite)
 	if (! strcmp(argv[1], "cmpdump")) {
 		return Assimp_CompareDump (&argv[2],argc-2);
 	}
@@ -125,7 +125,7 @@ int main (int argc, char* argv[])
 	globalImporter = &imp;
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-	// 
+	//
 	Assimp::Exporter exp;
 	globalExporter = &exp;
 #endif
@@ -145,7 +145,7 @@ int main (int argc, char* argv[])
 	// List all export file formats supported by Assimp (not the file extensions, just the format identifiers!)
 	if (! strcmp(argv[1], "listexport")) {
 		aiString s;
-		
+
 		for(size_t i = 0, end = exp.GetExportFormatCount(); i < end; ++i) {
 			const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
 			s.Append( e->id );
@@ -176,7 +176,7 @@ int main (int argc, char* argv[])
 				return AssimpCmdError::Success;
 			}
 		}
-		
+
 		printf("Unknown file format id: \'%s\'\n",argv[2]);
 		return AssimpCmdError::UnknownFileFormat;
 	}
@@ -207,13 +207,13 @@ int main (int argc, char* argv[])
 		return Assimp_Info ((const char**)&argv[2],argc-2);
 	}
 
-	// assimp dump 
-	// Dump a model to a file 
+	// assimp dump
+	// Dump a model to a file
 	if (! strcmp(argv[1], "dump")) {
 		return Assimp_Dump (&argv[2],argc-2);
 	}
 
-	// assimp extract 
+	// assimp extract
 	// Extract an embedded texture from a file
 	if (! strcmp(argv[1], "extract")) {
 		return Assimp_Extract (&argv[2],argc-2);
@@ -236,7 +236,7 @@ int main (int argc, char* argv[])
 void SetLogStreams(const ImportData& imp)
 {
 	printf("\nAttaching log stream   ...           OK\n");
-		
+
 	unsigned int flags = 0;
 	if (imp.logFile.length()) {
 		flags |= aiDefaultLogStream_FILE;
@@ -264,7 +264,7 @@ void PrintHorBar()
 // ------------------------------------------------------------------------------
 // Import a specific file
 const aiScene* ImportModel(
-	const ImportData& imp, 
+	const ImportData& imp,
 	const std::string& path)
 {
 	// Attach log streams
@@ -282,7 +282,7 @@ const aiScene* ImportModel(
 	if (imp.showLog) {
 		PrintHorBar();
 	}
-		
+
 
 	// do the actual import, measure time
 	const clock_t first = clock();
@@ -302,7 +302,7 @@ const aiScene* ImportModel(
 	printf("Importing file ...                   OK \n   import took approx. %.5f seconds\n"
 		"\n",seconds);
 
-	if (imp.log) { 
+	if (imp.log) {
 		FreeLogStreams();
 	}
 	return scene;
@@ -310,8 +310,8 @@ const aiScene* ImportModel(
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 // ------------------------------------------------------------------------------
-bool ExportModel(const aiScene* pOut,  
-	const ImportData& imp, 
+bool ExportModel(const aiScene* pOut,
+	const ImportData& imp,
 	const std::string& path,
 	const char* pID)
 {
@@ -352,7 +352,7 @@ bool ExportModel(const aiScene* pOut,
 	printf("Exporting file ...                   OK \n   export took approx. %.5f seconds\n"
 		"\n",seconds);
 
-	if (imp.log) { 
+	if (imp.log) {
 		FreeLogStreams();
 	}
 
@@ -363,7 +363,7 @@ bool ExportModel(const aiScene* pOut,
 // ------------------------------------------------------------------------------
 // Process standard arguments
 int ProcessStandardArguments(
-	ImportData& fill, 
+	ImportData& fill,
 	const char* const * params,
 	unsigned int num)
 {
@@ -396,7 +396,7 @@ int ProcessStandardArguments(
 	//
 	// -c<file> --config-file=<file>
 
-	for (unsigned int i = 0; i < num;++i) 
+	for (unsigned int i = 0; i < num;++i)
 	{
         const char *param = params[ i ];
         printf( "param = %s\n", param );
@@ -504,11 +504,11 @@ int ProcessStandardArguments(
 		else if (!strncmp(params[i], "-rx=", 4) || !strncmp(params[i], "--rotation-x=", 13)) {
             std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
             fill.rot.x = std::stof(value);
-		} 
+		}
 		else if (!strncmp(params[i], "-ry=", 4) || !strncmp(params[i], "--rotation-y=", 13)) {
             std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
             fill.rot.y = std::stof(value);
-        } 
+        }
 		else if (!strncmp(params[i], "-rz=", 4) || !strncmp(params[i], "--rotation-z=", 13)) {
             std::string value = std::string(params[i] + (params[i][1] == '-' ? 13 : 4));
             fill.rot.z = std::stof(value);
@@ -530,7 +530,7 @@ int ProcessStandardArguments(
 
 // ------------------------------------------------------------------------------
 int Assimp_TestBatchLoad (
-	const char* const* params, 
+	const char* const* params,
 	unsigned int num)
 {
 	for(unsigned int i = 0; i < num; ++i) {

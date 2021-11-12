@@ -24,13 +24,13 @@ LINK_DIRECTORIES(
 )
 
 ADD_EXECUTABLE( assimp_simpletextureddirectx11 WIN32
-  SimpleTexturedDirectx11/Mesh.h 
+  SimpleTexturedDirectx11/Mesh.h
   SimpleTexturedDirectx11/ModelLoader.cpp
   SimpleTexturedDirectx11/ModelLoader.h
   #SimpleTexturedDirectx11/PixelShader.hlsl
   SimpleTexturedDirectx11/TextureLoader.cpp
-  SimpleTexturedDirectx11/TextureLoader.h 
-  #SimpleTexturedDirectx11/VertexShader.hlsl  
+  SimpleTexturedDirectx11/TextureLoader.h
+  #SimpleTexturedDirectx11/VertexShader.hlsl
   SimpleTexturedDirectx11/main.cpp
   SimpleTexturedDirectx11/SafeRelease.hpp
   ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp

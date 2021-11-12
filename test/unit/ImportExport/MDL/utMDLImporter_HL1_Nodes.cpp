@@ -73,7 +73,7 @@ public:
         "Bone_3"       |
         ""        <----+
         "Bone_2"       |
-        "Bone_5"       | 
+        "Bone_5"       |
         ""        <----+
         ""        <----+
     */
@@ -139,7 +139,7 @@ public:
         $body "Bodypart_1" <--+  |
         $body "Bodypart_2"    |  |
         $body "Bodypart1"     |  |
-        $body "Bodypart"   ---|--+ 
+        $body "Bodypart"   ---|--+
         $body "Bodypart_1" ---+  |
         $body "Bodypart2"        |
         $body "Bodypart"   ------+
@@ -391,7 +391,7 @@ public:
                 // Unapply the transformation using the offset matrix.
                 aiMatrix4x4 unapplied_transform = scene_mesh_bone->mOffsetMatrix * transform;
 
-                // Ensure that we have, approximatively, the identity matrix.
+                // Ensure that we have, approximately, the identity matrix.
                 expect_equal_matrices(identity_matrix, unapplied_transform, TOLERANCE);
             }
         }

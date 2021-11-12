@@ -153,10 +153,10 @@ void HMPImporter::InternReadFile(const std::string &pFile,
     } else {
         // Print the magic word to the logger
         std::string szBuffer = ai_str_toprintable((const char *)&iMagic, sizeof(iMagic));
-    
+
         delete[] mBuffer;
         mBuffer = nullptr;
-        
+
         // We're definitely unable to load this file
         throw DeadlyImportError("Unknown HMP subformat ", pFile,
                                 ". Magic word (", szBuffer, ") is not known");
@@ -451,6 +451,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
 
     // now we need to skip any other skins ...
     for (unsigned int i = 1; i < iNumSkins; ++i) {
+        SizeCheck(szCursor + 3 * sizeof(uint32_t));
         iType = *((uint32_t *)szCursor);
         szCursor += sizeof(uint32_t);
         iWidth = *((uint32_t *)szCursor);

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -62,8 +60,7 @@ extern "C" {
 // ---------------------------------------------------------------------------
 /** Enumerates all supported types of light sources.
  */
-enum aiLightSourceType
-{
+enum aiLightSourceType {
     aiLightSource_UNDEFINED     = 0x0,
 
     //! A directional light source has a well-defined direction
@@ -110,16 +107,15 @@ enum aiLightSourceType
  *  a single structure and distinguished by their parameters.
  *  Note - some file formats (such as 3DS, ASE) export a "target point" -
  *  the point a spot light is looking at (it can even be animated). Assimp
- *  writes the target point as a subnode of a spotlights's main node,
+ *  writes the target point as a sub-node of a spot-lights's main node,
  *  called "<spotName>.Target". However, this is just additional information
  *  then, the transformation tracks of the main node make the
  *  spot light already point in the right direction.
 */
-struct aiLight
-{
+struct aiLight {
     /** The name of the light source.
      *
-     *  There must be a node in the scenegraph with the same name.
+     *  There must be a node in the scene-graph with the same name.
      *  This node specifies the position of the light in the scene
      *  hierarchy and can be animated.
      */
@@ -257,7 +253,7 @@ struct aiLight
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 
 #endif // !! AI_LIGHT_H_INC

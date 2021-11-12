@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// @brief Logger class, which will extend the class by log-functions.
+/// @tparam TDeriving 
 template<class TDeriving>
 class LogFunctions {
 public:
@@ -109,8 +110,8 @@ public:
 
 private:
     static const char* Prefix();
-
 };
+
 } // ! Assimp
 
-#endif
+#endif // INCLUDED_AI_LOGAUX_H

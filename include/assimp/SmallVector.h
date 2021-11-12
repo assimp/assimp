@@ -53,17 +53,17 @@ Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data S
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
-/// @brief Small vector with inplace storage. 
+/// @brief Small vector with inplace storage.
 ///
 /// Reduces heap allocations when list is shorter. It uses a small array for a dedicated size.
-/// When the growing gets bigger than this small cache a dynamic growing algorithm will be 
+/// When the growing gets bigger than this small cache a dynamic growing algorithm will be
 /// used.
 // --------------------------------------------------------------------------------------------
 template<typename T, unsigned int Capacity>
 class SmallVector {
 public:
     /// @brief  The default class constructor.
-    SmallVector() : 
+    SmallVector() :
             mStorage(mInplaceStorage),
             mSize(0),
             mCapacity(Capacity) {
@@ -84,7 +84,7 @@ public:
             mStorage[mSize++] = item;
             return;
         }
-        
+
         push_back_and_grow(item);
     }
 

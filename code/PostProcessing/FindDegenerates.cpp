@@ -90,7 +90,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene) {
     if ( nullptr == pScene) {
         return;
     }
-    
+
     std::unordered_map<unsigned int, unsigned int> meshMap;
     meshMap.reserve(pScene->mNumMeshes);
 

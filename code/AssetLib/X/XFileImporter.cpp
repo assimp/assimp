@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/TinyFormatter.h>
-#include <assimp/Defines.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -220,7 +219,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
     // convert meshes from the source node
     CreateMeshes( pScene, node, pNode->mMeshes);
 
-    // handle childs
+    // handle children
     if( !pNode->mChildren.empty() ) {
         node->mNumChildren = (unsigned int)pNode->mChildren.size();
         node->mChildren = new aiNode* [node->mNumChildren];
@@ -667,9 +666,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
                 // convert to lower case for easier comparison
                 for ( unsigned int c = 0; c < sz.length(); ++c ) {
-                    if ( isalpha( (unsigned char) sz[ c ] ) ) {
-                        sz[ c ] = (char) tolower( (unsigned char) sz[ c ] );
-                    }
+                    sz[ c ] = (char) tolower( (unsigned char) sz[ c ] );
                 }
 
                 // Place texture filename property under the corresponding name

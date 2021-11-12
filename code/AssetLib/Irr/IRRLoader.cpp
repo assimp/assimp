@@ -106,7 +106,7 @@ bool IRRImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
 		if (nullptr == pIOHandler) {
 			return true;
 		}
-		const char *tokens[] = { "irr_scene" };
+		static const char * const tokens[] = { "irr_scene" };
 		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 	}
 
@@ -132,7 +132,7 @@ void IRRImporter::SetupProperties(const Importer *pImp) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Build a mesh tha consists of a single squad (a side of a skybox)
+// Build a mesh that consists of a single squad (a side of a skybox)
 aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 		const SkyboxVertex &v2,
 		const SkyboxVertex &v3,

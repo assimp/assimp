@@ -56,8 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-using namespace Assimp;
 namespace Assimp {
+
 using namespace D3DS;
 
 namespace {
@@ -291,7 +291,7 @@ void Discreet3DSExporter::WriteMaterials() {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_SPECULAR);
             WriteColor(color);
         }
-                
+
         if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             ChunkWriter curChunk(writer, Discreet3DS::CHUNK_MAT_AMBIENT);
             WriteColor(color);
@@ -330,6 +330,7 @@ void Discreet3DSExporter::WriteMaterials() {
             case aiShadingMode_Blinn:
             case aiShadingMode_CookTorrance:
             case aiShadingMode_Fresnel:
+            case aiShadingMode_PBR_BRDF: // Possibly should be Discreet3DS::Metal in some cases but this is undocumented
                 shading_mode_out = Discreet3DS::Phong;
                 break;
 
@@ -356,7 +357,10 @@ void Discreet3DSExporter::WriteMaterials() {
             writer.PutI2(1);
         }
 
-        WriteTexture(mat, aiTextureType_DIFFUSE, Discreet3DS::CHUNK_MAT_TEXTURE);
+        // Fallback to BASE_COLOR if no DIFFUSE
+        if (!WriteTexture(mat, aiTextureType_DIFFUSE, Discreet3DS::CHUNK_MAT_TEXTURE))
+            WriteTexture(mat, aiTextureType_BASE_COLOR, Discreet3DS::CHUNK_MAT_TEXTURE);
+
         WriteTexture(mat, aiTextureType_HEIGHT, Discreet3DS::CHUNK_MAT_BUMPMAP);
         WriteTexture(mat, aiTextureType_OPACITY, Discreet3DS::CHUNK_MAT_OPACMAP);
         WriteTexture(mat, aiTextureType_SHININESS, Discreet3DS::CHUNK_MAT_MAT_SHINMAP);
@@ -367,20 +371,21 @@ void Discreet3DSExporter::WriteMaterials() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type, uint16_t chunk_flags) {
+// returns true if the texture existed
+bool Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type, uint16_t chunk_flags) {
     aiString path;
     aiTextureMapMode map_mode[2] = {
         aiTextureMapMode_Wrap, aiTextureMapMode_Wrap
     };
     ai_real blend = 1.0;
     if (mat.GetTexture(type, 0, &path, nullptr, nullptr, &blend, nullptr, map_mode) != AI_SUCCESS || !path.length) {
-        return;
+        return false;
     }
 
     // TODO: handle embedded textures properly
     if (path.data[0] == '*') {
         ASSIMP_LOG_ERROR("Ignoring embedded texture for export: ", path.C_Str());
-        return;
+        return false;
     }
 
     ChunkWriter chunk(writer, chunk_flags);
@@ -402,6 +407,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial &mat, aiTextureType type
         writer.PutU2(val);
     }
     // TODO: export texture transformation (i.e. UV offset, scale, rotation)
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -6,7 +6,7 @@ set(DRACO_CMAKE_DRACO_BUILD_DEFINITIONS_CMAKE_ 1)
 # Utility for controlling the main draco library dependency. This changes in
 # shared builds, and when an optional target requires a shared library build.
 macro(set_draco_target)
-  if(MSVC OR WIN32)
+  if(MSVC)
     set(draco_dependency draco)
     set(draco_plugin_dependency ${draco_dependency})
   else()
@@ -63,6 +63,11 @@ macro(draco_set_build_definitions)
     if(BUILD_SHARED_LIBS)
       set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     endif()
+  else()
+    if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+      # Ensure 64-bit platforms can support large files.
+      list(APPEND draco_defines "_LARGEFILE_SOURCE" "_FILE_OFFSET_BITS=64")
+    endif()
   endif()
 
   if(ANDROID)
@@ -114,4 +119,6 @@ macro(draco_set_build_definitions)
     draco_check_emscripten_environment()
     draco_get_required_emscripten_flags(FLAG_LIST_VAR draco_base_cxx_flags)
   endif()
+
+  draco_configure_sanitizer()
 endmacro()

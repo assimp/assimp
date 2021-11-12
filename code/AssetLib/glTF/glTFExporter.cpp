@@ -322,8 +322,8 @@ void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
     prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
-void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
-{
+void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, 
+        const char* propName, int type, int idx, aiTextureType tt) {
     aiString tex;
     aiColor4D col;
     if (mat->GetTextureCount(tt) > 0) {
@@ -370,7 +370,10 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
     }
 
     if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
-        prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
+        prop.color[0] = col.r; 
+        prop.color[1] = col.g;
+        prop.color[2] = col.b; 
+        prop.color[3] = col.a;
     }
 }
 
@@ -405,8 +408,7 @@ void glTFExporter::ExportMaterials()
  * Search through node hierarchy and find the node containing the given meshID.
  * Returns true on success, and false otherwise.
  */
-bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
-{
+bool FindMeshNode(Ref<Node> &nodeIn, Ref<Node> &meshNode, const std::string &meshID) {
     for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
         if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
           meshNode = nodeIn;
@@ -527,6 +529,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
 
 #if defined(__has_warning)
 #if __has_warning("-Wunused-but-set-variable")
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #endif

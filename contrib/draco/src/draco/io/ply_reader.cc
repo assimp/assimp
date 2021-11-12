@@ -268,14 +268,14 @@ std::vector<std::string> PlyReader::SplitWords(const std::string &line) {
   while ((end = line.find_first_of(" \t\n\v\f\r", start)) !=
          std::string::npos) {
     const std::string word(line.substr(start, end - start));
-    if (!std::all_of(word.begin(), word.end(), [](unsigned char c){return isspace(c);})) {
+    if (!std::all_of(word.begin(), word.end(), isspace)) {
       output.push_back(word);
     }
     start = end + 1;
   }
 
   const std::string last_word(line.substr(start));
-  if (!std::all_of(last_word.begin(), last_word.end(), [](unsigned char c){return isspace(c);})) {
+  if (!std::all_of(last_word.begin(), last_word.end(), isspace)) {
     output.push_back(last_word);
   }
   return output;

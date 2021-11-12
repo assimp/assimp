@@ -113,13 +113,14 @@ Value::~Value() {
     if (m_data != nullptr) {
         if (m_type == ValueType::ddl_ref) {
             Reference *tmp = (Reference *)m_data;
-            if (tmp != nullptr)
+            if (tmp != nullptr) {
                 delete tmp;
-        } else
+            }
+        } else {
             delete[] m_data;
+        }
     }
-    if (m_next != nullptr)
-        delete m_next;
+    delete m_next;
 }
 
 void Value::setBool(bool value) {

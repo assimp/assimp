@@ -67,7 +67,7 @@ public:
     ~ObjExporter();
     std::string GetMaterialLibName();
     std::string GetMaterialLibFileName();
-    
+
     /// public string-streams to write all output into
     std::ostringstream mOutput, mOutputMat;
 
@@ -137,13 +137,13 @@ private:
         }
     };
 
-    struct aiVectorCompare { 
-        bool operator() (const aiVector3D& a, const aiVector3D& b) const { 
-            if(a.x < b.x) return true; 
-            if(a.x > b.x) return false; 
-            if(a.y < b.y) return true; 
-            if(a.y > b.y) return false; 
-            if(a.z < b.z) return true; 
+    struct aiVectorCompare {
+        bool operator() (const aiVector3D& a, const aiVector3D& b) const {
+            if(a.x < b.x) return true;
+            if(a.x > b.x) return false;
+            if(a.y < b.y) return true;
+            if(a.y > b.y) return false;
+            if(a.z < b.z) return true;
             return false;
         }
     };
@@ -153,7 +153,7 @@ private:
         int mNextIndex;
         typedef std::map<T, int, Compare> dataType;
         dataType vecMap;
-    
+
     public:
         indexMap()
         : mNextIndex(1) {

@@ -439,8 +439,9 @@ void MDLImporter::InternReadFile_Quake1() {
         pcFirstFrame = (MDL::SimpleFrame *)&pcFrames->frame;
     } else {
         // get the first frame in the group
-        BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)pcFrames;
-        pcFirstFrame = &(pcFrames2->frames[0]);
+        BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)szCurrent;
+        pcFirstFrame = (MDL::SimpleFrame *)( szCurrent + sizeof(MDL::GroupFrame::type) + sizeof(MDL::GroupFrame::numframes)
+        + sizeof(MDL::GroupFrame::min) + sizeof(MDL::GroupFrame::max) + sizeof(*MDL::GroupFrame::times) * pcFrames2->numframes );
     }
     BE_NCONST MDL::Vertex *pcVertices = (BE_NCONST MDL::Vertex *)((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char *)(pcVertices + pcHeader->num_verts));
@@ -599,7 +600,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
     // need to read all textures
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins; ++i) {
-        if (szCurrent >= szEnd) {
+        if (szCurrent + sizeof(uint32_t) > szEnd) {
             throw DeadlyImportError("Texture data past end of file.");
         }
         BE_NCONST MDL::Skin *pcSkin;

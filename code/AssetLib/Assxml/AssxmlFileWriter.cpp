@@ -168,7 +168,7 @@ static void WriteNode(const aiNode *node, IOStream *io, unsigned int depth) {
 }
 
 // -----------------------------------------------------------------------------------
-// Some chuncks of text will need to be encoded for XML
+// Some chunks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
 static std::string encodeXML(const std::string &data) {
     std::string buffer;
@@ -601,7 +601,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
                 ioprintf(io, "\t\t<TextureCoords num=\"%u\" set=\"%u\" name=\"%s\" num_components=\"%u\"> \n",
                          mesh->mNumVertices,
                          a,
-                         mesh->mTextureCoordsNames[a].C_Str(),
+                         (mesh->HasTextureCoordsName(a) ? mesh->GetTextureCoordsName(a)->C_Str() : ""),
                          mesh->mNumUVComponents[a]);
 
                 if (!shortened) {

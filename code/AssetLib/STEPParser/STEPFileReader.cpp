@@ -49,21 +49,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "STEPFileEncoding.h"
 #include <assimp/TinyFormatter.h>
 #include <assimp/fast_atof.h>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <utility>
 
 using namespace Assimp;
 
 namespace EXPRESS = STEP::EXPRESS;
 
 // ------------------------------------------------------------------------------------------------
-std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "")
+std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = std::string())
 {
     return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,") ",s) );
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = "")
+std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = std::string())
 {
     return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(entity #",entity,") ",s));
 }
@@ -87,7 +88,7 @@ static const char *ISO_Token         = "ISO-10303-21;";
 static const char *FILE_SCHEMA_Token = "FILE_SCHEMA";
 // ------------------------------------------------------------------------------------------------
 STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
-    std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+    std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(std::move(stream)));
     std::unique_ptr<STEP::DB> db = std::unique_ptr<STEP::DB>(new STEP::DB(reader));
 
     LineSplitter &splitter = db->GetSplitter();
@@ -324,7 +325,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
                 std::transform(s.begin(),s.end(),s.begin(),&ai_tolower<char> );
                 if (schema->IsKnownToken(s)) {
                     for(cur = t+1;*cur++ != '(';);
-                    const std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
+                    std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
                     inout = *cur ? cur+1 : cur;
                     return dt;
                 }

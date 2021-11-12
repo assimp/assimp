@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,61 +42,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  MD2Loader.h
  *  @brief Declaration of the .MD2 importer class.
  */
+#pragma once
 #ifndef AI_MD2LOADER_H_INCLUDED
 #define AI_MD2LOADER_H_INCLUDED
 
-#include <assimp/BaseImporter.h>
-#include <assimp/types.h>
-#include <assimp/ByteSwapper.h>
 #include "MD2FileData.h"
+#include <assimp/BaseImporter.h>
+#include <assimp/ByteSwapper.h>
+#include <assimp/types.h>
 
 struct aiNode;
 
-namespace Assimp  {
+namespace Assimp {
 
 using namespace MD2;
 
 // ---------------------------------------------------------------------------
 /** Importer class for MD2
 */
-class MD2Importer : public BaseImporter
-{
+class MD2Importer : public BaseImporter {
 public:
     MD2Importer();
-    ~MD2Importer();
-
-
-public:
+    ~MD2Importer() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
-
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
     * The function is a request to the importer to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Validate the header of the file
@@ -105,15 +98,14 @@ protected:
     void ValidateHeader();
 
 protected:
-
     /** Configuration option: frame to be loaded */
     unsigned int configFrameID;
 
     /** Header of the MD2 file */
-    BE_NCONST MD2::Header* m_pcHeader;
+    BE_NCONST MD2::Header *m_pcHeader;
 
     /** Buffer to hold the loaded file */
-    BE_NCONST uint8_t* mBuffer;
+    BE_NCONST uint8_t *mBuffer;
 
     /** Size of the file, in bytes */
     unsigned int fileSize;

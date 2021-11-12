@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include <assimp/ColladaMetaData.h>
 #include <assimp/CreateAnimMesh.h>
-#include <assimp/Defines.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/ZipArchiveIOSystem.h>
@@ -135,14 +134,15 @@ bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
 
     // XML - too generic, we need to open the file and search for typical keywords
     if (extension == "xml" || !extension.length() || checkSig) {
-        /*  If CanRead() is called in order to check whether we
-         *  support a specific file extension in general pIOHandler
-         *  might be nullptr and it's our duty to return true here.
-         */
-        if (!pIOHandler) {
+        //  If CanRead() is called in order to check whether we
+        //  support a specific file extension in general pIOHandler
+        //  might be nullptr and it's our duty to return true here.
+        if (nullptr == pIOHandler) {
             return true;
         }
-        static const char *tokens[] = { "<collada" };
+        static const char * const tokens[] = {
+            "<collada"
+        };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 
@@ -573,7 +573,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
 
     // now place all mesh references we gathered in the target node
     pTarget->mNumMeshes = static_cast<unsigned int>(newMeshRefs.size());
-    if (newMeshRefs.size()) {
+    if (!newMeshRefs.empty()) {
         struct UIntTypeConverter {
             unsigned int operator()(const size_t &v) const {
                 return static_cast<unsigned int>(v);
@@ -617,6 +617,10 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         dstMesh->mName = pSrcMesh->mName;
     } else {
         dstMesh->mName = pSrcMesh->mId;
+    }
+
+    if (pSrcMesh->mPositions.empty()) {
+        return dstMesh.release();
     }
 
     // count the vertices addressed by its faces
@@ -1540,7 +1544,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));
+                map = strtoul10(&(*it));        
                 break;
             }
         }
@@ -1671,7 +1675,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
         const Material &material = matIt->second;
         // a material is only a reference to an effect
         ColladaParser::EffectLibrary::iterator effIt = pParser.mEffectLibrary.find(material.mEffect);
-        if (effIt == pParser.mEffectLibrary.end())  
+        if (effIt == pParser.mEffectLibrary.end())
             continue;
         Effect &effect = effIt->second;
 
@@ -1682,7 +1686,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
 
         // store the material
         mMaterialIndexByName[matIt->first] = newMats.size();
-        newMats.push_back(std::pair<Effect *, aiMaterial *>(&effect, mat));
+        newMats.emplace_back(&effect, mat);
     }
     // ScenePreprocessor generates a default material automatically if none is there.
     // All further code here in this loader works well without a valid material so

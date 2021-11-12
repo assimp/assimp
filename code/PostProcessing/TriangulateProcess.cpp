@@ -86,11 +86,11 @@ namespace {
 
         /**
          * @brief Encode the current triangle, and make sure it is recognized as a triangle.
-         * 
+         *
          * This method will rotate indices in tri if needed in order to avoid tri to be considered
          * part of the previous ngon. This method is to be used whenever you want to emit a real triangle,
          * and make sure it is seen as a triangle.
-         * 
+         *
          * @param tri Triangle to encode.
          */
         void ngonEncodeTriangle(aiFace * tri) {
@@ -108,10 +108,10 @@ namespace {
 
         /**
          * @brief Encode a quad (2 triangles) in ngon encoding, and make sure they are seen as a single ngon.
-         * 
+         *
          * @param tri1 First quad triangle
          * @param tri2 Second quad triangle
-         * 
+         *
          * @pre Triangles must be properly fanned from the most appropriate vertex.
          */
         void ngonEncodeQuad(aiFace *tri1, aiFace *tri2) {
@@ -140,7 +140,7 @@ namespace {
 
         /**
          * @brief Check whether this triangle would be considered part of the lastly emitted ngon or not.
-         * 
+         *
          * @param tri Current triangle.
          * @return true If used as is, this triangle will be part of last ngon.
          * @return false If used as is, this triangle is not considered part of the last ngon.
@@ -512,7 +512,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                     num = 0;
                     break;
 
-                    /*curOut -= (max-num); // undo all previous work 
+                    /*curOut -= (max-num); // undo all previous work
                     for (tmp = 0; tmp < max-2; ++tmp) {
                         aiFace& nface = *curOut++;
 

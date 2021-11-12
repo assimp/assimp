@@ -325,9 +325,10 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 
     // first check whether we can directly load the file
     FILE* pFile = fopen(p_szString->data,"rb");
-    if (pFile)fclose(pFile);
-    else
-    {
+    if (pFile) {
+        fclose(pFile);
+    }
+    else {
         // check whether we can use the directory of  the asset as relative base
         char szTemp[MAX_PATH*2], tmp2[MAX_PATH*2];
         strcpy(szTemp, g_szFileName);
@@ -1482,7 +1483,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     pcMesh->piEffect->EndPass();
     pcMesh->piEffect->End();
 
-    // reenable culling if necessary
+    // re-enable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
     }

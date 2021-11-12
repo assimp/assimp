@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -106,7 +104,7 @@ bool ASEImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     }
 
     if ((!extension.length() || cs) && pIOHandler) {
-        const char *tokens[] = { "*3dsmax_asciiexport" };
+        static const char * const tokens[] = { "*3dsmax_asciiexport" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;
@@ -683,7 +681,7 @@ void ASEImporter::BuildNodes(std::vector<BaseNode *> &nodes) {
         }
     }
 
-    // Are there ane orphaned nodes?
+    // Are there any orphaned nodes?
     if (!aiList.empty()) {
         std::vector<aiNode *> apcNodes;
         apcNodes.reserve(aiList.size() + pcScene->mRootNode->mNumChildren);

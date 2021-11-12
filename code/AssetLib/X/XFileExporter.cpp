@@ -86,7 +86,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
     if (iDoTheExportThing.mOutput.fail()) {
         throw DeadlyExportError("output data creation failed. Most likely the file became too large: " + std::string(pFile));
     }
-    
+
     // we're still here - export successfully completed. Write result to the given IOSYstem
     std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if (outfile == nullptr) {
@@ -530,8 +530,8 @@ void XFileExporter::writePath(const aiString &path)
     while( str.find( "\\\\") != std::string::npos)
         str.replace( str.find( "\\\\"), 2, "\\");
 
-    while( str.find( "\\") != std::string::npos)
-        str.replace( str.find( "\\"), 1, "/");
+    while (str.find('\\') != std::string::npos)
+        str.replace(str.find('\\'), 1, "/");
 
     mOutput << str;
 

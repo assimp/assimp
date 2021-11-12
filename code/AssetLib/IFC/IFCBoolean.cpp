@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
 
-#include <assimp/Defines.h>
 
 #include <iterator>
 #include <tuple>
@@ -513,7 +512,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
             }
 
             // we got a list of in-out-combinations of intersections. That should be an even number of intersections, or
-            // we're fucked.
+            // we are facing a non-recoverable error.
             if ((intersections.size() & 1) != 0) {
                 IFCImporter::LogWarn("Odd number of intersections, can't work with that. Omitting half space boundary check.");
                 continue;

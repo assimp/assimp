@@ -146,7 +146,13 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         ThrowException("failed to read document " + pFile);
     }
 
+    // Generate the root-node
     pScene->mRootNode = new aiNode("<C4DRoot>");
+
+    // convert left-handed to right-handed
+    pScene->mRootNode->mTransformation.a1 = 0.01f;
+    pScene->mRootNode->mTransformation.b2 = 0.01f;
+    pScene->mRootNode->mTransformation.c3 = -0.01f;
 
     // first convert all materials
     ReadMaterials(doc->GetFirstMaterial());

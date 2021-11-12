@@ -43,10 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-// internal headers
 #include "MDLDefaultColorMap.h"
 #include "MDLLoader.h"
-#include <assimp/Defines.h>
+
 #include <assimp/StringUtils.h>
 #include <assimp/qnan.h>
 #include <assimp/scene.h>
@@ -133,6 +132,9 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     pcNew->mWidth = pcHeader->skinwidth;
     pcNew->mHeight = pcHeader->skinheight;
 
+    if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
+        throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+    }
     pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
 
     const unsigned char *szColorMap;
@@ -218,6 +220,9 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 
     // allocate storage for the texture image
     if (do_read) {
+        if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
+            throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+        }
         pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
     }
 
@@ -388,7 +393,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
     // this should not occur - at least the docs say it shouldn't.
     // however, one can easily try out what MED does if you have
     // a model with a DDS texture and export it to MDL5 ...
-    // yeah, it embedds the DDS file.
+    // yeah, it embeds the DDS file.
     if (6 == iType) {
         // this is a compressed texture in DDS format
         *piSkip = pcNew->mWidth;
@@ -525,7 +530,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
 
     // sometimes there are MDL7 files which have a monochrome
-    // texture instead of material colors ... posssible they have
+    // texture instead of material colors ... possible they have
     // been converted to MDL7 from other formats, such as MDL5
     aiColor4D clrTexture;
     if (pcNew)

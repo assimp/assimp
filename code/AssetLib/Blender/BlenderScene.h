@@ -148,6 +148,26 @@ struct Group : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct Collection : ElemBase {
+    ID id FAIL;
+    ListBase gobject; // CollectionObject
+    ListBase children; // CollectionChild
+    //ListBase objects; // Objects
+};
+
+// -------------------------------------------------------------------------------
+struct CollectionObject : ElemBase {
+    std::shared_ptr<CollectionObject> next, prev;
+    std::shared_ptr<Object> ob;
+};
+
+// -------------------------------------------------------------------------------
+struct CollectionChild : ElemBase {
+    std::shared_ptr<CollectionChild> next, prev;
+    std::shared_ptr<Collection> collection;
+};
+
+// -------------------------------------------------------------------------------
 struct World : ElemBase {
     ID id FAIL;
 };
@@ -729,11 +749,12 @@ struct Scene : ElemBase {
     std::shared_ptr<Object> camera WARN;
     std::shared_ptr<World> world WARN;
     std::shared_ptr<Base> basact WARN;
+    std::shared_ptr<Collection> master_collection WARN;
 
     ListBase base;
 
     Scene() :
-            ElemBase(), camera(), world(), basact() {
+            ElemBase(), camera(), world(), basact(), master_collection() {
         // empty
     }
 };

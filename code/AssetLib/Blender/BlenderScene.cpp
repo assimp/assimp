@@ -96,6 +96,43 @@ void Structure ::Convert<Group>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure::Convert<CollectionObject>(
+        CollectionObject &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev, "*prev", db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.ob, "*ob", db);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<CollectionChild>(
+        CollectionChild &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev, "*prev", db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.collection, "*collection", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<Collection>(
+        Collection &dest,
+        const FileDatabase &db) const {
+
+    ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Fail>(dest.gobject, "gobject", db);
+    ReadField<ErrorPolicy_Fail>(dest.children, "children", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<MTex>(
         MTex &dest,
         const FileDatabase &db) const {
@@ -660,6 +697,7 @@ void Structure ::Convert<Scene>(
     ReadFieldPtr<ErrorPolicy_Warn>(dest.camera, "*camera", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.world, "*world", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.basact, "*basact", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.master_collection, "*master_collection", db);
     ReadField<ErrorPolicy_Igno>(dest.base, "base", db);
 
     db.reader->IncPtr(size);
@@ -833,6 +871,9 @@ void DNA::RegisterConverters() {
     converters["Image"] = DNA::FactoryPair(&Structure::Allocate<Image>, &Structure::Convert<Image>);
     converters["CustomData"] = DNA::FactoryPair(&Structure::Allocate<CustomData>, &Structure::Convert<CustomData>);
     converters["CustomDataLayer"] = DNA::FactoryPair(&Structure::Allocate<CustomDataLayer>, &Structure::Convert<CustomDataLayer>);
+    converters["Collection"] = DNA::FactoryPair(&Structure::Allocate<Collection>, &Structure::Convert<Collection>);
+    converters["CollectionChild"] = DNA::FactoryPair(&Structure::Allocate<CollectionChild>, &Structure::Convert<CollectionChild>);
+    converters["CollectionObject"] = DNA::FactoryPair(&Structure::Allocate<CollectionObject>, &Structure::Convert<CollectionObject>);
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

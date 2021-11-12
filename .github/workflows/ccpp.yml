@@ -106,7 +106,7 @@ jobs:
     - name: Set Hunter specific CMake arguments
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_cmake_args
-      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
+      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake -DASSIMP_COVERALLS=ON"
 
     - name: configure and build
       uses: lukka/run-cmake@v3

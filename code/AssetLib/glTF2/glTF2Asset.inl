@@ -197,18 +197,18 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
 
     // Not same size, convert
     switch (componentBytes) {
-        case sizeof(uint32_t):
-            CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh);
-            break;
-        case sizeof(uint16_t):
-            CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh);
-            break;
-        case sizeof(uint8_t):
-            CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh);
-            break;
-        default:
-            ai_assert(false);
-            break;
+    case sizeof(uint32_t):
+        CopyFaceIndex_Draco<uint32_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    case sizeof(uint16_t):
+        CopyFaceIndex_Draco<uint16_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    case sizeof(uint8_t):
+        CopyFaceIndex_Draco<uint8_t>(*decodedIndexBuffer, dracoMesh);
+        break;
+    default:
+        ai_assert(false);
+        break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -247,27 +247,27 @@ inline void SetDecodedAttributeBuffer_Draco(const draco::Mesh &dracoMesh, uint32
     decodedAttribBuffer->Grow(dracoMesh.num_points() * pDracoAttribute->num_components() * componentBytes);
 
     switch (accessor.componentType) {
-        case ComponentType_BYTE:
-            GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_UNSIGNED_BYTE:
-            GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_SHORT:
-            GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_UNSIGNED_SHORT:
-            GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_UNSIGNED_INT:
-            GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        case ComponentType_FLOAT:
-            GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
-            break;
-        default:
-            ai_assert(false);
-            break;
+    case ComponentType_BYTE:
+        GetAttributeForAllPoints_Draco<int8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_BYTE:
+        GetAttributeForAllPoints_Draco<uint8_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_SHORT:
+        GetAttributeForAllPoints_Draco<int16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_SHORT:
+        GetAttributeForAllPoints_Draco<uint16_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_UNSIGNED_INT:
+        GetAttributeForAllPoints_Draco<uint32_t>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    case ComponentType_FLOAT:
+        GetAttributeForAllPoints_Draco<float>(dracoMesh, *pDracoAttribute, *decodedAttribBuffer);
+        break;
+    default:
+        ai_assert(false);
+        break;
     }
 
     // Assign this alternate data buffer to the accessor
@@ -299,7 +299,7 @@ inline LazyDict<T>::~LazyDict() {
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
     Value *container = nullptr;
-    const char* context = nullptr;
+    const char *context = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -721,18 +721,18 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     while (pIndices != indicesEnd) {
         size_t offset;
         switch (indicesType) {
-            case ComponentType_UNSIGNED_BYTE:
-                offset = *pIndices;
-                break;
-            case ComponentType_UNSIGNED_SHORT:
-                offset = *reinterpret_cast<uint16_t *>(pIndices);
-                break;
-            case ComponentType_UNSIGNED_INT:
-                offset = *reinterpret_cast<uint32_t *>(pIndices);
-                break;
-            default:
-                // have fun with float and negative values from signed types as indices.
-                throw DeadlyImportError("Unsupported component type in index.");
+        case ComponentType_UNSIGNED_BYTE:
+            offset = *pIndices;
+            break;
+        case ComponentType_UNSIGNED_SHORT:
+            offset = *reinterpret_cast<uint16_t *>(pIndices);
+            break;
+        case ComponentType_UNSIGNED_INT:
+            offset = *reinterpret_cast<uint32_t *>(pIndices);
+            break;
+        default:
+            // have fun with float and negative values from signed types as indices.
+            throw DeadlyImportError("Unsupported component type in index.");
         }
 
         offset *= elementSize;
@@ -751,9 +751,8 @@ inline void Accessor::Read(Value &obj, Asset &r) {
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
     {
-        const Value* countValue = FindUInt(obj, "count");
-        if (!countValue)
-        {
+        const Value *countValue = FindUInt(obj, "count");
+        if (!countValue) {
             throw DeadlyImportError("A count value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
         }
         count = countValue->GetUint();
@@ -1233,7 +1232,7 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialIOR ior;
 
                 ReadMember(*curMaterialIOR, "ior", ior.ior);
-          
+
                 this->materialIOR = Nullable<MaterialIOR>(ior);
             }
         }
@@ -1777,9 +1776,9 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
         throw DeadlyImportError("GLTF: JSON chunk missing");
     }
 
-    // read the scene data
-
-    mSceneLength = chunk.chunkLength;
+    // read the scene data, ensure null termination
+    static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
+    mSceneLength = chunk.chunkLength; // Can't be larger than 4GB (max. uint32_t)
     sceneData.resize(mSceneLength + 1);
     sceneData[mSceneLength] = '\0';
 
@@ -1824,14 +1823,23 @@ inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, 
         mSceneLength = stream.FileSize();
         mBodyLength = 0;
 
-        // read the scene data
+        // Binary format only supports up to 4GB of JSON, use that as a maximum
+        if (mSceneLength >= std::numeric_limits<uint32_t>::max()) {
+            throw DeadlyImportError("GLTF: JSON size greater than 4GB");
+        }
 
+        // read the scene data, ensure null termination
         sceneData.resize(mSceneLength + 1);
         sceneData[mSceneLength] = '\0';
 
         if (stream.Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
             throw DeadlyImportError("GLTF: Could not read the file contents");
         }
+    }
+
+    // Smallest legal JSON file is "{}" Smallest loadable glTF file is larger than that but catch it later
+    if (mSceneLength < 2) {
+        throw DeadlyImportError("GLTF: No JSON file contents");
     }
 
     // parse the JSON document
@@ -2018,7 +2026,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(const std::string& path, const char *mode, bool /*absolute*/) {
+inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool /*absolute*/) {
 #ifdef ASSIMP_API
     return mIOSystem->Open(path, mode);
 #else

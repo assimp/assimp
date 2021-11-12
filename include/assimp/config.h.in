@@ -547,6 +547,15 @@ enum aiComponent
 // Various stuff to fine-tune the behaviour of specific importer plugins.
 // ###########################################################################
 
+// ---------------------------------------------------------------------------
+/** @brief Importers which parse JSON may use this to obtain a pointer to a
+ * rapidjson::IRemoteSchemaDocumentProvider.
+ *
+ * The default value is nullptr
+ * Property type: void*
+ */
+#define AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER \
+    "IMPORT_SCHEMA_DOCUMENT_PROVIDER"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will merge all geometry layers present

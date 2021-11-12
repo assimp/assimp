@@ -111,19 +111,16 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
     return &desc;
 }
 
-bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /* checkSig */) const {
-    const std::string &extension = GetExtension(pFile);
+bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig ) const {
+	const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf" && extension != "glb") {
-        return false;
-    }
+	if (!checkSig && (extension != "gltf") && (extension != "glb"))
+		return false;
 
-    if (pIOHandler) {
-        glTF2::Asset asset(pIOHandler);
-        asset.Load(pFile, extension == "glb");
-        std::string version = asset.asset.version;
-        return !version.empty() && version[0] == '2';
-    }
+	if (pIOHandler) {
+		glTF2::Asset asset(pIOHandler);
+		return asset.CanRead(pFile, extension == "glb");
+	}
 
     return false;
 }
@@ -1604,7 +1601,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     this->mScene = pScene;
 
     // read the asset file
-    glTF2::Asset asset(pIOHandler);
+  	glTF2::Asset asset(pIOHandler, static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(mSchemaDocumentProvider));
     asset.Load(pFile, GetExtension(pFile) == "glb");
     if (asset.scene) {
         pScene->mName = asset.scene->name;
@@ -1628,6 +1625,10 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     }
+}
+
+void glTF2Importer::SetupProperties(const Importer *pImp) {
+    mSchemaDocumentProvider = static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(pImp->GetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER));
 }
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER

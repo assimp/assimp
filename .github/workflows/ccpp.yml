@@ -72,13 +72,9 @@ jobs:
       with:
         repository: cpp-pm/polly
         path: cmake/polly 
-    
-    - name: Install cppcov for c++
-      if: endsWith(matrix.name,'latest-gcov')
-      run: |
-        pip install --user cpp-coveralls
-        sudo apt-get install -y lcov
-        echo "::set-output name=args::-ASSIMP_COVERALLS=1"
+
+    - name: Install  lcov
+      uses: danielealbano/lcov-action@v1
       
     - name: Remove contrib directory for Hunter builds
       if: contains(matrix.name, 'hunter')

@@ -1128,7 +1128,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
             *out_uv++ = aiVector3D(v.x, v.y, 0.0f);
         }
 
-        out_mesh->mTextureCoordsNames[i] = mesh.GetTextureCoordChannelName(i);
+        out_mesh->SetTextureCoordsName(i, aiString(mesh.GetTextureCoordChannelName(i)));
 
         out_mesh->mNumUVComponents[i] = 2;
     }

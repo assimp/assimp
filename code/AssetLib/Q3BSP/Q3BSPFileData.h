@@ -95,7 +95,7 @@ struct sQ3BSPVertex {
     vec3f vPosition;    ///< Position of vertex
     vec2f vTexCoord;    ///< (u,v) Texturecoordinate of detailtexture
     vec2f vLightmap;    ///< (u,v) Texturecoordinate of lightmap
-    vec3f vNormal;      ///< vertex normale
+    vec3f vNormal;      ///< vertex normal
     unsigned char bColor[ 4 ];          ///< Color in RGBA
 };
 
@@ -178,7 +178,7 @@ struct Q3BSPModel {
         m_Textures(),
         m_Lightmaps(),
         m_EntityData(),
-        m_ModelName( "" )
+        m_ModelName()
     {
         // empty
     }

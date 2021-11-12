@@ -205,7 +205,7 @@ void AMFImporter::ParseHelper_FixTruncatedFloatString(const char *pInStr, std::s
 }
 
 static bool ParseHelper_Decode_Base64_IsBase64(const char pChar) {
-    return (isalnum(pChar) || (pChar == '+') || (pChar == '/'));
+    return (isalnum((unsigned char)pChar) || (pChar == '+') || (pChar == '/'));
 }
 
 void AMFImporter::ParseHelper_Decode_Base64(const std::string &pInputBase64, std::vector<uint8_t> &pOutputData) const {
@@ -268,7 +268,8 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     mXmlParser = new XmlParser();
     if (!mXmlParser->parse(file.get())) {
         delete mXmlParser;
-        throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+        mXmlParser = nullptr;
+        throw DeadlyImportError("Failed to create XML reader for file ", pFile, ".");
     }
 
     // Start reading, search for root tag <amf>
@@ -302,7 +303,7 @@ void AMFImporter::ParseNode_Root() {
     }
     XmlNode node = *root;
     mUnit = ai_tolower(std::string(node.attribute("unit").as_string()));
-    
+
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
@@ -510,15 +511,11 @@ bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool p
     }
 
     if (extension.empty() || pCheckSig) {
-        const char *tokens[] = { "<amf" };
+        static const char * const tokens[] = { "<amf" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
 
     return false;
-}
-
-void AMFImporter::GetExtensionList(std::set<std::string> &pExtensionList) {
-    pExtensionList.insert("amf");
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

@@ -55,17 +55,19 @@ const aiVector3D PlaneInit(0.8523f, 0.34321f, 0.5736f);
 
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
-// define the reference plane. We choose some arbitrary vector away from all basic axises
+// define the reference plane. We choose some arbitrary vector away from all basic axes
 // in the hope that no model spreads all its vertices along this plane.
 SpatialSort::SpatialSort(const aiVector3D *pPositions, unsigned int pNumPositions, unsigned int pElementOffset) :
-        mPlaneNormal(PlaneInit) {
+        mPlaneNormal(PlaneInit),
+        mFinalized(false) {
     mPlaneNormal.Normalize();
     Fill(pPositions, pNumPositions, pElementOffset);
 }
 
 // ------------------------------------------------------------------------------------------------
 SpatialSort::SpatialSort() :
-        mPlaneNormal(PlaneInit) {
+        mPlaneNormal(PlaneInit),
+        mFinalized(false) {
     mPlaneNormal.Normalize();
 }
 
@@ -80,28 +82,41 @@ void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,
         unsigned int pElementOffset,
         bool pFinalize /*= true */) {
     mPositions.clear();
+    mFinalized = false;
     Append(pPositions, pNumPositions, pElementOffset, pFinalize);
+    mFinalized = pFinalize;
+}
+
+// ------------------------------------------------------------------------------------------------
+ai_real SpatialSort::CalculateDistance(const aiVector3D &pPosition) const {
+    return (pPosition - mCentroid) * mPlaneNormal;
 }
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Finalize() {
+    const ai_real scale = 1.0f / mPositions.size();
+    for (unsigned int i = 0; i < mPositions.size(); i++) {
+        mCentroid += scale * mPositions[i].mPosition; 
+    }
+    for (unsigned int i = 0; i < mPositions.size(); i++) {
+        mPositions[i].mDistance = CalculateDistance(mPositions[i].mPosition);
+    }
     std::sort(mPositions.begin(), mPositions.end());
+    mFinalized = true;
 }
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPositions,
         unsigned int pElementOffset,
         bool pFinalize /*= true */) {
+    ai_assert(!mFinalized && "You cannot add positions to the SpatialSort object after it has been finalized.");
     // store references to all given positions along with their distance to the reference plane
     const size_t initial = mPositions.size();
-    mPositions.reserve(initial + (pFinalize ? pNumPositions : pNumPositions * 2));
+    mPositions.reserve(initial + pNumPositions);
     for (unsigned int a = 0; a < pNumPositions; a++) {
         const char *tempPointer = reinterpret_cast<const char *>(pPositions);
         const aiVector3D *vec = reinterpret_cast<const aiVector3D *>(tempPointer + a * pElementOffset);
-
-        // store position by index and distance
-        ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec, distance));
+        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec));
     }
 
     if (pFinalize) {
@@ -114,7 +129,8 @@ void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPosition
 // Returns an iterator for all positions close to the given position.
 void SpatialSort::FindPositions(const aiVector3D &pPosition,
         ai_real pRadius, std::vector<unsigned int> &poResults) const {
-    const ai_real dist = pPosition * mPlaneNormal;
+    ai_assert(mFinalized && "The SpatialSort object must be finalized before FindPositions can be called.");
+    const ai_real dist = CalculateDistance(pPosition);
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
     // clear the array
@@ -148,7 +164,7 @@ void SpatialSort::FindPositions(const aiVector3D &pPosition,
         index++;
 
     // Mow start iterating from there until the first position lays outside of the distance range.
-    // Add all positions inside the distance range within the given radius to the result aray
+    // Add all positions inside the distance range within the given radius to the result array
     std::vector<Entry>::const_iterator it = mPositions.begin() + index;
     const ai_real pSquared = pRadius * pRadius;
     while (it->mDistance < maxDist) {
@@ -229,6 +245,7 @@ BinFloat ToBinary(const ai_real &pValue) {
 // Fills an array with indices of all positions identical to the given position. In opposite to
 // FindPositions(), not an epsilon is used but a (very low) tolerance of four floating-point units.
 void SpatialSort::FindIdenticalPositions(const aiVector3D &pPosition, std::vector<unsigned int> &poResults) const {
+    ai_assert(mFinalized && "The SpatialSort object must be finalized before FindIdenticalPositions can be called.");
     // Epsilons have a huge disadvantage: they are of constant precision, while floating-point
     //  values are of log2 precision. If you apply e=0.01 to 100, the epsilon is rather small, but
     //  if you apply it to 0.001, it is enormous.
@@ -254,7 +271,7 @@ void SpatialSort::FindIdenticalPositions(const aiVector3D &pPosition, std::vecto
 
     // Convert the plane distance to its signed integer representation so the ULPs tolerance can be
     //  applied. For some reason, VC won't optimize two calls of the bit pattern conversion.
-    const BinFloat minDistBinary = ToBinary(pPosition * mPlaneNormal) - distanceToleranceInULPs;
+    const BinFloat minDistBinary = ToBinary(CalculateDistance(pPosition)) - distanceToleranceInULPs;
     const BinFloat maxDistBinary = minDistBinary + 2 * distanceToleranceInULPs;
 
     // clear the array in this strange fashion because a simple clear() would also deallocate
@@ -297,13 +314,14 @@ void SpatialSort::FindIdenticalPositions(const aiVector3D &pPosition, std::vecto
 
 // ------------------------------------------------------------------------------------------------
 unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int> &fill, ai_real pRadius) const {
+    ai_assert(mFinalized && "The SpatialSort object must be finalized before GenerateMappingTable can be called.");
     fill.resize(mPositions.size(), UINT_MAX);
     ai_real dist, maxDist;
 
     unsigned int t = 0;
     const ai_real pSquared = pRadius * pRadius;
     for (size_t i = 0; i < mPositions.size();) {
-        dist = mPositions[i].mPosition * mPlaneNormal;
+        dist = (mPositions[i].mPosition - mCentroid) * mPlaneNormal;
         maxDist = dist + pRadius;
 
         fill[mPositions[i].mIndex] = t;

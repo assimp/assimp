@@ -104,6 +104,7 @@ private:
     /** Configuration option: maximum smoothing angle, in radians*/
     ai_real configMaxAngle;
     mutable bool force_ = false;
+    mutable bool flippedWindingOrder_ = false;
 };
 
 } // end of namespace Assimp

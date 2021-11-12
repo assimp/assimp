@@ -75,7 +75,7 @@ using namespace std;
 //  Default constructor
 MMDImporter::MMDImporter() :
         m_Buffer(),
-        m_strAbsPath("") {
+        m_strAbsPath() {
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }
@@ -94,8 +94,8 @@ bool MMDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler,
         return SimpleExtensionCheck(pFile, "pmx");
     } else {
         // Check file Header
-        static const char *pTokens[] = { "PMX " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1);
+        static const char * const pTokens[] = { "PMX " };
+        return SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1);
     }
 }
 

@@ -112,7 +112,7 @@ ASSIMP_API void aiReleaseExportFormatDescription(const C_STRUCT aiExportFormatDe
  *  export them again. Since the scene returned by the various importer functions
  *  is const, a modifiable copy is needed.
  *  @param pIn Valid scene to be copied
- *  @param pOut Receives a modifyable copy of the scene. Use aiFreeScene() to
+ *  @param pOut Receives a modifiable copy of the scene. Use aiFreeScene() to
  *    delete it again.
  */
 ASSIMP_API void aiCopyScene(const C_STRUCT aiScene *pIn,
@@ -205,16 +205,22 @@ struct aiExportDataBlob {
     void *data;
 
     /** Name of the blob. An empty string always
-        indicates the first (and primary) blob,
-        which contains the actual file data.
-        Any other blobs are auxiliary files produced
-        by exporters (i.e. material files). Existence
-        of such files depends on the file format. Most
-        formats don't split assets across multiple files.
-
-        If used, blob names usually contain the file
-        extension that should be used when writing
-        the data to disc.
+      * indicates the first (and primary) blob,
+      * which contains the actual file data.
+      * Any other blobs are auxiliary files produced
+      * by exporters (i.e. material files). Existence
+      * of such files depends on the file format. Most
+      * formats don't split assets across multiple files.
+      *
+      * If used, blob names usually contain the file
+      * extension that should be used when writing
+      * the data to disc.
+      *
+      * The blob names generated can be influenced by
+      * setting the #AI_CONFIG_EXPORT_BLOB_NAME export
+      * property to the name that is used for the master
+      * blob. All other names are typically derived from
+      * the base name, by the file format exporter.
      */
     C_STRUCT aiString name;
 

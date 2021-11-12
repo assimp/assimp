@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,84 +47,97 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
-#include <assimp/types.h>
 #include <assimp/material.h>
+#include <assimp/types.h>
 
-#include <sstream>
-#include <vector>
 #include <map>
 #include <memory>
+#include <sstream>
+#include <vector>
 
 struct aiScene;
 struct aiNode;
 struct aiMaterial;
 
-namespace glTF2
-{
-    template<class T>
-    class Ref;
-
-    class Asset;
-    struct TexProperty;
-    struct TextureInfo;
-    struct NormalTextureInfo;
-    struct OcclusionTextureInfo;
-    struct Node;
-    struct Texture;
-
-    // Vec/matrix types, as raw float arrays
-	typedef float (vec2)[2];
-    typedef float (vec3)[3];
-    typedef float (vec4)[4];
-}
-
-namespace Assimp
-{
-    class IOSystem;
-    class IOStream;
-    class ExportProperties;
-
-    // ------------------------------------------------------------------------------------------------
-    /** Helper class to export a given scene to an glTF file. */
-    // ------------------------------------------------------------------------------------------------
-    class glTF2Exporter {
-    public:
-        /// Constructor for a specific scene to export
-        glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-            const ExportProperties* pProperties, bool binary);
-        ~glTF2Exporter();
-
-    protected:
-        void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
-        void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
-        void GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int idx);
-        void GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int idx);
-        void GetMatTex(const aiMaterial* mat, glTF2::Ref<glTF2::Texture>& texture, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::TextureInfo& prop, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::NormalTextureInfo& prop, aiTextureType tt, unsigned int slot);
-        void GetMatTex(const aiMaterial* mat, glTF2::OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot);
-        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec4& prop, const char* propName, int type, int idx);
-        aiReturn GetMatColor(const aiMaterial* mat, glTF2::vec3& prop, const char* propName, int type, int idx);
-        void ExportMetadata();
-        void ExportMaterials();
-        void ExportMeshes();
-        void MergeMeshes();
-        unsigned int ExportNodeHierarchy(const aiNode* n);
-        unsigned int ExportNode(const aiNode* node, glTF2::Ref<glTF2::Node>& parent);
-        void ExportScene();
-        void ExportAnimations();
-
-    private:
-        const char* mFilename;
-        IOSystem* mIOSystem;
-        const aiScene* mScene;
-        const ExportProperties* mProperties;
-        std::map<std::string, unsigned int> mTexturesByPath;
-        std::shared_ptr<glTF2::Asset> mAsset;
-        std::vector<unsigned char> mBodyData;
-    };
+namespace glTFCommon {
+template <class T>
+class Ref;
 
 }
+
+namespace glTF2 {
+class Asset;
+struct TexProperty;
+struct TextureInfo;
+struct NormalTextureInfo;
+struct OcclusionTextureInfo;
+struct Node;
+struct Texture;
+struct PbrSpecularGlossiness;
+struct MaterialSheen;
+struct MaterialClearcoat;
+struct MaterialTransmission;
+struct MaterialVolume;
+struct MaterialIOR;
+
+// Vec/matrix types, as raw float arrays
+typedef float(vec2)[2];
+typedef float(vec3)[3];
+typedef float(vec4)[4];
+} // namespace glTF2
+
+namespace Assimp {
+class IOSystem;
+class IOStream;
+class ExportProperties;
+
+// ------------------------------------------------------------------------------------------------
+/** Helper class to export a given scene to an glTF file. */
+// ------------------------------------------------------------------------------------------------
+class glTF2Exporter {
+public:
+    /// Constructor for a specific scene to export
+    glTF2Exporter(const char *filename, IOSystem *pIOSystem, const aiScene *pScene,
+            const ExportProperties *pProperties, bool binary);
+    ~glTF2Exporter();
+
+protected:
+    void WriteBinaryData(IOStream *outfile, std::size_t sceneLength);
+    void GetTexSampler(const aiMaterial &mat, glTFCommon::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
+    void GetMatTexProp(const aiMaterial &mat, unsigned int &prop, const char *propName, aiTextureType tt, unsigned int idx);
+    void GetMatTexProp(const aiMaterial &mat, float &prop, const char *propName, aiTextureType tt, unsigned int idx);
+    void GetMatTex(const aiMaterial &mat, glTFCommon::Ref<glTF2::Texture> &texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot);
+    void GetMatTex(const aiMaterial &mat, glTF2::TextureInfo &prop, aiTextureType tt, unsigned int slot);
+    void GetMatTex(const aiMaterial &mat, glTF2::NormalTextureInfo &prop, aiTextureType tt, unsigned int slot);
+    void GetMatTex(const aiMaterial &mat, glTF2::OcclusionTextureInfo &prop, aiTextureType tt, unsigned int slot);
+    aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec4 &prop, const char *propName, int type, int idx) const;
+    aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec3 &prop, const char *propName, int type, int idx) const;
+    bool GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG);
+    bool GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen);
+    bool GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearcoat &clearcoat);
+    bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
+    bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
+    bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
+    void ExportMetadata();
+    void ExportMaterials();
+    void ExportMeshes();
+    void MergeMeshes();
+    unsigned int ExportNodeHierarchy(const aiNode *n);
+    unsigned int ExportNode(const aiNode *node, glTFCommon::Ref<glTF2::Node> &parent);
+    void ExportScene();
+    void ExportAnimations();
+
+private:
+    const char *mFilename;
+    IOSystem *mIOSystem;
+    const aiScene *mScene;
+    const ExportProperties *mProperties;
+    std::map<std::string, unsigned int> mTexturesByPath;
+    std::shared_ptr<glTF2::Asset> mAsset;
+    std::vector<unsigned char> mBodyData;
+};
+
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 

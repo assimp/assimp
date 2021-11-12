@@ -51,10 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exceptional.h"
 
-#include <assimp/ai_assert.h>
 #include <assimp/types.h>
 #include <assimp/ProgressHandler.hpp>
-#include <map>
 #include <set>
 #include <vector>
 #include <memory>
@@ -156,7 +154,7 @@ public:
     /** Returns the exception of the last exception that occurred.
      * Note: Exceptions are not the only source of error details, so GetErrorText
      * should be consulted too.
-     * @return The last exception that occurred. 
+     * @return The last exception that occurred.
      */
     const std::exception_ptr& GetException() const {
         return m_Exception;
@@ -179,40 +177,8 @@ public:
     /**
      * Will be called only by scale process when scaling is requested.
      */
-    virtual void SetFileScale(double scale) {
+    void SetFileScale(double scale) {
         fileScale = scale;
-    }
-
-    virtual double GetFileScale() const {
-        return fileScale;
-    }
-
-    enum ImporterUnits {
-        M,
-        MM,
-        CM,
-        INCHES,
-        FEET
-    };
-
-    /**
-     * Assimp Importer
-     * unit conversions available 
-     * NOTE: Valid options are initialised in the
-     * constructor in the implementation file to
-     * work around a VS2013 compiler bug if support
-     * for that compiler is dropped in the future
-     * initialisation can be moved back here
-     * */
-    std::map<ImporterUnits, double> importerUnits;
-
-    virtual void SetApplicationUnits(const ImporterUnits &unit) {
-        importerScale = importerUnits[unit];
-        applicationUnits = unit;
-    }
-
-    virtual const ImporterUnits &GetApplicationUnits() {
-        return applicationUnits;
     }
 
     // -------------------------------------------------------------------
@@ -223,7 +189,6 @@ public:
     void GetExtensionList(std::set<std::string> &extensions);
 
 protected:
-    ImporterUnits applicationUnits = ImporterUnits::M;
     double importerScale = 1.0;
     double fileScale = 1.0;
 
@@ -294,7 +259,7 @@ public: // static utilities
     static bool SearchFileHeaderForToken(
             IOSystem *pIOSystem,
             const std::string &file,
-            const char **tokens,
+            const char * const *tokens,
             unsigned int numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,
@@ -420,7 +385,7 @@ public: // static utilities
 
 private:
     /* Pushes state into importer for the importer scale */
-    virtual void UpdateImporterScale(Importer *pImp);
+    void UpdateImporterScale(Importer *pImp);
 
 protected:
     /// Error description in case there was one.

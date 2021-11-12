@@ -83,8 +83,7 @@ Other:
 #include <sstream>
 #include <string>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 using namespace Assimp;
 
@@ -106,14 +105,13 @@ void ExportScenePbrt (
 } // end of namespace Assimp
 
 // Constructor
-PbrtExporter::PbrtExporter (
-    const aiScene* pScene, IOSystem* pIOSystem,
-    const std::string path, const std::string file)
-: mScene(pScene),
-  mIOSystem(pIOSystem),
-  mPath(path),
-  mFile(file)
-{
+PbrtExporter::PbrtExporter(
+        const aiScene *pScene, IOSystem *pIOSystem,
+        const std::string &path, const std::string &file) :
+        mScene(pScene),
+        mIOSystem(pIOSystem),
+        mPath(path),
+        mFile(file) {
     // Export embedded textures.
     if (mScene->mNumTextures > 0)
         if (!mIOSystem->CreateDirectory("textures"))
@@ -210,12 +208,12 @@ void PbrtExporter::WriteMetaData() {
                 aiString* value =
                     static_cast<aiString*>(pMetaData->mValues[i].mData);
                 std::string svalue = value->C_Str();
-                std::size_t found = svalue.find_first_of("\n");
+                std::size_t found = svalue.find_first_of('\n');
                 mOutput << "\n";
                 while (found != std::string::npos) {
                     mOutput << "#     " << svalue.substr(0, found) << "\n";
                     svalue = svalue.substr(found + 1);
-                    found = svalue.find_first_of("\n");
+                    found = svalue.find_first_of('\n');
                 }
                 mOutput << "#     " << svalue << "\n";
                 break;
@@ -596,8 +594,8 @@ void PbrtExporter::WriteMaterial(int m) {
     }
     mOutput << "\n";
 
-    auto White = [](aiColor3D c) { return c.r == 1 && c.g == 1 && c.b == 1; };
-    auto Black = [](aiColor3D c) { return c.r == 0 && c.g == 0 && c.b == 0; };
+    auto White = [](const aiColor3D &c) { return c.r == 1 && c.g == 1 && c.b == 1; };
+    auto Black = [](const aiColor3D &c) { return c.r == 0 && c.g == 0 && c.b == 0; };
 
     aiColor3D diffuse, specular, transparency;
     bool constantDiffuse = (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS &&
@@ -616,7 +614,7 @@ void PbrtExporter::WriteMaterial(int m) {
                         eta != 1);
 
     mOutput << "#    - Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
-        " transprency " << constantTransparency << " opacity " << constantOpacity <<
+        " transparency " << constantTransparency << " opacity " << constantOpacity <<
         " shininess " << constantShininess << " shininess strength " << constantShininessStrength <<
         " eta " << constantEta << "\n";
 

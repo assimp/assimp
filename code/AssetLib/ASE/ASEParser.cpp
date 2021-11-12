@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -498,6 +496,12 @@ void Parser::ParseLV1MaterialListBlock() {
                 ParseLV2MaterialBlock(sMat);
                 continue;
             }
+            if( iDepth == 1 ){
+                // CRUDE HACK: support missing brace after "Ascii Scene Exporter v2.51"
+                LogWarning("Missing closing brace in material list");
+                --filePtr;
+                return;
+            }
         }
         AI_ASE_HANDLE_TOP_LEVEL_SECTION();
     }
@@ -671,7 +675,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                 if (!ParseString(temp, "*MAP_CLASS"))
                     SkipToNextToken();
                 if (temp != "Bitmap" && temp != "Normal Bump") {
-                    ASSIMP_LOG_WARN_F("ASE: Skipping unknown map type: ", temp);
+                    ASSIMP_LOG_WARN("ASE: Skipping unknown map type: ", temp);
                     parsePath = false;
                 }
                 continue;
@@ -685,7 +689,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                     // Files with 'None' as map name are produced by
                     // an Maja to ASE exporter which name I forgot ..
                     ASSIMP_LOG_WARN("ASE: Skipping invalid map entry");
-                    map.mMapName = "";
+                    map.mMapName = std::string();
                 }
 
                 continue;
@@ -1119,7 +1123,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
                                          "this is no spot light or target camera");
                     }
                 } else {
-                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: " + temp);
+                    ASSIMP_LOG_ERROR("ASE: Unknown node transformation: ", temp);
                     // mode = 0
                 }
                 continue;

@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 
-#include <assimp/BaseImporter.h>
 #include "MDCFileData.h"
+#include <assimp/BaseImporter.h>
 #include <assimp/ByteSwapper.h>
 
 namespace Assimp {
@@ -59,45 +59,37 @@ using namespace MDC;
 // ---------------------------------------------------------------------------
 /** Importer class to load the RtCW MDC file format
 */
-class MDCImporter : public BaseImporter
-{
+class MDCImporter : public BaseImporter {
 public:
     MDCImporter();
-    ~MDCImporter();
-
-
-public:
+    ~MDCImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
     * See BaseImporter::CanRead() for details.  */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
     * The function is a request to the importer to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer *pImp) override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
-protected:
-
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Validate the header of the file
@@ -107,19 +99,17 @@ protected:
     // -------------------------------------------------------------------
     /** Validate the header of a MDC surface
     */
-    void ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf);
+    void ValidateSurfaceHeader(BE_NCONST MDC::Surface *pcSurf);
 
 protected:
-
-
     /** Configuration option: frame to be loaded */
     unsigned int configFrameID;
 
     /** Header of the MDC file */
-    BE_NCONST MDC::Header* pcHeader;
+    BE_NCONST MDC::Header *pcHeader;
 
     /** Buffer to hold the loaded file */
-    unsigned char* mBuffer;
+    unsigned char *mBuffer;
 
     /** size of the file, in bytes */
     unsigned int fileSize;

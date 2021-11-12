@@ -76,7 +76,7 @@ public:
     /** Start a named timer */
     void BeginRegion(const std::string& region) {
         regions[region] = std::chrono::system_clock::now();
-        ASSIMP_LOG_DEBUG((format("START `"),region,"`"));
+        ASSIMP_LOG_DEBUG("START `",region,"`");
     }
 
 
@@ -88,7 +88,7 @@ public:
         }
 
         std::chrono::duration<double> elapsedSeconds = std::chrono::system_clock::now() - regions[region];
-        ASSIMP_LOG_DEBUG((format("END   `"),region,"`, dt= ", elapsedSeconds.count()," s"));
+        ASSIMP_LOG_DEBUG("END   `",region,"`, dt= ", elapsedSeconds.count()," s");
     }
 
 private:

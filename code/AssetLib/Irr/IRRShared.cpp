@@ -260,7 +260,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags) {
 							   prop.value == "parallaxmap_trans_add") {
 						matFlags = AI_IRRMESH_MAT_normalmap_ta;
 					} else {
-						ASSIMP_LOG_WARN("IRRMat: Unrecognized material type: " + prop.value);
+						ASSIMP_LOG_WARN("IRRMat: Unrecognized material type: ", prop.value);
 					}
 				}
 

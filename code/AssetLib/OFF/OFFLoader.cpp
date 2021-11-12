@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -94,7 +92,7 @@ bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
     else if (!extension.length() || checkSig)
     {
         if (!pIOHandler)return true;
-        const char* tokens[] = {"off"};
+        static const char * const tokens[] = {"off"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,3);
     }
     return false;
@@ -138,7 +136,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     const char* car = buffer;
     const char* end = buffer + mBuffer2.size();
     NextToken(&car, end);
-    
+
     if (car < end - 2 && car[0] == 'S' && car[1] == 'T') {
       hasTexCoord = true; car += 2;
     }
@@ -164,7 +162,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
       dimensions = 3;
       hasHomogenous = false;
       NextToken(&car, end);
-      
+
       // at this point the next token should be an integer number
       if (car >= end - 1 || *car < '0' || *car > '9') {
 	throw DeadlyImportError("OFF: Header is invalid");
@@ -223,7 +221,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
             ASSIMP_LOG_ERROR("OFF: The number of verts in the header is incorrect");
             break;
         }
-        aiVector3D& v = mesh->mVertices[i];	
+        aiVector3D& v = mesh->mVertices[i];
         sz = line;
 
 	// helper array to write a for loop over possible dimension values
@@ -235,7 +233,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	    sz = fast_atoreal_move<ai_real>(sz, *vec[dim]);
 	}
 
-	// if has homogenous coordinate, divide others by this one
+	// if has homogeneous coordinate, divide others by this one
 	if (hasHomogenous) {
 	    SkipSpaces(&sz);
 	    ai_real w = 1.;
@@ -255,7 +253,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	    SkipSpaces(&sz);
 	    fast_atoreal_move<ai_real>(sz,(ai_real&)n.z);
 	}
-	
+
 	// reading colors is a pain because the specification says it can be
 	// integers or floats, and any number of them between 1 and 4 included,
 	// until the next comment or end of line
@@ -321,7 +319,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         ++i;
         ++faces;
     }
-    
+
     // generate the output node graph
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mName.Set("<OFFRoot>");

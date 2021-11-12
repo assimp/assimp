@@ -61,7 +61,8 @@ static const std::string EmissiveTexture1 = "map_emissive";
 static const std::string EmissiveTexture2 = "map_Ke";
 static const std::string BumpTexture1 = "map_bump";
 static const std::string BumpTexture2 = "bump";
-static const std::string NormalTexture = "map_Kn";
+static const std::string NormalTextureV1 = "map_Kn";
+static const std::string NormalTextureV2 = "norm";
 static const std::string ReflectionTexture = "refl";
 static const std::string DisplacementTexture1 = "map_disp";
 static const std::string DisplacementTexture2 = "disp";
@@ -146,7 +147,7 @@ void ObjFileMtlImporter::load() {
                     ++m_DataIt;
                     ai_real d;
                     getFloatValue(d);
-                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;                    
+                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -232,6 +233,12 @@ void ObjFileMtlImporter::getIlluminationModel(int &illum_model) {
 //  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue(ai_real &value) {
     m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    size_t len = std::strlen(&m_buffer[0]);
+    if (0 == len) {
+        value = 0.0f;
+        return;
+    }
+    
     value = (ai_real)fast_atof(&m_buffer[0]);
 }
 
@@ -315,7 +322,7 @@ void ObjFileMtlImporter::getTexture() {
         // Bump texture
         out = &m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if (!ASSIMP_strincmp(pPtr, NormalTexture.c_str(), static_cast<unsigned int>(NormalTexture.size()))) {
+    } else if (!ASSIMP_strincmp(pPtr, NormalTextureV1.c_str(), static_cast<unsigned int>(NormalTextureV1.size())) || !ASSIMP_strincmp(pPtr, NormalTextureV2.c_str(), static_cast<unsigned int>(NormalTextureV2.size()))) {
         // Normal map
         out = &m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;

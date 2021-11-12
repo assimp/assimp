@@ -95,7 +95,7 @@ void UniqueNameGenerator::make_unique(std::vector<std::string> &names) {
     auto generate_unique_name = [&](const std::string &base_name) -> std::string {
         auto *duplicate_info = &names_to_duplicates[base_name];
 
-        std::string new_name = "";
+        std::string new_name;
 
         bool found_identical_name;
         bool tried_with_base_name_only = false;

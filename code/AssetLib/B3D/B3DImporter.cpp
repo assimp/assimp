@@ -143,9 +143,9 @@ AI_WONT_RETURN void B3DImporter::Oops() {
 }
 
 // ------------------------------------------------------------------------------------------------
-AI_WONT_RETURN void B3DImporter::Fail(string str) {
+AI_WONT_RETURN void B3DImporter::Fail(const string &str) {
 #ifdef DEBUG_B3D
-    ASSIMP_LOG_ERROR_F("Error in B3D file data: ", str);
+    ASSIMP_LOG_ERROR("Error in B3D file data: ", str);
 #endif
     throw DeadlyImportError("B3D Importer - error in B3D file data: ", str);
 }
@@ -233,7 +233,7 @@ string B3DImporter::ReadChunk() {
         tag += char(ReadByte());
     }
 #ifdef DEBUG_B3D
-    ASSIMP_LOG_DEBUG_F("ReadChunk: ", tag);
+    ASSIMP_LOG_DEBUG("ReadChunk: ", tag);
 #endif
     unsigned sz = (unsigned)ReadInt();
     _stack.push_back(_pos + sz);
@@ -397,7 +397,7 @@ void B3DImporter::ReadTRIS(int v0) {
         matid = 0;
     } else if (matid < 0 || matid >= (int)_materials.size()) {
 #ifdef DEBUG_B3D
-        ASSIMP_LOG_ERROR_F("material id=", matid);
+        ASSIMP_LOG_ERROR("material id=", matid);
 #endif
         Fail("Bad material id");
     }
@@ -417,7 +417,7 @@ void B3DImporter::ReadTRIS(int v0) {
         int i2 = ReadInt() + v0;
         if (i0 < 0 || i0 >= (int)_vertices.size() || i1 < 0 || i1 >= (int)_vertices.size() || i2 < 0 || i2 >= (int)_vertices.size()) {
 #ifdef DEBUG_B3D
-            ASSIMP_LOG_ERROR_F("Bad triangle index: i0=", i0, ", i1=", i1, ", i2=", i2);
+            ASSIMP_LOG_ERROR("Bad triangle index: i0=", i0, ", i1=", i1, ", i2=", i2);
 #endif
             Fail("Bad triangle index");
             continue;

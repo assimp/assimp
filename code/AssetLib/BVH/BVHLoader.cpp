@@ -100,7 +100,7 @@ bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs)
         return true;
 
     if ((!extension.length() || cs) && pIOHandler) {
-        const char *tokens[] = { "HIERARCHY" };
+        static const char * const tokens[] = { "HIERARCHY" };
         return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
     }
     return false;
@@ -178,7 +178,7 @@ void BVHLoader::ReadHierarchy(aiScene *pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads a node and recursively its childs and returns the created node;
+// Reads a node and recursively its children and returns the created node;
 aiNode *BVHLoader::ReadNode() {
     // first token is name
     std::string nodeName = GetNextToken();
@@ -359,7 +359,7 @@ void BVHLoader::ReadMotion(aiScene * /*pScene*/) {
 std::string BVHLoader::GetNextToken() {
     // skip any preceding whitespace
     while (mReader != mBuffer.end()) {
-        if (!isspace(*mReader))
+        if (!isspace((unsigned char)*mReader))
             break;
 
         // count lines
@@ -372,7 +372,7 @@ std::string BVHLoader::GetNextToken() {
     // collect all chars till the next whitespace. BVH is easy in respect to that.
     std::string token;
     while (mReader != mBuffer.end()) {
-        if (isspace(*mReader))
+        if (isspace((unsigned char)*mReader))
             break;
 
         token.push_back(*mReader);

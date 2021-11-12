@@ -46,8 +46,10 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
+#include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
 #include <vector>
+#include <cstdlib>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -205,6 +207,16 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
+
+    // Some importers may be unimplemented or otherwise unsuitable for general use
+    // in their current state. Devs can set ASSIMP_ENABLE_DEV_IMPORTERS in their
+    // local environment to enable them, otherwise they're left out of the registry.
+    const char *envStr = std::getenv("ASSIMP_ENABLE_DEV_IMPORTERS");
+    bool devImportersEnabled = envStr && strcmp(envStr, "0");
+
+    // Ensure no unused var warnings if all uses are #ifndef'd away below:
+    (void)devImportersEnabled;
+
     // ----------------------------------------------------------------------------
     // Add an instance of each worker class here
     // (register_new_importers_here)

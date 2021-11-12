@@ -48,8 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStreamBuffer.h>
 #include <vector>
 
-namespace Assimp
-{
+namespace Assimp {
 
 //pre-declaration
 class PLYImporter;

@@ -68,6 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/StringUtils.h>
 
 #include <map>
 
@@ -166,21 +167,20 @@ static aiColor3D ReadColor(StreamReaderLE *stream) {
 }
 
 static void UnknownChunk(StreamReaderLE * /*stream*/, const SIBChunk &chunk) {
-    char temp[5] = {
+    char temp[4] = {
         static_cast<char>((chunk.Tag >> 24) & 0xff),
         static_cast<char>((chunk.Tag >> 16) & 0xff),
         static_cast<char>((chunk.Tag >> 8) & 0xff),
-        static_cast<char>(chunk.Tag & 0xff), '\0'
+        static_cast<char>(chunk.Tag & 0xff)
     };
 
-    ASSIMP_LOG_WARN((Formatter::format(), "SIB: Skipping unknown '", temp, "' chunk."));
+    ASSIMP_LOG_WARN("SIB: Skipping unknown '", ai_str_toprintable(temp, 4), "' chunk.");
 }
 
 // Reads a UTF-16LE string and returns it at UTF-8.
 static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
     if (nullptr == stream || 0 == numWChars) {
-        static const aiString empty;
-        return empty;
+        return aiString();
     }
 
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)
@@ -804,7 +804,12 @@ static void ReadScene(SIB *sib, StreamReaderLE *stream) {
 // Imports the given file into the given scene structure.
 void SIBImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-    StreamReaderLE stream(pIOHandler->Open(pFile, "rb"));
+
+    auto file = pIOHandler->Open(pFile, "rb");
+    if (!file)
+        throw DeadlyImportError("SIB: Could not open ", pFile);
+
+    StreamReaderLE stream(file);
 
     // We should have at least one chunk
     if (stream.GetRemainingSize() < 16)

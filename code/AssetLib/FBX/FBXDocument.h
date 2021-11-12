@@ -500,6 +500,10 @@ public:
         return uvScaling;
     }
 
+    const ai_real &UVRotation() const {
+        return uvRotation;
+    }
+
     const PropertyTable& Props() const {
         ai_assert(props.get());
         return *props.get();
@@ -517,6 +521,7 @@ public:
 private:
     aiVector2D uvTrans;
     aiVector2D uvScaling;
+    ai_real    uvRotation;
 
     std::string type;
     std::string relativeFileName;
@@ -688,7 +693,7 @@ private:
 typedef std::vector<int64_t> KeyTimeList;
 typedef std::vector<float> KeyValueList;
 
-/** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
+/** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefore) */
 class AnimationCurve : public Object {
 public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);

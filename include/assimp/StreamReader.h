@@ -47,11 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STREAMREADER_H_INCLUDED
 
 #ifdef __GNUC__
-#pragma GCC system_header
+#   pragma GCC system_header
 #endif
 
 #include <assimp/ByteSwapper.h>
-#include <assimp/Defines.h>
 #include <assimp/Exceptional.h>
 #include <assimp/IOStream.hpp>
 
@@ -208,7 +207,7 @@ public:
 
     // ---------------------------------------------------------------------
     /** Set current file pointer (Get it from #GetPtr). This is if you
-     *  prefer to do pointer arithmetics on your own or want to copy
+     *  prefer to do pointer arithmetic on your own or want to copy
      *  large chunks of data at once.
      *  @param p The new pointer, which is validated against the size
      *    limit and buffer boundaries. */

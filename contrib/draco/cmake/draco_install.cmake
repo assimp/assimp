@@ -55,7 +55,7 @@ macro(draco_setup_install_target)
   install(TARGETS draco_encoder DESTINATION
                   "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
 
-  if(WIN32)
+  if(MSVC)
     install(TARGETS draco DESTINATION
                     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
   else()

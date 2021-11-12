@@ -46,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef AI_3DSIMPORTER_H_INC
 #define AI_3DSIMPORTER_H_INC
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #include <assimp/BaseImporter.h>
 #include <assimp/types.h>
 
-#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #include "3DSHelper.h"
 #include <assimp/StreamReader.h>
@@ -75,14 +75,14 @@ public:
      * See BaseImporter::CanRead() for details.
      */
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+        bool checkSig) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ReadFile().
      * The function is a request to the importer to update its configuration
      * basing on the Importer's configuration property list.
      */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
 protected:
 
@@ -90,14 +90,14 @@ protected:
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc* GetInfo () const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
     void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+        IOSystem* pIOHandler) override;
 
     // -------------------------------------------------------------------
     /** Converts a temporary material to the outer representation
@@ -207,6 +207,15 @@ protected:
     /** Replace the default material in the scene
     */
     void ReplaceDefaultMaterial();
+
+    bool ContainsTextures(unsigned int i) const {
+        return !mScene->mMaterials[i].sTexDiffuse.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexBump.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexOpacity.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexEmissive.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexSpecular.mMapName.empty() ||
+               !mScene->mMaterials[i].sTexShininess.mMapName.empty() ;
+    }
 
     // -------------------------------------------------------------------
     /** Convert the whole scene

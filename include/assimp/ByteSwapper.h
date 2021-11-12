@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Helper class tp perform various byte oder swappings
+/** @file Helper class tp perform various byte order swappings
    (e.g. little to big endian) */
 #pragma once
 #ifndef AI_BYTESWAPPER_H_INC
@@ -52,10 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
-#include <stdint.h>
+#include <cstdint>
 
 #if _MSC_VER >= 1400
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 namespace Assimp    {

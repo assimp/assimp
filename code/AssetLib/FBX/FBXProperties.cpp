@@ -52,6 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 
+#include <utility>
+
 namespace Assimp {
 namespace FBX {
 
@@ -131,7 +133,7 @@ Property* ReadTypedProperty(const Element& element)
             ParseTokenAsFloat(*tok[6]))
         );
     }
-    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
+    else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"float") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView") || !strcmp( cs, "UnitScaleFactor" ) ) {
         checkTokenCount(tok, 5);
         return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
     }
@@ -155,7 +157,7 @@ std::string PeekPropertyName(const Element& element)
     ai_assert(element.KeyToken().StringContents() == "P");
     const TokenList& tok = element.Tokens();
     if(tok.size() < 4) {
-        return "";
+        return std::string();
     }
 
     return ParseTokenAsString(*tok[0]);
@@ -172,10 +174,8 @@ PropertyTable::PropertyTable()
 }
 
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps)
-: templateProps(templateProps)
-, element(&element)
-{
+PropertyTable::PropertyTable(const Element &element, std::shared_ptr<const PropertyTable> templateProps) :
+        templateProps(std::move(templateProps)), element(&element) {
     const Scope& scope = GetRequiredScope(element);
     for(const ElementMap::value_type& v : scope.Elements()) {
         if(v.first != "P") {
@@ -198,7 +198,6 @@ PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const Prope
         lazyProps[name] = v.second;
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()

@@ -438,7 +438,7 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent) {
             pc->mTransformation = bone.sAnim.asKeys[0].matrix;
         }
 
-        if (bone.iParent == static_cast<uint32_t>(-1)) { 
+        if (bone.iParent == static_cast<uint32_t>(-1)) {
             bone.mOffsetMatrix = pc->mTransformation;
         } else {
             bone.mOffsetMatrix = asBones[bone.iParent].mOffsetMatrix * pc->mTransformation;
@@ -868,7 +868,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent, const char** szCurrentOut
 
     bool bQuota = true;
     if ('\"' != *szCurrent) {
-        LogWarning("Bone name is expcted to be enclosed in "
+        LogWarning("Bone name is expected to be enclosed in "
             "double quotation marks. ");
         bQuota = false;
     } else {

@@ -43,16 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file NFFLoader.h
  *  @brief Declaration of the NFF importer class.
  */
+#pragma once
 #ifndef AI_NFFLOADER_H_INCLUDED
 #define AI_NFFLOADER_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
-#include <assimp/types.h>
 #include <assimp/material.h>
+#include <assimp/types.h>
 #include <vector>
 
-
-namespace Assimp    {
+namespace Assimp {
 
 // ----------------------------------------------------------------------------------
 /** NFF (Neutral File Format) Importer class.
@@ -61,67 +61,56 @@ namespace Assimp    {
  * Both are quite different and the loading code is somewhat dirty at
  * the moment. Sense8 should be moved to a separate loader.
 */
-class NFFImporter : public BaseImporter
-{
+class NFFImporter : public BaseImporter {
 public:
     NFFImporter();
-    ~NFFImporter();
-
-
-public:
+    ~NFFImporter() override;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
      */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
      */
-    const aiImporterDesc* GetInfo () const;
+    const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
     /** Imports the given file into the given scene structure.
     * See BaseImporter::InternReadFile() for details
     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene,
+            IOSystem *pIOHandler) override;
 
 private:
-
-
     // describes face material properties
-    struct ShadingInfo
-    {
-        ShadingInfo()
-            : color     (0.6f,0.6f,0.6f)
-            , diffuse   (1.f,1.f,1.f)
-            , specular  (1.f,1.f,1.f)
-            , ambient   (0.f,0.f,0.f)
-            , emissive  (0.f,0.f,0.f)
-            , refracti  (1.f)
-            , twoSided  (false) // for NFF2
-            , shaded    (true)  // for NFF2
-            , opacity   (1.f)
-            , shininess (0.f)
-            , mapping   (aiTextureMapping_UV)
-        {}
+    struct ShadingInfo {
+        ShadingInfo() :
+                color(0.6f, 0.6f, 0.6f),
+                diffuse(1.f, 1.f, 1.f),
+                specular(1.f, 1.f, 1.f),
+                ambient(0.f, 0.f, 0.f),
+                emissive(0.f, 0.f, 0.f),
+                refracti(1.f),
+                twoSided(false), // for NFF2
+                shaded(true), // for NFF2
+                opacity(1.f),
+                shininess(0.f),
+                mapping(aiTextureMapping_UV) {
+            // empty
+        }
 
-        aiColor3D color,diffuse,specular,ambient,emissive;
+        aiColor3D color, diffuse, specular, ambient, emissive;
         ai_real refracti;
-
-        std::string texFile;
-
-        // For NFF2
-        bool twoSided;
+        std::string texFile;        
+        bool twoSided; // For NFF2
         bool shaded;
         ai_real opacity, shininess;
-
         std::string name;
 
         // texture mapping to be generated for the mesh - uv is the default
@@ -130,16 +119,15 @@ private:
         aiTextureMapping mapping;
 
         // shininess is ignored for the moment
-        bool operator == (const ShadingInfo& other) const
-        {
-            return color == other.color     &&
-                diffuse  == other.diffuse   &&
-                specular == other.specular  &&
-                ambient  == other.ambient   &&
-                refracti == other.refracti  &&
-                texFile  == other.texFile   &&
-                twoSided == other.twoSided  &&
-                shaded   == other.shaded;
+        bool operator == (const ShadingInfo &other) const {
+            return color == other.color &&
+                   diffuse == other.diffuse &&
+                   specular == other.specular &&
+                   ambient == other.ambient &&
+                   refracti == other.refracti &&
+                   texFile == other.texFile &&
+                   twoSided == other.twoSided &&
+                   shaded == other.shaded;
 
             // Some properties from NFF2 aren't compared by this operator.
             // Comparing MeshInfo::matIndex should do that.
@@ -147,35 +135,25 @@ private:
     };
 
     // describes a NFF light source
-    struct Light
-    {
-        Light()
-            : intensity (1.f)
-            , color     (1.f,1.f,1.f)
-        {}
+    struct Light {
+        Light() :
+                intensity(1.f), color(1.f, 1.f, 1.f) {}
 
         aiVector3D position;
         ai_real intensity;
         aiColor3D color;
     };
 
-    enum PatchType
-    {
+    enum PatchType {
         PatchType_Simple = 0x0,
         PatchType_Normals = 0x1,
         PatchType_UVAndNormals = 0x2
     };
 
     // describes a NFF mesh
-    struct MeshInfo
-    {
-        MeshInfo(PatchType _pType, bool bL = false)
-            : pType     (_pType)
-            , bLocked   (bL)
-            , radius    (1.f,1.f,1.f)
-            , dir       (0.f,1.f,0.f)
-            , matIndex  (0)
-        {
+    struct MeshInfo {
+        MeshInfo(PatchType _pType, bool bL = false) :
+                pType(_pType), bLocked(bL), radius(1.f, 1.f, 1.f), dir(0.f, 1.f, 0.f), matIndex(0) {
             name[0] = '\0'; // by default meshes are unnamed
         }
 
@@ -192,10 +170,9 @@ private:
         std::vector<unsigned int> faces;
 
         // for NFF2
-        std::vector<aiColor4D>  colors;
+        std::vector<aiColor4D> colors;
         unsigned int matIndex;
     };
-
 
     // -------------------------------------------------------------------
     /** Loads the material table for the NFF2 file format from an
@@ -205,9 +182,8 @@ private:
      *  @param path Path to the file (abs. or rel.)
      *  @param pIOHandler IOSystem to be used to open the file
     */
-    void LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
-        const std::string& path, IOSystem* pIOHandler);
-
+    void LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
+            const std::string &path, IOSystem *pIOHandler);
 };
 
 } // end of namespace Assimp

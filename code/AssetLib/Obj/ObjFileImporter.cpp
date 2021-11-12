@@ -162,7 +162,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
 // ------------------------------------------------------------------------------------------------
 //  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene) {
-    if (0L == pModel) {
+    if (nullptr == pModel) {
         return;
     }
 
@@ -468,7 +468,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
             }
 
             // Copy all vertex colors
-            if (!pModel->m_VertexColors.empty()) {
+            if (vertex < pModel->m_VertexColors.size()) {
                 const aiVector3D &color = pModel->m_VertexColors[vertex];
                 pMesh->mColors[0][newIndex] = aiColor4D(color.x, color.y, color.z, 1.0);
             }

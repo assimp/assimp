@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** 
+/**
  *  @file Implementation of the SplitLargeMeshes postprocessing step
  */
 
@@ -129,7 +129,7 @@ void SplitLargeMeshesProcess_Triangle::UpdateNode(aiNode* pcNode,
         pcNode->mMeshes[b] = aiEntries[b];
     }
 
-    // recusively update all other nodes
+    // recursively update all other nodes
     for (unsigned int i = 0; i < pcNode->mNumChildren;++i) {
         UpdateNode ( pcNode->mChildren[i], avList );
     }
@@ -353,7 +353,7 @@ void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene) {
 
     std::vector<std::pair<aiMesh*, unsigned int> > avList;
 
-    //Check for point cloud first, 
+    //Check for point cloud first,
     //Do not process point cloud, splitMesh works only with faces data
     for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
         if ( pScene->mMeshes[a]->mPrimitiveTypes == aiPrimitiveType_POINT ) {

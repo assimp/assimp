@@ -191,6 +191,6 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     pMesh->mNumBones = writeBone;
 
     if (!DefaultLogger::isNullLogger()) {
-        ASSIMP_LOG_INFO_F("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ", pMesh->mNumBones);
+        ASSIMP_LOG_INFO("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ", pMesh->mNumBones);
     }
 }

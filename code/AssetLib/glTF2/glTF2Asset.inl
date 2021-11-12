@@ -131,6 +131,7 @@ inline void CopyData(size_t count, const uint8_t *src, size_t src_stride,
     if (src_stride == dst_stride) {
         memcpy(dst, src, count * src_stride);
         return;
+    }
 
     size_t sz = std::min(src_stride, dst_stride);
     for (size_t i = 0; i < count; ++i) {

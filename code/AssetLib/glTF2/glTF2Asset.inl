@@ -90,7 +90,6 @@ namespace {
 //
 // JSON Value reading helpers
 //
-
 inline CustomExtension ReadExtensions(const char *name, Value &obj) {
     CustomExtension ret;
     ret.name = name;
@@ -125,6 +124,80 @@ inline CustomExtension ReadExtensions(const char *name, Value &obj) {
         ret.mBoolValue.isPresent = true;
     }
     return ret;
+}
+
+inline void CopyData(size_t count, const uint8_t *src, size_t src_stride,
+        uint8_t *dst, size_t dst_stride) {
+    if (src_stride == dst_stride) {
+        memcpy(dst, src, count * src_stride);
+        return;
+
+    size_t sz = std::min(src_stride, dst_stride);
+    for (size_t i = 0; i < count; ++i) {
+        memcpy(dst, src, sz);
+        if (sz < dst_stride) {
+            memset(dst + sz, 0, dst_stride - sz);
+        }
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+
+void SetVector(vec4 &v, const float (&in)[4]) {
+    v[0] = in[0];
+    v[1] = in[1];
+    v[2] = in[2];
+    v[3] = in[3];
+}
+
+void SetVector(vec3 &v, const float (&in)[3]) {
+    v[0] = in[0];
+    v[1] = in[1];
+    v[2] = in[2];
+}
+
+template <int N>
+inline int Compare(const char *attr, const char (&str)[N]) {
+    return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
+}
+
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4706)
+#endif // _MSC_VER
+
+inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
+    if ((pos = Compare(attr, "POSITION"))) {
+        v = &(p.attributes.position);
+    } else if ((pos = Compare(attr, "NORMAL"))) {
+        v = &(p.attributes.normal);
+    } else if ((pos = Compare(attr, "TANGENT"))) {
+        v = &(p.attributes.tangent);
+    } else if ((pos = Compare(attr, "TEXCOORD"))) {
+        v = &(p.attributes.texcoord);
+    } else if ((pos = Compare(attr, "COLOR"))) {
+        v = &(p.attributes.color);
+    } else if ((pos = Compare(attr, "JOINT"))) {
+        v = &(p.attributes.joint);
+    } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
+        v = &(p.attributes.jointmatrix);
+    } else if ((pos = Compare(attr, "WEIGHT"))) {
+        v = &(p.attributes.weight);
+    } else
+        return false;
+    return true;
+}
+
+inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, const char *attr, Mesh::AccessorList *&v, int &pos) {
+    if ((pos = Compare(attr, "POSITION"))) {
+        v = &(p.targets[targetIndex].position);
+    } else if ((pos = Compare(attr, "NORMAL"))) {
+        v = &(p.targets[targetIndex].normal);
+    } else if ((pos = Compare(attr, "TANGENT"))) {
+        v = &(p.targets[targetIndex].tangent);
+    } else
+        return false;
+    return true;
 }
 
 } // namespace
@@ -456,7 +529,6 @@ Ref<T> LazyDict<T>::Create(const char *id) {
 //
 // glTF dictionary objects methods
 //
-
 inline Buffer::Buffer() :
         byteLength(0),
         type(Type_arraybuffer),
@@ -865,27 +937,6 @@ inline size_t Accessor::GetMaxByteSize() {
     return (bufferView ? bufferView->byteLength : sparse->data.size());
 }
 
-namespace {
-inline void CopyData(size_t count,
-        const uint8_t *src, size_t src_stride,
-        uint8_t *dst, size_t dst_stride) {
-    if (src_stride == dst_stride) {
-        memcpy(dst, src, count * src_stride);
-    } else {
-        size_t sz = std::min(src_stride, dst_stride);
-        for (size_t i = 0; i < count; ++i) {
-            memcpy(dst, src, sz);
-            if (sz < dst_stride) {
-                memset(dst + sz, 0, dst_stride - sz);
-            }
-            src += src_stride;
-            dst += dst_stride;
-        }
-    }
-}
-
-} // namespace
-
 template <class T>
 void Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
@@ -959,11 +1010,12 @@ inline void Accessor::WriteSparseIndices(size_t _count, const void *src_idx, siz
     ai_assert(indices_dst + _count * indices_dst_stride <= indices_buffer_ptr + sparse->indices->buffer->byteLength);
     CopyData(_count, indices_src, src_idxStride, indices_dst, indices_dst_stride);
 }
+
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc),
-        data(acc.GetPointer()),
-        elemSize(acc.GetElementSize()),
-        stride(acc.GetStride()) {
+    accessor(acc),
+    data(acc.GetPointer()),
+    elemSize(acc.GetElementSize()),
+    stride(acc.GetStride()) {
 }
 
 //! Accesses the i-th value as defined by the accessor
@@ -1241,21 +1293,6 @@ inline void Material::Read(Value &material, Asset &r) {
     }
 }
 
-namespace {
-void SetVector(vec4 &v, const float (&in)[4]) {
-    v[0] = in[0];
-    v[1] = in[1];
-    v[2] = in[2];
-    v[3] = in[3];
-}
-
-void SetVector(vec3 &v, const float (&in)[3]) {
-    v[0] = in[0];
-    v[1] = in[1];
-    v[2] = in[2];
-}
-} // namespace
-
 inline void Material::SetDefaults() {
     //pbr materials
     SetVector(pbrMetallicRoughness.baseColorFactor, defaultBaseColor);
@@ -1293,53 +1330,6 @@ inline void MaterialIOR::SetDefaults() {
     //KHR_materials_ior properties
     ior = 1.5f;
 }
-
-namespace {
-
-template <int N>
-inline int Compare(const char *attr, const char (&str)[N]) {
-    return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
-}
-
-#if _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#endif // _MSC_VER
-
-inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::AccessorList *&v, int &pos) {
-    if ((pos = Compare(attr, "POSITION"))) {
-        v = &(p.attributes.position);
-    } else if ((pos = Compare(attr, "NORMAL"))) {
-        v = &(p.attributes.normal);
-    } else if ((pos = Compare(attr, "TANGENT"))) {
-        v = &(p.attributes.tangent);
-    } else if ((pos = Compare(attr, "TEXCOORD"))) {
-        v = &(p.attributes.texcoord);
-    } else if ((pos = Compare(attr, "COLOR"))) {
-        v = &(p.attributes.color);
-    } else if ((pos = Compare(attr, "JOINT"))) {
-        v = &(p.attributes.joint);
-    } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
-        v = &(p.attributes.jointmatrix);
-    } else if ((pos = Compare(attr, "WEIGHT"))) {
-        v = &(p.attributes.weight);
-    } else
-        return false;
-    return true;
-}
-
-inline bool GetAttribTargetVector(Mesh::Primitive &p, const int targetIndex, const char *attr, Mesh::AccessorList *&v, int &pos) {
-    if ((pos = Compare(attr, "POSITION"))) {
-        v = &(p.targets[targetIndex].position);
-    } else if ((pos = Compare(attr, "NORMAL"))) {
-        v = &(p.targets[targetIndex].normal);
-    } else if ((pos = Compare(attr, "TANGENT"))) {
-        v = &(p.targets[targetIndex].tangent);
-    } else
-        return false;
-    return true;
-}
-} // namespace
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
     Value *curName = FindMember(pJSON_Object, "name");
@@ -1811,8 +1801,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 }
 
-inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, std::vector<char> &sceneData)
-{
+inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, std::vector<char> &sceneData) {
     ASSIMP_LOG_DEBUG("Loading GLTF2 asset");
 
     // is binary? then read the header
@@ -1863,9 +1852,6 @@ inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, 
 inline void Asset::Load(const std::string &pFile, bool isBinary)
 {
     mCurrentAssetDir.clear();
-    /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
-    if (pos != int(std::string::npos)) */
-
     if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
         mCurrentAssetDir = glTFCommon::getCurrentAssetDir(pFile);
     }
@@ -1950,10 +1936,8 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     }
 }
 
-inline bool Asset::CanRead(const std::string &pFile, bool isBinary)
-{
-    try
-    {
+inline bool Asset::CanRead(const std::string &pFile, bool isBinary) {
+    try {
         shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
         if (!stream) {
             return false;
@@ -1961,9 +1945,7 @@ inline bool Asset::CanRead(const std::string &pFile, bool isBinary)
         std::vector<char> sceneData;
         rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
         asset.Read(doc);
-    }
-    catch (...)
-    {
+    } catch (...) {
         return false;
     }
     return true;
@@ -2069,7 +2051,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #if _MSC_VER
-#pragma warning(pop)
+#   pragma warning(pop)
 #endif // _MSC_VER
 
 } // namespace glTF2

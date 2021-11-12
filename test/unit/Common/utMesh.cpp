@@ -39,23 +39,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 
-#include <assimp/postprocess.h>
-#include <assimp/Importer.hpp>
+#include <assimp/mesh.h>
 
 using namespace Assimp;
 
-class utX3DImportExport : public AbstractImportExportBase {
-public:
-    bool importerTest() override {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/HelloX3dTrademark.x3d", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
-    }
+class utMesh : public ::testing::Test {
+protected:
+  aiMesh* mesh = nullptr;
+
+  void SetUp() override {
+    mesh = new aiMesh;
+  }
+
+  void TearDown() override {
+    delete mesh;
+    mesh = nullptr;
+  }
 };
 
-TEST_F(utX3DImportExport, importX3DFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST_F(utMesh, emptyMeshHasNoContentTest) {
+  EXPECT_EQ(0, mesh->mName.length);
+  EXPECT_FALSE(mesh->HasPositions());
+  EXPECT_FALSE(mesh->HasFaces());
+  EXPECT_FALSE(mesh->HasNormals());
+  EXPECT_FALSE(mesh->HasTangentsAndBitangents());
+  EXPECT_FALSE(mesh->HasVertexColors(0));
+  EXPECT_FALSE(mesh->HasVertexColors(AI_MAX_NUMBER_OF_COLOR_SETS));
+  EXPECT_FALSE(mesh->HasTextureCoords(0));
+  EXPECT_FALSE(mesh->HasTextureCoords(AI_MAX_NUMBER_OF_TEXTURECOORDS));
+  EXPECT_EQ(0, mesh->GetNumUVChannels());
+  EXPECT_EQ(0, mesh->GetNumColorChannels());
+  EXPECT_FALSE(mesh->HasBones());
+  EXPECT_FALSE(mesh->HasTextureCoordsName(0));
+  EXPECT_FALSE(mesh->HasTextureCoordsName(AI_MAX_NUMBER_OF_TEXTURECOORDS));
+}
+
+TEST_F(utMesh, setTextureCoordsName) {
+  EXPECT_FALSE(mesh->HasTextureCoordsName(0));
+  const aiString texcoords_name("texcoord_name");
+  mesh->SetTextureCoordsName(0, texcoords_name);
+  EXPECT_TRUE(mesh->HasTextureCoordsName(0));
+  EXPECT_FALSE(mesh->HasTextureCoordsName(1));
+  ASSERT_NE(nullptr, mesh->mTextureCoordsNames);
+  ASSERT_NE(nullptr, mesh->mTextureCoordsNames[0]);
+  EXPECT_STREQ(texcoords_name.C_Str(), mesh->mTextureCoordsNames[0]->C_Str());
+  EXPECT_STREQ(texcoords_name.C_Str(), mesh->GetTextureCoordsName(0)->C_Str());
+
+  // Now clear the name
+  mesh->SetTextureCoordsName(0, aiString());
+  EXPECT_FALSE(mesh->HasTextureCoordsName(0));
+  ASSERT_NE(nullptr, mesh->mTextureCoordsNames);
+  EXPECT_EQ(nullptr, mesh->mTextureCoordsNames[0]);
+  EXPECT_EQ(nullptr, mesh->GetTextureCoordsName(0));
 }

@@ -138,7 +138,7 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
-  unit/utM3DImportExport.cpp
+  #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
@@ -149,14 +149,13 @@ SET( IMPORTERS
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
   unit/ImportExport/utMD2Importer.cpp
-  unit/ImportExport/utMD3Importer.cpp
+  #unit/ImportExport/utMD3Importer.cpp
   unit/ImportExport/utMD5Importer.cpp
   unit/ImportExport/utMDLImporter.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
-  #unit/ImportExport/IRR/utIrrImportExport.cpp
   unit/ImportExport/RAW/utRAWImportExport.cpp
   unit/ImportExport/Terragen/utTerragenImportExport.cpp
 )

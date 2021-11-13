@@ -174,6 +174,22 @@ static void IdentityMatrix4(mat4 &o) {
     o[15] = 1;
 }
 
+static bool IsBoneWeightFitted(vec4 &weight) {
+    return weight[0] + weight[1] + weight[2] + weight[3] >= 1.f;
+}
+
+static int FitBoneWeight(vec4 &weight, float value) {
+    int i = 0;
+    for (; i < 4; ++i) {
+        if (weight[i] < value) {
+            weight[i] = value;
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 template <typename T>
 void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
         unsigned int numCompsIn, unsigned int numCompsOut) {
@@ -950,15 +966,21 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
             unsigned int vertexId = aib->mWeights[idx_weights].mVertexId;
             float vertWeight = aib->mWeights[idx_weights].mWeight;
 
-            // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) {
+            // A vertex can only have at most four joint weights, which ideally sum up to 1
+            if (IsBoneWeightFitted(vertexWeightData[vertexId])) {
                 continue;
             }
+            if (jointsPerVertex[vertexId] > 3) {
+                int boneIndexFitted = FitBoneWeight(vertexWeightData[vertexId], vertWeight);
+                if (boneIndexFitted) {
+                    vertexJointData[vertexId][boneIndexFitted] = static_cast<float>(jointNamesIndex);
+                }
+            }else {
+                vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
+                vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
 
-            vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
-            vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
-
-            jointsPerVertex[vertexId] += 1;
+                jointsPerVertex[vertexId] += 1;   
+            }
         }
 
     } // End: for-loop mNumMeshes

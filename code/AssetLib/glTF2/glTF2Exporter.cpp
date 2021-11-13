@@ -974,7 +974,7 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
         Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
         uint8_t *arrys = new uint8_t[bytesLen];
         unsigned int i = 0;
-        for (unsigned int j = 0; j <= bytesLen; j += bytesPerComp) {
+        for (unsigned int j = 0; j < bytesLen; j += bytesPerComp) {
             size_t len_p = offset + j;
             float f_value = *(float *)&buf->GetPointer()[len_p];
             unsigned short c = static_cast<unsigned short>(f_value);

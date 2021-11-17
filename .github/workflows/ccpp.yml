@@ -131,6 +131,7 @@ jobs:
       
     - name: Coveralls
       uses: coverallsapp/github-action@master
+      cmakeAppendedArgs: '-DASSIMP_COVERALLS=ON'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 

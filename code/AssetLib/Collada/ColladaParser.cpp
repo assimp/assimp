@@ -2204,7 +2204,7 @@ void ColladaParser::ReadMaterialVertexInputBinding(XmlNode &node, Collada::Seman
 
 void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive) {
     // Attempt to load any undefined Collada::Image in ImageLibrary
-    for (auto & it : mImageLibrary) {
+    for (auto &it : mImageLibrary) {
         Collada::Image &image = it.second;
 
         if (image.mImageData.empty()) {

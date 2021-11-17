@@ -90,6 +90,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utMesh.cpp
   unit/Common/utStandardShapes.cpp
   unit/Common/uiScene.cpp
   unit/Common/utLineSplitter.cpp
@@ -137,7 +138,7 @@ SET( IMPORTERS
   unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
-  unit/utM3DImportExport.cpp
+  #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
@@ -148,14 +149,13 @@ SET( IMPORTERS
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
   unit/ImportExport/utMD2Importer.cpp
-  unit/ImportExport/utMD3Importer.cpp
+  #unit/ImportExport/utMD3Importer.cpp
   unit/ImportExport/utMD5Importer.cpp
   unit/ImportExport/utMDLImporter.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
-  #unit/ImportExport/IRR/utIrrImportExport.cpp
   unit/ImportExport/RAW/utRAWImportExport.cpp
   unit/ImportExport/Terragen/utTerragenImportExport.cpp
 )
@@ -222,6 +222,19 @@ if(ASSIMP_HUNTER_ENABLED)
 else()
     target_sources(unit PUBLIC ${Assimp_SOURCE_DIR}/contrib/gtest/src/gtest-all.cc)
 endif()
+
+# RapidJSON
+IF(ASSIMP_HUNTER_ENABLED)
+  hunter_add_package(RapidJSON)
+  find_package(RapidJSON CONFIG REQUIRED)
+ELSE()
+  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+  ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
+  option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
+  if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
+    ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
+  endif()
+ENDIF()
 
 IF (ASSIMP_BUILD_DRACO)
   ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )

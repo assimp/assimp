@@ -600,7 +600,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
     // need to read all textures
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins; ++i) {
-        if (szCurrent >= szEnd) {
+        if (szCurrent + sizeof(uint32_t) > szEnd) {
             throw DeadlyImportError("Texture data past end of file.");
         }
         BE_NCONST MDL::Skin *pcSkin;

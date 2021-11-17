@@ -174,6 +174,22 @@ static void IdentityMatrix4(mat4 &o) {
     o[15] = 1;
 }
 
+static bool IsBoneWeightFitted(vec4 &weight) {
+    return weight[0] + weight[1] + weight[2] + weight[3] >= 1.f;
+}
+
+static int FitBoneWeight(vec4 &weight, float value) {
+    int i = 0;
+    for (; i < 4; ++i) {
+        if (weight[i] < value) {
+            weight[i] = value;
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 template <typename T>
 void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
         unsigned int numCompsIn, unsigned int numCompsOut) {
@@ -950,15 +966,21 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
             unsigned int vertexId = aib->mWeights[idx_weights].mVertexId;
             float vertWeight = aib->mWeights[idx_weights].mWeight;
 
-            // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) {
+            // A vertex can only have at most four joint weights, which ideally sum up to 1
+            if (IsBoneWeightFitted(vertexWeightData[vertexId])) {
                 continue;
             }
+            if (jointsPerVertex[vertexId] > 3) {
+                int boneIndexFitted = FitBoneWeight(vertexWeightData[vertexId], vertWeight);
+                if (boneIndexFitted) {
+                    vertexJointData[vertexId][boneIndexFitted] = static_cast<float>(jointNamesIndex);
+                }
+            }else {
+                vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
+                vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
 
-            vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
-            vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
-
-            jointsPerVertex[vertexId] += 1;
+                jointsPerVertex[vertexId] += 1;   
+            }
         }
 
     } // End: for-loop mNumMeshes
@@ -974,7 +996,7 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
         Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
         uint8_t *arrys = new uint8_t[bytesLen];
         unsigned int i = 0;
-        for (unsigned int j = 0; j <= bytesLen; j += bytesPerComp) {
+        for (unsigned int j = 0; j < bytesLen; j += bytesPerComp) {
             size_t len_p = offset + j;
             float f_value = *(float *)&buf->GetPointer()[len_p];
             unsigned short c = static_cast<unsigned short>(f_value);
@@ -1395,15 +1417,15 @@ inline Ref<Accessor> GetSamplerInputRef(Asset &asset, std::string &animId, Ref<B
 inline void ExtractTranslationSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumPositionKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 3);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey &key = nodeChannel->mPositionKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 3) + 0] = key.mValue.x;
-        values[(i * 3) + 1] = key.mValue.y;
-        values[(i * 3) + 2] = key.mValue.z;
+        values[(i * 3) + 0] = (ai_real) key.mValue.x;
+        values[(i * 3) + 1] = (ai_real) key.mValue.y;
+        values[(i * 3) + 2] = (ai_real) key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1414,15 +1436,15 @@ inline void ExtractTranslationSampler(Asset &asset, std::string &animId, Ref<Buf
 inline void ExtractScaleSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumScalingKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 3);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 3);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiVectorKey &key = nodeChannel->mScalingKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 3) + 0] = key.mValue.x;
-        values[(i * 3) + 1] = key.mValue.y;
-        values[(i * 3) + 2] = key.mValue.z;
+        values[(i * 3) + 0] = (ai_real) key.mValue.x;
+        values[(i * 3) + 1] = (ai_real) key.mValue.y;
+        values[(i * 3) + 2] = (ai_real) key.mValue.z;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1433,16 +1455,16 @@ inline void ExtractScaleSampler(Asset &asset, std::string &animId, Ref<Buffer> &
 inline void ExtractRotationSampler(Asset &asset, std::string &animId, Ref<Buffer> &buffer, const aiNodeAnim *nodeChannel, float ticksPerSecond, Animation::Sampler &sampler) {
     const unsigned int numKeyframes = nodeChannel->mNumRotationKeys;
 
-    std::vector<float> times(numKeyframes);
-    std::vector<float> values(numKeyframes * 4);
+    std::vector<ai_real> times(numKeyframes);
+    std::vector<ai_real> values(numKeyframes * 4);
     for (unsigned int i = 0; i < numKeyframes; ++i) {
         const aiQuatKey &key = nodeChannel->mRotationKeys[i];
         // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
         times[i] = static_cast<float>(key.mTime / ticksPerSecond);
-        values[(i * 4) + 0] = key.mValue.x;
-        values[(i * 4) + 1] = key.mValue.y;
-        values[(i * 4) + 2] = key.mValue.z;
-        values[(i * 4) + 3] = key.mValue.w;
+        values[(i * 4) + 0] = (ai_real) key.mValue.x;
+        values[(i * 4) + 1] = (ai_real) key.mValue.y;
+        values[(i * 4) + 2] = (ai_real) key.mValue.z;
+        values[(i * 4) + 3] = (ai_real) key.mValue.w;
     }
 
     sampler.input = GetSamplerInputRef(asset, animId, buffer, times);
@@ -1500,7 +1522,7 @@ void glTF2Exporter::ExportAnimations() {
             }
         }
 
-        // Assimp documentation staes this is not used (not implemented)
+        // Assimp documentation states this is not used (not implemented)
         // for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
         //     const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
         // }

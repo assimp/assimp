@@ -300,13 +300,14 @@ private:
 
         const char separator = getOsSeparator();
         for (it = in.begin(); it != in.end(); ++it) {
+            int remaining = std::distance(in.end(), it);
             // Exclude :// and \\, which remain untouched.
             // https://sourceforge.net/tracker/?func=detail&aid=3031725&group_id=226462&atid=1067632
-            if ( !strncmp(&*it, "://", 3 )) {
+            if (remaining >= 3 && !strncmp(&*it, "://", 3 )) {
                 it += 3;
                 continue;
             }
-            if (it == in.begin() && !strncmp(&*it, "\\\\", 2)) {
+            if (it == in.begin() && remaining >= 2 && !strncmp(&*it, "\\\\", 2)) {
                 it += 2;
                 continue;
             }

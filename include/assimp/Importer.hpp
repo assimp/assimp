@@ -246,6 +246,12 @@ public:
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
 
     // -------------------------------------------------------------------
+    /** Set a pointer configuration property.
+     * @see SetPropertyInteger()
+     */
+    bool SetPropertyPointer(const char *szName, void *sValue);
+
+    // -------------------------------------------------------------------
     /** Get a configuration property.
      * @param szName Name of the property. All supported properties
      *   are defined in the aiConfig.g header (all constants share the
@@ -296,6 +302,15 @@ public:
      */
     aiMatrix4x4 GetPropertyMatrix(const char *szName,
             const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
+
+    // -------------------------------------------------------------------
+    /** Get a pointer configuration property
+     *
+     *  The return value remains valid until the property is modified.
+     * @see GetPropertyInteger()
+     */
+    void* GetPropertyPointer(const char *szName,
+        void *sErrorReturn = nullptr) const;
 
     // -------------------------------------------------------------------
     /** Supplies a custom IO handler to the importer to use to open and

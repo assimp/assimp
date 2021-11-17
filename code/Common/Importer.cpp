@@ -1073,6 +1073,18 @@ bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
+bool Importer::SetPropertyPointer(const char* szName, void* value) {
+    ai_assert(nullptr != pimpl);
+    
+    bool existing;
+    ASSIMP_BEGIN_EXCEPTION_REGION();
+        existing = SetGenericProperty<void*>(pimpl->mPointerProperties, szName,value);
+    ASSIMP_END_EXCEPTION_REGION(bool);
+    return existing;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetPropertyInteger(const char* szName, int iErrorReturn /*= 0xffffffff*/) const {
     ai_assert(nullptr != pimpl);
@@ -1102,6 +1114,14 @@ aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& i
     ai_assert(nullptr != pimpl);
 
     return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+void* Importer::GetPropertyPointer(const char* szName, void* iErrorReturn /*= nullptr*/) const {
+    ai_assert(nullptr != pimpl);
+    
+    return GetGenericProperty<void*>(pimpl->mPointerProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

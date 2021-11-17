@@ -40,6 +40,9 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
+# Disabled importers: m3d for 5.1
+ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
+ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
 # Toggles the use of the hunter package manager
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
@@ -53,7 +56,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT( Assimp VERSION 5.0.1 )
+PROJECT(Assimp VERSION 5.1.0)
 
 # All supported options ###############################################
 

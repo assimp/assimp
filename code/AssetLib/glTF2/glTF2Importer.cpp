@@ -122,7 +122,7 @@ bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
 		return asset.CanRead(pFile, extension == "glb");
 	}
 
-    return false;
+    return true;
 }
 
 static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {

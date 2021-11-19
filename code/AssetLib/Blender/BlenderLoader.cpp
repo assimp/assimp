@@ -353,7 +353,6 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
         }
         iterator += 1;
     }
-    // Worst function I've ever written
 }
 
 // ------------------------------------------------------------------------------------------------

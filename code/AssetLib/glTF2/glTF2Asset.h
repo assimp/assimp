@@ -113,6 +113,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // clang-format on
 
 #include <assimp/StringUtils.h>
+#include <assimp/material.h>
+#include <assimp/GltfMaterial.h>
 
 #include "AssetLib/glTF/glTFCommon.h"
 
@@ -140,7 +142,6 @@ using glTFCommon::vec4;
 
 //! Magic number for GLB files
 #define AI_GLB_MAGIC_NUMBER "glTF"
-#include <assimp/pbrmaterial.h>
 
 #ifdef ASSIMP_API
 #include <assimp/Compiler/pushpack1.h>

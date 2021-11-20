@@ -299,6 +299,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         // glTFv2 is either PBR or Unlit
         aiShadingMode shadingMode = aiShadingMode_PBR_BRDF;
         if (mat.unlit) {
+            aimat->AddProperty(&mat.unlit, 1, "$mat.gltf.unlit", 0, 0); // TODO: Remove this property, it is kept for backwards compatibility with assimp 5.0.1
             shadingMode = aiShadingMode_Unlit;
         }
 

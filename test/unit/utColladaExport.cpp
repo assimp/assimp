@@ -125,12 +125,20 @@ TEST_F(utColladaExport, testExportLight) {
     ASSERT_TRUE(pTest->HasLights());
 
     const unsigned int origNumLights(pTest->mNumLights);
-    std::unique_ptr<aiLight[]> origLights(new aiLight[origNumLights]);
-    std::vector<std::string> origNames;
+    // There are FIVE!!! LIGHTS!!!
+    EXPECT_EQ(5, origNumLights) << "lights.dae should contain five lights";
+
+    std::vector<aiLight> origLights(5);
     for (size_t i = 0; i < origNumLights; i++) {
-        origNames.push_back(pTest->mLights[i]->mName.C_Str());
         origLights[i] = *(pTest->mLights[i]);
     }
+
+    // Check loaded first light properly
+    EXPECT_STREQ("Lamp", origLights[0].mName.C_Str());
+    EXPECT_EQ(aiLightSource_POINT, origLights[0].mType);
+    EXPECT_FLOAT_EQ(1.0f, origLights[0].mAttenuationConstant);
+    EXPECT_FLOAT_EQ(0.0f, origLights[0].mAttenuationLinear);
+    EXPECT_FLOAT_EQ(0.00111109f, origLights[0].mAttenuationQuadratic);
 
     // Common metadata
     // Confirm was loaded by the Collada importer
@@ -191,7 +199,7 @@ TEST_F(utColladaExport, testExportLight) {
     for (size_t i = 0; i < origNumLights; i++) {
         const aiLight *orig = &origLights[i];
         const aiLight *read = imported->mLights[i];
-        EXPECT_EQ(0, strncmp(origNames[i].c_str(), read->mName.C_Str(), origNames[i].size()));
+        EXPECT_EQ(0, strcmp(orig->mName.C_Str(), read->mName.C_Str()));
         EXPECT_EQ(orig->mType, read->mType);
         EXPECT_FLOAT_EQ(orig->mAttenuationConstant, read->mAttenuationConstant);
         EXPECT_FLOAT_EQ(orig->mAttenuationLinear, read->mAttenuationLinear);

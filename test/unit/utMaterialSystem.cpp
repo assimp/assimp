@@ -151,6 +151,8 @@ TEST_F(MaterialSystemTest, testCastIntProperty) {
     EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "integer"));
     value = 0;
     EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "zero"));
+    value = -1;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "negative"));
 
     // To float
     float valFloat = 0.0f;
@@ -158,6 +160,8 @@ TEST_F(MaterialSystemTest, testCastIntProperty) {
     EXPECT_EQ(10.0f, valFloat);
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valFloat));
     EXPECT_EQ(0.0f, valFloat);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("negative", 0, 0, valFloat));
+    EXPECT_EQ(-1.0f, valFloat);
 
     // To bool
     bool valBool = false;
@@ -165,6 +169,8 @@ TEST_F(MaterialSystemTest, testCastIntProperty) {
     EXPECT_EQ(true, valBool);
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
     EXPECT_EQ(false, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("negative", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -178,6 +184,28 @@ TEST_F(MaterialSystemTest, testCastFloatProperty) {
     int valInt = 0.0f;
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valInt));
     EXPECT_EQ(150392, valInt);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valInt));
+    EXPECT_EQ(0, valInt);
+
+    // To bool
+    bool valBool = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
+    EXPECT_EQ(false, valBool);
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testCastSmallFloatProperty) {
+    float value = 0.0078125f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "float"));
+    value = 0;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "zero"));
+
+    // To int
+    int valInt = 0.0f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valInt));
+    EXPECT_EQ(0, valInt);
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valInt));
     EXPECT_EQ(0, valInt);
 

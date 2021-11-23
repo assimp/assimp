@@ -163,15 +163,20 @@ AI_FORCE_INLINE
         } break;
 
         case aiPTI_Float:
-        case aiPTI_Double:
-        case aiPTI_Integer: {
-            // Read as integer and cast to bool
-            int value = 0;
-            if (AI_SUCCESS == ::aiGetMaterialInteger(this, pKey, type, idx, &value)) {
+        case aiPTI_Double: {
+            // Read as float and cast to bool
+            float value = 0.0f;
+            if (AI_SUCCESS == ::aiGetMaterialFloat(this, pKey, type, idx, &value)) {
                 pOut = static_cast<bool>(value);
                 return AI_SUCCESS;
             }
             return AI_FAILURE;
+        }
+        case aiPTI_Integer: {
+            // Cast to bool
+            const int value = static_cast<int>(*prop->mData);
+            pOut = static_cast<bool>(value);
+            return AI_SUCCESS;
         }
         }
     }

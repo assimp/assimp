@@ -138,6 +138,47 @@ aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 }
 
 // ---------------------------------------------------------------------------
+// Specialisation for a single bool.
+// Casts floating point and integer to bool
+template <>
+AI_FORCE_INLINE
+        aiReturn
+        aiMaterial::Get(const char *pKey, unsigned int type,
+                unsigned int idx, bool &pOut) const {
+    const aiMaterialProperty *prop;
+    const aiReturn ret = ::aiGetMaterialProperty(this, pKey, type, idx,
+            (const aiMaterialProperty **)&prop);
+    if (AI_SUCCESS == ret) {
+
+        switch (prop->mType) {
+            // Type cannot be converted
+        default: return AI_FAILURE;
+
+        case aiPTI_Buffer: {
+            // Native bool value storage
+            if (prop->mDataLength < sizeof(bool)) {
+                return AI_FAILURE;
+            }
+            ::memcpy(&pOut, prop->mData, sizeof(bool));
+        } break;
+
+        case aiPTI_Float:
+        case aiPTI_Double:
+        case aiPTI_Integer: {
+            // Read as integer and cast to bool
+            int value = 0;
+            if (AI_SUCCESS == ::aiGetMaterialInteger(this, pKey, type, idx, &value)) {
+                pOut = static_cast<bool>(value);
+                return AI_SUCCESS;
+            }
+            return AI_FAILURE;
+        }
+        }
+    }
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
 AI_FORCE_INLINE
 aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx,ai_real* pOut,

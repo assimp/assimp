@@ -863,6 +863,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             //indices componentType
             sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
             //sparse->indices->Read(*indicesValue, r);
+        } else {
+            // indicesType
+            sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
         }
 
         // value
@@ -875,8 +878,6 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             //sparse->values->Read(*valuesValue, r);
         }
 
-        // indicesType
-        sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;

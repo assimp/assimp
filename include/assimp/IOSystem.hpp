@@ -289,15 +289,6 @@ AI_FORCE_INLINE bool IOSystem::PushDirectory( const std::string &path ) {
 }
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE const std::string &IOSystem::CurrentDirectory() const {
-    if ( m_pathStack.empty() ) {
-        static const std::string Dummy;
-        return Dummy;
-    }
-    return m_pathStack[ m_pathStack.size()-1 ];
-}
-
-// ----------------------------------------------------------------------------
 AI_FORCE_INLINE size_t IOSystem::StackSize() const {
     return m_pathStack.size();
 }

@@ -809,6 +809,11 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
         }
 
         offset *= elementSize;
+
+        if (offset + elementSize > data.size()) {
+            throw DeadlyImportError("Invalid sparse accessor. Byte offset for patching points outside allocated memory.");
+        }
+
         std::memcpy(data.data() + offset, pValues, elementSize);
 
         pValues += elementSize;

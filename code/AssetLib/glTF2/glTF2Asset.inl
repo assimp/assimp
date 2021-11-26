@@ -600,6 +600,10 @@ inline void Buffer::Read(Value &obj, Asset &r) {
 inline bool Buffer::LoadFromStream(IOStream &stream, size_t length, size_t baseOffset) {
     byteLength = length ? length : stream.FileSize();
 
+    if (byteLength > stream.FileSize()) {
+        throw DeadlyImportError("GLTF: Invalid byteLength exceeds size of actual data.");
+    }
+
     if (baseOffset) {
         stream.Seek(baseOffset, aiOrigin_SET);
     }
@@ -809,11 +813,6 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
         }
 
         offset *= elementSize;
-
-        if (offset + elementSize > data.size()) {
-            throw DeadlyImportError("Invalid sparse accessor. Byte offset for patching points outside allocated memory.");
-        }
-
         std::memcpy(data.data() + offset, pValues, elementSize);
 
         pValues += elementSize;
@@ -868,9 +867,6 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             //indices componentType
             sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
             //sparse->indices->Read(*indicesValue, r);
-        } else {
-            // indicesType
-            sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
         }
 
         // value
@@ -883,6 +879,8 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             //sparse->values->Read(*valuesValue, r);
         }
 
+        // indicesType
+        sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;

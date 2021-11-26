@@ -107,6 +107,7 @@ namespace Blender {
 struct Object;
 struct MTex;
 struct Image;
+struct Collection;
 
 #include <memory>
 
@@ -148,23 +149,23 @@ struct Group : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Collection : ElemBase {
-    ID id FAIL;
-    ListBase gobject; // CollectionObject
-    ListBase children; // CollectionChild
-    //ListBase objects; // Objects
-};
-
-// -------------------------------------------------------------------------------
 struct CollectionObject : ElemBase {
-    std::shared_ptr<CollectionObject> next, prev;
-    std::shared_ptr<Object> ob;
+    //CollectionObject* prev;
+    std::shared_ptr<CollectionObject> next;
+    Object *ob;
 };
 
 // -------------------------------------------------------------------------------
 struct CollectionChild : ElemBase {
     std::shared_ptr<CollectionChild> next, prev;
     std::shared_ptr<Collection> collection;
+};
+
+// -------------------------------------------------------------------------------
+struct Collection : ElemBase {
+    ID id FAIL;
+    ListBase gobject; // CollectionObject
+    ListBase children; // CollectionChild
 };
 
 // -------------------------------------------------------------------------------

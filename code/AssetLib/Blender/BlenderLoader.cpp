@@ -325,7 +325,7 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
     // Count number of objects
     for (std::shared_ptr<CollectionObject> cur = std::static_pointer_cast<CollectionObject>(collection->gobject.first); cur; cur = cur->next) {
         if (cur->ob) {
-            root_objects.push_back(cur->ob.get());
+            root_objects.push_back(cur->ob);
         }
     }
     std::deque<Collection *> root_children;

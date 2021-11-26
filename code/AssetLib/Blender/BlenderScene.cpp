@@ -100,9 +100,18 @@ void Structure::Convert<CollectionObject>(
         CollectionObject &dest,
         const FileDatabase &db) const {
 
-    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev, "*prev", db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.ob, "*ob", db);
+    {
+        //std::shared_ptr<CollectionObject> prev;
+        //ReadFieldPtr<ErrorPolicy_Fail>(prev, "*prev", db);
+        //dest.prev = prev.get();
+
+        std::shared_ptr<Object> ob;
+        ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
+        dest.ob = ob.get();
+    }
+
+    db.reader->IncPtr(size);
 }
 
 //--------------------------------------------------------------------------------

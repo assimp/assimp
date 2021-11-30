@@ -361,6 +361,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
+    KeyFrameListList GetRotationKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
 
     // ------------------------------------------------------------------------------------------------
     KeyTimeList GetKeyTimeList(const KeyFrameListList& inputs);

@@ -319,41 +319,80 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
 }
 
 // ------------------------------------------------------------------------------------------------
+void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root, std::shared_ptr<Collection> collection, ConversionData &conv_data) {
+
+    std::deque<Object *> root_objects;
+    // Count number of objects
+    for (std::shared_ptr<CollectionObject> cur = std::static_pointer_cast<CollectionObject>(collection->gobject.first); cur; cur = cur->next) {
+        if (cur->ob) {
+            root_objects.push_back(cur->ob);
+        }
+    }
+    std::deque<Collection *> root_children;
+    // Count number of child nodes
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root_children.push_back(cur->collection.get());
+        }
+    }
+    root->mNumChildren = static_cast<unsigned int>(root_objects.size() + root_children.size());
+    root->mChildren = new aiNode *[root->mNumChildren]();
+
+    for (unsigned int i = 0; i < static_cast<unsigned int>(root_objects.size()); ++i) {
+        root->mChildren[i] = ConvertNode(in, root_objects[i], conv_data, aiMatrix4x4());
+        root->mChildren[i]->mParent = root;
+    }
+
+    // For each subcollection create a new node to represent it
+    unsigned int iterator = static_cast<unsigned int>(root_objects.size());
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root->mChildren[iterator] = new aiNode(cur->collection->id.name + 2); // skip over the name prefix 'OB'
+            root->mChildren[iterator]->mParent = root;
+            ParseSubCollection(in, root->mChildren[iterator], cur->collection, conv_data);
+        }
+        iterator += 1;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file) {
     ConversionData conv(file);
 
-    // FIXME it must be possible to take the hierarchy directly from
-    // the file. This is terrible. Here, we're first looking for
-    // all objects which don't have parent objects at all -
-    std::deque<const Object *> no_parents;
-    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
-        if (cur->object) {
-            if (!cur->object->parent) {
-                no_parents.push_back(cur->object.get());
-            } else {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-    for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
-        if (cur->object) {
-            if (cur->object->parent) {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-
-    if (no_parents.empty()) {
-        ThrowException("Expected at least one object with no parent");
-    }
-
     aiNode *root = out->mRootNode = new aiNode("<BlenderRoot>");
+    // Iterate over all objects directly under master_collection,
+    // If in.master_collection == null, then we're parsing something older.
+    if (in.master_collection) {
+        ParseSubCollection(in, root, in.master_collection, conv);
+    } else {
+        std::deque<const Object *> no_parents;
+        for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
+            if (cur->object) {
+                if (!cur->object->parent) {
+                    no_parents.push_back(cur->object.get());
+                } else {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
+        for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
+            if (cur->object) {
+                if (cur->object->parent) {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
 
-    root->mNumChildren = static_cast<unsigned int>(no_parents.size());
-    root->mChildren = new aiNode *[root->mNumChildren]();
-    for (unsigned int i = 0; i < root->mNumChildren; ++i) {
-        root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
-        root->mChildren[i]->mParent = root;
+        if (no_parents.empty()) {
+            ThrowException("Expected at least one object with no parent");
+        }
+
+        root->mNumChildren = static_cast<unsigned int>(no_parents.size());
+        root->mChildren = new aiNode *[root->mNumChildren]();
+        for (unsigned int i = 0; i < root->mNumChildren; ++i) {
+            root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
+            root->mChildren[i]->mParent = root;
+        }
     }
 
     BuildMaterials(conv);

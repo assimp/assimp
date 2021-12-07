@@ -114,6 +114,12 @@ TEST(utBlenderImporter, importBlenderDefault271) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utBlenderImporter, importBlenderDefault293) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_276.blend", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
 TEST(utBlenderImporter, importCubeHierarchy_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/CubeHierarchy_248.blend", aiProcess_ValidateDataStructure);

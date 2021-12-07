@@ -3127,7 +3127,12 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
         if (chain[i] == iterEnd)
             continue;
 
-        keyframeLists[i] = GetKeyframeList((*chain[i]).second, start, stop);
+        if (i == TransformationComp_Rotation || i == TransformationComp_PreRotation
+                || i == TransformationComp_PostRotation || i == TransformationComp_GeometricRotation) {
+            keyframeLists[i] = GetRotationKeyframeList((*chain[i]).second, start, stop);
+        } else {
+            keyframeLists[i] = GetKeyframeList((*chain[i]).second, start, stop);
+        }
 
         for (KeyFrameListList::const_iterator it = keyframeLists[i].begin(); it != keyframeLists[i].end(); ++it) {
             const KeyTimeList& times = *std::get<0>(*it);
@@ -3272,6 +3277,79 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<c
         }
     }
     return inputs; // pray for NRVO :-)
+}
+
+FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::vector<const AnimationCurveNode *> &nodes,
+                                                                     int64_t start, int64_t stop) {
+    KeyFrameListList inputs;
+    inputs.reserve(nodes.size() * 3);
+
+    //give some breathing room for rounding errors
+    const int64_t adj_start = start - 10000;
+    const int64_t adj_stop = stop + 10000;
+
+    for (const AnimationCurveNode *node : nodes) {
+        ai_assert(node);
+
+        const AnimationCurveMap &curves = node->Curves();
+        for (const AnimationCurveMap::value_type &kv : curves) {
+
+            unsigned int mapto;
+            if (kv.first == "d|X") {
+                mapto = 0;
+            } else if (kv.first == "d|Y") {
+                mapto = 1;
+            } else if (kv.first == "d|Z") {
+                mapto = 2;
+            } else {
+                FBXImporter::LogWarn("ignoring scale animation curve, did not recognize target component");
+                continue;
+            }
+
+            const AnimationCurve *const curve = kv.second;
+            ai_assert(curve->GetKeys().size() == curve->GetValues().size());
+            ai_assert(curve->GetKeys().size());
+
+            //get values within the start/stop time window
+            std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
+            std::shared_ptr<KeyValueList> Values(new KeyValueList());
+            const size_t count = curve->GetKeys().size();
+
+            int64_t tp = curve->GetKeys().at(0);
+            float vp = curve->GetValues().at(0);
+            Keys->push_back(tp);
+            Values->push_back(vp);
+            if (count > 1) {
+                int64_t tc = curve->GetKeys().at(1);
+                float vc = curve->GetValues().at(1);
+                for (size_t n = 1; n < count; n++) {
+                    while (std::abs(vc - vp) >= 180.0f) {
+                        float step = std::floor(float(tc - tp) / (vc - vp) * 179.0f);
+                        int64_t tnew = tp + int64_t(step);
+                        float vnew = vp + (vc - vp) * step / float(tc - tp);
+                        if (tnew >= adj_start && tnew <= adj_stop) {
+                            Keys->push_back(tnew);
+                            Values->push_back(vnew);
+                        }
+                        tp = tnew;
+                        vp = vnew;
+                    }
+                    if (tc >= adj_start && tc <= adj_stop) {
+                        Keys->push_back(tc);
+                        Values->push_back(vc);
+                    }
+                    if (n + 1 < count) {
+                        tp = tc;
+                        vp = vc;
+                        tc = curve->GetKeys().at(n + 1);
+                        vc = curve->GetValues().at(n + 1);
+                    }
+                }
+            }
+            inputs.push_back(std::make_tuple(Keys, Values, mapto));
+        }
+    }
+    return inputs;
 }
 
 KeyTimeList FBXConverter::GetKeyTimeList(const KeyFrameListList &inputs) {
@@ -3464,7 +3542,7 @@ void FBXConverter::ConvertRotationKeys(aiNodeAnim *na, const std::vector<const A
     ai_assert(nodes.size());
 
     // XXX see notes in ConvertScaleKeys()
-    const std::vector<KeyFrameList> &inputs = GetKeyframeList(nodes, start, stop);
+    const std::vector<KeyFrameList> &inputs = GetRotationKeyframeList(nodes, start, stop);
     const KeyTimeList &keys = GetKeyTimeList(inputs);
 
     na->mNumRotationKeys = static_cast<unsigned int>(keys.size());

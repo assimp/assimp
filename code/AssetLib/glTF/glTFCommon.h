@@ -300,7 +300,7 @@ public:
 
     inline unsigned int GetIndex() const { return index; }
 
-    operator bool() const { return vector != 0; }
+    operator bool() const { return vector != nullptr && index < vector->size(); }
 
     T *operator->() { return (*vector)[index]; }
 

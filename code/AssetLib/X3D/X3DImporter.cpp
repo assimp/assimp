@@ -235,10 +235,8 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
 
 bool X3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool checkSig) const {
     if (checkSig) {
-        std::string::size_type pos = pFile.find_last_of(".x3d");
-        if (pos != std::string::npos) {
+        if (GetExtension(pFile) == "x3d")
             return true;
-        }
     }
 
     return false;

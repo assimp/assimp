@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file PolyTools.h, various utilities for our dealings with arbitrary polygons */
 
+#pragma once
 #ifndef AI_POLYTOOLS_H_INCLUDED
 #define AI_POLYTOOLS_H_INCLUDED
 
@@ -55,8 +55,7 @@ namespace Assimp {
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline double GetArea2D(const T& v1, const T& v2, const T& v3)
-{
+inline double GetArea2D(const T& v1, const T& v2, const T& v3) {
     return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
 }
 
@@ -65,8 +64,7 @@ inline double GetArea2D(const T& v1, const T& v2, const T& v3)
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2)
-{
+inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2) {
     return GetArea2D(p0,p2,p1) > 0;
 }
 
@@ -75,20 +73,23 @@ inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2)
  * The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
-{
+inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp) {
     // Point in triangle test using baryzentric coordinates
     const aiVector2D v0 = p1 - p0;
     const aiVector2D v1 = p2 - p0;
     const aiVector2D v2 = pp - p0;
 
     double dot00 = v0 * v0;
-    double dot01 = v0 * v1;
-    double dot02 = v0 * v2;
     double dot11 = v1 * v1;
-    double dot12 = v1 * v2;
-
-    const double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    const double dot01 = v0 * v1;
+    const double dot02 = v0 * v2;
+    const double dot12 = v1 * v2;
+    const double denom = dot00 * dot11 - dot01 * dot01;
+    if (denom == 0.0) {
+        return false;
+    }
+    
+    const double invDenom = 1.0 / denom;
     dot11 = (dot11 * dot02 - dot01 * dot12) * invDenom;
     dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
@@ -133,8 +134,7 @@ inline bool IsCCW(T* in, size_t npoints) {
             //      in[i+2].x, in[i+2].y)) {
             convex_turn = AI_MATH_PI_F - theta;
             convex_sum += convex_turn;
-        }
-        else {
+        } else {
             convex_sum -= AI_MATH_PI_F - theta;
         }
     }
@@ -161,14 +161,12 @@ inline bool IsCCW(T* in, size_t npoints) {
     if (OnLeftSideOfLine2D(in[npoints-2],in[1],in[0])) {
         convex_turn = AI_MATH_PI_F - theta;
         convex_sum += convex_turn;
-    }
-    else {
+    } else {
         convex_sum -= AI_MATH_PI_F - theta;
     }
 
     return convex_sum >= (2 * AI_MATH_PI_F);
 }
-
 
 // -------------------------------------------------------------------------------
 /** Compute the normal of an arbitrary polygon in R3.
@@ -186,8 +184,7 @@ inline bool IsCCW(T* in, size_t npoints) {
  *  this method is much faster than the 'other' NewellNormal()
  */
 template <int ofs_x, int ofs_y, int ofs_z, typename TReal>
-inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, TReal* z)
-{
+inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, TReal* z) {
     // Duplicate the first two vertices at the end
     x[(num+0)*ofs_x] = x[0];
     x[(num+1)*ofs_x] = x[ofs_x];
@@ -224,6 +221,6 @@ inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, T
     out = aiVector3t<TReal>(sum_yz,sum_zx,sum_xy);
 }
 
-} // ! Assimp
+} // ! namespace Assimp
 
-#endif
+#endif // AI_POLYTOOLS_H_INCLUDED

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/scene.h>
+#include <assimp/SceneCombiner.h>
 
 using namespace Assimp;
 
@@ -86,6 +87,22 @@ TEST_F(utScene, getShortFilenameTest) {
     std::string long_filename2 = "foo_bar\\name";
     const char *name2 = scene->GetShortFilename(long_filename2.c_str());
 	EXPECT_NE(nullptr, name2);
+}
+
+TEST_F(utScene, deepCopyTest) {
+    scene->mRootNode = new aiNode();
+    
+    scene->mNumMeshes = 1;
+    scene->mMeshes = new aiMesh *[scene->mNumMeshes] ();
+    scene->mMeshes[0] = new aiMesh ();
+
+    scene->mMeshes[0]->SetTextureCoordsName (0, aiString ("test"));
+
+    {
+        aiScene* copied = nullptr;
+        SceneCombiner::CopyScene(&copied,scene);
+        delete copied;
+    }
 }
 
 TEST_F(utScene, getEmbeddedTextureTest) {

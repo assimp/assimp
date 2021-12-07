@@ -79,11 +79,11 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
     const aiVector2D v1 = p2 - p0;
     const aiVector2D v2 = pp - p0;
 
-    const double dot00 = v0 * v0;
+    double dot00 = v0 * v0;
+    double dot11 = v1 * v1;
     const double dot01 = v0 * v1;
     const double dot02 = v0 * v2;
-    double dot11 = v1 * v1;
-    double dot12 = v1 * v2;
+    const double dot12 = v1 * v2;
     const double denom = dot00 * dot11 - dot01 * dot01;
     if (denom == 0.0) {
         return false;

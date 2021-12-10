@@ -378,6 +378,11 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         const DXF::Block& bl_src = *(*it).second;
 
         for (std::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
+            if (!pl_in) {
+                ASSIMP_LOG_ERROR("DXF: PolyLine instance is nullptr, skipping.");
+                continue;
+            }
+            
             std::shared_ptr<DXF::PolyLine> pl_out = std::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {

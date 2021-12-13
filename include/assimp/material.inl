@@ -105,7 +105,7 @@ aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
             return AI_FAILURE;
         }
 
-        iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
+        iNum = (unsigned int)std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
         ::memcpy(pOut,prop->mData,iNum * sizeof(Type));
         if (pMax) {
             *pMax = iNum;

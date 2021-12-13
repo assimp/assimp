@@ -73,7 +73,7 @@ TEST_F(MaterialSystemTest, testFloatArrayProperty) {
     pf[0] = pf[1] = pf[2] = pf[3] = 12.0f;
 
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey2", 0, 0, pf, &pMax));
-    EXPECT_EQ(sizeof(pf) / sizeof(float), pMax);
+    EXPECT_EQ(sizeof(pf) / sizeof(float), static_cast<size_t>(pMax));
     EXPECT_TRUE(!pf[0] && 1.0f == pf[1] && 2.0f == pf[2] && 3.0f == pf[3]);
 }
 

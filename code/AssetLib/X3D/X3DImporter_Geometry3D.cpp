@@ -879,7 +879,7 @@ void X3DImporter::readSphere(XmlNode &node) {
     X3DNodeElementBase *ne(nullptr);
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
-    XmlParser::getFloatAttribute(node, "radius", radius);
+    XmlParser::getRealAttribute(node, "radius", radius);
     XmlParser::getBoolAttribute(node, "solid", solid);
 
     // if "USE" defined then find already defined element.

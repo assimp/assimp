@@ -255,5 +255,4 @@ struct aiLight {
 }
 #endif
 
-
 #endif // !! AI_LIGHT_H_INC

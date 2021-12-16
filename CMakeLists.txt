@@ -182,8 +182,8 @@ SET (ASSIMP_SOVERSION 5)
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 if(NOT ASSIMP_HUNTER_ENABLED)
-  # Enable C++17 support globally
-  set(CMAKE_CXX_STANDARD 17)
+  # Enable C++11 support globally
+  set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_C_STANDARD 99)
 endif()

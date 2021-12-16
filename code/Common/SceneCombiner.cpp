@@ -1101,6 +1101,14 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);
+
+    // make a deep copy of all texture coordinate names
+    if (src->mTextureCoordsNames != nullptr) {
+        dest->mTextureCoordsNames = new aiString *[AI_MAX_NUMBER_OF_TEXTURECOORDS] {};
+        for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            Copy(&dest->mTextureCoordsNames[i], src->mTextureCoordsNames[i]);
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1346,6 +1354,18 @@ void SceneCombiner::Copy(aiMetadata **_dest, const aiMetadata *src) {
             break;
         }
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+void SceneCombiner::Copy(aiString **_dest, const aiString *src) {
+    if (nullptr == _dest || nullptr == src) {
+        return;
+    }
+
+    aiString *dest = *_dest = new aiString();
+
+    // get a flat copy
+    *dest = *src;
 }
 
 #if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)

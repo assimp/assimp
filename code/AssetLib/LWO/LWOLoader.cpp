@@ -393,7 +393,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
 
                             // If a RGB color map is explicitly requested delete the
                             // alpha channel - it could theoretically be != 1.
-                            if (_mSurfaces[i].mVCMapType == AI_LWO_RGB)
+                            if (_mSurfaces[j].mVCMapType == AI_LWO_RGB)
                                 pvVC[w]->a = 1.f;
 
                             pvVC[w]++;

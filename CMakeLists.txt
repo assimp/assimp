@@ -56,7 +56,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.1.3)
+PROJECT(Assimp VERSION 5.1.4)
 
 # All supported options ###############################################
 
@@ -183,7 +183,9 @@ SET (ASSIMP_SOVERSION 5)
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 if(NOT ASSIMP_HUNTER_ENABLED)
   # Enable C++11 support globally
-  set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_C_STANDARD 99)
 endif()
 
 IF(NOT ASSIMP_IGNORE_GIT_HASH)
@@ -762,7 +764,7 @@ if(WIN32)
 
   IF(MSVC_TOOLSET_VERSION)
     SET(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
-    SET(ASSIMP_MSVC_VERSION ${MCVS_PREFIX})
+    SET(ASSIMP_MSVC_VERSION ${MSVC_PREFIX})
   ELSE()
     IF(MSVC12)
       SET(ASSIMP_MSVC_VERSION "vc120")

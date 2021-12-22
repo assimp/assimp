@@ -65,6 +65,7 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 BaseImporter::BaseImporter() AI_NO_EXCEPT
         : m_progress() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -371,11 +372,16 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
     }
 
     // UTF 16 BE with BOM
+    size_t index = 0;
     if (*((uint16_t *)&data.front()) == 0xFFFE) {
-
         // swap the endianness ..
         for (uint16_t *p = (uint16_t *)&data.front(), *end = (uint16_t *)&data.back(); p <= end; ++p) {
-            ByteSwap::Swap2(p);
+            // Check to ensure no overflow can happen
+            if ((index+2) < data.Size()) {
+                // Swap the data
+                ByteSwap::Swap2(p);
+                index += 2;
+            }
         }
     }
 

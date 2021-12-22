@@ -377,7 +377,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
         // swap the endianness ..
         for (uint16_t *p = (uint16_t *)&data.front(), *end = (uint16_t *)&data.back(); p <= end; ++p) {
             // Check to ensure no overflow can happen
-            if ((index+2) < data.Size()) {
+            if ((index+2) < data.size()) {
                 // Swap the data
                 ByteSwap::Swap2(p);
                 index += 2;

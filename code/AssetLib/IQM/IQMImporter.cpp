@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 inline void swap_block( uint32_t *block, size_t size ){
+    (void)block; // suppress 'unreferenced formal parameter' MSVC warning
     size >>= 2;
     for ( size_t i = 0; i < size; ++i )
         AI_SWAP4( block[ i ] );
@@ -182,7 +183,7 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     }
 
     // Read all surfaces from the file
-    for( auto imesh = reinterpret_cast<iqmmesh*>( data + hdr.ofs_meshes ), end = imesh + hdr.num_meshes; imesh != end; ++imesh )
+    for( auto imesh = reinterpret_cast<iqmmesh*>( data + hdr.ofs_meshes ), end_ = imesh + hdr.num_meshes; imesh != end_; ++imesh )
     {
         swap_block( &imesh->name, sizeof( iqmmesh ) );
         // Allocate output mesh & material
@@ -214,10 +215,10 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         }
 
         // Fill in all vertices
-        for( auto array = reinterpret_cast<const iqmvertexarray*>( data + hdr.ofs_vertexarrays ), end = array + hdr.num_vertexarrays; array != end; ++array )
+        for( auto array = reinterpret_cast<const iqmvertexarray*>( data + hdr.ofs_vertexarrays ), end__ = array + hdr.num_vertexarrays; array != end__; ++array )
         {
-            const size_t nVerts = imesh->num_vertexes;
-            const size_t step = array->size;
+            const unsigned int nVerts = imesh->num_vertexes;
+            const unsigned int step = array->size;
 
             switch ( array->type )
             {

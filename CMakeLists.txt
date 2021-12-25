@@ -295,6 +295,7 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
   ENDIF()
   SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -O3 ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+  ADD_COMPILE_OPTIONS(-Wa,-mbig-obj)
 ENDIF()
 
 IF ( IOS AND NOT ASSIMP_HUNTER_ENABLED)

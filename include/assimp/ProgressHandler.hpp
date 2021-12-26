@@ -74,6 +74,7 @@ protected:
 public:
     /// @brief  Virtual destructor.
     virtual ~ProgressHandler () {
+        // empty
     }
 
     // -------------------------------------------------------------------

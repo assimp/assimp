@@ -1616,6 +1616,7 @@ endif()
 if( CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_HOST_WIN32 )
  # it is a bad hack after all
  # CMake generates Ninja makefiles with UNIX paths only if it thinks that we are going to build with MinGW
+ set( MINGW TRUE ) # tell CMake that we are MinGW
  set( CMAKE_COMPILER_IS_MINGW TRUE ) # tell CMake that we are MinGW
  set( CMAKE_CROSSCOMPILING TRUE )    # stop recursion
  enable_language( C )

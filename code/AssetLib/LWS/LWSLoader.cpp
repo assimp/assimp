@@ -932,6 +932,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             SkeletonMeshBuilder builder(pScene);
         }
     }
+    delete master;
 }
 
 #endif // !! ASSIMP_BUILD_NO_LWS_IMPORTER

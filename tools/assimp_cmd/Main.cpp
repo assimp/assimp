@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2021, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,6 +45,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
+#include <assimp/ProgressHandler.hpp>
+#include <iostream>
+
+class ConsoleProgressHandler : public ProgressHandler {
+public:
+	ConsoleProgressHandler() :
+			ProgressHandler() {
+		// empty
+	}
+
+	~ConsoleProgressHandler() override {
+		// empty
+	}
+
+	bool Update(float percentage) override {
+        std::cout << percentage * 100.0f << " %\n";
+		return true;
+    }
+};
 const char* AICMD_MSG_ABOUT =
 "------------------------------------------------------ \n"
 "Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
@@ -73,10 +90,10 @@ const char* AICMD_MSG_HELP =
 "\n Use \'assimp <verb> --help\' for detailed help on a command.\n"
 ;
 
-/*extern*/ Assimp::Importer* globalImporter = NULL;
+/*extern*/ Assimp::Importer* globalImporter = nullptr;
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-/*extern*/ Assimp::Exporter* globalExporter = NULL;
+/*extern*/ Assimp::Exporter* globalExporter = nullptr;
 #endif
 
 // ------------------------------------------------------------------------------
@@ -286,6 +303,9 @@ const aiScene* ImportModel(
 
 	// do the actual import, measure time
 	const clock_t first = clock();
+    ConsoleProgressHandler *ph = new ConsoleProgressHandler;
+    globalImporter->SetProgressHandler(ph);
+    
 	const aiScene* scene = globalImporter->ReadFile(path,imp.ppFlags);
 
 	if (imp.showLog) {
@@ -305,6 +325,9 @@ const aiScene* ImportModel(
 	if (imp.log) {
 		FreeLogStreams();
 	}
+    globalImporter->SetProgressHandler(nullptr);
+    delete ph;
+
 	return scene;
 }
 

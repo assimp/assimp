@@ -463,8 +463,12 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
             ASSIMP_LOG_WARN("Found a reference to an embedded DDS texture, "
                             "but texture height is not equal to 1, which is not supported by MED");
         }
-
-        pcNew.reset(new aiTexture());
+        if (iWidth == 0) {
+            ASSIMP_LOG_ERROR("Found a reference to an embedded DDS texture, but texture width is zero, aborting import.");
+            return;
+        }
+        
+        pcNew.reset(new aiTexture);
         pcNew->mHeight = 0;
         pcNew->mWidth = iWidth;
 

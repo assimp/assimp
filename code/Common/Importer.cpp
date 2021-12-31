@@ -329,7 +329,7 @@ bool Importer::IsDefaultIOHandler() const {
 
 // ------------------------------------------------------------------------------------------------
 // Supplies a custom progress handler to get regular callbacks during importing
-void Importer::SetProgressHandler ( ProgressHandler* pHandler ) {
+void Importer::SetProgressHandler(ProgressHandler* pHandler) {
     ai_assert(nullptr != pimpl);
 
     ASSIMP_BEGIN_EXCEPTION_REGION();

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/Base64.hpp>
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 // Header files, Open3DGC.
@@ -194,7 +195,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
             uint8_t *data = 0;
-            this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
+            this->byteLength = Base64::Decode(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
@@ -513,7 +514,7 @@ inline void Image::Read(Value &obj, Asset &r) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
                     uint8_t *ptr = nullptr;
-                    mDataLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mDataLength = Base64::Decode(dataURI.data, dataURI.dataLength, ptr);
                     mData.reset(ptr);
                 }
             } else {

@@ -142,6 +142,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
+  ${HEADER_PATH}/Base64.hpp
 )
 
 SET( Core_SRCS
@@ -201,6 +202,7 @@ SET( Common_SRCS
   Common/material.cpp
   Common/AssertHandler.cpp
   Common/Exceptional.cpp
+  Common/Base64.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

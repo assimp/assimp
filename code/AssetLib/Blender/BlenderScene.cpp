@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderSceneGen.h"
 
-using namespace Assimp;
-using namespace Assimp::Blender;
+namespace Assimp {
+namespace Blender {
 
 //--------------------------------------------------------------------------------
 template <>
@@ -884,5 +884,8 @@ void DNA::RegisterConverters() {
     converters["CollectionChild"] = DNA::FactoryPair(&Structure::Allocate<CollectionChild>, &Structure::Convert<CollectionChild>);
     converters["CollectionObject"] = DNA::FactoryPair(&Structure::Allocate<CollectionObject>, &Structure::Convert<CollectionObject>);
 }
+
+} // namespace Blender
+} //namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

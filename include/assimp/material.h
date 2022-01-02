@@ -989,6 +989,9 @@ extern "C" {
 // Roughness factor. 0.0 = Perfectly Smooth, 1.0 = Completely Rough
 #define AI_MATKEY_ROUGHNESS_FACTOR "$mat.roughnessFactor", 0, 0
 #define AI_MATKEY_ROUGHNESS_TEXTURE aiTextureType_DIFFUSE_ROUGHNESS, 0
+// Anisotropy factor. 0.0 = isotropic, 1.0 = anisotropy along tangent direction,
+// -1.0 = anisotropy along bitangent direction
+#define AI_MATKEY_ANISOTROPY_FACTOR "$mat.anisotropyFactor", 0, 0
 
 // Specular/Glossiness Workflow
 // ---------------------------

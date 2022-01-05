@@ -2242,20 +2242,26 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
         if (currentName == "bind_material") {
             XmlNode techNode = currentNode.child("technique_common");
             if (techNode) {
-                XmlNode instanceMatNode = techNode.child("instance_material");
-                // read ID of the geometry subgroup and the target material
-                std::string group;
-                XmlParser::getStdStrAttribute(instanceMatNode, "symbol", group);
-                XmlParser::getStdStrAttribute(instanceMatNode, "target", url);
-                const char *urlMat = url.c_str();
-                Collada::SemanticMappingTable s;
-                if (urlMat[0] == '#')
-                    urlMat++;
+                for (XmlNode instanceMatNode = techNode.child("instance_material"); instanceMatNode; instanceMatNode = instanceMatNode.next_sibling())
+                {
+                    const std::string &instance_name = instanceMatNode.name();
+                    if (instance_name == "instance_material")
+                    {
+                        // read ID of the geometry subgroup and the target material
+                        std::string group;
+                        XmlParser::getStdStrAttribute(instanceMatNode, "symbol", group);
+                        XmlParser::getStdStrAttribute(instanceMatNode, "target", url);
+                        const char *urlMat = url.c_str();
+                        Collada::SemanticMappingTable s;
+                        if (urlMat[0] == '#')
+                            urlMat++;
 
-                s.mMatName = urlMat;
-                // store the association
-                instance.mMaterials[group] = s;
-                ReadMaterialVertexInputBinding(instanceMatNode, s);
+                        s.mMatName = urlMat;
+                        // store the association
+                        instance.mMaterials[group] = s;
+                        ReadMaterialVertexInputBinding(instanceMatNode, s);
+                    }
+                }
             }
         }
     }

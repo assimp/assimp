@@ -335,7 +335,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
                 try {
                     fast_atoreal_move<ai_real>(tUnitSizeString.data(), mUnitSize);
-                } catch (DeadlyImportError die) {
+                } catch (const DeadlyImportError& die) {
                     std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
                     warning.append(die.what());
                     ASSIMP_LOG_WARN(warning.data());

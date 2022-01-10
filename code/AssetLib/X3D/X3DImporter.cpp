@@ -264,6 +264,9 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     //search for root node element
 
     mNodeElementCur = NodeElement_List.front();
+    if (mNodeElementCur == nullptr) {
+        return;
+    }
     while (mNodeElementCur->Parent != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
     }

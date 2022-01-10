@@ -740,6 +740,7 @@ struct aiMesh {
 
     /**
      *  Method of morphing when anim-meshes are specified.
+     *  @see aiMorphingMethod to learn more about the provided morphing targets.
      */
     unsigned int mMethod;
 

@@ -1085,6 +1085,8 @@ void OpenGEXImporter::handleTextureNode(ODDLParser::DDLNode *node, aiScene * /*p
                 tex.Set(val->getString());
                 if (prop->m_value->getString() == Grammar::DiffuseTextureToken) {
                     m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
+                } else if (prop->m_value->getString() == Grammar::DiffuseSpecularTextureToken) {
+                    m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_SPECULAR(0));
                 } else if (prop->m_value->getString() == Grammar::SpecularPowerTextureToken) {
                     m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_SPECULAR(0));
                 } else if (prop->m_value->getString() == Grammar::EmissionTextureToken) {

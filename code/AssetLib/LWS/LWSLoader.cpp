@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -537,8 +537,8 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // get file format version and print to log
     ++it;
-    
-    if ((*it).tokens[0].empty()) {
+
+    if (it == root.children.end() || (*it).tokens[0].empty()) {
         ASSIMP_LOG_ERROR("Invalid LWS file detectedm abort import.");
         return;
     }

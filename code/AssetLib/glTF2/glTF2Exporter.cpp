@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -972,7 +972,7 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
             }
             if (jointsPerVertex[vertexId] > 3) {
                 int boneIndexFitted = FitBoneWeight(vertexWeightData[vertexId], vertWeight);
-                if (boneIndexFitted) {
+                if (boneIndexFitted != -1) {
                     vertexJointData[vertexId][boneIndexFitted] = static_cast<float>(jointNamesIndex);
                 }
             }else {

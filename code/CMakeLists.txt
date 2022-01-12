@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2021, assimp team
+# Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
 #
@@ -557,7 +557,7 @@ ADD_ASSIMP_IMPORTER( IFC
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
     set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
-  elseif(CMAKE_COMPILER_IS_MINGW)
+  elseif(MINGW)
     set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
   endif()
 endif ()
@@ -862,7 +862,7 @@ ADD_ASSIMP_IMPORTER( MMD
 # optimizations that take up extra space. Given that the issue is a string table overflowing, -Os seemed appropriate
 # Also, I'm not positive if both link & compile flags are needed, but this hopefully ensures that the issue should not
 # recur for edge cases such as static builds.
-if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
+if ((MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   message("-- Applying MinGW StepFileGen1.cpp Debug Workaround")
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES COMPILE_FLAGS -Os )
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES LINK_FLAGS -Os )
@@ -1177,7 +1177,7 @@ TARGET_COMPILE_FEATURES(assimp PRIVATE c_std_99)
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:${ASSIMP_INCLUDE_INSTALL_DIR}>
 )
 
 IF(ASSIMP_HUNTER_ENABLED)
@@ -1311,7 +1311,7 @@ INSTALL( TARGETS assimp
   RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
   FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
   COMPONENT ${LIBASSIMP_COMPONENT}
-  INCLUDES DESTINATION include
+  INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
 )
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)

@@ -618,6 +618,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         mat->AddProperty(&pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS);
         mat->AddProperty(&pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY);
         mat->AddProperty(&pCurrentMaterial->transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
+        mat->AddProperty(&pCurrentMaterial->roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->metallic, 1, AI_MATKEY_METALLIC_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->sheen, 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->clearcoat_thickness, 1, AI_MATKEY_CLEARCOAT_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->clearcoat_roughness, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->anisotropy, 1, AI_MATKEY_ANISOTROPY_FACTOR);
 
         // Adding refraction index
         mat->AddProperty(&pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI);
@@ -706,6 +712,39 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_SHININESS(0));
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularityType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_SHININESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureRoughness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRoughnessType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE_ROUGHNESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureMetallic.length) {
+            mat->AddProperty(&pCurrentMaterial->textureMetallic, _AI_MATKEY_TEXTURE_BASE, aiTextureType_METALNESS, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_METALNESS, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureMetallicType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_METALNESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSheen.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSheen, _AI_MATKEY_TEXTURE_BASE, aiTextureType_SHEEN, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_SHEEN, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureSheenType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_SHEEN);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureRMA.length) {
+            // NOTE: glTF importer places Rough/Metal/AO texture in Unknown so doing the same here for consistency.
+            mat->AddProperty(&pCurrentMaterial->textureRMA, _AI_MATKEY_TEXTURE_BASE, aiTextureType_UNKNOWN, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_UNKNOWN, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRMAType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_UNKNOWN);
             }
         }
 

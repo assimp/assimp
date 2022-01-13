@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -264,6 +264,9 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     //search for root node element
 
     mNodeElementCur = NodeElement_List.front();
+    if (mNodeElementCur == nullptr) {
+        return;
+    }
     while (mNodeElementCur->Parent != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
     }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -2070,6 +2070,7 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const LayeredTextur
     TrySetTextureProperties(out_mat, layeredTextures, "ShininessExponent", aiTextureType_SHININESS, mesh);
     TrySetTextureProperties(out_mat, layeredTextures, "EmissiveFactor", aiTextureType_EMISSIVE, mesh);
     TrySetTextureProperties(out_mat, layeredTextures, "TransparencyFactor", aiTextureType_OPACITY, mesh);
+    TrySetTextureProperties(out_mat, layeredTextures, "ReflectionFactor", aiTextureType_METALNESS, mesh);
 }
 
 aiColor3D FBXConverter::GetColorPropertyFactored(const PropertyTable &props, const std::string &colorName,

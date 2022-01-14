@@ -174,6 +174,7 @@ SET( Common_SRCS
   Common/ImporterRegistry.cpp
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
+  Common/IOSystem.cpp
   Common/DefaultIOSystem.cpp
   Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h

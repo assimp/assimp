@@ -120,7 +120,9 @@ static const char * const TokensForSearch[] = { "blender" };
 // Returns whether the class can handle the format of the given file.
 bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     // note: this won't catch compressed files
-    return SearchFileHeaderForToken(pIOHandler, pFile, TokensForSearch, AI_COUNT_OF(TokensForSearch));
+    static const char *tokens[] = { "<BLENDER", "blender" };
+
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

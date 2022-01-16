@@ -232,37 +232,6 @@ struct DataURI {
 //! Check if a uri is a data URI
 bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out);
 
-template <bool B>
-struct DATA {
-    static const uint8_t tableDecodeBase64[128];
-};
-
-template <bool B>
-const uint8_t DATA<B>::tableDecodeBase64[128] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 64, 0, 0,
-    0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0,
-    0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0
-};
-
-inline char EncodeCharBase64(uint8_t b) {
-    return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[size_t(b)];
-}
-
-inline uint8_t DecodeCharBase64(char c) {
-    if (c & 0x80) {
-        throw DeadlyImportError("Invalid base64 char value: ", size_t(c));
-    }
-    return DATA<true>::tableDecodeBase64[size_t(c & 0x7F)]; // TODO faster with lookup table or ifs?
-}
-
-size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out);
-
-void EncodeBase64(const uint8_t *in, size_t inLength, std::string &out);
 } // namespace Util
 
 #define CHECK_EXT(EXT) \

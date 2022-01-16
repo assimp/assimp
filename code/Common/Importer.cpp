@@ -617,29 +617,71 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
             profiler->BeginRegion("total");
         }
 
-        // Find an worker class which can handle the file
-        BaseImporter* imp = nullptr;
+        // Find an worker class which can handle the file extension.
+        // Multiple importers may be able to handle the same extension (.xml!); gather them all.
         SetPropertyInteger("importerIndex", -1);
-        for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
+        struct ImporterAndIndex {
+            BaseImporter * importer;
+            unsigned int   index;
+        };
+        std::vector<ImporterAndIndex> possibleImporters;
+        for (unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
 
-            if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, false)) {
-                imp = pimpl->mImporter[a];
-                SetPropertyInteger("importerIndex", a);
-                break;
+            // Every importer has a list of supported extensions.
+            std::set<std::string> extensions;
+            pimpl->mImporter[a]->GetExtensionList(extensions);
+
+            // CAUTION: Do not just search for the extension!
+            // GetExtension() returns the part after the *last* dot, but some extensions have dots
+            // inside them, e.g. ogre.mesh.xml. Compare the entire end of the string.
+            for (std::set<std::string>::const_iterator it = extensions.cbegin(); it != extensions.cend(); ++it) {
+
+                // Yay for C++<20 not having std::string::ends_with()
+                std::string extension = "." + *it;
+                if (extension.length() <= pFile.length()) {
+                    // Possible optimization: Fetch the lowercase filename!
+                    if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - extension.length(), extension.c_str())) {
+                        ImporterAndIndex candidate = { pimpl->mImporter[a], a };
+                        possibleImporters.push_back(candidate);
+                        break;
+                    }
+                }
+
             }
+
+        }
+
+        // If just one importer supports this extension, pick it and close the case.
+        BaseImporter* imp = nullptr;
+        if (1 == possibleImporters.size()) {
+            imp = possibleImporters[0].importer;
+            SetPropertyInteger("importerIndex", possibleImporters[0].index);
+        }
+        // If multiple importers claim this file extension, ask them to look at the actual file data to decide.
+        // This can happen e.g. with XML (COLLADA vs. Irrlicht).
+        else {
+            for (std::vector<ImporterAndIndex>::const_iterator it = possibleImporters.begin(); it < possibleImporters.end(); ++it) {
+                BaseImporter & importer = *it->importer;
+
+                ASSIMP_LOG_INFO("Found a possible importer: " + std::string(importer.GetInfo()->mName) + "; trying signature-based detection");
+                if (importer.CanRead( pFile, pimpl->mIOHandler, true)) {
+                    imp = &importer;
+                    SetPropertyInteger("importerIndex", it->index);
+                    break;
+                }
+
+            }
+
         }
 
         if (!imp)   {
             // not so bad yet ... try format auto detection.
-            const std::string::size_type s = pFile.find_last_of('.');
-            if (s != std::string::npos) {
-                ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
-                for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
-                    if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
-                        imp = pimpl->mImporter[a];
-                        SetPropertyInteger("importerIndex", a);
-                        break;
-                    }
+            ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
+            for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
+                if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
+                    imp = pimpl->mImporter[a];
+                    SetPropertyInteger("importerIndex", a);
+                    break;
                 }
             }
             // Put a proper error message if no suitable importer was found

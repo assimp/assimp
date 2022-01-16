@@ -331,4 +331,6 @@ static const ai_real ai_epsilon = (ai_real)0.00001;
 #define AI_DEBUG_INVALIDATE_PTR(x)
 #endif
 
+#define AI_COUNT_OF(X) (sizeof(X) / sizeof((X)[0]))
+
 #endif // !! AI_DEFINES_H_INC

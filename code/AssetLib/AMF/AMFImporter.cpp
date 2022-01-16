@@ -503,19 +503,9 @@ void AMFImporter::ParseNode_Metadata(XmlNode &node) {
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
-bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "amf") {
-        return true;
-    }
-
-    if (extension.empty() || pCheckSig) {
-        static const char * const tokens[] = { "<amf" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*pCheckSig*/) const {
+    static const char *tokens[] = { "<amf" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

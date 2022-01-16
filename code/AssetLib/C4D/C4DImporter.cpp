@@ -106,14 +106,19 @@ static const aiImporterDesc desc = {
 
 
 // ------------------------------------------------------------------------------------------------
-bool C4DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
-    const std::string& extension = GetExtension(pFile);
-    if (extension == "c4d") {
-        return true;
-    } else if ((!extension.length() || checkSig) && pIOHandler)   {
-        // TODO
-    }
+C4DImporter::C4DImporter()
+: BaseImporter() {
+    // empty
+}
 
+// ------------------------------------------------------------------------------------------------
+C4DImporter::~C4DImporter() {
+    // empty
+}
+
+// ------------------------------------------------------------------------------------------------
+bool C4DImporter::CanRead( const std::string& /*pFile*/, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {
+    // TODO
     return false;
 }
 

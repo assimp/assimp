@@ -100,18 +100,10 @@ FBXImporter::~FBXImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool FBXImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-	const std::string &extension = GetExtension(pFile);
-	if (extension == std::string(desc.mFileExtensions)) {
-		return true;
-	}
-
-	else if ((!extension.length() || checkSig) && pIOHandler) {
-		// at least ASCII-FBX files usually have a 'FBX' somewhere in their head
-		static const char * const tokens[] = { "fbx" };
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-	}
-	return false;
+bool FBXImporter::CanRead(const std::string & pFile, IOSystem * pIOHandler, bool /*checkSig*/) const {
+	// at least ASCII-FBX files usually have a 'FBX' somewhere in their head
+	static const char *tokens[] = { "fbx" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

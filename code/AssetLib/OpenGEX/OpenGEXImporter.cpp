@@ -290,16 +290,9 @@ OpenGEXImporter::~OpenGEXImporter() {
 }
 
 //------------------------------------------------------------------------------------------------
-bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool checkSig) const {
-    bool canRead(false);
-    if (!checkSig) {
-        canRead = SimpleExtensionCheck(file, "ogex");
-    } else {
-        static const char * const token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
-        canRead = SearchFileHeaderForToken(pIOHandler, file, token, 4);
-    }
-
-    return canRead;
+bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
+    return SearchFileHeaderForToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens));
 }
 
 //------------------------------------------------------------------------------------------------

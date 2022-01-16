@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#include <assimp/Base64.hpp>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
@@ -260,7 +261,7 @@ namespace glTF2 {
             if (img.HasData()) {
                 uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
                 uri += ";base64,";
-                glTFCommon::Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+                Base64::Encode(img.GetData(), img.GetDataLength(), uri);
             }
             else {
                 uri = img.uri;

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -48,19 +48,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 namespace Assimp {
-
 namespace Base64 {
 
-void                    Encode(const uint8_t *in, size_t inLength, std::string &out);
-void                    Encode(const std::vector<uint8_t>& in, std::string &out);
-std::string             Encode(const std::vector<uint8_t>& in);
+void Encode(const uint8_t *in, size_t inLength, std::string &out);
+void Encode(const std::vector<uint8_t>& in, std::string &out);
+std::string Encode(const std::vector<uint8_t>& in);
 
-size_t                  Decode(const char *in, size_t inLength, uint8_t *&out);
-size_t                  Decode(const std::string& in, std::vector<uint8_t>& out);
-std::vector<uint8_t>    Decode(const std::string& in);
+size_t Decode(const char *in, size_t inLength, uint8_t *&out);
+size_t Decode(const std::string& in, std::vector<uint8_t>& out);
+std::vector<uint8_t> Decode(const std::string& in);
 
-}
-
-}
+} // namespace Base64
+} // namespace Assimp
 
 #endif // AI_BASE64_HPP_INC

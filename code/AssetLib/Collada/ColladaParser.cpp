@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -331,7 +331,16 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
         const std::string &currentName = currentNode.name();
         if (currentName == "unit") {
             mUnitSize = 1.f;
-            XmlParser::getRealAttribute(currentNode, "meter", mUnitSize);
+            std::string tUnitSizeString;
+            if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
+                try {
+                    fast_atoreal_move<ai_real>(tUnitSizeString.data(), mUnitSize);
+                } catch (const DeadlyImportError& die) {
+                    std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
+                    warning.append(die.what());
+                    ASSIMP_LOG_WARN(warning.data());
+                }
+            }
         } else if (currentName == "up_axis") {
             std::string v;
             if (!XmlParser::getValueAsString(currentNode, v)) {

@@ -1480,7 +1480,7 @@ const float close { 1e-6f };
 
 static bool isClose(IfcVector2 first,IfcVector2 second) {
     auto diff = (second - first);
-    return (std::fabsf(diff.x) < close && std::fabsf(diff.y) < close);
+    return (std::fabs(diff.x) < close && std::fabs(diff.y) < close);
 }
 
 static void logSegment(std::pair<IfcVector2,IfcVector2> segment) {
@@ -1529,20 +1529,13 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
                 continue;
             }
 
-            // assuming the vertices are all in a plane (let's hope so!) we can get the intersection
-            // vector between the planes
             auto v0 = planeSpace * mesh->mVerts[vI0];
-            auto v1 = planeSpace * mesh->mVerts[vI0 + 1];
-            auto v2 = planeSpace * mesh->mVerts[vI0 + 2];
-
-            auto faceNor = ((v1 - v0) ^ (v2 - v0)).Normalize();
-            auto intersectionDir = faceNor ^ IfcVector3(0.f,0.f,1.f); // as we're in plane space, plane normal is (0,0,1)
 
             // now calculate intersections between face and plane
             IfcVector2 firstPoint;
             bool gotFirstPoint(false);
 
-            if(std::fabsf(v0.z - planeOffset) < close) {
+            if(std::fabs(v0.z - planeOffset) < close) {
                 // first point is on the plane
                 firstPoint.x = v0.x;
                 firstPoint.y = v0.y;
@@ -1555,7 +1548,7 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
                 vn = planeSpace * mesh->mVerts[vI];
                 IfcVector3 intersection;
 
-                if(std::fabsf(vn.z - planeOffset) < close) {
+                if(std::fabs(vn.z - planeOffset) < close) {
                     // on the plane
                     intersection = vn;
                 }
@@ -1572,7 +1565,7 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
                 }
 
                 if(!gotFirstPoint) {
-                    if(std::fabsf(vp.z - planeOffset) < close) {
+                    if(std::fabs(vp.z - planeOffset) < close) {
                         // just had a second line along the plane
                         firstPoint.x = vp.x;
                         firstPoint.y = vp.y;
@@ -1630,8 +1623,8 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
                 foundNextPoint = false;
                 for(auto nextSeg = lineSegments.begin(); nextSeg != lineSegments.end(); nextSeg++) {
                     // see if we can match up both ends - in which case we've closed the contour
-                    if(isClose(contour.front(),nextSeg->first) && isClose(contour.back(),nextSeg->second) ||
-                        isClose(contour.back(),nextSeg->first) && isClose(contour.front(),nextSeg->second)
+                    if((isClose(contour.front(),nextSeg->first) && isClose(contour.back(),nextSeg->second)) ||
+                        (isClose(contour.back(),nextSeg->first) && isClose(contour.front(),nextSeg->second))
                         ) {
                         lineSegments.erase(nextSeg);
                         closedContour = true;

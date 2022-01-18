@@ -89,11 +89,22 @@ void DeleteAllBarePointers(std::vector<T> &x) {
 }
 
 B3DImporter::~B3DImporter() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return false;
+    size_t pos = pFile.find_last_of('.');
+    if (pos == string::npos) {
+        return false;
+    }
+
+    string ext = pFile.substr(pos + 1);
+    if (ext.size() != 3) {
+        return false;
+    }
+
+    return (ext[0] == 'b' || ext[0] == 'B') && (ext[1] == '3') && (ext[2] == 'd' || ext[2] == 'D');
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -218,7 +218,7 @@ SIBImporter::~SIBImporter() {
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool SIBImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return false;
+    return SimpleExtensionCheck(pFile, "sib");
 }
 
 // ------------------------------------------------------------------------------------------------

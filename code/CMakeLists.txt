@@ -142,6 +142,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
+  ${HEADER_PATH}/Base64.hpp
 )
 
 SET( Core_SRCS
@@ -174,6 +175,7 @@ SET( Common_SRCS
   Common/ImporterRegistry.cpp
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
+  Common/IOSystem.cpp
   Common/DefaultIOSystem.cpp
   Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
@@ -201,6 +203,7 @@ SET( Common_SRCS
   Common/material.cpp
   Common/AssertHandler.cpp
   Common/Exceptional.cpp
+  Common/Base64.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -371,6 +374,12 @@ ADD_ASSIMP_IMPORTER( IRRMESH
   AssetLib/Irr/IRRMeshLoader.h
   AssetLib/Irr/IRRShared.cpp
   AssetLib/Irr/IRRShared.h
+)
+
+ADD_ASSIMP_IMPORTER( IQM
+  AssetLib/IQM/IQMImporter.cpp
+  AssetLib/IQM/iqm.h
+  AssetLib/IQM/IQMImporter.h
 )
 
 ADD_ASSIMP_IMPORTER( IRR

@@ -102,8 +102,7 @@ SMDImporter::~SMDImporter() {
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool SMDImporter::CanRead( const std::string& /*pFile*/, IOSystem* /*pIOHandler*/, bool) const {
-    // fixme: auto format detection
-    return false;
+    return SimpleExtensionCheck(pFile,"smd","vta");
 }
 
 // ------------------------------------------------------------------------------------------------

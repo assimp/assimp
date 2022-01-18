@@ -74,7 +74,7 @@ namespace Unreal {
     3 = Masked two-sided
     4 = Modulation blended two-sided
     8 = Placeholder triangle for weapon positioning (invisible)
-    */
+*/
 enum MeshFlags {
     MF_NORMAL_OS = 0,
     MF_NORMAL_TS = 1,
@@ -180,8 +180,8 @@ UnrealImporter::~UnrealImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool UnrealImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return SimpleExtensionCheck(pFile, "3d", "uc");
+bool UnrealImporter::CanRead(const std::string & filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+    return SimpleExtensionCheck(filename, "3d", "uc");
 }
 
 // ------------------------------------------------------------------------------------------------

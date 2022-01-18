@@ -168,16 +168,20 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 UnrealImporter::UnrealImporter() :
-        mConfigFrameID(0), mConfigHandleFlags(true) {}
+        mConfigFrameID(0), mConfigHandleFlags(true) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-UnrealImporter::~UnrealImporter() {}
+UnrealImporter::~UnrealImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool UnrealImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return false;
+    return SimpleExtensionCheck(pFile, "3d", "uc");
 }
 
 // ------------------------------------------------------------------------------------------------

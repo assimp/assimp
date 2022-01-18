@@ -157,9 +157,9 @@ Q3BSPFileImporter::~Q3BSPFileImporter() {
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true if the loader can read this.
-bool Q3BSPFileImporter::CanRead(const std::string &/*rFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+bool Q3BSPFileImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
     if (!checkSig) {
-        return SimpleExtensionCheck(rFile, "pk3", "bsp");
+        return SimpleExtensionCheck(filename, "pk3", "bsp");
     }
     return false;
 }

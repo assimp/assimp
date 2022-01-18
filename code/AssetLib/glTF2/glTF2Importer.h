@@ -79,7 +79,7 @@ private:
 
 private:
     std::vector<unsigned int> meshOffsets;
-    std::vector<int> embeddedTexIdxs;
+    std::vector<int> mEmbeddedTexIdxs;
     aiScene *mScene;
 
     /// An instance of rapidjson::IRemoteSchemaDocumentProvider

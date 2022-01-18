@@ -112,10 +112,8 @@ M3DImporter::M3DImporter() :
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
 bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    /*
-     * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-     * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-     */
+    // don't use CheckMagicToken because that checks with swapped bytes too, leading to false
+    // positives. This magic is not uint32_t, but char[4], so memcmp is the best way
     std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
     unsigned char data[4];
     if (4 != pStream->Read(data, 1, 4)) {

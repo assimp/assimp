@@ -376,6 +376,12 @@ ADD_ASSIMP_IMPORTER( IRRMESH
   AssetLib/Irr/IRRShared.h
 )
 
+ADD_ASSIMP_IMPORTER( IQM
+  AssetLib/IQM/IQMImporter.cpp
+  AssetLib/IQM/iqm.h
+  AssetLib/IQM/IQMImporter.h
+)
+
 ADD_ASSIMP_IMPORTER( IRR
   AssetLib/Irr/IRRLoader.cpp
   AssetLib/Irr/IRRLoader.h

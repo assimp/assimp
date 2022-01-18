@@ -85,7 +85,7 @@ RAWImporter::~RAWImporter() {
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool RAWImporter::CanRead(const std::string & /*pFile*/, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return false;
+    return SimpleExtensionCheck(pFile, "raw");
 }
 
 // ------------------------------------------------------------------------------------------------

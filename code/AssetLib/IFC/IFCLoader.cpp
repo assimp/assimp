@@ -129,18 +129,12 @@ IFCImporter::~IFCImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IFCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string &extension = GetExtension(pFile);
-    if (extension == "ifc" || extension == "ifczip") {
-        return true;
-    } else if ((!extension.length() || checkSig) && pIOHandler) {
-        // note: this is the common identification for STEP-encoded files, so
-        // it is only unambiguous as long as we don't support any further
-        // file formats with STEP as their encoding.
-        static const char * const tokens[] = { "ISO-10303-21" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-    return false;
+bool IFCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // note: this is the common identification for STEP-encoded files, so
+    // it is only unambiguous as long as we don't support any further
+    // file formats with STEP as their encoding.
+    static const char *tokens[] = { "ISO-10303-21" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

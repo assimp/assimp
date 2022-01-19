@@ -105,21 +105,13 @@ LWOImporter::~LWOImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(file);
-    if (extension == "lwo" || extension == "lxo") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[3];
-        tokens[0] = AI_LWO_FOURCC_LWOB;
-        tokens[1] = AI_LWO_FOURCC_LWO2;
-        tokens[2] = AI_LWO_FOURCC_LXOB;
-        return CheckMagicToken(pIOHandler, file, tokens, 3, 8);
-    }
-    return false;
+bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_LWO_FOURCC_LWOB,
+        AI_LWO_FOURCC_LWO2,
+        AI_LWO_FOURCC_LXOB
+    };
+    return CheckMagicToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens), 8);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -88,26 +88,12 @@ MS3DImporter::MS3DImporter()
 // Destructor, private as well
 MS3DImporter::~MS3DImporter()
 {}
-
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    // first call - simple extension check
-    const std::string extension = GetExtension(pFile);
-    if (extension == "ms3d") {
-        return true;
-    }
-
-    // second call - check for magic identifiers
-    else if (!extension.length() || checkSig)   {
-        if (!pIOHandler) {
-            return true;
-        }
-        static const char * const tokens[] = {"MS3D000000"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
-    }
-    return false;
+    static const char* tokens[] = { "MS3D000000" };
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

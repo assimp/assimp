@@ -114,22 +114,14 @@ BlenderImporter::~BlenderImporter() {
 }
 
 static const char * const Tokens[] = { "BLENDER" };
-static const char * const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string &extension = GetExtension(pFile);
-    if (extension == "blend") {
-        return true;
-    }
+bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // note: this won't catch compressed files
+    static const char *tokens[] = { "<BLENDER", "blender" };
 
-    if ((!extension.length() || checkSig) && pIOHandler) {
-        // note: this won't catch compressed files
-        return SearchFileHeaderForToken(pIOHandler, pFile, TokensForSearch, 1);
-    }
-
-    return false;
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

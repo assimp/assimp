@@ -114,7 +114,6 @@ BlenderImporter::~BlenderImporter() {
 }
 
 static const char * const Tokens[] = { "BLENDER" };
-//static const char * const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

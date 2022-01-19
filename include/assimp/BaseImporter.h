@@ -261,6 +261,20 @@ public: // static utilities
             bool noAlphaBeforeTokens = false);
 
     // -------------------------------------------------------------------
+    /** @brief Check whether a file has a specific file extension
+     *  @param pFile Input file
+     *  @param ext0 Extension to check for. Lowercase characters only, no dot!
+     *  @param ext1 Optional second extension
+     *  @param ext2 Optional third extension
+     *  @note Case-insensitive
+     */
+    static bool SimpleExtensionCheck(
+            const std::string &pFile,
+            const char *ext0,
+            const char *ext1 = nullptr,
+            const char *ext2 = nullptr);
+
+    // -------------------------------------------------------------------
     /** @brief Extract file extension from a string
      *  @param pFile Input file
      *  @return Extension without trailing dot, all lowercase

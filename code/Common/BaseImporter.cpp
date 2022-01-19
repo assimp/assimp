@@ -226,6 +226,32 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Simple check for file extension
+/*static*/ bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
+        const char *ext0,
+        const char *ext1,
+        const char *ext2) {
+    std::string::size_type pos = pFile.find_last_of('.');
+
+    // no file extension - can't read
+    if (pos == std::string::npos)
+        return false;
+
+    const char *ext_real = &pFile[pos + 1];
+    if (!ASSIMP_stricmp(ext_real, ext0))
+        return true;
+
+    // check for other, optional, file extensions
+    if (ext1 && !ASSIMP_stricmp(ext_real, ext1))
+        return true;
+
+    if (ext2 && !ASSIMP_stricmp(ext_real, ext2))
+        return true;
+
+    return false;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get file extension from path
 std::string BaseImporter::GetExtension(const std::string &file) {
     std::string::size_type pos = file.find_last_of('.');
@@ -241,6 +267,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
 
     return ret;
 }
+
 
 // ------------------------------------------------------------------------------------------------
 // Check for magic bytes at the beginning of the file.

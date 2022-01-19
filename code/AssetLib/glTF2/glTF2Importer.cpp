@@ -1521,12 +1521,6 @@ static unsigned int countEmbeddedTextures(glTF2::Asset &r) {
 void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
     mEmbeddedTexIdxs.resize(r.images.Size(), -1);
     const unsigned int numEmbeddedTexs = countEmbeddedTextures(r);
-    /* for (size_t i = 0; i < r.images.Size(); ++i) {
-        if (r.images[i].HasData()) {
-            numEmbeddedTexs += 1;
-        }
-    }*/
-
     if (numEmbeddedTexs == 0) {
         return;
     }

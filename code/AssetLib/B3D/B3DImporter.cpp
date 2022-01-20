@@ -81,7 +81,7 @@ static const aiImporterDesc desc = {
 
 //#define DEBUG_B3D
 
-template <typename T>
+template<typename T>
 void DeleteAllBarePointers(std::vector<T> &x) {
     for (auto p : x) {
         delete p;
@@ -89,11 +89,11 @@ void DeleteAllBarePointers(std::vector<T> &x) {
 }
 
 B3DImporter::~B3DImporter() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-
     size_t pos = pFile.find_last_of('.');
     if (pos == string::npos) {
         return false;

@@ -88,17 +88,9 @@ XFileImporter::~XFileImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
-    std::string extension = GetExtension(pFile);
-    if(extension == "x") {
-        return true;
-    }
-    if (!extension.length() || checkSig) {
-        uint32_t token[1];
-        token[0] = AI_MAKE_MAGIC("xof ");
-        return CheckMagicToken(pIOHandler,pFile,token,1,0);
-    }
-    return false;
+bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t token[] = { AI_MAKE_MAGIC("xof ") };
+    return CheckMagicToken(pIOHandler,pFile,token,AI_COUNT_OF(token));
 }
 
 // ------------------------------------------------------------------------------------------------

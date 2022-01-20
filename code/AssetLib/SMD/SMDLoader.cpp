@@ -81,15 +81,15 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SMDImporter::SMDImporter()
-: configFrameID()
-, mBuffer()
-, pScene( nullptr )
-, iFileSize( 0 )
-, iSmallestFrame( INT_MAX )
-, dLengthOfAnim( 0.0 )
-, bHasUVs(false )
-, iLineNumber((unsigned int)-1)  {
+SMDImporter::SMDImporter() :
+        configFrameID(), 
+        mBuffer(), 
+        pScene( nullptr ), 
+        iFileSize( 0 ), 
+        iSmallestFrame( INT_MAX ),
+        dLengthOfAnim( 0.0 ),
+        bHasUVs(false ), 
+        iLineNumber((unsigned int)-1)  {
     // empty
 }
 
@@ -101,9 +101,8 @@ SMDImporter::~SMDImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool SMDImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool) const {
-    // fixme: auto format detection
-    return SimpleExtensionCheck(pFile,"smd","vta");
+bool SMDImporter::CanRead( const std::string& filename, IOSystem* /*pIOHandler*/, bool) const {
+    return SimpleExtensionCheck(filename, "smd", "vta");
 }
 
 // ------------------------------------------------------------------------------------------------

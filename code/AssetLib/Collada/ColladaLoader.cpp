@@ -116,37 +116,15 @@ ColladaLoader::~ColladaLoader() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-    const bool readSig = checkSig && (pIOHandler != nullptr);
-    if (!readSig) {
-        if (extension == "dae" || extension == "zae") {
-            return true;
-        }
-    } else {
-        // Look for a DAE file inside, but don't extract it
-        ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
-        if (zip_archive.isOpen()) {
-            return !ColladaParser::ReadZaeManifest(zip_archive).empty();
-        }
+bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // Look for a DAE file inside, but don't extract it
+    ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
+    if (zip_archive.isOpen()) {
+        return !ColladaParser::ReadZaeManifest(zip_archive).empty();
     }
 
-    // XML - too generic, we need to open the file and search for typical keywords
-    if (extension == "xml" || !extension.length() || checkSig) {
-        //  If CanRead() is called in order to check whether we
-        //  support a specific file extension in general pIOHandler
-        //  might be nullptr and it's our duty to return true here.
-        if (nullptr == pIOHandler) {
-            return true;
-        }
-        static const char * const tokens[] = {
-            "<collada"
-        };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+    static const char *tokens[] = { "<collada" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

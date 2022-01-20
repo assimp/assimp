@@ -89,14 +89,9 @@ MMDImporter::~MMDImporter() {
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an pmx file.
 bool MMDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler,
-        bool checkSig) const {
-    if (!checkSig) {
-        return SimpleExtensionCheck(pFile, "pmx");
-    } else {
-        // Check file Header
-        static const char * const pTokens[] = { "PMX " };
-        return SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1);
-    }
+        bool /*checkSig*/) const {
+    static const char *tokens[] = { "PMX " };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -58,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <iterator>
+#include <forward_list>
+#include <deque>
 
 namespace Assimp {
     namespace IFC {
@@ -73,7 +75,7 @@ namespace Assimp {
 
 
         // fallback method to generate wall openings
-        bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors,
+        bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,
             TempMesh& curmesh);
 
 
@@ -1140,7 +1142,6 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 
 // ------------------------------------------------------------------------------------------------
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-    const std::vector<IfcVector3>& nors,
     TempMesh& curmesh,
     bool check_intersection,
     bool generate_connection_geometry,
@@ -1340,7 +1341,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
                 MergeWindowContours(temp_contour, other, poly);
 
                 if (poly.size() > 1) {
-                    return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
+                    return TryAddOpenings_Poly2Tri(openings, curmesh);
                 }
                 else if (poly.size() == 0) {
                     IFCImporter::LogWarn("ignoring duplicate opening");
@@ -1427,8 +1428,289 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
     return true;
 }
 
+std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+    IfcVector3 planeNor,IfcFloat planeOffset,
+    IfcVector3 extrusionDir,IfcVector3& wall_extrusion,bool& first,bool& ok) {
+    std::vector<IfcVector2> contour;
+
+    const auto outernor = ((mesh->mVerts[2] - mesh->mVerts[0]) ^ (mesh->mVerts[1] - mesh->mVerts[0])).Normalize();
+    const IfcFloat dot = planeNor * outernor;
+    if(std::fabs(dot) < 1.f - 1e-6f) {
+        std::stringstream msg;
+        msg << "Skipping: Unaligned opening (" << planeNor.x << ", " << planeNor.y << ", " << planeNor.z << ")";
+        msg << " . ( " << outernor.x << ", " << outernor.y << ", " << outernor.z << ") = " << dot;
+        IFCImporter::LogDebug(msg.str().c_str());
+        ok = false;
+        return contour;
+    }
+
+    const std::vector<IfcVector3>& va = mesh->mVerts;
+    if(va.size() <= 2) {
+        std::stringstream msg;
+        msg << "Skipping: Only " << va.size() << " verticies in opening mesh.";
+        IFCImporter::LogDebug(msg.str().c_str());
+        ok = false;
+        return contour;
+    }
+
+    for(const IfcVector3& xx : mesh->mVerts) {
+        IfcVector3 vv = planeSpace * xx,vv_extr = planeSpace * (xx + extrusionDir);
+
+        const bool is_extruded_side = std::fabs(vv.z - planeOffset) > std::fabs(vv_extr.z - planeOffset);
+        if(first) {
+            first = false;
+            if(dot > 0.f) {
+                wall_extrusion = extrusionDir;
+                if(is_extruded_side) {
+                    wall_extrusion = -wall_extrusion;
+                }
+            }
+        }
+
+        // XXX should not be necessary - but it is. Why? For precision reasons?
+        vv = is_extruded_side ? vv_extr : vv;
+        contour.push_back(IfcVector2(vv.x,vv.y));
+    }
+    ok = true;
+
+    return contour;
+}
+
+const float close { 1e-6f };
+
+static bool isClose(IfcVector2 first,IfcVector2 second) {
+    auto diff = (second - first);
+    return (std::fabs(diff.x) < close && std::fabs(diff.y) < close);
+}
+
+static void logSegment(std::pair<IfcVector2,IfcVector2> segment) {
+    std::stringstream msg2;
+    msg2 << " Segment: \n";
+    msg2 << "   " << segment.first.x << " " << segment.first.y << " \n";
+    msg2 << "   " << segment.second.x << " " << segment.second.y << " \n";
+    IFCImporter::LogInfo(msg2.str().c_str());
+}
+
+std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+    IfcFloat planeOffset) {
+
+        {
+            std::stringstream msg;
+            msg << "GetContoursInPlane3D: planeSpace is \n";
+            msg << planeSpace.a1 << " " << planeSpace.a2 << " " << planeSpace.a3 << " " << "\n";
+            msg << planeSpace.b1 << " " << planeSpace.b2 << " " << planeSpace.b3 << " " << "\n";
+            msg << planeSpace.c1 << " " << planeSpace.c2 << " " << planeSpace.c3 << " " << "\n";
+            msg << "\n planeOffset is " << planeOffset;
+            IFCImporter::LogInfo(msg.str().c_str());
+        }
+
+        // we'll put our line segments in here, and then merge them together into contours later
+        std::deque<std::pair<IfcVector2,IfcVector2>> lineSegments;
+
+        // find the lines giving the intersection of the faces with the plane - we'll work in planeSpace throughout.
+        size_t vI0{ 0 }; // vertex index for first vertex in plane
+        for(auto nVertices : mesh->mVertcnt) { // iterate over faces
+            {
+                std::stringstream msg;
+                msg << "GetContoursInPlane3D: face (transformed) is  \n";
+                for(auto vI = vI0; vI < vI0 + nVertices; vI++) {
+                    auto v = planeSpace * mesh->mVerts[vI];
+                    msg << "   " << v.x << " " << v.y << " " << v.z << " " << "\n";
+                }
+                IFCImporter::LogInfo(msg.str().c_str());
+            }
+
+            if(nVertices <= 2) // not a plane, a point or line
+            {
+                std::stringstream msg;
+                msg << "GetContoursInPlane3D: found point or line when expecting plane (only " << nVertices << " vertices)";
+                IFCImporter::LogWarn(msg.str().c_str());
+                vI0 += nVertices;
+                continue;
+            }
+
+            auto v0 = planeSpace * mesh->mVerts[vI0];
+
+            // now calculate intersections between face and plane
+            IfcVector2 firstPoint;
+            bool gotFirstPoint(false);
+
+            if(std::fabs(v0.z - planeOffset) < close) {
+                // first point is on the plane
+                firstPoint.x = v0.x;
+                firstPoint.y = v0.y;
+                gotFirstPoint = true;
+            }
+
+            auto vn = v0;
+            for(auto vI = vI0 + 1; vI < vI0 + nVertices; vI++) {
+                auto vp = vn;
+                vn = planeSpace * mesh->mVerts[vI];
+                IfcVector3 intersection;
+
+                if(std::fabs(vn.z - planeOffset) < close) {
+                    // on the plane
+                    intersection = vn;
+                }
+                else if((vn.z > planeOffset) != (vp.z > planeOffset))
+                {
+                    // passes through the plane
+                    auto vdir = vn - vp;
+                    auto scale = (planeOffset - vp.z) / vdir.z;
+                    intersection = vp + scale * vdir;
+                }
+                else {
+                    // nowhere near - move on
+                    continue;
+                }
+
+                if(!gotFirstPoint) {
+                    if(std::fabs(vp.z - planeOffset) < close) {
+                        // just had a second line along the plane
+                        firstPoint.x = vp.x;
+                        firstPoint.y = vp.y;
+                        IfcVector2 secondPoint(intersection.x,intersection.y);
+                        auto s = std::pair<IfcVector2,IfcVector2>(firstPoint,secondPoint);
+                        logSegment(s);
+                        lineSegments.push_back(s);
+                        // next firstpoint should be this one
+                    }
+                    else {
+                        // store the first intersection point
+                        firstPoint.x = intersection.x;
+                        firstPoint.y = intersection.y;
+                        gotFirstPoint = true;
+                    }
+                }
+                else {
+                    // now got the second point, so store the pair
+                    IfcVector2 secondPoint(intersection.x,intersection.y);
+                    auto s = std::pair<IfcVector2,IfcVector2>(firstPoint,secondPoint);
+                    logSegment(s);
+                    lineSegments.push_back(s);
+
+                    // - note that we don't move onto the next face as a non-convex face can create two or more intersections with a plane
+                    gotFirstPoint = false;
+                }
+            }
+            if(gotFirstPoint) {
+                IFCImporter::LogWarn("GetContoursInPlane3D: odd number of intersections with plane");
+            }
+            vI0 += nVertices;
+        }
+
+        {
+            std::stringstream msg;
+            msg << "GetContoursInPlane3D: found " << lineSegments.size() << " line segments:\n";
+            IFCImporter::LogInfo(msg.str().c_str());
+
+            for(auto& s : lineSegments) {
+                logSegment(s);
+            }
+
+        }
+
+        // now merge contours until we have the best-looking polygons we can
+        std::vector<Contour> contours;
+        while(!lineSegments.empty()) {
+            // start with a polygon and make the best closed contour we can
+            const auto& firstSeg = lineSegments.front();
+            std::deque<IfcVector2> contour{ firstSeg.first, firstSeg.second };
+            lineSegments.pop_front();
+            bool foundNextPoint{ true };
+            bool closedContour{ false };
+            while(foundNextPoint) {
+                foundNextPoint = false;
+                for(auto nextSeg = lineSegments.begin(); nextSeg != lineSegments.end(); nextSeg++) {
+                    // see if we can match up both ends - in which case we've closed the contour
+                    if((isClose(contour.front(),nextSeg->first) && isClose(contour.back(),nextSeg->second)) ||
+                        (isClose(contour.back(),nextSeg->first) && isClose(contour.front(),nextSeg->second))
+                        ) {
+                        lineSegments.erase(nextSeg);
+                        closedContour = true;
+                        break;
+                    }
+
+                    // otherwise, see if we can match up either end
+                    foundNextPoint = true;
+                    if(isClose(contour.front(),nextSeg->first)) {
+                        contour.push_front(nextSeg->second);
+                    }
+                    else if(isClose(contour.front(),nextSeg->second)) {
+                        contour.push_front(nextSeg->first);
+                    }
+                    else if(isClose(contour.back(),nextSeg->first)) {
+                        contour.push_back(nextSeg->second);
+                    }
+                    else if(isClose(contour.back(),nextSeg->second)) {
+                        contour.push_back(nextSeg->first);
+                    }
+                    else {
+                        foundNextPoint = false;
+                    }
+                    if(foundNextPoint) {
+                        lineSegments.erase(nextSeg);
+                        break;
+                    }
+                }
+            }
+
+            if(!closedContour) {
+                IFCImporter::LogWarn("GetContoursInPlane3D: did not close contour");
+            }
+
+            // now add the contour if we can
+            if(contour.size() <= 2) {
+                IFCImporter::LogWarn("GetContoursInPlane3D: discarding line/point contour");
+                continue;
+            }
+            Contour c{};
+            for(auto p : contour)
+            {
+                c.push_back(p);
+            }
+            contours.push_back(c);
+        }
+
+        {
+            std::stringstream msg;
+            msg << "GetContoursInPlane3D: found " << contours.size() << " contours:\n";
+
+            for(auto c : contours) {
+                msg << " Contour: \n";
+                for(auto p : c) {
+                    msg << "   " << p.x << " " << p.y << " \n";
+                }
+            }
+
+            IFCImporter::LogInfo(msg.str().c_str());
+        }
+
+
+        return contours;
+}
+
+std::vector<std::vector<IfcVector2>> GetContoursInPlane(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+    IfcVector3 planeNor,IfcFloat planeOffset,
+    IfcVector3 extrusionDir,IfcVector3& wall_extrusion,bool& first) {
+
+    if(mesh->mVertcnt.size() == 1)
+    {
+        bool ok;
+        auto contour = GetContourInPlane2D(mesh,planeSpace,planeNor,planeOffset,extrusionDir,wall_extrusion,first,ok);
+        if(ok)
+            return std::vector<std::vector<IfcVector2>> {contour};
+        else
+            return std::vector<std::vector<IfcVector2>> {};
+    }
+    else
+    {
+        return GetContoursInPlane3D(mesh,planeSpace,planeOffset);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors,
+bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,
     TempMesh& curmesh)
 {
     IFCImporter::LogWarn("forced to use poly2tri fallback method to generate wall openings");
@@ -1498,61 +1780,41 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     try {
 
         ClipperLib::Clipper clipper_holes;
-        size_t c = 0;
 
-        for(const TempOpening& t :openings) {
-            const IfcVector3& outernor = nors[c++];
-            const IfcFloat dot = nor * outernor;
-            if (std::fabs(dot)<1.f-1e-6f) {
-                continue;
-            }
+        for(const TempOpening& t : openings) {
+            auto contours = GetContoursInPlane(t.profileMesh,m,nor,coord,t.extrusionDir,wall_extrusion,first);
 
-            const std::vector<IfcVector3>& va = t.profileMesh->mVerts;
-            if(va.size() <= 2) {
-                continue;
-            }
+            for(auto& contour : contours) {
+                // scale to clipping space
+                ClipperLib::Polygon hole;
+                for(IfcVector2& pip : contour) {
+                    pip.x = (pip.x - vmin.x) / vmax.x;
+                    pip.y = (pip.y - vmin.y) / vmax.y;
 
-            std::vector<IfcVector2> contour;
-
-            for(const IfcVector3& xx : t.profileMesh->mVerts) {
-                IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
-
-                const bool is_extruded_side = std::fabs(vv.z - coord) > std::fabs(vv_extr.z - coord);
-                if (first) {
-                    first = false;
-                    if (dot > 0.f) {
-                        wall_extrusion = t.extrusionDir;
-                        if (is_extruded_side) {
-                            wall_extrusion = - wall_extrusion;
-                        }
-                    }
+                    hole.push_back(ClipperLib::IntPoint(to_int64(pip.x),to_int64(pip.y)));
                 }
 
-                // XXX should not be necessary - but it is. Why? For precision reasons?
-                vv = is_extruded_side ? vv_extr : vv;
-                contour.push_back(IfcVector2(vv.x,vv.y));
+                if(!ClipperLib::Orientation(hole)) {
+                    std::reverse(hole.begin(),hole.end());
+                    //  assert(ClipperLib::Orientation(hole));
+                }
+
+                /*ClipperLib::Polygons pol_temp(1), pol_temp2(1);
+                pol_temp[0] = hole;
+
+                ClipperLib::OffsetPolygons(pol_temp,pol_temp2,5.0);
+                hole = pol_temp2[0];*/
+
+                clipper_holes.AddPolygon(hole,ClipperLib::ptSubject);
+                {
+                    std::stringstream msg;
+                    msg << "- added polygon ";
+                    for(auto elem : hole) {
+                        msg << " (" << elem.X << ", " << elem.Y << ")";
+                    }
+                    IFCImporter::LogDebug(msg.str().c_str());
+                }
             }
-
-            ClipperLib::Polygon hole;
-            for(IfcVector2& pip : contour) {
-                pip.x  = (pip.x - vmin.x) / vmax.x;
-                pip.y  = (pip.y - vmin.y) / vmax.y;
-
-                hole.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
-            }
-
-            if (!ClipperLib::Orientation(hole)) {
-                std::reverse(hole.begin(), hole.end());
-            //  assert(ClipperLib::Orientation(hole));
-            }
-
-            /*ClipperLib::Polygons pol_temp(1), pol_temp2(1);
-            pol_temp[0] = hole;
-
-            ClipperLib::OffsetPolygons(pol_temp,pol_temp2,5.0);
-            hole = pol_temp2[0];*/
-
-            clipper_holes.AddPolygon(hole,ClipperLib::ptSubject);
         }
 
         clipper_holes.Execute(ClipperLib::ctUnion,holes_union,

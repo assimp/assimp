@@ -307,7 +307,6 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
 // IFCOpenings.cpp
 
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-                      const std::vector<IfcVector3>& nors,
                       TempMesh& curmesh,
                       bool check_intersection,
                       bool generate_connection_geometry,

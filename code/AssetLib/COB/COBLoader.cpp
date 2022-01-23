@@ -103,17 +103,9 @@ COBImporter::~COBImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool COBImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string &extension = GetExtension(pFile);
-    if (extension == "cob" || extension == "scn" || extension == "COB" || extension == "SCN") {
-        return true;
-    }
-
-    else if ((!extension.length() || checkSig) && pIOHandler) {
-        static const char * const tokens[] = { "Caligary" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-    return false;
+bool COBImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "Caligary" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -85,26 +83,14 @@ IRRMeshImporter::~IRRMeshImporter() {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IRRMeshImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
+bool IRRMeshImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
 	/* NOTE: A simple check for the file extension is not enough
-     * here. Irrmesh and irr are easy, but xml is too generic
-     * and could be collada, too. So we need to open the file and
-     * search for typical tokens.
-     */
-	const std::string extension = GetExtension(pFile);
-
-	if (extension == "irrmesh")
-		return true;
-	else if (extension == "xml" || checkSig) {
-		/*  If CanRead() is called to check whether the loader
-         *  supports a specific file extension in general we
-         *  must return true here.
-         */
-		if (!pIOHandler) return true;
-		static const char * const tokens[] = { "irrmesh" };
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-	}
-	return false;
+	 * here. Irrmesh and irr are easy, but xml is too generic
+	 * and could be collada, too. So we need to open the file and
+	 * search for typical tokens.
+	 */
+	static const char *tokens[] = { "irrmesh" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------

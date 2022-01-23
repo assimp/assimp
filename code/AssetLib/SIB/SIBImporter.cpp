@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -61,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_USE_HUNTER
 #include <utf8.h>
 #else
-//#  include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
 #endif
 #include <assimp/importerdesc.h>
@@ -217,8 +214,8 @@ SIBImporter::~SIBImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool SIBImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return SimpleExtensionCheck(pFile, "sib");
+bool SIBImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+    return SimpleExtensionCheck(filename, "sib");
 }
 
 // ------------------------------------------------------------------------------------------------

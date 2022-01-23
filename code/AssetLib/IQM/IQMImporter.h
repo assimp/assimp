@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2021, assimp team
 
 All rights reserved.
 
@@ -39,53 +38,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTF2IMPORTER_H_INC
-#define AI_GLTF2IMPORTER_H_INC
+
+/** @file IQMImporter.h
+*   @brief Declares the importer class to read a scene from an Inter-Quake Model file
+*/
+
+#pragma once
+
+#ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
 
 #include <assimp/BaseImporter.h>
-
-struct aiNode;
-
-namespace glTF2 {
-    class Asset;
-}
+#include <assimp/material.h>
 
 namespace Assimp {
 
-/**
- * Load the glTF2 format.
- * https://github.com/KhronosGroup/glTF/tree/master/specification
- */
-class glTF2Importer : public BaseImporter {
+class IQMImporter : public BaseImporter {
 public:
-    glTF2Importer();
-    ~glTF2Importer() override;
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
+	/// \brief  Default constructor
+	IQMImporter();
+    ~IQMImporter() override {}
+
+	/// \brief  Returns whether the class can handle the format of the given file.
+	/// \remark See BaseImporter::CanRead() for details.
+	bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
+    //! \brief  Appends the supported extension.
     const aiImporterDesc *GetInfo() const override;
+
+    //! \brief  File import implementation.
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
-    virtual void SetupProperties(const Importer *pImp) override;
 
 private:
-    void ImportEmbeddedTextures(glTF2::Asset &a);
-    void ImportMaterials(glTF2::Asset &a);
-    void ImportMeshes(glTF2::Asset &a);
-    void ImportCameras(glTF2::Asset &a);
-    void ImportLights(glTF2::Asset &a);
-    void ImportNodes(glTF2::Asset &a);
-    void ImportAnimations(glTF2::Asset &a);
-    void ImportCommonMetadata(glTF2::Asset &a);
-
-private:
-    std::vector<unsigned int> meshOffsets;
-    std::vector<int> mEmbeddedTexIdxs;
-    aiScene *mScene;
-
-    /// An instance of rapidjson::IRemoteSchemaDocumentProvider
-    void *mSchemaDocumentProvider = nullptr;
+    aiScene *mScene = nullptr; // the scene to import to
 };
 
-} // namespace Assimp
+} // Namespace Assimp
 
-#endif // AI_GLTF2IMPORTER_H_INC
+#endif // ASSIMP_BUILD_NO_IQM_IMPORTER

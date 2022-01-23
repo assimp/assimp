@@ -156,8 +156,8 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 // ------------------------------------------------------------------------------------------------
 /*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
         const std::string &pFile,
-        const char * const *tokens,
-        unsigned int numTokens,
+        const char **tokens,
+        std::size_t numTokens,
         unsigned int searchBytes /* = 200 */,
         bool tokensSol /* false */,
         bool noAlphaBeforeTokens /* false */) {
@@ -268,10 +268,11 @@ std::string BaseImporter::GetExtension(const std::string &file) {
     return ret;
 }
 
+
 // ------------------------------------------------------------------------------------------------
 // Check for magic bytes at the beginning of the file.
 /* static */ bool BaseImporter::CheckMagicToken(IOSystem *pIOHandler, const std::string &pFile,
-        const void *_magic, unsigned int num, unsigned int offset, unsigned int size) {
+        const void *_magic, std::size_t num, unsigned int offset, unsigned int size) {
     ai_assert(size <= 16);
     ai_assert(_magic);
 

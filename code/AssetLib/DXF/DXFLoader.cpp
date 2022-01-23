@@ -123,18 +123,9 @@ DXFImporter::~DXFImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bool checkSig ) const {
-    const std::string& extension = GetExtension( filename );
-    if ( extension == desc.mFileExtensions ) {
-        return true;
-    }
-
-    if ( extension.empty() || checkSig ) {
-        static const char * const pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
-        return SearchFileHeaderForToken(pIOHandler, filename, pTokens, 4, 32 );
-    }
-
-    return false;
+bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bool /*checkSig*/ ) const {
+    static const char *tokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
+    return SearchFileHeaderForToken(pIOHandler, filename, tokens, AI_COUNT_OF(tokens), 32);
 }
 
 // ------------------------------------------------------------------------------------------------

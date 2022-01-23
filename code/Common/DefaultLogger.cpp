@@ -388,15 +388,16 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
     ai_assert(nullptr != message);
 
     // Check whether this is a repeated message
-    if (!::strncmp(message, lastMsg, lastLen - 1)) {
+    auto thisLen = ::strlen(message);
+    if (thisLen == lastLen - 1 && !::strncmp(message, lastMsg, lastLen - 1)) {
         if (!noRepeatMsg) {
             noRepeatMsg = true;
             message = "Skipping one or more lines with the same contents\n";
-        } else
-            return;
+        }
+        return;
     } else {
         // append a new-line character to the message to be printed
-        lastLen = ::strlen(message);
+        lastLen = thisLen;
         ::memcpy(lastMsg, message, lastLen + 1);
         ::strcat(lastMsg + lastLen, "\n");
 

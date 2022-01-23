@@ -111,34 +111,19 @@ M3DImporter::M3DImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
-bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "m3d"
-            || extension == "a3d"
-    )
-        return true;
-    else if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        /*
-         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-
-        const char* tokens[] = {"3DMO", "3dmo"};
-        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
-        */
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
-        unsigned char data[4];
-        if (!pStream || 4 != pStream->Read(data, 1, 4)) {
-            return false;
-        }
-        return !memcmp(data, "3DMO", 4) /* bin */
-               || !memcmp(data, "3dmo", 4) /* ASCII */
-                ;
+bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // don't use CheckMagicToken because that checks with swapped bytes too, leading to false
+    // positives. This magic is not uint32_t, but char[4], so memcmp is the best way
+    std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
+    unsigned char data[4];
+    if (4 != pStream->Read(data, 1, 4)) {
+        return false;
     }
-    return false;
+    return !memcmp(data, "3DMO", 4) /* bin */
+#ifdef M3D_ASCII
+        || !memcmp(data, "3dmo", 4) /* ASCII */
+#endif
+            ;
 }
 
 // ------------------------------------------------------------------------------------------------

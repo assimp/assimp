@@ -699,7 +699,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
             continue;
         }
 
-        GenerateOpenings(openings, std::vector<IfcVector3>(1, IfcVector3(1, 0, 0)), temp, false, true);
+        GenerateOpenings(openings, temp, false, true);
         result.Append(temp);
 
         vit += pcount;

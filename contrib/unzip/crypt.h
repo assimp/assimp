@@ -17,7 +17,9 @@
 #define _MINICRYPT_H
 
 #if ZLIB_VERNUM < 0x1270
+#if !defined(Z_U4)
 typedef unsigned long z_crc_t;
+#endif
 #endif
 
 #ifdef __cplusplus

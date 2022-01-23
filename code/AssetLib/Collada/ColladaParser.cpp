@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -331,7 +331,16 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
         const std::string &currentName = currentNode.name();
         if (currentName == "unit") {
             mUnitSize = 1.f;
-            XmlParser::getRealAttribute(currentNode, "meter", mUnitSize);
+            std::string tUnitSizeString;
+            if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
+                try {
+                    fast_atoreal_move<ai_real>(tUnitSizeString.data(), mUnitSize);
+                } catch (const DeadlyImportError& die) {
+                    std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
+                    warning.append(die.what());
+                    ASSIMP_LOG_WARN(warning.data());
+                }
+            }
         } else if (currentName == "up_axis") {
             std::string v;
             if (!XmlParser::getValueAsString(currentNode, v)) {
@@ -924,6 +933,8 @@ void ColladaParser::ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
 void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
     XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
+    // TODO: Check the current technique and skip over unsupported extra techniques
+
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
         if (currentName == "spot") {
@@ -949,33 +960,34 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
             content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
             SkipSpacesAndLineEnd(&content);
         } else if (currentName == "constant_attenuation") {
-            XmlParser::getRealAttribute(currentNode, "constant_attenuation", pLight.mAttConstant);
+            XmlParser::getValueAsFloat(currentNode, pLight.mAttConstant);
         } else if (currentName == "linear_attenuation") {
-            XmlParser::getRealAttribute(currentNode, "linear_attenuation", pLight.mAttLinear);
+            XmlParser::getValueAsFloat(currentNode, pLight.mAttLinear);
         } else if (currentName == "quadratic_attenuation") {
-            XmlParser::getRealAttribute(currentNode, "quadratic_attenuation", pLight.mAttQuadratic);
+            XmlParser::getValueAsFloat(currentNode, pLight.mAttQuadratic);
         } else if (currentName == "falloff_angle") {
-            XmlParser::getRealAttribute(currentNode, "falloff_angle", pLight.mFalloffAngle);
+            XmlParser::getValueAsFloat(currentNode, pLight.mFalloffAngle);
         } else if (currentName == "falloff_exponent") {
-            XmlParser::getRealAttribute(currentNode, "falloff_exponent", pLight.mFalloffExponent);
+            XmlParser::getValueAsFloat(currentNode, pLight.mFalloffExponent);
         }
         // FCOLLADA extensions
         // -------------------------------------------------------
         else if (currentName == "outer_cone") {
-            XmlParser::getRealAttribute(currentNode, "outer_cone", pLight.mOuterAngle);
-        } else if (currentName == "penumbra_angle") { // ... and this one is even deprecated
-            XmlParser::getRealAttribute(currentNode, "penumbra_angle", pLight.mPenumbraAngle);
+            XmlParser::getValueAsFloat(currentNode, pLight.mOuterAngle);
+        } else if (currentName == "penumbra_angle") { // this one is deprecated, now calculated using outer_cone
+            XmlParser::getValueAsFloat(currentNode, pLight.mPenumbraAngle);
         } else if (currentName == "intensity") {
-            XmlParser::getRealAttribute(currentNode, "intensity", pLight.mIntensity);
-        } else if (currentName == "falloff") {
-            XmlParser::getRealAttribute(currentNode, "falloff", pLight.mOuterAngle);
+            XmlParser::getValueAsFloat(currentNode, pLight.mIntensity);
+        }
+        else if (currentName == "falloff") {
+            XmlParser::getValueAsFloat(currentNode, pLight.mOuterAngle);
         } else if (currentName == "hotspot_beam") {
-            XmlParser::getRealAttribute(currentNode, "hotspot_beam", pLight.mFalloffAngle);
+            XmlParser::getValueAsFloat(currentNode, pLight.mFalloffAngle);
         }
         // OpenCOLLADA extensions
         // -------------------------------------------------------
         else if (currentName == "decay_falloff") {
-            XmlParser::getRealAttribute(currentNode, "decay_falloff", pLight.mOuterAngle);
+            XmlParser::getValueAsFloat(currentNode, pLight.mOuterAngle);
         }
     }
 }
@@ -1109,7 +1121,7 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         // GOOGLEEARTH/OKINO extensions
         // -------------------------------------------------------
         else if (currentName == "double_sided")
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mDoubleSided);
+            XmlParser::getValueAsBool(currentNode, pEffect.mDoubleSided);
 
         // FCOLLADA extensions
         // -------------------------------------------------------
@@ -1121,9 +1133,9 @@ void ColladaParser::ReadEffectProfileCommon(XmlNode &node, Collada::Effect &pEff
         // MAX3D extensions
         // -------------------------------------------------------
         else if (currentName == "wireframe") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mWireframe);
+            XmlParser::getValueAsBool(currentNode, pEffect.mWireframe);
         } else if (currentName == "faceted") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), pEffect.mFaceted);
+            XmlParser::getValueAsBool(currentNode, pEffect.mFaceted);
         }
     }
 }
@@ -1142,23 +1154,23 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         // MAYA extensions
         // -------------------------------------------------------
         if (currentName == "wrapU") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mWrapU);
+            XmlParser::getValueAsBool(currentNode, out.mWrapU);
         } else if (currentName == "wrapV") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mWrapV);
+            XmlParser::getValueAsBool(currentNode, out.mWrapV);
         } else if (currentName == "mirrorU") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mMirrorU);
+            XmlParser::getValueAsBool(currentNode, out.mMirrorU);
         } else if (currentName == "mirrorV") {
-            XmlParser::getBoolAttribute(currentNode, currentName.c_str(), out.mMirrorV);
+            XmlParser::getValueAsBool(currentNode, out.mMirrorV);
         } else if (currentName == "repeatU") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mTransform.mScaling.x);
+            XmlParser::getValueAsFloat(currentNode, out.mTransform.mScaling.x);
         } else if (currentName == "repeatV") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mTransform.mScaling.y);
+            XmlParser::getValueAsFloat(currentNode, out.mTransform.mScaling.y);
         } else if (currentName == "offsetU") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mTransform.mTranslation.x);
+            XmlParser::getValueAsFloat(currentNode, out.mTransform.mTranslation.x);
         } else if (currentName == "offsetV") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mTransform.mTranslation.y);
+            XmlParser::getValueAsFloat(currentNode, out.mTransform.mTranslation.y);
         } else if (currentName == "rotateUV") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mTransform.mRotation);
+            XmlParser::getValueAsFloat(currentNode, out.mTransform.mRotation);
         } else if (currentName == "blend_mode") {
             std::string v;
             XmlParser::getValueAsString(currentNode, v);
@@ -1178,14 +1190,14 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         // OKINO extensions
         // -------------------------------------------------------
         else if (currentName == "weighting") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mWeighting);
+            XmlParser::getValueAsFloat(currentNode, out.mWeighting);
         } else if (currentName == "mix_with_previous_layer") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mMixWithPrevious);
+            XmlParser::getValueAsFloat(currentNode, out.mMixWithPrevious);
         }
         // MAX3D extensions
         // -------------------------------------------------------
         else if (currentName == "amount") {
-            XmlParser::getRealAttribute(currentNode, currentName.c_str(), out.mWeighting);
+            XmlParser::getValueAsFloat(currentNode, out.mWeighting);
         }
     }
 }
@@ -2204,7 +2216,7 @@ void ColladaParser::ReadMaterialVertexInputBinding(XmlNode &node, Collada::Seman
 
 void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive) {
     // Attempt to load any undefined Collada::Image in ImageLibrary
-    for (auto & it : mImageLibrary) {
+    for (auto &it : mImageLibrary) {
         Collada::Image &image = it.second;
 
         if (image.mImageData.empty()) {
@@ -2239,20 +2251,26 @@ void ColladaParser::ReadNodeGeometry(XmlNode &node, Node *pNode) {
         if (currentName == "bind_material") {
             XmlNode techNode = currentNode.child("technique_common");
             if (techNode) {
-                XmlNode instanceMatNode = techNode.child("instance_material");
-                // read ID of the geometry subgroup and the target material
-                std::string group;
-                XmlParser::getStdStrAttribute(instanceMatNode, "symbol", group);
-                XmlParser::getStdStrAttribute(instanceMatNode, "target", url);
-                const char *urlMat = url.c_str();
-                Collada::SemanticMappingTable s;
-                if (urlMat[0] == '#')
-                    urlMat++;
+                for (XmlNode instanceMatNode = techNode.child("instance_material"); instanceMatNode; instanceMatNode = instanceMatNode.next_sibling())
+                {
+                    const std::string &instance_name = instanceMatNode.name();
+                    if (instance_name == "instance_material")
+                    {
+                        // read ID of the geometry subgroup and the target material
+                        std::string group;
+                        XmlParser::getStdStrAttribute(instanceMatNode, "symbol", group);
+                        XmlParser::getStdStrAttribute(instanceMatNode, "target", url);
+                        const char *urlMat = url.c_str();
+                        Collada::SemanticMappingTable s;
+                        if (urlMat[0] == '#')
+                            urlMat++;
 
-                s.mMatName = urlMat;
-                // store the association
-                instance.mMaterials[group] = s;
-                ReadMaterialVertexInputBinding(instanceMatNode, s);
+                        s.mMatName = urlMat;
+                        // store the association
+                        instance.mMaterials[group] = s;
+                        ReadMaterialVertexInputBinding(instanceMatNode, s);
+                    }
+                }
             }
         }
     }

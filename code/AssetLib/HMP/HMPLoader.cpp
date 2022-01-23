@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -84,20 +84,13 @@ HMPImporter::~HMPImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "hmp")
-        return true;
-
-    // if check for extension is not enough, check for the magic tokens
-    if (!extension.length() || cs) {
-        uint32_t tokens[3];
-        tokens[0] = AI_HMP_MAGIC_NUMBER_LE_4;
-        tokens[1] = AI_HMP_MAGIC_NUMBER_LE_5;
-        tokens[2] = AI_HMP_MAGIC_NUMBER_LE_7;
-        return CheckMagicToken(pIOHandler, pFile, tokens, 3, 0);
-    }
-    return false;
+bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_HMP_MAGIC_NUMBER_LE_4,
+        AI_HMP_MAGIC_NUMBER_LE_5,
+        AI_HMP_MAGIC_NUMBER_LE_7
+    };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -473,16 +466,22 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
 
 // ------------------------------------------------------------------------------------------------
 // Generate proepr texture coords
-void HMPImporter::GenerateTextureCoords(
-        const unsigned int width, const unsigned int height) {
+void HMPImporter::GenerateTextureCoords(const unsigned int width, const unsigned int height) {
     ai_assert(nullptr != pScene->mMeshes);
     ai_assert(nullptr != pScene->mMeshes[0]);
     ai_assert(nullptr != pScene->mMeshes[0]->mTextureCoords[0]);
 
     aiVector3D *uv = pScene->mMeshes[0]->mTextureCoords[0];
-
-    const float fY = (1.0f / height) + (1.0f / height) / (height - 1);
-    const float fX = (1.0f / width) + (1.0f / width) / (width - 1);
+    if (uv == nullptr) {
+        return;
+    }
+    
+    if (height == 0.0f || width == 0.0) {
+        return;
+    }
+    
+    const float fY = (1.0f / height) + (1.0f / height) / height;
+    const float fX = (1.0f / width) + (1.0f / width) / width;
 
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x, ++uv) {

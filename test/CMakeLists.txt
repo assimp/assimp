@@ -1,7 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2021, assimp team
+# Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
 #
@@ -97,6 +97,7 @@ SET( COMMON
   unit/Common/utSpatialSort.cpp
   unit/Common/utAssertHandler.cpp
   unit/Common/utXmlParser.cpp
+  unit/Common/utBase64.cpp
 )
 
 SET( IMPORTERS
@@ -208,6 +209,7 @@ add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Common/Version.cpp
+	../code/Common/Base64.cpp
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}

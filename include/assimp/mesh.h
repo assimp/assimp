@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -740,6 +740,7 @@ struct aiMesh {
 
     /**
      *  Method of morphing when anim-meshes are specified.
+     *  @see aiMorphingMethod to learn more about the provided morphing targets.
      */
     unsigned int mMethod;
 

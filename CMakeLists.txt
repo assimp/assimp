@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2021, assimp team
+# Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
 #
@@ -56,7 +56,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.1.0)
+PROJECT(Assimp VERSION 5.1.6)
 
 # All supported options ###############################################
 
@@ -183,7 +183,9 @@ SET (ASSIMP_SOVERSION 5)
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 if(NOT ASSIMP_HUNTER_ENABLED)
   # Enable C++11 support globally
-  set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_C_STANDARD 99)
 endif()
 
 IF(NOT ASSIMP_IGNORE_GIT_HASH)
@@ -244,7 +246,7 @@ IF( UNIX )
 ENDIF()
 
 # Grouped compiler settings ########################################
-IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
+IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_STANDARD 11)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -281,19 +283,18 @@ ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   ENDIF()
   SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-ELSEIF( CMAKE_COMPILER_IS_MINGW )
+ELSEIF( MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     message(FATAL_ERROR "MinGW is too old to be supported. Please update MinGW and try again.")
   ELSEIF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
     message(WARNING "MinGW is old, if you experience errors, update MinGW.")
   ENDIF()
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
   SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -O3 ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-  ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
 IF ( IOS AND NOT ASSIMP_HUNTER_ENABLED)
@@ -340,9 +341,24 @@ INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # Set Assimp project output directory variables.
-SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
-SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
-SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for archive output files")
+# Will respect top-level CMAKE_*_OUTPUT_DIRECTORY variables if any are set.
+IF(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
+ELSE()
+  SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
+
+IF(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
+ELSE()
+  SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
+
+IF(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+  SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for library output files")
+ELSE()
+  SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
 
 # Macro used to set the output directories of a target to the
 # respective Assimp output directories.
@@ -763,7 +779,7 @@ if(WIN32)
 
   IF(MSVC_TOOLSET_VERSION)
     SET(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
-    SET(ASSIMP_MSVC_VERSION ${MCVS_PREFIX})
+    SET(ASSIMP_MSVC_VERSION ${MSVC_PREFIX})
   ELSE()
     IF(MSVC12)
       SET(ASSIMP_MSVC_VERSION "vc120")

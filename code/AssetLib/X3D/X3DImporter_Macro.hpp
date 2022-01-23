@@ -60,14 +60,12 @@ namespace Assimp {
 /// \param [in] pType - type of element to find.
 /// \param [out] pNE - pointer to found node element.
 inline X3DNodeElementBase *X3DImporter::MACRO_USE_CHECKANDAPPLY(XmlNode &node, std::string pDEF, std::string pUSE, X3DElemType pType, X3DNodeElementBase *pNE) {
-    if (nullptr == mNodeElementCur) {
-        printf("here\n");
-    }
     checkNodeMustBeEmpty(node);
     if (!pDEF.empty())
         Assimp::Throw_DEF_And_USE(node.name());
     if (!FindNodeElement(pUSE, pType, &pNE))
         Assimp::Throw_USE_NotFound(node.name(), pUSE);
+    ai_assert(nullptr != mNodeElementCur);
     mNodeElementCur->Children.push_back(pNE); /* add found object as child to current element */
 
     return pNE;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IRRXML_WRAPPER
 #define INCLUDED_AI_IRRXML_WRAPPER
 
-#include <assimp/DefaultLogger.hpp>
 #include <assimp/ai_assert.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include "BaseImporter.h"
 #include "IOStream.hpp"
@@ -112,7 +112,7 @@ public:
 
     ///	@brief  Will clear the parsed xml-file.
     void clear() {
-        if(mData.empty()) {
+        if (mData.empty()) {
             mDoc = nullptr;
             return;
         }
@@ -243,7 +243,7 @@ public:
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The int value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is an int.
-    static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val ) {
+    static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {
             return false;
@@ -258,7 +258,7 @@ public:
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The real value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a real.
-    static inline bool getRealAttribute( XmlNode &xmlNode, const char *name, ai_real &val ) {
+    static inline bool getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {
             return false;
@@ -284,7 +284,6 @@ public:
 
         val = attr.as_float();
         return true;
-
     }
 
     /// @brief Will try to get a double attribute value.
@@ -322,7 +321,7 @@ public:
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The bool value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a bool.
-    static inline bool getBoolAttribute( XmlNode &xmlNode, const char *name, bool &val ) {
+    static inline bool getBoolAttribute(XmlNode &xmlNode, const char *name, bool &val) {
         pugi::xml_attribute attr = xmlNode.attribute(name);
         if (attr.empty()) {
             return false;
@@ -330,14 +329,13 @@ public:
 
         val = attr.as_bool();
         return true;
-
     }
 
     /// @brief Will try to get the value of the node as a string.
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a text.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsString( XmlNode &node, std::string &text ) {
+    static inline bool getValueAsString(XmlNode &node, std::string &text) {
         text = std::string();
         if (node.empty()) {
             return false;
@@ -352,7 +350,7 @@ public:
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a float.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsFloat( XmlNode &node, ai_real &v ) {
+    static inline bool getValueAsFloat(XmlNode &node, ai_real &v) {
         if (node.empty()) {
             return false;
         }
@@ -360,10 +358,38 @@ public:
         v = node.text().as_float();
 
         return true;
-
     }
 
- private:
+    /// @brief Will try to get the value of the node as an integer.
+    /// @param node     [in] The node to search in.
+    /// @param text     [out] The value as a int.
+    /// @return true, if the value can be read out.
+    static inline bool getValueAsInt(XmlNode &node, int &v) {
+        if (node.empty()) {
+            return false;
+        }
+
+        v = node.text().as_int();
+
+        return true;
+    }
+
+    /// @brief Will try to get the value of the node as an bool.
+    /// @param node     [in] The node to search in.
+    /// @param text     [out] The value as a bool.
+    /// @return true, if the value can be read out.
+    static inline bool getValueAsBool(XmlNode& node, bool& v)
+    {
+        if (node.empty()) {
+            return false;
+        }
+
+        v = node.text().as_bool();
+
+        return true;
+    }
+
+private:
     pugi::xml_document *mDoc;
     TNodeType mCurrent;
     std::vector<char> mData;
@@ -376,8 +402,8 @@ class XmlNodeIterator {
 public:
     /// @brief The iteration mode.
     enum IterationMode {
-        PreOrderMode,   ///< Pre-ordering, get the values, continue the iteration.
-        PostOrderMode   ///< Post-ordering, continue the iteration, get the values.
+        PreOrderMode, ///< Pre-ordering, get the values, continue the iteration.
+        PostOrderMode ///< Post-ordering, continue the iteration, get the values.
     };
     ///	@brief  The class constructor
     /// @param  parent      [in] The xml parent to to iterate through.
@@ -400,7 +426,7 @@ public:
 
     ///	@brief  Will iterate through all children in pre-order iteration.
     /// @param  node    [in] The nod to iterate through.
-    void collectChildrenPreOrder( XmlNode &node ) {
+    void collectChildrenPreOrder(XmlNode &node) {
         if (node != mParent && node.type() == pugi::node_element) {
             mNodes.push_back(node);
         }

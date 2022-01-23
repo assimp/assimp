@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -486,8 +486,9 @@ void Parser::ParseLV1MaterialListBlock() {
                 ParseLV4MeshLong(iIndex);
 
                 if (iIndex >= iMaterialCount) {
-                    LogWarning("Out of range: material index is too large");
+                    LogError("Out of range: material index is too large");
                     iIndex = iMaterialCount - 1;
+                    return;
                 }
 
                 // get a reference to the material

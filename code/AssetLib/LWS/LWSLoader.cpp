@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -147,20 +147,12 @@ LWSImporter::~LWSImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "lws" || extension == "mot") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens LWSC and LWMO
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[2];
-        tokens[0] = AI_MAKE_MAGIC("LWSC");
-        tokens[1] = AI_MAKE_MAGIC("LWMO");
-        return CheckMagicToken(pIOHandler, pFile, tokens, 2);
-    }
-    return false;
+bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_MAKE_MAGIC("LWSC"),
+        AI_MAKE_MAGIC("LWMO")
+    };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -537,6 +529,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // get file format version and print to log
     ++it;
+
+    if (it == root.children.end() || (*it).tokens[0].empty()) {
+        ASSIMP_LOG_ERROR("Invalid LWS file detectedm abort import.");
+        return;
+    }
     unsigned int version = strtoul10((*it).tokens[0].c_str());
     ASSIMP_LOG_INFO("LWS file format version is ", (*it).tokens[0]);
     first = 0.;

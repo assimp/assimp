@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -111,6 +111,12 @@ TEST(utBlenderImporter, importBlenderDefault269) {
 TEST(utBlenderImporter, importBlenderDefault271) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_271.blend", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+TEST(utBlenderImporter, importBlenderDefault293) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_276.blend", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 

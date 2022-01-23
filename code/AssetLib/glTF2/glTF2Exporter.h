@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -66,7 +66,9 @@ class Ref;
 }
 
 namespace glTF2 {
+
 class Asset;
+
 struct TexProperty;
 struct TextureInfo;
 struct NormalTextureInfo;
@@ -84,6 +86,7 @@ struct MaterialIOR;
 typedef float(vec2)[2];
 typedef float(vec3)[3];
 typedef float(vec4)[4];
+
 } // namespace glTF2
 
 namespace Assimp {

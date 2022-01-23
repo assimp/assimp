@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -699,7 +699,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
             continue;
         }
 
-        GenerateOpenings(openings, std::vector<IfcVector3>(1, IfcVector3(1, 0, 0)), temp, false, true);
+        GenerateOpenings(openings, temp, false, true);
         result.Append(temp);
 
         vit += pcount;

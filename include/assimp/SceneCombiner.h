@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -361,6 +361,7 @@ public:
     static void Copy(aiNodeAnim **dest, const aiNodeAnim *src);
     static void Copy(aiMeshMorphAnim **dest, const aiMeshMorphAnim *src);
     static void Copy(aiMetadata **dest, const aiMetadata *src);
+    static void Copy(aiString **dest, const aiString *src);
 
     // recursive, of course
     static void Copy(aiNode **dest, const aiNode *src);

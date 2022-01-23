@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -82,19 +80,10 @@ NDOImporter::~NDOImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-
-    if( extension == "ndo")
-        return true;
-
-    if ((checkSig || !extension.length()) && pIOHandler) {
-        static const char * const tokens[] = {"nendo"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,5);
-    }
-    return false;
+    static const char* tokens[] = {"nendo"};
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens),5);
 }
 
 // ------------------------------------------------------------------------------------------------

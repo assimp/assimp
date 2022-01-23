@@ -133,6 +133,10 @@ struct Material {
     aiString textureSpecularity;
     aiString textureOpacity;
     aiString textureDisp;
+    aiString textureRoughness;
+    aiString textureMetallic;
+    aiString textureSheen;
+    aiString textureRMA;
 
     enum TextureType {
         TextureDiffuseType = 0,
@@ -151,6 +155,10 @@ struct Material {
         TextureSpecularityType,
         TextureOpacityType,
         TextureDispType,
+        TextureRoughnessType,
+        TextureMetallicType,
+        TextureSheenType,
+        TextureRMAType,
         TextureTypeCount
     };
     bool clamp[TextureTypeCount];
@@ -174,6 +182,19 @@ struct Material {
     //! Transparency color
     aiColor3D transparent;
 
+    //! PBR Roughness
+    ai_real roughness;
+    //! PBR Metallic
+    ai_real metallic;
+    //! PBR Metallic
+    aiColor3D sheen;
+    //! PBR Clearcoat Thickness
+    ai_real clearcoat_thickness;
+    //! PBR Clearcoat Rougness
+    ai_real clearcoat_roughness;
+    //! PBR Anisotropy
+    ai_real anisotropy;
+
     //! Constructor
     Material() :
             diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
@@ -181,7 +202,13 @@ struct Material {
             shineness(ai_real(0.0)),
             illumination_model(1),
             ior(ai_real(1.0)),
-            transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)) {
+            transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
+            roughness(ai_real(1.0)),
+            metallic(ai_real(0.0)),
+            sheen(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
+            clearcoat_thickness(ai_real(0.0)),
+            clearcoat_roughness(ai_real(0.0)),
+            anisotropy(ai_real(0.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 

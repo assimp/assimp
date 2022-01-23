@@ -5,7 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static const char *LEGAL_INFORMATION =
         "Open Asset Import Library (Assimp).\n"
         "A free C/C++ library to import various 3D file formats into applications\n\n"
-        "(c) 2006-2021, Assimp team\n"
+        "(c) 2006-2022, Assimp team\n"
         "License under the terms and conditions of the 3-clause BSD license\n"
         "https://www.assimp.org\n";
 

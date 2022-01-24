@@ -487,8 +487,6 @@ void Parser::ParseLV1MaterialListBlock() {
 
                 if (iIndex >= iMaterialCount) {
                     LogError("Out of range: material index is too large");
-                    iIndex = iMaterialCount - 1;
-                    return;
                 }
 
                 // get a reference to the material

@@ -275,7 +275,9 @@ void HMPImporter::InternReadFile_HMP7() {
 
     // now load all vertices from the file
     aiVector3D *pcVertOut = pcMesh->mVertices;
+    ai_assert(pcVertOut != nullptr);
     aiVector3D *pcNorOut = pcMesh->mNormals;
+    ai_assert(pcNorOut != nullptr);
     const HMP::Vertex_HMP7 *src = (const HMP::Vertex_HMP7 *)szCurrent;
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
@@ -327,29 +329,31 @@ void HMPImporter::CreateMaterial(const unsigned char *szCurrent,
 
         // now read the first skin and skip all others
         ReadFirstSkin(pcHeader->numskins, szCurrent, &szCurrent);
-    } else {
-        // generate a default material
-        const int iMode = (int)aiShadingMode_Gouraud;
-        aiMaterial *pcHelper = new aiMaterial();
-        pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+        *szCurrentOut = szCurrent;
+        return;
+    } 
 
-        aiColor3D clr;
-        clr.b = clr.g = clr.r = 0.6f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
+    // generate a default material
+    const int iMode = (int)aiShadingMode_Gouraud;
+    aiMaterial *pcHelper = new aiMaterial();
+    pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
-        clr.b = clr.g = clr.r = 0.05f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
+    aiColor3D clr;
+    clr.b = clr.g = clr.r = 0.6f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
 
-        aiString szName;
-        szName.Set(AI_DEFAULT_MATERIAL_NAME);
-        pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
+    clr.b = clr.g = clr.r = 0.05f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
 
-        // add the material to the scene
-        pScene->mNumMaterials = 1;
-        pScene->mMaterials = new aiMaterial *[1];
-        pScene->mMaterials[0] = pcHelper;
-    }
+    aiString szName;
+    szName.Set(AI_DEFAULT_MATERIAL_NAME);
+    pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
+
+    // add the material to the scene
+    pScene->mNumMaterials = 1;
+    pScene->mMaterials = new aiMaterial *[1];
+    pScene->mMaterials[0] = pcHelper;
     *szCurrentOut = szCurrent;
 }
 
@@ -376,28 +380,30 @@ void HMPImporter::CreateOutputFaceList(unsigned int width, unsigned int height) 
     const unsigned int upperBound = pcMesh->mNumVertices;
     unsigned int iCurrent = 0;
     for (unsigned int y = 0; y < height - 1; ++y) {
+        const size_t offset0 = y * width;
+        const size_t offset1 = (y + 1) * width;
         for (unsigned int x = 0; x < width - 1; ++x, ++pcFaceOut) {
             pcFaceOut->mNumIndices = 4;
             pcFaceOut->mIndices = new unsigned int[4];
-            if ((y * width + x + 1) >= upperBound){
+            if ((offset + x + 1) >= upperBound){
                 continue;
             }
-            ai_assert(upperBound
-            *pcVertOut++ = pcMesh->mVertices[y * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x + 1];
-            *pcVertOut++ = pcMesh->mVertices[y * width + x + 1];
 
-            *pcNorOut++ = pcMesh->mNormals[y * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x + 1];
-            *pcNorOut++ = pcMesh->mNormals[y * width + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x + 1];
+
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x + 1];
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x + 1];
 
             if (pcMesh->mTextureCoords[0]) {
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x + 1];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x + 1];
             }
 
             for (unsigned int i = 0; i < 4; ++i)

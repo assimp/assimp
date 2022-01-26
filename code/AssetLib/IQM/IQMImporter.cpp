@@ -64,7 +64,7 @@ inline void swap_block( uint32_t *block, size_t size ){
     (void)block; // suppress 'unreferenced formal parameter' MSVC warning
     size >>= 2;
     for ( size_t i = 0; i < size; ++i )
-        AI_SWAP4( block[ i ] );
+        Assimp::AI_SWAP4( block[ i ] );
 }
 
 static const aiImporterDesc desc = {

@@ -385,7 +385,10 @@ void HMPImporter::CreateOutputFaceList(unsigned int width, unsigned int height) 
         for (unsigned int x = 0; x < width - 1; ++x, ++pcFaceOut) {
             pcFaceOut->mNumIndices = 4;
             pcFaceOut->mIndices = new unsigned int[4];
-            if ((offset + x + 1) >= upperBound){
+            if ((offset0 + x + 1) >= upperBound){
+                continue;
+            }
+            if ((offset1 + x + 1) >= upperBound){
                 continue;
             }
 

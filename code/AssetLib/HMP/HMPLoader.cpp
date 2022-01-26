@@ -373,12 +373,16 @@ void HMPImporter::CreateOutputFaceList(unsigned int width, unsigned int height) 
     aiVector3D *pcUVOut(pcUVs);
 
     // Build the terrain square
+    const unsigned int upperBound = pcMesh->mNumVertices;
     unsigned int iCurrent = 0;
     for (unsigned int y = 0; y < height - 1; ++y) {
         for (unsigned int x = 0; x < width - 1; ++x, ++pcFaceOut) {
             pcFaceOut->mNumIndices = 4;
             pcFaceOut->mIndices = new unsigned int[4];
-
+            if ((y * width + x + 1) >= upperBound){
+                continue;
+            }
+            ai_assert(upperBound
             *pcVertOut++ = pcMesh->mVertices[y * width + x];
             *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x];
             *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x + 1];

@@ -1,15 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -36,18 +35,46 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
-/** @file Default implementation of IOSystem using the standard C file functions */
 
-#include <assimp/IOSystem.hpp>
+#pragma once
 
-using namespace Assimp;
+#include <vector>
 
-const std::string &IOSystem::CurrentDirectory() const {
-    if ( m_pathStack.empty() ) {
-        static const std::string Dummy = std::string();
-        return Dummy;
-    }
-    return m_pathStack[ m_pathStack.size()-1 ];
-}
+namespace Assimp {
+
+/// @brief This class provides the decompression of zlib-compressed data.
+class Compression {
+public:
+    /// @brief  The class constructor.
+    Compression();
+
+    ///	@brief  The class destructor.
+    ~Compression();
+
+    /// @brief  Will open the access to the compression.
+    /// @return true if close was successful, false if not.
+    bool open();
+
+    /// @brief  Will return the open state.
+    /// @return true if the access is opened, false if not.
+    bool isOpen() const;
+
+    /// @brief  Will close the decompress access.
+    /// @return true if close was successful, false if not.
+    bool close();
+
+    /// @brief Will decompress the data buffer.
+    /// @param[in] data         The data to decompress
+    /// @param[in] in           The size of the data.
+    /// @param[out uncompressed A std::vector containing the decompressed data.
+    size_t decompress(unsigned char *data, size_t in, std::vector<unsigned char> &uncompressed);
+
+private:
+    struct impl;
+    impl *mImpl;
+};
+
+} // namespace Assimp

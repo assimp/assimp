@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -57,7 +57,7 @@ static const uint8_t tableDecodeBase64[128] = {
     41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0
 };
 
-static const char* tableEncodeBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+static const char *tableEncodeBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 static inline char EncodeChar(uint8_t b) {
     return tableEncodeBase64[size_t(b)];
@@ -104,16 +104,15 @@ void Encode(const uint8_t *in, size_t inLength, std::string &out) {
     }
 }
 
-void Encode(const std::vector<uint8_t>& in, std::string &out) {
-    Encode (in.data (), in.size (), out);
+void Encode(const std::vector<uint8_t> &in, std::string &out) {
+    Encode(in.data(), in.size(), out);
 }
 
-std::string Encode (const std::vector<uint8_t>& in) {
+std::string Encode(const std::vector<uint8_t> &in) {
     std::string encoded;
-    Encode (in, encoded);
+    Encode(in, encoded);
     return encoded;
 }
-
 
 size_t Decode(const char *in, size_t inLength, uint8_t *&out) {
     if (inLength % 4 != 0) {
@@ -159,23 +158,22 @@ size_t Decode(const char *in, size_t inLength, uint8_t *&out) {
     return outLength;
 }
 
-size_t Decode(const std::string& in, std::vector<uint8_t>& out) {
-    uint8_t* outPtr = nullptr;
-    size_t decodedSize = Decode (in.data (), in.size (), outPtr);
+size_t Decode(const std::string &in, std::vector<uint8_t> &out) {
+    uint8_t *outPtr = nullptr;
+    size_t decodedSize = Decode(in.data(), in.size(), outPtr);
     if (outPtr == nullptr) {
         return 0;
     }
-    out.assign (outPtr, outPtr + decodedSize);
+    out.assign(outPtr, outPtr + decodedSize);
     delete[] outPtr;
     return decodedSize;
 }
 
-std::vector<uint8_t> Decode (const std::string& in) {
+std::vector<uint8_t> Decode(const std::string &in) {
     std::vector<uint8_t> result;
-    Decode (in, result);
+    Decode(in, result);
     return result;
 }
 
-}
-
-}
+} // namespace Base64
+} // namespace Assimp

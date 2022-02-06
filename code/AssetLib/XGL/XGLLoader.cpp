@@ -58,15 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// zlib is needed for compressed XGL files
-#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#    include <zlib.h>
-#  else
-#    include <contrib/zlib/zlib.h>
-#  endif
-#endif
-
 namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
 
 template <>
@@ -120,8 +111,8 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-	std::vector<Bytef> uncompressed;
+ #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
+	std::vector<unsigned char> uncompressed;
 #endif
 
 	m_scene = pScene;

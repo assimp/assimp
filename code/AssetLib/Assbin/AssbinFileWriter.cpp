@@ -182,6 +182,8 @@ inline size_t Write<aiVertexWeight>(IOStream *stream, const aiVertexWeight &v) {
     return t + Write<float>(stream, v.mWeight);
 }
 
+constexpr size_t MatrixSize = 64;
+
 // -----------------------------------------------------------------------------------
 // Serialize a mat4x4
 template <>
@@ -192,7 +194,7 @@ inline size_t Write<aiMatrix4x4>(IOStream *stream, const aiMatrix4x4 &m) {
         }
     }
 
-    return 64;
+    return MatrixSize;
 }
 
 // -----------------------------------------------------------------------------------

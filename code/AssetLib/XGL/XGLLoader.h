@@ -186,7 +186,7 @@ private:
     void ReadLighting(XmlNode &node, TempScope &scope);
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope);
-    bool ReadMesh(XmlNode &node, TempScope &scope);
+    bool ReadMesh(XmlNode &node, TempScope &scope, bool &empty);
     void ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);
     aiVector3D ReadVec3(XmlNode &node);

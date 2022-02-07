@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Base64 {
 
+/// @brief Will encode the given 
+/// @param in 
+/// @param inLength 
+/// @param out 
 void Encode(const uint8_t *in, size_t inLength, std::string &out);
 void Encode(const std::vector<uint8_t>& in, std::string &out);
 std::string Encode(const std::vector<uint8_t>& in);

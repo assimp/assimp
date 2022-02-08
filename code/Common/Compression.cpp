@@ -108,6 +108,7 @@ size_t Compression::decompress(const void *data, size_t in, std::vector<char> &u
     do {
         mImpl->mZSstream.avail_out = MYBLOCK;
         mImpl->mZSstream.next_out = block;
+        
         ret = inflate(&mImpl->mZSstream, Z_NO_FLUSH);
 
         if (ret != Z_STREAM_END && ret != Z_OK) {
@@ -121,6 +122,30 @@ size_t Compression::decompress(const void *data, size_t in, std::vector<char> &u
     } while (ret != Z_STREAM_END);
 
     return total;
+}
+
+size_t Compression::decompressBlock(const void *data, size_t in, char *out, size_t availableOut) {
+
+    // push data to the stream
+    mImpl->mZSstream.next_in = (Bytef *)data;
+    mImpl->mZSstream.avail_in = (uInt)in;
+    mImpl->mZSstream.next_out = (Bytef *)out;
+    mImpl->mZSstream.avail_out = (uInt)availableOut;
+
+    // and decompress the data ....
+    int ret = ::inflate(&mImpl->mZSstream, Z_SYNC_FLUSH);
+    if (ret != Z_OK && ret != Z_STREAM_END)
+        throw DeadlyImportError("X: Failed to decompress MSZIP-compressed data");
+
+    ::inflateReset(&mImpl->mZSstream);
+    ::inflateSetDictionary(&mImpl->mZSstream, (const Bytef *)out, (uInt)availableOut - mImpl->mZSstream.avail_out);
+
+
+
+    ::inflateReset(&mImpl->mZSstream);
+    ::inflateSetDictionary(&mImpl->mZSstream, (const Bytef *)out, (uInt)availableOut - mImpl->mZSstream.avail_out);
+
+    return availableOut - (size_t)mImpl->mZSstream.avail_out;
 }
 
 bool Compression::isOpen() const {

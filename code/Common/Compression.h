@@ -79,6 +79,8 @@ public:
     /// @param[out uncompressed A std::vector containing the decompressed data.
     size_t decompress(const void *data, size_t in, std::vector<char> &uncompressed);
 
+    size_t decompressBlock(const void *data, size_t in, char *out, size_t availableOut);
+
 private:
     struct impl;
     impl *mImpl;

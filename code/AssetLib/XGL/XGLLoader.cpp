@@ -112,7 +112,7 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 // Imports the given file into the given scene structure.
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
  #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-	std::vector<unsigned char> uncompressed;
+	std::vector<char> uncompressed;
 #endif
 
 	m_scene = pScene;
@@ -132,7 +132,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         Compression c;
         size_t total = 0l;
-        if (c.open()) {
+        if (c.open(Compression::Format::Binary)) {
             // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
             raw_reader->IncPtr(2);
             total = c.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);

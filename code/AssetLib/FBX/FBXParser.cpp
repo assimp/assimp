@@ -46,11 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#   include <zlib.h>
+//#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include "Common/Compression.h"
+/*#   include <zlib.h>
 #else
 #   include "../contrib/zlib/zlib.h"
-#endif
+#endif*/
 
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
@@ -571,8 +572,11 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
     else if(encmode == 1) {
         // zlib/deflate, next comes ZIP head (0x78 0x01)
         // see http://www.ietf.org/rfc/rfc1950.txt
-
-        z_stream zstream;
+        Compression compress;
+        if (compress.open(Compression::Format::Binary)) {
+            compress.decompress(data, comp_len, buff);
+        }
+        /* z_stream zstream;
         zstream.opaque = Z_NULL;
         zstream.zalloc = Z_NULL;
         zstream.zfree  = Z_NULL;
@@ -581,9 +585,9 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
         if(Z_OK != inflateInit(&zstream)) {
             ParseError("failure initializing zlib");
-        }
+        }*/
 
-        zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
+        /* zstream.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(data));
         zstream.avail_in  = comp_len;
 
         zstream.avail_out = static_cast<uInt>(buff.size());
@@ -595,7 +599,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         }
 
         // terminate zlib
-        inflateEnd(&zstream);
+        inflateEnd(&zstream);*/
     }
 #ifdef ASSIMP_BUILD_DEBUG
     else {

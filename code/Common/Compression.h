@@ -48,6 +48,13 @@ namespace Assimp {
 /// @brief This class provides the decompression of zlib-compressed data.
 class Compression {
 public:
+    enum class Format {
+        Binary = 0,
+        ASCII,
+
+        NumFormats,
+        InvalidFormat
+    };
     /// @brief  The class constructor.
     Compression();
 
@@ -56,7 +63,7 @@ public:
 
     /// @brief  Will open the access to the compression.
     /// @return true if close was successful, false if not.
-    bool open();
+    bool open(Format format);
 
     /// @brief  Will return the open state.
     /// @return true if the access is opened, false if not.
@@ -70,7 +77,7 @@ public:
     /// @param[in] data         The data to decompress
     /// @param[in] in           The size of the data.
     /// @param[out uncompressed A std::vector containing the decompressed data.
-    size_t decompress(unsigned char *data, size_t in, std::vector<unsigned char> &uncompressed);
+    size_t decompress(const void *data, size_t in, std::vector<char> &uncompressed);
 
 private:
     struct impl;

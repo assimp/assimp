@@ -60,11 +60,12 @@ using namespace Assimp::Formatter;
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+/* #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #include <zlib.h>
 #else
 #include "../contrib/zlib/zlib.h"
-#endif
+#endif*/
+#include "Common/Compression.h"
 
 // Magic identifier for MSZIP compressed data
 #define MSZIP_MAGIC 0x4B43
@@ -72,13 +73,13 @@ using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Dummy memory wrappers for use with zlib
-static void *dummy_alloc(void * /*opaque*/, unsigned int items, unsigned int size) {
+/* static void *dummy_alloc(void * opaque, unsigned int items, unsigned int size) {
     return ::operator new(items *size);
 }
 
-static void dummy_free(void * /*opaque*/, void *address) {
+static void dummy_free(void * opaque, void *address) {
     return ::operator delete(address);
-}
+}*/
 
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
 
@@ -171,15 +172,16 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
          * ///////////////////////////////////////////////////////////////////////
          */
 
+        Compression compression;
         // build a zlib stream
-        z_stream stream;
+        /* z_stream stream;
         stream.opaque = nullptr;
         stream.zalloc = &dummy_alloc;
         stream.zfree = &dummy_free;
         stream.data_type = (mIsBinaryFormat ? Z_BINARY : Z_ASCII);
 
         // initialize the inflation algorithm
-        ::inflateInit2(&stream, -MAX_WBITS);
+        ::inflateInit2(&stream, -MAX_WBITS);*/
 
         // skip unknown data (checksum, flags?)
         mP += 6;
@@ -213,7 +215,12 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         // Allocate storage and terminating zero and do the actual uncompressing
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        while (mP + 3 < mEnd) {
+        
+        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII)) {
+            compression.decompress(mP, std::distance(mP, mEnd-3), uncompressed);
+            compression.close();
+        }
+        /* while (mP + 3 < mEnd) {
             uint16_t ofs = *((uint16_t *)mP);
             AI_SWAP2(ofs);
             mP += 4;
@@ -242,7 +249,7 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         }
 
         // terminate zlib
-        ::inflateEnd(&stream);
+        ::inflateEnd(&stream);*/
 
         // ok, update pointers to point to the uncompressed file data
         mP = &uncompressed[0];

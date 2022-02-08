@@ -70,7 +70,7 @@ Compression::~Compression() {
     delete mImpl;
 }
 
-bool Compression::open() {
+bool Compression::open(Format format) {
     ai_assert(mImpl != nullptr);
 
     if (mImpl->mOpen) {
@@ -81,7 +81,11 @@ bool Compression::open() {
     mImpl->mZSstream.opaque = Z_NULL;
     mImpl->mZSstream.zalloc = Z_NULL;
     mImpl->mZSstream.zfree = Z_NULL;
-    mImpl->mZSstream.data_type = Z_BINARY;
+    if (format == Format::Binary) {
+        mImpl->mZSstream.data_type = Z_BINARY;
+    } else {
+        mImpl->mZSstream.data_type = Z_ASCII;
+    }
 
     // raw decompression without a zlib or gzip header
     inflateInit2(&mImpl->mZSstream, -MAX_WBITS);
@@ -90,12 +94,12 @@ bool Compression::open() {
     return mImpl->mOpen;
 }
 
-constexpr size_t MYBLOCK = 1024;
+constexpr size_t MYBLOCK = 32786;
 
-size_t Compression::decompress(unsigned char *data, size_t in, std::vector<unsigned char> &uncompressed) {
+size_t Compression::decompress(const void *data, size_t in, std::vector<char> &uncompressed) {
     ai_assert(mImpl != nullptr);
 
-    mImpl->mZSstream.next_in = reinterpret_cast<Bytef *>(data);
+    mImpl->mZSstream.next_in = (Bytef*)(data);
     mImpl->mZSstream.avail_in = (uInt)in;
 
     Bytef block[MYBLOCK] = {};

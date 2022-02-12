@@ -188,7 +188,7 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         Compression compression;
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII)) {
+        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII, Compression::FlushMode::SyncFlush)) {
             while (mP + 3 < mEnd) {
                 uint16_t ofs = *((uint16_t *)mP);
                 AI_SWAP2(ofs);
@@ -238,8 +238,9 @@ void XFileParser::ParseFile() {
     while (running) {
         // read name of next object
         std::string objectName = GetNextToken();
-        if (objectName.length() == 0)
+        if (objectName.length() == 0) {
             break;
+        }
 
         // parse specific object
         if (objectName == "template")

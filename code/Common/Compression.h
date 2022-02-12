@@ -55,6 +55,16 @@ public:
         NumFormats,
         InvalidFormat
     };
+
+    enum class FlushMode {
+        NoFlush = 0,
+        SyncFlush,
+        Finish,
+
+        NumModes,
+        InvalidMode
+    };
+
     /// @brief  The class constructor.
     Compression();
 
@@ -63,7 +73,7 @@ public:
 
     /// @brief  Will open the access to the compression.
     /// @return true if close was successful, false if not.
-    bool open(Format format);
+    bool open(Format format, FlushMode flush);
 
     /// @brief  Will return the open state.
     /// @return true if the access is opened, false if not.

@@ -175,7 +175,7 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
 
         size_t total = 0;
         Compression compression;
-        if (compression.open(Compression::Format::Binary)) {
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::Finish) ) {
             total = compression.decompress((unsigned char *)reader->GetPtr(), reader->GetRemainingSize(), uncompressed);
             compression.close();
         }

@@ -54,9 +54,12 @@ namespace Assimp {
 struct Compression::impl {
     bool mOpen;
     z_stream mZSstream;
-
+    FlushMode mFlushMode;
     impl() :
-            mOpen(false) {}
+            mOpen(false),
+            mFlushMode(Compression::FlushMode::NoFlush) {
+        // empty
+    }
 };
 
 Compression::Compression() :
@@ -70,7 +73,7 @@ Compression::~Compression() {
     delete mImpl;
 }
 
-bool Compression::open(Format format) {
+bool Compression::open(Format format, FlushMode flush) {
     ai_assert(mImpl != nullptr);
 
     if (mImpl->mOpen) {
@@ -81,6 +84,7 @@ bool Compression::open(Format format) {
     mImpl->mZSstream.opaque = Z_NULL;
     mImpl->mZSstream.zalloc = Z_NULL;
     mImpl->mZSstream.zfree = Z_NULL;
+    mImpl->mFlushMode = flush;
     if (format == Format::Binary) {
         mImpl->mZSstream.data_type = Z_BINARY;
     } else {
@@ -88,7 +92,7 @@ bool Compression::open(Format format) {
     }
 
     // raw decompression without a zlib or gzip header
-    inflateInit2(&mImpl->mZSstream, -MAX_WBITS);
+    inflateInit(&mImpl->mZSstream);
     mImpl->mOpen = true;
 
     return mImpl->mOpen;
@@ -96,30 +100,62 @@ bool Compression::open(Format format) {
 
 constexpr size_t MYBLOCK = 32786;
 
+static int getFlushMode(Compression::FlushMode flush) {
+    int z_flush = 0;
+    switch (flush) {
+        case Compression::FlushMode::NoFlush:
+            z_flush = Z_NO_FLUSH;
+            break;
+        case Compression::FlushMode::SyncFlush:
+            z_flush = Z_SYNC_FLUSH;
+            break;
+        case Compression::FlushMode::Finish:
+            z_flush = Z_FINISH;
+            break;
+        default:
+            ai_assert(false);
+            break;
+    }
+
+    return z_flush;
+}
+
 size_t Compression::decompress(const void *data, size_t in, std::vector<char> &uncompressed) {
     ai_assert(mImpl != nullptr);
 
     mImpl->mZSstream.next_in = (Bytef*)(data);
     mImpl->mZSstream.avail_in = (uInt)in;
 
-    Bytef block[MYBLOCK] = {};
     int ret = 0;
     size_t total = 0l;
-    do {
-        mImpl->mZSstream.avail_out = MYBLOCK;
-        mImpl->mZSstream.next_out = block;
-        
-        ret = inflate(&mImpl->mZSstream, Z_NO_FLUSH);
+
+    const int flushMode = getFlushMode(mImpl->mFlushMode);
+    if (flushMode == Z_FINISH) {
+        mImpl->mZSstream.avail_out = static_cast<uInt>(uncompressed.size());
+        mImpl->mZSstream.next_out = reinterpret_cast<Bytef *>(&*uncompressed.begin());
+        ret = inflate(&mImpl->mZSstream, Z_FINISH);
 
         if (ret != Z_STREAM_END && ret != Z_OK) {
             throw DeadlyImportError("Compression", "Failure decompressing this file using gzip.");
-
         }
-        const size_t have = MYBLOCK - mImpl->mZSstream.avail_out;
-        total += have;
-        uncompressed.resize(total);
-        ::memcpy(uncompressed.data() + total - have, block, have);
-    } while (ret != Z_STREAM_END);
+        total = mImpl->mZSstream.avail_out;
+    } else {
+        do {
+            Bytef block[MYBLOCK] = {};
+            mImpl->mZSstream.avail_out = MYBLOCK;
+            mImpl->mZSstream.next_out = block;
+
+            ret = inflate(&mImpl->mZSstream, flushMode);
+
+            if (ret != Z_STREAM_END && ret != Z_OK) {
+                throw DeadlyImportError("Compression", "Failure decompressing this file using gzip.");
+            }
+            const size_t have = MYBLOCK - mImpl->mZSstream.avail_out;
+            total += have;
+            uncompressed.resize(total);
+            ::memcpy(uncompressed.data() + total - have, block, have);
+        } while (ret != Z_STREAM_END);
+    }
 
     return total;
 }
@@ -136,11 +172,6 @@ size_t Compression::decompressBlock(const void *data, size_t in, char *out, size
     int ret = ::inflate(&mImpl->mZSstream, Z_SYNC_FLUSH);
     if (ret != Z_OK && ret != Z_STREAM_END)
         throw DeadlyImportError("X: Failed to decompress MSZIP-compressed data");
-
-    ::inflateReset(&mImpl->mZSstream);
-    ::inflateSetDictionary(&mImpl->mZSstream, (const Bytef *)out, (uInt)availableOut - mImpl->mZSstream.avail_out);
-
-
 
     ::inflateReset(&mImpl->mZSstream);
     ::inflateSetDictionary(&mImpl->mZSstream, (const Bytef *)out, (uInt)availableOut - mImpl->mZSstream.avail_out);

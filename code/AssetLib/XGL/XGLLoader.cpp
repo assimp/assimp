@@ -130,13 +130,13 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 #else
 		std::unique_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
 
-        Compression c;
+        Compression compression;
         size_t total = 0l;
-        if (c.open(Compression::Format::Binary)) {
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush)) {
             // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
             raw_reader->IncPtr(2);
-            total = c.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
-            c.close();
+            total = compression.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
+            compression.close();
         }
 		// replace the input stream with a memory stream
 		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));

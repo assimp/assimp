@@ -13,7 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        #name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
           - name: windows-latest-cl.exe
@@ -38,9 +39,9 @@ jobs:
           - name: macos-clang-hunter
             os: macos-latest
             toolchain: ninja-clang-cxx17-fpic
-          - name: windows-msvc-hunter
-            os: windows-latest
-            toolchain: ninja-vs-win64-cxx17
+          #- name: windows-msvc-hunter
+          #  os: windows-latest
+          #  toolchain: ninja-vs-win64-cxx17
 
     steps:
     - uses: actions/checkout@v2

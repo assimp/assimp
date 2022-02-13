@@ -41,6 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include <zlib.h>
+#else
+#include "../contrib/zlib/zlib.h"
+#endif
+
 #include <vector>
 
 namespace Assimp {
@@ -49,20 +55,20 @@ namespace Assimp {
 class Compression {
 public:
     enum class Format {
+        InvalidFormat = -1,
         Binary = 0,
         ASCII,
 
-        NumFormats,
-        InvalidFormat
+        NumFormats
     };
 
     enum class FlushMode {
+        InvalidFormat = -1,
         NoFlush = 0,
         SyncFlush,
         Finish,
 
-        NumModes,
-        InvalidMode
+        NumModes
     };
 
     /// @brief  The class constructor.
@@ -73,7 +79,7 @@ public:
 
     /// @brief  Will open the access to the compression.
     /// @return true if close was successful, false if not.
-    bool open(Format format, FlushMode flush);
+    bool open(Format format, FlushMode flush, int windowBits);
 
     /// @brief  Will return the open state.
     /// @return true if the access is opened, false if not.

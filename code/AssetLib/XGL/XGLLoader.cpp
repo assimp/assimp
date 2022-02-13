@@ -132,7 +132,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         Compression compression;
         size_t total = 0l;
-        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush)) {
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, -MAX_WBITS)) {
             // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
             raw_reader->IncPtr(2);
             total = compression.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);

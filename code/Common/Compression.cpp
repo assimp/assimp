@@ -43,11 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/Exceptional.h>
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include "../contrib/zlib/zlib.h"
-#endif
 
 namespace Assimp {
 
@@ -73,7 +68,7 @@ Compression::~Compression() {
     delete mImpl;
 }
 
-bool Compression::open(Format format, FlushMode flush) {
+bool Compression::open(Format format, FlushMode flush, int windowBits) {
     ai_assert(mImpl != nullptr);
 
     if (mImpl->mOpen) {
@@ -92,7 +87,11 @@ bool Compression::open(Format format, FlushMode flush) {
     }
 
     // raw decompression without a zlib or gzip header
-    inflateInit(&mImpl->mZSstream);
+    if (windowBits == 0) {
+        inflateInit(&mImpl->mZSstream);
+    } else {
+        inflateInit2(&mImpl->mZSstream, windowBits);
+    }
     mImpl->mOpen = true;
 
     return mImpl->mOpen;

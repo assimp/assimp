@@ -567,7 +567,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         // zlib/deflate, next comes ZIP head (0x78 0x01)
         // see http://www.ietf.org/rfc/rfc1950.txt
          Compression compress;
-        if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish)) {
+        if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish,0)) {
             compress.decompress(data, comp_len, buff);
             compress.close();
         }

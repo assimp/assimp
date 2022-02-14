@@ -70,6 +70,8 @@ public:
     enum class FlushMode {
         InvalidFormat = -1, ///< Invalid enum type.
         NoFlush = 0,        ///< No flush, will be done on inflate end.
+        Block,              ///< Assists in combination of compress.
+        Tree,               ///< Assists in combination of compress and returns if stream is finish.
         SyncFlush,          ///< Synced flush mode.
         Finish,             ///< Finish mode, all in once, no block access.
 

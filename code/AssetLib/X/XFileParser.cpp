@@ -188,7 +188,8 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         Compression compression;
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII, Compression::FlushMode::SyncFlush, -Compression::MAX_WBITS)) {
+        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
+                Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
             while (mP + 3 < mEnd) {
                 uint16_t ofs = *((uint16_t *)mP);
                 AI_SWAP2(ofs);
@@ -243,11 +244,11 @@ void XFileParser::ParseFile() {
         }
 
         // parse specific object
-        if (objectName == "template")
+        if (objectName == "template") {
             ParseDataObjectTemplate();
-        else if (objectName == "Frame")
+        } else if (objectName == "Frame") {
             ParseDataObjectFrame(nullptr);
-        else if (objectName == "Mesh") {
+        } else if (objectName == "Mesh") {
             // some meshes have no frames at all
             Mesh *mesh = new Mesh;
             ParseDataObjectMesh(mesh);
@@ -286,11 +287,13 @@ void XFileParser::ParseDataObjectTemplate() {
     while (running) {
         std::string s = GetNextToken();
 
-        if (s == "}")
+        if (s == "}") {
             break;
+        }
 
-        if (s.length() == 0)
+        if (s.length() == 0) {
             ThrowException("Unexpected end of file reached while parsing template definition");
+        }
     }
 }
 

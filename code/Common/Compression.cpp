@@ -104,6 +104,12 @@ static int getFlushMode(Compression::FlushMode flush) {
         case Compression::FlushMode::NoFlush:
             z_flush = Z_NO_FLUSH;
             break;
+        case Compression::FlushMode::Block:
+            z_flush = Z_BLOCK;
+            break;
+        case Compression::FlushMode::Tree:
+            z_flush = Z_TREES;
+            break;
         case Compression::FlushMode::SyncFlush:
             z_flush = Z_SYNC_FLUSH;
             break;

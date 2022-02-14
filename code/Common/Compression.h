@@ -54,21 +54,25 @@ namespace Assimp {
 /// @brief This class provides the decompression of zlib-compressed data.
 class Compression {
 public:
-    enum class Format {
-        InvalidFormat = -1,
-        Binary = 0,
-        ASCII,
+    static const int MaxWBits = MAX_WBITS;
 
-        NumFormats
+    /// @brief Describes the format data type
+    enum class Format {
+        InvalidFormat = -1, ///< Invalid enum type.
+        Binary = 0,         ///< Binary format.
+        ASCII,              ///< ASCII format.
+
+        NumFormats          ///< The number of supported formats.
     };
 
+    /// @brief The supported flush mode, used for blocked access.
     enum class FlushMode {
-        InvalidFormat = -1,
-        NoFlush = 0,
-        SyncFlush,
-        Finish,
+        InvalidFormat = -1, ///< Invalid enum type.
+        NoFlush = 0,        ///< No flush, will be done on inflate end.
+        SyncFlush,          ///< Synced flush mode.
+        Finish,             ///< Finish mode, all in once, no block access.
 
-        NumModes
+        NumModes            ///< The number of supported modes.
     };
 
     /// @brief  The class constructor.
@@ -78,6 +82,9 @@ public:
     ~Compression();
 
     /// @brief  Will open the access to the compression.
+    /// @param[in] format       The format type
+    /// @param[in] flush        The flush mode.
+    /// @param[in] windowBits   The windows history working size, shall be between 8 and 15.
     /// @return true if close was successful, false if not.
     bool open(Format format, FlushMode flush, int windowBits);
 
@@ -89,12 +96,18 @@ public:
     /// @return true if close was successful, false if not.
     bool close();
 
-    /// @brief Will decompress the data buffer.
+    /// @brief Will decompress the data buffer in one step.
     /// @param[in] data         The data to decompress
     /// @param[in] in           The size of the data.
     /// @param[out uncompressed A std::vector containing the decompressed data.
     size_t decompress(const void *data, size_t in, std::vector<char> &uncompressed);
 
+    /// @brief Will decompress the data buffer block-wise.
+    /// @param[in]  data         The compressed data
+    /// @param[in]  in           The size of the data buffer
+    /// @param[out] out          The output buffer
+    /// @param[out] availableOut The upper limit of the output buffer.
+    /// @return The size of the decompressed data buffer.
     size_t decompressBlock(const void *data, size_t in, char *out, size_t availableOut);
 
 private:

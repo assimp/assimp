@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
-#include <cctype>
-#include <memory>
+//#include <cctype>
+//#include <memory>
 
 using namespace Assimp;
 
@@ -132,14 +132,14 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         Compression compression;
         size_t total = 0l;
-        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, -MAX_WBITS)) {
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, -Compression::MaxWBits)) {
             // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
             raw_reader->IncPtr(2);
             total = compression.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
             compression.close();
         }
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()), total));
 #endif
 	}
 
@@ -200,7 +200,7 @@ void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
-	if (!nd->mName.length) {
+	if (nd->mName.length == 0) {
 		nd->mName.Set("WORLD");
 	}
 
@@ -784,4 +784,4 @@ aiColor3D XGLImporter::ReadCol3(XmlNode &node) {
 	return aiColor3D(v.x, v.y, v.z);
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_XGL_IMPORTER

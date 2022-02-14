@@ -567,34 +567,10 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         // zlib/deflate, next comes ZIP head (0x78 0x01)
         // see http://www.ietf.org/rfc/rfc1950.txt
          Compression compress;
-        if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish,0)) {
+        if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish, 0)) {
             compress.decompress(data, comp_len, buff);
             compress.close();
         }
-        /* z_stream zstream = {};
-        zstream.opaque = Z_NULL;
-        zstream.zalloc = Z_NULL;
-        zstream.zfree  = Z_NULL;
-        zstream.data_type = Z_BINARY;
-
-        // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-        if(Z_OK != inflateInit(&zstream)) {
-            ParseError("failure initializing zlib");
-        }
-
-        zstream.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(data));
-        zstream.avail_in  = comp_len;
-
-        zstream.avail_out = static_cast<uInt>(buff.size());
-        zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
-        const int ret = inflate(&zstream, Z_FINISH);
-
-        if (ret != Z_STREAM_END && ret != Z_OK) {
-            ParseError("failure decompressing compressed data section");
-        }
-
-        // terminate zlib
-        inflateEnd(&zstream);*/
     }
 #ifdef ASSIMP_BUILD_DEBUG
     else {

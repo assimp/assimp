@@ -43,15 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/Exceptional.h>
 
-
 namespace Assimp {
 
 struct Compression::impl {
     bool mOpen;
     z_stream mZSstream;
     FlushMode mFlushMode;
+
     impl() :
             mOpen(false),
+            mZSstream(),
             mFlushMode(Compression::FlushMode::NoFlush) {
         // empty
     }
@@ -97,8 +98,6 @@ bool Compression::open(Format format, FlushMode flush, int windowBits) {
     return mImpl->mOpen;
 }
 
-constexpr size_t MYBLOCK = 32786;
-
 static int getFlushMode(Compression::FlushMode flush) {
     int z_flush = 0;
     switch (flush) {
@@ -119,15 +118,19 @@ static int getFlushMode(Compression::FlushMode flush) {
     return z_flush;
 }
 
+constexpr size_t MYBLOCK = 32786;
+
 size_t Compression::decompress(const void *data, size_t in, std::vector<char> &uncompressed) {
     ai_assert(mImpl != nullptr);
+    if (data == nullptr || in == 0) {
+        return 0l;
+    }
 
     mImpl->mZSstream.next_in = (Bytef*)(data);
     mImpl->mZSstream.avail_in = (uInt)in;
 
     int ret = 0;
     size_t total = 0l;
-
     const int flushMode = getFlushMode(mImpl->mFlushMode);
     if (flushMode == Z_FINISH) {
         mImpl->mZSstream.avail_out = static_cast<uInt>(uncompressed.size());
@@ -160,6 +163,10 @@ size_t Compression::decompress(const void *data, size_t in, std::vector<char> &u
 }
 
 size_t Compression::decompressBlock(const void *data, size_t in, char *out, size_t availableOut) {
+    ai_assert(mImpl != nullptr);
+    if (data == nullptr || in == 0 || out == nullptr || availableOut == 0) {
+        return 0l;
+    }
 
     // push data to the stream
     mImpl->mZSstream.next_in = (Bytef *)data;
@@ -169,8 +176,9 @@ size_t Compression::decompressBlock(const void *data, size_t in, char *out, size
 
     // and decompress the data ....
     int ret = ::inflate(&mImpl->mZSstream, Z_SYNC_FLUSH);
-    if (ret != Z_OK && ret != Z_STREAM_END)
+    if (ret != Z_OK && ret != Z_STREAM_END) {
         throw DeadlyImportError("X: Failed to decompress MSZIP-compressed data");
+    }
 
     ::inflateReset(&mImpl->mZSstream);
     ::inflateSetDictionary(&mImpl->mZSstream, (const Bytef *)out, (uInt)availableOut - mImpl->mZSstream.avail_out);

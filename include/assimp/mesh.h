@@ -937,6 +937,20 @@ struct aiMesh {
 #endif // __cplusplus
 };
 
+struct aiSkeleton {
+    C_STRUCT aiString mName;
+    unsigned int mNumWeights;
+    C_STRUCT aiVertexWeight *mWeights;
+
+#ifdef __cplusplus
+    aiSkeleton() AI_NO_EXCEPT : mName(), mNumWeights(0), mWeights(nullptr) {
+        // empty
+    }
+    ~aiSkeleton() {
+
+    }
+#endif // __cplusplus
+};
 #ifdef __cplusplus
 }
 #endif //! extern "C"

@@ -283,7 +283,7 @@ typedef unsigned int ai_uint;
 #define AI_RAD_TO_DEG(x) ((x) * (ai_real)57.2957795)
 
 /* Numerical limits */
-static const ai_real ai_epsilon = (ai_real)0.00001;
+static const ai_real ai_epsilon = (ai_real) 1e-6;
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)

@@ -66,11 +66,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include "Common/Compression.h"
+/* #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #    include <zlib.h>
 #  else
 #    include "../contrib/zlib/zlib.h"
-#  endif
+#  endif*/
 #endif
 
 namespace Assimp {
@@ -141,7 +142,7 @@ void BlenderImporter::SetupProperties(const Importer * /*pImp*/) {
 void BlenderImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-    std::vector<Bytef> uncompressed;
+    std::vector<char> uncompressed;
 #endif
 
     FileDatabase file;
@@ -159,7 +160,6 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_BLEND
         ThrowException("BLENDER magic bytes are missing, is this file compressed (Assimp was built without decompression support)?");
 #else
-
         if (magic[0] != 0x1f || static_cast<uint8_t>(magic[1]) != 0x8b) {
             ThrowException("BLENDER magic bytes are missing, couldn't find GZIP header either");
         }
@@ -173,42 +173,12 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
         stream->Seek(0L, aiOrigin_SET);
         std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
 
-        // build a zlib stream
-        z_stream zstream;
-        zstream.opaque = Z_NULL;
-        zstream.zalloc = Z_NULL;
-        zstream.zfree = Z_NULL;
-        zstream.data_type = Z_BINARY;
-
-        // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-        inflateInit2(&zstream, 16 + MAX_WBITS);
-
-        zstream.next_in = reinterpret_cast<Bytef *>(reader->GetPtr());
-        zstream.avail_in = (uInt)reader->GetRemainingSize();
-
-        size_t total = 0l;
-
-        // TODO: be smarter about this, decompress directly into heap buffer
-        // and decompress the data .... do 1k chunks in the hope that we won't kill the stack
-#define MYBLOCK 1024
-        Bytef block[MYBLOCK];
-        int ret;
-        do {
-            zstream.avail_out = MYBLOCK;
-            zstream.next_out = block;
-            ret = inflate(&zstream, Z_NO_FLUSH);
-
-            if (ret != Z_STREAM_END && ret != Z_OK) {
-                ThrowException("Failure decompressing this file using gzip, seemingly it is NOT a compressed .BLEND file");
-            }
-            const size_t have = MYBLOCK - zstream.avail_out;
-            total += have;
-            uncompressed.resize(total);
-            memcpy(uncompressed.data() + total - have, block, have);
-        } while (ret != Z_STREAM_END);
-
-        // terminate zlib
-        inflateEnd(&zstream);
+        size_t total = 0;
+        Compression compression;
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, 16 + Compression::MaxWBits)) {
+            total = compression.decompress((unsigned char *)reader->GetPtr(), reader->GetRemainingSize(), uncompressed);
+            compression.close();
+        }
 
         // replace the input stream with a memory stream
         stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));

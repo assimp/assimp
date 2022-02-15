@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -60,25 +58,11 @@ using namespace Assimp::Formatter;
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include "../contrib/zlib/zlib.h"
-#endif
+#include "Common/Compression.h"
 
 // Magic identifier for MSZIP compressed data
-#define MSZIP_MAGIC 0x4B43
-#define MSZIP_BLOCK 32786
-
-// ------------------------------------------------------------------------------------------------
-// Dummy memory wrappers for use with zlib
-static void *dummy_alloc(void * /*opaque*/, unsigned int items, unsigned int size) {
-    return ::operator new(items *size);
-}
-
-static void dummy_free(void * /*opaque*/, void *address) {
-    return ::operator delete(address);
-}
+constexpr unsigned int MSZIP_MAGIC = 0x4B43;
+constexpr size_t MSZIP_BLOCK = 32786l;
 
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
 
@@ -133,13 +117,13 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         mIsBinaryFormat = true;
         compressed = true;
     } else
-        ThrowException("Unsupported xfile format '", mP[8], mP[9], mP[10], mP[11], "'");
+        ThrowException("Unsupported x-file format '", mP[8], mP[9], mP[10], mP[11], "'");
 
     // float size
     mBinaryFloatSize = (unsigned int)(mP[12] - 48) * 1000 + (unsigned int)(mP[13] - 48) * 100 + (unsigned int)(mP[14] - 48) * 10 + (unsigned int)(mP[15] - 48);
 
     if (mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-        ThrowException("Unknown float size ", mBinaryFloatSize, " specified in xfile header.");
+        ThrowException("Unknown float size ", mBinaryFloatSize, " specified in x-file header.");
 
     // The x format specifies size in bits, but we work in bytes
     mBinaryFloatSize /= 8;
@@ -171,16 +155,6 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
          * ///////////////////////////////////////////////////////////////////////
          */
 
-        // build a zlib stream
-        z_stream stream;
-        stream.opaque = nullptr;
-        stream.zalloc = &dummy_alloc;
-        stream.zfree = &dummy_free;
-        stream.data_type = (mIsBinaryFormat ? Z_BINARY : Z_ASCII);
-
-        // initialize the inflation algorithm
-        ::inflateInit2(&stream, -MAX_WBITS);
-
         // skip unknown data (checksum, flags?)
         mP += 6;
 
@@ -207,42 +181,28 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
 
             // and advance to the next offset
             P1 += ofs;
-            est_out += MSZIP_BLOCK; // one decompressed block is 32786 in size
+            est_out += MSZIP_BLOCK; // one decompressed block is 327861 in size
         }
-
+        
         // Allocate storage and terminating zero and do the actual uncompressing
+        Compression compression;
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        while (mP + 3 < mEnd) {
-            uint16_t ofs = *((uint16_t *)mP);
-            AI_SWAP2(ofs);
-            mP += 4;
+        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
+                Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
+            while (mP + 3 < mEnd) {
+                uint16_t ofs = *((uint16_t *)mP);
+                AI_SWAP2(ofs);
+                mP += 4;
 
-            if (mP + ofs > mEnd + 2) {
-                throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+                if (mP + ofs > mEnd + 2) {
+                    throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+                }
+                out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
+                mP += ofs;
             }
-
-            // push data to the stream
-            stream.next_in = (Bytef *)mP;
-            stream.avail_in = ofs;
-            stream.next_out = (Bytef *)out;
-            stream.avail_out = MSZIP_BLOCK;
-
-            // and decompress the data ....
-            int ret = ::inflate(&stream, Z_SYNC_FLUSH);
-            if (ret != Z_OK && ret != Z_STREAM_END)
-                throw DeadlyImportError("X: Failed to decompress MSZIP-compressed data");
-
-            ::inflateReset(&stream);
-            ::inflateSetDictionary(&stream, (const Bytef *)out, MSZIP_BLOCK - stream.avail_out);
-
-            // and advance to the next offset
-            out += MSZIP_BLOCK - stream.avail_out;
-            mP += ofs;
+            compression.close();
         }
-
-        // terminate zlib
-        ::inflateEnd(&stream);
 
         // ok, update pointers to point to the uncompressed file data
         mP = &uncompressed[0];
@@ -279,15 +239,16 @@ void XFileParser::ParseFile() {
     while (running) {
         // read name of next object
         std::string objectName = GetNextToken();
-        if (objectName.length() == 0)
+        if (objectName.length() == 0) {
             break;
+        }
 
         // parse specific object
-        if (objectName == "template")
+        if (objectName == "template") {
             ParseDataObjectTemplate();
-        else if (objectName == "Frame")
+        } else if (objectName == "Frame") {
             ParseDataObjectFrame(nullptr);
-        else if (objectName == "Mesh") {
+        } else if (objectName == "Mesh") {
             // some meshes have no frames at all
             Mesh *mesh = new Mesh;
             ParseDataObjectMesh(mesh);
@@ -326,11 +287,13 @@ void XFileParser::ParseDataObjectTemplate() {
     while (running) {
         std::string s = GetNextToken();
 
-        if (s == "}")
+        if (s == "}") {
             break;
+        }
 
-        if (s.length() == 0)
+        if (s.length() == 0) {
             ThrowException("Unexpected end of file reached while parsing template definition");
+        }
     }
 }
 
@@ -500,7 +463,7 @@ void XFileParser::ParseDataObjectSkinWeights(Mesh *pMesh) {
     bone.mWeights.reserve(numWeights);
 
     for (unsigned int a = 0; a < numWeights; a++) {
-        BoneWeight weight;
+        BoneWeight weight = {};
         weight.mVertex = ReadInt();
         bone.mWeights.push_back(weight);
     }

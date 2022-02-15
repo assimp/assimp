@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
-#include <cctype>
-#include <memory>
+//#include <cctype>
+//#include <memory>
 
 using namespace Assimp;
 
@@ -112,7 +112,7 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 // Imports the given file into the given scene structure.
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
  #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-	std::vector<unsigned char> uncompressed;
+	std::vector<char> uncompressed;
 #endif
 
 	m_scene = pScene;
@@ -130,16 +130,16 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 #else
 		std::unique_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
 
-        Compression c;
+        Compression compression;
         size_t total = 0l;
-        if (c.open()) {
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, -Compression::MaxWBits)) {
             // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
             raw_reader->IncPtr(2);
-            total = c.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
-            c.close();
+            total = compression.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
+            compression.close();
         }
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()), total));
 #endif
 	}
 
@@ -200,7 +200,7 @@ void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
-	if (!nd->mName.length) {
+	if (nd->mName.length == 0) {
 		nd->mName.Set("WORLD");
 	}
 
@@ -784,4 +784,4 @@ aiColor3D XGLImporter::ReadCol3(XmlNode &node) {
 	return aiColor3D(v.x, v.y, v.z);
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_XGL_IMPORTER

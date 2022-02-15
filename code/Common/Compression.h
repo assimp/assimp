@@ -41,6 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include <zlib.h>
+#else
+#include "../contrib/zlib/zlib.h"
+#endif
+
 #include <vector>
 #include <cstddef> // size_t
 
@@ -49,6 +55,29 @@ namespace Assimp {
 /// @brief This class provides the decompression of zlib-compressed data.
 class Compression {
 public:
+    static const int MaxWBits = MAX_WBITS;
+
+    /// @brief Describes the format data type
+    enum class Format {
+        InvalidFormat = -1, ///< Invalid enum type.
+        Binary = 0,         ///< Binary format.
+        ASCII,              ///< ASCII format.
+
+        NumFormats          ///< The number of supported formats.
+    };
+
+    /// @brief The supported flush mode, used for blocked access.
+    enum class FlushMode {
+        InvalidFormat = -1, ///< Invalid enum type.
+        NoFlush = 0,        ///< No flush, will be done on inflate end.
+        Block,              ///< Assists in combination of compress.
+        Tree,               ///< Assists in combination of compress and returns if stream is finish.
+        SyncFlush,          ///< Synced flush mode.
+        Finish,             ///< Finish mode, all in once, no block access.
+
+        NumModes            ///< The number of supported modes.
+    };
+
     /// @brief  The class constructor.
     Compression();
 
@@ -56,8 +85,11 @@ public:
     ~Compression();
 
     /// @brief  Will open the access to the compression.
+    /// @param[in] format       The format type
+    /// @param[in] flush        The flush mode.
+    /// @param[in] windowBits   The windows history working size, shall be between 8 and 15.
     /// @return true if close was successful, false if not.
-    bool open();
+    bool open(Format format, FlushMode flush, int windowBits);
 
     /// @brief  Will return the open state.
     /// @return true if the access is opened, false if not.
@@ -67,11 +99,19 @@ public:
     /// @return true if close was successful, false if not.
     bool close();
 
-    /// @brief Will decompress the data buffer.
+    /// @brief Will decompress the data buffer in one step.
     /// @param[in] data         The data to decompress
     /// @param[in] in           The size of the data.
     /// @param[out uncompressed A std::vector containing the decompressed data.
-    size_t decompress(unsigned char *data, size_t in, std::vector<unsigned char> &uncompressed);
+    size_t decompress(const void *data, size_t in, std::vector<char> &uncompressed);
+
+    /// @brief Will decompress the data buffer block-wise.
+    /// @param[in]  data         The compressed data
+    /// @param[in]  in           The size of the data buffer
+    /// @param[out] out          The output buffer
+    /// @param[out] availableOut The upper limit of the output buffer.
+    /// @return The size of the decompressed data buffer.
+    size_t decompressBlock(const void *data, size_t in, char *out, size_t availableOut);
 
 private:
     struct impl;

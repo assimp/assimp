@@ -527,7 +527,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
     return m;
 }
 
-constexpr auto closeDistance = ai_epsilon;
+const auto closeDistance = ai_epsilon;
 
 bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt2) {
     if(pt1.Coordinates.size() != pt2.Coordinates.size())

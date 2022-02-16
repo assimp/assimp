@@ -357,9 +357,9 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Node 
             out->mAngleInnerCone = AI_DEG_TO_RAD(srcLight->mFalloffAngle);
 
             // ... some extension magic.
-            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                 // ... some deprecation magic.
-                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
                     float f = 1.0f;
@@ -1065,7 +1065,7 @@ void insertMorphTimeValue(std::vector<MorphTimeValues> &values, float time, floa
         return;
     }
     for (unsigned int i = 0; i < values.size(); i++) {
-        if (std::abs(time - values[i].mTime) < 1e-6f) {
+        if (std::abs(time - values[i].mTime) < ai_epsilon) {
             values[i].mKeys.push_back(k);
             return;
         } else if (time > values[i].mTime && time < values[i + 1].mTime) {

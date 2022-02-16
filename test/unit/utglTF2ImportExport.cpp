@@ -573,7 +573,7 @@ TEST_F(utglTF2ImportExport, export_normalized_normals) {
     scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxBadNormals-glTF-Binary/BoxBadNormals_out.glb", aiProcess_ValidateDataStructure);
     for ( auto i = 0u; i < scene->mMeshes[0]->mNumVertices; ++i ) {
         const auto length = scene->mMeshes[0]->mNormals[i].Length();
-        EXPECT_TRUE(abs(length) < 1e-6 || abs(length - 1) < 1e-6);
+        EXPECT_TRUE(abs(length) < 1e-6 || abs(length - 1) < ai_epsilon);
     }
 }
 

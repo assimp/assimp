@@ -653,7 +653,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
     bool ok;
 
-    const float zero_epsilon = 1e-6f;
+    const float zero_epsilon = ai_epsilon;
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
@@ -3187,7 +3187,8 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     bool ok = false;
-    const float zero_epsilon = 1e-6f;
+    
+    const float zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
     if (ok && preRotation.SquareLength() > zero_epsilon) {

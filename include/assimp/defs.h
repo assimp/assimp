@@ -279,11 +279,11 @@ typedef unsigned int ai_uint;
 #define AI_MATH_HALF_PI_F (AI_MATH_PI_F * 0.5f)
 
 /* Tiny macro to convert from radians to degrees and back */
-#define AI_DEG_TO_RAD(x) ((x) * (ai_real)0.0174532925)
-#define AI_RAD_TO_DEG(x) ((x) * (ai_real)57.2957795)
+#define AI_DEG_TO_RAD(x) ((x) * (ai_real) 0.0174532925)
+#define AI_RAD_TO_DEG(x) ((x) * (ai_real) 57.2957795)
 
 /* Numerical limits */
-static const ai_real ai_epsilon = (ai_real)0.00001;
+static const ai_real ai_epsilon = (ai_real) 1e-6;
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)

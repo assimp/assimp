@@ -1476,7 +1476,7 @@ std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMa
     return contour;
 }
 
-constexpr float close{ ai_epsilon };
+const float close{ ai_epsilon };
 
 static bool isClose(IfcVector2 first,IfcVector2 second) {
     auto diff = (second - first);

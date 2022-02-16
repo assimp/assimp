@@ -114,7 +114,7 @@ public:
     bool operator < (const aiVector3t& other) const;
 
     /// @brief  
-    bool Equal(const aiVector3t& other, TReal epsilon = 1e-6) const;
+    bool Equal(const aiVector3t &other, TReal epsilon = ai_epsilon) const;
 
     template <typename TOther>
     operator aiVector3t<TOther> () const;

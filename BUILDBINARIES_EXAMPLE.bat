@@ -10,16 +10,15 @@
 :: Also see: https://github.com/assimp/assimp/pull/2646
 
 SET SOURCE_DIR=.
+SET GENERATOR=Visual Studio 16 2019
 
-:: For generators see "cmake --help"
-SET GENERATOR=Visual Studio 15 2017
-
-SET BINARIES_DIR="./BINARIES/Win32"
-cmake CMakeLists.txt -G "%GENERATOR%" -S %SOURCE_DIR% -B %BINARIES_DIR%
+SET BINARIES_DIR="./build/Win32"
+cmake . -G "%GENERATOR%" -A Win32 -S %SOURCE_DIR% -B %BINARIES_DIR%
+cmake --build %BINARIES_DIR% --config debug
 cmake --build %BINARIES_DIR% --config release
 
-SET BINARIES_DIR="./BINARIES/x64"
-cmake CMakeLists.txt -G "%GENERATOR% Win64" -S %SOURCE_DIR% -B %BINARIES_DIR%
+SET BINARIES_DIR="./build/x64"
+cmake . -G "%GENERATOR%" -A x64 -S %SOURCE_DIR% -B %BINARIES_DIR%
 cmake --build %BINARIES_DIR% --config debug
 cmake --build %BINARIES_DIR% --config release
 

@@ -472,7 +472,11 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
             }
 
             skipToken = 2;
-        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
+        } else if (!ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size()))) {
+            DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+            getFloat(it, m_DataItEnd, m_pModel->m_pCurrentMaterial->bump_multiplier);
+            skipToken = 2;
+        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption.c_str(), static_cast<unsigned int>(ModifyMapOption.size()))) {
             skipToken = 3;

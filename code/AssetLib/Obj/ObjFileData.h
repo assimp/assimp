@@ -195,6 +195,9 @@ struct Material {
     //! PBR Anisotropy
     ai_real anisotropy;
 
+    //! bump map multipler (normal map scalar)(-bm)
+    ai_real bump_multiplier;
+
     //! Constructor
     Material() :
             diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
@@ -208,7 +211,8 @@ struct Material {
             sheen(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
             clearcoat_thickness(ai_real(0.0)),
             clearcoat_roughness(ai_real(0.0)),
-            anisotropy(ai_real(0.0)) {
+            anisotropy(ai_real(0.0)),
+            bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 

@@ -134,12 +134,12 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    OFF
 )
 
-IF ( WIN32 )
+IF (WIN32)
   # Use subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
   IF(MSVC)
-    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
+    OPTION (ASSIMP_BUILD_ASSIMP_VIEW
       "If the Assimp view tool is built. (requires DirectX)"
       OFF )
 
@@ -694,11 +694,13 @@ ENDIF()
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
-  IF ( WIN32 )
+  IF (WIN32)
     OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" OFF )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
+  ELSE()
+    MESSAGE("Building Assimp Viewer only supported on Windows.")
   ENDIF ()
   # The command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )

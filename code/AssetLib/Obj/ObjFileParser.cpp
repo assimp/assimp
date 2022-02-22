@@ -117,6 +117,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     unsigned int processed = 0;
     size_t lastFilePos(0);
 
+    bool insideCstype = false;
     std::vector<char> buffer;
     while (streamBuffer.getNextDataLine(buffer, '\\')) {
         m_DataIt = buffer.begin();
@@ -129,6 +130,23 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             lastFilePos = filePos;
             progressCounter++;
             m_progress->UpdateFileRead(processed, progressTotal);
+        }
+
+        // handle cstype (http://paulbourke.net/dataformats/obj/) which contains parm property which is handled by the parser as fase, but is not
+        // cstype bspline
+        // deg 1
+        // curv 0 4.4342367553943109 468085 ...
+        // parm u 0 0 0.39203731404307385 ...
+        // end
+        if (insideCstype) {
+            switch (*m_DataIt) {
+            case 'e': {
+                std::string name;
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+                insideCstype = name != "end";
+            } break;
+            }
+            goto pf_skip_line;
         }
 
         // parse line
@@ -217,6 +235,14 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         case 'o': // Parse object name
         {
             getObjectName();
+        } break;
+
+        case 'c':
+        {
+            std::string name;
+            getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            insideCstype = name == "cstype";
+            goto pf_skip_line;
         } break;
 
         default: {

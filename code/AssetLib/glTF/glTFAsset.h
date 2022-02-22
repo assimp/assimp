@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -260,20 +260,9 @@ public:
         VEC4,
         MAT2,
         MAT3,
-        MAT4 };
-
-private:
-    static const size_t NUM_VALUES = static_cast<size_t>(MAT4) + 1;
-
-    struct Info {
-        const char *name;
-        unsigned int numComponents;
+        MAT4 
     };
 
-    template <int N>
-    struct data { static const Info infos[NUM_VALUES]; };
-
-public:
     inline static Value FromString(const char *str) {
         for (size_t i = 0; i < NUM_VALUES; ++i) {
             if (strcmp(data<0>::infos[i].name, str) == 0) {
@@ -290,40 +279,31 @@ public:
     inline static unsigned int GetNumComponents(Value type) {
         return data<0>::infos[static_cast<size_t>(type)].numComponents;
     }
+
+private:
+    static const size_t NUM_VALUES = static_cast<size_t>(MAT4) + 1;
+    struct Info {
+        const char *name;
+        unsigned int numComponents;
+    };
+
+    template <int N>
+    struct data { 
+        static const Info infos[NUM_VALUES]; 
+    };
 };
 
 // must match the order of the AttribTypeTraits::Value enum!
 template <int N>
-const AttribType::Info
-        AttribType::data<N>::infos[AttribType::NUM_VALUES] = {
-            { "SCALAR", 1 }, { "VEC2", 2 }, { "VEC3", 3 }, { "VEC4", 4 }, { "MAT2", 4 }, { "MAT3", 9 }, { "MAT4", 16 }
-        };
-
-/*
-    //! A reference to one top-level object, which is valid
-    //! until the Asset instance is destroyed
-    template<class T>
-    class Ref
-    {
-        std::vector<T*>* vector;
-        unsigned int index;
-
-    public:
-        Ref() : vector(0), index(0) {}
-        Ref(std::vector<T*>& vec, unsigned int idx) : vector(&vec), index(idx) {}
-
-        inline unsigned int GetIndex() const
-            { return index; }
-
-        operator bool() const
-            { return vector != 0; }
-
-        T* operator->()
-            { return (*vector)[index]; }
-
-        T& operator*()
-            { return *((*vector)[index]); }
-    };*/
+const AttribType::Info AttribType::data<N>::infos[AttribType::NUM_VALUES] = {
+    { "SCALAR", 1 },
+    { "VEC2", 2 }, 
+    { "VEC3", 3 }, 
+    { "VEC4", 4 }, 
+    { "MAT2", 4 }, 
+    { "MAT3", 9 }, 
+    { "MAT4", 16 }
+};
 
 //! Base class for all glTF top-level objects
 struct Object {
@@ -333,6 +313,7 @@ struct Object {
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }
 
+    Object() = default;
     virtual ~Object() {}
 
     //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
@@ -401,21 +382,19 @@ struct Accessor : public Object {
         return Indexer(*this);
     }
 
-    Accessor() {}
+    Accessor() = default;
     void Read(Value &obj, Asset &r);
 };
 
 //! A buffer points to binary geometry, animation, or skins.
 struct Buffer : public Object {
     /********************* Types *********************/
-public:
     enum Type {
         Type_arraybuffer,
         Type_text
     };
 
-    /// \struct SEncodedRegion
-    /// Descriptor of encoded region in "bufferView".
+    /// @brief  Descriptor of encoded region in "bufferView".
     struct SEncodedRegion {
         const size_t Offset; ///< Offset from begin of "bufferView" to encoded region, in bytes.
         const size_t EncodedData_Length; ///< Size of encoded region, in bytes.
@@ -423,8 +402,7 @@ public:
         const size_t DecodedData_Length; ///< Size of decoded region, in bytes.
         const std::string ID; ///< ID of the region.
 
-        /// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
-        /// Constructor.
+        /// @brief Constructor.
         /// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
         /// \param [in] pEncodedData_Length - size of encoded region, in bytes.
         /// \param [in] pDecodedData - pointer to decoded data array.
@@ -433,16 +411,13 @@ public:
         SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID) :
                 Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID) {}
 
-        /// \fn ~SEncodedRegion()
         /// Destructor.
         ~SEncodedRegion() { delete[] DecodedData; }
     };
 
     /******************* Variables *******************/
 
-    //std::string uri; //!< The uri of the buffer. Can be a filepath, a data uri, etc. (required)
     size_t byteLength; //!< The length of the buffer in bytes. (default: 0)
-    //std::string type; //!< XMLHttpRequest responseType (default: "arraybuffer")
 
     Type type;
 
@@ -486,7 +461,6 @@ public:
 
     bool LoadFromStream(IOStream &stream, size_t length = 0, size_t baseOffset = 0);
 
-    /// \fn void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
     /// Mark region of "bufferView" as encoded. When data is request from such region then "bufferView" use decoded data.
     /// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
     /// \param [in] pEncodedData_Length - size of encoded region, in bytes.
@@ -495,12 +469,10 @@ public:
     /// \param [in] pID - ID of the region.
     void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID);
 
-    /// \fn void EncodedRegion_SetCurrent(const std::string& pID)
     /// Select current encoded region by ID. \sa EncodedRegion_Current.
     /// \param [in] pID - ID of the region.
     void EncodedRegion_SetCurrent(const std::string &pID);
 
-    /// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
     /// Replace part of buffer data. Pay attention that function work with original array of data (\ref mData) not with encoded regions.
     /// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
     /// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
@@ -558,37 +530,29 @@ struct Camera : public Object {
         } ortographic;
     };
 
-    Camera() {}
+    Camera() = default;
     void Read(Value &obj, Asset &r);
 };
 
 //! Image data used to create a texture.
 struct Image : public Object {
     std::string uri; //! The uri of the image, that can be a file path, a data URI, etc.. (required)
-
     Ref<BufferView> bufferView;
-
     std::string mimeType;
-
     int width, height;
-
-private:
-    std::unique_ptr<uint8_t[]> mData;
-    size_t mDataLength;
 
 public:
     Image();
     void Read(Value &obj, Asset &r);
-
     inline bool HasData() const { return mDataLength > 0; }
-
     inline size_t GetDataLength() const { return mDataLength; }
-
     inline const uint8_t *GetData() const { return mData.get(); }
-
     inline uint8_t *StealData();
-
     inline void SetData(uint8_t *data, size_t length, Asset &r);
+
+private:
+    std::unique_ptr<uint8_t[]> mData;
+    size_t mDataLength;
 };
 
 //! Holds a material property that can be a texture or a color
@@ -671,6 +635,7 @@ struct Mesh : public Object {
     };
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+
     /// \struct SCompression_Open3DGC
     /// Compression of mesh data using Open3DGC algorithm.
     struct SCompression_Open3DGC : public SExtension {
@@ -703,7 +668,6 @@ struct Mesh : public Object {
 
     Mesh() {}
 
-    /// \fn ~Mesh()
     /// Destructor.
     ~Mesh() {
         for (std::list<SExtension *>::iterator it = Extension.begin(), it_end = Extension.end(); it != it_end; it++) {
@@ -711,15 +675,13 @@ struct Mesh : public Object {
         };
     }
 
-    /// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
-    /// Get mesh data from JSON-object and place them to root asset.
+    /// @brief Get mesh data from JSON-object and place them to root asset.
     /// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
     /// \param [out] pAsset_Root - reference to root asset where data will be stored.
     void Read(Value &pJSON_Object, Asset &pAsset_Root);
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-    /// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
-    /// Decode part of "buffer" which encoded with Open3DGC algorithm.
+    /// @brief Decode part of "buffer" which encoded with Open3DGC algorithm.
     /// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
     /// \param [out] pAsset_Root - reference to root assed where data will be stored.
     void Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DGC, Asset &pAsset_Root);
@@ -759,7 +721,7 @@ struct Sampler : public Object {
     SamplerWrap wrapS; //!< The texture wrapping in the S direction. (required)
     SamplerWrap wrapT; //!< The texture wrapping in the T direction. (required)
 
-    Sampler() {}
+    Sampler() = default;
     void Read(Value &obj, Asset &r);
     void SetDefaults();
 };
@@ -767,12 +729,12 @@ struct Sampler : public Object {
 struct Scene : public Object {
     std::vector<Ref<Node>> nodes;
 
-    Scene() {}
+    Scene() = default;
     void Read(Value &obj, Asset &r);
 };
 
 struct Shader : public Object {
-    Shader() {}
+    Shader() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -782,7 +744,7 @@ struct Skin : public Object {
     std::vector<Ref<Node>> jointNames; //!< Joint names of the joints (nodes with a jointName property) in this skin.
     std::string name; //!< The user-defined name of this object.
 
-    Skin() {}
+    Skin() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -796,7 +758,7 @@ struct Technique : public Object {
     struct Functions {
     };
 
-    Technique() {}
+    Technique() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -805,13 +767,7 @@ struct Texture : public Object {
     Ref<Sampler> sampler; //!< The ID of the sampler used by this texture. (required)
     Ref<Image> source; //!< The ID of the image used by this texture. (required)
 
-    //TextureFormat format; //!< The texture's format. (default: TextureFormat_RGBA)
-    //TextureFormat internalFormat; //!< The texture's internal format. (default: TextureFormat_RGBA)
-
-    //TextureTarget target; //!< The target that the WebGL texture should be bound to. (default: TextureTarget_TEXTURE_2D)
-    //TextureType type; //!< Texel datatype. (default: TextureType_UNSIGNED_BYTE)
-
-    Texture() {}
+    Texture() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -826,7 +782,6 @@ struct Light : public Object {
     };
 
     Type type;
-
     vec4 color;
     float distance;
     float constantAttenuation;
@@ -835,9 +790,8 @@ struct Light : public Object {
     float falloffAngle;
     float falloffExponent;
 
-    Light() {}
+    Light() = default;
     void Read(Value &obj, Asset &r);
-
     void SetDefaults();
 };
 
@@ -865,15 +819,11 @@ struct Animation : public Object {
         Ref<Accessor> translation; //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
     };
 
-    // AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
-    // AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
-    // AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
-
     std::vector<AnimChannel> Channels; //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
     AnimParameters Parameters; //!< The samplers that interpolate between the key-frames.
     std::vector<AnimSampler> Samplers; //!< The parameterized inputs representing the key-frame data.
 
-    Animation() {}
+    Animation() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -963,13 +913,11 @@ struct AssetMetadata {
 
 //! Root object for a glTF asset
 class Asset {
-    typedef std::gltf_unordered_map<std::string, int> IdMap;
+    using IdMap = std::gltf_unordered_map<std::string, int>;
 
     template <class T>
     friend class LazyDict;
-
     friend struct Buffer; // To access OpenFile
-
     friend class AssetWriter;
 
 private:
@@ -1010,12 +958,9 @@ public:
     LazyDict<Material> materials;
     LazyDict<Mesh> meshes;
     LazyDict<Node> nodes;
-    //LazyDict<Program>   programs;
     LazyDict<Sampler> samplers;
     LazyDict<Scene> scenes;
-    //LazyDict<Shader>    shaders;
     LazyDict<Skin> skins;
-    //LazyDict<Technique> techniques;
     LazyDict<Texture> textures;
 
     LazyDict<Light> lights; // KHR_materials_common ext
@@ -1024,16 +969,20 @@ public:
 
 public:
     Asset(IOSystem *io = 0) :
-            mIOSystem(io), asset(), accessors(*this, "accessors"), animations(*this, "animations"), buffers(*this, "buffers"), bufferViews(*this, "bufferViews"), cameras(*this, "cameras"), images(*this, "images"), materials(*this, "materials"), meshes(*this, "meshes"), nodes(*this, "nodes")
-            //, programs    (*this, "programs")
-            ,
+            mIOSystem(io), 
+            asset(), 
+            accessors(*this, "accessors"), 
+            animations(*this, "animations"), 
+            buffers(*this, "buffers"), 
+            bufferViews(*this, "bufferViews"), 
+            cameras(*this, "cameras"), 
+            images(*this, "images"), 
+            materials(*this, "materials"), 
+            meshes(*this, "meshes"), 
+            nodes(*this, "nodes"),
             samplers(*this, "samplers"),
-            scenes(*this, "scenes")
-            //, shaders     (*this, "shaders")
-            ,
-            skins(*this, "skins")
-            //, techniques  (*this, "techniques")
-            ,
+            scenes(*this, "scenes"),
+            skins(*this, "skins"),
             textures(*this, "textures"),
             lights(*this, "lights", "KHR_materials_common") {
         memset(&extensionsUsed, 0, sizeof(extensionsUsed));

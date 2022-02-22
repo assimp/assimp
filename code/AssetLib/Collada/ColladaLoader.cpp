@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -116,37 +116,15 @@ ColladaLoader::~ColladaLoader() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-    const bool readSig = checkSig && (pIOHandler != nullptr);
-    if (!readSig) {
-        if (extension == "dae" || extension == "zae") {
-            return true;
-        }
-    } else {
-        // Look for a DAE file inside, but don't extract it
-        ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
-        if (zip_archive.isOpen()) {
-            return !ColladaParser::ReadZaeManifest(zip_archive).empty();
-        }
+bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // Look for a DAE file inside, but don't extract it
+    ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
+    if (zip_archive.isOpen()) {
+        return !ColladaParser::ReadZaeManifest(zip_archive).empty();
     }
 
-    // XML - too generic, we need to open the file and search for typical keywords
-    if (extension == "xml" || !extension.length() || checkSig) {
-        //  If CanRead() is called in order to check whether we
-        //  support a specific file extension in general pIOHandler
-        //  might be nullptr and it's our duty to return true here.
-        if (nullptr == pIOHandler) {
-            return true;
-        }
-        static const char * const tokens[] = {
-            "<collada"
-        };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+    static const char *tokens[] = { "<collada" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -379,9 +357,9 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Node 
             out->mAngleInnerCone = AI_DEG_TO_RAD(srcLight->mFalloffAngle);
 
             // ... some extension magic.
-            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                 // ... some deprecation magic.
-                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
                     float f = 1.0f;
@@ -1087,7 +1065,7 @@ void insertMorphTimeValue(std::vector<MorphTimeValues> &values, float time, floa
         return;
     }
     for (unsigned int i = 0; i < values.size(); i++) {
-        if (std::abs(time - values[i].mTime) < 1e-6f) {
+        if (std::abs(time - values[i].mTime) < ai_epsilon) {
             values[i].mKeys.push_back(k);
             return;
         } else if (time > values[i].mTime && time < values[i + 1].mTime) {

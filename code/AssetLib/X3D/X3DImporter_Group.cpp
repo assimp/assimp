@@ -72,7 +72,7 @@ void X3DImporter::startReadGroup(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne = nullptr;
+        X3DNodeElementBase *ne(nullptr);
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
         ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
@@ -110,7 +110,7 @@ void X3DImporter::startReadStaticGroup(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne = nullptr;
+        X3DNodeElementBase *ne(nullptr);
 
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
@@ -153,7 +153,7 @@ void X3DImporter::startReadSwitch(XmlNode &node) {
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
-        X3DNodeElementBase *ne=nullptr;
+        X3DNodeElementBase *ne(nullptr);
 
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
     } else {
@@ -226,8 +226,13 @@ void X3DImporter::startReadTransform(XmlNode &node) {
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
         X3DNodeElementBase *ne(nullptr);
-
+        bool newgroup = (nullptr == mNodeElementCur);
+        if(newgroup)
+            ParseHelper_Group_Begin();
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        if (newgroup && isNodeEmpty(node)) {
+            ParseHelper_Node_Exit();
+        }
     } else {
         ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
         // at this place new group mode created and made current, so we can name it.

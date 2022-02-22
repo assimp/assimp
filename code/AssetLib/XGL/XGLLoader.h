@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -186,7 +186,7 @@ private:
     void ReadLighting(XmlNode &node, TempScope &scope);
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope);
-    bool ReadMesh(XmlNode &node, TempScope &scope);
+    bool ReadMesh(XmlNode &node, TempScope &scope, bool &empty);
     void ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);
     aiVector3D ReadVec3(XmlNode &node);

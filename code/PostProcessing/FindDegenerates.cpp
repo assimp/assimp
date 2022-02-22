@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -221,7 +221,7 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
             if ( mConfigCheckAreaOfTriangle ) {
                 if ( face.mNumIndices == 3 ) {
                     ai_real area = calculateAreaOfTriangle( face, mesh );
-                    if ( area < 1e-6 ) {
+                    if (area < ai_epsilon) {
                         if ( mConfigRemoveDegenerates ) {
                             remove_me[ a ] = true;
                             ++deg;

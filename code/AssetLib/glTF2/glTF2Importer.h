@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -79,7 +79,7 @@ private:
 
 private:
     std::vector<unsigned int> meshOffsets;
-    std::vector<int> embeddedTexIdxs;
+    std::vector<int> mEmbeddedTexIdxs;
     aiScene *mScene;
 
     /// An instance of rapidjson::IRemoteSchemaDocumentProvider

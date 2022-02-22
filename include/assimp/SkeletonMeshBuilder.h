@@ -4,8 +4,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -102,7 +101,7 @@ protected:
     /** Creates a dummy material and returns it. */
     aiMaterial *CreateMaterial();
 
-protected:
+private:
     /** space to assemble the mesh data: points */
     std::vector<aiVector3D> mVertices;
 

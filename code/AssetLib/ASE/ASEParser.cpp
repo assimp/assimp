@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -112,6 +112,7 @@ using namespace Assimp::ASE;
 // ------------------------------------------------------------------------------------------------
 Parser::Parser(const char *szFile, unsigned int fileFormatDefault) {
     ai_assert(nullptr != szFile);
+
     filePtr = szFile;
     iFileFormat = fileFormatDefault;
 
@@ -488,6 +489,7 @@ void Parser::ParseLV1MaterialListBlock() {
                 if (iIndex >= iMaterialCount) {
                     LogWarning("Out of range: material index is too large");
                     iIndex = iMaterialCount - 1;
+                    return;
                 }
 
                 // get a reference to the material
@@ -904,7 +906,6 @@ void Parser::ParseLV2LightSettingsBlock(ASE::Light &light) {
         }
         AI_ASE_HANDLE_SECTION("2", "LIGHT_SETTINGS");
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1781,7 +1782,9 @@ void Parser::ParseLV4MeshFace(ASE::Face &out) {
 
     // *MESH_MTLID  is optional, too
     while (true) {
-        if ('*' == *filePtr) break;
+        if ('*' == *filePtr) {
+            break;
+        }
         if (IsLineEnd(*filePtr)) {
             return;
         }
@@ -1830,8 +1833,9 @@ void Parser::ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut) {
 void Parser::ParseLV4MeshFloatTriple(ai_real *apOut) {
     ai_assert(nullptr != apOut);
 
-    for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int i = 0; i < 3; ++i) {
         ParseLV4MeshFloat(apOut[i]);
+    }
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloat(ai_real &fOut) {

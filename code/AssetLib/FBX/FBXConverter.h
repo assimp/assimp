@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -361,6 +361,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
+    KeyFrameListList GetRotationKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
 
     // ------------------------------------------------------------------------------------------------
     KeyTimeList GetKeyTimeList(const KeyFrameListList& inputs);

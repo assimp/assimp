@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -66,135 +66,135 @@ static const aiImporterDesc desc = {
 };
 
 namespace Grammar {
-static const std::string MetricType = "Metric";
-static const std::string Metric_DistanceType = "distance";
-static const std::string Metric_AngleType = "angle";
-static const std::string Metric_TimeType = "time";
-static const std::string Metric_UpType = "up";
-static const std::string NameType = "Name";
-static const std::string ObjectRefType = "ObjectRef";
-static const std::string MaterialRefType = "MaterialRef";
-static const std::string MetricKeyType = "key";
-static const std::string GeometryNodeType = "GeometryNode";
-static const std::string CameraNodeType = "CameraNode";
-static const std::string LightNodeType = "LightNode";
-static const std::string GeometryObjectType = "GeometryObject";
-static const std::string CameraObjectType = "CameraObject";
-static const std::string LightObjectType = "LightObject";
-static const std::string TransformType = "Transform";
-static const std::string MeshType = "Mesh";
-static const std::string VertexArrayType = "VertexArray";
-static const std::string IndexArrayType = "IndexArray";
-static const std::string MaterialType = "Material";
-static const std::string ColorType = "Color";
-static const std::string ParamType = "Param";
-static const std::string TextureType = "Texture";
-static const std::string AttenType = "Atten";
+    static const char* MetricType = "Metric";
+    static const char *Metric_DistanceType = "distance";
+    static const char *Metric_AngleType = "angle";
+    static const char *Metric_TimeType = "time";
+    static const char *Metric_UpType = "up";
+    static const char *NameType = "Name";
+    static const char *ObjectRefType = "ObjectRef";
+    static const char *MaterialRefType = "MaterialRef";
+    static const char *MetricKeyType = "key";
+    static const char *GeometryNodeType = "GeometryNode";
+    static const char *CameraNodeType = "CameraNode";
+    static const char *LightNodeType = "LightNode";
+    static const char *GeometryObjectType = "GeometryObject";
+    static const char *CameraObjectType = "CameraObject";
+    static const char *LightObjectType = "LightObject";
+    static const char *TransformType = "Transform";
+    static const char *MeshType = "Mesh";
+    static const char *VertexArrayType = "VertexArray";
+    static const char *IndexArrayType = "IndexArray";
+    static const char *MaterialType = "Material";
+    static const char *ColorType = "Color";
+    static const char *ParamType = "Param";
+    static const char *TextureType = "Texture";
+    static const char *AttenType = "Atten";
 
-static const std::string DiffuseColorToken = "diffuse";
-static const std::string SpecularColorToken = "specular";
-static const std::string EmissionColorToken = "emission";
+    static const char *DiffuseColorToken = "diffuse";
+    static const char *SpecularColorToken = "specular";
+    static const char *EmissionColorToken = "emission";
 
-static const std::string DiffuseTextureToken = "diffuse";
-static const std::string DiffuseSpecularTextureToken = "specular";
-static const std::string SpecularPowerTextureToken = "specular_power";
-static const std::string EmissionTextureToken = "emission";
-static const std::string OpacyTextureToken = "opacity";
-static const std::string TransparencyTextureToken = "transparency";
-static const std::string NormalTextureToken = "normal";
+    static const char *DiffuseTextureToken = "diffuse";
+    static const char *DiffuseSpecularTextureToken = "specular";
+    static const char *SpecularPowerTextureToken = "specular_power";
+    static const char *EmissionTextureToken = "emission";
+    static const char *OpacyTextureToken = "opacity";
+    static const char *TransparencyTextureToken = "transparency";
+    static const char *NormalTextureToken = "normal";
 
-enum TokenType {
-    NoneType = -1,
-    MetricToken,
-    NameToken,
-    ObjectRefToken,
-    MaterialRefToken,
-    MetricKeyToken,
-    GeometryNodeToken,
-    CameraNodeToken,
-    LightNodeToken,
-    GeometryObjectToken,
-    CameraObjectToken,
-    LightObjectToken,
-    TransformToken,
-    MeshToken,
-    VertexArrayToken,
-    IndexArrayToken,
-    MaterialToken,
-    ColorToken,
-    ParamToken,
-    TextureToken,
-    AttenToken
-};
+    enum TokenType {
+        NoneType = -1,
+        MetricToken,
+        NameToken,
+        ObjectRefToken,
+        MaterialRefToken,
+        MetricKeyToken,
+        GeometryNodeToken,
+        CameraNodeToken,
+        LightNodeToken,
+        GeometryObjectToken,
+        CameraObjectToken,
+        LightObjectToken,
+        TransformToken,
+        MeshToken,
+        VertexArrayToken,
+        IndexArrayToken,
+        MaterialToken,
+        ColorToken,
+        ParamToken,
+        TextureToken,
+        AttenToken
+    };
 
-static const std::string ValidMetricToken[4] = {
-    Metric_DistanceType,
-    Metric_AngleType,
-    Metric_TimeType,
-    Metric_UpType
-};
+    static const std::string ValidMetricToken[4] = {
+        Metric_DistanceType,
+        Metric_AngleType,
+        Metric_TimeType,
+        Metric_UpType
+    };
 
-static int isValidMetricType(const char *token) {
-    if (nullptr == token) {
-        return false;
-    }
-
-    int idx(-1);
-    for (size_t i = 0; i < 4; i++) {
-        if (ValidMetricToken[i] == token) {
-            idx = (int)i;
-            break;
+    static int isValidMetricType(const char *token) {
+        if (nullptr == token) {
+            return false;
         }
+
+        int idx(-1);
+        for (size_t i = 0; i < 4; i++) {
+            if (ValidMetricToken[i] == token) {
+                idx = (int)i;
+                break;
+            }
+        }
+
+        return idx;
     }
 
-    return idx;
-}
+    static TokenType matchTokenType(const char *tokenType) {
+        if (MetricType == tokenType) {
+            return MetricToken;
+        } else if (NameType == tokenType) {
+            return NameToken;
+        } else if (ObjectRefType == tokenType) {
+            return ObjectRefToken;
+        } else if (MaterialRefType == tokenType) {
+            return MaterialRefToken;
+        } else if (MetricKeyType == tokenType) {
+            return MetricKeyToken;
+        } else if (GeometryNodeType == tokenType) {
+            return GeometryNodeToken;
+        } else if (CameraNodeType == tokenType) {
+            return CameraNodeToken;
+        } else if (LightNodeType == tokenType) {
+            return LightNodeToken;
+        } else if (GeometryObjectType == tokenType) {
+            return GeometryObjectToken;
+        } else if (CameraObjectType == tokenType) {
+            return CameraObjectToken;
+        } else if (LightObjectType == tokenType) {
+            return LightObjectToken;
+        } else if (TransformType == tokenType) {
+            return TransformToken;
+        } else if (MeshType == tokenType) {
+            return MeshToken;
+        } else if (VertexArrayType == tokenType) {
+            return VertexArrayToken;
+        } else if (IndexArrayType == tokenType) {
+            return IndexArrayToken;
+        } else if (MaterialType == tokenType) {
+            return MaterialToken;
+        } else if (ColorType == tokenType) {
+            return ColorToken;
+        } else if (ParamType == tokenType) {
+            return ParamToken;
+        } else if (TextureType == tokenType) {
+            return TextureToken;
+        } else if (AttenType == tokenType) {
+            return AttenToken;
+        }
 
-static TokenType matchTokenType(const char *tokenType) {
-    if (MetricType == tokenType) {
-        return MetricToken;
-    } else if (NameType == tokenType) {
-        return NameToken;
-    } else if (ObjectRefType == tokenType) {
-        return ObjectRefToken;
-    } else if (MaterialRefType == tokenType) {
-        return MaterialRefToken;
-    } else if (MetricKeyType == tokenType) {
-        return MetricKeyToken;
-    } else if (GeometryNodeType == tokenType) {
-        return GeometryNodeToken;
-    } else if (CameraNodeType == tokenType) {
-        return CameraNodeToken;
-    } else if (LightNodeType == tokenType) {
-        return LightNodeToken;
-    } else if (GeometryObjectType == tokenType) {
-        return GeometryObjectToken;
-    } else if (CameraObjectType == tokenType) {
-        return CameraObjectToken;
-    } else if (LightObjectType == tokenType) {
-        return LightObjectToken;
-    } else if (TransformType == tokenType) {
-        return TransformToken;
-    } else if (MeshType == tokenType) {
-        return MeshToken;
-    } else if (VertexArrayType == tokenType) {
-        return VertexArrayToken;
-    } else if (IndexArrayType == tokenType) {
-        return IndexArrayToken;
-    } else if (MaterialType == tokenType) {
-        return MaterialToken;
-    } else if (ColorType == tokenType) {
-        return ColorToken;
-    } else if (ParamType == tokenType) {
-        return ParamToken;
-    } else if (TextureType == tokenType) {
-        return TextureToken;
-    } else if (AttenType == tokenType) {
-        return AttenToken;
+        return NoneType;
     }
-
-    return NoneType;
-}
 } // Namespace Grammar
 
 namespace Assimp {
@@ -290,16 +290,9 @@ OpenGEXImporter::~OpenGEXImporter() {
 }
 
 //------------------------------------------------------------------------------------------------
-bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool checkSig) const {
-    bool canRead(false);
-    if (!checkSig) {
-        canRead = SimpleExtensionCheck(file, "ogex");
-    } else {
-        static const char * const token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
-        canRead = SearchFileHeaderForToken(pIOHandler, file, token, 4);
-    }
-
-    return canRead;
+bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
+    return SearchFileHeaderForToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -854,7 +847,7 @@ void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene *
         return;
     }
 
-    Property *prop(node->getProperties());
+    Property *prop = node->getProperties();
     if (nullptr != prop) {
         std::string propName, propKey;
         propId2StdString(prop, propName, propKey);
@@ -1085,6 +1078,8 @@ void OpenGEXImporter::handleTextureNode(ODDLParser::DDLNode *node, aiScene * /*p
                 tex.Set(val->getString());
                 if (prop->m_value->getString() == Grammar::DiffuseTextureToken) {
                     m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_DIFFUSE(0));
+                } else if (prop->m_value->getString() == Grammar::DiffuseSpecularTextureToken) {
+                    m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_SPECULAR(0));
                 } else if (prop->m_value->getString() == Grammar::SpecularPowerTextureToken) {
                     m_currentMaterial->AddProperty(&tex, AI_MATKEY_TEXTURE_SPECULAR(0));
                 } else if (prop->m_value->getString() == Grammar::EmissionTextureToken) {

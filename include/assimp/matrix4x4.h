@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -110,7 +110,7 @@ public:
     bool operator== (const aiMatrix4x4t& m) const;
     bool operator!= (const aiMatrix4x4t& m) const;
 
-    bool Equal(const aiMatrix4x4t& m, TReal epsilon = 1e-6) const;
+    bool Equal(const aiMatrix4x4t &m, TReal epsilon = ai_epsilon) const;
 
     // matrix multiplication.
     aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);

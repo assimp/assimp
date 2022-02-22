@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -235,10 +235,8 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
 
 bool X3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool checkSig) const {
     if (checkSig) {
-        std::string::size_type pos = pFile.find_last_of(".x3d");
-        if (pos != std::string::npos) {
+        if (GetExtension(pFile) == "x3d")
             return true;
-        }
     }
 
     return false;
@@ -266,6 +264,9 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     //search for root node element
 
     mNodeElementCur = NodeElement_List.front();
+    if (mNodeElementCur == nullptr) {
+        return;
+    }
     while (mNodeElementCur->Parent != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
     }
@@ -482,6 +483,6 @@ void X3DImporter::ParseHelper_Node_Exit() {
     }
 }
 
-#endif // !ASSIMP_BUILD_NO_X3D_IMPORTER
-
 } // namespace Assimp
+
+#endif // !ASSIMP_BUILD_NO_X3D_IMPORTER

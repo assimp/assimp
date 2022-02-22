@@ -67,6 +67,10 @@ static const std::string ReflectionTexture = "refl";
 static const std::string DisplacementTexture1 = "map_disp";
 static const std::string DisplacementTexture2 = "disp";
 static const std::string SpecularityTexture = "map_ns";
+static const std::string RoughnessTexture = "map_Pr";
+static const std::string MetallicTexture = "map_Pm";
+static const std::string SheenTexture = "map_Ps";
+static const std::string RMATexture = "map_Ps";
 
 // texture option specific token
 static const std::string BlendUOption = "-blendu";
@@ -178,9 +182,44 @@ void ObjFileMtlImporter::load() {
                     case 'e': // New material
                         createMaterial();
                         break;
+                    case 'o': // Norm texture
+                        --m_DataIt;
+                        getTexture();
+                        break;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
+
+            case 'P':
+                {
+                    ++m_DataIt;
+                    switch(*m_DataIt)
+                    {
+                    case 'r':
+                        ++m_DataIt;
+                        getFloatValue(m_pModel->m_pCurrentMaterial->roughness);
+                        break;
+                    case 'm':
+                        ++m_DataIt;
+                        getFloatValue(m_pModel->m_pCurrentMaterial->metallic);
+                        break;
+                    case 's':
+                        ++m_DataIt;
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->sheen);
+                        break;
+                    case 'c':
+                        ++m_DataIt;
+                        if (*m_DataIt == 'r') {
+                            ++m_DataIt;
+                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_roughness);
+                        } else {
+                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_thickness);
+                        }
+                        break;
+                    }
+                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+                }
+                break;
 
             case 'm': // Texture
             case 'b': // quick'n'dirty - for 'bump' sections
@@ -194,6 +233,12 @@ void ObjFileMtlImporter::load() {
             {
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
                 getIlluminationModel(m_pModel->m_pCurrentMaterial->illumination_model);
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 'a': // Anisotropy
+            {
+                getFloatValue(m_pModel->m_pCurrentMaterial->anisotropy);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -334,6 +379,22 @@ void ObjFileMtlImporter::getTexture() {
         // Specularity scaling (glossiness)
         out = &m_pModel->m_pCurrentMaterial->textureSpecularity;
         clampIndex = ObjFile::Material::TextureSpecularityType;
+    } else if ( !ASSIMP_strincmp( pPtr, RoughnessTexture.c_str(), static_cast<unsigned int>(RoughnessTexture.size()))) {
+        // PBR Roughness texture
+        out = & m_pModel->m_pCurrentMaterial->textureRoughness;
+        clampIndex = ObjFile::Material::TextureRoughnessType;
+    } else if ( !ASSIMP_strincmp( pPtr, MetallicTexture.c_str(), static_cast<unsigned int>(MetallicTexture.size()))) {
+        // PBR Metallic texture
+        out = & m_pModel->m_pCurrentMaterial->textureMetallic;
+        clampIndex = ObjFile::Material::TextureMetallicType;
+    } else if (!ASSIMP_strincmp( pPtr, SheenTexture.c_str(), static_cast<unsigned int>(SheenTexture.size()))) {
+        // PBR Sheen (reflectance) texture
+        out = & m_pModel->m_pCurrentMaterial->textureSheen;
+        clampIndex = ObjFile::Material::TextureSheenType;
+    } else if (!ASSIMP_strincmp( pPtr, RMATexture.c_str(), static_cast<unsigned int>(RMATexture.size()))) {
+        // PBR Rough/Metal/AO texture
+        out = & m_pModel->m_pCurrentMaterial->textureRMA;
+        clampIndex = ObjFile::Material::TextureRMAType;
     } else {
         ASSIMP_LOG_ERROR("OBJ/MTL: Encountered unknown texture type");
         return;
@@ -411,7 +472,11 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
             }
 
             skipToken = 2;
-        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
+        } else if (!ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size()))) {
+            DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+            getFloat(it, m_DataItEnd, m_pModel->m_pCurrentMaterial->bump_multiplier);
+            skipToken = 2;
+        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption.c_str(), static_cast<unsigned int>(ModifyMapOption.size()))) {
             skipToken = 3;

@@ -1090,6 +1090,8 @@ class Asset {
     friend struct Buffer; // To access OpenFile
     friend class AssetWriter;
 
+    std::vector<LazyDictBase *> mDicts;
+
 public:
     //! Keeps info about the enabled extensions
     struct Extensions {
@@ -1156,7 +1158,8 @@ public:
     Ref<Scene> scene;
 
 public:
-    Asset(IOSystem *io = nullptr, rapidjson::IRemoteSchemaDocumentProvider *schemaDocumentProvider = nullptr) : 
+    Asset(IOSystem *io = nullptr, rapidjson::IRemoteSchemaDocumentProvider *schemaDocumentProvider = nullptr) :
+            mDicts(),
             extensionsUsed(),
             extensionsRequired(),
             asset(),
@@ -1217,7 +1220,6 @@ private:
     size_t mSceneLength;
     size_t mBodyOffset;
     size_t mBodyLength;
-    std::vector<LazyDictBase *> mDicts;
     IdMap mUsedIds;
     Ref<Buffer> mBodyBuffer;
 };

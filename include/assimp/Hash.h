@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -96,7 +95,11 @@ int rem;
     switch (rem) {
         case 3: hash += get16bits (data);
                 hash ^= hash << 16;
-                hash ^= data[sizeof (uint16_t)] << 18;
+                size_t offset = static_cast<size_t>(sizeof(uint16_t));
+                if (offset < 0) {
+                    return 0;
+                }
+                hash ^= data[offset] << 18;
                 hash += hash >> 11;
                 break;
         case 2: hash += get16bits (data);

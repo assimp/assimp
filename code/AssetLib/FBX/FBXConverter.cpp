@@ -1267,7 +1267,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     const std::vector<aiVector3D> &normals = mesh.GetNormals();
     if (normals.size()) {
         ai_assert(normals.size() == vertices.size());
-        out_mesh->mNormals = new aiVector3D[vertices.size()];
+        out_mesh->mNormals = new aiVector3D[count_vertices];
     }
 
     // allocate tangents, binormals.
@@ -1295,8 +1295,8 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             ai_assert(tangents.size() == vertices.size());
             ai_assert(binormals->size() == vertices.size());
 
-            out_mesh->mTangents = new aiVector3D[vertices.size()];
-            out_mesh->mBitangents = new aiVector3D[vertices.size()];
+            out_mesh->mTangents = new aiVector3D[count_vertices];
+            out_mesh->mBitangents = new aiVector3D[count_vertices];
         }
     }
 
@@ -1308,7 +1308,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             break;
         }
 
-        out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
+        out_mesh->mTextureCoords[i] = new aiVector3D[count_vertices];
         out_mesh->mNumUVComponents[i] = 2;
     }
 
@@ -1320,7 +1320,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             break;
         }
 
-        out_mesh->mColors[i] = new aiColor4D[vertices.size()];
+        out_mesh->mColors[i] = new aiColor4D[count_vertices];
     }
 
     unsigned int cursor = 0, in_cursor = 0;

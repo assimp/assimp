@@ -54,6 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 
 // ---------------------------------------------------------------------------
+
+// the original illum property
+#define AI_MATKEY_OBJ_ILLUM "$mat.illum", 0, 0
+
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 // Pure key names for all obj texture-related properties
 //! @cond MATS_DOC_FULL
 

@@ -605,6 +605,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
 
         mat->AddProperty<int>(&sm, 1, AI_MATKEY_SHADING_MODEL);
 
+        // Preserve the original illum value
+        mat->AddProperty<int>(&pCurrentMaterial->illumination_model, 1, AI_MATKEY_OBJ_ILLUM);
+
         // Adding material colors
         mat->AddProperty(&pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT);
         mat->AddProperty(&pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);

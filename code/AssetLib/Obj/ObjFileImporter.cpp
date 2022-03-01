@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/ObjMaterial.h>
 #include <memory>
 
 static const aiImporterDesc desc = {
@@ -604,6 +605,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
 
         mat->AddProperty<int>(&sm, 1, AI_MATKEY_SHADING_MODEL);
 
+        // Preserve the original illum value
+        mat->AddProperty<int>(&pCurrentMaterial->illumination_model, 1, AI_MATKEY_OBJ_ILLUM);
+
         // Adding material colors
         mat->AddProperty(&pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT);
         mat->AddProperty(&pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -657,6 +661,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         if (0 != pCurrentMaterial->textureBump.length) {
             mat->AddProperty(&pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_HEIGHT(0));
+            if (pCurrentMaterial->bump_multiplier != 1.0) {
+                mat->AddProperty(&pCurrentMaterial->bump_multiplier, 1, AI_MATKEY_OBJ_BUMPMULT_HEIGHT(0));
+            }
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureBumpType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_HEIGHT);
             }
@@ -665,6 +672,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         if (0 != pCurrentMaterial->textureNormal.length) {
             mat->AddProperty(&pCurrentMaterial->textureNormal, AI_MATKEY_TEXTURE_NORMALS(0));
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_NORMALS(0));
+            if (pCurrentMaterial->bump_multiplier != 1.0) {
+                mat->AddProperty(&pCurrentMaterial->bump_multiplier, 1, AI_MATKEY_OBJ_BUMPMULT_NORMALS(0));
+            }
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureNormalType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_NORMALS);
             }

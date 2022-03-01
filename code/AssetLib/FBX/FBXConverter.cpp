@@ -653,7 +653,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
     bool ok;
 
-    const float zero_epsilon = 1e-6f;
+    const float zero_epsilon = ai_epsilon;
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
@@ -1267,7 +1267,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     const std::vector<aiVector3D> &normals = mesh.GetNormals();
     if (normals.size()) {
         ai_assert(normals.size() == vertices.size());
-        out_mesh->mNormals = new aiVector3D[vertices.size()];
+        out_mesh->mNormals = new aiVector3D[count_vertices];
     }
 
     // allocate tangents, binormals.
@@ -1295,8 +1295,8 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             ai_assert(tangents.size() == vertices.size());
             ai_assert(binormals->size() == vertices.size());
 
-            out_mesh->mTangents = new aiVector3D[vertices.size()];
-            out_mesh->mBitangents = new aiVector3D[vertices.size()];
+            out_mesh->mTangents = new aiVector3D[count_vertices];
+            out_mesh->mBitangents = new aiVector3D[count_vertices];
         }
     }
 
@@ -1308,7 +1308,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             break;
         }
 
-        out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
+        out_mesh->mTextureCoords[i] = new aiVector3D[count_vertices];
         out_mesh->mNumUVComponents[i] = 2;
     }
 
@@ -1320,7 +1320,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             break;
         }
 
-        out_mesh->mColors[i] = new aiColor4D[vertices.size()];
+        out_mesh->mColors[i] = new aiColor4D[count_vertices];
     }
 
     unsigned int cursor = 0, in_cursor = 0;
@@ -3187,7 +3187,8 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     bool ok = false;
-    const float zero_epsilon = 1e-6f;
+    
+    const float zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
     if (ok && preRotation.SquareLength() > zero_epsilon) {

@@ -80,8 +80,10 @@ enum TransformInheritance {
 
     TransformInheritance_MAX // end-of-enum sentinel
 };
+
 } // namespace FBX
 } // namespace Assimp
+
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 
 #endif // AI_FBXCOMMON_H_INC

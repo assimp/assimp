@@ -425,19 +425,31 @@ int Assimp_Info(const char *const *params, unsigned int num) {
     }
 
     // materials
-    unsigned int total = 0;
+    if (scene->mNumMaterials)
+        printf("\nNamed Materials:");
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
-        aiString name;
-        if (AI_SUCCESS == aiGetMaterialString(scene->mMaterials[i], AI_MATKEY_NAME, &name)) {
-            printf("%s\n    \'%s\'", (total++ ? "" : "\nNamed Materials:"), name.data);
+        const aiMaterial *mat = scene->mMaterials[i];
+        aiString name = mat->GetName();
+        printf("\n    \'%s\'", name.data);
+        if (mat->mNumProperties)
+            printf(" (prop) [index / bytes | texture semantic]");
+        for (unsigned p = 0; p < mat->mNumProperties; p++) {
+            const aiMaterialProperty *prop = mat->mProperties[p];
+            const aiTextureType textype = static_cast<aiTextureType>(prop->mSemantic);
+            printf("\n        %d (%s): [%d / %d | %s]",
+                    p,
+                    prop->mKey.data,
+                    prop->mIndex,
+                    prop->mDataLength,
+                    TextureTypeToString(textype));
         }
     }
-    if (total) {
+    if (scene->mNumMaterials) {
         printf("\n");
     }
 
     // textures
-    total = 0;
+    unsigned int total = 0;
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
         aiString name;
         static const aiTextureType types[] = {

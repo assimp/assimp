@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -73,12 +73,12 @@ public:
     // Data type to store the key hash
     typedef unsigned int KeyType;
 
-    // typedefs for our four configuration maps.
-    // We don't need more, so there is no need for a generic solution
+    // typedefs for our configuration maps.
     typedef std::map<KeyType, int> IntPropertyMap;
     typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
+    typedef std::map<KeyType, void*> PointerPropertyMap;
 
     /** IO handler to use for all file accesses. */
     IOSystem* mIOHandler;
@@ -116,6 +116,9 @@ public:
     /** List of Matrix properties */
     MatrixPropertyMap mMatrixProperties;
 
+    /** List of pointer properties */
+    PointerPropertyMap mPointerProperties;
+
     /** Used for testing - extra verbose mode causes the ValidateDataStructure-Step
      *  to be executed before and after every single post-process step */
     bool bExtraVerbose;
@@ -142,6 +145,7 @@ ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT :
         mFloatProperties(),
         mStringProperties(),
         mMatrixProperties(),
+        mPointerProperties(),
         bExtraVerbose( false ),
         mPPShared( nullptr ) {
     // empty

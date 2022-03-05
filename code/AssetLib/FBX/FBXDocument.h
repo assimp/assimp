@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -693,7 +693,7 @@ private:
 typedef std::vector<int64_t> KeyTimeList;
 typedef std::vector<float> KeyValueList;
 
-/** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
+/** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefore) */
 class AnimationCurve : public Object {
 public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);

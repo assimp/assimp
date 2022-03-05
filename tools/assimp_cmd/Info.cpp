@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -313,7 +313,7 @@ int Assimp_Info (const char* const* params, unsigned int num) {
 
 	// Verbose and silent at the same time are not allowed
 	if ( verbose && silent ) {
-		printf("assimp info: Invalid arguments, verbose and silent at the same time are forbitten. ");
+		printf("assimp info: Invalid arguments, verbose and silent at the same time are forbidden. ");
 		return AssimpCmdInfoError::InvalidCombinaisonOfArguments;
 	}
 

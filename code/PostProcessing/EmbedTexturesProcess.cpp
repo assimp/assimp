@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -89,7 +89,7 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
                 // Indeed embed
                 if (addTexture(pScene, path.data)) {
                     auto embeddedTextureId = pScene->mNumTextures - 1u;
-                    ::ai_snprintf(path.data, 1024, "*%u", embeddedTextureId);
+                    path.length = ::ai_snprintf(path.data, 1024, "*%u", embeddedTextureId);
                     material->AddProperty(&path, AI_MATKEY_TEXTURE(tt, texId));
                     embeddedTexturesCount++;
                 }

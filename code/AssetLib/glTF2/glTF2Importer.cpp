@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/glTF2/glTF2Importer.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 #include "AssetLib/glTF2/glTF2Asset.h"
+
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif
@@ -57,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/commonMetaData.h>
+#include <assimp/DefaultIOSystem.h>
 
 #include <memory>
 #include <unordered_map>
@@ -96,7 +98,7 @@ static const aiImporterDesc desc = {
 glTF2Importer::glTF2Importer() :
         BaseImporter(),
         meshOffsets(),
-        embeddedTexIdxs(),
+        mEmbeddedTexIdxs(),
         mScene(nullptr) {
     // empty
 }
@@ -109,24 +111,21 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
     return &desc;
 }
 
-bool glTF2Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /* checkSig */) const {
-    const std::string &extension = GetExtension(pFile);
-
-    if (extension != "gltf" && extension != "glb") {
+bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig ) const {
+    const std::string extension = GetExtension(filename);
+    if (!checkSig && (extension != "gltf") && (extension != "glb")) {
         return false;
     }
 
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);
-        asset.Load(pFile, extension == "glb");
-        std::string version = asset.asset.version;
-        return !version.empty() && version[0] == '2';
+        return asset.CanRead(filename, extension == "glb");
     }
 
     return false;
 }
 
-static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
+static inline aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
     switch (gltfWrapMode) {
         case SamplerWrap::Mirrored_Repeat:
             return aiTextureMapMode_Mirror;
@@ -141,19 +140,23 @@ static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
     }
 }
 
-inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat, const char *pKey, unsigned int type, unsigned int idx) {
+static inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat,
+        const char *pKey, unsigned int type, unsigned int idx) {
     aiColor4D col;
     CopyValue(prop, col);
     mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
-inline void SetMaterialColorProperty(Asset & /*r*/, vec3 &prop, aiMaterial *mat, const char *pKey, unsigned int type, unsigned int idx) {
+static inline void SetMaterialColorProperty(Asset & /*r*/, vec3 &prop, aiMaterial *mat,
+        const char *pKey, unsigned int type, unsigned int idx) {
     aiColor4D col;
     glTFCommon::CopyValue(prop, col);
     mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
-inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset & /*r*/, glTF2::TextureInfo prop, aiMaterial *mat, aiTextureType texType, unsigned int texSlot = 0) {
+static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset & /*r*/,
+        glTF2::TextureInfo prop, aiMaterial *mat, aiTextureType texType,
+        unsigned int texSlot = 0) {
     if (prop.texture && prop.texture->source) {
         aiString uri(prop.texture->source->uri);
 
@@ -218,7 +221,9 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     }
 }
 
-inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r, glTF2::NormalTextureInfo &prop, aiMaterial *mat, aiTextureType texType, unsigned int texSlot = 0) {
+inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
+        NormalTextureInfo &prop, aiMaterial *mat, aiTextureType texType,
+        unsigned int texSlot = 0) {
     SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
@@ -226,7 +231,9 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     }
 }
 
-inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r, glTF2::OcclusionTextureInfo &prop, aiMaterial *mat, aiTextureType texType, unsigned int texSlot = 0) {
+inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
+        OcclusionTextureInfo &prop, aiMaterial *mat, aiTextureType texType,
+        unsigned int texSlot = 0) {
     SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
@@ -292,6 +299,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         // glTFv2 is either PBR or Unlit
         aiShadingMode shadingMode = aiShadingMode_PBR_BRDF;
         if (mat.unlit) {
+            aimat->AddProperty(&mat.unlit, 1, "$mat.gltf.unlit", 0, 0); // TODO: Remove this property, it is kept for backwards compatibility with assimp 5.0.1
             shadingMode = aiShadingMode_Unlit;
         }
 
@@ -302,7 +310,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialSheen.isPresent) {
             MaterialSheen &sheen = mat.materialSheen.value;
             // Default value {0,0,0} disables Sheen
-            if (sheen.sheenColorFactor != defaultSheenFactor) {
+            if (std::memcmp(sheen.sheenColorFactor, defaultSheenFactor, sizeof(glTFCommon::vec3)) != 0) {
                 SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_SHEEN_COLOR_FACTOR);
                 aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_SHEEN_COLOR_TEXTURE);
@@ -331,6 +339,23 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
         }
 
+        // KHR_materials_volume
+        if (mat.materialVolume.isPresent) {
+            MaterialVolume &volume = mat.materialVolume.value;
+
+            aimat->AddProperty(&volume.thicknessFactor, 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+            aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+            SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+        }
+
+        // KHR_materials_ior
+        if (mat.materialIOR.isPresent) {
+            MaterialIOR &ior = mat.materialIOR.value;
+
+            aimat->AddProperty(&ior.ior, 1, AI_MATKEY_REFRACTI);
+        }
+
         return aimat;
     } catch (...) {
         delete aimat;
@@ -338,7 +363,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
     }
 }
 
-void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
+void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
@@ -346,10 +371,10 @@ void glTF2Importer::ImportMaterials(glTF2::Asset &r) {
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
     std::fill(mScene->mMaterials, mScene->mMaterials + mScene->mNumMaterials, nullptr);
-    mScene->mMaterials[numImportedMaterials] = ImportMaterial(embeddedTexIdxs, r, defaultMaterial);
+    mScene->mMaterials[numImportedMaterials] = ImportMaterial(mEmbeddedTexIdxs, r, defaultMaterial);
 
     for (unsigned int i = 0; i < numImportedMaterials; ++i) {
-        mScene->mMaterials[i] = ImportMaterial(embeddedTexIdxs, r, r.materials[i]);
+        mScene->mMaterials[i] = ImportMaterial(mEmbeddedTexIdxs, r, r.materials[i]);
     }
 }
 
@@ -363,7 +388,8 @@ static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, u
     ++face;
 }
 
-static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b) {
+static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices,
+        unsigned int a, unsigned int b) {
     if ((a >= numVertices) || (b >= numVertices)) {
         return;
     }
@@ -374,7 +400,8 @@ static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices, u
     ++face;
 }
 
-static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a, unsigned int b, unsigned int c) {
+static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a,
+        unsigned int b, unsigned int c) {
     if ((a >= numVertices) || (b >= numVertices) || (c >= numVertices)) {
         return;
     }
@@ -401,8 +428,8 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 #endif // ASSIMP_BUILD_DEBUG
 
 template<typename T>
-aiColor4D* GetVertexColorsForType(glTF2::Ref<glTF2::Accessor> input) {
-    float max = std::numeric_limits<T>::max();
+aiColor4D* GetVertexColorsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
     aiColor4t<T>* colors;
     input->ExtractData(colors);
     auto output = new aiColor4D[input->count];
@@ -463,19 +490,19 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             Mesh::Primitive::Attributes &attr = prim.attributes;
 
-            if (attr.position.size() > 0 && attr.position[0]) {
+            if (!attr.position.empty() && attr.position[0]) {
                 aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->count);
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
-            if (attr.normal.size() > 0 && attr.normal[0]) {
+            if (!attr.normal.empty() && attr.normal[0]) {
                 if (attr.normal[0]->count != aim->mNumVertices) {
                     DefaultLogger::get()->warn("Normal count in mesh \"", mesh.name, "\" does not match the vertex count, normals ignored.");
                 } else {
                     attr.normal[0]->ExtractData(aim->mNormals);
 
                     // only extract tangents if normals are present
-                    if (attr.tangent.size() > 0 && attr.tangent[0]) {
+                    if (!attr.tangent.empty() && attr.tangent[0]) {
                         if (attr.tangent[0]->count != aim->mNumVertices) {
                             DefaultLogger::get()->warn("Tangent count in mesh \"", mesh.name, "\" does not match the vertex count, tangents ignored.");
                         } else {
@@ -538,7 +565,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             }
 
             std::vector<Mesh::Primitive::Target> &targets = prim.targets;
-            if (targets.size() > 0) {
+            if (!targets.empty()) {
                 aim->mNumAnimMeshes = (unsigned int)targets.size();
                 aim->mAnimMeshes = new aiAnimMesh *[aim->mNumAnimMeshes];
                 std::fill(aim->mAnimMeshes, aim->mAnimMeshes + aim->mNumAnimMeshes, nullptr);
@@ -775,8 +802,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 if (actualNumFaces < nFaces) {
                     ASSIMP_LOG_WARN("Some faces had out-of-range indices. Those faces were dropped.");
                 }
-                if (actualNumFaces == 0)
-                {
+                if (actualNumFaces == 0) {
                     throw DeadlyImportError("Mesh \"", aim->mName.C_Str(), "\" has no faces");
                 }
                 aim->mNumFaces = actualNumFaces;
@@ -797,7 +823,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 }
 
 void glTF2Importer::ImportCameras(glTF2::Asset &r) {
-    if (!r.cameras.Size()) return;
+    if (!r.cameras.Size()) {
+        return;
+    }
 
     const unsigned int numCameras = r.cameras.Size();
     ASSIMP_LOG_DEBUG("Importing ", numCameras, " cameras");
@@ -814,7 +842,6 @@ void glTF2Importer::ImportCameras(glTF2::Asset &r) {
         aicam->mLookAt = aiVector3D(0.f, 0.f, -1.f);
 
         if (cam.type == Camera::Perspective) {
-
             aicam->mAspect = cam.cameraProperties.perspective.aspectRatio;
             aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
             aicam->mClipPlaneFar = cam.cameraProperties.perspective.zfar;
@@ -833,8 +860,9 @@ void glTF2Importer::ImportCameras(glTF2::Asset &r) {
 }
 
 void glTF2Importer::ImportLights(glTF2::Asset &r) {
-    if (!r.lights.Size())
+    if (!r.lights.Size()) {
         return;
+    }
 
     const unsigned int numLights = r.lights.Size();
     ASSIMP_LOG_DEBUG("Importing ", numLights, " lights");
@@ -897,28 +925,29 @@ void glTF2Importer::ImportLights(glTF2::Asset &r) {
 static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
     if (node.matrix.isPresent) {
         CopyValue(node.matrix.value, matrix);
-    } else {
-        if (node.translation.isPresent) {
-            aiVector3D trans;
-            CopyValue(node.translation.value, trans);
-            aiMatrix4x4 t;
-            aiMatrix4x4::Translation(trans, t);
-            matrix = matrix * t;
-        }
+        return;
+    } 
 
-        if (node.rotation.isPresent) {
-            aiQuaternion rot;
-            CopyValue(node.rotation.value, rot);
-            matrix = matrix * aiMatrix4x4(rot.GetMatrix());
-        }
+    if (node.translation.isPresent) {
+        aiVector3D trans;
+        CopyValue(node.translation.value, trans);
+        aiMatrix4x4 t;
+        aiMatrix4x4::Translation(trans, t);
+        matrix = matrix * t;
+    }
 
-        if (node.scale.isPresent) {
-            aiVector3D scal(1.f);
-            CopyValue(node.scale.value, scal);
-            aiMatrix4x4 s;
-            aiMatrix4x4::Scaling(scal, s);
-            matrix = matrix * s;
-        }
+    if (node.rotation.isPresent) {
+        aiQuaternion rot;
+        CopyValue(node.rotation.value, rot);
+        matrix = matrix * aiMatrix4x4(rot.GetMatrix());
+    }
+
+    if (node.scale.isPresent) {
+        aiVector3D scal(1.f);
+        CopyValue(node.scale.value, scal);
+        aiMatrix4x4 s;
+        aiMatrix4x4::Scaling(scal, s);
+        matrix = matrix * s;
     }
 }
 
@@ -981,21 +1010,21 @@ static std::string GetNodeName(const Node &node) {
 
 void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
     if (extension.mStringValue.isPresent) {
-        metadata->Add(extension.name.c_str(), aiString(extension.mStringValue.value));
+        metadata->Add(extension.name, aiString(extension.mStringValue.value));
     } else if (extension.mDoubleValue.isPresent) {
-        metadata->Add(extension.name.c_str(), extension.mDoubleValue.value);
+        metadata->Add(extension.name, extension.mDoubleValue.value);
     } else if (extension.mUint64Value.isPresent) {
-        metadata->Add(extension.name.c_str(), extension.mUint64Value.value);
+        metadata->Add(extension.name, extension.mUint64Value.value);
     } else if (extension.mInt64Value.isPresent) {
-        metadata->Add(extension.name.c_str(), static_cast<int32_t>(extension.mInt64Value.value));
+        metadata->Add(extension.name, static_cast<int32_t>(extension.mInt64Value.value));
     } else if (extension.mBoolValue.isPresent) {
-        metadata->Add(extension.name.c_str(), extension.mBoolValue.value);
+        metadata->Add(extension.name, extension.mBoolValue.value);
     } else if (extension.mValues.isPresent) {
         aiMetadata val;
         for (auto const & subExtension : extension.mValues.value) {
             ParseExtensions(&val, subExtension);
         }
-        metadata->Add(extension.name.c_str(), val);
+        metadata->Add(extension.name, val);
     }
 }
 
@@ -1041,7 +1070,9 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             // GLTF files contain at most 1 mesh per node.
             if (node.meshes.size() > 1)
             {
-                throw DeadlyImportError("GLTF: Invalid input, found ", node.meshes.size(), " meshes in ", getContextForErrorMessages(node.id, node.name), ", but only 1 mesh per node allowed.");
+                throw DeadlyImportError("GLTF: Invalid input, found ", node.meshes.size(),
+                    " meshes in ", getContextForErrorMessages(node.id, node.name),
+                    ", but only 1 mesh per node allowed.");
             }
             int mesh_idx = node.meshes[0].GetIndex();
             int count = meshOffsets[mesh_idx + 1] - meshOffsets[mesh_idx];
@@ -1093,8 +1124,8 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
                         bone->mNumWeights = static_cast<uint32_t>(weights.size());
 
                         if (bone->mNumWeights > 0) {
-                          bone->mWeights = new aiVertexWeight[bone->mNumWeights];
-                          memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
+                            bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+                            memcpy(bone->mWeights, weights.data(), bone->mNumWeights * sizeof(aiVertexWeight));
                         } else {
                             // Assimp expects all bones to have at least 1 weight.
                             bone->mWeights = new aiVertexWeight[1];
@@ -1135,8 +1166,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
                 if (!ainode->mMetaData) {
                     ainode->mMetaData = aiMetadata::Alloc(1);
                     ainode->mMetaData->Set(0, "PBR_LightRange", node.light->range.value);
-                }
-                else {
+                } else {
                     ainode->mMetaData->Add("PBR_LightRange", node.light->range.value);
                 }
             }
@@ -1284,7 +1314,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
 }
 
 aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
-    aiMeshMorphAnim *anim = new aiMeshMorphAnim();
+    auto *anim = new aiMeshMorphAnim();
 
     try {
         anim->mName = GetNodeName(node);
@@ -1337,6 +1367,17 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         auto& animsampler = anim.samplers[channel.sampler];
+
+        if (!animsampler.input) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler input. Skipping.");
+            continue;
+        }
+
+        if (!animsampler.output) {
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler output. Skipping.");
+            continue;
+        }
+
         if (animsampler.input->count > animsampler.output->count) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
@@ -1421,7 +1462,7 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             }
         }
 
-        // Use the latest keyframe for the duration of the animation
+        // Use the latest key-frame for the duration of the animation
         double maxDuration = 0;
         unsigned int maxNumberOfKeys = 0;
         for (unsigned int j = 0; j < ai_anim->mNumChannels; ++j) {
@@ -1466,20 +1507,25 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
     }
 }
 
-void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
-    embeddedTexIdxs.resize(r.images.Size(), -1);
-
-    int numEmbeddedTexs = 0;
+static unsigned int countEmbeddedTextures(glTF2::Asset &r) {
+    unsigned int numEmbeddedTexs = 0;
     for (size_t i = 0; i < r.images.Size(); ++i) {
         if (r.images[i].HasData()) {
             numEmbeddedTexs += 1;
         }
     }
 
-    if (numEmbeddedTexs == 0)
-        return;
+    return numEmbeddedTexs;
+}
 
-      ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
+void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
+    mEmbeddedTexIdxs.resize(r.images.Size(), -1);
+    const unsigned int numEmbeddedTexs = countEmbeddedTextures(r);
+    if (numEmbeddedTexs == 0) {
+        return;
+    }
+
+    ASSIMP_LOG_DEBUG("Importing ", numEmbeddedTexs, " embedded textures");
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
     std::fill(mScene->mTextures, mScene->mTextures + numEmbeddedTexs, nullptr);
@@ -1492,7 +1538,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         }
 
         int idx = mScene->mNumTextures++;
-        embeddedTexIdxs[i] = idx;
+        mEmbeddedTexIdxs[i] = idx;
 
         aiTexture *tex = mScene->mTextures[idx] = new aiTexture();
 
@@ -1509,11 +1555,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
             if (ext) {
                 if (strcmp(ext, "jpeg") == 0) {
                     ext = "jpg";
-                }
-                else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
+                } else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
                     ext = "kx2";
-                }
-                else if(strcmp(ext, "basis") == 0) { //basisu
+                } else if(strcmp(ext, "basis") == 0) { //basisu
                     ext = "bu";
                 }
 
@@ -1551,26 +1595,22 @@ void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
 }
 
 void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-
     ASSIMP_LOG_DEBUG("Reading GLTF2 file");
 
     // clean all member arrays
     meshOffsets.clear();
-    embeddedTexIdxs.clear();
+    mEmbeddedTexIdxs.clear();
 
     this->mScene = pScene;
 
     // read the asset file
-    glTF2::Asset asset(pIOHandler);
+  	glTF2::Asset asset(pIOHandler, static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(mSchemaDocumentProvider));
     asset.Load(pFile, GetExtension(pFile) == "glb");
     if (asset.scene) {
         pScene->mName = asset.scene->name;
     }
 
-    //
     // Copy the data out
-    //
-
     ImportEmbeddedTextures(asset);
     ImportMaterials(asset);
 
@@ -1588,6 +1628,10 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     }
+}
+
+void glTF2Importer::SetupProperties(const Importer *pImp) {
+    mSchemaDocumentProvider = static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(pImp->GetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER));
 }
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER

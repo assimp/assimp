@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -90,7 +90,7 @@ D3DXVECTOR4 g_aclNormalColors[14] =
 
 
 //-------------------------------------------------------------------------------
-// Recursivly count the number of nodes in an asset's node graph
+// Recursively count the number of nodes in an asset's node graph
 // Used by LoadAsset()
 //-------------------------------------------------------------------------------
 void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
@@ -1535,7 +1535,7 @@ int CDisplay::RenderStereoView(const aiMatrix4x4& m)
         // (move back to the original position)
         g_sCamera.vPos -= g_sCamera.vRight * 0.03f;
 
-        // reenable all channels
+        // re-enable all channels
         g_piDevice->SetRenderState(D3DRS_COLORWRITEENABLE,
             D3DCOLORWRITEENABLE_RED |
             D3DCOLORWRITEENABLE_GREEN |

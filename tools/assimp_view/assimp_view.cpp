@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -489,7 +489,7 @@ int CreateAssetData() {
             nidx = 3;
             break;
         default:
-            CLogWindow::Instance().WriteLine("Unknown primitiv type");
+            CLogWindow::Instance().WriteLine("Unknown primitive type");
             break;
         };
 

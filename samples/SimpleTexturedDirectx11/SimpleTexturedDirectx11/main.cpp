@@ -129,7 +129,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	if (!argv) {
 		MessageBox(nullptr,
-			TEXT("An error occured while reading command line arguments."),
+			TEXT("An error occurred while reading command line arguments."),
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
 		return EXIT_FAILURE;

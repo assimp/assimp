@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -322,8 +322,8 @@ void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
     prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
-void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
-{
+void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, 
+        const char* propName, int type, int idx, aiTextureType tt) {
     aiString tex;
     aiColor4D col;
     if (mat->GetTextureCount(tt) > 0) {
@@ -370,7 +370,10 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
     }
 
     if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
-        prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
+        prop.color[0] = col.r; 
+        prop.color[1] = col.g;
+        prop.color[2] = col.b; 
+        prop.color[3] = col.a;
     }
 }
 

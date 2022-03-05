@@ -1,13 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -34,25 +36,18 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
+/** @file Default implementation of IOSystem using the standard C file functions */
 
-#pragma once
-#ifndef AI_DEFINES_H_INC
-#define AI_DEFINES_H_INC
+#include <assimp/IOSystem.hpp>
 
-#ifdef __GNUC__
-#   pragma GCC system_header
-#endif
+using namespace Assimp;
 
-// We need those constants, workaround for any platforms where nobody defined them yet
-#if (!defined SIZE_MAX)
-#   define SIZE_MAX (~((size_t)0))
-#endif
-
-#if (!defined UINT_MAX)
-#   define UINT_MAX (~((unsigned int)0))
-#endif
-
-#endif // AI_DEINES_H_INC
+const std::string &IOSystem::CurrentDirectory() const {
+    if ( m_pathStack.empty() ) {
+        static const std::string Dummy = std::string();
+        return Dummy;
+    }
+    return m_pathStack[ m_pathStack.size()-1 ];
+}

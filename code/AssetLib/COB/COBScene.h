@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -43,15 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  COBScene.h
 *  @brief Utilities for the COB importer.
 */
+#pragma once
 #ifndef INCLUDED_AI_COB_SCENE_H
 #define INCLUDED_AI_COB_SCENE_H
 
-#include <memory>
-#include <deque>
-#include <map>
-
 #include <assimp/BaseImporter.h>
 #include <assimp/material.h>
+
+#include <deque>
+#include <map>
 
 namespace Assimp {
 namespace COB {

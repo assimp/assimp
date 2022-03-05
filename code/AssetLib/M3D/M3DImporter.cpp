@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -111,34 +111,19 @@ M3DImporter::M3DImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
-bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "m3d"
-            || extension == "a3d"
-    )
-        return true;
-    else if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        /*
-         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-
-        const char* tokens[] = {"3DMO", "3dmo"};
-        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
-        */
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
-        unsigned char data[4];
-        if (!pStream || 4 != pStream->Read(data, 1, 4)) {
-            return false;
-        }
-        return !memcmp(data, "3DMO", 4) /* bin */
-               || !memcmp(data, "3dmo", 4) /* ASCII */
-                ;
+bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // don't use CheckMagicToken because that checks with swapped bytes too, leading to false
+    // positives. This magic is not uint32_t, but char[4], so memcmp is the best way
+    std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
+    unsigned char data[4];
+    if (4 != pStream->Read(data, 1, 4)) {
+        return false;
     }
-    return false;
+    return !memcmp(data, "3DMO", 4) /* bin */
+#ifdef M3D_ASCII
+        || !memcmp(data, "3dmo", 4) /* ASCII */
+#endif
+            ;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -296,7 +281,7 @@ void M3DImporter::importMaterials(const M3DWrapper &m3d) {
             }
             // texture map properties
             if (m->prop[j].type >= 128 && aiTxProps[k].pKey &&
-                    // extra check, should never happen, do we have the refered texture?
+                    // extra check, should never happen, do we have the referred texture?
                     m->prop[j].value.textureid < m3d->numtexture &&
                     m3d->texture[m->prop[j].value.textureid].name) {
                 name.Set(std::string(std::string(m3d->texture[m->prop[j].value.textureid].name) + ".png"));
@@ -474,7 +459,7 @@ void M3DImporter::importMeshes(const M3DWrapper &m3d) {
     mScene->mMeshes = new aiMesh *[mScene->mNumMeshes];
     std::copy(meshes->begin(), meshes->end(), mScene->mMeshes);
 
-    // create mesh indeces in root node
+    // create mesh indices in root node
     mScene->mRootNode->mNumMeshes = static_cast<unsigned int>(meshes->size());
     mScene->mRootNode->mMeshes = new unsigned int[meshes->size()];
     for (i = 0; i < meshes->size(); i++) {
@@ -688,7 +673,7 @@ void M3DImporter::calculateOffsetMatrix(aiNode *pNode, aiMatrix4x4 *m) {
 
 // ------------------------------------------------------------------------------------------------
 // because M3D has a global mesh, global vertex ids and stores materialid on the face, we need
-// temporary lists to collect data for an aiMesh, which requires local arrays and local indeces
+// temporary lists to collect data for an aiMesh, which requires local arrays and local indices
 // this function fills up an aiMesh with those temporary lists
 void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector<aiFace> *faces, std::vector<aiVector3D> *vertices,
         std::vector<aiVector3D> *normals, std::vector<aiVector3D> *texcoords, std::vector<aiColor4D> *colors,

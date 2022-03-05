@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -391,7 +391,7 @@ public:
                 // Unapply the transformation using the offset matrix.
                 aiMatrix4x4 unapplied_transform = scene_mesh_bone->mOffsetMatrix * transform;
 
-                // Ensure that we have, approximatively, the identity matrix.
+                // Ensure that we have, approximately, the identity matrix.
                 expect_equal_matrices(identity_matrix, unapplied_transform, TOLERANCE);
             }
         }

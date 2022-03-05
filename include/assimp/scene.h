@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -400,7 +400,7 @@ struct aiScene
 
     //! Returns an embedded texture and its index
     std::pair<const aiTexture*, int> GetEmbeddedTextureAndIndex(const char* filename) const {
-        if(nullptr==filename) {
+        if (nullptr==filename) {
             return std::make_pair(nullptr, -1);
         }
         // lookup using texture ID (if referenced like: "*1", "*2", etc.)
@@ -437,7 +437,7 @@ struct aiScene
 };
 
 #ifdef __cplusplus
-} //! namespace Assimp
-#endif
+} 
+#endif //! extern "C"
 
 #endif // AI_SCENE_H_INC

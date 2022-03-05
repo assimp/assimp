@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -82,7 +82,6 @@ inline int select_fseek<8>(FILE *file, int64_t offset, int origin) {
 DefaultIOStream::~DefaultIOStream() {
     if (mFile) {
         ::fclose(mFile);
-        mFile = nullptr;
     }
 }
 

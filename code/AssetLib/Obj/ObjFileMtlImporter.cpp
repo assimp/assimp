@@ -61,11 +61,16 @@ static const std::string EmissiveTexture1 = "map_emissive";
 static const std::string EmissiveTexture2 = "map_Ke";
 static const std::string BumpTexture1 = "map_bump";
 static const std::string BumpTexture2 = "bump";
-static const std::string NormalTexture = "map_Kn";
+static const std::string NormalTextureV1 = "map_Kn";
+static const std::string NormalTextureV2 = "norm";
 static const std::string ReflectionTexture = "refl";
 static const std::string DisplacementTexture1 = "map_disp";
 static const std::string DisplacementTexture2 = "disp";
 static const std::string SpecularityTexture = "map_ns";
+static const std::string RoughnessTexture = "map_Pr";
+static const std::string MetallicTexture = "map_Pm";
+static const std::string SheenTexture = "map_Ps";
+static const std::string RMATexture = "map_Ps";
 
 // texture option specific token
 static const std::string BlendUOption = "-blendu";
@@ -177,9 +182,44 @@ void ObjFileMtlImporter::load() {
                     case 'e': // New material
                         createMaterial();
                         break;
+                    case 'o': // Norm texture
+                        --m_DataIt;
+                        getTexture();
+                        break;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
+
+            case 'P':
+                {
+                    ++m_DataIt;
+                    switch(*m_DataIt)
+                    {
+                    case 'r':
+                        ++m_DataIt;
+                        getFloatValue(m_pModel->m_pCurrentMaterial->roughness);
+                        break;
+                    case 'm':
+                        ++m_DataIt;
+                        getFloatValue(m_pModel->m_pCurrentMaterial->metallic);
+                        break;
+                    case 's':
+                        ++m_DataIt;
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->sheen);
+                        break;
+                    case 'c':
+                        ++m_DataIt;
+                        if (*m_DataIt == 'r') {
+                            ++m_DataIt;
+                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_roughness);
+                        } else {
+                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_thickness);
+                        }
+                        break;
+                    }
+                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+                }
+                break;
 
             case 'm': // Texture
             case 'b': // quick'n'dirty - for 'bump' sections
@@ -193,6 +233,12 @@ void ObjFileMtlImporter::load() {
             {
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
                 getIlluminationModel(m_pModel->m_pCurrentMaterial->illumination_model);
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 'a': // Anisotropy
+            {
+                getFloatValue(m_pModel->m_pCurrentMaterial->anisotropy);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -232,6 +278,12 @@ void ObjFileMtlImporter::getIlluminationModel(int &illum_model) {
 //  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue(ai_real &value) {
     m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    size_t len = std::strlen(&m_buffer[0]);
+    if (0 == len) {
+        value = 0.0f;
+        return;
+    }
+    
     value = (ai_real)fast_atof(&m_buffer[0]);
 }
 
@@ -315,7 +367,7 @@ void ObjFileMtlImporter::getTexture() {
         // Bump texture
         out = &m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if (!ASSIMP_strincmp(pPtr, NormalTexture.c_str(), static_cast<unsigned int>(NormalTexture.size()))) {
+    } else if (!ASSIMP_strincmp(pPtr, NormalTextureV1.c_str(), static_cast<unsigned int>(NormalTextureV1.size())) || !ASSIMP_strincmp(pPtr, NormalTextureV2.c_str(), static_cast<unsigned int>(NormalTextureV2.size()))) {
         // Normal map
         out = &m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
@@ -327,6 +379,22 @@ void ObjFileMtlImporter::getTexture() {
         // Specularity scaling (glossiness)
         out = &m_pModel->m_pCurrentMaterial->textureSpecularity;
         clampIndex = ObjFile::Material::TextureSpecularityType;
+    } else if ( !ASSIMP_strincmp( pPtr, RoughnessTexture.c_str(), static_cast<unsigned int>(RoughnessTexture.size()))) {
+        // PBR Roughness texture
+        out = & m_pModel->m_pCurrentMaterial->textureRoughness;
+        clampIndex = ObjFile::Material::TextureRoughnessType;
+    } else if ( !ASSIMP_strincmp( pPtr, MetallicTexture.c_str(), static_cast<unsigned int>(MetallicTexture.size()))) {
+        // PBR Metallic texture
+        out = & m_pModel->m_pCurrentMaterial->textureMetallic;
+        clampIndex = ObjFile::Material::TextureMetallicType;
+    } else if (!ASSIMP_strincmp( pPtr, SheenTexture.c_str(), static_cast<unsigned int>(SheenTexture.size()))) {
+        // PBR Sheen (reflectance) texture
+        out = & m_pModel->m_pCurrentMaterial->textureSheen;
+        clampIndex = ObjFile::Material::TextureSheenType;
+    } else if (!ASSIMP_strincmp( pPtr, RMATexture.c_str(), static_cast<unsigned int>(RMATexture.size()))) {
+        // PBR Rough/Metal/AO texture
+        out = & m_pModel->m_pCurrentMaterial->textureRMA;
+        clampIndex = ObjFile::Material::TextureRMAType;
     } else {
         ASSIMP_LOG_ERROR("OBJ/MTL: Encountered unknown texture type");
         return;
@@ -404,7 +472,11 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
             }
 
             skipToken = 2;
-        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
+        } else if (!ASSIMP_strincmp(pPtr, BumpOption.c_str(), static_cast<unsigned int>(BumpOption.size()))) {
+            DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+            getFloat(it, m_DataItEnd, m_pModel->m_pCurrentMaterial->bump_multiplier);
+            skipToken = 2;
+        } else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), static_cast<unsigned int>(BlendUOption.size())) || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), static_cast<unsigned int>(BlendVOption.size())) || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), static_cast<unsigned int>(BoostOption.size())) || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), static_cast<unsigned int>(ResolutionOption.size())) || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), static_cast<unsigned int>(ChannelOption.size()))) {
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption.c_str(), static_cast<unsigned int>(ModifyMapOption.size()))) {
             skipToken = 3;

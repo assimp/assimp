@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -43,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Logger.hpp
  *  @brief Abstract base class 'Logger', base of the logging system.
  */
+#pragma once
 #ifndef INCLUDED_AI_LOGGER_H
 #define INCLUDED_AI_LOGGER_H
 
@@ -92,8 +92,6 @@ public:
         Warn        = 4,    //!< Warn log message
         Err         = 8     //!< Error log message
     };
-
-public:
 
     /** @brief  Virtual destructor */
     virtual ~Logger();
@@ -259,39 +257,30 @@ protected:
 };
 
 // ----------------------------------------------------------------------------------
-//  Default constructor
-inline
-Logger::Logger() AI_NO_EXCEPT
-: m_Severity(NORMAL) {
+inline Logger::Logger() AI_NO_EXCEPT :
+        m_Severity(NORMAL) {
     // empty
 }
 
 // ----------------------------------------------------------------------------------
-//  Virtual destructor
-inline
-Logger::~Logger() {
+inline Logger::~Logger() {
     // empty
 }
 
 // ----------------------------------------------------------------------------------
-// Construction with given logging severity
-inline
-Logger::Logger(LogSeverity severity)
-: m_Severity(severity) {
+inline Logger::Logger(LogSeverity severity) :
+        m_Severity(severity) {
     // empty
 }
 
 // ----------------------------------------------------------------------------------
-// Log severity setter
-inline
-void Logger::setLogSeverity(LogSeverity log_severity){
+inline void Logger::setLogSeverity(LogSeverity log_severity){
     m_Severity = log_severity;
 }
 
 // ----------------------------------------------------------------------------------
 // Log severity getter
-inline
-Logger::LogSeverity Logger::getLogSeverity() const {
+inline Logger::LogSeverity Logger::getLogSeverity() const {
     return m_Severity;
 }
 

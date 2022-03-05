@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/ParsingUtils.h>
-#include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <cstdlib>
@@ -56,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
+constexpr char ObjFileParser::DEFAULT_MATERIAL[];
 
 ObjFileParser::ObjFileParser() :
         m_DataIt(),

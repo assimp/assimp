@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -46,6 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_COLLADAMETADATA_H_INC
 #define AI_COLLADAMETADATA_H_INC
+
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
 
 #define AI_METADATA_COLLADA_ID "Collada_id"
 #define AI_METADATA_COLLADA_SID "Collada_sid"

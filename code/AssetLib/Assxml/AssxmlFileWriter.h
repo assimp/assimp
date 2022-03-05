@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -43,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file AssxmlFileWriter.h
  *  @brief Declaration of Assxml file writer.
  */
-
+#pragma once
 #ifndef AI_ASSXMLFILEWRITER_H_INC
 #define AI_ASSXMLFILEWRITER_H_INC
 

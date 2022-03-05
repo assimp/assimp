@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -85,19 +83,10 @@ OFFImporter::~OFFImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
+bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "off")
-        return true;
-    else if (!extension.length() || checkSig)
-    {
-        if (!pIOHandler)return true;
-        const char* tokens[] = {"off"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1,3);
-    }
-    return false;
+    static const char* tokens[] = { "off" };
+    return SearchFileHeaderForToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens),3);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -235,7 +224,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	    sz = fast_atoreal_move<ai_real>(sz, *vec[dim]);
 	}
 
-	// if has homogenous coordinate, divide others by this one
+	// if has homogeneous coordinate, divide others by this one
 	if (hasHomogenous) {
 	    SkipSpaces(&sz);
 	    ai_real w = 1.;

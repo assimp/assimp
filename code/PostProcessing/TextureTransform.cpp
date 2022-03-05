@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -178,7 +178,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
         }
         else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)    {
             // Clamp - translations beyond 1,1 are senseless
-            ::ai_snprintf(szTemp,512,"[c] UV V offset %f canbe clamped to 1.0f",info.mTranslation.y);
+            ::ai_snprintf(szTemp,512,"[c] UV V offset %f can be clamped to 1.0f",info.mTranslation.y);
 
             out = 1.f;
         }
@@ -539,7 +539,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
                 m5.a3 += trl.x; m5.b3 += trl.y;
                 matrix = m2 * m4 * matrix * m3 * m5;
 
-                for (src = dest; src != end; ++src) { /* manual homogenious divide */
+                for (src = dest; src != end; ++src) { /* manual homogeneous divide */
                     src->z = 1.f;
                     *src = matrix * *src;
                     src->x /= src->z;

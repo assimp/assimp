@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -614,7 +614,7 @@ void PbrtExporter::WriteMaterial(int m) {
                         eta != 1);
 
     mOutput << "#    - Constants: diffuse " << constantDiffuse << " specular " << constantSpecular <<
-        " transprency " << constantTransparency << " opacity " << constantOpacity <<
+        " transparency " << constantTransparency << " opacity " << constantOpacity <<
         " shininess " << constantShininess << " shininess strength " << constantShininessStrength <<
         " eta " << constantEta << "\n";
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -173,7 +173,7 @@ inline static std::string MakeAbsolutePath(const char *in) {
         free(ret);
     }
 #endif
-    if (!ret) {
+    else {
         // preserve the input path, maybe someone else is able to fix
         // the path before it is accessed (e.g. our file system filter)
         ASSIMP_LOG_WARN("Invalid path: ", std::string(in));

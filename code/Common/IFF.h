@@ -35,6 +35,17 @@ struct SubChunkHeader
     uint16_t length;
 };
 
+/////////////////////////////////////////////////////////////////////////////////
+//! Describes an IFF form header
+/////////////////////////////////////////////////////////////////////////////////
+struct FormHeader
+{
+    //! Length of the chunk data, in bytes
+    uint32_t length;
+
+    //! Type of the chunk header - FourCC
+    uint32_t type;
+};
 
 #define AI_IFF_FOURCC(a,b,c,d) ((uint32_t) (((uint8_t)a << 24u) | \
     ((uint8_t)b << 16u) | ((uint8_t)c << 8u) | ((uint8_t)d)))
@@ -73,6 +84,24 @@ inline SubChunkHeader LoadSubChunk(uint8_t*& outFile)
     ::memcpy(&head.length, outFile, 2);
     outFile += 2;
     AI_LSWAP2(head.length);
+    AI_LSWAP4(head.type);
+    return head;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//! Load a chunk header
+//! @param outFile Pointer to the file data - points to the chunk data afterwards
+//! @return Copy of the chunk header
+/////////////////////////////////////////////////////////////////////////////////
+inline ChunkHeader LoadForm(uint8_t*& outFile)
+{
+    ChunkHeader head;
+    outFile += 4;
+    ::memcpy(&head.length, outFile, 4);
+    outFile += 4;
+    ::memcpy(&head.type, outFile, 4);
+
+    AI_LSWAP4(head.length);
     AI_LSWAP4(head.type);
     return head;
 }

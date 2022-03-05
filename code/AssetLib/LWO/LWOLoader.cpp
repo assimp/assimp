@@ -82,8 +82,8 @@ static const aiImporterDesc desc = {
 // Constructor to be privately used by Importer
 LWOImporter::LWOImporter() :
         mIsLWO2(),
-        mIsLWO3(),
         mIsLXOB(),
+        mIsLWO3(),
         mLayers(),
         mCurLayer(),
         mTags(),

@@ -885,17 +885,13 @@ void LWOImporter::LoadNodeData(unsigned int size) {
                             GetS0(valueType, 8);
 
                             if (valueType == "int") {
-                                uint32_t value;
-                                value = GetU4();
+                                static_cast<void>(GetU4());
                             } else if (valueType == "double") {
-                                uint64_t value;
-                                value = GetU8();
+                                static_cast<void>(GetU8());
                             } else if (valueType == "vparam") {
                                 mFileBuffer += 24;
 
-                                float value;
-                                value = GetF8();
-
+                                float value = GetF8();
                                 if (attrName == "Diffuse") {
                                     surf.mDiffuseValue = value;
                                 } else if (attrName == "Specular") {

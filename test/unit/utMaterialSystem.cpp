@@ -125,13 +125,94 @@ TEST_F(MaterialSystemTest, testStringProperty) {
 }
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(MaterialSystemTest, testMaterialNameAccess) {
-    aiMaterial *mat = new aiMaterial();
-    EXPECT_NE(nullptr, mat);
-
-    aiString name = mat->GetName();
+TEST_F(MaterialSystemTest, testDefaultMaterialName) {
+    aiString name = pcMat->GetName();
     const int retValue(strncmp(name.C_Str(), AI_DEFAULT_MATERIAL_NAME, name.length));
     EXPECT_EQ(0, retValue);
+}
 
-    delete mat;
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testBoolProperty) {
+    const bool valTrue = true;
+    const bool valFalse = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&valTrue, 1, "bool_true"));
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&valFalse, 1, "bool_false"));
+
+    bool read = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("bool_true", 0, 0, read));
+    EXPECT_TRUE(read) << "read true bool";
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("bool_false", 0, 0, read));
+    EXPECT_FALSE(read) << "read false bool";
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testCastIntProperty) {
+    int value = 10;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "integer"));
+    value = 0;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "zero"));
+    value = -1;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "negative"));
+
+    // To float
+    float valFloat = 0.0f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("integer", 0, 0, valFloat));
+    EXPECT_EQ(10.0f, valFloat);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valFloat));
+    EXPECT_EQ(0.0f, valFloat);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("negative", 0, 0, valFloat));
+    EXPECT_EQ(-1.0f, valFloat);
+
+    // To bool
+    bool valBool = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("integer", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
+    EXPECT_EQ(false, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("negative", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testCastFloatProperty) {
+    float value = 150392.63f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "float"));
+    value = 0;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "zero"));
+
+    // To int
+    int valInt = 0.0f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valInt));
+    EXPECT_EQ(150392, valInt);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valInt));
+    EXPECT_EQ(0, valInt);
+
+    // To bool
+    bool valBool = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
+    EXPECT_EQ(false, valBool);
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testCastSmallFloatProperty) {
+    float value = 0.0078125f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "float"));
+    value = 0;
+    EXPECT_EQ(AI_SUCCESS, pcMat->AddProperty(&value, 1, "zero"));
+
+    // To int
+    int valInt = 0.0f;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valInt));
+    EXPECT_EQ(0, valInt);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valInt));
+    EXPECT_EQ(0, valInt);
+
+    // To bool
+    bool valBool = false;
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("float", 0, 0, valBool));
+    EXPECT_EQ(true, valBool);
+    EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
+    EXPECT_EQ(false, valBool);
 }

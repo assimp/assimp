@@ -38,72 +38,47 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file vector2.h
- *  @brief 2D vector structure, including operators when compiling in C++
+
+/** @file OBJMATERIAL.h
+ *  @brief Obj-specific material macros
+ *  
  */
-#pragma once
-#ifndef AI_VECTOR2D_H_INC
-#define AI_VECTOR2D_H_INC
+
+#ifndef AI_OBJMATERIAL_H_INC
+#define AI_OBJMATERIAL_H_INC
 
 #ifdef __GNUC__
 #   pragma GCC system_header
 #endif
 
-#ifdef __cplusplus
-#   include <cmath>
-#else
-#   include <math.h>
+#include <assimp/material.h>
+
+// ---------------------------------------------------------------------------
+
+// the original illum property
+#define AI_MATKEY_OBJ_ILLUM "$mat.illum", 0, 0
+
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Pure key names for all obj texture-related properties
+//! @cond MATS_DOC_FULL
+
+// support for bump -bm 
+#define _AI_MATKEY_OBJ_BUMPMULT_BASE "$tex.bumpmult"
+//! @endcond
+
+// ---------------------------------------------------------------------------
+#define AI_MATKEY_OBJ_BUMPMULT(type, N) _AI_MATKEY_OBJ_BUMPMULT_BASE, type, N
+
+//! @cond MATS_DOC_FULL
+#define AI_MATKEY_OBJ_BUMPMULT_NORMALS(N) \
+    AI_MATKEY_OBJ_BUMPMULT(aiTextureType_NORMALS, N)
+
+#define AI_MATKEY_OBJ_BUMPMULT_HEIGHT(N) \
+    AI_MATKEY_OBJ_BUMPMULT(aiTextureType_HEIGHT, N)
+
+//! @endcond
+
+
 #endif
-
-#include "defs.h"
-
-// ----------------------------------------------------------------------------------
-/** Represents a two-dimensional vector.
- */
-
-#ifdef __cplusplus
-template <typename TReal>
-class aiVector2t {
-public:
-    aiVector2t () : x(), y() {}
-    aiVector2t (TReal _x, TReal _y) : x(_x), y(_y) {}
-    explicit aiVector2t (TReal _xyz) : x(_xyz), y(_xyz) {}
-    aiVector2t (const aiVector2t& o) = default;
-
-    void Set( TReal pX, TReal pY);
-    TReal SquareLength() const ;
-    TReal Length() const ;
-    aiVector2t& Normalize();
-
-    const aiVector2t& operator += (const aiVector2t& o);
-    const aiVector2t& operator -= (const aiVector2t& o);
-    const aiVector2t& operator *= (TReal f);
-    const aiVector2t& operator /= (TReal f);
-
-    TReal operator[](unsigned int i) const;
-
-    bool operator== (const aiVector2t& other) const;
-    bool operator!= (const aiVector2t& other) const;
-
-    bool Equal(const aiVector2t &other, TReal epsilon = ai_epsilon) const;
-
-    aiVector2t& operator= (TReal f);
-    const aiVector2t SymMul(const aiVector2t& o);
-
-    template <typename TOther>
-    operator aiVector2t<TOther> () const;
-
-    TReal x, y;
-};
-
-typedef aiVector2t<ai_real> aiVector2D;
-
-#else
-
-struct aiVector2D {
-    ai_real x, y;
-};
-
-#endif // __cplusplus
-
-#endif // AI_VECTOR2D_H_INC

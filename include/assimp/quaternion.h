@@ -92,7 +92,7 @@ public:
     // transform vector by matrix
     aiQuaterniont& operator *= (const aiMatrix4x4t<TReal>& mat);
 
-    bool Equal(const aiQuaterniont& o, TReal epsilon = 1e-6) const;
+    bool Equal(const aiQuaterniont &o, TReal epsilon = ai_epsilon) const;
 
 public:
 

@@ -228,25 +228,24 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 
 // ------------------------------------------------------------------------------------------------
 // Compute the normal of the last polygon in the given mesh
-IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const
-{
+IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const {
     return ComputePolygonNormal(&mVerts[mVerts.size() - mVertcnt.back()], mVertcnt.back(), normalize);
 }
 
-struct CompareVector
-{
-    bool operator () (const IfcVector3& a, const IfcVector3& b) const
-    {
+struct CompareVector {
+    bool operator () (const IfcVector3& a, const IfcVector3& b) const {
         IfcVector3 d = a - b;
-        IfcFloat eps = 1e-6;
+        IfcFloat eps = ai_epsilon;
         return d.x < -eps || (std::abs(d.x) < eps && d.y < -eps) || (std::abs(d.x) < eps && std::abs(d.y) < eps && d.z < -eps);
     }
 };
-struct FindVector
-{
+
+struct FindVector {
     IfcVector3 v;
     FindVector(const IfcVector3& p) : v(p) { }
-    bool operator () (const IfcVector3& p) { return FuzzyVectorCompare(1e-6)(p, v); }
+    bool operator()(const IfcVector3 &p) {
+        return FuzzyVectorCompare(ai_epsilon)(p, v);
+    }
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -357,8 +356,7 @@ void TempMesh::FixupFaceOrientation()
                 // to reverse the neighbour
                 nb_vidx = (nb_vidx + 1) % nbvc;
                 size_t oursideidx = (a + 1) % vc;
-                if( FuzzyVectorCompare(1e-6)(mVerts[vsi + oursideidx], mVerts[nbvsi + nb_vidx]) )
-                {
+                if (FuzzyVectorCompare(ai_epsilon)(mVerts[vsi + oursideidx], mVerts[nbvsi + nb_vidx])) {
                     std::reverse(mVerts.begin() + nbvsi, mVerts.begin() + nbvsi + nbvc);
                     std::reverse(neighbour.begin() + nbvsi, neighbour.begin() + nbvsi + nbvc);
                     for (size_t aa = 0; aa < nbvc - 1; ++aa) {
@@ -564,7 +562,7 @@ void ConvertDirection(IfcVector3& out, const Schema_2x3::IfcDirection& in)
         out[static_cast<unsigned int>(i)] = in.DirectionRatios[i];
     }
     const IfcFloat len = out.Length();
-    if (len<1e-6) {
+    if (len < ai_epsilon) {
         IFCImporter::LogWarn("direction vector magnitude too small, normalization would result in a division by zero");
         return;
     }

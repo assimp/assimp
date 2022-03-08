@@ -1133,7 +1133,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
     }
 
     for(size_t i = 0; i < out_contour.size(); ++i) {
-        ai_assert((out_contour[i]-out_contour2[i]).SquareLength() < 1e-6);
+        ai_assert((out_contour[i] - out_contour2[i]).SquareLength() < ai_epsilon);
     }
 #endif
 
@@ -1435,7 +1435,7 @@ std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMa
 
     const auto outernor = ((mesh->mVerts[2] - mesh->mVerts[0]) ^ (mesh->mVerts[1] - mesh->mVerts[0])).Normalize();
     const IfcFloat dot = planeNor * outernor;
-    if(std::fabs(dot) < 1.f - 1e-6f) {
+    if (std::fabs(dot) < 1.f - ai_epsilon) {
         std::stringstream msg;
         msg << "Skipping: Unaligned opening (" << planeNor.x << ", " << planeNor.y << ", " << planeNor.z << ")";
         msg << " . ( " << outernor.x << ", " << outernor.y << ", " << outernor.z << ") = " << dot;
@@ -1476,7 +1476,7 @@ std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMa
     return contour;
 }
 
-const float close { 1e-6f };
+const float close{ ai_epsilon };
 
 static bool isClose(IfcVector2 first,IfcVector2 second) {
     auto diff = (second - first);

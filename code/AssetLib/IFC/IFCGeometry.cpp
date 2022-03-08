@@ -380,21 +380,19 @@ void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh&
         bool take_any = false;
 
         for (unsigned int j = 0; j < 2; ++j, take_any = true) {
-            if ((last_dir == 0 || take_any) && std::abs(d.x) > 1e-6) {
+            if ((last_dir == 0 || take_any) && std::abs(d.x) > ai_epsilon) {
                 q.y = startvec.y;
                 q.z = startvec.z;
                 q.x = -(d.y * q.y + d.z * q.z) / d.x;
                 last_dir = 0;
                 break;
-            }
-            else if ((last_dir == 1 || take_any) && std::abs(d.y) > 1e-6) {
+            } else if ((last_dir == 1 || take_any) && std::abs(d.y) > ai_epsilon) {
                 q.x = startvec.x;
                 q.z = startvec.z;
                 q.y = -(d.x * q.x + d.z * q.z) / d.y;
                 last_dir = 1;
                 break;
-            }
-            else if ((last_dir == 2 && std::abs(d.z) > 1e-6) || take_any) {
+            } else if ((last_dir == 2 && std::abs(d.z) > ai_epsilon) || take_any) {
                 q.y = startvec.y;
                 q.x = startvec.x;
                 q.z = -(d.y * q.y + d.x * q.x) / d.z;
@@ -529,7 +527,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
     return m;
 }
 
-const auto closeDistance = 1e-6;
+const auto closeDistance = ai_epsilon;
 
 bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt2) {
     if(pt1.Coordinates.size() != pt2.Coordinates.size())
@@ -561,7 +559,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
     // Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis,
     // forming new triangles.
     const bool has_area = solid.SweptArea->ProfileType == "AREA" && curve.mVerts.size() > 2;
-    if( solid.Depth < 1e-6 ) {
+    if (solid.Depth < ai_epsilon) {
         if( has_area ) {
             result.Append(curve);
         }

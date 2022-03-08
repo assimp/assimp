@@ -237,8 +237,6 @@ bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out);
 #define CHECK_EXT(EXT) \
     if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
-
-
 //! Helper struct to represent values that might not be present
 template <class T>
 struct Nullable {

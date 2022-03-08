@@ -95,7 +95,7 @@ public:
     bool operator== (const aiMatrix3x3t<TReal>& m) const;
     bool operator!= (const aiMatrix3x3t<TReal>& m) const;
 
-    bool Equal(const aiMatrix3x3t<TReal>& m, TReal epsilon = 1e-6) const;
+    bool Equal(const aiMatrix3x3t<TReal> &m, TReal epsilon = ai_epsilon) const;
 
     template <typename TOther>
     operator aiMatrix3x3t<TOther> () const;

@@ -195,10 +195,6 @@ struct Material {
     //! PBR Anisotropy
     ai_real anisotropy;
 
-    //! PBR hint - set to 1 when the MTL material contains a PBR related field. 0 otherwise.
-    int pbr_hint;
-
-
     //! bump map multipler (normal map scalar)(-bm)
     ai_real bump_multiplier;
 
@@ -216,7 +212,6 @@ struct Material {
             clearcoat_thickness(ai_real(0.0)),
             clearcoat_roughness(ai_real(0.0)),
             anisotropy(ai_real(0.0)),
-            pbr_hint(0),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }

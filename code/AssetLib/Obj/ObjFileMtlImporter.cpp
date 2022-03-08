@@ -198,27 +198,22 @@ void ObjFileMtlImporter::load() {
                     case 'r':
                         ++m_DataIt;
                         getFloatValue(m_pModel->m_pCurrentMaterial->roughness);
-                        m_pModel->m_pCurrentMaterial->pbr_hint = 1;
                         break;
                     case 'm':
                         ++m_DataIt;
                         getFloatValue(m_pModel->m_pCurrentMaterial->metallic);
-                        m_pModel->m_pCurrentMaterial->pbr_hint = 1;
                         break;
                     case 's':
                         ++m_DataIt;
                         getColorRGBA(&m_pModel->m_pCurrentMaterial->sheen);
-                        m_pModel->m_pCurrentMaterial->pbr_hint = 1;
                         break;
                     case 'c':
                         ++m_DataIt;
                         if (*m_DataIt == 'r') {
                             ++m_DataIt;
                             getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_roughness);
-                            m_pModel->m_pCurrentMaterial->pbr_hint = 1;
                         } else {
                             getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_thickness);
-                            m_pModel->m_pCurrentMaterial->pbr_hint = 1;
                         }
                         break;
                     }
@@ -245,7 +240,6 @@ void ObjFileMtlImporter::load() {
             {
                 getFloatValue(m_pModel->m_pCurrentMaterial->anisotropy);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
-                m_pModel->m_pCurrentMaterial->pbr_hint = 1;
             } break;
 
             default: {
@@ -341,8 +335,6 @@ void ObjFileMtlImporter::getTexture() {
     aiString *out(nullptr);
     int clampIndex = -1;
 
-    bool bPBRHint = false;
-
     const char *pPtr(&(*m_DataIt));
     if (!ASSIMP_strincmp(pPtr, DiffuseTexture.c_str(), static_cast<unsigned int>(DiffuseTexture.size()))) {
         // Diffuse texture
@@ -391,22 +383,18 @@ void ObjFileMtlImporter::getTexture() {
         // PBR Roughness texture
         out = & m_pModel->m_pCurrentMaterial->textureRoughness;
         clampIndex = ObjFile::Material::TextureRoughnessType;
-        bPBRHint = true;
     } else if ( !ASSIMP_strincmp( pPtr, MetallicTexture.c_str(), static_cast<unsigned int>(MetallicTexture.size()))) {
         // PBR Metallic texture
         out = & m_pModel->m_pCurrentMaterial->textureMetallic;
         clampIndex = ObjFile::Material::TextureMetallicType;
-        bPBRHint = true;
     } else if (!ASSIMP_strincmp( pPtr, SheenTexture.c_str(), static_cast<unsigned int>(SheenTexture.size()))) {
         // PBR Sheen (reflectance) texture
         out = & m_pModel->m_pCurrentMaterial->textureSheen;
         clampIndex = ObjFile::Material::TextureSheenType;
-        bPBRHint = true;
     } else if (!ASSIMP_strincmp( pPtr, RMATexture.c_str(), static_cast<unsigned int>(RMATexture.size()))) {
         // PBR Rough/Metal/AO texture
         out = & m_pModel->m_pCurrentMaterial->textureRMA;
         clampIndex = ObjFile::Material::TextureRMAType;
-        bPBRHint = true;
     } else {
         ASSIMP_LOG_ERROR("OBJ/MTL: Encountered unknown texture type");
         return;
@@ -420,8 +408,6 @@ void ObjFileMtlImporter::getTexture() {
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, texture);
     if (nullptr != out) {
         out->Set(texture);
-        if(bPBRHint)
-            m_pModel->m_pCurrentMaterial->pbr_hint = 1;
     }
 }
 

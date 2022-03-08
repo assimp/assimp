@@ -626,9 +626,6 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         // Adding refraction index
         mat->AddProperty(&pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI);
 
-        // Track if the material contained PBR style properties
-        mat->AddProperty(&pCurrentMaterial->pbr_hint, 1, AI_MATKEY_OBJ_PBR_HINT);
-
         // Adding textures
         const int uvwIndex = 0;
 

@@ -58,9 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // the original illum property
 #define AI_MATKEY_OBJ_ILLUM "$mat.illum", 0, 0
 
-// The OBJ material has fields that indicate this is PBR material
-#define AI_MATKEY_OBJ_PBR_HINT "$mat.pbrhint", 0, 0
-
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------

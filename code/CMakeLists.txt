@@ -78,6 +78,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/matrix4x4.h
   ${HEADER_PATH}/matrix4x4.inl
   ${HEADER_PATH}/mesh.h
+  ${HEADER_PATH}/ObjMaterial.h
   ${HEADER_PATH}/pbrmaterial.h
   ${HEADER_PATH}/GltfMaterial.h
   ${HEADER_PATH}/postprocess.h

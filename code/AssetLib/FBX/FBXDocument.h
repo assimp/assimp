@@ -344,7 +344,7 @@ public:
 
     Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Model();
+    virtual ~Model() = default;
 
     fbx_simple_property(QuaternionInterpolate, int, 0)
 

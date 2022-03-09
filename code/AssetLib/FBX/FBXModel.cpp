@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,10 +73,6 @@ Model::Model(uint64_t id, const Element &element, const Document &doc, const std
 
     props = GetPropertyTable(doc, "Model.FbxNode", element, sc);
     ResolveLinks(element, doc);
-}
-
-// ------------------------------------------------------------------------------------------------
-Model::~Model() {
 }
 
 // ------------------------------------------------------------------------------------------------

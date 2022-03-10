@@ -140,11 +140,32 @@ Material::~Material() {
     // empty
 }
 
+    aiVector2D uvTrans;
+    aiVector2D uvScaling;
+    ai_real    uvRotation;
+
+    std::string type;
+    std::string relativeFileName;
+    std::string fileName;
+    std::string alphaSource;
+    std::shared_ptr<const PropertyTable> props;
+
+    unsigned int crop[4]{};
+
+    const Video* media;
+
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
         Object(id,element,name),
+        uvTrans(0.0f, 0.0f),
         uvScaling(1.0f,1.0f),
-        media(0) {
+        uvRotation(0.0f),
+        type(),
+        relativeFileName(),
+        fileName(),
+        alphaSource(),
+        props(),
+        media(nullptr) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Type = sc["Type"];

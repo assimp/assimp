@@ -40,10 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJFILEMTLIMPORTER_H_INC
 #define OBJFILEMTLIMPORTER_H_INC
 
-#include <Common/maybe.h>
 #include <assimp/defs.h>
 #include <string>
 #include <vector>
+#include "Common/Maybe.h"
 
 struct aiColor3D;
 struct aiString;

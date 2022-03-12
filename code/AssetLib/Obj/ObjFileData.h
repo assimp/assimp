@@ -43,11 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJ_FILEDATA_H_INC
 #define OBJ_FILEDATA_H_INC
 
-#include <Common/maybe.h>
 #include <assimp/mesh.h>
 #include <assimp/types.h>
 #include <map>
 #include <vector>
+#include "Common/Maybe.h"
 
 namespace Assimp {
 namespace ObjFile {

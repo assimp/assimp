@@ -12,7 +12,7 @@ public:
             _valid(false) {}
 
     explicit Maybe(const T &val) :
-            _valid(true), _val(val) {
+            _val(val), _valid(true) {
     }
 
     operator bool() const {

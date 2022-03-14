@@ -216,3 +216,63 @@ TEST_F(MaterialSystemTest, testCastSmallFloatProperty) {
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("zero", 0, 0, valBool));
     EXPECT_EQ(false, valBool);
 }
+
+// ------------------------------------------------------------------------------------------------
+#if defined(_MSC_VER)
+// Refuse to compile on Windows if any enum values are not explicitly handled in the switch
+// TODO: Move this into assimp/Compiler as a macro and add clang/gcc versions so other code can use it
+__pragma(warning(push));
+__pragma(warning(error : 4061)); // enumerator 'identifier' in switch of enum 'enumeration' is not explicitly handled by a case label
+__pragma(warning(error : 4062)); // enumerator 'identifier' in switch of enum 'enumeration' is not handled
+#endif
+
+TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
+    // Verify that AI_TEXTURE_TYPE_MAX equals the largest 'real' value in the enum
+
+    int32_t maxTextureType = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_TYPE_MAX) << "AI_TEXTURE_TYPE_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiTextureType texType = static_cast<aiTextureType>(i);
+        switch (texType) {
+        default: break;
+#ifndef SWIG
+        case _aiTextureType_Force32Bit: break;
+#endif
+            // All the real values
+        case aiTextureType_NONE:
+        case aiTextureType_DIFFUSE:
+        case aiTextureType_SPECULAR:
+        case aiTextureType_AMBIENT:
+        case aiTextureType_EMISSIVE:
+        case aiTextureType_HEIGHT:
+        case aiTextureType_NORMALS:
+        case aiTextureType_SHININESS:
+        case aiTextureType_OPACITY:
+        case aiTextureType_DISPLACEMENT:
+        case aiTextureType_LIGHTMAP:
+        case aiTextureType_REFLECTION:
+        case aiTextureType_BASE_COLOR:
+        case aiTextureType_NORMAL_CAMERA:
+        case aiTextureType_EMISSION_COLOR:
+        case aiTextureType_METALNESS:
+        case aiTextureType_DIFFUSE_ROUGHNESS:
+        case aiTextureType_AMBIENT_OCCLUSION:
+        case aiTextureType_SHEEN:
+        case aiTextureType_CLEARCOAT:
+        case aiTextureType_TRANSMISSION:
+        case aiTextureType_UNKNOWN:
+            if (i > maxTextureType)
+                maxTextureType = i;
+            break;
+        }
+    }
+
+    EXPECT_EQ(maxTextureType, AI_TEXTURE_TYPE_MAX) << "AI_TEXTURE_TYPE_MAX macro must be equal to the largest valid aiTextureType_XXX";
+}
+
+#if defined(_MSC_VER)
+__pragma (warning(pop))
+#endif

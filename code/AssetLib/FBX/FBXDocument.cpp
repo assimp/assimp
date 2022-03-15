@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -68,23 +67,13 @@ namespace FBX {
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
-: doc(doc)
-, element(element)
-, id(id)
-, flags() {
+LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc) : 
+        doc(doc), element(element), id(id), flags() {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::~LazyObject()
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-const Object* LazyObject::Get(bool dieOnError)
-{
+const Object* LazyObject::Get(bool dieOnError) {
     if(IsBeingConstructed() || FailedToConstruct()) {
         return nullptr;
     }
@@ -234,17 +223,8 @@ const Object* LazyObject::Get(bool dieOnError)
 }
 
 // ------------------------------------------------------------------------------------------------
-Object::Object(uint64_t id, const Element& element, const std::string& name)
-: element(element)
-, name(name)
-, id(id)
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-Object::~Object()
-{
+Object::Object(uint64_t id, const Element& element, const std::string& name) :
+        element(element), name(name), id(id) {
     // empty
 }
 
@@ -255,16 +235,8 @@ FileGlobalSettings::FileGlobalSettings(const Document &doc, std::shared_ptr<cons
 }
 
 // ------------------------------------------------------------------------------------------------
-FileGlobalSettings::~FileGlobalSettings()
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-Document::Document(const Parser& parser, const ImportSettings& settings)
-: settings(settings)
-, parser(parser)
-{
+Document::Document(const Parser& parser, const ImportSettings& settings) :
+     settings(settings), parser(parser) {
 	ASSIMP_LOG_DEBUG("Creating FBX Document");
 
     // Cannot use array default initialization syntax because vc8 fails on it
@@ -285,8 +257,7 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 }
 
 // ------------------------------------------------------------------------------------------------
-Document::~Document()
-{
+Document::~Document() {
     for(ObjectMap::value_type& v : objects) {
         delete v.second;
     }
@@ -348,8 +319,7 @@ void Document::ReadHeader() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void Document::ReadGlobalSettings()
-{
+void Document::ReadGlobalSettings() {
     const Scope& sc = parser.GetRootScope();
     const Element* const ehead = sc["GlobalSettings"];
     if ( nullptr == ehead || !ehead->Compound() ) {
@@ -370,8 +340,7 @@ void Document::ReadGlobalSettings()
 }
 
 // ------------------------------------------------------------------------------------------------
-void Document::ReadObjects()
-{
+void Document::ReadObjects() {
     // read ID objects from "Objects" section
     const Scope& sc = parser.GetRootScope();
     const Element* const eobjects = sc["Objects"];
@@ -418,8 +387,7 @@ void Document::ReadObjects()
 }
 
 // ------------------------------------------------------------------------------------------------
-void Document::ReadPropertyTemplates()
-{
+void Document::ReadPropertyTemplates() {
     const Scope& sc = parser.GetRootScope();
     // read property templates from "Definitions" section
     const Element* const edefs = sc["Definitions"];
@@ -476,8 +444,7 @@ void Document::ReadPropertyTemplates()
 }
 
 // ------------------------------------------------------------------------------------------------
-void Document::ReadConnections()
-{
+void Document::ReadConnections() {
     const Scope& sc = parser.GetRootScope();
     // read property templates from "Definitions" section
     const Element* const econns = sc["Connections"];
@@ -524,8 +491,7 @@ void Document::ReadConnections()
 }
 
 // ------------------------------------------------------------------------------------------------
-const std::vector<const AnimationStack*>& Document::AnimationStacks() const
-{
+const std::vector<const AnimationStack*>& Document::AnimationStacks() const {
     if (!animationStacksResolved.empty() || animationStacks.empty()) {
         return animationStacksResolved;
     }
@@ -545,17 +511,15 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
 }
 
 // ------------------------------------------------------------------------------------------------
-LazyObject* Document::GetObject(uint64_t id) const
-{
+LazyObject* Document::GetObject(uint64_t id) const {
     ObjectMap::const_iterator it = objects.find(id);
     return it == objects.end() ? nullptr : (*it).second;
 }
 
-#define MAX_CLASSNAMES 6
+constexpr size_t MAX_CLASSNAMES  = 6;
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns) const
-{
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns) const {
     std::vector<const Connection*> temp;
 
     const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range =
@@ -573,11 +537,9 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, co
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src,
-    const ConnectionMap& conns,
-    const char* const* classnames,
-    size_t count) const
-
-{
+        const ConnectionMap& conns,
+        const char* const* classnames,
+        size_t count) const {
     ai_assert(classnames);
     ai_assert( count != 0 );
     ai_assert( count <= MAX_CLASSNAMES);
@@ -622,95 +584,72 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const
-{
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source) const {
     return GetConnectionsSequenced(source, ConnectionsBySource());
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t src, const char* classname) const
-{
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t src, const char* classname) const {
     const char* arr[] = {classname};
     return GetConnectionsBySourceSequenced(src, arr,1);
 }
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source,
-        const char* const* classnames, size_t count) const
-{
+        const char* const* classnames, size_t count) const {
     return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);
 }
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
-        const char* classname) const
-{
+        const char* classname) const {
     const char* arr[] = {classname};
     return GetConnectionsByDestinationSequenced(dest, arr,1);
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const
-{
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest) const {
     return GetConnectionsSequenced(dest, ConnectionsByDestination());
 }
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
-    const char* const* classnames, size_t count) const
-
-{
+        const char* const* classnames, size_t count) const {
     return GetConnectionsSequenced(dest, false, ConnectionsByDestination(),classnames, count);
 }
 
 // ------------------------------------------------------------------------------------------------
 Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop,
-        const Document& doc)
-
-: insertionOrder(insertionOrder)
-, prop(prop)
-, src(src)
-, dest(dest)
-, doc(doc)
-{
+            const Document& doc) :
+            insertionOrder(insertionOrder), prop(prop), src(src), dest(dest), doc(doc) {
     ai_assert(doc.Objects().find(src) != doc.Objects().end());
     // dest may be 0 (root node)
     ai_assert(!dest || doc.Objects().find(dest) != doc.Objects().end());
 }
 
 // ------------------------------------------------------------------------------------------------
-Connection::~Connection()
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-LazyObject& Connection::LazySourceObject() const
-{
+LazyObject& Connection::LazySourceObject() const {
     LazyObject* const lazy = doc.GetObject(src);
     ai_assert(lazy);
     return *lazy;
 }
 
 // ------------------------------------------------------------------------------------------------
-LazyObject& Connection::LazyDestinationObject() const
-{
+LazyObject& Connection::LazyDestinationObject() const {
     LazyObject* const lazy = doc.GetObject(dest);
     ai_assert(lazy);
     return *lazy;
 }
 
 // ------------------------------------------------------------------------------------------------
-const Object* Connection::SourceObject() const
-{
+const Object* Connection::SourceObject() const {
     LazyObject* const lazy = doc.GetObject(src);
     ai_assert(lazy);
     return lazy->Get();
 }
 
 // ------------------------------------------------------------------------------------------------
-const Object* Connection::DestinationObject() const
-{
+const Object* Connection::DestinationObject() const {
     LazyObject* const lazy = doc.GetObject(dest);
     ai_assert(lazy);
     return lazy->Get();
@@ -719,4 +658,4 @@ const Object* Connection::DestinationObject() const
 } // !FBX
 } // !Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_FBX_IMPORTER

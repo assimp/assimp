@@ -122,15 +122,15 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char *filename, int mode) {
 voidpf IOSystem2Unzip::opendisk(voidpf opaque, voidpf stream, uint32_t number_disk, int mode) {
     ZipFile *io_stream = (ZipFile *)stream;
     voidpf ret = NULL;
-    size_t i;
+    int i;
 
     char *disk_filename = (char*)malloc(io_stream->m_Filename.length() + 1);
     strncpy(disk_filename, io_stream->m_Filename.c_str(), io_stream->m_Filename.length() + 1);
-    for (i = io_stream->m_Filename.length() - 1; i >= 0; i -= 1)
+    for (i = (int)io_stream->m_Filename.length() - 1; i >= 0; i -= 1)
     {
         if (disk_filename[i] != '.')
             continue;
-        snprintf(&disk_filename[i], io_stream->m_Filename.length() - i, ".z%02u", number_disk + 1);
+        snprintf(&disk_filename[i], io_stream->m_Filename.length() - size_t(i), ".z%02u", number_disk + 1);
         break;
     }
 

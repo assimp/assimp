@@ -42,23 +42,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
 #include "AssetLib/glTF2/glTF2Importer.h"
-#include "PostProcessing/MakeVerboseFormat.h"
 #include "AssetLib/glTF2/glTF2Asset.h"
+#include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif
 
 #include <assimp/CreateAnimMesh.h>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/StringComparison.h>
 #include <assimp/StringUtils.h>
 #include <assimp/ai_assert.h>
+#include <assimp/commonMetaData.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/commonMetaData.h>
-#include <assimp/DefaultIOSystem.h>
 
 #include <memory>
 #include <unordered_map>
@@ -111,7 +111,7 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
     return &desc;
 }
 
-bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig ) const {
+bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(filename);
     if (!checkSig && (extension != "gltf") && (extension != "glb")) {
         return false;
@@ -127,16 +127,16 @@ bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, b
 
 static inline aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
     switch (gltfWrapMode) {
-        case SamplerWrap::Mirrored_Repeat:
-            return aiTextureMapMode_Mirror;
+    case SamplerWrap::Mirrored_Repeat:
+        return aiTextureMapMode_Mirror;
 
-        case SamplerWrap::Clamp_To_Edge:
-            return aiTextureMapMode_Clamp;
+    case SamplerWrap::Clamp_To_Edge:
+        return aiTextureMapMode_Clamp;
 
-        case SamplerWrap::UNSET:
-        case SamplerWrap::Repeat:
-        default:
-            return aiTextureMapMode_Wrap;
+    case SamplerWrap::UNSET:
+    case SamplerWrap::Repeat:
+    default:
+        return aiTextureMapMode_Wrap;
     }
 }
 
@@ -185,8 +185,9 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             // coordinate of the actual meshes during import.
             const ai_real rcos(cos(-transform.mRotation));
             const ai_real rsin(sin(-transform.mRotation));
-            transform.mTranslation.x = (static_cast<ai_real>( 0.5 ) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-            transform.mTranslation.y = ((static_cast<ai_real>( 0.5 ) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];;
+            transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
+            transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
+            ;
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }
@@ -259,7 +260,10 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, aiTextureType_DIFFUSE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, aiTextureType_BASE_COLOR);
 
+        // Keep AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE for backwards compatibility
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, aiTextureType_METALNESS);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, aiTextureType_DIFFUSE_ROUGHNESS);
 
         aimat->AddProperty(&mat.pbrMetallicRoughness.metallicFactor, 1, AI_MATKEY_METALLIC_FACTOR);
         aimat->AddProperty(&mat.pbrMetallicRoughness.roughnessFactor, 1, AI_MATKEY_ROUGHNESS_FACTOR);
@@ -304,7 +308,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         }
 
         aimat->AddProperty(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
-
 
         // KHR_materials_sheen
         if (mat.materialSheen.isPresent) {
@@ -378,7 +381,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     }
 }
 
-static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, unsigned int a) {
+static inline void SetFaceAndAdvance1(aiFace *&face, unsigned int numVertices, unsigned int a) {
     if (a >= numVertices) {
         return;
     }
@@ -388,7 +391,7 @@ static inline void SetFaceAndAdvance1(aiFace*& face, unsigned int numVertices, u
     ++face;
 }
 
-static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices,
+static inline void SetFaceAndAdvance2(aiFace *&face, unsigned int numVertices,
         unsigned int a, unsigned int b) {
     if ((a >= numVertices) || (b >= numVertices)) {
         return;
@@ -400,7 +403,7 @@ static inline void SetFaceAndAdvance2(aiFace*& face, unsigned int numVertices,
     ++face;
 }
 
-static inline void SetFaceAndAdvance3(aiFace*& face, unsigned int numVertices, unsigned int a,
+static inline void SetFaceAndAdvance3(aiFace *&face, unsigned int numVertices, unsigned int a,
         unsigned int b, unsigned int c) {
     if ((a >= numVertices) || (b >= numVertices) || (c >= numVertices)) {
         return;
@@ -427,17 +430,16 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 }
 #endif // ASSIMP_BUILD_DEBUG
 
-template<typename T>
-aiColor4D* GetVertexColorsForType(Ref<Accessor> input) {
+template <typename T>
+aiColor4D *GetVertexColorsForType(Ref<Accessor> input) {
     constexpr float max = std::numeric_limits<T>::max();
-    aiColor4t<T>* colors;
+    aiColor4t<T> *colors;
     input->ExtractData(colors);
     auto output = new aiColor4D[input->count];
     for (size_t i = 0; i < input->count; i++) {
         output[i] = aiColor4D(
-            colors[i].r / max, colors[i].g / max,
-            colors[i].b / max, colors[i].a / max
-        );
+                colors[i].r / max, colors[i].g / max,
+                colors[i].b / max, colors[i].a / max);
     }
     delete[] colors;
     return output;
@@ -471,21 +473,21 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             }
 
             switch (prim.mode) {
-                case PrimitiveMode_POINTS:
-                    aim->mPrimitiveTypes |= aiPrimitiveType_POINT;
-                    break;
+            case PrimitiveMode_POINTS:
+                aim->mPrimitiveTypes |= aiPrimitiveType_POINT;
+                break;
 
-                case PrimitiveMode_LINES:
-                case PrimitiveMode_LINE_LOOP:
-                case PrimitiveMode_LINE_STRIP:
-                    aim->mPrimitiveTypes |= aiPrimitiveType_LINE;
-                    break;
+            case PrimitiveMode_LINES:
+            case PrimitiveMode_LINE_LOOP:
+            case PrimitiveMode_LINE_STRIP:
+                aim->mPrimitiveTypes |= aiPrimitiveType_LINE;
+                break;
 
-                case PrimitiveMode_TRIANGLES:
-                case PrimitiveMode_TRIANGLE_STRIP:
-                case PrimitiveMode_TRIANGLE_FAN:
-                    aim->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
-                    break;
+            case PrimitiveMode_TRIANGLES:
+            case PrimitiveMode_TRIANGLE_STRIP:
+            case PrimitiveMode_TRIANGLE_FAN:
+                aim->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+                break;
             }
 
             Mesh::Primitive::Attributes &attr = prim.attributes;
@@ -528,7 +530,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             for (size_t c = 0; c < attr.color.size() && c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c) {
                 if (attr.color[c]->count != aim->mNumVertices) {
                     DefaultLogger::get()->warn("Color stream size in mesh \"", mesh.name,
-                                               "\" does not match the vertex count");
+                            "\" does not match the vertex count");
                     continue;
                 }
 
@@ -551,7 +553,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 if (attr.texcoord[tc]->count != aim->mNumVertices) {
                     DefaultLogger::get()->warn("Texcoord stream size in mesh \"", mesh.name,
-                                               "\" does not match the vertex count");
+                            "\" does not match the vertex count");
                     continue;
                 }
 
@@ -644,77 +646,77 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
 
                 switch (prim.mode) {
-                    case PrimitiveMode_POINTS: {
-                        nFaces = count;
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; ++i) {
-                            SetFaceAndAdvance1(facePtr, aim->mNumVertices, data.GetUInt(i));
-                        }
-                        break;
+                case PrimitiveMode_POINTS: {
+                    nFaces = count;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; ++i) {
+                        SetFaceAndAdvance1(facePtr, aim->mNumVertices, data.GetUInt(i));
                     }
+                    break;
+                }
 
-                    case PrimitiveMode_LINES: {
-                        nFaces = count / 2;
-                        if (nFaces * 2 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
-                            count = nFaces * 2;
-                        }
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; i += 2) {
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
-                        }
-                        break;
+                case PrimitiveMode_LINES: {
+                    nFaces = count / 2;
+                    if (nFaces * 2 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                        count = nFaces * 2;
                     }
-
-                    case PrimitiveMode_LINE_LOOP:
-                    case PrimitiveMode_LINE_STRIP: {
-                        nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
-                        facePtr = faces = new aiFace[nFaces];
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
-                        for (unsigned int i = 2; i < count; ++i) {
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i - 1), data.GetUInt(i));
-                        }
-                        if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(static_cast<int>(count) - 1), faces[0].mIndices[0]);
-                        }
-                        break;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 2) {
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
                     }
+                    break;
+                }
 
-                    case PrimitiveMode_TRIANGLES: {
-                        nFaces = count / 3;
-                        if (nFaces * 3 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
-                            count = nFaces * 3;
-                        }
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; i += 3) {
+                case PrimitiveMode_LINE_LOOP:
+                case PrimitiveMode_LINE_STRIP: {
+                    nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
+                    facePtr = faces = new aiFace[nFaces];
+                    SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
+                    for (unsigned int i = 2; i < count; ++i) {
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i - 1), data.GetUInt(i));
+                    }
+                    if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(static_cast<int>(count) - 1), faces[0].mIndices[0]);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_TRIANGLES: {
+                    nFaces = count / 3;
+                    if (nFaces * 3 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                        count = nFaces * 3;
+                    }
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 3) {
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_STRIP: {
+                    nFaces = count - 2;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        //The ordering is to ensure that the triangles are all drawn with the same orientation
+                        if ((i + 1) % 2 == 0) {
+                            //For even n, vertices n + 1, n, and n + 2 define triangle n
+                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+                        } else {
+                            //For odd n, vertices n, n+1, and n+2 define triangle n
                             SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
                         }
-                        break;
                     }
-                    case PrimitiveMode_TRIANGLE_STRIP: {
-                        nFaces = count - 2;
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < nFaces; ++i) {
-                            //The ordering is to ensure that the triangles are all drawn with the same orientation
-                            if ((i + 1) % 2 == 0) {
-                                //For even n, vertices n + 1, n, and n + 2 define triangle n
-                                SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
-                            } else {
-                                //For odd n, vertices n, n+1, and n+2 define triangle n
-                                SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
-                            }
-                        }
-                        break;
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_FAN:
+                    nFaces = count - 2;
+                    facePtr = faces = new aiFace[nFaces];
+                    SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+                    for (unsigned int i = 1; i < nFaces; ++i) {
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
                     }
-                    case PrimitiveMode_TRIANGLE_FAN:
-                        nFaces = count - 2;
-                        facePtr = faces = new aiFace[nFaces];
-                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
-                        for (unsigned int i = 1; i < nFaces; ++i) {
-                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
-                        }
-                        break;
+                    break;
                 }
             } else { // no indices provided so directly generate from counts
 
@@ -722,77 +724,77 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 unsigned int count = aim->mNumVertices;
 
                 switch (prim.mode) {
-                    case PrimitiveMode_POINTS: {
-                        nFaces = count;
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; ++i) {
-                            SetFaceAndAdvance1(facePtr, aim->mNumVertices, i);
-                        }
-                        break;
+                case PrimitiveMode_POINTS: {
+                    nFaces = count;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; ++i) {
+                        SetFaceAndAdvance1(facePtr, aim->mNumVertices, i);
                     }
+                    break;
+                }
 
-                    case PrimitiveMode_LINES: {
-                        nFaces = count / 2;
-                        if (nFaces * 2 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
-                            count = (unsigned int)nFaces * 2;
-                        }
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; i += 2) {
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, i, i + 1);
-                        }
-                        break;
+                case PrimitiveMode_LINES: {
+                    nFaces = count / 2;
+                    if (nFaces * 2 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINES mode. Some vertices were dropped.");
+                        count = (unsigned int)nFaces * 2;
                     }
-
-                    case PrimitiveMode_LINE_LOOP:
-                    case PrimitiveMode_LINE_STRIP: {
-                        nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
-                        facePtr = faces = new aiFace[nFaces];
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
-                        for (unsigned int i = 2; i < count; ++i) {
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, i - 1, i);
-                        }
-                        if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                            SetFaceAndAdvance2(facePtr, aim->mNumVertices, count - 1, 0);
-                        }
-                        break;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 2) {
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, i, i + 1);
                     }
+                    break;
+                }
 
-                    case PrimitiveMode_TRIANGLES: {
-                        nFaces = count / 3;
-                        if (nFaces * 3 != count) {
-                            ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
-                            count = (unsigned int)nFaces * 3;
-                        }
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < count; i += 3) {
+                case PrimitiveMode_LINE_LOOP:
+                case PrimitiveMode_LINE_STRIP: {
+                    nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
+                    facePtr = faces = new aiFace[nFaces];
+                    SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
+                    for (unsigned int i = 2; i < count; ++i) {
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, i - 1, i);
+                    }
+                    if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, count - 1, 0);
+                    }
+                    break;
+                }
+
+                case PrimitiveMode_TRIANGLES: {
+                    nFaces = count / 3;
+                    if (nFaces * 3 != count) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLES mode. Some vertices were dropped.");
+                        count = (unsigned int)nFaces * 3;
+                    }
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < count; i += 3) {
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
+                    }
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_STRIP: {
+                    nFaces = count - 2;
+                    facePtr = faces = new aiFace[nFaces];
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        //The ordering is to ensure that the triangles are all drawn with the same orientation
+                        if ((i + 1) % 2 == 0) {
+                            //For even n, vertices n + 1, n, and n + 2 define triangle n
+                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, i + 1, i, i + 2);
+                        } else {
+                            //For odd n, vertices n, n+1, and n+2 define triangle n
                             SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
                         }
-                        break;
                     }
-                    case PrimitiveMode_TRIANGLE_STRIP: {
-                        nFaces = count - 2;
-                        facePtr = faces = new aiFace[nFaces];
-                        for (unsigned int i = 0; i < nFaces; ++i) {
-                            //The ordering is to ensure that the triangles are all drawn with the same orientation
-                            if ((i + 1) % 2 == 0) {
-                                //For even n, vertices n + 1, n, and n + 2 define triangle n
-                                SetFaceAndAdvance3(facePtr, aim->mNumVertices, i + 1, i, i + 2);
-                            } else {
-                                //For odd n, vertices n, n+1, and n+2 define triangle n
-                                SetFaceAndAdvance3(facePtr, aim->mNumVertices, i, i + 1, i + 2);
-                            }
-                        }
-                        break;
+                    break;
+                }
+                case PrimitiveMode_TRIANGLE_FAN:
+                    nFaces = count - 2;
+                    facePtr = faces = new aiFace[nFaces];
+                    SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
+                    for (unsigned int i = 1; i < nFaces; ++i) {
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, i + 1, i + 2);
                     }
-                    case PrimitiveMode_TRIANGLE_FAN:
-                        nFaces = count - 2;
-                        facePtr = faces = new aiFace[nFaces];
-                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
-                        for (unsigned int i = 1; i < nFaces; ++i) {
-                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, i + 1, i + 2);
-                        }
-                        break;
+                    break;
                 }
             }
 
@@ -876,15 +878,15 @@ void glTF2Importer::ImportLights(glTF2::Asset &r) {
         aiLight *ail = mScene->mLights[i] = new aiLight();
 
         switch (light.type) {
-            case Light::Directional:
-                ail->mType = aiLightSource_DIRECTIONAL;
-                break;
-            case Light::Point:
-                ail->mType = aiLightSource_POINT;
-                break;
-            case Light::Spot:
-                ail->mType = aiLightSource_SPOT;
-                break;
+        case Light::Directional:
+            ail->mType = aiLightSource_DIRECTIONAL;
+            break;
+        case Light::Point:
+            ail->mType = aiLightSource_POINT;
+            break;
+        case Light::Spot:
+            ail->mType = aiLightSource_SPOT;
+            break;
         }
 
         if (ail->mType != aiLightSource_POINT) {
@@ -926,7 +928,7 @@ static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
     if (node.matrix.isPresent) {
         CopyValue(node.matrix.value, matrix);
         return;
-    } 
+    }
 
     if (node.translation.isPresent) {
         aiVector3D trans;
@@ -1021,7 +1023,7 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
         metadata->Add(extension.name, extension.mBoolValue.value);
     } else if (extension.mValues.isPresent) {
         aiMetadata val;
-        for (auto const & subExtension : extension.mValues.value) {
+        for (auto const &subExtension : extension.mValues.value) {
             ParseExtensions(&val, subExtension);
         }
         metadata->Add(extension.name, val);
@@ -1030,7 +1032,7 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
 
 void ParseExtras(aiMetadata *metadata, const CustomExtension &extension) {
     if (extension.mValues.isPresent) {
-        for (auto const & subExtension : extension.mValues.value) {
+        for (auto const &subExtension : extension.mValues.value) {
             ParseExtensions(metadata, subExtension);
         }
     }
@@ -1068,11 +1070,10 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
         if (!node.meshes.empty()) {
             // GLTF files contain at most 1 mesh per node.
-            if (node.meshes.size() > 1)
-            {
+            if (node.meshes.size() > 1) {
                 throw DeadlyImportError("GLTF: Invalid input, found ", node.meshes.size(),
-                    " meshes in ", getContextForErrorMessages(node.id, node.name),
-                    ", but only 1 mesh per node allowed.");
+                        " meshes in ", getContextForErrorMessages(node.id, node.name),
+                        ", but only 1 mesh per node allowed.");
             }
             int mesh_idx = node.meshes[0].GetIndex();
             int count = meshOffsets[mesh_idx + 1] - meshOffsets[mesh_idx];
@@ -1083,7 +1084,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             if (node.skin) {
                 for (int primitiveNo = 0; primitiveNo < count; ++primitiveNo) {
                     aiMesh *mesh = pScene->mMeshes[meshOffsets[mesh_idx] + primitiveNo];
-                    unsigned int numBones =static_cast<unsigned int>(node.skin->jointNames.size());
+                    unsigned int numBones = static_cast<unsigned int>(node.skin->jointNames.size());
 
                     std::vector<std::vector<aiVertexWeight>> weighting(numBones);
                     BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
@@ -1222,7 +1223,7 @@ struct AnimationSamplers {
     Animation::Sampler *weight;
 };
 
-aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
+aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &samplers) {
     aiNodeAnim *anim = new aiNodeAnim();
 
     try {
@@ -1313,7 +1314,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset&, Node &node, AnimationSamplers &sampler
     }
 }
 
-aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset&, Node &node, AnimationSamplers &samplers) {
+aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSamplers &samplers) {
     auto *anim = new aiMeshMorphAnim();
 
     try {
@@ -1366,7 +1367,7 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
             continue;
         }
 
-        auto& animsampler = anim.samplers[channel.sampler];
+        auto &animsampler = anim.samplers[channel.sampler];
 
         if (!animsampler.input) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Missing sampler input. Skipping.");
@@ -1555,9 +1556,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
             if (ext) {
                 if (strcmp(ext, "jpeg") == 0) {
                     ext = "jpg";
-                } else if(strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
+                } else if (strcmp(ext, "ktx2") == 0) { //basisu: ktx remains
                     ext = "kx2";
-                } else if(strcmp(ext, "basis") == 0) { //basisu
+                } else if (strcmp(ext, "basis") == 0) { //basisu
                     ext = "bu";
                 }
 
@@ -1570,7 +1571,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
     }
 }
 
-void glTF2Importer::ImportCommonMetadata(glTF2::Asset& a) {
+void glTF2Importer::ImportCommonMetadata(glTF2::Asset &a) {
     ASSIMP_LOG_DEBUG("Importing metadata");
     ai_assert(mScene->mMetaData == nullptr);
     const bool hasVersion = !a.asset.version.empty();
@@ -1604,7 +1605,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     this->mScene = pScene;
 
     // read the asset file
-  	glTF2::Asset asset(pIOHandler, static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(mSchemaDocumentProvider));
+    glTF2::Asset asset(pIOHandler, static_cast<rapidjson::IRemoteSchemaDocumentProvider *>(mSchemaDocumentProvider));
     asset.Load(pFile, GetExtension(pFile) == "glb");
     if (asset.scene) {
         pScene->mName = asset.scene->name;
@@ -1631,7 +1632,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 }
 
 void glTF2Importer::SetupProperties(const Importer *pImp) {
-    mSchemaDocumentProvider = static_cast<rapidjson::IRemoteSchemaDocumentProvider*>(pImp->GetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER));
+    mSchemaDocumentProvider = static_cast<rapidjson::IRemoteSchemaDocumentProvider *>(pImp->GetPropertyPointer(AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER));
 }
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER

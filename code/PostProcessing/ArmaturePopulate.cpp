@@ -90,12 +90,14 @@ void ArmaturePopulate::Execute(aiScene *out) {
 
         ai_assert(armature);
 
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
         // set up bone armature id
         bone->mArmature = armature;
 
         // set this bone node to be referenced properly
         ai_assert(bone_node);
         bone->mNode = bone_node;
+#endif
     }
 }
 

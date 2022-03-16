@@ -179,11 +179,11 @@ inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::Accessor
         v = &(p.attributes.texcoord);
     } else if ((pos = Compare(attr, "COLOR"))) {
         v = &(p.attributes.color);
-    } else if ((pos = Compare(attr, "JOINT"))) {
+    } else if ((pos = Compare(attr, "JOINTS"))) {
         v = &(p.attributes.joint);
     } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
         v = &(p.attributes.jointmatrix);
-    } else if ((pos = Compare(attr, "WEIGHT"))) {
+    } else if ((pos = Compare(attr, "WEIGHTS"))) {
         v = &(p.attributes.weight);
     } else
         return false;

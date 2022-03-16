@@ -857,6 +857,9 @@ void MDLImporter::CalculateUVCoordinates_MDL5() {
             const float fHeight = (float)iHeight;
             aiMesh *pcMesh = this->pScene->mMeshes[0];
             for (unsigned int i = 0; i < pcMesh->mNumVertices; ++i) {
+                if (!pcMesh->HasTextureCoords(0)) {
+                    continue;
+                }
                 pcMesh->mTextureCoords[0][i].x /= fWidth;
                 pcMesh->mTextureCoords[0][i].y /= fHeight;
                 pcMesh->mTextureCoords[0][i].y = 1.0f - pcMesh->mTextureCoords[0][i].y; // DX to OGL

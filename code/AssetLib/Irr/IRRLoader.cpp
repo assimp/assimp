@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -94,23 +94,9 @@ IRRImporter::~IRRImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool IRRImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-	const std::string extension = GetExtension(pFile);
-	if (extension == "irr") {
-		return true;
-	} else if (extension == "xml" || checkSig) {
-		/*  If CanRead() is called in order to check whether we
-         *  support a specific file extension in general pIOHandler
-         *  might be nullptr and it's our duty to return true here.
-         */
-		if (nullptr == pIOHandler) {
-			return true;
-		}
-		const char *tokens[] = { "irr_scene" };
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-	}
-
-	return false;
+bool IRRImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+	static const char *tokens[] = { "irr_scene" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -132,7 +118,7 @@ void IRRImporter::SetupProperties(const Importer *pImp) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Build a mesh tha consists of a single squad (a side of a skybox)
+// Build a mesh that consists of a single squad (a side of a skybox)
 aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 		const SkyboxVertex &v2,
 		const SkyboxVertex &v3,

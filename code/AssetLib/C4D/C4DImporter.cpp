@@ -106,14 +106,25 @@ static const aiImporterDesc desc = {
 
 
 // ------------------------------------------------------------------------------------------------
-bool C4DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
+C4DImporter::C4DImporter()
+: BaseImporter() {
+    // empty
+}
+
+// ------------------------------------------------------------------------------------------------
+C4DImporter::~C4DImporter() {
+    // empty
+}
+
+// ------------------------------------------------------------------------------------------------
+bool C4DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {
     const std::string& extension = GetExtension(pFile);
     if (extension == "c4d") {
         return true;
     } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // TODO
     }
-
+    
     return false;
 }
 
@@ -146,7 +157,13 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         ThrowException("failed to read document " + pFile);
     }
 
+    // Generate the root-node
     pScene->mRootNode = new aiNode("<C4DRoot>");
+
+    // convert left-handed to right-handed
+    pScene->mRootNode->mTransformation.a1 = 0.01f;
+    pScene->mRootNode->mTransformation.b2 = 0.01f;
+    pScene->mRootNode->mTransformation.c3 = -0.01f;
 
     // first convert all materials
     ReadMaterials(doc->GetFirstMaterial());

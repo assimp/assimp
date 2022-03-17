@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -159,7 +159,7 @@ bool LWOImporter::HandleTextures(aiMaterial *pcMat, const TextureList &in, aiTex
 
         // The older LWOB format does not use indirect references to clips.
         // The file name of a texture is directly specified in the tex chunk.
-        if (mIsLWO2) {
+        if (mIsLWO2 || mIsLWO3) {
             // find the corresponding clip (take the last one if multiple
             // share the same index)
             ClipList::iterator end = mClips.end(), candidate = end;
@@ -270,7 +270,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface &surf, aiMaterial *pcMat) {
     aiShadingMode m;
     if (surf.mSpecularValue && surf.mGlossiness) {
         float fGloss;
-        if (mIsLWO2) {
+        if (mIsLWO2 || mIsLWO3) {
             fGloss = std::pow(surf.mGlossiness * ai_real(10.0) + ai_real(2.0), ai_real(2.0));
         } else {
             if (16.0 >= surf.mGlossiness)
@@ -689,6 +689,252 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader * /*head*/, 
 }
 
 // ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadNodalBlocks(unsigned int size) {
+    LE_NCONST uint8_t *const end = mFileBuffer + size;
+
+    while (true) {
+        if (mFileBuffer + 8 >= end)
+            break;
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+        int bufOffset = 0;
+        if (head.type == AI_IFF_FOURCC_FORM) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
+
+        if (mFileBuffer + head.length > end) {
+            throw DeadlyImportError("LWO3: cannot read length; LoadNodalBlocks");
+        }
+        int node_idx = 0;
+        uint8_t *const next = mFileBuffer + head.length;
+        mFileBuffer += bufOffset;
+        switch (head.type) {
+        case AI_LWO_NNDS:
+            node_idx++;
+            LoadNodes(head.length);
+            break;
+        }
+
+        mFileBuffer = next;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadNodes(unsigned int size) {
+    LE_NCONST uint8_t *const end = mFileBuffer + size;
+
+    while (true) {
+        if (mFileBuffer + 8 >= end)
+            break;
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+        int bufOffset = 0;
+        if (head.type == AI_IFF_FOURCC_FORM) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
+
+        if (mFileBuffer + head.length > end) {
+            throw DeadlyImportError("LWO3: cannot read length; LoadNodes");
+        }
+
+        uint8_t *const next = mFileBuffer + head.length;
+        mFileBuffer += bufOffset;
+        switch (head.type) {
+        case AI_LWO_NTAG:
+            LoadNodeTag(head.length);
+            break;
+        }
+
+        mFileBuffer = next;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadNodeTag(unsigned int size) {
+    LE_NCONST uint8_t *const end = mFileBuffer + size;
+
+    while (true) {
+        if (mFileBuffer + 8 >= end)
+            break;
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+        int bufOffset = 0;
+        if (head.type == AI_IFF_FOURCC_FORM) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
+
+        if (mFileBuffer + head.length > end) {
+            throw DeadlyImportError("LWO3: cannot read length; LoadNodeTag");
+        }
+
+        uint8_t *const next = mFileBuffer + head.length;
+        mFileBuffer += bufOffset;
+
+        switch (head.type) {
+        case AI_LWO_NDTA:
+            LoadNodeData(head.length);
+            break;
+        }
+
+        mFileBuffer = next;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadNodeData(unsigned int size) {
+    LE_NCONST uint8_t *const end = mFileBuffer + size;
+
+    LWO::Surface &surf = mSurfaces->back();
+
+    while (true) {
+        if (mFileBuffer + 8 >= end)
+            break;
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+        int bufOffset = 0;
+        if (head.type == AI_IFF_FOURCC_FORM) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
+
+        if (mFileBuffer + head.length > end) {
+            throw DeadlyImportError("LWO3: INVALID LENGTH; LoadNodeData");
+        }
+
+        uint8_t *const next = mFileBuffer + head.length;
+        mFileBuffer += bufOffset;
+        switch (head.type) {
+            case AI_LWO_VERS:
+            case AI_LWO_ENUM:
+            case AI_LWO_IBGC:
+            case AI_LWO_IOPC:
+            case AI_LWO_IIMG:
+            case AI_LWO_TXTR:
+            case AI_LWO_IFAL:
+            case AI_LWO_ISCL:
+            case AI_LWO_IPOS:
+            case AI_LWO_IROT:
+            case AI_LWO_IBMP:
+            case AI_LWO_IUTD:
+            case AI_LWO_IVTD:
+
+            case AI_LWO_IPIX:
+            case AI_LWO_IMIP:
+            case AI_LWO_IMOD:
+            case AI_LWO_AMOD:
+            case AI_LWO_IINV:
+            case AI_LWO_INCR:
+            case AI_LWO_IAXS:
+            case AI_LWO_IFOT:
+            case AI_LWO_ITIM:
+            case AI_LWO_IWRL:
+            case AI_LWO_IUTI:
+            case AI_LWO_IUVI:
+            case AI_LWO_IINX:
+            case AI_LWO_IINY:
+            case AI_LWO_IINZ:
+            case AI_LWO_IREF:
+            case AI_LWO_IMST:
+            case AI_LWO_IMAP:
+            case AI_LWO_IUTL:
+            case AI_LWO_IVTL:
+            case AI_LWO_VPVL:
+            case AI_LWO_VPRM:
+                mFileBuffer = next;
+                break;
+            case AI_LWO_ENTR:
+                std::string attrName;
+
+                while (true) {
+                    if (mFileBuffer + 8 >= next)
+                        break;
+
+                    IFF::ChunkHeader head1 = IFF::LoadChunk(mFileBuffer);
+                    int bufOffset1 = 0;
+                    if (head1.type == AI_IFF_FOURCC_FORM) { // not chunk, it's a form
+                        mFileBuffer -= 8;
+                        head1 = IFF::LoadForm(mFileBuffer);
+                        bufOffset1 = 4;
+                    }
+
+                    if (mFileBuffer + head1.length > end) {
+                        throw DeadlyImportError("LWO3: cannot read length;");
+                    }
+                    uint8_t *const next1 = mFileBuffer + head1.length;
+                    mFileBuffer += bufOffset1;
+
+                    switch (head1.type) {
+                        case AI_LWO_FLAG:
+                        case AI_LWO_TAG:
+                            mFileBuffer = next1;
+                            break;
+                        case AI_LWO_NAME:
+                            GetS0(attrName, head1.length);
+                            break;
+                        case AI_LWO_VALU:
+                            mFileBuffer += 8;
+
+                            std::string valueType;
+                            GetS0(valueType, 8);
+
+                            if (valueType == "int") {
+                                static_cast<void>(GetU4());
+                            } else if (valueType == "double") {
+                                static_cast<void>(GetU8());
+                            } else if (valueType == "vparam") {
+                                mFileBuffer += 24;
+
+                                float value = GetF8();
+                                if (attrName == "Diffuse") {
+                                    surf.mDiffuseValue = value;
+                                } else if (attrName == "Specular") {
+                                    surf.mSpecularValue = value;
+                                } else if (attrName == "Transparency") {
+                                    surf.mTransparency = value;
+                                } else if (attrName == "Glossiness") {
+                                    surf.mGlossiness = value;
+                                } else if (attrName == "Luminosity") {
+                                    surf.mLuminosity = value;
+                                } else if (attrName == "Color Highlight") {
+                                    surf.mColorHighlights = value;
+                                } else if (attrName == "Refraction Index") {
+                                    surf.mIOR = value;
+                                } else if (attrName == "Bump Height") {
+                                    surf.mBumpIntensity = value;
+                                }
+                            } else if (valueType == "vparam3") {
+                                mFileBuffer += 24;
+
+                                float value1, value2, value3;
+                                value1 = GetF8();
+                                value2 = GetF8();
+                                value3 = GetF8();
+
+                                if (attrName == "Color") {
+                                    surf.mColor.r = value1;
+                                    surf.mColor.g = value2;
+                                    surf.mColor.b = value3;
+                                }
+                            }
+
+                            mFileBuffer = next1;
+                            break;
+                    }
+                }
+
+                break;
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2Surface(unsigned int size) {
     LE_NCONST uint8_t *const end = mFileBuffer + size;
 
@@ -834,6 +1080,71 @@ void LWOImporter::LoadLWO2Surface(unsigned int size) {
                         ASSIMP_LOG_WARN("LWO2: Found an unsupported surface BLOK");
                 };
 
+                break;
+            }
+        }
+        mFileBuffer = next;
+    }
+}
+
+void LWOImporter::LoadLWO3Surface(unsigned int size) {
+    mFileBuffer += 8;
+    LE_NCONST uint8_t *const end = mFileBuffer + size - 12;
+
+    mSurfaces->push_back(LWO::Surface());
+    LWO::Surface &surf = mSurfaces->back();
+
+    GetS0(surf.mName, size);
+
+    // check whether this surface was derived from any other surface
+    std::string derived;
+    GetS0(derived, (unsigned int)(end - mFileBuffer));
+    if (derived.length()) {
+        // yes, find this surface
+        for (SurfaceList::iterator it = mSurfaces->begin(), itEnd = mSurfaces->end() - 1; it != itEnd; ++it) {
+            if ((*it).mName == derived) {
+                // we have it ...
+                surf = *it;
+                derived.clear();
+                break;
+            }
+        }
+        if (derived.size()) {
+            ASSIMP_LOG_WARN("LWO3: Unable to find source surface: ", derived);
+        }
+    }
+    while (true) {
+        if (mFileBuffer + 8 >= end)
+            break;
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+        int bufOffset = 0;
+        if( head.type == AI_IFF_FOURCC_FORM ) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
+
+        if (mFileBuffer + head.length > end) {
+            throw DeadlyImportError("LWO3: cannot read length; LoadLWO3Surface");
+        }
+
+        uint8_t *const next = mFileBuffer + head.length;
+        mFileBuffer += bufOffset;
+        switch (head.type) {
+            case AI_LWO_NODS:
+                LoadNodalBlocks(head.length);
+                break;
+                // polygon sidedness
+            case AI_LWO_SIDE: {
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, SIDE, 2);
+                surf.bDoubleSided = (3 == GetU2());
+                break;
+            }
+                // maximum smoothing angle
+            case AI_LWO_SMAN: {
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, SMAN, 4);
+                surf.mMaximumSmoothAngle = std::fabs(GetF4());
                 break;
             }
         }

@@ -41,12 +41,17 @@ public:
     enum {
         Flag_DoNotIndent = 0x1,
         Flag_WriteSpecialFloats = 0x2,
+        Flag_SkipWhitespaces = 0x4
     };
-
+    
     JSONWriter(Assimp::IOStream &out, unsigned int flags = 0u) :
-            out(out), first(), flags(flags) {
+            out(out), indent (""), newline("\n"), space(" "), buff (), first(false), flags(flags) {
         // make sure that all formatting happens using the standard, C locale and not the user's current locale
         buff.imbue(std::locale("C"));
+        if (flags & Flag_SkipWhitespaces) {
+            newline = "";
+            space = "";
+        }
     }
 
     ~JSONWriter() {
@@ -70,7 +75,7 @@ public:
     void Key(const std::string &name) {
         AddIndentation();
         Delimit();
-        buff << '\"' + name + "\": ";
+        buff << '\"' + name + "\":" << space;
     }
 
     template <typename Literal>
@@ -78,12 +83,12 @@ public:
         AddIndentation();
         Delimit();
 
-        LiteralToString(buff, name) << '\n';
+        LiteralToString(buff, name) << newline;
     }
 
     template <typename Literal>
     void SimpleValue(const Literal &s) {
-        LiteralToString(buff, s) << '\n';
+        LiteralToString(buff, s) << newline;
     }
 
     void SimpleValue(const void *buffer, size_t len) {
@@ -102,7 +107,7 @@ public:
             }
         }
 
-        buff << '\"' << cur_out << "\"\n";
+        buff << '\"' << cur_out << "\"" << newline;
         delete[] cur_out;
     }
 
@@ -115,7 +120,7 @@ public:
             }
         }
         first = true;
-        buff << "{\n";
+        buff << "{" << newline;
         PushIndent();
     }
 
@@ -123,7 +128,7 @@ public:
         PopIndent();
         AddIndentation();
         first = false;
-        buff << "}\n";
+        buff << "}" << newline;
     }
 
     void StartArray(bool is_element = false) {
@@ -135,19 +140,19 @@ public:
             }
         }
         first = true;
-        buff << "[\n";
+        buff << "[" << newline;
         PushIndent();
     }
 
     void EndArray() {
         PopIndent();
         AddIndentation();
-        buff << "]\n";
+        buff << "]" << newline;
         first = false;
     }
 
     void AddIndentation() {
-        if (!(flags & Flag_DoNotIndent)) {
+        if (!(flags & Flag_DoNotIndent) && !(flags & Flag_SkipWhitespaces)) {
             buff << indent;
         }
     }
@@ -156,7 +161,7 @@ public:
         if (!first) {
             buff << ',';
         } else {
-            buff << ' ';
+            buff << space;
             first = false;
         }
     }
@@ -227,7 +232,9 @@ private:
 
 private:
     Assimp::IOStream &out;
-    std::string indent, newline;
+    std::string indent;
+    std::string newline;
+    std::string space;
     std::stringstream buff;
     bool first;
 
@@ -765,7 +772,7 @@ void Write(JSONWriter &out, const aiScene &ai) {
     out.EndObj();
 }
 
-void ExportAssimp2Json(const char *file, Assimp::IOSystem *io, const aiScene *scene, const Assimp::ExportProperties *) {
+void ExportAssimp2Json(const char *file, Assimp::IOSystem *io, const aiScene *scene, const Assimp::ExportProperties *pProperties) {
     std::unique_ptr<Assimp::IOStream> str(io->Open(file, "wt"));
     if (!str) {
         throw DeadlyExportError("could not open output file");
@@ -782,7 +789,12 @@ void ExportAssimp2Json(const char *file, Assimp::IOSystem *io, const aiScene *sc
         splitter.Execute(scenecopy_tmp);
 
         // XXX Flag_WriteSpecialFloats is turned on by default, right now we don't have a configuration interface for exporters
-        JSONWriter s(*str, JSONWriter::Flag_WriteSpecialFloats);
+
+        unsigned int flags = JSONWriter::Flag_WriteSpecialFloats;
+        if (pProperties->GetPropertyBool("JSON_SKIP_WHITESPACES", false)) {
+            flags |= JSONWriter::Flag_SkipWhitespaces;
+        }
+        JSONWriter s(*str, flags);
         Write(s, *scenecopy_tmp);
 
     } catch (...) {

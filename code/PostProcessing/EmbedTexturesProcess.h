@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -78,7 +78,7 @@ public:
 
 private:
     // Resolve the path and add the file content to the scene as a texture.
-    bool addTexture(aiScene* pScene, std::string path) const;
+    bool addTexture(aiScene *pScene, const std::string &path) const;
 
 private:
     std::string mRootPath;

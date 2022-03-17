@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -514,7 +514,7 @@ IfcFloat Curve::GetParametricRangeDelta() const {
 
 // ------------------------------------------------------------------------------------------------
 size_t Curve::EstimateSampleCount(IfcFloat a, IfcFloat b) const {
-    (void)(a); (void)(b);  
+    (void)(a); (void)(b);
     ai_assert( InRange( a ) );
     ai_assert( InRange( b ) );
 

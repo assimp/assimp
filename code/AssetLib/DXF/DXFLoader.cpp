@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -123,18 +123,9 @@ DXFImporter::~DXFImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bool checkSig ) const {
-    const std::string& extension = GetExtension( filename );
-    if ( extension == desc.mFileExtensions ) {
-        return true;
-    }
-
-    if ( extension.empty() || checkSig ) {
-        const char *pTokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, filename, pTokens, 4, 32 );
-    }
-
-    return false;
+bool DXFImporter::CanRead( const std::string& filename, IOSystem* pIOHandler, bool /*checkSig*/ ) const {
+    static const char *tokens[] = { "SECTION", "HEADER", "ENDSEC", "BLOCKS" };
+    return SearchFileHeaderForToken(pIOHandler, filename, tokens, AI_COUNT_OF(tokens), 32);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -378,6 +369,11 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         const DXF::Block& bl_src = *(*it).second;
 
         for (std::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
+            if (!pl_in) {
+                ASSIMP_LOG_ERROR("DXF: PolyLine instance is nullptr, skipping.");
+                continue;
+            }
+            
             std::shared_ptr<DXF::PolyLine> pl_out = std::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {
@@ -547,7 +543,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
         ++reader;
     }
 
-    ASSIMP_LOG_VERBOSE_DEBUG( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(), 
+    ASSIMP_LOG_VERBOSE_DEBUG( "DXF: got ", block.lines.size()," polylines and ", block.insertions.size(),
         " inserted blocks in ENTITIES" );
 }
 

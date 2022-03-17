@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -112,7 +112,7 @@ ASSIMP_API void aiReleaseExportFormatDescription(const C_STRUCT aiExportFormatDe
  *  export them again. Since the scene returned by the various importer functions
  *  is const, a modifiable copy is needed.
  *  @param pIn Valid scene to be copied
- *  @param pOut Receives a modifyable copy of the scene. Use aiFreeScene() to
+ *  @param pOut Receives a modifiable copy of the scene. Use aiFreeScene() to
  *    delete it again.
  */
 ASSIMP_API void aiCopyScene(const C_STRUCT aiScene *pIn,

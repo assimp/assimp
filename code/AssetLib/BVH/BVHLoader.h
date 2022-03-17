@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -112,7 +112,7 @@ protected:
     /** Reads the hierarchy */
     void ReadHierarchy(aiScene *pScene);
 
-    /** Reads a node and recursively its childs and returns the created node. */
+    /** Reads a node and recursively its children and returns the created node. */
     aiNode *ReadNode();
 
     /** Reads an end node and returns the created node. */

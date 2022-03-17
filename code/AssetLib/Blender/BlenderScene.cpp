@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderSceneGen.h"
 
-using namespace Assimp;
-using namespace Assimp::Blender;
+namespace Assimp {
+namespace Blender {
 
 //--------------------------------------------------------------------------------
 template <>
@@ -90,6 +90,52 @@ void Structure ::Convert<Group>(
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
     ReadField<ErrorPolicy_Igno>(dest.layer, "layer", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.gobject, "*gobject", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<CollectionObject>(
+        CollectionObject &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    {
+        //std::shared_ptr<CollectionObject> prev;
+        //ReadFieldPtr<ErrorPolicy_Fail>(prev, "*prev", db);
+        //dest.prev = prev.get();
+
+        std::shared_ptr<Object> ob;
+        ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
+        dest.ob = ob.get();
+    }
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<CollectionChild>(
+        CollectionChild &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev, "*prev", db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.collection, "*collection", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<Collection>(
+        Collection &dest,
+        const FileDatabase &db) const {
+
+    ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Fail>(dest.gobject, "gobject", db);
+    ReadField<ErrorPolicy_Fail>(dest.children, "children", db);
 
     db.reader->IncPtr(size);
 }
@@ -660,6 +706,7 @@ void Structure ::Convert<Scene>(
     ReadFieldPtr<ErrorPolicy_Warn>(dest.camera, "*camera", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.world, "*world", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.basact, "*basact", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.master_collection, "*master_collection", db);
     ReadField<ErrorPolicy_Igno>(dest.base, "base", db);
 
     db.reader->IncPtr(size);
@@ -833,6 +880,12 @@ void DNA::RegisterConverters() {
     converters["Image"] = DNA::FactoryPair(&Structure::Allocate<Image>, &Structure::Convert<Image>);
     converters["CustomData"] = DNA::FactoryPair(&Structure::Allocate<CustomData>, &Structure::Convert<CustomData>);
     converters["CustomDataLayer"] = DNA::FactoryPair(&Structure::Allocate<CustomDataLayer>, &Structure::Convert<CustomDataLayer>);
+    converters["Collection"] = DNA::FactoryPair(&Structure::Allocate<Collection>, &Structure::Convert<Collection>);
+    converters["CollectionChild"] = DNA::FactoryPair(&Structure::Allocate<CollectionChild>, &Structure::Convert<CollectionChild>);
+    converters["CollectionObject"] = DNA::FactoryPair(&Structure::Allocate<CollectionObject>, &Structure::Convert<CollectionObject>);
 }
+
+} // namespace Blender
+} //namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

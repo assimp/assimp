@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -74,8 +74,8 @@ class PbrtExporter
 {
 public:
     /// Constructor for a specific scene to export
-    PbrtExporter(const aiScene* pScene, IOSystem* pIOSystem,
-        const std::string path, const std::string file);
+    PbrtExporter(const aiScene *pScene, IOSystem *pIOSystem,
+            const std::string &path, const std::string &file);
 
     /// Destructor
     virtual ~PbrtExporter();

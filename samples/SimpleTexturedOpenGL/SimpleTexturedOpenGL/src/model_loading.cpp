@@ -23,7 +23,7 @@
 #endif // _MSC_VER
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "contrib/stb_image/stb_image.h"
+#include "contrib/stb/stb_image.h"
 
 #ifdef _MSC_VER
 #pragma warning(default: 4100) // Enable warning 'unreferenced formal parameter'
@@ -579,7 +579,7 @@ void KillGLWindow()			// Properly Kill The Window
 		if (!DestroyWindow(g_hWnd)) // Are We Able To Destroy The Window
 			MessageBox(nullptr, TEXT("Could Not Release hWnd."), TEXT("SHUTDOWN ERROR"), MB_OK | MB_ICONINFORMATION);
 		g_hWnd = nullptr;
-	} 
+	}
 
 	if (g_hInstance)
 	{
@@ -667,7 +667,7 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		dwStyle=WS_OVERLAPPEDWINDOW;					// Windows style
 	}
 
-	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requestes Size
+	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
 	if (nullptr == (g_hWnd=CreateWindowEx(dwExStyle,			// Extended Style For The Window
 								TEXT("OpenGL"),						// Class Name
@@ -727,7 +727,7 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		return FALSE;
 	}
 
-	if (nullptr == (hRC=wglCreateContext(hDC))) 
+	if (nullptr == (hRC=wglCreateContext(hDC)))
 	{
 		abortGLInit("Can't Create A GL Rendering Context.");
 		return FALSE;

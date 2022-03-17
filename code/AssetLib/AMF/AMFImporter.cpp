@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -303,7 +303,7 @@ void AMFImporter::ParseNode_Root() {
     }
     XmlNode node = *root;
     mUnit = ai_tolower(std::string(node.attribute("unit").as_string()));
-    
+
     mVersion = node.attribute("version").as_string();
 
     // Read attributes for node <amf>.
@@ -503,19 +503,9 @@ void AMFImporter::ParseNode_Metadata(XmlNode &node) {
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
-bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "amf") {
-        return true;
-    }
-
-    if (extension.empty() || pCheckSig) {
-        const char *tokens[] = { "<amf" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*pCheckSig*/) const {
+    static const char *tokens[] = { "<amf" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

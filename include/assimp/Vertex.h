@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -93,7 +93,7 @@ namespace Assimp    {
 
 // ------------------------------------------------------------------------------------------------
 /** Intermediate description a vertex with all possible components. Defines a full set of
- *  operators, so you may use such a 'Vertex' in basic arithmetics. All operators are applied
+ *  operators, so you may use such a 'Vertex' in basic arithmetic. All operators are applied
  *  to *all* vertex components equally. This is useful for stuff like interpolation
  *  or subdivision, but won't work if special handling is required for some vertex components. */
 // ------------------------------------------------------------------------------------------------
@@ -135,7 +135,9 @@ public:
     /** Extract a particular vertex from a anim mesh and interleave all components */
     explicit Vertex(const aiAnimMesh* msh, unsigned int idx) {
         ai_assert(idx < msh->mNumVertices);
-        position = msh->mVertices[idx];
+        if (msh->HasPositions()) {
+            position = msh->mVertices[idx];
+        }
 
         if (msh->HasNormals()) {
             normal = msh->mNormals[idx];
@@ -222,7 +224,7 @@ private:
     }
 
     // ----------------------------------------------------------------------------
-    /** This time binary arithmetics of v0 with a floating-point number */
+    /** This time binary arithmetic of v0 with a floating-point number */
     template <template <typename, typename, typename> class op> static Vertex BinaryOp(const Vertex& v0, ai_real f) {
         // this is a heavy task for the compiler to optimize ... *pray*
 
@@ -242,7 +244,7 @@ private:
     }
 
     // ----------------------------------------------------------------------------
-    /** This time binary arithmetics of v0 with a floating-point number */
+    /** This time binary arithmetic of v0 with a floating-point number */
     template <template <typename, typename, typename> class op> static Vertex BinaryOp(ai_real f, const Vertex& v0) {
         // this is a heavy task for the compiler to optimize ... *pray*
 

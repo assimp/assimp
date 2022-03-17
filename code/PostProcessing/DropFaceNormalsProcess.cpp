@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -104,7 +104,7 @@ bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* mesh) {
     if (nullptr == mesh->mNormals) {
         return false;
     }
-    
+
     delete[] mesh->mNormals;
     mesh->mNormals = nullptr;
     return true;

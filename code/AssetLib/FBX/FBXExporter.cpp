@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -498,7 +498,7 @@ void FBXExporter::WriteDocuments ()
     if (!binary) {
         WriteAsciiSectionHeader("Documents Description");
     }
-    
+
     // not sure what the use of multiple documents would be,
     // or whether any end-application supports it
     FBX::Node docs("Documents");
@@ -1258,7 +1258,7 @@ void FBXExporter::WriteObjects ()
             indent = 2;
             vertexcolors.End(outstream, binary, indent, true);
         }
-        
+
         // uvs, if any
         for (size_t uvi = 0; uvi < m->GetNumUVChannels(); ++uvi) {
             if (m->mNumUVComponents[uvi] > 2) {
@@ -1688,6 +1688,10 @@ void FBXExporter::WriteObjects ()
             // link the image data to the texture
             connections.emplace_back("C", "OO", image_uid, texture_uid);
 
+            aiUVTransform trafo;
+            unsigned int max = sizeof(aiUVTransform);
+            aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), (ai_real *)&trafo, &max);
+
             // now write the actual texture node
             FBX::Node tnode("Texture");
             // TODO: some way to determine texture name?
@@ -1698,11 +1702,14 @@ void FBXExporter::WriteObjects ()
             tnode.AddChild("Version", int32_t(202));
             tnode.AddChild("TextureName", texture_name);
             FBX::Node p("Properties70");
+            p.AddP70vectorA("Translation", trafo.mTranslation[0], trafo.mTranslation[1], 0.0);
+            p.AddP70vectorA("Rotation", 0, 0, trafo.mRotation);
+            p.AddP70vectorA("Scaling", trafo.mScaling[0], trafo.mScaling[1], 0.0);
             p.AddP70enum("CurrentTextureBlendMode", 0); // TODO: verify
             //p.AddP70string("UVSet", ""); // TODO: how should this work?
             p.AddP70bool("UseMaterial", 1);
             tnode.AddChild(p);
-            // can't easily detrmine which texture path will be correct,
+            // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
             // these being incorrect is a common problem with FBX anyway.
             tnode.AddChild("FileName", texture_path);
@@ -1744,7 +1751,7 @@ void FBXExporter::WriteObjects ()
         bsnode.AddProperty(blendshape_uid);
         bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Blendshape");
         bsnode.AddProperty("Shape");
-        bsnode.AddChild("Version", int32_t(100));        
+        bsnode.AddChild("Version", int32_t(100));
         bsnode.Begin(outstream, binary, indent);
         bsnode.DumpProperties(outstream, binary, indent);
         bsnode.EndProperties(outstream, binary, indent);
@@ -1796,7 +1803,7 @@ void FBXExporter::WriteObjects ()
             blendchannel_uid, blendshape_name + FBX::SEPARATOR + "SubDeformer", "BlendShapeChannel"
         );
         sdnode.AddChild("Version", int32_t(100));
-        sdnode.AddChild("DeformPercent", float_t(0.0));
+        sdnode.AddChild("DeformPercent", float(0.0));
         FBX::Node p("Properties70");
         p.AddP70numberA("DeformPercent", 0.0);
         sdnode.AddChild(p);
@@ -1870,7 +1877,7 @@ void FBXExporter::WriteObjects ()
     // at the same time we can build a list of all the skeleton nodes,
     // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
-    
+
     //actual bone nodes in fbx, without parenting-up
     std::unordered_set<std::string> setAllBoneNamesInScene;
     for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m)
@@ -1880,7 +1887,7 @@ void FBXExporter::WriteObjects ()
             setAllBoneNamesInScene.insert(pMesh->mBones[b]->mName.data);
     }
     aiMatrix4x4 mxTransIdentity;
-    
+
     // and a map of nodes by bone name, as finding them is annoying.
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
@@ -1908,7 +1915,7 @@ void FBXExporter::WriteObjects ()
             // mark all parent nodes as skeleton as well,
             // up until we find the root node,
             // or else the node containing the mesh,
-            // or else the parent of a node containig the mesh.
+            // or else the parent of a node containing the mesh.
             for (
                 const aiNode* parent = n->mParent;
                 parent && parent != mScene->mRootNode;
@@ -1949,7 +1956,7 @@ void FBXExporter::WriteObjects ()
                     }
                     if (end) { break; }
                 }
-                
+
                 // if it was the skeleton root we can finish here
                 if (end) { break; }
             }
@@ -2718,16 +2725,14 @@ void FBXExporter::WriteModelNodes(
     }
 }
 
-
 void FBXExporter::WriteAnimationCurveNode(
-    StreamWriterLE& outstream,
-    int64_t uid,
-    const std::string& name, // "T", "R", or "S"
-    aiVector3D default_value,
-    std::string property_name, // "Lcl Translation" etc
-    int64_t layer_uid,
-    int64_t node_uid
-) {
+        StreamWriterLE &outstream,
+        int64_t uid,
+        const std::string &name, // "T", "R", or "S"
+        aiVector3D default_value,
+        const std::string &property_name, // "Lcl Translation" etc
+        int64_t layer_uid,
+        int64_t node_uid) {
     FBX::Node n("AnimationCurveNode");
     n.AddProperties(uid, name + FBX::SEPARATOR + "AnimCurveNode", "");
     FBX::Node p("Properties70");
@@ -2741,7 +2746,6 @@ void FBXExporter::WriteAnimationCurveNode(
     // connect to bone
     this->connections.emplace_back("C", "OP", uid, node_uid, property_name);
 }
-
 
 void FBXExporter::WriteAnimationCurve(
     StreamWriterLE& outstream,

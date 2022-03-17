@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -98,7 +98,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Checks whether the scene is already in verbose format.
-    * @param pScene The data to check. 
+    * @param pScene The data to check.
     * @return true if the scene is already in verbose format. */
     static bool IsVerboseFormat(const aiScene* pScene);
 

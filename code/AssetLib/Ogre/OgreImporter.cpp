@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -73,18 +73,14 @@ void OgreImporter::SetupProperties(const Importer *pImp) {
     m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
-bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const {
-    if (!checkSig) {
-        return EndsWith(pFile, ".mesh.xml", false) || EndsWith(pFile, ".mesh", false);
+bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool /*checkSig*/) const {
+    if (EndsWith(pFile, ".mesh.xml", false)) {
+        static const char *tokens[] = { "<mesh>" };
+        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
     }
 
-    if (EndsWith(pFile, ".mesh.xml", false)) {
-        const char *tokens[] = { "<mesh>" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    } else {
-        /// @todo Read and validate first header chunk?
-        return EndsWith(pFile, ".mesh", false);
-    }
+    /// @todo Read and validate first header chunk?
+    return EndsWith(pFile, ".mesh", false);
 }
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler) {
@@ -110,28 +106,27 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
         // Convert to Assimp
         mesh->ConvertToAssimpScene(pScene);
+        return;
     }
     // XML .mesh.xml import
-    else {
-        /// @note XmlReader does not take ownership of f, hence the scoped ptr.
-        std::unique_ptr<IOStream> scopedFile(f);
-        XmlParser xmlParser;
+    /// @note XmlReader does not take ownership of f, hence the scoped ptr.
+    std::unique_ptr<IOStream> scopedFile(f);
+    XmlParser xmlParser;
 
-        //std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
-        //std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
-        xmlParser.parse(scopedFile.get());
-        // Import mesh
-        std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(&xmlParser));
+    //std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
+    //std::unique_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+    xmlParser.parse(scopedFile.get());
+    // Import mesh
+    std::unique_ptr<MeshXml> mesh(OgreXmlSerializer::ImportMesh(&xmlParser));
 
-        // Import skeleton
-        OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());
+    // Import skeleton
+    OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh.get());
 
-        // Import mesh referenced materials
-        ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
+    // Import mesh referenced materials
+    ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
 
-        // Convert to Assimp
-        mesh->ConvertToAssimpScene(pScene);
-    }
+    // Convert to Assimp
+    mesh->ConvertToAssimpScene(pScene);
 }
 
 } // namespace Ogre

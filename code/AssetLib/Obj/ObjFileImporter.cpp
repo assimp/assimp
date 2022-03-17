@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/ObjMaterial.h>
 #include <memory>
 
 static const aiImporterDesc desc = {
@@ -87,16 +88,10 @@ ObjFileImporter::~ObjFileImporter() {
 }
 
 // ------------------------------------------------------------------------------------------------
-//  Returns true, if file is an obj file.
-bool ObjFileImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    if (!checkSig) {
-        //Check File Extension
-        return SimpleExtensionCheck(pFile, "obj");
-    } else {
-        // Check file Header
-        static const char *pTokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 9, 200, false, true);
-    }
+//  Returns true if file is an obj file.
+bool ObjFileImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "mtllib", "usemtl", "v ", "vt ", "vn ", "o ", "g ", "s ", "f " };
+    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens), 200, false, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -162,7 +157,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
 // ------------------------------------------------------------------------------------------------
 //  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene) {
-    if (0L == pModel) {
+    if (nullptr == pModel) {
         return;
     }
 
@@ -468,7 +463,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
             }
 
             // Copy all vertex colors
-            if (!pModel->m_VertexColors.empty()) {
+            if (vertex < pModel->m_VertexColors.size()) {
                 const aiVector3D &color = pModel->m_VertexColors[vertex];
                 pMesh->mColors[0][newIndex] = aiColor4D(color.x, color.y, color.z, 1.0);
             }
@@ -610,6 +605,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
 
         mat->AddProperty<int>(&sm, 1, AI_MATKEY_SHADING_MODEL);
 
+        // Preserve the original illum value
+        mat->AddProperty<int>(&pCurrentMaterial->illumination_model, 1, AI_MATKEY_OBJ_ILLUM);
+
         // Adding material colors
         mat->AddProperty(&pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT);
         mat->AddProperty(&pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -618,6 +616,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         mat->AddProperty(&pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS);
         mat->AddProperty(&pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY);
         mat->AddProperty(&pCurrentMaterial->transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
+        mat->AddProperty(&pCurrentMaterial->roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->metallic, 1, AI_MATKEY_METALLIC_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->sheen, 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->clearcoat_thickness, 1, AI_MATKEY_CLEARCOAT_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->clearcoat_roughness, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+        mat->AddProperty(&pCurrentMaterial->anisotropy, 1, AI_MATKEY_ANISOTROPY_FACTOR);
 
         // Adding refraction index
         mat->AddProperty(&pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI);
@@ -657,6 +661,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         if (0 != pCurrentMaterial->textureBump.length) {
             mat->AddProperty(&pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_HEIGHT(0));
+            if (pCurrentMaterial->bump_multiplier != 1.0) {
+                mat->AddProperty(&pCurrentMaterial->bump_multiplier, 1, AI_MATKEY_OBJ_BUMPMULT_HEIGHT(0));
+            }
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureBumpType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_HEIGHT);
             }
@@ -665,6 +672,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         if (0 != pCurrentMaterial->textureNormal.length) {
             mat->AddProperty(&pCurrentMaterial->textureNormal, AI_MATKEY_TEXTURE_NORMALS(0));
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_NORMALS(0));
+            if (pCurrentMaterial->bump_multiplier != 1.0) {
+                mat->AddProperty(&pCurrentMaterial->bump_multiplier, 1, AI_MATKEY_OBJ_BUMPMULT_NORMALS(0));
+            }
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureNormalType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_NORMALS);
             }
@@ -706,6 +716,39 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_SHININESS(0));
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularityType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_SHININESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureRoughness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRoughnessType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE_ROUGHNESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureMetallic.length) {
+            mat->AddProperty(&pCurrentMaterial->textureMetallic, _AI_MATKEY_TEXTURE_BASE, aiTextureType_METALNESS, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_METALNESS, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureMetallicType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_METALNESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSheen.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSheen, _AI_MATKEY_TEXTURE_BASE, aiTextureType_SHEEN, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_SHEEN, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureSheenType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_SHEEN);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureRMA.length) {
+            // NOTE: glTF importer places Rough/Metal/AO texture in Unknown so doing the same here for consistency.
+            mat->AddProperty(&pCurrentMaterial->textureRMA, _AI_MATKEY_TEXTURE_BASE, aiTextureType_UNKNOWN, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_UNKNOWN, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRMAType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_UNKNOWN);
             }
         }
 

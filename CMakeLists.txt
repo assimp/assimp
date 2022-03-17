@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2021, assimp team
+# Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
 #
@@ -40,20 +40,23 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
+# Disabled importers: m3d for 5.1
+ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
+ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
 # Toggles the use of the hunter package manager
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake")
+  include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.293.tar.gz"
-    SHA1 "e8e5470652db77149d9b38656db2a6c0b7642693"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.0.tar.gz"
+    SHA1 "a3d7f4372b1dcd52faa6ff4a3bd5358e1d0e5efd"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT( Assimp VERSION 5.0.1 )
+PROJECT(Assimp VERSION 5.2.0)
 
 # All supported options ###############################################
 
@@ -131,15 +134,15 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    OFF
 )
 
-IF ( WIN32 )
+IF (WIN32)
   # Use subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
-  OPTION ( ASSIMP_BUILD_ASSIMP_VIEW
-    "If the Assimp view tool is built. (requires DirectX)"
-    OFF )
-
   IF(MSVC)
+    OPTION (ASSIMP_BUILD_ASSIMP_VIEW
+      "If the Assimp view tool is built. (requires DirectX)"
+      OFF )
+
     OPTION( ASSIMP_INSTALL_PDB
       "Install MSVC debug files."
       ON )
@@ -147,6 +150,27 @@ IF ( WIN32 )
       # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
       ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
     ENDIF()
+
+    # Link statically against c/c++ lib to avoid missing redistriburable such as
+    # "VCRUNTIME140.dll not found. Try reinstalling the app.", but give users
+    # a choice to opt for the shared runtime if they want.
+    option(USE_STATIC_CRT "Link against the static runtime libraries." OFF)
+
+    # The CMAKE_CXX_FLAGS vars can be overriden by some Visual Studio generators, so we use an alternative
+    # global method here:
+    if (${USE_STATIC_CRT})
+      add_compile_options(
+          $<$<CONFIG:>:/MT>
+          $<$<CONFIG:Debug>:/MTd>
+          $<$<CONFIG:Release>:/MT>
+      )
+    else()
+      add_compile_options(
+          $<$<CONFIG:>:/MD>
+          $<$<CONFIG:Debug>:/MDd>
+          $<$<CONFIG:Release>:/MD>
+      )
+    endif()
   ENDIF()
 ENDIF()
 
@@ -180,7 +204,9 @@ SET (ASSIMP_SOVERSION 5)
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 if(NOT ASSIMP_HUNTER_ENABLED)
   # Enable C++11 support globally
-  set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_C_STANDARD 99)
 endif()
 
 IF(NOT ASSIMP_IGNORE_GIT_HASH)
@@ -238,10 +264,17 @@ SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 IF( UNIX )
   # Use GNUInstallDirs for Unix predefined directories
   INCLUDE(GNUInstallDirs)
+  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
+  IF( ${OPERATING_SYSTEM} MATCHES "Android")
+  ELSE()
+    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
+      ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 # Grouped compiler settings ########################################
-IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
+IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW)
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_STANDARD 11)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -265,8 +298,9 @@ ELSEIF(MSVC)
   ENDIF()
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
-    ADD_COMPILE_OPTIONS(/wd4351)
+    ADD_COMPILE_OPTIONS(/wd4351)	
   ENDIF()
+  ADD_COMPILE_OPTIONS(/wd4244) #supress warning for double to float conversion if Double precission is activated
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
@@ -277,19 +311,18 @@ ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   ENDIF()
   SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-ELSEIF( CMAKE_COMPILER_IS_MINGW )
+ELSEIF( MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     message(FATAL_ERROR "MinGW is too old to be supported. Please update MinGW and try again.")
   ELSEIF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
     message(WARNING "MinGW is old, if you experience errors, update MinGW.")
   ENDIF()
   IF(NOT ASSIMP_HUNTER_ENABLED)
-    SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
   SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -O3 ${CMAKE_CXX_FLAGS}")
   SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-  ADD_DEFINITIONS( -U__STRICT_ANSI__ )
 ENDIF()
 
 IF ( IOS AND NOT ASSIMP_HUNTER_ENABLED)
@@ -336,9 +369,24 @@ INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # Set Assimp project output directory variables.
-SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
-SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
-SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for archive output files")
+# Will respect top-level CMAKE_*_OUTPUT_DIRECTORY variables if any are set.
+IF(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for runtime output files")
+ELSE()
+  SET(ASSIMP_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
+
+IF(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin" CACHE STRING "Path for library output files")
+ELSE()
+  SET(ASSIMP_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
+
+IF(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+  SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib" CACHE STRING "Path for library output files")
+ELSE()
+  SET(ASSIMP_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} CACHE STRING "Path for runtime output files")
+ENDIF()
 
 # Macro used to set the output directories of a target to the
 # respective Assimp output directories.
@@ -397,14 +445,14 @@ set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 IF(ASSIMP_HUNTER_ENABLED)
   set(CONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-hunter-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-hunter-config.cmake.in")
   set(NAMESPACE "${PROJECT_NAME}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
   set(VERSION_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
   set(PROJECT_CONFIG "${GENERATED_DIR}/${PROJECT_NAME}Config.cmake")
 ELSE()
   set(CONFIG_INSTALL_DIR "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}")
-  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake/assimp-plain-config.cmake.in")
+  set(CMAKE_CONFIG_TEMPLATE_FILE "cmake-modules/assimp-plain-config.cmake.in")
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
   set(NAMESPACE "${PROJECT_NAME_LOWERCASE}::")
   set(TARGETS_EXPORT_NAME "${PROJECT_NAME_LOWERCASE}Targets")
@@ -667,11 +715,13 @@ ENDIF()
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
-  IF ( WIN32 )
+  IF (WIN32)
     OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" OFF )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
+  ELSE()
+    MESSAGE("Building Assimp Viewer only supported on Windows.")
   ENDIF ()
   # The command line tool
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
@@ -759,7 +809,7 @@ if(WIN32)
 
   IF(MSVC_TOOLSET_VERSION)
     SET(MSVC_PREFIX "vc${MSVC_TOOLSET_VERSION}")
-    SET(ASSIMP_MSVC_VERSION ${MCVS_PREFIX})
+    SET(ASSIMP_MSVC_VERSION ${MSVC_PREFIX})
   ELSE()
     IF(MSVC12)
       SET(ASSIMP_MSVC_VERSION "vc120")

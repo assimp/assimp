@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -101,7 +101,7 @@ std::string GetLineAndColumnText(unsigned int line, unsigned int column)
 std::string GetTokenText(const Token* tok)
 {
     if(tok->IsBinary()) {
-        return static_cast<std::string>( Formatter::format() << 
+        return static_cast<std::string>( Formatter::format() <<
             " (" << TokenTypeString(tok->Type()) <<
             ", offset 0x" << std::hex << tok->Offset() << ") " );
     }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+
+#include <utility>
 
 namespace Assimp {
 namespace FBX {
@@ -172,10 +174,8 @@ PropertyTable::PropertyTable()
 }
 
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps)
-: templateProps(templateProps)
-, element(&element)
-{
+PropertyTable::PropertyTable(const Element &element, std::shared_ptr<const PropertyTable> templateProps) :
+        templateProps(std::move(templateProps)), element(&element) {
     const Scope& scope = GetRequiredScope(element);
     for(const ElementMap::value_type& v : scope.Elements()) {
         if(v.first != "P") {
@@ -198,7 +198,6 @@ PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const Prope
         lazyProps[name] = v.second;
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()

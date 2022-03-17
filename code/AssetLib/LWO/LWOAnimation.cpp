@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -83,9 +83,13 @@ AnimResolver::AnimResolver(std::list<Envelope> &_envelopes, double tick) :
         (*it).old_first = 0;
         (*it).old_last = (*it).keys.size() - 1;
 
-        if ((*it).keys.empty()) continue;
+        if ((*it).keys.empty()) {
+            continue;
+        }
+        if ((int)(*it).type < 1 || (int)(*it).type>EnvelopeType_Unknown) {
+            continue;
+        }
         switch ((*it).type) {
-
         // translation
         case LWO::EnvelopeType_Position_X:
             trans_x = &*it;

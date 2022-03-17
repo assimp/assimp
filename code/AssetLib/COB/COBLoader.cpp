@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -103,17 +103,9 @@ COBImporter::~COBImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool COBImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string &extension = GetExtension(pFile);
-    if (extension == "cob" || extension == "scn" || extension == "COB" || extension == "SCN") {
-        return true;
-    }
-
-    else if ((!extension.length() || checkSig) && pIOHandler) {
-        const char *tokens[] = { "Caligary" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-    return false;
+bool COBImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "Caligary" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -230,7 +222,7 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTexture(std::shared_ptr<Texture> tex, aiMaterial *out, aiTextureType type) {
+void ConvertTexture(const std::shared_ptr<Texture> &tex, aiMaterial *out, aiTextureType type) {
     const aiString path(tex->path);
     out->AddProperty(&path, AI_MATKEY_TEXTURE(type, 0));
     out->AddProperty(&tex->transform, 1, AI_MATKEY_UVTRANSFORM(type, 0));
@@ -586,7 +578,7 @@ void COBImporter::ReadUnit_Ascii(Scene &out, LineSplitter &splitter, const Chunk
         return;
     }
 
-    // parent chunks preceede their childs, so we should have the
+    // parent chunks preceede their children, so we should have the
     // corresponding chunk already.
     for (std::shared_ptr<Node> &nd : out.nodes) {
         if (nd->id == nfo.parent_id) {
@@ -668,7 +660,7 @@ void COBImporter::ReadCame_Ascii(Scene &out, LineSplitter &splitter, const Chunk
 
     ReadBasicNodeInfo_Ascii(msh, ++splitter, nfo);
 
-    // skip the next line, we don't know this differenciation between a
+    // skip the next line, we don't know this differentiation between a
     // standard camera and a panoramic camera.
     ++splitter;
 }
@@ -884,7 +876,7 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
         std::string type;
         type += reader->GetI1();
         type += reader->GetI1();
-        type += reader->GetI1(); 
+        type += reader->GetI1();
         type += reader->GetI1();
 
         ChunkInfo nfo;
@@ -1169,7 +1161,7 @@ void COBImporter::ReadUnit_Binary(COB::Scene &out, StreamReaderLE &reader, const
 
     const chunk_guard cn(nfo, reader);
 
-    // parent chunks preceede their childs, so we should have the
+    // parent chunks preceede their children, so we should have the
     // corresponding chunk already.
     for (std::shared_ptr<Node> &nd : out.nodes) {
         if (nd->id == nfo.parent_id) {

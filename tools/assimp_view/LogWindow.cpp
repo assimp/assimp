@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -128,16 +128,14 @@ void CMyLogStream::write(const char *message) {
 //-------------------------------------------------------------------------------
 void CLogWindow::Clear() {
     this->szText = AI_VIEW_RTF_LOG_HEADER;
-    ;
     this->szPlainText = "";
-
     this->Update();
 }
 
 //-------------------------------------------------------------------------------
 void CLogWindow::Update() {
     if (this->bIsVisible) {
-        SETTEXTEX sInfo;
+        SETTEXTEX sInfo = {};
         sInfo.flags = ST_DEFAULT;
         sInfo.codepage = CP_ACP;
 
@@ -148,7 +146,7 @@ void CLogWindow::Update() {
 
 //-------------------------------------------------------------------------------
 void CLogWindow::Save() {
-    char szFileName[MAX_PATH];
+    char szFileName[MAX_PATH] = {};
 
     DWORD dwTemp = MAX_PATH;
     if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "LogDestination", nullptr, nullptr, (BYTE *)szFileName, &dwTemp)) {
@@ -228,7 +226,7 @@ void CLogWindow::WriteLine(const char *message) {
     this->szText.append("\\par}}");
 
     if (this->bIsVisible && this->bUpdate) {
-        SETTEXTEX sInfo;
+        SETTEXTEX sInfo = {};
         sInfo.flags = ST_DEFAULT;
         sInfo.codepage = CP_ACP;
 

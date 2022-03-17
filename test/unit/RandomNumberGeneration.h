@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -53,11 +53,11 @@ class RandomUniformRealGenerator {
 public:
     RandomUniformRealGenerator() :
             dist_(),
-            rd_(), 
+            rd_(),
             re_(rd_())  {
         // empty
     }
-    
+
     RandomUniformRealGenerator(T min, T max) :
             dist_(min, max),
             rd_(),

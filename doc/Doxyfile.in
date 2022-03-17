@@ -32,13 +32,13 @@ PROJECT_NAME           = Assimp
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = "v4.1. (December 2018)"
+PROJECT_NUMBER         = "v5.2.2 (January 2022)"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description 
 # for a project that appears at the top of each page and should give viewer 
 # a quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = 
+PROJECT_BRIEF          = The Asset-Importer-Lib API documentation.
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is 
 # included in the documentation. The maximum height of the logo should not 
@@ -197,7 +197,7 @@ SEPARATE_MEMBER_PAGES  = NO
 # The TAB_SIZE tag can be used to set the number of spaces in a tab. 
 # Doxygen uses this value to replace tabs by spaces in code fragments.
 
-TAB_SIZE               = 8
+TAB_SIZE               = 4
 
 # This tag can be used to specify a number of aliases that acts 
 # as commands in the documentation. An alias has the form "name=value". 
@@ -636,7 +636,7 @@ WARN_IF_DOC_ERROR      = YES
 # wrong or incomplete parameter documentation, but not about the absence of 
 # documentation.
 
-WARN_NO_PARAMDOC       = NO
+WARN_NO_PARAMDOC       = YES
 
 # The WARN_FORMAT tag determines the format of the warning messages that 
 # doxygen can produce. The string should contain the $file, $line, and $text 
@@ -663,11 +663,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @doxy_main_page@ \
-                         @PROJECT_SOURCE_DIR@ \
-                         @PROJECT_BINARY_DIR@ \
-                         @PROJECT_SOURCE_DIR@/include/ \
-                         @PROJECT_SOURCE_DIR@/doc/dox.h \
-                         @PROJECT_SOURCE_DIR@/code/BaseImporter.h
+                         @PROJECT_SOURCE_DIR@/include/
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -690,28 +686,10 @@ FILE_PATTERNS          = *.c \
                          *.cxx \
                          *.cpp \
                          *.c++ \
-                         *.d \
-                         *.java \
-                         *.ii \
-                         *.ixx \
-                         *.ipp \
-                         *.i++ \
                          *.inl \
                          *.h \
-                         *.hh \
-                         *.hxx \
                          *.hpp \
-                         *.h++ \
-                         *.idl \
-                         *.odl \
-                         *.cs \
-                         *.php \
-                         *.php3 \
-                         *.inc \
-                         *.m \
-                         *.mm \
-                         *.dox \
-                         *.py
+                         *.dox
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories 
 # should be searched for input files as well. Possible values are YES and NO. 
@@ -725,7 +703,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is 
 # run.
 
-EXCLUDE                = irrXML.h
+EXCLUDE                = contrib/*
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
@@ -739,8 +717,7 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories 
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */.svn/* \
-                         */.svn
+EXCLUDE_PATTERNS       = */.git/* 
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the 
@@ -901,7 +878,7 @@ IGNORE_PREFIX          =
 # If the GENERATE_HTML tag is set to YES (the default) Doxygen will 
 # generate HTML output.
 
-GENERATE_HTML          = YES
+GENERATE_HTML          = NO
 
 # The HTML_OUTPUT tag is used to specify where the HTML docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
@@ -1484,7 +1461,7 @@ MAN_LINKS              = NO
 # generate an XML file that captures the structure of 
 # the code including all documentation.
 
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 

@@ -20,27 +20,27 @@
 #import <Quartz/Quartz.h>
 
 
-@interface MyDocument : NSPersistentDocument 
+@interface MyDocument : NSPersistentDocument
 {
     CVDisplayLinkRef _displayLink;
     NSOpenGLContext* _glContext;
     NSOpenGLPixelFormat* _glPixelFormat;
-    
+
     NSView* _view;
-    
+
     // Assimp Stuff
     aiScene* _scene;
     aiVector3D scene_min, scene_max, scene_center;
-    double normalizedScale;    
-    
+    double normalizedScale;
+
     // Our array of textures.
     GLuint *textureIds;
-    
+
     // only used if we use
-    NSMutableArray* modelMeshes;   
+    NSMutableArray* modelMeshes;
     BOOL builtBuffers;
-    
-    NSMutableDictionary* textureDictionary;	// Array of Dicionaries that map image filenames to textureIds      
+
+    NSMutableDictionary* textureDictionary;	// Array of Dictionaries that map image filenames to textureIds
 }
 
 @property (retain) IBOutlet NSView* _view;

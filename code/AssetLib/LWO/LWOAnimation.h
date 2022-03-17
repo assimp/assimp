@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -114,7 +114,7 @@ enum PrePostBehaviour
 /** \brief Data structure for a LWO animation keyframe
  */
 struct Key {
-    Key() AI_NO_EXCEPT 
+    Key() AI_NO_EXCEPT
     : time()
     , value()
     , inter(IT_LINE)

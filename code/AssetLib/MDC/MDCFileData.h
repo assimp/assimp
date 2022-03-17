@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -120,13 +120,13 @@ struct Surface {
     , ulFlags()
     , ulNumCompFrames()
     , ulNumBaseFrames()
-    , ulNumShaders() 
+    , ulNumShaders()
     , ulNumVertices()
     , ulNumTriangles()
     , ulOffsetTriangles()
     , ulOffsetShaders()
     , ulOffsetTexCoords()
-    , ulOffsetBaseVerts() 
+    , ulOffsetBaseVerts()
     , ulOffsetCompVerts()
     , ulOffsetFrameBaseFrames()
     , ulOffsetFrameCompFrames()

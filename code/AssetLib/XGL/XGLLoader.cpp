@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -44,27 +44,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 
 #include "XGLLoader.h"
+#include "Common/Compression.h"
+
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
-
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StreamReader.h>
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
-#include <cctype>
-#include <memory>
+//#include <cctype>
+//#include <memory>
 
 using namespace Assimp;
-
-// zlib is needed for compressed XGL files
-#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#    include <zlib.h>
-#  else
-#    include <contrib/zlib/zlib.h>
-#  endif
-#endif
 
 namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
 
@@ -73,6 +65,7 @@ const char *LogFunctions<XGLImporter>::Prefix() {
     static auto prefix = "XGL: ";
 	return prefix;
 }
+
 } // namespace Assimp
 
 static const aiImporterDesc desc = {
@@ -100,28 +93,13 @@ XGLImporter::XGLImporter() :
 // Destructor, private as well
 XGLImporter::~XGLImporter() {
 	delete mXmlParser;
-    mXmlParser = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-	/* NOTE: A simple check for the file extension is not enough
-     * here. XGL and ZGL are ok, but xml is too generic
-     * and might be collada as well. So open the file and
-     * look for typical signal tokens.
-     */
-	const std::string extension = GetExtension(pFile);
-
-	if (extension == "xgl" || extension == "zgl") {
-		return true;
-	} else if (extension == "xml" || checkSig) {
-		ai_assert(pIOHandler != NULL);
-
-		const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 3);
-	}
-	return false;
+bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+	static const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -133,8 +111,8 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
-	std::vector<Bytef> uncompressed;
+ #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
+	std::vector<char> uncompressed;
 #endif
 
 	m_scene = pScene;
@@ -152,48 +130,16 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 #else
 		std::unique_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
 
-		// build a zlib stream
-		z_stream zstream;
-		zstream.opaque = Z_NULL;
-		zstream.zalloc = Z_NULL;
-		zstream.zfree = Z_NULL;
-		zstream.data_type = Z_BINARY;
-
-		// raw decompression without a zlib or gzip header
-		inflateInit2(&zstream, -MAX_WBITS);
-
-		// skip two extra bytes, zgl files do carry a crc16 upfront (I think)
-		raw_reader->IncPtr(2);
-
-		zstream.next_in = reinterpret_cast<Bytef *>(raw_reader->GetPtr());
-		zstream.avail_in = (uInt) raw_reader->GetRemainingSize();
-
-		size_t total = 0l;
-
-		// TODO: be smarter about this, decompress directly into heap buffer
-		// and decompress the data .... do 1k chunks in the hope that we won't kill the stack
-#define MYBLOCK 1024
-		Bytef block[MYBLOCK];
-		int ret;
-		do {
-			zstream.avail_out = MYBLOCK;
-			zstream.next_out = block;
-			ret = inflate(&zstream, Z_NO_FLUSH);
-
-			if (ret != Z_STREAM_END && ret != Z_OK) {
-				ThrowException("Failure decompressing this file using gzip, seemingly it is NOT a compressed .XGL file");
-			}
-			const size_t have = MYBLOCK - zstream.avail_out;
-			total += have;
-			uncompressed.resize(total);
-			memcpy(uncompressed.data() + total - have, block, have);
-		} while (ret != Z_STREAM_END);
-
-		// terminate zlib
-		inflateEnd(&zstream);
-
+        Compression compression;
+        size_t total = 0l;
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, -Compression::MaxWBits)) {
+            // skip two extra bytes, zgl files do carry a crc16 upfront (I think)
+            raw_reader->IncPtr(2);
+            total = compression.decompress((unsigned char *)raw_reader->GetPtr(), raw_reader->GetRemainingSize(), uncompressed);
+            compression.close();
+        }
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()), total));
 #endif
 	}
 
@@ -240,7 +186,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &s = ai_stdStrToLower(currentNode.name());
-        
+
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
 		if (s == "lighting") {
@@ -250,11 +196,11 @@ void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
 		}
 	}
 
-	aiNode *const nd = ReadObject(node, scope, true);
+	aiNode *const nd = ReadObject(node, scope);
 	if (!nd) {
 		ThrowException("failure reading <world>");
 	}
-	if (!nd->mName.length) {
+	if (nd->mName.length == 0) {
 		nd->mName.Set("WORLD");
 	}
 
@@ -296,20 +242,18 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 }
 
 // ------------------------------------------------------------------------------------------------
-aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope, bool skipFirst/*, const char *closetag */) {
+aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 	aiNode *nd = new aiNode;
 	std::vector<aiNode *> children;
 	std::vector<unsigned int> meshes;
 
 	try {
 		for (XmlNode &child : node.children()) {
-
-			skipFirst = false;
-
 			const std::string &s = ai_stdStrToLower(child.name());
 			if (s == "mesh") {
 				const size_t prev = scope.meshes_linear.size();
-				if (ReadMesh(child, scope)) {
+                bool empty;
+				if (ReadMesh(child, scope, empty)) {
 					const size_t newc = scope.meshes_linear.size();
 					for (size_t i = 0; i < newc - prev; ++i) {
 						meshes.push_back(static_cast<unsigned int>(i + prev));
@@ -457,12 +401,12 @@ aiMesh *XGLImporter::ToOutputMesh(const TempMaterialMesh &m) {
 	mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 	std::copy(m.positions.begin(), m.positions.end(), mesh->mVertices);
 
-	if (m.normals.size()) {
+	if (!m.normals.empty()) {
 		mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 		std::copy(m.normals.begin(), m.normals.end(), mesh->mNormals);
 	}
 
-	if (m.uvs.size()) {
+	if (!m.uvs.empty()) {
 		mesh->mNumUVComponents[0] = 2;
 		mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
 
@@ -493,12 +437,12 @@ aiMesh *XGLImporter::ToOutputMesh(const TempMaterialMesh &m) {
 }
 
 // ------------------------------------------------------------------------------------------------
-bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
+bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope, bool &empty) {
 	TempMesh t;
 
 	std::map<unsigned int, TempMaterialMesh> bymat;
     const unsigned int mesh_id = ReadIDAttr(node);
-
+    bool empty_mesh = true;
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
 
@@ -557,6 +501,9 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 					mid = ResolveMaterialRef(sub_child, scope);
 				}
 			}
+            if (has[0] || has[1] || has[2]) {
+                empty_mesh = false;
+            }
 
 			if (mid == ~0u) {
 				ThrowException("missing material index");
@@ -598,7 +545,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 	}
 
 	// finally extract output meshes and add them to the scope
-	typedef std::pair<const unsigned int, TempMaterialMesh> pairt;
+	using pairt = std::pair<const unsigned int, TempMaterialMesh>;
 	for (const pairt &p : bymat) {
 		aiMesh *const m = ToOutputMesh(p.second);
 		scope.meshes_linear.push_back(m);
@@ -608,6 +555,11 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 			scope.meshes.insert(std::pair<unsigned int, aiMesh *>(mesh_id, m));
 		}
 	}
+    if (empty_mesh) {
+        LogWarn("Mesh is empty, skipping.");
+        empty = empty_mesh;
+        return false;
+    }
 
 	// no id == not a reference, insert this mesh right *here*
 	return mesh_id == ~0u;
@@ -623,7 +575,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 
 	const int id = ReadIndexFromText(node);
 
-	std::map<unsigned int, aiMaterial *>::iterator it = scope.materials.find(id), end = scope.materials.end();
+	auto it = scope.materials.find(id), end = scope.materials.end();
 	if (it == end) {
 		ThrowException("<matref> index out of range");
 	}
@@ -647,7 +599,7 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
     const unsigned int mat_id = ReadIDAttr(node);
 
-	aiMaterial *mat(new aiMaterial);
+	auto *mat(new aiMaterial);
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "amb") {
@@ -777,7 +729,7 @@ aiVector2D XGLImporter::ReadVec2(XmlNode &node) {
     std::string val;
     XmlParser::getValueAsString(node, val);
     const char *s = val.c_str();
-	ai_real v[2];
+    ai_real v[2] = {};
 	for (int i = 0; i < 2; ++i) {
 		if (!SkipSpaces(&s)) {
 			LogError("unexpected EOL, failed to parse vec2");
@@ -832,4 +784,4 @@ aiColor3D XGLImporter::ReadCol3(XmlNode &node) {
 	return aiColor3D(v.x, v.y, v.z);
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_XGL_IMPORTER

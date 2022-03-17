@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -84,8 +84,8 @@ RAWImporter::~RAWImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool RAWImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return SimpleExtensionCheck(pFile, "raw");
+bool RAWImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+    return SimpleExtensionCheck(filename, "raw");
 }
 
 // ------------------------------------------------------------------------------------------------

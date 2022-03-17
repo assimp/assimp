@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 
-// internal headers
 #include "STLLoader.h"
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
@@ -141,20 +140,9 @@ STLImporter::~STLImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "stl") {
-        return true;
-    } else if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        const char *tokens[] = { "STL", "solid" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
-    }
-
-    return false;
+bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "STL", "solid" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -372,7 +360,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mVertices[i].x = positionBuffer[i].x;
-                pMesh->mVertices[i].y = positionBuffer[i].y;                
+                pMesh->mVertices[i].y = positionBuffer[i].y;
                 pMesh->mVertices[i].z = positionBuffer[i].z;
             }
             positionBuffer.clear();
@@ -382,7 +370,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
             for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
                 pMesh->mNormals[i].x = normalBuffer[i].x;
-                pMesh->mNormals[i].y = normalBuffer[i].y;                
+                pMesh->mNormals[i].y = normalBuffer[i].y;
                 pMesh->mNormals[i].z = normalBuffer[i].z;
             }
             normalBuffer.clear();

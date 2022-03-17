@@ -34,7 +34,8 @@ if os.name=='posix':
         additional_dirs.extend([item for item in os.environ['LD_LIBRARY_PATH'].split(':') if item])
 
     # check if running from anaconda.
-    if "conda" or "continuum" in sys.version.lower():
+    anaconda_keywords = ("conda", "continuum")
+    if any(k in sys.version.lower() for k in anaconda_keywords):
       cur_path = get_python_lib()
       pattern = re.compile('.*\/lib\/')
       conda_lib = pattern.match(cur_path).group()

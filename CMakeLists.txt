@@ -164,12 +164,6 @@ IF (WIN32)
           $<$<CONFIG:Debug>:/MTd>
           $<$<CONFIG:Release>:/MT>
       )
-    else()
-      add_compile_options(
-          $<$<CONFIG:>:/MD>
-          $<$<CONFIG:Debug>:/MDd>
-          $<$<CONFIG:Release>:/MD>
-      )
     endif()
   ENDIF()
 ENDIF()

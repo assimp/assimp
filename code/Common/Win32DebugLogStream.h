@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -71,19 +71,19 @@ public:
 };
 
 // ---------------------------------------------------------------------------
-inline 
-Win32DebugLogStream::Win32DebugLogStream(){ 
+inline
+Win32DebugLogStream::Win32DebugLogStream(){
     // empty
 }
 
 // ---------------------------------------------------------------------------
-inline 
+inline
 Win32DebugLogStream::~Win32DebugLogStream(){
     // empty
 }
 
 // ---------------------------------------------------------------------------
-inline 
+inline
 void Win32DebugLogStream::write(const char* message) {
     ::OutputDebugStringA( message);
 }

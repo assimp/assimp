@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -97,7 +97,7 @@ public:
 
     static void BuildBoneList(aiNode *current_node, const aiNode *root_node,
                                  const aiScene *scene,
-                                 std::vector<aiBone *> &bones);                        
+                                 std::vector<aiBone *> &bones);
 
     static void BuildBoneStack(aiNode *current_node, const aiNode *root_node,
                                   const aiScene *scene,

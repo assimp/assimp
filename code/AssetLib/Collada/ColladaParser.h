@@ -2,7 +2,7 @@
  Open Asset Import Library (assimp)
  ----------------------------------------------------------------------
 
- Copyright (c) 2006-2021, assimp team
+ Copyright (c) 2006-2022, assimp team
 
  All rights reserved.
 
@@ -43,6 +43,7 @@
  *  @brief Defines the parser helper class for the collada loader
  */
 
+#pragma once
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 

@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/ParsingUtils.h>
-#include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <cstdlib>
@@ -56,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
+constexpr char ObjFileParser::DEFAULT_MATERIAL[];
 
 ObjFileParser::ObjFileParser() :
         m_DataIt(),
@@ -118,6 +117,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     unsigned int processed = 0;
     size_t lastFilePos(0);
 
+    bool insideCstype = false;
     std::vector<char> buffer;
     while (streamBuffer.getNextDataLine(buffer, '\\')) {
         m_DataIt = buffer.begin();
@@ -130,6 +130,18 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             lastFilePos = filePos;
             progressCounter++;
             m_progress->UpdateFileRead(processed, progressTotal);
+        }
+
+        // handle cstype section end (http://paulbourke.net/dataformats/obj/)
+        if (insideCstype) {
+            switch (*m_DataIt) {
+            case 'e': {
+                std::string name;
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+                insideCstype = name != "end";
+            } break;
+            }
+            goto pf_skip_line;
         }
 
         // parse line
@@ -218,6 +230,14 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         case 'o': // Parse object name
         {
             getObjectName();
+        } break;
+
+        case 'c': // handle cstype section start
+        {
+            std::string name;
+            getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            insideCstype = name == "cstype";
+            goto pf_skip_line;
         } break;
 
         default: {

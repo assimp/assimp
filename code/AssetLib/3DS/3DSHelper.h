@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/light.h>
 #include <assimp/material.h>
 #include <assimp/qnan.h>
-#include <stdio.h> //sprintf
+#include <cstdio> //sprintf
 
 namespace Assimp {
 namespace D3DS {
@@ -259,7 +259,7 @@ namespace Discreet3DS {
         // Specifies the file name of a texture
         CHUNK_MAPFILE = 0xA300,
 
-        // Specifies whether a materail requires two-sided rendering
+        // Specifies whether a material requires two-sided rendering
         CHUNK_MAT_TWO_SIDE = 0xA081,
         // ********************************************************************
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_sheen: full
  *   KHR_materials_clearcoat: full
  *   KHR_materials_transmission: full
+ *   KHR_materials_volume: full
+ *   KHR_materials_ior: full
  */
 #ifndef GLTF2ASSETWRITER_H_INC
 #define GLTF2ASSETWRITER_H_INC

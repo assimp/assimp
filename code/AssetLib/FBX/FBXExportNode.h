@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,7 @@ namespace FBX {
 }
 
 class FBX::Node {
-public: 
+public:
     // TODO: accessors
     std::string name; // node name
     std::vector<FBX::FBXExportProperty> properties; // node properties

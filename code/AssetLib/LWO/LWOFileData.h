@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -64,6 +64,7 @@ namespace LWO {
 
 #define AI_LWO_FOURCC_LWOB AI_IFF_FOURCC('L', 'W', 'O', 'B')
 #define AI_LWO_FOURCC_LWO2 AI_IFF_FOURCC('L', 'W', 'O', '2')
+#define AI_LWO_FOURCC_LWO3 AI_IFF_FOURCC('L', 'W', 'O', '3')
 #define AI_LWO_FOURCC_LXOB AI_IFF_FOURCC('L', 'X', 'O', 'B')
 
 // chunks specific to the LWOB format
@@ -247,6 +248,57 @@ namespace LWO {
 #define AI_LWO_MORF AI_IFF_FOURCC('M', 'O', 'R', 'F')
 #define AI_LWO_SPOT AI_IFF_FOURCC('S', 'P', 'O', 'T')
 #define AI_LWO_PICK AI_IFF_FOURCC('P', 'I', 'C', 'K')
+
+// Surface Part
+#define AI_LWO_NODS AI_IFF_FOURCC('N', 'O', 'D', 'S')
+#define AI_LWO_NNDS AI_IFF_FOURCC('N', 'N', 'D', 'S')
+#define AI_LWO_NTAG AI_IFF_FOURCC('N', 'T', 'A', 'G')
+#define AI_LWO_NRNM AI_IFF_FOURCC('N', 'R', 'N', 'M')
+#define AI_LWO_NRME AI_IFF_FOURCC('N', 'R', 'M', 'E')
+#define AI_LWO_NDTA AI_IFF_FOURCC('N', 'D', 'T', 'A')
+#define AI_LWO_ATTR AI_IFF_FOURCC('A', 'T', 'T', 'R')
+#define AI_LWO_VERS AI_IFF_FOURCC('V', 'E', 'R', 'S')
+#define AI_LWO_ENUM AI_IFF_FOURCC('E', 'N', 'U', 'M')
+#define AI_LWO_ENTR AI_IFF_FOURCC('E', 'N', 'T', 'R')
+#define AI_LWO_NAME AI_IFF_FOURCC('N', 'A', 'M', 'E')
+#define AI_LWO_FLAG AI_IFF_FOURCC('F', 'L', 'A', 'G')
+#define AI_LWO_TAG AI_IFF_FOURCC('T', 'A', 'G', ' ')
+#define AI_LWO_VALU AI_IFF_FOURCC('V', 'A', 'L', 'U')
+#define AI_LWO_IBGC AI_IFF_FOURCC('I', 'B', 'G', 'C')
+#define AI_LWO_IOPC AI_IFF_FOURCC('I', 'O', 'P', 'C')
+#define AI_LWO_IIMG AI_IFF_FOURCC('I', 'I', 'M', 'G')
+#define AI_LWO_TXTR AI_IFF_FOURCC('T', 'X', 'T', 'R')
+
+#define AI_LWO_IFAL AI_IFF_FOURCC('I', 'F', 'A', 'L')
+#define AI_LWO_ISCL AI_IFF_FOURCC('I', 'S', 'C', 'L')
+#define AI_LWO_IPOS AI_IFF_FOURCC('I', 'P', 'O', 'S')
+#define AI_LWO_IROT AI_IFF_FOURCC('I', 'R', 'O', 'T')
+#define AI_LWO_IBMP AI_IFF_FOURCC('I', 'B', 'M', 'P')
+#define AI_LWO_IUTD AI_IFF_FOURCC('I', 'U', 'T', 'D')
+#define AI_LWO_IVTD AI_IFF_FOURCC('I', 'V', 'T', 'D')
+
+#define AI_LWO_IPIX AI_IFF_FOURCC('I', 'P', 'I', 'X')
+#define AI_LWO_IMIP AI_IFF_FOURCC('I', 'M', 'I', 'P')
+#define AI_LWO_IMOD AI_IFF_FOURCC('I', 'M', 'O', 'D')
+#define AI_LWO_AMOD AI_IFF_FOURCC('A', 'M', 'O', 'D')
+#define AI_LWO_IINV AI_IFF_FOURCC('I', 'I', 'N', 'V')
+#define AI_LWO_INCR AI_IFF_FOURCC('I', 'N', 'C', 'R')
+#define AI_LWO_IAXS AI_IFF_FOURCC('I', 'A', 'X', 'S')
+#define AI_LWO_IFOT AI_IFF_FOURCC('I', 'F', 'O', 'T')
+#define AI_LWO_ITIM AI_IFF_FOURCC('I', 'T', 'I', 'M')
+#define AI_LWO_IWRL AI_IFF_FOURCC('I', 'W', 'R', 'L')
+#define AI_LWO_IUTI AI_IFF_FOURCC('I', 'U', 'T', 'I')
+#define AI_LWO_IINX AI_IFF_FOURCC('I', 'I', 'N', 'X')
+#define AI_LWO_IINY AI_IFF_FOURCC('I', 'I', 'N', 'Y')
+#define AI_LWO_IINZ AI_IFF_FOURCC('I', 'I', 'N', 'Z')
+#define AI_LWO_IREF AI_IFF_FOURCC('I', 'R', 'E', 'F')
+#define AI_LWO_IMST AI_IFF_FOURCC('I', 'M', 'S', 'T')
+#define AI_LWO_VPVL AI_IFF_FOURCC('V', 'P', 'V', 'L')
+#define AI_LWO_VPRM AI_IFF_FOURCC('V', 'P', 'R', 'M')
+#define AI_LWO_IMAP AI_IFF_FOURCC('I', 'M', 'A', 'P')
+#define AI_LWO_IUVI AI_IFF_FOURCC('I', 'U', 'V', 'I')
+#define AI_LWO_IUTL AI_IFF_FOURCC('I', 'U', 'T', 'L')
+#define AI_LWO_IVTL AI_IFF_FOURCC('I', 'V', 'T', 'L')
 
 // MODO extension - per-vertex normal vectors
 #define AI_LWO_MODO_NORM AI_IFF_FOURCC('N', 'O', 'R', 'M')
@@ -553,6 +605,31 @@ struct Surface {
 
     //! Intensity of additive blending
     float mAdditiveTransparency;
+};
+
+// ---------------------------------------------------------------------------
+/** \brief Data structure for a LWO node
+ */
+struct Node {
+    // Name of node
+    std::string mName;
+
+    // RefName of node
+    std::string mRefName;
+
+    // Ref FileName
+    std::string fileName;
+};
+
+struct NodeAttribute {
+    //! Color of the surface
+    aiColor3D mColor;
+
+    //! true for two-sided materials
+    bool bDoubleSided;
+
+    //! Various material parameters
+    float mDiffuseValue, mSpecularValue, mTransparency, mGlossiness, mLuminosity, mColorHighlights;
 };
 
 // ---------------------------------------------------------------------------

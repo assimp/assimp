@@ -54,6 +54,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
         aiProcessPreset_TargetRealtime_Quality, nullptr );
 
     aiDetachLogStream(&stream);
-    
+
     return 0;
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#include <assimp/Base64.hpp>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
@@ -260,7 +261,7 @@ namespace glTF2 {
             if (img.HasData()) {
                 uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
                 uri += ";base64,";
-                glTFCommon::Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
+                Base64::Encode(img.GetData(), img.GetDataLength(), uri);
             }
             else {
                 uri = img.uri;
@@ -452,7 +453,7 @@ namespace glTF2 {
             WriteTex(materialClearcoat, clearcoat.clearcoatTexture, "clearcoatTexture", w.mAl);
             WriteTex(materialClearcoat, clearcoat.clearcoatRoughnessTexture, "clearcoatRoughnessTexture", w.mAl);
             WriteTex(materialClearcoat, clearcoat.clearcoatNormalTexture, "clearcoatNormalTexture", w.mAl);
-                        
+
             if (!materialClearcoat.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_clearcoat", materialClearcoat, w.mAl);
             }
@@ -468,9 +469,45 @@ namespace glTF2 {
             }
 
             WriteTex(materialTransmission, transmission.transmissionTexture, "transmissionTexture", w.mAl);
-                                   
+
             if (!materialTransmission.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_transmission", materialTransmission, w.mAl);
+            }
+        }
+
+        if (m.materialVolume.isPresent) {
+            Value materialVolume(rapidjson::Type::kObjectType);
+
+            MaterialVolume &volume = m.materialVolume.value;
+
+            if (volume.thicknessFactor != 0.f) {
+                WriteFloat(materialVolume, volume.thicknessFactor, "thicknessFactor", w.mAl);
+            }
+
+            WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
+
+            if (volume.attenuationDistance != INFINITY) {
+                WriteFloat(materialVolume, volume.attenuationDistance, "attenuationDistance", w.mAl);
+            }
+
+            WriteVec(materialVolume, volume.attenuationColor, "attenuationColor", defaultAttenuationColor, w.mAl);
+
+            if (!materialVolume.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_volume", materialVolume, w.mAl);
+            }
+        }
+
+        if (m.materialIOR.isPresent) {
+            Value materialIOR(rapidjson::Type::kObjectType);
+
+            MaterialIOR &ior = m.materialIOR.value;
+
+            if (ior.ior != 1.5f) {
+                WriteFloat(materialIOR, ior.ior, "ior", w.mAl);
+            }
+
+            if (!materialIOR.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_ior", materialIOR, w.mAl);
             }
         }
 
@@ -613,7 +650,7 @@ namespace glTF2 {
         if (n.skin) {
             obj.AddMember("skin", n.skin->index, w.mAl);
         }
-        
+
         //gltf2 spec does not support "skeletons" under node
         if(n.skeletons.size()) {
             AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
@@ -711,7 +748,7 @@ namespace glTF2 {
         if (mAsset.scene) {
             mDoc.AddMember("scene", mAsset.scene->index, mAl);
         }
-        
+
         if(mAsset.extras) {
             mDoc.AddMember("extras", *mAsset.extras, mAl);
         }
@@ -812,7 +849,7 @@ namespace glTF2 {
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
             binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
-            
+
             auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
             ++GLB_Chunk_count;
 
@@ -881,7 +918,7 @@ namespace glTF2 {
             if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
                 exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
             }
-                        
+
             if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
                 exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
             }
@@ -890,10 +927,18 @@ namespace glTF2 {
                 exts.PushBack(StringRef("KHR_materials_transmission"), mAl);
             }
 
+            if (this->mAsset.extensionsUsed.KHR_materials_volume) {
+                exts.PushBack(StringRef("KHR_materials_volume"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_ior) {
+                exts.PushBack(StringRef("KHR_materials_ior"), mAl);
+            }
+
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {
                 exts.PushBack(StringRef("FB_ngon_encoding"), mAl);
             }
-            
+
             if (this->mAsset.extensionsUsed.KHR_texture_basisu) {
                 exts.PushBack(StringRef("KHR_texture_basisu"), mAl);
             }
@@ -901,7 +946,7 @@ namespace glTF2 {
 
         if (!exts.Empty())
             mDoc.AddMember("extensionsUsed", exts, mAl);
-            
+
         //basisu extensionRequired
         Value extsReq;
         extsReq.SetArray();

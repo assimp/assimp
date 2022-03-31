@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -47,7 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_M3DWRAPPER_H_INC
 #define AI_M3DWRAPPER_H_INC
 
-#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER
+#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
+#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)  
 
 #include <memory>
 #include <vector>
@@ -84,11 +85,11 @@ public:
     void reset();
 
 	// The Name access, empty string returned when no m3d instance.
-	std::string Name() const; 
+	std::string Name() const;
 
 	/// Executes a save.
 	unsigned char *Save(int quality, int flags, unsigned int &size);
-    
+
     /// Clearer
 	void ClearSave();
 
@@ -113,20 +114,21 @@ inline std::string M3DWrapper::Name() const {
     return std::string();
 }
 
-inline M3DWrapper::operator bool() const { 
-    return m3d_ != nullptr; 
+inline M3DWrapper::operator bool() const {
+    return m3d_ != nullptr;
 }
 
 inline m3d_t *M3DWrapper::operator->() const {
-    return m3d_; 
+    return m3d_;
 }
 
 inline m3d_t *M3DWrapper::M3D() const {
-    return m3d_; 
+    return m3d_;
 }
 
 } // namespace Assimp
 
 #endif
+#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
 
 #endif // AI_M3DWRAPPER_H_INC

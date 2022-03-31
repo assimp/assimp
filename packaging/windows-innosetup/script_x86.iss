@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v5.0.1)
+AppVerName=Open Asset Import Library - SDK (v5.1.0)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
@@ -12,9 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-5.0.1-setup
-VersionInfoVersion=5.0.1.0
-VersionInfoTextVersion=5.0.1
+OutputBaseFileName=assimp-sdk-5.1.0-setup
+VersionInfoVersion=5.1.0.0
+VersionInfoTextVersion=5.1.0
 VersionInfoCompany=Assimp Development Team
 ;ArchitecturesInstallIn64BitMode=x64
 
@@ -49,11 +49,11 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-Source: "..\..\bin\release\assimp-vc141-mt.dll";  DestDir: "{app}\bin\x86"
-Source: "..\..\bin\release\assimp_viewer.exe";    DestDir: "{app}\bin\x86"; Components: tools
+Source: "..\..\bin\release\assimp-vc141-mt.dll";      DestDir: "{app}\bin\x86"
+Source: "..\..\bin\release\assimp_viewer.exe";        DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DCompiler_42.dll";     DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DX9_42.dll";           DestDir: "{app}\bin\x86"; Components: tools
-Source: "..\..\bin\release\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
+Source: "..\..\bin\release\assimp.exe";               DestDir: "{app}\bin\x86"; Components: tools
 
 
 ; Import libraries

@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v5.0.1)
+AppVerName=Open Asset Import Library - SDK (v5.1.0)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x64\assimp.exe
@@ -12,9 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-5.0.1-setup
-VersionInfoVersion=5.0.1.0
-VersionInfoTextVersion=5.0.1
+OutputBaseFileName=assimp-sdk-5.1.0-setup
+VersionInfoVersion=5.1.0.0
+VersionInfoTextVersion=5.1.0
 VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -76,7 +76,7 @@ namespace Assimp {
 namespace FBX {
 
 class Document;
-/** 
+/**
  *  Convert a FBX #Document to #aiScene
  *  @param out Empty scene to be populated
  *  @param doc Parsed FBX document
@@ -182,7 +182,7 @@ private:
     // ------------------------------------------------------------------------------------------------
     void ConvertModel(const Model &model, aiNode *parent, aiNode *root_node,
                       const aiMatrix4x4 &absolute_transform);
-    
+
     // ------------------------------------------------------------------------------------------------
     // MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
     std::vector<unsigned int>
@@ -361,6 +361,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
+    KeyFrameListList GetRotationKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop);
 
     // ------------------------------------------------------------------------------------------------
     KeyTimeList GetKeyTimeList(const KeyFrameListList& inputs);

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -46,6 +46,7 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
+#include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
 #include <vector>
 #include <cstdlib>
@@ -201,12 +202,15 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 #include "AssetLib/M3D/M3DImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
+#include "AssetLib/IQM/IQMImporter.h"
+#endif
 
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-void GetImporterInstanceList(std::vector<BaseImporter *> &out) {    
-    
+void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
+
     // Some importers may be unimplemented or otherwise unsuitable for general use
     // in their current state. Devs can set ASSIMP_ENABLE_DEV_IMPORTERS in their
     // local environment to enable them, otherwise they're left out of the registry.
@@ -365,12 +369,13 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     out.push_back(new D3MFImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
-    if (devImportersEnabled) { // https://github.com/assimp/assimp/issues/3647
-        out.push_back(new X3DImporter());
-    }
+    out.push_back(new X3DImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
     out.push_back(new MMDImporter());
+#endif
+#ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
+    out.push_back(new IQMImporter());
 #endif
     //#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
     //    out.push_back(new StepFile::StepFileImporter());

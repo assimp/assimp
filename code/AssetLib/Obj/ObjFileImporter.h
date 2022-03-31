@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#pragma once
 #ifndef OBJ_FILE_IMPORTER_H_INC
 #define OBJ_FILE_IMPORTER_H_INC
 
@@ -65,19 +66,18 @@ public:
     ObjFileImporter();
 
     /// \brief  Destructor
-    ~ObjFileImporter();
+    ~ObjFileImporter() override;
 
-public:
     /// \brief  Returns whether the class can handle the format of the given file.
     /// \remark See BaseImporter::CanRead() for details.
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
-private:
+protected:
     //! \brief  Appends the supported extension.
-    const aiImporterDesc *GetInfo() const;
+    const aiImporterDesc *GetInfo() const override;
 
     //! \brief  File import implementation.
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     //! \brief  Create the data from imported content.
     void CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene);

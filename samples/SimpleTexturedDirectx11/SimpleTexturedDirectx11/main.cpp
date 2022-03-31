@@ -128,8 +128,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	int argc;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	if (!argv) {
-		MessageBox(nullptr, 
-			TEXT("An error occured while reading command line arguments."),
+		MessageBox(nullptr,
+			TEXT("An error occurred while reading command line arguments."),
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
 		return EXIT_FAILURE;
@@ -145,8 +145,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 
 	// Ensure that a model file has been specified.
 	if (argc < 2) {
-		MessageBox(nullptr, 
-			TEXT("No model file specified. The program will now close."), 
+		MessageBox(nullptr,
+			TEXT("No model file specified. The program will now close."),
 			TEXT("Error!"),
 			MB_ICONERROR | MB_OK);
 		free_command_line_allocated_memory();
@@ -157,7 +157,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	g_ModelPath = UTFConverter(argv[1]).str();
 
 	free_command_line_allocated_memory();
-	
+
 	WNDCLASSEX wc;
 	MSG msg;
 
@@ -573,7 +573,7 @@ void InitGraphics()
 HRESULT	CompileShaderFromFile(LPCWSTR pFileName, const D3D_SHADER_MACRO* pDefines, LPCSTR pEntryPoint, LPCSTR pShaderModel, ID3DBlob** ppBytecodeBlob)
 {
 	UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-	
+
 #ifdef _DEBUG
 	compileFlags |= D3DCOMPILE_DEBUG;
 #endif

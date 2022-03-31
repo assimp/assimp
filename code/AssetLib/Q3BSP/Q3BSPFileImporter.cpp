@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -146,9 +146,6 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPFileImporter::~Q3BSPFileImporter() {
-    m_pCurrentMesh = nullptr;
-    m_pCurrentFace = nullptr;
-
     // Clear face-to-material map
     for (FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it) {
         const std::string &matName = it->first;
@@ -156,16 +153,14 @@ Q3BSPFileImporter::~Q3BSPFileImporter() {
             delete it->second;
         }
     }
-    m_MaterialLookupMap.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
-//  Returns true, if the loader can read this.
-bool Q3BSPFileImporter::CanRead(const std::string &rFile, IOSystem * /*pIOHandler*/, bool checkSig) const {
+//  Returns true if the loader can read this.
+bool Q3BSPFileImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool checkSig) const {
     if (!checkSig) {
-        return SimpleExtensionCheck(rFile, "pk3", "bsp");
+        return SimpleExtensionCheck(filename, "pk3", "bsp");
     }
-
     return false;
 }
 

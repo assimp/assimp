@@ -1,7 +1,7 @@
 
 // ===============================================================================
-// May be included multiple times - resets structure packing to the defaults 
-// for all supported compilers. Reverts the changes made by #include <pushpack1.h> 
+// May be included multiple times - resets structure packing to the defaults
+// for all supported compilers. Reverts the changes made by #include <pushpack1.h>
 //
 // Currently this works on the following compilers:
 // MSVC 7,8,9

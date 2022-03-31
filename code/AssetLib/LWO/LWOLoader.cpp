@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -83,6 +83,7 @@ static const aiImporterDesc desc = {
 LWOImporter::LWOImporter() :
         mIsLWO2(),
         mIsLXOB(),
+        mIsLWO3(),
         mLayers(),
         mCurLayer(),
         mTags(),
@@ -105,21 +106,13 @@ LWOImporter::~LWOImporter() {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(file);
-    if (extension == "lwo" || extension == "lxo") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[3];
-        tokens[0] = AI_LWO_FOURCC_LWOB;
-        tokens[1] = AI_LWO_FOURCC_LWO2;
-        tokens[2] = AI_LWO_FOURCC_LXOB;
-        return CheckMagicToken(pIOHandler, file, tokens, 3, 8);
-    }
-    return false;
+bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_LWO_FOURCC_LWOB,
+        AI_LWO_FOURCC_LWO2,
+        AI_LWO_FOURCC_LXOB
+    };
+    return CheckMagicToken(pIOHandler, file, tokens, AI_COUNT_OF(tokens), 8);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -190,16 +183,19 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     mCurLayer->mIndex = (uint16_t) -1;
 
     // old lightwave file format (prior to v6)
+    mIsLWO2 = false;
+    mIsLWO3 = false;
+    mIsLXOB = false;
+
     if (AI_LWO_FOURCC_LWOB == fileType) {
         ASSIMP_LOG_INFO("LWO file format: LWOB (<= LightWave 5.5)");
 
-        mIsLWO2 = false;
-        mIsLXOB = false;
         LoadLWOBFile();
     } else if (AI_LWO_FOURCC_LWO2 == fileType) {
         // New lightwave format
-        mIsLXOB = false;
         ASSIMP_LOG_INFO("LWO file format: LWO2 (>= LightWave 6)");
+    } else if ( AI_LWO_FOURCC_LWO3 == fileType ) {
+        ASSIMP_LOG_INFO("LWO file format: LWO3 (>= LightWave 2018)");
     } else if (AI_LWO_FOURCC_LXOB == fileType) {
         // MODO file format
         mIsLXOB = true;
@@ -215,8 +211,13 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         throw DeadlyImportError("Unknown LWO sub format: ", szBuff);
     }
 
-    if (AI_LWO_FOURCC_LWOB != fileType) {
-        mIsLWO2 = true;
+    if (AI_LWO_FOURCC_LWOB != fileType) {   //
+        if( AI_LWO_FOURCC_LWO3 == fileType ) {
+            mIsLWO3 = true;
+        } else {
+            mIsLWO2 = true;
+        }
+        
         LoadLWO2File();
 
         // The newer lightwave format allows the user to configure the
@@ -393,7 +394,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
 
                             // If a RGB color map is explicitly requested delete the
                             // alpha channel - it could theoretically be != 1.
-                            if (_mSurfaces[i].mVCMapType == AI_LWO_RGB)
+                            if (_mSurfaces[j].mVCMapType == AI_LWO_RGB)
                                 pvVC[w]->a = 1.f;
 
                             pvVC[w]++;
@@ -450,6 +451,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
 
     // The RemoveRedundantMaterials step will clean this up later
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
+
     for (unsigned int mat = 0; mat < pScene->mNumMaterials; ++mat) {
         aiMaterial *pcMat = new aiMaterial();
         pScene->mMaterials[mat] = pcMat;
@@ -695,7 +697,7 @@ void LWOImporter::ResolveClips() {
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::AdjustTexturePath(std::string &out) {
     // --- this function is used for both LWO2 and LWOB
-    if (!mIsLWO2 && ::strstr(out.c_str(), "(sequence)")) {
+    if (!mIsLWO2 && !mIsLWO3 && ::strstr(out.c_str(), "(sequence)")) {
 
         // remove the (sequence) and append 000
         ASSIMP_LOG_INFO("LWOB: Sequence of animated texture found. It will be ignored");
@@ -738,7 +740,7 @@ void LWOImporter::LoadLWOPoints(unsigned int length) {
         throw DeadlyImportError("LWO2: Points chunk length is not multiple of vertexLen (12)");
     }
     unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
-    if (mIsLWO2) {
+    if (mIsLWO2 || mIsLWO3) {
         mCurLayer->mTempPoints.reserve(regularSize + (regularSize >> 2u));
         mCurLayer->mTempPoints.resize(regularSize);
 
@@ -1163,6 +1165,76 @@ void LWOImporter::LoadLWO2Clip(unsigned int length) {
     }
 }
 
+void LWOImporter::LoadLWO3Clip(unsigned int length) {
+    AI_LWO_VALIDATE_CHUNK_LENGTH(length, CLIP, 12);
+
+    mClips.push_back(LWO::Clip());
+    LWO::Clip &clip = mClips.back();
+
+    // first - get the index of the clip
+    clip.idx = GetU4();
+
+    IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+    switch (head.type) {
+        case AI_LWO_STIL:
+            AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, STIL, 1);
+
+            // "Normal" texture
+            GetS0(clip.path, head.length);
+            clip.type = Clip::STILL;
+            break;
+
+        case AI_LWO_ISEQ:
+            AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, ISEQ, 16);
+            // Image sequence. We'll later take the first.
+            {
+                uint8_t digits = GetU1();
+                mFileBuffer++;
+                int16_t offset = GetU2();
+                mFileBuffer += 4;
+                int16_t start = GetU2();
+                mFileBuffer += 4;
+
+                std::string s;
+                std::ostringstream ss;
+                GetS0(s, head.length);
+
+                head.length -= (uint16_t)s.length() + 1;
+                ss << s;
+                ss << std::setw(digits) << offset + start;
+                GetS0(s, head.length);
+                ss << s;
+                clip.path = ss.str();
+                clip.type = Clip::SEQ;
+            }
+            break;
+
+        case AI_LWO_STCC:
+            ASSIMP_LOG_WARN("LWO3: Color shifted images are not supported");
+            break;
+
+        case AI_LWO_ANIM:
+            ASSIMP_LOG_WARN("LWO3: Animated textures are not supported");
+            break;
+
+        case AI_LWO_XREF:
+            AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, XREF, 4);
+
+            // Just a cross-reference to another CLIp
+            clip.type = Clip::REF;
+            clip.clipRef = GetU4();
+            break;
+
+        case AI_LWO_NEGA:
+            AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, NEGA, 2);
+            clip.negate = (0 != GetU2());
+            break;
+
+        default:
+            ASSIMP_LOG_WARN("LWO3: Encountered unknown CLIP sub-chunk");
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // Load envelope description
 void LWOImporter::LoadLWO2Envelope(unsigned int length) {
@@ -1273,6 +1345,104 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length) {
     }
 }
 
+void LWOImporter::LoadLWO3Envelope(unsigned int length) {
+    LE_NCONST uint8_t *const end = mFileBuffer + length;
+    AI_LWO_VALIDATE_CHUNK_LENGTH(length, ENVL, 4);
+
+    mEnvelopes.push_back(LWO::Envelope());
+    LWO::Envelope &envelope = mEnvelopes.back();
+
+    // Get the index of the envelope
+    envelope.index = ReadVSizedIntLWO2(mFileBuffer);
+
+    // ... and read all blocks
+    while (true) {
+        if (mFileBuffer + 8 >= end) break;
+        LE_NCONST IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+
+        if (mFileBuffer + head.length > end)
+            throw DeadlyImportError("LWO3: Invalid envelope chunk length");
+
+        uint8_t *const next = mFileBuffer + head.length;
+        switch (head.type) {
+                // Type & representation of the envelope
+            case AI_LWO_TYPE:
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, TYPE, 4);
+                mFileBuffer++; // skip user format
+
+                // Determine type of envelope
+                envelope.type = (LWO::EnvelopeType)*mFileBuffer;
+                ++mFileBuffer;
+                break;
+
+                // precondition
+            case AI_LWO_PRE:
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, PRE, 4);
+                envelope.pre = (LWO::PrePostBehaviour)GetU2();
+                break;
+
+                // postcondition
+            case AI_LWO_POST:
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, POST, 4);
+                envelope.post = (LWO::PrePostBehaviour)GetU2();
+                break;
+
+                // keyframe
+            case AI_LWO_KEY: {
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, KEY, 10);
+
+                envelope.keys.push_back(LWO::Key());
+                LWO::Key &key = envelope.keys.back();
+
+                key.time = GetF4();
+                key.value = GetF4();
+                break;
+            }
+
+                // interval interpolation
+            case AI_LWO_SPAN: {
+                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, SPAN, 6);
+                if (envelope.keys.size() < 2)
+                    ASSIMP_LOG_WARN("LWO3: Unexpected SPAN chunk");
+                else {
+                    LWO::Key &key = envelope.keys.back();
+                    switch (GetU4()) {
+                        case AI_LWO_STEP:
+                            key.inter = LWO::IT_STEP;
+                            break;
+                        case AI_LWO_LINE:
+                            key.inter = LWO::IT_LINE;
+                            break;
+                        case AI_LWO_TCB:
+                            key.inter = LWO::IT_TCB;
+                            break;
+                        case AI_LWO_HERM:
+                            key.inter = LWO::IT_HERM;
+                            break;
+                        case AI_LWO_BEZI:
+                            key.inter = LWO::IT_BEZI;
+                            break;
+                        case AI_LWO_BEZ2:
+                            key.inter = LWO::IT_BEZ2;
+                            break;
+                        default:
+                            ASSIMP_LOG_WARN("LWO3: Unknown interval interpolation mode");
+                    };
+
+                    // todo ... read params
+                }
+                break;
+            }
+
+            default:
+                ASSIMP_LOG_WARN("LWO3: Encountered unknown ENVL subchunk");
+                break;
+        }
+        // regardless how much we did actually read, go to the next chunk
+        mFileBuffer = next;
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // Load file - master function
 void LWOImporter::LoadLWO2File() {
@@ -1280,16 +1450,25 @@ void LWOImporter::LoadLWO2File() {
 
     LE_NCONST uint8_t *const end = mFileBuffer + fileSize;
     unsigned int iUnnamed = 0;
+
     while (true) {
         if (mFileBuffer + sizeof(IFF::ChunkHeader) > end) break;
-        const IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+
+        IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
+
+        int bufOffset = 0;
+        if( head.type == AI_IFF_FOURCC_FORM ) { // not chunk, it's a form
+            mFileBuffer -= 8;
+            head = IFF::LoadForm(mFileBuffer);
+            bufOffset = 4;
+        }
 
         if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWO2: Chunk length points behind the file");
             break;
         }
         uint8_t *const next = mFileBuffer + head.length;
-
+        mFileBuffer += bufOffset;
         if (!head.length) {
             mFileBuffer = next;
             continue;
@@ -1345,7 +1524,6 @@ void LWOImporter::LoadLWO2File() {
 
                 break;
             }
-
                 // vertex list
             case AI_LWO_PNTS: {
                 if (skip)
@@ -1407,19 +1585,29 @@ void LWOImporter::LoadLWO2File() {
 
                 // surface chunk
             case AI_LWO_SURF: {
-                LoadLWO2Surface(head.length);
+                if( mIsLWO3 )
+                    LoadLWO3Surface(head.length);
+                else
+                    LoadLWO2Surface(head.length);
+
                 break;
             }
 
                 // clip chunk
             case AI_LWO_CLIP: {
-                LoadLWO2Clip(head.length);
+                if( mIsLWO3 )
+                    LoadLWO3Clip(head.length);
+                else
+                    LoadLWO2Clip(head.length);
                 break;
             }
 
                 // envelope chunk
             case AI_LWO_ENVL: {
-                LoadLWO2Envelope(head.length);
+                if( mIsLWO3 )
+                    LoadLWO3Envelope(head.length);
+                else
+                    LoadLWO2Envelope(head.length);
                 break;
             }
         }

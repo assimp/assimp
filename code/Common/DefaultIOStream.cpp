@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -62,7 +62,7 @@ inline int select_fseek(FILE *file, int64_t offset, int origin) {
 }
 
 
-    
+
 #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
 template <>
 inline size_t select_ftell<8>(FILE *file) {
@@ -75,14 +75,13 @@ inline int select_fseek<8>(FILE *file, int64_t offset, int origin) {
 }
 
 #endif // #if defined _WIN32 && (!defined __GNUC__ || __MSVCRT_VERSION__ >= 0x0601)
-    
+
 } // namespace
 
 // ----------------------------------------------------------------------------------
 DefaultIOStream::~DefaultIOStream() {
     if (mFile) {
         ::fclose(mFile);
-        mFile = nullptr;
     }
 }
 
@@ -95,7 +94,7 @@ size_t DefaultIOStream::Read(void *pvBuffer,
     }
     ai_assert(nullptr != pvBuffer);
     ai_assert(0 != pSize);
-    
+
     return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -72,4 +72,4 @@ private:
     std::vector<std::string> m_diffs;
 };
 
-} 
+}

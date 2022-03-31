@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -92,18 +92,9 @@ BVHLoader::~BVHLoader() {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "bvh")
-        return true;
-
-    if ((!extension.length() || cs) && pIOHandler) {
-        const char *tokens[] = { "HIERARCHY" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-    return false;
+bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "HIERARCHY" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -178,7 +169,7 @@ void BVHLoader::ReadHierarchy(aiScene *pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads a node and recursively its childs and returns the created node;
+// Reads a node and recursively its children and returns the created node;
 aiNode *BVHLoader::ReadNode() {
     // first token is name
     std::string nodeName = GetNextToken();

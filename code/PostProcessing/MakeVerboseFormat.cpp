@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -161,6 +161,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
         delete[] pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
+            pcMesh->mBones[i]->mNumWeights = static_cast<unsigned int>(newWeights[i].size());
             aiVertexWeight *weightToCopy = &(newWeights[i][0]);
             memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
                     sizeof(aiVertexWeight) * newWeights[i].size());

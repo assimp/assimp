@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -421,7 +421,7 @@ void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TRea
     and post-multiplication of column vectors,
     the rotation matrix for an euler XYZ rotation is M = Rz * Ry * Rx.
     combining gives:
-    
+
         |  CE  BDE-AF  ADE+BF  0  |
     M = |  CF  BDF+AE  ADF-BE  0  |
         |  -D    CB      AC    0  |

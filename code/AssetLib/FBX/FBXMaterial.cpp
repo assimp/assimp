@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -140,11 +140,32 @@ Material::~Material() {
     // empty
 }
 
+    aiVector2D uvTrans;
+    aiVector2D uvScaling;
+    ai_real    uvRotation;
+
+    std::string type;
+    std::string relativeFileName;
+    std::string fileName;
+    std::string alphaSource;
+    std::shared_ptr<const PropertyTable> props;
+
+    unsigned int crop[4]{};
+
+    const Video* media;
+
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
-        Object(id,element,name), 
-        uvScaling(1.0f,1.0f), 
-        media(0) {
+        Object(id,element,name),
+        uvTrans(0.0f, 0.0f),
+        uvScaling(1.0f,1.0f),
+        uvRotation(0.0f),
+        type(),
+        relativeFileName(),
+        fileName(),
+        alphaSource(),
+        props(),
+        media(nullptr) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Type = sc["Type"];
@@ -278,8 +299,8 @@ void LayeredTexture::fillTexture(const Document& doc) {
 
 // ------------------------------------------------------------------------------------------------
 Video::Video(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
-        Object(id,element,name), 
-        contentLength(0), 
+        Object(id,element,name),
+        contentLength(0),
         content(0) {
     const Scope& sc = GetRequiredScope(element);
 

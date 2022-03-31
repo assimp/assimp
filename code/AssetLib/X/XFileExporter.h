@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -94,9 +94,9 @@ protected:
     void PushTag() { startstr.append( "  "); }
 
     /// Leaves an element, decreasing the indentation
-    void PopTag() { 
-        ai_assert( startstr.length() > 1); 
-        startstr.erase( startstr.length() - 2); 
+    void PopTag() {
+        ai_assert( startstr.length() > 1);
+        startstr.erase( startstr.length() - 2);
     }
 
 public:

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -190,7 +190,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
     std::copy(outer_vit, outer_vit+outer_polygon_size,
         std::back_inserter(temp.mVerts));
 
-    GenerateOpenings(fake_openings, normals, temp, false, false);
+    GenerateOpenings(fake_openings, temp, false, false);
     result.Append(temp);
 }
 
@@ -380,21 +380,19 @@ void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh&
         bool take_any = false;
 
         for (unsigned int j = 0; j < 2; ++j, take_any = true) {
-            if ((last_dir == 0 || take_any) && std::abs(d.x) > 1e-6) {
+            if ((last_dir == 0 || take_any) && std::abs(d.x) > ai_epsilon) {
                 q.y = startvec.y;
                 q.z = startvec.z;
                 q.x = -(d.y * q.y + d.z * q.z) / d.x;
                 last_dir = 0;
                 break;
-            }
-            else if ((last_dir == 1 || take_any) && std::abs(d.y) > 1e-6) {
+            } else if ((last_dir == 1 || take_any) && std::abs(d.y) > ai_epsilon) {
                 q.x = startvec.x;
                 q.z = startvec.z;
                 q.y = -(d.x * q.x + d.z * q.z) / d.y;
                 last_dir = 1;
                 break;
-            }
-            else if ((last_dir == 2 && std::abs(d.z) > 1e-6) || take_any) {
+            } else if ((last_dir == 2 && std::abs(d.z) > ai_epsilon) || take_any) {
                 q.y = startvec.y;
                 q.x = startvec.x;
                 q.z = -(d.y * q.y + d.x * q.x) / d.z;
@@ -529,6 +527,31 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
     return m;
 }
 
+const auto closeDistance = ai_epsilon;
+
+bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt2) {
+    if(pt1.Coordinates.size() != pt2.Coordinates.size())
+    {
+        IFCImporter::LogWarn("unable to compare differently-dimensioned points");
+        return false;
+    }
+    auto coord1 = pt1.Coordinates.begin();
+    auto coord2 = pt2.Coordinates.begin();
+    // we're just testing each dimension separately rather than doing euclidean distance, as we're
+    // looking for very close coordinates
+    for(; coord1 != pt1.Coordinates.end(); coord1++,coord2++)
+    {
+        if(std::fabs(*coord1 - *coord2) > closeDistance)
+            return false;
+    }
+    return true;
+}
+
+bool areClose(IfcVector3 pt1,IfcVector3 pt2) {
+    return (std::fabs(pt1.x - pt2.x) < closeDistance &&
+        std::fabs(pt1.y - pt2.y) < closeDistance &&
+        std::fabs(pt1.z - pt2.z) < closeDistance);
+}
 // Extrudes the given polygon along the direction, converts it into an opening or applies all openings as necessary.
 void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const TempMesh& curve,
     const IfcVector3& extrusionDir, TempMesh& result, ConversionData &conv, bool collect_openings)
@@ -536,7 +559,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
     // Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis,
     // forming new triangles.
     const bool has_area = solid.SweptArea->ProfileType == "AREA" && curve.mVerts.size() > 2;
-    if( solid.Depth < 1e-6 ) {
+    if (solid.Depth < ai_epsilon) {
         if( has_area ) {
             result.Append(curve);
         }
@@ -592,7 +615,21 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
                 nors.push_back(IfcVector3());
                 continue;
             }
-            nors.push_back(((bounds.mVerts[2] - bounds.mVerts[0]) ^ (bounds.mVerts[1] - bounds.mVerts[0])).Normalize());
+            auto nor = ((bounds.mVerts[2] - bounds.mVerts[0]) ^ (bounds.mVerts[1] - bounds.mVerts[0])).Normalize();
+            auto vI0 = bounds.mVertcnt[0];
+            for(size_t faceI = 0; faceI < bounds.mVertcnt.size(); faceI++)
+            {
+                if(bounds.mVertcnt[faceI] >= 3) {
+                    // do a check that this is at least parallel to the base plane
+                    auto nor2 = ((bounds.mVerts[vI0 + 2] - bounds.mVerts[vI0]) ^ (bounds.mVerts[vI0 + 1] - bounds.mVerts[vI0])).Normalize();
+                    if(!areClose(nor,nor2)) {
+                        std::stringstream msg;
+                        msg << "Face " << faceI << " is not parallel with face 0 - opening on entity " << solid.GetID();
+                        IFCImporter::LogWarn(msg.str().c_str());
+                    }
+                }
+            }
+            nors.push_back(nor);
         }
     }
 
@@ -613,7 +650,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         out.push_back(in[i] + dir);
 
         if( openings ) {
-            if( (in[i] - in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
+            if( (in[i] - in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings, temp, true, true, dir) ) {
                 ++sides_with_openings;
             }
 
@@ -622,31 +659,33 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         }
     }
 
-    if( openings ) {
+    if(openings) {
         for(TempOpening& opening : *conv.apply_openings) {
-            if( !opening.wallPoints.empty() ) {
-                IFCImporter::LogError("failed to generate all window caps");
+            if(!opening.wallPoints.empty()) {
+                std::stringstream msg;
+                msg << "failed to generate all window caps on ID " << (int)solid.GetID();
+                IFCImporter::LogError(msg.str().c_str());
             }
             opening.wallPoints.clear();
         }
     }
 
     size_t sides_with_v_openings = 0;
-    if( has_area ) {
+    if(has_area) {
 
-        for( size_t n = 0; n < 2; ++n ) {
-            if( n > 0 ) {
-                for( size_t i = 0; i < in.size(); ++i )
+        for(size_t n = 0; n < 2; ++n) {
+            if(n > 0) {
+                for(size_t i = 0; i < in.size(); ++i)
                     out.push_back(in[i] + dir);
             }
             else {
-                for( size_t i = in.size(); i--; )
+                for(size_t i = in.size(); i--; )
                     out.push_back(in[i]);
             }
 
             curmesh.mVertcnt.push_back(static_cast<unsigned int>(in.size()));
-            if( openings && in.size() > 2 ) {
-                if( GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
+            if(openings && in.size() > 2) {
+                if(GenerateOpenings(*conv.apply_openings,temp,true,true,dir)) {
                     ++sides_with_v_openings;
                 }
 
@@ -656,8 +695,10 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         }
     }
 
-    if( openings && (sides_with_openings == 1 || sides_with_v_openings == 2 ) ) {
-        IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
+    if (openings && (sides_with_openings == 1 || sides_with_v_openings == 2)) {
+        std::stringstream msg;
+        msg << "failed to resolve all openings, presumably their topology is not supported by Assimp - ID " << solid.GetID() << " sides_with_openings " << sides_with_openings << " sides_with_v_openings " << sides_with_v_openings;
+        IFCImporter::LogWarn(msg.str().c_str());
     }
 
     IFCImporter::LogVerboseDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
@@ -781,7 +822,9 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         return false;
     }
     else {
-        IFCImporter::LogWarn("skipping unknown IfcGeometricRepresentationItem entity, type is ", geo.GetClassName());
+        std::stringstream toLog;
+        toLog << "skipping unknown IfcGeometricRepresentationItem entity, type is " << geo.GetClassName() << " id is " << geo.GetID();
+        IFCImporter::LogWarn(toLog.str().c_str());
         return false;
     }
 

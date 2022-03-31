@@ -15,7 +15,7 @@
 
 /* workflow:
 
- 1) create a new scene wrapper 
+ 1) create a new scene wrapper
  2) populate an array of of meshHelpers for each mesh in the original scene
  3) (eventually) create an animator instance
  4) scale the asset (needed?)
@@ -24,16 +24,16 @@
     5b) create a static vertex buffer
     5c) create index buffer
     5d) populate the index buffer
-    5e) (eventually) gather weights    
+    5e) (eventually) gather weights
 */
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-struct Vertex 
+struct Vertex
 {
     aiVector3D vPosition;
     aiVector3D vNormal;
-    
+
     aiColor4D  dColorDiffuse;
     aiVector3D vTangent;
     aiVector3D vBitangent;
@@ -46,33 +46,33 @@ struct Vertex
 
 // Helper Class to store GPU related resources from a given aiMesh
 // Modeled after AssimpView asset helper
-@interface MeshHelper : NSObject 
-{        
+@interface MeshHelper : NSObject
+{
     // Display list ID, this one shots *all drawing* of the mesh. Only ever use this to draw. Booya.
     GLuint displayList;
-    
+
     // VAO that encapsulates all VBO drawing state
     GLuint vao;
-    
+
     // VBOs
     GLuint vertexBuffer;
     GLuint indexBuffer;
     GLuint normalBuffer;
     GLuint numIndices;
-        
+
     // texture
     GLuint textureID;
-    
-    // Material 
+
+    // Material
     aiColor4D diffuseColor;
     aiColor4D specularColor;
     aiColor4D ambientColor;
     aiColor4D emissiveColor;
-    
+
     GLfloat opacity;
     GLfloat shininess;
     GLfloat specularStrength;
-    
+
     BOOL twoSided;
 }
 

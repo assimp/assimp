@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -132,6 +132,6 @@ TEST_F(TriangulateProcessTest, testTriangulation) {
         }
     }
 
-    // we should have no valid normal vectors now necause we aren't a pure polygon mesh
+    // we should have no valid normal vectors now because we aren't a pure polygon mesh
     EXPECT_TRUE(pcMesh->mNormals == NULL);
 }

@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-constexpr char ObjFileParser::DEFAULT_MATERIAL[];
+constexpr char ObjFileParser::DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
 
 ObjFileParser::ObjFileParser() :
         m_DataIt(),

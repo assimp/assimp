@@ -82,6 +82,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // clang-format on
 
 using namespace Assimp;
+
+namespace glTF2 {
 using glTFCommon::FindStringInContext;
 using glTFCommon::FindNumberInContext;
 using glTFCommon::FindUIntInContext;
@@ -95,8 +97,6 @@ using glTFCommon::FindObject;
 using glTFCommon::FindUInt;
 using glTFCommon::FindArray;
 using glTFCommon::FindArray;
-
-namespace glTF2 {
 
 namespace {
 

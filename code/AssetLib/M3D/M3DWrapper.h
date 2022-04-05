@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
 #define STBI_ONLY_PNG
+#define STB_IMAGE_STATIC
 #include <stb/stb_image.h>
 
 #include "m3d.h"

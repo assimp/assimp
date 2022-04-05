@@ -1290,6 +1290,7 @@ ASSIMP_API void aiQuaternionInterpolate(
 #   endif
 
 #   define STB_IMAGE_IMPLEMENTATION
+#   define STB_IMAGE_STATIC
 #   include "stb/stb_image.h"
 
 #   if _MSC_VER

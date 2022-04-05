@@ -1283,18 +1283,5 @@ ASSIMP_API void aiQuaternionInterpolate(
 #endif
 
 #if ASSIMP_NEEDS_STB_IMAGE
-
-#   if _MSC_VER // "unreferenced function has been removed" (SSE2 detection routine in x64 builds)
-#       pragma warning(push)
-#       pragma warning(disable: 4505)
-#   endif
-
-#   define STB_IMAGE_IMPLEMENTATION
-#   define STB_IMAGE_STATIC
-#   include "stb/stb_image.h"
-
-#   if _MSC_VER
-#       pragma warning(pop)
-#   endif
-
+#include "Common/StbCommon.h"
 #endif

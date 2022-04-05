@@ -86,12 +86,17 @@ Other:
 #if _MSC_VER // "unreferenced function has been removed" (SSE2 detection routine in x64 builds)
 #pragma warning(push)
 #pragma warning(disable : 4505)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #if _MSC_VER
 #pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
 #endif
 
 using namespace Assimp;

@@ -1435,6 +1435,16 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     return static_cast<unsigned int>(mMeshes.size() - 1);
 }
 
+void ConvertWeightsToSkeleton(const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
+        std::vector<unsigned int> *outputVertStartIndices) {
+    ai_assert(geo.DeformerSkin() != nullptr);
+
+    const Skin &sk = *geo.DeformerSkin();
+    for (auto &cluster : sk.Clusters()) {
+        cluster->Transform();
+    }
+}
+
 void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
         const aiMatrix4x4 &absolute_transform,
         aiNode *parent, unsigned int materialIndex,
@@ -1527,12 +1537,6 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
 
         std::swap_ranges(bones.begin(), bones.end(), out->mBones);
     }
-}
-
-const aiNode *GetNodeByName(aiNode *current_node) {
-    aiNode *iter = current_node;
-    //printf("Child count: %d", iter->mNumChildren);
-    return iter;
 }
 
 void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,

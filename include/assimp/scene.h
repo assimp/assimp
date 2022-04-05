@@ -343,6 +343,16 @@ struct aiScene
      */
     C_STRUCT aiString mName;
 
+    /**
+     *
+     */
+    unsigned int mNumSkeletons;
+
+    /**
+     *
+     */
+    C_STRUCT aiSkeleton **mSkeletons;
+
 #ifdef __cplusplus
 
     //! Default constructor - set everything to 0/nullptr
@@ -381,6 +391,10 @@ struct aiScene
     //! Check whether the scene contains animations
     inline bool HasAnimations() const {
         return mAnimations != nullptr && mNumAnimations > 0;
+    }
+
+    bool hasSkeletons() const {
+        return mSkeletons != nullptr && mNumSkeletons > 0;
     }
 
     //! Returns a short filename from a full path

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -97,13 +96,14 @@ void SkeletonMeshBuilder::CreateGeometry(const aiNode *pNode) {
             const aiMatrix4x4 &childTransform = pNode->mChildren[a]->mTransformation;
             aiVector3D childpos(childTransform.a4, childTransform.b4, childTransform.c4);
             ai_real distanceToChild = childpos.Length();
-            if (distanceToChild < 0.0001)
+            if (distanceToChild < ai_epsilon) {
                 continue;
+            }
             aiVector3D up = aiVector3D(childpos).Normalize();
-
             aiVector3D orth(1.0, 0.0, 0.0);
-            if (std::fabs(orth * up) > 0.99)
+            if (std::fabs(orth * up) > 0.99) {
                 orth.Set(0.0, 1.0, 0.0);
+            }
 
             aiVector3D front = (up ^ orth).Normalize();
             aiVector3D side = (front ^ up).Normalize();
@@ -183,8 +183,9 @@ void SkeletonMeshBuilder::CreateGeometry(const aiNode *pNode) {
         // add all the vertices to the bone's influences
         bone->mNumWeights = numVertices;
         bone->mWeights = new aiVertexWeight[numVertices];
-        for (unsigned int a = 0; a < numVertices; a++)
+        for (unsigned int a = 0; a < numVertices; ++a) {
             bone->mWeights[a] = aiVertexWeight(vertexStartIndex + a, 1.0);
+        }
 
         // HACK: (thom) transform all vertices to the bone's local space. Should be done before adding
         // them to the array, but I'm tired now and I'm annoyed.
@@ -194,8 +195,9 @@ void SkeletonMeshBuilder::CreateGeometry(const aiNode *pNode) {
     }
 
     // and finally recurse into the children list
-    for (unsigned int a = 0; a < pNode->mNumChildren; a++)
+    for (unsigned int a = 0; a < pNode->mNumChildren; ++a) {
         CreateGeometry(pNode->mChildren[a]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

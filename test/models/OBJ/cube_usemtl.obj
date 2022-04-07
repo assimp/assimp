@@ -1,0 +1,44 @@
+mtllib cube_usemtl.mtl
+ 
+g cube
+ 
+v  0.0  0.0  0.0
+v  0.0  0.0  1.0
+v  0.0  1.0  0.0
+v  0.0  1.0  1.0
+v  1.0  0.0  0.0
+v  1.0  0.0  1.0
+v  1.0  1.0  0.0
+v  1.0  1.0  1.0
+
+vn  0.0  0.0  1.0
+vn  0.0  0.0 -1.0
+vn  0.0  1.0  0.0
+vn  0.0 -1.0  0.0
+vn  1.0  0.0  0.0
+vn -1.0  0.0  0.0
+
+usemtl mtl3
+f  1//2  7//2  5//2
+usemtl mtl3
+f  1//2  3//2  7//2 
+usemtl mtl
+f  1//6  4//6  3//6 
+usemtl mtl
+f  1//6  2//6  4//6 
+usemtl mtl
+f  3//3  8//3  7//3 
+usemtl mtl2
+f  3//3  4//3  8//3 
+usemtl mtl2
+f  5//5  7//5  8//5 
+usemtl mtl2
+f  5//5  8//5  6//5 
+usemtl mtl2
+f  1//4  5//4  6//4 
+usemtl mtl
+f  1//4  6//4  2//4 
+usemtl mtl
+f  2//1  6//1  8//1 
+usemtl mtl
+f  2//1  8//1  4//1 

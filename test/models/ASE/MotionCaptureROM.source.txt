@@ -1,0 +1,3 @@
+"MotionCaptureROM.ase" - Free for any purpose.
+
+NOTE: The errors in the middle of the animation are caused by problems during recording, it's not an importer issue.

@@ -1,0 +1,17 @@
+	
+========================================================================
+Open Asset Import Library (assimp) INSTALL 
+========================================================================
+
+------------------------------
+Getting the documentation
+------------------------------
+
+A regularly-updated copy is available at 
+https://assimp-docs.readthedocs.io/en/latest/
+
+------------------------------
+Building Assimp 
+------------------------------
+
+Just check the build-instaructions which you can find here: https://github.com/assimp/assimp/blob/master/Build.md

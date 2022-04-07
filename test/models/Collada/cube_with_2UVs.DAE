@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Draco</author>
+      <authoring_tool>COLLADAMax NextGen;  Version: 0.9.5;  Revision: 447;  Platform: Win32;  Configuration: Release Max2008</authoring_tool>
+      <source_data>file:///C:/Dokumente%20und%20Einstellungen/Draco/Desktop/W%C3%BCrfel.max</source_data>
+    </contributor>
+    <created>2008-04-22T19:32:42</created>
+    <modified>2008-04-22T19:32:42</modified>
+    <unit name="inch" meter="0.0254"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="ColorEffectR0G0B0">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0 0 1</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float>10</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent>
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="ColorEffectR138G8B110">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <ambient>
+              <color>0.541176 0.0313725 0.431373 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.541176 0.0313725 0.431373 1</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1</color>
+            </specular>
+            <shininess>
+              <float>10</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <transparent>
+              <color>1 1 1 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="ColorEffectR0G0B0-material" name="ColorEffectR0G0B0-material">
+      <instance_effect url="#ColorEffectR0G0B0"/>
+    </material>
+    <material id="ColorEffectR138G8B110-material" name="ColorEffectR138G8B110-material">
+      <instance_effect url="#ColorEffectR138G8B110"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="geom-Quader01" name="Quader01">
+      <mesh>
+        <source id="geom-Quader01-positions">
+          <float_array id="geom-Quader01-positions-array" count="24">-1 -1 0 1 -1 0 -1 1 0 1 1 0 -1 -1 2 1 -1 2 -1 1 2 1 1 2</float_array>
+          <technique_common>
+            <accessor source="#geom-Quader01-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Quader01-normals">
+          <float_array id="geom-Quader01-normals-array" count="72">0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#geom-Quader01-normals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Quader01-map-channel1">
+          <float_array id="geom-Quader01-map-channel1-array" count="108">0.9995 0.000499487 0.000499547 0.000499547 0.000499487 0.9995 0.000499547 0.000499487 0.000499785 0.000499547 0.000499487 0.9995 0.9995 0.999501 0.000499547 0.000499547 0.999501 0.9995 0.000499547 0.999501 0.000499785 0.000499547 0.999501 0.9995 0.9995 0.000499785 0.000499487 0.9995 0.9995 0.000499487 0.000499547 0.9995 0.000499487 0.000499547 0.9995 0.000499487 0.000499785 0.000499547 0.000499487 0.9995 0.000499785 0.000499487 0.000499547 0.000499785 0.999501 0.9995 0.000499547 0.999501 0.9995 0.9995 0.999501 0.9995 0.9995 0.999501 0.000499785 0.9995 0.999501 0.000499547 0.000499785 0.999501 0.000499547 0.000499487 0.000499785 0.9995 0.000499487 0.000499547 0.9995 0.999501 0.000499547 0.9995 0.999501 0.000499547 0.000499547 0.999501 0.000499785 0.000499547 0.000499487 0.000499785 0.000499547 0.000499487 0.9995 0.9995 0.000499487 0.9995 0.9995 0.999501 0.9995 0.9995 0.999501 0.9995 0.000499547 0.000499487 0.9995 0.9995 0.000499487 0.9995 0.9995 0.999501 0.9995 0.9995 0.999501 0.9995 0.000499547 0.000499487 0.000499785 0.9995 0.999501 0.000499547</float_array>
+          <technique_common>
+            <accessor source="#geom-Quader01-map-channel1-array" count="36" stride="3">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+              <param name="P" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom-Quader01-map-channel2">
+          <float_array id="geom-Quader01-map-channel2-array" count="108">0.000249892 0.49975 0.49975 0.49975 0.49975 0.000249892 0.49975 0.49975 0.49975 0.49975 0.49975 0.000249892 0.000249892 0.000249743 0.49975 0.49975 0.000249743 0.000249892 0.49975 0.000249743 0.49975 0.49975 0.000249743 0.000249892 0.000249773 0.49975 0.49975 0.000249892 0.000249773 0.49975 0.49975 0.000249892 0.49975 0.49975 0.000249892 0.49975 0.49975 0.49975 0.49975 0.000249773 0.49975 0.49975 0.49975 0.49975 0.000249743 0.000249892 0.49975 0.000249743 0.000249773 0.000249892 0.000249743 0.000249773 0.000249892 0.000249743 0.49975 0.000249773 0.000249743 0.49975 0.49975 0.000249743 0.49975 0.49975 0.49975 0.000249892 0.49975 0.49975 0.000249892 0.000249743 0.49975 0.000249892 0.000249743 0.49975 0.49975 0.000249743 0.49975 0.49975 0.49975 0.49975 0.49975 0.49975 0.000249892 0.000249892 0.49975 0.000249773 0.000249892 0.000249743 0.000249773 0.000249892 0.000249743 0.000249773 0.49975 0.49975 0.000249892 0.000249892 0.49975 0.000249773 0.000249892 0.000249743 0.000249773 0.000249892 0.000249743 0.000249773 0.49975 0.49975 0.49975 0.000249892 0.000249743 0.49975</float_array>
+          <technique_common>
+            <accessor source="#geom-Quader01-map-channel2-array" count="36" stride="3">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+              <param name="P" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom-Quader01-vertices">
+          <input semantic="POSITION" source="#geom-Quader01-positions"/>
+        </vertices>
+        <triangles material="ColorMaterial" count="12">
+          <input semantic="VERTEX" source="#geom-Quader01-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#geom-Quader01-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#geom-Quader01-map-channel1" offset="2" set="1"/>
+          <input semantic="TEXCOORD" source="#geom-Quader01-map-channel2" offset="3" set="2"/>
+          <p>0 0 8 8 2 1 9 9 3 2 10 10 3 2 11 11 1 3 12 12 0 0 13 13 4 4 14 14 5 5 15 15 7 6 16 16 7 6 17 17 6 7 18 18 4 4 19 19 0 8 20 20 1 9 21 21 5 10 22 22 5 10 23 23 4 11 24 24 0 8 25 25 1 12 26 26 3 13 27 27 7 14 28 28 7 14 29 29 5 15 5 5 1 12 1 1 3 16 30 30 2 17 31 31 6 18 32 32 6 18 33 33 7 19 7 7 3 16 3 3 2 20 34 34 0 21 0 0 4 22 35 35 4 22 4 4 6 23 6 6 2 20 2 2</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="MaxScene">
+      <node id="node-Szenenstamm" name="Szenenstamm">
+        <node id="node-Quader01" name="Quader01">
+          <instance_geometry url="#geom-Quader01">
+            <bind_material>
+              <technique_common>
+                <instance_material symbol="ColorMaterial" target="#ColorEffectR138G8B110-material"/>
+              </technique_common>
+            </bind_material>
+          </instance_geometry>
+        </node>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#MaxScene"/>
+  </scene>
+</COLLADA>

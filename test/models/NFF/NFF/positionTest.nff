@@ -1,0 +1,36 @@
+
+# Enable high-quality subdivision
+tess 4
+
+
+# This represents a C4H10 molecule (Butan)
+
+
+f 0.3 0.3 0.3 1 1
+s 0 0 0 5
+s 20 0 0 5
+s 40 0 0 5
+s 60 0 0 5
+
+
+
+# Switch to white
+f 1 1 1 1 1
+
+s -5 0 0 3
+s 0 5 0 3
+s 0 -5 0 3
+s 20 5 0 3
+s 20 -5 0 3
+s 40 5 0 3
+s 40 -5 0 3
+s 60 5 0 3
+s 60 -5 0 3
+s 65 0 0 3
+
+
+# Now a tube to connect them
+c
+0 0 0 0.8
+60 0 0 0.8
+

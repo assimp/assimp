@@ -1,0 +1,3 @@
+Simple textured test cube exported from Maya. Has a texture that does label each cube side uniquely, but the sides do not match DirectX coordinate space.
+
+Is not readable using D3DXLoadFrameHierarchy, needs custom text parsing.

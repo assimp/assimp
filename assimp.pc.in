@@ -1,0 +1,9 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: @CMAKE_PROJECT_NAME@
+Description: Import various well-known 3D model formats in an uniform manner.
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lassimp@ASSIMP_LIBRARY_SUFFIX@
+Libs.private: @LIBSTDC++_LIBRARIES@ @ZLIB_LIBRARIES_LINKED@
+Cflags: -I${includedir}

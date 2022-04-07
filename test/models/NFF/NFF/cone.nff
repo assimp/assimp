@@ -1,0 +1,26 @@
+
+#red
+f 1.0 0.0 0.0 0.5 45.2776 0 1 cantfindme.png
+
+
+tess 4
+
+
+# a simple cone - should go directly through the center
+c 
+10 10 10 3
+-10 -10 -10 6
+
+
+f 1.0 1.0 1.0 0.5 0.5 45.2776 0 1 ./../../LWO/LWo2/MappingModes/EarthSpherical.jpg
+s -10 -10 -10 2
+s 10 10 10 3
+
+
+#white
+f 1.0 1.0 1.0 0.5 0.5 45.2776 0 1 ./../../LWO/LWo2/MappingModes/EarthCylindric.jpg
+
+# another cone, closed this time 
+c 
+20 20 20 6
+11 11 11 0

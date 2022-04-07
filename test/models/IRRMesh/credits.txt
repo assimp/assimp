@@ -1,0 +1,2 @@
+cellar.irrmesh - From irrlight/irrEdit. Irrlicht/irredit license (which?)
+Textures resized to 400*400, improved JPEG compression to make them smaller

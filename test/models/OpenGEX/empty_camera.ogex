@@ -1,0 +1,7 @@
+CameraObject {
+    Param (attrib = "fov") { float { 0.97 } }
+    Param (attrib = "near") { float { 1.5 } }
+    Param (attrib = "far") { float { 150.0 } }
+}
+
+CameraObject {}

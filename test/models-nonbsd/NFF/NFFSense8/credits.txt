@@ -1,0 +1,4 @@
+teapot.nff, home4.nff - http://www.martinreddy.net/ukvrsig/wtk.html
+
+cokecan.nff -www.vrupl.evl.uic.edu/Eng591_Pages/cokecan.nff
+TODO: License status to be confirmed

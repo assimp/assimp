@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "https://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D profile='Immersive' version='3.0' xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' xsd:noNamespaceSchemaLocation='https://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <!-- X3D&#8482; is a trademark of the Web3D Consortium Incorporated, standing for Extensible 3D Graphics (X3D). -->
+  <head>
+    <meta content='HelloX3dTrademark.x3d' name='title'/>
+    <meta content='Don Brutzman' name='creator'/>
+    <meta content='6 June 2001' name='created'/>
+    <meta content='20 October 2019' name='modified'/>
+    <meta content='Simple example showing spinning globe and X3D&amp;#8482; trademark text. X3D (tm) is a trademark of the Web3D Consortium Inc. X3D stands for Extensible 3D Graphics (X3D), an encoding of VRML using XML. X3D has been defined since 1998. Trademark registration pending. VRML is the Virtual Reality Modeling Language (VRML), International Standard ISO/IEC 14772-1:1997. XML is the Extensible Markup Language (XML), a Recommendation of the World Wide Web Consortium (W3C).' name='description'/>
+    <meta content='HelloX3dTrademark.png' name='Image'/>
+    <meta content='https://www.web3d.org' name='reference'/>
+    <meta content='https://www.web3d.org/x3d' name='reference'/>
+    <meta content='https://www.web3d.org/Specifications/VRML97' name='reference'/>
+    <meta content='http://www.w3.org/XML' name='reference'/>
+    <meta content='https://www.web3d.org/x3d/content/examples/Basic/development/HelloX3dTrademark.x3d' name='identifier'/>
+    <meta content='X3D-Edit 3.3, https://savage.nps.edu/X3D-Edit' name='generator'/>
+    <meta content='../license.html' name='license'/>
+  </head>
+  <Scene>
+    <WorldInfo info='"an introductory scene"' title='Hello X3D&amp;#8482; Trademark (tm)'/>
+    <Viewpoint description='Hello, world' orientation='0 1 0 3.14159' position='0 0 -8'/>
+    <Transform DEF='EarthCoordinateSystem'>
+      <Group DEF='MiniWorld'>
+        <Shape>
+          <Appearance>
+            <ImageTexture url='"earth-topo.png" "earth-topo.gif" "earth-topo-small.gif" "https://www.web3d.org/x3d/content/examples/Basic/development/earth-topo.png" "https://www.web3d.org/x3d/content/examples/Basic/development/earth-topo.gif" "https://www.web3d.org/x3d/content/examples/Basic/development/earth-topo-small.gif"'/>
+          </Appearance>
+          <Sphere DEF='GlobeNotToScale'/>
+        </Shape>
+      </Group>
+      <Transform DEF='SimpleGeoStationarySatellite' scale='0.1 0.3 0.1' translation='0 0 4'>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='0.9 0.1 0.1'/>
+          </Appearance>
+          <Text string='"Hello" "X3D Trademark (tm)"'>
+            <FontStyle justify='"MIDDLE" "MIDDLE"' size='3'/>
+          </Text>
+        </Shape>
+      </Transform>
+    </Transform>
+    <TimeSensor DEF='OrbitalTimeInterval' cycleInterval='12.0' loop='true'/>
+    <OrientationInterpolator DEF='SpinThoseThings' key='0.00 0.25 0.50 0.75 1.00' keyValue='0 1 0 0 0 1 0 1.57079 0 1 0 3.14159 0 1 0 4.7123889 0 1 0 6.2831852'/>
+    <ROUTE fromField='fraction_changed' fromNode='OrbitalTimeInterval' toField='set_fraction' toNode='SpinThoseThings'/>
+    <ROUTE fromField='value_changed' fromNode='SpinThoseThings' toField='rotation' toNode='EarthCoordinateSystem'/>
+  </Scene>
+</X3D>

@@ -1,0 +1,15 @@
+version 1
+
+nodes
+  0 "TriangleTest0"  -1
+end
+skeleton
+time 0
+  0 0.0 0.0 0.0 0.0 0.0 0.0
+end
+triangles
+none.quak
+0  0.0 0.0 0.0 1.0 1.0 1.0 0.0 0.0
+0  1.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0
+0  1.0 1.0 0.0 1.0 1.0 1.0 1.0 1.0
+end

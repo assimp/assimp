@@ -1,0 +1,12 @@
+mat		// cokecan.mat, Materials for coke texture example
+version 3.0
+valid ambientdiffuse specular shininess opacity
+
+matdef // #0 Shiny silver ( aluminum )
+ambientdiffuse 0.9 0.9 0.9
+specular 1.0 1.0 1.0
+shininess 128.0
+
+matdef // #1 Semi-Transparent Green
+ambientdiffuse 0.0 1.0 0.0
+opacity 0.6

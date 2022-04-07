@@ -1,0 +1,52 @@
+// Materials copied from the Ogre3D SDK
+// from location Samples/Media/materials/scripts
+
+// fish.mesh
+
+material Examples/Fish
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture fish.jpg
+			}
+		}
+	}
+}
+
+// ninja.mesh
+
+material Examples/Ninja
+{
+	technique
+	{
+		pass
+		{
+		
+			texture_unit
+			{
+				texture ninja.jpg
+			}
+		}
+	}
+}
+
+// razor.mesh
+
+material Material__25
+{
+	technique
+	{
+		pass
+		{
+
+			texture_unit
+			{
+				texture razor.jpg
+			}
+		}
+	}
+}

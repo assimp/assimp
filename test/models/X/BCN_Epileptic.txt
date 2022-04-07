@@ -1,0 +1,1 @@
+A human body separated into three meshes: lower body, upper body, head. A common bone hierarchy for all three meshes, plus an test animation that makes the body sort of jump. No material information exported.

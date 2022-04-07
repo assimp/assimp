@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<mesh xmlns="http://irrlicht.sourceforge.net/IRRMESH_09_2007" version="1.0">
+<!-- This file contains a static mesh in the Irrlicht Engine format with 5 materials.-->
+	<boundingBox minEdge="-856.310974 -268.159119 -55.100883" maxEdge="98.810463 248.437958 1227.140869" />
+	<buffer>
+		<boundingBox minEdge="-1.189549 -13.579381 564.385864" maxEdge="98.810463 86.420624 664.385864" />
+		<material>
+			<enum name="Type" value="solid" />
+			<color name="Ambient" value="ff18cb00" />
+			<color name="Diffuse" value="ffc000dc" />
+			<color name="Emissive" value="00000000" />
+			<color name="Specular" value="ff268800" />
+			<float name="Shininess" value="0.100000" />
+			<float name="Param1" value="0.000000" />
+			<float name="Param2" value="0.000000" />
+			<texture name="Texture1" value="" />
+			<texture name="Texture2" value="" />
+			<texture name="Texture3" value="" />
+			<texture name="Texture4" value="" />
+			<bool name="Wireframe" value="false" />
+			<bool name="GouraudShading" value="true" />
+			<bool name="Lighting" value="true" />
+			<bool name="ZWriteEnable" value="true" />
+			<int name="ZBuffer" value="1" />
+			<bool name="BackfaceCulling" value="true" />
+			<bool name="FogEnable" value="false" />
+			<bool name="NormalizeNormals" value="false" />
+			<bool name="BilinearFilter1" value="true" />
+			<bool name="BilinearFilter2" value="true" />
+			<bool name="BilinearFilter3" value="true" />
+			<bool name="BilinearFilter4" value="true" />
+			<bool name="TrilinearFilter1" value="false" />
+			<bool name="TrilinearFilter2" value="false" />
+			<bool name="TrilinearFilter3" value="false" />
+			<bool name="TrilinearFilter4" value="false" />
+			<bool name="AnisotropicFilter1" value="false" />
+			<bool name="AnisotropicFilter2" value="false" />
+			<bool name="AnisotropicFilter3" value="false" />
+			<bool name="AnisotropicFilter4" value="false" />
+			<enum name="TextureWrap1" value="texture_clamp_repeat" />
+			<enum name="TextureWrap2" value="texture_clamp_repeat" />
+			<enum name="TextureWrap3" value="texture_clamp_repeat" />
+			<enum name="TextureWrap4" value="texture_clamp_repeat" />
+		</material>
+		<vertices type="standard" vertexCount="0">
+</vertices>
+		<indices indexCount="0">
+</indices>
+	</buffer>
+	<buffer>
+		<boundingBox minEdge="-425.481689 -112.485245 -55.100883" maxEdge="-225.481689 87.514755 144.899109" />
+		<material>
+			<enum name="Type" value="solid" />
+			<color name="Ambient" value="ff00a19b" />
+			<color name="Diffuse" value="ff6d0005" />
+			<color name="Emissive" value="00000000" />
+			<color name="Specular" value="ff510085" />
+			<float name="Shininess" value="0.100000" />
+			<float name="Param1" value="0.000000" />
+			<float name="Param2" value="0.000000" />
+			<texture name="Texture1" value="" />
+			<texture name="Texture2" value="" />
+			<texture name="Texture3" value="" />
+			<texture name="Texture4" value="" />
+			<bool name="Wireframe" value="false" />
+			<bool name="GouraudShading" value="true" />
+			<bool name="Lighting" value="true" />
+			<bool name="ZWriteEnable" value="true" />
+			<int name="ZBuffer" value="1" />
+			<bool name="BackfaceCulling" value="true" />
+			<bool name="FogEnable" value="false" />
+			<bool name="NormalizeNormals" value="false" />
+			<bool name="BilinearFilter1" value="true" />
+			<bool name="BilinearFilter2" value="true" />
+			<bool name="BilinearFilter3" value="true" />
+			<bool name="BilinearFilter4" value="true" />
+			<bool name="TrilinearFilter1" value="false" />
+			<bool name="TrilinearFilter2" value="false" />
+			<bool name="TrilinearFilter3" value="false" />
+			<bool name="TrilinearFilter4" value="false" />
+			<bool name="AnisotropicFilter1" value="false" />
+			<bool name="AnisotropicFilter2" value="false" />
+			<bool name="AnisotropicFilter3" value="false" />
+			<bool name="AnisotropicFilter4" value="false" />
+			<enum name="TextureWrap1" value="texture_clamp_repeat" />
+			<enum name="TextureWrap2" value="texture_clamp_repeat" />
+			<enum name="TextureWrap3" value="texture_clamp_repeat" />
+			<enum name="TextureWrap4" value="texture_clamp_repeat" />
+		</material>
+		<vertices type="standard" vertexCount="0">
+</vertices>
+		<indices indexCount="0">
+</indices>
+	</buffer>
+	<buffer>
+		<boundingBox minEdge="-594.103699 -268.159119 927.140869" maxEdge="-294.103699 31.840881 1227.140869" />
+		<material>
+			<enum name="Type" value="solid" />
+			<color name="Ambient" value="ff620086" />
+			<color name="Diffuse" value="ff2f3e00" />
+			<color name="Emissive" value="00000000" />
+			<color name="Specular" value="ffa12600" />
+			<float name="Shininess" value="0.100000" />
+			<float name="Param1" value="0.000000" />
+			<float name="Param2" value="0.000000" />
+			<texture name="Texture1" value="" />
+			<texture name="Texture2" value="" />
+			<texture name="Texture3" value="" />
+			<texture name="Texture4" value="" />
+			<bool name="Wireframe" value="false" />
+			<bool name="GouraudShading" value="true" />
+			<bool name="Lighting" value="true" />
+			<bool name="ZWriteEnable" value="true" />
+			<int name="ZBuffer" value="1" />
+			<bool name="BackfaceCulling" value="true" />
+			<bool name="FogEnable" value="false" />
+			<bool name="NormalizeNormals" value="false" />
+			<bool name="BilinearFilter1" value="true" />
+			<bool name="BilinearFilter2" value="true" />
+			<bool name="BilinearFilter3" value="true" />
+			<bool name="BilinearFilter4" value="true" />
+			<bool name="TrilinearFilter1" value="false" />
+			<bool name="TrilinearFilter2" value="false" />
+			<bool name="TrilinearFilter3" value="false" />
+			<bool name="TrilinearFilter4" value="false" />
+			<bool name="AnisotropicFilter1" value="false" />
+			<bool name="AnisotropicFilter2" value="false" />
+			<bool name="AnisotropicFilter3" value="false" />
+			<bool name="AnisotropicFilter4" value="false" />
+			<enum name="TextureWrap1" value="texture_clamp_repeat" />
+			<enum name="TextureWrap2" value="texture_clamp_repeat" />
+			<enum name="TextureWrap3" value="texture_clamp_repeat" />
+			<enum name="TextureWrap4" value="texture_clamp_repeat" />
+		</material>
+		<vertices type="standard" vertexCount="0">
+</vertices>
+		<indices indexCount="0">
+</indices>
+	</buffer>
+	<buffer>
+		<boundingBox minEdge="-387.523499 -151.562042 573.689575" maxEdge="12.476517 248.437958 973.689575" />
+		<material>
+			<enum name="Type" value="solid" />
+			<color name="Ambient" value="ff0014a9" />
+			<color name="Diffuse" value="ffc97b00" />
+			<color name="Emissive" value="00000000" />
+			<color name="Specular" value="ffb40000" />
+			<float name="Shininess" value="0.100000" />
+			<float name="Param1" value="0.000000" />
+			<float name="Param2" value="0.000000" />
+			<texture name="Texture1" value="" />
+			<texture name="Texture2" value="" />
+			<texture name="Texture3" value="" />
+			<texture name="Texture4" value="" />
+			<bool name="Wireframe" value="false" />
+			<bool name="GouraudShading" value="true" />
+			<bool name="Lighting" value="true" />
+			<bool name="ZWriteEnable" value="true" />
+			<int name="ZBuffer" value="1" />
+			<bool name="BackfaceCulling" value="true" />
+			<bool name="FogEnable" value="false" />
+			<bool name="NormalizeNormals" value="false" />
+			<bool name="BilinearFilter1" value="true" />
+			<bool name="BilinearFilter2" value="true" />
+			<bool name="BilinearFilter3" value="true" />
+			<bool name="BilinearFilter4" value="true" />
+			<bool name="TrilinearFilter1" value="false" />
+			<bool name="TrilinearFilter2" value="false" />
+			<bool name="TrilinearFilter3" value="false" />
+			<bool name="TrilinearFilter4" value="false" />
+			<bool name="AnisotropicFilter1" value="false" />
+			<bool name="AnisotropicFilter2" value="false" />
+			<bool name="AnisotropicFilter3" value="false" />
+			<bool name="AnisotropicFilter4" value="false" />
+			<enum name="TextureWrap1" value="texture_clamp_repeat" />
+			<enum name="TextureWrap2" value="texture_clamp_repeat" />
+			<enum name="TextureWrap3" value="texture_clamp_repeat" />
+			<enum name="TextureWrap4" value="texture_clamp_repeat" />
+		</material>
+		<vertices type="standard" vertexCount="0">
+</vertices>
+		<indices indexCount="0">
+</indices>
+	</buffer>
+	<buffer>
+		<boundingBox minEdge="-856.310974 -267.823242 115.341156" maxEdge="-356.310974 232.176758 615.341187" />
+		<material>
+			<enum name="Type" value="trans_vertex_alpha" />
+			<color name="Ambient" value="ff00516f" />
+			<color name="Diffuse" value="ffb20800" />
+			<color name="Emissive" value="00000000" />
+			<color name="Specular" value="ff00aebe" />
+			<float name="Shininess" value="0.100000" />
+			<float name="Param1" value="0.170000" />
+			<float name="Param2" value="0.000000" />
+			<texture name="Texture1" value="" />
+			<texture name="Texture2" value="" />
+			<texture name="Texture3" value="" />
+			<texture name="Texture4" value="" />
+			<bool name="Wireframe" value="false" />
+			<bool name="GouraudShading" value="true" />
+			<bool name="Lighting" value="true" />
+			<bool name="ZWriteEnable" value="true" />
+			<int name="ZBuffer" value="1" />
+			<bool name="BackfaceCulling" value="true" />
+			<bool name="FogEnable" value="false" />
+			<bool name="NormalizeNormals" value="false" />
+			<bool name="BilinearFilter1" value="true" />
+			<bool name="BilinearFilter2" value="true" />
+			<bool name="BilinearFilter3" value="true" />
+			<bool name="BilinearFilter4" value="true" />
+			<bool name="TrilinearFilter1" value="false" />
+			<bool name="TrilinearFilter2" value="false" />
+			<bool name="TrilinearFilter3" value="false" />
+			<bool name="TrilinearFilter4" value="false" />
+			<bool name="AnisotropicFilter1" value="false" />
+			<bool name="AnisotropicFilter2" value="false" />
+			<bool name="AnisotropicFilter3" value="false" />
+			<bool name="AnisotropicFilter4" value="false" />
+			<enum name="TextureWrap1" value="texture_clamp_repeat" />
+			<enum name="TextureWrap2" value="texture_clamp_repeat" />
+			<enum name="TextureWrap3" value="texture_clamp_repeat" />
+			<enum name="TextureWrap4" value="texture_clamp_repeat" />
+		</material>
+		<vertices type="standard" vertexCount="0">
+
+</vertices>
+		<indices indexCount="0">
+</indices>
+	</buffer>
+</mesh>

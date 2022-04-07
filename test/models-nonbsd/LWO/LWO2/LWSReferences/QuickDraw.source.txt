@@ -1,0 +1,31 @@
+=====================================================================
+
+From http://telias.free.fr
+Model copyright: Elias Tsiantas
+
+"These 3d models are contributed by John Hoffman and are based on
+characters from a cartoon show called "Jayce and the wheel warriors"
+(except the marauder) John's site: http://www3.sympatico.ca/john.hoffman"
+
+=====================================================================
+
+Downloaded 4th November 2008 (Obama ftw!).
+Notice found on the page:
+
+"
+Free the models is a site that offers free 3d models in 3ds, bryce, poser,
+lightwave and md2 format. Also a great collection of textures to use in
+your favorite modelling and rendering program. All the content is free
+for any use. In the future more 3d formats will be added and some other
+sections such as wallpapers, 3d screensavers, 3d coding source code and
+tutorials.
+"
+
+
+
+INFO
+====
+
+
+These files belong to the QuickDraw model in the LWS folder - they are referenced
+and loaded into the LWS scene.

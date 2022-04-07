@@ -1,0 +1,9 @@
+Zylinder animation:
+
+Frame 1 - 10: Zylinder knickt ein, so dass der Knick in Richtung z+ zeigt.
+Frame 10 - 18: Zylinder-Spitze streckt sich in Richtung z-.
+Frame 18 - 24: Zylinder-Spitze bewegt sich zu Position in Richtung x+
+
+Remarks: The exporter failed here for some reasons... although the mesh referres to four bones, only two of them are stored in the corresponding node hierarchy. So you have a mesh with 4 bones, a hirarchy with 2 nodes and a animation that affects only those two nodes.
+
+There is no timing given for the animation. You have to scale the animation manually. For this file, the timing seems to be 24 ticks per second.

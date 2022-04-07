@@ -1,0 +1,1669 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.2.8 with hand-edits for clearcoat",
+        "version" : "2.0"
+    },
+    "extensionsUsed": [
+        "KHR_materials_clearcoat"
+    ],
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                3,
+                7,
+                11,
+                15,
+                19,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 1,
+            "name" : "ClearCoatSample"
+        },
+        {
+            "mesh" : 2,
+            "name" : "CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                0,
+                1,
+                2
+            ],
+            "name" : "R0_SimpleCoatTest",
+            "translation" : [
+                0,
+                5.25,
+                0
+            ]
+        },
+        {
+            "mesh" : 3,
+            "name" : "R1_BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 4,
+            "name" : "R1_ClearCoatSample"
+        },
+        {
+            "mesh" : 5,
+            "name" : "R1_CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                4,
+                5,
+                6
+            ],
+            "name" : "R1_PartialCoatTest",
+            "translation" : [
+                0,
+                3.1500000953674316,
+                0
+            ]
+        },
+        {
+            "mesh" : 6,
+            "name" : "R2_BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 7,
+            "name" : "R2_ClearCoatSample"
+        },
+        {
+            "mesh" : 8,
+            "name" : "R2_CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                8,
+                9,
+                10
+            ],
+            "name" : "R2_RoughnessVariations",
+            "translation" : [
+                0,
+                1.0499999523162842,
+                0
+            ]
+        },
+        {
+            "mesh" : 9,
+            "name" : "R3_BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 10,
+            "name" : "R3_ClearCoatSample"
+        },
+        {
+            "mesh" : 11,
+            "name" : "R3_CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                12,
+                13,
+                14
+            ],
+            "name" : "R3_BaseNormals",
+            "translation" : [
+                0,
+                -1.0499999523162842,
+                0
+            ]
+        },
+        {
+            "mesh" : 12,
+            "name" : "R4_BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 13,
+            "name" : "R4_ClearCoatSample"
+        },
+        {
+            "mesh" : 14,
+            "name" : "R4_CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                16,
+                17,
+                18
+            ],
+            "name" : "R4_CoatNormals",
+            "translation" : [
+                0,
+                -5.25,
+                0
+            ]
+        },
+        {
+            "mesh" : 15,
+            "name" : "R5_BaseLayerSample",
+            "translation" : [
+                -2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "mesh" : 16,
+            "name" : "R5_ClearCoatSample"
+        },
+        {
+            "mesh" : 17,
+            "name" : "R5_CoatOnlySample",
+            "translation" : [
+                2.0999999046325684,
+                0,
+                0
+            ]
+        },
+        {
+            "children" : [
+                20,
+                21,
+                22
+            ],
+            "name" : "R5_SharedNormals",
+            "translation" : [
+                0,
+                -3.1500000953674316,
+                0
+            ]
+        },
+        {
+            "mesh" : 18,
+            "name" : "X2_Label_CoatingOnly",
+            "translation" : [
+                2.0712804794311523,
+                6.619500160217285,
+                0
+            ]
+        },
+        {
+            "mesh" : 19,
+            "name" : "Y0_Label_SimpleCoating",
+            "translation" : [
+                -5.3578033447265625,
+                5.25,
+                0
+            ]
+        },
+        {
+            "mesh" : 20,
+            "name" : "Y1_Label_PartialCoating",
+            "translation" : [
+                -5.3578033447265625,
+                3.1673200130462646,
+                0
+            ]
+        },
+        {
+            "mesh" : 21,
+            "name" : "Y2_Label_Roughness",
+            "translation" : [
+                -5.3578033447265625,
+                1.1383899450302124,
+                0
+            ]
+        },
+        {
+            "mesh" : 22,
+            "name" : "Y3_Label_BaseNormals",
+            "translation" : [
+                -5.3578033447265625,
+                -1.099429965019226,
+                0
+            ]
+        },
+        {
+            "mesh" : 23,
+            "name" : "Y4_Label_CoatNormals",
+            "translation" : [
+                -5.3578033447265625,
+                -5.252500057220459,
+                0
+            ]
+        },
+        {
+            "mesh" : 24,
+            "name" : "Y5_Label_SharedNormals",
+            "translation" : [
+                -5.3578033447265625,
+                -3.1963000297546387,
+                0
+            ]
+        },
+        {
+            "mesh" : 25,
+            "name" : "X0_Label_BaseLayer",
+            "translation" : [
+                -2.087031602859497,
+                6.616230010986328,
+                0
+            ]
+        },
+        {
+            "mesh" : 26,
+            "name" : "X1_Label_Coated",
+            "translation" : [
+                0,
+                6.614150047302246,
+                0
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Simple_Base",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.5,
+                    0.019999999552965164,
+                    0.009999999776482582,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Simple_Coated",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.5,
+                    0.019999999552965164,
+                    0.009999999776482582,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 0.03
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Simple_Coating",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.029999999329447746
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Partial_Base",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Partial_Coated",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 0.03,
+                    "clearcoatTexture": {
+                        "index": 0,
+                        "texCoord": 0
+                    }
+                }
+            }
+        },
+        {
+            "alphaMode" : "BLEND",
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "Partial_Coating",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 1,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.029999999329447746
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "RoughVariations_Base",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.6000000238418579
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "RoughVariations_Coated",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.6000000238418579
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 1,
+                    "clearcoatRoughnessTexture": {
+                        "index": 2,
+                        "texCoord": 0
+                    }
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "RoughVariations_Coating",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "metallicRoughnessTexture" : {
+                    "index" : 2,
+                    "texCoord" : 0
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "BaseNorm_Base",
+            "normalTexture" : {
+                "index" : 3,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "BaseNorm_Coated",
+            "normalTexture" : {
+                "index" : 4,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012848637998104095,
+                    0.021861059591174126,
+                    0.11068868637084961,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 0.03
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "BaseNorm_Coating",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.029999999329447746
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "CoatNorm_Base",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "CoatNorm_Coated",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 0.03,
+                    "clearcoatNormalTexture": {
+                        "index": 5,
+                        "texCoord": 0,
+                        "scale": 1
+                    }
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "CoatNorm_Coating",
+            "normalTexture" : {
+                "index" : 5,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.029999999329447746
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "SharedNorm_Base",
+            "normalTexture" : {
+                "index" : 6,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "SharedNorm_Coated",
+            "normalTexture" : {
+                "index" : 7,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.012983020395040512,
+                    0.022173883393406868,
+                    0.10946174710988998,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4399999976158142
+            },
+            "extensions": {
+                "KHR_materials_clearcoat": {
+                    "clearcoatFactor": 1,
+                    "clearcoatRoughnessFactor": 0.03,
+                    "clearcoatNormalTexture": {
+                        "index": 7,
+                        "texCoord": 0
+                    }
+                }
+            }
+        },
+        {
+            "emissiveFactor" : [
+                0,
+                0,
+                0
+            ],
+            "name" : "SharedNorm_Coating",
+            "normalTexture" : {
+                "index" : 8,
+                "texCoord" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.029999999329447746
+            }
+        },
+        {
+            "emissiveFactor" : [
+                1,
+                1,
+                1
+            ],
+            "emissiveTexture" : {
+                "index" : 9,
+                "texCoord" : 0
+            },
+            "name" : "LabelMaterial",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.8999999761581421
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 0
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 1
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 2
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 3
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 4
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 5
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 6
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 7
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 8
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 9
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 10
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 11
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 12
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 13
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 14
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 15
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 16
+                }
+            ]
+        },
+        {
+            "name" : "ClearCoatSampleMesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 17
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 4,
+                        "NORMAL" : 5,
+                        "TEXCOORD_0" : 6
+                    },
+                    "indices" : 7,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.001",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 8,
+                        "NORMAL" : 9,
+                        "TEXCOORD_0" : 10
+                    },
+                    "indices" : 7,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.002",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 11,
+                        "NORMAL" : 12,
+                        "TEXCOORD_0" : 13
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.003",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 15,
+                        "NORMAL" : 16,
+                        "TEXCOORD_0" : 17
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.004",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 18,
+                        "NORMAL" : 19,
+                        "TEXCOORD_0" : 20
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.005",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 21,
+                        "NORMAL" : 22,
+                        "TEXCOORD_0" : 23
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.006",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 24,
+                        "NORMAL" : 25,
+                        "TEXCOORD_0" : 26
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.007",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 27,
+                        "NORMAL" : 28,
+                        "TEXCOORD_0" : 29
+                    },
+                    "indices" : 14,
+                    "material" : 18
+                }
+            ]
+        },
+        {
+            "name" : "Labels_Mesh.008",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 30,
+                        "NORMAL" : 31,
+                        "TEXCOORD_0" : 32
+                    },
+                    "indices" : 7,
+                    "material" : 18
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "source" : 0
+        },
+        {
+            "source" : 1
+        },
+        {
+            "source" : 2
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 4
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 5
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/png",
+            "name" : "PartialCoating",
+            "uri" : "PartialCoating.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "PartialCoating_Alpha",
+            "uri" : "PartialCoating_Alpha.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "RoughnessStripes",
+            "uri" : "RoughnessStripes.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "RibsNormal",
+            "uri" : "RibsNormal.png"
+        },
+        {
+            "mimeType" : "image/jpeg",
+            "name" : "PlasticWrap_normals",
+            "uri" : "PlasticWrap_normals.jpg"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "ClearCoatLabels",
+            "uri" : "ClearCoatLabels.png"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 1113,
+            "max" : [
+                1,
+                1,
+                1.0499999523162842
+            ],
+            "min" : [
+                -1,
+                -1,
+                -0.06000000983476639
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 1113,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 1113,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 6180,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 4,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                1.0280373096466064,
+                0.23501670360565186,
+                3.8289083903464416e-08
+            ],
+            "min" : [
+                -0.968224287033081,
+                -0.2350165843963623,
+                -0.010000125505030155
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5123,
+            "count" : 12,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 8,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.23026323318481445,
+                3.751463495405005e-08
+            ],
+            "min" : [
+                -2,
+                -0.23026317358016968,
+                -0.010000579059123993
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 9,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 10,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 11,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.2302631139755249,
+                3.7514624295909016e-08
+            ],
+            "min" : [
+                -2,
+                -0.23026323318481445,
+                -0.010000428184866905
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 12,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 13,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 14,
+            "componentType" : 5123,
+            "count" : 12,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 15,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.22039484977722168,
+                3.590687924770464e-08
+            ],
+            "min" : [
+                -2,
+                -0.22039473056793213,
+                -0.010000280104577541
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 16,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 17,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 18,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.21764808893203735,
+                3.545937588000925e-08
+            ],
+            "min" : [
+                -2,
+                -0.21764802932739258,
+                -0.010000137612223625
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 19,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 20,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 21,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.20775499939918518,
+                3.3847587843638394e-08
+            ],
+            "min" : [
+                -2,
+                -0.20775499939918518,
+                -0.009999996051192284
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 22,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 23,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 24,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                2,
+                0.22341907024383545,
+                3.6399587344249085e-08
+            ],
+            "min" : [
+                -2,
+                -0.22341907024383545,
+                -0.009999859146773815
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 25,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 26,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 27,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                0.9169960618019104,
+                0.22670458257198334,
+                3.69348676088066e-08
+            ],
+            "min" : [
+                -0.9199233651161194,
+                -0.22670456767082214,
+                -0.010000176727771759
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 28,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 29,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 30,
+            "componentType" : 5126,
+            "count" : 8,
+            "max" : [
+                0.8968609571456909,
+                0.20853587985038757,
+                3.397480696776256e-08
+            ],
+            "min" : [
+                -0.9147982001304626,
+                -0.2085357904434204,
+                -0.010000113397836685
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 31,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 32,
+            "componentType" : 5126,
+            "count" : 8,
+            "type" : "VEC2"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 13356,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 13356,
+            "byteOffset" : 13356
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 8904,
+            "byteOffset" : 26712
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 12360,
+            "byteOffset" : 35616
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 47976
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48072
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 48168
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 24,
+            "byteOffset" : 48232
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48256
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48352
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 48448
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48512
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48608
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 48704
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 24,
+            "byteOffset" : 48768
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48792
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 48888
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 48984
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49048
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49144
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 49240
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49304
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49400
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 49496
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49560
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49656
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 49752
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49816
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 49912
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 50008
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 50072
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 96,
+            "byteOffset" : 50168
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 64,
+            "byteOffset" : 50264
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 50328,
+            "uri" : "ClearCoatTest.bin"
+        }
+    ]
+}

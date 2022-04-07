@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+    <asset>
+        <contributor>
+            <authoring_tool>Lightwave 9.5</authoring_tool>
+        </contributor>
+        <created>2009-03-27T22:29:42Z</created>
+        <modified>2009-03-27T22:29:42Z</modified>
+        <unit meter="1"></unit>
+        <up_axis>Y_UP</up_axis>
+    </asset>
+    <library_animations></library_animations>
+    <library_cameras></library_cameras>
+    <library_lights></library_lights>
+    <library_materials>
+        <material id="test_Smoothing" name="test_Smoothing">
+            <instance_effect url="#test_Smoothing-fx"></instance_effect>
+        </material>
+    </library_materials>
+    <library_effects>
+        <effect id="test_Smoothing-fx">
+            <profile_COMMON>
+                <technique sid="common">
+                    <blinn>
+                        <diffuse>
+                            <color>0.141176 0.184314 0.411765 0</color>
+                        </diffuse>
+                    </blinn>
+                </technique>
+            </profile_COMMON>
+        </effect>
+    </library_effects>
+    <library_geometries>
+        <geometry id="Mesh_Object_lib" name="Mesh_Object">
+            <mesh>
+                <source id="Mesh_Object_positions" name="position">
+                    <float_array id="Mesh_Object_positions_array" count="192">-1.146 1.6575 2.348 
+-1.146 1.67177 2.49285 
+-1.146 1.67177 2.20315 
+-1.146 1.7125 2.35 
+-1.146 1.71402 2.63214 
+-1.146 1.71402 2.06386 
+-1.146 1.72571 2.48412 
+-1.146 1.72571 2.21588 
+-1.146 1.76483 2.61309 
+-1.146 1.76483 2.08691 
+-1.146 1.78263 2.76051 
+-1.146 1.78263 1.93549 
+-1.146 1.82836 2.73195 
+-1.146 1.82836 1.96805 
+-1.146 1.87497 2.87303 
+-1.146 1.87497 1.82297 
+-1.146 1.91386 2.83614 
+-1.146 1.91386 1.86386 
+-1.146 1.98749 2.96537 
+-1.146 1.98749 1.73063 
+-1.146 2.01805 2.92164 
+-1.146 2.01805 1.77836 
+-1.146 2.11586 3.03398 
+-1.146 2.11586 1.66202 
+-1.146 2.13691 2.98517 
+-1.146 2.13691 1.71483 
+-1.146 2.25515 3.07623 
+-1.146 2.25515 1.61977 
+-1.146 2.26588 3.02429 
+-1.146 2.26588 1.67571 
+-1.146 2.4 3.0905 
+-1.146 2.4 3.0375 
+-1.146 2.4 1.6625 
+-1.146 2.4 1.6055 
+-1.146 2.53412 3.02429 
+-1.146 2.53412 1.67571 
+-1.146 2.54485 3.07623 
+-1.146 2.54485 1.61977 
+-1.146 2.66309 2.98517 
+-1.146 2.66309 1.71483 
+-1.146 2.68414 3.03398 
+-1.146 2.68414 1.66202 
+-1.146 2.78195 2.92164 
+-1.146 2.78195 1.77836 
+-1.146 2.81251 2.96537 
+-1.146 2.81251 1.73063 
+-1.146 2.88614 2.83614 
+-1.146 2.88614 1.86386 
+-1.146 2.92503 2.87303 
+-1.146 2.92503 1.82297 
+-1.146 2.97164 2.73195 
+-1.146 2.97164 1.96805 
+-1.146 3.01737 2.76051 
+-1.146 3.01737 1.93549 
+-1.146 3.03517 2.61309 
+-1.146 3.03517 2.08691 
+-1.146 3.07429 2.48412 
+-1.146 3.07429 2.21588 
+-1.146 3.08598 2.63214 
+-1.146 3.08598 2.06386 
+-1.146 3.0875 2.35 
+-1.146 3.12823 2.49285 
+-1.146 3.12823 2.20315 
+-1.146 3.1425 2.348 
+</float_array>
+                    <technique_common>
+                        <accessor count="64" offset="0" source="#Mesh_Object_positions_array" stride="3">
+                            <param name="X" type="float"></param>
+                            <param name="Y" type="float"></param>
+                            <param name="Z" type="float"></param>
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="Mesh_Object_vertices">
+                    <input semantic="POSITION" source="#Mesh_Object_positions"></input>
+                </vertices>
+                <polylist count="1" material="test_Smoothing">
+                    <input offset="0" semantic="VERTEX" source="#Mesh_Object_vertices"></input>
+                    <vcount>66 </vcount>
+                    <p>26 22 18 14 10 4 1 0 2 5 11 15 19 23 27 33 37 41 45 49 53 59 62 63 61 58 52 48 44 40 36 30 31 34 38 42 46 50 54 56 60 57 55 51 47 43 39 35 32 29 25 21 17 13 9 7 3 6 8 12 16 20 24 28 31 30 </p>
+                </polylist>
+            </mesh>
+        </geometry>
+    </library_geometries>
+    <library_controllers></library_controllers>
+    <library_visual_scenes>
+        <visual_scene id="VisualSceneNode" name="Scene">
+            <node id="Mesh_Object" name="Mesh_Object">
+                <instance_geometry url="#Mesh_Object_lib">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="test_Smoothing" target="#test_Smoothing"></instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#VisualSceneNode"></instance_visual_scene>
+    </scene>
+</COLLADA>

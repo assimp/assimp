@@ -1053,7 +1053,9 @@ ENDIF()
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
-FIND_PACKAGE(RT QUIET)
+IF (NOT WIN32)
+  FIND_PACKAGE(RT QUIET)
+ENDIF ()
 IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
@@ -1274,10 +1276,17 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
   OUTPUT_NAME assimp${LIBRARY_SUFFIX}
 )
 
-if (WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND BUILD_SHARED_LIBS)
-  set_target_properties(assimp PROPERTIES
-    SUFFIX "-${ASSIMP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  )
+if (MINGW)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties(assimp PROPERTIES
+      SUFFIX "-${ASSIMP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
+    if (NOT DEFINED ${LIBRARY_SUFFIX}) #Added as a guard for subsequent runs, but seems to not work when cache is outdated
+      set(LIBRARY_SUFFIX "-${ASSIMP_SOVERSION}" CACHE STRING "the suffix for the assimp MinGW shared library")
+    endif()
+  else ()
+    TARGET_LINK_LIBRARIES ( assimp -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread ) # winpthread is for libminizip.
+  endif ()
 endif()
 
 if (APPLE)

@@ -2161,6 +2161,9 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     const float ShininessExponent = PropertyGet<float>(props, "ShininessExponent", ok);
     if (ok) {
         out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS);
+         // Match Blender behavior to extract roughness when only shininess is present
+        const float roughness = 1.0 - (sqrt(ShininessExponent) / 10.0);
+        out_mat->AddProperty(&roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
     }
 
     // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:

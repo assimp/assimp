@@ -53,9 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace Assimp;
-using namespace glTFCommon;
 
 namespace glTF {
+using namespace glTFCommon;
 
 #if _MSC_VER
 #pragma warning(push)

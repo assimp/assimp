@@ -52,10 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-#include <fstream>
+
 #include <iomanip>
 #include <memory>
-#include <strstream>
+#include <sstream>
 
 static const aiImporterDesc desc = { "MMD Importer",
     "",
@@ -123,12 +123,12 @@ void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
     }
 
     std::vector<char> contents(fileStream->FileSize());
-    fileStream->Read(std::data(contents), 1, std::size(contents));
+    fileStream->Read(contents.data(), 1, contents.size());
 
-    std::istrstream is(static_cast<const char *>(std::data(contents)), std::size(contents));
+    std::istringstream iss(std::string(contents.begin(), contents.end()));
 
     pmx::PmxModel model;
-    model.Read(&is);
+    model.Read(&iss);
 
     CreateDataFromImport(&model, pScene);
 }

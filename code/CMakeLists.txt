@@ -182,6 +182,7 @@ SET( Common_SRCS
   Common/DefaultIOSystem.cpp
   Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
+  Common/Maybe.h
   Common/Importer.cpp
   Common/IFF.h
   Common/SGSpatialSort.cpp

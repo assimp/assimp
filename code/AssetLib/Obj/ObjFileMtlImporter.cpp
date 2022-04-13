@@ -205,7 +205,7 @@ void ObjFileMtlImporter::load() {
                         break;
                     case 's':
                         ++m_DataIt;
-                        getColorRGBA(&m_pModel->m_pCurrentMaterial->sheen);
+                        getColorRGBA(m_pModel->m_pCurrentMaterial->sheen);
                         break;
                     case 'c':
                         ++m_DataIt;
@@ -268,12 +268,19 @@ void ObjFileMtlImporter::getColorRGBA(aiColor3D *pColor) {
     pColor->b = b;
 }
 
+void ObjFileMtlImporter::getColorRGBA(Maybe<aiColor3D> &value) {
+    aiColor3D v;
+    getColorRGBA(&v);
+    value = Maybe<aiColor3D>(v);
+}
+
 // -------------------------------------------------------------------
 //  Loads the kind of illumination model.
 void ObjFileMtlImporter::getIlluminationModel(int &illum_model) {
     m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
     illum_model = atoi(&m_buffer[0]);
 }
+
 
 // -------------------------------------------------------------------
 //  Loads a single float value.
@@ -284,8 +291,17 @@ void ObjFileMtlImporter::getFloatValue(ai_real &value) {
         value = 0.0f;
         return;
     }
-    
+
     value = (ai_real)fast_atof(&m_buffer[0]);
+}
+
+void ObjFileMtlImporter::getFloatValue(Maybe<ai_real> &value) {
+    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    size_t len = std::strlen(&m_buffer[0]);
+    if (len)
+        value = Maybe<ai_real>(fast_atof(&m_buffer[0]));
+    else
+        value = Maybe<ai_real>();
 }
 
 // -------------------------------------------------------------------

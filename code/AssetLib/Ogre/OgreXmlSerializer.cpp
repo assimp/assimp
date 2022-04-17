@@ -587,11 +587,11 @@ void OgreXmlSerializer::ReadAnimations(XmlNode &node, Skeleton *skeleton) {
                 const std::string currentChildName = currentChildNode.name();
                 if (currentChildName == nnTracks) {
                     ReadAnimationTracks(currentChildNode, anim);
-                    skeleton->animations.push_back(anim);
                 } else {
                     throw DeadlyImportError("No <tracks> found in <animation> ", anim->name);
                 }
             }
+            skeleton->animations.push_back(anim);
         }
     }
 }
@@ -607,11 +607,11 @@ void OgreXmlSerializer::ReadAnimationTracks(XmlNode &node, Animation *dest) {
                 const std::string currentChildName = currentChildNode.name();
                 if (currentChildName == nnKeyFrames) {
                     ReadAnimationKeyFrames(currentChildNode, dest, &track);
-                    dest->tracks.push_back(track);
                 } else {
                     throw DeadlyImportError("No <keyframes> found in <track> ", dest->name);
                 }
             }
+            dest->tracks.push_back(track);
         }
     }
 }
@@ -631,7 +631,7 @@ void OgreXmlSerializer::ReadAnimationKeyFrames(XmlNode &node, Animation *anim, V
                     keyframe.position.z = ReadAttribute<float>(currentChildNode, anZ);
                 } else if (currentChildName == nnRotate) {
                     float angle = ReadAttribute<float>(currentChildNode, "angle");
-                    for (XmlNode &currentChildChildNode : currentNode.children()) {
+                    for (XmlNode &currentChildChildNode : currentChildNode.children()) {
                         const std::string currentChildChildName = currentChildChildNode.name();
                         if (currentChildChildName == nnAxis) {
                             aiVector3D axis;

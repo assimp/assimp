@@ -1554,6 +1554,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         bone->mName = bone_name;
 
         bone->mOffsetMatrix = cl->Transform();
+        aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
         // store local transform link for post processing
         /*
         bone->mOffsetMatrix = cl->TransformLink();

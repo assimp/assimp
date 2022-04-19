@@ -1439,9 +1439,20 @@ void ConvertWeightsToSkeleton(const MeshGeometry &geo, const aiMatrix4x4 &absolu
         std::vector<unsigned int> *outputVertStartIndices) {
     ai_assert(geo.DeformerSkin() != nullptr);
 
+    aiSkeleton *skeleton = new aiSkeleton;
     const Skin &sk = *geo.DeformerSkin();
-    for (auto &cluster : sk.Clusters()) {
-        cluster->Transform();
+    try {
+        for (auto &cluster : sk.Clusters()) {
+            const WeightIndexArray &indices = cluster->GetIndices();
+            const MatIndexArray &mats = geo.GetMaterialIndices();
+
+            aiMatrix4x4 transform = cluster->Transform();
+            for (WeightIndexArray::value_type index : indices) {
+                unsigned int count = 0;
+                const unsigned int *out_idx = geo.ToOutputVertexIndex(index, count);
+            }
+        }
+    } catch (...) {
     }
 }
 
@@ -1451,14 +1462,11 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
         std::vector<unsigned int> *outputVertStartIndices) {
     ai_assert(geo.DeformerSkin());
 
-    std::vector<size_t> out_indices;
-    std::vector<size_t> index_out_indices;
-    std::vector<size_t> count_out_indices;
+    std::vector<size_t> out_indices, index_out_indices, count_out_indices;
 
     const Skin &sk = *geo.DeformerSkin();
 
-    std::vector<aiBone *> bones;
-
+    std::vector<aiBone*> bones;
     const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
     ai_assert(no_mat_check || outputVertStartIndices);
 
@@ -1539,12 +1547,13 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
     }
 }
 
-void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
+void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Cluster *cluster,
         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
         std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
         aiNode *) {
-    ai_assert(cl); // make sure cluster valid
-    std::string deformer_name = cl->TargetNode()->Name();
+    ai_assert(cluster != nullptr); // make sure cluster valid
+
+    std::string deformer_name = cluster->TargetNode()->Name();
     aiString bone_name = aiString(FixNodeName(deformer_name));
 
     aiBone *bone = nullptr;
@@ -1558,7 +1567,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         bone->mName = bone_name;
 
         // store local transform link for post processing
-        bone->mOffsetMatrix = cl->TransformLink();
+        bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
         aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
@@ -1575,7 +1584,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
 
         const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
-        const WeightArray &weights = cl->GetWeights();
+        const WeightArray &weights = cluster->GetWeights();
 
         const size_t c = index_out_indices.size();
         for (size_t i = 0; i < c; ++i) {

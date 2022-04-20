@@ -59,7 +59,7 @@ void *StackAllocator::Allocate(size_t byteSize) {
         // double block size every time, up to maximum of g_maxBytesPerBlock.
         // Block size must be at least as large as byteSize, but we want to use this for small allocations anyway.
         m_blockAllocationSize = std::max(std::min(m_blockAllocationSize * 2, g_maxBytesPerBlock), byteSize);
-        uint8_t *data = (uint8_t *)malloc(m_blockAllocationSize);
+        uint8_t *data = new uint8_t[m_blockAllocationSize];
         m_storageBlocks.push_back(data);
         m_subIndex = byteSize;
         return data;
@@ -74,7 +74,7 @@ void *StackAllocator::Allocate(size_t byteSize) {
 
 void StackAllocator::FreeAll() {
     for (size_t i = 0; i < m_storageBlocks.size(); i++) {
-        free(m_storageBlocks[i]);
+        delete [] m_storageBlocks[i];
     }
     std::deque<uint8_t *> empty;
     m_storageBlocks.swap(empty);

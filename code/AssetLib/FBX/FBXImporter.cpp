@@ -160,17 +160,18 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	TokenList tokens;
 	try {
 
+        Assimp::StackAllocator tempAllocator;
 		bool is_binary = false;
 		if (!strncmp(begin, "Kaydara FBX Binary", 18)) {
 			is_binary = true;
-			TokenizeBinary(tokens, begin, contents.size());
+            TokenizeBinary(tokens, begin, contents.size(), tempAllocator);
 		} else {
-			Tokenize(tokens, begin);
+            Tokenize(tokens, begin, tempAllocator);
 		}
 
 		// use this information to construct a very rudimentary
 		// parse-tree representing the FBX scope structure
-		Parser parser(tokens, is_binary);
+        Parser parser(tokens, tempAllocator, is_binary);
 
 		// take the raw parse-tree and convert it to a FBX DOM
 		Document doc(parser, settings);
@@ -189,10 +190,7 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		// Set FBX file scale is relative to CM must be converted to M for
 		// assimp universal format (M)
 		SetFileScale(size_relative_to_cm * 0.01f);
-
-		std::for_each(tokens.begin(), tokens.end(), Util::delete_fun<Token>());
 	} catch (std::exception &) {
-		std::for_each(tokens.begin(), tokens.end(), Util::delete_fun<Token>());
 		throw;
 	}
 }

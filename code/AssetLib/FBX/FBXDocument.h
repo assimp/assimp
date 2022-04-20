@@ -80,6 +80,8 @@ class BlendShape;
 class Skin;
 class Cluster;
 
+#define new_LazyObject new (allocator.Allocate(sizeof(LazyObject))) LazyObject
+#define new_Connection new (allocator.Allocate(sizeof(Connection))) Connection
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
  *  are not needed by assimp, so it makes no sense to parse them

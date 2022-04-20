@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogAux.h>
 #include <assimp/fast_atof.h>
 
+#include "Common/StackAllocator.h"
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
 
@@ -68,8 +69,8 @@ typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
 typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
-#   define new_Scope new Scope
-#   define new_Element new Element
+#define new_Scope new (allocator.Allocate(sizeof(Scope))) Scope
+#define new_Element new (allocator.Allocate(sizeof(Element))) Element
 
 
 /** FBX data entity that consists of a key:value tuple.
@@ -159,15 +160,19 @@ class Parser
 public:
     /** Parse given a token list. Does not take ownership of the tokens -
      *  the objects must persist during the entire parser lifetime */
-    Parser (const TokenList& tokens,bool is_binary);
+    Parser(const TokenList &tokens, StackAllocator &allocator, bool is_binary);
     ~Parser();
 
     const Scope& GetRootScope() const {
-        return *root.get();
+        return *root;
     }
 
     bool IsBinary() const {
         return is_binary;
+    }
+
+    StackAllocator &GetAllocator() {
+        return allocator;
     }
 
 private:
@@ -180,10 +185,10 @@ private:
 
 private:
     const TokenList& tokens;
-
+    StackAllocator &allocator;
     TokenPtr last, current;
     TokenList::const_iterator cursor;
-    std::unique_ptr<Scope> root;
+    Scope *root;
 
     const bool is_binary;
 };

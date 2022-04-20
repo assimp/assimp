@@ -158,9 +158,8 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// broadphase tokenizing pass in which we identify the core
 	// syntax elements of FBX (brackets, commas, key:value mappings)
 	TokenList tokens;
-	try {
-
-        Assimp::StackAllocator tempAllocator;
+    Assimp::StackAllocator tempAllocator;
+    try {
 		bool is_binary = false;
 		if (!strncmp(begin, "Kaydara FBX Binary", 18)) {
 			is_binary = true;
@@ -190,8 +189,13 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		// Set FBX file scale is relative to CM must be converted to M for
 		// assimp universal format (M)
 		SetFileScale(size_relative_to_cm * 0.01f);
-	} catch (std::exception &) {
-		throw;
+
+		// This collection does not own the memory for the tokens, but we need to call their d'tor
+        std::for_each(tokens.begin(), tokens.end(), Util::destructor_fun<Token>());
+
+    } catch (std::exception &) {
+        std::for_each(tokens.begin(), tokens.end(), Util::destructor_fun<Token>());
+        throw;
 	}
 }
 

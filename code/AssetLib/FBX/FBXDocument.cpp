@@ -257,7 +257,18 @@ Document::Document(Parser& parser, const ImportSettings& settings) :
 }
 
 // ------------------------------------------------------------------------------------------------
-Document::~Document() {
+Document::~Document()
+{
+	// The document does not own the memory for the following objects, but we need to call their d'tor
+	// so they can properly free memory like string members:
+	
+    for (ObjectMap::value_type &v : objects) {
+        delete_LazyObject(v.second);
+    }
+
+    for (ConnectionMap::value_type &v : src_connections) {
+        delete_Connection(v.second);
+    }
     // |dest_connections| contain the same Connection objects as the |src_connections|
 }
 

@@ -66,6 +66,17 @@ struct delete_fun
     }
 };
 
+/** helper for std::for_each to call the destructor on all items in a container without freeing their heap*/
+template <typename T>
+struct destructor_fun {
+    void operator()(const volatile T* del) {
+        if (del) {
+            del->~T();
+        }
+    }
+};
+
+
 /** Get a string representation for a #TokenType. */
 const char* TokenTypeString(TokenType t);
 

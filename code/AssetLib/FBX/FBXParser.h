@@ -71,7 +71,8 @@ typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> Element
 
 #define new_Scope new (allocator.Allocate(sizeof(Scope))) Scope
 #define new_Element new (allocator.Allocate(sizeof(Element))) Element
-
+#define delete_Scope(_p) (_p)->~Scope()
+#define delete_Element(_p) (_p)->~Element()
 
 /** FBX data entity that consists of a key:value tuple.
  *
@@ -91,7 +92,7 @@ public:
     ~Element();
 
     const Scope* Compound() const {
-        return compound.get();
+        return compound;
     }
 
     const Token& KeyToken() const {
@@ -105,7 +106,7 @@ public:
 private:
     const Token& key_token;
     TokenList tokens;
-    std::unique_ptr<Scope> compound;
+    Scope* compound;
 };
 
 /** FBX data entity that consists of a 'scope', a collection

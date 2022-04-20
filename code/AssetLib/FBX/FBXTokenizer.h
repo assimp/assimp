@@ -160,6 +160,7 @@ typedef const Token* TokenPtr;
 typedef std::vector< TokenPtr > TokenList;
 
 #define new_Token new (token_allocator.Allocate(sizeof(Token))) Token
+#define delete_Token(_p) (_p)->~Token()
 
 
 /** Main FBX tokenizer function. Transform input buffer into a list of preprocessed tokens.

@@ -67,6 +67,10 @@ public:
     // Destructs the allocator and frees all memory
     ~StackAllocator();
 
+    // non copyable
+    StackAllocator(const StackAllocator &) = delete;
+    StackAllocator &operator=(const StackAllocator &) = delete;
+
     // Returns a pointer to byteSize bytes of heap memory that persists
     // for the lifetime of the allocator (or until FreeAll is called).
     void *Allocate(size_t byteSize);

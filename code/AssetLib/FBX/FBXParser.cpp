@@ -115,7 +115,9 @@ namespace Assimp {
 namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
-Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) {
+Element::Element(const Token& key_token, Parser& parser) :
+    key_token(key_token), compound(nullptr)
+{
     TokenPtr n = nullptr;
     StackAllocator &allocator = parser.GetAllocator();
     do {
@@ -146,7 +148,7 @@ Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) 
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            compound.reset(new_Scope(parser));
+            compound = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
@@ -166,6 +168,10 @@ Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) 
 // ------------------------------------------------------------------------------------------------
 Element::~Element()
 {
+    if (compound) {
+        delete_Scope(compound);
+    }
+
      // no need to delete tokens, they are owned by the parser
 }
 
@@ -212,6 +218,11 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
+	// This collection does not own the memory for the elements, but we need to call their d'tor:
+
+    for (ElementMap::value_type &v : elements) {
+        delete_Element(v.second);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -225,7 +236,7 @@ Parser::Parser(const TokenList &tokens, StackAllocator &allocator, bool is_binar
 // ------------------------------------------------------------------------------------------------
 Parser::~Parser()
 {
-    // empty
+    delete_Scope(root);
 }
 
 // ------------------------------------------------------------------------------------------------

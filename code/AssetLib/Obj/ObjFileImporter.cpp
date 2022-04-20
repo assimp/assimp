@@ -616,11 +616,16 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         mat->AddProperty(&pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS);
         mat->AddProperty(&pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY);
         mat->AddProperty(&pCurrentMaterial->transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
-        mat->AddProperty(&pCurrentMaterial->roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
-        mat->AddProperty(&pCurrentMaterial->metallic, 1, AI_MATKEY_METALLIC_FACTOR);
-        mat->AddProperty(&pCurrentMaterial->sheen, 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
-        mat->AddProperty(&pCurrentMaterial->clearcoat_thickness, 1, AI_MATKEY_CLEARCOAT_FACTOR);
-        mat->AddProperty(&pCurrentMaterial->clearcoat_roughness, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+        if (pCurrentMaterial->roughness)
+            mat->AddProperty(&pCurrentMaterial->roughness.Get(), 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        if (pCurrentMaterial->metallic)
+            mat->AddProperty(&pCurrentMaterial->metallic.Get(), 1, AI_MATKEY_METALLIC_FACTOR);
+        if (pCurrentMaterial->sheen)
+            mat->AddProperty(&pCurrentMaterial->sheen.Get(), 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
+        if (pCurrentMaterial->clearcoat_thickness)
+            mat->AddProperty(&pCurrentMaterial->clearcoat_thickness.Get(), 1, AI_MATKEY_CLEARCOAT_FACTOR);
+        if (pCurrentMaterial->clearcoat_roughness)
+            mat->AddProperty(&pCurrentMaterial->clearcoat_roughness.Get(), 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
         mat->AddProperty(&pCurrentMaterial->anisotropy, 1, AI_MATKEY_ANISOTROPY_FACTOR);
 
         // Adding refraction index

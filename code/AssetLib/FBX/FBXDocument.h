@@ -1076,7 +1076,7 @@ private:
 /** DOM root for a FBX file */
 class Document {
 public:
-    Document(const Parser& parser, const ImportSettings& settings);
+    Document(Parser& parser, const ImportSettings& settings);
 
     ~Document();
 
@@ -1160,7 +1160,7 @@ private:
     const ImportSettings& settings;
 
     ObjectMap objects;
-    const Parser& parser;
+    Parser& parser;
 
     PropertyTemplateMap templates;
     ConnectionMap src_connections;

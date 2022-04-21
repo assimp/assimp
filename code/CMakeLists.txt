@@ -194,7 +194,7 @@ SET( Common_SRCS
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
   Common/StackAllocator.h
-  Common/StackAllocator.cpp
+  Common/StackAllocator.inl
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h

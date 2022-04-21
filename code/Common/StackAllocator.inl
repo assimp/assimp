@@ -46,14 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 
-StackAllocator::StackAllocator() {
+inline StackAllocator::StackAllocator() {
 }
 
-StackAllocator::~StackAllocator() {
+inline StackAllocator::~StackAllocator() {
     FreeAll();
 }
 
-void *StackAllocator::Allocate(size_t byteSize) {
+inline void *StackAllocator::Allocate(size_t byteSize) {
     if (m_subIndex + byteSize > m_blockAllocationSize) // start a new block
     {
         // double block size every time, up to maximum of g_maxBytesPerBlock.
@@ -72,7 +72,7 @@ void *StackAllocator::Allocate(size_t byteSize) {
     return data;
 }
 
-void StackAllocator::FreeAll() {
+inline void StackAllocator::FreeAll() {
     for (size_t i = 0; i < m_storageBlocks.size(); i++) {
         delete [] m_storageBlocks[i];
     }

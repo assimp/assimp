@@ -64,9 +64,9 @@ namespace Assimp
 class StackAllocator {
 public:
     // Constructs the allocator
-    StackAllocator();
+    inline StackAllocator();
     // Destructs the allocator and frees all memory
-    ~StackAllocator();
+    inline ~StackAllocator();
 
     // non copyable
     StackAllocator(const StackAllocator &) = delete;
@@ -74,11 +74,11 @@ public:
 
     // Returns a pointer to byteSize bytes of heap memory that persists
     // for the lifetime of the allocator (or until FreeAll is called).
-    void *Allocate(size_t byteSize);
+    inline void *Allocate(size_t byteSize);
 
     // Releases all the memory owned by this allocator.
     // Memory provided through function Allocate is not valid anymore after this function has been called.
-    void FreeAll();
+    inline void FreeAll();
 
 private:
     constexpr const static size_t g_maxBytesPerBlock = 64 * 1024 * 1024; // The maximum size (in bytes) of a block
@@ -90,5 +90,7 @@ private:
 
 
 } // namespace Assimp
+
+#include "StackAllocator.inl"
 
 #endif // include guard

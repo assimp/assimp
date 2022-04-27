@@ -648,10 +648,11 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
                 // get a reference to the material
                 if (iIndex < mat.avSubMaterials.size()) {
                     Material &sMat = mat.avSubMaterials[iIndex];
+
+                    // parse the material block
+                    ParseLV2MaterialBlock(sMat);
                 }
 
-                // parse the material block
-                ParseLV2MaterialBlock(sMat);
                 continue;
             }
         }

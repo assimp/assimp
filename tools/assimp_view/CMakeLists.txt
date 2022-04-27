@@ -39,8 +39,6 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 3.10 )
 
-FIND_PACKAGE(DirectX REQUIRED)
-
 INCLUDE_DIRECTORIES (
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code

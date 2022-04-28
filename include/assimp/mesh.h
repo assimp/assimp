@@ -946,6 +946,7 @@ struct aiSkeletonBone {
     /// The parent bone index, is -1 one if this bone represents the root bone.
     int mParent;
 
+
 #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     /// The bone armature node - used for skeleton conversion
     /// you must enable aiProcess_PopulateArmatureData to populate this
@@ -958,6 +959,9 @@ struct aiSkeletonBone {
 #endif
     /// @brief The number of weights
     unsigned int mNumnWeights;
+
+    /// The mesh index, which will get influenced by the weight.
+    C_STRUCT aiMesh *mMeshId;
 
     /// The influence weights of this bone, by vertex index.
     C_STRUCT aiVertexWeight *mWeights;
@@ -984,6 +988,7 @@ struct aiSkeletonBone {
             mArmature(nullptr),
             mNode(nullptr),
             mNumnWeights(0),
+            mMeshId(nullptr),
             mWeights(nullptr),
             mOffsetMatrix(),
             mLocalMatrix() {

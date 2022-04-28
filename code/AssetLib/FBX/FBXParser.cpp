@@ -949,8 +949,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of uints
-void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -1173,7 +1172,6 @@ aiMatrix4x4 ReadMatrix(const Element& element)
     result.Transpose();
     return result;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsString() with ParseError handling

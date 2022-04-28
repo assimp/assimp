@@ -132,6 +132,7 @@ public:
     /** Determine the face to which a particular output vertex index belongs.
     *  This mapping is always unique. */
     unsigned int FaceForVertexIndex( unsigned int in_index ) const;
+
 private:
     void ReadLayer( const Scope& layer );
     void ReadLayerElement( const Scope& layerElement );

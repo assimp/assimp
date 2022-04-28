@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -68,23 +67,13 @@ namespace FBX {
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc)
-: doc(doc)
-, element(element)
-, id(id)
-, flags() {
+LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc) :
+        doc(doc), element(element), id(id), flags() {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::~LazyObject()
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-const Object* LazyObject::Get(bool dieOnError)
-{
+const Object* LazyObject::Get(bool dieOnError) {
     if(IsBeingConstructed() || FailedToConstruct()) {
         return nullptr;
     }
@@ -234,29 +223,14 @@ const Object* LazyObject::Get(bool dieOnError)
 }
 
 // ------------------------------------------------------------------------------------------------
-Object::Object(uint64_t id, const Element& element, const std::string& name)
-: element(element)
-, name(name)
-, id(id)
-{
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-Object::~Object()
-{
+Object::Object(uint64_t id, const Element& element, const std::string& name) :
+        element(element), name(name), id(id) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 FileGlobalSettings::FileGlobalSettings(const Document &doc, std::shared_ptr<const PropertyTable> props) :
         props(std::move(props)), doc(doc) {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-FileGlobalSettings::~FileGlobalSettings()
-{
     // empty
 }
 
@@ -573,16 +547,14 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, co
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src,
-    const ConnectionMap& conns,
-    const char* const* classnames,
-    size_t count) const
-
-{
+        const ConnectionMap& conns,
+        const char* const* classnames,
+        size_t count) const {
     ai_assert(classnames);
     ai_assert( count != 0 );
     ai_assert( count <= MAX_CLASSNAMES);
 
-    size_t lengths[MAX_CLASSNAMES];
+    size_t lengths[MAX_CLASSNAMES] = {};
 
     const size_t c = count;
     for (size_t i = 0; i < c; ++i) {
@@ -657,9 +629,7 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 
 // ------------------------------------------------------------------------------------------------
 std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
-    const char* const* classnames, size_t count) const
-
-{
+        const char* const* classnames, size_t count) const {
     return GetConnectionsSequenced(dest, false, ConnectionsByDestination(),classnames, count);
 }
 

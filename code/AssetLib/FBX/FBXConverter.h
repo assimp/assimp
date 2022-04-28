@@ -75,7 +75,18 @@ typedef std::map<int64_t, morphKeyData*> morphAnimData;
 namespace Assimp {
 namespace FBX {
 
+class MeshGeometry;
+
+using SkeletonBoneArray = std::vector<aiSkeletonBone *>;
+using SkeletonBoneToMesh = std::map<aiMesh*, SkeletonBoneArray*>;
+
+struct SkeletonBoneContainer {
+    std::vector<aiMesh *> MeshArray;
+    SkeletonBoneToMesh SkeletonBoneToMeshLookup;
+};
+
 class Document;
+
 /**
  *  Convert a FBX #Document to #aiScene
  *  @param out Empty scene to be populated
@@ -225,6 +236,11 @@ private:
             std::vector<unsigned int> *outputVertStartIndices = nullptr);
 
     // ------------------------------------------------------------------------------------------------
+    void ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
+            aiNode *parent, unsigned int materialIndex, std::vector<unsigned int> *outputVertStartIndices,
+            SkeletonBoneContainer &skeletonContainer);
+
+    // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
                         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
                         std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
@@ -301,7 +317,8 @@ private:
     void ConvertAnimationStack(const AnimationStack& st);
 
     // ------------------------------------------------------------------------------------------------
-    void ProcessMorphAnimDatas(std::map<std::string, morphAnimData*>* morphAnimDatas, const BlendShapeChannel* bsc, const AnimationCurveNode* node);
+    void ProcessMorphAnimDatas(std::map<std::string, morphAnimData*>* morphAnimDatas,
+        const BlendShapeChannel* bsc, const AnimationCurveNode* node);
 
     // ------------------------------------------------------------------------------------------------
     void GenerateNodeAnimations(std::vector<aiNodeAnim*>& node_anims,

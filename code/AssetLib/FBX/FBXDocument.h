@@ -89,7 +89,7 @@ class LazyObject {
 public:
     LazyObject(uint64_t id, const Element& element, const Document& doc);
 
-    ~LazyObject();
+    ~LazyObject() = default;
 
     const Object* Get(bool dieOnError = false);
 
@@ -139,7 +139,7 @@ class Object {
 public:
     Object(uint64_t id, const Element& element, const std::string& name);
 
-    virtual ~Object();
+    virtual ~Object() = default;
 
     const Element& SourceElement() const {
         return element;
@@ -165,7 +165,7 @@ class NodeAttribute : public Object {
 public:
     NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~NodeAttribute();
+    virtual ~NodeAttribute() = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -181,7 +181,7 @@ class CameraSwitcher : public NodeAttribute {
 public:
     CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~CameraSwitcher();
+    virtual ~CameraSwitcher() = default;
 
     int CameraID() const {
         return cameraId;
@@ -226,7 +226,7 @@ class Camera : public NodeAttribute {
 public:
     Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual  ~Camera();
+    virtual  ~Camera() = default;
 
     fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0))
     fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0))
@@ -251,21 +251,21 @@ public:
 class Null : public NodeAttribute {
 public:
     Null(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Null();
+    virtual ~Null() = default;
 };
 
 /** DOM base class for FBX limb node markers attached to a node */
 class LimbNode : public NodeAttribute {
 public:
     LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~LimbNode();
+    virtual ~LimbNode() = default;
 };
 
 /** DOM base class for FBX lights attached to a node */
 class Light : public NodeAttribute {
 public:
     Light(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Light();
+    virtual ~Light() = default;
 
     enum Type
     {
@@ -697,7 +697,7 @@ typedef std::vector<float> KeyValueList;
 class AnimationCurve : public Object {
 public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    virtual ~AnimationCurve();
+    virtual ~AnimationCurve() = default;
 
     /** get list of keyframe positions (time).
      *  Invariant: |GetKeys()| > 0 */
@@ -738,7 +738,7 @@ public:
     AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
             const char *const *target_prop_whitelist = nullptr, size_t whitelist_size = 0);
 
-    virtual ~AnimationCurveNode();
+    virtual ~AnimationCurveNode() = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -783,7 +783,7 @@ typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;
 class AnimationLayer : public Object {
 public:
     AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    virtual ~AnimationLayer();
+    virtual ~AnimationLayer() = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -806,7 +806,7 @@ typedef std::vector<const AnimationLayer*> AnimationLayerList;
 class AnimationStack : public Object {
 public:
     AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    virtual ~AnimationStack();
+    virtual ~AnimationStack() = default;
 
     fbx_simple_property(LocalStart, int64_t, 0L)
     fbx_simple_property(LocalStop, int64_t, 0L)
@@ -1022,7 +1022,7 @@ class FileGlobalSettings {
 public:
     FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props);
 
-    ~FileGlobalSettings();
+    ~FileGlobalSettings() = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());

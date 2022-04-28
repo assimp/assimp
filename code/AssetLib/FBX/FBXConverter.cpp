@@ -907,7 +907,6 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
     meshes.reserve(geos.size());
 
     for (const Geometry *geo : geos) {
-
         const MeshGeometry *const mesh = dynamic_cast<const MeshGeometry *>(geo);
         const LineGeometry *const line = dynamic_cast<const LineGeometry *>(geo);
         if (mesh) {
@@ -1151,8 +1150,10 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
         ConvertMaterialForMesh(out_mesh, model, mesh, mindices[0]);
     }
 
-    if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr) {
+    if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && !doc.Settings().useSkeleton) {
         ConvertWeights(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr);
+    } else if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && doc.Settings().useSkeleton) {
+        ConvertWeightsToSkeleton(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr);
     }
 
     std::vector<aiAnimMesh *> animMeshes;
@@ -1435,25 +1436,35 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     return static_cast<unsigned int>(mMeshes.size() - 1);
 }
 
-void ConvertWeightsToSkeleton(const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
-        std::vector<unsigned int> *outputVertStartIndices) {
-    ai_assert(geo.DeformerSkin() != nullptr);
+static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *skeletonBone ) {
+    skeletonBone->mNumnWeights = bone->mNumWeights;
+    skeletonBone->mWeights = bone->mWeights;
+    skeletonBone->mOffsetMatrix = bone->mOffsetMatrix;
+    skeletonBone->mMeshId = mesh;
+    skeletonBone->mNode = bone->mNode;
+    skeletonBone->mParent = -1;
+}
 
-    aiSkeleton *skeleton = new aiSkeleton;
-    const Skin &sk = *geo.DeformerSkin();
-    try {
-        for (auto &cluster : sk.Clusters()) {
-            const WeightIndexArray &indices = cluster->GetIndices();
-            const MatIndexArray &mats = geo.GetMaterialIndices();
+void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
+        std::vector<unsigned int> *outputVertStartIndices, SkeletonBoneContainer &skeletonContainer) {
 
-            aiMatrix4x4 transform = cluster->Transform();
-            for (WeightIndexArray::value_type index : indices) {
-                unsigned int count = 0;
-                const unsigned int *out_idx = geo.ToOutputVertexIndex(index, count);
-            }
-        }
-    } catch (...) {
+    if (skeletonContainer.SkeletonBoneToMeshLookup.find(out) != skeletonContainer.SkeletonBoneToMeshLookup.end()) {
+        return;
     }
+
+    ConvertWeights(out, geo, absolute_transform, parent, materialIndex, outputVertStartIndices);
+    skeletonContainer.MeshArray.emplace_back(out);
+    SkeletonBoneArray *ba = new SkeletonBoneArray;
+    for (size_t i = 0; i < out->mNumBones; ++i) {
+        aiBone *bone = out->mBones[i];
+        if (bone == nullptr) {
+            continue;
+        }
+        aiSkeletonBone *skeletonBone = new aiSkeletonBone;
+        copyBoneToSkeletonBone(out, bone, skeletonBone);
+        ba->emplace_back(skeletonBone);
+    }
+    skeletonContainer.SkeletonBoneToMeshLookup[out] = ba;
 }
 
 void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
@@ -1539,12 +1550,11 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
         out->mBones = nullptr;
         out->mNumBones = 0;
         return;
-    } else {
-        out->mBones = new aiBone *[bones.size()]();
-        out->mNumBones = static_cast<unsigned int>(bones.size());
+    } 
 
-        std::swap_ranges(bones.begin(), bones.end(), out->mBones);
-    }
+    out->mBones = new aiBone *[bones.size()]();
+    out->mNumBones = static_cast<unsigned int>(bones.size());
+    std::swap_ranges(bones.begin(), bones.end(), out->mBones);
 }
 
 void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Cluster *cluster,

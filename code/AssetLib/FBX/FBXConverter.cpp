@@ -1153,7 +1153,8 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && !doc.Settings().useSkeleton) {
         ConvertWeights(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr);
     } else if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && doc.Settings().useSkeleton) {
-        ConvertWeightsToSkeleton(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr);
+        SkeletonBoneContainer sbc;
+        ConvertWeightsToSkeleton(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr, sbc);
     }
 
     std::vector<aiAnimMesh *> animMeshes;

@@ -1018,7 +1018,7 @@ struct aiSkeleton {
     /**
      *
      */
-    C_STRUCT aiSkeletonBone *mBones;
+    C_STRUCT aiSkeletonBone **mBones;
 
 #ifdef __cplusplus
     /**

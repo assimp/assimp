@@ -467,6 +467,7 @@ private:
 
     double anim_fps;
 
+    std::vector<aiSkeleton *> mSkeletons;
     aiScene* const mSceneOut;
     const FBX::Document& doc;
     bool mRemoveEmptyBones;

@@ -1030,6 +1030,34 @@ aiMesh *FBXConverter::SetupEmptyMesh(const Geometry &mesh, aiNode *parent) {
     return out_mesh;
 }
 
+static aiSkeleton *createAiSkeleton(SkeletonBoneContainer &sbc) {
+    if (sbc.MeshArray.empty() || sbc.SkeletonBoneToMeshLookup.empty()) {
+        return nullptr;
+    }
+
+    aiSkeleton *skeleton = new aiSkeleton;
+    for (auto *mesh : sbc.MeshArray) {
+        auto it = sbc.SkeletonBoneToMeshLookup.find(mesh);
+        if (it == sbc.SkeletonBoneToMeshLookup.end()) {
+            continue;
+        }
+        SkeletonBoneArray *ba = it->second;
+        if (ba == nullptr) {
+            continue;
+        }
+
+        skeleton->mNumBones = static_cast<unsigned int>(ba->size());
+        skeleton->mBones = new aiSkeletonBone*[skeleton->mNumBones];
+        size_t index = 0;
+        for (auto bone : (* ba)) {
+            skeleton->mBones[index] = bone;
+            ++index;
+        }
+    }
+
+    return skeleton;
+}
+
 unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model,
         const aiMatrix4x4 &absolute_transform, aiNode *parent,
         aiNode *) {
@@ -1155,6 +1183,10 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     } else if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && doc.Settings().useSkeleton) {
         SkeletonBoneContainer sbc;
         ConvertWeightsToSkeleton(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr, sbc);
+        aiSkeleton *skeleton = createAiSkeleton(sbc);
+        if (skeleton != nullptr) {
+            mSkeletons.emplace_back(skeleton);
+        }
     }
 
     std::vector<aiAnimMesh *> animMeshes;
@@ -3656,6 +3688,12 @@ void FBXConverter::TransferDataToScene() {
         mSceneOut->mNumTextures = static_cast<unsigned int>(textures.size());
 
         std::swap_ranges(textures.begin(), textures.end(), mSceneOut->mTextures);
+    }
+
+    if (!mSkeletons.empty()) {
+        mSceneOut->mSkeletons = new aiSkeleton *[mSkeletons.size()];
+        mSceneOut->mNumSkeletons = static_cast<unsigned int>(mSkeletons.size());
+        std::swap_ranges(mSkeletons.begin(), mSkeletons.end(), mSceneOut->mSkeletons);
     }
 }
 

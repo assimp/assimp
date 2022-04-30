@@ -150,7 +150,7 @@ SET( Core_SRCS
   Common/Assimp.cpp
 )
 
-IF(MSVC)
+IF(MSVC OR (MINGW AND BUILD_SHARED_LIBS))
   list(APPEND Core_SRCS "res/assimp.rc")
 ENDIF()
 

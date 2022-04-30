@@ -108,7 +108,11 @@ OPTION( ASSIMP_INSTALL
   "Disable this if you want to use assimp as a submodule."
   ON
 )
-OPTION ( ASSIMP_ERROR_MAX
+OPTION ( ASSIMP_WARNINGS_AS_ERRORS
+  "Treat all warnings as errors."
+  OFF
+)
+OPTION ( ASSIMP_WARNINGS_MAX
   "Enable all warnings."
   OFF
 )
@@ -146,12 +150,10 @@ IF (WIN32)
       # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
       ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
     ENDIF()
-
     # Link statically against c/c++ lib to avoid missing redistriburable such as
     # "VCRUNTIME140.dll not found. Try reinstalling the app.", but give users
     # a choice to opt for the shared runtime if they want.
     option(USE_STATIC_CRT "Link against the static runtime libraries." OFF)
-
     # The CMAKE_CXX_FLAGS vars can be overriden by some Visual Studio generators, so we use an alternative
     # global method here:
     if (${USE_STATIC_CRT})
@@ -324,13 +326,26 @@ IF (ASSIMP_COVERALLS)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 ENDIF()
 
-IF (ASSIMP_ERROR_MAX)
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
+  set(ASSIMP_ERROR_MAX ON)
+  IF (MSVC)
+    # TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
+    # TARGET_COMPILE_OPTIONS(assimp_cmd PRIVATE /WX)
+    ADD_COMPILE_OPTIONS(/WX)
+  ELSE()
+    # TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+    # TARGET_COMPILE_OPTIONS(assimp_cmd PRIVATE -Werror)
+    ADD_COMPILE_OPTIONS(-Werror)
+  ENDIF()
+ENDIF()
+
+IF (ASSIMP_WARNINGS_MAX)
   MESSAGE(STATUS "Turning on all warnings")
   IF (MSVC)
     ADD_COMPILE_OPTIONS(/W4) # NB: there is a /Wall option, pedantic mode
   ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    ADD_COMPILE_OPTIONS(-Wall)
   ENDIF()
 ENDIF()
 
@@ -694,6 +709,7 @@ ENDIF()
 
 # Main assimp code
 ADD_SUBDIRECTORY( code/ )
+
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
   IF (WIN32)

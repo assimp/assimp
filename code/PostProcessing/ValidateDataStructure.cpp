@@ -521,7 +521,7 @@ void ValidateDSProcess::Validate(const aiAnimation *pAnimation) {
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial *pMaterial,
         aiTextureType type) {
-    const char *szType = TextureTypeToString(type);
+    const char *szType = aiTextureTypeToString(type);
 
     // ****************************************************************************
     // Search all keys of the material ...

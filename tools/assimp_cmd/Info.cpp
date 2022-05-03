@@ -441,7 +441,7 @@ int Assimp_Info(const char *const *params, unsigned int num) {
                     prop->mKey.data,
                     prop->mIndex,
                     prop->mDataLength,
-                    TextureTypeToString(textype));
+                    aiTextureTypeToString(textype));
         }
     }
     if (scene->mNumMaterials) {

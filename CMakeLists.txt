@@ -110,7 +110,7 @@ OPTION( ASSIMP_INSTALL
 )
 OPTION ( ASSIMP_WARNINGS_AS_ERRORS
   "Treat all warnings as errors."
-  OFF
+  ON
 )
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."

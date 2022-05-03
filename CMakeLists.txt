@@ -112,10 +112,6 @@ OPTION ( ASSIMP_WARNINGS_AS_ERRORS
   "Treat all warnings as errors."
   OFF
 )
-OPTION ( ASSIMP_WARNINGS_MAX
-  "Enable all warnings."
-  OFF
-)
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
   OFF
@@ -330,22 +326,12 @@ ENDIF()
 
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
-  set(ASSIMP_WARNINGS_MAX ON)
   IF (MSVC)
-    TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
-    # ADD_COMPILE_OPTIONS(/WX)
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+    # ADD_COMPILE_OPTIONS(/W4 /WX)
   ELSE()
-    TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
-    # ADD_COMPILE_OPTIONS(-Werror)
-  ENDIF()
-ENDIF()
-
-IF (ASSIMP_WARNINGS_MAX)
-  MESSAGE(STATUS "Turning on all warnings")
-  IF (MSVC)
-    ADD_COMPILE_OPTIONS(/W4) # NB: there is a /Wall option, pedantic mode
-  ELSE()
-    ADD_COMPILE_OPTIONS(-Wall)
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror)
+    # ADD_COMPILE_OPTIONS(-Wall -Werror)
   ENDIF()
 ENDIF()
 

@@ -1710,7 +1710,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
                 CLogWindow::Instance().Show();
             } else if (ID__WEBSITE == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","http://assimp.org","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://assimp.org","","",SW_SHOW);
             } else if (ID__WEBSITEGH == LOWORD(wParam)) {
                 ShellExecute(nullptr,"open","https://github.com/assimp/assimp","","",SW_SHOW);
             }  else if (ID_REPORTBUG == LOWORD(wParam)) {

@@ -1179,6 +1179,15 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
+  IF (MSVC)
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+  ELSE()
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror)
+  ENDIF()
+ENDIF()
+
 # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
 TARGET_COMPILE_FEATURES(assimp PRIVATE c_std_99)
 

@@ -1266,6 +1266,16 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
+if (MINGW)
+  set(LIBRARY_SUFFIX "-${ASSIMP_SOVERSION}" CACHE STRING "the suffix for the assimp MinGW shared library")
+  SET_TARGET_PROPERTIES( assimp PROPERTIES
+    ARCHIVE_OUTPUT_NAME assimp
+  )
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_LINK_LIBRARIES ( assimp -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread ) # winpthread is for libminizip.
+  endif ()
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
     target_compile_definitions(assimp PUBLIC WindowsStore)
     TARGET_LINK_LIBRARIES(assimp advapi32)
@@ -1276,19 +1286,6 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
   SOVERSION ${ASSIMP_SOVERSION} # use full version
   OUTPUT_NAME assimp${LIBRARY_SUFFIX}
 )
-
-if (MINGW)
-  if (BUILD_SHARED_LIBS)
-    set_target_properties(assimp PROPERTIES
-      SUFFIX "-${ASSIMP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    )
-    if (NOT DEFINED ${LIBRARY_SUFFIX}) #Added as a guard for subsequent runs, but seems to not work when cache is outdated
-      set(LIBRARY_SUFFIX "-${ASSIMP_SOVERSION}" CACHE STRING "the suffix for the assimp MinGW shared library")
-    endif()
-  else ()
-    TARGET_LINK_LIBRARIES ( assimp -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread ) # winpthread is for libminizip.
-  endif ()
-endif()
 
 if (APPLE)
   if (ASSIMP_BUILD_FRAMEWORK)

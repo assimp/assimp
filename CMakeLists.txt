@@ -108,9 +108,9 @@ OPTION( ASSIMP_INSTALL
   "Disable this if you want to use assimp as a submodule."
   ON
 )
-OPTION ( ASSIMP_ERROR_MAX
-  "Enable all warnings."
-  OFF
+OPTION ( ASSIMP_WARNINGS_AS_ERRORS
+  "Treat all warnings as errors."
+  ON
 )
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
@@ -322,16 +322,6 @@ IF (ASSIMP_COVERALLS)
   INCLUDE(Coveralls)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-ENDIF()
-
-IF (ASSIMP_ERROR_MAX)
-  MESSAGE(STATUS "Turning on all warnings")
-  IF (MSVC)
-    ADD_COMPILE_OPTIONS(/W4) # NB: there is a /Wall option, pedantic mode
-  ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-  ENDIF()
 ENDIF()
 
 IF (ASSIMP_ASAN)
@@ -694,6 +684,7 @@ ENDIF()
 
 # Main assimp code
 ADD_SUBDIRECTORY( code/ )
+
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
   IF (WIN32)

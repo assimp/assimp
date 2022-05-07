@@ -1,7 +1,7 @@
 /**
- * pugixml parser - version 1.11
+ * pugixml parser - version 1.12
  * --------------------------------------------------------
- * Copyright (C) 2006-2020, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * Copyright (C) 2006-2022, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
  *
  * This library is distributed under the MIT License. See notice at the end
@@ -11,10 +11,10 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
-#ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
 // Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
-#	define PUGIXML_VERSION 1110
+#ifndef PUGIXML_VERSION
+#	define PUGIXML_VERSION 1120 // 1.12
 #endif
 
 // Include user configuration file (this can define various configuration macros)
@@ -311,6 +311,8 @@ namespace pugi
 
 		It begin() const { return _begin; }
 		It end() const { return _end; }
+
+		bool empty() const { return _begin == _end; }
 
 	private:
 		It _begin, _end;
@@ -851,10 +853,10 @@ namespace pugi
 		xml_node& operator*() const;
 		xml_node* operator->() const;
 
-		const xml_node_iterator& operator++();
+		xml_node_iterator& operator++();
 		xml_node_iterator operator++(int);
 
-		const xml_node_iterator& operator--();
+		xml_node_iterator& operator--();
 		xml_node_iterator operator--(int);
 	};
 
@@ -893,10 +895,10 @@ namespace pugi
 		xml_attribute& operator*() const;
 		xml_attribute* operator->() const;
 
-		const xml_attribute_iterator& operator++();
+		xml_attribute_iterator& operator++();
 		xml_attribute_iterator operator++(int);
 
-		const xml_attribute_iterator& operator--();
+		xml_attribute_iterator& operator--();
 		xml_attribute_iterator operator--(int);
 	};
 
@@ -929,10 +931,10 @@ namespace pugi
 		xml_node& operator*() const;
 		xml_node* operator->() const;
 
-		const xml_named_node_iterator& operator++();
+		xml_named_node_iterator& operator++();
 		xml_named_node_iterator operator++(int);
 
-		const xml_named_node_iterator& operator--();
+		xml_named_node_iterator& operator--();
 		xml_named_node_iterator operator--(int);
 
 	private:
@@ -1474,7 +1476,7 @@ namespace std
 #endif
 
 /**
- * Copyright (c) 2006-2020 Arseny Kapoulkine
+ * Copyright (c) 2006-2022 Arseny Kapoulkine
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation

@@ -96,7 +96,7 @@ IF ( MSVC )
 ENDIF ()
 
 # Link the executable to the assimp + dx libs.
-TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib winmm.lib )
+TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32 winmm )
 
 INSTALL( TARGETS assimp_viewer
   DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev

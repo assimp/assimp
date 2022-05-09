@@ -1710,13 +1710,13 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
                 CLogWindow::Instance().Show();
             } else if (ID__WEBSITE == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","http://assimp.sourceforge.net","","",SW_SHOW);
-            } else if (ID__WEBSITESF == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/projects/assimp","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://assimp.org","","",SW_SHOW);
+            } else if (ID__WEBSITEGH == LOWORD(wParam)) {
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp","","",SW_SHOW);
             }  else if (ID_REPORTBUG == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/tracker/?func=add&group_id=226462&atid=1067632","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp/issues/new?assignees=&labels=Bug&template=bug_report.md&title=Bug%3A","","",SW_SHOW);
             } else if (ID_FR == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/forum/forum.php?forum_id=817653","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp/issues/new?assignees=&labels=Feature-Request&template=feature_request.md","","",SW_SHOW);
             } else if (ID_TOOLS_CLEARLOG == LOWORD(wParam)) {
                 CLogWindow::Instance().Clear();
             } else if (ID_TOOLS_SAVELOGTOFILE == LOWORD(wParam)) {

@@ -209,7 +209,7 @@
 #define ID__WEBSITE                     32867
 #define ID__SF                          32868
 #define ID__                            32869
-#define ID__WEBSITESF                   32870
+#define ID__WEBSITEGH                   32870
 #define ID_IMPORTSETTINGS_CALCULATETANGENTSPACE 32871
 #define ID_VIEWER_CTS                   32872
 #define ID_VIEWER_PP_CTS                32873

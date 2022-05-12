@@ -281,7 +281,7 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root, std::shared_ptr<Collection> collection, ConversionData &conv_data) {
+void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root, const std::shared_ptr<Collection>& collection, ConversionData &conv_data) {
 
     std::deque<Object *> root_objects;
     // Count number of objects

@@ -106,7 +106,7 @@ bool getNodeAttribute(const XmlNode &node, const std::string &attribute, int &va
     return false;
 }
 
-aiMatrix4x4 parseTransformMatrix(std::string matrixStr) {
+aiMatrix4x4 parseTransformMatrix(const std::string& matrixStr) {
     // split the string
     std::vector<float> numbers;
     std::string currentNumber;

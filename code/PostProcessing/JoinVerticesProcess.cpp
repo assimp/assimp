@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <stdio.h>
 #include <unordered_set>
+#include <unordered_map>
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
@@ -258,7 +259,7 @@ return seed;
 template<>
 struct std::equal_to<Vertex> {
     bool operator()(const Vertex &lhs, const Vertex &rhs) const {
-        return lhs.position.Equal(rhs.position);
+        return areVerticesEqual(lhs, rhs, false);
     }
 };
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
@@ -333,9 +334,10 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
     }
-    std::unordered_set<Vertex> m;
-    m.reserve(pMesh->mNumVertices);
+    std::unordered_map<Vertex,int> vertex2Index;
+    vertex2Index.reserve(pMesh->mNumVertices);
     // Now check each vertex if it brings something new to the table
+    int newIndex = 0;
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
         if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
             continue;
@@ -343,17 +345,22 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
         // collect the vertex data
         Vertex v(pMesh,a);
-        auto it = m.find(v);
-        if (it == m.end()) {
-            m.insert(v);
+        auto it = vertex2Index.find(v);
+        if (it == vertex2Index.end()) {
+            vertex2Index[v] = newIndex;
+            replaceIndex[a] = newIndex++;
             uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
                     Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    uniqueAnimatedVertices[animMeshIndex].push_back(aniMeshVertex);
+                    uniqueAnimatedVertices[animMeshIndex].push_back(v);
                 }
             }
-        } 
+
+        }
+        else {
+            replaceIndex[a] = it->second;
+            }
 
 
     }

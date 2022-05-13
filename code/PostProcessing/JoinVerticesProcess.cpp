@@ -230,6 +230,37 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
+inline void hash_combine(std::size_t &seed) {
+    seed;
+}
+
+template <typename T, typename... Rest>
+inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    hash_combine(seed, rest...);
+}
+//template specialization for std::equal_to
+template<>
+struct std::hash<Vertex>
+{
+std::size_t operator()(Vertex const& v) const noexcept
+{
+
+size_t seed = 0;
+hash_combine(seed, v.position.x ,v.position.y,v.position.z);
+//hash_combine(seed, v.position.y );
+//hash_combine(seed, v.position.z );
+return seed; 
+}
+};
+//template specialization for std::equal_to
+template<>
+struct std::equal_to<Vertex> {
+    bool operator()(const Vertex &lhs, const Vertex &rhs) const {
+        return lhs.position.Equal(rhs.position);
+    }
+};
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
@@ -292,7 +323,6 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
     // Run an optimized code path if we don't have multiple UVs or vertex colors.
     // This should yield false in more than 99% of all imports ...
-    const bool complex = ( pMesh->GetNumColorChannels() > 0 || pMesh->GetNumUVChannels() > 1);
     const bool hasAnimMeshes = pMesh->mNumAnimMeshes > 0;
 
     // We'll never have more vertices afterwards.
@@ -303,7 +333,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
     }
-
+    std::unordered_set<Vertex> m;
+    m.reserve(pMesh->mNumVertices);
     // Now check each vertex if it brings something new to the table
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
         if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
@@ -312,64 +343,19 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
         // collect the vertex data
         Vertex v(pMesh,a);
-
-        // collect all vertices that are close enough to the given position
-        vertexFinder->FindIdenticalPositions( v.position, verticesFound);
-        unsigned int matchIndex = 0xffffffff;
-
-        // check all unique vertices close to the position if this vertex is already present among them
-        for( unsigned int b = 0; b < verticesFound.size(); b++) {
-            const unsigned int vidx = verticesFound[b];
-            const unsigned int uidx = replaceIndex[ vidx];
-            if( uidx & 0x80000000)
-                continue;
-
-            const Vertex& uv = uniqueVertices[ uidx];
-
-            if (!areVerticesEqual(v, uv, complex)) {
-                continue;
-            }
-
-            if (hasAnimMeshes) {
-                // If given vertex is animated, then it has to be preserver 1 to 1 (base mesh and animated mesh require same topology)
-                // NOTE: not doing this totaly breaks anim meshes as they don't have their own faces (they use pMesh->mFaces)
-                bool breaksAnimMesh = false;
-                for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
-                    const Vertex& animatedUV = uniqueAnimatedVertices[animMeshIndex][ uidx];
-                    Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    if (!areVerticesEqual(aniMeshVertex, animatedUV, complex)) {
-                        breaksAnimMesh = true;
-                        break;
-                    }
-                }
-                if (breaksAnimMesh) {
-                    continue;
-                }
-            }
-
-            // we're still here -> this vertex perfectly matches our given vertex
-            matchIndex = uidx;
-            break;
-        }
-
-        // found a replacement vertex among the uniques?
-        if( matchIndex != 0xffffffff)
-        {
-            // store where to found the matching unique vertex
-            replaceIndex[a] = matchIndex | 0x80000000;
-        }
-        else
-        {
-            // no unique vertex matches it up to now -> so add it
-            replaceIndex[a] = (unsigned int)uniqueVertices.size();
-            uniqueVertices.push_back( v);
+        auto it = m.find(v);
+        if (it == m.end()) {
+            m.insert(v);
+            uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
                     Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
                     uniqueAnimatedVertices[animMeshIndex].push_back(aniMeshVertex);
                 }
             }
-        }
+        } 
+
+
     }
 
     if (!DefaultLogger::isNullLogger() && DefaultLogger::get()->getLogSeverity() == Logger::VERBOSE)    {

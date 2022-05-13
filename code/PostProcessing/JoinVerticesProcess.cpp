@@ -231,6 +231,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
+// combine hashes
 inline void hash_combine(std::size_t &seed) {
     seed;
 }
@@ -241,31 +242,29 @@ inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
     seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     hash_combine(seed, rest...);
 }
-//template specialization for std::equal_to
+//template specialization for std::hash for Vertex
 template<>
 struct std::hash<Vertex>
 {
 std::size_t operator()(Vertex const& v) const noexcept
 {
-
 size_t seed = 0;
 hash_combine(seed, v.position.x ,v.position.y,v.position.z);
-//hash_combine(seed, v.position.y );
-//hash_combine(seed, v.position.z );
 return seed; 
 }
 };
-//template specialization for std::equal_to
+//template specialization for std::equal_to for Vertex
 template<>
 struct std::equal_to<Vertex> {
     bool operator()(const Vertex &lhs, const Vertex &rhs) const {
         return areVerticesEqual(lhs, rhs, false);
     }
 };
+// now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
-	static_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8, "AI_MAX_NUMBER_OF_TEXTURECOORDS == 8");
+	 static_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8, "AI_MAX_NUMBER_OF_TEXTURECOORDS == 8");
 
     // Return early if we don't have any positions
     if (!pMesh->HasPositions() || !pMesh->HasFaces()) {
@@ -334,21 +333,28 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
     }
+    // a map that maps a vertix to its new index
     std::unordered_map<Vertex,int> vertex2Index;
+    // we can not end up with more vertices than we started with
     vertex2Index.reserve(pMesh->mNumVertices);
     // Now check each vertex if it brings something new to the table
     int newIndex = 0;
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
+        // if the vertex is unused Do nothing
         if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
             continue;
         }
-
         // collect the vertex data
         Vertex v(pMesh,a);
+        // is the vertex already in the map?
         auto it = vertex2Index.find(v);
+        // if the vertex is not in the map then it is a new vertex add it.
         if (it == vertex2Index.end()) {
+            // this is a new vertex give it a new index
             vertex2Index[v] = newIndex;
+            //keep track of its index and increment 1
             replaceIndex[a] = newIndex++;
+            // add the vertex to the unique vertices
             uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
@@ -356,9 +362,9 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
                     uniqueAnimatedVertices[animMeshIndex].push_back(v);
                 }
             }
-
         }
-        else {
+        else{
+            // if the vertex is already there just find the replace index that is appropriate to it
             replaceIndex[a] = it->second;
             }
 

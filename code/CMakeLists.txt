@@ -150,7 +150,7 @@ SET( Core_SRCS
   Common/Assimp.cpp
 )
 
-IF(MSVC)
+IF(MSVC OR (MINGW AND BUILD_SHARED_LIBS))
   list(APPEND Core_SRCS "res/assimp.rc")
 ENDIF()
 
@@ -1054,7 +1054,9 @@ ENDIF()
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
-FIND_PACKAGE(RT QUIET)
+IF (NOT WIN32)
+  FIND_PACKAGE(RT QUIET)
+ENDIF ()
 IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
@@ -1177,11 +1179,13 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 
-# enable warnings as errors ########################################
-IF (MSVC)
-  TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
-ELSE()
-  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
+  IF (MSVC)
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+  ELSE()
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror)
+  ENDIF()
 ENDIF()
 
 # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
@@ -1264,6 +1268,16 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
+if (MINGW)
+  set(LIBRARY_SUFFIX "-${ASSIMP_SOVERSION}" CACHE STRING "the suffix for the assimp MinGW shared library")
+  SET_TARGET_PROPERTIES( assimp PROPERTIES
+    ARCHIVE_OUTPUT_NAME assimp
+  )
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_LINK_LIBRARIES ( assimp -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread ) # winpthread is for libminizip.
+  endif ()
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
     target_compile_definitions(assimp PUBLIC WindowsStore)
     TARGET_LINK_LIBRARIES(assimp advapi32)
@@ -1274,12 +1288,6 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
   SOVERSION ${ASSIMP_SOVERSION} # use full version
   OUTPUT_NAME assimp${LIBRARY_SUFFIX}
 )
-
-if (WIN32 AND CMAKE_COMPILER_IS_GNUCXX AND BUILD_SHARED_LIBS)
-  set_target_properties(assimp PROPERTIES
-    SUFFIX "-${ASSIMP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  )
-endif()
 
 if (APPLE)
   if (ASSIMP_BUILD_FRAMEWORK)

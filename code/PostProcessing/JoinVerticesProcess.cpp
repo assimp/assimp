@@ -223,8 +223,8 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
 // combine hashes
-inline void hash_combine(std::size_t &seed) {
-    seed;
+inline void hash_combine(std::size_t &) {
+    // empty
 }
 
 template <typename T, typename... Rest>

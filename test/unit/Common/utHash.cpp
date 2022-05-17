@@ -38,17 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "MathTest.h"
 
-namespace Assimp {
+#include "UnitTestPCH.h"
 
-// Initialize epsilon value.
-const float AssimpMathTest::Epsilon = Math::getEpsilon<float>();
+#include <assimp/Hash.h>
 
-// Initialize with an interval of [1,100].
-RandomUniformFloatGenerator AssimpMathTest::RandNonZero(1.0f, 100.0f);
+using namespace Assimp;
 
-// Initialize with an interval of [-PI,PI] inclusively.
-RandomUniformFloatGenerator AssimpMathTest::RandPI(-Math::aiPi<float>(), Math::aiPi<float>());
+class utHash : public ::testing::Test {
+    // empty
+};
 
+TEST_F( utHash, SuperFastHashTest ) {
+    const char *Data = "-21416115v";
+    auto result = SuperFastHash(Data, 10);
+    EXPECT_NE(0, result);
 }

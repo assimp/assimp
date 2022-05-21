@@ -65,12 +65,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <cstdint>
 #include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <tuple>
-#include <vector>
 
 namespace Assimp {
 namespace FBX {
@@ -187,8 +184,7 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
 
 /// This struct manages nodes which may or may not end up in the node hierarchy.
 /// When a node becomes a child of another node, that node becomes its owner and mOwnership should be released.
-struct FBXConverter::PotentialNode
-{
+struct FBXConverter::PotentialNode {
     PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {}
     PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {}
     aiNode* operator->() { return mNode; }
@@ -452,7 +448,7 @@ void FBXConverter::GetUniqueName(const std::string &name, std::string &uniqueNam
     auto it_pair = mNodeNames.insert({ name, 0 }); // duplicate node name instance count
     unsigned int &i = it_pair.first->second;
     while (!it_pair.second) {
-        i++;
+        ++i;
         std::ostringstream ext;
         ext << name << std::setfill('0') << std::setw(3) << i;
         uniqueName = ext.str();
@@ -651,7 +647,6 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
 
 bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
-    bool ok;
 
     const float zero_epsilon = ai_epsilon;
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
@@ -665,6 +660,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
 
         bool scale_compare = (comp == TransformationComp_GeometricScaling || comp == TransformationComp_Scaling);
 
+        bool ok = true;
         const aiVector3D &v = PropertyGet<aiVector3D>(props, NameTransformationCompProperty(comp), ok);
         if (ok && scale_compare) {
             if ((v - all_ones).SquareLength() > zero_epsilon) {

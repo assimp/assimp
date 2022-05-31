@@ -83,7 +83,9 @@ Other:
 #include <sstream>
 #include <string>
 
+#if ASSIMP_NEEDS_STB_IMAGE
 #include "Common/StbCommon.h"
+#endif
 
 using namespace Assimp;
 

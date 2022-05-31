@@ -84,23 +84,28 @@ Besides the toolchain, compilation should be the same as for Linux / Unix.
 
 ### CMake build options
 The cmake-build-environment provides options to configure the build. The following options can be used:
-- **BUILD_SHARED_LIBS ( default ON )**: Generation of shared libs ( dll for windows, so for Linux ). Set this to OFF to get a static lib.
-- **BUILD_FRAMEWORK ( default OFF, MacOnly)**: Build package as Mac OS X Framework bundle
-- **ASSIMP_DOUBLE_PRECISION( default OFF )**: All data will be stored as double values.
-- **ASSIMP_OPT_BUILD_PACKAGES ( default OFF)**: Set to ON to generate CPack configuration files and packaging targets
-- **ASSIMP_ANDROID_JNIIOSYSTEM ( default OFF )**: Android JNI IOSystem support is active
-- **ASSIMP_NO_EXPORT ( default OFF )**: Disable Assimp's export functionality
-- **ASSIMP_BUILD_ZLIB ( default OFF )**: Build your own zlib
-- **ASSIMP_BUILD_ASSIMP_TOOLS ( default ON )**: If the supplementary tools for Assimp are built in addition to the library.
-- **ASSIMP_BUILD_SAMPLES ( default OFF )**: If the official samples are built as well (needs Glut).
-- **ASSIMP_BUILD_TESTS ( default ON )**: If the test suite for Assimp is built in addition to the library.
-- **ASSIMP_COVERALLS ( default OFF )**: Enable this to measure test coverage.
-- **ASSIMP_ERROR_MAX( default OFF)**: Enable all warnings.
-- **ASSIMP_WERROR( default OFF )**: Treat warnings as errors.
-- **ASSIMP_ASAN ( default OFF )**: Enable AddressSanitizer.
-- **ASSIMP_UBSAN ( default OFF )**: Enable Undefined Behavior sanitizer.
-- **SYSTEM_IRRXML ( default OFF )**: Use system installed Irrlicht/IrrXML library.
-- **BUILD_DOCS ( default OFF )**: Build documentation using Doxygen.
-- **INJECT_DEBUG_POSTFIX( default ON )**: Inject debug postfix in .a/.so lib names
-- **IGNORE_GIT_HASH ( default OFF )**: Don't call git to get the hash.
-- **ASSIMP_INSTALL_PDB ( default ON )**: Install MSVC debug files.
+- **ASSIMP_HUNTER_ENABLED (default OFF)**: Enable Hunter package manager support.
+- **BUILD_SHARED_LIBS (default ON)**: Generation of shared libs (dll for windows, so for Linux). Set this to OFF to get a static lib.
+- **ASSIMP_BUILD_FRAMEWORK (default OFF, MacOnly)**: Build package as Mac OS X Framework bundle.
+- **ASSIMP_DOUBLE_PRECISION (default OFF)**: All data will be stored as double values.
+- **ASSIMP_OPT_BUILD_PACKAGES (default OFF)**: Set to ON to generate CPack configuration files and packaging targets.
+- **ASSIMP_ANDROID_JNIIOSYSTEM (default OFF)**: Android JNI IOSystem support is active.
+- **ASSIMP_NO_EXPORT (default OFF)**: Disable Assimp's export functionality.
+- **ASSIMP_BUILD_ZLIB (default OFF)**: Build our own zlib.
+- **ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all exporter senabled.
+- **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all importer senabled.
+- **ASSIMP_BUILD_ASSIMP_TOOLS (default ON)**: If the supplementary tools for Assimp are built in addition to the library.
+- **ASSIMP_BUILD_SAMPLES (default OFF)**: If the official samples are built as well (needs Glut).
+- **ASSIMP_BUILD_TESTS (default ON)**: If the test suite for Assimp is built in addition to the library.
+- **ASSIMP_COVERALLS (default OFF)**: Enable this to measure test coverage.
+- **ASSIMP_INSTALL (default ON)**: Install Assimp library. Disable this if you want to use Assimp as a submodule.
+- **ASSIMP_WARNINGS_AS_ERRORS (default ON)**: Treat all warnings as errors.
+- **ASSIMP_ASAN (default OFF)**: Enable AddressSanitizer.
+- **ASSIMP_UBSAN (default OFF)**: Enable Undefined Behavior sanitizer.
+- **ASSIMP_BUILD_DOCS (default OFF)**: Build documentation using Doxygen. OBSOLETE, see https://github.com/assimp/assimp-docs
+- **ASSIMP_INJECT_DEBUG_POSTFIX (default ON)**: Inject debug postfix in .a/.so/.lib/.dll lib names
+- **ASSIMP_IGNORE_GIT_HASH (default OFF)**: Don't call git to get the hash.
+- **ASSIMP_INSTALL_PDB (default ON)**: Install MSVC debug files.
+- **USE_STATIC_CRT (default OFF)**: Link against the static MSVC runtime libraries.
+- **ASSIMP_BUILD_DRACO (default OFF)**: Build Draco libraries. Primarily for glTF.
+- **ASSIMP_BUILD_ASSIMP_VIEW (default ON, if DirectX found, OFF otherwise)**: Build Assimp view tool (requires DirectX).

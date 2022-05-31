@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <map>
 #include <vector>
+#include "Common/Maybe.h"
 
 namespace Assimp {
 namespace ObjFile {
@@ -183,15 +184,15 @@ struct Material {
     aiColor3D transparent;
 
     //! PBR Roughness
-    ai_real roughness;
+    Maybe<ai_real> roughness;
     //! PBR Metallic
-    ai_real metallic;
+    Maybe<ai_real> metallic;
     //! PBR Metallic
-    aiColor3D sheen;
+    Maybe<aiColor3D> sheen;
     //! PBR Clearcoat Thickness
-    ai_real clearcoat_thickness;
+    Maybe<ai_real> clearcoat_thickness;
     //! PBR Clearcoat Rougness
-    ai_real clearcoat_roughness;
+    Maybe<ai_real> clearcoat_roughness;
     //! PBR Anisotropy
     ai_real anisotropy;
 
@@ -206,11 +207,11 @@ struct Material {
             illumination_model(1),
             ior(ai_real(1.0)),
             transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
-            roughness(ai_real(1.0)),
-            metallic(ai_real(0.0)),
-            sheen(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
-            clearcoat_thickness(ai_real(0.0)),
-            clearcoat_roughness(ai_real(0.0)),
+            roughness(),
+            metallic(),
+            sheen(),
+            clearcoat_thickness(),
+            clearcoat_roughness(),
             anisotropy(ai_real(0.0)),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);

@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -1283,5 +1281,6 @@ ASSIMP_API void aiQuaternionInterpolate(
 #endif
 
 #if ASSIMP_NEEDS_STB_IMAGE
-#include "Common/StbCommon.h"
+#   define STB_IMAGE_IMPLEMENTATION
+#   include "Common/StbCommon.h"
 #endif

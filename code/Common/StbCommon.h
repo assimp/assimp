@@ -48,8 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
-#define STB_IMAGE_STATIC
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
 #if _MSC_VER

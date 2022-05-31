@@ -83,7 +83,9 @@ Other:
 #include <sstream>
 #include <string>
 
+#if ASSIMP_NEEDS_STB_IMAGE
 #include "Common/StbCommon.h"
+#endif
 
 using namespace Assimp;
 
@@ -590,7 +592,7 @@ void PbrtExporter::WriteMaterial(int m) {
     for (int i = 1; i <= aiTextureType_UNKNOWN; i++) {
         int count = material->GetTextureCount(aiTextureType(i));
         if (count > 0)
-            mOutput << TextureTypeToString(aiTextureType(i)) << ": " <<  count << " ";
+            mOutput << aiTextureTypeToString(aiTextureType(i)) << ": " <<  count << " ";
     }
     mOutput << "\n";
 

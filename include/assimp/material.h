@@ -335,7 +335,7 @@ enum aiTextureType {
 
 // -------------------------------------------------------------------------------
 // Get a string for a given aiTextureType
-ASSIMP_API const char *TextureTypeToString(enum aiTextureType in);
+ASSIMP_API const char *aiTextureTypeToString(enum aiTextureType in);
 
 // ---------------------------------------------------------------------------
 /** @brief Defines all shading models supported by the library

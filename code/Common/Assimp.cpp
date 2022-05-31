@@ -1280,7 +1280,9 @@ ASSIMP_API void aiQuaternionInterpolate(
 #   define STBI_ONLY_PNG
 #endif
 
+// Ensure all symbols are linked correctly
 #if ASSIMP_NEEDS_STB_IMAGE
+#   define STB_IMAGE_STATIC
 #   define STB_IMAGE_IMPLEMENTATION
 #   include "Common/StbCommon.h"
 #endif

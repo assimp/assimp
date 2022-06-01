@@ -1176,7 +1176,7 @@ ENDIF()
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
-# Remove any dllexport tags when building a static library.
+# Add or remove dllexport tags depending on the library type.
 IF (BUILD_SHARED_LIBS)
   TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
 ELSE ()

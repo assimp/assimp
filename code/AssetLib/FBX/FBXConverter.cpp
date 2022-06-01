@@ -2151,7 +2151,7 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     if (ok) {
         out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS);
          // Match Blender behavior to extract roughness when only shininess is present
-        const float roughness = 1.0 - (sqrt(ShininessExponent) / 10.0);
+        const float roughness = 1.0f - (sqrt(ShininessExponent) / 10.0f);
         out_mat->AddProperty(&roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
     }
 

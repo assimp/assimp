@@ -1428,7 +1428,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
     return true;
 }
 
-std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+std::vector<IfcVector2> GetContourInPlane2D(const std::shared_ptr<TempMesh>& mesh,IfcMatrix3 planeSpace,
     IfcVector3 planeNor,IfcFloat planeOffset,
     IfcVector3 extrusionDir,IfcVector3& wall_extrusion,bool& first,bool& ok) {
     std::vector<IfcVector2> contour;
@@ -1476,7 +1476,7 @@ std::vector<IfcVector2> GetContourInPlane2D(std::shared_ptr<TempMesh> mesh,IfcMa
     return contour;
 }
 
-const float close{ ai_epsilon };
+const ai_real close{ ai_epsilon };
 
 static bool isClose(IfcVector2 first,IfcVector2 second) {
     auto diff = (second - first);
@@ -1491,7 +1491,7 @@ static void logSegment(std::pair<IfcVector2,IfcVector2> segment) {
     IFCImporter::LogInfo(msg2.str().c_str());
 }
 
-std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(const std::shared_ptr<TempMesh>& mesh,IfcMatrix3 planeSpace,
     IfcFloat planeOffset) {
 
         {
@@ -1676,7 +1676,7 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
             std::stringstream msg;
             msg << "GetContoursInPlane3D: found " << contours.size() << " contours:\n";
 
-            for(auto c : contours) {
+            for(const auto& c : contours) {
                 msg << " Contour: \n";
                 for(auto p : c) {
                     msg << "   " << p.x << " " << p.y << " \n";
@@ -1690,7 +1690,7 @@ std::vector<std::vector<IfcVector2>> GetContoursInPlane3D(std::shared_ptr<TempMe
         return contours;
 }
 
-std::vector<std::vector<IfcVector2>> GetContoursInPlane(std::shared_ptr<TempMesh> mesh,IfcMatrix3 planeSpace,
+std::vector<std::vector<IfcVector2>> GetContoursInPlane(const std::shared_ptr<TempMesh>& mesh,IfcMatrix3 planeSpace,
     IfcVector3 planeNor,IfcFloat planeOffset,
     IfcVector3 extrusionDir,IfcVector3& wall_extrusion,bool& first) {
 

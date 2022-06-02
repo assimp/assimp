@@ -1,6 +1,5 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
 # Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
@@ -72,6 +71,7 @@ SET( COMMON
   unit/AssimpAPITest_aiQuaternion.cpp
   unit/AssimpAPITest_aiVector2D.cpp
   unit/AssimpAPITest_aiVector3D.cpp
+  unit/Common/utHash.cpp
   unit/MathTest.cpp
   unit/MathTest.h
   unit/RandomNumberGeneration.h

@@ -9,9 +9,11 @@ A library to import and export various 3d-model-formats including scene-post-pro
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
+
 [![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Percentage of issues still open")
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/assimp/assimp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/assimp/assimp/alerts/)
 <br>
 
@@ -58,6 +60,7 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 	/code		Source code
 	/contrib	Third-party libraries
 	/doc		Documentation (doxysource and pre-compiled docs)
+	/fuzz           Contains the test-code for the Google-Fuzzer project
 	/include	Public header C and C++ header files
 	/scripts 	Scripts used to generate the loading code for some formats
 	/port		Ports to other languages and scripts to maintain those.

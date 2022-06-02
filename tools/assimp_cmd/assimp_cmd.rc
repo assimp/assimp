@@ -1,51 +1,39 @@
-// Microsoft Visual C++ generated resource script.
-//
-#include "resource.h"
-#include "../../revision.h"
+#include "revision.h"
+#include "winres.h"
 
-#define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 2 resource.
-//
-#define APSTUDIO_HIDDEN_SYMBOLS
-#include "windows.h"
-#undef APSTUDIO_HIDDEN_SYMBOLS
-
-/////////////////////////////////////////////////////////////////////////////
-#undef APSTUDIO_READONLY_SYMBOLS
-
-/////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
+IDI_ASSIMP_CMD         ICON                    "../shared/assimp_tools_icon.ico"
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico"
-
-
-
-
-
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VER_FILEVERSION
+ PRODUCTVERSION VER_FILEVERSION
+ FILEFLAGSMASK VS_FF_DEBUG
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG
 #endif
+ FILEOS VOS_NT
+ FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "Comments", "Licensed under a 3-clause BSD license"
+            VALUE "CompanyName", "ASSIMP Team"
+            VALUE "FileDescription", "ASSIMP CMD Application"
+            VALUE "FileVersion", VER_FILEVERSION_STR
+            VALUE "InternalName", "assimp"
+            VALUE "LegalCopyright", VER_COPYRIGHT_STR
+            VALUE "OriginalFilename", "assimp.exe"
+            VALUE "ProductName", "ASSIMP CMD Application"
+            VALUE "ProductVersion", VER_FILEVERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 65001
+    END
+END
+

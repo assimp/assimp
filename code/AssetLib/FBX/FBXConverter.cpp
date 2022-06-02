@@ -228,7 +228,6 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             nodes_chain.clear();
             post_nodes_chain.clear();
 
-            aiMatrix4x4 new_abs_transform = parent->mTransformation;
             std::string node_name = FixNodeName(model->Name());
             // even though there is only a single input node, the design of
             // assimp (or rather: the complicated transformation chain that
@@ -262,12 +261,10 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                 child->mParent = last_parent;
                 last_parent = child.mNode;
-
-                new_abs_transform *= child->mTransformation;
             }
 
             // attach geometry
-            ConvertModel(*model, nodes_chain.back().mNode, root_node, new_abs_transform);
+            ConvertModel(*model, nodes_chain.back().mNode, root_node);
 
             // check if there will be any child nodes
             const std::vector<const Connection *> &child_conns = doc.GetConnectionsByDestinationSequenced(model->ID(), "Model");
@@ -286,8 +283,6 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                     postnode->mParent = last_parent;
                     last_parent = postnode.mNode;
-
-                    new_abs_transform *= postnode->mTransformation;
                 }
             } else {
                 // free the nodes we allocated as we don't need them
@@ -895,8 +890,7 @@ void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     }
 }
 
-void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root_node,
-        const aiMatrix4x4 &absolute_transform) {
+void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root_node) {
     const std::vector<const Geometry *> &geos = model.GetGeometry();
 
     std::vector<unsigned int> meshes;
@@ -906,8 +900,7 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
         const MeshGeometry *const mesh = dynamic_cast<const MeshGeometry *>(geo);
         const LineGeometry *const line = dynamic_cast<const LineGeometry *>(geo);
         if (mesh) {
-            const std::vector<unsigned int> &indices = ConvertMesh(*mesh, model, parent, root_node,
-                    absolute_transform);
+            const std::vector<unsigned int> &indices = ConvertMesh(*mesh, model, parent, root_node);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
         } else if (line) {
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
@@ -928,8 +921,7 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
 }
 
 std::vector<unsigned int>
-FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node,
-        const aiMatrix4x4 &absolute_transform) {
+FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node) {
     std::vector<unsigned int> temp;
 
     MeshMap::const_iterator it = meshes_converted.find(&mesh);
@@ -952,13 +944,13 @@ FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *
         const MatIndexArray::value_type base = mindices[0];
         for (MatIndexArray::value_type index : mindices) {
             if (index != base) {
-                return ConvertMeshMultiMaterial(mesh, model, parent, root_node, absolute_transform);
+                return ConvertMeshMultiMaterial(mesh, model, parent, root_node);
             }
         }
     }
 
     // faster code-path, just copy the data
-    temp.push_back(ConvertMeshSingleMaterial(mesh, model, absolute_transform, parent, root_node));
+    temp.push_back(ConvertMeshSingleMaterial(mesh, model, parent, root_node));
     return temp;
 }
 
@@ -1055,8 +1047,7 @@ static aiSkeleton *createAiSkeleton(SkeletonBoneContainer &sbc) {
 }
 
 unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model,
-        const aiMatrix4x4 &absolute_transform, aiNode *parent,
-        aiNode *) {
+        aiNode *parent, aiNode *) {
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     aiMesh *const out_mesh = SetupEmptyMesh(mesh, parent);
 
@@ -1230,8 +1221,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
 
 std::vector<unsigned int>
 FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, aiNode *parent,
-        aiNode *root_node,
-        const aiMatrix4x4 &absolute_transform) {
+        aiNode *root_node) {
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     ai_assert(mindices.size());
 
@@ -1241,7 +1231,7 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
     for (MatIndexArray::value_type index : mindices) {
         if (had.find(index) == had.end()) {
 
-            indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, parent, root_node, absolute_transform));
+            indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, parent, root_node));
             had.insert(index);
         }
     }
@@ -1251,8 +1241,7 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
 
 unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model,
         MatIndexArray::value_type index,
-        aiNode *parent, aiNode *,
-        const aiMatrix4x4 &absolute_transform) {
+        aiNode *parent, aiNode *) {
     aiMesh *const out_mesh = SetupEmptyMesh(mesh, parent);
 
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
@@ -1415,7 +1404,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     ConvertMaterialForMesh(out_mesh, model, mesh, index);
 
     if (process_weights) {
-        ConvertWeights(out_mesh, mesh, absolute_transform, parent, index, &reverseMapping);
+        ConvertWeights(out_mesh, mesh, parent, index, &reverseMapping);
     }
 
     std::vector<aiAnimMesh *> animMeshes;
@@ -1497,7 +1486,6 @@ void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo
 }
 
 void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
-        const aiMatrix4x4 &absolute_transform,
         aiNode *parent, unsigned int materialIndex,
         std::vector<unsigned int> *outputVertStartIndices) {
     ai_assert(geo.DeformerSkin());
@@ -1566,7 +1554,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
             // XXX this could be heavily simplified by collecting the bone
             // data in a single step.
             ConvertCluster(bones, cluster, out_indices, index_out_indices,
-                    count_out_indices, absolute_transform, parent);
+                    count_out_indices, parent);
         }
 
         bone_map.clear();
@@ -1605,14 +1593,16 @@ void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const 
         bone = new aiBone();
         bone->mName = bone_name;
 
+        bone->mOffsetMatrix = cl->Transform();
         // store local transform link for post processing
+        /*
         bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
         aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
 
         bone->mOffsetMatrix = bone->mOffsetMatrix * matrix; // * mesh_offset
-
+        */
         //
         // Now calculate the aiVertexWeights
         //
@@ -2213,6 +2203,9 @@ void FBXConverter::SetShadingPropertiesCommon(aiMaterial *out_mat, const Propert
     const float ShininessExponent = PropertyGet<float>(props, "ShininessExponent", ok);
     if (ok) {
         out_mat->AddProperty(&ShininessExponent, 1, AI_MATKEY_SHININESS);
+         // Match Blender behavior to extract roughness when only shininess is present
+        const float roughness = 1.0f - (sqrt(ShininessExponent) / 10.0f);
+        out_mat->AddProperty(&roughness, 1, AI_MATKEY_ROUGHNESS_FACTOR);
     }
 
     // TransparentColor / TransparencyFactor... gee thanks FBX :rolleyes:

@@ -3318,9 +3318,9 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                 float vc = curve->GetValues().at(1);
                 for (size_t n = 1; n < count; n++) {
                     while (std::abs(vc - vp) >= 180.0f) {
-                        float step = std::floor(float(tc - tp) / (vc - vp) * 179.0f);
+                        double step = std::floor(double(tc - tp) / std::abs(vc - vp) * 179.0f);
                         int64_t tnew = tp + int64_t(step);
-                        float vnew = vp + (vc - vp) * step / float(tc - tp);
+                        float vnew = vp + (vc - vp) * float(step / (tc - tp));
                         if (tnew >= adj_start && tnew <= adj_stop) {
                             Keys->push_back(tnew);
                             Values->push_back(vnew);

@@ -167,6 +167,7 @@ SET( Logging_SRCS
 SOURCE_GROUP(Logging FILES ${Logging_SRCS})
 
 SET( Common_SRCS
+  Common/StbCommon.h
   Common/Compression.cpp
   Common/Compression.h
   Common/BaseImporter.cpp
@@ -1099,8 +1100,6 @@ if(MSVC10)
   endif()
 endif()
 
-ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
-
 IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
@@ -1176,6 +1175,13 @@ ENDIF()
 
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
+
+# Add or remove dllexport tags depending on the library type.
+IF (BUILD_SHARED_LIBS)
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
+ELSE ()
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY)
+ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 

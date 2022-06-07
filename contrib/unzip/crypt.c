@@ -43,6 +43,11 @@
 
 #include "crypt.h"
 
+#ifdef _WIN32
+#   pragma warning(push)
+#   pragma warning(disable : 4244)
+#endif // _WIN32
+
 /***************************************************************************/
 
 #define CRC32(c, b) ((*(pcrc_32_tab+(((uint32_t)(c) ^ (b)) & 0xff))) ^ ((c) >> 8))
@@ -158,5 +163,9 @@ int crypthead(const char *passwd, uint8_t *buf, int buf_size, uint32_t *pkeys,
     buf[n++] = (uint8_t)zencode(pkeys, pcrc_32_tab, verify2, t);
     return n;
 }
+
+#ifdef _WIN32
+#   pragma warning(pop)
+#endif // _WIN32
 
 /***************************************************************************/

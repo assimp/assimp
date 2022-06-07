@@ -23,6 +23,8 @@
 
 #ifdef _WIN32
 #   define snprintf _snprintf
+#   pragma warning(push)
+#   pragma warning(disable : 4131 4100)
 #   ifdef __clang__
 #       pragma clang diagnostic push
 #       pragma clang diagnostic ignored "-Wunused-parameter"
@@ -356,6 +358,7 @@ void fill_fopen64_filefunc(zlib_filefunc64_def *pzlib_filefunc_def)
 }
 
 #ifdef _WIN32
+#   pragma warning(pop)
 #   ifdef __clang__
 #       pragma clang diagnostic pop
 #   endif

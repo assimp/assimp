@@ -908,7 +908,7 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin> &skinRef) {
     do {
         startNodeRef = parentNodeRef;
         parentNodeRef = startNodeRef->parent;
-    } while (nullptr != parentNodeRef && !parentNodeRef->jointName.empty());
+    } while (parentNodeRef && !parentNodeRef->jointName.empty());
 
     return parentNodeRef;
 }

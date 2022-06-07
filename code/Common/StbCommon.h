@@ -1,15 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -36,21 +35,24 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
+#pragma once
 
-#include "UnitTestPCH.h"
+#if _MSC_VER // "unreferenced function has been removed" (SSE2 detection routine in x64 builds)
+#pragma warning(push)
+#pragma warning(disable : 4505)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 
-#include <assimp/Hash.h>
+#include "stb/stb_image.h"
 
-using namespace Assimp;
+#if _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
 
-class utHash : public ::testing::Test {
-    // empty
-};
-
-TEST_F( utHash, SuperFastHashTest ) {
-    const char *Data = "-21416115v";
-    auto result = SuperFastHash(Data, 10);
-    EXPECT_NE(0u, result);
-}

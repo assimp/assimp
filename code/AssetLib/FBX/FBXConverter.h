@@ -191,12 +191,12 @@ private:
     void SetupNodeMetadata(const Model& model, aiNode& nd);
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertModel(const Model &model, aiNode *parent, aiNode *root_node);
+    void ConvertModel(const Model &model, aiNode *parent, aiNode *root_node, const aiMatrix4x4 &absolute_transform);
 
     // ------------------------------------------------------------------------------------------------
     // MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
     std::vector<unsigned int>
-    ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node);
+    ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node, const aiMatrix4x4 &absolute_transform);
 
     // ------------------------------------------------------------------------------------------------
     std::vector<unsigned int> ConvertLine(const LineGeometry& line, aiNode *root_node);
@@ -205,15 +205,15 @@ private:
     aiMesh* SetupEmptyMesh(const Geometry& mesh, aiNode *parent);
 
     // ------------------------------------------------------------------------------------------------
-    unsigned int ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model,
+    unsigned int ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform,
                                            aiNode *parent, aiNode *root_node);
 
     // ------------------------------------------------------------------------------------------------
     std::vector<unsigned int>
-    ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node);
+    ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform, aiNode *parent, aiNode *root_node);
 
     // ------------------------------------------------------------------------------------------------
-    unsigned int ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, MatIndexArray::value_type index,
+    unsigned int ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform, MatIndexArray::value_type index,
                                           aiNode *parent, aiNode *root_node);
 
     // ------------------------------------------------------------------------------------------------
@@ -227,7 +227,7 @@ private:
     *  - outputVertStartIndices is only used when a material index is specified, it gives for
     *    each output vertex the DOM index it maps to.
     */
-    void ConvertWeights(aiMesh *out, const MeshGeometry &geo, aiNode *parent = nullptr,
+    void ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent = nullptr,
             unsigned int materialIndex = NO_MATERIAL_SEPARATION,
             std::vector<unsigned int> *outputVertStartIndices = nullptr);
 
@@ -239,7 +239,7 @@ private:
     // ------------------------------------------------------------------------------------------------
     void ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
                         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
-                        std::vector<size_t> &count_out_indices, aiNode *parent );
+            std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform, aiNode *parent);
 
     // ------------------------------------------------------------------------------------------------
     void ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo,

@@ -59,14 +59,12 @@ namespace Util {
 
 // ------------------------------------------------------------------------------------------------
 // signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
-void DOMError(const std::string& message, const Token& token)
-{
+void DOMError(const std::string& message, const Token& token) {
     throw DeadlyImportError("FBX-DOM", Util::GetTokenText(&token), message);
 }
 
 // ------------------------------------------------------------------------------------------------
-void DOMError(const std::string& message, const Element* element /*= nullptr*/)
-{
+void DOMError(const std::string& message, const Element* element /*= nullptr*/) {
     if(element) {
         DOMError(message,element->KeyToken());
     }
@@ -76,8 +74,7 @@ void DOMError(const std::string& message, const Element* element /*= nullptr*/)
 
 // ------------------------------------------------------------------------------------------------
 // print warning, do return
-void DOMWarning(const std::string& message, const Token& token)
-{
+void DOMWarning(const std::string& message, const Token& token) {
     if(DefaultLogger::get()) {
         ASSIMP_LOG_WARN("FBX-DOM", Util::GetTokenText(&token), message);
     }

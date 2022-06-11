@@ -423,3 +423,10 @@ TEST_F(utFBXImporterExporter, importMaxPbrMaterialsSpecularGloss) {
     ASSERT_EQ(mat->Get("$raw.3dsMax|main|emit_color", aiTextureType_NONE, 0, emitColor), aiReturn_SUCCESS);
     EXPECT_EQ(emitColor, aiColor4D(1, 0, 1, 1));
 }
+
+TEST_F(utFBXImporterExporter, importSkeletonTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/animation_with_skeleton.fbx", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_TRUE(scene->mRootNode);
+}

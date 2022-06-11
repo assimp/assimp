@@ -65,12 +65,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <cstdint>
 #include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <tuple>
-#include <vector>
 
 namespace Assimp {
 namespace FBX {
@@ -187,8 +184,7 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
 
 /// This struct manages nodes which may or may not end up in the node hierarchy.
 /// When a node becomes a child of another node, that node becomes its owner and mOwnership should be released.
-struct FBXConverter::PotentialNode
-{
+struct FBXConverter::PotentialNode {
     PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {}
     PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {}
     aiNode* operator->() { return mNode; }
@@ -231,7 +227,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
         if (nullptr != model) {
             nodes_chain.clear();
             post_nodes_chain.clear();
-
+            aiMatrix4x4 new_abs_transform = parent->mTransformation;
             std::string node_name = FixNodeName(model->Name());
             // even though there is only a single input node, the design of
             // assimp (or rather: the complicated transformation chain that
@@ -268,7 +264,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             }
 
             // attach geometry
-            ConvertModel(*model, nodes_chain.back().mNode, root_node);
+            ConvertModel(*model, nodes_chain.back().mNode, root_node, new_abs_transform);
 
             // check if there will be any child nodes
             const std::vector<const Connection *> &child_conns = doc.GetConnectionsByDestinationSequenced(model->ID(), "Model");
@@ -447,7 +443,7 @@ void FBXConverter::GetUniqueName(const std::string &name, std::string &uniqueNam
     auto it_pair = mNodeNames.insert({ name, 0 }); // duplicate node name instance count
     unsigned int &i = it_pair.first->second;
     while (!it_pair.second) {
-        i++;
+        ++i;
         std::ostringstream ext;
         ext << name << std::setfill('0') << std::setw(3) << i;
         uniqueName = ext.str();
@@ -646,7 +642,6 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
 
 bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
-    bool ok;
 
     const auto zero_epsilon = ai_epsilon;
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
@@ -660,6 +655,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
 
         bool scale_compare = (comp == TransformationComp_GeometricScaling || comp == TransformationComp_Scaling);
 
+        bool ok = true;
         const aiVector3D &v = PropertyGet<aiVector3D>(props, NameTransformationCompProperty(comp), ok);
         if (ok && scale_compare) {
             if ((v - all_ones).SquareLength() > zero_epsilon) {
@@ -894,18 +890,17 @@ void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
     }
 }
 
-void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root_node) {
+void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root_node, const aiMatrix4x4 &absolute_transform) {
     const std::vector<const Geometry *> &geos = model.GetGeometry();
 
     std::vector<unsigned int> meshes;
     meshes.reserve(geos.size());
 
     for (const Geometry *geo : geos) {
-
         const MeshGeometry *const mesh = dynamic_cast<const MeshGeometry *>(geo);
         const LineGeometry *const line = dynamic_cast<const LineGeometry *>(geo);
         if (mesh) {
-            const std::vector<unsigned int> &indices = ConvertMesh(*mesh, model, parent, root_node);
+            const std::vector<unsigned int> &indices = ConvertMesh(*mesh, model, parent, root_node, absolute_transform);
             std::copy(indices.begin(), indices.end(), std::back_inserter(meshes));
         } else if (line) {
             const std::vector<unsigned int> &indices = ConvertLine(*line, root_node);
@@ -926,7 +921,7 @@ void FBXConverter::ConvertModel(const Model &model, aiNode *parent, aiNode *root
 }
 
 std::vector<unsigned int>
-FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node) {
+FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *parent, aiNode *root_node, const aiMatrix4x4 &absolute_transform) {
     std::vector<unsigned int> temp;
 
     MeshMap::const_iterator it = meshes_converted.find(&mesh);
@@ -949,13 +944,13 @@ FBXConverter::ConvertMesh(const MeshGeometry &mesh, const Model &model, aiNode *
         const MatIndexArray::value_type base = mindices[0];
         for (MatIndexArray::value_type index : mindices) {
             if (index != base) {
-                return ConvertMeshMultiMaterial(mesh, model, parent, root_node);
+                return ConvertMeshMultiMaterial(mesh, model, absolute_transform, parent, root_node);
             }
         }
     }
 
     // faster code-path, just copy the data
-    temp.push_back(ConvertMeshSingleMaterial(mesh, model, parent, root_node));
+    temp.push_back(ConvertMeshSingleMaterial(mesh, model, absolute_transform, parent, root_node));
     return temp;
 }
 
@@ -1023,7 +1018,35 @@ aiMesh *FBXConverter::SetupEmptyMesh(const Geometry &mesh, aiNode *parent) {
     return out_mesh;
 }
 
-unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model,
+static aiSkeleton *createAiSkeleton(SkeletonBoneContainer &sbc) {
+    if (sbc.MeshArray.empty() || sbc.SkeletonBoneToMeshLookup.empty()) {
+        return nullptr;
+    }
+
+    aiSkeleton *skeleton = new aiSkeleton;
+    for (auto *mesh : sbc.MeshArray) {
+        auto it = sbc.SkeletonBoneToMeshLookup.find(mesh);
+        if (it == sbc.SkeletonBoneToMeshLookup.end()) {
+            continue;
+        }
+        SkeletonBoneArray *ba = it->second;
+        if (ba == nullptr) {
+            continue;
+        }
+
+        skeleton->mNumBones = static_cast<unsigned int>(ba->size());
+        skeleton->mBones = new aiSkeletonBone*[skeleton->mNumBones];
+        size_t index = 0;
+        for (auto bone : (* ba)) {
+            skeleton->mBones[index] = bone;
+            ++index;
+        }
+    }
+
+    return skeleton;
+}
+
+unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform,
         aiNode *parent, aiNode *) {
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     aiMesh *const out_mesh = SetupEmptyMesh(mesh, parent);
@@ -1142,8 +1165,15 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
         ConvertMaterialForMesh(out_mesh, model, mesh, mindices[0]);
     }
 
-    if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr) {
-        ConvertWeights(out_mesh, mesh, parent, NO_MATERIAL_SEPARATION, nullptr);
+    if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && !doc.Settings().useSkeleton) {
+        ConvertWeights(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr);
+    } else if (doc.Settings().readWeights && mesh.DeformerSkin() != nullptr && doc.Settings().useSkeleton) {
+        SkeletonBoneContainer sbc;
+        ConvertWeightsToSkeleton(out_mesh, mesh, absolute_transform, parent, NO_MATERIAL_SEPARATION, nullptr, sbc);
+        aiSkeleton *skeleton = createAiSkeleton(sbc);
+        if (skeleton != nullptr) {
+            mSkeletons.emplace_back(skeleton);
+        }
     }
 
     std::vector<aiAnimMesh *> animMeshes;
@@ -1190,7 +1220,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
 }
 
 std::vector<unsigned int>
-FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, aiNode *parent,
+FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform, aiNode *parent,
         aiNode *root_node) {
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     ai_assert(mindices.size());
@@ -1201,7 +1231,7 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
     for (MatIndexArray::value_type index : mindices) {
         if (had.find(index) == had.end()) {
 
-            indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, parent, root_node));
+            indices.push_back(ConvertMeshMultiMaterial(mesh, model, absolute_transform, index, parent, root_node));
             had.insert(index);
         }
     }
@@ -1209,9 +1239,8 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
     return indices;
 }
 
-unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model,
-        MatIndexArray::value_type index,
-        aiNode *parent, aiNode *) {
+unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &model, const aiMatrix4x4 &absolute_transform,
+        MatIndexArray::value_type index, aiNode *parent, aiNode *) {
     aiMesh *const out_mesh = SetupEmptyMesh(mesh, parent);
 
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
@@ -1374,7 +1403,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     ConvertMaterialForMesh(out_mesh, model, mesh, index);
 
     if (process_weights) {
-        ConvertWeights(out_mesh, mesh, parent, index, &reverseMapping);
+        ConvertWeights(out_mesh, mesh, absolute_transform, parent, index, &reverseMapping);
     }
 
     std::vector<aiAnimMesh *> animMeshes;
@@ -1424,19 +1453,47 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     return static_cast<unsigned int>(mMeshes.size() - 1);
 }
 
-void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
+static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *skeletonBone ) {
+    skeletonBone->mNumnWeights = bone->mNumWeights;
+    skeletonBone->mWeights = bone->mWeights;
+    skeletonBone->mOffsetMatrix = bone->mOffsetMatrix;
+    skeletonBone->mMeshId = mesh;
+    skeletonBone->mNode = bone->mNode;
+    skeletonBone->mParent = -1;
+}
+
+void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
+        std::vector<unsigned int> *outputVertStartIndices, SkeletonBoneContainer &skeletonContainer) {
+
+    if (skeletonContainer.SkeletonBoneToMeshLookup.find(out) != skeletonContainer.SkeletonBoneToMeshLookup.end()) {
+        return;
+    }
+
+    ConvertWeights(out, geo, absolute_transform, parent, materialIndex, outputVertStartIndices);
+    skeletonContainer.MeshArray.emplace_back(out);
+    SkeletonBoneArray *ba = new SkeletonBoneArray;
+    for (size_t i = 0; i < out->mNumBones; ++i) {
+        aiBone *bone = out->mBones[i];
+        if (bone == nullptr) {
+            continue;
+        }
+        aiSkeletonBone *skeletonBone = new aiSkeletonBone;
+        copyBoneToSkeletonBone(out, bone, skeletonBone);
+        ba->emplace_back(skeletonBone);
+    }
+    skeletonContainer.SkeletonBoneToMeshLookup[out] = ba;
+}
+
+void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
         aiNode *parent, unsigned int materialIndex,
         std::vector<unsigned int> *outputVertStartIndices) {
     ai_assert(geo.DeformerSkin());
 
-    std::vector<size_t> out_indices;
-    std::vector<size_t> index_out_indices;
-    std::vector<size_t> count_out_indices;
+    std::vector<size_t> out_indices, index_out_indices, count_out_indices;
 
     const Skin &sk = *geo.DeformerSkin();
 
-    std::vector<aiBone *> bones;
-
+    std::vector<aiBone*> bones;
     const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
     ai_assert(no_mat_check || outputVertStartIndices);
 
@@ -1496,7 +1553,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
             // XXX this could be heavily simplified by collecting the bone
             // data in a single step.
             ConvertCluster(bones, cluster, out_indices, index_out_indices,
-                    count_out_indices, parent);
+                    count_out_indices, absolute_transform, parent);
         }
 
         bone_map.clear();
@@ -1509,25 +1566,20 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo,
         out->mBones = nullptr;
         out->mNumBones = 0;
         return;
-    } else {
-        out->mBones = new aiBone *[bones.size()]();
-        out->mNumBones = static_cast<unsigned int>(bones.size());
+    } 
 
-        std::swap_ranges(bones.begin(), bones.end(), out->mBones);
-    }
+    out->mBones = new aiBone *[bones.size()]();
+    out->mNumBones = static_cast<unsigned int>(bones.size());
+    std::swap_ranges(bones.begin(), bones.end(), out->mBones);
 }
 
-const aiNode *GetNodeByName(aiNode *current_node) {
-    aiNode *iter = current_node;
-    //printf("Child count: %d", iter->mNumChildren);
-    return iter;
-}
-
-void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const Cluster *cl,
+void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Cluster *cluster,
         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
-        std::vector<size_t> &count_out_indices, aiNode *) {
-    ai_assert(cl); // make sure cluster valid
-    std::string deformer_name = cl->TargetNode()->Name();
+        std::vector<size_t> &count_out_indices, const aiMatrix4x4 & /* absolute_transform*/,
+        aiNode *) {
+    ai_assert(cluster != nullptr); // make sure cluster valid
+
+    std::string deformer_name = cluster->TargetNode()->Name();
     aiString bone_name = aiString(FixNodeName(deformer_name));
 
     aiBone *bone = nullptr;
@@ -1540,10 +1592,10 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         bone = new aiBone();
         bone->mName = bone_name;
 
-        bone->mOffsetMatrix = cl->Transform();
+        bone->mOffsetMatrix = cluster->Transform();
         // store local transform link for post processing
         /*
-        bone->mOffsetMatrix = cl->TransformLink();
+        bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
         aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
@@ -1560,7 +1612,7 @@ void FBXConverter::ConvertCluster(std::vector<aiBone *> &local_mesh_bones, const
         cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
 
         const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
-        const WeightArray &weights = cl->GetWeights();
+        const WeightArray &weights = cluster->GetWeights();
 
         const size_t c = index_out_indices.size();
         for (size_t i = 0; i < c; ++i) {
@@ -2605,7 +2657,7 @@ void FBXConverter::ConvertAnimationStack(const AnimationStack &st) {
                 meshMorphAnim->mNumKeys = numKeys;
                 meshMorphAnim->mKeys = new aiMeshMorphKey[numKeys];
                 unsigned int j = 0;
-                for (auto animIt : *animData) {
+                for (auto &animIt : *animData) {
                     morphKeyData *keyData = animIt.second;
                     unsigned int numValuesAndWeights = static_cast<unsigned int>(keyData->values.size());
                     meshMorphAnim->mKeys[j].mNumValuesAndWeights = numValuesAndWeights;
@@ -3624,6 +3676,12 @@ void FBXConverter::TransferDataToScene() {
         mSceneOut->mNumTextures = static_cast<unsigned int>(textures.size());
 
         std::swap_ranges(textures.begin(), textures.end(), mSceneOut->mTextures);
+    }
+
+    if (!mSkeletons.empty()) {
+        mSceneOut->mSkeletons = new aiSkeleton *[mSkeletons.size()];
+        mSceneOut->mNumSkeletons = static_cast<unsigned int>(mSkeletons.size());
+        std::swap_ranges(mSkeletons.begin(), mSkeletons.end(), mSceneOut->mSkeletons);
     }
 }
 

@@ -643,7 +643,7 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
 bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
 
-    const float zero_epsilon = ai_epsilon;
+    const auto zero_epsilon = ai_epsilon;
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
@@ -3232,7 +3232,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
 
     bool ok = false;
     
-    const float zero_epsilon = ai_epsilon;
+    const auto zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
     if (ok && preRotation.SquareLength() > zero_epsilon) {
@@ -3370,9 +3370,9 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                 float vc = curve->GetValues().at(1);
                 for (size_t n = 1; n < count; n++) {
                     while (std::abs(vc - vp) >= 180.0f) {
-                        float step = std::floor(float(tc - tp) / (vc - vp) * 179.0f);
+                        double step = std::floor(double(tc - tp) / std::abs(vc - vp) * 179.0f);
                         int64_t tnew = tp + int64_t(step);
-                        float vnew = vp + (vc - vp) * step / float(tc - tp);
+                        float vnew = vp + (vc - vp) * float(step / (tc - tp));
                         if (tnew >= adj_start && tnew <= adj_stop) {
                             Keys->push_back(tnew);
                             Values->push_back(vnew);

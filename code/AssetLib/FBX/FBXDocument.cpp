@@ -67,7 +67,7 @@ namespace FBX {
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc) : 
+LazyObject::LazyObject(uint64_t id, const Element& element, const Document& doc) :
         doc(doc), element(element), id(id), flags() {
     // empty
 }
@@ -544,7 +544,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
     ai_assert( count != 0 );
     ai_assert( count <= MAX_CLASSNAMES);
 
-    size_t lengths[MAX_CLASSNAMES];
+    size_t lengths[MAX_CLASSNAMES] = {};
 
     const size_t c = count;
     for (size_t i = 0; i < c; ++i) {

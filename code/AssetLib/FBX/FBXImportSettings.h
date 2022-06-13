@@ -60,6 +60,7 @@ struct ImportSettings {
             readLights(true),
             readAnimations(true),
             readWeights(true),
+            useSkeleton(false),
             preservePivots(true),
             optimizeEmptyAnimationCurves(true),
             useLegacyEmbeddedTextureNaming(false),
@@ -111,6 +112,11 @@ struct ImportSettings {
     /** read bones (vertex weights and deform info).
      *  Default value is true. */
     bool readWeights;
+
+    /** will convert all animation data into a skeleton (experimental)
+     *  Default value is false.
+     */
+    bool useSkeleton;
 
     /** preserve transformation pivots and offsets. Since these can
      *  not directly be represented in assimp, additional dummy

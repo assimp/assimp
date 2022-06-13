@@ -55,22 +55,25 @@ namespace FBX {
 /**
  *  DOM base class for all kinds of FBX geometry
  */
-class Geometry : public Object
-{
+class Geometry : public Object {
 public:
+    /// @brief The class constructor with all parameters.
+    /// @param id       The id.
+    /// @param element  
+    /// @param name 
+    /// @param doc 
     Geometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
-    virtual ~Geometry();
+    virtual ~Geometry() = default;
 
-    /** Get the Skin attached to this geometry or nullptr */
+    /// Get the Skin attached to this geometry or nullptr
     const Skin* DeformerSkin() const;
 
-    /** Get the BlendShape attached to this geometry or nullptr */
+    /// Get the BlendShape attached to this geometry or nullptr
     const std::vector<const BlendShape*>& GetBlendShapes() const;
 
 private:
     const Skin* skin;
     std::vector<const BlendShape*> blendShapes;
-
 };
 
 typedef std::vector<int> MatIndexArray;
@@ -79,14 +82,13 @@ typedef std::vector<int> MatIndexArray;
 /**
  *  DOM class for FBX geometry of type "Mesh"
  */
-class MeshGeometry : public Geometry
-{
+class MeshGeometry : public Geometry {
 public:
     /** The class constructor */
     MeshGeometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
 
     /** The class destructor */
-    virtual ~MeshGeometry();
+    virtual ~MeshGeometry() = default;
 
     /** Get a list of all vertex points, non-unique*/
     const std::vector<aiVector3D>& GetVertices() const;
@@ -130,6 +132,7 @@ public:
     /** Determine the face to which a particular output vertex index belongs.
     *  This mapping is always unique. */
     unsigned int FaceForVertexIndex( unsigned int in_index ) const;
+
 private:
     void ReadLayer( const Scope& layer );
     void ReadLayerElement( const Scope& layerElement );

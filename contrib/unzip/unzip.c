@@ -73,10 +73,10 @@
 #  define TRYFREE(p) {if (p) free(p);}
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   pragma warning(push)
 #   pragma warning(disable : 4131 4244 4189 4245)
-#endif // _WIN32
+#endif // _MSC_VER
 
 const char unz_copyright[] =
    " unzip 1.01 Copyright 1998-2004 Gilles Vollant - http://www.winimage.com/zLibDll";
@@ -1995,6 +1995,6 @@ extern int ZEXPORT unzEndOfFile(unzFile file)
     return 0;
 }
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER

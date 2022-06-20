@@ -804,7 +804,6 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
                 continue;
             }
             ++numRemainingBones;
-
         }
 
         // create bone array and copy bone weights one by one
@@ -832,7 +831,6 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
             bone->mOffsetMatrix.c2 = ReadFloat(jointMatrixAcc, jointMatrices, a, 9);
             bone->mOffsetMatrix.c3 = ReadFloat(jointMatrixAcc, jointMatrices, a, 10);
             bone->mOffsetMatrix.c4 = ReadFloat(jointMatrixAcc, jointMatrices, a, 11);
-
             bone->mNumWeights = static_cast<unsigned int>(dstBones[a].size());
             bone->mWeights = new aiVertexWeight[bone->mNumWeights];
             std::copy(dstBones[a].begin(), dstBones[a].end(), bone->mWeights);
@@ -1831,4 +1829,3 @@ std::string ColladaLoader::FindNameForNode(const Node *pNode) {
 } // Namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER
-

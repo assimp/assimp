@@ -59,8 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <numeric>
 
-#include <iostream>
-
 namespace Assimp {
 
 using namespace Assimp::Formatter;

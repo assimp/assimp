@@ -87,7 +87,7 @@ class Element
 {
 public:
     Element(const Token& key_token, Parser& parser);
-    ~Element();
+    ~Element() = default;
 
     const Scope* Compound() const {
         return compound.get();
@@ -160,7 +160,7 @@ public:
     /** Parse given a token list. Does not take ownership of the tokens -
      *  the objects must persist during the entire parser lifetime */
     Parser (const TokenList& tokens,bool is_binary);
-    ~Parser();
+    ~Parser() = default;
 
     const Scope& GetRootScope() const {
         return *root.get();

@@ -163,12 +163,6 @@ Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) 
 }
 
 // ------------------------------------------------------------------------------------------------
-Element::~Element()
-{
-     // no need to delete tokens, they are owned by the parser
-}
-
-// ------------------------------------------------------------------------------------------------
 Scope::Scope(Parser& parser,bool topLevel)
 {
     if(!topLevel) {
@@ -224,12 +218,6 @@ Parser::Parser (const TokenList& tokens, bool is_binary)
 {
     ASSIMP_LOG_DEBUG("Parsing FBX tokens");
     root.reset(new Scope(*this,true));
-}
-
-// ------------------------------------------------------------------------------------------------
-Parser::~Parser()
-{
-    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -961,8 +949,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of uints
-void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -1185,7 +1172,6 @@ aiMatrix4x4 ReadMatrix(const Element& element)
     result.Transpose();
     return result;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsString() with ParseError handling

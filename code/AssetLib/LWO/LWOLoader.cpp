@@ -287,7 +287,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
             if (UINT_MAX == iDefaultSurface) {
                 pSorted.erase(pSorted.end() - 1);
             }
-            for (unsigned int p = 0, j = 0; j < mSurfaces->size(); ++j) {
+            for (unsigned int j = 0; j < mSurfaces->size(); ++j) {
                 SortedRep &sorted = pSorted[j];
                 if (sorted.empty())
                     continue;
@@ -425,7 +425,6 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                 } else {
                     ASSIMP_LOG_VERBOSE_DEBUG("LWO2: No need to compute normals, they're already there");
                 }
-                ++p;
             }
         }
 

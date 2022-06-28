@@ -53,7 +53,7 @@ public:
     bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0);
-        printf("Number of meshes = %d\n", scene->mNumMeshes);
+        EXPECT_EQ(1u, scene->mNumMeshes);
         return nullptr != scene;
     }
 };

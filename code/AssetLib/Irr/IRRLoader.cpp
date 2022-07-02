@@ -874,7 +874,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	// Batch loader used to load external models
 	BatchLoader batch(pIOHandler);
-	//  batch.SetBasePath(pFile);
+	//batch.SetBasePath(pFile);
 
 	cameras.reserve(5);
 	lights.reserve(5);

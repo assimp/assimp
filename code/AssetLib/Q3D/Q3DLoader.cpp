@@ -131,7 +131,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     std::vector<Material> materials;
     try {
         materials.reserve(numMats);
-    } catch(const std::bad_alloc& e) {
+    } catch(const std::bad_alloc&) {
         ASSIMP_LOG_ERROR("Invalid alloc for materials.");
         throw DeadlyImportError("Invalid Quick3D-file, material allocation failed.");
     }
@@ -139,7 +139,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     std::vector<Mesh> meshes;
     try {
         meshes.reserve(numMeshes);
-    } catch(const std::bad_alloc& e) {
+    } catch(const std::bad_alloc&) {
         ASSIMP_LOG_ERROR("Invalid alloc for meshes.");
         throw DeadlyImportError("Invalid Quick3D-file, mesh allocation failed.");
     }

@@ -1,5 +1,9 @@
 #include "revision.h"
+#ifdef __GNUC__
+#include "winresrc.h"
+#else
 #include "winres.h"
+#endif
 
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #pragma code_page(1252)

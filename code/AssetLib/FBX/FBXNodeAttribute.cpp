@@ -57,114 +57,65 @@ namespace FBX {
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: Object(id,element,name)
-, props()
-{
-    const Scope& sc = GetRequiredScope(element);
+NodeAttribute::NodeAttribute(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        Object(id, element, name), props() {
+    const Scope &sc = GetRequiredScope(element);
 
-    const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
+    const std::string &classname = ParseTokenAsString(GetRequiredToken(element, 2));
 
     // hack on the deriving type but Null/LimbNode attributes are the only case in which
     // the property table is by design absent and no warning should be generated
     // for it.
     const bool is_null_or_limb = !strcmp(classname.c_str(), "Null") || !strcmp(classname.c_str(), "LimbNode");
-    props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null_or_limb);
+    props = GetPropertyTable(doc, "NodeAttribute.Fbx" + classname, element, sc, is_null_or_limb);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-NodeAttribute::~NodeAttribute()
-{
-    // empty
-}
+CameraSwitcher::CameraSwitcher(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        NodeAttribute(id, element, doc, name) {
+    const Scope &sc = GetRequiredScope(element);
+    const Element *const CameraId = sc["CameraId"];
+    const Element *const CameraName = sc["CameraName"];
+    const Element *const CameraIndexName = sc["CameraIndexName"];
 
-
-// ------------------------------------------------------------------------------------------------
-CameraSwitcher::CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-    : NodeAttribute(id,element,doc,name)
-{
-    const Scope& sc = GetRequiredScope(element);
-    const Element* const CameraId = sc["CameraId"];
-    const Element* const CameraName = sc["CameraName"];
-    const Element* const CameraIndexName = sc["CameraIndexName"];
-
-    if(CameraId) {
-        cameraId = ParseTokenAsInt(GetRequiredToken(*CameraId,0));
+    if (CameraId) {
+        cameraId = ParseTokenAsInt(GetRequiredToken(*CameraId, 0));
     }
 
-    if(CameraName) {
-        cameraName = GetRequiredToken(*CameraName,0).StringContents();
+    if (CameraName) {
+        cameraName = GetRequiredToken(*CameraName, 0).StringContents();
     }
 
-    if(CameraIndexName && CameraIndexName->Tokens().size()) {
-        cameraIndexName = GetRequiredToken(*CameraIndexName,0).StringContents();
+    if (CameraIndexName && CameraIndexName->Tokens().size()) {
+        cameraIndexName = GetRequiredToken(*CameraIndexName, 0).StringContents();
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-CameraSwitcher::~CameraSwitcher()
-{
+Camera::Camera(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        NodeAttribute(id, element, doc, name) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-Camera::Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: NodeAttribute(id,element,doc,name)
-{
+Light::Light(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        NodeAttribute(id, element, doc, name) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-Camera::~Camera()
-{
+Null::Null(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        NodeAttribute(id, element, doc, name) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-Light::Light(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: NodeAttribute(id,element,doc,name)
-{
+LimbNode::LimbNode(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        NodeAttribute(id, element, doc, name) {
     // empty
 }
 
+} // namespace FBX
+} // namespace Assimp
 
-// ------------------------------------------------------------------------------------------------
-Light::~Light()
-{
-}
-
-
-// ------------------------------------------------------------------------------------------------
-Null::Null(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: NodeAttribute(id,element,doc,name)
-{
-
-}
-
-
-// ------------------------------------------------------------------------------------------------
-Null::~Null()
-{
-
-}
-
-
-// ------------------------------------------------------------------------------------------------
-LimbNode::LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: NodeAttribute(id,element,doc,name)
-{
-
-}
-
-
-// ------------------------------------------------------------------------------------------------
-LimbNode::~LimbNode()
-{
-
-}
-
-}
-}
-
-#endif
+#endif // ASSIMP_BUILD_NO_FBX_IMPORTER

@@ -448,6 +448,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         unsigned int iType,
         unsigned int iWidth,
         unsigned int iHeight) {
+    std::unique_ptr<aiTexture> pcNew;
     if (szCurrent == nullptr) {
         return;
     }
@@ -470,7 +471,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
             return;
         }
         
-        std::unique_ptr<aiTexture> pcNew;
         pcNew.reset(new aiTexture);
         pcNew->mHeight = 0;
         pcNew->mWidth = iWidth;

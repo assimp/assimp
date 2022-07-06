@@ -501,10 +501,8 @@ public:
         }
     }
 
-    ///	@brief  The class destructor.
-    ~XmlNodeIterator() {
-        // empty
-    }
+    ///	@brief  The class destructor, default implementation.
+    ~XmlNodeIterator() = default;
 
     ///	@brief  Will iterate through all children in pre-order iteration.
     /// @param  node    [in] The nod to iterate through.

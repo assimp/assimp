@@ -122,7 +122,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'

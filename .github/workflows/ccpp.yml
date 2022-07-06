@@ -71,7 +71,7 @@ jobs:
 
     - name: Remove contrib directory for Hunter builds
       if: contains(matrix.name, 'hunter')
-      uses: JesseTG/rm@v1.0.2
+      uses: JesseTG/rm@v1.0.3
       with:
         path: contrib
 

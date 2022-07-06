@@ -43,7 +43,7 @@ jobs:
             toolchain: ninja-vs-win64-cxx17
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - uses: lukka/get-cmake@latest
     
@@ -64,7 +64,7 @@ jobs:
 
     - name: Checkout Hunter toolchains
       if: endsWith(matrix.name, 'hunter')
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: cpp-pm/polly
         path: cmake/polly

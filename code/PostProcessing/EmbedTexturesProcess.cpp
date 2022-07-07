@@ -128,7 +128,7 @@ bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) 
 
     aiTexel* imageContent = new aiTexel[ 1ul + static_cast<unsigned long>( imageSize ) / sizeof(aiTexel)];
     pFile->Seek(0, aiOrigin_SET);
-    pFile->Read(reinterpret_cast<char*>(imageContent), imageSize, 1);
+    pFile->Read(reinterpret_cast<char*>(imageContent), static_cast<size_t>(imageSize), 1);
     mIOHandler->Close(pFile);
 
     // Enlarging the textures table

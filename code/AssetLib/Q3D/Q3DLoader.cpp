@@ -129,10 +129,20 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     unsigned int numTextures = (unsigned int)stream.GetI4();
 
     std::vector<Material> materials;
-    materials.reserve(numMats);
+    try {
+        materials.reserve(numMats);
+    } catch(const std::bad_alloc&) {
+        ASSIMP_LOG_ERROR("Invalid alloc for materials.");
+        throw DeadlyImportError("Invalid Quick3D-file, material allocation failed.");
+    }
 
     std::vector<Mesh> meshes;
-    meshes.reserve(numMeshes);
+    try {
+        meshes.reserve(numMeshes);
+    } catch(const std::bad_alloc&) {
+        ASSIMP_LOG_ERROR("Invalid alloc for meshes.");
+        throw DeadlyImportError("Invalid Quick3D-file, mesh allocation failed.");
+    }
 
     // Allocate the scene root node
     pScene->mRootNode = new aiNode();

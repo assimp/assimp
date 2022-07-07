@@ -449,6 +449,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         unsigned int iWidth,
         unsigned int iHeight) {
     std::unique_ptr<aiTexture> pcNew;
+    if (szCurrent == nullptr) {
+        return;
+    }
 
     // get the type of the skin
     unsigned int iMasked = (unsigned int)(iType & 0xF);

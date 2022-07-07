@@ -517,13 +517,13 @@ bool STLImporter::LoadBinaryFile() {
             const ai_real invVal((ai_real)1.0 / (ai_real)31.0);
             if (bIsMaterialise) // this is reversed
             {
-                clr->r = (color & 0x31u) * invVal;
-                clr->g = ((color & (0x31u << 5)) >> 5u) * invVal;
-                clr->b = ((color & (0x31u << 10)) >> 10u) * invVal;
+                clr->r = (color & 0x1fu) * invVal;
+                clr->g = ((color & (0x1fu << 5)) >> 5u) * invVal;
+                clr->b = ((color & (0x1fu << 10)) >> 10u) * invVal;
             } else {
-                clr->b = (color & 0x31u) * invVal;
-                clr->g = ((color & (0x31u << 5)) >> 5u) * invVal;
-                clr->r = ((color & (0x31u << 10)) >> 10u) * invVal;
+                clr->b = (color & 0x1fu) * invVal;
+                clr->g = ((color & (0x1fu << 5)) >> 5u) * invVal;
+                clr->r = ((color & (0x1fu << 10)) >> 10u) * invVal;
             }
             // assign the color to all vertices of the face
             *(clr + 1) = *clr;

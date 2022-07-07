@@ -64,7 +64,7 @@ bool validateColorString(const char *color) {
     return true;
 }
 
-aiFace ReadTriangle(XmlNode &node, unsigned int &texId0, unsigned int &texId1, unsigned int &texId2) {
+aiFace ReadTriangle(XmlNode &node, int &texId0, int &texId1, int &texId2) {
     aiFace face;
 
     face.mNumIndices = 3;
@@ -73,9 +73,10 @@ aiFace ReadTriangle(XmlNode &node, unsigned int &texId0, unsigned int &texId1, u
     face.mIndices[1] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v2).as_string()));
     face.mIndices[2] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v3).as_string()));
 
-    texId0 = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::p1).as_string()));
-    texId1 = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::p2).as_string()));
-    texId2 = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::p3).as_string()));
+    texId0 = texId1 = texId2 = -1;
+    XmlParser::getIntAttribute(node, XmlTag::p1, texId0);
+    XmlParser::getIntAttribute(node, XmlTag::p2, texId1);
+    XmlParser::getIntAttribute(node, XmlTag::p3, texId2);
 
     return face;
 }
@@ -416,7 +417,8 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
             bool hasPid = getNodeAttribute(currentNode, D3MF::XmlTag::pid, pid);
             bool hasP1 = getNodeAttribute(currentNode, D3MF::XmlTag::p1, p1);
 
-            unsigned int texId[3];
+            int texId[3];
+            Texture2DGroup *group = nullptr;
             aiFace face = ReadTriangle(currentNode, texId[0], texId[1], texId[2]);
             if (hasPid && hasP1) {
                 auto it = mResourcesDictionnary.find(pid);
@@ -431,7 +433,7 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                                 mesh->mNumUVComponents[i] = 0;
                             }
 
-                            Texture2DGroup *group = static_cast<Texture2DGroup *>(it->second);
+                            group = static_cast<Texture2DGroup *>(it->second);
                             const std::string name = ai_to_string(group->mTexId);
                             for (size_t i = 0; i < mMaterials.size(); ++i) {
                                 if (name == mMaterials[i]->GetName().C_Str()) {
@@ -439,13 +441,19 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                                 }
                             }
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
-                            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-
-                                mesh->mTextureCoords[0][i] = aiVector3D(group->mTex2dCoords[i].x, group->mTex2dCoords[i].y, 0);
-                            }
                         }
                     } 
                 }
+            }
+
+            // Load texture coordinates into mesh, when any
+            if (group != nullptr) {
+                size_t i0 = face.mIndices[0];
+                size_t i1 = face.mIndices[1];
+                size_t i2 = face.mIndices[2];
+                mesh->mTextureCoords[0][i0] = aiVector3D(group->mTex2dCoords[texId[0]].x, group->mTex2dCoords[texId[0]].y, 0.0f);
+                mesh->mTextureCoords[0][i1] = aiVector3D(group->mTex2dCoords[texId[1]].x, group->mTex2dCoords[texId[1]].y, 0.0f);
+                mesh->mTextureCoords[0][i2] = aiVector3D(group->mTex2dCoords[texId[2]].x, group->mTex2dCoords[texId[2]].y, 0.0f);
             }
 
             faces.push_back(face);

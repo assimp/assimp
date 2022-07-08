@@ -357,6 +357,10 @@ namespace pmx
 	{
 	public:
 		void virtual Read(std::istream *stream, PmxSetting *setting) = 0;
+
+        virtual ~PmxMorphOffset() {
+
+        }
 	};
 
 	class PmxMorphVertexOffset : public PmxMorphOffset

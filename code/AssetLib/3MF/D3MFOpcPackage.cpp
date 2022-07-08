@@ -187,7 +187,7 @@ D3MFOpcPackage::~D3MFOpcPackage() {
     mZipArchive->Close(mRootStream);
     delete mZipArchive;
     for (auto tex : mEmbeddedTextures) {
-        delete mEmbeddedTextures[i];
+        delete tex;
     }
 }
 

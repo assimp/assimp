@@ -163,7 +163,7 @@ public:
     typedef std::shared_ptr<const DataType> Out;
 
 public:
-    virtual ~DataType() = default
+    virtual ~DataType() = default;
 
     template <typename T>
     const T &To() const {
@@ -341,7 +341,7 @@ public:
         *this = schemas;
     }
 
-    ConversionSchema() = default
+    ConversionSchema() = default;
 
     ConvertObjectProc GetConverterProc(const std::string &name) const {
         ConverterMap::const_iterator it = converters.find(name);

@@ -374,6 +374,8 @@ struct CustomExtension {
             mValues(other.mValues) {
         // empty
     }
+
+    CustomExtension& operator=(const CustomExtension&) = default;
 };
 
 //! Base class for all glTF top-level objects

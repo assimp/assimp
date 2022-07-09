@@ -1622,11 +1622,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
                             throw DeadlyImportError("Expected more values while reading <vcount> contents.");
                         }
                         // read a number
-                        size_t valueRead = (size_t)strtoul10(content, &content);
-                        if(valueRead == 0) {
-                            printf("wohoo");
-                        }
-                        vcount.push_back(valueRead);
+                        vcount.push_back((size_t)strtoul10(content, &content));
                         // skip whitespace after it
                         SkipSpacesAndLineEnd(&content);
                     }

@@ -87,7 +87,6 @@ static bool IsBinarySTL(const char *buffer, size_t fileSize) {
 }
 
 static const size_t BufferSize = 500;
-static const char UnicodeBoundary = 127;
 
 // An ascii STL buffer will begin with "solid NAME", where NAME is optional.
 // Note: The "solid NAME" check is necessary, but not sufficient, to determine
@@ -96,30 +95,23 @@ static bool IsAsciiSTL(const char *buffer, size_t fileSize) {
     if (IsBinarySTL(buffer, fileSize))
         return false;
 
-    const char *bufferEnd = buffer + fileSize;
-
     if (!SkipSpaces(&buffer)) {
         return false;
     }
 
-    if (buffer + 5 >= bufferEnd) {
+    if (strncmp(buffer, "solid", 5)) {
         return false;
     }
-
-    bool isASCII(strncmp(buffer, "solid", 5) == 0);
-    if (isASCII) {
-        // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
-        if (fileSize >= BufferSize) {
-            isASCII = true;
-            for (unsigned int i = 0; i < BufferSize; i++) {
-                if (buffer[i] > UnicodeBoundary) {
-                    isASCII = false;
-                    break;
-                }
-            }
+    
+    // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
+    unsigned int checksize = (fileSize > BufferSize) ? BufferSize : fileSize;
+    for (unsigned int i = 0; i < checksize; i++) {
+        if (buffer[i] <= 0 ||
+            (buffer[i] < 32 && buffer[i] != '\t' && buffer[i] != '\n' && buffer[i] != '\r')) {
+            return false;
         }
     }
-    return isASCII;
+    return true;
 }
 } // namespace
 

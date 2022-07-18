@@ -126,17 +126,21 @@ void ObjFileMtlImporter::load() {
                 if (*m_DataIt == 'a') // Ambient color
                 {
                     ++m_DataIt;
-                    getColorRGBA(&m_pModel->m_pCurrentMaterial->ambient);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->ambient);
                 } else if (*m_DataIt == 'd') {
                     // Diffuse color
                     ++m_DataIt;
-                    getColorRGBA(&m_pModel->m_pCurrentMaterial->diffuse);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->diffuse);
                 } else if (*m_DataIt == 's') {
                     ++m_DataIt;
-                    getColorRGBA(&m_pModel->m_pCurrentMaterial->specular);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->specular);
                 } else if (*m_DataIt == 'e') {
                     ++m_DataIt;
-                    getColorRGBA(&m_pModel->m_pCurrentMaterial->emissive);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->emissive);
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -145,13 +149,15 @@ void ObjFileMtlImporter::load() {
                 // Material transmission color
                 if (*m_DataIt == 'f')  {
                     ++m_DataIt;
-                    getColorRGBA(&m_pModel->m_pCurrentMaterial->transparent);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getColorRGBA(&m_pModel->m_pCurrentMaterial->transparent);
                 } else if (*m_DataIt == 'r')  {
                     // Material transmission alpha value
                     ++m_DataIt;
                     ai_real d;
                     getFloatValue(d);
-                    m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        m_pModel->m_pCurrentMaterial->alpha = static_cast<ai_real>(1.0) - d;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -162,7 +168,8 @@ void ObjFileMtlImporter::load() {
                 } else {
                     // Alpha value
                     ++m_DataIt;
-                    getFloatValue(m_pModel->m_pCurrentMaterial->alpha);
+                    if (m_pModel->m_pCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->m_pCurrentMaterial->alpha);
                     m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
                 }
             } break;
@@ -173,11 +180,13 @@ void ObjFileMtlImporter::load() {
                 switch (*m_DataIt) {
                     case 's': // Specular exponent
                         ++m_DataIt;
-                        getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
+                        if (m_pModel->m_pCurrentMaterial != nullptr)
+                            getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
                         break;
                     case 'i': // Index Of refraction
                         ++m_DataIt;
-                        getFloatValue(m_pModel->m_pCurrentMaterial->ior);
+                        if (m_pModel->m_pCurrentMaterial != nullptr)
+                            getFloatValue(m_pModel->m_pCurrentMaterial->ior);
                         break;
                     case 'e': // New material
                         createMaterial();
@@ -197,23 +206,28 @@ void ObjFileMtlImporter::load() {
                     {
                     case 'r':
                         ++m_DataIt;
-                        getFloatValue(m_pModel->m_pCurrentMaterial->roughness);
+                        if (m_pModel->m_pCurrentMaterial != nullptr)
+                            getFloatValue(m_pModel->m_pCurrentMaterial->roughness);
                         break;
                     case 'm':
                         ++m_DataIt;
-                        getFloatValue(m_pModel->m_pCurrentMaterial->metallic);
+                        if (m_pModel->m_pCurrentMaterial != nullptr)
+                            getFloatValue(m_pModel->m_pCurrentMaterial->metallic);
                         break;
                     case 's':
                         ++m_DataIt;
-                        getColorRGBA(m_pModel->m_pCurrentMaterial->sheen);
+                        if (m_pModel->m_pCurrentMaterial != nullptr)
+                            getColorRGBA(m_pModel->m_pCurrentMaterial->sheen);
                         break;
                     case 'c':
                         ++m_DataIt;
                         if (*m_DataIt == 'r') {
                             ++m_DataIt;
-                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_roughness);
+                            if (m_pModel->m_pCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_roughness);
                         } else {
-                            getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_thickness);
+                            if (m_pModel->m_pCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->m_pCurrentMaterial->clearcoat_thickness);
                         }
                         break;
                     }
@@ -232,7 +246,8 @@ void ObjFileMtlImporter::load() {
             case 'i': // Illumination model
             {
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
-                getIlluminationModel(m_pModel->m_pCurrentMaterial->illumination_model);
+                if (m_pModel->m_pCurrentMaterial != nullptr)
+                    getIlluminationModel(m_pModel->m_pCurrentMaterial->illumination_model);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -240,7 +255,8 @@ void ObjFileMtlImporter::load() {
             {
                 ++m_DataIt;
                 getFloatValue(m_pModel->m_pCurrentMaterial->anisotropy);
-                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+                if (m_pModel->m_pCurrentMaterial != nullptr)
+                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
             default: {

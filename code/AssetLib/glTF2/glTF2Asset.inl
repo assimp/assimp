@@ -139,45 +139,13 @@ inline CustomExtension ReadExtensions(const char *name, Value &obj) {
     return ret;
 }
 
-inline ExtrasValue ReadExtrasValue(const char *name, Value &obj) {
-    ExtrasValue ret;
-    ret.name = name;
-
-    if (obj.IsObject()) {
-        ret.mMetadataValue.value.reserve(obj.MemberCount());
-        ret.mMetadataValue.isPresent = true;
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-            auto &val = it->value;
-            ret.mMetadataValue.value.push_back(ReadExtrasValue(it->name.GetString(), val));
-        }
-    } else if (obj.IsNumber()) {
-        if (obj.IsUint64()) {
-            ret.mUint64Value.value = obj.GetUint64();
-            ret.mUint64Value.isPresent = true;
-        } else if (obj.IsInt()) {
-            ret.mInt32Value.value = obj.GetInt64();
-            ret.mInt32Value.isPresent = true;
-        } else if (obj.IsDouble()) {
-            ret.mDoubleValue.value = obj.GetDouble();
-            ret.mDoubleValue.isPresent = true;
-        }
-    } else if (obj.IsString()) {
-        ReadValue(obj, ret.mStringValue);
-        ret.mStringValue.isPresent = true;
-    } else if (obj.IsBool()) {
-        ret.mBoolValue.value = obj.GetBool();
-        ret.mBoolValue.isPresent = true;
-    }
-    return ret;
-}
-
 inline Extras ReadExtras(Value &obj) {
     Extras ret;
 
     ret.mValues.reserve(obj.MemberCount());
     for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
         auto &val = it->value;
-        ret.mValues.push_back(ReadExtrasValue(it->name.GetString(), val));
+        ret.mValues.push_back(ReadExtensions(it->name.GetString(), val));
     }
 
     return ret;

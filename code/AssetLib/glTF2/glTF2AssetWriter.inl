@@ -620,6 +620,44 @@ namespace glTF2 {
         }
     }
 
+    inline void WriteExtrasValue(Value &parent, const ExtrasValue &value, AssetWriter &w) {
+        Value valueNode;
+
+        if (value.mStringValue.isPresent) {
+            MakeValue(valueNode, value.mStringValue.value.c_str(), w.mAl);
+        } else if (value.mDoubleValue.isPresent) {
+            MakeValue(valueNode, value.mDoubleValue.value, w.mAl);
+        } else if (value.mUint64Value.isPresent) {
+            MakeValue(valueNode, value.mUint64Value.value, w.mAl);
+        } else if (value.mInt32Value.isPresent) {
+            MakeValue(valueNode, value.mInt32Value.value, w.mAl);
+        } else if (value.mBoolValue.isPresent) {
+            MakeValue(valueNode, value.mBoolValue.value, w.mAl);
+        } else if (value.mMetadataValue.isPresent) {
+            valueNode.SetObject();
+            for (auto const &subvalue : value.mMetadataValue.value) {
+                WriteExtrasValue(valueNode, subvalue, w);
+            }
+        }
+
+        parent.AddMember(StringRef(value.name), valueNode, w.mAl);
+    }
+
+    inline void WriteExtras(Value &obj, const Extras &extras, AssetWriter &w) {
+        if (!extras.HasExtras()) {
+            return;
+        }
+
+        Value extrasNode;
+        extrasNode.SetObject();
+
+        for (auto const &value : extras.mValues) {
+            WriteExtrasValue(extrasNode, value, w);
+        }
+        
+        obj.AddMember("extras", extrasNode, w.mAl);
+    }
+
     inline void Write(Value& obj, Node& n, AssetWriter& w)
     {
         if (n.matrix.isPresent) {
@@ -655,6 +693,8 @@ namespace glTF2 {
         if(n.skeletons.size()) {
             AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
         }
+
+        WriteExtras(obj, n.extras, w);
     }
 
     inline void Write(Value& /*obj*/, Program& /*b*/, AssetWriter& /*w*/)
@@ -727,7 +767,6 @@ namespace glTF2 {
             obj.AddMember("sampler", tex.sampler->index, w.mAl);
         }
     }
-
 
     inline AssetWriter::AssetWriter(Asset& a)
         : mDoc()

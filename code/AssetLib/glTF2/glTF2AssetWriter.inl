@@ -620,7 +620,7 @@ namespace glTF2 {
         }
     }
 
-    inline void WriteExtrasValue(Value &parent, const ExtrasValue &value, AssetWriter &w) {
+    inline void WriteExtrasValue(Value &parent, const CustomExtension &value, AssetWriter &w) {
         Value valueNode;
 
         if (value.mStringValue.isPresent) {
@@ -629,13 +629,13 @@ namespace glTF2 {
             MakeValue(valueNode, value.mDoubleValue.value, w.mAl);
         } else if (value.mUint64Value.isPresent) {
             MakeValue(valueNode, value.mUint64Value.value, w.mAl);
-        } else if (value.mInt32Value.isPresent) {
-            MakeValue(valueNode, value.mInt32Value.value, w.mAl);
+        } else if (value.mInt64Value.isPresent) {
+            MakeValue(valueNode, value.mInt64Value.value, w.mAl);
         } else if (value.mBoolValue.isPresent) {
             MakeValue(valueNode, value.mBoolValue.value, w.mAl);
-        } else if (value.mMetadataValue.isPresent) {
+        } else if (value.mValues.isPresent) {
             valueNode.SetObject();
-            for (auto const &subvalue : value.mMetadataValue.value) {
+            for (auto const &subvalue : value.mValues.value) {
                 WriteExtrasValue(valueNode, subvalue, w);
             }
         }

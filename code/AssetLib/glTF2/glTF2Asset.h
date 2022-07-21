@@ -376,36 +376,9 @@ struct CustomExtension {
     }
 };
 
-//! Represents a union of metadata values. Only one nullable is supposed to be set.
-struct ExtrasValue {
-    std::string name;
-
-    Nullable<bool> mBoolValue;
-    Nullable<int32_t> mInt32Value;
-    Nullable<uint64_t> mUint64Value;
-    Nullable<float> mFloatValue;
-    Nullable<double> mDoubleValue;
-    Nullable<std::string> mStringValue;
-    Nullable<std::vector<ExtrasValue>> mMetadataValue;
-
-    ExtrasValue() = default;
-    ~ExtrasValue() = default;
-
-    ExtrasValue(const ExtrasValue& other) :
-        name(other.name),
-        mStringValue(other.mStringValue),
-        mFloatValue(other.mFloatValue),
-        mDoubleValue(other.mDoubleValue),
-        mUint64Value(other.mUint64Value),
-        mInt32Value(other.mInt32Value),
-        mBoolValue(other.mBoolValue),
-        mMetadataValue(other.mMetadataValue) {
-    }
-};
-
 //! Represents metadata in an glTF2 object
 struct Extras {
-    std::vector<ExtrasValue> mValues;
+    std::vector<CustomExtension> mValues;
 
     inline bool HasExtras() const {
         return mValues.size() != 0;

@@ -445,7 +445,7 @@ inline Ref<Accessor> ExportData(Asset &a, std::string &meshName, Ref<Buffer> &bu
     return acc;
 }
 
-inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name, ExtrasValue &value) {
+inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name, CustomExtension &value) {
 
     value.name = name.C_Str();
     switch (metadataEntry.mType) {
@@ -454,16 +454,12 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
         value.mBoolValue.isPresent = true;
         break;
     case AI_INT32:
-        value.mInt32Value.value = *static_cast<int32_t *>(metadataEntry.mData);
-        value.mInt32Value.isPresent = true;
+        value.mInt64Value.value = *static_cast<int32_t *>(metadataEntry.mData);
+        value.mInt64Value.isPresent = true;
         break;
     case AI_UINT64:
         value.mUint64Value.value = *static_cast<uint64_t *>(metadataEntry.mData);
         value.mUint64Value.isPresent = true;
-        break;
-    case AI_FLOAT:
-        value.mFloatValue.value = *static_cast<double *>(metadataEntry.mData);
-        value.mFloatValue.isPresent = true;
         break;
     case AI_DOUBLE:
         value.mDoubleValue.value = *static_cast<double *>(metadataEntry.mData);
@@ -475,11 +471,11 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
         break;
     case AI_AIMETADATA:
         const aiMetadata *subMetadata = static_cast<aiMetadata *>(metadataEntry.mData);
-        value.mMetadataValue.value.resize(subMetadata->mNumProperties);
-        value.mMetadataValue.isPresent = true;
+        value.mValues.value.resize(subMetadata->mNumProperties);
+        value.mValues.isPresent = true;
 
         for (unsigned i = 0; i < subMetadata->mNumProperties; ++i) {
-            ExportNodeExtras(subMetadata->mValues[i], subMetadata->mKeys[i], value.mMetadataValue.value.at(i));
+            ExportNodeExtras(subMetadata->mValues[i], subMetadata->mKeys[i], value.mValues.value.at(i));
         }
         break;
     }

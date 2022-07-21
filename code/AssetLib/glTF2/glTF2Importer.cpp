@@ -1033,33 +1033,9 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
     }
 }
 
-void ParseExtrasValue(aiMetadata *metadata, const ExtrasValue &value) {
-
-    if (value.mBoolValue.isPresent) {
-        metadata->Add(value.name, value.mBoolValue.value);
-    } else if (value.mInt32Value.isPresent) {
-        metadata->Add(value.name, value.mInt32Value.value);
-    } else if (value.mUint64Value.isPresent) {
-        metadata->Add(value.name, value.mUint64Value.value);
-    } else if (value.mFloatValue.isPresent) {
-        metadata->Add(value.name, value.mFloatValue.value);
-    } else if (value.mDoubleValue.isPresent) {
-        metadata->Add(value.name, value.mDoubleValue.value);
-    } else if (value.mStringValue.isPresent) {
-        metadata->Add(value.name, aiString(value.mStringValue.value));
-    } else if (value.mMetadataValue.isPresent) {
-        aiMetadata subMetadata;
-        for (auto const &subValue : value.mMetadataValue.value) {
-            ParseExtrasValue(&subMetadata, subValue);
-        }
-
-        metadata->Add(value.name, subMetadata);
-    }
-}
-
 void ParseExtras(aiMetadata* metadata, const Extras& extras) {
     for (auto const &value : extras.mValues) {
-        ParseExtrasValue(metadata, value);
+        ParseExtensions(metadata, value);
     }
 }
 

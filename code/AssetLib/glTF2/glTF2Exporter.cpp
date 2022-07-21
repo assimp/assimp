@@ -486,7 +486,7 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
 }
 
 inline void ExportNodeExtras(const aiMetadata *metadata, Extras &extras) {
-    if (metadata == nullptr) {
+    if (metadata == nullptr || metadata->mNumProperties == 0) {
         return;
     }
 
@@ -1406,9 +1406,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
     node->parent = parent;
     node->name = name;
 
-    if (n->mMetaData != nullptr && n->mMetaData->mNumProperties > 0) {
-        ExportNodeExtras(n->mMetaData, node->extras);
-    }
+    ExportNodeExtras(n->mMetaData, node->extras);
 
     if (!n->mTransformation.IsIdentity()) {
         if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {

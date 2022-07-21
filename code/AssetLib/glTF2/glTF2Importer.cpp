@@ -1081,7 +1081,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             }
         }
 
-        if (node.customExtensions || !node.extras.HasExtras()) {
+        if (node.customExtensions || node.extras.HasExtras()) {
             ainode->mMetaData = new aiMetadata;
             if (node.customExtensions) {
                 ParseExtensions(ainode->mMetaData, node.customExtensions);

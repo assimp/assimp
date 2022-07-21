@@ -376,9 +376,7 @@ struct CustomExtension {
     }
 };
 
-struct ExtrasValue;
-
-//! Represents a union of metadata values
+//! Represents a union of metadata values. Only one nullable is supposed to be set.
 struct ExtrasValue {
     std::string name;
 
@@ -396,6 +394,7 @@ struct ExtrasValue {
     ExtrasValue(const ExtrasValue& other) :
         name(other.name),
         mStringValue(other.mStringValue),
+        mFloatValue(other.mFloatValue),
         mDoubleValue(other.mDoubleValue),
         mUint64Value(other.mUint64Value),
         mInt32Value(other.mInt32Value),
@@ -404,7 +403,7 @@ struct ExtrasValue {
     }
 };
 
-//! Represents metadata in an glTF object
+//! Represents metadata in an glTF2 object
 struct Extras {
     std::vector<ExtrasValue> mValues;
 

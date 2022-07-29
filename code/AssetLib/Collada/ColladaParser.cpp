@@ -1616,6 +1616,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
                     XmlParser::getValueAsString(currentNode, v);
                     const char *content = v.c_str();
                     vcount.reserve(numPrimitives);
+                    SkipSpacesAndLineEnd(&content);
                     for (unsigned int a = 0; a < numPrimitives; a++) {
                         if (*content == 0) {
                             throw DeadlyImportError("Expected more values while reading <vcount> contents.");

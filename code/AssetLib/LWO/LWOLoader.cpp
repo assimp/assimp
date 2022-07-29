@@ -1540,6 +1540,7 @@ void LWOImporter::LoadLWO2File() {
                     break;
                 }
                 // --- intentionally no break here
+                // fallthrough
             case AI_LWO_VMAP: {
                 if (skip)
                     break;

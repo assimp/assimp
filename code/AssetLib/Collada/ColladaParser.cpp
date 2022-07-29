@@ -2058,7 +2058,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
                 XmlParser::getStdStrAttribute(currentNode, "id", child->mID);
             }
             if (XmlParser::hasAttribute(currentNode, "sid")) {
-                XmlParser::getStdStrAttribute(currentNode, "id", child->mSID);
+                XmlParser::getStdStrAttribute(currentNode, "sid", child->mSID);
             }
             if (XmlParser::hasAttribute(currentNode, "name")) {
                 XmlParser::getStdStrAttribute(currentNode, "name", child->mName);

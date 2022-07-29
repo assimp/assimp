@@ -102,6 +102,7 @@ ColladaLoader::ColladaLoader() :
         mTextures(),
         mAnims(),
         noSkeletonMesh(false),
+        removeEmptyBones(false),
         ignoreUpDirection(false),
         useColladaName(false),
         mNodeNameCounter(0) {
@@ -130,6 +131,7 @@ bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool
 // ------------------------------------------------------------------------------------------------
 void ColladaLoader::SetupProperties(const Importer *pImp) {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
+    removeEmptyBones = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION, 0) != 0;
     useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES, 0) != 0;
 }
@@ -798,9 +800,10 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         // count the number of bones which influence vertices of the current submesh
         size_t numRemainingBones = 0;
         for (const auto & dstBone : dstBones) {
-            if (!dstBone.empty()) {
-                ++numRemainingBones;
+            if (dstBone.empty() && removeEmptyBones) {
+                continue;
             }
+            ++numRemainingBones;
         }
 
         // create bone array and copy bone weights one by one
@@ -809,7 +812,7 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         size_t boneCount = 0;
         for (size_t a = 0; a < numBones; ++a) {
             // omit bones without weights
-            if (dstBones[a].empty()) {
+            if (dstBones[a].empty() && removeEmptyBones) {
                 continue;
             }
 

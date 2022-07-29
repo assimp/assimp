@@ -14,7 +14,8 @@ The assimp port in vcpkg is kept up to date by Microsoft team members and commun
 ## Install on Ubuntu
 You can install the Asset-Importer-Lib via apt:
 ```
-sudo apt-get install assimp
+sudo apt-get update
+sudo apt-get install libassimp-dev
 ```
 
 ## Install pyassimp

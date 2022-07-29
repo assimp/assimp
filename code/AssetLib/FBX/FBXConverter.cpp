@@ -3377,6 +3377,10 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                             Keys->push_back(tnew);
                             Values->push_back(vnew);
                         }
+                        else {
+                            // Something broke
+                            break;
+                        }
                         tp = tnew;
                         vp = vnew;
                     }

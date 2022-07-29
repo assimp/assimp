@@ -99,301 +99,383 @@ template <class TNodeType>
 class TXmlParser {
 public:
     /// @brief The default class constructor.
-    TXmlParser() :
-            mDoc(nullptr),
-            mData() {
-        // empty
-    }
+    TXmlParser();
 
     ///	@brief  The class destructor.
-    ~TXmlParser() {
-        clear();
-    }
+    ~TXmlParser();
 
     ///	@brief  Will clear the parsed xml-file.
-    void clear() {
-        if (mData.empty()) {
-            mDoc = nullptr;
-            return;
-        }
-        mData.clear();
-        delete mDoc;
-        mDoc = nullptr;
-    }
+    void clear();
 
     ///	@brief  Will search for a child-node by its name
     /// @param  name     [in] The name of the child-node.
     /// @return The node instance or nullptr, if nothing was found.
-    TNodeType *findNode(const std::string &name) {
-        if (name.empty()) {
-            return nullptr;
-        }
-
-        if (nullptr == mDoc) {
-            return nullptr;
-        }
-
-        find_node_by_name_predicate predicate(name);
-        mCurrent = mDoc->find_node(predicate);
-        if (mCurrent.empty()) {
-            return nullptr;
-        }
-
-        return &mCurrent;
-    }
+    TNodeType *findNode(const std::string &name);
 
     /// @brief  Will return true, if the node is a child-node.
     /// @param  name    [in] The name of the child node to look for.
     /// @return true, if the node is a child-node or false if not.
-    bool hasNode(const std::string &name) {
-        return nullptr != findNode(name);
-    }
+    bool hasNode(const std::string &name);
 
     /// @brief  Will parse an xml-file from a given stream.
     /// @param  stream      The input stream.
     /// @return true, if the parsing was successful, false if not.
-    bool parse(IOStream *stream) {
-        if (nullptr == stream) {
-            ASSIMP_LOG_DEBUG("Stream is nullptr.");
-            return false;
-        }
+    bool parse(IOStream *stream);
 
-        const size_t len = stream->FileSize();
-        mData.resize(len + 1);
-        memset(&mData[0], '\0', len + 1);
-        stream->Read(&mData[0], 1, len);
-
-        mDoc = new pugi::xml_document();
-        pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
-        if (parse_result.status == pugi::status_ok) {
-            return true;
-        }
-
-        ASSIMP_LOG_DEBUG("Error while parse xml.", std::string(parse_result.description()), " @ ", parse_result.offset);
-
-        return false;
-    }
-
-    /// @brief  Will return truem if a root node is there.
+    /// @brief  Will return true if a root node is there.
     /// @return true in case of an existing root.
-    bool hasRoot() const {
-        return nullptr != mDoc;
-    }
+    bool hasRoot() const;
+
     /// @brief  Will return the document pointer, is nullptr if no xml-file was parsed.
     /// @return The pointer showing to the document.
-    pugi::xml_document *getDocument() const {
-        return mDoc;
-    }
+    pugi::xml_document *getDocument() const;
 
     /// @brief  Will return the root node, const version.
     /// @return The root node.
-    const TNodeType getRootNode() const {
-        static pugi::xml_node none;
-        if (nullptr == mDoc) {
-            return none;
-        }
-        return mDoc->root();
-    }
+    const TNodeType getRootNode() const;
 
     /// @brief  Will return the root node, non-const version.
     /// @return The root node.
-    TNodeType getRootNode() {
-        static pugi::xml_node none;
-        if (nullptr == mDoc) {
-            return none;
-        }
-        return mDoc->root();
-    }
+    TNodeType getRootNode();
 
     /// @brief Will check if a node with the given name is in.
     /// @param node     [in] The node to look in.
     /// @param name     [in] The name of the child-node.
     /// @return true, if node was found, false if not.
-    static inline bool hasNode(XmlNode &node, const char *name) {
-        pugi::xml_node child = node.find_child(find_node_by_name_predicate(name));
-        return !child.empty();
-    }
+    static inline bool hasNode(XmlNode &node, const char *name);
 
     /// @brief Will check if an attribute is part of the XmlNode.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in} The attribute name to look for.
     /// @return true, if the was found, false if not.
-    static inline bool hasAttribute(XmlNode &xmlNode, const char *name) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        return !attr.empty();
-    }
+    static inline bool hasAttribute(XmlNode &xmlNode, const char *name);
 
     /// @brief Will try to get an unsigned int attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The unsigned int value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is an unsigned int.
-    static inline bool getUIntAttribute(XmlNode &xmlNode, const char *name, unsigned int &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_uint();
-        return true;
-    }
+    static inline bool getUIntAttribute(XmlNode &xmlNode, const char *name, unsigned int &val);
 
     /// @brief Will try to get an int attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The int value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is an int.
-    static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_int();
-        return true;
-    }
+    static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val);
 
     /// @brief Will try to get a real attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The real value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a real.
-    static inline bool getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-#ifdef ASSIMP_DOUBLE_PRECISION
-        val = attr.as_double();
-#else
-        val = attr.as_float();
-#endif
-        return true;
-    }
+    static inline bool getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val);
 
     /// @brief Will try to get a float attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The float value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a float.
-    static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_float();
-        return true;
-    }
+    static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val);
 
     /// @brief Will try to get a double attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The double value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a double.
-    static inline bool getDoubleAttribute(XmlNode &xmlNode, const char *name, double &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_double();
-        return true;
-    }
+    static inline bool getDoubleAttribute(XmlNode &xmlNode, const char *name, double &val);
 
     /// @brief Will try to get a std::string attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The std::string value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a std::string.
-    static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_string();
-        return true;
-    }
+    static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val);
 
     /// @brief Will try to get a bool attribute value.
     /// @param xmlNode  [in] The node to search in.
     /// @param name     [in] The attribute name to look for.
     /// @param val      [out] The bool value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a bool.
-    static inline bool getBoolAttribute(XmlNode &xmlNode, const char *name, bool &val) {
-        pugi::xml_attribute attr = xmlNode.attribute(name);
-        if (attr.empty()) {
-            return false;
-        }
-
-        val = attr.as_bool();
-        return true;
-    }
+    static inline bool getBoolAttribute(XmlNode &xmlNode, const char *name, bool &val);
 
     /// @brief Will try to get the value of the node as a string.
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a text.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsString(XmlNode &node, std::string &text) {
-        text = std::string();
-        if (node.empty()) {
-            return false;
-        }
-
-        text = node.text().as_string();
-
-        return true;
-    }
+    static inline bool getValueAsString(XmlNode &node, std::string &text);
 
     /// @brief Will try to get the value of the node as a float.
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a float.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsFloat(XmlNode &node, ai_real &v) {
-        if (node.empty()) {
-            return false;
-        }
-
-        v = node.text().as_float();
-
-        return true;
-    }
+    static inline bool getValueAsFloat(XmlNode &node, ai_real &v);
 
     /// @brief Will try to get the value of the node as an integer.
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a int.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsInt(XmlNode &node, int &v) {
-        if (node.empty()) {
-            return false;
-        }
-
-        v = node.text().as_int();
-
-        return true;
-    }
+    static inline bool getValueAsInt(XmlNode &node, int &v);
 
     /// @brief Will try to get the value of the node as an bool.
     /// @param node     [in] The node to search in.
     /// @param text     [out] The value as a bool.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsBool(XmlNode& node, bool& v)
-    {
-        if (node.empty()) {
-            return false;
-        }
-
-        v = node.text().as_bool();
-
-        return true;
-    }
+    static inline bool getValueAsBool(XmlNode &node, bool &v);
 
 private:
     pugi::xml_document *mDoc;
     TNodeType mCurrent;
     std::vector<char> mData;
 };
+
+template <class TNodeType>
+inline TXmlParser<TNodeType>::TXmlParser() :
+        mDoc(nullptr),
+        mData() {
+    // empty
+}
+
+template <class TNodeType>
+inline TXmlParser<TNodeType>::~TXmlParser() {
+    clear();
+}
+
+template <class TNodeType>
+inline void TXmlParser<TNodeType>::clear() {
+    if (mData.empty()) {
+        if (mDoc) {
+            delete mDoc;
+        }
+        mDoc = nullptr;
+        return;
+    }
+
+    mData.clear();
+    delete mDoc;
+    mDoc = nullptr;
+}
+
+template <class TNodeType>
+inline TNodeType *TXmlParser<TNodeType>::findNode(const std::string &name) {
+    if (name.empty()) {
+        return nullptr;
+    }
+
+    if (nullptr == mDoc) {
+        return nullptr;
+    }
+
+    find_node_by_name_predicate predicate(name);
+    mCurrent = mDoc->find_node(predicate);
+    if (mCurrent.empty()) {
+        return nullptr;
+    }
+
+    return &mCurrent;
+}
+
+template <class TNodeType>
+bool TXmlParser<TNodeType>::hasNode(const std::string &name) {
+    return nullptr != findNode(name);
+}
+
+template <class TNodeType>
+bool TXmlParser<TNodeType>::parse(IOStream *stream) {
+    if (hasRoot()) {
+        clear();
+    }
+
+    if (nullptr == stream) {
+        ASSIMP_LOG_DEBUG("Stream is nullptr.");
+        return false;
+    }
+
+    const size_t len = stream->FileSize();
+    mData.resize(len + 1);
+    memset(&mData[0], '\0', len + 1);
+    stream->Read(&mData[0], 1, len);
+
+    mDoc = new pugi::xml_document();
+    pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
+    if (parse_result.status == pugi::status_ok) {
+        return true;
+    }
+
+    ASSIMP_LOG_DEBUG("Error while parse xml.", std::string(parse_result.description()), " @ ", parse_result.offset);
+
+    return false;
+}
+
+template <class TNodeType>
+bool TXmlParser<TNodeType>::hasRoot() const {
+    return nullptr != mDoc;
+}
+
+template <class TNodeType>
+pugi::xml_document *TXmlParser<TNodeType>::getDocument() const {
+    return mDoc;
+}
+
+template <class TNodeType>
+const TNodeType TXmlParser<TNodeType>::getRootNode() const {
+    static pugi::xml_node none;
+    if (nullptr == mDoc) {
+        return none;
+    }
+    return mDoc->root();
+}
+
+template <class TNodeType>
+TNodeType TXmlParser<TNodeType>::getRootNode() {
+    static pugi::xml_node none;
+    if (nullptr == mDoc) {
+        return none;
+    }
+
+    return mDoc->root();
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::hasNode(XmlNode &node, const char *name) {
+    pugi::xml_node child = node.find_child(find_node_by_name_predicate(name));
+    return !child.empty();
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::hasAttribute(XmlNode &xmlNode, const char *name) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    return !attr.empty();
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getUIntAttribute(XmlNode &xmlNode, const char *name, unsigned int &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_uint();
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getIntAttribute(XmlNode &xmlNode, const char *name, int &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_int();
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+#ifdef ASSIMP_DOUBLE_PRECISION
+    val = attr.as_double();
+#else
+    val = attr.as_float();
+#endif
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getFloatAttribute(XmlNode &xmlNode, const char *name, float &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_float();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getDoubleAttribute(XmlNode &xmlNode, const char *name, double &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_double();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_string();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getBoolAttribute(XmlNode &xmlNode, const char *name, bool &val) {
+    pugi::xml_attribute attr = xmlNode.attribute(name);
+    if (attr.empty()) {
+        return false;
+    }
+
+    val = attr.as_bool();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsString(XmlNode &node, std::string &text) {
+    text = std::string();
+    if (node.empty()) {
+        return false;
+    }
+
+    text = node.text().as_string();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsFloat(XmlNode &node, ai_real &v) {
+    if (node.empty()) {
+        return false;
+    }
+
+    v = node.text().as_float();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsInt(XmlNode &node, int &v) {
+    if (node.empty()) {
+        return false;
+    }
+
+    v = node.text().as_int();
+
+    return true;
+}
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsBool(XmlNode &node, bool &v) {
+    if (node.empty()) {
+        return false;
+    }
+
+    v = node.text().as_bool();
+
+    return true;
+}
 
 using XmlParser = TXmlParser<pugi::xml_node>;
 
@@ -419,10 +501,8 @@ public:
         }
     }
 
-    ///	@brief  The class destructor.
-    ~XmlNodeIterator() {
-        // empty
-    }
+    ///	@brief  The class destructor, default implementation.
+    ~XmlNodeIterator() = default;
 
     ///	@brief  Will iterate through all children in pre-order iteration.
     /// @param  node    [in] The nod to iterate through.

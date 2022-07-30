@@ -434,7 +434,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     }
 
     //ObjFile::Face *face = new ObjFile::Face(type);
-    ObjFile::Face face(type);
+    ObjFile::Face *face = new ObjFile::Face(type);
     bool hasNormal = false;
 
     const int vSize = static_cast<unsigned int>(m_pModel->m_Vertices.size());
@@ -478,11 +478,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             if (iVal > 0) {
                 // Store parsed index
                 if (0 == iPos) {
-                    face.m_vertices.push_back(iVal - 1);
+                    face->m_vertices.push_back(iVal - 1);
                 } else if (1 == iPos) {
-                    face.m_texturCoords.push_back(iVal - 1);
+                    face->m_texturCoords.push_back(iVal - 1);
                 } else if (2 == iPos) {
-                    face.m_normals.push_back(iVal - 1);
+                    face->m_normals.push_back(iVal - 1);
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -490,11 +490,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             } else if (iVal < 0) {
                 // Store relatively index
                 if (0 == iPos) {
-                    face.m_vertices.push_back(vSize + iVal);
+                    face->m_vertices.push_back(vSize + iVal);
                 } else if (1 == iPos) {
-                    face.m_texturCoords.push_back(vtSize + iVal);
+                    face->m_texturCoords.push_back(vtSize + iVal);
                 } else if (2 == iPos) {
-                    face.m_normals.push_back(vnSize + iVal);
+                    face->m_normals.push_back(vnSize + iVal);
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -508,7 +508,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         m_DataIt += iStep;
     }
 
-    if (face.m_vertices.empty()) {
+    if (face->m_vertices.empty()) {
         ASSIMP_LOG_ERROR("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -518,9 +518,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Set active material, if one set
     if (nullptr != m_pModel->m_pCurrentMaterial) {
-        face.m_pMaterial = m_pModel->m_pCurrentMaterial;
+        face->m_pMaterial = m_pModel->m_pCurrentMaterial;
     } else {
-        face.m_pMaterial = m_pModel->m_pDefaultMaterial;
+        face->m_pMaterial = m_pModel->m_pDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
@@ -534,9 +534,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     }
 
     // Store the face
-    m_pModel->m_pCurrentMesh->m_Faces.push_back(face);
-    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face.m_vertices.size();
-    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[0] += (unsigned int)face.m_texturCoords.size();
+    m_pModel->m_pCurrentMesh->m_Faces.emplace_back(face);
+    m_pModel->m_pCurrentMesh->m_uiNumIndices += static_cast<unsigned int>(face->m_vertices.size());
+    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[0] += static_cast<unsigned int>(face->m_texturCoords.size());
     if (!m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }

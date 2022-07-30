@@ -64,7 +64,7 @@ struct Face {
     using IndexArray = std::vector<unsigned int>;
 
     //! Primitive type
-    aiPrimitiveType m_PrimitiveType;
+    aiPrimitiveType mPrimitiveType;
     //! Vertex indices
     IndexArray m_vertices;
     //! Normal indices
@@ -76,7 +76,7 @@ struct Face {
 
     //! \brief  Default constructor
     Face(aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
-            m_PrimitiveType(pt), m_vertices(), m_normals(), m_texturCoords(), m_pMaterial(0L) {
+            mPrimitiveType(pt), m_vertices(), m_normals(), m_texturCoords(), m_pMaterial(nullptr) {
         // empty
     }
 
@@ -228,7 +228,7 @@ struct Mesh {
     /// The name for the mesh
     std::string m_name;
     /// Array with pointer to all stored faces
-    std::vector<Face> m_Faces;
+    std::vector<Face*> m_Faces;
     /// Assigned material
     Material *m_pMaterial;
     /// Number of stored indices.

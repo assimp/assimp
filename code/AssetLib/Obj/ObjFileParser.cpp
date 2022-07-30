@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <memory>
 #include <utility>
+#include <string_view>
 
 namespace Assimp {
 
@@ -424,7 +425,7 @@ void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
     m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
 }
 
-static const std::string DefaultObjName = "defaultobject";
+static constexpr char DefaultObjName[] = "defaultobject";
 
 void ObjFileParser::getFace(aiPrimitiveType type) {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
@@ -432,7 +433,8 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         return;
     }
 
-    ObjFile::Face *face = new ObjFile::Face(type);
+    //ObjFile::Face *face = new ObjFile::Face(type);
+    ObjFile::Face face(type);
     bool hasNormal = false;
 
     const int vSize = static_cast<unsigned int>(m_pModel->m_Vertices.size());
@@ -458,9 +460,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
-            const int iVal(::atoi(number.c_str()));
-
+            const char *token = &(*m_DataIt);
+            const int iVal = ::atoi(token);
+            
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;
             if (iVal < 0) {
@@ -476,11 +478,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             if (iVal > 0) {
                 // Store parsed index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(iVal - 1);
+                    face.m_vertices.push_back(iVal - 1);
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(iVal - 1);
+                    face.m_texturCoords.push_back(iVal - 1);
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(iVal - 1);
+                    face.m_normals.push_back(iVal - 1);
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -488,37 +490,37 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             } else if (iVal < 0) {
                 // Store relatively index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(vSize + iVal);
+                    face.m_vertices.push_back(vSize + iVal);
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(vtSize + iVal);
+                    face.m_texturCoords.push_back(vtSize + iVal);
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(vnSize + iVal);
+                    face.m_normals.push_back(vnSize + iVal);
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
                 }
             } else {
                 //On error, std::atoi will return 0 which is not a valid value
-                delete face;
-                throw DeadlyImportError("OBJ: Invalid face indice");
+                //delete face;
+                throw DeadlyImportError("OBJ: Invalid face index.");
             }
         }
         m_DataIt += iStep;
     }
 
-    if (face->m_vertices.empty()) {
+    if (face.m_vertices.empty()) {
         ASSIMP_LOG_ERROR("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
-        delete face;
+        //delete face;
         return;
     }
 
     // Set active material, if one set
     if (nullptr != m_pModel->m_pCurrentMaterial) {
-        face->m_pMaterial = m_pModel->m_pCurrentMaterial;
+        face.m_pMaterial = m_pModel->m_pCurrentMaterial;
     } else {
-        face->m_pMaterial = m_pModel->m_pDefaultMaterial;
+        face.m_pMaterial = m_pModel->m_pDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
@@ -533,8 +535,8 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Store the face
     m_pModel->m_pCurrentMesh->m_Faces.push_back(face);
-    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_vertices.size();
-    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[0] += (unsigned int)face->m_texturCoords.size();
+    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face.m_vertices.size();
+    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[0] += (unsigned int)face.m_texturCoords.size();
     if (!m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }

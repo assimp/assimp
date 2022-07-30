@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -81,9 +81,7 @@ struct Face {
     }
 
     //! \brief  Destructor
-    ~Face() {
-        // empty
-    }
+    ~Face() = default;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -230,7 +228,7 @@ struct Mesh {
     /// The name for the mesh
     std::string m_name;
     /// Array with pointer to all stored faces
-    std::vector<Face *> m_Faces;
+    std::vector<Face> m_Faces;
     /// Assigned material
     Material *m_pMaterial;
     /// Number of stored indices.
@@ -256,10 +254,10 @@ struct Mesh {
 
     /// Destructor
     ~Mesh() {
-        for (std::vector<Face *>::iterator it = m_Faces.begin();
+        /* for (std::vector<Face *>::iterator it = m_Faces.begin();
                 it != m_Faces.end(); ++it) {
             delete *it;
-        }
+        }*/
     }
 };
 

@@ -56,7 +56,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.2.0)
+PROJECT(Assimp VERSION 5.2.4)
 
 # All supported options ###############################################
 
@@ -302,8 +302,12 @@ ELSEIF( MINGW )
     SET(CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
     SET(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
   ENDIF()
-  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -O3 ${CMAKE_CXX_FLAGS}")
-  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+    IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+      SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -g ${CMAKE_CXX_FLAGS}")
+    ELSE()
+      SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -Wa,-mbig-obj -O3 ${CMAKE_CXX_FLAGS}")
+    ENDIF()
+    SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ENDIF()
 
 IF ( IOS AND NOT ASSIMP_HUNTER_ENABLED)

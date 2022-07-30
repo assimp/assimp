@@ -86,6 +86,13 @@ class Int128
 
     Int128(const Int128 &val): hi(val.hi), lo(val.lo){}
 
+    Int128 operator = (const Int128 &val)
+    {
+        lo = val.lo;
+        hi = val.hi;
+        return val;
+    }
+
     long64 operator = (const long64 &val)
     {
       lo = val;

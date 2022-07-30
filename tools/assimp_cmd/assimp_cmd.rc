@@ -1,5 +1,9 @@
 #include "revision.h"
-#include "winres.h"
+#if defined(__GNUC__) && defined(_WIN32)
+	#include "winresrc.h"
+#else
+	#include "winres.h"
+#endif
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)

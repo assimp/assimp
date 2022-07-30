@@ -986,7 +986,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
     // key is material number, value is the TextureUVMapping for the material
     typedef std::map<uint32_t, TextureUVMapping> MaterialTextureUVMappings;
     MaterialTextureUVMappings matTexUvMappings;
-    const uint32_t maxMat = static_cast<const uint32_t>(mesh->mat.size());
+    const uint32_t maxMat = static_cast<uint32_t>(mesh->mat.size());
     for (uint32_t m = 0; m < maxMat; ++m) {
         // get material by index
         const std::shared_ptr<Material> pMat = mesh->mat[m];

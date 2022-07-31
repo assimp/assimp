@@ -433,7 +433,6 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         return;
     }
 
-    //ObjFile::Face *face = new ObjFile::Face(type);
     ObjFile::Face *face = new ObjFile::Face(type);
     bool hasNormal = false;
 
@@ -501,7 +500,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 }
             } else {
                 //On error, std::atoi will return 0 which is not a valid value
-                //delete face;
+                delete face;
                 throw DeadlyImportError("OBJ: Invalid face index.");
             }
         }
@@ -512,7 +511,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         ASSIMP_LOG_ERROR("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
-        //delete face;
+        delete face;
         return;
     }
 

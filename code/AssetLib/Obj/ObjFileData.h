@@ -254,10 +254,10 @@ struct Mesh {
 
     /// Destructor
     ~Mesh() {
-        /* for (std::vector<Face *>::iterator it = m_Faces.begin();
+        for (std::vector<Face *>::iterator it = m_Faces.begin();
                 it != m_Faces.end(); ++it) {
             delete *it;
-        }*/
+        }
     }
 };
 

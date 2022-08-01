@@ -145,7 +145,7 @@ inline Extras ReadExtras(Value &obj) {
     ret.mValues.reserve(obj.MemberCount());
     for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
         auto &val = it->value;
-        ret.mValues.push_back(ReadExtensions(it->name.GetString(), val));
+        ret.mValues.emplace_back(ReadExtensions(it->name.GetString(), val));
     }
 
     return ret;

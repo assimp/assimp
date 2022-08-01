@@ -461,6 +461,10 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
         value.mUint64Value.value = *static_cast<uint64_t *>(metadataEntry.mData);
         value.mUint64Value.isPresent = true;
         break;
+    case AI_FLOAT:
+        value.mDoubleValue.value = *static_cast<float *>(metadataEntry.mData);
+        value.mDoubleValue.isPresent = true;
+        break;
     case AI_DOUBLE:
         value.mDoubleValue.value = *static_cast<double *>(metadataEntry.mData);
         value.mDoubleValue.isPresent = true;
@@ -469,7 +473,7 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
         value.mStringValue.value = static_cast<aiString *>(metadataEntry.mData)->C_Str();
         value.mStringValue.isPresent = true;
         break;
-    case AI_AIMETADATA:
+    case AI_AIMETADATA: {
         const aiMetadata *subMetadata = static_cast<aiMetadata *>(metadataEntry.mData);
         value.mValues.value.resize(subMetadata->mNumProperties);
         value.mValues.isPresent = true;
@@ -477,6 +481,10 @@ inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name
         for (unsigned i = 0; i < subMetadata->mNumProperties; ++i) {
             ExportNodeExtras(subMetadata->mValues[i], subMetadata->mKeys[i], value.mValues.value.at(i));
         }
+        break;
+    }
+    default:
+        // AI_AIVECTOR3D not handled
         break;
     }
 }

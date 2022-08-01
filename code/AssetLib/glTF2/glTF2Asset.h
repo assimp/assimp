@@ -383,32 +383,7 @@ struct Extras {
     std::vector<CustomExtension> mValues;
 
     inline bool HasExtras() const {
-        return mValues.size() != 0;
-    }
-
-    Extras() = default;
-    ~Extras() = default;
-
-    Extras(const Extras &other) :
-            mValues(other.mValues) {
-        // empty
-    }
-};
-
-//! Represents metadata in an glTF2 object
-struct Extras {
-    std::vector<CustomExtension> mValues;
-
-    inline bool HasExtras() const {
-        return mValues.size() != 0;
-    }
-
-    Extras() = default;
-    ~Extras() = default;
-
-    Extras(const Extras &other) :
-            mValues(other.mValues) {
-        // empty
+        return !mValues.empty();
     }
 };
 

@@ -870,6 +870,7 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
         unsigned int iWire = 1;
         mat.pcInstance->AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
+    // fallthrough
     case D3DS::Discreet3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
         break;

@@ -236,7 +236,7 @@ inline char_t CopyNextWord(char_t it, char_t end, char *pBuffer, size_t length) 
 template <class char_t>
 inline char_t getFloat(char_t it, char_t end, ai_real &value) {
     static const size_t BUFFERSIZE = 1024;
-    char buffer[BUFFERSIZE];
+    char buffer[BUFFERSIZE] = {};
     it = CopyNextWord<char_t>(it, end, buffer, BUFFERSIZE);
     value = (ai_real)fast_atof(buffer);
 

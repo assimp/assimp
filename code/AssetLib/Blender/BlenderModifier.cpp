@@ -71,10 +71,6 @@ static const fpCreateModifier creators[] = {
     nullptr // sentinel
 };
 
-// ------------------------------------------------------------------------------------------------
-struct SharedModifierData : ElemBase {
-    ModifierData modifier;
-};
 
 // ------------------------------------------------------------------------------------------------
 void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_data, const Scene &in, const Object &orig_object) {

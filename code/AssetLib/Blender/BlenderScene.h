@@ -648,6 +648,13 @@ struct ModifierData : ElemBase {
     char name[32];
 };
 
+
+// ------------------------------------------------------------------------------------------------
+struct SharedModifierData : ElemBase {
+    ModifierData modifier;
+};
+
+
 // -------------------------------------------------------------------------------
 struct SubsurfModifierData : ElemBase {
 

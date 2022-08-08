@@ -656,7 +656,7 @@ struct SharedModifierData : ElemBase {
 
 
 // -------------------------------------------------------------------------------
-struct SubsurfModifierData : ElemBase {
+struct SubsurfModifierData : SharedModifierData {
 
     enum Type {
 
@@ -669,7 +669,6 @@ struct SubsurfModifierData : ElemBase {
         FLAGS_SubsurfUV = 1 << 3
     };
 
-    ModifierData modifier FAIL;
     short subdivType WARN;
     short levels FAIL;
     short renderLevels;
@@ -677,7 +676,7 @@ struct SubsurfModifierData : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MirrorModifierData : ElemBase {
+struct MirrorModifierData : SharedModifierData {
 
     enum Flags {
         Flags_CLIPPING = 1 << 0,
@@ -688,8 +687,6 @@ struct MirrorModifierData : ElemBase {
         Flags_AXIS_Z = 1 << 5,
         Flags_VGROUP = 1 << 6
     };
-
-    ModifierData modifier FAIL;
 
     short axis, flag;
     float tolerance;

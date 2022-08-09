@@ -516,7 +516,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::list<LWS::NodeDesc> nodes;
 
     unsigned int cur_light = 0, cur_camera = 0, cur_object = 0;
-    unsigned int num_light = 0, num_camera = 0, num_object = 0;
+    unsigned int num_light = 0, num_camera = 0;
 
     // check magic identifier, 'LWSC'
     bool motion_file = false;
@@ -586,7 +586,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             d.id = batch.AddLoadRequest(path, 0, &props);
 
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "LoadObject") { // 'LoadObject': load a LWO file into the scene-graph
 
             // add node to list
@@ -604,7 +603,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             d.path = path;
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "AddNullObject") { // 'AddNullObject': add a dummy node to the hierarchy
 
             // add node to list
@@ -618,8 +616,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
             d.name = c;
             nodes.push_back(d);
-
-            num_object++;
         }
         // 'NumChannels': Number of envelope channels assigned to last layer
         else if ((*it).tokens[0] == "NumChannels") {

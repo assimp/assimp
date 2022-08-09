@@ -118,10 +118,8 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
         // as if they were 2D channels .. just in case an application doesn't handle
         // this case
         if (2 == mesh->mNumUVComponents[i]) {
-            size_t num = 0;
             for (; p != end; ++p) {
                 p->z = 0.f;
-                num++;
             }
         } else if (1 == mesh->mNumUVComponents[i]) {
             for (; p != end; ++p) {

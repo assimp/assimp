@@ -647,12 +647,9 @@ char *OpenDDLParser::parseBooleanLiteral(char *in, char *end, Value **boolean) {
 
     in = lookForNextToken(in, end);
     char *start(in);
-    size_t len(0);
     while (!isSeparator(*in) && in != end) {
         ++in;
-        ++len;
     }
-    ++len;
     int res = ::strncmp(Grammar::BoolTrue, start, strlen(Grammar::BoolTrue));
     if (0 != res) {
         res = ::strncmp(Grammar::BoolFalse, start, strlen(Grammar::BoolFalse));

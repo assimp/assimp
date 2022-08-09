@@ -642,7 +642,7 @@ struct ModifierData : ElemBase {
     };
 
     std::shared_ptr<ElemBase> next WARN;
-    std::shared_ptr<ElemBase> prev WARN;
+    std::weak_ptr<ElemBase> prev WARN;
 
     int type, mode;
     char name[32];

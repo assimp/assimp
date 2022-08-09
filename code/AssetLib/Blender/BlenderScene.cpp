@@ -650,7 +650,9 @@ void Structure ::Convert<ModifierData>(
         const FileDatabase &db) const {
 
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
-    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
+    std::shared_ptr<ElemBase> prev;
+    ReadFieldPtr<ErrorPolicy_Warn>(prev, "*prev", db);
+    dest.prev = prev;
     ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
     ReadField<ErrorPolicy_Igno>(dest.mode, "mode", db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);

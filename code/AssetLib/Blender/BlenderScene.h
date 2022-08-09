@@ -690,7 +690,7 @@ struct MirrorModifierData : SharedModifierData {
 
     short axis, flag;
     float tolerance;
-    std::shared_ptr<Object> mirror_ob;
+    std::weak_ptr<Object> mirror_ob;
 };
 
 // -------------------------------------------------------------------------------

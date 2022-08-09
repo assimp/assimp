@@ -772,7 +772,9 @@ void Structure ::Convert<MirrorModifierData>(
     ReadField<ErrorPolicy_Igno>(dest.axis, "axis", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     ReadField<ErrorPolicy_Igno>(dest.tolerance, "tolerance", db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.mirror_ob, "*mirror_ob", db);
+    std::shared_ptr<Object> mirror_ob;
+    ReadFieldPtr<ErrorPolicy_Igno>(mirror_ob, "*mirror_ob", db);
+    dest.mirror_ob = mirror_ob;
 
     db.reader->IncPtr(size);
 }

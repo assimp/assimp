@@ -624,7 +624,9 @@ void Structure ::Convert<ListBase>(
         const FileDatabase &db) const {
 
     ReadFieldPtr<ErrorPolicy_Igno>(dest.first, "*first", db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.last, "*last", db);
+    std::shared_ptr<ElemBase> last;
+    ReadFieldPtr<ErrorPolicy_Igno>(last, "*last", db);
+    dest.last = last;
 
     db.reader->IncPtr(size);
 }

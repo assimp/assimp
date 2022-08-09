@@ -124,7 +124,7 @@ struct ID : ElemBase {
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
     std::shared_ptr<ElemBase> first;
-    std::shared_ptr<ElemBase> last;
+    std::weak_ptr<ElemBase> last;
 };
 
 // -------------------------------------------------------------------------------

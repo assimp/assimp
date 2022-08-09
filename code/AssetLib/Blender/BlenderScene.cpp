@@ -839,9 +839,9 @@ void Structure::Convert<CustomDataLayer>(
     ReadField<ErrorPolicy_Fail>(dest.flag, "flag", db);
     ReadField<ErrorPolicy_Fail>(dest.active, "active", db);
     ReadField<ErrorPolicy_Fail>(dest.active_rnd, "active_rnd", db);
-    ReadField<ErrorPolicy_Fail>(dest.active_clone, "active_clone", db);
-    ReadField<ErrorPolicy_Fail>(dest.active_mask, "active_mask", db);
-    ReadField<ErrorPolicy_Fail>(dest.uid, "uid", db);
+    ReadField<ErrorPolicy_Warn>(dest.active_clone, "active_clone", db);
+    ReadField<ErrorPolicy_Warn>(dest.active_mask, "active_mask", db);
+    ReadField<ErrorPolicy_Warn>(dest.uid, "uid", db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
     ReadCustomDataPtr<ErrorPolicy_Fail>(dest.data, dest.type, "*data", db);
 

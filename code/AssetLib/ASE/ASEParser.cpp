@@ -74,7 +74,7 @@ using namespace Assimp::ASE;
             return;                                \
         }                                          \
     }                                              \
-    else if ('\0' == *filePtr) {                   \
+    if ('\0' == *filePtr) {                        \
         return;                                    \
     }                                              \
     if (IsLineEnd(*filePtr) && !bLastWasEndLine) { \
@@ -420,6 +420,8 @@ void Parser::ParseLV1SoftSkinBlock() {
                 }
             }
         }
+        if (*filePtr == '\0')
+            return;
         ++filePtr;
         SkipSpacesAndLineEnd(&filePtr);
     }

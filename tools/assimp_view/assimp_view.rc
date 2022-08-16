@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "revision.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -15,10 +16,10 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// English (U.S.) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,9 @@ FONT 9, "Courier New", 400, 0, 0x0
 BEGIN
     LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,30,14,144,9
     LTEXT           "A free C/C++ library to read various well-known 3D model formats into a straightforward in-memory format for easy processing by applications. Licensed under a 3-clause BSD license and totally awesome.",IDC_STATIC,31,34,204,24
-    LTEXT           "(c) 2008-2020. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
+    LTEXT           "\xA9 2008-2022. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,27,282,1
-    LTEXT           "http://assimp.sourceforge.net  http://www.zfx.info",IDC_STATIC,31,101,127,22
+    LTEXT           "https://assimp.org",IDC_STATIC,31,101,127,22
     DEFPUSHBUTTON   "Love this library",IDOK,186,110,84,14
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,148,283,1
     CONTROL         IDB_BITMAP1,IDC_STATIC,"Static",SS_BITMAP,0,129,514,20
@@ -187,35 +188,33 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,700,0
- PRODUCTVERSION 1,1,700,1
- FILEFLAGSMASK 0x17L
+ FILEVERSION VER_FILEVERSION
+ PRODUCTVERSION VER_FILEVERSION
+ FILEFLAGSMASK VS_FF_DEBUG
 #ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
+ FILEFLAGS VS_FF_DEBUG
 #endif
- FILEOS 0x4L
- FILETYPE 0x0L
- FILESUBTYPE 0x0L
+ FILEOS VOS_NT
+ FILETYPE VFT_APP
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040704b0"
+        BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "assimp team"
+            VALUE "Comments", "Licensed under a 3-clause BSD license"
+            VALUE "CompanyName", "ASSIMP Team"
             VALUE "FileDescription", "ASSIMP Viewer Application"
-            VALUE "FileVersion", "1, 1, SVNRevision, 0"
+            VALUE "FileVersion", VER_FILEVERSION_STR
             VALUE "InternalName", "assimp_view"
-            VALUE "LegalCopyright", "Licensed under the LGPL"
-            VALUE "OriginalFilename", "assimpview32.exe"
+            VALUE "LegalCopyright", VER_COPYRIGHT_STR
+            VALUE "OriginalFilename", "assimp_viewer.exe"
             VALUE "ProductName", "ASSIMP Viewer Application"
-            VALUE "ProductVersion", "1, 1, SVNRevision, 0"
+            VALUE "ProductVersion", VER_FILEVERSION_STR
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x407, 1200
+        VALUE "Translation", 0x409, 65001
     END
 END
 
@@ -380,15 +379,15 @@ BEGIN
     BEGIN
         POPUP "Feedback"
         BEGIN
-            MENUITEM "Report bug",                  ID_REPORTBUG
-            MENUITEM "Feature request/discuss",     ID_FR
+            MENUITEM "Report bug",              ID_REPORTBUG
+            MENUITEM "Feature request",         ID_FR
         END
         MENUITEM "Help",                        ID__HELP
         MENUITEM SEPARATOR
         MENUITEM "About",                       ID__ABOUT
         MENUITEM SEPARATOR
         MENUITEM "Website",                     ID__WEBSITE
-        MENUITEM "SF.net Project Page",         ID__WEBSITESF
+        MENUITEM "GitHub Repository",           ID__WEBSITEGH
     END
 END
 
@@ -451,7 +450,7 @@ IDR_HUD                 RCDATA                  "HUD.png"
 
 IDR_HUDMASK             RCDATA                  "HUDMask.png"
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

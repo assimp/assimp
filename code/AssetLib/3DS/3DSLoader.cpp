@@ -1284,7 +1284,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
     switch (chunk.Flag) {
     case Discreet3DS::CHUNK_LINRGBF:
         bGamma = true;
-
+    // fallthrough
     case Discreet3DS::CHUNK_RGBF:
         if (sizeof(float) * 3 > diff) {
             *out = clrError;
@@ -1297,6 +1297,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
 
     case Discreet3DS::CHUNK_LINRGBB:
         bGamma = true;
+            // fallthrough
     case Discreet3DS::CHUNK_RGBB: {
         if (sizeof(char) * 3 > diff) {
             *out = clrError;

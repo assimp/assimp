@@ -137,11 +137,8 @@ protected:
     void reportErrorTokenInFace();
 
 private:
-    // Copy and assignment constructor should be private
-    // because the class contains pointer to allocated memory
-
     /// Default material name
-    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
+    static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
     DataArrayIt m_DataIt;
     //! Iterator to end position of buffer

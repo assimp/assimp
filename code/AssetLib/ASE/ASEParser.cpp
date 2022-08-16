@@ -74,7 +74,7 @@ using namespace Assimp::ASE;
             return;                                \
         }                                          \
     }                                              \
-    else if ('\0' == *filePtr) {                   \
+    if ('\0' == *filePtr) {                        \
         return;                                    \
     }                                              \
     if (IsLineEnd(*filePtr) && !bLastWasEndLine) { \
@@ -420,6 +420,8 @@ void Parser::ParseLV1SoftSkinBlock() {
                 }
             }
         }
+        if (*filePtr == '\0')
+            return;
         ++filePtr;
         SkipSpacesAndLineEnd(&filePtr);
     }
@@ -646,10 +648,13 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
                 }
 
                 // get a reference to the material
-                Material &sMat = mat.avSubMaterials[iIndex];
+                if (iIndex < mat.avSubMaterials.size()) {
+                    Material &sMat = mat.avSubMaterials[iIndex];
 
-                // parse the material block
-                ParseLV2MaterialBlock(sMat);
+                    // parse the material block
+                    ParseLV2MaterialBlock(sMat);
+                }
+
                 continue;
             }
         }

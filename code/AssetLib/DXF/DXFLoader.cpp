@@ -368,7 +368,9 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // XXX this would be the place to implement recursive expansion if needed.
         const DXF::Block& bl_src = *(*it).second;
 
-        for (std::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
+        const size_t size = bl_src.lines.size(); // the size may increase in the loop
+        for (size_t i = 0; i < size; ++i) {
+            std::shared_ptr<const DXF::PolyLine> pl_in = bl_src.lines[i];
             if (!pl_in) {
                 ASSIMP_LOG_ERROR("DXF: PolyLine instance is nullptr, skipping.");
                 continue;

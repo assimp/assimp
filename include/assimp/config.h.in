@@ -692,6 +692,15 @@ enum aiComponent
     "AI_CONFIG_FBX_CONVERT_TO_M"
 
 // ---------------------------------------------------------------------------
+/** @brief  Will enable the skeleton structo to store bone data.
+ *
+ *  This will decouple the bone coupling to the mesh. This feature is
+ *  experimental.
+ */
+#define AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER \
+    "AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER"
+
+// ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported
  *
  * ASSIMP does not support vertex keyframes (only bone animation is supported).

@@ -1616,6 +1616,7 @@ void ColladaParser::ReadIndexData(XmlNode &node, Mesh &pMesh) {
                     XmlParser::getValueAsString(currentNode, v);
                     const char *content = v.c_str();
                     vcount.reserve(numPrimitives);
+                    SkipSpacesAndLineEnd(&content);
                     for (unsigned int a = 0; a < numPrimitives; a++) {
                         if (*content == 0) {
                             throw DeadlyImportError("Expected more values while reading <vcount> contents.");
@@ -2057,7 +2058,7 @@ void ColladaParser::ReadSceneNode(XmlNode &node, Node *pNode) {
                 XmlParser::getStdStrAttribute(currentNode, "id", child->mID);
             }
             if (XmlParser::hasAttribute(currentNode, "sid")) {
-                XmlParser::getStdStrAttribute(currentNode, "id", child->mSID);
+                XmlParser::getStdStrAttribute(currentNode, "sid", child->mSID);
             }
             if (XmlParser::hasAttribute(currentNode, "name")) {
                 XmlParser::getStdStrAttribute(currentNode, "name", child->mName);

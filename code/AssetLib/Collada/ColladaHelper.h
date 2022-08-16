@@ -621,6 +621,11 @@ struct Animation {
 
         for (std::vector<Animation *>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
             Animation *anim = *it;
+            // Assign the first animation name to the parent if empty.
+            // This prevents the animation name from being lost when animations are combined
+            if (mName.empty()) {
+              mName = anim->mName;
+            }
             CombineSingleChannelAnimationsRecursively(anim);
 
             if (childrenAnimationsHaveDifferentChannels && anim->mChannels.size() == 1 &&

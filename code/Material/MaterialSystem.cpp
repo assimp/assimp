@@ -89,7 +89,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        ai_real *pOut,
+        float *pOut,
         unsigned int *pMax) {
     ai_assert(pOut != nullptr);
     ai_assert(pMat != nullptr);
@@ -110,7 +110,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         }
 
         for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<float *>(prop->mData)[a]);
+            pOut[a] = (prop->mData)[a];
         }
 
         if (pMax) {
@@ -136,7 +136,6 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         iWrite = prop->mDataLength / sizeof(int32_t);
         if (pMax) {
             iWrite = std::min(*pMax, iWrite);
-            ;
         }
         for (unsigned int a = 0; a < iWrite; ++a) {
             pOut[a] = static_cast<ai_real>(reinterpret_cast<int32_t *>(prop->mData)[a]);
@@ -144,9 +143,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         if (pMax) {
             *pMax = iWrite;
         }
-    }
-    // a string ... read floats separated by spaces
-    else {
+    } else { // a string ... read floats separated by spaces
         if (pMax) {
             iWrite = *pMax;
         }

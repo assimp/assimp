@@ -231,7 +231,7 @@ void SMDImporter::CreateOutputMeshes() {
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 
     typedef std::vector<unsigned int> FaceList;
-    FaceList* aaiFaces = new FaceList[pScene->mNumMeshes];
+    std::unique_ptr<FaceList[]> aaiFaces(new FaceList[pScene->mNumMeshes]);
 
     // approximate the space that will be required
     unsigned int iNum = (unsigned int)asTriangles.size() / pScene->mNumMeshes;
@@ -392,7 +392,6 @@ void SMDImporter::CreateOutputMeshes() {
         }
         delete[] aaiBones;
     }
-    delete[] aaiFaces;
 }
 
 // ------------------------------------------------------------------------------------------------

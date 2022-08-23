@@ -268,7 +268,7 @@ void SMDImporter::CreateOutputMeshes() {
         typedef std::pair<unsigned int,float> TempWeightListEntry;
         typedef std::vector< TempWeightListEntry > TempBoneWeightList;
 
-        TempBoneWeightList* aaiBones = new TempBoneWeightList[asBones.size()]();
+        std::unique_ptr<TempBoneWeightList[]> aaiBones(new TempBoneWeightList[asBones.size()]());
 
         // try to reserve enough memory without wasting too much
         for (unsigned int iBone = 0; iBone < asBones.size();++iBone) {
@@ -390,7 +390,6 @@ void SMDImporter::CreateOutputMeshes() {
                 ++iNum;
             }
         }
-        delete[] aaiBones;
     }
 }
 

@@ -209,11 +209,9 @@ void SMDImporter::FixTimeValues() {
     double dDelta = (double)iSmallestFrame;
     double dMax = 0.0f;
     for (auto &asBone : asBones) {
-        for (std::vector<SMD::Bone::Animation::MatrixKey>::iterator
-                iKey =  asBone.sAnim.asKeys.begin();
-                iKey != asBone.sAnim.asKeys.end();++iKey) {
-            (*iKey).dTime -= dDelta;
-            dMax = std::max(dMax, (*iKey).dTime);
+        for (auto &asKey : asBone.sAnim.asKeys) {
+            asKey.dTime -= dDelta;
+            dMax = std::max(dMax, asKey.dTime);
         }
     }
     dLengthOfAnim = dMax;
@@ -522,15 +520,13 @@ void SMDImporter::CreateOutputAnimation(int index, const std::string &name) {
             aiVectorKey* pVecKeys = p->mPositionKeys = new aiVectorKey[p->mNumRotationKeys];
             aiQuatKey* pRotKeys = p->mRotationKeys = new aiQuatKey[p->mNumRotationKeys];
 
-            for (std::vector<SMD::Bone::Animation::MatrixKey>::const_iterator
-                    qq = asBone.sAnim.asKeys.begin();
-                    qq != asBone.sAnim.asKeys.end(); ++qq) {
-                pRotKeys->mTime = pVecKeys->mTime = (*qq).dTime;
+            for (const auto &asKey : asBone.sAnim.asKeys) {
+                pRotKeys->mTime = pVecKeys->mTime = asKey.dTime;
 
                 // compute the rotation quaternion from the euler angles
                 // aiQuaternion: The order of the parameters is yzx?
-                pRotKeys->mValue = aiQuaternion((*qq).vRot.y, (*qq).vRot.z, (*qq).vRot.x);
-                pVecKeys->mValue = (*qq).vPos;
+                pRotKeys->mValue = aiQuaternion(asKey.vRot.y, asKey.vRot.z, asKey.vRot.x);
+                pVecKeys->mValue = asKey.vPos;
 
                 ++pVecKeys; ++pRotKeys;
             }

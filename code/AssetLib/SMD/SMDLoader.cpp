@@ -244,7 +244,7 @@ void SMDImporter::CreateOutputMeshes() {
     iNum = 0;
     for (std::vector<SMD::Face>::const_iterator
             iFace =  asTriangles.begin();
-            iFace != asTriangles.end();++iFace,++iNum) {
+            iFace != asTriangles.end(); ++iFace) {
         if (UINT_MAX == (*iFace).iTexture) {
             aaiFaces[(*iFace).iTexture].push_back( 0 );
         } else if ((*iFace).iTexture >= aszTextures.size()) {
@@ -253,6 +253,7 @@ void SMDImporter::CreateOutputMeshes() {
         } else {
             aaiFaces[(*iFace).iTexture].push_back(iNum);
         }
+        ++iNum;
     }
 
     // now create the output meshes

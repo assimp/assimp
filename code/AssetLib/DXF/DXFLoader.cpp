@@ -475,7 +475,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output) {
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
     // push a new block onto the stack.
-    output.blocks.emplace_back( );
+    output.blocks.emplace_back();
     DXF::Block& block = output.blocks.back();
 
     while( !reader.End() && !reader.Is(0,"ENDBLK")) {
@@ -520,7 +520,7 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) {
     // Push a new block onto the stack.
-    output.blocks.emplace_back( );
+    output.blocks.emplace_back();
     DXF::Block& block = output.blocks.back();
 
     block.name = AI_DXF_ENTITIES_MAGIC_BLOCK;
@@ -550,7 +550,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
 }
 
 void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output) {
-    output.blocks.back().insertions.emplace_back( );
+    output.blocks.back().insertions.emplace_back();
     DXF::InsertBlock& bl = output.blocks.back().insertions.back();
 
     while( !reader.End() && !reader.Is(0)) {

@@ -147,10 +147,8 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* scene, IOSy
 
     if (!asBones.empty()) {
         // Check whether all bones have been initialized
-        for (std::vector<SMD::Bone>::const_iterator
-                i =  asBones.begin();
-                i != asBones.end();++i) {
-            if (!(*i).mName.length()) {
+        for (const auto &asBone : asBones) {
+            if (!asBone.mName.length()) {
                 ASSIMP_LOG_WARN("SMD: Not all bones have been initialized");
                 break;
             }
@@ -210,12 +208,10 @@ void SMDImporter::LogWarning(const char* msg) {
 void SMDImporter::FixTimeValues() {
     double dDelta = (double)iSmallestFrame;
     double dMax = 0.0f;
-    for (std::vector<SMD::Bone>::iterator
-            iBone =  asBones.begin();
-            iBone != asBones.end();++iBone) {
+    for (auto &asBone : asBones) {
         for (std::vector<SMD::Bone::Animation::MatrixKey>::iterator
-                iKey =  (*iBone).sAnim.asKeys.begin();
-                iKey != (*iBone).sAnim.asKeys.end();++iKey) {
+                iKey =  asBone.sAnim.asKeys.begin();
+                iKey != asBone.sAnim.asKeys.end();++iKey) {
             (*iKey).dTime -= dDelta;
             dMax = std::max(dMax, (*iKey).dTime);
         }
@@ -351,8 +347,7 @@ void SMDImporter::CreateOutputMeshes() {
 
                         if (fSum) {
                             fSum = 1 / fSum;
-                            for (unsigned int iBone = 0;iBone < face.avVertices[iVert].aiBoneLinks.size();++iBone) {
-                                TempWeightListEntry& pairval = face.avVertices[iVert].aiBoneLinks[iBone];
+                            for (auto &pairval : face.avVertices[iVert].aiBoneLinks) {
                                 if (pairval.first >= asBones.size()) {
                                     continue;
                                 }
@@ -411,8 +406,7 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent) {
     ai_assert( nullptr == pcNode->mChildren);
 
     // first count ...
-    for (unsigned int i = 0; i < asBones.size();++i) {
-        SMD::Bone& bone = asBones[i];
+    for (auto &bone : asBones) {
         if (bone.iParent == iParent) {
             ++pcNode->mNumChildren;
         }
@@ -516,21 +510,21 @@ void SMDImporter::CreateOutputAnimation(int index, const std::string &name) {
 
     // now build valid keys
     unsigned int a = 0;
-    for (std::vector<SMD::Bone>::const_iterator i = asBones.begin(); i != asBones.end(); ++i) {
+    for (const auto &asBone : asBones) {
         aiNodeAnim* p = pp[a] = new aiNodeAnim();
 
         // copy the name of the bone
-        p->mNodeName.Set(i->mName);
+        p->mNodeName.Set(asBone.mName);
 
-        p->mNumRotationKeys = (unsigned int)(*i).sAnim.asKeys.size();
+        p->mNumRotationKeys = (unsigned int)asBone.sAnim.asKeys.size();
         if (p->mNumRotationKeys){
             p->mNumPositionKeys = p->mNumRotationKeys;
             aiVectorKey* pVecKeys = p->mPositionKeys = new aiVectorKey[p->mNumRotationKeys];
             aiQuatKey* pRotKeys = p->mRotationKeys = new aiQuatKey[p->mNumRotationKeys];
 
             for (std::vector<SMD::Bone::Animation::MatrixKey>::const_iterator
-                    qq = (*i).sAnim.asKeys.begin();
-                    qq != (*i).sAnim.asKeys.end(); ++qq) {
+                    qq = asBone.sAnim.asKeys.begin();
+                    qq != asBone.sAnim.asKeys.end(); ++qq) {
                 pRotKeys->mTime = pVecKeys->mTime = (*qq).dTime;
 
                 // compute the rotation quaternion from the euler angles
@@ -982,8 +976,8 @@ void SMDImporter::ParseTriangle(const char* szCurrent, const char** szCurrentOut
     SkipSpacesAndLineEnd(szCurrent,&szCurrent);
 
     // load three vertices
-    for (unsigned int iVert = 0; iVert < 3;++iVert) {
-        ParseVertex(szCurrent,&szCurrent, face.avVertices[iVert]);
+    for (auto &avVertex : face.avVertices) {
+        ParseVertex(szCurrent,&szCurrent, avVertex);
     }
     *szCurrentOut = szCurrent;
 }
@@ -1080,13 +1074,11 @@ void SMDImporter::ParseVertex(const char* szCurrent,
     }
     vertex.aiBoneLinks.resize(iSize,std::pair<unsigned int, float>(0,0.0f));
 
-    for (std::vector<std::pair<unsigned int, float> >::iterator
-            i =  vertex.aiBoneLinks.begin();
-            i != vertex.aiBoneLinks.end();++i) {
-        if(!ParseUnsignedInt(szCurrent,&szCurrent,(*i).first)) {
+    for (auto &aiBoneLink : vertex.aiBoneLinks) {
+        if(!ParseUnsignedInt(szCurrent,&szCurrent,aiBoneLink.first)) {
             SMDI_PARSE_RETURN;
         }
-        if(!ParseFloat(szCurrent,&szCurrent,(*i).second)) {
+        if(!ParseFloat(szCurrent,&szCurrent,aiBoneLink.second)) {
             SMDI_PARSE_RETURN;
         }
     }

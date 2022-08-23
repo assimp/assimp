@@ -114,9 +114,9 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
     if (!found) {
         // the rectangle [pmin,pend] is opaque, fill it
         out.push_back(pmin);
-        out.push_back(IfcVector2(pmin.x,pmax.y));
+        out.emplace_back(pmin.x,pmax.y);
         out.push_back(pmax);
-        out.push_back(IfcVector2(pmax.x,pmin.y));
+        out.emplace_back(pmax.x,pmin.y);
         return;
     }
 
@@ -126,9 +126,9 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
     // see if there's an offset to fill at the top of our quad
     if (xs - pmin.x) {
         out.push_back(pmin);
-        out.push_back(IfcVector2(pmin.x,pmax.y));
-        out.push_back(IfcVector2(xs,pmax.y));
-        out.push_back(IfcVector2(xs,pmin.y));
+        out.emplace_back(pmin.x,pmax.y);
+        out.emplace_back(xs,pmax.y);
+        out.emplace_back(xs,pmin.y);
     }
 
     // search along the y-axis for all openings that overlap xs and our quad
@@ -159,10 +159,10 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
     }
     if (!found) {
         // the rectangle [pmin,pend] is opaque, fill it
-        out.push_back(IfcVector2(xs,pmin.y));
-        out.push_back(IfcVector2(xs,pmax.y));
-        out.push_back(IfcVector2(xe,pmax.y));
-        out.push_back(IfcVector2(xe,pmin.y));
+        out.emplace_back(xs,pmin.y);
+        out.emplace_back(xs,pmax.y);
+        out.emplace_back(xe,pmax.y);
+        out.emplace_back(xe,pmin.y);
         return;
     }
     if (ylast < pmax.y) {
@@ -342,7 +342,7 @@ void InsertWindowContours(const ContourVector& contours,
                         if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
                             continue;
                         }
-                        curmesh.mVerts.push_back(IfcVector3(contour[a].x, contour[a].y, 0.0f));
+                        curmesh.mVerts.emplace_back(contour[a].x, contour[a].y, 0.0f);
                     }
 
                     if (edge != contour[last_hit]) {
@@ -363,7 +363,7 @@ void InsertWindowContours(const ContourVector& contours,
                             corner.y = bb.second.y;
                         }
 
-                        curmesh.mVerts.push_back(IfcVector3(corner.x, corner.y, 0.0f));
+                        curmesh.mVerts.emplace_back(corner.x, corner.y, 0.0f);
                     }
                     else if (cnt == 1) {
                         // avoid degenerate polygons (also known as lines or points)
@@ -558,10 +558,10 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
                 for(const ClipperLib::ExPolygon& ex : clipped) {
                     iold.push_back(static_cast<unsigned int>(ex.outer.size()));
                     for(const ClipperLib::IntPoint& point : ex.outer) {
-                        vold.push_back(IfcVector3(
+                        vold.emplace_back(
                             from_int64(point.X),
                             from_int64(point.Y),
-                            0.0f));
+                            0.0f);
                     }
                 }
 
@@ -1039,7 +1039,7 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
     curmesh.mVertcnt.resize(quads.size()/4,4);
     curmesh.mVerts.reserve(quads.size());
     for(const IfcVector2& v2 : quads) {
-        curmesh.mVerts.push_back(IfcVector3(v2.x, v2.y, static_cast<IfcFloat>(0.0)));
+        curmesh.mVerts.emplace_back(v2.x, v2.y, static_cast<IfcFloat>(0.0));
     }
 }
 
@@ -1095,7 +1095,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
         vmin = std::min(vv, vmin);
         vmax = std::max(vv, vmax);
 
-        out_contour.push_back(IfcVector2(vv.x,vv.y));
+        out_contour.emplace_back(vv.x,vv.y);
     }
 
     zcoord /= in_verts.size();
@@ -1128,7 +1128,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
     for(const IfcVector3& x : in_verts) {
         const IfcVector3& vv = m * x;
 
-        out_contour2.push_back(IfcVector2(vv.x,vv.y));
+        out_contour2.emplace_back(vv.x,vv.y);
         ai_assert(std::fabs(vv.z) < vmax.z + 1e-8);
     }
 
@@ -1469,7 +1469,7 @@ std::vector<IfcVector2> GetContourInPlane2D(const std::shared_ptr<TempMesh>& mes
 
         // XXX should not be necessary - but it is. Why? For precision reasons?
         vv = is_extruded_side ? vv_extr : vv;
-        contour.push_back(IfcVector2(vv.x,vv.y));
+        contour.emplace_back(vv.x,vv.y);
     }
     ok = true;
 
@@ -1758,7 +1758,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,
         vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
         vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
 
-        contour_flat.push_back(IfcVector2(vv.x,vv.y));
+        contour_flat.emplace_back(vv.x,vv.y);
     }
 
     // With the current code in DerivePlaneCoordinateSpace,
@@ -1891,7 +1891,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,
         // Build the poly2tri inner contours for all holes we got from ClipperLib
         for(ClipperLib::Polygon& opening : clip.holes) {
 
-            contours.push_back(std::vector<p2t::Point*>());
+            contours.emplace_back();
             std::vector<p2t::Point*>& contour = contours.back();
 
             for(ClipperLib::IntPoint& point : opening) {

@@ -171,7 +171,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.edges.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.edges.push_back(Edge());
+            obj.edges.emplace_back();
             Edge& edge = obj.edges.back();
 
             for (unsigned int i = 0; i< 8; ++i) {
@@ -188,7 +188,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.faces.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.faces.push_back(Face());
+            obj.faces.emplace_back();
             Face& face = obj.faces.back();
 
             face.elem = file_format >= 12 ? reader.GetU4() : reader.GetU2();
@@ -199,7 +199,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.vertices.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.vertices.push_back(Vertex());
+            obj.vertices.emplace_back();
             Vertex& v = obj.vertices.back();
 
             v.num = file_format >= 12 ? reader.GetU4() : reader.GetU2();

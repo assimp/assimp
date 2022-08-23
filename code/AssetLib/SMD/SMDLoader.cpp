@@ -227,7 +227,7 @@ void SMDImporter::FixTimeValues() {
 // create output meshes
 void SMDImporter::CreateOutputMeshes() {
     if (aszTextures.empty()) {
-        aszTextures.push_back(std::string());
+        aszTextures.emplace_back();
     }
 
     // we need to sort all faces by their material index
@@ -589,7 +589,7 @@ void SMDImporter::GetAnimationFileList(const std::string &pFile, IOSystem* pIOHa
                 animPath = p;
                 animName = DefaultIOSystem::completeBaseName(animPath);
             }
-            outList.push_back(std::make_tuple(animName, base + "/" + animPath));
+            outList.emplace_back(animName, base + "/" + animPath);
         }
         tok1 = strtok_s(nullptr, "\r\n", &context1);
     }
@@ -799,7 +799,7 @@ void SMDImporter::ParseVASection(const char* szCurrent, const char** szCurrentOu
             SkipLine(szCurrent,&szCurrent);
         } else {
             if(0 == iCurIndex) {
-                asTriangles.push_back(SMD::Face());
+                asTriangles.emplace_back();
             }
             if (++iCurIndex == 3) {
                 iCurIndex = 0;
@@ -919,7 +919,7 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent, const char** szCur
     }
     SMD::Bone& bone = asBones[iBone];
 
-    bone.sAnim.asKeys.push_back(SMD::Bone::Animation::MatrixKey());
+    bone.sAnim.asKeys.emplace_back();
     SMD::Bone::Animation::MatrixKey& key = bone.sAnim.asKeys.back();
 
     key.dTime = (double)iTime;
@@ -964,7 +964,7 @@ void SMDImporter::ParseSkeletonElement(const char* szCurrent, const char** szCur
 // ------------------------------------------------------------------------------------------------
 // Parse a triangle
 void SMDImporter::ParseTriangle(const char* szCurrent, const char** szCurrentOut) {
-    asTriangles.push_back(SMD::Face());
+    asTriangles.emplace_back();
     SMD::Face& face = asTriangles.back();
 
     if(!SkipSpaces(szCurrent,&szCurrent)) {

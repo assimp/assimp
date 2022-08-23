@@ -63,7 +63,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
                     return;
                 }
             }
-            out.push_back(std::string(base, (size_t)(s - base)));
+            out.emplace_back(base, (size_t)(s - base));
             ++s;
         } else {
             out.push_back(GetNextToken(s));

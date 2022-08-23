@@ -90,7 +90,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
     // create default material and store it
     m_pModel->mDefaultMaterial = new ObjFile::Material;
     m_pModel->mDefaultMaterial->MaterialName.Set(DEFAULT_MATERIAL);
-    m_pModel->mMaterialLib.push_back(DEFAULT_MATERIAL);
+    m_pModel->mMaterialLib.emplace_back(DEFAULT_MATERIAL);
     m_pModel->mMaterialMap[DEFAULT_MATERIAL] = m_pModel->mDefaultMaterial;
 
     // Start parsing the file

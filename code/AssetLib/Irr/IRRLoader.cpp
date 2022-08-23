@@ -628,7 +628,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 				ASSIMP_LOG_ERROR("IRR: Unable to load external file: ", root->meshPath);
 				break;
 			}
-			attach.push_back(AttachmentInfo(localScene, rootOut));
+			attach.emplace_back(localScene, rootOut);
 
 			// Now combine the material we've loaded for this mesh
 			// with the real materials we got from the file. As we
@@ -979,7 +979,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 					// Materials can occur for nearly any type of node
 					if (inMaterials && curNode->type != Node::DUMMY) {
 						//  This is a material description - parse it!
-						curNode->materials.push_back(std::pair<aiMaterial *, unsigned int>());
+						curNode->materials.emplace_back();
 						std::pair<aiMaterial *, unsigned int> &p = curNode->materials.back();
 
 						p.first = ParseMaterial(p.second);
@@ -988,7 +988,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 					} else if (inAnimator) {
 						//  This is an animation path - add a new animator
 						//  to the list.
-						curNode->animators.push_back(Animator());
+						curNode->animators.emplace_back();
 						curAnim = &curNode->animators.back();
 
 						++guessedAnimCnt;
@@ -1015,7 +1015,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 										// here N is the ONE-based index of the point
 										if (prop.name.length() >= 6 && prop.name.substr(0, 5) == "Point") {
 											// Add a new key to the list
-											curAnim->splineKeys.push_back(aiVectorKey());
+											curAnim->splineKeys.emplace_back();
 											aiVectorKey &key = curAnim->splineKeys.back();
 
 											// and parse its properties

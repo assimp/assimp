@@ -180,7 +180,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
 
     ++mNumMeshes;
 
-    objects.push_back(Object());
+    objects.emplace_back();
     Object &obj = objects.back();
 
     aiLight *light = nullptr;
@@ -267,7 +267,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                     --buffer; // make sure the line is processed a second time
                     break;
                 }
-                obj.vertices.push_back(aiVector3D());
+                obj.vertices.emplace_back();
                 aiVector3D &v = obj.vertices.back();
                 buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 3, &v.x);
             }
@@ -293,7 +293,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                     Q3DWorkAround = true;
                 }
                 SkipSpaces(&buffer);
-                obj.surfaces.push_back(Surface());
+                obj.surfaces.emplace_back();
                 Surface &surf = obj.surfaces.back();
                 surf.flags = strtoul_cppstyle(buffer);
 
@@ -324,7 +324,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                                 ASSIMP_LOG_ERROR("AC3D: Unexpected EOF: surface references are incomplete");
                                 break;
                             }
-                            surf.entries.push_back(Surface::SurfaceEntry());
+                            surf.entries.emplace_back();
                             Surface::SurfaceEntry &entry = surf.entries.back();
 
                             entry.first = strtoul10(buffer, &buffer);
@@ -786,7 +786,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
 
     while (GetNextLine()) {
         if (TokenMatch(buffer, "MATERIAL", 8)) {
-            materials.push_back(Material());
+            materials.emplace_back();
             Material &mat = materials.back();
 
             // manually parse the material ... sscanf would use the buldin atof ...
@@ -813,7 +813,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     }
     if (materials.empty()) {
         ASSIMP_LOG_WARN("AC3D: No material has been found");
-        materials.push_back(Material());
+        materials.emplace_back();
     }
 
     mNumMeshes += (mNumMeshes >> 2u) + 1;

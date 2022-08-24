@@ -642,6 +642,10 @@ protected:
         Write<aiString>(&chunk, l->mName);
         Write<unsigned int>(&chunk, l->mType);
 
+        Write<aiVector3D>(&chunk, l->mPosition);
+        Write<aiVector3D>(&chunk, l->mDirection);
+        Write<aiVector3D>(&chunk, l->mUp);
+
         if (l->mType != aiLightSource_DIRECTIONAL) {
             Write<float>(&chunk, l->mAttenuationConstant);
             Write<float>(&chunk, l->mAttenuationLinear);

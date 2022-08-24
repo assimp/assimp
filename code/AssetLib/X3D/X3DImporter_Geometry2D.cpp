@@ -276,6 +276,7 @@ void X3DImporter::readDisk2D(XmlNode &node) {
             // add last quad
             vlist.push_back(tlist_i.back()); // 1st point
             vlist.push_back(tlist_o.back()); // 2nd point
+            // FIXME: one of these should probably be tlist_i.front()
             vlist.push_back(tlist_o.front()); // 3rd point
             vlist.push_back(tlist_o.front()); // 4th point
 

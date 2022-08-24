@@ -903,8 +903,10 @@ struct AssetMetadata {
     void Read(Document &doc);
 
     AssetMetadata() :
-            premultipliedAlpha(false), version() {
+            premultipliedAlpha(false) {
     }
+
+    operator bool() const { return version.size() && version[0] == '1'; }
 };
 
 //

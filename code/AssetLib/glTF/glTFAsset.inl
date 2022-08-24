@@ -1114,10 +1114,6 @@ inline void AssetMetadata::Read(Document &doc) {
             ReadMember(*curProfile, "version", this->profile.version);
         }
     }
-
-    if (version.empty() || version[0] != '1') {
-        throw DeadlyImportError("GLTF: Unsupported glTF version: ", version);
-    }
 }
 
 //
@@ -1222,6 +1218,10 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
 
     // Load the metadata
     asset.Read(doc);
+    if (!asset) {
+        return;
+    }
+
     ReadExtensionsUsed(doc);
 
     // Prepare the dictionaries

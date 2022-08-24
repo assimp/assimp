@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -262,22 +261,25 @@ void X3DImporter::readDisk2D(XmlNode &node) {
             //
             // create quad list from two point lists
             //
-            if (tlist_i.size() < 2) throw DeadlyImportError("Disk2D. Not enough points for creating quad list."); // tlist_i and tlist_o has equal size.
+            if (tlist_i.size() < 2) {
+                // tlist_i and tlist_o has equal size.
+                throw DeadlyImportError("Disk2D. Not enough points for creating quad list."); 
+            }
 
             // add all quads except last
             for (std::list<aiVector3D>::iterator it_i = tlist_i.begin(), it_o = tlist_o.begin(); it_i != tlist_i.end();) {
                 // do not forget - CCW direction
-                vlist.push_back(*it_i++); // 1st point
-                vlist.push_back(*it_o++); // 2nd point
-                vlist.push_back(*it_o); // 3rd point
-                vlist.push_back(*it_i); // 4th point
+                vlist.emplace_back(*it_i++); // 1st point
+                vlist.emplace_back(*it_o++); // 2nd point
+                vlist.emplace_back(*it_o); // 3rd point
+                vlist.emplace_back(*it_i); // 4th point
             }
 
             // add last quad
-            vlist.push_back(*tlist_i.end()); // 1st point
-            vlist.push_back(*tlist_o.end()); // 2nd point
-            vlist.push_back(*tlist_o.begin()); // 3rd point
-            vlist.push_back(*tlist_o.begin()); // 4th point
+            vlist.emplace_back(tlist_i.back()); // 1st point
+            vlist.emplace_back(tlist_o.back()); // 2nd point
+            vlist.emplace_back(tlist_o.front()); // 3rd point
+            vlist.emplace_back(tlist_i.front()); // 4th point
 
             ((X3DNodeElementGeometry2D *)ne)->NumIndices = 4;
         }

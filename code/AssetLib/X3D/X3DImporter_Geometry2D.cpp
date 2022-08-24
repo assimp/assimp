@@ -274,10 +274,10 @@ void X3DImporter::readDisk2D(XmlNode &node) {
             }
 
             // add last quad
-            vlist.push_back(*tlist_i.end()); // 1st point
-            vlist.push_back(*tlist_o.end()); // 2nd point
-            vlist.push_back(*tlist_o.begin()); // 3rd point
-            vlist.push_back(*tlist_o.begin()); // 4th point
+            vlist.push_back(tlist_i.back()); // 1st point
+            vlist.push_back(tlist_o.back()); // 2nd point
+            vlist.push_back(tlist_o.front()); // 3rd point
+            vlist.push_back(tlist_o.front()); // 4th point
 
             ((X3DNodeElementGeometry2D *)ne)->NumIndices = 4;
         }

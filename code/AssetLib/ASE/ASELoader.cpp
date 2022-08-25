@@ -265,7 +265,7 @@ void ASEImporter::GenerateDefaultMaterial() {
     }
     if (bHas || mParser->m_vMaterials.empty()) {
         // add a simple material without submaterials to the parser's list
-        mParser->m_vMaterials.push_back(ASE::Material(AI_DEFAULT_MATERIAL_NAME));
+        mParser->m_vMaterials.emplace_back(AI_DEFAULT_MATERIAL_NAME);
         ASE::Material &mat = mParser->m_vMaterials.back();
 
         mat.mDiffuse = aiColor3D(0.6f, 0.6f, 0.6f);
@@ -1005,8 +1005,8 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                                             blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end(); ++blubb) {
 
                                         // NOTE: illegal cases have already been filtered out
-                                        avOutputBones[(*blubb).first].push_back(std::pair<unsigned int, float>(
-                                                iBase, (*blubb).second));
+                                        avOutputBones[(*blubb).first].emplace_back(
+                                                iBase, (*blubb).second);
                                     }
                                 }
                             }

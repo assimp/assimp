@@ -1292,7 +1292,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length) {
             case AI_LWO_KEY: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, KEY, 8);
 
-                envelope.keys.push_back(LWO::Key());
+                envelope.keys.emplace_back();
                 LWO::Key &key = envelope.keys.back();
 
                 key.time = GetF4();
@@ -1390,7 +1390,7 @@ void LWOImporter::LoadLWO3Envelope(unsigned int length) {
             case AI_LWO_KEY: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, KEY, 10);
 
-                envelope.keys.push_back(LWO::Key());
+                envelope.keys.emplace_back();
                 LWO::Key &key = envelope.keys.back();
 
                 key.time = GetF4();

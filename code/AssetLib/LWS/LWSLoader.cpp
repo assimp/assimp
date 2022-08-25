@@ -90,7 +90,7 @@ void LWS::Element::Parse(const char *&buffer) {
         } else if (*buffer == '}')
             return;
 
-        children.push_back(Element());
+        children.emplace_back();
 
         // copy data line - read token per token
 
@@ -199,7 +199,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
         const char *c = (*it).tokens[1].c_str();
 
         if ((*it).tokens[0] == "Key") {
-            fill.keys.push_back(LWO::Key());
+            fill.keys.emplace_back();
             LWO::Key &key = fill.keys.back();
 
             float f;
@@ -262,7 +262,7 @@ void LWSImporter::ReadEnvelope_Old(
     num = strtoul10((*it).tokens[0].c_str());
     for (unsigned int i = 0; i < num; ++i) {
 
-        nodes.channels.push_back(LWO::Envelope());
+        nodes.channels.emplace_back();
         LWO::Envelope &envl = nodes.channels.back();
 
         envl.index = i;
@@ -384,7 +384,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 
         //Push attachment, if the object came from an external file
         if (obj) {
-            attach.push_back(AttachmentInfo(obj, nd));
+            attach.emplace_back(obj, nd);
         }
     }
 
@@ -637,7 +637,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
 
             // important: index of channel
-            nodes.back().channels.push_back(LWO::Envelope());
+            nodes.back().channels.emplace_back();
             LWO::Envelope &env = nodes.back().channels.back();
 
             env.index = strtoul10(c);

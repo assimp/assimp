@@ -422,15 +422,15 @@ void StandardShapes::MakeCone(ai_real height, ai_real radius1,
 
         if (!bOpen) {
             // generate the end 'cap'
-            positions.push_back(aiVector3D(s * radius2, halfHeight, t * radius2));
-            positions.push_back(aiVector3D(s2 * radius2, halfHeight, t2 * radius2));
-            positions.push_back(aiVector3D(0.0, halfHeight, 0.0));
+            positions.emplace_back(s * radius2, halfHeight, t * radius2);
+            positions.emplace_back(s2 * radius2, halfHeight, t2 * radius2);
+            positions.emplace_back(0.0, halfHeight, 0.0);
 
             if (radius1) {
                 // generate the other end 'cap'
-                positions.push_back(aiVector3D(s * radius1, -halfHeight, t * radius1));
-                positions.push_back(aiVector3D(s2 * radius1, -halfHeight, t2 * radius1));
-                positions.push_back(aiVector3D(0.0, -halfHeight, 0.0));
+                positions.emplace_back(s * radius1, -halfHeight, t * radius1);
+                positions.emplace_back(s2 * radius1, -halfHeight, t2 * radius1);
+                positions.emplace_back(0.0, -halfHeight, 0.0);
             }
         }
         s = s2;
@@ -466,13 +466,13 @@ void StandardShapes::MakeCircle(ai_real radius, unsigned int tess,
     ai_real t = 0.0; // std::sin(angle == 0);
 
     for (ai_real angle = 0.0; angle < angle_max;) {
-        positions.push_back(aiVector3D(s * radius, 0.0, t * radius));
+        positions.emplace_back(s * radius, 0.0, t * radius);
         angle += angle_delta;
         s = std::cos(angle);
         t = std::sin(angle);
-        positions.push_back(aiVector3D(s * radius, 0.0, t * radius));
+        positions.emplace_back(s * radius, 0.0, t * radius);
 
-        positions.push_back(aiVector3D(0.0, 0.0, 0.0));
+        positions.emplace_back(0.0, 0.0, 0.0);
     }
 }
 

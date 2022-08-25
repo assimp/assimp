@@ -560,9 +560,9 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
     }
 
     std::vector<std::string> supportedExtensions;
-    supportedExtensions.push_back(".jpg");
-    supportedExtensions.push_back(".png");
-    supportedExtensions.push_back(".tga");
+    supportedExtensions.emplace_back(".jpg");
+    supportedExtensions.emplace_back(".png");
+    supportedExtensions.emplace_back(".tga");
     std::string textureName, ext;
     if (expandFile(archive, pTexture->strName, supportedExtensions, textureName, ext)) {
         IOStream *pTextureStream = archive->Open(textureName.c_str());

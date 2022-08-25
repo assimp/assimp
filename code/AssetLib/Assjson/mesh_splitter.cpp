@@ -304,7 +304,7 @@ void MeshSplitter :: SplitMesh(unsigned int a, aiMesh* in_mesh, std::vector<std:
 		}
 
 		// add the newly created mesh to the list
-		source_mesh_map.push_back(std::make_pair(out_mesh,a));
+		source_mesh_map.emplace_back(out_mesh,a);
 
 		if (base == in_mesh->mNumFaces) {
 			break;

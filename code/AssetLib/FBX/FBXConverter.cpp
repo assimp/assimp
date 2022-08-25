@@ -242,7 +242,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             ai_assert(nodes_chain.size());
 
             if (need_additional_node) {
-                nodes_chain.emplace_back(PotentialNode(node_name));
+                nodes_chain.emplace_back(node_name);
             }
 
             //setup metadata on newest node

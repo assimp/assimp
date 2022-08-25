@@ -224,7 +224,7 @@ public:
                 IFCImporter::LogVerboseDebug("ignoring transition code on composite curve segment, only continuous transitions are supported");
             }
 
-            curves.push_back( CurveEntry(bc,IsTrue(curveSegment.SameSense)) );
+            curves.emplace_back(bc,IsTrue(curveSegment.SameSense) );
             total += bc->GetParametricRangeDelta();
         }
 

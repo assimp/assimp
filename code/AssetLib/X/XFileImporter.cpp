@@ -380,7 +380,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                     // does the new vertex stem from an old vertex which was influenced by this bone?
                     ai_real w = oldWeights[orgPoints[d]];
                     if ( w > 0.0 ) {
-                        newWeights.push_back( aiVertexWeight( d, w ) );
+                        newWeights.emplace_back( d, w );
                     }
                 }
 

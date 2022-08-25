@@ -753,7 +753,7 @@ void COBImporter::ReadPolH_Ascii(Scene &out, LineSplitter &splitter, const Chunk
                     ThrowException("Expected Face line");
                 }
 
-                msh.faces.push_back(Face());
+                msh.faces.emplace_back();
                 Face &face = msh.faces.back();
 
                 face.indices.resize(strtoul10(splitter[2]));
@@ -956,7 +956,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene &out, StreamReaderLE &reader, const
                 ThrowException(format("A hole is the first entity in the `PolH` chunk with id ") << nfo.id);
             }
         } else
-            msh.faces.push_back(Face());
+            msh.faces.emplace_back();
         Face &f = msh.faces.back();
 
         const size_t num = reader.GetI2();
@@ -968,7 +968,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene &out, StreamReaderLE &reader, const
         }
 
         for (size_t x = 0; x < num; ++x) {
-            f.indices.push_back(VertexIndex());
+            f.indices.emplace_back();
 
             VertexIndex &v = f.indices.back();
             v.pos_idx = reader.GetI4();

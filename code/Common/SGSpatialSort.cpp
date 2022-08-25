@@ -69,8 +69,8 @@ void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
 {
     // store position by index and distance
     float distance = vPosition * mPlaneNormal;
-    mPositions.push_back( Entry( index, vPosition,
-        distance, smoothingGroup));
+    mPositions.emplace_back( index, vPosition,
+        distance, smoothingGroup);
 }
 // ------------------------------------------------------------------------------------------------
 void SGSpatialSort::Prepare()

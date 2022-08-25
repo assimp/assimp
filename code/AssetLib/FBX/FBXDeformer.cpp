@@ -66,11 +66,7 @@ Deformer::Deformer(uint64_t id, const Element& element, const Document& doc, con
 }
 
 // ------------------------------------------------------------------------------------------------
-Deformer::~Deformer()
-{
-
-}
-
+Deformer::~Deformer() = default;
 
 // ------------------------------------------------------------------------------------------------
 Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name)
@@ -119,11 +115,7 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 
 
 // ------------------------------------------------------------------------------------------------
-Cluster::~Cluster()
-{
-
-}
-
+Cluster::~Cluster() = default;
 
 // ------------------------------------------------------------------------------------------------
 Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name)
@@ -152,10 +144,7 @@ Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::
 
 
 // ------------------------------------------------------------------------------------------------
-Skin::~Skin()
-{
-
-}
+Skin::~Skin() = default;
 // ------------------------------------------------------------------------------------------------
 BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc, const std::string& name)
     : Deformer(id, element, doc, name)
@@ -171,10 +160,7 @@ BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc,
     }
 }
 // ------------------------------------------------------------------------------------------------
-BlendShape::~BlendShape()
-{
-
-}
+BlendShape::~BlendShape() = default;
 // ------------------------------------------------------------------------------------------------
 BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const Document& doc, const std::string& name)
     : Deformer(id, element, doc, name)
@@ -199,10 +185,7 @@ BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const 
     }
 }
 // ------------------------------------------------------------------------------------------------
-BlendShapeChannel::~BlendShapeChannel()
-{
-
-}
+BlendShapeChannel::~BlendShapeChannel() = default;
 // ------------------------------------------------------------------------------------------------
 }
 }

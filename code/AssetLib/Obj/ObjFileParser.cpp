@@ -97,8 +97,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
     parseFile(streamBuffer);
 }
 
-ObjFileParser::~ObjFileParser() {
-}
+ObjFileParser::~ObjFileParser() = default;
 
 void ObjFileParser::setBuffer(std::vector<char> &buffer) {
     m_DataIt = buffer.begin();

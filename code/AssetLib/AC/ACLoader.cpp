@@ -146,9 +146,7 @@ AC3DImporter::AC3DImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-AC3DImporter::~AC3DImporter() {
-    // nothing to be done here
-}
+AC3DImporter::~AC3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-HMPImporter::HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-HMPImporter::~HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::~HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

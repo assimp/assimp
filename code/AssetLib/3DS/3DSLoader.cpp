@@ -105,9 +105,7 @@ Discreet3DSImporter::Discreet3DSImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Discreet3DSImporter::~Discreet3DSImporter() {
-    // empty
-}
+Discreet3DSImporter::~Discreet3DSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

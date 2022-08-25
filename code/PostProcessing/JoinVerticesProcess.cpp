@@ -57,15 +57,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-JoinVerticesProcess::JoinVerticesProcess() {
-    // nothing to do here
-}
+JoinVerticesProcess::JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess() {
-    // nothing to do here
-}
+JoinVerticesProcess::~JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

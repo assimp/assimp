@@ -66,10 +66,7 @@ DeboneProcess::DeboneProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-DeboneProcess::~DeboneProcess()
-{
-    // nothing to do here
-}
+DeboneProcess::~DeboneProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

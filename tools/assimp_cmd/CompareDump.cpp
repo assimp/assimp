@@ -569,8 +569,7 @@ public:
     {}
 
     //
-    ~sliced_chunk_reader() {
-    }
+    ~sliced_chunk_reader() = default;
 
 public:
 

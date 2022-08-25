@@ -665,9 +665,7 @@ ShapeGeometry::ShapeGeometry(uint64_t id, const Element& element, const std::str
 }
 
 // ------------------------------------------------------------------------------------------------
-ShapeGeometry::~ShapeGeometry() {
-    // empty
-}
+ShapeGeometry::~ShapeGeometry() = default;
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector3D>& ShapeGeometry::GetVertices() const {
     return m_vertices;
@@ -695,9 +693,7 @@ LineGeometry::LineGeometry(uint64_t id, const Element& element, const std::strin
 }
 
 // ------------------------------------------------------------------------------------------------
-LineGeometry::~LineGeometry() {
-    // empty
-}
+LineGeometry::~LineGeometry() = default;
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector3D>& LineGeometry::GetVertices() const {
     return m_vertices;

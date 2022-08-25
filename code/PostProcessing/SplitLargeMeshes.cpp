@@ -56,9 +56,7 @@ SplitLargeMeshesProcess_Triangle::SplitLargeMeshesProcess_Triangle() {
 }
 
 // ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle() {
-    // nothing to do here
-}
+SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -332,9 +330,7 @@ SplitLargeMeshesProcess_Vertex::SplitLargeMeshesProcess_Vertex() {
 }
 
 // ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex() {
-    // nothing to do here
-}
+SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-Q3DImporter::Q3DImporter() {
-    // empty
-}
+Q3DImporter::Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Q3DImporter::~Q3DImporter() {
-    // empty
-}
+Q3DImporter::~Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

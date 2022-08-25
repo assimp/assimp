@@ -64,10 +64,7 @@ TextureTransformStep::TextureTransformStep() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-TextureTransformStep::~TextureTransformStep()
-{
-    // nothing to do here
-}
+TextureTransformStep::~TextureTransformStep() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

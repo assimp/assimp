@@ -48,14 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-GenBoundingBoxesProcess::GenBoundingBoxesProcess()
-: BaseProcess() {
+GenBoundingBoxesProcess::GenBoundingBoxesProcess() = default;
 
-}
-
-GenBoundingBoxesProcess::~GenBoundingBoxesProcess() {
-    // empty
-}
+GenBoundingBoxesProcess::~GenBoundingBoxesProcess() = default;
 
 bool GenBoundingBoxesProcess::IsActive(unsigned int pFlags) const {
     return 0 != ( pFlags & aiProcess_GenBoundingBoxes );

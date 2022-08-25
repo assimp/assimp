@@ -100,9 +100,7 @@ LWOImporter::LWOImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LWOImporter::~LWOImporter() {
-    // empty
-}
+LWOImporter::~LWOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

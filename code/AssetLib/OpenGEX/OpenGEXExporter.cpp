@@ -48,7 +48,7 @@ namespace OpenGEX {
 
 OpenGEXExporter::OpenGEXExporter() = default;
 
-OpenGEXExporter::~OpenGEXExporter() = default;
+
 
 bool OpenGEXExporter::exportScene( const char * /*filename*/, const aiScene* /*pScene*/ ) {
     return true;

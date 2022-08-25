@@ -110,16 +110,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-DXFImporter::DXFImporter()
-: BaseImporter() {
-    // empty
-}
+DXFImporter::DXFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-DXFImporter::~DXFImporter() {
-    // empty
-}
+DXFImporter::~DXFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

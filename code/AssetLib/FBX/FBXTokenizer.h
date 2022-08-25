@@ -96,7 +96,7 @@ public:
     /** construct a binary token */
     Token(const char* sbegin, const char* send, TokenType type, size_t offset);
 
-    ~Token();
+    ~Token() = default;
 
 public:
     std::string StringContents() const {

@@ -83,9 +83,7 @@ MMDImporter::MMDImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
-MMDImporter::~MMDImporter() {
-    // empty
-}
+MMDImporter::~MMDImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an pmx file.

@@ -73,9 +73,7 @@ SpatialSort::SpatialSort() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SpatialSort::~SpatialSort() {
-    // empty
-}
+SpatialSort::~SpatialSort() = default;
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,

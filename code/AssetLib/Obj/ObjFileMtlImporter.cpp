@@ -108,9 +108,7 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
 
 // -------------------------------------------------------------------
 //  Destructor
-ObjFileMtlImporter::~ObjFileMtlImporter() {
-    // empty
-}
+ObjFileMtlImporter::~ObjFileMtlImporter() = default;
 
 // -------------------------------------------------------------------
 //  Loads the material description

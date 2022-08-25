@@ -91,15 +91,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-COBImporter::COBImporter() {
-    // empty
-}
+COBImporter::COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-COBImporter::~COBImporter() {
-    // empty
-}
+COBImporter::~COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

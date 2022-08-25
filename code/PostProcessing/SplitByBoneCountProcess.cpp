@@ -67,10 +67,7 @@ SplitByBoneCountProcess::SplitByBoneCountProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SplitByBoneCountProcess::~SplitByBoneCountProcess()
-{
-    // nothing to do here
-}
+SplitByBoneCountProcess::~SplitByBoneCountProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag.

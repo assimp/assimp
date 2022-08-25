@@ -61,9 +61,7 @@ SortByPTypeProcess::SortByPTypeProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SortByPTypeProcess::~SortByPTypeProcess() {
-    // nothing to do here
-}
+SortByPTypeProcess::~SortByPTypeProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

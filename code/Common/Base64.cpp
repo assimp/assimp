@@ -57,7 +57,7 @@ static constexpr uint8_t tableDecodeBase64[128] = {
     41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0
 };
 
-static constexpr char *tableEncodeBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+static constexpr char tableEncodeBase64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 static inline char EncodeChar(uint8_t b) {
     return tableEncodeBase64[size_t(b)];

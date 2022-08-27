@@ -47,26 +47,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Assimp;
 
-class Base64Test : public ::testing::Test {
-public:
-    virtual void SetUp() {
-    }
-
-    virtual void TearDown() {
-    }
-};
+class Base64Test : public ::testing::Test {};
 
 static const std::vector<uint8_t> assimpStringBinary = { 97, 115, 115, 105, 109, 112 };
 static const std::string assimpStringEncoded = "YXNzaW1w";
 
-TEST_F( Base64Test, encodeTest ) {
-    EXPECT_EQ( "", Base64::Encode (std::vector<uint8_t>{}) );
-    EXPECT_EQ( "Vg==", Base64::Encode (std::vector<uint8_t>{ 86 }) );
-    EXPECT_EQ( assimpStringEncoded, Base64::Encode (assimpStringBinary) );
+TEST_F( Base64Test, encodeTest) {
+    EXPECT_EQ( "", Base64::Encode(std::vector<uint8_t>{}) );
+    EXPECT_EQ( "Vg==", Base64::Encode(std::vector<uint8_t>{ 86 }) );
+    EXPECT_EQ( assimpStringEncoded, Base64::Encode(assimpStringBinary) );
 }
 
-TEST_F( Base64Test, decodeTest ) {
-    EXPECT_EQ( std::vector<uint8_t> {}, Base64::Decode ("") );
-    EXPECT_EQ( std::vector<uint8_t> { 86 }, Base64::Decode ("Vg==") );
-    EXPECT_EQ( assimpStringBinary, Base64::Decode (assimpStringEncoded) );
+TEST_F( Base64Test, encodeTestWithNullptr ) {
+    std::string out;
+    Base64::Encode(nullptr, 100u, out);
+    EXPECT_TRUE(out.empty());
+
+    Base64::Encode(&assimpStringBinary[0], 0u, out);
+    EXPECT_TRUE(out.empty());
+}
+
+TEST_F( Base64Test, decodeTest) {
+    EXPECT_EQ( std::vector<uint8_t> {}, Base64::Decode("") );
+    EXPECT_EQ( std::vector<uint8_t> { 86 }, Base64::Decode("Vg==") );
+    EXPECT_EQ( assimpStringBinary, Base64::Decode(assimpStringEncoded) );
+}
+
+TEST_F(Base64Test, decodeTestWithNullptr) {
+    uint8_t *out = nullptr;
+    size_t size = Base64::Decode(nullptr, 100u, out);
+    EXPECT_EQ(nullptr, out);
+    EXPECT_EQ(0u, size);
 }

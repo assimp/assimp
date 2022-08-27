@@ -219,8 +219,7 @@ struct PmdIk {
     float angle_limit;
     std::vector<uint16_t> ik_child_bone_index;
 
-    PmdIk() :
-            ik_child_bone_index(0), target_bone_index(0), iterations(0), angle_limit(0.0f) {}
+    PmdIk() : ik_bone_index(0), target_bone_index(0), iterations(0), angle_limit(0.0f) {}
 
     ~PmdIk() = default;
 

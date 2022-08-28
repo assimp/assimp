@@ -66,17 +66,26 @@ BaseProcess::~BaseProcess() {
 // ------------------------------------------------------------------------------------------------
 void BaseProcess::ExecuteOnScene(Importer *pImp) {
     ai_assert( nullptr != pImp );
-    ai_assert( nullptr != pImp->Pimpl()->mScene);
+    if (pImp == nullptr) {
+        return;
+    }
+
+    ai_assert(nullptr != pImp->Pimpl()->mScene);
+    if (pImp->Pimpl()->mScene == nullptr) {
+        return;
+    }
 
     progress = pImp->GetProgressHandler();
     ai_assert(nullptr != progress);
+    if (progress == nullptr) {
+        return;
+    }
 
     SetupProperties(pImp);
 
     // catch exceptions thrown inside the PostProcess-Step
     try {
         Execute(pImp->Pimpl()->mScene);
-
     } catch (const std::exception &err) {
 
         // extract error description

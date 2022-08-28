@@ -71,7 +71,6 @@ SET( COMMON
   unit/AssimpAPITest_aiQuaternion.cpp
   unit/AssimpAPITest_aiVector2D.cpp
   unit/AssimpAPITest_aiVector3D.cpp
-  unit/Common/utHash.cpp
   unit/MathTest.cpp
   unit/MathTest.h
   unit/RandomNumberGeneration.h
@@ -98,6 +97,8 @@ SET( COMMON
   unit/Common/utAssertHandler.cpp
   unit/Common/utXmlParser.cpp
   unit/Common/utBase64.cpp
+  unit/Common/utHash.cpp
+  unit/Common/utBaseProcess.cpp
 )
 
 SET( IMPORTERS

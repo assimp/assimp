@@ -175,7 +175,7 @@ private:
  * should be executed. If the function returns true, the class' Execute()
  * function is called subsequently.
  */
-class ASSIMP_API_WINONLY BaseProcess {
+class ASSIMP_API BaseProcess {
     friend class Importer;
 
 public:

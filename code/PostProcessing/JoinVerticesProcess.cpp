@@ -345,8 +345,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
-                    Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    uniqueAnimatedVertices[animMeshIndex].push_back(v);
+                    uniqueAnimatedVertices[animMeshIndex].emplace_back(pMesh->mAnimMeshes[animMeshIndex], a);
                 }
             }
         } else{

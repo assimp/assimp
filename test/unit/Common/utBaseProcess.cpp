@@ -101,7 +101,7 @@ TEST_F( BaseProcessTest, constructTest ) {
 TEST_F( BaseProcessTest, executeOnSceneTest ) {
     TestingBaseProcess process;
     process.ExecuteOnScene(nullptr);
-#ifdef DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
     EXPECT_TRUE(BaseProcessTest::handlerWasCalled());
 #else
     EXPECT_FALSE(BaseProcessTest::handlerWasCalled());

@@ -39,43 +39,72 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
 #include "TestIOSystem.h"
+#include "UnitTestPCH.h"
 
-#include <assimp/Base64.hpp>
+#include "Common/BaseProcess.h"
+#include "Common/AssertHandler.h"
 
-using namespace std;
 using namespace Assimp;
 
-class Base64Test : public ::testing::Test {};
+class BaseProcessTest : public ::testing::Test {
+public:
+    static void test_handler( const char*, const char*, int ) {
+        HandlerWasCalled = true;
+    }
 
-static const std::vector<uint8_t> assimpStringBinary = { 97, 115, 115, 105, 109, 112 };
-static const std::string assimpStringEncoded = "YXNzaW1w";
+    void SetUp() override {
+        HandlerWasCalled = false;
+        setAiAssertHandler(test_handler);
+    }
 
-TEST_F( Base64Test, encodeTest) {
-    EXPECT_EQ( "", Base64::Encode(std::vector<uint8_t>{}) );
-    EXPECT_EQ( "Vg==", Base64::Encode(std::vector<uint8_t>{ 86 }) );
-    EXPECT_EQ( assimpStringEncoded, Base64::Encode(assimpStringBinary) );
+    void TearDown() override {
+        setAiAssertHandler(nullptr);
+    }
+
+    static bool handlerWasCalled() {
+        return HandlerWasCalled;
+    }
+
+private:
+    static bool HandlerWasCalled;
+};
+
+bool BaseProcessTest::HandlerWasCalled = false;
+
+class TestingBaseProcess : public BaseProcess {
+public:
+    TestingBaseProcess() : BaseProcess() {
+        // empty
+    }
+
+    ~TestingBaseProcess() override = default;
+
+    bool IsActive( unsigned int ) const override {
+        return true;
+    }
+
+    void Execute(aiScene*) override {
+
+    }
+};
+TEST_F( BaseProcessTest, constructTest ) {
+    bool ok = true;
+    try {
+        TestingBaseProcess process;
+    } catch (...) {
+        ok = false;
+    }
+    EXPECT_TRUE(ok);
 }
 
-TEST_F( Base64Test, encodeTestWithNullptr ) {
-    std::string out;
-    Base64::Encode(nullptr, 100u, out);
-    EXPECT_TRUE(out.empty());
+TEST_F( BaseProcessTest, executeOnSceneTest ) {
+    TestingBaseProcess process;
+    process.ExecuteOnScene(nullptr);
+#ifdef ASSIMP_BUILD_DEBUG
+    EXPECT_TRUE(BaseProcessTest::handlerWasCalled());
+#else
+    EXPECT_FALSE(BaseProcessTest::handlerWasCalled());
+#endif
 
-    Base64::Encode(&assimpStringBinary[0], 0u, out);
-    EXPECT_TRUE(out.empty());
-}
-
-TEST_F( Base64Test, decodeTest) {
-    EXPECT_EQ( std::vector<uint8_t> {}, Base64::Decode("") );
-    EXPECT_EQ( std::vector<uint8_t> { 86 }, Base64::Decode("Vg==") );
-    EXPECT_EQ( assimpStringBinary, Base64::Decode(assimpStringEncoded) );
-}
-
-TEST_F(Base64Test, decodeTestWithNullptr) {
-    uint8_t *out = nullptr;
-    size_t size = Base64::Decode(nullptr, 100u, out);
-    EXPECT_EQ(nullptr, out);
-    EXPECT_EQ(0u, size);
 }

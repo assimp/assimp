@@ -234,19 +234,23 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     std::string::size_type pos = pFile.find_last_of('.');
 
     // no file extension - can't read
-    if (pos == std::string::npos)
+    if (pos == std::string::npos) {
         return false;
+    }
 
     const char *ext_real = &pFile[pos + 1];
-    if (!ASSIMP_stricmp(ext_real, ext0))
+    if (!ASSIMP_stricmp(ext_real, ext0)) {
         return true;
+    }
 
     // check for other, optional, file extensions
-    if (ext1 && !ASSIMP_stricmp(ext_real, ext1))
+    if (ext1 && !ASSIMP_stricmp(ext_real, ext1)) {
         return true;
+    }
 
-    if (ext2 && !ASSIMP_stricmp(ext_real, ext2))
-        return true;
+    if (ext2 && !ASSIMP_stricmp(ext_real, ext2)) {
+        return true;        
+    }
 
     return false;
 }

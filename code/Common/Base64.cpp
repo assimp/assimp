@@ -46,7 +46,7 @@ namespace Assimp {
 
 namespace Base64 {
 
-static const uint8_t tableDecodeBase64[128] = {
+static constexpr uint8_t tableDecodeBase64[128] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63,
@@ -57,7 +57,7 @@ static const uint8_t tableDecodeBase64[128] = {
     41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0
 };
 
-static const char *tableEncodeBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+static constexpr char tableEncodeBase64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 static inline char EncodeChar(uint8_t b) {
     return tableEncodeBase64[size_t(b)];
@@ -71,6 +71,11 @@ inline uint8_t DecodeChar(char c) {
 }
 
 void Encode(const uint8_t *in, size_t inLength, std::string &out) {
+    if (in == nullptr || inLength==0) {
+        out.clear();
+        return;
+    }
+
     size_t outLength = ((inLength + 2) / 3) * 4;
 
     size_t j = out.size();
@@ -115,8 +120,14 @@ std::string Encode(const std::vector<uint8_t> &in) {
 }
 
 size_t Decode(const char *in, size_t inLength, uint8_t *&out) {
+    if (in == nullptr) {
+        out = nullptr;
+        return 0;
+    }
+
     if (inLength % 4 != 0) {
-        throw DeadlyImportError("Invalid base64 encoded data: \"", std::string(in, std::min(size_t(32), inLength)), "\", length:", inLength);
+        throw DeadlyImportError("Invalid base64 encoded data: \"", std::string(in, std::min(size_t(32), inLength)),
+            "\", length:", inLength);
     }
 
     if (inLength < 4) {

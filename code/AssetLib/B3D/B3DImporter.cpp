@@ -88,9 +88,7 @@ void DeleteAllBarePointers(std::vector<T> &x) {
     }
 }
 
-B3DImporter::~B3DImporter() {
-    // empty
-}
+B3DImporter::~B3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {

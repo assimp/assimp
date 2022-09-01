@@ -59,9 +59,7 @@ BaseProcess::BaseProcess() AI_NO_EXCEPT
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-BaseProcess::~BaseProcess() {
-    // nothing to do here
-}
+BaseProcess::~BaseProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 void BaseProcess::ExecuteOnScene(Importer *pImp) {

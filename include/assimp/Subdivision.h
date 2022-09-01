@@ -122,10 +122,7 @@ public:
 
 };
 
-inline
-Subdivider::~Subdivider() {
-    // empty
-}
+inline Subdivider::~Subdivider() = default;
 
 } // end namespace Assimp
 

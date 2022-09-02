@@ -434,7 +434,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
         for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) {
             if (ref[n])
                 continue;
-            trafo.push_back(STransformVecInfo());
+            trafo.emplace_back();
             trafo.back().uvIndex = n;
         }
 

@@ -418,7 +418,7 @@ outer:
                 (*fit).mat = 0;
             }
             if (fidx[(*fit).mat].empty()) ++pScene->mNumMeshes;
-            fidx[(*fit).mat].push_back(FaceIdx(p, q));
+            fidx[(*fit).mat].emplace_back(p, q);
         }
     }
     pScene->mNumMaterials = pScene->mNumMeshes;

@@ -671,7 +671,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
                         int bone = v.bones[k];
                         float weight = v.weights[k];
 
-                        vweights[bone].push_back(aiVertexWeight(vertIdx + faceIndex, weight));
+                        vweights[bone].emplace_back(vertIdx + faceIndex, weight);
                     }
                 }
                 ++face;

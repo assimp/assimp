@@ -518,7 +518,7 @@ void COBImporter::ReadMat1_Ascii(Scene &out, LineSplitter &splitter, const Chunk
         return;
     }
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 
@@ -1004,7 +1004,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
 
     const chunk_guard cn(nfo, reader);
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 

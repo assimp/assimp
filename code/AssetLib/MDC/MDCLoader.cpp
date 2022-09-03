@@ -105,9 +105,7 @@ MDCImporter::MDCImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MDCImporter::~MDCImporter() {
-    // empty
-}
+MDCImporter::~MDCImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

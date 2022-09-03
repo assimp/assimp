@@ -111,9 +111,7 @@ ColladaLoader::ColladaLoader() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ColladaLoader::~ColladaLoader() {
-    // empty
-}
+ColladaLoader::~ColladaLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

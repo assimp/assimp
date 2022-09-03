@@ -44,6 +44,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ::Assimp;
 
-AbstractImportExportBase::~AbstractImportExportBase() {
-    // empty
-}
+AbstractImportExportBase::~AbstractImportExportBase() = default;

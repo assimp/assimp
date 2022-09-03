@@ -62,9 +62,7 @@ CalcTangentsProcess::CalcTangentsProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-CalcTangentsProcess::~CalcTangentsProcess() {
-    // nothing to do here
-}
+CalcTangentsProcess::~CalcTangentsProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

@@ -59,10 +59,7 @@ SGSpatialSort::SGSpatialSort()
 }
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SGSpatialSort::~SGSpatialSort()
-{
-    // nothing to do here, everything destructs automatically
-}
+SGSpatialSort::~SGSpatialSort() = default;
 // ------------------------------------------------------------------------------------------------
 void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
     unsigned int smoothingGroup)

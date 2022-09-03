@@ -91,15 +91,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-COBImporter::COBImporter() {
-    // empty
-}
+COBImporter::COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-COBImporter::~COBImporter() {
-    // empty
-}
+COBImporter::~COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -522,7 +518,7 @@ void COBImporter::ReadMat1_Ascii(Scene &out, LineSplitter &splitter, const Chunk
         return;
     }
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 
@@ -1008,7 +1004,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
 
     const chunk_guard cn(nfo, reader);
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 

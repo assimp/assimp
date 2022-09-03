@@ -154,8 +154,7 @@ ColladaExporter::ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, con
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-ColladaExporter::~ColladaExporter() {
-}
+ColladaExporter::~ColladaExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Starts writing the contents

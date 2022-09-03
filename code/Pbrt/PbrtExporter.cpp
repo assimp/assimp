@@ -162,9 +162,7 @@ PbrtExporter::PbrtExporter(
 }
 
 // Destructor
-PbrtExporter::~PbrtExporter() {
-    // Empty
-}
+PbrtExporter::~PbrtExporter() = default;
 
 void PbrtExporter::WriteMetaData() {
     mOutput << "#############################\n";

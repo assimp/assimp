@@ -65,8 +65,7 @@ namespace Blender {
     struct TempArray    {
         typedef TCLASS< T*,std::allocator<T*> > mywrap;
 
-        TempArray() {
-        }
+        TempArray() = default;
 
         ~TempArray () {
             for(T* elem : arr) {

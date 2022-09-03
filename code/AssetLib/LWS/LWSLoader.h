@@ -69,7 +69,7 @@ namespace LWS {
  */
 class Element {
 public:
-    Element() {}
+    Element() = default;
 
     // first: name, second: rest
     std::string tokens[2];

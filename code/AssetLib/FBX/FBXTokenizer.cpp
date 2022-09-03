@@ -79,9 +79,7 @@ Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int 
 }
 
 // ------------------------------------------------------------------------------------------------
-Token::~Token()
-{
-}
+
 
 namespace {
 

@@ -338,13 +338,7 @@ struct Face : public aiFace {
     uint32_t type;
 
     //! Assignment operator
-    Face &operator=(const LWO::Face &f) {
-        aiFace::operator=(f);
-        surfaceIndex = f.surfaceIndex;
-        smoothGroup = f.smoothGroup;
-        type = f.type;
-        return *this;
-    }
+    Face &operator=(const LWO::Face &f) = default;
 };
 
 // ---------------------------------------------------------------------------
@@ -354,7 +348,7 @@ struct VMapEntry {
     explicit VMapEntry(unsigned int _dims) :
             dims(_dims) {}
 
-    virtual ~VMapEntry() {}
+    virtual ~VMapEntry() = default;
 
     //! allocates memory for the vertex map
     virtual void Allocate(unsigned int num) {

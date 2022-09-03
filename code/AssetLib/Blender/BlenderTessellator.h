@@ -186,7 +186,7 @@ namespace Assimp
     {
     public:
         BlenderTessellatorP2T( BlenderBMeshConverter& converter );
-        ~BlenderTessellatorP2T( );
+        ~BlenderTessellatorP2T( ) = default;
 
         void Tessellate( const Blender::MLoop* polyLoop, int vertexCount, const std::vector< Blender::MVert >& vertices );
 

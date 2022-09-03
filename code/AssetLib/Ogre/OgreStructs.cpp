@@ -272,8 +272,7 @@ std::set<uint16_t> IVertexData::ReferencedBonesByWeights() const {
 
 // VertexData
 
-VertexData::VertexData() {
-}
+VertexData::VertexData() = default;
 
 VertexData::~VertexData() {
     Reset();
@@ -310,8 +309,7 @@ VertexElement *VertexData::GetVertexElement(VertexElement::Semantic semantic, ui
 
 // VertexDataXml
 
-VertexDataXml::VertexDataXml() {
-}
+VertexDataXml::VertexDataXml() = default;
 
 bool VertexDataXml::HasPositions() const {
     return !positions.empty();

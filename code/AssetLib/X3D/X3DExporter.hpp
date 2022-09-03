@@ -241,7 +241,7 @@ public:
 
     /// \fn ~X3DExporter()
     /// Default destructor.
-    ~X3DExporter() {}
+    ~X3DExporter() = default;
 
 }; // class X3DExporter
 

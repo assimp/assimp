@@ -86,8 +86,7 @@ MS3DImporter::MS3DImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MS3DImporter::~MS3DImporter()
-{}
+MS3DImporter::~MS3DImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const

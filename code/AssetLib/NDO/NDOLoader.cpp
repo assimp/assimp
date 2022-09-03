@@ -70,13 +70,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-NDOImporter::NDOImporter()
-{}
+NDOImporter::NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-NDOImporter::~NDOImporter()
-{}
+NDOImporter::~NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

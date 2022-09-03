@@ -60,8 +60,7 @@ FindInstancesProcess::FindInstancesProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-FindInstancesProcess::~FindInstancesProcess()
-{}
+FindInstancesProcess::~FindInstancesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

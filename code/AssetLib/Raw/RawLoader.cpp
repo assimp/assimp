@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-RAWImporter::RAWImporter() {
-    // empty
-}
+RAWImporter::RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-RAWImporter::~RAWImporter() {
-    // empty
-}
+RAWImporter::~RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

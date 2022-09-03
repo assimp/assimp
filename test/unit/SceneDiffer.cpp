@@ -53,9 +53,7 @@ SceneDiffer::SceneDiffer()
     // empty
 }
 
-SceneDiffer::~SceneDiffer() {
-    // empty
-}
+SceneDiffer::~SceneDiffer() = default;
 
 bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     if ( expected == toCompare ) {

@@ -52,9 +52,7 @@ ScaleProcess::ScaleProcess()
 , mScale( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT ) {
 }
 
-ScaleProcess::~ScaleProcess() {
-    // empty
-}
+ScaleProcess::~ScaleProcess() = default;
 
 void ScaleProcess::setScale( ai_real scale ) {
     mScale = scale;

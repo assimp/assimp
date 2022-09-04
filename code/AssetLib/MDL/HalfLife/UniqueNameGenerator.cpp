@@ -68,8 +68,7 @@ UniqueNameGenerator::UniqueNameGenerator(const char *template_name, const char *
     separator_(separator) {
 }
 
-UniqueNameGenerator::~UniqueNameGenerator() {
-}
+UniqueNameGenerator::~UniqueNameGenerator() = default;
 
 void UniqueNameGenerator::make_unique(std::vector<std::string> &names) {
     struct DuplicateInfo {

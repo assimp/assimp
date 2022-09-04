@@ -585,19 +585,10 @@ void Exporter::UnregisterExporter(const char* id) {
 }
 
 // ------------------------------------------------------------------------------------------------
-ExportProperties::ExportProperties() {
-    // empty
-}
+ExportProperties::ExportProperties() = default;
 
 // ------------------------------------------------------------------------------------------------
-ExportProperties::ExportProperties(const ExportProperties &other)
-: mIntProperties(other.mIntProperties)
-, mFloatProperties(other.mFloatProperties)
-, mStringProperties(other.mStringProperties)
-, mMatrixProperties(other.mMatrixProperties)
-, mCallbackProperties(other.mCallbackProperties){
-    // empty
-}
+ExportProperties::ExportProperties(const ExportProperties &other) = default;
 
 bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
     return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);

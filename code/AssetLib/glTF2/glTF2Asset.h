@@ -391,7 +391,7 @@ struct Object {
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }
 
-    virtual ~Object() {}
+    virtual ~Object() = default;
 
     //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
     static const char *TranslateId(Asset & /*r*/, const char *id) { return id; }
@@ -613,7 +613,7 @@ struct Accessor : public Object {
         return Indexer(*this);
     }
 
-    Accessor() {}
+    Accessor() = default;
     void Read(Value &obj, Asset &r);
 
     //sparse
@@ -681,7 +681,7 @@ struct Light : public Object {
     float innerConeAngle;
     float outerConeAngle;
 
-    Light() {}
+    Light() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -877,7 +877,7 @@ struct Mesh : public Object {
     std::vector<float> weights;
     std::vector<std::string> targetNames;
 
-    Mesh() {}
+    Mesh() = default;
 
     /// Get mesh data from JSON-object and place them to root asset.
     /// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
@@ -903,12 +903,12 @@ struct Node : public Object {
 
     Ref<Node> parent; //!< This is not part of the glTF specification. Used as a helper.
 
-    Node() {}
+    Node() = default;
     void Read(Value &obj, Asset &r);
 };
 
 struct Program : public Object {
-    Program() {}
+    Program() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -927,12 +927,12 @@ struct Scene : public Object {
     std::string name;
     std::vector<Ref<Node>> nodes;
 
-    Scene() {}
+    Scene() = default;
     void Read(Value &obj, Asset &r);
 };
 
 struct Shader : public Object {
-    Shader() {}
+    Shader() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -942,7 +942,7 @@ struct Skin : public Object {
     std::vector<Ref<Node>> jointNames; //!< Joint names of the joints (nodes with a jointName property) in this skin.
     std::string name; //!< The user-defined name of this object.
 
-    Skin() {}
+    Skin() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -957,7 +957,7 @@ struct Texture : public Object {
     //TextureTarget target; //!< The target that the WebGL texture should be bound to. (default: TextureTarget_TEXTURE_2D)
     //TextureType type; //!< Texel datatype. (default: TextureType_UNSIGNED_BYTE)
 
-    Texture() {}
+    Texture() = default;
     void Read(Value &obj, Asset &r);
 };
 
@@ -990,14 +990,14 @@ struct Animation : public Object {
     std::vector<Sampler> samplers; //!< All the key-frame data for this animation.
     std::vector<Channel> channels; //!< Data to connect nodes to key-frames.
 
-    Animation() {}
+    Animation() = default;
     void Read(Value &obj, Asset &r);
 };
 
 //! Base class for LazyDict that acts as an interface
 class LazyDictBase {
 public:
-    virtual ~LazyDictBase() {}
+    virtual ~LazyDictBase() = default;
 
     virtual void AttachToDocument(Document &doc) = 0;
     virtual void DetachFromDocument() = 0;

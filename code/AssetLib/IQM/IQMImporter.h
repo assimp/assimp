@@ -56,9 +56,9 @@ class IQMImporter : public BaseImporter {
 public:
 	/// \brief  Default constructor
 	IQMImporter();
-    ~IQMImporter() override {}
+    ~IQMImporter() override = default;
 
-	/// \brief  Returns whether the class can handle the format of the given file.
+    /// \brief  Returns whether the class can handle the format of the given file.
 	/// \remark See BaseImporter::CanRead() for details.
 	bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 

@@ -134,9 +134,7 @@ STLImporter::STLImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-STLImporter::~STLImporter() {
-    // empty
-}
+STLImporter::~STLImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

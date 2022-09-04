@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-Q3DImporter::Q3DImporter() {
-    // empty
-}
+Q3DImporter::Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Q3DImporter::~Q3DImporter() {
-    // empty
-}
+Q3DImporter::~Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -422,7 +418,7 @@ outer:
                 (*fit).mat = 0;
             }
             if (fidx[(*fit).mat].empty()) ++pScene->mNumMeshes;
-            fidx[(*fit).mat].push_back(FaceIdx(p, q));
+            fidx[(*fit).mat].emplace_back(p, q);
         }
     }
     pScene->mNumMaterials = pScene->mNumMeshes;

@@ -174,9 +174,7 @@ UnrealImporter::UnrealImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-UnrealImporter::~UnrealImporter() {
-    // empty
-}
+UnrealImporter::~UnrealImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

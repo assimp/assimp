@@ -63,7 +63,7 @@ class Importer;
 class SharedPostProcessInfo {
 public:
     struct Base {
-        virtual ~Base() {}
+        virtual ~Base() = default;
     };
 
     //! Represents data that is allocated on the heap, thus needs to be deleted
@@ -84,7 +84,7 @@ public:
         explicit TStaticData(T in) :
                 data(in) {}
 
-        ~TStaticData() {}
+        ~TStaticData() = default;
 
         T data;
     };

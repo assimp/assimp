@@ -73,9 +73,7 @@ struct aiAABB {
     }
 
     ///	@brief  The class destructor.
-    ~aiAABB() {
-        // empty
-    }
+    ~aiAABB() = default;
 
 #endif // __cplusplus
 };

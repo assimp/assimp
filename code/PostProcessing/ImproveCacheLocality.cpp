@@ -70,9 +70,7 @@ ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess() {
-    // nothing to do here
-}
+ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

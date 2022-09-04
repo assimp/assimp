@@ -82,9 +82,7 @@ XFileImporter::XFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-XFileImporter::~XFileImporter() {
-    // empty
-}
+XFileImporter::~XFileImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

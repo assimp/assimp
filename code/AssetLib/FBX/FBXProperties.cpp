@@ -60,29 +60,23 @@ namespace FBX {
     using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-Property::Property()
-{
-}
+    Property::Property() = default;
 
-// ------------------------------------------------------------------------------------------------
-Property::~Property()
-{
-}
+    // ------------------------------------------------------------------------------------------------
+    Property::~Property() = default;
 
-namespace {
+    namespace {
 
-void checkTokenCount(const TokenList& tok, unsigned int expectedCount)
-{
-    ai_assert(expectedCount >= 2);
-    if (tok.size() < expectedCount) {
-        const std::string& s = ParseTokenAsString(*tok[1]);
-        if (tok[1]->IsBinary()) {
-            throw DeadlyImportError("Not enough tokens for property of type ", s, " at offset ", tok[1]->Offset());
+    void checkTokenCount(const TokenList &tok, unsigned int expectedCount) {
+        ai_assert(expectedCount >= 2);
+        if (tok.size() < expectedCount) {
+            const std::string &s = ParseTokenAsString(*tok[1]);
+            if (tok[1]->IsBinary()) {
+                throw DeadlyImportError("Not enough tokens for property of type ", s, " at offset ", tok[1]->Offset());
+            } else {
+                throw DeadlyImportError("Not enough tokens for property of type ", s, " at line ", tok[1]->Line());
+            }
         }
-        else {
-            throw DeadlyImportError("Not enough tokens for property of type ", s, " at line ", tok[1]->Line());
-        }
-    }
 }
 
 // ------------------------------------------------------------------------------------------------

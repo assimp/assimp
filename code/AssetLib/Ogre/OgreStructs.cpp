@@ -256,7 +256,7 @@ AssimpVertexBoneWeightList IVertexData::AssimpBoneWeights(size_t vertices) {
         for (VertexBoneAssignmentList::const_iterator iter = vertexWeights.begin(), end = vertexWeights.end();
                 iter != end; ++iter) {
             std::vector<aiVertexWeight> &boneWeights = weights[iter->boneIndex];
-            boneWeights.push_back(aiVertexWeight(static_cast<unsigned int>(vi), iter->weight));
+            boneWeights.emplace_back(static_cast<unsigned int>(vi), iter->weight);
         }
     }
     return weights;
@@ -272,8 +272,7 @@ std::set<uint16_t> IVertexData::ReferencedBonesByWeights() const {
 
 // VertexData
 
-VertexData::VertexData() {
-}
+VertexData::VertexData() = default;
 
 VertexData::~VertexData() {
     Reset();
@@ -310,8 +309,7 @@ VertexElement *VertexData::GetVertexElement(VertexElement::Semantic semantic, ui
 
 // VertexDataXml
 
-VertexDataXml::VertexDataXml() {
-}
+VertexDataXml::VertexDataXml() = default;
 
 bool VertexDataXml::HasPositions() const {
     return !positions.empty();

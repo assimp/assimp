@@ -201,7 +201,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
     size_t vidx = std::accumulate(mVertcnt.begin(),begin,0);
     for(iit = begin; iit != end; vidx += *iit++) {
         if (!*iit) {
-            normals.push_back(IfcVector3());
+            normals.emplace_back();
             continue;
         }
         for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
@@ -215,7 +215,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
             ++cnt;
         }
 
-        normals.push_back(IfcVector3());
+        normals.emplace_back();
         NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
     }
 

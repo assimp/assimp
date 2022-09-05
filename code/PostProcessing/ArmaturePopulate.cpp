@@ -48,15 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 /// The default class constructor.
-ArmaturePopulate::ArmaturePopulate() :
-        BaseProcess() {
-    // do nothing
-}
+ArmaturePopulate::ArmaturePopulate() = default;
 
 /// The class destructor.
-ArmaturePopulate::~ArmaturePopulate() {
-    // do nothing
-}
+ArmaturePopulate::~ArmaturePopulate() = default;
 
 bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_PopulateArmatureData) != 0;

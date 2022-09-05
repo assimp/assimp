@@ -88,9 +88,7 @@ void DeleteAllBarePointers(std::vector<T> &x) {
     }
 }
 
-B3DImporter::~B3DImporter() {
-    // empty
-}
+B3DImporter::~B3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
@@ -479,13 +477,13 @@ void B3DImporter::ReadKEYS(aiNodeAnim *nodeAnim) {
     while (ChunkSize()) {
         int frame = ReadInt();
         if (flags & 1) {
-            trans.push_back(aiVectorKey(frame, ReadVec3()));
+            trans.emplace_back(frame, ReadVec3());
         }
         if (flags & 2) {
-            scale.push_back(aiVectorKey(frame, ReadVec3()));
+            scale.emplace_back(frame, ReadVec3());
         }
         if (flags & 4) {
-            rot.push_back(aiQuatKey(frame, ReadQuat()));
+            rot.emplace_back(frame, ReadQuat());
         }
     }
 
@@ -673,7 +671,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
                         int bone = v.bones[k];
                         float weight = v.weights[k];
 
-                        vweights[bone].push_back(aiVertexWeight(vertIdx + faceIndex, weight));
+                        vweights[bone].emplace_back(vertIdx + faceIndex, weight);
                     }
                 }
                 ++face;

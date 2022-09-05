@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -64,7 +64,7 @@ struct Face {
     using IndexArray = std::vector<unsigned int>;
 
     //! Primitive type
-    aiPrimitiveType m_PrimitiveType;
+    aiPrimitiveType mPrimitiveType;
     //! Vertex indices
     IndexArray m_vertices;
     //! Normal indices
@@ -76,14 +76,12 @@ struct Face {
 
     //! \brief  Default constructor
     Face(aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
-            m_PrimitiveType(pt), m_vertices(), m_normals(), m_texturCoords(), m_pMaterial(0L) {
+            mPrimitiveType(pt), m_vertices(), m_normals(), m_texturCoords(), m_pMaterial(nullptr) {
         // empty
     }
 
     //! \brief  Destructor
-    ~Face() {
-        // empty
-    }
+    ~Face() = default;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -230,7 +228,7 @@ struct Mesh {
     /// The name for the mesh
     std::string m_name;
     /// Array with pointer to all stored faces
-    std::vector<Face *> m_Faces;
+    std::vector<Face*> m_Faces;
     /// Assigned material
     Material *m_pMaterial;
     /// Number of stored indices.
@@ -273,65 +271,65 @@ struct Model {
     using ConstGroupMapIt = std::map<std::string, std::vector<unsigned int> *>::const_iterator;
 
     //! Model name
-    std::string m_ModelName;
+    std::string mModelName;
     //! List ob assigned objects
-    std::vector<Object *> m_Objects;
+    std::vector<Object *> mObjects;
     //! Pointer to current object
-    ObjFile::Object *m_pCurrent;
+    ObjFile::Object *mCurrentObject;
     //! Pointer to current material
-    ObjFile::Material *m_pCurrentMaterial;
+    ObjFile::Material *mCurrentMaterial;
     //! Pointer to default material
-    ObjFile::Material *m_pDefaultMaterial;
+    ObjFile::Material *mDefaultMaterial;
     //! Vector with all generated materials
-    std::vector<std::string> m_MaterialLib;
+    std::vector<std::string> mMaterialLib;
     //! Vector with all generated vertices
-    std::vector<aiVector3D> m_Vertices;
+    std::vector<aiVector3D> mVertices;
     //! vector with all generated normals
-    std::vector<aiVector3D> m_Normals;
+    std::vector<aiVector3D> mNormals;
     //! vector with all vertex colors
-    std::vector<aiVector3D> m_VertexColors;
+    std::vector<aiVector3D> mVertexColors;
     //! Group map
-    GroupMap m_Groups;
+    GroupMap mGroups;
     //! Group to face id assignment
-    std::vector<unsigned int> *m_pGroupFaceIDs;
+    std::vector<unsigned int> *mGroupFaceIDs;
     //! Active group
-    std::string m_strActiveGroup;
+    std::string mActiveGroup;
     //! Vector with generated texture coordinates
-    std::vector<aiVector3D> m_TextureCoord;
+    std::vector<aiVector3D> mTextureCoord;
     //! Maximum dimension of texture coordinates
-    unsigned int m_TextureCoordDim;
+    unsigned int mTextureCoordDim;
     //! Current mesh instance
-    Mesh *m_pCurrentMesh;
+    Mesh *mCurrentMesh;
     //! Vector with stored meshes
-    std::vector<Mesh *> m_Meshes;
+    std::vector<Mesh *> mMeshes;
     //! Material map
-    std::map<std::string, Material *> m_MaterialMap;
+    std::map<std::string, Material*> mMaterialMap;
 
     //! \brief  The default class constructor
     Model() :
-            m_ModelName(),
-            m_pCurrent(nullptr),
-            m_pCurrentMaterial(nullptr),
-            m_pDefaultMaterial(nullptr),
-            m_pGroupFaceIDs(nullptr),
-            m_strActiveGroup(),
-            m_TextureCoordDim(0),
-            m_pCurrentMesh(nullptr) {
+            mModelName(),
+            mCurrentObject(nullptr),
+            mCurrentMaterial(nullptr),
+            mDefaultMaterial(nullptr),
+            mGroupFaceIDs(nullptr),
+            mActiveGroup(),
+            mTextureCoordDim(0),
+            mCurrentMesh(nullptr) {
         // empty
     }
 
     //! \brief  The class destructor
     ~Model() {
-        for (auto & it : m_Objects) {
+        for (auto & it : mObjects) {
             delete it;
         }
-        for (auto & Meshe : m_Meshes) {
+        for (auto & Meshe : mMeshes) {
             delete Meshe;
         }
-        for (auto & Group : m_Groups) {
+        for (auto & Group : mGroups) {
             delete Group.second;
         }
-        for (auto & it : m_MaterialMap) {
+        for (auto & it : mMaterialMap) {
             delete it.second;
         }
     }

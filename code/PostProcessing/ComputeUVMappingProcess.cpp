@@ -59,17 +59,11 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ComputeUVMappingProcess::ComputeUVMappingProcess()
-{
-    // nothing to do here
-}
+ComputeUVMappingProcess::ComputeUVMappingProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ComputeUVMappingProcess::~ComputeUVMappingProcess()
-{
-    // nothing to do here
-}
+ComputeUVMappingProcess::~ComputeUVMappingProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

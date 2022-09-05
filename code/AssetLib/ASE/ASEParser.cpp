@@ -74,7 +74,7 @@ using namespace Assimp::ASE;
             return;                                \
         }                                          \
     }                                              \
-    else if ('\0' == *filePtr) {                   \
+    if ('\0' == *filePtr) {                        \
         return;                                    \
     }                                              \
     if (IsLineEnd(*filePtr) && !bLastWasEndLine) { \
@@ -264,7 +264,7 @@ void Parser::Parse() {
             if (TokenMatch(filePtr, "GEOMOBJECT", 10))
 
             {
-                m_vMeshes.push_back(Mesh("UNNAMED"));
+                m_vMeshes.emplace_back("UNNAMED");
                 ParseLV1ObjectBlock(m_vMeshes.back());
                 continue;
             }
@@ -272,7 +272,7 @@ void Parser::Parse() {
             if (TokenMatch(filePtr, "HELPEROBJECT", 12))
 
             {
-                m_vDummies.push_back(Dummy());
+                m_vDummies.emplace_back();
                 ParseLV1ObjectBlock(m_vDummies.back());
                 continue;
             }
@@ -280,13 +280,13 @@ void Parser::Parse() {
             if (TokenMatch(filePtr, "LIGHTOBJECT", 11))
 
             {
-                m_vLights.push_back(Light("UNNAMED"));
+                m_vLights.emplace_back("UNNAMED");
                 ParseLV1ObjectBlock(m_vLights.back());
                 continue;
             }
             // camera object
             if (TokenMatch(filePtr, "CAMERAOBJECT", 12)) {
-                m_vCameras.push_back(Camera("UNNAMED"));
+                m_vCameras.emplace_back("UNNAMED");
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }
@@ -385,7 +385,7 @@ void Parser::ParseLV1SoftSkinBlock() {
                         unsigned int numWeights;
                         ParseLV4MeshLong(numWeights);
 
-                        curMesh->mBoneVertices.push_back(ASE::BoneVertex());
+                        curMesh->mBoneVertices.emplace_back();
                         ASE::BoneVertex &vert = curMesh->mBoneVertices.back();
 
                         // Reserve enough storage
@@ -409,7 +409,7 @@ void Parser::ParseLV1SoftSkinBlock() {
                             if (-1 == me.first) {
                                 // We don't have this bone yet, so add it to the list
                                 me.first = static_cast<int>(curMesh->mBones.size());
-                                curMesh->mBones.push_back(ASE::Bone(bone));
+                                curMesh->mBones.emplace_back(bone);
                             }
                             ParseLV4MeshFloat(me.second);
 
@@ -420,6 +420,8 @@ void Parser::ParseLV1SoftSkinBlock() {
                 }
             }
         }
+        if (*filePtr == '\0')
+            return;
         ++filePtr;
         SkipSpacesAndLineEnd(&filePtr);
     }
@@ -1009,7 +1011,7 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation &anim) {
                 anim.mScalingType = ASE::Animation::TCB;
             }
             if (b) {
-                anim.akeyScaling.push_back(aiVectorKey());
+                anim.akeyScaling.emplace_back();
                 aiVectorKey &key = anim.akeyScaling.back();
                 ParseLV4MeshFloatTriple(&key.mValue.x, iIndex);
                 key.mTime = (double)iIndex;
@@ -1048,7 +1050,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation &anim) {
                 anim.mPositionType = ASE::Animation::TCB;
             }
             if (b) {
-                anim.akeyPositions.push_back(aiVectorKey());
+                anim.akeyPositions.emplace_back();
                 aiVectorKey &key = anim.akeyPositions.back();
                 ParseLV4MeshFloatTriple(&key.mValue.x, iIndex);
                 key.mTime = (double)iIndex;
@@ -1087,7 +1089,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation &anim) {
                 anim.mRotationType = ASE::Animation::TCB;
             }
             if (b) {
-                anim.akeyRotations.push_back(aiQuatKey());
+                anim.akeyRotations.emplace_back();
                 aiQuatKey &key = anim.akeyRotations.back();
                 aiVector3D v;
                 ai_real f;

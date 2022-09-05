@@ -55,9 +55,7 @@ public:
 		// empty
 	}
 
-	~ConsoleProgressHandler() override {
-		// empty
-	}
+	~ConsoleProgressHandler() override = default;
 
 	bool Update(float percentage) override {
         std::cout << percentage * 100.0f << " %\n";

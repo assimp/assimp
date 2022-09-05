@@ -108,10 +108,10 @@ void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& de
         const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
 
         meshout.mVerts.reserve(meshout.mVerts.size()+4);
-        meshout.mVerts.push_back( IfcVector3( x, y, 0.f ));
-        meshout.mVerts.push_back( IfcVector3(-x, y, 0.f ));
-        meshout.mVerts.push_back( IfcVector3(-x,-y, 0.f ));
-        meshout.mVerts.push_back( IfcVector3( x,-y, 0.f ));
+        meshout.mVerts.emplace_back( x, y, 0.f );
+        meshout.mVerts.emplace_back(-x, y, 0.f );
+        meshout.mVerts.emplace_back(-x,-y, 0.f );
+        meshout.mVerts.emplace_back( x,-y, 0.f );
         meshout.mVertcnt.push_back(4);
     }
     else if( const Schema_2x3::IfcCircleProfileDef* const circle = def.ToPtr<Schema_2x3::IfcCircleProfileDef>()) {
@@ -125,7 +125,7 @@ void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& de
 
         IfcFloat angle = 0.f;
         for(size_t i = 0; i < segments; ++i, angle += delta) {
-            meshout.mVerts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
+            meshout.mVerts.emplace_back( std::cos(angle)*radius, std::sin(angle)*radius, 0.f );
         }
 
         meshout.mVertcnt.push_back(static_cast<unsigned int>(segments));
@@ -136,18 +136,18 @@ void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& de
         const IfcFloat inner_height = ishape->OverallDepth - ishape->FlangeThickness * 2;
 
         meshout.mVerts.reserve(12);
-        meshout.mVerts.push_back(IfcVector3(0,0,0));
-        meshout.mVerts.push_back(IfcVector3(0,ishape->FlangeThickness,0));
-        meshout.mVerts.push_back(IfcVector3(offset,ishape->FlangeThickness,0));
-        meshout.mVerts.push_back(IfcVector3(offset,ishape->FlangeThickness + inner_height,0));
-        meshout.mVerts.push_back(IfcVector3(0,ishape->FlangeThickness + inner_height,0));
-        meshout.mVerts.push_back(IfcVector3(0,ishape->OverallDepth,0));
-        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->OverallDepth,0));
-        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness + inner_height,0));
-        meshout.mVerts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness + inner_height,0));
-        meshout.mVerts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness,0));
-        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness,0));
-        meshout.mVerts.push_back(IfcVector3(ishape->OverallWidth,0,0));
+        meshout.mVerts.emplace_back(0,0,0);
+        meshout.mVerts.emplace_back(0,ishape->FlangeThickness,0);
+        meshout.mVerts.emplace_back(offset,ishape->FlangeThickness,0);
+        meshout.mVerts.emplace_back(offset,ishape->FlangeThickness + inner_height,0);
+        meshout.mVerts.emplace_back(0,ishape->FlangeThickness + inner_height,0);
+        meshout.mVerts.emplace_back(0,ishape->OverallDepth,0);
+        meshout.mVerts.emplace_back(ishape->OverallWidth,ishape->OverallDepth,0);
+        meshout.mVerts.emplace_back(ishape->OverallWidth,ishape->FlangeThickness + inner_height,0);
+        meshout.mVerts.emplace_back(offset+ishape->WebThickness,ishape->FlangeThickness + inner_height,0);
+        meshout.mVerts.emplace_back(offset+ishape->WebThickness,ishape->FlangeThickness,0);
+        meshout.mVerts.emplace_back(ishape->OverallWidth,ishape->FlangeThickness,0);
+        meshout.mVerts.emplace_back(ishape->OverallWidth,0,0);
 
         meshout.mVertcnt.push_back(12);
     }

@@ -63,7 +63,7 @@ class Importer;
 class SharedPostProcessInfo {
 public:
     struct Base {
-        virtual ~Base() {}
+        virtual ~Base() = default;
     };
 
     //! Represents data that is allocated on the heap, thus needs to be deleted
@@ -84,7 +84,7 @@ public:
         explicit TStaticData(T in) :
                 data(in) {}
 
-        ~TStaticData() {}
+        ~TStaticData() = default;
 
         T data;
     };
@@ -175,23 +175,24 @@ private:
  * should be executed. If the function returns true, the class' Execute()
  * function is called subsequently.
  */
-class ASSIMP_API_WINONLY BaseProcess {
+class ASSIMP_API BaseProcess {
     friend class Importer;
 
 public:
-    /** Constructor to be privately used by Importer */
+    /** @brief onstructor to be privately used by Importer */
     BaseProcess() AI_NO_EXCEPT;
 
-    /** Destructor, private as well */
+    /** @brief Destructor, private as well */
     virtual ~BaseProcess();
 
     // -------------------------------------------------------------------
-    /** Returns whether the processing step is present in the given flag.
+    /**
+     * @brief Returns whether the processing step is present in the given flag.
      * @param pFlags The processing flags the importer was called with. A
      *   bitwise combination of #aiPostProcessSteps.
      * @return true if the process is present in this flag fields,
      *   false if not.
-    */
+     */
     virtual bool IsActive(unsigned int pFlags) const = 0;
 
     // -------------------------------------------------------------------
@@ -200,33 +201,36 @@ public:
     virtual bool RequireVerboseFormat() const;
 
     // -------------------------------------------------------------------
-    /** Executes the post processing step on the given imported data.
-    * The function deletes the scene if the postprocess step fails (
-    * the object pointer will be set to nullptr).
-    * @param pImp Importer instance (pImp->mScene must be valid)
-    */
+    /**
+     * @brief Executes the post processing step on the given imported data.
+     * The function deletes the scene if the post-process step fails (
+     * the object pointer will be set to nullptr).
+     * @param pImp Importer instance (pImp->mScene must be valid)
+     */
     void ExecuteOnScene(Importer *pImp);
 
     // -------------------------------------------------------------------
-    /** Called prior to ExecuteOnScene().
-    * The function is a request to the process to update its configuration
-    * basing on the Importer's configuration property list.
-    */
+    /**
+     * @brief Called prior to ExecuteOnScene().
+     * The function is a request to the process to update its configuration
+     * basing on the Importer's configuration property list.
+     */
     virtual void SetupProperties(const Importer *pImp);
 
     // -------------------------------------------------------------------
-    /** Executes the post processing step on the given imported data.
-    * A process should throw an ImportErrorException* if it fails.
-    * This method must be implemented by deriving classes.
-    * @param pScene The imported data to work at.
-    */
+    /**
+     * @brief Executes the post processing step on the given imported data.
+     * A process should throw an ImportErrorException* if it fails.
+     * This method must be implemented by deriving classes.
+     * @param pScene The imported data to work at.
+     */
     virtual void Execute(aiScene *pScene) = 0;
 
     // -------------------------------------------------------------------
     /** Assign a new SharedPostProcessInfo to the step. This object
-     *  allows multiple postprocess steps to share data.
+     *  allows multiple post-process steps to share data.
      * @param sh May be nullptr
-    */
+     */
     inline void SetSharedData(SharedPostProcessInfo *sh) {
         shared = sh;
     }

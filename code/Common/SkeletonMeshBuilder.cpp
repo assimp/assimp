@@ -122,50 +122,50 @@ void SkeletonMeshBuilder::CreateGeometry(const aiNode *pNode) {
             mVertices.push_back(childpos);
             mVertices.push_back(-front * distanceToChild * (ai_real)0.1);
 
-            mFaces.push_back(Face(localVertexStart + 0, localVertexStart + 1, localVertexStart + 2));
-            mFaces.push_back(Face(localVertexStart + 3, localVertexStart + 4, localVertexStart + 5));
-            mFaces.push_back(Face(localVertexStart + 6, localVertexStart + 7, localVertexStart + 8));
-            mFaces.push_back(Face(localVertexStart + 9, localVertexStart + 10, localVertexStart + 11));
+            mFaces.emplace_back(localVertexStart + 0, localVertexStart + 1, localVertexStart + 2);
+            mFaces.emplace_back(localVertexStart + 3, localVertexStart + 4, localVertexStart + 5);
+            mFaces.emplace_back(localVertexStart + 6, localVertexStart + 7, localVertexStart + 8);
+            mFaces.emplace_back(localVertexStart + 9, localVertexStart + 10, localVertexStart + 11);
         }
     } else {
         // if the node has no children, it's an end node. Put a little knob there instead
         aiVector3D ownpos(pNode->mTransformation.a4, pNode->mTransformation.b4, pNode->mTransformation.c4);
         ai_real sizeEstimate = ownpos.Length() * ai_real(0.18);
 
-        mVertices.push_back(aiVector3D(-sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, -sizeEstimate));
-        mVertices.push_back(aiVector3D(0.0, sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, -sizeEstimate));
-        mVertices.push_back(aiVector3D(sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, -sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, -sizeEstimate));
-        mVertices.push_back(aiVector3D(0.0, -sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(-sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, -sizeEstimate));
+        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
+        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
+        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
+        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
+        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
+        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
 
-        mVertices.push_back(aiVector3D(-sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, sizeEstimate));
-        mVertices.push_back(aiVector3D(0.0, sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, sizeEstimate));
-        mVertices.push_back(aiVector3D(sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(sizeEstimate, 0.0, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, sizeEstimate));
-        mVertices.push_back(aiVector3D(0.0, -sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, -sizeEstimate, 0.0));
-        mVertices.push_back(aiVector3D(0.0, 0.0, sizeEstimate));
-        mVertices.push_back(aiVector3D(-sizeEstimate, 0.0, 0.0));
+        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
+        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
+        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
+        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
+        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
+        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
 
-        mFaces.push_back(Face(vertexStartIndex + 0, vertexStartIndex + 1, vertexStartIndex + 2));
-        mFaces.push_back(Face(vertexStartIndex + 3, vertexStartIndex + 4, vertexStartIndex + 5));
-        mFaces.push_back(Face(vertexStartIndex + 6, vertexStartIndex + 7, vertexStartIndex + 8));
-        mFaces.push_back(Face(vertexStartIndex + 9, vertexStartIndex + 10, vertexStartIndex + 11));
-        mFaces.push_back(Face(vertexStartIndex + 12, vertexStartIndex + 13, vertexStartIndex + 14));
-        mFaces.push_back(Face(vertexStartIndex + 15, vertexStartIndex + 16, vertexStartIndex + 17));
-        mFaces.push_back(Face(vertexStartIndex + 18, vertexStartIndex + 19, vertexStartIndex + 20));
-        mFaces.push_back(Face(vertexStartIndex + 21, vertexStartIndex + 22, vertexStartIndex + 23));
+        mFaces.emplace_back(vertexStartIndex + 0, vertexStartIndex + 1, vertexStartIndex + 2);
+        mFaces.emplace_back(vertexStartIndex + 3, vertexStartIndex + 4, vertexStartIndex + 5);
+        mFaces.emplace_back(vertexStartIndex + 6, vertexStartIndex + 7, vertexStartIndex + 8);
+        mFaces.emplace_back(vertexStartIndex + 9, vertexStartIndex + 10, vertexStartIndex + 11);
+        mFaces.emplace_back(vertexStartIndex + 12, vertexStartIndex + 13, vertexStartIndex + 14);
+        mFaces.emplace_back(vertexStartIndex + 15, vertexStartIndex + 16, vertexStartIndex + 17);
+        mFaces.emplace_back(vertexStartIndex + 18, vertexStartIndex + 19, vertexStartIndex + 20);
+        mFaces.emplace_back(vertexStartIndex + 21, vertexStartIndex + 22, vertexStartIndex + 23);
     }
 
     unsigned int numVertices = static_cast<unsigned int>(mVertices.size() - vertexStartIndex);

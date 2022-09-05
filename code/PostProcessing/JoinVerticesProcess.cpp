@@ -57,15 +57,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-JoinVerticesProcess::JoinVerticesProcess() {
-    // nothing to do here
-}
+JoinVerticesProcess::JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess() {
-    // nothing to do here
-}
+JoinVerticesProcess::~JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -345,8 +341,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
-                    Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    uniqueAnimatedVertices[animMeshIndex].push_back(v);
+                    uniqueAnimatedVertices[animMeshIndex].emplace_back(pMesh->mAnimMeshes[animMeshIndex], a);
                 }
             }
         } else{
@@ -395,6 +390,16 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
                 // if the vertex is a unique one, translate it
                 if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
+                    bool weightAlreadyExists = false;
+                    for (std::vector<aiVertexWeight>::iterator vit = newWeights.begin(); vit != newWeights.end(); ++vit) {
+                        if (vit->mVertexId == replaceIndex[ow.mVertexId]) {
+                            weightAlreadyExists = true;
+                            break;
+                        }
+                    }
+                    if (weightAlreadyExists) {
+                        continue;
+                    }                    
                     aiVertexWeight nw;
                     nw.mVertexId = replaceIndex[ ow.mVertexId ];
                     nw.mWeight = ow.mWeight;

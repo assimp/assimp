@@ -707,12 +707,10 @@ void LWOImporter::LoadNodalBlocks(unsigned int size) {
         if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWO3: cannot read length; LoadNodalBlocks");
         }
-        int node_idx = 0;
         uint8_t *const next = mFileBuffer + head.length;
         mFileBuffer += bufOffset;
         switch (head.type) {
         case AI_LWO_NNDS:
-            node_idx++;
             LoadNodes(head.length);
             break;
         }

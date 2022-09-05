@@ -55,9 +55,7 @@ public:
         // empty
     }
 
-    ~TestObjFileParser() {
-        // empty
-    }
+    ~TestObjFileParser() = default;
 
     void testCopyNextWord(char *pBuffer, size_t length) {
         copyNextWord(pBuffer, length);

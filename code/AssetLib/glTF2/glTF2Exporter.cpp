@@ -124,9 +124,7 @@ glTF2Exporter::glTF2Exporter(const char *filename, IOSystem *pIOSystem, const ai
     }
 }
 
-glTF2Exporter::~glTF2Exporter() {
-    // empty
-}
+glTF2Exporter::~glTF2Exporter() = default;
 
 /*
  * Copy a 4x4 matrix from struct aiMatrix to typedef mat4.

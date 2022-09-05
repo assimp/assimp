@@ -80,9 +80,7 @@ OptimizeGraphProcess::OptimizeGraphProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-OptimizeGraphProcess::~OptimizeGraphProcess() {
-	// empty
-}
+OptimizeGraphProcess::~OptimizeGraphProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

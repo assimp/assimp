@@ -11,7 +11,7 @@ jobs:
     name: adress-sanitizer
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:
@@ -35,7 +35,7 @@ jobs:
     name: undefined-behavior-sanitizer
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:

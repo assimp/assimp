@@ -281,7 +281,7 @@ struct aiBone {
     //! The influence weights of this bone, by vertex index.
     C_STRUCT aiVertexWeight *mWeights;
 
-    /** Matrix that transforms from bone space to mesh space in bind pose.
+    /** Matrix that transforms from mesh space to bone space in bind pose.
      *
      * This matrix describes the position of the mesh
      * in the local space of this bone when the skeleton was bound.

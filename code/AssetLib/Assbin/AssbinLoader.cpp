@@ -556,6 +556,10 @@ void AssbinImporter::ReadBinaryLight(IOStream *stream, aiLight *l) {
     l->mName = Read<aiString>(stream);
     l->mType = (aiLightSourceType)Read<unsigned int>(stream);
 
+    l->mPosition = Read<aiVector3D>(stream);
+    l->mDirection = Read<aiVector3D>(stream);
+    l->mUp = Read<aiVector3D>(stream);
+
     if (l->mType != aiLightSource_DIRECTIONAL) {
         l->mAttenuationConstant = Read<float>(stream);
         l->mAttenuationLinear = Read<float>(stream);

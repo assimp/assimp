@@ -58,7 +58,7 @@ jobs:
         platform: x64
         
     - name: Set Compiler Environment
-      if: "!endsWith(matrix.name, 'hunter')"
+      if: "!endsWith(matrix.name, 'hunter')" && "!endsWith(matrix.name, 'mingw-g++')"
       uses: lukka/set-shell-env@v1
       with:
         CXX: ${{ matrix.cxx }}

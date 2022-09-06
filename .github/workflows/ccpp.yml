@@ -43,6 +43,7 @@ jobs:
             toolchain: ninja-vs-win64-cxx17
           - name: windows-mingw
             os: windows-latest
+            cygwin: 1
             cxx: i686-w64-mingw32-g++
             cc: x86_64-w64-mingw32-gcc
 

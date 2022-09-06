@@ -41,7 +41,7 @@ jobs:
           - name: windows-msvc-hunter
             os: windows-latest
             toolchain: ninja-vs-win64-cxx17
-          - name: windows-mingw-g++
+          - name: windows-mingw
             os: windows-latest
             cxx: i686-w64-mingw32-g++
             cc: x86_64-w64-mingw32-gcc
@@ -54,11 +54,9 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
 
     - uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: x64
         
     - name: Set Compiler Environment
-      if: "(!endsWith(matrix.name, 'hunter') || !endsWith(matrix.name, 'mingw-g++')) "
+      if: "(!endsWith(matrix.name, 'hunter')"
       uses: lukka/set-shell-env@v1
       with:
         CXX: ${{ matrix.cxx }}

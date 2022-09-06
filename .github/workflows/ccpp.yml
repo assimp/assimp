@@ -56,7 +56,7 @@ jobs:
     - uses: egor-tensin/setup-mingw@v2
         
     - name: Set Compiler Environment
-      if: "(!endsWith(matrix.name, 'hunter')"
+      if: "!endsWith(matrix.name, 'hunter')"
       uses: lukka/set-shell-env@v1
       with:
         CXX: ${{ matrix.cxx }}

@@ -146,73 +146,73 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 	(void)exporters;
 
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada));
+	exporters.emplace_back("collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_X_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("x", "X Files", "x", &ExportSceneXFile,
-			aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs));
+	exporters.emplace_back("x", "X Files", "x", &ExportSceneXFile,
+			aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("stp", "Step Files", "stp", &ExportSceneStep, 0));
+	exporters.emplace_back("stp", "Step Files", "stp", &ExportSceneStep, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("obj", "Wavefront OBJ format", "obj", &ExportSceneObj,
-			aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */));
-	exporters.push_back(Exporter::ExportFormatEntry("objnomtl", "Wavefront OBJ format without material file", "obj", &ExportSceneObjNoMtl,
-			aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */));
+	exporters.emplace_back("obj", "Wavefront OBJ format", "obj", &ExportSceneObj,
+			aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */);
+	exporters.emplace_back("objnomtl", "Wavefront OBJ format without material file", "obj", &ExportSceneObjNoMtl,
+			aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("stl", "Stereolithography", "stl", &ExportSceneSTL,
-			aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices));
-	exporters.push_back(Exporter::ExportFormatEntry("stlb", "Stereolithography (binary)", "stl", &ExportSceneSTLBinary,
-			aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices));
+	exporters.emplace_back("stl", "Stereolithography", "stl", &ExportSceneSTL,
+			aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices);
+	exporters.emplace_back("stlb", "Stereolithography (binary)", "stl", &ExportSceneSTLBinary,
+			aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_PLY_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("ply", "Stanford Polygon Library", "ply", &ExportScenePly,
-			aiProcess_PreTransformVertices));
-	exporters.push_back(Exporter::ExportFormatEntry("plyb", "Stanford Polygon Library (binary)", "ply", &ExportScenePlyBinary,
-			aiProcess_PreTransformVertices));
+	exporters.emplace_back("ply", "Stanford Polygon Library", "ply", &ExportScenePly,
+			aiProcess_PreTransformVertices);
+	exporters.emplace_back("plyb", "Stanford Polygon Library (binary)", "ply", &ExportScenePlyBinary,
+			aiProcess_PreTransformVertices);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("3ds", "Autodesk 3DS (legacy)", "3ds", &ExportScene3DS,
-			aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices));
+	exporters.emplace_back("3ds", "Autodesk 3DS (legacy)", "3ds", &ExportScene3DS,
+			aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices);
 #endif
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_EXPORTER)
-	exporters.push_back(Exporter::ExportFormatEntry("gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
-			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
-	exporters.push_back(Exporter::ExportFormatEntry("glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
-			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
+	exporters.emplace_back("gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
+			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType);
+	exporters.emplace_back("glb2", "GL Transmission Format v. 2 (binary)", "glb", &ExportSceneGLB2,
+			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType);
 #endif
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_EXPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_EXPORTER)
-	exporters.push_back(Exporter::ExportFormatEntry("gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
-			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
-	exporters.push_back(Exporter::ExportFormatEntry("glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType));
+	exporters.emplace_back("gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
+			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType);
+	exporters.emplace_back("glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
+			aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("assbin", "Assimp Binary File", "assbin", &ExportSceneAssbin, 0));
+	exporters.emplace_back("assbin", "Assimp Binary File", "assbin", &ExportSceneAssbin, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("assxml", "Assimp XML Document", "assxml", &ExportSceneAssxml, 0));
+	exporters.emplace_back("assxml", "Assimp XML Document", "assxml", &ExportSceneAssxml, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("x3d", "Extensible 3D", "x3d", &ExportSceneX3D, 0));
+	exporters.emplace_back("x3d", "Extensible 3D", "x3d", &ExportSceneX3D, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("fbx", "Autodesk FBX (binary)", "fbx", &ExportSceneFBX, 0));
-	exporters.push_back(Exporter::ExportFormatEntry("fbxa", "Autodesk FBX (ascii)", "fbx", &ExportSceneFBXA, 0));
+	exporters.emplace_back("fbx", "Autodesk FBX (binary)", "fbx", &ExportSceneFBX, 0);
+	exporters.emplace_back("fbxa", "Autodesk FBX (ascii)", "fbx", &ExportSceneFBXA, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
@@ -221,15 +221,15 @@ static void setupExporterArray(std::vector<Exporter::ExportFormatEntry> &exporte
 #endif
 
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0));
+	exporters.emplace_back("3mf", "The 3MF-File-Format", "3mf", &ExportScene3MF, 0);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_PBRT_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("pbrt", "pbrt-v4 scene description file", "pbrt", &ExportScenePbrt, aiProcess_Triangulate | aiProcess_SortByPType));
+	exporters.emplace_back("pbrt", "pbrt-v4 scene description file", "pbrt", &ExportScenePbrt, aiProcess_Triangulate | aiProcess_SortByPType);
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSJSON_EXPORTER
-	exporters.push_back(Exporter::ExportFormatEntry("assjson", "Assimp JSON Document", "json", &ExportAssimp2Json, 0));
+	exporters.emplace_back("assjson", "Assimp JSON Document", "json", &ExportAssimp2Json, 0);
 #endif
 }
 
@@ -585,19 +585,10 @@ void Exporter::UnregisterExporter(const char* id) {
 }
 
 // ------------------------------------------------------------------------------------------------
-ExportProperties::ExportProperties() {
-    // empty
-}
+ExportProperties::ExportProperties() = default;
 
 // ------------------------------------------------------------------------------------------------
-ExportProperties::ExportProperties(const ExportProperties &other)
-: mIntProperties(other.mIntProperties)
-, mFloatProperties(other.mFloatProperties)
-, mStringProperties(other.mStringProperties)
-, mMatrixProperties(other.mMatrixProperties)
-, mCallbackProperties(other.mCallbackProperties){
-    // empty
-}
+ExportProperties::ExportProperties(const ExportProperties &other) = default;
 
 bool ExportProperties::SetPropertyCallback(const char *szName, const std::function<void *(void *)> &f) {
     return SetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, f);

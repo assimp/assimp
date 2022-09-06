@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,8 +38,73 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "AbstractImportExportBase.h"
 
-using namespace ::Assimp;
+#include "TestIOSystem.h"
+#include "UnitTestPCH.h"
 
-AbstractImportExportBase::~AbstractImportExportBase() = default;
+#include "Common/BaseProcess.h"
+#include "Common/AssertHandler.h"
+
+using namespace Assimp;
+
+class BaseProcessTest : public ::testing::Test {
+public:
+    static void test_handler( const char*, const char*, int ) {
+        HandlerWasCalled = true;
+    }
+
+    void SetUp() override {
+        HandlerWasCalled = false;
+        setAiAssertHandler(test_handler);
+    }
+
+    void TearDown() override {
+        setAiAssertHandler(nullptr);
+    }
+
+    static bool handlerWasCalled() {
+        return HandlerWasCalled;
+    }
+
+private:
+    static bool HandlerWasCalled;
+};
+
+bool BaseProcessTest::HandlerWasCalled = false;
+
+class TestingBaseProcess : public BaseProcess {
+public:
+    TestingBaseProcess() : BaseProcess() {
+        // empty
+    }
+
+    ~TestingBaseProcess() override = default;
+
+    bool IsActive( unsigned int ) const override {
+        return true;
+    }
+
+    void Execute(aiScene*) override {
+
+    }
+};
+TEST_F( BaseProcessTest, constructTest ) {
+    bool ok = true;
+    try {
+        TestingBaseProcess process;
+    } catch (...) {
+        ok = false;
+    }
+    EXPECT_TRUE(ok);
+}
+
+TEST_F( BaseProcessTest, executeOnSceneTest ) {
+    TestingBaseProcess process;
+    process.ExecuteOnScene(nullptr);
+#ifdef ASSIMP_BUILD_DEBUG
+    EXPECT_TRUE(BaseProcessTest::handlerWasCalled());
+#else
+    EXPECT_FALSE(BaseProcessTest::handlerWasCalled());
+#endif
+
+}

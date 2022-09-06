@@ -90,15 +90,14 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
     // create default material and store it
     m_pModel->mDefaultMaterial = new ObjFile::Material;
     m_pModel->mDefaultMaterial->MaterialName.Set(DEFAULT_MATERIAL);
-    m_pModel->mMaterialLib.push_back(DEFAULT_MATERIAL);
+    m_pModel->mMaterialLib.emplace_back(DEFAULT_MATERIAL);
     m_pModel->mMaterialMap[DEFAULT_MATERIAL] = m_pModel->mDefaultMaterial;
 
     // Start parsing the file
     parseFile(streamBuffer);
 }
 
-ObjFileParser::~ObjFileParser() {
-}
+ObjFileParser::~ObjFileParser() = default;
 
 void ObjFileParser::setBuffer(std::vector<char> &buffer) {
     m_DataIt = buffer.begin();
@@ -112,7 +111,6 @@ ObjFile::Model *ObjFileParser::GetModel() const {
 void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     // only update every 100KB or it'll be too slow
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
-    unsigned int progressCounter = 0;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = bytesToProcess;
     unsigned int processed = 0;
@@ -129,7 +127,6 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         if (lastFilePos < filePos) {
             processed = static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
-            progressCounter++;
             m_progress->UpdateFileRead(processed, progressTotal);
         }
 

@@ -286,17 +286,17 @@ void PrintHierarchy(
 // -----------------------------------------------------------------------------------
 // Implementation of the assimp info utility to print basic file info
 int Assimp_Info(const char *const *params, unsigned int num) {
-    // --help
-    if (!strcmp(params[0], "-h") || !strcmp(params[0], "--help") || !strcmp(params[0], "-?")) {
-        printf("%s", AICMD_MSG_INFO_HELP_E);
-        return AssimpCmdError::Success;
-    }
-
     // asssimp info <file> [-r]
     if (num < 1) {
         printf("assimp info: Invalid number of arguments. "
                "See \'assimp info --help\'\n");
         return AssimpCmdError::InvalidNumberOfArguments;
+    }
+
+    // --help
+    if (!strcmp(params[0], "-h") || !strcmp(params[0], "--help") || !strcmp(params[0], "-?")) {
+        printf("%s", AICMD_MSG_INFO_HELP_E);
+        return AssimpCmdError::Success;
     }
 
     const std::string in = std::string(params[0]);

@@ -64,10 +64,7 @@ RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-RemoveRedundantMatsProcess::~RemoveRedundantMatsProcess()
-{
-    // nothing to do here
-}
+RemoveRedundantMatsProcess::~RemoveRedundantMatsProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

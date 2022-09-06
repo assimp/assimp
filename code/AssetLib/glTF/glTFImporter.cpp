@@ -84,9 +84,7 @@ glTFImporter::glTFImporter() :
     // empty
 }
 
-glTFImporter::~glTFImporter() {
-    // empty
-}
+glTFImporter::~glTFImporter() = default;
 
 const aiImporterDesc *glTFImporter::GetInfo() const {
     return &desc;
@@ -96,8 +94,7 @@ bool glTFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool 
     glTF::Asset asset(pIOHandler);
     try {
         asset.Load(pFile, GetExtension(pFile) == "glb");
-        std::string version = asset.asset.version;
-        return !version.empty() && version[0] == '1';
+        return asset.asset;
     } catch (...) {
         return false;
     }

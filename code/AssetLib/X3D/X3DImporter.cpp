@@ -477,9 +477,6 @@ void X3DImporter::ParseHelper_Node_Exit() {
     // check if we can walk up.
     if (mNodeElementCur != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
-    } else {
-        int i = 0;
-        ++i;
     }
 }
 

@@ -69,7 +69,7 @@ TEST_F(BlendImportAreaLight, testImportLight) {
     std::vector<std::pair<std::string, size_t>> lightNames;
 
     for (size_t i = 0; i < pTest->mNumLights; i++) {
-        lightNames.push_back(std::make_pair(pTest->mLights[i]->mName.C_Str(), i));
+        lightNames.emplace_back(pTest->mLights[i]->mName.C_Str(), i);
     }
 
     std::sort(lightNames.begin(), lightNames.end());

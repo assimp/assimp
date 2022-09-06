@@ -270,7 +270,7 @@ public:
     void Clear();
 
 private:
-    X3DNodeElementBase *MACRO_USE_CHECKANDAPPLY(XmlNode &node, std::string pDEF, std::string pUSE, X3DElemType pType, X3DNodeElementBase *pNE);
+    X3DNodeElementBase *MACRO_USE_CHECKANDAPPLY(XmlNode &node, const std::string &pDEF, const std::string &pUSE, X3DElemType pType, X3DNodeElementBase *pNE);
     bool isNodeEmpty(XmlNode &node);
     void checkNodeMustBeEmpty(XmlNode &node);
     void skipUnsupportedNode(const std::string &pParentNodeName, XmlNode &node);

@@ -94,9 +94,7 @@ PLYImporter::PLYImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-PLYImporter::~PLYImporter() {
-    // empty
-}
+PLYImporter::~PLYImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

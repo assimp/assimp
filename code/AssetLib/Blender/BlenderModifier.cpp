@@ -71,10 +71,6 @@ static const fpCreateModifier creators[] = {
     nullptr // sentinel
 };
 
-// ------------------------------------------------------------------------------------------------
-struct SharedModifierData : ElemBase {
-    ModifierData modifier;
-};
 
 // ------------------------------------------------------------------------------------------------
 void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_data, const Scene &in, const Object &orig_object) {
@@ -157,6 +153,7 @@ void BlenderModifier_Mirror ::DoIt(aiNode &out, ConversionData &conv_data, const
     // hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
     const MirrorModifierData &mir = static_cast<const MirrorModifierData &>(orig_modifier);
     ai_assert(mir.modifier.type == ModifierData::eModifierType_Mirror);
+    std::shared_ptr<Object> mirror_ob = mir.mirror_ob.lock();
 
     conv_data.meshes->reserve(conv_data.meshes->size() + out.mNumMeshes);
 
@@ -171,8 +168,8 @@ void BlenderModifier_Mirror ::DoIt(aiNode &out, ConversionData &conv_data, const
         const float ys = mir.flag & MirrorModifierData::Flags_AXIS_Y ? -1.f : 1.f;
         const float zs = mir.flag & MirrorModifierData::Flags_AXIS_Z ? -1.f : 1.f;
 
-        if (mir.mirror_ob) {
-            const aiVector3D center(mir.mirror_ob->obmat[3][0], mir.mirror_ob->obmat[3][1], mir.mirror_ob->obmat[3][2]);
+        if (mirror_ob) {
+            const aiVector3D center(mirror_ob->obmat[3][0], mirror_ob->obmat[3][1], mirror_ob->obmat[3][2]);
             for (unsigned int j = 0; j < mesh->mNumVertices; ++j) {
                 aiVector3D &v = mesh->mVertices[j];
 

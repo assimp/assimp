@@ -65,7 +65,7 @@ ValidateDSProcess::ValidateDSProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ValidateDSProcess::~ValidateDSProcess() {}
+ValidateDSProcess::~ValidateDSProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

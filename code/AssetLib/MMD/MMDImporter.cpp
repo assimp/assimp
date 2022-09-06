@@ -83,9 +83,7 @@ MMDImporter::MMDImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
-MMDImporter::~MMDImporter() {
-    // empty
-}
+MMDImporter::~MMDImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an pmx file.
@@ -271,43 +269,30 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
                 dynamic_cast<pmx::PmxVertexSkinningSDEF *>(v->skinning.get());
         switch (v->skinning_type) {
         case pmx::PmxVertexSkinningType::BDEF1:
-            bone_vertex_map[vsBDEF1_ptr->bone_index].push_back(
-                    aiVertexWeight(index, 1.0));
+            bone_vertex_map[vsBDEF1_ptr->bone_index].emplace_back(index, 1.0);
             break;
         case pmx::PmxVertexSkinningType::BDEF2:
-            bone_vertex_map[vsBDEF2_ptr->bone_index1].push_back(
-                    aiVertexWeight(index, vsBDEF2_ptr->bone_weight));
-            bone_vertex_map[vsBDEF2_ptr->bone_index2].push_back(
-                    aiVertexWeight(index, 1.0f - vsBDEF2_ptr->bone_weight));
+            bone_vertex_map[vsBDEF2_ptr->bone_index1].emplace_back(index, vsBDEF2_ptr->bone_weight);
+            bone_vertex_map[vsBDEF2_ptr->bone_index2].emplace_back(index, 1.0f - vsBDEF2_ptr->bone_weight);
             break;
         case pmx::PmxVertexSkinningType::BDEF4:
-            bone_vertex_map[vsBDEF4_ptr->bone_index1].push_back(
-                    aiVertexWeight(index, vsBDEF4_ptr->bone_weight1));
-            bone_vertex_map[vsBDEF4_ptr->bone_index2].push_back(
-                    aiVertexWeight(index, vsBDEF4_ptr->bone_weight2));
-            bone_vertex_map[vsBDEF4_ptr->bone_index3].push_back(
-                    aiVertexWeight(index, vsBDEF4_ptr->bone_weight3));
-            bone_vertex_map[vsBDEF4_ptr->bone_index4].push_back(
-                    aiVertexWeight(index, vsBDEF4_ptr->bone_weight4));
+            bone_vertex_map[vsBDEF4_ptr->bone_index1].emplace_back(index, vsBDEF4_ptr->bone_weight1);
+            bone_vertex_map[vsBDEF4_ptr->bone_index2].emplace_back(index, vsBDEF4_ptr->bone_weight2);
+            bone_vertex_map[vsBDEF4_ptr->bone_index3].emplace_back(index, vsBDEF4_ptr->bone_weight3);
+            bone_vertex_map[vsBDEF4_ptr->bone_index4].emplace_back(index, vsBDEF4_ptr->bone_weight4);
             break;
         case pmx::PmxVertexSkinningType::SDEF: // TODO: how to use sdef_c, sdef_r0,
                 // sdef_r1?
-            bone_vertex_map[vsSDEF_ptr->bone_index1].push_back(
-                    aiVertexWeight(index, vsSDEF_ptr->bone_weight));
-            bone_vertex_map[vsSDEF_ptr->bone_index2].push_back(
-                    aiVertexWeight(index, 1.0f - vsSDEF_ptr->bone_weight));
+            bone_vertex_map[vsSDEF_ptr->bone_index1].emplace_back(index, vsSDEF_ptr->bone_weight);
+            bone_vertex_map[vsSDEF_ptr->bone_index2].emplace_back(index, 1.0f - vsSDEF_ptr->bone_weight);
             break;
         case pmx::PmxVertexSkinningType::QDEF:
             const auto vsQDEF_ptr =
                     dynamic_cast<pmx::PmxVertexSkinningQDEF *>(v->skinning.get());
-            bone_vertex_map[vsQDEF_ptr->bone_index1].push_back(
-                    aiVertexWeight(index, vsQDEF_ptr->bone_weight1));
-            bone_vertex_map[vsQDEF_ptr->bone_index2].push_back(
-                    aiVertexWeight(index, vsQDEF_ptr->bone_weight2));
-            bone_vertex_map[vsQDEF_ptr->bone_index3].push_back(
-                    aiVertexWeight(index, vsQDEF_ptr->bone_weight3));
-            bone_vertex_map[vsQDEF_ptr->bone_index4].push_back(
-                    aiVertexWeight(index, vsQDEF_ptr->bone_weight4));
+            bone_vertex_map[vsQDEF_ptr->bone_index1].emplace_back(index, vsQDEF_ptr->bone_weight1);
+            bone_vertex_map[vsQDEF_ptr->bone_index2].emplace_back(index, vsQDEF_ptr->bone_weight2);
+            bone_vertex_map[vsQDEF_ptr->bone_index3].emplace_back(index, vsQDEF_ptr->bone_weight3);
+            bone_vertex_map[vsQDEF_ptr->bone_index4].emplace_back(index, vsQDEF_ptr->bone_weight4);
             break;
         }
     }

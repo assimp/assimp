@@ -110,16 +110,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-DXFImporter::DXFImporter()
-: BaseImporter() {
-    // empty
-}
+DXFImporter::DXFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-DXFImporter::~DXFImporter() {
-    // empty
-}
+DXFImporter::~DXFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -475,7 +470,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output) {
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
     // push a new block onto the stack.
-    output.blocks.push_back( DXF::Block() );
+    output.blocks.emplace_back();
     DXF::Block& block = output.blocks.back();
 
     while( !reader.End() && !reader.Is(0,"ENDBLK")) {
@@ -520,7 +515,7 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) {
     // Push a new block onto the stack.
-    output.blocks.push_back( DXF::Block() );
+    output.blocks.emplace_back();
     DXF::Block& block = output.blocks.back();
 
     block.name = AI_DXF_ENTITIES_MAGIC_BLOCK;
@@ -550,7 +545,7 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
 }
 
 void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output) {
-    output.blocks.back().insertions.push_back( DXF::InsertBlock() );
+    output.blocks.back().insertions.emplace_back();
     DXF::InsertBlock& bl = output.blocks.back().insertions.back();
 
     while( !reader.End() && !reader.Is(0)) {

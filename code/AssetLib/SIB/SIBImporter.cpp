@@ -202,15 +202,11 @@ static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SIBImporter::SIBImporter() {
-    // empty
-}
+SIBImporter::SIBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SIBImporter::~SIBImporter() {
-    // empty
-}
+SIBImporter::~SIBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

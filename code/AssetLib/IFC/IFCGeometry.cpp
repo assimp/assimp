@@ -170,7 +170,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             continue;
         }
 
-        fake_openings.push_back(TempOpening());
+        fake_openings.emplace_back();
         TempOpening& opening = fake_openings.back();
 
         opening.extrusionDir = master_normal;
@@ -612,7 +612,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
             TempMesh& bounds = *t.profileMesh.get();
 
             if( bounds.mVerts.size() <= 2 ) {
-                nors.push_back(IfcVector3());
+                nors.emplace_back();
                 continue;
             }
             auto nor = ((bounds.mVerts[2] - bounds.mVerts[0]) ^ (bounds.mVerts[1] - bounds.mVerts[0])).Normalize();

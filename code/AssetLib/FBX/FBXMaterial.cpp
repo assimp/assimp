@@ -136,9 +136,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
 
 // ------------------------------------------------------------------------------------------------
-Material::~Material() {
-    // empty
-}
+Material::~Material() = default;
 
     aiVector2D uvTrans;
     aiVector2D uvScaling;
@@ -255,9 +253,7 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 }
 
 
-Texture::~Texture() {
-    // empty
-}
+Texture::~Texture() = default;
 
 LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name) :
         Object(id,element,name),
@@ -276,9 +272,7 @@ LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Docume
     }
 }
 
-LayeredTexture::~LayeredTexture() {
-    // empty
-}
+LayeredTexture::~LayeredTexture() = default;
 
 void LayeredTexture::fillTexture(const Document& doc) {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());

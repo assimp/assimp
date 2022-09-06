@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-Q3DImporter::Q3DImporter() {
-    // empty
-}
+Q3DImporter::Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Q3DImporter::~Q3DImporter() {
-    // empty
-}
+Q3DImporter::~Q3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -157,7 +153,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
             // Meshes chunk
         case 'm': {
             for (unsigned int quak = 0; quak < numMeshes; ++quak) {
-                meshes.push_back(Mesh());
+                meshes.emplace_back();
                 Mesh &mesh = meshes.back();
 
                 // read all vertices
@@ -184,7 +180,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
                 // number of indices
                 for (unsigned int i = 0; i < numVerts; ++i) {
-                    faces.push_back(Face(stream.GetI2()));
+                    faces.emplace_back(stream.GetI2());
                     if (faces.back().indices.empty())
                         throw DeadlyImportError("Quick3D: Found face with zero indices");
                 }
@@ -248,7 +244,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
         case 'c':
 
             for (unsigned int i = 0; i < numMats; ++i) {
-                materials.push_back(Material());
+                materials.emplace_back();
                 Material &mat = materials.back();
 
                 // read the material name
@@ -402,7 +398,7 @@ outer:
     // If we have no materials loaded - generate a default mat
     if (materials.empty()) {
         ASSIMP_LOG_INFO("Quick3D: No material found, generating one");
-        materials.push_back(Material());
+        materials.emplace_back();
         materials.back().diffuse = fgColor;
     }
 
@@ -422,7 +418,7 @@ outer:
                 (*fit).mat = 0;
             }
             if (fidx[(*fit).mat].empty()) ++pScene->mNumMeshes;
-            fidx[(*fit).mat].push_back(FaceIdx(p, q));
+            fidx[(*fit).mat].emplace_back(p, q);
         }
     }
     pScene->mNumMaterials = pScene->mNumMeshes;

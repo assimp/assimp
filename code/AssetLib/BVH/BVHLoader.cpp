@@ -88,7 +88,7 @@ BVHLoader::BVHLoader() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-BVHLoader::~BVHLoader() {}
+BVHLoader::~BVHLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -186,7 +186,7 @@ aiNode *BVHLoader::ReadNode() {
     std::vector<aiNode *> childNodes;
 
     // and create an bone entry for it
-    mNodes.push_back(Node(node));
+    mNodes.emplace_back(node);
     Node &internNode = mNodes.back();
 
     // now read the node's contents

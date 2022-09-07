@@ -63,7 +63,7 @@ struct Maybe {
     }
 
     /// @brief Will assign a value.
-    /// @param v The enw valid value.
+    /// @param v The new valid value.
     void Set(T &v) {
         ai_assert(!_valid);
 
@@ -79,6 +79,7 @@ struct Maybe {
     }
 
     Maybe &operator&() = delete;
+    Maybe(const Maybe &) = delete;
 
 private:
     T _val;

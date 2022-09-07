@@ -76,7 +76,7 @@ MD5Parser::MD5Parser(char *_buffer, unsigned int _fileSize) {
     // and read all sections until we're finished
     bool running = true;
     while (running) {
-        mSections.push_back(Section());
+        mSections.emplace_back();
         Section &sec = mSections.back();
         if (!ParseSection(sec)) {
             break;
@@ -158,7 +158,7 @@ bool MD5Parser::ParseSection(Section &out) {
                     break;
                 }
 
-                out.mElements.push_back(Element());
+                out.mElements.emplace_back();
                 Element &elem = out.mElements.back();
 
                 elem.iLineNumber = lineNumber;
@@ -253,7 +253,7 @@ MD5MeshParser::MD5MeshParser(SectionList &mSections) {
         } else if ((*iter).mName == "joints") {
             // "origin" -1 ( -0.000000 0.016430 -0.006044 ) ( 0.707107 0.000000 0.707107 )
             for (const auto &elem : (*iter).mElements) {
-                mJoints.push_back(BoneDesc());
+                mJoints.emplace_back();
                 BoneDesc &desc = mJoints.back();
 
                 const char *sz = elem.szStart;
@@ -267,7 +267,7 @@ MD5MeshParser::MD5MeshParser(SectionList &mSections) {
                 AI_MD5_READ_TRIPLE(desc.mRotationQuat); // normalized quaternion, so w is not there
             }
         } else if ((*iter).mName == "mesh") {
-            mMeshes.push_back(MeshDesc());
+            mMeshes.emplace_back();
             MeshDesc &desc = mMeshes.back();
 
             for (const auto &elem : (*iter).mElements) {
@@ -364,7 +364,7 @@ MD5AnimParser::MD5AnimParser(SectionList &mSections) {
         if ((*iter).mName == "hierarchy") {
             // "sheath" 0 63 6
             for (const auto &elem : (*iter).mElements) {
-                mAnimatedBones.push_back(AnimBoneDesc());
+                mAnimatedBones.emplace_back();
                 AnimBoneDesc &desc = mAnimatedBones.back();
 
                 const char *sz = elem.szStart;
@@ -389,7 +389,7 @@ MD5AnimParser::MD5AnimParser(SectionList &mSections) {
             for (const auto &elem : (*iter).mElements) {
                 const char *sz = elem.szStart;
 
-                mBaseFrames.push_back(BaseFrameDesc());
+                mBaseFrames.emplace_back();
                 BaseFrameDesc &desc = mBaseFrames.back();
 
                 AI_MD5_READ_TRIPLE(desc.vPositionXYZ);
@@ -401,7 +401,7 @@ MD5AnimParser::MD5AnimParser(SectionList &mSections) {
                 continue;
             }
 
-            mFrames.push_back(FrameDesc());
+            mFrames.emplace_back();
             FrameDesc &desc = mFrames.back();
             desc.iIndex = strtoul10((*iter).mGlobalValue.c_str());
 
@@ -459,7 +459,7 @@ MD5CameraParser::MD5CameraParser(SectionList &mSections) {
             for (const auto &elem : (*iter).mElements) {
                 const char *sz = elem.szStart;
 
-                frames.push_back(CameraAnimFrameDesc());
+                frames.emplace_back();
                 CameraAnimFrameDesc &cur = frames.back();
                 AI_MD5_READ_TRIPLE(cur.vPositionXYZ);
                 AI_MD5_READ_TRIPLE(cur.vRotationQuat);

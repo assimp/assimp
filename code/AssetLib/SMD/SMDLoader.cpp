@@ -95,9 +95,7 @@ SMDImporter::SMDImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SMDImporter::~SMDImporter() {
-    // empty
-}
+SMDImporter::~SMDImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -322,7 +320,7 @@ void SMDImporter::CreateOutputMeshes() {
                             "to the vertex' parent node");
                         continue;
                     }
-                    aaiBones[pairval.first].push_back(TempWeightListEntry(iNum,pairval.second));
+                    aaiBones[pairval.first].emplace_back(iNum,pairval.second);
                     fSum += pairval.second;
                 }
                 // ******************************************************************
@@ -350,8 +348,7 @@ void SMDImporter::CreateOutputMeshes() {
                             }
                         }
                     } else {
-                        aaiBones[face.avVertices[iVert].iParentNode].push_back(
-                            TempWeightListEntry(iNum,1.0f-fSum));
+                        aaiBones[face.avVertices[iVert].iParentNode].emplace_back(iNum,1.0f-fSum);
                     }
                 }
                 pcMesh->mFaces[iFace].mIndices[iVert] = iNum++;

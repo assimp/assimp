@@ -243,9 +243,7 @@ AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT :
 }
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::~IOSystem() {
-    // empty
-}
+AI_FORCE_INLINE IOSystem::~IOSystem() = default;
 
 // ----------------------------------------------------------------------------
 // For compatibility, the interface of some functions taking a std::string was

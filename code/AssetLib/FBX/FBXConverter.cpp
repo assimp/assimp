@@ -3319,7 +3319,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetKeyframeList(const std::vector<c
                 }
             }
 
-            inputs.push_back(std::make_tuple(Keys, Values, mapto));
+            inputs.emplace_back(Keys, Values, mapto);
         }
     }
     return inputs; // pray for NRVO :-)
@@ -3396,7 +3396,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                     }
                 }
             }
-            inputs.push_back(std::make_tuple(Keys, Values, mapto));
+            inputs.emplace_back(Keys, Values, mapto);
         }
     }
     return inputs;

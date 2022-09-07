@@ -279,8 +279,7 @@ ZipFile::ZipFile(std::string &filename, size_t size) :
     m_Buffer = std::unique_ptr<uint8_t[]>(new uint8_t[m_Size]);
 }
 
-ZipFile::~ZipFile() {
-}
+ZipFile::~ZipFile() = default;
 
 size_t ZipFile::Read(void *pvBuffer, size_t pSize, size_t pCount) {
     // Should be impossible

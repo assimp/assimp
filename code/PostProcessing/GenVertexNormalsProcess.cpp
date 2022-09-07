@@ -62,9 +62,7 @@ GenVertexNormalsProcess::GenVertexNormalsProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-GenVertexNormalsProcess::~GenVertexNormalsProcess() {
-    // nothing to do here
-}
+GenVertexNormalsProcess::~GenVertexNormalsProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

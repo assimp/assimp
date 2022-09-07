@@ -84,9 +84,7 @@ glTFImporter::glTFImporter() :
     // empty
 }
 
-glTFImporter::~glTFImporter() {
-    // empty
-}
+glTFImporter::~glTFImporter() = default;
 
 const aiImporterDesc *glTFImporter::GetInfo() const {
     return &desc;

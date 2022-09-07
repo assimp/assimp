@@ -88,9 +88,7 @@ IRRImporter::IRRImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-IRRImporter::~IRRImporter() {
-	// empty
-}
+IRRImporter::~IRRImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

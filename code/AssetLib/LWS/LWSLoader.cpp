@@ -141,9 +141,7 @@ LWSImporter::LWSImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LWSImporter::~LWSImporter() {
-    // nothing to do here
-}
+LWSImporter::~LWSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

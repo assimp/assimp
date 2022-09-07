@@ -89,9 +89,7 @@ ASEImporter::ASEImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ASEImporter::~ASEImporter() {
-    // empty
-}
+ASEImporter::~ASEImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

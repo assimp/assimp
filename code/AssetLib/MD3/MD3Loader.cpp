@@ -345,7 +345,7 @@ MD3Importer::MD3Importer() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MD3Importer::~MD3Importer() {}
+MD3Importer::~MD3Importer() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

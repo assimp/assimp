@@ -125,10 +125,10 @@ public:
         ai_assert(expect);
 
         fseek(actual,0,SEEK_END);
-        lengths.push(std::make_pair(static_cast<uint32_t>(ftell(actual)),0));
+        lengths.emplace(static_cast<uint32_t>(ftell(actual)),0);
         fseek(actual,0,SEEK_SET);
 
-        history.push_back(HistoryEntry("---",PerChunkCounter()));
+        history.emplace_back("---",PerChunkCounter());
     }
 
 public:
@@ -144,7 +144,7 @@ public:
         }
         else history.back().second[s] = 0;
 
-        history.push_back(HistoryEntry(s,PerChunkCounter()));
+        history.emplace_back(s,PerChunkCounter());
         debug_trace.push_back("PUSH " + s);
     }
 
@@ -158,7 +158,7 @@ public:
 
     /* push current chunk length and start offset on top of stack */
     void push_length(uint32_t nl, uint32_t start) {
-        lengths.push(std::make_pair(nl,start));
+        lengths.emplace(nl,start);
         ++cnt_chunks;
     }
 
@@ -569,8 +569,7 @@ public:
     {}
 
     //
-    ~sliced_chunk_reader() {
-    }
+    ~sliced_chunk_reader() = default;
 
 public:
 

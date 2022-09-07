@@ -137,9 +137,7 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMt
 }
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter::~ObjExporter() {
-    // empty
-}
+ObjExporter::~ObjExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibName() {

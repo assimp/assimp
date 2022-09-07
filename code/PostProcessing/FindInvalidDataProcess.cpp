@@ -62,9 +62,7 @@ FindInvalidDataProcess::FindInvalidDataProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-FindInvalidDataProcess::~FindInvalidDataProcess() {
-    // nothing to do here
-}
+FindInvalidDataProcess::~FindInvalidDataProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

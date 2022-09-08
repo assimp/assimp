@@ -82,8 +82,8 @@ struct Maybe {
     Maybe(const Maybe &) = delete;
 
 private:
-    T _val = false;
-    bool _valid;
+    T _val;
+    bool _valid = false;
 };
 
 } // namespace Assimp

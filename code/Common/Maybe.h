@@ -49,7 +49,7 @@ namespace Assimp {
 template <typename T>
 struct Maybe {
     /// @brief 
-    Maybe() : _valid(false) {}
+    Maybe() = default;
 
     /// @brief 
     /// @param val 
@@ -82,7 +82,7 @@ struct Maybe {
     Maybe(const Maybe &) = delete;
 
 private:
-    T _val;
+    T _val = false;
     bool _valid;
 };
 

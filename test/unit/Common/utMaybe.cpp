@@ -38,14 +38,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
 
-#include <assimp/defs.h>
+#include "UnitTestPCH.h"
+#include "Common/Maybe.h"
 
-namespace Assimp {
+using namespace Assimp;
 
-/// @brief  Checks if the platform supports SSE2 optimization
-/// @return true, if SSE2 is supported. false if SSE2 is not supported.
-bool ASSIMP_API CPUSupportsSSE2();
+class utMaybe : public ::testing::Test {
+    // empty
+};
 
-} // Namespace Assimp
+TEST_F(utMaybe, creationTest) {
+    Maybe<int> first(1);
+    EXPECT_EQ(first.Get(), 1);
+}

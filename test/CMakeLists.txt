@@ -89,6 +89,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utMaybe.cpp
   unit/Common/utMesh.cpp
   unit/Common/utStandardShapes.cpp
   unit/Common/uiScene.cpp

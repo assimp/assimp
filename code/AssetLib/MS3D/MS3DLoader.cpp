@@ -86,8 +86,7 @@ MS3DImporter::MS3DImporter()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MS3DImporter::~MS3DImporter()
-{}
+MS3DImporter::~MS3DImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
@@ -399,7 +398,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         // if one of the groups has no material assigned, but there are other
         // groups with materials, a default material needs to be added (
         // scenepreprocessor adds a default material only if nummat==0).
-        materials.push_back(TempMaterial());
+        materials.emplace_back();
         TempMaterial& m = materials.back();
 
         strcpy(m.name,"<MS3D_DefaultMat>");

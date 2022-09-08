@@ -54,7 +54,7 @@ macro(clear_if_changed TESTVAR)
       set(${var} "NOTFOUND" CACHE STRING "x" FORCE)
     endforeach(var)
   endif ()
-  set(${TESTVAR}_INT_CHECK ${${TESTVAR}} CACHE INTERNAL "x" FORCE)
+  set(${TESTVAR}_INT_CHECK "${${TESTVAR}}" CACHE INTERNAL "x" FORCE)
 endmacro(clear_if_changed)
 
 # Try to get some hints from pkg-config, if available

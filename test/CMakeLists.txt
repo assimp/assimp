@@ -1,6 +1,5 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
 # Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
@@ -90,6 +89,7 @@ SET( COMMON
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/Common/utMaybe.cpp
   unit/Common/utMesh.cpp
   unit/Common/utStandardShapes.cpp
   unit/Common/uiScene.cpp
@@ -98,6 +98,8 @@ SET( COMMON
   unit/Common/utAssertHandler.cpp
   unit/Common/utXmlParser.cpp
   unit/Common/utBase64.cpp
+  unit/Common/utHash.cpp
+  unit/Common/utBaseProcess.cpp
 )
 
 SET( IMPORTERS

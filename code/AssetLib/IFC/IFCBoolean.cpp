@@ -310,7 +310,7 @@ bool IntersectsBoundaryProfile(const IfcVector3 &e0, const IfcVector3 &e1, const
                 if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10)
                     continue;
             }
-            intersect_results.push_back(std::make_pair(i, e0));
+            intersect_results.emplace_back(i, e0);
             continue;
         }
 
@@ -324,7 +324,7 @@ bool IntersectsBoundaryProfile(const IfcVector3 &e0, const IfcVector3 &e1, const
                 if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10)
                     continue;
             }
-            intersect_results.push_back(std::make_pair(i, p));
+            intersect_results.emplace_back(i, p);
         }
     }
 
@@ -504,7 +504,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
                 }
                 // now add them to the list of intersections
                 for (size_t b = 0; b < intersected_boundary.size(); ++b)
-                    intersections.push_back(std::make_tuple(a, proj_inv * intersected_boundary[b].second, intersected_boundary[b].first));
+                    intersections.emplace_back(a, proj_inv * intersected_boundary[b].second, intersected_boundary[b].first);
 
                 // and calculate our new inside/outside state
                 if (intersected_boundary.size() & 1)

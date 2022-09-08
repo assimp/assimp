@@ -175,7 +175,6 @@ Element::~Element()
      // no need to delete tokens, they are owned by the parser
 }
 
-// ------------------------------------------------------------------------------------------------
 Scope::Scope(Parser& parser,bool topLevel)
 {
     if(!topLevel) {
@@ -638,9 +637,9 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, d += 3) {
-                out.push_back(aiVector3D(static_cast<ai_real>(d[0]),
+                out.emplace_back(static_cast<ai_real>(d[0]),
                     static_cast<ai_real>(d[1]),
-                    static_cast<ai_real>(d[2])));
+                    static_cast<ai_real>(d[2]));
             }
             // for debugging
             /*for ( size_t i = 0; i < out.size(); i++ ) {
@@ -653,7 +652,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, f += 3) {
-                out.push_back(aiVector3D(f[0],f[1],f[2]));
+                out.emplace_back(f[0],f[1],f[2]);
             }
         }
 
@@ -727,16 +726,16 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, d += 4) {
-                out.push_back(aiColor4D(static_cast<float>(d[0]),
+                out.emplace_back(static_cast<float>(d[0]),
                     static_cast<float>(d[1]),
                     static_cast<float>(d[2]),
-                    static_cast<float>(d[3])));
+                    static_cast<float>(d[3]));
             }
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, f += 4) {
-                out.push_back(aiColor4D(f[0],f[1],f[2],f[3]));
+                out.emplace_back(f[0],f[1],f[2],f[3]);
             }
         }
         return;
@@ -808,13 +807,13 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el) {
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, d += 2) {
-                out.push_back(aiVector2D(static_cast<float>(d[0]),
-                    static_cast<float>(d[1])));
+                out.emplace_back(static_cast<float>(d[0]),
+                    static_cast<float>(d[1]));
             }
         } else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, f += 2) {
-                out.push_back(aiVector2D(f[0],f[1]));
+                out.emplace_back(f[0],f[1]);
             }
         }
 
@@ -968,8 +967,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of uints
-void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -1192,7 +1190,6 @@ aiMatrix4x4 ReadMatrix(const Element& element)
     result.Transpose();
     return result;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsString() with ParseError handling

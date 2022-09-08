@@ -59,17 +59,11 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ComputeUVMappingProcess::ComputeUVMappingProcess()
-{
-    // nothing to do here
-}
+ComputeUVMappingProcess::ComputeUVMappingProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ComputeUVMappingProcess::~ComputeUVMappingProcess()
-{
-    // nothing to do here
-}
+ComputeUVMappingProcess::~ComputeUVMappingProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -415,7 +409,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
                     if (!DefaultLogger::isNullLogger())
                     {
                         ai_snprintf(buffer, 1024, "Found non-UV mapped texture (%s,%u). Mapping type: %s",
-                            TextureTypeToString((aiTextureType)prop->mSemantic),prop->mIndex,
+                            aiTextureTypeToString((aiTextureType)prop->mSemantic),prop->mIndex,
                             MappingTypeToString(mapping));
 
                         ASSIMP_LOG_INFO(buffer);

@@ -73,9 +73,7 @@ SpatialSort::SpatialSort() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SpatialSort::~SpatialSort() {
-    // empty
-}
+SpatialSort::~SpatialSort() = default;
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,
@@ -116,7 +114,7 @@ void SpatialSort::Append(const aiVector3D *pPositions, unsigned int pNumPosition
     for (unsigned int a = 0; a < pNumPositions; a++) {
         const char *tempPointer = reinterpret_cast<const char *>(pPositions);
         const aiVector3D *vec = reinterpret_cast<const aiVector3D *>(tempPointer + a * pElementOffset);
-        mPositions.push_back(Entry(static_cast<unsigned int>(a + initial), *vec));
+        mPositions.emplace_back(static_cast<unsigned int>(a + initial), *vec);
     }
 
     if (pFinalize) {

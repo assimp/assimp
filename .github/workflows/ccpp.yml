@@ -43,7 +43,7 @@ jobs:
             toolchain: ninja-vs-win64-cxx17
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - uses: lukka/get-cmake@latest
     
@@ -64,21 +64,21 @@ jobs:
 
     - name: Checkout Hunter toolchains
       if: endsWith(matrix.name, 'hunter')
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: cpp-pm/polly
         path: cmake/polly
 
     - name: Remove contrib directory for Hunter builds
       if: contains(matrix.name, 'hunter')
-      uses: JesseTG/rm@v1.0.2
+      uses: JesseTG/rm@v1.0.3
       with:
         path: contrib
 
     - name: Cache DX SDK
       id: dxcache
       if: contains(matrix.name, 'windows')
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: '${{ github.workspace }}/DX_SDK'
         key: ${{ runner.os }}-DX_SDK
@@ -110,7 +110,7 @@ jobs:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
         cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
-        buildWithCMakeArgs: '-- -v'
+        buildWithCMakeArgs: '-- -j 24 -v'
         buildDirectory: '${{ github.workspace }}/build/'
         
     - name: Exclude certain tests in Hunter specific builds
@@ -122,7 +122,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'

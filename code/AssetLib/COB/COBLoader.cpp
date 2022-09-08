@@ -91,15 +91,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-COBImporter::COBImporter() {
-    // empty
-}
+COBImporter::COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-COBImporter::~COBImporter() {
-    // empty
-}
+COBImporter::~COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -522,7 +518,7 @@ void COBImporter::ReadMat1_Ascii(Scene &out, LineSplitter &splitter, const Chunk
         return;
     }
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 
@@ -753,7 +749,7 @@ void COBImporter::ReadPolH_Ascii(Scene &out, LineSplitter &splitter, const Chunk
                     ThrowException("Expected Face line");
                 }
 
-                msh.faces.push_back(Face());
+                msh.faces.emplace_back();
                 Face &face = msh.faces.back();
 
                 face.indices.resize(strtoul10(splitter[2]));
@@ -956,7 +952,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene &out, StreamReaderLE &reader, const
                 ThrowException(format("A hole is the first entity in the `PolH` chunk with id ") << nfo.id);
             }
         } else
-            msh.faces.push_back(Face());
+            msh.faces.emplace_back();
         Face &f = msh.faces.back();
 
         const size_t num = reader.GetI2();
@@ -968,7 +964,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene &out, StreamReaderLE &reader, const
         }
 
         for (size_t x = 0; x < num; ++x) {
-            f.indices.push_back(VertexIndex());
+            f.indices.emplace_back();
 
             VertexIndex &v = f.indices.back();
             v.pos_idx = reader.GetI4();
@@ -1008,7 +1004,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
 
     const chunk_guard cn(nfo, reader);
 
-    out.materials.push_back(Material());
+    out.materials.emplace_back();
     Material &mat = out.materials.back();
     mat = nfo;
 

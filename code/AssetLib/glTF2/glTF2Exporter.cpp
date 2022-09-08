@@ -124,9 +124,7 @@ glTF2Exporter::glTF2Exporter(const char *filename, IOSystem *pIOSystem, const ai
     }
 }
 
-glTF2Exporter::~glTF2Exporter() {
-    // empty
-}
+glTF2Exporter::~glTF2Exporter() = default;
 
 /*
  * Copy a 4x4 matrix from struct aiMatrix to typedef mat4.
@@ -683,7 +681,7 @@ bool glTF2Exporter::GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &she
     }
 
     // Default Sheen color factor {0,0,0} disables Sheen, so do not export
-    if (sheen.sheenColorFactor == defaultSheenFactor) {
+    if (sheen.sheenColorFactor[0] == defaultSheenFactor[0] && sheen.sheenColorFactor[1] == defaultSheenFactor[1] && sheen.sheenColorFactor[2] == defaultSheenFactor[2]) {
         return false;
     }
 
@@ -908,7 +906,7 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin> &skinRef) {
     do {
         startNodeRef = parentNodeRef;
         parentNodeRef = startNodeRef->parent;
-    } while (!parentNodeRef->jointName.empty());
+    } while (parentNodeRef && !parentNodeRef->jointName.empty());
 
     return parentNodeRef;
 }

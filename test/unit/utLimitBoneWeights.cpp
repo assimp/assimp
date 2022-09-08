@@ -114,7 +114,7 @@ TEST_F(LimitBoneWeightsTest, testProcess) {
         aiBone &pcBone = **(mMesh->mBones + i);
         for (unsigned int q = 0; q < pcBone.mNumWeights; ++q) {
             aiVertexWeight weight = pcBone.mWeights[q];
-            asWeights[weight.mVertexId].push_back(LimitBoneWeightsProcess::Weight(i, weight.mWeight));
+            asWeights[weight.mVertexId].emplace_back(i, weight.mWeight);
         }
     }
 

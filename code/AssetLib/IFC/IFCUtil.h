@@ -344,8 +344,7 @@ protected:
 public:
     typedef std::pair<IfcFloat, IfcFloat> ParamRange;
 
-    virtual ~Curve() {}
-
+    virtual ~Curve() = default;
 
     // check if a curve is closed
     virtual bool IsClosed() const = 0;

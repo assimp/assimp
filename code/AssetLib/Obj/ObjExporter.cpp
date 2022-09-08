@@ -137,9 +137,7 @@ ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene, bool noMt
 }
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter::~ObjExporter() {
-    // empty
-}
+ObjExporter::~ObjExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialLibName() {
@@ -271,12 +269,12 @@ void ObjExporter::WriteGeometryFile(bool noMtl) {
     if ( !useVc ) {
         mOutput << "# " << vp.size() << " vertex positions" << endl;
         for ( const vertexData& v : vp ) {
-            mOutput << "v  " << v.vp.x << " " << v.vp.y << " " << v.vp.z << endl;
+            mOutput << "v " << v.vp.x << " " << v.vp.y << " " << v.vp.z << endl;
         }
     } else {
         mOutput << "# " << vp.size() << " vertex positions and colors" << endl;
         for ( const vertexData& v : vp ) {
-            mOutput << "v  " << v.vp.x << " " << v.vp.y << " " << v.vp.z << " " << v.vc.r << " " << v.vc.g << " " << v.vc.b << endl;
+            mOutput << "v " << v.vp.x << " " << v.vp.y << " " << v.vp.z << " " << v.vc.r << " " << v.vc.g << " " << v.vc.b << endl;
         }
     }
     mOutput << endl;
@@ -333,7 +331,7 @@ void ObjExporter::WriteGeometryFile(bool noMtl) {
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat) {
-    mMeshes.push_back(MeshInstance() );
+    mMeshes.emplace_back();
     MeshInstance& mesh = mMeshes.back();
 
     if ( nullptr != m->mColors[ 0 ] ) {

@@ -90,7 +90,7 @@ void LWS::Element::Parse(const char *&buffer) {
         } else if (*buffer == '}')
             return;
 
-        children.push_back(Element());
+        children.emplace_back();
 
         // copy data line - read token per token
 
@@ -141,9 +141,7 @@ LWSImporter::LWSImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LWSImporter::~LWSImporter() {
-    // nothing to do here
-}
+LWSImporter::~LWSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -199,7 +197,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
         const char *c = (*it).tokens[1].c_str();
 
         if ((*it).tokens[0] == "Key") {
-            fill.keys.push_back(LWO::Key());
+            fill.keys.emplace_back();
             LWO::Key &key = fill.keys.back();
 
             float f;
@@ -262,7 +260,7 @@ void LWSImporter::ReadEnvelope_Old(
     num = strtoul10((*it).tokens[0].c_str());
     for (unsigned int i = 0; i < num; ++i) {
 
-        nodes.channels.push_back(LWO::Envelope());
+        nodes.channels.emplace_back();
         LWO::Envelope &envl = nodes.channels.back();
 
         envl.index = i;
@@ -313,6 +311,9 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
             std::string::size_type t = src.path.substr(s).find_last_of('.');
 
             nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
+            if (nd->mName.length > MAXLEN) {
+                nd->mName.length = MAXLEN;
+            }
             return;
         }
     }
@@ -381,7 +382,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 
         //Push attachment, if the object came from an external file
         if (obj) {
-            attach.push_back(AttachmentInfo(obj, nd));
+            attach.emplace_back(obj, nd);
         }
     }
 
@@ -513,7 +514,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::list<LWS::NodeDesc> nodes;
 
     unsigned int cur_light = 0, cur_camera = 0, cur_object = 0;
-    unsigned int num_light = 0, num_camera = 0, num_object = 0;
+    unsigned int num_light = 0, num_camera = 0;
 
     // check magic identifier, 'LWSC'
     bool motion_file = false;
@@ -583,7 +584,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             d.id = batch.AddLoadRequest(path, 0, &props);
 
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "LoadObject") { // 'LoadObject': load a LWO file into the scene-graph
 
             // add node to list
@@ -601,7 +601,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             d.path = path;
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "AddNullObject") { // 'AddNullObject': add a dummy node to the hierarchy
 
             // add node to list
@@ -615,8 +614,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
             d.name = c;
             nodes.push_back(d);
-
-            num_object++;
         }
         // 'NumChannels': Number of envelope channels assigned to last layer
         else if ((*it).tokens[0] == "NumChannels") {
@@ -638,7 +635,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
 
             // important: index of channel
-            nodes.back().channels.push_back(LWO::Envelope());
+            nodes.back().channels.emplace_back();
             LWO::Envelope &env = nodes.back().channels.back();
 
             env.index = strtoul10(c);

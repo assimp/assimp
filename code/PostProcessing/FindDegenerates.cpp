@@ -65,9 +65,7 @@ FindDegeneratesProcess::FindDegeneratesProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-FindDegeneratesProcess::~FindDegeneratesProcess() {
-    // nothing to do here
-}
+FindDegeneratesProcess::~FindDegeneratesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

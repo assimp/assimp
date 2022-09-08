@@ -237,6 +237,7 @@ protected:
     std::vector<aiAnimation *> mAnims;
 
     bool noSkeletonMesh;
+    bool removeEmptyBones;
     bool ignoreUpDirection;
     bool useColladaName;
 

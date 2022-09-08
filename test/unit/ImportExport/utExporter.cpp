@@ -55,9 +55,7 @@ public:
         // empty
     }
 
-    virtual ~TestProgressHandler() {
-        // empty
-    }
+    virtual ~TestProgressHandler() = default;
 
     bool Update(float percentage = -1.f) override {
         mPercentage = percentage;

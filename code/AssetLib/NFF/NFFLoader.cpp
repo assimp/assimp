@@ -73,11 +73,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-NFFImporter::NFFImporter() {}
+NFFImporter::NFFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-NFFImporter::~NFFImporter() {}
+NFFImporter::~NFFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -167,7 +167,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
         // 'matdef' starts a new material in the file
         else if (TokenMatch(sz, "matdef", 6)) {
             // add a new material to the list
-            output.push_back(ShadingInfo());
+            output.emplace_back();
             curShader = &output.back();
 
             // parse the name of the material
@@ -549,7 +549,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         }
                     }
                     if (!mesh) {
-                        meshes.push_back(MeshInfo(PatchType_Simple, false));
+                        meshes.emplace_back(PatchType_Simple, false);
                         mesh = &meshes.back();
                         mesh->matIndex = matIdx;
 
@@ -614,7 +614,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     }
 
                     if (!currentMeshWithUVCoords) {
-                        meshesWithUVCoords.push_back(MeshInfo(PatchType_UVAndNormals));
+                        meshesWithUVCoords.emplace_back(PatchType_UVAndNormals);
                         currentMeshWithUVCoords = &meshesWithUVCoords.back();
                         currentMeshWithUVCoords->shader = s;
                     }
@@ -631,7 +631,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     }
 
                     if (!currentMeshWithNormals) {
-                        meshesWithNormals.push_back(MeshInfo(PatchType_Normals));
+                        meshesWithNormals.emplace_back(PatchType_Normals);
                         currentMeshWithNormals = &meshesWithNormals.back();
                         currentMeshWithNormals->shader = s;
                     }
@@ -649,7 +649,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     }
 
                     if (!currentMesh) {
-                        meshes.push_back(MeshInfo(PatchType_Simple));
+                        meshes.emplace_back(PatchType_Simple);
                         currentMesh = &meshes.back();
                         currentMesh->shader = s;
                     }
@@ -749,7 +749,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 'l' - light source
             else if (TokenMatch(sz, "l", 1)) {
-                lights.push_back(Light());
+                lights.emplace_back();
                 Light &light = lights.back();
 
                 AI_NFF_PARSE_TRIPLE(light.position);
@@ -758,7 +758,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 's' - sphere
             else if (TokenMatch(sz, "s", 1)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_SPHERE;
@@ -774,7 +774,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 'dod' - dodecahedron
             else if (TokenMatch(sz, "dod", 3)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_SPHERE;
@@ -791,7 +791,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
             // 'oct' - octahedron
             else if (TokenMatch(sz, "oct", 3)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_SPHERE;
@@ -808,7 +808,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
             // 'tet' - tetrahedron
             else if (TokenMatch(sz, "tet", 3)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_SPHERE;
@@ -825,7 +825,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
             // 'hex' - hexahedron
             else if (TokenMatch(sz, "hex", 3)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_BOX;
@@ -841,7 +841,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 'c' - cone
             else if (TokenMatch(sz, "c", 1)) {
-                meshesLocked.push_back(MeshInfo(PatchType_Simple, true));
+                meshesLocked.emplace_back(PatchType_Simple, true);
                 MeshInfo &curMesh = meshesLocked.back();
                 curMesh.shader = s;
                 curMesh.shader.mapping = aiTextureMapping_CYLINDER;

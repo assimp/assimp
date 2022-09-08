@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-RAWImporter::RAWImporter() {
-    // empty
-}
+RAWImporter::RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-RAWImporter::~RAWImporter() {
-    // empty
-}
+RAWImporter::~RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -138,7 +134,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
                 }
             }
             if (sz2) {
-                outGroups.push_back(GroupInformation(std::string(sz, length)));
+                outGroups.emplace_back(std::string(sz, length));
                 curGroup = outGroups.end() - 1;
             }
         } else {
@@ -179,7 +175,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
             }
             // if we don't have the mesh, create it
             if (!output) {
-                (*curGroup).meshes.push_back(MeshInformation(std::string(sz, length)));
+                (*curGroup).meshes.emplace_back(std::string(sz, length));
                 output = &((*curGroup).meshes.back());
             }
             if (12 == num) {
@@ -188,13 +184,13 @@ void RAWImporter::InternReadFile(const std::string &pFile,
                 output->colors.push_back(v);
                 output->colors.push_back(v);
 
-                output->vertices.push_back(aiVector3D(data[3], data[4], data[5]));
-                output->vertices.push_back(aiVector3D(data[6], data[7], data[8]));
-                output->vertices.push_back(aiVector3D(data[9], data[10], data[11]));
+                output->vertices.emplace_back(data[3], data[4], data[5]);
+                output->vertices.emplace_back(data[6], data[7], data[8]);
+                output->vertices.emplace_back(data[9], data[10], data[11]);
             } else {
-                output->vertices.push_back(aiVector3D(data[0], data[1], data[2]));
-                output->vertices.push_back(aiVector3D(data[3], data[4], data[5]));
-                output->vertices.push_back(aiVector3D(data[6], data[7], data[8]));
+                output->vertices.emplace_back(data[0], data[1], data[2]);
+                output->vertices.emplace_back(data[3], data[4], data[5]);
+                output->vertices.emplace_back(data[6], data[7], data[8]);
             }
         }
     }

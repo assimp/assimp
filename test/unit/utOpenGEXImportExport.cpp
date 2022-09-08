@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AbstractImportExportBase.h"
+
+#include <assimp/scene.h>
 #include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>
@@ -51,11 +53,12 @@ public:
     bool importerTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0);
+        EXPECT_EQ(1u, scene->mNumMeshes);
         return nullptr != scene;
     }
 };
 
-TEST_F(utOpenGEXImportExport, importLWSFromFileTest) {
+TEST_F(utOpenGEXImportExport, importOpenGexFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 

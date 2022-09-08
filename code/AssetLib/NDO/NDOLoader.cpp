@@ -70,13 +70,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-NDOImporter::NDOImporter()
-{}
+NDOImporter::NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-NDOImporter::~NDOImporter()
-{}
+NDOImporter::~NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -136,7 +134,9 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         ASSIMP_LOG_INFO("NDO file format is 1.2");
     }
     else {
-        ASSIMP_LOG_WARN( "Unrecognized nendo file format version, continuing happily ... :", (head+6));
+        char buff[4] = {0};
+        memcpy(buff, head+6, 3);
+        ASSIMP_LOG_WARN( "Unrecognized nendo file format version, continuing happily ... :", buff);
     }
 
     reader.IncPtr(2); /* skip flags */
@@ -169,7 +169,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.edges.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.edges.push_back(Edge());
+            obj.edges.emplace_back();
             Edge& edge = obj.edges.back();
 
             for (unsigned int i = 0; i< 8; ++i) {
@@ -186,7 +186,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.faces.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.faces.push_back(Face());
+            obj.faces.emplace_back();
             Face& face = obj.faces.back();
 
             face.elem = file_format >= 12 ? reader.GetU4() : reader.GetU2();
@@ -197,7 +197,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         obj.vertices.reserve(temp);
         for (unsigned int e = 0; e < temp; ++e) {
 
-            obj.vertices.push_back(Vertex());
+            obj.vertices.emplace_back();
             Vertex& v = obj.vertices.back();
 
             v.num = file_format >= 12 ? reader.GetU4() : reader.GetU2();

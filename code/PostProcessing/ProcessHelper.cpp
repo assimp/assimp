@@ -63,7 +63,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
                     return;
                 }
             }
-            out.push_back(std::string(base, (size_t)(s - base)));
+            out.emplace_back(base, (size_t)(s - base));
             ++s;
         } else {
             out.push_back(GetNextToken(s));
@@ -208,7 +208,7 @@ VertexWeightTable *ComputeVertexBoneWeightTable(const aiMesh *pMesh) {
         aiBone *bone = pMesh->mBones[i];
         for (unsigned int a = 0; a < bone->mNumWeights; ++a) {
             const aiVertexWeight &weight = bone->mWeights[a];
-            avPerVertexWeights[weight.mVertexId].push_back(std::pair<unsigned int, float>(i, weight.mWeight));
+            avPerVertexWeights[weight.mVertexId].emplace_back(i, weight.mWeight);
         }
     }
     return avPerVertexWeights;

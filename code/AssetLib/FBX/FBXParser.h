@@ -89,7 +89,7 @@ class Element
 {
 public:
     Element(const Token& key_token, Parser& parser);
-    ~Element();
+    ~Element() = default;
 
     const Scope* Compound() const {
         return compound;

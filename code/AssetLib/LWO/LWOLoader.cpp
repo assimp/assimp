@@ -100,9 +100,7 @@ LWOImporter::LWOImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LWOImporter::~LWOImporter() {
-    // empty
-}
+LWOImporter::~LWOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -287,7 +285,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
             if (UINT_MAX == iDefaultSurface) {
                 pSorted.erase(pSorted.end() - 1);
             }
-            for (unsigned int p = 0, j = 0; j < mSurfaces->size(); ++j) {
+            for (unsigned int j = 0; j < mSurfaces->size(); ++j) {
                 SortedRep &sorted = pSorted[j];
                 if (sorted.empty())
                     continue;
@@ -425,7 +423,6 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                 } else {
                     ASSIMP_LOG_VERBOSE_DEBUG("LWO2: No need to compute normals, they're already there");
                 }
-                ++p;
             }
         }
 
@@ -1098,7 +1095,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly) {
 void LWOImporter::LoadLWO2Clip(unsigned int length) {
     AI_LWO_VALIDATE_CHUNK_LENGTH(length, CLIP, 10);
 
-    mClips.push_back(LWO::Clip());
+    mClips.emplace_back();
     LWO::Clip &clip = mClips.back();
 
     // first - get the index of the clip
@@ -1168,7 +1165,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length) {
 void LWOImporter::LoadLWO3Clip(unsigned int length) {
     AI_LWO_VALIDATE_CHUNK_LENGTH(length, CLIP, 12);
 
-    mClips.push_back(LWO::Clip());
+    mClips.emplace_back();
     LWO::Clip &clip = mClips.back();
 
     // first - get the index of the clip
@@ -1241,7 +1238,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length) {
     LE_NCONST uint8_t *const end = mFileBuffer + length;
     AI_LWO_VALIDATE_CHUNK_LENGTH(length, ENVL, 4);
 
-    mEnvelopes.push_back(LWO::Envelope());
+    mEnvelopes.emplace_back();
     LWO::Envelope &envelope = mEnvelopes.back();
 
     // Get the index of the envelope
@@ -1293,7 +1290,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length) {
             case AI_LWO_KEY: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, KEY, 8);
 
-                envelope.keys.push_back(LWO::Key());
+                envelope.keys.emplace_back();
                 LWO::Key &key = envelope.keys.back();
 
                 key.time = GetF4();
@@ -1349,7 +1346,7 @@ void LWOImporter::LoadLWO3Envelope(unsigned int length) {
     LE_NCONST uint8_t *const end = mFileBuffer + length;
     AI_LWO_VALIDATE_CHUNK_LENGTH(length, ENVL, 4);
 
-    mEnvelopes.push_back(LWO::Envelope());
+    mEnvelopes.emplace_back();
     LWO::Envelope &envelope = mEnvelopes.back();
 
     // Get the index of the envelope
@@ -1391,7 +1388,7 @@ void LWOImporter::LoadLWO3Envelope(unsigned int length) {
             case AI_LWO_KEY: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, KEY, 10);
 
-                envelope.keys.push_back(LWO::Key());
+                envelope.keys.emplace_back();
                 LWO::Key &key = envelope.keys.back();
 
                 key.time = GetF4();
@@ -1541,6 +1538,7 @@ void LWOImporter::LoadLWO2File() {
                     break;
                 }
                 // --- intentionally no break here
+                // fallthrough
             case AI_LWO_VMAP: {
                 if (skip)
                     break;

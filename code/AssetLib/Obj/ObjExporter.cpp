@@ -269,12 +269,12 @@ void ObjExporter::WriteGeometryFile(bool noMtl) {
     if ( !useVc ) {
         mOutput << "# " << vp.size() << " vertex positions" << endl;
         for ( const vertexData& v : vp ) {
-            mOutput << "v  " << v.vp.x << " " << v.vp.y << " " << v.vp.z << endl;
+            mOutput << "v " << v.vp.x << " " << v.vp.y << " " << v.vp.z << endl;
         }
     } else {
         mOutput << "# " << vp.size() << " vertex positions and colors" << endl;
         for ( const vertexData& v : vp ) {
-            mOutput << "v  " << v.vp.x << " " << v.vp.y << " " << v.vp.z << " " << v.vc.r << " " << v.vc.g << " " << v.vc.b << endl;
+            mOutput << "v " << v.vp.x << " " << v.vp.y << " " << v.vp.z << " " << v.vc.r << " " << v.vc.g << " " << v.vc.b << endl;
         }
     }
     mOutput << endl;

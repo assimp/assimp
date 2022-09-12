@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -60,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_CONFIG_H_INC
 #define AI_CONFIG_H_INC
 
-
 // ###########################################################################
 // LIBRARY SETTINGS
 // General, global settings
@@ -79,7 +77,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_GLOB_MEASURE_TIME  \
     "GLOB_MEASURE_TIME"
 
-
 // ---------------------------------------------------------------------------
 /** @brief Global setting to disable generation of skeleton dummy meshes
  *
@@ -91,33 +88,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_IMPORT_NO_SKELETON_MESHES \
     "IMPORT_NO_SKELETON_MESHES"
 
-
-
-# if 0 // not implemented yet
-// ---------------------------------------------------------------------------
-/** @brief Set Assimp's multithreading policy.
- *
- * This setting is ignored if Assimp was built without boost.thread
- * support (ASSIMP_BUILD_NO_THREADING, which is implied by ASSIMP_BUILD_BOOST_WORKAROUND).
- * Possible values are: -1 to let Assimp decide what to do, 0 to disable
- * multithreading entirely and any number larger than 0 to force a specific
- * number of threads. Assimp is always free to ignore this settings, which is
- * merely a hint. Usually, the default value (-1) will be fine. However, if
- * Assimp is used concurrently from multiple user threads, it might be useful
- * to limit each Importer instance to a specific number of cores.
- *
- * For more information, see the @link threading Threading page@endlink.
- * Property type: int, default value: -1.
- */
-#define AI_CONFIG_GLOB_MULTITHREADING  \
-    "GLOB_MULTITHREADING"
-#endif
-
 // ###########################################################################
 // POST PROCESSING SETTINGS
 // Various stuff to fine-tune the behavior of a specific post processing step.
 // ###########################################################################
-
 
 // ---------------------------------------------------------------------------
 /** @brief Maximum bone count per mesh for the SplitbyBoneCount step.
@@ -131,12 +105,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_PP_SBBC_MAX_BONES \
     "PP_SBBC_MAX_BONES"
 
-
 // default limit for bone count
 #if (!defined AI_SBBC_DEFAULT_MAX_BONES)
 #   define AI_SBBC_DEFAULT_MAX_BONES        60
 #endif
-
 
 // ---------------------------------------------------------------------------
 /** @brief  Specifies the maximum angle that may be between two vertex tangents
@@ -173,7 +145,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
     "PP_GSN_MAX_SMOOTHING_ANGLE"
-
 
 // ---------------------------------------------------------------------------
 /** @brief Sets the colormap (= palette) to be used to decode embedded
@@ -540,7 +511,6 @@ enum aiComponent
  */
 #define AI_CONFIG_FAVOUR_SPEED              \
  "FAVOUR_SPEED"
-
 
 // ###########################################################################
 // IMPORTER SETTINGS
@@ -1090,6 +1060,8 @@ enum aiComponent
  *  Point clouds are only a collection of vertices which have nor spatial organization
  *  by a face and the validation process will remove them. Enabling this feature will
  *  switch off the flag and enable the functionality to export pure point clouds.
+ *
+ * Property type: Bool. Default value: false.
  */
 #define AI_CONFIG_EXPORT_POINT_CLOUDS "EXPORT_POINT_CLOUDS"
 

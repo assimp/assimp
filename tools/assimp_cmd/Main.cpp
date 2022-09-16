@@ -58,11 +58,12 @@ public:
 	~ConsoleProgressHandler() override = default;
 
 	bool Update(float percentage) override {
-        std::cout << percentage * 100.0f << " %\n";
+        std::cout << "\r" << percentage * 100.0f << " %";
 		return true;
     }
 };
-const char* AICMD_MSG_ABOUT =
+
+constexpr char AICMD_MSG_ABOUT[] =
 "------------------------------------------------------ \n"
 "Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
 " -- Commandline toolchain --\n"
@@ -70,7 +71,7 @@ const char* AICMD_MSG_ABOUT =
 
 "Version %i.%i %s%s%s%s%s(GIT commit %x)\n\n";
 
-const char* AICMD_MSG_HELP =
+constexpr char AICMD_MSG_HELP[] =
 "assimp <verb> <parameters>\n\n"
 " verbs:\n"
 " \tinfo       - Quick file stats\n"
@@ -96,8 +97,7 @@ const char* AICMD_MSG_HELP =
 
 // ------------------------------------------------------------------------------
 // Application entry point
-int main (int argc, char* argv[])
-{
+int main (int argc, char* argv[]) {
 	if (argc <= 1)	{
 		printf("assimp: No command specified. Use \'assimp help\' for a detailed command list\n");
 		return AssimpCmdError::Success;
@@ -550,10 +550,7 @@ int ProcessStandardArguments(
 }
 
 // ------------------------------------------------------------------------------
-int Assimp_TestBatchLoad (
-	const char* const* params,
-	unsigned int num)
-{
+int Assimp_TestBatchLoad(const char* const* params, unsigned int num) {
 	for(unsigned int i = 0; i < num; ++i) {
 		globalImporter->ReadFile(params[i],aiProcessPreset_TargetRealtime_MaxQuality);
 		// we're totally silent. scene destructs automatically.

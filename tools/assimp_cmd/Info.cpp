@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -68,9 +66,15 @@ const char *TREE_CONTINUE_UTF8 = "\xe2\x94\x82 ";
 // this is well supported on pretty much any linux terminal.
 // if this causes problems on some platform,
 // put an #ifdef to use the ascii version for that platform.
+#ifdef _WIN32
+const char *TREE_BRANCH = TREE_BRANCH_ASCII;
+const char *TREE_STOP = TREE_STOP_ASCII;
+const char *TREE_CONTINUE = TREE_CONTINUE_ASCII;
+#else
 const char *TREE_BRANCH = TREE_BRANCH_UTF8;
 const char *TREE_STOP = TREE_STOP_UTF8;
 const char *TREE_CONTINUE = TREE_CONTINUE_UTF8;
+#endif
 
 // -----------------------------------------------------------------------------------
 unsigned int CountNodes(const aiNode *root) {

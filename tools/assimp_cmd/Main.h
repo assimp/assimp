@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AICMD_MAIN_INCLUDED
 
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
+#   define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <stdio.h>
@@ -66,9 +66,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
+#   include <zlib.h>
 #else
-#include <../contrib/zlib/zlib.h>
+#   include <../contrib/zlib/zlib.h>
 #endif
 
 

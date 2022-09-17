@@ -305,18 +305,15 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
         }
     }
 
-    if (nodes.size()) {
-        parent->mChildren = new aiNode *[nodes.size()]();
-        parent->mNumChildren = static_cast<unsigned int>(nodes.size());
-
-        for (unsigned int i = 0; i < nodes.size(); ++i)
-        {
-            parent->mChildren[i] = nodes[i].mOwnership.release();
-        }
-        nodes.clear();
-    } else {
+    if (nodes.empty()) {
         parent->mNumChildren = 0;
         parent->mChildren = nullptr;
+    }
+
+    parent->mChildren = new aiNode *[nodes.size()]();
+    parent->mNumChildren = static_cast<unsigned int>(nodes.size());
+    for (unsigned int i = 0; i < nodes.size(); ++i) {
+        parent->mChildren[i] = nodes[i].mOwnership.release();
     }
 }
 

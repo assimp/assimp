@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,27 +48,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <string>
 
-const char *AICMD_MSG_INFO_HELP_E =
+constexpr char AICMD_MSG_INFO_HELP_E[] =
         "assimp info <file> [-r] [-v]\n"
         "\tPrint basic structure of a 3D model\n"
         "\t-r,--raw: No postprocessing, do a raw import\n"
         "\t-v,--verbose: Print verbose info such as node transform data\n"
         "\t-s, --silent: Print only minimal info\n";
 
-const char *TREE_BRANCH_ASCII = "|-";
-const char *TREE_BRANCH_UTF8 = "\xe2\x94\x9c\xe2\x95\xb4";
-const char *TREE_STOP_ASCII = "'-";
-const char *TREE_STOP_UTF8 = "\xe2\x94\x94\xe2\x95\xb4";
-const char *TREE_CONTINUE_ASCII = "| ";
-const char *TREE_CONTINUE_UTF8 = "\xe2\x94\x82 ";
+constexpr char TREE_BRANCH_ASCII[] = "|-";
+constexpr char TREE_BRANCH_UTF8[] = "\xe2\x94\x9c\xe2\x95\xb4";
+constexpr char TREE_STOP_ASCII[] = "'-";
+constexpr char TREE_STOP_UTF8[] = "\xe2\x94\x94\xe2\x95\xb4";
+constexpr char TREE_CONTINUE_ASCII[] = "| ";
+constexpr char TREE_CONTINUE_UTF8[] = "\xe2\x94\x82 ";
 
 // note: by default this is using utf-8 text.
 // this is well supported on pretty much any linux terminal.
 // if this causes problems on some platform,
 // put an #ifdef to use the ascii version for that platform.
+#ifdef _WIN32
+const char *TREE_BRANCH = TREE_BRANCH_ASCII;
+const char *TREE_STOP = TREE_STOP_ASCII;
+const char *TREE_CONTINUE = TREE_CONTINUE_ASCII;
+#else
 const char *TREE_BRANCH = TREE_BRANCH_UTF8;
 const char *TREE_STOP = TREE_STOP_UTF8;
 const char *TREE_CONTINUE = TREE_CONTINUE_UTF8;
+#endif
 
 // -----------------------------------------------------------------------------------
 unsigned int CountNodes(const aiNode *root) {

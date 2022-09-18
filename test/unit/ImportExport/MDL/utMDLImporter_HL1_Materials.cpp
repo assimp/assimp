@@ -64,7 +64,7 @@ public:
         EXPECT_NE(nullptr, scene);
         EXPECT_NE(nullptr, scene->mMaterials);
 
-        aiShadingMode shading_mode;
+        aiShadingMode shading_mode = aiShadingMode_Flat;
         scene->mMaterials[0]->Get(AI_MATKEY_SHADING_MODEL, shading_mode);
         EXPECT_EQ(aiShadingMode_Flat, shading_mode);
     }

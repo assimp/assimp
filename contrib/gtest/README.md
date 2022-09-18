@@ -25,7 +25,7 @@ When building GoogleTest as a standalone project, the typical workflow starts
 with
 
 ```
-git clone https://github.com/google/googletest.git -b release-1.10.0
+git clone https://github.com/google/googletest.git -b release-1.11.0
 cd googletest        # Main directory of the cloned repository.
 mkdir build          # Create a directory to hold the build output.
 cd build
@@ -94,7 +94,7 @@ include(FetchContent)
 FetchContent_Declare(
   googletest
   # Specify the commit you depend on and update it regularly.
-  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+  URL https://github.com/google/googletest/archive/e2239ee6043f73722e7aa812a459f54a28552929.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -203,7 +203,9 @@ add
     -DGTEST_DONT_DEFINE_FOO=1
 
 to the compiler flags to tell GoogleTest to change the macro's name from `FOO`
-to `GTEST_FOO`. Currently `FOO` can be `FAIL`, `SUCCEED`, or `TEST`. For
+to `GTEST_FOO`. Currently `FOO` can be `ASSERT_EQ`, `ASSERT_FALSE`, `ASSERT_GE`,
+`ASSERT_GT`, `ASSERT_LE`, `ASSERT_LT`, `ASSERT_NE`, `ASSERT_TRUE`,
+`EXPECT_FALSE`, `EXPECT_TRUE`, `FAIL`, `SUCCEED`, `TEST`, or `TEST_F`. For
 example, with `-DGTEST_DONT_DEFINE_TEST=1`, you'll need to write
 
     GTEST_TEST(SomeTest, DoesThis) { ... }

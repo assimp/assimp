@@ -64,7 +64,7 @@ public:
         EXPECT_NE(nullptr, scene);
         EXPECT_NE(nullptr, scene->mMaterials);
 
-        aiShadingMode shading_mode;
+        aiShadingMode shading_mode = aiShadingMode_Flat;
         scene->mMaterials[0]->Get(AI_MATKEY_SHADING_MODEL, shading_mode);
         EXPECT_EQ(aiShadingMode_Flat, shading_mode);
     }
@@ -90,7 +90,7 @@ public:
         EXPECT_NE(nullptr, scene);
         EXPECT_NE(nullptr, scene->mMaterials);
 
-        aiBlendMode blend_mode;
+        aiBlendMode blend_mode = aiBlendMode_Default;
         scene->mMaterials[0]->Get(AI_MATKEY_BLEND_FUNC, blend_mode);
         EXPECT_EQ(aiBlendMode_Additive, blend_mode);
     }
@@ -104,14 +104,14 @@ public:
         EXPECT_NE(nullptr, scene);
         EXPECT_NE(nullptr, scene->mMaterials);
 
-        int texture_flags;
+        int texture_flags = 0;
         scene->mMaterials[0]->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(0), texture_flags);
         EXPECT_EQ(aiTextureFlags_UseAlpha, texture_flags);
 
         // The model has only one texture, a 256 color bitmap with
         // a palette. Pure blue is the last color in the palette,
         // and should be the transparency color.
-        aiColor3D transparency_color;
+        aiColor3D transparency_color = {};
         scene->mMaterials[0]->Get(AI_MATKEY_COLOR_TRANSPARENT, transparency_color);
         EXPECT_EQ(aiColor3D(0, 0, 255), transparency_color);
     }

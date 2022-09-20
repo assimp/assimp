@@ -64,7 +64,7 @@ MD5Parser::MD5Parser(char *_buffer, unsigned int _fileSize) : buffer(_buffer), b
     ai_assert(nullptr != _buffer);
     ai_assert(0 != _fileSize);
 
-    bufferEnd = buffer + _fileSize;
+    bufferEnd = buffer + fileSize;
     ASSIMP_LOG_DEBUG("MD5Parser begin");
 
     // parse the file header

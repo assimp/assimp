@@ -60,10 +60,11 @@ using namespace Assimp::MD5;
 
 // ------------------------------------------------------------------------------------------------
 // Parse the segment structure for an MD5 file
-MD5Parser::MD5Parser(char *_buffer, unsigned int _fileSize) : buffer(_buffer), bufferEnd(_buffer + fileSize), fileSize(_fileSize), lineNumber(0) {
+MD5Parser::MD5Parser(char *_buffer, unsigned int _fileSize) : buffer(_buffer), bufferEnd(nullptr), fileSize(_fileSize), lineNumber(0) {
     ai_assert(nullptr != _buffer);
     ai_assert(0 != _fileSize);
 
+    bufferEnd = buffer + _fileSize;
     ASSIMP_LOG_DEBUG("MD5Parser begin");
 
     // parse the file header

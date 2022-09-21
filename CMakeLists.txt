@@ -560,7 +560,11 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
     SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/includes")
 
     # pick the correct prebuilt library
-    IF(MSVC15)
+    IF(MSVC143)
+      SET(C4D_LIB_POSTFIX "_2022")
+    ELSEIF(MSV142)
+      SET(C4D_LIB_POSTFIX "_2019")
+    ELSEIF(MSVC15)
       SET(C4D_LIB_POSTFIX "_2017")
     ELSEIF(MSVC14)
       SET(C4D_LIB_POSTFIX "_2015")
@@ -572,7 +576,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
       SET(C4D_LIB_POSTFIX "_2010")
     ELSE()
       MESSAGE( FATAL_ERROR
-        "C4D is currently only supported with MSVC 10, 11, 12, 14"
+        "C4D is currently only supported with MSVC 10, 11, 12, 14, 14.2, 14.3"
       )
     ENDIF()
 
@@ -804,6 +808,10 @@ if(WIN32)
       SET(ASSIMP_MSVC_VERSION "vc140")
     ELSEIF(MSVC15)
       SET(ASSIMP_MSVC_VERSION "vc141")
+    ELSEIF(MSV142)
+      SET(ASSIMP_MSVC_VERSION "vc142")
+    ELSEIF(MSVC143)
+      SET(ASSIMP_MSVC_VERSION "vc143")
     ENDIF()
   ENDIF()
 

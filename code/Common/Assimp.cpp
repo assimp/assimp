@@ -1273,11 +1273,13 @@ ASSIMP_API void aiQuaternionInterpolate(
 #define ASSIMP_HAS_PBRT_EXPORT (!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_PBRT_EXPORTER)
 #define ASSIMP_HAS_M3D ((!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER)
 
-#if ASSIMP_HAS_PBRT_EXPORT
-#   define ASSIMP_NEEDS_STB_IMAGE 1
-#elif ASSIMP_HAS_M3D
-#   define ASSIMP_NEEDS_STB_IMAGE 1
-#   define STBI_ONLY_PNG
+#ifndef STB_USE_HUNTER
+#   if ASSIMP_HAS_PBRT_EXPORT
+#       define ASSIMP_NEEDS_STB_IMAGE 1
+#   elif ASSIMP_HAS_M3D
+#       define ASSIMP_NEEDS_STB_IMAGE 1
+#       define STBI_ONLY_PNG
+#   endif
 #endif
 
 // Ensure all symbols are linked correctly

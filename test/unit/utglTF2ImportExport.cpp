@@ -754,9 +754,9 @@ TEST_F(utglTF2ImportExport, wrongTypes) {
     using tup_T = std::tuple<std::string, std::string, std::string, std::string>;
     std::vector<tup_T> wrongTypes = {
 #ifdef __cpp_lib_constexpr_tuple
-    #define TUPLE(x) {x}
+    #define TUPLE(x, y, z, w) {x, y, z, w}
 #else
-    #define TUPLE(x) tup_T(x)
+    #define TUPLE(x, y, z, w) tup_T(x, y, z, w)
 #endif
         TUPLE("/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]"),
         TUPLE("/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]"),

@@ -754,20 +754,17 @@ TEST_F(utglTF2ImportExport, wrongTypes) {
     using tup_T = std::tuple<std::string, std::string, std::string, std::string>;
     std::vector<tup_T> wrongTypes = {
 #ifdef __cpp_lib_constexpr_tuple
-        { "/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]" },
-        { "/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]" },
-        { "/glTF2/wrongTypes/badUint.gltf", "uint", "index", "materials[0]" },
-        { "/glTF2/wrongTypes/badNumber.gltf", "number", "scale", "materials[0]" },
-        { "/glTF2/wrongTypes/badObject.gltf", "object", "pbrMetallicRoughness", "materials[0]" },
-        { "/glTF2/wrongTypes/badExtension.gltf", "object", "KHR_texture_transform", "materials[0]" }
+    #define TUPLE(x) {x}
 #else
-        tup_T( "/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]" ),
-        tup_T( "/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]" ),
-        tup_T( "/glTF2/wrongTypes/badUint.gltf", "uint", "index", "materials[0]" ),
-        tup_T( "/glTF2/wrongTypes/badNumber.gltf", "number", "scale", "materials[0]" ),
-        tup_T( "/glTF2/wrongTypes/badObject.gltf", "object", "pbrMetallicRoughness", "materials[0]" ),
-        tup_T( "/glTF2/wrongTypes/badExtension.gltf", "object", "KHR_texture_transform", "materials[0]" )
+    #define TUPLE(x) tup_T(x)
 #endif
+        TUPLE("/glTF2/wrongTypes/badArray.gltf", "array", "primitives", "meshes[0]"),
+        TUPLE("/glTF2/wrongTypes/badString.gltf", "string", "name", "scenes[0]"),
+        TUPLE("/glTF2/wrongTypes/badUint.gltf", "uint", "index", "materials[0]"),
+        TUPLE("/glTF2/wrongTypes/badNumber.gltf", "number", "scale", "materials[0]"),
+        TUPLE("/glTF2/wrongTypes/badObject.gltf", "object", "pbrMetallicRoughness", "materials[0]"),
+        TUPLE("/glTF2/wrongTypes/badExtension.gltf", "object", "KHR_texture_transform", "materials[0]")
+#undef TUPLE
     };
     for (const auto& tuple : wrongTypes)
     {

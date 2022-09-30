@@ -298,7 +298,7 @@ void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int 
         }
 
         char szBuffer[1024];
-        ::sprintf(szBuffer, "Invalid MDL file. The file is too small "
+        ::snprintf(szBuffer, 1024, "Invalid MDL file. The file is too small "
                             "or contains invalid data (File: %s Line: %u)",
                 szFilePtr, iLine);
 

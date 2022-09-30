@@ -1228,7 +1228,7 @@ void FBXExporter::WriteObjects ()
                 "Version", int32_t(101), outstream, binary, indent
             );
             char layerName[8];
-            sprintf(layerName, "COLOR_%d", colorChannelIndex);
+            snprintf(layerName, 8, "COLOR_%d", colorChannelIndex);
             FBX::Node::WritePropertyNode(
                 "Name", (const char*)layerName, outstream, binary, indent
             );

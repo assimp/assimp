@@ -415,9 +415,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 {
     bool isDirect = ReferenceInformationType == "Direct";
     bool isIndexToDirect = ReferenceInformationType == "IndexToDirect";
+    const bool hasDataElement = HasElement(source, dataElementName);
+    const bool hasIndexDataElement = HasElement(source, indexDataElementName);
 
     // fall-back to direct data if there is no index data element
-    if ( isIndexToDirect && !HasElement( source, indexDataElementName ) ) {
+    if (isIndexToDirect && !hasIndexDataElement) {
         isDirect = true;
         isIndexToDirect = false;
     }
@@ -426,7 +428,8 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     // deal with this more elegantly and with less redundancy, but right
     // now it seems unavoidable.
     if (MappingInformationType == "ByVertice" && isDirect) {
-        if (!HasElement(source, dataElementName)) {
+        if (!hasDataElement) {
+            FBXImporter::LogWarn("missing data element: ", dataElementName);
             return;
         }
         std::vector<T> tempData;
@@ -448,7 +451,15 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     }
     else if (MappingInformationType == "ByVertice" && isIndexToDirect) {
 		std::vector<T> tempData;
-		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
+        if (!hasDataElement || !hasIndexDataElement) {
+            if (!hasDataElement)
+                FBXImporter::LogWarn("missing data element: ", dataElementName);
+            if (!hasIndexDataElement)
+                FBXImporter::LogWarn("missing index data element: ", indexDataElementName);
+            return;
+        }
+
+        ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
@@ -473,6 +484,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         }
     }
     else if (MappingInformationType == "ByPolygonVertex" && isDirect) {
+        if (!hasDataElement) {
+            FBXImporter::LogWarn("missing data element: ", dataElementName);
+            return;
+        }
+
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -487,7 +503,14 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     }
     else if (MappingInformationType == "ByPolygonVertex" && isIndexToDirect) {
 		std::vector<T> tempData;
-		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
+        if (!hasDataElement || !hasIndexDataElement) {
+            if (!hasDataElement)
+                FBXImporter::LogWarn("missing data element: ", dataElementName);
+            if (!hasIndexDataElement)
+                FBXImporter::LogWarn("missing index data element: ", indexDataElementName);
+            return;
+        }
+        ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));

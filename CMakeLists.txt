@@ -393,6 +393,7 @@ if(${BUILD_SHARED_LIBS})
   set(BUILD_LIB_TYPE SHARED)
 else()
   set(BUILD_LIB_TYPE STATIC)
+  add_definitions(-DDDL_STATIC_LIBRARY=OFF)
 endif()
 
 IF( UNIX )

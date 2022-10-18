@@ -501,10 +501,6 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM *p_pc
 
     streamBuffer.getNextBlock(buffer);
 
-    // remove first char if it's /n in case of file with /r/n
-    if (((char *)&buffer[0])[0] == '\n')
-        buffer.erase(buffer.begin(), buffer.begin() + 1);
-
     unsigned int bufferSize = static_cast<unsigned int>(buffer.size());
     const char *pCur = (char *)&buffer[0];
     if (!p_pcOut->ParseElementInstanceListsBinary(streamBuffer, buffer, pCur, bufferSize, loader, p_bBE)) {

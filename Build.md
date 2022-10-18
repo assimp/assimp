@@ -7,7 +7,7 @@ You can download and install assimp using the [vcpkg](https://github.com/Microso
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
-    vcpkg install assimp
+    ./vcpkg install assimp
 ```
 The assimp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
@@ -95,7 +95,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **ASSIMP_BUILD_ZLIB (default OFF)**: Build our own zlib.
 - **ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all exporter senabled.
 - **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all importer senabled.
-- **ASSIMP_BUILD_ASSIMP_TOOLS (default ON)**: If the supplementary tools for Assimp are built in addition to the library.
+- **ASSIMP_BUILD_ASSIMP_TOOLS (default OFF)**: If the supplementary tools for Assimp are built in addition to the library.
 - **ASSIMP_BUILD_SAMPLES (default OFF)**: If the official samples are built as well (needs Glut).
 - **ASSIMP_BUILD_TESTS (default ON)**: If the test suite for Assimp is built in addition to the library.
 - **ASSIMP_COVERALLS (default OFF)**: Enable this to measure test coverage.

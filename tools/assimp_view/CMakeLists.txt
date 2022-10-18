@@ -95,6 +95,14 @@ IF ( MSVC )
   REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
 ENDIF ()
 
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  IF (MSVC)
+    TARGET_COMPILE_OPTIONS(assimp_viewer PRIVATE /W4 /WX)
+  ELSE()
+    TARGET_COMPILE_OPTIONS(assimp_viewer PRIVATE -Wall -Werror)
+  ENDIF()
+ENDIF()
+
 # Link the executable to the assimp + dx libs.
 TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32 winmm )
 

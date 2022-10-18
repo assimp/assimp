@@ -27,53 +27,51 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// A sample program demonstrating using Google C++ testing framework.
+// The Google C++ Testing and Mocking Framework (Google Test)
+//
+// This file defines the AssertionResult type.
 
-#ifndef GOOGLETEST_SAMPLES_SAMPLE2_H_
-#define GOOGLETEST_SAMPLES_SAMPLE2_H_
+#include "gtest/gtest-assertion-result.h"
 
-#include <string.h>
+#include <string>
+#include <utility>
 
-// A simple string class.
-class MyString {
- private:
-  const char* c_string_;
-  const MyString& operator=(const MyString& rhs);
+#include "gtest/gtest-message.h"
 
- public:
-  // Clones a 0-terminated C string, allocating memory using new.
-  static const char* CloneCString(const char* a_c_string);
+namespace testing {
 
-  ////////////////////////////////////////////////////////////
-  //
-  // C'tors
+// AssertionResult constructors.
+// Used in EXPECT_TRUE/FALSE(assertion_result).
+AssertionResult::AssertionResult(const AssertionResult& other)
+    : success_(other.success_),
+      message_(other.message_.get() != nullptr
+                   ? new ::std::string(*other.message_)
+                   : static_cast< ::std::string*>(nullptr)) {}
 
-  // The default c'tor constructs a NULL string.
-  MyString() : c_string_(nullptr) {}
+// Swaps two AssertionResults.
+void AssertionResult::swap(AssertionResult& other) {
+  using std::swap;
+  swap(success_, other.success_);
+  swap(message_, other.message_);
+}
 
-  // Constructs a MyString by cloning a 0-terminated C string.
-  explicit MyString(const char* a_c_string) : c_string_(nullptr) {
-    Set(a_c_string);
-  }
+// Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
+AssertionResult AssertionResult::operator!() const {
+  AssertionResult negation(!success_);
+  if (message_.get() != nullptr) negation << *message_;
+  return negation;
+}
 
-  // Copy c'tor
-  MyString(const MyString& string) : c_string_(nullptr) {
-    Set(string.c_string_);
-  }
+// Makes a successful assertion result.
+AssertionResult AssertionSuccess() { return AssertionResult(true); }
 
-  ////////////////////////////////////////////////////////////
-  //
-  // D'tor.  MyString is intended to be a final class, so the d'tor
-  // doesn't need to be virtual.
-  ~MyString() { delete[] c_string_; }
+// Makes a failed assertion result.
+AssertionResult AssertionFailure() { return AssertionResult(false); }
 
-  // Gets the 0-terminated C string this MyString object represents.
-  const char* c_string() const { return c_string_; }
+// Makes a failed assertion result with the given failure message.
+// Deprecated; use AssertionFailure() << message.
+AssertionResult AssertionFailure(const Message& message) {
+  return AssertionFailure() << message;
+}
 
-  size_t Length() const { return c_string_ == nullptr ? 0 : strlen(c_string_); }
-
-  // Sets the 0-terminated C string this MyString object represents.
-  void Set(const char* c_string);
-};
-
-#endif  // GOOGLETEST_SAMPLES_SAMPLE2_H_
+}  // namespace testing

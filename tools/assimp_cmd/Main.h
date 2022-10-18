@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AICMD_MAIN_INCLUDED
 
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
+#   define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <stdio.h>
@@ -60,25 +60,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include "../code/Common/Compression.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #	include <assimp/Exporter.hpp>
 #endif
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include <../contrib/zlib/zlib.h>
-#endif
-
-
 #ifndef SIZE_MAX
 #	define SIZE_MAX (std::numeric_limits<size_t>::max())
 #endif
 
-
 using namespace Assimp;
-
 
 // Global assimp importer instance
 extern Assimp::Importer* globalImporter;
@@ -118,8 +110,8 @@ struct ImportData {
 	aiVector3D rot;
 };
 
-/// \enum AssimpCmdError
-/// \brief General error codes used among assimp_cmd's utilities.
+// ------------------------------------------------------------------------------
+/// @brief General error codes used among assimp_cmd's utilities.
 enum AssimpCmdError {
 	Success = 0,
 	InvalidNumberOfArguments,
@@ -179,8 +171,8 @@ int Assimp_Dump (
 	const char* const* params,
 	unsigned int num);
 
-/// \enum AssimpCmdExportError
-/// \brief Error codes used by the 'Export' utility.
+// ------------------------------------------------------------------------------
+/// @brief Error codes used by the 'Export' utility.
 enum AssimpCmdExportError {
 	FailedToImportModel = AssimpCmdError::LastAssimpCmdError,
 	FailedToExportModel,
@@ -199,8 +191,8 @@ int Assimp_Export (
 	const char* const* params,
 	unsigned int num);
 
-/// \enum AssimpCmdExtractError
-/// \brief Error codes used by the 'Image Extractor' utility.
+// ------------------------------------------------------------------------------
+/// @brief Error codes used by the 'Image Extractor' utility.
 enum AssimpCmdExtractError {
 	TextureIndexIsOutOfRange = AssimpCmdError::LastAssimpCmdError,
 	NoAvailableTextureEncoderFound,
@@ -220,8 +212,8 @@ int Assimp_Extract (
 	const char* const* params,
 	unsigned int num);
 
-/// \enum AssimpCmdCompareDumpError
-/// \brief Error codes used by the 'Compare Dump' utility.
+// ------------------------------------------------------------------------------
+/// @brief Error codes used by the 'Compare Dump' utility.
 enum AssimpCmdCompareDumpError {
 	FailedToLoadExpectedInputFile = AssimpCmdError::LastAssimpCmdError,
 	FileComparaisonFailure,
@@ -241,8 +233,7 @@ int Assimp_CompareDump (
 	const char* const* params,
 	unsigned int num);
 
-/// \enum AssimpCmdInfoError
-/// \brief Error codes used by the 'Info' utility.
+/// @brief Error codes used by the 'Info' utility.
 enum AssimpCmdInfoError {
 	InvalidCombinaisonOfArguments = AssimpCmdError::LastAssimpCmdError,
 

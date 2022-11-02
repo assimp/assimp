@@ -370,7 +370,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
     // format. They will likely not be aware that there is a flag in the scene to indicate
     // this, however. To avoid surprises and bug reports, we check for duplicates in
     // meshes upfront.
-    const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || MakeVerboseFormatProcess::IsVerboseFormat(pScene);
+    const bool is_verbose_format = !((pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || !MakeVerboseFormatProcess::IsVerboseFormat(pScene));
 
     pimpl->mProgressHandler->UpdateFileWrite(0, 4);
 

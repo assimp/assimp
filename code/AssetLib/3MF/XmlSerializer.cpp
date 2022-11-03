@@ -584,7 +584,7 @@ aiMaterial *XmlSerializer::readMaterialDef(XmlNode &node, unsigned int basemater
     stdMaterialName += strId;
     stdMaterialName += "_";
     if (hasName) {
-        stdMaterialName += std::string(std::move(name));
+        stdMaterialName += name;
     } else {
         stdMaterialName += "basemat_";
         stdMaterialName += ai_to_string(mMaterials.size());

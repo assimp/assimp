@@ -119,7 +119,7 @@ public: // functions to add properties or children
     ) {
         FBX::Node c(name);
         c.AddProperties(std::forward<More>(more)...);
-        children.push_back(c);
+        children.push_back(std::move(c));
     }
 
 public: // support specifically for dealing with Properties70 nodes

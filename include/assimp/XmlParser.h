@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.hpp"
 
 #include <pugixml.hpp>
+#include <utility>
 #include <vector>
 
 namespace Assimp {
@@ -267,7 +268,7 @@ inline TNodeType *TXmlParser<TNodeType>::findNode(const std::string &name) {
     }
 
     find_node_by_name_predicate predicate(name);
-    mCurrent = mDoc->find_node(predicate);
+    mCurrent = mDoc->find_node(std::move(predicate));
     if (mCurrent.empty()) {
         return nullptr;
     }

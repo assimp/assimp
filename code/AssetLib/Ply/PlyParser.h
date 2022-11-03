@@ -431,7 +431,7 @@ public:
     static bool ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pcOut, PLYImporter* loader, bool p_bBE);
 
     //! Skip all comment lines after this
-    static bool SkipComments(std::vector<char> &buffer);
+    static bool SkipComments(std::vector<char> buffer);
 
     static bool SkipSpaces(std::vector<char> &buffer);
 

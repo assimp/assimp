@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 
 #include <cctype>
+#include <utility>
 
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
@@ -201,7 +202,7 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
             " (64bit: ", file.i64bit ? "true" : "false",
             ", little endian: ", file.little ? "true" : "false", ")");
 
-    ParseBlendFile(file, stream);
+    ParseBlendFile(file, std::move(stream));
 
     Scene scene;
     ExtractScene(scene, file);

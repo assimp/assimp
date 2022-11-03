@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <memory>
+#include <utility>
 
 using namespace Assimp;
 using namespace Assimp::Collada;
@@ -2305,7 +2306,7 @@ void ColladaParser::ReadScene(XmlNode &node) {
             // find the referred scene, skip the leading #
             NodeLibrary::const_iterator sit = mNodeLibrary.find(url.c_str() + 1);
             if (sit == mNodeLibrary.end()) {
-                throw DeadlyImportError("Unable to resolve visual_scene reference \"", std::string(url), "\" in <instance_visual_scene> element.");
+                throw DeadlyImportError("Unable to resolve visual_scene reference \"", std::string(std::move(url)), "\" in <instance_visual_scene> element.");
             }
             mRootNode = sit->second;
         }

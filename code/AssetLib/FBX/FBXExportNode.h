@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StreamWriter.h> // StreamWriterLE
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Assimp {
@@ -96,14 +97,14 @@ public: // functions to add properties or children
     // add a single property to the node
     template <typename T>
     void AddProperty(T value) {
-        properties.emplace_back(value);
+        properties.emplace_back(std::forward<T>(value));
     }
 
     // convenience function to add multiple properties at once
     template <typename T, typename... More>
     void AddProperties(T value, More... more) {
-        properties.emplace_back(value);
-        AddProperties(more...);
+        properties.emplace_back(std::forward<T>(value));
+        AddProperties(std::forward<More>(more)...);
     }
     void AddProperties() {}
 
@@ -117,7 +118,7 @@ public: // functions to add properties or children
         More... more
     ) {
         FBX::Node c(name);
-        c.AddProperties(more...);
+        c.AddProperties(std::forward<More>(more)...);
         children.push_back(c);
     }
 
@@ -149,7 +150,7 @@ public: // support specifically for dealing with Properties70 nodes
         More... more
     ) {
         Node n("P");
-        n.AddProperties(name, type, type2, flags, more...);
+        n.AddProperties(name, type, type2, flags, std::forward<More>(more)...);
         AddChild(n);
     }
 
@@ -214,7 +215,7 @@ public: // static member functions
         bool binary, int indent
     ) {
         FBX::FBXExportProperty p(value);
-        FBX::Node node(name, p);
+        FBX::Node node(name, std::move(p));
         node.Dump(s, binary, indent);
     }
 

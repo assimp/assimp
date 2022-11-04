@@ -122,7 +122,7 @@ protected:
     bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
     bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
     bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
-	bool GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength);
+    bool GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength);
     void ExportMetadata();
     void ExportMaterials();
     void ExportMeshes();

@@ -1313,7 +1313,7 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
-		if (r.extensionsUsed.KHR_materials_emissive_strength) {
+        if (r.extensionsUsed.KHR_materials_emissive_strength) {
             if (Value *curMaterialEmissiveStrength = FindObject(*extensions, "KHR_materials_emissive_strength")) {
                 MaterialEmissiveStrength emissiveStrength;
 
@@ -2041,7 +2041,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_materials_volume);
     CHECK_EXT(KHR_materials_ior);
-	CHECK_EXT(KHR_materials_emissive_strength);
+    CHECK_EXT(KHR_materials_emissive_strength);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
 

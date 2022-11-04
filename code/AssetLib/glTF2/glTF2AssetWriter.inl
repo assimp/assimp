@@ -511,7 +511,7 @@ namespace glTF2 {
             }
         }
 
-		if (m.materialEmissiveStrength.isPresent) {
+        if (m.materialEmissiveStrength.isPresent) {
             Value materialEmissiveStrength(rapidjson::Type::kObjectType);
 
             MaterialEmissiveStrength &emissiveStrength = m.materialEmissiveStrength.value;
@@ -520,8 +520,8 @@ namespace glTF2 {
                 WriteFloat(materialEmissiveStrength, emissiveStrength.emissiveStrength, "emissiveStrength", w.mAl);
             }
 
-            if (!emissiveStrength.ObjectEmpty()) {
-                exts.AddMember("KHR_materials_emissive_strength", emissiveStrength, w.mAl);
+            if (!materialEmissiveStrength.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_emissive_strength", materialEmissiveStrength, w.mAl);
             }
         }
 

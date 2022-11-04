@@ -357,7 +357,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             aimat->AddProperty(&ior.ior, 1, AI_MATKEY_REFRACTI);
         }
 
-		// KHR_materials_emissive_strength
+        // KHR_materials_emissive_strength
         if (mat.materialEmissiveStrength.isPresent) {
             MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
 

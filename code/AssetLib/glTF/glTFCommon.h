@@ -245,12 +245,9 @@ struct Nullable {
 
     Nullable() :
             isPresent(false) {}
-    Nullable(const T &val) :
+    Nullable(T &val) :
             value(val),
             isPresent(true) {}
-	Nullable(T &&val) :
-			value(std::move(val)),
-			isPresent(true) {}
 };
 
 //! A reference to one top-level object, which is valid

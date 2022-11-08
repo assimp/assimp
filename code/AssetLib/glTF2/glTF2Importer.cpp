@@ -283,8 +283,9 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 
         // pbrSpecularGlossiness
-        if (mat.pbrSpecularGlossiness.isPresent) {
+        if (mat.pbrSpecularGlossiness.isPresent) { // TODO: Consider importing this only if KHR_materials_specular isn't also defined
             PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
+            aimat->AddProperty(new int(1), 1, AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS);
 
             SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
             SetMaterialColorProperty(r, pbrSG.specularFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
@@ -306,6 +307,18 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         }
 
         aimat->AddProperty(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
+
+        // KHR_materials_specular
+        if (mat.materialSpecular.isPresent) {
+            MaterialSpecular &specular = mat.materialSpecular.value;
+            // Default values of zero disables Specular
+            if (std::memcmp(specular.specularColorFactor, defaultSpecularColorFactor, sizeof(glTFCommon::vec3)) != 0 || specular.specularFactor != 0.0f) {
+                SetMaterialColorProperty(r, specular.specularColorFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
+                aimat->AddProperty(&specular.specularFactor, 1, AI_MATKEY_SPECULAR_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularTexture, aimat, aiTextureType_SPECULAR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularColorTexture, aimat, aiTextureType_SPECULAR);
+            }
+        }
 
         // KHR_materials_sheen
         if (mat.materialSheen.isPresent) {

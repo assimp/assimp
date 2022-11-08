@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
+ *   KHR_materials_specular full
  *   KHR_materials_unlit full
  *   KHR_lights_punctual full
  *   KHR_materials_sheen full
@@ -718,6 +719,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
+const vec3 defaultSpecularColorFactor = { 0, 0, 0 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
 const vec3 defaultAttenuationColor = { 1, 1, 1 };
 
@@ -758,6 +760,16 @@ struct PbrSpecularGlossiness {
     TextureInfo specularGlossinessTexture;
 
     PbrSpecularGlossiness() { SetDefaults(); }
+    void SetDefaults();
+};
+
+struct MaterialSpecular {
+    float specularFactor;
+    vec3 specularColorFactor;
+    TextureInfo specularTexture;
+    TextureInfo specularColorTexture;
+
+    MaterialSpecular() { SetDefaults(); }
     void SetDefaults();
 };
 
@@ -817,6 +829,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_pbrSpecularGlossiness
     Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
+
+    //extension: KHR_materials_specular
+    Nullable<MaterialSpecular> materialSpecular;
 
     //extension: KHR_materials_sheen
     Nullable<MaterialSheen> materialSheen;
@@ -1098,6 +1113,7 @@ public:
     //! Keeps info about the enabled extensions
     struct Extensions {
         bool KHR_materials_pbrSpecularGlossiness;
+        bool KHR_materials_specular;
         bool KHR_materials_unlit;
         bool KHR_lights_punctual;
         bool KHR_texture_transform;
@@ -1112,6 +1128,7 @@ public:
 
         Extensions() :
                 KHR_materials_pbrSpecularGlossiness(false), 
+                KHR_materials_specular(false), 
                 KHR_materials_unlit(false), 
                 KHR_lights_punctual(false), 
                 KHR_texture_transform(false), 

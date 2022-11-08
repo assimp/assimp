@@ -1236,7 +1236,7 @@ inline void Material::Read(Value &material, Asset &r) {
     ReadMember(material, "alphaCutoff", this->alphaCutoff);
 
     if (Value *extensions = FindObject(material, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {  //TODO: Maybe ignore this if KHR_materials_specular is also defined
             if (Value *curPbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
                 PbrSpecularGlossiness pbrSG;
 
@@ -1247,6 +1247,19 @@ inline void Material::Read(Value &material, Asset &r) {
                 ReadMember(*curPbrSpecularGlossiness, "glossinessFactor", pbrSG.glossinessFactor);
 
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
+            }
+        }
+        
+        if (r.extensionsUsed.KHR_materials_specular) {
+            if (Value *curMatSpecular = FindObject(*extensions, "KHR_materials_specular")) {
+                MaterialSpecular specular;
+
+                ReadMember(*curMatSpecular, "specularFactor", specular.specularFactor);
+                ReadTextureProperty(r, *curMatSpecular, "specularTexture", specular.specularTexture);
+                ReadMember(*curMatSpecular, "specularColorFactor", specular.specularColorFactor);
+                ReadTextureProperty(r, *curMatSpecular, "specularColorTexture", specular.specularColorTexture);
+
+                this->materialSpecular = Nullable<MaterialSpecular>(specular);
             }
         }
 
@@ -1335,6 +1348,12 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
     glossinessFactor = 1.0f;
+}
+
+inline void MaterialSpecular::SetDefaults() {
+    //KHR_materials_specular properties
+    SetVector(specularColorFactor, defaultSpecularColorFactor);
+    specularFactor = 0.f;
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -2018,6 +2037,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     }
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
+    CHECK_EXT(KHR_materials_specular);
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
     CHECK_EXT(KHR_texture_transform);

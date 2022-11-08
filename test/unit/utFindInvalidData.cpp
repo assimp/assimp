@@ -115,17 +115,17 @@ TEST_F(utFindInvalidDataProcess, testStepNegativeResult) {
 
     mProcess->ProcessMesh(mMesh);
 
-    EXPECT_TRUE(NULL != mMesh->mVertices);
-    EXPECT_EQ(NULL, mMesh->mNormals);
-    EXPECT_EQ(NULL, mMesh->mTangents);
-    EXPECT_EQ(NULL, mMesh->mBitangents);
+    EXPECT_TRUE(nullptr != mMesh->mVertices);
+    EXPECT_EQ(nullptr, mMesh->mNormals);
+    EXPECT_EQ(nullptr, mMesh->mTangents);
+    EXPECT_EQ(nullptr, mMesh->mBitangents);
 
     for (unsigned int i = 0; i < 2; ++i) {
-        EXPECT_TRUE(NULL != mMesh->mTextureCoords[i]);
+        EXPECT_TRUE(nullptr != mMesh->mTextureCoords[i]);
     }
 
     for (unsigned int i = 2; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-        EXPECT_EQ(NULL, mMesh->mTextureCoords[i]);
+        EXPECT_EQ(nullptr, mMesh->mTextureCoords[i]);
     }
 }
 

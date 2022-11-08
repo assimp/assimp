@@ -119,7 +119,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
             if (mat) {
 
                 if (materials_converted.find(mat) == materials_converted.end()) {
-                    ConvertMaterial(*mat, 0);
+                    ConvertMaterial(*mat, nullptr);
                 }
             }
         }

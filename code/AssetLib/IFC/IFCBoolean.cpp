@@ -389,7 +389,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
 
     // obtain the polygonal bounding volume
     std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
-    if (!ProcessCurve(hs->PolygonalBoundary, *profile.get(), conv)) {
+    if (!ProcessCurve(hs->PolygonalBoundary, *profile, conv)) {
         IFCImporter::LogError("expected valid polyline for boundary of boolean halfspace");
         return;
     }

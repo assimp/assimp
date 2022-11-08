@@ -321,7 +321,7 @@ inline size_t NZDiff(ComponentType compType, void *data, void *dataBase, size_t 
 }
 
 inline Ref<Accessor> ExportDataSparse(Asset &a, std::string &meshName, Ref<Buffer> &buffer,
-        size_t count, void *data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE, void *dataBase = 0) {
+        size_t count, void *data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, BufferViewTarget target = BufferViewTarget_NONE, void *dataBase = nullptr) {
     if (!count || !data) {
         return Ref<Accessor>();
     }
@@ -356,7 +356,7 @@ inline Ref<Accessor> ExportDataSparse(Asset &a, std::string &meshName, Ref<Buffe
     acc->type = typeOut;
 
     if (data) {
-        void *nzDiff = 0, *nzIdx = 0;
+        void *nzDiff = nullptr, *nzIdx = nullptr;
         size_t nzCount = NZDiff(compType, data, dataBase, count, numCompsIn, numCompsOut, nzDiff, nzIdx);
         acc->sparse.reset(new Accessor::Sparse);
         acc->sparse->count = nzCount;

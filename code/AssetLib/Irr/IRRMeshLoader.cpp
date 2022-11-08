@@ -120,7 +120,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 	std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
 	// Check whether we can read from the file
-	if (file.get() == NULL)
+    if (file == nullptr)
         throw DeadlyImportError("Failed to open IRRMESH file ", pFile);
 
 	// Construct the irrXML parser

@@ -136,7 +136,7 @@ void DXFImporter::InternReadFile( const std::string& filename, aiScene* pScene, 
     std::shared_ptr<IOStream> file = std::shared_ptr<IOStream>( pIOHandler->Open( filename) );
 
     // Check whether we can read the file
-    if( file.get() == nullptr ) {
+    if (file == nullptr) {
         throw DeadlyImportError( "Failed to open DXF file ", filename, "");
     }
 

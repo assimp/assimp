@@ -195,7 +195,7 @@ public:
     template <typename T>
     const T *ResolveSelectPtr(const DB &db) const {
         const EXPRESS::ENTITY *e = ToPtr<EXPRESS::ENTITY>();
-        return e ? Couple<T>(db).MustGetObject(*e)->template ToPtr<T>() : (const T *)0;
+        return e ? Couple<T>(db).MustGetObject(*e)->template ToPtr<T>() : (const T *)nullptr;
     }
 
 public:
@@ -207,7 +207,7 @@ public:
      */
     static std::shared_ptr<const EXPRESS::DataType> Parse(const char *&inout,
             uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
-            const EXPRESS::ConversionSchema *schema = NULL);
+            const EXPRESS::ConversionSchema *schema = nullptr);
 };
 
 typedef DataType SELECT;
@@ -306,7 +306,7 @@ public:
      */
     static std::shared_ptr<const EXPRESS::LIST> Parse(const char *&inout,
             uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
-            const EXPRESS::ConversionSchema *schema = NULL);
+            const EXPRESS::ConversionSchema *schema = nullptr);
 
 private:
     typedef std::vector<std::shared_ptr<const DataType>> MemberList;

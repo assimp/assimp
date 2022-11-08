@@ -168,7 +168,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 private:
@@ -432,7 +432,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     /** Get material links */
@@ -503,7 +503,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     // return a 4-tuple
@@ -618,7 +618,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const uint8_t* Content() const {
@@ -632,7 +632,7 @@ public:
 
     uint8_t* RelinquishContent() {
         uint8_t* ptr = content;
-        content = 0;
+        content = nullptr;
         return ptr;
     }
 
@@ -663,7 +663,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const TextureMap& Textures() const {
@@ -735,7 +735,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 
@@ -780,7 +780,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     /* the optional white list specifies a list of property names for which the caller
@@ -808,7 +808,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const AnimationLayerList& Layers() const {
@@ -829,7 +829,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 private:
@@ -1018,7 +1018,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const Document& GetDocument() const {
@@ -1097,7 +1097,7 @@ public:
 
     const FileGlobalSettings& GlobalSettings() const {
         ai_assert(globals.get());
-        return *globals.get();
+        return *globals;
     }
 
     const PropertyTemplateMap& Templates() const {

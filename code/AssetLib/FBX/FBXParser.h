@@ -163,7 +163,7 @@ public:
     ~Parser() = default;
 
     const Scope& GetRootScope() const {
-        return *root.get();
+        return *root;
     }
 
     bool IsBinary() const {

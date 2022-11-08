@@ -949,7 +949,7 @@ namespace glTF2 {
                 exts.PushBack(StringRef("KHR_materials_ior"), mAl);
             }
 
-			if (this->mAsset.extensionsUsed.KHR_materials_emissive_strength) {
+            if (this->mAsset.extensionsUsed.KHR_materials_emissive_strength) {
                 exts.PushBack(StringRef("KHR_materials_emissive_strength"), mAl);
             }
 

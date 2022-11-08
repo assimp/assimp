@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3MFTypes.h"
 #include <assimp/scene.h>
 
+#include <utility>
+
 namespace Assimp {
 namespace D3MF {
 
@@ -582,7 +584,7 @@ aiMaterial *XmlSerializer::readMaterialDef(XmlNode &node, unsigned int basemater
     stdMaterialName += strId;
     stdMaterialName += "_";
     if (hasName) {
-        stdMaterialName += std::string(name);
+        stdMaterialName += name;
     } else {
         stdMaterialName += "basemat_";
         stdMaterialName += ai_to_string(mMaterials.size());

@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+
+#include <utility>
 //#include <cctype>
 //#include <memory>
 
@@ -224,7 +226,7 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 	std::unique_ptr<aiLight> l(new aiLight());
 	l->mType = aiLightSource_DIRECTIONAL;
 	find_node_by_name_predicate predicate("directionallight");
-	XmlNode child = node.find_child(predicate);
+	XmlNode child = node.find_child(std::move(predicate));
 	if (child.empty()) {
 		return nullptr;
 	}

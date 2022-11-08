@@ -57,8 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  include "../contrib/clipper/clipper.hpp"
 #endif
 
-#include <memory>
 #include <iterator>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 namespace IFC {
@@ -713,7 +714,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->mVerts.insert(profile2D->mVerts.end(), in.begin(), in.end());
         profile2D->mVertcnt.push_back(static_cast<unsigned int>(in.size()));
-        conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
+        conv.collect_openings->push_back(TempOpening(&solid, dir, std::move(profile), std::move(profile2D)));
 
         ai_assert(result.IsEmpty());
     }
@@ -839,7 +840,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         if (!meshtmp->IsEmpty()) {
             conv.collect_openings->push_back(TempOpening(geo.ToPtr<Schema_2x3::IfcSolidModel>(),
                 IfcVector3(0,0,0),
-                meshtmp,
+                std::move(meshtmp),
                 std::shared_ptr<TempMesh>()));
         }
         return true;

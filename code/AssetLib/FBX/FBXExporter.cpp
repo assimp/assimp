@@ -58,16 +58,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 
 // Header files, standard library.
-#include <memory> // shared_ptr
-#include <string>
-#include <sstream> // stringstream
+#include <array>
 #include <ctime> // localtime, tm_*
 #include <map>
-#include <set>
-#include <vector>
-#include <array>
-#include <unordered_set>
+#include <memory> // shared_ptr
 #include <numeric>
+#include <set>
+#include <sstream> // stringstream
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -390,7 +391,7 @@ void FBXExporter::WriteHeaderExtension ()
         raw[i] = uint8_t(GENERIC_FILEID[i]);
     }
     FBX::Node::WritePropertyNode(
-        "FileId", raw, outstream, binary, indent
+        "FileId", std::move(raw), outstream, binary, indent
     );
     FBX::Node::WritePropertyNode(
         "CreationTime", GENERIC_CTIME, outstream, binary, indent
@@ -2497,7 +2498,7 @@ void FBXExporter::WriteModelNode(
     const aiVector3D one = {1, 1, 1};
     FBX::Node m("Model");
     std::string name = node->mName.C_Str() + FBX::SEPARATOR + "Model";
-    m.AddProperties(node_uid, name, type);
+    m.AddProperties(node_uid, std::move(name), type);
     m.AddChild("Version", int32_t(232));
     FBX::Node p("Properties70");
     p.AddP70bool("RotationActive", 1);

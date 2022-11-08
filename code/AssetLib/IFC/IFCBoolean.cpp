@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <tuple>
+#include <utility>
 
 namespace Assimp {
 namespace IFC {
@@ -674,7 +675,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
     std::shared_ptr<TempMesh> meshtmp = std::shared_ptr<TempMesh>(new TempMesh());
     ProcessExtrudedAreaSolid(*as, *meshtmp, conv, false);
 
-    std::vector<TempOpening> openings(1, TempOpening(as, IfcVector3(0, 0, 0), meshtmp, std::shared_ptr<TempMesh>()));
+    std::vector<TempOpening> openings(1, TempOpening(as, IfcVector3(0, 0, 0), std::move(meshtmp), std::shared_ptr<TempMesh>()));
 
     result = first_operand;
 

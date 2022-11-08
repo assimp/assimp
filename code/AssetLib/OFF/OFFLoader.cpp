@@ -110,7 +110,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 
     // Check whether we can read from the file
     if (file == nullptr) {
-    throw DeadlyImportError("Failed to open OFF file ", pFile, ".");
+      throw DeadlyImportError("Failed to open OFF file ", pFile, ".");
     }
 
     // allocate storage and copy the contents of the file to a memory buffer

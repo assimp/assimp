@@ -336,7 +336,7 @@ void Document::ReadGlobalSettings() {
         DOMError("GlobalSettings dictionary contains no property table");
     }
 
-    globals.reset(new FileGlobalSettings(*this, props));
+    globals.reset(new FileGlobalSettings(*this, std::move(props)));
 }
 
 // ------------------------------------------------------------------------------------------------

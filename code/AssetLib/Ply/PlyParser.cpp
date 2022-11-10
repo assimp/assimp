@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
+#include <utility>
 
 using namespace Assimp;
 
@@ -381,10 +382,10 @@ bool PLY::DOM::SkipSpacesAndLineEnd(std::vector<char> &buffer) {
     return ret;
 }
 
-bool PLY::DOM::SkipComments(std::vector<char> &buffer) {
+bool PLY::DOM::SkipComments(std::vector<char> buffer) {
     ai_assert(!buffer.empty());
 
-    std::vector<char> nbuffer = buffer;
+    std::vector<char> nbuffer = std::move(buffer);
     // skip spaces
     if (!SkipSpaces(nbuffer)) {
         return false;

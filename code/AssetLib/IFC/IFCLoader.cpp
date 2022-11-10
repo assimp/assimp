@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
+#include <utility>
 
 namespace Assimp {
 template <>
@@ -227,7 +228,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 #endif
     }
 
-    std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
+    std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(std::move(stream)));
     const STEP::HeaderInfo &head = static_cast<const STEP::DB &>(*db).GetHeader();
 
     if (!head.fileSchema.size() || head.fileSchema.substr(0, 3) != "IFC") {

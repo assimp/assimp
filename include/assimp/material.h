@@ -1000,7 +1000,7 @@ extern "C" {
 // Specular Color.
 // Note: Metallic/Roughness may also have a Specular Color
 // AI_MATKEY_COLOR_SPECULAR
-#define AI_MATKEY_USE_PBR_SPECULAR_GLOSSINESS "$mat.useGltfPbrSpecularGlossiness", 0, 0
+#define AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS "$mat.useGltfPbrSpecularGlossiness", 0, 0
 #define AI_MATKEY_SPECULAR_FACTOR "$mat.specularFactor", 0, 0
 // Glossiness factor. 0.0 = Completely Rough, 1.0 = Perfectly Smooth
 #define AI_MATKEY_GLOSSINESS_FACTOR "$mat.glossinessFactor", 0, 0

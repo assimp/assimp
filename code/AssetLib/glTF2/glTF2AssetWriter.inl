@@ -435,6 +435,7 @@ namespace glTF2 {
 
             if (!materialSpecular.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_specular", materialSpecular, w.mAl);
+            }
         }
 
         if (m.materialSheen.isPresent) {

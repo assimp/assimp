@@ -733,6 +733,10 @@ bool glTF2Exporter::GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior) {
     return mat.Get(AI_MATKEY_REFRACTI, ior.ior) == aiReturn_SUCCESS;
 }
 
+bool glTF2Exporter::GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength) {
+    return mat.Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength.emissiveStrength) == aiReturn_SUCCESS;
+}
+
 void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -862,6 +866,12 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatIOR(mat, ior)) {
                     mAsset->extensionsUsed.KHR_materials_ior = true;
                     m->materialIOR = Nullable<MaterialIOR>(ior);
+                }
+
+                MaterialEmissiveStrength emissiveStrength;
+                if (GetMatEmissiveStrength(mat, emissiveStrength)) {
+                    mAsset->extensionsUsed.KHR_materials_emissive_strength = true;
+                    m->materialEmissiveStrength = Nullable<MaterialEmissiveStrength>(emissiveStrength);
                 }
             }
         }

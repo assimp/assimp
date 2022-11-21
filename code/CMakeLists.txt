@@ -971,9 +971,15 @@ ENDIF()
 separate_arguments(ASSIMP_EXPORTERS_LIST UNIX_COMMAND ${ASSIMP_EXPORTERS_ENABLED})
 IF(3MF IN_LIST ASSIMP_EXPORTERS_LIST)
   IF(ASSIMP_HUNTER_ENABLED)
+    target_include_directories(target SYSTEM zip)
     hunter_add_package(zip)
     find_package(zip CONFIG REQUIRED)
   ELSE()
+    IF(WIN32)
+      ADD_COMPILE_OPTIONS(/wd4706)
+      ADD_COMPILE_OPTIONS(/wd4127)
+      ADD_COMPILE_OPTIONS(/wd4267)	
+    ENDIF()
     SET( ziplib_SRCS
       ../contrib/zip/src/miniz.h
       ../contrib/zip/src/zip.c

@@ -115,7 +115,7 @@ jobs:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
         cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
-        buildWithCMakeArgs: '-- -j 24 -v'
+        buildWithCMakeArgs: '--parallel 24 -v'
         buildDirectory: '${{ github.workspace }}/build/'
         
     - name: Exclude certain tests in Hunter specific builds

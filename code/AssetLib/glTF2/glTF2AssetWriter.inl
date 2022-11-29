@@ -511,6 +511,20 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialEmissiveStrength.isPresent) {
+            Value materialEmissiveStrength(rapidjson::Type::kObjectType);
+
+            MaterialEmissiveStrength &emissiveStrength = m.materialEmissiveStrength.value;
+
+            if (emissiveStrength.emissiveStrength != 0.f) {
+                WriteFloat(materialEmissiveStrength, emissiveStrength.emissiveStrength, "emissiveStrength", w.mAl);
+            }
+
+            if (!materialEmissiveStrength.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_emissive_strength", materialEmissiveStrength, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -933,6 +947,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_ior) {
                 exts.PushBack(StringRef("KHR_materials_ior"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_emissive_strength) {
+                exts.PushBack(StringRef("KHR_materials_emissive_strength"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {

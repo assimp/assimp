@@ -199,6 +199,14 @@ const Object* LazyObject::Get(bool dieOnError) {
             object.reset(new AnimationCurveNode(id,element,name,doc));
         }
     }
+    catch (std::bad_alloc&) {
+        // out-of-memory is unrecoverable and should always lead to a failure
+
+        flags &= ~BEING_CONSTRUCTED;
+        flags |= FAILED_TO_CONSTRUCT;
+
+        throw;
+    }
     catch(std::exception& ex) {
         flags &= ~BEING_CONSTRUCTED;
         flags |= FAILED_TO_CONSTRUCT;

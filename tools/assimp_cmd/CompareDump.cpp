@@ -910,7 +910,7 @@ int Assimp_CompareDump (const char* const* params, unsigned int num)
             if (m_file)
             {
                 fclose(m_file);
-                m_file = NULL;
+                m_file = nullptr;
             }
         }
 

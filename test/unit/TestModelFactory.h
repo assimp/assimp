@@ -67,7 +67,7 @@ public:
         aiColor3D color( 1, 0, 0 );
         EXPECT_EQ( AI_SUCCESS, scene->mMaterials[ 0 ]->AddProperty( &color, 1, AI_MATKEY_COLOR_DIFFUSE ) );
 
-        ::srand( static_cast< unsigned int >( ::time( NULL ) ) );
+        ::srand(static_cast<unsigned int>(::time(nullptr)));
         opacity = float( rand() ) / float( RAND_MAX );
         EXPECT_EQ( AI_SUCCESS, scene->mMaterials[ 0 ]->AddProperty( &opacity, 1, AI_MATKEY_OPACITY ) );
 

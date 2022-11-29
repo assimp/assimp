@@ -315,7 +315,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
     // we can live without the uc file if necessary
     std::unique_ptr<IOStream> pb(pIOHandler->Open(uc_path));
-    if (pb.get()) {
+    if (pb) {
 
         std::vector<char> _data;
         TextFileToBuffer(pb.get(), _data);

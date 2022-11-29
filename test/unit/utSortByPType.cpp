@@ -184,13 +184,13 @@ TEST_F(SortByPTypeProcessTest, SortByPTypeStep) {
 
                 aiMesh *mesh = mScene->mMeshes[real];
 
-                EXPECT_TRUE(NULL != mesh);
+                EXPECT_TRUE(nullptr != mesh);
                 EXPECT_EQ(AI_PRIMITIVE_TYPE_FOR_N_INDICES(n + 1), mesh->mPrimitiveTypes);
-                EXPECT_TRUE(NULL != mesh->mVertices);
-                EXPECT_TRUE(NULL != mesh->mNormals);
-                EXPECT_TRUE(NULL != mesh->mTangents);
-                EXPECT_TRUE(NULL != mesh->mBitangents);
-                EXPECT_TRUE(NULL != mesh->mTextureCoords[0]);
+                EXPECT_TRUE(nullptr != mesh->mVertices);
+                EXPECT_TRUE(nullptr != mesh->mNormals);
+                EXPECT_TRUE(nullptr != mesh->mTangents);
+                EXPECT_TRUE(nullptr != mesh->mBitangents);
+                EXPECT_TRUE(nullptr != mesh->mTextureCoords[0]);
 
                 EXPECT_TRUE(mesh->mNumFaces == idx);
                 for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {

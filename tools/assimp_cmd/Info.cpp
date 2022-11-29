@@ -177,7 +177,7 @@ void FindSpecialPoints(const aiScene *scene, aiVector3D special_points[3]) {
 
 // -----------------------------------------------------------------------------------
 std::string FindPTypes(const aiScene *scene) {
-    bool haveit[4] = { 0 };
+    bool haveit[4] = { false };
     for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
         const unsigned int pt = scene->mMeshes[i]->mPrimitiveTypes;
         if (pt & aiPrimitiveType_POINT) {

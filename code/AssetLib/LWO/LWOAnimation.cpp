@@ -463,7 +463,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey> &out,
     cur_z = envl_z->keys.begin();
 
     end_x = end_y = end_z = false;
-    while (1) {
+    while (true) {
 
         aiVectorKey fill;
 

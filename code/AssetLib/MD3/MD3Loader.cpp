@@ -109,7 +109,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string &m) {
 // Load a Quake 3 shader
 bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *io) {
     std::unique_ptr<IOStream> file(io->Open(pFile, "rt"));
-    if (!file.get())
+    if (!file)
         return false; // if we can't access the file, don't worry and return
 
     ASSIMP_LOG_INFO("Loading Quake3 shader file ", pFile);
@@ -223,7 +223,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
 // Load a Quake 3 skin
 bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) {
     std::unique_ptr<IOStream> file(io->Open(pFile, "rt"));
-    if (!file.get())
+    if (!file)
         return false; // if we can't access the file, don't worry and return
 
     ASSIMP_LOG_INFO("Loading Quake3 skin file ", pFile);
@@ -709,7 +709,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MD3 file ", pFile, ".");
     }
 

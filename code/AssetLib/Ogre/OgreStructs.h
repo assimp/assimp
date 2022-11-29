@@ -437,7 +437,7 @@ public:
     void CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton);
 
     /// Convert to Assimp node (animation nodes).
-    aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = 0);
+    aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = nullptr);
 
     /// Convert to Assimp bone (mesh bones).
     aiBone *ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights);

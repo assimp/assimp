@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <tuple>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
@@ -186,7 +187,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 // get file size, etc.
                 unz_file_info fileInfo;
                 char filename[256];
-                unzGetCurrentFileInfo(zip, &fileInfo, filename, sizeof(filename), 0, 0, 0, 0);
+                unzGetCurrentFileInfo(zip, &fileInfo, filename, sizeof(filename), nullptr, 0, nullptr, 0);
                 if (GetExtension(filename) != "ifc") {
                     continue;
                 }
@@ -211,7 +212,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     ThrowException("Failed to decompress IFC ZIP file");
                 }
                 unzCloseCurrentFile(zip);
-                stream.reset(new MemoryIOStream(buff, fileInfo.uncompressed_size, true));
+                stream = std::make_shared<MemoryIOStream>(buff, fileInfo.uncompressed_size, true);
                 if (unzGoToNextFile(zip) == UNZ_END_OF_LIST_OF_FILE) {
                     ThrowException("Found no IFC file member in IFCZIP file (1)");
                 }

@@ -374,7 +374,7 @@ struct Accessor : public Object {
         }
 
         inline bool IsValid() const {
-            return data != 0;
+            return data != nullptr;
         }
     };
 
@@ -873,7 +873,7 @@ class LazyDict : public LazyDictBase {
     Ref<T> Add(T *obj);
 
 public:
-    LazyDict(Asset &asset, const char *dictId, const char *extId = 0);
+    LazyDict(Asset &asset, const char *dictId, const char *extId = nullptr);
     ~LazyDict();
 
     Ref<T> Get(const char *id);
@@ -970,17 +970,17 @@ public:
     Ref<Scene> scene;
 
 public:
-    Asset(IOSystem *io = 0) :
-            mIOSystem(io), 
-            asset(), 
-            accessors(*this, "accessors"), 
-            animations(*this, "animations"), 
-            buffers(*this, "buffers"), 
-            bufferViews(*this, "bufferViews"), 
-            cameras(*this, "cameras"), 
-            images(*this, "images"), 
-            materials(*this, "materials"), 
-            meshes(*this, "meshes"), 
+    Asset(IOSystem *io = nullptr) :
+            mIOSystem(io),
+            asset(),
+            accessors(*this, "accessors"),
+            animations(*this, "animations"),
+            buffers(*this, "buffers"),
+            bufferViews(*this, "bufferViews"),
+            cameras(*this, "cameras"),
+            images(*this, "images"),
+            materials(*this, "materials"),
+            meshes(*this, "meshes"),
             nodes(*this, "nodes"),
             samplers(*this, "samplers"),
             scenes(*this, "scenes"),

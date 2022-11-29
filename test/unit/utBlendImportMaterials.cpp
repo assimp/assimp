@@ -62,7 +62,7 @@ protected:
 // ------------------------------------------------------------------------------------------------
 TEST_F(BlendImportMaterials, testImportMaterial) {
     const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderMaterial_269.blend", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(pTest != NULL);
+    ASSERT_TRUE(pTest != nullptr);
     ASSERT_TRUE(pTest->HasMaterials());
 
     ASSERT_EQ(1U, pTest->mNumMaterials);
@@ -121,7 +121,7 @@ TEST_F(BlendImportMaterials, testImportMaterial) {
 
 TEST_F(BlendImportMaterials, testImportMaterialwith2texturesAnd2TexCoordMappings) {
     const aiScene *pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/plane_2_textures_2_texcoords_279.blend", aiProcess_ValidateDataStructure);
-    ASSERT_TRUE(pTest != NULL);
+    ASSERT_TRUE(pTest != nullptr);
 
     // material has 2 diffuse textures
     ASSERT_TRUE(pTest->HasMaterials());

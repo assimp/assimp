@@ -107,7 +107,7 @@ jobs:
       run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
 
     - name: configure and build
-      uses: lukka/run-cmake@v3
+      uses: lukka/run-cmake@v10
       env:
         DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
 

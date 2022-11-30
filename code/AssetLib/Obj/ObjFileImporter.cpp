@@ -108,7 +108,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
         pIOHandler->Close(pStream);
     };
     std::unique_ptr<IOStream, decltype(streamCloser)> fileStream(pIOHandler->Open(file, mode), streamCloser);
-    if (!fileStream.get()) {
+    if (!fileStream) {
         throw DeadlyImportError("Failed to open file ", file, ".");
     }
 

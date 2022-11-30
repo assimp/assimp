@@ -295,7 +295,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                 Surface &surf = obj.surfaces.back();
                 surf.flags = strtoul_cppstyle(buffer);
 
-                while (1) {
+                while (true) {
                     if (!GetNextLine()) {
                         throw DeadlyImportError("AC3D: Unexpected EOF: surface is incomplete");
                     }
@@ -750,7 +750,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open AC3D file ", pFile, ".");
     }
 

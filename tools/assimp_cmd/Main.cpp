@@ -291,7 +291,7 @@ const aiScene* ImportModel(
 	// Now validate this flag combination
 	if(!globalImporter->ValidateFlags(imp.ppFlags)) {
 		printf("ERROR: Unsupported post-processing flags \n");
-		return NULL;
+		return nullptr;
 	}
 	printf("Validating postprocessing flags ...  OK\n");
 	if (imp.showLog) {
@@ -311,7 +311,7 @@ const aiScene* ImportModel(
 	}
 	if (!scene) {
 		printf("ERROR: Failed to load file: %s\n", globalImporter->GetErrorString());
-		return NULL;
+		return nullptr;
 	}
 
 	const clock_t second = ::clock();

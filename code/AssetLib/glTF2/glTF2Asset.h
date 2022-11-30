@@ -1055,7 +1055,7 @@ class LazyDict : public LazyDictBase {
     Ref<T> Add(T *obj);
 
 public:
-    LazyDict(Asset &asset, const char *dictId, const char *extId = 0);
+    LazyDict(Asset &asset, const char *dictId, const char *extId = nullptr);
     ~LazyDict();
 
     Ref<T> Retrieve(unsigned int i);

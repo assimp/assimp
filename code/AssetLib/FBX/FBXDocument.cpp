@@ -78,7 +78,7 @@ const Object* LazyObject::Get(bool dieOnError) {
         return nullptr;
     }
 
-    if (object.get()) {
+    if (object) {
         return object.get();
     }
 
@@ -222,7 +222,7 @@ const Object* LazyObject::Get(bool dieOnError) {
         return nullptr;
     }
 
-    if (!object.get()) {
+    if (!object) {
         //DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
     }
 

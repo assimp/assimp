@@ -388,8 +388,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
     n.Normalize();
 
     // obtain the polygonal bounding volume
-    std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
-    if (!ProcessCurve(hs->PolygonalBoundary, *profile.get(), conv)) {
+    std::shared_ptr<TempMesh> profile = std::make_shared<TempMesh>();
+    if (!ProcessCurve(hs->PolygonalBoundary, *profile, conv)) {
         IFCImporter::LogError("expected valid polyline for boundary of boolean halfspace");
         return;
     }
@@ -672,7 +672,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
     // operand should be near-planar. Luckily, this is usually the case in Ifc
     // buildings.
 
-    std::shared_ptr<TempMesh> meshtmp = std::shared_ptr<TempMesh>(new TempMesh());
+    std::shared_ptr<TempMesh> meshtmp = std::make_shared<TempMesh>();
     ProcessExtrudedAreaSolid(*as, *meshtmp, conv, false);
 
     std::vector<TempOpening> openings(1, TempOpening(as, IfcVector3(0, 0, 0), std::move(meshtmp), std::shared_ptr<TempMesh>()));

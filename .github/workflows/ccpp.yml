@@ -4,7 +4,15 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
+  workflow_call:
+    inputs:
+      ref:
+        description: Reference to use for checking out
+        default: ${{ github.sha }}
+        type: string
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
 
 jobs:
   job:
@@ -13,22 +21,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        name: [ubuntu-latest-gcc, macos-latest-clang, windows-latest-clang, ubuntu-latest-clang, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
-          - name: windows-latest-cl.exe
+          - name: windows-latest-clang
             os: windows-latest
             cxx: cl.exe
             cc: cl.exe
-          - name: ubuntu-latest-clang++
+          - name: ubuntu-latest-clang
             os: ubuntu-latest
             cxx: clang++
             cc: clang
-          - name: macos-latest-clang++
+          - name: macos-latest-clang
             os: macos-latest
             cxx: clang++
             cc: clang
-          - name: ubuntu-latest-g++
+          - name: ubuntu-latest-gcc
             os: ubuntu-latest
             cxx: g++
             cc: gcc
@@ -42,11 +50,42 @@ jobs:
             os: windows-latest
             toolchain: ninja-vs-win64-cxx17
 
+    env: 
+      workingDir: build
+
+    defaults:
+      run:
+        shell: bash
+
     steps:
-    - uses: actions/checkout@v3
+    - name: Determine Reference
+      id: version
+      env:
+        ref: ${{ inputs.ref }}
+        sha: ${{ github.sha }}
+      run: |
+        if [ "$ref" == "" ] ; then
+          ref=$sha
+        fi
+        echo "ref=$ref" >> $GITHUB_OUTPUT
+
+    - name: Check out code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ steps.version.outputs.ref }}
+        submodules: true
     
-    - uses: lukka/get-cmake@latest
-    
+    - name: Install Dependencies
+      run: |
+        case "${RUNNER_OS}" in
+          Linux)    sudo apt install ninja-build ;;
+          macOS)    brew install ninja ;;
+          Windows)  choco install ninja ;;
+          *)        echo "Do not recognise ${RUNNER_OS}." && exit 1 ;;
+        esac
+      env:
+        HOMEBREW_NO_ENV_HINTS: true
+
     - uses: ilammy/msvc-dev-cmd@v1
     
     - name: Set Compiler Environment
@@ -89,41 +128,60 @@ jobs:
       if: contains(matrix.name, 'windows') && steps.dxcache.outputs.cache-hit != 'true'
       run: |
         curl -s -o DXSDK_Jun10.exe --location https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
-        cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
+        .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
+        dir /w
+      shell: cmd
 
+    - name: Set macOS specific CMake arguments
+      if: runner.os == 'macOS'
+      id: macos_extra_cmake_args
+      run: |
+        if [[ $matrixName != *"hunter"* ]]; then
+          echo "args=-DCMAKE_OSX_ARCHITECTURES='arm64;x86_64'" >> $GITHUB_OUTPUT
+        else
+          echo Hunter has not been configured to build for Apple Silicon.
+        fi
+      env:
+        matrixName: ${{ matrix.name }}
+    
     - name: Set Windows specific CMake arguments
       if: contains(matrix.name, 'windows')
       id: windows_extra_cmake_args
-      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1"
+      run: echo "args=-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1"  >> $GITHUB_OUTPUT
     
     - name: Set Hunter specific CMake arguments
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_cmake_args
-      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
+      run: |
+        if [ -f "$pollyConfig" ]; then
+          echo "args=-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=$pollyConfig" >> $GITHUB_OUTPUT
+        else
+          echo "Polly config not found"
+          exit 1
+        fi
+      env:
+        pollyConfig: "cmake/polly/${{ matrix.toolchain }}.cmake"
 
-    - name: configure and build
-      uses: lukka/run-cmake@v3
+    - name: Configure & Build
+      run: |
+        mkdir $workingDir && cd $workingDir
+        # Note: each instance of args is empty if not building for that platform
+        cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.macos_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}
+        cmake --build . -- -j 24 -v
       env:
         DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
 
-      with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
-        buildWithCMakeArgs: '-- -j 24 -v'
-        buildDirectory: '${{ github.workspace }}/build/'
-        
-    - name: Exclude certain tests in Hunter specific builds
+    - name: Less tests in Hunter builds
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_test_args
-      run: echo "::set-output name=args::--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest"
+      run: echo "args=--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest" >> $GITHUB_OUTPUT
 
     - name: test
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: matrix.name == 'windows-msvc'
+      if: matrix.artifact == true
       with:
-        name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
+        name: 'assimp-${{ matrix.name }}'
         path: build/bin

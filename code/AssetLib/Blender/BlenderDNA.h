@@ -431,6 +431,17 @@ inline bool Structure ::ResolvePointer<std::shared_ptr, ElemBase>(std::shared_pt
         const Field &f,
         bool) const;
 
+template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(
+    std::shared_ptr<ElemBase>& out, const Pointer & ptrval,
+    const FileDatabase& db, const Field&, bool) const;
+template <> inline void Structure :: Convert<int>    (int& dest,const FileDatabase& db) const;
+template<> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<char>   (char& dest,const FileDatabase& db) const;
+template <> inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const;
+template <> inline void Structure :: Convert<float>  (float& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<double> (double& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<Pointer> (Pointer& dest,const FileDatabase& db) const;
+
 // -------------------------------------------------------------------------------
 /** Represents the full data structure information for a single BLEND file.
  *  This data is extracted from the DNA1 chunk in the file.

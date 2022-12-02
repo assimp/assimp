@@ -55,6 +55,7 @@ const char NULL_RECORD[NumNullRecords] = { // 25 null bytes in 64-bit and 13 nul
     '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
     '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'
 }; // who knows why, it looks like two integers 32/64 bit (compressed and uncompressed sizes?) + 1 byte (might be compression type?)
+static std::string NULL_RECORD_STRING(NumNullRecords, '\0');
 const std::string SEPARATOR = { '\x00', '\x01' }; // for use inside strings
 const std::string MAGIC_NODE_TAG = "_$AssimpFbx$"; // from import
 const int64_t SECOND = 46186158000; // FBX's kTime unit

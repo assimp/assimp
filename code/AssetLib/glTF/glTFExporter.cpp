@@ -111,7 +111,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     mScene.reset(sceneCopy_tmp);
 
-    mAsset.reset( new glTF::Asset( pIOSystem ) );
+    mAsset = std::make_shared<glTF::Asset>(pIOSystem);
 
     if (isBinary) {
         mAsset->SetAsBinary();

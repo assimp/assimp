@@ -122,7 +122,7 @@ inline const char* ReadHeader(uint8_t* outFile, uint32_t& fileType)
     }
     ::memcpy(&fileType, outFile, 4);
     AI_LSWAP4(fileType);
-    return 0;
+    return nullptr;
 }
 
 

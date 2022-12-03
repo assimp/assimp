@@ -421,16 +421,18 @@ void StandardShapes::MakeCone(ai_real height, ai_real radius1,
         positions.push_back(v3);
 
         if (!bOpen) {
+            const ai_real zero(0.0);
+
             // generate the end 'cap'
             positions.emplace_back(s * radius2, halfHeight, t * radius2);
             positions.emplace_back(s2 * radius2, halfHeight, t2 * radius2);
-            positions.emplace_back(0.0, halfHeight, 0.0);
+            positions.emplace_back(zero, halfHeight, zero);
 
             if (radius1) {
                 // generate the other end 'cap'
                 positions.emplace_back(s * radius1, -halfHeight, t * radius1);
                 positions.emplace_back(s2 * radius1, -halfHeight, t2 * radius1);
-                positions.emplace_back(0.0, -halfHeight, 0.0);
+                positions.emplace_back(zero, -halfHeight, zero);
             }
         }
         s = s2;

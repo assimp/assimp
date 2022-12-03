@@ -468,13 +468,14 @@ void StandardShapes::MakeCircle(ai_real radius, unsigned int tess,
     ai_real t = 0.0; // std::sin(angle == 0);
 
     for (ai_real angle = 0.0; angle < angle_max;) {
-        positions.emplace_back(s * radius, 0.0, t * radius);
+        const ai_real zero(0.0);
+        positions.emplace_back(s * radius, zero, t * radius);
         angle += angle_delta;
         s = std::cos(angle);
         t = std::sin(angle);
-        positions.emplace_back(s * radius, 0.0, t * radius);
+        positions.emplace_back(s * radius, zero, t * radius);
 
-        positions.emplace_back(0.0, 0.0, 0.0);
+        positions.emplace_back(zero, zero, zero);
     }
 }
 

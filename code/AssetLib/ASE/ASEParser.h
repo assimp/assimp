@@ -386,7 +386,7 @@ struct Dummy : public BaseNode {
 class Parser {
 public:
     /// @brief No default constructor.
-    Parser() AI_NO_EXCEPT = delete
+    Parser() = delete;
 
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is

@@ -88,10 +88,6 @@ ASEImporter::ASEImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ASEImporter::~ASEImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool ASEImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "*3dsmax_asciiexport" };

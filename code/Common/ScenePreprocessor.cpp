@@ -142,6 +142,7 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
     // If the information which primitive types are there in the
     // mesh is currently not available, compute it.
     if (!mesh->mPrimitiveTypes) {
+        ai_assert(mesh->mFaces != nullptr);
         for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
             aiFace &face = mesh->mFaces[a];
             switch (face.mNumIndices) {

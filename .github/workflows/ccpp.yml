@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write-all # to fetch code (actions/checkout),and release
+  contents: write # to fetch code (actions/checkout),and release
 
 jobs:
   job:

@@ -132,6 +132,7 @@ jobs:
         path: build/bin
         
     - uses: marvinpinto/action-automatic-releases@latest
+      if: contains(matrix.name, 'windows')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "master"

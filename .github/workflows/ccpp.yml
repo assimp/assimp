@@ -2,7 +2,9 @@ name: C/C++ CI
 
 on:
   push:
+    branches: [master]
   pull_request:
+    branches: [master]
 
 permissions:
   contents: write # to fetch code (actions/checkout),and release
@@ -97,12 +99,12 @@ jobs:
     - name: Set Windows specific CMake arguments
       if: contains(matrix.name, 'windows')
       id: windows_extra_cmake_args
-      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1"
+      run: echo "args=-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1" >> $GITHUB_OUTPUT
     
     - name: Set Hunter specific CMake arguments
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_cmake_args
-      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
+      run: echo "args=-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake" >> $GITHUB_OUTPUT
 
     - name: configure and build
       uses: lukka/run-cmake@v3
@@ -119,20 +121,20 @@ jobs:
     - name: Exclude certain tests in Hunter specific builds
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_test_args
-      run: echo "::set-output name=args::--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest"
+      run: echo "args=--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest" >> $GITHUB_OUTPUT
 
     - name: test
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: contains(matrix.name, 'windows')
+      if: contains(matrix.name, 'windows-msvc')
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
         path: build/bin
         
     - uses: marvinpinto/action-automatic-releases@latest
-      if: contains(matrix.name, 'windows-latest-cl')
+      if: contains(matrix.name, 'windows-msvc')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "master"

@@ -117,6 +117,8 @@ void MD5Parser::ParseHeader() {
         ReportError("MD5 version tag is unknown (10 is expected)");
     }
     SkipLine();
+    if (buffer == bufferEnd)
+        return;
 
     // print the command line options to the console
     // FIX: can break the log length limit, so we need to be careful

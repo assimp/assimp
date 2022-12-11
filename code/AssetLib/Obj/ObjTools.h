@@ -111,6 +111,9 @@ inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd) {
  */
 template <class char_t>
 inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine) {
+    if (it >= end)
+        return it;
+
     while (!isEndOfBuffer(it, end) && !IsLineEnd(*it)) {
         ++it;
     }

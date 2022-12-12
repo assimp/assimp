@@ -128,13 +128,13 @@ jobs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: contains(matrix.name, 'windows-msvc')
+      if: contains(matrix.name, 'latest')
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
         path: build/bin
         
     - uses: marvinpinto/action-automatic-releases@latest
-      if: contains(matrix.name, 'windows-msvc')
+      if: contains(matrix.name, 'windows-latest')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "master"

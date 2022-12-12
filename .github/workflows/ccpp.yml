@@ -128,7 +128,7 @@ jobs:
       shell: bash
 
     - uses: actions/upload-artifact@v3
-      if: contains(matrix.name,'windows-latest-cl')
+      if: contains(matrix.name,'windows')
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
         path: build/bin

@@ -535,7 +535,7 @@ XmlParserPtr OgreXmlSerializer::OpenXmlParser(Assimp::IOSystem *pIOHandler, cons
     }
 
     std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
-    if (!file.get()) {
+    if (!file) {
         throw DeadlyImportError("Failed to open skeleton file ", filename);
     }
 

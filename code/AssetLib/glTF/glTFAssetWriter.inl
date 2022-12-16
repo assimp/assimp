@@ -525,7 +525,7 @@ namespace glTF {
     {
         std::unique_ptr<IOStream> jsonOutFile(mAsset.OpenFile(path, "wt", true));
 
-        if (jsonOutFile == 0) {
+        if (jsonOutFile == nullptr) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
@@ -548,7 +548,7 @@ namespace glTF {
 
             std::unique_ptr<IOStream> binOutFile(mAsset.OpenFile(binPath, "wb", true));
 
-            if (binOutFile == 0) {
+            if (binOutFile == nullptr) {
                 throw DeadlyExportError("Could not open output file: " + binPath);
             }
 
@@ -564,7 +564,7 @@ namespace glTF {
     {
         std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
 
-        if (outfile == 0) {
+        if (outfile == nullptr) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 

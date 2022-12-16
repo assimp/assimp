@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 
 #include <cctype>
+#include <memory>
 #include <utility>
 
 // zlib is needed for compressed blend files
@@ -182,7 +183,7 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
         }
 
         // replace the input stream with a memory stream
-        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
+        stream = std::make_shared<MemoryIOStream>(reinterpret_cast<uint8_t *>(uncompressed.data()), total);
 
         // .. and retry
         stream->Read(magic, 7, 1);
@@ -219,7 +220,7 @@ void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream
 
     out.entries.reserve(128);
     { // even small BLEND files tend to consist of many file blocks
-        SectionParser parser(*out.reader.get(), out.i64bit);
+        SectionParser parser(*out.reader, out.i64bit);
 
         // first parse the file in search for the DNA and insert all other sections into the database
         while ((parser.Next(), 1)) {

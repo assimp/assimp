@@ -199,7 +199,7 @@ void MDCImporter::InternReadFile(
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MDC file ", pFile, ".");
     }
 

@@ -149,10 +149,10 @@ TEST_F(RemoveRedundantMatsTest, testRedundantMaterials) {
 
     piProcess->Execute(pcScene1);
     EXPECT_EQ(3U, pcScene1->mNumMaterials);
-    EXPECT_TRUE(0 != pcScene1->mMaterials &&
-                0 != pcScene1->mMaterials[0] &&
-                0 != pcScene1->mMaterials[1] &&
-                0 != pcScene1->mMaterials[2]);
+    EXPECT_TRUE(nullptr != pcScene1->mMaterials &&
+                nullptr != pcScene1->mMaterials[0] &&
+                nullptr != pcScene1->mMaterials[1] &&
+                nullptr != pcScene1->mMaterials[2]);
 
     aiString sName;
     EXPECT_EQ(AI_SUCCESS, aiGetMaterialString(pcScene1->mMaterials[2], AI_MATKEY_NAME, &sName));
@@ -165,11 +165,11 @@ TEST_F(RemoveRedundantMatsTest, testRedundantMaterialsWithExcludeList) {
 
     piProcess->Execute(pcScene1);
     EXPECT_EQ(4U, pcScene1->mNumMaterials);
-    EXPECT_TRUE(0 != pcScene1->mMaterials &&
-                0 != pcScene1->mMaterials[0] &&
-                0 != pcScene1->mMaterials[1] &&
-                0 != pcScene1->mMaterials[2] &&
-                0 != pcScene1->mMaterials[3]);
+    EXPECT_TRUE(nullptr != pcScene1->mMaterials &&
+                nullptr != pcScene1->mMaterials[0] &&
+                nullptr != pcScene1->mMaterials[1] &&
+                nullptr != pcScene1->mMaterials[2] &&
+                nullptr != pcScene1->mMaterials[3]);
 
     aiString sName;
     EXPECT_EQ(AI_SUCCESS, aiGetMaterialString(pcScene1->mMaterials[3], AI_MATKEY_NAME, &sName));

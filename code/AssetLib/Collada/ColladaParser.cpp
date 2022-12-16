@@ -145,7 +145,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
     } else {
         // attempt to open the file directly
         daefile.reset(pIOHandler->Open(pFile));
-        if (daefile.get() == nullptr) {
+        if (daefile == nullptr) {
             throw DeadlyImportError("Failed to open file '", pFile, "'.");
         }
     }
@@ -759,7 +759,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
             XmlParser::getValueAsString(currentNode, stdText);
             const char *text = stdText.c_str();
             for (std::vector<std::pair<size_t, size_t>>::iterator it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it) {
-                if (text == 0) {
+                if (text == nullptr) {
                     throw DeadlyImportError("Out of data while reading <vertex_weights>");
                 }
                 it->first = strtoul10(text, &text);

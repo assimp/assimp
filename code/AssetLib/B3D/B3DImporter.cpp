@@ -116,7 +116,7 @@ void B3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open B3D file ", pFile, ".");
     }
 
@@ -253,7 +253,7 @@ size_t B3DImporter::ChunkSize() {
 template <class T>
 T *B3DImporter::to_array(const vector<T> &v) {
     if (v.empty()) {
-        return 0;
+        return nullptr;
     }
     T *p = new T[v.size()];
     for (size_t i = 0; i < v.size(); ++i) {
@@ -266,7 +266,7 @@ T *B3DImporter::to_array(const vector<T> &v) {
 template <class T>
 T **unique_to_array(vector<std::unique_ptr<T>> &v) {
     if (v.empty()) {
-        return 0;
+        return nullptr;
     }
     T **p = new T *[v.size()];
     for (size_t i = 0; i < v.size(); ++i) {
@@ -617,7 +617,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
             } else if (chunk == "BRUS") {
                 ReadBRUS();
             } else if (chunk == "NODE") {
-                ReadNODE(0);
+                ReadNODE(nullptr);
             }
             ExitChunk();
         }
@@ -642,7 +642,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
             int n_tris = mesh->mNumFaces;
             int n_verts = mesh->mNumVertices = n_tris * 3;
 
-            aiVector3D *mv = mesh->mVertices = new aiVector3D[n_verts], *mn = 0, *mc = 0;
+            aiVector3D *mv = mesh->mVertices = new aiVector3D[n_verts], *mn = nullptr, *mc = nullptr;
             if (_vflags & 1) {
                 mn = mesh->mNormals = new aiVector3D[n_verts];
             }

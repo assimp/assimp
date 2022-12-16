@@ -72,7 +72,7 @@ struct Type {
 
 // ------------------------------------------------------------------------------------------------
 void DNAParser::Parse() {
-    StreamReaderAny &stream = *db.reader.get();
+    StreamReaderAny &stream = *db.reader;
     DNA &dna = db.dna;
 
     if (!match4(stream, "SDNA")) {

@@ -140,7 +140,7 @@ void BlenderBMeshConverter::ConvertPolyToFaces(const MPoly &poly) {
                 ThrowException("BMesh uv loop array has incorrect size");
             }
             const MLoopUV *loopUV = &BMesh->mloopuv[poly.loopstart];
-            AddTFace(loopUV[0].uv, loopUV[1].uv, loopUV[2].uv, poly.totloop == 4 ? loopUV[3].uv : 0);
+            AddTFace(loopUV[0].uv, loopUV[1].uv, loopUV[2].uv, poly.totloop == 4 ? loopUV[3].uv : nullptr);
         }
     } else if (poly.totloop > 4) {
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE

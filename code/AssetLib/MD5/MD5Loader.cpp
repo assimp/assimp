@@ -331,7 +331,7 @@ void MD5Importer::LoadMD5MeshFile() {
     std::unique_ptr<IOStream> file(mIOHandler->Open(filename, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr || !file->FileSize()) {
+    if (file == nullptr || !file->FileSize()) {
         ASSIMP_LOG_WARN("Failed to access MD5MESH file: ", filename);
         return;
     }
@@ -553,7 +553,7 @@ void MD5Importer::LoadMD5AnimFile() {
     std::unique_ptr<IOStream> file(mIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (!file.get() || !file->FileSize()) {
+    if (!file || !file->FileSize()) {
         ASSIMP_LOG_WARN("Failed to read MD5ANIM file: ", pFile);
         return;
     }
@@ -661,7 +661,7 @@ void MD5Importer::LoadMD5CameraFile() {
     std::unique_ptr<IOStream> file(mIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (!file.get() || !file->FileSize()) {
+    if (!file || !file->FileSize()) {
         throw DeadlyImportError("Failed to read MD5CAMERA file: ", pFile);
     }
     mHadMD5Camera = true;

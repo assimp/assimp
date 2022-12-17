@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -111,6 +111,10 @@ inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd) {
  */
 template <class char_t>
 inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine) {
+    if (it >= end) {
+        return it;
+    }
+
     while (!isEndOfBuffer(it, end) && !IsLineEnd(*it)) {
         ++it;
     }
@@ -129,7 +133,7 @@ inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine) {
 
 /** 
  *  @brief  Get a name from the current line. Preserve space in the middle,
- *    but trim it at the end.
+ *          but trim it at the end.
  *  @param[in]  it      set to current position
  *  @param[in]  end     set to end of scratch buffer for readout
  *  @param[out] name    Separated name

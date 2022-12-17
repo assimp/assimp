@@ -360,7 +360,7 @@ void FBX::Node::EndBinary(
     bool has_children
 ) {
     // if there were children, add a null record
-    if (has_children) { s.PutString(Assimp::FBX::NULL_RECORD); }
+    if (has_children) { s.PutString(Assimp::FBX::NULL_RECORD_STRING); }
 
     // now go back and write initial pos
     this->end_pos = s.Tell();

@@ -41,9 +41,9 @@ jobs:
           - name: macos-clang-hunter
             os: macos-latest
             toolchain: ninja-clang-cxx17-fpic
-          - name: windows-msvc-hunter
-            os: windows-latest
-            toolchain: ninja-vs-win64-cxx17
+          #- name: windows-msvc-hunter
+          #  os: windows-latest
+          #  toolchain: ninja-vs-win64-cxx17
 
     steps:
     - uses: actions/checkout@v3
@@ -134,7 +134,7 @@ jobs:
         path: build/bin
         
     - uses: marvinpinto/action-automatic-releases@latest
-      if: contains(matrix.name, 'windows-latest')
+      if: contains(matrix.name, 'windows-latest-cl.exe')
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "master"

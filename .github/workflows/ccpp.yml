@@ -133,6 +133,16 @@ jobs:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
         path: build/bin
         
+    - uses: marvinpinto/action-automatic-releases@latest
+      if: contains(matrix.name, 'windows-latest')
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "master"
+        prerelease: true
+        title: "AutoRelease"
+        files: |
+          build/bin/*
+
   create-release:
     needs: [build]
     runs-on: ubuntu-latest

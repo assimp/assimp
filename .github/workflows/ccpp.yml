@@ -7,10 +7,10 @@ on:
     branches: [ master ]
 
 permissions:
-  contents: read # to fetch code (actions/checkout)
+  contents: write # to fetch code (actions/checkout),and release
 
 jobs:
-  job:
+  build:
     name: ${{ matrix.name }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -132,3 +132,87 @@ jobs:
       with:
         name: 'assimp-bins-${{ matrix.name }}'
         path: build/bin/assimp*.exe
+        
+    - uses: marvinpinto/action-automatic-releases@latest
+      if: contains(matrix.name, 'windows-msvc-hunter')
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "master"
+        prerelease: true
+        title: "AutoRelease"
+        files: |
+          build/bin/assimp*.exe
+
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+        with:
+          tag_name: '${{github.ref}}'
+          release_name: 'Release ${{github.ref}}'
+          draft: false
+          prerelease: true
+      - run: |
+          echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
+      - uses: actions/upload-artifact@v1
+        with:
+          name: create-release
+          path: release_upload_url.txt
+
+  upload-release:
+    strategy:
+      matrix:
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
+        include:
+          - name: windows-latest-cl.exe
+            os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
+          - name: ubuntu-latest-clang++
+            os: ubuntu-latest
+            cxx: clang++
+            cc: clang
+          - name: macos-latest-clang++
+            os: macos-latest
+            cxx: clang++
+            cc: clang
+          - name: ubuntu-latest-g++
+            os: ubuntu-latest
+            cxx: g++
+            cc: gcc
+          - name: ubuntu-gcc-hunter
+            os: ubuntu-latest
+            toolchain: ninja-gcc-cxx17-fpic
+          - name: macos-clang-hunter
+            os: macos-latest
+            toolchain: ninja-clang-cxx17-fpic
+          - name: windows-msvc-hunter
+            os: windows-latest
+            toolchain: ninja-vs-win64-cxx17
+            
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: create-release
+      - id: upload-url
+        run: |
+          echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v1
+        with:
+          name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+        with:
+          files: |
+            *.zip
+ 

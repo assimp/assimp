@@ -448,7 +448,7 @@ void ColladaExporter::WriteLight(size_t pIndex) {
     PushTag();
     switch (light->mType) {
     case aiLightSource_AMBIENT:
-        WriteAmbienttLight(light);
+        WriteAmbientLight(light);
         break;
     case aiLightSource_DIRECTIONAL:
         WriteDirectionalLight(light);
@@ -543,7 +543,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light) {
     mOutput << startstr << "</spot>" << endstr;
 }
 
-void ColladaExporter::WriteAmbienttLight(const aiLight *const light) {
+void ColladaExporter::WriteAmbientLight(const aiLight *const light) {
 
     const aiColor3D &color = light->mColorAmbient;
     mOutput << startstr << "<ambient>" << endstr;

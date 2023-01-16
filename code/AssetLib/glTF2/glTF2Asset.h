@@ -890,6 +890,7 @@ struct Mesh : public Object {
 
     Mesh() = default;
 
+    /// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
     /// Get mesh data from JSON-object and place them to root asset.
     /// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
     /// \param [out] pAsset_Root - reference to root asset where data will be stored.

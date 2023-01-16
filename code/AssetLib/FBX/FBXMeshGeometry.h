@@ -59,9 +59,9 @@ class Geometry : public Object {
 public:
     /// @brief The class constructor with all parameters.
     /// @param id       The id.
-    /// @param element  
-    /// @param name 
-    /// @param doc 
+    /// @param element
+    /// @param name
+    /// @param doc
     Geometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
     virtual ~Geometry() = default;
 

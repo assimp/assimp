@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-/** 
+/**
  *  @brief  Returns true, if the last entry of the buffer is reached.
  *  @param[in] it   Iterator of current position.
  *  @param[in] end  Iterator with end of buffer.
@@ -67,7 +67,7 @@ inline bool isEndOfBuffer(char_t it, char_t end) {
     return (it == end);
 }
 
-/** 
+/**
  *  @brief  Returns next word separated by a space
  *  @param[in] pBuffer  Pointer to data buffer
  *  @param[in] pEnd     Pointer to end of buffer
@@ -85,7 +85,7 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd) {
     return pBuffer;
 }
 
-/** 
+/**
  *  @brief  Returns pointer a next token
  *  @param[in] pBuffer  Pointer to data buffer
  *  @param[in] pEnd     Pointer to end of buffer
@@ -102,7 +102,7 @@ inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd) {
     return getNextWord(pBuffer, pEnd);
 }
 
-/** 
+/**
  *  @brief  Skips a line
  *  @param[in]  it      Iterator set to current position
  *  @param[in]  end     Iterator set to end of scratch buffer for readout
@@ -131,7 +131,7 @@ inline char_t skipLine(char_t it, char_t end, unsigned int &uiLine) {
     return it;
 }
 
-/** 
+/**
  *  @brief  Get a name from the current line. Preserve space in the middle,
  *          but trim it at the end.
  *  @param[in]  it      set to current position
@@ -162,13 +162,13 @@ inline char_t getName(char_t it, char_t end, std::string &name) {
     std::string strName(pStart, &(*it));
     if (!strName.empty()) {
         name = strName;
-    } 
-    
+    }
+
 
     return it;
 }
 
-/** 
+/**
  *  @brief  Get a name from the current line. Do not preserve space
  *    in the middle, but trim it at the end.
  *  @param  it      set to current position
@@ -202,11 +202,11 @@ inline char_t getNameNoSpace(char_t it, char_t end, std::string &name) {
     if (!strName.empty()) {
         name = strName;
     }
-        
+
     return it;
 }
 
-/** 
+/**
  *  @brief  Get next word from given line
  *  @param[in] it      set to current position
  *  @param[in] end     set to end of scratch buffer for readout
@@ -230,7 +230,7 @@ inline char_t CopyNextWord(char_t it, char_t end, char *pBuffer, size_t length) 
     return it;
 }
 
-/** 
+/**
  *  @brief  Get next float from given line
  *  @param[in]  it      set to current position
  *  @param[in]  end     set to end of scratch buffer for readout

@@ -87,7 +87,7 @@ struct Vertex {
 */
 struct Face {
     Face() AI_NO_EXCEPT :
-            iTexture(0x0), avVertices{} {
+            iTexture(0x0) {
         // empty
     }
     

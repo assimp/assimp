@@ -81,9 +81,7 @@ BlenderTessellatorGL::BlenderTessellatorGL( BlenderBMeshConverter& converter ):
 }
 
 // ------------------------------------------------------------------------------------------------
-BlenderTessellatorGL::~BlenderTessellatorGL( )
-{
-}
+BlenderTessellatorGL::~BlenderTessellatorGL() = default;
 
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorGL::Tessellate( const MLoop* polyLoop, int vertexCount, const std::vector< MVert >& vertices )

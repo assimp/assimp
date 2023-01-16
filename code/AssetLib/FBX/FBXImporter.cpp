@@ -90,10 +90,7 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by #Importer
-FBXImporter::FBXImporter() :
-        mSettings() {
-    // empty
-}
+FBXImporter::FBXImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

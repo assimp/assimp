@@ -83,7 +83,6 @@ static const aiImporterDesc desc = {
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter() :
         configFrameID(), 
-        mBuffer(), 
         pScene( nullptr ), 
         iFileSize( 0 ), 
         iSmallestFrame( INT_MAX ),

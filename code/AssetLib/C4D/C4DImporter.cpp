@@ -106,15 +106,10 @@ static const aiImporterDesc desc = {
 
 
 // ------------------------------------------------------------------------------------------------
-C4DImporter::C4DImporter()
-: BaseImporter() {
-    // empty
-}
+C4DImporter::C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
-C4DImporter::~C4DImporter() {
-    // empty
-}
+C4DImporter::~C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {

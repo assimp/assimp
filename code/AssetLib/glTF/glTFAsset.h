@@ -629,9 +629,7 @@ struct Mesh : public Object {
         SExtension(const EType pType) :
                 Type(pType) {}
 
-        virtual ~SExtension() {
-            // empty
-        }
+        virtual ~SExtension() = default;
     };
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
@@ -657,9 +655,7 @@ struct Mesh : public Object {
             // empty
         }
 
-        virtual ~SCompression_Open3DGC() {
-            // empty
-        }
+        virtual ~SCompression_Open3DGC() = default;
     };
 #endif
 

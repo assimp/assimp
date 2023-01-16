@@ -96,9 +96,6 @@ static const aiImporterDesc desc = {
 };
 
 glTF2Importer::glTF2Importer() :
-        BaseImporter(),
-        meshOffsets(),
-        mEmbeddedTexIdxs(),
         mScene(nullptr) {
     // empty
 }

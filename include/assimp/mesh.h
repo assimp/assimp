@@ -988,8 +988,10 @@ struct aiSkeletonBone {
 #ifdef __cplusplus
     aiSkeletonBone() :
             mParent(-1),
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
             mArmature(nullptr),
             mNode(nullptr),
+#endif
             mNumnWeights(0),
             mMeshId(nullptr),
             mWeights(nullptr),

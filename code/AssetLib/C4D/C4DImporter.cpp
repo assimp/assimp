@@ -86,8 +86,7 @@ void GetWriterInfo(int &id, String &appname) {
 
 namespace Assimp {
     template<> const char* LogFunctions<C4DImporter>::Prefix() {
-        static auto prefix = "C4D: ";
-        return prefix;
+        return "C4D: ";
     }
 }
 

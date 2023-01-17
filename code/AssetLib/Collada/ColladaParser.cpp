@@ -762,6 +762,7 @@ void ColladaParser::ReadControllerWeights(XmlNode &node, Collada::Controller &pC
                 if (text == nullptr) {
                     throw DeadlyImportError("Out of data while reading <vertex_weights>");
                 }
+                SkipSpacesAndLineEnd(&text);
                 it->first = strtoul10(text, &text);
                 SkipSpacesAndLineEnd(&text);
                 if (*text == 0) {

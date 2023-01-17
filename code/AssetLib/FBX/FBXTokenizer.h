@@ -154,7 +154,6 @@ private:
     const unsigned int column;
 };
 
-// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
 typedef const Token* TokenPtr;
 typedef std::vector< TokenPtr > TokenList;
 

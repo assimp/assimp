@@ -55,10 +55,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-LimitBoneWeightsProcess::LimitBoneWeightsProcess()
-{
-    mMaxWeights = AI_LMW_MAX_WEIGHTS;
-}
+LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -66,15 +63,15 @@ LimitBoneWeightsProcess::~LimitBoneWeightsProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const
-{
+bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_LimitBoneWeights) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::Execute( aiScene* pScene)
-{
+void LimitBoneWeightsProcess::Execute( aiScene* pScene) {
+    ai_assert(pScene != nullptr);
+              
     ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
     for (unsigned int m = 0; m < pScene->mNumMeshes; ++m) {
@@ -86,16 +83,28 @@ void LimitBoneWeightsProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp)
-{
-    // get the current value of the property
+void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp) {
     this->mMaxWeights = pImp->GetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS,AI_LMW_MAX_WEIGHTS);
 }
 
 // ------------------------------------------------------------------------------------------------
+static void removeEmptyBones(aiMesh *pMesh) {
+    ai_assert(pMesh != nullptr);
+    
+    unsigned int writeBone = 0;
+    for (unsigned int readBone = 0; readBone< pMesh->mNumBones; ++readBone) {
+        aiBone* bone = pMesh->mBones[readBone];
+        if (bone->mNumWeights > 0) {
+            pMesh->mBones[writeBone++] = bone;
+        } else {
+            delete bone;
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
-{
+void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh) {
     if (!pMesh->HasBones())
         return;
 
@@ -105,11 +114,9 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     WeightsPerVertex vertexWeights(pMesh->mNumVertices);
     size_t maxVertexWeights = 0;
 
-    for (unsigned int b = 0; b < pMesh->mNumBones; ++b)
-    {
+    for (unsigned int b = 0; b < pMesh->mNumBones; ++b) {
         const aiBone* bone = pMesh->mBones[b];
-        for (unsigned int w = 0; w < bone->mNumWeights; ++w)
-        {
+        for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
             const aiVertexWeight& vw = bone->mWeights[w];
 
             if (vertexWeights.size() <= vw.mVertexId)
@@ -126,8 +133,7 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     unsigned int removed = 0, old_bones = pMesh->mNumBones;
 
     // now cut the weight count if it exceeds the maximum
-    for (WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit)
-    {
+    for (WeightsPerVertex::iterator vit = vertexWeights.begin(); vit != vertexWeights.end(); ++vit) {
         if (vit->size() <= mMaxWeights)
             continue;
 
@@ -154,39 +160,25 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh)
     }
 
     // clear weight count for all bone
-    for (unsigned int a = 0; a < pMesh->mNumBones; ++a)
-    {
+    for (unsigned int a = 0; a < pMesh->mNumBones; ++a) {
         pMesh->mBones[a]->mNumWeights = 0;
     }
 
     // rebuild the vertex weight array for all bones
-    for (unsigned int a = 0; a < vertexWeights.size(); ++a)
-    {
+    for (unsigned int a = 0; a < vertexWeights.size(); ++a) {
         const VertexWeightArray& vw = vertexWeights[a];
-        for (const Weight* it = vw.begin(); it != vw.end(); ++it)
-        {
+        for (const Weight* it = vw.begin(); it != vw.end(); ++it) {
             aiBone* bone = pMesh->mBones[it->mBone];
             bone->mWeights[bone->mNumWeights++] = aiVertexWeight(a, it->mWeight);
         }
     }
 
     // remove empty bones
-    unsigned int writeBone = 0;
+#ifdef AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES 
+    removeEmptyBones(pMesh);
+#endif // AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES 
 
-    for (unsigned int readBone = 0; readBone< pMesh->mNumBones; ++readBone)
-    {
-        aiBone* bone = pMesh->mBones[readBone];
-        if (bone->mNumWeights > 0)
-        {
-            pMesh->mBones[writeBone++] = bone;
-        }
-        else
-        {
-            delete bone;
-        }
-    }
     pMesh->mNumBones = writeBone;
-
     if (!DefaultLogger::isNullLogger()) {
         ASSIMP_LOG_INFO("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ", pMesh->mNumBones);
     }

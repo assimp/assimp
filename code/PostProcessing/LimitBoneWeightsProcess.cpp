@@ -46,6 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+// Make sure this value is set.
+#ifndef AI_LMW_MAX_WEIGHTS
+#   define AI_LMW_MAX_WEIGHTS 16
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {}

@@ -132,7 +132,9 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         const aiVector3D *pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D *pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
-        if (flippedWindingOrder_ != leftHanded_) // Boolean XOR
+        // Boolean XOR - if either but not both of these flags is set, then the winding order has
+        // changed and the cross product to calculate the normal needs to be reversed
+        if (flippedWindingOrder_ != leftHanded_) 
             std::swap(pV2, pV3);
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 

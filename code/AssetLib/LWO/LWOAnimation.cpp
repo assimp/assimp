@@ -165,7 +165,7 @@ void AnimResolver::UpdateAnimRangeSetup() {
         if (delta == 0.0) {
             continue;
         }
-        
+
         const size_t old_size = (*it).keys.size();
         const float value_delta = (*it).keys.back().value - (*it).keys.front().value;
 

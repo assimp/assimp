@@ -1123,13 +1123,13 @@ public:
         bool KHR_texture_basisu;
 
         Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false), 
-                KHR_materials_unlit(false), 
-                KHR_lights_punctual(false), 
-                KHR_texture_transform(false), 
-                KHR_materials_sheen(false), 
-                KHR_materials_clearcoat(false), 
-                KHR_materials_transmission(false), 
+                KHR_materials_pbrSpecularGlossiness(false),
+                KHR_materials_unlit(false),
+                KHR_lights_punctual(false),
+                KHR_texture_transform(false),
+                KHR_materials_sheen(false),
+                KHR_materials_clearcoat(false),
+                KHR_materials_transmission(false),
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),
                 KHR_materials_emissive_strength(false),

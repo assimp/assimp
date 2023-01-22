@@ -187,7 +187,7 @@ Scope::Scope(Parser& parser,bool topLevel)
         if (str.empty()) {
             ParseError("unexpected content: empty string.");
         }
-        
+
         elements.insert(ElementMap::value_type(str,new_Element(*n,parser)));
 
         // Element() should stop at the next Key token (or right after a Close token)

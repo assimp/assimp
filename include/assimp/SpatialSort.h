@@ -162,7 +162,7 @@ protected:
         unsigned int mIndex; ///< The vertex referred by this entry
         aiVector3D mPosition; ///< Position
         /// Distance of this vertex to the sorting plane. This is set by Finalize.
-        ai_real mDistance; 
+        ai_real mDistance;
 
         Entry() AI_NO_EXCEPT
                 : mIndex(std::numeric_limits<unsigned int>::max()),

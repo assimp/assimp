@@ -105,7 +105,11 @@ void JoinVerticesProcess::Execute( aiScene* pScene) {
 
 namespace {
 
-bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex) {
+bool areVerticesEqual(
+    const Vertex &lhs,
+    const Vertex &rhs,
+    unsigned numUVChannels,
+    unsigned numColorChannels) {
     // A little helper to find locally close vertices faster.
     // Try to reuse the lookup table from the last step.
     const static float epsilon = 1e-5f;
@@ -124,10 +128,6 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex) {
         return false;
     }
 
-    if ((lhs.texcoords[0] - rhs.texcoords[0]).SquareLength() > squareEpsilon) {
-        return false;
-    }
-
     if ((lhs.tangent - rhs.tangent).SquareLength() > squareEpsilon) {
         return false;
     }
@@ -136,19 +136,18 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex) {
         return false;
     }
 
-    // Usually we won't have vertex colors or multiple UVs, so we can skip from here
-    // Actually this increases runtime performance slightly, at least if branch
-    // prediction is on our side.
-    if (complex) {
-        for (int i = 0; i < 8; i++) {
-            if (i > 0 && (lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
-                return false;
-            }
-            if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
-                return false;
-            }
+    for (unsigned i = 0; i < numUVChannels; i++) {
+        if ((lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
+            return false;
         }
     }
+
+    for (unsigned i = 0; i < numColorChannels; i++) {
+        if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -241,9 +240,16 @@ struct std::hash<Vertex> {
 //template specialization for std::equal_to for Vertex
 template<>
 struct std::equal_to<Vertex> {
+    equal_to(unsigned numUVChannels, unsigned numColorChannels) :
+            mNumUVChannels(numUVChannels),
+            mNumColorChannels(numColorChannels) {}
     bool operator()(const Vertex &lhs, const Vertex &rhs) const {
-        return areVerticesEqual(lhs, rhs, false);
+        return areVerticesEqual(lhs, rhs, mNumUVChannels, mNumColorChannels);
     }
+
+private:
+    unsigned mNumUVChannels;
+    unsigned mNumColorChannels;
 };
 // now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
@@ -316,8 +322,13 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
     }
-    // a map that maps a vertix to its new index
-    std::unordered_map<Vertex,int> vertex2Index;
+    // a map that maps a vertex to its new index
+    const auto numBuckets = pMesh->mNumVertices;
+    const auto hasher = std::hash<Vertex>();
+    const auto comparator = std::equal_to<Vertex>(
+            pMesh->GetNumUVChannels(),
+            pMesh->GetNumColorChannels());
+    std::unordered_map<Vertex, int> vertex2Index(numBuckets, hasher, comparator);
     // we can not end up with more vertices than we started with
     vertex2Index.reserve(pMesh->mNumVertices);
     // Now check each vertex if it brings something new to the table

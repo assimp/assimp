@@ -1118,7 +1118,7 @@ bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value) {
 // Set a configuration property
 bool Importer::SetPropertyPointer(const char* szName, void* value) {
     ai_assert(nullptr != pimpl);
-    
+
     bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();
         existing = SetGenericProperty<void*>(pimpl->mPointerProperties, szName,value);
@@ -1162,7 +1162,7 @@ aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& i
 // Get a configuration property
 void* Importer::GetPropertyPointer(const char* szName, void* iErrorReturn /*= nullptr*/) const {
     ai_assert(nullptr != pimpl);
-    
+
     return GetGenericProperty<void*>(pimpl->mPointerProperties,szName,iErrorReturn);
 }
 

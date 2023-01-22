@@ -327,7 +327,7 @@ void HMPImporter::CreateMaterial(const unsigned char *szCurrent,
         ReadFirstSkin(pcHeader->numskins, szCurrent, &szCurrent);
         *szCurrentOut = szCurrent;
         return;
-    } 
+    }
 
     // generate a default material
     const int iMode = (int)aiShadingMode_Gouraud;
@@ -484,11 +484,11 @@ void HMPImporter::GenerateTextureCoords(const unsigned int width, const unsigned
     if (uv == nullptr) {
         return;
     }
-    
+
     if (height == 0.0f || width == 0.0) {
         return;
     }
-    
+
     const float fY = (1.0f / height) + (1.0f / height) / height;
     const float fX = (1.0f / width) + (1.0f / width) / width;
 

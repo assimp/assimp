@@ -183,7 +183,7 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
             P1 += ofs;
             est_out += MSZIP_BLOCK; // one decompressed block is 327861 in size
         }
-        
+
         // Allocate storage and terminating zero and do the actual uncompressing
         Compression compression;
         uncompressed.resize(est_out + 1);

@@ -1563,7 +1563,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
         out->mBones = nullptr;
         out->mNumBones = 0;
         return;
-    } 
+    }
 
     out->mBones = new aiBone *[bones.size()]();
     out->mNumBones = static_cast<unsigned int>(bones.size());
@@ -3228,7 +3228,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     bool ok = false;
-    
+
     const auto zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);

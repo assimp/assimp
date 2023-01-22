@@ -215,7 +215,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         } else {
             mIsLWO2 = true;
         }
-        
+
         LoadLWO2File();
 
         // The newer lightwave format allows the user to configure the

@@ -55,7 +55,7 @@ namespace Assimp {
 
 /// @brief Assert violation behavior can be customized: see AssertHandler.h.
 /// @param failedExpression     The expression to validate.
-/// @param file                 The file location    
+/// @param file                 The file location
 /// @param line                 The line number
 ASSIMP_API void aiAssertViolation(const char* failedExpression, const char* file, int line);
 

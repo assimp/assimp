@@ -269,7 +269,7 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
                 dynamic_cast<pmx::PmxVertexSkinningSDEF *>(v->skinning.get());
         switch (v->skinning_type) {
         case pmx::PmxVertexSkinningType::BDEF1:
-            bone_vertex_map[vsBDEF1_ptr->bone_index].emplace_back(index, 1.0);
+            bone_vertex_map[vsBDEF1_ptr->bone_index].emplace_back(index, static_cast<ai_real>(1));
             break;
         case pmx::PmxVertexSkinningType::BDEF2:
             bone_vertex_map[vsBDEF2_ptr->bone_index1].emplace_back(index, vsBDEF2_ptr->bone_weight);

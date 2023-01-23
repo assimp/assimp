@@ -47,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_M3DWRAPPER_H_INC
 #define AI_M3DWRAPPER_H_INC
 
-#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER)  
+#if !defined ASSIMP_BUILD_NO_M3D_IMPORTER || !(defined ASSIMP_BUILD_NO_EXPORT || defined ASSIMP_BUILD_NO_M3D_EXPORTER)
 
 #include <memory>
 #include <vector>
@@ -126,7 +125,6 @@ inline m3d_t *M3DWrapper::M3D() const {
 
 } // namespace Assimp
 
-#endif
 #endif // ASSIMP_BUILD_NO_M3D_IMPORTER
 
 #endif // AI_M3DWRAPPER_H_INC

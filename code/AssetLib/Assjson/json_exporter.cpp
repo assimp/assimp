@@ -43,7 +43,7 @@ public:
         Flag_WriteSpecialFloats = 0x2,
         Flag_SkipWhitespaces = 0x4
     };
-    
+
     JSONWriter(Assimp::IOStream &out, unsigned int flags = 0u) :
             out(out), indent (""), newline("\n"), space(" "), buff (), first(false), flags(flags) {
         // make sure that all formatting happens using the standard, C locale and not the user's current locale
@@ -499,18 +499,18 @@ static void Write(JSONWriter &out, const aiMaterial &ai, bool is_elem = true) {
                 }
                 break;
 
-            case aiPTI_String: 
+            case aiPTI_String:
                 {
                     aiString s;
                     aiGetMaterialString(&ai, prop->mKey.data, prop->mSemantic, prop->mIndex, &s);
                     out.SimpleValue(s);
-                } 
+                }
                 break;
-            case aiPTI_Buffer: 
+            case aiPTI_Buffer:
                 {
                     // binary data is written as series of hex-encoded octets
                     out.SimpleValue(prop->mData, prop->mDataLength);
-                } 
+                }
                 break;
             default:
                 ai_assert(false);

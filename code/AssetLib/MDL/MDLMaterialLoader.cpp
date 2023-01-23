@@ -470,7 +470,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
             ASSIMP_LOG_ERROR("Found a reference to an embedded DDS texture, but texture width is zero, aborting import.");
             return;
         }
-        
+
         pcNew.reset(new aiTexture);
         pcNew->mHeight = 0;
         pcNew->mWidth = iWidth;

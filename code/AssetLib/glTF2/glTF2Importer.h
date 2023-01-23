@@ -65,7 +65,7 @@ public:
 protected:
     const aiImporterDesc *GetInfo() const override;
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
-    virtual void SetupProperties(const Importer *pImp) override;
+    void SetupProperties(const Importer *pImp) override;
 
 private:
     void ImportEmbeddedTextures(glTF2::Asset &a);

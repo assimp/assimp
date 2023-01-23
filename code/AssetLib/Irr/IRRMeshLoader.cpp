@@ -71,11 +71,7 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-IRRMeshImporter::IRRMeshImporter() :
-        BaseImporter(),
-        IrrlichtBase() {
-    // empty
-}
+IRRMeshImporter::IRRMeshImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well

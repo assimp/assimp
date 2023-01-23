@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "configure",
+            "type": "shell",
+            "command": "cmake --preset debug-clang"
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "cmake --build --preset debug-clang"
+        }
+    ]
+}

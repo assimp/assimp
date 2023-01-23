@@ -1,0 +1,51 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 23,
+      "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "debug-clang",
+            "displayName": "Clang (system)",
+            "description": "Using compilers: C = clang, CXX = clang++",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug-clang",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": {
+                    "type": "FILEPATH",
+                    "value": "clang"
+                },
+                "CMAKE_CXX_COMPILER": {
+                    "type": "FILEPATH",
+                    "value": "clang++"
+                },
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STRING", 
+                    "value": "Debug"
+                },
+                "ASSIMP_BUILD_ASSIMP_TOOLS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "ASSIMP_BUILD_SAMPLES": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "ASSIMP_BUILD_TESTS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }        
+            },
+            "environment": {
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+          "name": "debug-clang",
+          "configurePreset": "debug-clang"
+        }
+    ]
+}

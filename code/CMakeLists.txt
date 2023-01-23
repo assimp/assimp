@@ -779,6 +779,14 @@ ADD_ASSIMP_IMPORTER( RAW
   AssetLib/Raw/RawLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( S3O
+  AssetLib/S3O/S3OHelper.hpp
+  AssetLib/S3O/S3OFileParser.h
+  AssetLib/S3O/S3OFileParser.cpp
+  AssetLib/S3O/S3OLoader.cpp
+  AssetLib/S3O/S3OLoader.h
+)
+
 ADD_ASSIMP_IMPORTER( SIB
   AssetLib/SIB/SIBImporter.cpp
   AssetLib/SIB/SIBImporter.h

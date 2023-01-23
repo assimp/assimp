@@ -109,6 +109,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
 #include "AssetLib/Raw/RawLoader.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_S3O_IMPORTER
+#include "AssetLib/S3O/S3OLoader.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
 #include "AssetLib/SIB/SIBImporter.h"
 #endif
@@ -283,6 +286,9 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_RAW_IMPORTER)
     out.push_back(new RAWImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_S3O_IMPORTER)
+    out.push_back(new S3OImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_SIB_IMPORTER)
     out.push_back(new SIBImporter());

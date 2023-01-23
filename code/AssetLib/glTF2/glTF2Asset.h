@@ -365,16 +365,7 @@ struct CustomExtension {
 
     ~CustomExtension() = default;
 
-    CustomExtension(const CustomExtension &other) :
-            name(other.name),
-            mStringValue(other.mStringValue),
-            mDoubleValue(other.mDoubleValue),
-            mUint64Value(other.mUint64Value),
-            mInt64Value(other.mInt64Value),
-            mBoolValue(other.mBoolValue),
-            mValues(other.mValues) {
-        // empty
-    }
+    CustomExtension(const CustomExtension &other) = default;
 
     CustomExtension& operator=(const CustomExtension&) = default;
 };
@@ -1086,8 +1077,7 @@ struct AssetMetadata {
 
     void Read(Document &doc);
 
-    AssetMetadata() :
-            version() {}
+    AssetMetadata() = default;
 };
 
 //
@@ -1123,13 +1113,13 @@ public:
         bool KHR_texture_basisu;
 
         Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false), 
-                KHR_materials_unlit(false), 
-                KHR_lights_punctual(false), 
-                KHR_texture_transform(false), 
-                KHR_materials_sheen(false), 
-                KHR_materials_clearcoat(false), 
-                KHR_materials_transmission(false), 
+                KHR_materials_pbrSpecularGlossiness(false),
+                KHR_materials_unlit(false),
+                KHR_lights_punctual(false),
+                KHR_texture_transform(false),
+                KHR_materials_sheen(false),
+                KHR_materials_clearcoat(false),
+                KHR_materials_transmission(false),
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),
                 KHR_materials_emissive_strength(false),

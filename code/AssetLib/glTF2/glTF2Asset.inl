@@ -1903,7 +1903,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     std::vector<char> sceneData;
     rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
 
-    // If a schemaDocumentProvider is available, see if the glTF schema is present. 
+    // If a schemaDocumentProvider is available, see if the glTF schema is present.
     // If so, use it to validate the document.
     if (mSchemaDocumentProvider) {
         if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {

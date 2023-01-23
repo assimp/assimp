@@ -139,7 +139,7 @@ static void normalizePathName(const std::string &rPath, std::string &normalizedP
 // ------------------------------------------------------------------------------------------------
 //  Constructor.
 Q3BSPFileImporter::Q3BSPFileImporter() :
-        m_pCurrentMesh(nullptr), m_pCurrentFace(nullptr), m_MaterialLookupMap(), mTextures() {
+        m_pCurrentMesh(nullptr), m_pCurrentFace(nullptr) {
     // empty
 }
 

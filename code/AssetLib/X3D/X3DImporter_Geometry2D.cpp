@@ -263,7 +263,7 @@ void X3DImporter::readDisk2D(XmlNode &node) {
             //
             if (tlist_i.size() < 2) {
                 // tlist_i and tlist_o has equal size.
-                throw DeadlyImportError("Disk2D. Not enough points for creating quad list."); 
+                throw DeadlyImportError("Disk2D. Not enough points for creating quad list.");
             }
 
             // add all quads except last

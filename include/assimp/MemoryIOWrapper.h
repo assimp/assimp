@@ -162,8 +162,7 @@ public:
     }
 
     /** Destructor. */
-    ~MemoryIOSystem() {
-    }
+    ~MemoryIOSystem() = default;
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */

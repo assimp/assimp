@@ -471,7 +471,7 @@ void X3DImporter::ParseHelper_Node_Enter(X3DNodeElementBase *pNode) {
 
     mNodeElementCur->Children.push_back(pNode); // add new element to current element child list.
     mNodeElementCur = pNode; // switch current element to new one.
-}    
+}
 
 void X3DImporter::ParseHelper_Node_Exit() {
     // check if we can walk up.

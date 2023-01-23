@@ -55,11 +55,11 @@ constexpr char AICMD_MSG_INFO_HELP_E[] =
         "\t-v,--verbose: Print verbose info such as node transform data\n"
         "\t-s, --silent: Print only minimal info\n";
 
-constexpr char TREE_BRANCH_ASCII[] = "|-";
+// constexpr char TREE_BRANCH_ASCII[] = "|-";
 constexpr char TREE_BRANCH_UTF8[] = "\xe2\x94\x9c\xe2\x95\xb4";
-constexpr char TREE_STOP_ASCII[] = "'-";
+// constexpr char TREE_STOP_ASCII[] = "'-";
 constexpr char TREE_STOP_UTF8[] = "\xe2\x94\x94\xe2\x95\xb4";
-constexpr char TREE_CONTINUE_ASCII[] = "| ";
+// constexpr char TREE_CONTINUE_ASCII[] = "| ";
 constexpr char TREE_CONTINUE_UTF8[] = "\xe2\x94\x82 ";
 
 // note: by default this is using utf-8 text.

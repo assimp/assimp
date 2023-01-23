@@ -237,7 +237,7 @@ inline void aiQuaterniont<TReal>::Interpolate( aiQuaterniont& pOut, const aiQuat
 
     // Calculate coefficients
     TReal sclp, sclq;
-    
+
     if ((static_cast<TReal>(1.0) - cosom) > ai_epsilon) // 0.0001 -> some epsillon
     {
         // Standard case (slerp)

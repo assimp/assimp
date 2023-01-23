@@ -95,7 +95,7 @@ void JoinVerticesProcess::Execute( aiScene* pScene) {
             ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
             return;
         }
-        
+
         // Show statistics
         ASSIMP_LOG_INFO("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
             " out: ", iNumVertices, " | ~",
@@ -234,7 +234,7 @@ struct std::hash<Vertex> {
     std::size_t operator()(Vertex const& v) const noexcept {
         size_t seed = 0;
         hash_combine(seed, v.position.x ,v.position.y,v.position.z);
-        return seed; 
+        return seed;
     }
 };
 //template specialization for std::equal_to for Vertex
@@ -410,7 +410,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
                     }
                     if (weightAlreadyExists) {
                         continue;
-                    }                    
+                    }
                     aiVertexWeight nw;
                     nw.mVertexId = replaceIndex[ ow.mVertexId ];
                     nw.mWeight = ow.mWeight;

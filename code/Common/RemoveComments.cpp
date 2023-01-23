@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** 
+/**
  *  @file  RemoveComments.cpp
  *  @brief Defines the CommentRemover utility class
  */

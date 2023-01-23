@@ -141,9 +141,7 @@ AI_FORCE_INLINE IOStreamBuffer<T>::IOStreamBuffer(size_t cache) :
 }
 
 template <class T>
-AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() {
-    // empty
-}
+AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() = default;
 
 template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::open(IOStream *stream) {

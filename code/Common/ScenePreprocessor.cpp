@@ -106,7 +106,7 @@ void ScenePreprocessor::ProcessMesh(aiMesh *mesh) {
         if (!mesh->mTextureCoords[i]) {
             mesh->mNumUVComponents[i] = 0;
             continue;
-        } 
+        }
 
         if (!mesh->mNumUVComponents[i]) {
             mesh->mNumUVComponents[i] = 2;

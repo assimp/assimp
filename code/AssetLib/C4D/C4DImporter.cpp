@@ -123,7 +123,7 @@ bool C4DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, b
     } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // TODO
     }
-    
+
     return false;
 }
 

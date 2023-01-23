@@ -1523,7 +1523,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));        
+                map = strtoul10(&(*it));
                 break;
             }
         }

@@ -62,8 +62,7 @@ namespace Assimp {
 
 template <>
 const char *LogFunctions<FBXImporter>::Prefix() {
-	static auto prefix = "FBX: ";
-	return prefix;
+	return "FBX: ";
 }
 
 } // namespace Assimp

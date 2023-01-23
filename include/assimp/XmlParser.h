@@ -58,8 +58,8 @@ namespace Assimp {
 struct find_node_by_name_predicate {
     /// @brief The default constructor.
     find_node_by_name_predicate() = default;
-    
-    
+
+
     std::string mName; ///< The name to find.
     find_node_by_name_predicate(const std::string &name) :
             mName(name) {

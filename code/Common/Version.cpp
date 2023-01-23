@@ -185,6 +185,6 @@ ASSIMP_API aiScene::~aiScene() {
     aiMetadata::Dealloc(mMetaData);
 
     delete[] mSkeletons;
-    
+
     delete static_cast<Assimp::ScenePrivateData *>(mPrivate);
 }

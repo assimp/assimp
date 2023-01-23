@@ -450,7 +450,7 @@ struct aiScene
 };
 
 #ifdef __cplusplus
-} 
+}
 #endif //! extern "C"
 
 #endif // AI_SCENE_H_INC

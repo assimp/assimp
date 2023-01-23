@@ -90,7 +90,7 @@ struct Face {
             iTexture(0x0) {
         // empty
     }
-    
+
     //! Texture index for the face
     unsigned int iTexture;
 

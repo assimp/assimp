@@ -87,7 +87,7 @@ SMDImporter::SMDImporter() :
         iFileSize( 0 ), 
         iSmallestFrame( INT_MAX ),
         dLengthOfAnim( 0.0 ),
-        bHasUVs(false ), 
+        bHasUVs(false ),
         iLineNumber((unsigned int)-1)  {
     // empty
 }

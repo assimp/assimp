@@ -62,8 +62,7 @@ namspace Assimp
 {
     template< > const char* LogFunctions< BlenderTessellatorGL >::Prefix()
     {
-        static auto prefix = "BLEND_TESS_GL: ";
-        return prefix;
+        return "BLEND_TESS_GL: ";
     }
 }
 
@@ -257,8 +256,7 @@ namespace Assimp
 {
     template< > const char* LogFunctions< BlenderTessellatorP2T >::Prefix()
     {
-        static auto prefix = "BLEND_TESS_P2T: ";
-        return prefix;
+        return "BLEND_TESS_P2T: ";
     }
 }
 

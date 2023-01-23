@@ -260,7 +260,7 @@ public:
         VEC4,
         MAT2,
         MAT3,
-        MAT4 
+        MAT4
     };
 
     inline static Value FromString(const char *str) {
@@ -288,8 +288,8 @@ private:
     };
 
     template <int N>
-    struct data { 
-        static const Info infos[NUM_VALUES]; 
+    struct data {
+        static const Info infos[NUM_VALUES];
     };
 };
 
@@ -297,11 +297,11 @@ private:
 template <int N>
 const AttribType::Info AttribType::data<N>::infos[AttribType::NUM_VALUES] = {
     { "SCALAR", 1 },
-    { "VEC2", 2 }, 
-    { "VEC3", 3 }, 
-    { "VEC4", 4 }, 
-    { "MAT2", 4 }, 
-    { "MAT3", 9 }, 
+    { "VEC2", 2 },
+    { "VEC3", 3 },
+    { "VEC4", 4 },
+    { "MAT2", 4 },
+    { "MAT3", 9 },
     { "MAT4", 16 }
 };
 

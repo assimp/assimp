@@ -216,7 +216,7 @@ void XmlSerializer::ImportXml(aiScene *scene) {
     if (nullptr == scene) {
         return;
     }
-    
+
     scene->mRootNode = new aiNode(XmlTag::RootTag);
     XmlNode node = mXmlParser->getRootNode().child(XmlTag::model);
     if (node.empty()) {
@@ -444,7 +444,7 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                             }
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
                         }
-                    } 
+                    }
                 }
             }
 

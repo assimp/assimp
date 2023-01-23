@@ -83,7 +83,7 @@ void ExportScene3MF(const char *pFile, IOSystem *pIOSystem, const aiScene *pScen
 namespace D3MF {
 
 D3MFExporter::D3MFExporter(const char *pFile, const aiScene *pScene) :
-        mArchiveName(pFile), m_zipArchive(nullptr), mScene(pScene), mModelOutput(), mRelOutput(), mContentOutput(), mBuildItems(), mRelations() {
+        mArchiveName(pFile), m_zipArchive(nullptr), mScene(pScene) {
     // empty
 }
 

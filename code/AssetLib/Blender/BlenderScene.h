@@ -182,7 +182,7 @@ struct MVert : ElemBase {
     int bweight;
 
     MVert() :
-            ElemBase(), flag(0), mat_nr(0), bweight(0) {}
+            flag(0), mat_nr(0), bweight(0) {}
 };
 
 // -------------------------------------------------------------------------------
@@ -417,7 +417,6 @@ struct CustomDataLayer : ElemBase {
     std::shared_ptr<ElemBase> data; // must be converted to real type according type member
 
     CustomDataLayer() :
-            ElemBase(),
             type(0),
             offset(0),
             flag(0),
@@ -729,7 +728,7 @@ struct Object : ElemBase {
     ListBase modifiers;
 
     Object() :
-            ElemBase(), type(Type_EMPTY), parent(nullptr), track(), proxy(), proxy_from(), data() {
+            type(Type_EMPTY), parent(nullptr) {
         // empty
     }
 };
@@ -741,8 +740,7 @@ struct Base : ElemBase {
     std::shared_ptr<Object> object WARN;
 
     Base() :
-            ElemBase(), prev(nullptr), next(), object() {
-        // empty
+            prev(nullptr) {
         // empty
     }
 };
@@ -758,10 +756,7 @@ struct Scene : ElemBase {
 
     ListBase base;
 
-    Scene() :
-            ElemBase(), camera(), world(), basact(), master_collection() {
-        // empty
-    }
+    Scene() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -791,10 +786,7 @@ struct Image : ElemBase {
 
     short gen_x, gen_y, gen_type;
 
-    Image() :
-            ElemBase() {
-        // empty
-    }
+    Image() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -884,7 +876,7 @@ struct Tex : ElemBase {
     //char use_nodes;
 
     Tex() :
-            ElemBase(), imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS), ima() {
+            imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS) {
         // empty
     }
 };
@@ -976,10 +968,7 @@ struct MTex : ElemBase {
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
 
-    MTex() :
-            ElemBase() {
-        // empty
-    }
+    MTex() = default;
 };
 
 } // namespace Blender

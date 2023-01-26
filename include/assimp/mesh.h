@@ -737,13 +737,20 @@ struct aiMesh {
      **/
     C_STRUCT aiString mName;
 
-    /** The number of attachment meshes. Note! Currently only works with Collada loader. */
+    /** The number of attachment meshes.
+     *  Currently known to work with loaders:
+     *   - Collada
+     *   - gltf
+     */
     unsigned int mNumAnimMeshes;
 
     /** Attachment meshes for this mesh, for vertex-based animation.
      *  Attachment meshes carry replacement data for some of the
      *  mesh'es vertex components (usually positions, normals).
-     *  Note! Currently only works with Collada loader.*/
+     *  Currently known to work with loaders:
+     *   - Collada
+     *   - gltf
+     */
     C_STRUCT aiAnimMesh **mAnimMeshes;
 
     /**

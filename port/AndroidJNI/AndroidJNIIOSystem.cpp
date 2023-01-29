@@ -84,7 +84,7 @@ AndroidJNIIOSystem::~AndroidJNIIOSystem() {
 bool AndroidJNIIOSystem::Exists( const char* pFile) const {
     AAsset* asset = AAssetManager_open(mApkAssetManager, pFile, AASSET_MODE_UNKNOWN);
     FILE* file = ::fopen( (mApkWorkspacePath + getOsSeparator() + std::string(pFile)).c_str(), "rb");
-	
+
     if (!asset && !file) {
         __android_log_print(ANDROID_LOG_ERROR, "Assimp", "Asset manager can not find: %s", pFile);
         return false;
@@ -94,7 +94,7 @@ bool AndroidJNIIOSystem::Exists( const char* pFile) const {
     if (file) {
         ::fclose( file);
     }
-    
+
     return true;
 }
 
@@ -140,7 +140,7 @@ bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name) {
         __android_log_print(ANDROID_LOG_DEFAULT, "Assimp", "Asset already extracted");
         return true;
     }
-	
+
     // Open file
     AAsset* asset = AAssetManager_open(mApkAssetManager, name.c_str(),
 			AASSET_MODE_UNKNOWN);
@@ -182,7 +182,7 @@ bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name) {
         __android_log_print(ANDROID_LOG_ERROR, "assimp", "Asset not found: %s", name.c_str());
         return false;
     }
-	
+
     return true;
 }
 

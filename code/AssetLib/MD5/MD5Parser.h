@@ -394,7 +394,7 @@ private:
 
     bool SkipLine(const char* in, const char** out);
     bool SkipLine( );
-    bool SkipSpacesAndLineEnd( const char* in, const char** out);    
+    bool SkipSpacesAndLineEnd( const char* in, const char** out);
     bool SkipSpacesAndLineEnd();
     bool SkipSpaces();
 

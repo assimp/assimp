@@ -80,8 +80,7 @@ namespace Assimp {
 
 template <>
 const char *LogFunctions<BlenderImporter>::Prefix() {
-    static auto prefix = "BLEND: ";
-    return prefix;
+    return "BLEND: ";
 }
 
 } // namespace Assimp

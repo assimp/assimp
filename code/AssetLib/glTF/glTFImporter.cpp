@@ -80,7 +80,7 @@ static const aiImporterDesc desc = {
 };
 
 glTFImporter::glTFImporter() :
-        BaseImporter(), meshOffsets(), embeddedTexIdxs(), mScene(nullptr) {
+        mScene(nullptr) {
     // empty
 }
 

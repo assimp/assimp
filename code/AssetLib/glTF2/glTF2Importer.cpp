@@ -96,9 +96,6 @@ static const aiImporterDesc desc = {
 };
 
 glTF2Importer::glTF2Importer() :
-        BaseImporter(),
-        meshOffsets(),
-        mEmbeddedTexIdxs(),
         mScene(nullptr) {
     // empty
 }
@@ -185,7 +182,6 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             const ai_real rsin(sin(-transform.mRotation));
             transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
             transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
-            ;
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }
@@ -853,7 +849,7 @@ void glTF2Importer::ImportCameras(glTF2::Asset &r) {
 
         if (cam.type == Camera::Perspective) {
             aicam->mAspect = cam.cameraProperties.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.cameraProperties.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
+            aicam->mHorizontalFOV = 2.0f * std::atan(std::tan(cam.cameraProperties.perspective.yfov * 0.5f) * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect));
             aicam->mClipPlaneFar = cam.cameraProperties.perspective.zfar;
             aicam->mClipPlaneNear = cam.cameraProperties.perspective.znear;
         } else {

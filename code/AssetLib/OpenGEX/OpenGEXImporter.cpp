@@ -261,7 +261,6 @@ OpenGEXImporter::RefInfo::RefInfo(aiNode *node, Type type, std::vector<std::stri
 OpenGEXImporter::OpenGEXImporter() :
         m_root(nullptr),
         m_nodeChildMap(),
-        m_meshCache(),
         m_mesh2refMap(),
         m_material2refMap(),
         m_ctx(nullptr),

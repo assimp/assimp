@@ -264,12 +264,12 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     // We should care only about used vertices, not all of them
     // (this can happen due to original file vertices buffer being used by
     // multiple meshes)
-    std::unordered_set<unsigned int> usedVertexIndices;
-    usedVertexIndices.reserve(pMesh->mNumVertices);
-    for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
+    std::vector<bool> usedVertexIndicesMask;
+    usedVertexIndicesMask.resize(pMesh->mNumVertices, false);
+    for (unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
-        for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            usedVertexIndices.insert(face.mIndices[b]);
+        for (unsigned int b = 0; b < face.mNumIndices; b++) {
+            usedVertexIndicesMask[face.mIndices[b]] = true;
         }
     }
 
@@ -335,7 +335,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     int newIndex = 0;
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
         // if the vertex is unused Do nothing
-        if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
+        if (!usedVertexIndicesMask[a]) {
             continue;
         }
         // collect the vertex data

@@ -1455,7 +1455,9 @@ static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *s
     skeletonBone->mWeights = bone->mWeights;
     skeletonBone->mOffsetMatrix = bone->mOffsetMatrix;
     skeletonBone->mMeshId = mesh;
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     skeletonBone->mNode = bone->mNode;
+#endif
     skeletonBone->mParent = -1;
 }
 

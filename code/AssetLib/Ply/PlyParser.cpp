@@ -308,8 +308,8 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
         streamBuffer.getNextLine(buffer);
         pCur = (char *)&buffer[0];
 
-        // skip all comments
-        PLY::DOM::SkipComments(buffer);
+        // skip all comments and go to next line
+        if (PLY::DOM::SkipComments(buffer)) continue;
 
         PLY::Property prop;
         if (!PLY::Property::ParseProperty(buffer, &prop))

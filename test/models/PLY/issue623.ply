@@ -2,6 +2,7 @@ ply
 format ascii 1.0
 comment Created by Blender 2.77 (sub 0) - www.blender.org, source file: ''
 element vertex 24
+comment Manually added comment line to fix issue #4866
 property float x
 property float y
 property float z

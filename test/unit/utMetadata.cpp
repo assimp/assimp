@@ -212,7 +212,7 @@ TEST_F( utMetadata, copy_test ) {
 
     // int32_t test
     {
-		int32_t v = 0;
+        int32_t v = 127;
         bool ok = copy.Get( "int32", v );
         EXPECT_TRUE( ok );
         EXPECT_EQ( i32v, v );
@@ -220,7 +220,7 @@ TEST_F( utMetadata, copy_test ) {
 
     // uint64_t test
     {
-        uint64_t v;
+        uint64_t v = 255;
         bool ok = copy.Get( "uint64", v );
         EXPECT_TRUE( ok );
         EXPECT_EQ( ui64v, v );
@@ -228,14 +228,14 @@ TEST_F( utMetadata, copy_test ) {
 
     // float test
     {
-        float v;
+        float v = -9.9999f;
         EXPECT_TRUE( copy.Get( "float", v ) );
         EXPECT_EQ( fv, v );
     }
 
     // double test
     {
-        double v;
+        double v = -99.99;
         EXPECT_TRUE( copy.Get( "double", v ) );
         EXPECT_EQ( dv, v );
     }

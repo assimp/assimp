@@ -175,18 +175,22 @@ public:
     // -------------------------------------------------------------------
     /** Returns the directory separator. */
     char getOsSeparator() const override {
-        return existing_io ? existing_io->getOsSeparator()
-                           : '/';  // why not? it doesn't care
+        return existing_io ? existing_io->getOsSeparator() : '/'; 
     }
 
     // -------------------------------------------------------------------
-    /** Open a new file with a given path. */
+    /// Open a new file with a given path.
     IOStream* Open(const char* pFile, const char* pMode = "rb") override {
+        if (pFile == nullptr) {
+            return nullptr;
+        }
+        
         if ( 0 == strncmp( pFile, AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH ) ) {
             created_streams.emplace_back(new MemoryIOStream(buffer, length));
             return created_streams.back();
         }
-        return existing_io ? existing_io->Open(pFile, pMode) : NULL;
+        
+        return existing_io ? existing_io->Open(pFile, pMode) : nullptr;
     }
 
     // -------------------------------------------------------------------

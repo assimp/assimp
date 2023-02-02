@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -66,11 +65,7 @@ namespace Assimp    {
 // ----------------------------------------------------------------------------------
 class MemoryIOStream : public IOStream {
 public:
-    MemoryIOStream (const uint8_t* buff, size_t len, bool own = false)
-    : buffer (buff)
-    , length(len)
-    , pos((size_t)0)
-    , own(own) {
+    MemoryIOStream (const uint8_t* buff, size_t len, bool own = false) : buffer (buff), length(len), pos((size_t)0), own(own) {
         // empty
     }
 
@@ -162,7 +157,11 @@ public:
     }
 
     /** Destructor. */
-    ~MemoryIOSystem() = default;
+    ~MemoryIOSystem() {
+        for (auto &it : created_streams) {
+            MemoryIOSystem::Close(it);
+        }
+    }
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */

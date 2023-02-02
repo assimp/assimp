@@ -81,7 +81,7 @@ TEST_F(SharedPPDataTest, testPODProperty)
     EXPECT_FALSE(shared->GetProperty("test2",o));
     EXPECT_EQ(5, o);
 
-    float f = 12.f, m;
+    float f = 12.f, m = -98.7654f;
     shared->AddProperty("test",f);
     EXPECT_TRUE(shared->GetProperty("test",m));
     EXPECT_EQ(12.f, m);

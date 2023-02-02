@@ -99,7 +99,7 @@ jobs:
     - name: Set Windows specific CMake arguments
       if: contains(matrix.name, 'windows')
       id: windows_extra_cmake_args
-      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1"
+      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1 -DASSIMP_BUILD_ZLIB=1"
     
     - name: Set Hunter specific CMake arguments
       if: contains(matrix.name, 'hunter')

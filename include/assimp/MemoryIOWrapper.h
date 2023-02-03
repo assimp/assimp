@@ -159,7 +159,7 @@ public:
     /** Destructor. */
     ~MemoryIOSystem() {
         for (auto &it : created_streams) {
-            MemoryIOSystem::Close(it);
+            delete it;
         }
     }
 

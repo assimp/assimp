@@ -324,7 +324,7 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
     }
     buffer[i] = '\n';
     while (m_cachePos < m_cacheSize && (m_cache[m_cachePos] == '\r' || m_cache[m_cachePos] == '\n')) {
-    ++m_cachePos;
+        ++m_cachePos;
     }
 
     return true;

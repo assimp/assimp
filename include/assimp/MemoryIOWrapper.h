@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -153,11 +152,7 @@ private:
 class MemoryIOSystem : public IOSystem {
 public:
     /** Constructor. */
-    MemoryIOSystem(const uint8_t* buff, size_t len, IOSystem* io)
-    : buffer(buff)
-    , length(len)
-    , existing_io(io)
-    , created_streams() {
+    MemoryIOSystem(const uint8_t* buff, size_t len, IOSystem* io) : buffer(buff), length(len), existing_io(io) {
         // empty
     }
 
@@ -167,6 +162,7 @@ public:
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
     bool Exists(const char* pFile) const override {
+        printf("Exists\n");
         if (0 == strncmp( pFile, AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH ) ) {
             return true;
         }
@@ -187,7 +183,7 @@ public:
             created_streams.emplace_back(new MemoryIOStream(buffer, length));
             return created_streams.back();
         }
-        return existing_io ? existing_io->Open(pFile, pMode) : NULL;
+        return existing_io ? existing_io->Open(pFile, pMode) : nullptr;
     }
 
     // -------------------------------------------------------------------
@@ -246,4 +242,4 @@ private:
 
 } // end namespace Assimp
 
-#endif
+#endif // AI_MEMORYIOSTREAM_H_INC

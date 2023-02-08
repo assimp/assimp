@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
-	aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
-	aiAttachLogStream(&stream);
+    aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
+    aiAttachLogStream(&stream);
 
     Importer importer;
     const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
@@ -57,3 +57,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
 
     return 0;
 }
+

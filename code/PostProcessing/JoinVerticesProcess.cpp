@@ -251,6 +251,8 @@ private:
     unsigned mNumUVChannels;
     unsigned mNumColorChannels;
 };
+
+#define JOINED_VERTICES_MARK 0x80000000u
 // now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
@@ -357,8 +359,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             }
         } else{
             // if the vertex is already there just find the replace index that is appropriate to it
-			// mark it with '0x80000000'
-            replaceIndex[a] = it->second | 0x80000000;
+			// mark it with JOINED_VERTICES_MARK
+            replaceIndex[a] = it->second | JOINED_VERTICES_MARK;
         }
     }
 
@@ -387,7 +389,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
         for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~0x80000000;
+            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~JOINED_VERTICES_MARK;
         }
     }
 
@@ -401,8 +403,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
                 // if the vertex is a unique one, translate it
-				// filter out joined vertices by mrak.
-                if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
+				// filter out joined vertices by JOINED_VERTICES_MARK.
+                if ( !( replaceIndex[ ow.mVertexId ] & JOINED_VERTICES_MARK ) ) {
                     aiVertexWeight nw;
                     nw.mVertexId = replaceIndex[ ow.mVertexId ];
                     nw.mWeight = ow.mWeight;

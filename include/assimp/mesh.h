@@ -952,7 +952,7 @@ struct aiMesh {
 #endif // __cplusplus
 };
 
-*
+/**
  * @brief  A skeleton bone represents a single bone is a skeleton structure.
  *
  * Skeleton-Animations can be represented via a skeleton struct, which describes

@@ -631,7 +631,9 @@ struct aiMesh {
     */
     C_STRUCT aiVector3D *mVertices;
 
-    /** Vertex normals.
+    /** 
+    * @brief Vertex normals.
+    *
     * The array contains normalized vectors, nullptr if not present.
     * The array is mNumVertices in size. Normals are undefined for
     * point and line primitives. A mesh consisting of points and
@@ -770,7 +772,7 @@ struct aiMesh {
 
 #ifdef __cplusplus
 
-    //! Default constructor. Initializes all members to 0
+    //! The default class constructor.
     aiMesh() AI_NO_EXCEPT
             : mPrimitiveTypes(0),
               mNumVertices(0),
@@ -953,7 +955,7 @@ struct aiMesh {
 };
 
 /**
- * @brief  A skeleton bone represents a single bone is a skeleton structure.
+ * @brief  A skeleton bone represents a single bone in a aiSkeleton instance.
  *
  * Skeleton-Animations can be represented via a skeleton struct, which describes
  * a hierarchical tree assembled from skeleton bones. A bone is linked to a mesh.

@@ -125,7 +125,7 @@ public:
         return length;
     }
 
-    void Flush() {
+    void Flush() override{
         ai_assert(false); // won't be needed
     }
 

@@ -631,7 +631,9 @@ struct aiMesh {
     */
     C_STRUCT aiVector3D *mVertices;
 
-    /** Vertex normals.
+    /** 
+    * @brief Vertex normals.
+    *
     * The array contains normalized vectors, nullptr if not present.
     * The array is mNumVertices in size. Normals are undefined for
     * point and line primitives. A mesh consisting of points and
@@ -770,7 +772,7 @@ struct aiMesh {
 
 #ifdef __cplusplus
 
-    //! Default constructor. Initializes all members to 0
+    //! The default class constructor.
     aiMesh() AI_NO_EXCEPT
             : mPrimitiveTypes(0),
               mNumVertices(0),
@@ -952,17 +954,32 @@ struct aiMesh {
 #endif // __cplusplus
 };
 
+/**
+ * @brief  A skeleton bone represents a single bone in a aiSkeleton instance.
+ *
+ * Skeleton-Animations can be represented via a skeleton struct, which describes
+ * a hierarchical tree assembled from skeleton bones. A bone is linked to a mesh.
+ * The bone knows its parent bone. If there is no parent bone the parent id is
+ * marked with -1.
+ * The skeleton-bone stores a pointer to its used armature. If there is no
+ * armature this value if set to nullptr.
+ * A skeleton bone stores its offset-matrix, which is the absolute transformation
+ * for the bone. The bone stores the locale transformation to its parent as well.
+ * You can compute the offset matrix by multiplying the hierarchy like:
+ * Tree: s1 -> s2 -> s3
+ * Offset-Matrix s3 = locale-s3 * locale-s2 * locale-s1
+ */
 struct aiSkeletonBone {
     /// The parent bone index, is -1 one if this bone represents the root bone.
     int mParent;
 
 
 #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
-    /// The bone armature node - used for skeleton conversion
+    /// @brief The bone armature node - used for skeleton conversion
     /// you must enable aiProcess_PopulateArmatureData to populate this
     C_STRUCT aiNode *mArmature;
 
-    /// The bone node in the scene - used for skeleton conversion
+    /// @brief The bone node in the scene - used for skeleton conversion
     /// you must enable aiProcess_PopulateArmatureData to populate this
     C_STRUCT aiNode *mNode;
 
@@ -993,6 +1010,7 @@ struct aiSkeletonBone {
     C_STRUCT aiMatrix4x4 mLocalMatrix;
 
 #ifdef __cplusplus
+    ///	@brief The class constructor.
     aiSkeletonBone() :
             mParent(-1),
 #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
@@ -1007,6 +1025,7 @@ struct aiSkeletonBone {
         // empty
     }
 
+    /// @brief The class destructor.
     ~aiSkeletonBone() {
         delete[] mWeights;
         mWeights = nullptr;
@@ -1014,34 +1033,45 @@ struct aiSkeletonBone {
 #endif // __cplusplus
 };
 /**
- *  @brief
+ * @brief A skeleton represents the bone hierarchy of an animation.
+ *
+ * Skeleton animations can be described as a tree of bones:
+ *                  root
+ *                    |
+ *                  node1
+ *                  /   \
+ *               node3  node4
+ * If you want to calculate the transformation of node three you need to compute the
+ * transformation hierarchy for the transformation chain of node3:
+ * root->node1->node3
+ * Each node is represented as a skeleton instance.
  */
 struct aiSkeleton {
     /**
-     *
+     *  @brief The name of the skeleton instance.
      */
     C_STRUCT aiString mName;
 
     /**
-     *
+     *  @brief  The number of bones in the skeleton.
      */
     unsigned int mNumBones;
 
     /**
-     *
+     *  @brief The bone instance in the skeleton.
      */
     C_STRUCT aiSkeletonBone **mBones;
 
 #ifdef __cplusplus
     /**
-     *
+     *  @brief The class constructor.
      */
     aiSkeleton() AI_NO_EXCEPT : mName(), mNumBones(0), mBones(nullptr) {
         // empty
     }
 
     /**
-     *
+     *  @brief  The class destructor.
      */
     ~aiSkeleton() {
         delete[] mBones;

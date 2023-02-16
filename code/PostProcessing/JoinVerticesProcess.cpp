@@ -55,13 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 
 using namespace Assimp;
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-JoinVerticesProcess::JoinVerticesProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -252,7 +245,7 @@ private:
     unsigned mNumColorChannels;
 };
 
-static constexpr siue_T JOINED_VERTICES_MARK = 0x80000000u;
+static constexpr size_t JOINED_VERTICES_MARK = 0x80000000u;
 
 // now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {

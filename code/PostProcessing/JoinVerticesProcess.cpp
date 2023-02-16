@@ -252,7 +252,8 @@ private:
     unsigned mNumColorChannels;
 };
 
-#define JOINED_VERTICES_MARK 0x80000000u
+static constexpr siue_T JOINED_VERTICES_MARK = 0x80000000u;
+
 // now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");

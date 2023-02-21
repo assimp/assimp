@@ -590,7 +590,7 @@ void SMDImporter::CreateOutputMaterials() {
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
-        szName.length = (size_t)ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat);
+        szName.length = static_cast<ai_uint32>(ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat));
         pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
         if (aszTextures[iMat].length())

@@ -14,7 +14,7 @@ __Importers__:
 - B3D
 - [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format))
 - [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
-- CMS
+- CSM
 - COB
 - [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
 - [DXF](https://en.wikipedia.org/wiki/AutoCAD_DXF)

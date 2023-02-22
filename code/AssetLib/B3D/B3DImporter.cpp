@@ -150,7 +150,7 @@ AI_WONT_RETURN void B3DImporter::Fail(const string &str) {
 
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadByte() {
-    if (_pos > _buf.size()) {
+    if (_pos >= _buf.size()) {
         Fail("EOF");
     }
 

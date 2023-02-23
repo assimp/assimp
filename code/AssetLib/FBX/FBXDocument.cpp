@@ -381,8 +381,10 @@ void Document::ReadObjects() {
             DOMError("encountered object with implicitly defined id 0",el.second);
         }
 
-        if(objects.find(id) != objects.end()) {
+        const auto foundObject = objects.find(id);
+        if(foundObject != objects.end()) {
             DOMWarning("encountered duplicate object id, ignoring first occurrence",el.second);
+            delete foundObject->second;
         }
 
         objects[id] = new LazyObject(id, *el.second, *this);

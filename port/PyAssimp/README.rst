@@ -81,7 +81,7 @@ Install ``pyassimp`` by running:
     $ python setup.py install
 
 PyAssimp requires a assimp dynamic library (``DLL`` on windows, ``.so``
-on linux, ``.dynlib`` on macOS) in order to work. The default search
+on linux, ``.dylib`` on macOS) in order to work. The default search
 directories are:
 
 -  the current directory

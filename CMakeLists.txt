@@ -84,10 +84,6 @@ OPTION( ASSIMP_NO_EXPORT
   "Disable Assimp's export functionality."
   OFF
 )
-OPTION( ASSIMP_BUILD_ZLIB
-  "Build your own zlib"
-  OFF
-)
 OPTION( ASSIMP_BUILD_ASSIMP_TOOLS
   "If the supplementary tools for Assimp are built in addition to the library."
   OFF
@@ -133,6 +129,18 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    "Don't call git to get the hash."
    OFF
 )
+
+IF (WIN32)
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    ON
+  )
+ELSE()
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    OFF
+  )
+ENDIF()
 
 IF (WIN32)
   # Use subset of Windows.h

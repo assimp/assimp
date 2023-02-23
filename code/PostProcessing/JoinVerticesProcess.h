@@ -64,8 +64,13 @@ namespace Assimp
  */
 class ASSIMP_API JoinVerticesProcess : public BaseProcess {
 public:
-    JoinVerticesProcess();
-    ~JoinVerticesProcess();
+    // -------------------------------------------------------------------
+    /// @brief  The default class constructor.
+    JoinVerticesProcess() = default;
+    
+    // -------------------------------------------------------------------
+    /// @brief  The default class destructor.
+    ~JoinVerticesProcess() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

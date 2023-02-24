@@ -565,6 +565,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
     root->mName.Set("<LWORoot>");
 
     //Set parent of all children, inserting pivots
+    {
     std::map<uint16_t, aiNode *> mapPivot;
     for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
 
@@ -598,6 +599,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
     //Merge pivot map into node map
     for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
         apcNodes[itMapPivot->first] = itMapPivot->second;
+    }
     }
 
     //Set children of all parents

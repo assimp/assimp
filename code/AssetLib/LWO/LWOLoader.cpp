@@ -431,6 +431,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                 for (unsigned int p = 0; p < pcNode->mNumMeshes; ++p)
                     pcNode->mMeshes[p] = p + meshStart;
             }
+            ASSIMP_LOG_DEBUG("insert apcNode for layer ", layer.mIndex, " \"", layer.mName, "\"");
             apcNodes[layer.mIndex] = pcNode.release();
         }
     }
@@ -564,6 +565,11 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
     aiNode *root = mScene->mRootNode = new aiNode();
     root->mName.Set("<LWORoot>");
 
+    ASSIMP_LOG_DEBUG("apcNodes initial size: ", apcNodes.size());
+    if (!apcNodes.empty()) {
+        ASSIMP_LOG_DEBUG("first apcNode is: ", apcNodes.begin()->first, " \"", apcNodes.begin()->second->mName.C_Str(), "\"");
+    }
+
     //Set parent of all children, inserting pivots
     {
         std::map<uint16_t, aiNode *> mapPivot;
@@ -593,14 +599,30 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
             pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
             pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
             pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
-            mapPivot[-(itapcNodes->first + 2)] = pivotNode.release();
+            uint16_t pivotNodeId = static_cast<uint16_t>(-(itapcNodes->first + 2));
+            ASSIMP_LOG_DEBUG("insert pivot node: ", pivotNodeId);
+            auto oldNodeIt = mapPivot.find(pivotNodeId);
+            if (oldNodeIt != mapPivot.end()) {
+                ASSIMP_LOG_ERROR("attempted to insert pivot node which already exists in pivot map ", pivotNodeId, " \"", pivotNode->mName.C_Str(), "\"");
+            } else {
+                mapPivot.emplace(pivotNodeId, pivotNode.release());
+            }
         }
 
+        ASSIMP_LOG_DEBUG("pivot nodes: ", mapPivot.size());
         //Merge pivot map into node map
         for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end();) {
-            apcNodes[itMapPivot->first] = itMapPivot->second;
+            uint16_t pivotNodeId = itMapPivot->first;
+            auto oldApcNodeIt = apcNodes.find(pivotNodeId);
+            if (oldApcNodeIt != apcNodes.end()) {
+                ASSIMP_LOG_ERROR("attempted to insert pivot node which already exists in apc nodes ", pivotNodeId, " \"", itMapPivot->second->mName.C_Str(), "\"");
+            } else {
+                apcNodes.emplace(pivotNodeId, itMapPivot->second);
+            }
+            itMapPivot->second = nullptr;
             itMapPivot = mapPivot.erase(itMapPivot);
         }
+        ASSIMP_LOG_DEBUG("total nodes: ", apcNodes.size());
     }
 
     //Set children of all parents
@@ -622,8 +644,15 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
         }
     }
 
-    if (!mScene->mRootNode->mNumChildren)
+    if (!mScene->mRootNode->mNumChildren) {
+        ASSIMP_LOG_DEBUG("All apcNodes:");
+        for (auto nodeIt = apcNodes.begin(); nodeIt != apcNodes.end(); ) {
+            ASSIMP_LOG_DEBUG("Node ", nodeIt->first, " \"", nodeIt->second->mName.C_Str(), "\"");
+            nodeIt->second = nullptr;
+            nodeIt = apcNodes.erase(nodeIt);
+        }
         throw DeadlyImportError("LWO: Unable to build a valid node graph");
+    }
 
     // Remove a single root node with no meshes assigned to it ...
     if (1 == mScene->mRootNode->mNumChildren) {

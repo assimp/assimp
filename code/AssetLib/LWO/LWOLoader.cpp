@@ -597,8 +597,9 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
         }
 
         //Merge pivot map into node map
-        for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+        for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end();) {
             apcNodes[itMapPivot->first] = itMapPivot->second;
+            itMapPivot = mapPivot.erase(itMapPivot);
         }
     }
 

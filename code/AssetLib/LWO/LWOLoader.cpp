@@ -398,14 +398,6 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                             pvVC[w]++;
                         }
 
-#if 0
-                        // process vertex weights. We can't properly reconstruct the whole skeleton for now,
-                        // but we can create dummy bones for all weight channels which we have.
-                        for (unsigned int w = 0; w < layer.mWeightChannels.size();++w)
-                        {
-                        }
-#endif
-
                         face.mIndices[q] = vert;
                     }
                     pf->mIndices = face.mIndices;

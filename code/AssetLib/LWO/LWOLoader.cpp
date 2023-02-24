@@ -574,9 +574,9 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
             uint16_t parentIndex = nodeLayer->mParent;
 
             //Create pivot node, store it into the pivot map, and set the parent as the pivot
-            aiNode *pivotNode = new aiNode();
+            std::unique_ptr<aiNode> pivotNode(new aiNode());
             pivotNode->mName.Set("Pivot-" + std::string(itapcNodes->second->mName.data));
-            itapcNodes->second->mParent = pivotNode;
+            itapcNodes->second->mParent = pivotNode.get();
 
             //Look for the parent node to attach the pivot to
             if (apcNodes.find(parentIndex) != apcNodes.end()) {
@@ -593,7 +593,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
             pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
             pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
             pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
-            mapPivot[-(itapcNodes->first + 2)] = pivotNode;
+            mapPivot[-(itapcNodes->first + 2)] = pivotNode.release();
         }
 
         //Merge pivot map into node map

@@ -178,7 +178,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     mLayers->push_back(Layer());
     mCurLayer = &mLayers->back();
     mCurLayer->mName = "<LWODefault>";
-    mCurLayer->mIndex = (uint16_t) -1;
+    mCurLayer->mIndex = 1;
 
     // old lightwave file format (prior to v6)
     mIsLWO2 = false;

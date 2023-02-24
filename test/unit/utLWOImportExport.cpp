@@ -357,16 +357,11 @@ TEST_F(utLWOImportExport, importLWOuvtest) {
 }
 
 
-// These tests leak memory and complain on ASAN CI build
-#if 0
-
-
 TEST_F(utLWOImportExport, importLWOBConcavePolygon) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/ConcavePolygon.lwo", aiProcess_ValidateDataStructure);
 
-    // FIXME: this should succees but there's a bug in the importer
-    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(nullptr, scene);
 }
 
 
@@ -374,8 +369,7 @@ TEST_F(utLWOImportExport, importLWOBbluewithcylindrictex) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/MappingModes/bluewithcylindrictexz.lwo", aiProcess_ValidateDataStructure);
 
-    // FIXME: this should succees but there's a bug in the importer
-    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(nullptr, scene);
 }
 
 
@@ -383,8 +377,7 @@ TEST_F(utLWOImportExport, importLWOBsphere_with_mat_gloss_10pc) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/sphere_with_mat_gloss_10pc.lwo", aiProcess_ValidateDataStructure);
 
-    // FIXME: this should succees but there's a bug in the importer
-    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(nullptr, scene);
 }
 
 
@@ -392,9 +385,5 @@ TEST_F(utLWOImportExport, importLWOBsphere_with_mat_gloss_50pc) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/sphere_with_mat_gloss_50pc.lwo", aiProcess_ValidateDataStructure);
 
-    // FIXME: this should succees but there's a bug in the importer
-    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(nullptr, scene);
 }
-
-
-#endif  // ASAN failing tests

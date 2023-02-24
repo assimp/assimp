@@ -566,40 +566,40 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
 
     //Set parent of all children, inserting pivots
     {
-    std::map<uint16_t, aiNode *> mapPivot;
-    for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+        std::map<uint16_t, aiNode *> mapPivot;
+        for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
 
-        //Get the parent index
-        LWO::Layer *nodeLayer = (LWO::Layer *)(itapcNodes->second->mParent);
-        uint16_t parentIndex = nodeLayer->mParent;
+            //Get the parent index
+            LWO::Layer *nodeLayer = (LWO::Layer *)(itapcNodes->second->mParent);
+            uint16_t parentIndex = nodeLayer->mParent;
 
-        //Create pivot node, store it into the pivot map, and set the parent as the pivot
-        aiNode *pivotNode = new aiNode();
-        pivotNode->mName.Set("Pivot-" + std::string(itapcNodes->second->mName.data));
-        itapcNodes->second->mParent = pivotNode;
+            //Create pivot node, store it into the pivot map, and set the parent as the pivot
+            aiNode *pivotNode = new aiNode();
+            pivotNode->mName.Set("Pivot-" + std::string(itapcNodes->second->mName.data));
+            itapcNodes->second->mParent = pivotNode;
 
-        //Look for the parent node to attach the pivot to
-        if (apcNodes.find(parentIndex) != apcNodes.end()) {
-            pivotNode->mParent = apcNodes[parentIndex];
-        } else {
-            //If not, attach to the root node
-            pivotNode->mParent = root;
+            //Look for the parent node to attach the pivot to
+            if (apcNodes.find(parentIndex) != apcNodes.end()) {
+                pivotNode->mParent = apcNodes[parentIndex];
+            } else {
+                //If not, attach to the root node
+                pivotNode->mParent = root;
+            }
+
+            //Set the node and the pivot node transformation
+            itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
+            itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
+            itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
+            pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
+            pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
+            pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
+            mapPivot[-(itapcNodes->first + 2)] = pivotNode;
         }
 
-        //Set the node and the pivot node transformation
-        itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
-        itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
-        itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
-        pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
-        pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
-        pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
-        mapPivot[-(itapcNodes->first + 2)] = pivotNode;
-    }
-
-    //Merge pivot map into node map
-    for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
-        apcNodes[itMapPivot->first] = itMapPivot->second;
-    }
+        //Merge pivot map into node map
+        for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
+            apcNodes[itMapPivot->first] = itMapPivot->second;
+        }
     }
 
     //Set children of all parents

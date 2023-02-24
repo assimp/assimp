@@ -429,7 +429,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         // Generate nodes to render the mesh. Store the source layer in the mParent member of the nodes
         unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
-            aiNode *pcNode = new aiNode();
+            std::unique_ptr<aiNode> pcNode(new aiNode());
             pcNode->mName.Set(layer.mName);
             pcNode->mParent = (aiNode *)&layer;
             pcNode->mNumMeshes = num;
@@ -439,7 +439,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                 for (unsigned int p = 0; p < pcNode->mNumMeshes; ++p)
                     pcNode->mMeshes[p] = p + meshStart;
             }
-            apcNodes[layer.mIndex] = pcNode;
+            apcNodes[layer.mIndex] = pcNode.release();
         }
     }
 

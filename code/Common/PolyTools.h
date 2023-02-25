@@ -74,26 +74,8 @@ inline bool OnLeftSideOfLine2D(const T& p0, const T& p1,const T& p2) {
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
 inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp) {
-    // Point in triangle test using baryzentric coordinates
-    const aiVector2D v0 = p1 - p0;
-    const aiVector2D v1 = p2 - p0;
-    const aiVector2D v2 = pp - p0;
-
-    double dot00 = v0 * v0;
-    double dot11 = v1 * v1;
-    const double dot01 = v0 * v1;
-    const double dot02 = v0 * v2;
-    const double dot12 = v1 * v2;
-    const double denom = dot00 * dot11 - dot01 * dot01;
-    if (denom == 0.0) {
-        return false;
-    }
-
-    const double invDenom = 1.0 / denom;
-    dot11 = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-    return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
+    // pp should be left side of the three triangle side, by ccw arrow
+    return OnLeftSideOfLine2D(p0, p1, pp) && OnLeftSideOfLine2D(p1, p2, pp) && OnLeftSideOfLine2D(p2, p0, pp);
 }
 
 

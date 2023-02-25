@@ -154,8 +154,10 @@ BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc,
     for (const Connection* con : conns) {
         const BlendShapeChannel* const bspc = ProcessSimpleConnection<BlendShapeChannel>(*con, false, "BlendShapeChannel -> BlendShape", element);
         if (bspc) {
-            blendShapeChannels.push_back(bspc);
-            continue;
+            auto pr = blendShapeChannels.insert(bspc);
+            if (!pr.second) {
+                FBXImporter::LogWarn("there is the same blendShapeChannel id ", bspc->ID());
+            }
         }
     }
 }
@@ -179,8 +181,10 @@ BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const 
     for (const Connection* con : conns) {
         const ShapeGeometry* const sg = ProcessSimpleConnection<ShapeGeometry>(*con, false, "Shape -> BlendShapeChannel", element);
         if (sg) {
-            shapeGeometries.push_back(sg);
-            continue;
+            auto pr = shapeGeometries.insert(sg);
+            if (!pr.second) {
+                FBXImporter::LogWarn("there is the same shapeGeometrie id ", sg->ID());
+            }
         }
     }
 }

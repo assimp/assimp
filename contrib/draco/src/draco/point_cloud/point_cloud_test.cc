@@ -14,6 +14,9 @@
 //
 #include "draco/point_cloud/point_cloud.h"
 
+#include <string>
+#include <utility>
+
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
 #include "draco/metadata/geometry_metadata.h"
@@ -24,6 +27,57 @@ class PointCloudTest : public ::testing::Test {
  protected:
   PointCloudTest() {}
 };
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+TEST_F(PointCloudTest, PointCloudCopy) {
+  // Tests that we can copy a point cloud.
+  std::unique_ptr<draco::PointCloud> pc =
+      draco::ReadPointCloudFromTestFile("pc_kd_color.drc");
+  ASSERT_NE(pc, nullptr);
+
+  // Add metadata to the point cloud.
+  std::unique_ptr<draco::GeometryMetadata> metadata(
+      new draco::GeometryMetadata());
+  metadata->AddEntryInt("speed", 1050);
+  metadata->AddEntryString("code", "YT-1300f");
+
+  // Add attribute metadata.
+  std::unique_ptr<draco::AttributeMetadata> a_metadata(
+      new draco::AttributeMetadata());
+  a_metadata->set_att_unique_id(pc->attribute(0)->unique_id());
+  a_metadata->AddEntryInt("attribute_test", 3);
+  metadata->AddAttributeMetadata(std::move(a_metadata));
+  pc->AddMetadata(std::move(metadata));
+
+  // Create a copy of the point cloud.
+  draco::PointCloud pc_copy;
+  pc_copy.Copy(*pc);
+
+  // Check the point cloud data.
+  ASSERT_EQ(pc->num_points(), pc_copy.num_points());
+  ASSERT_EQ(pc->num_attributes(), pc_copy.num_attributes());
+  for (int i = 0; i < pc->num_attributes(); ++i) {
+    ASSERT_EQ(pc->attribute(i)->attribute_type(),
+              pc_copy.attribute(i)->attribute_type());
+  }
+
+  // Check the point cloud metadata.
+  int speed;
+  std::string code;
+  ASSERT_NE(pc->GetMetadata(), nullptr);
+  ASSERT_TRUE(pc->GetMetadata()->GetEntryInt("speed", &speed));
+  ASSERT_TRUE(pc->GetMetadata()->GetEntryString("code", &code));
+  ASSERT_EQ(speed, 1050);
+  ASSERT_EQ(code, "YT-1300f");
+
+  const auto *const att_metadata_copy =
+      pc->GetMetadata()->GetAttributeMetadataByUniqueId(0);
+  ASSERT_NE(att_metadata_copy, nullptr);
+  int att_test;
+  ASSERT_TRUE(att_metadata_copy->GetEntryInt("attribute_test", &att_test));
+  ASSERT_EQ(att_test, 3);
+}
+#endif
 
 TEST_F(PointCloudTest, TestAttributeDeletion) {
   draco::PointCloud pc;

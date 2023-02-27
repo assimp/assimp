@@ -449,6 +449,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         unsigned int iWidth,
         unsigned int iHeight) {
     std::unique_ptr<aiTexture> pcNew;
+    if (szCurrent == nullptr) {
+        return;
+    }
 
     // get the type of the skin
     unsigned int iMasked = (unsigned int)(iType & 0xF);
@@ -467,7 +470,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
             ASSIMP_LOG_ERROR("Found a reference to an embedded DDS texture, but texture width is zero, aborting import.");
             return;
         }
-        
+
         pcNew.reset(new aiTexture);
         pcNew->mHeight = 0;
         pcNew->mWidth = iWidth;
@@ -493,7 +496,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         size_t iLen2 = iLen + 1;
         iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
         memcpy(szFile.data, (const char *)szCurrent, iLen2);
-        szFile.length = (ai_uint32)iLen;
+        szFile.length = static_cast<ai_uint32>(iLen2);
 
         szCurrent += iLen2;
 

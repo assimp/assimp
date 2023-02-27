@@ -68,9 +68,7 @@ using namespace Formatter;
  */
 class Profiler {
 public:
-    Profiler() {
-        // empty
-    }
+    Profiler() = default;
 
 
     /** Start a named timer */

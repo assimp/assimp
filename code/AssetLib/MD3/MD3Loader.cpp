@@ -109,7 +109,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string &m) {
 // Load a Quake 3 shader
 bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *io) {
     std::unique_ptr<IOStream> file(io->Open(pFile, "rt"));
-    if (!file.get())
+    if (!file)
         return false; // if we can't access the file, don't worry and return
 
     ASSIMP_LOG_INFO("Loading Quake3 shader file ", pFile);
@@ -144,7 +144,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
                 if (*buff == '{') {
                     ++buff;
                     // add new map section
-                    curData->maps.push_back(Q3Shader::ShaderMapBlock());
+                    curData->maps.emplace_back();
                     curMap = &curData->maps.back();
 
                     for (; SkipSpacesAndLineEnd(&buff); SkipLine(&buff)) {
@@ -209,7 +209,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
             }
         } else {
             // add new section
-            fill.blocks.push_back(Q3Shader::ShaderDataBlock());
+            fill.blocks.emplace_back();
             curData = &fill.blocks.back();
 
             // get the name of this section
@@ -223,7 +223,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
 // Load a Quake 3 skin
 bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) {
     std::unique_ptr<IOStream> file(io->Open(pFile, "rt"));
-    if (!file.get())
+    if (!file)
         return false; // if we can't access the file, don't worry and return
 
     ASSIMP_LOG_INFO("Loading Quake3 skin file ", pFile);
@@ -249,7 +249,7 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
         if (!::strncmp(&ss[0], "tag_", std::min((size_t)4, ss.length())))
             continue;
 
-        fill.textures.push_back(SkinData::TextureEntry());
+        fill.textures.emplace_back();
         SkinData::TextureEntry &entry = fill.textures.back();
 
         entry.first = ss;
@@ -345,7 +345,7 @@ MD3Importer::MD3Importer() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MD3Importer::~MD3Importer() {}
+MD3Importer::~MD3Importer() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -584,7 +584,7 @@ bool MD3Importer::ReadMultipartFile() {
 
         // original root
         scene_lower->mRootNode->mName.Set("lower");
-        attach.push_back(AttachmentInfo(scene_lower, nd));
+        attach.emplace_back(scene_lower, nd);
 
         // tag_torso
         tag_torso = scene_lower->mRootNode->FindNode("tag_torso");
@@ -593,7 +593,7 @@ bool MD3Importer::ReadMultipartFile() {
             goto error_cleanup;
         }
         scene_upper->mRootNode->mName.Set("upper");
-        attach.push_back(AttachmentInfo(scene_upper, tag_torso));
+        attach.emplace_back(scene_upper, tag_torso);
 
         // tag_head
         tag_head = scene_upper->mRootNode->FindNode("tag_head");
@@ -602,7 +602,7 @@ bool MD3Importer::ReadMultipartFile() {
             goto error_cleanup;
         }
         scene_head->mRootNode->mName.Set("head");
-        attach.push_back(AttachmentInfo(scene_head, tag_head));
+        attach.emplace_back(scene_head, tag_head);
 
         // Remove tag_head and tag_torso from all other model parts ...
         // this ensures (together with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY)
@@ -709,7 +709,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MD3 file ", pFile, ".");
     }
 

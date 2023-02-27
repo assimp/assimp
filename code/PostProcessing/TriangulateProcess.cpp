@@ -159,17 +159,11 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-TriangulateProcess::TriangulateProcess()
-{
-    // nothing to do here
-}
+TriangulateProcess::TriangulateProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-TriangulateProcess::~TriangulateProcess()
-{
-    // nothing to do here
-}
+TriangulateProcess::~TriangulateProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

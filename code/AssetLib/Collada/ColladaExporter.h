@@ -101,7 +101,7 @@ protected:
     void WritePointLight(const aiLight *const light);
     void WriteDirectionalLight(const aiLight *const light);
     void WriteSpotLight(const aiLight *const light);
-    void WriteAmbienttLight(const aiLight *const light);
+    void WriteAmbientLight(const aiLight *const light);
 
     /// Writes the controller library
     void WriteControllerLibrary();
@@ -233,7 +233,7 @@ public:
         Surface ambient, diffuse, specular, emissive, reflective, transparent, normal;
         Property shininess, transparency, index_refraction;
 
-        Material() {}
+        Material() = default;
     };
 
     std::map<unsigned int, std::string> textures;

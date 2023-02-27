@@ -482,37 +482,43 @@ bool Importer::ValidateFlags(unsigned int pFlags) const {
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
-    size_t pLength,
-    unsigned int pFlags,
-    const char* pHint /*= ""*/) {
+const aiScene* Importer::ReadFileFromMemory(const void* pBuffer, size_t pLength, unsigned int pFlags, const char* pHint ) {
     ai_assert(nullptr != pimpl);
 
-    ASSIMP_BEGIN_EXCEPTION_REGION();
-    if (!pHint) {
-        pHint = "";
-    }
-
-    if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
-        pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
-        return nullptr;
-    }
-
-    // prevent deletion of the previous IOHandler
     IOSystem* io = pimpl->mIOHandler;
-    pimpl->mIOHandler = nullptr;
+    try {
+        if (pHint == nullptr) {
+            pHint = "";
+        }
+        if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
+            pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
+            return nullptr;
+        }
+        // prevent deletion of the previous IOHandler
+        pimpl->mIOHandler = nullptr;
 
-    SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength,io));
+        SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength,io));
 
-    // read the file and recover the previous IOSystem
-    static const size_t BufSize(Importer::MaxLenHint + 28);
-    char fbuff[BufSize];
-    ai_snprintf(fbuff, BufSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
+        // read the file and recover the previous IOSystem
+        static const size_t BufSize(Importer::MaxLenHint + 28);
+        char fbuff[BufSize];
+        ai_snprintf(fbuff, BufSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
 
-    ReadFile(fbuff,pFlags);
-    SetIOHandler(io);
+        ReadFile(fbuff,pFlags);
+        SetIOHandler(io);
+    } catch(const DeadlyImportError &e) {
+        pimpl->mErrorString = e.what();
+        pimpl->mException = std::current_exception();
+        SetIOHandler(io);
+        return ExceptionSwallower<const aiScene*>()();                                                                                                    \
+    } catch(...) {
+        pimpl->mErrorString = "Unknown exception";
+        pimpl->mException = std::current_exception();
+        SetIOHandler(io);
+        return ExceptionSwallower<const aiScene*>()();                                                                                                    \
 
-    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mException);
+    }
+
     return pimpl->mScene;
 }
 
@@ -1118,7 +1124,7 @@ bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value) {
 // Set a configuration property
 bool Importer::SetPropertyPointer(const char* szName, void* value) {
     ai_assert(nullptr != pimpl);
-    
+
     bool existing;
     ASSIMP_BEGIN_EXCEPTION_REGION();
         existing = SetGenericProperty<void*>(pimpl->mPointerProperties, szName,value);
@@ -1162,7 +1168,7 @@ aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& i
 // Get a configuration property
 void* Importer::GetPropertyPointer(const char* szName, void* iErrorReturn /*= nullptr*/) const {
     ai_assert(nullptr != pimpl);
-    
+
     return GetGenericProperty<void*>(pimpl->mPointerProperties,szName,iErrorReturn);
 }
 

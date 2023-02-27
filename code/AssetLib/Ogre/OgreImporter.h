@@ -60,17 +60,17 @@ namespace Ogre {
 class OgreImporter : public BaseImporter {
 public:
     /// BaseImporter override.
-    virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
     /// BaseImporter override.
-    virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     /// BaseImporter override.
-    virtual const aiImporterDesc *GetInfo() const override;
+    const aiImporterDesc *GetInfo() const override;
 
     /// BaseImporter override.
-    virtual void SetupProperties(const Importer *pImp) override;
+    void SetupProperties(const Importer *pImp) override;
 
 private:
     /// Read materials referenced by the @c mesh to @c pScene.

@@ -72,7 +72,7 @@ struct Type {
 
 // ------------------------------------------------------------------------------------------------
 void DNAParser::Parse() {
-    StreamReaderAny &stream = *db.reader.get();
+    StreamReaderAny &stream = *db.reader;
     DNA &dna = db.dna;
 
     if (!match4(stream, "SDNA")) {
@@ -325,10 +325,10 @@ void SectionParser ::Next() {
     stream.SetCurrentPos(current.start + current.size);
 
     const char tmp[] = {
-        (const char)stream.GetI1(),
-        (const char)stream.GetI1(),
-        (const char)stream.GetI1(),
-        (const char)stream.GetI1()
+        (char)stream.GetI1(),
+        (char)stream.GetI1(),
+        (char)stream.GetI1(),
+        (char)stream.GetI1()
     };
     current.id = std::string(tmp, tmp[3] ? 4 : tmp[2] ? 3 : tmp[1] ? 2 : 1);
 

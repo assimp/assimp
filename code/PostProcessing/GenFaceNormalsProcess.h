@@ -81,6 +81,7 @@ private:
     bool GenMeshFaceNormals(aiMesh* pcMesh);
     mutable bool force_ = false;
     mutable bool flippedWindingOrder_ = false;
+    mutable bool leftHanded_ = false;
 };
 
 } // end of namespace Assimp

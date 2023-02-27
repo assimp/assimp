@@ -65,7 +65,7 @@ ValidateDSProcess::ValidateDSProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ValidateDSProcess::~ValidateDSProcess() {}
+ValidateDSProcess::~ValidateDSProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -80,7 +80,7 @@ AI_WONT_RETURN void ValidateDSProcess::ReportError(const char *msg, ...) {
     va_start(args, msg);
 
     char szBuffer[3000];
-    const int iLen = vsprintf(szBuffer, msg, args);
+    const int iLen = vsnprintf(szBuffer, sizeof(szBuffer), msg, args);
     ai_assert(iLen > 0);
 
     va_end(args);
@@ -95,7 +95,7 @@ void ValidateDSProcess::ReportWarning(const char *msg, ...) {
     va_start(args, msg);
 
     char szBuffer[3000];
-    const int iLen = vsprintf(szBuffer, msg, args);
+    const int iLen = vsnprintf(szBuffer, sizeof(szBuffer), msg, args);
     ai_assert(iLen > 0);
 
     va_end(args);
@@ -521,7 +521,7 @@ void ValidateDSProcess::Validate(const aiAnimation *pAnimation) {
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial *pMaterial,
         aiTextureType type) {
-    const char *szType = TextureTypeToString(type);
+    const char *szType = aiTextureTypeToString(type);
 
     // ****************************************************************************
     // Search all keys of the material ...

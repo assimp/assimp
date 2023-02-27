@@ -26,8 +26,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
 
 // This sample shows how to test common properties of multiple
 // implementations of an interface (aka interface tests) using
@@ -37,10 +35,8 @@
 
 // The interface and its implementations are in this header.
 #include "prime_tables.h"
-
 #include "gtest/gtest.h"
-
-#if GTEST_HAS_PARAM_TEST
+namespace {
 
 using ::testing::TestWithParam;
 using ::testing::Values;
@@ -52,9 +48,7 @@ using ::testing::Values;
 // SetUp() method and delete them in TearDown() method.
 typedef PrimeTable* CreatePrimeTableFunc();
 
-PrimeTable* CreateOnTheFlyPrimeTable() {
-  return new OnTheFlyPrimeTable();
-}
+PrimeTable* CreateOnTheFlyPrimeTable() { return new OnTheFlyPrimeTable(); }
 
 template <size_t max_precalculated>
 PrimeTable* CreatePreCalculatedPrimeTable() {
@@ -65,20 +59,20 @@ PrimeTable* CreatePreCalculatedPrimeTable() {
 // can refer to the test parameter by GetParam().  In this case, the test
 // parameter is a factory function which we call in fixture's SetUp() to
 // create and store an instance of PrimeTable.
-class PrimeTableTest : public TestWithParam<CreatePrimeTableFunc*> {
+class PrimeTableTestSmpl7 : public TestWithParam<CreatePrimeTableFunc*> {
  public:
-  virtual ~PrimeTableTest() { delete table_; }
-  virtual void SetUp() { table_ = (*GetParam())(); }
-  virtual void TearDown() {
+  ~PrimeTableTestSmpl7() override { delete table_; }
+  void SetUp() override { table_ = (*GetParam())(); }
+  void TearDown() override {
     delete table_;
-    table_ = NULL;
+    table_ = nullptr;
   }
 
  protected:
   PrimeTable* table_;
 };
 
-TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
+TEST_P(PrimeTableTestSmpl7, ReturnsFalseForNonPrimes) {
   EXPECT_FALSE(table_->IsPrime(-5));
   EXPECT_FALSE(table_->IsPrime(0));
   EXPECT_FALSE(table_->IsPrime(1));
@@ -87,7 +81,7 @@ TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
   EXPECT_FALSE(table_->IsPrime(100));
 }
 
-TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
+TEST_P(PrimeTableTestSmpl7, ReturnsTrueForPrimes) {
   EXPECT_TRUE(table_->IsPrime(2));
   EXPECT_TRUE(table_->IsPrime(3));
   EXPECT_TRUE(table_->IsPrime(5));
@@ -96,7 +90,7 @@ TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
   EXPECT_TRUE(table_->IsPrime(131));
 }
 
-TEST_P(PrimeTableTest, CanGetNextPrime) {
+TEST_P(PrimeTableTestSmpl7, CanGetNextPrime) {
   EXPECT_EQ(2, table_->GetNextPrime(0));
   EXPECT_EQ(3, table_->GetNextPrime(2));
   EXPECT_EQ(5, table_->GetNextPrime(3));
@@ -112,19 +106,8 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 //
 // Here, we instantiate our tests with a list of two PrimeTable object
 // factory functions:
-INSTANTIATE_TEST_CASE_P(
-    OnTheFlyAndPreCalculated,
-    PrimeTableTest,
-    Values(&CreateOnTheFlyPrimeTable, &CreatePreCalculatedPrimeTable<1000>));
+INSTANTIATE_TEST_SUITE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
+                         Values(&CreateOnTheFlyPrimeTable,
+                                &CreatePreCalculatedPrimeTable<1000>));
 
-#else
-
-// Google Test may not support value-parameterized tests with some
-// compilers. If we use conditional compilation to compile out all
-// code referring to the gtest_main library, MSVC linker will not link
-// that library at all and consequently complain about missing entry
-// point defined in that library (fatal error LNK1561: entry point
-// must be defined). This dummy test keeps gtest_main linked in.
-TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
-
-#endif  // GTEST_HAS_PARAM_TEST
+}  // namespace

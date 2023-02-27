@@ -245,9 +245,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 }
 
 // ------------------------------------------------------------------------------------------------
-PlyExporter::~PlyExporter() {
-    // empty
-}
+PlyExporter::~PlyExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)

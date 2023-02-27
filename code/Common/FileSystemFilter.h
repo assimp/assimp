@@ -93,9 +93,7 @@ public:
     }
 
     /** Destructor. */
-    ~FileSystemFilter() {
-        // empty
-    }
+    ~FileSystemFilter() = default;
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */
@@ -300,10 +298,10 @@ private:
 
         const char separator = getOsSeparator();
         for (it = in.begin(); it != in.end(); ++it) {
-            int remaining = std::distance(in.end(), it);
+            const size_t remaining = std::distance(in.end(), it);
             // Exclude :// and \\, which remain untouched.
             // https://sourceforge.net/tracker/?func=detail&aid=3031725&group_id=226462&atid=1067632
-            if (remaining >= 3 && !strncmp(&*it, "://", 3 )) {
+            if (remaining >= 3u && !strncmp(&*it, "://", 3 )) {
                 it += 3;
                 continue;
             }

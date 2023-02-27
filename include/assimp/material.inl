@@ -97,9 +97,12 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         if (prop->mType != aiPTI_Buffer) {
             return AI_FAILURE;
         }
-
+// std::min has in some cases a conflict with a defined min
+#ifdef min
+#   undef min
+#endif
         iNum = static_cast<unsigned int>(std::min(static_cast<size_t>(iNum),prop->mDataLength / sizeof(Type)));
-        ::memcpy(pOut,prop->mData,iNum * sizeof(Type));
+        std::memcpy(pOut,prop->mData,iNum * sizeof(Type));
         if (pMax) {
             *pMax = iNum;
         }
@@ -130,7 +133,54 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 }
 
 // ---------------------------------------------------------------------------
-AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
+// Specialisation for a single bool.
+// Casts floating point and integer to bool
+template <>
+AI_FORCE_INLINE
+        aiReturn
+        aiMaterial::Get(const char *pKey, unsigned int type,
+                unsigned int idx, bool &pOut) const {
+    const aiMaterialProperty *prop;
+    const aiReturn ret = ::aiGetMaterialProperty(this, pKey, type, idx,
+            (const aiMaterialProperty **)&prop);
+    if (AI_SUCCESS == ret) {
+
+        switch (prop->mType) {
+            // Type cannot be converted
+        default: return AI_FAILURE;
+
+        case aiPTI_Buffer: {
+            // Native bool value storage
+            if (prop->mDataLength < sizeof(bool)) {
+                return AI_FAILURE;
+            }
+            ::memcpy(&pOut, prop->mData, sizeof(bool));
+        } break;
+
+        case aiPTI_Float:
+        case aiPTI_Double: {
+            // Read as float and cast to bool
+            ai_real value = 0.0f;
+            if (AI_SUCCESS == ::aiGetMaterialFloat(this, pKey, type, idx, &value)) {
+                pOut = static_cast<bool>(value);
+                return AI_SUCCESS;
+            }
+            return AI_FAILURE;
+        }
+        case aiPTI_Integer: {
+            // Cast to bool
+            const int value = static_cast<int>(*prop->mData);
+            pOut = static_cast<bool>(value);
+            return AI_SUCCESS;
+        }
+        }
+    }
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+AI_FORCE_INLINE
+aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx,ai_real* pOut,
         unsigned int* pMax) const {
     return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
@@ -177,8 +227,8 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 
 // ---------------------------------------------------------------------------
 template<class TYPE>
-aiReturn aiMaterial::AddProperty (const TYPE* pInput, 
-        const unsigned int pNumValues, const char* pKey, unsigned int type, 
+aiReturn aiMaterial::AddProperty (const TYPE* pInput,
+        const unsigned int pNumValues, const char* pKey, unsigned int type,
         unsigned int index) {
     return AddBinaryProperty((const void*)pInput, pNumValues * sizeof(TYPE),
         pKey,type,index,aiPTI_Buffer);

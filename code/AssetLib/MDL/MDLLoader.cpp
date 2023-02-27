@@ -98,9 +98,7 @@ MDLImporter::MDLImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MDLImporter::~MDLImporter() {
-    // empty
-}
+MDLImporter::~MDLImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -161,7 +159,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MDL file ", pFile, ".");
     }
 
@@ -300,7 +298,7 @@ void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int 
         }
 
         char szBuffer[1024];
-        ::sprintf(szBuffer, "Invalid MDL file. The file is too small "
+        ::snprintf(szBuffer, sizeof(szBuffer), "Invalid MDL file. The file is too small "
                             "or contains invalid data (File: %s Line: %u)",
                 szFilePtr, iLine);
 
@@ -406,8 +404,15 @@ void MDLImporter::InternReadFile_Quake1() {
                     this->CreateTextureARGB8_3DGS_MDL3(szCurrent + iNumImages * sizeof(float));
                 }
                 // go to the end of the skin section / the beginning of the next skin
-                szCurrent += pcHeader->skinheight * pcHeader->skinwidth +
-                             sizeof(float) * iNumImages;
+                bool overflow = false;
+                if (pcHeader->skinwidth != 0 || pcHeader->skinheight != 0) {
+                    if ((pcHeader->skinheight > INT_MAX / pcHeader->skinwidth) || (pcHeader->skinwidth > INT_MAX / pcHeader->skinheight)){
+                        overflow = true;
+                    }
+                    if (!overflow) {
+                        szCurrent += pcHeader->skinheight * pcHeader->skinwidth +sizeof(float) * iNumImages;
+                    }
+                }
             }
         } else {
             szCurrent += sizeof(uint32_t);
@@ -857,6 +862,9 @@ void MDLImporter::CalculateUVCoordinates_MDL5() {
             const float fHeight = (float)iHeight;
             aiMesh *pcMesh = this->pScene->mMeshes[0];
             for (unsigned int i = 0; i < pcMesh->mNumVertices; ++i) {
+                if (!pcMesh->HasTextureCoords(0)) {
+                    continue;
+                }
                 pcMesh->mTextureCoords[0][i].x /= fWidth;
                 pcMesh->mTextureCoords[0][i].y /= fHeight;
                 pcMesh->mTextureCoords[0][i].y = 1.0f - pcMesh->mTextureCoords[0][i].y; // DX to OGL
@@ -967,7 +975,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
                     }
 
                     // store the name of the bone
-                    pcOutBone->mName.length = (size_t)iMaxLen;
+                    pcOutBone->mName.length = static_cast<ai_uint32>(iMaxLen);
                     ::memcpy(pcOutBone->mName.data, pcBone->name, pcOutBone->mName.length);
                     pcOutBone->mName.data[pcOutBone->mName.length] = '\0';
                 }

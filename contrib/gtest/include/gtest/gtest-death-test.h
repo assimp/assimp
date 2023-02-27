@@ -26,21 +26,21 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
-//
-// The Google C++ Testing Framework (Google Test)
+
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This header file defines the public API for death tests.  It is
 // #included by gtest.h so a user doesn't need to include this
 // directly.
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
-#define GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+// IWYU pragma: private, include "gtest/gtest.h"
+// IWYU pragma: friend gtest/.*
+// IWYU pragma: friend gmock/.*
+
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 
 #include "gtest/internal/gtest-death-test-internal.h"
-
-namespace testing {
 
 // This flag controls the style of death tests.  Valid values are "threadsafe",
 // meaning that the death test child process will re-execute the test binary
@@ -48,6 +48,8 @@ namespace testing {
 // meaning that the child process will execute the test logic immediately
 // after forking.
 GTEST_DECLARE_string_(death_test_style);
+
+namespace testing {
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -97,12 +99,16 @@ GTEST_API_ bool InDeathTestChild();
 //
 //   ASSERT_EXIT(client.HangUpServer(), KilledBySIGHUP, "Hanging up!");
 //
+// The final parameter to each of these macros is a matcher applied to any data
+// the sub-process wrote to stderr.  For compatibility with existing tests, a
+// bare string is interpreted as a regular expression matcher.
+//
 // On the regular expressions used in death tests:
 //
 //   On POSIX-compliant systems (*nix), we use the <regex.h> library,
 //   which uses the POSIX extended regex syntax.
 //
-//   On other platforms (e.g. Windows), we only support a simple regex
+//   On other platforms (e.g. Windows or Mac), we only support a simple regex
 //   syntax implemented as part of Google Test.  This limited
 //   implementation should be enough most of the time when writing
 //   death tests; though it lacks many features you can find in PCRE
@@ -160,29 +166,28 @@ GTEST_API_ bool InDeathTestChild();
 //   is rarely a problem as people usually don't put the test binary
 //   directory in PATH.
 //
-// TODO(wan@google.com): make thread-safe death tests search the PATH.
 
-// Asserts that a given statement causes the program to exit, with an
-// integer exit status that satisfies predicate, and emitting error output
-// that matches regex.
-# define ASSERT_EXIT(statement, predicate, regex) \
-    GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_FATAL_FAILURE_)
+// Asserts that a given `statement` causes the program to exit, with an
+// integer exit status that satisfies `predicate`, and emitting error output
+// that matches `matcher`.
+#define ASSERT_EXIT(statement, predicate, matcher) \
+  GTEST_DEATH_TEST_(statement, predicate, matcher, GTEST_FATAL_FAILURE_)
 
-// Like ASSERT_EXIT, but continues on to successive tests in the
-// test case, if any:
-# define EXPECT_EXIT(statement, predicate, regex) \
-    GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_NONFATAL_FAILURE_)
+// Like `ASSERT_EXIT`, but continues on to successive tests in the
+// test suite, if any:
+#define EXPECT_EXIT(statement, predicate, matcher) \
+  GTEST_DEATH_TEST_(statement, predicate, matcher, GTEST_NONFATAL_FAILURE_)
 
-// Asserts that a given statement causes the program to exit, either by
+// Asserts that a given `statement` causes the program to exit, either by
 // explicitly exiting with a nonzero exit code or being killed by a
-// signal, and emitting error output that matches regex.
-# define ASSERT_DEATH(statement, regex) \
-    ASSERT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, regex)
+// signal, and emitting error output that matches `matcher`.
+#define ASSERT_DEATH(statement, matcher) \
+  ASSERT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, matcher)
 
-// Like ASSERT_DEATH, but continues on to successive tests in the
-// test case, if any:
-# define EXPECT_DEATH(statement, regex) \
-    EXPECT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, regex)
+// Like `ASSERT_DEATH`, but continues on to successive tests in the
+// test suite, if any:
+#define EXPECT_DEATH(statement, matcher) \
+  EXPECT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, matcher)
 
 // Two predicate classes that can be used in {ASSERT,EXPECT}_EXIT*:
 
@@ -190,25 +195,26 @@ GTEST_API_ bool InDeathTestChild();
 class GTEST_API_ ExitedWithCode {
  public:
   explicit ExitedWithCode(int exit_code);
+  ExitedWithCode(const ExitedWithCode&) = default;
+  void operator=(const ExitedWithCode& other) = delete;
   bool operator()(int exit_status) const;
- private:
-  // No implementation - assignment is unsupported.
-  void operator=(const ExitedWithCode& other);
 
+ private:
   const int exit_code_;
 };
 
-# if !GTEST_OS_WINDOWS
+#if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 // Tests that an exit code describes an exit due to termination by a
 // given signal.
 class GTEST_API_ KilledBySignal {
  public:
   explicit KilledBySignal(int signum);
   bool operator()(int exit_status) const;
+
  private:
   const int signum_;
 };
-# endif  // !GTEST_OS_WINDOWS
+#endif  // !GTEST_OS_WINDOWS
 
 // EXPECT_DEBUG_DEATH asserts that the given statements die in debug mode.
 // The death testing framework causes this to have interesting semantics,
@@ -226,7 +232,7 @@ class GTEST_API_ KilledBySignal {
 //   return 12;
 // }
 //
-// TEST(TestCase, TestDieOr12WorksInDgbAndOpt) {
+// TEST(TestSuite, TestDieOr12WorksInDgbAndOpt) {
 //   int sideeffect = 0;
 //   // Only asserts in dbg.
 //   EXPECT_DEBUG_DEATH(DieInDebugOr12(&sideeffect), "death");
@@ -253,24 +259,69 @@ class GTEST_API_ KilledBySignal {
 //   EXPECT_EQ(12, DieInDebugOr12(&sideeffect));
 // }, "death");
 //
-# ifdef NDEBUG
+#ifdef NDEBUG
 
-#  define EXPECT_DEBUG_DEATH(statement, regex) \
+#define EXPECT_DEBUG_DEATH(statement, regex) \
   GTEST_EXECUTE_STATEMENT_(statement, regex)
 
-#  define ASSERT_DEBUG_DEATH(statement, regex) \
+#define ASSERT_DEBUG_DEATH(statement, regex) \
   GTEST_EXECUTE_STATEMENT_(statement, regex)
 
-# else
+#else
 
-#  define EXPECT_DEBUG_DEATH(statement, regex) \
-  EXPECT_DEATH(statement, regex)
+#define EXPECT_DEBUG_DEATH(statement, regex) EXPECT_DEATH(statement, regex)
 
-#  define ASSERT_DEBUG_DEATH(statement, regex) \
-  ASSERT_DEATH(statement, regex)
+#define ASSERT_DEBUG_DEATH(statement, regex) ASSERT_DEATH(statement, regex)
 
-# endif  // NDEBUG for EXPECT_DEBUG_DEATH
+#endif  // NDEBUG for EXPECT_DEBUG_DEATH
 #endif  // GTEST_HAS_DEATH_TEST
+
+// This macro is used for implementing macros such as
+// EXPECT_DEATH_IF_SUPPORTED and ASSERT_DEATH_IF_SUPPORTED on systems where
+// death tests are not supported. Those macros must compile on such systems
+// if and only if EXPECT_DEATH and ASSERT_DEATH compile with the same parameters
+// on systems that support death tests. This allows one to write such a macro on
+// a system that does not support death tests and be sure that it will compile
+// on a death-test supporting system. It is exposed publicly so that systems
+// that have death-tests with stricter requirements than GTEST_HAS_DEATH_TEST
+// can write their own equivalent of EXPECT_DEATH_IF_SUPPORTED and
+// ASSERT_DEATH_IF_SUPPORTED.
+//
+// Parameters:
+//   statement -  A statement that a macro such as EXPECT_DEATH would test
+//                for program termination. This macro has to make sure this
+//                statement is compiled but not executed, to ensure that
+//                EXPECT_DEATH_IF_SUPPORTED compiles with a certain
+//                parameter if and only if EXPECT_DEATH compiles with it.
+//   regex     -  A regex that a macro such as EXPECT_DEATH would use to test
+//                the output of statement.  This parameter has to be
+//                compiled but not evaluated by this macro, to ensure that
+//                this macro only accepts expressions that a macro such as
+//                EXPECT_DEATH would accept.
+//   terminator - Must be an empty statement for EXPECT_DEATH_IF_SUPPORTED
+//                and a return statement for ASSERT_DEATH_IF_SUPPORTED.
+//                This ensures that ASSERT_DEATH_IF_SUPPORTED will not
+//                compile inside functions where ASSERT_DEATH doesn't
+//                compile.
+//
+//  The branch that has an always false condition is used to ensure that
+//  statement and regex are compiled (and thus syntactically correct) but
+//  never executed. The unreachable code macro protects the terminator
+//  statement from generating an 'unreachable code' warning in case
+//  statement unconditionally returns or throws. The Message constructor at
+//  the end allows the syntax of streaming additional messages into the
+//  macro, for compilational compatibility with EXPECT_DEATH/ASSERT_DEATH.
+#define GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, terminator)             \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                                \
+  if (::testing::internal::AlwaysTrue()) {                                     \
+    GTEST_LOG_(WARNING) << "Death tests are not supported on this platform.\n" \
+                        << "Statement '" #statement "' cannot be verified.";   \
+  } else if (::testing::internal::AlwaysFalse()) {                             \
+    ::testing::internal::RE::PartialMatch(".*", (regex));                      \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);                 \
+    terminator;                                                                \
+  } else                                                                       \
+    ::testing::Message()
 
 // EXPECT_DEATH_IF_SUPPORTED(statement, regex) and
 // ASSERT_DEATH_IF_SUPPORTED(statement, regex) expand to real death tests if
@@ -278,17 +329,17 @@ class GTEST_API_ KilledBySignal {
 // useful when you are combining death test assertions with normal test
 // assertions in one test.
 #if GTEST_HAS_DEATH_TEST
-# define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
-    EXPECT_DEATH(statement, regex)
-# define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
-    ASSERT_DEATH(statement, regex)
+#define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
+  EXPECT_DEATH(statement, regex)
+#define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
+  ASSERT_DEATH(statement, regex)
 #else
-# define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
-    GTEST_UNSUPPORTED_DEATH_TEST_(statement, regex, )
-# define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
-    GTEST_UNSUPPORTED_DEATH_TEST_(statement, regex, return)
+#define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, )
+#define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, return)
 #endif
 
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_

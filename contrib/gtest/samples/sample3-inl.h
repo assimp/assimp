@@ -28,14 +28,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
-#ifndef GTEST_SAMPLES_SAMPLE3_INL_H_
-#define GTEST_SAMPLES_SAMPLE3_INL_H_
+#ifndef GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
+#define GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
 
 #include <stddef.h>
-
 
 // Queue is a simple queue implemented as a singled-linked list.
 //
@@ -60,10 +57,11 @@ class QueueNode {
  private:
   // Creates a node with a given element value.  The next pointer is
   // set to NULL.
-  explicit QueueNode(const E& an_element) : element_(an_element), next_(NULL) {}
+  explicit QueueNode(const E& an_element)
+      : element_(an_element), next_(nullptr) {}
 
   // We disable the default assignment operator and copy c'tor.
-  const QueueNode& operator = (const QueueNode&);
+  const QueueNode& operator=(const QueueNode&);
   QueueNode(const QueueNode&);
 
   E element_;
@@ -74,7 +72,7 @@ template <typename E>  // E is the element type.
 class Queue {
  public:
   // Creates an empty queue.
-  Queue() : head_(NULL), last_(NULL), size_(0) {}
+  Queue() : head_(nullptr), last_(nullptr), size_(0) {}
 
   // D'tor.  Clears the queue.
   ~Queue() { Clear(); }
@@ -85,15 +83,15 @@ class Queue {
       // 1. Deletes every node.
       QueueNode<E>* node = head_;
       QueueNode<E>* next = node->next();
-      for (; ;) {
+      for (;;) {
         delete node;
         node = next;
-        if (node == NULL) break;
+        if (node == nullptr) break;
         next = node->next();
       }
 
       // 2. Resets the member variables.
-      head_ = last_ = NULL;
+      head_ = last_ = nullptr;
       size_ = 0;
     }
   }
@@ -130,14 +128,14 @@ class Queue {
   // the queue is empty.
   E* Dequeue() {
     if (size_ == 0) {
-      return NULL;
+      return nullptr;
     }
 
     const QueueNode<E>* const old_head = head_;
     head_ = head_->next_;
     size_--;
     if (size_ == 0) {
-      last_ = NULL;
+      last_ = nullptr;
     }
 
     E* element = new E(old_head->element());
@@ -152,7 +150,8 @@ class Queue {
   template <typename F>
   Queue* Map(F function) const {
     Queue* new_queue = new Queue();
-    for (const QueueNode<E>* node = head_; node != NULL; node = node->next_) {
+    for (const QueueNode<E>* node = head_; node != nullptr;
+         node = node->next_) {
       new_queue->Enqueue(function(node->element()));
     }
 
@@ -162,11 +161,11 @@ class Queue {
  private:
   QueueNode<E>* head_;  // The first node of the queue.
   QueueNode<E>* last_;  // The last node of the queue.
-  size_t size_;  // The number of elements in the queue.
+  size_t size_;         // The number of elements in the queue.
 
   // We disallow copying a queue.
   Queue(const Queue&);
-  const Queue& operator = (const Queue&);
+  const Queue& operator=(const Queue&);
 };
 
-#endif  // GTEST_SAMPLES_SAMPLE3_INL_H_
+#endif  // GOOGLETEST_SAMPLES_SAMPLE3_INL_H_

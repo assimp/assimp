@@ -91,7 +91,7 @@ void ExportSceneCollada(const char *pFile, IOSystem *pIOSystem, const aiScene *p
 // Encodes a string into a valid XML ID using the xsd:ID schema qualifications.
 static const std::string XMLIDEncode(const std::string &name) {
     const char XML_ID_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-.";
-    const unsigned int XML_ID_CHARS_COUNT = sizeof(XML_ID_CHARS) / sizeof(char);
+    const unsigned int XML_ID_CHARS_COUNT = sizeof(XML_ID_CHARS) / sizeof(char) - 1;
 
     if (name.length() == 0) {
         return name;
@@ -154,8 +154,7 @@ ColladaExporter::ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, con
 
 // ------------------------------------------------------------------------------------------------
 // Destructor
-ColladaExporter::~ColladaExporter() {
-}
+ColladaExporter::~ColladaExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Starts writing the contents
@@ -247,7 +246,7 @@ void ColladaExporter::WriteHeader() {
     }
 
     // Assimp root nodes can have meshes, Collada Scenes cannot
-    if (mScene->mRootNode->mNumChildren == 0 || mScene->mRootNode->mMeshes != 0) {
+    if (mScene->mRootNode->mNumChildren == 0 || mScene->mRootNode->mMeshes != nullptr) {
         mAdd_root_node = true;
     }
 
@@ -449,7 +448,7 @@ void ColladaExporter::WriteLight(size_t pIndex) {
     PushTag();
     switch (light->mType) {
     case aiLightSource_AMBIENT:
-        WriteAmbienttLight(light);
+        WriteAmbientLight(light);
         break;
     case aiLightSource_DIRECTIONAL:
         WriteDirectionalLight(light);
@@ -544,7 +543,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light) {
     mOutput << startstr << "</spot>" << endstr;
 }
 
-void ColladaExporter::WriteAmbienttLight(const aiLight *const light) {
+void ColladaExporter::WriteAmbientLight(const aiLight *const light) {
 
     const aiColor3D &color = light->mColorAmbient;
     mOutput << startstr << "<ambient>" << endstr;
@@ -1330,9 +1329,9 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex) {
             std::vector<std::string> names;
             for (size_t i = 0; i < nodeAnim->mNumPositionKeys; ++i) {
                 if (nodeAnim->mPreState == aiAnimBehaviour_DEFAULT || nodeAnim->mPreState == aiAnimBehaviour_LINEAR || nodeAnim->mPreState == aiAnimBehaviour_REPEAT) {
-                    names.push_back("LINEAR");
+                    names.emplace_back("LINEAR");
                 } else if (nodeAnim->mPostState == aiAnimBehaviour_CONSTANT) {
-                    names.push_back("STEP");
+                    names.emplace_back("STEP");
                 }
             }
 

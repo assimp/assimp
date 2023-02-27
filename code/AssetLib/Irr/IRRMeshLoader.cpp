@@ -71,15 +71,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-IRRMeshImporter::IRRMeshImporter() :
-        BaseImporter(),
-        IrrlichtBase() {
-    // empty
-}
+IRRMeshImporter::IRRMeshImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-IRRMeshImporter::~IRRMeshImporter() {}
+IRRMeshImporter::~IRRMeshImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -120,15 +116,15 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 	std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
 	// Check whether we can read from the file
-	if (file.get() == NULL)
-        throw DeadlyImportError("Failed to open IRRMESH file ", pFile);
+	if (file == nullptr)
+		throw DeadlyImportError("Failed to open IRRMESH file ", pFile);
 
 	// Construct the irrXML parser
 	XmlParser parser;
-    if (!parser.parse( file.get() )) {
-        throw DeadlyImportError("XML parse error while loading IRRMESH file ", pFile);
-    }
-    XmlNode root = parser.getRootNode();
+	if (!parser.parse( file.get() )) {
+		throw DeadlyImportError("XML parse error while loading IRRMESH file ", pFile);
+	}
+	XmlNode root = parser.getRootNode();
 
 	// final data
 	std::vector<aiMaterial *> materials;

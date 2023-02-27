@@ -57,8 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  include "../contrib/clipper/clipper.hpp"
 #endif
 
-#include <memory>
 #include <iterator>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 namespace IFC {
@@ -170,7 +171,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             continue;
         }
 
-        fake_openings.push_back(TempOpening());
+        fake_openings.emplace_back();
         TempOpening& opening = fake_openings.back();
 
         opening.extrusionDir = master_normal;
@@ -380,21 +381,19 @@ void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh&
         bool take_any = false;
 
         for (unsigned int j = 0; j < 2; ++j, take_any = true) {
-            if ((last_dir == 0 || take_any) && std::abs(d.x) > 1e-6) {
+            if ((last_dir == 0 || take_any) && std::abs(d.x) > ai_epsilon) {
                 q.y = startvec.y;
                 q.z = startvec.z;
                 q.x = -(d.y * q.y + d.z * q.z) / d.x;
                 last_dir = 0;
                 break;
-            }
-            else if ((last_dir == 1 || take_any) && std::abs(d.y) > 1e-6) {
+            } else if ((last_dir == 1 || take_any) && std::abs(d.y) > ai_epsilon) {
                 q.x = startvec.x;
                 q.z = startvec.z;
                 q.y = -(d.x * q.x + d.z * q.z) / d.y;
                 last_dir = 1;
                 break;
-            }
-            else if ((last_dir == 2 && std::abs(d.z) > 1e-6) || take_any) {
+            } else if ((last_dir == 2 && std::abs(d.z) > ai_epsilon) || take_any) {
                 q.y = startvec.y;
                 q.x = startvec.x;
                 q.z = -(d.y * q.y + d.x * q.x) / d.z;
@@ -529,7 +528,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
     return m;
 }
 
-const auto closeDistance = 1e-6;
+const auto closeDistance = ai_epsilon;
 
 bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt2) {
     if(pt1.Coordinates.size() != pt2.Coordinates.size())
@@ -561,7 +560,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
     // Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis,
     // forming new triangles.
     const bool has_area = solid.SweptArea->ProfileType == "AREA" && curve.mVerts.size() > 2;
-    if( solid.Depth < 1e-6 ) {
+    if (solid.Depth < ai_epsilon) {
         if( has_area ) {
             result.Append(curve);
         }
@@ -611,10 +610,10 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
 
         nors.reserve(conv.apply_openings->size());
         for(TempOpening& t : *conv.apply_openings) {
-            TempMesh& bounds = *t.profileMesh.get();
+            TempMesh &bounds = *t.profileMesh;
 
             if( bounds.mVerts.size() <= 2 ) {
-                nors.push_back(IfcVector3());
+                nors.emplace_back();
                 continue;
             }
             auto nor = ((bounds.mVerts[2] - bounds.mVerts[0]) ^ (bounds.mVerts[1] - bounds.mVerts[0])).Normalize();
@@ -715,7 +714,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->mVerts.insert(profile2D->mVerts.end(), in.begin(), in.end());
         profile2D->mVertcnt.push_back(static_cast<unsigned int>(in.size()));
-        conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
+        conv.collect_openings->push_back(TempOpening(&solid, dir, std::move(profile), std::move(profile2D)));
 
         ai_assert(result.IsEmpty());
     }
@@ -788,7 +787,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
                 const ::Assimp::STEP::EXPRESS::ENTITY& e = shell->To<::Assimp::STEP::EXPRESS::ENTITY>();
                 const Schema_2x3::IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<Schema_2x3::IfcConnectedFaceSet>();
 
-                ProcessConnectedFaceSet(fs,*meshtmp.get(),conv);
+                ProcessConnectedFaceSet(fs, *meshtmp, conv);
             }
             catch(std::bad_cast&) {
                 IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
@@ -797,27 +796,27 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcConnectedFaceSet* fset = geo.ToPtr<Schema_2x3::IfcConnectedFaceSet>()) {
-        ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
+        ProcessConnectedFaceSet(*fset, *meshtmp, conv);
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcSweptAreaSolid* swept = geo.ToPtr<Schema_2x3::IfcSweptAreaSolid>()) {
-        ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
+        ProcessSweptAreaSolid(*swept, *meshtmp, conv);
     }
     else  if(const Schema_2x3::IfcSweptDiskSolid* disk = geo.ToPtr<Schema_2x3::IfcSweptDiskSolid>()) {
-        ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
+        ProcessSweptDiskSolid(*disk, *meshtmp, conv);
     }
     else if(const Schema_2x3::IfcManifoldSolidBrep* brep = geo.ToPtr<Schema_2x3::IfcManifoldSolidBrep>()) {
-        ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
+        ProcessConnectedFaceSet(brep->Outer, *meshtmp, conv);
         fix_orientation = true;
     }
     else if(const Schema_2x3::IfcFaceBasedSurfaceModel* surf = geo.ToPtr<Schema_2x3::IfcFaceBasedSurfaceModel>()) {
         for(const Schema_2x3::IfcConnectedFaceSet& fc : surf->FbsmFaces) {
-            ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
+            ProcessConnectedFaceSet(fc, *meshtmp, conv);
         }
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcBooleanResult* boolean = geo.ToPtr<Schema_2x3::IfcBooleanResult>()) {
-        ProcessBoolean(*boolean,*meshtmp.get(),conv);
+        ProcessBoolean(*boolean, *meshtmp, conv);
     }
     else if(geo.ToPtr<Schema_2x3::IfcBoundingBox>()) {
         // silently skip over bounding boxes
@@ -841,7 +840,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         if (!meshtmp->IsEmpty()) {
             conv.collect_openings->push_back(TempOpening(geo.ToPtr<Schema_2x3::IfcSolidModel>(),
                 IfcVector3(0,0,0),
-                meshtmp,
+                std::move(meshtmp),
                 std::shared_ptr<TempMesh>()));
         }
         return true;

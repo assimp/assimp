@@ -54,6 +54,11 @@ protected:
 };
 
 // ------------------------------------------------------------------------------------------------
+static unsigned int foo() {
+    return static_cast<unsigned int>(((float)rand() / static_cast<float>(RAND_MAX)) * 499);
+}
+
+// ------------------------------------------------------------------------------------------------
 TEST_F(VTAdjacencyTest, largeRandomDataSet) {
     // build a test mesh with randomized input data
     // *******************************************************************************
@@ -72,11 +77,8 @@ TEST_F(VTAdjacencyTest, largeRandomDataSet) {
         if (499 == iCurrent) iCurrent = 0;
         face.mIndices[0] = iCurrent++;
 
-        while (face.mIndices[0] == (face.mIndices[1] = (unsigned int)(((float)rand() / RAND_MAX) * 499)))
-            ;
-        while (face.mIndices[0] == (face.mIndices[2] = (unsigned int)(((float)rand() / RAND_MAX) * 499)) ||
-                face.mIndices[1] == face.mIndices[2])
-            ;
+        while (face.mIndices[0] == (face.mIndices[1] = foo()));
+        while (face.mIndices[0] == (face.mIndices[2] = foo()) || face.mIndices[1] == face.mIndices[2]);
     }
 
     checkMesh(mesh);

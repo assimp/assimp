@@ -67,7 +67,6 @@ struct TexEntry {
     bool mIsNormalMap; // true if the texname was specified in a NormalmapFilename tag
 
     TexEntry() AI_NO_EXCEPT :
-            mName(),
             mIsNormalMap(false) {
         // empty
     }
@@ -128,17 +127,8 @@ struct Mesh {
 
     explicit Mesh(const std::string &pName = std::string()) AI_NO_EXCEPT
             : mName(pName),
-              mPositions(),
-              mPosFaces(),
-              mNormals(),
-              mNormFaces(),
               mNumTextures(0),
-              mTexCoords{},
-              mNumColorSets(0),
-              mColors{},
-              mFaceMaterials(),
-              mMaterials(),
-              mBones() {
+              mNumColorSets(0) {
         // empty
     }
 };
@@ -152,15 +142,12 @@ struct Node {
     std::vector<Mesh *> mMeshes;
 
     Node() AI_NO_EXCEPT
-            : mName(),
-              mTrafoMatrix(),
-              mParent(nullptr),
-              mChildren(),
-              mMeshes() {
+            : mTrafoMatrix(),
+              mParent(nullptr) {
         // empty
     }
     explicit Node(Node *pParent) :
-            mName(), mTrafoMatrix(), mParent(pParent), mChildren(), mMeshes() {
+            mTrafoMatrix(), mParent(pParent) {
         // empty
     }
 
@@ -211,8 +198,6 @@ struct Scene {
 
     Scene() AI_NO_EXCEPT
             : mRootNode(nullptr),
-              mGlobalMeshes(),
-              mGlobalMaterials(),
               mAnimTicksPerSecond(0) {
         // empty
     }

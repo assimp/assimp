@@ -73,10 +73,10 @@
 #  define TRYFREE(p) {if (p) free(p);}
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   pragma warning(push)
 #   pragma warning(disable : 4131 4244 4189 4245)
-#endif // _WIN32
+#endif // _MSC_VER
 
 const char unz_copyright[] =
    " unzip 1.01 Copyright 1998-2004 Gilles Vollant - http://www.winimage.com/zLibDll";
@@ -1175,7 +1175,7 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int *method, int *level, in
             pfile_in_zip_read_info->stream.zalloc = (alloc_func)0;
             pfile_in_zip_read_info->stream.zfree = (free_func)0;
             pfile_in_zip_read_info->stream.opaque = (voidpf)s;
-            pfile_in_zip_read_info->stream.next_in = 0;
+            pfile_in_zip_read_info->stream.next_in = (voidpf)0;
             pfile_in_zip_read_info->stream.avail_in = 0;
 
 #ifdef HAVE_APPLE_COMPRESSION
@@ -1995,6 +1995,6 @@ extern int ZEXPORT unzEndOfFile(unzFile file)
     return 0;
 }
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   pragma warning(pop)
-#endif // _WIN32
+#endif // _MSC_VER

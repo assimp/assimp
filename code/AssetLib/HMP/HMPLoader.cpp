@@ -72,15 +72,11 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-HMPImporter::HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-HMPImporter::~HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::~HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -108,7 +104,7 @@ void HMPImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(mIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open HMP file ", pFile, ".");
     }
 
@@ -275,7 +271,9 @@ void HMPImporter::InternReadFile_HMP7() {
 
     // now load all vertices from the file
     aiVector3D *pcVertOut = pcMesh->mVertices;
+    ai_assert(pcVertOut != nullptr);
     aiVector3D *pcNorOut = pcMesh->mNormals;
+    ai_assert(pcNorOut != nullptr);
     const HMP::Vertex_HMP7 *src = (const HMP::Vertex_HMP7 *)szCurrent;
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
@@ -327,29 +325,31 @@ void HMPImporter::CreateMaterial(const unsigned char *szCurrent,
 
         // now read the first skin and skip all others
         ReadFirstSkin(pcHeader->numskins, szCurrent, &szCurrent);
-    } else {
-        // generate a default material
-        const int iMode = (int)aiShadingMode_Gouraud;
-        aiMaterial *pcHelper = new aiMaterial();
-        pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
-
-        aiColor3D clr;
-        clr.b = clr.g = clr.r = 0.6f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
-
-        clr.b = clr.g = clr.r = 0.05f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
-
-        aiString szName;
-        szName.Set(AI_DEFAULT_MATERIAL_NAME);
-        pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
-
-        // add the material to the scene
-        pScene->mNumMaterials = 1;
-        pScene->mMaterials = new aiMaterial *[1];
-        pScene->mMaterials[0] = pcHelper;
+        *szCurrentOut = szCurrent;
+        return;
     }
+
+    // generate a default material
+    const int iMode = (int)aiShadingMode_Gouraud;
+    aiMaterial *pcHelper = new aiMaterial();
+    pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+
+    aiColor3D clr;
+    clr.b = clr.g = clr.r = 0.6f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
+
+    clr.b = clr.g = clr.r = 0.05f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
+
+    aiString szName;
+    szName.Set(AI_DEFAULT_MATERIAL_NAME);
+    pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
+
+    // add the material to the scene
+    pScene->mNumMaterials = 1;
+    pScene->mMaterials = new aiMaterial *[1];
+    pScene->mMaterials[0] = pcHelper;
     *szCurrentOut = szCurrent;
 }
 
@@ -373,27 +373,36 @@ void HMPImporter::CreateOutputFaceList(unsigned int width, unsigned int height) 
     aiVector3D *pcUVOut(pcUVs);
 
     // Build the terrain square
+    const unsigned int upperBound = pcMesh->mNumVertices;
     unsigned int iCurrent = 0;
     for (unsigned int y = 0; y < height - 1; ++y) {
+        const size_t offset0 = y * width;
+        const size_t offset1 = (y + 1) * width;
         for (unsigned int x = 0; x < width - 1; ++x, ++pcFaceOut) {
             pcFaceOut->mNumIndices = 4;
             pcFaceOut->mIndices = new unsigned int[4];
+            if ((offset0 + x + 1) >= upperBound){
+                continue;
+            }
+            if ((offset1 + x + 1) >= upperBound){
+                continue;
+            }
 
-            *pcVertOut++ = pcMesh->mVertices[y * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x + 1];
-            *pcVertOut++ = pcMesh->mVertices[y * width + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x + 1];
 
-            *pcNorOut++ = pcMesh->mNormals[y * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x + 1];
-            *pcNorOut++ = pcMesh->mNormals[y * width + x + 1];
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x + 1];
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x + 1];
 
             if (pcMesh->mTextureCoords[0]) {
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x + 1];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x + 1];
             }
 
             for (unsigned int i = 0; i < 4; ++i)
@@ -475,11 +484,11 @@ void HMPImporter::GenerateTextureCoords(const unsigned int width, const unsigned
     if (uv == nullptr) {
         return;
     }
-    
+
     if (height == 0.0f || width == 0.0) {
         return;
     }
-    
+
     const float fY = (1.0f / height) + (1.0f / height) / height;
     const float fX = (1.0f / width) + (1.0f / width) / width;
 

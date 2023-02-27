@@ -50,13 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::MakeVerboseFormatProcess() {
-    // nothing to do here
-}
+MakeVerboseFormatProcess::MakeVerboseFormatProcess() = default;
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::~MakeVerboseFormatProcess() {
-    // nothing to do here
-}
+MakeVerboseFormatProcess::~MakeVerboseFormatProcess() = default;
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
@@ -97,8 +93,8 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
         pvBitangents = new aiVector3D[iNumVerts];
     }
 
-    aiVector3D *apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = { 0 };
-    aiColor4D *apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = { 0 };
+    aiVector3D *apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = { nullptr };
+    aiColor4D *apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = { nullptr };
 
     unsigned int p = 0;
     while (pcMesh->HasTextureCoords(p))

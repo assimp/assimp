@@ -88,12 +88,6 @@ ASEImporter::ASEImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ASEImporter::~ASEImporter() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool ASEImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "*3dsmax_asciiexport" };
@@ -124,7 +118,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open ASE file ", pFile, ".");
     }
 
@@ -265,7 +259,7 @@ void ASEImporter::GenerateDefaultMaterial() {
     }
     if (bHas || mParser->m_vMaterials.empty()) {
         // add a simple material without submaterials to the parser's list
-        mParser->m_vMaterials.push_back(ASE::Material(AI_DEFAULT_MATERIAL_NAME));
+        mParser->m_vMaterials.emplace_back(AI_DEFAULT_MATERIAL_NAME);
         ASE::Material &mat = mParser->m_vMaterials.back();
 
         mat.mDiffuse = aiColor3D(0.6f, 0.6f, 0.6f);
@@ -870,6 +864,7 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
         unsigned int iWire = 1;
         mat.pcInstance->AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
+    // fallthrough
     case D3DS::Discreet3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
         break;
@@ -1004,8 +999,8 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                                             blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end(); ++blubb) {
 
                                         // NOTE: illegal cases have already been filtered out
-                                        avOutputBones[(*blubb).first].push_back(std::pair<unsigned int, float>(
-                                                iBase, (*blubb).second));
+                                        avOutputBones[(*blubb).first].emplace_back(
+                                                iBase, (*blubb).second);
                                     }
                                 }
                             }

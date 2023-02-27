@@ -102,8 +102,7 @@ MD2Importer::MD2Importer()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MD2Importer::~MD2Importer()
-{}
+MD2Importer::~MD2Importer() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -206,7 +205,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MD2 file ", pFile, "");
     }
 

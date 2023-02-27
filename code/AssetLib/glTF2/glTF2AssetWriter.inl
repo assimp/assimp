@@ -511,6 +511,20 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialEmissiveStrength.isPresent) {
+            Value materialEmissiveStrength(rapidjson::Type::kObjectType);
+
+            MaterialEmissiveStrength &emissiveStrength = m.materialEmissiveStrength.value;
+
+            if (emissiveStrength.emissiveStrength != 0.f) {
+                WriteFloat(materialEmissiveStrength, emissiveStrength.emissiveStrength, "emissiveStrength", w.mAl);
+            }
+
+            if (!materialEmissiveStrength.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_emissive_strength", materialEmissiveStrength, w.mAl);
+            }
+        }
+
         if (!exts.ObjectEmpty()) {
             obj.AddMember("extensions", exts, w.mAl);
         }
@@ -758,7 +772,7 @@ namespace glTF2 {
     {
         std::unique_ptr<IOStream> jsonOutFile(mAsset.OpenFile(path, "wt", true));
 
-        if (jsonOutFile == 0) {
+        if (jsonOutFile == nullptr) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
@@ -781,7 +795,7 @@ namespace glTF2 {
 
             std::unique_ptr<IOStream> binOutFile(mAsset.OpenFile(binPath, "wb", true));
 
-            if (binOutFile == 0) {
+            if (binOutFile == nullptr) {
                 throw DeadlyExportError("Could not open output file: " + binPath);
             }
 
@@ -797,7 +811,7 @@ namespace glTF2 {
     {
         std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
 
-        if (outfile == 0) {
+        if (outfile == nullptr) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
@@ -822,7 +836,7 @@ namespace glTF2 {
             throw DeadlyExportError("Failed to write scene data!");
         }
 
-        uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
+        uint32_t jsonChunkLength = static_cast<uint32_t>((docBuffer.GetSize() + 3) & ~3); // Round up to next multiple of 4
         auto paddingLength = jsonChunkLength - docBuffer.GetSize();
 
         GLB_Chunk jsonChunk;
@@ -848,7 +862,7 @@ namespace glTF2 {
         int GLB_Chunk_count = 1;
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
-            binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
+            binaryChunkLength = static_cast<uint32_t>((bodyBuffer->byteLength + 3) & ~3); // Round up to next multiple of 4
 
             auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
             ++GLB_Chunk_count;
@@ -933,6 +947,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_ior) {
                 exts.PushBack(StringRef("KHR_materials_ior"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_emissive_strength) {
+                exts.PushBack(StringRef("KHR_materials_emissive_strength"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {

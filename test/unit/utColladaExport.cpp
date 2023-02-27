@@ -124,9 +124,9 @@ TEST_F(utColladaExport, testExportLight) {
     ASSERT_NE(pTest, nullptr);
     ASSERT_TRUE(pTest->HasLights());
 
-    const unsigned int origNumLights(pTest->mNumLights);
+    const unsigned int origNumLights = pTest->mNumLights;
     // There are FIVE!!! LIGHTS!!!
-    EXPECT_EQ(5, origNumLights) << "lights.dae should contain five lights";
+    EXPECT_EQ(5u, origNumLights) << "lights.dae should contain five lights";
 
     std::vector<aiLight> origLights(5);
     for (size_t i = 0; i < origNumLights; i++) {
@@ -169,7 +169,7 @@ TEST_F(utColladaExport, testExportLight) {
 
     const aiScene *imported = im->ReadFile(file, aiProcess_ValidateDataStructure);
 
-    ASSERT_TRUE(imported != NULL);
+    ASSERT_TRUE(imported != nullptr);
 
     // Check common metadata survived roundtrip
     aiString readImporter;

@@ -75,9 +75,7 @@ TerragenImporter::TerragenImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-TerragenImporter::~TerragenImporter() {
-    // empty
-}
+TerragenImporter::~TerragenImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -232,8 +230,8 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
         }
 
         // Get to the next chunk (4 byte aligned)
-        unsigned dtt = reader.GetCurrentPos();
-        if (dtt & 0x3) {
+        unsigned dtt = reader.GetCurrentPos() & 0x3;
+        if (dtt) {
             reader.IncPtr(4 - dtt);
         }
     }

@@ -124,7 +124,7 @@ struct ID : ElemBase {
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
     std::shared_ptr<ElemBase> first;
-    std::shared_ptr<ElemBase> last;
+    std::weak_ptr<ElemBase> last;
 };
 
 // -------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ struct MVert : ElemBase {
     int bweight;
 
     MVert() :
-            ElemBase(), flag(0), mat_nr(0), bweight(0) {}
+            flag(0), mat_nr(0), bweight(0) {}
 };
 
 // -------------------------------------------------------------------------------
@@ -417,7 +417,6 @@ struct CustomDataLayer : ElemBase {
     std::shared_ptr<ElemBase> data; // must be converted to real type according type member
 
     CustomDataLayer() :
-            ElemBase(),
             type(0),
             offset(0),
             flag(0),
@@ -642,14 +641,21 @@ struct ModifierData : ElemBase {
     };
 
     std::shared_ptr<ElemBase> next WARN;
-    std::shared_ptr<ElemBase> prev WARN;
+    std::weak_ptr<ElemBase> prev WARN;
 
     int type, mode;
     char name[32];
 };
 
+
+// ------------------------------------------------------------------------------------------------
+struct SharedModifierData : ElemBase {
+    ModifierData modifier;
+};
+
+
 // -------------------------------------------------------------------------------
-struct SubsurfModifierData : ElemBase {
+struct SubsurfModifierData : SharedModifierData {
 
     enum Type {
 
@@ -662,7 +668,6 @@ struct SubsurfModifierData : ElemBase {
         FLAGS_SubsurfUV = 1 << 3
     };
 
-    ModifierData modifier FAIL;
     short subdivType WARN;
     short levels FAIL;
     short renderLevels;
@@ -670,7 +675,7 @@ struct SubsurfModifierData : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MirrorModifierData : ElemBase {
+struct MirrorModifierData : SharedModifierData {
 
     enum Flags {
         Flags_CLIPPING = 1 << 0,
@@ -682,11 +687,9 @@ struct MirrorModifierData : ElemBase {
         Flags_VGROUP = 1 << 6
     };
 
-    ModifierData modifier FAIL;
-
     short axis, flag;
     float tolerance;
-    std::shared_ptr<Object> mirror_ob;
+    std::weak_ptr<Object> mirror_ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -725,7 +728,7 @@ struct Object : ElemBase {
     ListBase modifiers;
 
     Object() :
-            ElemBase(), type(Type_EMPTY), parent(nullptr), track(), proxy(), proxy_from(), data() {
+            type(Type_EMPTY), parent(nullptr) {
         // empty
     }
 };
@@ -737,8 +740,7 @@ struct Base : ElemBase {
     std::shared_ptr<Object> object WARN;
 
     Base() :
-            ElemBase(), prev(nullptr), next(), object() {
-        // empty
+            prev(nullptr) {
         // empty
     }
 };
@@ -754,10 +756,7 @@ struct Scene : ElemBase {
 
     ListBase base;
 
-    Scene() :
-            ElemBase(), camera(), world(), basact(), master_collection() {
-        // empty
-    }
+    Scene() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -787,10 +786,7 @@ struct Image : ElemBase {
 
     short gen_x, gen_y, gen_type;
 
-    Image() :
-            ElemBase() {
-        // empty
-    }
+    Image() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -880,7 +876,7 @@ struct Tex : ElemBase {
     //char use_nodes;
 
     Tex() :
-            ElemBase(), imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS), ima() {
+            imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS) {
         // empty
     }
 };
@@ -972,10 +968,7 @@ struct MTex : ElemBase {
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
 
-    MTex() :
-            ElemBase() {
-        // empty
-    }
+    MTex() = default;
 };
 
 } // namespace Blender

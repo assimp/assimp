@@ -75,16 +75,7 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-XFileImporter::XFileImporter()
-: mBuffer() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-XFileImporter::~XFileImporter() {
-    // empty
-}
+XFileImporter::XFileImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -104,7 +95,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const {
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
     // read file into memory
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
-    if ( file.get() == nullptr ) {
+    if (file == nullptr) {
         throw DeadlyImportError( "Failed to open file ", pFile, "." );
     }
 
@@ -380,7 +371,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                     // does the new vertex stem from an old vertex which was influenced by this bone?
                     ai_real w = oldWeights[orgPoints[d]];
                     if ( w > 0.0 ) {
-                        newWeights.push_back( aiVertexWeight( d, w ) );
+                        newWeights.emplace_back( d, w );
                     }
                 }
 

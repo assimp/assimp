@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -54,18 +53,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 
-
 namespace Assimp {
 namespace FBX {
 
 using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-Geometry::Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
-    : Object(id, element, name)
-    , skin()
-{
-    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
+Geometry::Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc) :
+        Object(id, element, name), skin() {
+    const std::vector<const Connection*> &conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
     for(const Connection* con : conns) {
         const Skin* const sk = ProcessSimpleConnection<Skin>(*con, false, "Skin -> Geometry", element);
         if(sk) {
@@ -76,12 +72,6 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
             blendShapes.push_back(bsp);
         }
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-Geometry::~Geometry()
-{
-    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -183,16 +173,10 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
         if(doc.Settings().readAllLayers || index == 0) {
             const Scope& layer = GetRequiredScope(*(*it).second);
             ReadLayer(layer);
-        }
-        else {
+        } else {
             FBXImporter::LogWarn("ignoring additional geometry layers");
         }
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-MeshGeometry::~MeshGeometry() {
-    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -431,9 +415,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 {
     bool isDirect = ReferenceInformationType == "Direct";
     bool isIndexToDirect = ReferenceInformationType == "IndexToDirect";
+    const bool hasDataElement = HasElement(source, dataElementName);
+    const bool hasIndexDataElement = HasElement(source, indexDataElementName);
 
     // fall-back to direct data if there is no index data element
-    if ( isIndexToDirect && !HasElement( source, indexDataElementName ) ) {
+    if (isIndexToDirect && !hasIndexDataElement) {
         isDirect = true;
         isIndexToDirect = false;
     }
@@ -442,7 +428,8 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     // deal with this more elegantly and with less redundancy, but right
     // now it seems unavoidable.
     if (MappingInformationType == "ByVertice" && isDirect) {
-        if (!HasElement(source, dataElementName)) {
+        if (!hasDataElement) {
+            FBXImporter::LogWarn("missing data element: ", dataElementName);
             return;
         }
         std::vector<T> tempData;
@@ -464,7 +451,15 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     }
     else if (MappingInformationType == "ByVertice" && isIndexToDirect) {
 		std::vector<T> tempData;
-		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
+        if (!hasDataElement || !hasIndexDataElement) {
+            if (!hasDataElement)
+                FBXImporter::LogWarn("missing data element: ", dataElementName);
+            if (!hasIndexDataElement)
+                FBXImporter::LogWarn("missing index data element: ", indexDataElementName);
+            return;
+        }
+
+        ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
@@ -489,6 +484,11 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         }
     }
     else if (MappingInformationType == "ByPolygonVertex" && isDirect) {
+        if (!hasDataElement) {
+            FBXImporter::LogWarn("missing data element: ", dataElementName);
+            return;
+        }
+
 		std::vector<T> tempData;
 		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
@@ -503,7 +503,14 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
     }
     else if (MappingInformationType == "ByPolygonVertex" && isIndexToDirect) {
 		std::vector<T> tempData;
-		ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
+        if (!hasDataElement || !hasIndexDataElement) {
+            if (!hasDataElement)
+                FBXImporter::LogWarn("missing data element: ", dataElementName);
+            if (!hasIndexDataElement)
+                FBXImporter::LogWarn("missing index data element: ", indexDataElementName);
+            return;
+        }
+        ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
@@ -681,9 +688,7 @@ ShapeGeometry::ShapeGeometry(uint64_t id, const Element& element, const std::str
 }
 
 // ------------------------------------------------------------------------------------------------
-ShapeGeometry::~ShapeGeometry() {
-    // empty
-}
+ShapeGeometry::~ShapeGeometry() = default;
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector3D>& ShapeGeometry::GetVertices() const {
     return m_vertices;
@@ -711,9 +716,7 @@ LineGeometry::LineGeometry(uint64_t id, const Element& element, const std::strin
 }
 
 // ------------------------------------------------------------------------------------------------
-LineGeometry::~LineGeometry() {
-    // empty
-}
+LineGeometry::~LineGeometry() = default;
 // ------------------------------------------------------------------------------------------------
 const std::vector<aiVector3D>& LineGeometry::GetVertices() const {
     return m_vertices;

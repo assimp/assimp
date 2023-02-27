@@ -66,10 +66,7 @@ DeboneProcess::DeboneProcess()
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-DeboneProcess::~DeboneProcess()
-{
-    // nothing to do here
-}
+DeboneProcess::~DeboneProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -136,9 +133,9 @@ void DeboneProcess::Execute( aiScene* pScene)
 
                 // store new meshes and indices of the new meshes
                 for(unsigned int b=0;b<newMeshes.size();b++)    {
-                    const aiString *find = newMeshes[b].second?&newMeshes[b].second->mName:0;
+                    const aiString *find = newMeshes[b].second ? &newMeshes[b].second->mName : nullptr;
 
-                    aiNode *theNode = find?pScene->mRootNode->FindNode(*find):0;
+                    aiNode *theNode = find ? pScene->mRootNode->FindNode(*find) : nullptr;
                     std::pair<unsigned int,aiNode*> push_pair(static_cast<unsigned int>(meshes.size()),theNode);
 
                     mSubMeshIndices[a].push_back(push_pair);
@@ -156,7 +153,7 @@ void DeboneProcess::Execute( aiScene* pScene)
             }
             else    {
                 // Mesh is kept unchanged - store it's new place in the mesh array
-                mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(static_cast<unsigned int>(meshes.size()),(aiNode*)0));
+                mSubMeshIndices[a].emplace_back(static_cast<unsigned int>(meshes.size()), (aiNode *)nullptr);
                 meshes.push_back(srcMesh);
             }
         }
@@ -344,7 +341,7 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
         }
 
         aiMesh *baseMesh = MakeSubmesh(pMesh,subFaces,0);
-        std::pair<aiMesh*,const aiBone*> push_pair(baseMesh,(const aiBone*)0);
+        std::pair<aiMesh *, const aiBone *> push_pair(baseMesh, (const aiBone *)nullptr);
 
         poNewMeshes.push_back(push_pair);
     }

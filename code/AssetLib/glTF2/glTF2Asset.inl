@@ -82,9 +82,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // clang-format on
 
 using namespace Assimp;
-using namespace glTFCommon;
 
 namespace glTF2 {
+using glTFCommon::FindStringInContext;
+using glTFCommon::FindNumberInContext;
+using glTFCommon::FindUIntInContext;
+using glTFCommon::FindArrayInContext;
+using glTFCommon::FindObjectInContext;
+using glTFCommon::FindExtensionInContext;
+using glTFCommon::MemberOrDefault;
+using glTFCommon::ReadMember;
+using glTFCommon::FindMember;
+using glTFCommon::FindObject;
+using glTFCommon::FindUInt;
+using glTFCommon::FindArray;
+using glTFCommon::FindArray;
 
 namespace {
 
@@ -179,11 +191,11 @@ inline bool GetAttribVector(Mesh::Primitive &p, const char *attr, Mesh::Accessor
         v = &(p.attributes.texcoord);
     } else if ((pos = Compare(attr, "COLOR"))) {
         v = &(p.attributes.color);
-    } else if ((pos = Compare(attr, "JOINT"))) {
+    } else if ((pos = Compare(attr, "JOINTS"))) {
         v = &(p.attributes.joint);
     } else if ((pos = Compare(attr, "JOINTMATRIX"))) {
         v = &(p.attributes.jointmatrix);
-    } else if ((pos = Compare(attr, "WEIGHT"))) {
+    } else if ((pos = Compare(attr, "WEIGHTS"))) {
         v = &(p.attributes.weight);
     } else
         return false;
@@ -359,7 +371,7 @@ template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
         mDictId(dictId),
         mExtId(extId),
-        mDict(0),
+        mDict(nullptr),
         mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
@@ -891,7 +903,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;
-        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : 0);
+        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : nullptr);
         sparse->PatchData(elementSize);
     }
 }
@@ -1301,6 +1313,16 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_emissive_strength) {
+            if (Value *curMaterialEmissiveStrength = FindObject(*extensions, "KHR_materials_emissive_strength")) {
+                MaterialEmissiveStrength emissiveStrength;
+
+                ReadMember(*curMaterialEmissiveStrength, "emissiveStrength", emissiveStrength.emissiveStrength);
+
+                this->materialEmissiveStrength = Nullable<MaterialEmissiveStrength>(emissiveStrength);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1341,6 +1363,11 @@ inline void MaterialVolume::SetDefaults() {
 inline void MaterialIOR::SetDefaults() {
     //KHR_materials_ior properties
     ior = 1.5f;
+}
+
+inline void MaterialEmissiveStrength::SetDefaults() {
+    //KHR_materials_emissive_strength properties
+    emissiveStrength = 0.f;
 }
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
@@ -1876,7 +1903,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     std::vector<char> sceneData;
     rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
 
-    // If a schemaDocumentProvider is available, see if the glTF schema is present. 
+    // If a schemaDocumentProvider is available, see if the glTF schema is present.
     // If so, use it to validate the document.
     if (mSchemaDocumentProvider) {
         if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {
@@ -2014,6 +2041,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_materials_volume);
     CHECK_EXT(KHR_materials_ior);
+    CHECK_EXT(KHR_materials_emissive_strength);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
     CHECK_EXT(KHR_materials_ior);

@@ -136,15 +136,34 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
 
 // ------------------------------------------------------------------------------------------------
-Material::~Material() {
-    // empty
-}
+Material::~Material() = default;
+
+    aiVector2D uvTrans;
+    aiVector2D uvScaling;
+    ai_real    uvRotation;
+
+    std::string type;
+    std::string relativeFileName;
+    std::string fileName;
+    std::string alphaSource;
+    std::shared_ptr<const PropertyTable> props;
+
+    unsigned int crop[4]{};
+
+    const Video* media;
 
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
         Object(id,element,name),
+        uvTrans(0.0f, 0.0f),
         uvScaling(1.0f,1.0f),
-        media(0) {
+        uvRotation(0.0f),
+        type(),
+        relativeFileName(),
+        fileName(),
+        alphaSource(),
+        props(),
+        media(nullptr) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Type = sc["Type"];
@@ -234,9 +253,7 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 }
 
 
-Texture::~Texture() {
-    // empty
-}
+Texture::~Texture() = default;
 
 LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name) :
         Object(id,element,name),
@@ -255,9 +272,7 @@ LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Docume
     }
 }
 
-LayeredTexture::~LayeredTexture() {
-    // empty
-}
+LayeredTexture::~LayeredTexture() = default;
 
 void LayeredTexture::fillTexture(const Document& doc) {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
@@ -277,10 +292,10 @@ void LayeredTexture::fillTexture(const Document& doc) {
 }
 
 // ------------------------------------------------------------------------------------------------
-Video::Video(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
-        Object(id,element,name),
+Video::Video(uint64_t id, const Element &element, const Document &doc, const std::string &name) :
+        Object(id, element, name),
         contentLength(0),
-        content(0) {
+        content(nullptr) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Type = sc["Type"];
@@ -364,7 +379,6 @@ Video::Video(uint64_t id, const Element& element, const Document& doc, const std
 
     props = GetPropertyTable(doc,"Video.FbxVideo",element,sc);
 }
-
 
 Video::~Video() {
     delete[] content;

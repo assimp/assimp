@@ -65,9 +65,7 @@ FindDegeneratesProcess::FindDegeneratesProcess() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-FindDegeneratesProcess::~FindDegeneratesProcess() {
-    // nothing to do here
-}
+FindDegeneratesProcess::~FindDegeneratesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -221,7 +219,7 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
             if ( mConfigCheckAreaOfTriangle ) {
                 if ( face.mNumIndices == 3 ) {
                     ai_real area = calculateAreaOfTriangle( face, mesh );
-                    if ( area < 1e-6 ) {
+                    if (area < ai_epsilon) {
                         if ( mConfigRemoveDegenerates ) {
                             remove_me[ a ] = true;
                             ++deg;

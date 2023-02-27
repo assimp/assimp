@@ -141,9 +141,7 @@ AI_FORCE_INLINE IOStreamBuffer<T>::IOStreamBuffer(size_t cache) :
 }
 
 template <class T>
-AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() {
-    // empty
-}
+AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() = default;
 
 template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::open(IOStream *stream) {
@@ -325,7 +323,9 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         }
     }
     buffer[i] = '\n';
-    ++m_cachePos;
+    while (m_cachePos < m_cacheSize && (m_cache[m_cachePos] == '\r' || m_cache[m_cachePos] == '\n')) {
+        ++m_cachePos;
+    }
 
     return true;
 }

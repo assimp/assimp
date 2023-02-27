@@ -94,9 +94,7 @@ PLYImporter::PLYImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-PLYImporter::~PLYImporter() {
-    // empty
-}
+PLYImporter::~PLYImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -135,7 +133,7 @@ static bool isBigEndian(const char *szMe) {
 void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
-    if (!fileStream.get()) {
+    if (!fileStream) {
         throw DeadlyImportError("Failed to open file ", pFile, ".");
     }
 

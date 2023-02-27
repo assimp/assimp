@@ -207,7 +207,7 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
 
     static const std::string mode = "rb";
     std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, mode));
-    if (!fileStream.get()) {
+    if (!fileStream) {
         throw DeadlyImportError("Failed to open file " + file + ".");
     }
 
@@ -333,7 +333,7 @@ void X3DImporter::readHead(XmlNode &node) {
     }
     mScene->mMetaData = aiMetadata::Alloc(static_cast<unsigned int>(metaArray.size()));
     unsigned int i = 0;
-    for (auto currentMeta : metaArray) {
+    for (const auto& currentMeta : metaArray) {
         mScene->mMetaData->Set(i, currentMeta.name, aiString(currentMeta.value));
         ++i;
     }
@@ -471,15 +471,12 @@ void X3DImporter::ParseHelper_Node_Enter(X3DNodeElementBase *pNode) {
 
     mNodeElementCur->Children.push_back(pNode); // add new element to current element child list.
     mNodeElementCur = pNode; // switch current element to new one.
-}    
+}
 
 void X3DImporter::ParseHelper_Node_Exit() {
     // check if we can walk up.
     if (mNodeElementCur != nullptr) {
         mNodeElementCur = mNodeElementCur->Parent;
-    } else {
-        int i = 0;
-        ++i;
     }
 }
 

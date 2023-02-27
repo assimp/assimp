@@ -131,7 +131,7 @@ void X3DExporter::AttrHelper_Color3ToAttrList(std::list<SAttribute> &pList, cons
     if (pValue == pDefaultValue) return;
 
     AttrHelper_Col3DArrToString(&pValue, 1, tstr);
-    pList.push_back({ pName, tstr });
+    pList.emplace_back( pName, tstr );
 }
 
 void X3DExporter::AttrHelper_FloatToAttrList(std::list<SAttribute> &pList, const string &pName, const float pValue, const float pDefaultValue) {
@@ -140,7 +140,7 @@ void X3DExporter::AttrHelper_FloatToAttrList(std::list<SAttribute> &pList, const
     if (pValue == pDefaultValue) return;
 
     AttrHelper_FloatToString(pValue, tstr);
-    pList.push_back({ pName, tstr });
+    pList.emplace_back( pName, tstr );
 }
 
 void X3DExporter::NodeHelper_OpenNode(const string &pNodeName, const size_t pTabLevel, const bool pEmptyElement, const list<SAttribute> &pAttrList) {
@@ -186,7 +186,7 @@ void X3DExporter::Export_Node(const aiNode *pNode, const size_t pTabLevel) {
     if (CheckAndExport_Light(*pNode, pTabLevel)) return;
 
     // Check if need DEF.
-    if (pNode->mName.length) attr_list.push_back({ "DEF", pNode->mName.C_Str() });
+    if (pNode->mName.length) attr_list.emplace_back( "DEF", pNode->mName.C_Str() );
 
     // Check if need <Transformation> node against <Group>.
     if (!pNode->mTransformation.IsIdentity()) {
@@ -213,13 +213,13 @@ void X3DExporter::Export_Node(const aiNode *pNode, const size_t pTabLevel) {
         pNode->mTransformation.Decompose(scale, rotate_axis, rotate_angle, translate);
         // Check if values different from default
         if ((rotate_angle != 0) && (rotate_axis.Length() > 0))
-            attr_list.push_back({ "rotation", Rotation2String(rotate_axis, rotate_angle) });
+            attr_list.emplace_back( "rotation", Rotation2String(rotate_axis, rotate_angle) );
 
         if (!scale.Equal({ 1.0, 1.0, 1.0 })) {
-            attr_list.push_back({ "scale", Vector2String(scale) });
+            attr_list.emplace_back( "scale", Vector2String(scale) );
         }
         if (translate.Length() > 0) {
-            attr_list.push_back({ "translation", Vector2String(translate) });
+            attr_list.emplace_back( "translation", Vector2String(translate) );
         }
     }
 
@@ -284,7 +284,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
     // Check if mesh already defined early.
     if (mDEF_Map_Mesh.find(pIdxMesh) != mDEF_Map_Mesh.end()) {
         // Mesh already defined, just refer to it
-        attr_list.push_back({ "USE", mDEF_Map_Mesh.at(pIdxMesh) });
+        attr_list.emplace_back( "USE", mDEF_Map_Mesh.at(pIdxMesh) );
         NodeHelper_OpenNode(NodeName_Shape, pTabLevel, true, attr_list);
 
         return;
@@ -293,7 +293,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
     string mesh_name(mesh.mName.C_Str() + string("_IDX_") + to_string(pIdxMesh)); // Create mesh name
 
     // Define mesh name.
-    attr_list.push_back({ "DEF", mesh_name });
+    attr_list.emplace_back( "DEF", mesh_name );
     mDEF_Map_Mesh[pIdxMesh] = mesh_name;
 
     //
@@ -327,7 +327,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
 
     // remove last space symbol.
     coordIndex.resize(coordIndex.length() - 1);
-    attr_list.push_back({ "coordIndex", coordIndex });
+    attr_list.emplace_back( "coordIndex", coordIndex );
     // create node
     NodeHelper_OpenNode(NodeName_IFS, pTabLevel + 1, false, attr_list);
     attr_list.clear();
@@ -336,14 +336,14 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
 
     // Export <Coordinate>
     AttrHelper_Vec3DArrToString(mesh.mVertices, mesh.mNumVertices, attr_value);
-    attr_list.push_back({ "point", attr_value });
+    attr_list.emplace_back( "point", attr_value );
     NodeHelper_OpenNode("Coordinate", pTabLevel + 2, true, attr_list);
     attr_list.clear();
 
     // Export <ColorRGBA>
     if (mesh.HasVertexColors(0)) {
         AttrHelper_Col4DArrToString(mesh.mColors[0], mesh.mNumVertices, attr_value);
-        attr_list.push_back({ "color", attr_value });
+        attr_list.emplace_back( "color", attr_value );
         NodeHelper_OpenNode("ColorRGBA", pTabLevel + 2, true, attr_list);
         attr_list.clear();
     }
@@ -351,7 +351,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
     // Export <TextureCoordinate>
     if (mesh.HasTextureCoords(0)) {
         AttrHelper_Vec3DAsVec2fArrToString(mesh.mTextureCoords[0], mesh.mNumVertices, attr_value);
-        attr_list.push_back({ "point", attr_value });
+        attr_list.emplace_back( "point", attr_value );
         NodeHelper_OpenNode("TextureCoordinate", pTabLevel + 2, true, attr_list);
         attr_list.clear();
     }
@@ -359,7 +359,7 @@ void X3DExporter::Export_Mesh(const size_t pIdxMesh, const size_t pTabLevel) {
     // Export <Normal>
     if (mesh.HasNormals()) {
         AttrHelper_Vec3DArrToString(mesh.mNormals, mesh.mNumVertices, attr_value);
-        attr_list.push_back({ "vector", attr_value });
+        attr_list.emplace_back( "vector", attr_value );
         NodeHelper_OpenNode("Normal", pTabLevel + 2, true, attr_list);
         attr_list.clear();
     }
@@ -380,7 +380,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
     // Check if material already defined early.
     if (mDEF_Map_Material.find(pIdxMaterial) != mDEF_Map_Material.end()) {
         // Material already defined, just refer to it
-        attr_list.push_back({ "USE", mDEF_Map_Material.at(pIdxMaterial) });
+        attr_list.emplace_back( "USE", mDEF_Map_Material.at(pIdxMaterial) );
         NodeHelper_OpenNode(NodeName_A, pTabLevel, true, attr_list);
 
         return;
@@ -392,7 +392,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
     if (material.Get(AI_MATKEY_NAME, ai_mat_name) == AI_SUCCESS) material_name.insert(0, ai_mat_name.C_Str());
 
     // Define material name.
-    attr_list.push_back({ "DEF", material_name });
+    attr_list.emplace_back( "DEF", material_name );
     mDEF_Map_Material[pIdxMaterial] = material_name;
 
     //
@@ -410,7 +410,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
 
             if (aiColor3D(pAttrValue.r, pAttrValue.g, pAttrValue.b) != pAttrDefaultValue) {
                 AttrHelper_Col4DArrToString(&pAttrValue, 1, tstr);
-                attr_list.push_back({ pAttrName, tstr });
+                attr_list.emplace_back( pAttrName, tstr );
             }
         };
 
@@ -462,7 +462,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
     //
     {
         auto RepeatToAttrList = [&](const string &pAttrName, const bool pAttrValue) {
-            if (!pAttrValue) attr_list.push_back({ pAttrName, "false" });
+            if (!pAttrValue) attr_list.emplace_back( pAttrName, "false" );
         };
 
         bool tvalb;
@@ -473,7 +473,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
             if (strncmp(tstring.C_Str(), AI_EMBEDDED_TEXNAME_PREFIX, strlen(AI_EMBEDDED_TEXNAME_PREFIX)) == 0)
                 LogError("Embedded texture is not supported");
             else
-                attr_list.push_back({ "url", string("\"") + tstring.C_Str() + "\"" });
+                attr_list.emplace_back( "url", string("\"") + tstring.C_Str() + "\"" );
         }
 
         // repeatS="true" SFBool
@@ -495,7 +495,7 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
 
             if (pAttrValue != pAttrDefaultValue) {
                 AttrHelper_Vec2DArrToString(&pAttrValue, 1, tstr);
-                attr_list.push_back({ pAttrName, tstr });
+                attr_list.emplace_back( pAttrName, tstr );
             }
         };
 
@@ -520,40 +520,40 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
 void X3DExporter::Export_MetadataBoolean(const aiString &pKey, const bool pValue, const size_t pTabLevel) {
     list<SAttribute> attr_list;
 
-    attr_list.push_back({ "name", pKey.C_Str() });
-    attr_list.push_back({ "value", pValue ? "true" : "false" });
+    attr_list.emplace_back( "name", pKey.C_Str() );
+    attr_list.emplace_back( "value", pValue ? "true" : "false" );
     NodeHelper_OpenNode("MetadataBoolean", pTabLevel, true, attr_list);
 }
 
 void X3DExporter::Export_MetadataDouble(const aiString &pKey, const double pValue, const size_t pTabLevel) {
     list<SAttribute> attr_list;
 
-    attr_list.push_back({ "name", pKey.C_Str() });
-    attr_list.push_back({ "value", to_string(pValue) });
+    attr_list.emplace_back( "name", pKey.C_Str() );
+    attr_list.emplace_back( "value", to_string(pValue) );
     NodeHelper_OpenNode("MetadataDouble", pTabLevel, true, attr_list);
 }
 
 void X3DExporter::Export_MetadataFloat(const aiString &pKey, const float pValue, const size_t pTabLevel) {
     list<SAttribute> attr_list;
 
-    attr_list.push_back({ "name", pKey.C_Str() });
-    attr_list.push_back({ "value", to_string(pValue) });
+    attr_list.emplace_back( "name", pKey.C_Str() );
+    attr_list.emplace_back( "value", to_string(pValue) );
     NodeHelper_OpenNode("MetadataFloat", pTabLevel, true, attr_list);
 }
 
 void X3DExporter::Export_MetadataInteger(const aiString &pKey, const int32_t pValue, const size_t pTabLevel) {
     list<SAttribute> attr_list;
 
-    attr_list.push_back({ "name", pKey.C_Str() });
-    attr_list.push_back({ "value", to_string(pValue) });
+    attr_list.emplace_back( "name", pKey.C_Str() );
+    attr_list.emplace_back( "value", to_string(pValue) );
     NodeHelper_OpenNode("MetadataInteger", pTabLevel, true, attr_list);
 }
 
 void X3DExporter::Export_MetadataString(const aiString &pKey, const aiString &pValue, const size_t pTabLevel) {
     list<SAttribute> attr_list;
 
-    attr_list.push_back({ "name", pKey.C_Str() });
-    attr_list.push_back({ "value", pValue.C_Str() });
+    attr_list.emplace_back( "name", pKey.C_Str() );
+    attr_list.emplace_back( "value", pValue.C_Str() );
     NodeHelper_OpenNode("MetadataString", pTabLevel, true, attr_list);
 }
 
@@ -565,7 +565,7 @@ bool X3DExporter::CheckAndExport_Light(const aiNode &pNode, const size_t pTabLev
 
         if (pAttrValue != pAttrDefaultValue) {
             AttrHelper_Vec3DArrToString(&pAttrValue, 1, tstr);
-            attr_list.push_back({ pAttrName, tstr });
+            attr_list.emplace_back( pAttrName, tstr );
         }
     };
 
@@ -590,8 +590,8 @@ bool X3DExporter::CheckAndExport_Light(const aiNode &pNode, const size_t pTabLev
 
     aiMatrix4x4 trafo_mat = Matrix_GlobalToCurrent(pNode).Inverse();
 
-    attr_list.push_back({ "DEF", light.mName.C_Str() });
-    attr_list.push_back({ "global", "true" }); // "false" is not supported.
+    attr_list.emplace_back( "DEF", light.mName.C_Str() );
+    attr_list.emplace_back( "global", "true" ); // "false" is not supported.
     // ambientIntensity="0" SFFloat [inputOutput]
     AttrHelper_FloatToAttrList(attr_list, "ambientIntensity", aiVector3D(light.mColorAmbient.r, light.mColorAmbient.g, light.mColorAmbient.b).Length(), 0);
     // color="1 1 1"        SFColor [inputOutput]
@@ -648,10 +648,10 @@ X3DExporter::X3DExporter(const char *pFileName, IOSystem *pIOSystem, const aiSce
     XML_Write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     XML_Write("<!DOCTYPE X3D PUBLIC \"ISO//Web3D//DTD X3D 3.3//EN\" \"http://www.web3d.org/specifications/x3d-3.3.dtd\">\n");
     // Root node
-    attr_list.push_back({ "profile", "Interchange" });
-    attr_list.push_back({ "version", "3.3" });
-    attr_list.push_back({ "xmlns:xsd", "http://www.w3.org/2001/XMLSchema-instance" });
-    attr_list.push_back({ "xsd:noNamespaceSchemaLocation", "http://www.web3d.org/specifications/x3d-3.3.xsd" });
+    attr_list.emplace_back( "profile", "Interchange" );
+    attr_list.emplace_back( "version", "3.3" );
+    attr_list.emplace_back( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema-instance" );
+    attr_list.emplace_back( "xsd:noNamespaceSchemaLocation", "http://www.web3d.org/specifications/x3d-3.3.xsd" );
     NodeHelper_OpenNode("X3D", 0, false, attr_list);
     attr_list.clear();
     // <head>: meta data.

@@ -88,7 +88,7 @@ BVHLoader::BVHLoader() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-BVHLoader::~BVHLoader() {}
+BVHLoader::~BVHLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -115,7 +115,7 @@ void BVHLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IOSyst
 
     // read file into memory
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open file ", pFile, ".");
     }
 
@@ -186,12 +186,12 @@ aiNode *BVHLoader::ReadNode() {
     std::vector<aiNode *> childNodes;
 
     // and create an bone entry for it
-    mNodes.push_back(Node(node));
+    mNodes.emplace_back(node);
     Node &internNode = mNodes.back();
 
     // now read the node's contents
     std::string siteToken;
-    while (1) {
+    while (true) {
         std::string token = GetNextToken();
 
         // node offset to parent node
@@ -247,7 +247,7 @@ aiNode *BVHLoader::ReadEndSite(const std::string &pParentName) {
 
     // now read the node's contents. Only possible entry is "OFFSET"
     std::string token;
-    while (1) {
+    while (true) {
         token.clear();
         token = GetNextToken();
 

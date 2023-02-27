@@ -558,13 +558,13 @@ class JavaIOSystem : public Assimp::IOSystem {
 	    	lprintf("NULL object from AiIOSystem.open\n");
 	    	return NULL;
 	    }
-	
+
 	    size_t size = calli(mJniEnv, jStream, "jassimp/AiIOStream", "getFileSize", "()I");
 	    lprintf("Model file size is %d\n", size);
-	
+
 	    char* buffer = (char*)malloc(size);
 	    jobject javaBuffer = mJniEnv->NewDirectByteBuffer(buffer, size);
-	
+
 	    jvalue readParams[1];
 	    readParams[0].l = javaBuffer;
 	    if(call(mJniEnv, jStream, "jassimp/AiIOStream", "read", "(Ljava/nio/ByteBuffer;)Z", readParams))

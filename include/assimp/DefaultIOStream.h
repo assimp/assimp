@@ -74,7 +74,7 @@ class ASSIMP_API DefaultIOStream : public IOStream {
 #endif // __ANDROID__
 
 protected:
-    /// @brief 
+    /// @brief
     DefaultIOStream() AI_NO_EXCEPT;
 
     /// @brief The class constructor with the file name and the stream.

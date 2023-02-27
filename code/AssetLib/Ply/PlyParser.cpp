@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
+#include <utility>
 
 using namespace Assimp;
 
@@ -307,8 +308,8 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
         streamBuffer.getNextLine(buffer);
         pCur = (char *)&buffer[0];
 
-        // skip all comments
-        PLY::DOM::SkipComments(buffer);
+        // skip all comments and go to next line
+        if (PLY::DOM::SkipComments(buffer)) continue;
 
         PLY::Property prop;
         if (!PLY::Property::ParseProperty(buffer, &prop))
@@ -381,10 +382,10 @@ bool PLY::DOM::SkipSpacesAndLineEnd(std::vector<char> &buffer) {
     return ret;
 }
 
-bool PLY::DOM::SkipComments(std::vector<char> &buffer) {
+bool PLY::DOM::SkipComments(std::vector<char> buffer) {
     ai_assert(!buffer.empty());
 
-    std::vector<char> nbuffer = buffer;
+    std::vector<char> nbuffer = std::move(buffer);
     // skip spaces
     if (!SkipSpaces(nbuffer)) {
         return false;
@@ -419,7 +420,7 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
         if (PLY::Element::ParseElement(streamBuffer, buffer, &out)) {
             // add the element to the list of elements
             alElements.push_back(out);
-        } else if (TokenMatch(buffer, "end_header", 10)) { //checks for /n ending, if it doesn't end with /r/n
+        } else if (TokenMatch(buffer, "end_header", 10)) {
             // we have reached the end of the header
             break;
         } else {
@@ -500,10 +501,6 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM *p_pc
     }
 
     streamBuffer.getNextBlock(buffer);
-
-    // remove first char if it's /n in case of file with /r/n
-    if (((char *)&buffer[0])[0] == '\n')
-        buffer.erase(buffer.begin(), buffer.begin() + 1);
 
     unsigned int bufferSize = static_cast<unsigned int>(buffer.size());
     const char *pCur = (char *)&buffer[0];

@@ -169,19 +169,7 @@ struct Q3BSPModel {
     std::vector<char> m_EntityData;
     std::string m_ModelName;
 
-    Q3BSPModel() :
-        m_Data(),
-        m_Lumps(),
-        m_Vertices(),
-        m_Faces(),
-        m_Indices(),
-        m_Textures(),
-        m_Lightmaps(),
-        m_EntityData(),
-        m_ModelName()
-    {
-        // empty
-    }
+    Q3BSPModel() = default;
 
     ~Q3BSPModel() {
         for ( unsigned int i=0; i<m_Lumps.size(); i++ ) {

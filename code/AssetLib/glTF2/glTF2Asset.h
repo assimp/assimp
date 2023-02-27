@@ -838,9 +838,6 @@ struct Material : public Object {
     //extension: KHR_materials_unlit
     bool unlit;
 
-    //extension: KHR_materials_ior
-    Nullable<MaterialIOR> materialIOR;
-
     Material() { SetDefaults(); }
     void Read(Value &obj, Asset &r);
     void SetDefaults();

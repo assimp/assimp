@@ -259,7 +259,7 @@ class Ref {
 
 public:
     Ref() :
-            vector(0),
+            vector(nullptr),
             index(0) {}
     Ref(std::vector<T *> &vec, unsigned int idx) :
             vector(&vec),
@@ -495,22 +495,22 @@ inline Value *FindExtension(Value &val, const char *extensionId) {
 
 inline Value *FindString(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : nullptr;
 }
 
 inline Value *FindObject(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : nullptr;
 }
 
 inline Value *FindArray(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
 }
 
 inline Value *FindNumber(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : nullptr;
 }
 
 } // namespace glTFCommon

@@ -53,6 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+
+#include <memory>
+#include <utility>
 //#include <cctype>
 //#include <memory>
 
@@ -62,8 +65,7 @@ namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
 
 template <>
 const char *LogFunctions<XGLImporter>::Prefix() {
-    static auto prefix = "XGL: ";
-	return prefix;
+	return "XGL: ";
 }
 
 } // namespace Assimp
@@ -119,11 +121,11 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
 
 	// check whether we can read from the file
-	if (stream.get() == NULL) {
-		throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile);
-	}
+    if (stream == nullptr) {
+        throw DeadlyImportError("Failed to open XGL/ZGL file " + pFile);
+    }
 
-	// see if its compressed, if so uncompress it
+    // see if its compressed, if so uncompress it
 	if (GetExtension(pFile) == "zgl") {
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_XGL
 		ThrowException("Cannot read ZGL file since Assimp was built without compression support");
@@ -139,7 +141,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             compression.close();
         }
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(uncompressed.data()), total));
+        stream = std::make_shared<MemoryIOStream>(reinterpret_cast<uint8_t *>(uncompressed.data()), total);
 #endif
 	}
 
@@ -224,7 +226,7 @@ aiLight *XGLImporter::ReadDirectionalLight(XmlNode &node) {
 	std::unique_ptr<aiLight> l(new aiLight());
 	l->mType = aiLightSource_DIRECTIONAL;
 	find_node_by_name_predicate predicate("directionallight");
-	XmlNode child = node.find_child(predicate);
+	XmlNode child = node.find_child(std::move(predicate));
 	if (child.empty()) {
 		return nullptr;
 	}

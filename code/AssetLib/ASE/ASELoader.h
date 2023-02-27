@@ -62,7 +62,7 @@ namespace Assimp {
 class ASEImporter : public BaseImporter {
 public:
     ASEImporter();
-    ~ASEImporter() override;
+    ~ASEImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

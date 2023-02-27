@@ -88,7 +88,7 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
     if (denom == 0.0) {
         return false;
     }
-    
+
     const double invDenom = 1.0 / denom;
     dot11 = (dot11 * dot02 - dot01 * dot12) * invDenom;
     dot00 = (dot00 * dot12 - dot01 * dot02) * invDenom;

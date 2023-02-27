@@ -121,7 +121,7 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char *filename, int mode) {
 
 voidpf IOSystem2Unzip::opendisk(voidpf opaque, voidpf stream, uint32_t number_disk, int mode) {
     ZipFile *io_stream = (ZipFile *)stream;
-    voidpf ret = NULL;
+    voidpf ret = nullptr;
     int i;
 
     char *disk_filename = (char*)malloc(io_stream->m_Filename.length() + 1);

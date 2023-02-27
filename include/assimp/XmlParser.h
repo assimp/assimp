@@ -49,13 +49,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.hpp"
 
 #include <pugixml.hpp>
+#include <utility>
 #include <vector>
 
 namespace Assimp {
 
 /// @brief  Will find a node by its name.
 struct find_node_by_name_predicate {
-    std::string mName;
+    /// @brief The default constructor.
+    find_node_by_name_predicate() = default;
+
+
+    std::string mName; ///< The name to find.
     find_node_by_name_predicate(const std::string &name) :
             mName(name) {
         // empty
@@ -67,7 +72,7 @@ struct find_node_by_name_predicate {
 };
 
 /// @brief  Will convert an attribute to its int value.
-/// @tparam TNodeType The node type.
+/// @tparam[in] TNodeType  The node type.
 template <class TNodeType>
 struct NodeConverter {
 public:
@@ -108,17 +113,17 @@ public:
     void clear();
 
     ///	@brief  Will search for a child-node by its name
-    /// @param  name     [in] The name of the child-node.
+    /// @param[in] name     The name of the child-node.
     /// @return The node instance or nullptr, if nothing was found.
     TNodeType *findNode(const std::string &name);
 
     /// @brief  Will return true, if the node is a child-node.
-    /// @param  name    [in] The name of the child node to look for.
+    /// @param[in]  name    The name of the child node to look for.
     /// @return true, if the node is a child-node or false if not.
     bool hasNode(const std::string &name);
 
     /// @brief  Will parse an xml-file from a given stream.
-    /// @param  stream      The input stream.
+    /// @param[in] stream      The input stream.
     /// @return true, if the parsing was successful, false if not.
     bool parse(IOStream *stream);
 
@@ -139,87 +144,87 @@ public:
     TNodeType getRootNode();
 
     /// @brief Will check if a node with the given name is in.
-    /// @param node     [in] The node to look in.
-    /// @param name     [in] The name of the child-node.
+    /// @param[in] node     The node to look in.
+    /// @param[in] name     The name of the child-node.
     /// @return true, if node was found, false if not.
     static inline bool hasNode(XmlNode &node, const char *name);
 
     /// @brief Will check if an attribute is part of the XmlNode.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in} The attribute name to look for.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
     /// @return true, if the was found, false if not.
     static inline bool hasAttribute(XmlNode &xmlNode, const char *name);
 
     /// @brief Will try to get an unsigned int attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The unsigned int value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The unsigned int value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is an unsigned int.
     static inline bool getUIntAttribute(XmlNode &xmlNode, const char *name, unsigned int &val);
 
     /// @brief Will try to get an int attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The int value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The int value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is an int.
     static inline bool getIntAttribute(XmlNode &xmlNode, const char *name, int &val);
 
     /// @brief Will try to get a real attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The real value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The real value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a real.
     static inline bool getRealAttribute(XmlNode &xmlNode, const char *name, ai_real &val);
 
     /// @brief Will try to get a float attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The float value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The float value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a float.
     static inline bool getFloatAttribute(XmlNode &xmlNode, const char *name, float &val);
 
     /// @brief Will try to get a double attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The double value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The double value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a double.
     static inline bool getDoubleAttribute(XmlNode &xmlNode, const char *name, double &val);
 
     /// @brief Will try to get a std::string attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The std::string value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The std::string value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a std::string.
     static inline bool getStdStrAttribute(XmlNode &xmlNode, const char *name, std::string &val);
 
     /// @brief Will try to get a bool attribute value.
-    /// @param xmlNode  [in] The node to search in.
-    /// @param name     [in] The attribute name to look for.
-    /// @param val      [out] The bool value from the attribute.
+    /// @param[in] xmlNode  The node to search in.
+    /// @param[in] name     The attribute name to look for.
+    /// @param[out] val     The bool value from the attribute.
     /// @return true, if the node contains an attribute with the given name and if the value is a bool.
     static inline bool getBoolAttribute(XmlNode &xmlNode, const char *name, bool &val);
 
     /// @brief Will try to get the value of the node as a string.
-    /// @param node     [in] The node to search in.
-    /// @param text     [out] The value as a text.
+    /// @param[in] node     The node to search in.
+    /// @param[out] text    The value as a text.
     /// @return true, if the value can be read out.
     static inline bool getValueAsString(XmlNode &node, std::string &text);
 
     /// @brief Will try to get the value of the node as a float.
-    /// @param node     [in] The node to search in.
-    /// @param text     [out] The value as a float.
+    /// @param[in] node     The node to search in.
+    /// @param[out] text    The value as a float.
     /// @return true, if the value can be read out.
     static inline bool getValueAsFloat(XmlNode &node, ai_real &v);
 
     /// @brief Will try to get the value of the node as an integer.
-    /// @param node     [in] The node to search in.
-    /// @param text     [out] The value as a int.
+    /// @param[in] node     The node to search in.
+    /// @param[out] text    The value as a int.
     /// @return true, if the value can be read out.
     static inline bool getValueAsInt(XmlNode &node, int &v);
 
     /// @brief Will try to get the value of the node as an bool.
-    /// @param node     [in] The node to search in.
-    /// @param text     [out] The value as a bool.
+    /// @param[in] node     The node to search in.
+    /// @param[out] text    The value as a bool.
     /// @return true, if the value can be read out.
     static inline bool getValueAsBool(XmlNode &node, bool &v);
 
@@ -267,7 +272,7 @@ inline TNodeType *TXmlParser<TNodeType>::findNode(const std::string &name) {
     }
 
     find_node_by_name_predicate predicate(name);
-    mCurrent = mDoc->find_node(predicate);
+    mCurrent = mDoc->find_node(std::move(predicate));
     if (mCurrent.empty()) {
         return nullptr;
     }

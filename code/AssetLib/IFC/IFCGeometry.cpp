@@ -57,8 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  include "../contrib/clipper/clipper.hpp"
 #endif
 
-#include <memory>
 #include <iterator>
+#include <memory>
+#include <utility>
 
 namespace Assimp {
 namespace IFC {
@@ -609,7 +610,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
 
         nors.reserve(conv.apply_openings->size());
         for(TempOpening& t : *conv.apply_openings) {
-            TempMesh& bounds = *t.profileMesh.get();
+            TempMesh &bounds = *t.profileMesh;
 
             if( bounds.mVerts.size() <= 2 ) {
                 nors.emplace_back();
@@ -713,7 +714,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
         std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->mVerts.insert(profile2D->mVerts.end(), in.begin(), in.end());
         profile2D->mVertcnt.push_back(static_cast<unsigned int>(in.size()));
-        conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
+        conv.collect_openings->push_back(TempOpening(&solid, dir, std::move(profile), std::move(profile2D)));
 
         ai_assert(result.IsEmpty());
     }
@@ -786,7 +787,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
                 const ::Assimp::STEP::EXPRESS::ENTITY& e = shell->To<::Assimp::STEP::EXPRESS::ENTITY>();
                 const Schema_2x3::IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<Schema_2x3::IfcConnectedFaceSet>();
 
-                ProcessConnectedFaceSet(fs,*meshtmp.get(),conv);
+                ProcessConnectedFaceSet(fs, *meshtmp, conv);
             }
             catch(std::bad_cast&) {
                 IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
@@ -795,27 +796,27 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcConnectedFaceSet* fset = geo.ToPtr<Schema_2x3::IfcConnectedFaceSet>()) {
-        ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
+        ProcessConnectedFaceSet(*fset, *meshtmp, conv);
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcSweptAreaSolid* swept = geo.ToPtr<Schema_2x3::IfcSweptAreaSolid>()) {
-        ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
+        ProcessSweptAreaSolid(*swept, *meshtmp, conv);
     }
     else  if(const Schema_2x3::IfcSweptDiskSolid* disk = geo.ToPtr<Schema_2x3::IfcSweptDiskSolid>()) {
-        ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
+        ProcessSweptDiskSolid(*disk, *meshtmp, conv);
     }
     else if(const Schema_2x3::IfcManifoldSolidBrep* brep = geo.ToPtr<Schema_2x3::IfcManifoldSolidBrep>()) {
-        ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
+        ProcessConnectedFaceSet(brep->Outer, *meshtmp, conv);
         fix_orientation = true;
     }
     else if(const Schema_2x3::IfcFaceBasedSurfaceModel* surf = geo.ToPtr<Schema_2x3::IfcFaceBasedSurfaceModel>()) {
         for(const Schema_2x3::IfcConnectedFaceSet& fc : surf->FbsmFaces) {
-            ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
+            ProcessConnectedFaceSet(fc, *meshtmp, conv);
         }
         fix_orientation = true;
     }
     else  if(const Schema_2x3::IfcBooleanResult* boolean = geo.ToPtr<Schema_2x3::IfcBooleanResult>()) {
-        ProcessBoolean(*boolean,*meshtmp.get(),conv);
+        ProcessBoolean(*boolean, *meshtmp, conv);
     }
     else if(geo.ToPtr<Schema_2x3::IfcBoundingBox>()) {
         // silently skip over bounding boxes
@@ -839,7 +840,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
         if (!meshtmp->IsEmpty()) {
             conv.collect_openings->push_back(TempOpening(geo.ToPtr<Schema_2x3::IfcSolidModel>(),
                 IfcVector3(0,0,0),
-                meshtmp,
+                std::move(meshtmp),
                 std::shared_ptr<TempMesh>()));
         }
         return true;

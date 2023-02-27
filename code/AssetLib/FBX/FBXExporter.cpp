@@ -58,16 +58,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 
 // Header files, standard library.
-#include <memory> // shared_ptr
-#include <string>
-#include <sstream> // stringstream
+#include <array>
 #include <ctime> // localtime, tm_*
 #include <map>
-#include <set>
-#include <vector>
-#include <array>
-#include <unordered_set>
+#include <memory> // shared_ptr
 #include <numeric>
+#include <set>
+#include <sstream> // stringstream
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -390,7 +391,7 @@ void FBXExporter::WriteHeaderExtension ()
         raw[i] = uint8_t(GENERIC_FILEID[i]);
     }
     FBX::Node::WritePropertyNode(
-        "FileId", raw, outstream, binary, indent
+        "FileId", std::move(raw), outstream, binary, indent
     );
     FBX::Node::WritePropertyNode(
         "CreationTime", GENERIC_CTIME, outstream, binary, indent
@@ -680,9 +681,9 @@ void FBXExporter::WriteDefinitions ()
         pt = FBX::Node("PropertyTemplate", "FBXAnimLayer");
         p = FBX::Node("Properties70");
         p.AddP70("Weight", "Number", "", "A", double(100));
-        p.AddP70bool("Mute", 0);
-        p.AddP70bool("Solo", 0);
-        p.AddP70bool("Lock", 0);
+        p.AddP70bool("Mute", false);
+        p.AddP70bool("Solo", false);
+        p.AddP70bool("Lock", false);
         p.AddP70color("Color", 0.8, 0.8, 0.8);
         p.AddP70("BlendMode", "enum", "", "", int32_t(0));
         p.AddP70("RotationAccumulationMode", "enum", "", "", int32_t(0));
@@ -732,42 +733,42 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70vector("RotationPivot", 0.0, 0.0, 0.0);
         p.AddP70vector("ScalingOffset", 0.0, 0.0, 0.0);
         p.AddP70vector("ScalingPivot", 0.0, 0.0, 0.0);
-        p.AddP70bool("TranslationActive", 0);
+        p.AddP70bool("TranslationActive", false);
         p.AddP70vector("TranslationMin", 0.0, 0.0, 0.0);
         p.AddP70vector("TranslationMax", 0.0, 0.0, 0.0);
-        p.AddP70bool("TranslationMinX", 0);
-        p.AddP70bool("TranslationMinY", 0);
-        p.AddP70bool("TranslationMinZ", 0);
-        p.AddP70bool("TranslationMaxX", 0);
-        p.AddP70bool("TranslationMaxY", 0);
-        p.AddP70bool("TranslationMaxZ", 0);
+        p.AddP70bool("TranslationMinX", false);
+        p.AddP70bool("TranslationMinY", false);
+        p.AddP70bool("TranslationMinZ", false);
+        p.AddP70bool("TranslationMaxX", false);
+        p.AddP70bool("TranslationMaxY", false);
+        p.AddP70bool("TranslationMaxZ", false);
         p.AddP70enum("RotationOrder", 0);
-        p.AddP70bool("RotationSpaceForLimitOnly", 0);
+        p.AddP70bool("RotationSpaceForLimitOnly", false);
         p.AddP70double("RotationStiffnessX", 0.0);
         p.AddP70double("RotationStiffnessY", 0.0);
         p.AddP70double("RotationStiffnessZ", 0.0);
         p.AddP70double("AxisLen", 10.0);
         p.AddP70vector("PreRotation", 0.0, 0.0, 0.0);
         p.AddP70vector("PostRotation", 0.0, 0.0, 0.0);
-        p.AddP70bool("RotationActive", 0);
+        p.AddP70bool("RotationActive", false);
         p.AddP70vector("RotationMin", 0.0, 0.0, 0.0);
         p.AddP70vector("RotationMax", 0.0, 0.0, 0.0);
-        p.AddP70bool("RotationMinX", 0);
-        p.AddP70bool("RotationMinY", 0);
-        p.AddP70bool("RotationMinZ", 0);
-        p.AddP70bool("RotationMaxX", 0);
-        p.AddP70bool("RotationMaxY", 0);
-        p.AddP70bool("RotationMaxZ", 0);
+        p.AddP70bool("RotationMinX", false);
+        p.AddP70bool("RotationMinY", false);
+        p.AddP70bool("RotationMinZ", false);
+        p.AddP70bool("RotationMaxX", false);
+        p.AddP70bool("RotationMaxY", false);
+        p.AddP70bool("RotationMaxZ", false);
         p.AddP70enum("InheritType", 0);
-        p.AddP70bool("ScalingActive", 0);
+        p.AddP70bool("ScalingActive", false);
         p.AddP70vector("ScalingMin", 0.0, 0.0, 0.0);
         p.AddP70vector("ScalingMax", 1.0, 1.0, 1.0);
-        p.AddP70bool("ScalingMinX", 0);
-        p.AddP70bool("ScalingMinY", 0);
-        p.AddP70bool("ScalingMinZ", 0);
-        p.AddP70bool("ScalingMaxX", 0);
-        p.AddP70bool("ScalingMaxY", 0);
-        p.AddP70bool("ScalingMaxZ", 0);
+        p.AddP70bool("ScalingMinX", false);
+        p.AddP70bool("ScalingMinY", false);
+        p.AddP70bool("ScalingMinZ", false);
+        p.AddP70bool("ScalingMaxX", false);
+        p.AddP70bool("ScalingMaxY", false);
+        p.AddP70bool("ScalingMaxZ", false);
         p.AddP70vector("GeometricTranslation", 0.0, 0.0, 0.0);
         p.AddP70vector("GeometricRotation", 0.0, 0.0, 0.0);
         p.AddP70vector("GeometricScaling", 1.0, 1.0, 1.0);
@@ -788,11 +789,11 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70double("PreferedAngleZ", 0.0);
         p.AddP70("LookAtProperty", "object", "", "");
         p.AddP70("UpVectorProperty", "object", "", "");
-        p.AddP70bool("Show", 1);
-        p.AddP70bool("NegativePercentShapeSupport", 1);
+        p.AddP70bool("Show", true);
+        p.AddP70bool("NegativePercentShapeSupport", true);
         p.AddP70int("DefaultAttributeIndex", -1);
-        p.AddP70bool("Freeze", 0);
-        p.AddP70bool("LODBox", 0);
+        p.AddP70bool("Freeze", false);
+        p.AddP70bool("LODBox", false);
         p.AddP70(
             "Lcl Translation", "Lcl Translation", "", "A",
             double(0), double(0), double(0)
@@ -839,9 +840,9 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70color("Color", 0, 0, 0);
         p.AddP70vector("BBoxMin", 0, 0, 0);
         p.AddP70vector("BBoxMax", 0, 0, 0);
-        p.AddP70bool("Primary Visibility", 1);
-        p.AddP70bool("Casts Shadows", 1);
-        p.AddP70bool("Receive Shadows", 1);
+        p.AddP70bool("Primary Visibility", true);
+        p.AddP70bool("Casts Shadows", true);
+        p.AddP70bool("Receive Shadows", true);
         pt.AddChild(p);
         n.AddChild(pt);
         object_nodes.push_back(n);
@@ -872,7 +873,7 @@ void FBXExporter::WriteDefinitions ()
         } else {
             p.AddP70string("ShadingModel", "Lambert");
         }
-        p.AddP70bool("MultiLayer", 0);
+        p.AddP70bool("MultiLayer", false);
         p.AddP70colorA("EmissiveColor", 0.0, 0.0, 0.0);
         p.AddP70numberA("EmissiveFactor", 1.0);
         p.AddP70colorA("AmbientColor", 0.2, 0.2, 0.2);
@@ -909,7 +910,7 @@ void FBXExporter::WriteDefinitions ()
         n.AddChild("Count", count);
         pt = FBX::Node("PropertyTemplate", "FbxVideo");
         p = FBX::Node("Properties70");
-        p.AddP70bool("ImageSequence", 0);
+        p.AddP70bool("ImageSequence", false);
         p.AddP70int("ImageSequenceOffset", 0);
         p.AddP70double("FrameRate", 0.0);
         p.AddP70int("LastFrame", 0);
@@ -921,8 +922,8 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70double("PlaySpeed", 0.0);
         p.AddP70time("Offset", 0);
         p.AddP70enum("InterlaceMode", 0);
-        p.AddP70bool("FreeRunning", 0);
-        p.AddP70bool("Loop", 0);
+        p.AddP70bool("FreeRunning", false);
+        p.AddP70bool("Loop", false);
         p.AddP70enum("AccessMode", 0);
         pt.AddChild(p);
         n.AddChild(pt);
@@ -943,8 +944,8 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70enum("CurrentMappingType", 0);
         p.AddP70enum("WrapModeU", 0);
         p.AddP70enum("WrapModeV", 0);
-        p.AddP70bool("UVSwap", 0);
-        p.AddP70bool("PremultiplyAlpha", 1);
+        p.AddP70bool("UVSwap", false);
+        p.AddP70bool("PremultiplyAlpha", true);
         p.AddP70vectorA("Translation", 0.0, 0.0, 0.0);
         p.AddP70vectorA("Rotation", 0.0, 0.0, 0.0);
         p.AddP70vectorA("Scaling", 1.0, 1.0, 1.0);
@@ -952,8 +953,8 @@ void FBXExporter::WriteDefinitions ()
         p.AddP70vector("TextureScalingPivot", 0.0, 0.0, 0.0);
         p.AddP70enum("CurrentTextureBlendMode", 1);
         p.AddP70string("UVSet", "default");
-        p.AddP70bool("UseMaterial", 0);
-        p.AddP70bool("UseMipMap", 0);
+        p.AddP70bool("UseMaterial", false);
+        p.AddP70bool("UseMipMap", false);
         pt.AddChild(p);
         n.AddChild(pt);
         object_nodes.push_back(n);
@@ -1707,7 +1708,7 @@ void FBXExporter::WriteObjects ()
             p.AddP70vectorA("Scaling", trafo.mScaling[0], trafo.mScaling[1], 0.0);
             p.AddP70enum("CurrentTextureBlendMode", 0); // TODO: verify
             //p.AddP70string("UVSet", ""); // TODO: how should this work?
-            p.AddP70bool("UseMaterial", 1);
+            p.AddP70bool("UseMaterial", true);
             tnode.AddChild(p);
             // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
@@ -2497,10 +2498,10 @@ void FBXExporter::WriteModelNode(
     const aiVector3D one = {1, 1, 1};
     FBX::Node m("Model");
     std::string name = node->mName.C_Str() + FBX::SEPARATOR + "Model";
-    m.AddProperties(node_uid, name, type);
+    m.AddProperties(node_uid, std::move(name), type);
     m.AddChild("Version", int32_t(232));
     FBX::Node p("Properties70");
-    p.AddP70bool("RotationActive", 1);
+    p.AddP70bool("RotationActive", true);
     p.AddP70int("DefaultAttributeIndex", 0);
     p.AddP70enum("InheritType", inherit_type);
     if (transform_chain.empty()) {

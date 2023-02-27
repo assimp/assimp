@@ -174,7 +174,7 @@ TEST_F(ImporterTest, testMemoryRead) {
     const aiScene *sc = pImp->ReadFileFromMemory(InputData_abRawBlock, InputData_BLOCK_SIZE,
             aiProcessPreset_TargetRealtime_Quality, "3ds");
 
-    ASSERT_TRUE(sc != NULL);
+    ASSERT_TRUE(sc != nullptr);
     EXPECT_EQ(aiString("<3DSRoot>"), sc->mRootNode->mName);
     EXPECT_EQ(1U, sc->mNumMeshes);
     EXPECT_EQ(24U, sc->mMeshes[0]->mNumVertices);
@@ -220,10 +220,10 @@ TEST_F(ImporterTest, testPluginInterface) {
     EXPECT_FALSE(pImp->IsExtensionSupported("."));
 
     TestPlugin *p = (TestPlugin *)pImp->GetImporter(".windows");
-    ASSERT_TRUE(NULL != p);
+    ASSERT_TRUE(nullptr != p);
 
     try {
-        p->InternReadFile("", 0, NULL);
+        p->InternReadFile("", nullptr, nullptr);
     } catch (const DeadlyImportError &dead) {
         EXPECT_TRUE(!strcmp(dead.what(), AIUT_DEF_ERROR_TEXT));
 

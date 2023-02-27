@@ -103,8 +103,8 @@ TEST_F(SplitLargeMeshesTest, testVertexSplit) {
             iter != end; ++iter) {
         aiMesh *mesh = (*iter).first;
         EXPECT_LT(mesh->mNumVertices, 1000U);
-        EXPECT_TRUE(NULL != mesh->mNormals);
-        EXPECT_TRUE(NULL != mesh->mVertices);
+        EXPECT_TRUE(nullptr != mesh->mNormals);
+        EXPECT_TRUE(nullptr != mesh->mVertices);
 
         iOldFaceNum -= mesh->mNumFaces;
         delete mesh;
@@ -145,8 +145,8 @@ TEST_F(SplitLargeMeshesTest, testTriangleSplit) {
             iter != end; ++iter) {
         aiMesh *mesh = (*iter).first;
         EXPECT_LT(mesh->mNumFaces, 1000U);
-        EXPECT_TRUE(NULL != mesh->mNormals);
-        EXPECT_TRUE(NULL != mesh->mVertices);
+        EXPECT_TRUE(nullptr != mesh->mNormals);
+        EXPECT_TRUE(nullptr != mesh->mVertices);
 
         iOldFaceNum -= mesh->mNumFaces;
         delete mesh;

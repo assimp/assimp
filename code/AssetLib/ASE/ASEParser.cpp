@@ -1774,7 +1774,13 @@ void Parser::ParseLV4MeshFace(ASE::Face &out) {
         // FIX: There needn't always be a value, sad but true
         while (true) {
             if (*filePtr < '9' && *filePtr >= '0') {
-                out.iSmoothGroup |= (1 << strtoul10(filePtr, &filePtr));
+                uint32_t value = strtoul10(filePtr, &filePtr);
+                if (value < 32) {
+                    out.iSmoothGroup |= (1 << strtoul10(filePtr, &filePtr));
+                } else {
+                    const std::string message = std::string("Unable to set smooth group, value with ") + ai_to_string(value) + std::string(" out of range");
+                    LogWarning(message.c_str());
+                }
             }
             SkipSpaces(&filePtr);
             if (',' != *filePtr) {

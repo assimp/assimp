@@ -81,6 +81,7 @@ struct MaterialClearcoat;
 struct MaterialTransmission;
 struct MaterialVolume;
 struct MaterialIOR;
+struct MaterialEmissiveStrength;
 
 // Vec/matrix types, as raw float arrays
 typedef float(vec2)[2];
@@ -121,6 +122,7 @@ protected:
     bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
     bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
     bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
+    bool GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength);
     void ExportMetadata();
     void ExportMaterials();
     void ExportMeshes();

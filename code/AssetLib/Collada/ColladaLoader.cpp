@@ -92,15 +92,6 @@ inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
-        mFileName(),
-        mMeshIndexByID(),
-        mMaterialIndexByName(),
-        mMeshes(),
-        newMats(),
-        mCameras(),
-        mLights(),
-        mTextures(),
-        mAnims(),
         noSkeletonMesh(false),
         removeEmptyBones(false),
         ignoreUpDirection(false),
@@ -1264,12 +1255,12 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             // now for every unique point in time, find or interpolate the key values for that time
             // and apply them to the transform chain. Then the node's present transformation can be calculated.
             ai_real time = startTime;
-            while (1) {
+            while (true) {
                 for (ChannelEntry & e : entries) {
                     // find the keyframe behind the current point in time
                     size_t pos = 0;
                     ai_real postTime = 0.0;
-                    while (1) {
+                    while (true) {
                         if (pos >= e.mTimeAccessor->mCount) {
                             break;
                         }
@@ -1523,7 +1514,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));        
+                map = strtoul10(&(*it));
                 break;
             }
         }
@@ -1680,7 +1671,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
 
     // recurse through the param references until we end up at an image
     std::string name = pName;
-    while (1) {
+    while (true) {
         // the given string is a param entry. Find it
         Effect::ParamLibrary::const_iterator it = pEffect.mParams.find(name);
         // if not found, we're at the end of the recursion. The resulting string should be the image ID

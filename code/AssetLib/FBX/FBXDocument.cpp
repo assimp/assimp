@@ -78,7 +78,7 @@ const Object* LazyObject::Get(bool dieOnError) {
         return nullptr;
     }
 
-    if (object.get()) {
+    if (object) {
         return object.get();
     }
 
@@ -199,6 +199,14 @@ const Object* LazyObject::Get(bool dieOnError) {
             object.reset(new AnimationCurveNode(id,element,name,doc));
         }
     }
+    catch (std::bad_alloc&) {
+        // out-of-memory is unrecoverable and should always lead to a failure
+
+        flags &= ~BEING_CONSTRUCTED;
+        flags |= FAILED_TO_CONSTRUCT;
+
+        throw;
+    }
     catch(std::exception& ex) {
         flags &= ~BEING_CONSTRUCTED;
         flags |= FAILED_TO_CONSTRUCT;
@@ -214,7 +222,7 @@ const Object* LazyObject::Get(bool dieOnError) {
         return nullptr;
     }
 
-    if (!object.get()) {
+    if (!object) {
         //DOMError("failed to convert element to DOM object, class: " + classtag + ", name: " + name,&element);
     }
 
@@ -336,7 +344,7 @@ void Document::ReadGlobalSettings() {
         DOMError("GlobalSettings dictionary contains no property table");
     }
 
-    globals.reset(new FileGlobalSettings(*this, props));
+    globals.reset(new FileGlobalSettings(*this, std::move(props)));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -373,8 +381,10 @@ void Document::ReadObjects() {
             DOMError("encountered object with implicitly defined id 0",el.second);
         }
 
-        if(objects.find(id) != objects.end()) {
+        const auto foundObject = objects.find(id);
+        if(foundObject != objects.end()) {
             DOMWarning("encountered duplicate object id, ignoring first occurrence",el.second);
+            delete foundObject->second;
         }
 
         objects[id] = new LazyObject(id, *el.second, *this);

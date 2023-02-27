@@ -119,7 +119,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
             if (mat) {
 
                 if (materials_converted.find(mat) == materials_converted.end()) {
-                    ConvertMaterial(*mat, 0);
+                    ConvertMaterial(*mat, nullptr);
                 }
             }
         }
@@ -1455,7 +1455,9 @@ static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *s
     skeletonBone->mWeights = bone->mWeights;
     skeletonBone->mOffsetMatrix = bone->mOffsetMatrix;
     skeletonBone->mMeshId = mesh;
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     skeletonBone->mNode = bone->mNode;
+#endif
     skeletonBone->mParent = -1;
 }
 
@@ -1563,7 +1565,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
         out->mBones = nullptr;
         out->mNumBones = 0;
         return;
-    } 
+    }
 
     out->mBones = new aiBone *[bones.size()]();
     out->mNumBones = static_cast<unsigned int>(bones.size());
@@ -3228,7 +3230,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     bool ok = false;
-    
+
     const auto zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);

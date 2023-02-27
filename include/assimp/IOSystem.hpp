@@ -237,10 +237,7 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT :
-        m_pathStack() {
-    // empty
-}
+AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT = default;
 
 // ----------------------------------------------------------------------------
 AI_FORCE_INLINE IOSystem::~IOSystem() = default;

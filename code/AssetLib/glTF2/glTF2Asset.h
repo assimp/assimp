@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_transmission full
  *   KHR_materials_volume full
  *   KHR_materials_ior full
+ *   KHR_materials_emissive_strength full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -364,16 +365,7 @@ struct CustomExtension {
 
     ~CustomExtension() = default;
 
-    CustomExtension(const CustomExtension &other) :
-            name(other.name),
-            mStringValue(other.mStringValue),
-            mDoubleValue(other.mDoubleValue),
-            mUint64Value(other.mUint64Value),
-            mInt64Value(other.mInt64Value),
-            mBoolValue(other.mBoolValue),
-            mValues(other.mValues) {
-        // empty
-    }
+    CustomExtension(const CustomExtension &other) = default;
 
     CustomExtension& operator=(const CustomExtension&) = default;
 };
@@ -801,6 +793,13 @@ struct MaterialIOR {
     void SetDefaults();
 };
 
+struct MaterialEmissiveStrength {
+    float emissiveStrength = 0.f;
+
+    MaterialEmissiveStrength() { SetDefaults(); }
+    void SetDefaults();
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -832,7 +831,10 @@ struct Material : public Object {
 
     //extension: KHR_materials_ior
     Nullable<MaterialIOR> materialIOR;
-    
+
+    //extension: KHR_materials_emissive_strength
+    Nullable<MaterialEmissiveStrength> materialEmissiveStrength;
+
     //extension: KHR_materials_unlit
     bool unlit;
 
@@ -1044,7 +1046,7 @@ class LazyDict : public LazyDictBase {
     Ref<T> Add(T *obj);
 
 public:
-    LazyDict(Asset &asset, const char *dictId, const char *extId = 0);
+    LazyDict(Asset &asset, const char *dictId, const char *extId = nullptr);
     ~LazyDict();
 
     Ref<T> Retrieve(unsigned int i);
@@ -1075,8 +1077,7 @@ struct AssetMetadata {
 
     void Read(Document &doc);
 
-    AssetMetadata() :
-            version() {}
+    AssetMetadata() = default;
 };
 
 //
@@ -1106,20 +1107,22 @@ public:
         bool KHR_materials_transmission;
         bool KHR_materials_volume;
         bool KHR_materials_ior;
+        bool KHR_materials_emissive_strength;
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;
 
         Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false), 
-                KHR_materials_unlit(false), 
-                KHR_lights_punctual(false), 
-                KHR_texture_transform(false), 
-                KHR_materials_sheen(false), 
-                KHR_materials_clearcoat(false), 
-                KHR_materials_transmission(false), 
+                KHR_materials_pbrSpecularGlossiness(false),
+                KHR_materials_unlit(false),
+                KHR_lights_punctual(false),
+                KHR_texture_transform(false),
+                KHR_materials_sheen(false),
+                KHR_materials_clearcoat(false),
+                KHR_materials_transmission(false),
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),
+                KHR_materials_emissive_strength(false),
                 KHR_draco_mesh_compression(false),
                 FB_ngon_encoding(false),
                 KHR_texture_basisu(false) {

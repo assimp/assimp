@@ -159,7 +159,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MDL file ", pFile, ".");
     }
 
@@ -404,8 +404,15 @@ void MDLImporter::InternReadFile_Quake1() {
                     this->CreateTextureARGB8_3DGS_MDL3(szCurrent + iNumImages * sizeof(float));
                 }
                 // go to the end of the skin section / the beginning of the next skin
-                szCurrent += pcHeader->skinheight * pcHeader->skinwidth +
-                             sizeof(float) * iNumImages;
+                bool overflow = false;
+                if (pcHeader->skinwidth != 0 || pcHeader->skinheight != 0) {
+                    if ((pcHeader->skinheight > INT_MAX / pcHeader->skinwidth) || (pcHeader->skinwidth > INT_MAX / pcHeader->skinheight)){
+                        overflow = true;
+                    }
+                    if (!overflow) {
+                        szCurrent += pcHeader->skinheight * pcHeader->skinwidth +sizeof(float) * iNumImages;
+                    }
+                }
             }
         } else {
             szCurrent += sizeof(uint32_t);
@@ -968,7 +975,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
                     }
 
                     // store the name of the bone
-                    pcOutBone->mName.length = (size_t)iMaxLen;
+                    pcOutBone->mName.length = static_cast<ai_uint32>(iMaxLen);
                     ::memcpy(pcOutBone->mName.data, pcBone->name, pcOutBone->mName.length);
                     pcOutBone->mName.data[pcOutBone->mName.length] = '\0';
                 }

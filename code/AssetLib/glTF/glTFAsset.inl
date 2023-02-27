@@ -68,7 +68,7 @@ using namespace glTFCommon;
 
 template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
-        mDictId(dictId), mExtId(extId), mDict(0), mAsset(asset) {
+        mDictId(dictId), mExtId(extId), mDict(nullptr), mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
 
@@ -81,7 +81,7 @@ inline LazyDict<T>::~LazyDict() {
 
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
-    Value *container = 0;
+    Value *container = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -98,7 +98,7 @@ inline void LazyDict<T>::AttachToDocument(Document &doc) {
 
 template <class T>
 inline void LazyDict<T>::DetachFromDocument() {
-    mDict = 0;
+    mDict = nullptr;
 }
 
 template <class T>
@@ -194,7 +194,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     glTFCommon::Util::DataURI dataURI;
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
-            uint8_t *data = 0;
+            uint8_t *data = nullptr;
             this->byteLength = Base64::Decode(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
@@ -383,9 +383,9 @@ inline unsigned int Accessor::GetElementSize() {
 }
 
 inline uint8_t *Accessor::GetPointer() {
-    if (!bufferView || !bufferView->buffer) return 0;
+    if (!bufferView || !bufferView->buffer) return nullptr;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = byteOffset + bufferView->byteOffset;
 
@@ -698,7 +698,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
-                    Mesh::AccessorList *vec = 0;
+                    Mesh::AccessorList *vec = nullptr;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);

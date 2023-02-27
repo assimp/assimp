@@ -127,7 +127,7 @@ const aiImporterDesc *IQMImporter::GetInfo() const {
 void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
     // Read file into memory
     std::unique_ptr<IOStream> pStream(pIOHandler->Open(file, "rb"));
-    if (!pStream.get()) {
+    if (!pStream) {
         throw DeadlyImportError("Failed to open file ", file, ".");
     }
 

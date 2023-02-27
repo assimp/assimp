@@ -595,7 +595,7 @@ bool ExportProperties::SetPropertyCallback(const char *szName, const std::functi
 }
 
 std::function<void *(void *)> ExportProperties::GetPropertyCallback(const char *szName) const {
-    return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, 0);
+    return GetGenericProperty<std::function<void *(void *)>>(mCallbackProperties, szName, nullptr);
 }
 
 bool ExportProperties::HasPropertyCallback(const char *szName) const {

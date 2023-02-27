@@ -193,7 +193,7 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor3D> &pColors,
 
     // create RGBA array from RGB.
     for (std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it)
-        tcol.emplace_back((*it).r, (*it).g, (*it).b, 1);
+        tcol.emplace_back((*it).r, (*it).g, (*it).b, static_cast<ai_real>(1));
 
     // call existing function for adding RGBA colors
     add_color(pMesh, tcol, pColorPerVertex);
@@ -238,7 +238,7 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &pCoordId
 
     // create RGBA array from RGB.
     for (std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); ++it) {
-        tcol.emplace_back((*it).r, (*it).g, (*it).b, 1);
+        tcol.emplace_back((*it).r, (*it).g, (*it).b, static_cast<ai_real>(1));
     }
 
     // call existing function for adding RGBA colors
@@ -440,7 +440,7 @@ void X3DGeoHelper::add_tex_coord(aiMesh &pMesh, const std::vector<int32_t> &pCoo
     // copy list to array because we are need indexed access to normals.
     texcoord_arr_copy.reserve(pTexCoords.size());
     for (std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it) {
-        texcoord_arr_copy.emplace_back((*it).x, (*it).y, 0);
+        texcoord_arr_copy.emplace_back((*it).x, (*it).y, static_cast<ai_real>(0));
     }
 
     if (pTexCoordIdx.size() > 0) {
@@ -480,7 +480,7 @@ void X3DGeoHelper::add_tex_coord(aiMesh &pMesh, const std::list<aiVector2D> &pTe
     // copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
     tc_arr_copy.reserve(pTexCoords.size());
     for (std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it) {
-        tc_arr_copy.emplace_back((*it).x, (*it).y, 0);
+        tc_arr_copy.emplace_back((*it).x, (*it).y, static_cast<ai_real>(0));
     }
 
     // copy texture coordinates to mesh

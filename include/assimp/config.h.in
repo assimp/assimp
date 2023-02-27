@@ -241,7 +241,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /**
  *  @brief  Configures the #aiProcess_FindDegenerates to check the area of a
- *  trinagle to be greates than e-6. If this is not the case the triangle will
+ *  triangle to be greater than e-6. If this is not the case the triangle will
  *  be removed if #AI_CONFIG_PP_FD_REMOVE is set to true.
  */
 #define AI_CONFIG_PP_FD_CHECKAREA \
@@ -662,7 +662,7 @@ enum aiComponent
     "AI_CONFIG_FBX_CONVERT_TO_M"
 
 // ---------------------------------------------------------------------------
-/** @brief  Will enable the skeleton structo to store bone data.
+/** @brief  Will enable the skeleton struct to store bone data.
  *
  *  This will decouple the bone coupling to the mesh. This feature is
  *  experimental.
@@ -1083,7 +1083,7 @@ enum aiComponent
 #define AI_CONFIG_EXPORT_BLOB_NAME "EXPORT_BLOB_NAME"
 
 /**
- *  @brief  Specifies a gobal key factor for scale, float value
+ *  @brief  Specifies a global key factor for scale, float value
  */
 #define AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY "GLOBAL_SCALE_FACTOR"
 

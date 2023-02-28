@@ -115,6 +115,10 @@ def _init(self, target = None, parent = None):
         if m.startswith("_"):
             continue
 
+        # We should not be accessing `mPrivate` according to structs.Scene.
+        if m == 'mPrivate':
+            continue
+
         if m.startswith('mNum'):
             if 'm' + m[4:] in dirself:
                 continue # will be processed later on

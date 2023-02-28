@@ -45,43 +45,54 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_SAMPLES_SHARED_CODE_UTFCONVERTER_H
 
 #include <string>
-#include <locale>
-#include <codecvt>
+#include <vector>
+
+#ifdef ASSIMP_USE_HUNTER
+#include <utf8.h>
+#else
+#include "../contrib/utf8cpp/source/utf8.h"
+#endif
 
 namespace AssimpSamples {
 namespace SharedCode {
 
 // Used to convert between multibyte and unicode strings.
 class UTFConverter {
-    using UTFConverterImpl = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>;
 public:
-    UTFConverter(const char* s) :
-        s_(s),
-        ws_(impl_.from_bytes(s)) {
+    //utf8::utf16to8(start, end, back_inserter(str));
+
+    UTFConverter(const char* s) : s_(s), ws_() { 
+        std::vector<unsigned char> str;
+        utf8::utf8to16(s, s + std::strlen(s) + 1, back_inserter(str));
     }
-    UTFConverter(const wchar_t* s) :
-        s_(impl_.to_bytes(s)),
-        ws_(s) {
+    
+    UTFConverter(const wchar_t* s) : s_(),ws_(s) {
+        std::vector<wchar_t> str;
+        utf8::utf16to8(s, s + ws_.size() + 1, back_inserter(str));
     }
-    UTFConverter(const std::string& s) :
-        s_(s),
-        ws_(impl_.from_bytes(s)) {
+    
+    UTFConverter(const std::string& s) : s_(s), ws_() {
+        std::vector<unsigned char> str;
+        utf8::utf8to16(s.c_str(), s.c_str() + s.size() + 1, back_inserter(str));    
     }
-    UTFConverter(const std::wstring& s) :
-        s_(impl_.to_bytes(s)),
-        ws_(s) {
+    
+    UTFConverter(const std::wstring& s) : s_(), ws_(s) {
+        std::vector<wchar_t> str;
+        utf8::utf16to8(s.c_str(), s.c_str() + ws_.size() + 1, back_inserter(str));    
     }
+    
     inline const char* c_str() const {
         return s_.c_str();
     }
+    
     inline const std::string& str() const {
         return s_;
     }
+    
     inline const wchar_t* c_wstr() const {
         return ws_.c_str();
     }
 private:
-    static UTFConverterImpl impl_;
     std::string s_;
     std::wstring ws_;
 };

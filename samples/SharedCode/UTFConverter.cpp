@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpSamples {
 namespace SharedCode {
 
-typename UTFConverter::UTFConverterImpl UTFConverter::impl_;
+//typename UTFConverter::UTFConverterImpl UTFConverter::impl_;
 
 }
 }

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
-
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -56,11 +54,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpSamples {
 namespace SharedCode {
 
-// Used to convert between multibyte and unicode strings.
+/// @brief Used to convert between multibyte and unicode strings.
 class UTFConverter {
 public:
-    //utf8::utf16to8(start, end, back_inserter(str));
-
     UTFConverter(const char* s) : s_(s), ws_() { 
         std::vector<unsigned char> str;
         utf8::utf8to16(s, s + std::strlen(s) + 1, back_inserter(str));

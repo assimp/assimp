@@ -21,8 +21,12 @@
 #include <dxgi1_2.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#ifdef ASSIMP_USE_HUNTER
+#include <utf8.h>
+#else
+#include "../contrib/utf8cpp/source/utf8.h"
+#endif
 #include "ModelLoader.h"
-#include "UTFConverter.h"
 #include "SafeRelease.hpp"
 
 #ifdef _MSC_VER
@@ -33,7 +37,6 @@
 #endif // _MSC_VER
 
 using namespace DirectX;
-using namespace AssimpSamples::SharedCode;
 
 #define VERTEX_SHADER_FILE L"VertexShader.hlsl"
 #define PIXEL_SHADER_FILE L"PixelShader.hlsl"
@@ -154,8 +157,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	}
 
 	// Retrieve the model file path.
-	g_ModelPath = UTFConverter(argv[1]).str();
+    std::wstring filename(argv[1]);
+    
+	char *targetStart = new char[filename.size()+1];
+    memset(targetStart, '\0', filename.size() + 1);
 
+	utf8::utf16to8(filename.c_str(), filename.c_str() + filename.size(), targetStart);
+    g_ModelPath = targetStart;
+    delete[] targetStart;
 	free_command_line_allocated_memory();
 
 	WNDCLASSEX wc;
@@ -511,9 +520,9 @@ void InitPipeline()
 {
 	ID3DBlob *VS, *PS;
 	if(FAILED(CompileShaderFromFile(SHADER_PATH VERTEX_SHADER_FILE, 0, "main", "vs_4_0", &VS)))
-		Throwanerror(UTFConverter(L"Failed to compile shader from file " VERTEX_SHADER_FILE).c_str());
+		Throwanerror("Failed to compile shader from file");
 	if(FAILED(CompileShaderFromFile(SHADER_PATH PIXEL_SHADER_FILE, 0, "main", "ps_4_0", &PS)))
-		Throwanerror(UTFConverter(L"Failed to compile shader from file " PIXEL_SHADER_FILE).c_str());
+		Throwanerror("Failed to compile shader from file ");
 
 	dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), nullptr, &pVS);
 	dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pPS);

@@ -1,14 +1,8 @@
-#!/bin/sh
-
-PATHS="include code"
-FILTER_INCLUDE='\*.{c,cpp,h}'
-FILTER_EXCLUDE="{include/assimp/Compiler/pstdint.h,code/AssetLib/M3D/m3d.h}"
-
-PATTERN='^\s*printf'
+#!/bin/bash
 
 grep \
   --include=\*.{c,cpp,h} \
-  --exclude={include/assimp/Compiler/pstdint.h,code/AssetLib/M3D/m3d.h} \
+  --exclude={pstdint,m3d}.h \
   -rnw include code \
   -e '^\s*printf'
 

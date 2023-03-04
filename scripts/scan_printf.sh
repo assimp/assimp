@@ -8,7 +8,7 @@ grep \
 
 if [ $? ]
 then
-  echo "Debug statement(s) detected. Please remove, or manually add to exclude filter, if appropriate" 
+  echo "Debug statement(s) detected. Please uncomment (using single-line comment), remove, or manually add to exclude filter, if appropriate" 
   exit 1
 fi
 

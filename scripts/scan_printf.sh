@@ -6,8 +6,7 @@ grep \
   -rnw include code \
   -e '^\s*printf'
 
-if [ $? ]
-then
+if [ $? -eq 0 ]; then
   echo "Debug statement(s) detected. Please uncomment (using single-line comment), remove, or manually add to exclude filter, if appropriate" 
   exit 1
 fi

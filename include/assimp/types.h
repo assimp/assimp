@@ -57,6 +57,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <sys/types.h>
 
+#ifdef ASSIMP_USE_HUNTER
+#include <utf8.h>
+#else
+#include "../contrib/utf8cpp/source/utf8.h"
+#endif
+
 // Our compile configuration
 #include <assimp/defs.h>
 

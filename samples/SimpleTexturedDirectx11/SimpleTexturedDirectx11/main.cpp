@@ -13,6 +13,8 @@
 // Written by IAS. :)
 // ---------------------------------------------------------------------------
 
+#include <assimp/types.h>
+
 #include <Windows.h>
 #include <shellapi.h>
 #include <stdexcept>
@@ -21,11 +23,7 @@
 #include <dxgi1_2.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
-#ifdef ASSIMP_USE_HUNTER
-#include <utf8.h>
-#else
-#include "../contrib/utf8cpp/source/utf8.h"
-#endif
+
 #include "ModelLoader.h"
 #include "SafeRelease.hpp"
 
@@ -53,10 +51,10 @@ struct ConstantBuffer {
 // ------------------------------------------------------------
 //                        Window Variables
 // ------------------------------------------------------------
-#define SCREEN_WIDTH  800
-#define SCREEN_HEIGHT 600
+static constexpr uint32_t SCREEN_WIDTH = 800;
+static constexpr uint32_t SCREEN_HEIGHT = 600;
 
-const char g_szClassName[] = "directxWindowClass";
+constexpr char g_szClassName[] = "directxWindowClass";
 
 static std::string g_ModelPath;
 

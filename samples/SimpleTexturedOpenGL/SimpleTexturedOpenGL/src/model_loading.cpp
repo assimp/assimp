@@ -622,9 +622,12 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
-	const std::string message = title;
-    std::wstring targetMessage;
-    utf8::utf8to16(message.c_str(), message.c_str() + message.size(), back_inserter(targetMessage));
+    const size_t len = std::strlen(title) + 1;
+    wchar_t *tmp = new wchar_t[len];
+    memset(tmp, L'\0', sizeof(wchar_t) * len);
+    utf8::utf8to16(title, title+len, tmp);
+    std::wstring targetMessage = tmp;
+    delete[] tmp;
 
 	if (nullptr == (g_hWnd = CreateWindowEx(dwExStyle,			// Extended Style For The Window
 								TEXT("OpenGL"),						// Class Name

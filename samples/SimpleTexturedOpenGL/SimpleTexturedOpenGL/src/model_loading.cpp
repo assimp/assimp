@@ -233,13 +233,15 @@ int LoadGLTextures(const aiScene* scene) {
             glPixelStorei( GL_UNPACK_SKIP_PIXELS, 0 );
             glPixelStorei( GL_UNPACK_SKIP_ROWS, 0 );
             stbi_image_free(data);
-        }
-		else
-		{
-			/* Error occurred */
+        } else {
+            /* Error occurred */
             const std::string message = "Couldn't load Image: " + fileloc;
             std::wstring targetMessage;
-            utf8::utf8to16(message.c_str(), message.c_str() + message.size(), back_inserter(targetMessage));
+            wchar_t *tmp = new wchar_t[message.size() + 1];
+            memset(tmp, L'\0', sizeof(wchar_t) *(message.size() + 1));
+            utf8::utf8to16(message.c_str(), message.c_str() + message.size(), tmp);
+            targetMessage = tmp;
+            delete [] tmp;
             MessageBox(nullptr, targetMessage.c_str(), TEXT("ERROR"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
@@ -535,7 +537,12 @@ GLboolean abortGLInit(const char* abortMessage)
 	KillGLWindow();
     const std::string message = abortMessage;
     std::wstring targetMessage;
-    utf8::utf8to16(message.c_str(), message.c_str() + message.size(), back_inserter(targetMessage));
+    const size_t len = std::strlen(abortMessage) + 1;
+    wchar_t *tmp = new wchar_t[len];
+    memset(tmp, L'\0', len);
+    utf8::utf8to16(message.c_str(), message.c_str() + message.size(), tmp);
+    targetMessage = tmp;
+    delete [] tmp;
 
 	MessageBox(nullptr, targetMessage.c_str(), TEXT("ERROR"), MB_OK|MB_ICONEXCLAMATION);
 	return FALSE;									// quit and return False
@@ -587,7 +594,8 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 		if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
 		{
 			// If The Mode Fails, Offer Two Options.  Quit Or Run In A Window.
-			if (MessageBox(nullptr,TEXT("The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?"),TEXT("NeHe GL"),MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
+			if (MessageBox(nullptr,TEXT("The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?"),
+				TEXT("NeHe GL"),MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
 			{
 				fullscreen = FALSE;		// Select Windowed Mode (Fullscreen = FALSE)
 			}
@@ -618,7 +626,7 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
     std::wstring targetMessage;
     utf8::utf8to16(message.c_str(), message.c_str() + message.size(), back_inserter(targetMessage));
 
-	if (nullptr == (g_hWnd=CreateWindowEx(dwExStyle,			// Extended Style For The Window
+	if (nullptr == (g_hWnd = CreateWindowEx(dwExStyle,			// Extended Style For The Window
 								TEXT("OpenGL"),						// Class Name
 								targetMessage.c_str(), // Window Title
 								WS_CLIPSIBLINGS |				// Required Window Style
@@ -792,7 +800,11 @@ int WINAPI WinMain( HINSTANCE /*hInstance*/,     // The instance
 	if (argv != nullptr && argc > 1)
 	{
 		std::wstring modelpathW(argv[1]);
-        utf8::utf16to8(modelpathW.c_str(), modelpathW.c_str() + modelpathW.size(), back_inserter(modelpath));
+        char *tmp = new char[modelpathW.size() + 1];
+        memset(tmp, '\0', modelpathW.size() + 1);
+        utf8::utf16to8(modelpathW.c_str(), modelpathW.c_str() + modelpathW.size(), tmp);
+        modelpath = tmp;
+        delete[]tmp;
 	}
 
 	if (!Import3DFromFile(modelpath))
@@ -820,7 +832,7 @@ int WINAPI WinMain( HINSTANCE /*hInstance*/,     // The instance
 		{
 			if (msg.message==WM_QUIT)
 			{
-				done=TRUE;
+				done = TRUE;
 			}
 			else
 			{

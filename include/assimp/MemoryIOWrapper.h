@@ -150,7 +150,6 @@ public:
     // -------------------------------------------------------------------
     /// @brief Tests for the existence of a file at the given path.
     bool Exists(const char* pFile) const override {
-        printf("Exists\n");
         if (0 == strncmp( pFile, AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH ) ) {
             return true;
         }

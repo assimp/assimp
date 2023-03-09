@@ -136,7 +136,7 @@ public:
     void emptyBonesNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_bones.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_bones_names = {
             "Bone",
@@ -172,7 +172,7 @@ public:
     void emptyBodypartsNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_bodyparts.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_bodyparts_names = {
             "Bodypart",
@@ -209,7 +209,7 @@ public:
     void duplicateBodypartsNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_bodyparts.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_bodyparts_names = {
             "Bodypart",
@@ -254,7 +254,7 @@ public:
     void duplicateSubModelsNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_submodels.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const std::vector<StringVector> expected_bodypart_sub_models_names = {
             {
@@ -272,7 +272,7 @@ public:
         };
 
         const aiNode *bodyparts_node = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BODYPARTS);
-        EXPECT_NE(nullptr, bodyparts_node);
+        ASSERT_NE(nullptr, bodyparts_node);
         EXPECT_EQ(3u, bodyparts_node->mNumChildren);
 
         StringVector actual_submodels_names;
@@ -301,7 +301,7 @@ public:
     void duplicateSequenceNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_sequences.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_sequence_names = {
             "idle_1",
@@ -337,7 +337,7 @@ public:
     void emptySequenceNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_sequences.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_sequence_names = {
             "Sequence",
@@ -374,7 +374,7 @@ public:
     void duplicateSequenceGroupNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_sequence_groups/duplicate_sequence_groups.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_sequence_names = {
             "default",
@@ -412,7 +412,7 @@ public:
     void emptySequenceGroupNames() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_sequence_groups/unnamed_sequence_groups.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         const StringVector expected_sequence_names = {
             "default",
@@ -440,7 +440,7 @@ public:
 
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(MDL_HL1_FILE_MAN, aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
 
         aiNode *scene_bones_node = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BONES);
 

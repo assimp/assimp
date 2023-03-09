@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
 
 using namespace Assimp;
 
@@ -68,6 +70,27 @@ TEST(utACImportExport, importSampleSubdiv) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/sample_subdiv.ac", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+
+    // check approximate shape by averaging together all vertices
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    aiVector3D vertexAvg(0.0, 0.0, 0.0);
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+        const aiMesh *mesh = scene->mMeshes[i];
+        ASSERT_NE(mesh, nullptr);
+
+        ai_real invVertexCount = 1.0 / mesh->mNumVertices;
+        for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+            vertexAvg += mesh->mVertices[j] * invVertexCount;
+        }
+    }
+
+    // must not be inf or nan
+    ASSERT_TRUE(std::isfinite(vertexAvg.x));
+    ASSERT_TRUE(std::isfinite(vertexAvg.y));
+    ASSERT_TRUE(std::isfinite(vertexAvg.z));
+    EXPECT_NEAR(vertexAvg.x, 0.079997420310974121, 0.0001);
+    EXPECT_NEAR(vertexAvg.y, 0.099498569965362549, 0.0001);
+    EXPECT_NEAR(vertexAvg.z, -0.10344827175140381, 0.0001);
 }
 
 TEST(utACImportExport, importSphereWithLight) {

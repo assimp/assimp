@@ -454,7 +454,6 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
     meshOffsets.clear();
 
 
-    const unsigned int unusedIndex = ~0;
     std::vector<unsigned int> usedVertexIndices;
     std::vector<unsigned int> reverseMappingIndices;
     std::vector<unsigned int> indexBuffer;
@@ -470,14 +469,14 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             // extract used vertices:
             bool useIndexBuffer = prim.indices;
-            std::vector<unsigned int>* usedVertexIndicesPtr = nullptr;
+            std::vector<unsigned int>* vertexRemappingTable = nullptr;
             if (useIndexBuffer) {
                 size_t count = prim.indices->count;
                 indexBuffer.resize(count);
                 usedVertexIndices.clear();
                 reverseMappingIndices.clear();
                 usedVertexIndices.reserve(count / 3); // this is a very rough heuristic to reduce re-allocations
-                usedVertexIndicesPtr = &usedVertexIndices;
+                vertexRemappingTable = &usedVertexIndices;
                 Accessor::Indexer data = prim.indices->GetIndexer();
                 if (!data.IsValid()) {
                     throw DeadlyImportError("GLTF: Invalid accessor without data in mesh ", getContextForErrorMessages(mesh.id, mesh.name));
@@ -485,6 +484,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 // Build the vertex remapping table and the modified index buffer (used later instead of the original one)
                 // In case no index buffer is used, the original vertex arrays are being used so no remapping is required in the first place.
+                const unsigned int unusedIndex = ~0u;
                 for (unsigned int i = 0; i < count; ++i) {
                     unsigned int index = data.GetUInt(i);
                     if (index >= reverseMappingIndices.size()) {
@@ -532,14 +532,14 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             size_t numAllVertices = 0;
             if (!attr.position.empty() && attr.position[0]) {
                     numAllVertices = attr.position[0]->count;
-                    aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->ExtractData(aim->mVertices, usedVertexIndicesPtr));
+                    aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->ExtractData(aim->mVertices, vertexRemappingTable));
             }
 
             if (!attr.normal.empty() && attr.normal[0]) {
                     if (attr.normal[0]->count != numAllVertices) {
                     DefaultLogger::get()->warn("Normal count in mesh \"", mesh.name, "\" does not match the vertex count, normals ignored.");
                 } else {
-                    attr.normal[0]->ExtractData(aim->mNormals, usedVertexIndicesPtr);
+                    attr.normal[0]->ExtractData(aim->mNormals, vertexRemappingTable);
 
                     // only extract tangents if normals are present
                     if (!attr.tangent.empty() && attr.tangent[0]) {
@@ -549,7 +549,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             // generate bitangents from normals and tangents according to spec
                             Tangent *tangents = nullptr;
 
-                            attr.tangent[0]->ExtractData(tangents, usedVertexIndicesPtr);
+                            attr.tangent[0]->ExtractData(tangents, vertexRemappingTable);
 
                             aim->mTangents = new aiVector3D[aim->mNumVertices];
                             aim->mBitangents = new aiVector3D[aim->mNumVertices];
@@ -574,7 +574,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 auto componentType = attr.color[c]->componentType;
                 if (componentType == glTF2::ComponentType_FLOAT) {
-                    attr.color[c]->ExtractData(aim->mColors[c], usedVertexIndicesPtr);
+                    attr.color[c]->ExtractData(aim->mColors[c], vertexRemappingTable);
                 } else {
                     if (componentType == glTF2::ComponentType_UNSIGNED_BYTE) {
                         aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c]);
@@ -595,7 +595,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     continue;
                 }
 
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc], usedVertexIndicesPtr);
+                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc], vertexRemappingTable);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D *values = aim->mTextureCoords[tc];
@@ -624,7 +624,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             ASSIMP_LOG_WARN("Positions of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *positionDiff = nullptr;
-                            target.position[0]->ExtractData(positionDiff, usedVertexIndicesPtr);
+                            target.position[0]->ExtractData(positionDiff, vertexRemappingTable);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                                 aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
                             }
@@ -636,7 +636,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             ASSIMP_LOG_WARN("Normals of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *normalDiff = nullptr;
-                            target.normal[0]->ExtractData(normalDiff, usedVertexIndicesPtr);
+                            target.normal[0]->ExtractData(normalDiff, vertexRemappingTable);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                                 aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
                             }
@@ -651,10 +651,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             ASSIMP_LOG_WARN("Tangents of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             Tangent *tangent = nullptr;
-                            attr.tangent[0]->ExtractData(tangent, usedVertexIndicesPtr);
+                            attr.tangent[0]->ExtractData(tangent, vertexRemappingTable);
 
                             aiVector3D *tangentDiff = nullptr;
-                            target.tangent[0]->ExtractData(tangentDiff, usedVertexIndicesPtr);
+                            target.tangent[0]->ExtractData(tangentDiff, vertexRemappingTable);
 
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
                                 tangent[vertexId].xyz += tangentDiff[vertexId];

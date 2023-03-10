@@ -467,7 +467,15 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             Mesh::Primitive &prim = mesh.primitives[p];
 
-            // extract used vertices:
+            Mesh::Primitive::Attributes &attr = prim.attributes;
+
+            // Find out the maximum number of vertices:
+            size_t numAllVertices = 0;
+            if (!attr.position.empty() && attr.position[0]) {
+                numAllVertices = attr.position[0]->count;
+            }
+
+            // Extract used vertices:
             bool useIndexBuffer = prim.indices;
             std::vector<unsigned int>* vertexRemappingTable = nullptr;
             if (useIndexBuffer) {
@@ -487,6 +495,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 const unsigned int unusedIndex = ~0u;
                 for (unsigned int i = 0; i < count; ++i) {
                     unsigned int index = data.GetUInt(i);
+                    if (index >= numAllVertices) {
+                        // Out-of-range indices will be filtered out when adding the faces and then lead to a warning. At this stage, we just keep them.
+                        indexBuffer[i] = index;
+                        continue; 
+                    }
                     if (index >= reverseMappingIndices.size()) {
                         reverseMappingIndices.resize(index + 1, unusedIndex);
                     }
@@ -527,12 +540,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 break;
             }
 
-            Mesh::Primitive::Attributes &attr = prim.attributes;
-
-            size_t numAllVertices = 0;
             if (!attr.position.empty() && attr.position[0]) {
-                    numAllVertices = attr.position[0]->count;
-                    aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->ExtractData(aim->mVertices, vertexRemappingTable));
+                aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->ExtractData(aim->mVertices, vertexRemappingTable));
             }
 
             if (!attr.normal.empty() && attr.normal[0]) {

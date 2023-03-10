@@ -75,3 +75,315 @@ TEST_F(utLWOImportExport, importLWOformatdetection) {
 
     EXPECT_NE(nullptr, scene);
 }
+
+
+TEST_F(utLWOImportExport, importLWOempty) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/empty.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_EQ(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWObox_2uv_1unused) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/box_2uv_1unused.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWObox_2vc_1unused) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/box_2vc_1unused.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOconcave_polygon) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/concave_polygon.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOconcave_self_intersecting) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/concave_self_intersecting.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOhierarchy) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/hierarchy.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOhierarchy_smoothed) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/hierarchy_smoothed.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_x) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_x.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_x_scale_222_wrap_21) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_x_scale_222_wrap_21.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_y) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_y.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_y_scale_111) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_y_scale_111.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_y_scale_111_wrap_21) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_y_scale_111_wrap_21.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_cylindrical_z) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_cylindrical_z.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_planar_x) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_planar_x.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_planar_y) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_planar_y.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_planar_z) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_planar_z.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_planar_z_scale_111) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_planar_z_scale_111.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_spherical_x) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_spherical_x.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_spherical_x_scale_222_wrap_22) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_spherical_x_scale_222_wrap_22.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_spherical_y) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_spherical_y.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_spherical_) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_spherical_z.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_spherical_z_wrap_22) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_spherical_z_wrap_22.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOearth_uv_cylindrical_y) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/MappingModes/earth_uv_cylindrical_y.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOModoExport_vertNormals) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/ModoExport_vertNormals.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOnonplanar_polygon) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/nonplanar_polygon.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOCellShader) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/shader_test/CellShader.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOfastFresne) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/shader_test/fastFresnel.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOrealFresnel) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/shader_test/realFresnel.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOSuperCellShader) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/shader_test/SuperCellShader.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOsphere_with_gradient) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/sphere_with_gradient.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOsphere_with_mat_gloss_10pc) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/sphere_with_mat_gloss_10pc.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOSubdivision) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/Subdivision.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOtransparency) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/transparency.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOUglyVertexColors) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/UglyVertexColors.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOuvtest) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/uvtest.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOBConcavePolygon) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/ConcavePolygon.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOBbluewithcylindrictex) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/MappingModes/bluewithcylindrictexz.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOBsphere_with_mat_gloss_10pc) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/sphere_with_mat_gloss_10pc.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utLWOImportExport, importLWOBsphere_with_mat_gloss_50pc) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWOB/sphere_with_mat_gloss_50pc.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}

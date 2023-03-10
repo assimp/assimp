@@ -57,3 +57,13 @@ jobs:
     - name: test
       run: cd build/bin && ./unit
       shell: bash
+
+  job3:
+    name: printf-sanitizer
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: run scan_printf script
+      run: ./scripts/scan_printf.sh
+      shell: bash

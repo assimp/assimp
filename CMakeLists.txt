@@ -84,10 +84,6 @@ OPTION( ASSIMP_NO_EXPORT
   "Disable Assimp's export functionality."
   OFF
 )
-OPTION( ASSIMP_BUILD_ZLIB
-  "Build your own zlib"
-  OFF
-)
 OPTION( ASSIMP_BUILD_ASSIMP_TOOLS
   "If the supplementary tools for Assimp are built in addition to the library."
   OFF
@@ -133,6 +129,18 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    "Don't call git to get the hash."
    OFF
 )
+
+IF (WIN32)
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    ON
+  )
+ELSE()
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    OFF
+  )
+ENDIF()
 
 IF (WIN32)
   # Use subset of Windows.h
@@ -482,7 +490,11 @@ ELSE()
     FIND_PACKAGE(ZLIB)
   ENDIF()
 
-  IF( NOT ZLIB_FOUND )
+  IF ( NOT ZLIB_FOUND AND NOT ASSIMP_BUILD_ZLIB )
+    message( FATAL_ERROR
+      "Build configured with -DASSIMP_BUILD_ZLIB=OFF but unable to find zlib"
+    )
+  ELSEIF( NOT ZLIB_FOUND )
     MESSAGE(STATUS "compiling zlib from sources")
     INCLUDE(CheckIncludeFile)
     INCLUDE(CheckTypeSize)

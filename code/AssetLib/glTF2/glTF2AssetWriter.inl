@@ -836,7 +836,7 @@ namespace glTF2 {
             throw DeadlyExportError("Failed to write scene data!");
         }
 
-        uint32_t jsonChunkLength = (docBuffer.GetSize() + 3) & ~3; // Round up to next multiple of 4
+        uint32_t jsonChunkLength = static_cast<uint32_t>((docBuffer.GetSize() + 3) & ~3); // Round up to next multiple of 4
         auto paddingLength = jsonChunkLength - docBuffer.GetSize();
 
         GLB_Chunk jsonChunk;
@@ -862,7 +862,7 @@ namespace glTF2 {
         int GLB_Chunk_count = 1;
         uint32_t binaryChunkLength = 0;
         if (bodyBuffer->byteLength > 0) {
-            binaryChunkLength = (bodyBuffer->byteLength + 3) & ~3; // Round up to next multiple of 4
+            binaryChunkLength = static_cast<uint32_t>((bodyBuffer->byteLength + 3) & ~3); // Round up to next multiple of 4
 
             auto curPaddingLength = binaryChunkLength - bodyBuffer->byteLength;
             ++GLB_Chunk_count;

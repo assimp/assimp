@@ -486,7 +486,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
         for (unsigned int j = 0,n = 0; j < m->mNumFaces; ++j) {
             aiFace& f = m->mFaces[j];
-            if (g.triangles[j]>triangles.size()) {
+            if (g.triangles[j] >= triangles.size()) {
                 throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
             }
 
@@ -494,7 +494,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             f.mIndices = new unsigned int[f.mNumIndices=3];
 
             for (unsigned int k = 0; k < 3; ++k,++n) {
-                if (t.indices[k]>vertices.size()) {
+                if (t.indices[k] >= vertices.size()) {
                     throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
                 }
 

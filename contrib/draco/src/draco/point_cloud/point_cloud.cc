@@ -16,10 +16,40 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <utility>
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+#include "draco/attributes/point_attribute.h"
+#endif
 
 namespace draco {
 
 PointCloud::PointCloud() : num_points_(0) {}
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+void PointCloud::Copy(const PointCloud &src) {
+  num_points_ = src.num_points_;
+  for (int i = 0; i < GeometryAttribute::NAMED_ATTRIBUTES_COUNT; ++i) {
+    named_attribute_index_[i] = src.named_attribute_index_[i];
+  }
+  attributes_.resize(src.attributes_.size());
+  for (int i = 0; i < src.attributes_.size(); ++i) {
+    attributes_[i] = std::unique_ptr<PointAttribute>(new PointAttribute());
+    attributes_[i]->CopyFrom(*src.attributes_[i]);
+  }
+  CopyMetadata(src);
+}
+
+void PointCloud::CopyMetadata(const PointCloud &src) {
+  if (src.metadata_ == nullptr) {
+    metadata_ = nullptr;
+  } else {
+    // Copy base metadata.
+    const GeometryMetadata *const metadata = src.metadata_.get();
+    metadata_.reset(new GeometryMetadata(*metadata));
+  }
+}
+#endif
 
 int32_t PointCloud::NumNamedAttributes(GeometryAttribute::Type type) const {
   if (type == GeometryAttribute::INVALID ||
@@ -253,11 +283,16 @@ bool PointCloud::DeduplicateAttributeValues() {
 }
 #endif
 
-// TODO(xiaoxumeng): Consider to cash the BBox.
+// TODO(b/199760503): Consider to cache the BBox.
 BoundingBox PointCloud::ComputeBoundingBox() const {
   BoundingBox bounding_box;
   auto pc_att = GetNamedAttribute(GeometryAttribute::POSITION);
-  // TODO(xiaoxumeng): Make the BoundingBox a template type, it may not be easy
+  if (pc_att == nullptr) {
+    // Return default invalid bounding box.
+    return bounding_box;
+  }
+
+  // TODO(b/199760503): Make the BoundingBox a template type, it may not be easy
   // because PointCloud is not a template.
   // Or simply add some preconditioning here to make sure the position attribute
   // is valid, because the current code works only if the position attribute is

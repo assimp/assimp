@@ -36,8 +36,6 @@ ADD_EXECUTABLE( assimp_simpletextureddirectx11 WIN32
   #SimpleTexturedDirectx11/VertexShader.hlsl
   SimpleTexturedDirectx11/main.cpp
   SimpleTexturedDirectx11/SafeRelease.hpp
-  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp
-  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
 )
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_simpletextureddirectx11)

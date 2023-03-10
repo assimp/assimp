@@ -66,7 +66,7 @@ public:
     AnimEvaluator(const aiAnimation *pAnim);
 
     /// @brief  The class destructor.
-    ~AnimEvaluator();
+    ~AnimEvaluator() = default;
 
     /// @brief Evaluates the animation tracks for a given time stamp.
     /// The calculated pose can be retrieved as an array of transformation

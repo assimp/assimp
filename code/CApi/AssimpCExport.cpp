@@ -50,7 +50,7 @@ Assimp C export interface. See Exporter.cpp for some notes.
 #include <assimp/SceneCombiner.h>
 #include <assimp/Exporter.hpp>
 
-namespace Assimp {
+using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API size_t aiGetExportFormatCount(void) {
@@ -138,7 +138,5 @@ ASSIMP_API const C_STRUCT aiExportDataBlob *aiExportSceneToBlob(const aiScene *p
 ASSIMP_API C_STRUCT void aiReleaseExportBlob(const aiExportDataBlob *pData) {
     delete pData;
 }
-
-} // namespace Assimp
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

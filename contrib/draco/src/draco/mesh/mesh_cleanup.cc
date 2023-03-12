@@ -14,21 +14,25 @@
 //
 #include "draco/mesh/mesh_cleanup.h"
 
+#include <array>
+#include <memory>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "draco/core/hash_utils.h"
 
 namespace draco {
 
-bool MeshCleanup::operator()(Mesh *mesh, const MeshCleanupOptions &options) {
+Status MeshCleanup::Cleanup(Mesh *mesh, const MeshCleanupOptions &options) {
   if (!options.remove_degenerated_faces && !options.remove_unused_attributes &&
       !options.remove_duplicate_faces && !options.make_geometry_manifold) {
-    return true;  // Nothing to cleanup.
+    return OkStatus();  // Nothing to cleanup.
   }
   const PointAttribute *const pos_att =
       mesh->GetNamedAttribute(GeometryAttribute::POSITION);
   if (pos_att == nullptr) {
-    return false;
+    return Status(Status::DRACO_ERROR, "Missing position attribute.");
   }
 
   if (options.remove_degenerated_faces) {
@@ -43,7 +47,7 @@ bool MeshCleanup::operator()(Mesh *mesh, const MeshCleanupOptions &options) {
     RemoveUnusedAttributes(mesh);
   }
 
-  return true;
+  return OkStatus();
 }
 
 void MeshCleanup::RemoveDegeneratedFaces(Mesh *mesh) {

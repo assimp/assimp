@@ -7,6 +7,10 @@
 
 #include "draco/draco_features.h"
 
+#ifdef DRACO_TRANSCODER_SUPPORTED
+#include "ghc/filesystem.hpp"
+#endif  // DRACO_TRANSCODER_SUPPORTED
+
 namespace draco {
 
 void SplitPathPrivate(const std::string &full_path,
@@ -30,8 +34,18 @@ void SplitPathPrivate(const std::string &full_path,
   }
 }
 
-bool DirectoryExists(const std::string &path) {
+bool DirectoryExists(const std::string &path_arg) {
   struct stat path_stat;
+  std::string path = path_arg;
+
+#if defined(_WIN32) && not defined(__MINGW32__)
+  // Avoid a silly windows issue: stat() will fail on a drive letter missing the
+  // trailing slash.
+  if (path.size() > 0 && path[path.size()] != '\\' &&
+      path[path.size()] != '/') {
+    path.append("\\");
+  }
+#endif
 
   // Check if |path| exists.
   if (stat(path.c_str(), &path_stat) != 0) {
@@ -50,7 +64,12 @@ bool CheckAndCreatePathForFile(const std::string &filename) {
   std::string basename;
   SplitPathPrivate(filename, &path, &basename);
 
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  const ghc::filesystem::path ghc_path(path);
+  ghc::filesystem::create_directories(ghc_path);
+#endif  // DRACO_TRANSCODER_SUPPORTED
   const bool directory_exists = DirectoryExists(path);
+
   return directory_exists;
 }
 

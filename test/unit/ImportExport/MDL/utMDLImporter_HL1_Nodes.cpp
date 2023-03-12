@@ -81,6 +81,7 @@ public:
         ASSERT_NE(nullptr, scene);
         ASSERT_NE(nullptr, scene->mRootNode);
 
+        // First, check that "<MDL_root>" and "<MDL_bones>" are linked.
         const aiNode* node_MDL_root = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_ROOT);
         ASSERT_NE(nullptr, node_MDL_root);
 
@@ -89,6 +90,7 @@ public:
         ASSERT_NE(nullptr, node_MDL_bones->mParent);
         ASSERT_EQ(node_MDL_root, node_MDL_bones->mParent);
 
+        // Second, verify "<MDL_bones>" hierarchy.
         const Hierarchy expected_hierarchy = {
             { 0, AI_MDL_HL1_NODE_BONES },
                 { 1, "root1_bone1" },

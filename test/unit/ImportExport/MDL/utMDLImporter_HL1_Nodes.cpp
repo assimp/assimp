@@ -55,6 +55,12 @@ using namespace Assimp;
 
 class utMDLImporter_HL1_Nodes : public ::testing::Test {
 
+    /**
+    * @note Represents a flattened node hierarchy where each item is a pair
+    * containing the node level and it's name.
+    */
+    typedef std::vector<std::pair<unsigned int, std::string>> Hierarchy;
+
 public:
     /**
     * @note The following tests require a basic understanding
@@ -62,6 +68,49 @@ public:
     * please refer to the SMD importer or go to VDC
     * (Valve Developer Community).
     */
+
+    // Given a model, verify that the bones nodes hierarchy is correctly formed.
+    void checkBoneHierarchy() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "multiple_roots.mdl", aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene->mRootNode);
+
+        const aiNode* node_MDL_root = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_ROOT);
+        ASSERT_NE(nullptr, node_MDL_root);
+
+        const aiNode *node_MDL_bones = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BONES);
+        ASSERT_NE(nullptr, node_MDL_bones);
+        ASSERT_NE(nullptr, node_MDL_bones->mParent);
+        ASSERT_EQ(node_MDL_root, node_MDL_bones->mParent);
+
+        const Hierarchy expected_hierarchy = {
+            { 0, AI_MDL_HL1_NODE_BONES },
+                { 1, "root1_bone1" },
+                    { 2, "root1_bone2" },
+                        { 3, "root1_bone4" },
+                        { 3, "root1_bone5" },
+                    { 2, "root1_bone3" },
+                        { 3, "root1_bone6" },
+                { 1, "root2_bone1" },
+                    { 2, "root2_bone2" },
+                    { 2, "root2_bone3" },
+                        { 3, "root2_bone5" },
+                    { 2, "root2_bone4" },
+                        { 3, "root2_bone6" },
+                { 1, "root3_bone1" },
+                    { 2, "root3_bone2" },
+                    { 2, "root3_bone3" },
+                    { 2, "root3_bone4" },
+                        { 3, "root3_bone5" },
+                            { 4, "root3_bone6" },
+                            { 4, "root3_bone7" },
+        };
+
+        Hierarchy actual_hierarchy;
+        flatten_hierarchy(node_MDL_bones, actual_hierarchy);
+        ASSERT_EQ(expected_hierarchy, actual_hierarchy);
+    }
 
     /*  Given a model with bones that have empty names,
         verify that all the bones of the imported model
@@ -416,7 +465,25 @@ private:
                 EXPECT_NEAR(expected[i][j], actual[i][j], abs_error);
         }
     }
+
+    void flatten_hierarchy(const aiNode *node, Hierarchy &hierarchy)
+    {
+        flatten_hierarchy(node, hierarchy, 0);
+    }
+
+    void flatten_hierarchy(const aiNode *node, Hierarchy &hierarchy, unsigned int level)
+    {
+        hierarchy.push_back({ level, node->mName.C_Str() });
+        for (size_t i = 0; i < node->mNumChildren; ++i)
+        {
+            flatten_hierarchy(node->mChildren[i], hierarchy, level + 1);
+        }
+    }
 };
+
+TEST_F(utMDLImporter_HL1_Nodes, checkBoneHierarchy) {
+    checkBoneHierarchy();
+}
 
 TEST_F(utMDLImporter_HL1_Nodes, emptyBonesNames) {
     emptyBonesNames();

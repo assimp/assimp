@@ -61,6 +61,11 @@ class utMDLImporter_HL1_Nodes : public ::testing::Test {
     */
     typedef std::vector<std::pair<unsigned int, std::string>> Hierarchy;
 
+    /**
+    * @note A vector of strings. Used for symplifying syntax.
+    */
+    typedef std::vector<std::string> StringVector;
+
 public:
     /**
     * @note The following tests require a basic understanding
@@ -131,7 +136,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_bones.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_bones_names = {
+        const StringVector expected_bones_names = {
             "Bone",
             "Bone_0",
             "Bone_1",
@@ -143,7 +148,7 @@ public:
             "Bone_7"
         };
 
-        std::vector<std::string> actual_bones_names;
+        StringVector actual_bones_names;
         get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BONES), actual_bones_names);
         ASSERT_EQ(expected_bones_names, actual_bones_names);
     }
@@ -167,7 +172,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_bodyparts.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_bodyparts_names = {
+        const StringVector expected_bodyparts_names = {
             "Bodypart",
             "Bodypart_1",
             "Bodypart_5",
@@ -179,7 +184,10 @@ public:
             "Bodypart_7"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_BODYPARTS, expected_bodyparts_names);
+        StringVector actual_bodyparts_names;
+        // Get the bodyparts names "without" the submodels.
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BODYPARTS), actual_bodyparts_names, 0);
+        ASSERT_EQ(expected_bodyparts_names, actual_bodyparts_names);
     }
 
     /*  Given a model with bodyparts that have duplicate names,
@@ -201,7 +209,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_bodyparts.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_bodyparts_names = {
+        const StringVector expected_bodyparts_names = {
             "Bodypart",
             "Bodypart_1",
             "Bodypart_2",
@@ -213,7 +221,10 @@ public:
             "Bodypart_4"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_BODYPARTS, expected_bodyparts_names);
+        StringVector actual_bodyparts_names;
+        // Get the bodyparts names "without" the submodels.
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BODYPARTS), actual_bodyparts_names, 0);
+        ASSERT_EQ(expected_bodyparts_names, actual_bodyparts_names);
     }
 
     /*  Given a model with several bodyparts that contains multiple
@@ -243,7 +254,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_submodels.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::vector<std::string>> expected_bodypart_sub_models_names = {
+        const std::vector<StringVector> expected_bodypart_sub_models_names = {
             {
                     "triangle",
                     "triangle_0",
@@ -261,9 +272,13 @@ public:
         const aiNode *bodyparts_node = scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BODYPARTS);
         EXPECT_NE(nullptr, bodyparts_node);
         EXPECT_EQ(3u, bodyparts_node->mNumChildren);
-        for (unsigned int i = 0; i < bodyparts_node->mNumChildren; ++i) {
-            expect_named_children(bodyparts_node->mChildren[i],
-                    expected_bodypart_sub_models_names[i]);
+
+        StringVector actual_submodels_names;
+        for (unsigned int i = 0; i < bodyparts_node->mNumChildren; ++i)
+        {
+            actual_submodels_names.clear();
+            get_node_children_names(bodyparts_node->mChildren[i], actual_submodels_names);
+            ASSERT_EQ(expected_bodypart_sub_models_names[i], actual_submodels_names);
         }
     }
 
@@ -286,7 +301,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_sequences.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_sequence_names = {
+        const StringVector expected_sequence_names = {
             "idle_1",
             "idle",
             "idle_2",
@@ -298,7 +313,9 @@ public:
             "idle_7"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_SEQUENCE_INFOS, expected_sequence_names);
+        StringVector actual_sequence_names;
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_INFOS), actual_sequence_names);
+        ASSERT_EQ(expected_sequence_names, actual_sequence_names);
     }
 
     /*  Given a model with sequences that have empty names, verify
@@ -320,7 +337,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_sequences.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_sequence_names = {
+        const StringVector expected_sequence_names = {
             "Sequence",
             "Sequence_1",
             "Sequence_0",
@@ -332,7 +349,9 @@ public:
             "Sequence_6"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_SEQUENCE_INFOS, expected_sequence_names);
+        StringVector actual_sequence_names;
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_INFOS), actual_sequence_names);
+        ASSERT_EQ(expected_sequence_names, actual_sequence_names);
     }
 
     /*  Given a model with sequence groups that have duplicate names,
@@ -355,7 +374,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_sequence_groups/duplicate_sequence_groups.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_sequence_names = {
+        const StringVector expected_sequence_names = {
             "default",
             "SequenceGroup",
             "SequenceGroup_1",
@@ -368,7 +387,9 @@ public:
             "SequenceGroup_2"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_SEQUENCE_GROUPS, expected_sequence_names);
+        StringVector actual_sequence_names;
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_GROUPS), actual_sequence_names);
+        ASSERT_EQ(expected_sequence_names, actual_sequence_names);
     }
 
     /*  Given a model with sequence groups that have empty names,
@@ -391,7 +412,7 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "unnamed_sequence_groups/unnamed_sequence_groups.mdl", aiProcess_ValidateDataStructure);
         EXPECT_NE(nullptr, scene);
 
-        const std::vector<std::string> expected_sequence_names = {
+        const StringVector expected_sequence_names = {
             "default",
             "SequenceGroup",
             "SequenceGroup_2",
@@ -404,7 +425,9 @@ public:
             "SequenceGroup_4"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_SEQUENCE_GROUPS, expected_sequence_names);
+        StringVector actual_sequence_names;
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_SEQUENCE_GROUPS), actual_sequence_names);
+        ASSERT_EQ(expected_sequence_names, actual_sequence_names);
     }
 
     /*  Verify that mOffsetMatrix applies the correct
@@ -449,18 +472,6 @@ public:
     }
 
 private:
-    void expect_named_children(const aiNode *parent_node, const std::vector<std::string> &expected_names) {
-        EXPECT_NE(nullptr, parent_node);
-        EXPECT_EQ(expected_names.size(), parent_node->mNumChildren);
-
-        for (unsigned int i = 0; i < parent_node->mNumChildren; ++i)
-            EXPECT_EQ(expected_names[i], parent_node->mChildren[i]->mName.C_Str());
-    }
-
-    void expect_named_children(const aiScene *scene, const char *node_name, const std::vector<std::string> &expected_names) {
-        expect_named_children(scene->mRootNode->FindNode(node_name), expected_names);
-    }
-
     void expect_equal_matrices(const aiMatrix4x4 &expected, const aiMatrix4x4 &actual, float abs_error) {
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 4; ++j)
@@ -468,26 +479,43 @@ private:
         }
     }
 
+    /** Get a flattened representation of a node's hierarchy.
+     * \param[in] node The node.
+     * \param[out] hierarchy The flattened node's hierarchy.
+     */
     void flatten_hierarchy(const aiNode *node, Hierarchy &hierarchy)
     {
-        flatten_hierarchy(node, hierarchy, 0);
+        flatten_hierarchy_impl(node, hierarchy, 0);
     }
 
-    void flatten_hierarchy(const aiNode *node, Hierarchy &hierarchy, unsigned int level)
+    void flatten_hierarchy_impl(const aiNode *node, Hierarchy &hierarchy, unsigned int level)
     {
         hierarchy.push_back({ level, node->mName.C_Str() });
         for (size_t i = 0; i < node->mNumChildren; ++i)
         {
-            flatten_hierarchy(node->mChildren[i], hierarchy, level + 1);
+            flatten_hierarchy_impl(node->mChildren[i], hierarchy, level + 1);
         }
     }
 
-    void get_node_children_names(const aiNode *node, std::vector<std::string> &names)
+    /** Get all node's children names beneath max_level.
+     * \param[in] node The parent node from which to get all children names.
+     * \param[out] names The list of children names.
+     * \param[in] max_level If set to -1, all children names will be collected.
+     */
+    void get_node_children_names(const aiNode *node, StringVector &names, const int max_level = -1)
+    {
+        get_node_children_names_impl(node, names, 0, max_level);
+    }
+
+    void get_node_children_names_impl(const aiNode *node, StringVector &names, int level, const int max_level = -1)
     {
         for (size_t i = 0; i < node->mNumChildren; ++i)
         {
             names.push_back(node->mChildren[i]->mName.C_Str());
-            get_node_children_names(node->mChildren[i], names);
+            if (max_level == -1 || level < max_level)
+            {
+                get_node_children_names_impl(node->mChildren[i], names, level + 1, max_level);
+            }
         }
     }
 };

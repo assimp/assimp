@@ -206,7 +206,8 @@ private:
         TempBone() :
             node(nullptr),
             absolute_transform(),
-            offset_matrix() {}
+            offset_matrix(),
+            children() {}
 
         aiNode *node;
         aiMatrix4x4 absolute_transform;

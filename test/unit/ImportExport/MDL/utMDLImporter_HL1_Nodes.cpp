@@ -143,7 +143,9 @@ public:
             "Bone_7"
         };
 
-        expect_named_children(scene, AI_MDL_HL1_NODE_BONES, expected_bones_names);
+        std::vector<std::string> actual_bones_names;
+        get_node_children_names(scene->mRootNode->FindNode(AI_MDL_HL1_NODE_BONES), actual_bones_names);
+        ASSERT_EQ(expected_bones_names, actual_bones_names);
     }
 
     /*  Given a model with bodyparts that have empty names,
@@ -477,6 +479,15 @@ private:
         for (size_t i = 0; i < node->mNumChildren; ++i)
         {
             flatten_hierarchy(node->mChildren[i], hierarchy, level + 1);
+        }
+    }
+
+    void get_node_children_names(const aiNode *node, std::vector<std::string> &names)
+    {
+        for (size_t i = 0; i < node->mNumChildren; ++i)
+        {
+            names.push_back(node->mChildren[i]->mName.C_Str());
+            get_node_children_names(node->mChildren[i], names);
         }
     }
 };

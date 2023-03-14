@@ -156,15 +156,14 @@ public:
     *   combination of #aiPostProcessSteps.
     * @return true if the process is present in this flag fields, false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    virtual void SetupProperties(const Importer* pImp);
-
+    void SetupProperties(const Importer* pImp) override;
 
     //! Set the split limit - needed for unit testing
     inline void SetLimit(unsigned int l)
@@ -174,14 +173,12 @@ public:
     inline unsigned int GetLimit() const
         {return LIMIT;}
 
-public:
-
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * At the moment a process is not supposed to fail.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
     //! Apply the algorithm to a given mesh

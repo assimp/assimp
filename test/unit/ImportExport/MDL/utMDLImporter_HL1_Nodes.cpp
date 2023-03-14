@@ -59,12 +59,12 @@ class utMDLImporter_HL1_Nodes : public ::testing::Test {
     * @note Represents a flattened node hierarchy where each item is a pair
     * containing the node level and it's name.
     */
-    typedef std::vector<std::pair<unsigned int, std::string>> Hierarchy;
+    using Hierarchy = std::vector<std::pair<unsigned int, std::string>>;
 
     /**
     * @note A vector of strings. Used for symplifying syntax.
     */
-    typedef std::vector<std::string> StringVector;
+    using StringVector = std::vector<std::string>;
 
 public:
     /**

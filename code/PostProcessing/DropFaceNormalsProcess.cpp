@@ -55,14 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-DropFaceNormalsProcess::DropFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-DropFaceNormalsProcess::~DropFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool DropFaceNormalsProcess::IsActive( unsigned int pFlags) const {
     return  (pFlags & aiProcess_DropNormals) != 0;

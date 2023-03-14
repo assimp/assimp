@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,53 +39,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/** @file Defines a post processing step to fix infacing normals */
-#ifndef AI_FIXNORMALSPROCESS_H_INC
-#define AI_FIXNORMALSPROCESS_H_INC
-
-#include "Common/BaseProcess.h"
-
-struct aiMesh;
+#include <assimp/types.h>
+#include <assimp/mesh.h>
 
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** The FixInfacingNormalsProcess tries to determine whether the normal
- * vectors of an object are facing inwards. In this case they will be
- * flipped.
- */
-class FixInfacingNormalsProcess : public BaseProcess {
+/// @brief This helper class supports some basic geometry algorithms.
+// ---------------------------------------------------------------------------
+class GeometryUtils {
 public:
-    // -------------------------------------------------------------------
-    /// The default class constructor / destructor.
-    FixInfacingNormalsProcess() = default;
-    ~FixInfacingNormalsProcess() override = default;
+    static ai_real heron( ai_real a, ai_real b, ai_real c );
+    
+    /// @brief Will compute the distance between 2 3D-vectors
+    /// @param vA  Vector a.
+    /// @param vB  Vector b.
+    /// @return The distance.
+    static ai_real distance3D( const aiVector3D &vA, aiVector3D &vB );
 
-    // -------------------------------------------------------------------
-    /** Returns whether the processing step is present in the given flag field.
-     * @param pFlags The processing flags the importer was called with. A bitwise
-     *   combination of #aiPostProcessSteps.
-     * @return true if the process is present in this flag fields, false if not.
-    */
-    bool IsActive( unsigned int pFlags) const override;
-
-    // -------------------------------------------------------------------
-    /** Executes the post processing step on the given imported data.
-    * At the moment a process is not supposed to fail.
-    * @param pScene The imported data to work at.
-    */
-    void Execute( aiScene* pScene) override;
-
-protected:
-
-    // -------------------------------------------------------------------
-    /** Executes the step on the given mesh
-     * @param pMesh The mesh to process.
-     */
-    bool ProcessMesh( aiMesh* pMesh, unsigned int index);
+    /// @brief Will calculate the area of a triangle described by a aiFace.
+    /// @param face   The face
+    /// @param mesh   The mesh containing the face
+    /// @return The area.
+    static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh );
 };
 
-} // end of namespace Assimp
-
-#endif // AI_FIXNORMALSPROCESS_H_INC
+} // namespace Assimp

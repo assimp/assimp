@@ -49,8 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** The FixInfacingNormalsProcess tries to determine whether the normal
@@ -59,8 +58,8 @@ namespace Assimp
  */
 class FixInfacingNormalsProcess : public BaseProcess {
 public:
-    FixInfacingNormalsProcess();
-    ~FixInfacingNormalsProcess();
+    FixInfacingNormalsProcess() = default;
+    ~FixInfacingNormalsProcess() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

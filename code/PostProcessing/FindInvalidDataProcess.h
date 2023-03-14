@@ -65,7 +65,7 @@ namespace Assimp {
 class ASSIMP_API FindInvalidDataProcess : public BaseProcess {
 public:
     FindInvalidDataProcess();
-    ~FindInvalidDataProcess();
+    ~FindInvalidDataProcess() = default;
 
     // -------------------------------------------------------------------
     //

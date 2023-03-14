@@ -47,20 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/BaseProcess.h"
 #include <assimp/mesh.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
-/** The GenFaceNormalsProcess computes face normals for all faces of all meshes
-*/
-class ASSIMP_API_WINONLY GenFaceNormalsProcess : public BaseProcess
-{
+/** 
+ * @brief The GenFaceNormalsProcess computes face normals for all faces of all meshes
+ */
+class ASSIMP_API_WINONLY GenFaceNormalsProcess : public BaseProcess {
 public:
+    GenFaceNormalsProcess() = default;
+    ~GenFaceNormalsProcess() = default;
 
-    GenFaceNormalsProcess();
-    ~GenFaceNormalsProcess();
-
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
     * @param pFlags The processing flags the importer was called with. A bitwise

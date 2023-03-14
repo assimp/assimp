@@ -59,7 +59,7 @@ namespace Assimp    {
 class ASSIMP_API FindDegeneratesProcess : public BaseProcess {
 public:
     FindDegeneratesProcess();
-    ~FindDegeneratesProcess();
+    ~FindDegeneratesProcess() = default;
 
     // -------------------------------------------------------------------
     // Check whether step is active
@@ -105,23 +105,19 @@ private:
     bool mConfigCheckAreaOfTriangle;
 };
 
-inline
-void FindDegeneratesProcess::EnableInstantRemoval(bool enabled) {
+inline void FindDegeneratesProcess::EnableInstantRemoval(bool enabled) {
     mConfigRemoveDegenerates = enabled;
 }
 
-inline
-bool FindDegeneratesProcess::IsInstantRemoval() const {
+inline bool FindDegeneratesProcess::IsInstantRemoval() const {
     return mConfigRemoveDegenerates;
 }
 
-inline
-void FindDegeneratesProcess::EnableAreaCheck( bool enabled ) {
+inline void FindDegeneratesProcess::EnableAreaCheck( bool enabled ) {
     mConfigCheckAreaOfTriangle = enabled;
 }
 
-inline
-bool FindDegeneratesProcess::isAreaCheckEnabled() const {
+inline bool FindDegeneratesProcess::isAreaCheckEnabled() const {
     return mConfigCheckAreaOfTriangle;
 }
 

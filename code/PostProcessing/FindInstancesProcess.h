@@ -107,14 +107,11 @@ inline bool CompareArrays(const aiColor4D* first, const aiColor4D* second,
 // ---------------------------------------------------------------------------
 /** @brief A post-processing steps to search for instanced meshes
 */
-class FindInstancesProcess : public BaseProcess
-{
+class FindInstancesProcess : public BaseProcess {
 public:
-
     FindInstancesProcess();
-    ~FindInstancesProcess();
+    ~FindInstancesProcess() = default;
 
-public:
     // -------------------------------------------------------------------
     // Check whether step is active in given flags combination
     bool IsActive( unsigned int pFlags) const;
@@ -128,10 +125,9 @@ public:
     void SetupProperties(const Importer* pImp);
 
 private:
-
     bool configSpeedFlag;
-
 }; // ! end class FindInstancesProcess
+
 }  // ! end namespace Assimp
 
 #endif // !! AI_FINDINSTANCES_H_INC

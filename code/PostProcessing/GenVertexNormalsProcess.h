@@ -61,7 +61,7 @@ namespace Assimp {
 class ASSIMP_API GenVertexNormalsProcess : public BaseProcess {
 public:
     GenVertexNormalsProcess();
-    ~GenVertexNormalsProcess();
+    ~GenVertexNormalsProcess() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.

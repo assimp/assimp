@@ -60,13 +60,17 @@ namespace Assimp {
  */
 class ASSIMP_API GenBoundingBoxesProcess : public BaseProcess {
 public:
-    /// The class constructor.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     GenBoundingBoxesProcess() = default;
-    /// The class destructor.
-    ~GenBoundingBoxesProcess() = default;
-    /// Will return true, if aiProcess_GenBoundingBoxes is defined.
+    ~GenBoundingBoxesProcess() override = default;
+
+    // -------------------------------------------------------------------
+    /// @brief Will return true, if aiProcess_GenBoundingBoxes is defined.
     bool IsActive(unsigned int pFlags) const override;
-    /// The execution callback.
+
+    // -------------------------------------------------------------------
+    /// @brief The execution callback.
     void Execute(aiScene* pScene) override;
 };
 

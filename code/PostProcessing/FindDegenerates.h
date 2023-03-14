@@ -59,7 +59,7 @@ namespace Assimp    {
 class ASSIMP_API FindDegeneratesProcess : public BaseProcess {
 public:
     FindDegeneratesProcess();
-    ~FindDegeneratesProcess() = default;
+    ~FindDegeneratesProcess() override = default;
 
     // -------------------------------------------------------------------
     // Check whether step is active

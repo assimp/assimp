@@ -60,8 +60,10 @@ namespace Assimp {
 */
 class ASSIMP_API GenVertexNormalsProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     GenVertexNormalsProcess();
-    ~GenVertexNormalsProcess() = default;
+    ~GenVertexNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.

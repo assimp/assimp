@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** The JoinVerticesProcess unites identical vertices in all imported meshes.
@@ -65,12 +64,9 @@ namespace Assimp
 class ASSIMP_API JoinVerticesProcess : public BaseProcess {
 public:
     // -------------------------------------------------------------------
-    /// @brief  The default class constructor.
-    JoinVerticesProcess() = default;
-    
-    // -------------------------------------------------------------------
-    /// @brief  The default class destructor.
-    ~JoinVerticesProcess() = default;
+    /// The default class constructor / destructor.
+    JoinVerticesProcess() = default;    
+    ~JoinVerticesProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

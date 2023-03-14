@@ -72,11 +72,11 @@ namespace Assimp    {
 class ValidateDSProcess : public BaseProcess
 {
 public:
-
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     ValidateDSProcess();
-    ~ValidateDSProcess();
+    ~ValidateDSProcess() override = default;
 
-public:
     // -------------------------------------------------------------------
     bool IsActive( unsigned int pFlags) const;
 

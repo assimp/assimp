@@ -55,8 +55,8 @@ namespace Assimp {
 */
 class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess {
 public:
-    DropFaceNormalsProcess();
-    ~DropFaceNormalsProcess();
+    DropFaceNormalsProcess() = default;
+    ~DropFaceNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

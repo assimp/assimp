@@ -83,16 +83,15 @@ class SplitLargeMeshesProcess_Vertex;
  * Applied BEFORE the JoinVertices-Step occurs.
  * Returns NON-UNIQUE vertices, splits by triangle number.
 */
-class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
-{
+class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess {
     friend class SplitLargeMeshesProcess_Vertex;
 
 public:
-
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     SplitLargeMeshesProcess_Triangle();
-    ~SplitLargeMeshesProcess_Triangle();
+    ~SplitLargeMeshesProcess_Triangle() override = default;
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
     * @param pFlags The processing flags the importer was called with. A
@@ -102,14 +101,12 @@ public:
     */
     bool IsActive( unsigned int pFlags) const;
 
-
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    virtual void SetupProperties(const Importer* pImp);
-
+    void SetupProperties(const Importer* pImp) override;
 
     //! Set the split limit - needed for unit testing
     inline void SetLimit(unsigned int l)
@@ -118,8 +115,6 @@ public:
     //! Get the split limit
     inline unsigned int GetLimit() const
         {return LIMIT;}
-
-public:
 
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
@@ -144,21 +139,17 @@ public:
     unsigned int LIMIT;
 };
 
-
 // ---------------------------------------------------------------------------
 /** Post-processing filter to split large meshes into sub-meshes
  *
  * Applied AFTER the JoinVertices-Step occurs.
  * Returns UNIQUE vertices, splits by vertex number.
 */
-class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
-{
+class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess {
 public:
-
     SplitLargeMeshesProcess_Vertex();
-    ~SplitLargeMeshesProcess_Vertex();
+    ~SplitLargeMeshesProcess_Vertex() override = default;
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
     * @param pFlags The processing flags the importer was called with. A bitwise

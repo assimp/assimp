@@ -58,11 +58,10 @@ namespace Assimp {
 */
 class ASSIMP_API RemoveVCProcess : public BaseProcess {
 public:
-    /// The default class constructor.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     RemoveVCProcess();
-
-    /// The class destructor.
-    ~RemoveVCProcess();
+    ~RemoveVCProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

@@ -60,8 +60,10 @@ namespace Assimp    {
 */
 class ASSIMP_API SortByPTypeProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     SortByPTypeProcess();
-    ~SortByPTypeProcess();
+    ~SortByPTypeProcess() override = default;
 
     // -------------------------------------------------------------------
     bool IsActive( unsigned int pFlags) const;

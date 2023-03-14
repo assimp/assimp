@@ -70,7 +70,7 @@ namespace Assimp {
 class DeboneProcess : public BaseProcess {
 public:
     DeboneProcess();
-    ~DeboneProcess();
+    ~DeboneProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.

@@ -62,11 +62,10 @@ namespace Assimp {
 */
 class ASSIMP_API ScaleProcess : public BaseProcess {
 public:
-    /// The default class constructor.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     ScaleProcess();
-
-    /// The class destructor.
-    virtual ~ScaleProcess();
+    ~ScaleProcess() override = default;
 
     /// Will set the scale manually.
     void setScale( ai_real scale );

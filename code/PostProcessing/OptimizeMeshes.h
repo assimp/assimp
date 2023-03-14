@@ -68,11 +68,10 @@ namespace Assimp    {
  */
 class OptimizeMeshesProcess : public BaseProcess {
 public:
-    /// @brief  The class constructor.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     OptimizeMeshesProcess();
-
-    /// @brief  The class destructor.
-    ~OptimizeMeshesProcess();
+    ~OptimizeMeshesProcess() override = default;
 
     /** @brief Internal utility to store additional mesh info
      */

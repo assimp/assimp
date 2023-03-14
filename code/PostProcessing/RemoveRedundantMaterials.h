@@ -59,11 +59,10 @@ namespace Assimp    {
  */
 class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess {
 public:
-    /// The default class constructor.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     RemoveRedundantMatsProcess();
-
-    /// The class destructor.
-    ~RemoveRedundantMatsProcess();
+    ~RemoveRedundantMatsProcess() override = default;
 
     // -------------------------------------------------------------------
     // Check whether step is active

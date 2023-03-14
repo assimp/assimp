@@ -74,8 +74,10 @@ namespace Assimp {
 */
 class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     LimitBoneWeightsProcess();
-    ~LimitBoneWeightsProcess();
+    ~LimitBoneWeightsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.

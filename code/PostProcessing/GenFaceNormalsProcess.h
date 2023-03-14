@@ -55,8 +55,10 @@ namespace Assimp {
  */
 class ASSIMP_API_WINONLY GenFaceNormalsProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     GenFaceNormalsProcess() = default;
-    ~GenFaceNormalsProcess() = default;
+    ~GenFaceNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

@@ -58,8 +58,10 @@ namespace Assimp {
  */
 class FixInfacingNormalsProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     FixInfacingNormalsProcess() = default;
-    ~FixInfacingNormalsProcess() = default;
+    ~FixInfacingNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

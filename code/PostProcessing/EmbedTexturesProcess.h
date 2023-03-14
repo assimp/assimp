@@ -62,10 +62,10 @@ namespace Assimp {
 class ASSIMP_API EmbedTexturesProcess : public BaseProcess {
 public:
     /// The default class constructor.
-    EmbedTexturesProcess();
+    EmbedTexturesProcess() = default;
 
     /// The class destructor.
-    virtual ~EmbedTexturesProcess();
+    ~EmbedTexturesProcess() override = default;
 
     /// Overwritten, @see BaseProcess
     virtual bool IsActive(unsigned int pFlags) const;

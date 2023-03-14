@@ -110,7 +110,7 @@ inline bool CompareArrays(const aiColor4D* first, const aiColor4D* second,
 class FindInstancesProcess : public BaseProcess {
 public:
     FindInstancesProcess();
-    ~FindInstancesProcess() = default;
+    ~FindInstancesProcess() override = default;
 
     // -------------------------------------------------------------------
     // Check whether step is active in given flags combination

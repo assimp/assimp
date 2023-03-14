@@ -61,8 +61,10 @@ namespace Assimp {
  */
 class ASSIMP_API TriangulateProcess : public BaseProcess {
 public:
-    TriangulateProcess();
-    ~TriangulateProcess();
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
+    TriangulateProcess() = default;
+    ~TriangulateProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.

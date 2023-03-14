@@ -81,7 +81,7 @@ protected:
     /// Executes the post processing step on the given imported data.
     /// At the moment a process is not supposed to fail.
     /// @param pScene The imported data to work at.
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     /// Splits the given mesh by bone count.
     /// @param pMesh the Mesh to split. Is not changed at all, but might be superfluous in case it was split.

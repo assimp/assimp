@@ -516,19 +516,19 @@ void HL1MDLLoader::read_bones() {
 
 void HL1MDLLoader::build_bone_children_hierarchy(const TempBone &bone)
 {
-    if (bone.children.size() > 0)
-    {
-        aiNode* bone_node = bone.node;
-        bone_node->mNumChildren = static_cast<unsigned int>(bone.children.size());
-        bone_node->mChildren = new aiNode *[bone_node->mNumChildren];
+    if (bone.children.empty())
+        return;
 
-        // Build each child bone's hierarchy recursively.
-        for (size_t i = 0; i < bone.children.size(); ++i)
-        {
-            const TempBone &child_bone = temp_bones_[bone.children[i]];
-            bone_node->mChildren[i] = child_bone.node;
-            build_bone_children_hierarchy(child_bone);
-        }
+    aiNode* bone_node = bone.node;
+    bone_node->mNumChildren = static_cast<unsigned int>(bone.children.size());
+    bone_node->mChildren = new aiNode *[bone_node->mNumChildren];
+
+    // Build each child bone's hierarchy recursively.
+    for (size_t i = 0; i < bone.children.size(); ++i)
+    {
+        const TempBone &child_bone = temp_bones_[bone.children[i]];
+        bone_node->mChildren[i] = child_bone.node;
+        build_bone_children_hierarchy(child_bone);
     }
 }
 

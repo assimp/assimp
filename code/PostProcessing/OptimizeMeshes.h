@@ -93,16 +93,14 @@ public:
         unsigned int output_id;
     };
 
-public:
     // -------------------------------------------------------------------
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
-    void SetupProperties(const Importer* pImp);
-
+    void SetupProperties(const Importer* pImp) override;
 
     // -------------------------------------------------------------------
     /** @brief Specify whether you want meshes with different

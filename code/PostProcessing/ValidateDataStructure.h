@@ -69,8 +69,7 @@ namespace Assimp    {
 /** Validates the whole ASSIMP scene data structure for correctness.
  *  ImportErrorException is thrown of the scene is corrupt.*/
 // --------------------------------------------------------------------------------------
-class ValidateDSProcess : public BaseProcess
-{
+class ValidateDSProcess : public BaseProcess {
 public:
     // -------------------------------------------------------------------
     /// The default class constructor / destructor.
@@ -78,13 +77,12 @@ public:
     ~ValidateDSProcess() override = default;
 
     // -------------------------------------------------------------------
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Report a validation error. This will throw an exception,
      *  control won't return.

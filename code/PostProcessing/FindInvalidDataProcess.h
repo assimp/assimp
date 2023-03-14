@@ -71,15 +71,15 @@ public:
 
     // -------------------------------------------------------------------
     /// Returns active state.
-    bool IsActive(unsigned int pFlags) const;
+    bool IsActive(unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /// Setup import settings
-    void SetupProperties(const Importer *pImp);
+    void SetupProperties(const Importer *pImp) override;
 
     // -------------------------------------------------------------------
     /// Run the step
-    void Execute(aiScene *pScene);
+    void Execute(aiScene *pScene) override;
 
     // -------------------------------------------------------------------
     /// Executes the post-processing step on the given mesh

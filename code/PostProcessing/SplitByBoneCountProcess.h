@@ -75,7 +75,7 @@ public:
     /// @brief Called prior to ExecuteOnScene().
     /// The function is a request to the process to update its configuration
     /// basing on the Importer's configuration property list.
-    virtual void SetupProperties(const Importer* pImp);
+    virtual void SetupProperties(const Importer* pImp) override;
 
 protected:
     /// Executes the post processing step on the given imported data.

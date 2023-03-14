@@ -69,15 +69,15 @@ public:
 
     // -------------------------------------------------------------------
     // Check whether the pp step is active
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     // Executes the pp step on a given scene
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
     // Configures the pp step
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
 protected:
     // -------------------------------------------------------------------

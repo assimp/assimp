@@ -68,13 +68,13 @@ public:
     ~EmbedTexturesProcess() override = default;
 
     /// Overwritten, @see BaseProcess
-    virtual bool IsActive(unsigned int pFlags) const;
+    bool IsActive(unsigned int pFlags) const override;
 
     /// Overwritten, @see BaseProcess
-    virtual void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
     /// Overwritten, @see BaseProcess
-    virtual void Execute(aiScene* pScene);
+    virtual void Execute(aiScene* pScene) override;
 
 private:
     // Resolve the path and add the file content to the scene as a texture.

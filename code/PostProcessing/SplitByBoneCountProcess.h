@@ -70,7 +70,7 @@ public:
     /// @param pFlags The processing flags the importer was called with. A
     ///        bitwise combination of #aiPostProcessSteps.
     /// @return true if the process is present in this flag fields, false if not.
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     /// @brief Called prior to ExecuteOnScene().
     /// The function is a request to the process to update its configuration

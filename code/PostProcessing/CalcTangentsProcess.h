@@ -86,7 +86,6 @@ public:
     }
 
 protected:
-
     // -------------------------------------------------------------------
     /** Calculates tangents and bitangents for a specific mesh.
     * @param pMesh The mesh to process.
@@ -98,10 +97,9 @@ protected:
     /** Executes the post processing step on the given imported data.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 private:
-
     /** Configuration option: maximum smoothing angle, in radians*/
     float configMaxAngle;
     unsigned int configSourceUV;

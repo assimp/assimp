@@ -156,15 +156,6 @@ namespace {
 
 }
 
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-TriangulateProcess::TriangulateProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-TriangulateProcess::~TriangulateProcess() = default;
-
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool TriangulateProcess::IsActive( unsigned int pFlags) const

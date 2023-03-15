@@ -50,10 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::MakeVerboseFormatProcess() = default;
-// ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::~MakeVerboseFormatProcess() = default;
-// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
     ai_assert(nullptr != pScene);

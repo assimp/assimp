@@ -69,10 +69,6 @@ PretransformVertices::PretransformVertices() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-PretransformVertices::~PretransformVertices() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool PretransformVertices::IsActive(unsigned int pFlags) const {
 	return (pFlags & aiProcess_PreTransformVertices) != 0;

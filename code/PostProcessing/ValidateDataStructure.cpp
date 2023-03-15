@@ -60,12 +60,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ValidateDSProcess::ValidateDSProcess() :
-        mScene() {}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ValidateDSProcess::~ValidateDSProcess() = default;
+ValidateDSProcess::ValidateDSProcess() : mScene(nullptr) {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

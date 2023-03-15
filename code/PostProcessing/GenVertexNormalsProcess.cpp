@@ -61,10 +61,6 @@ GenVertexNormalsProcess::GenVertexNormalsProcess() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-GenVertexNormalsProcess::~GenVertexNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenVertexNormalsProcess::IsActive(unsigned int pFlags) const {
     force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
@@ -109,10 +105,10 @@ void GenVertexNormalsProcess::Execute(aiScene *pScene) {
 // Executes the post processing step on the given imported data.
 bool GenVertexNormalsProcess::GenMeshVertexNormals(aiMesh *pMesh, unsigned int meshIndex) {
     if (nullptr != pMesh->mNormals) {
-        if (force_)
-            delete[] pMesh->mNormals;
-        else
+        if (!force_) {
             return false;
+        }
+        delete[] pMesh->mNormals;
     }
 
     // If the mesh consists of lines and/or points but not of
@@ -144,8 +140,9 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals(aiMesh *pMesh, unsigned int m
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
         // Boolean XOR - if either but not both of these flags is set, then the winding order has
         // changed and the cross product to calculate the normal needs to be reversed
-        if (flippedWindingOrder_ != leftHanded_)
+        if (flippedWindingOrder_ != leftHanded_) {
             std::swap(pV2, pV3);
+        }
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,48 +39,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to compute face normals for all loaded faces*/
-#ifndef AI_GENFACENORMALPROCESS_H_INC
-#define AI_GENFACENORMALPROCESS_H_INC
+#include "GeometryUtils.h"
 
-#include "Common/BaseProcess.h"
-#include <assimp/mesh.h>
+#include <assimp/vector3.h>
 
 namespace Assimp {
 
-// ---------------------------------------------------------------------------
-/** 
- * @brief The GenFaceNormalsProcess computes face normals for all faces of all meshes
- */
-class ASSIMP_API_WINONLY GenFaceNormalsProcess : public BaseProcess {
-public:
-    // -------------------------------------------------------------------
-    /// The default class constructor / destructor.
-    GenFaceNormalsProcess() = default;
-    ~GenFaceNormalsProcess() override = default;
+ai_real GeometryUtils::heron( ai_real a, ai_real b, ai_real c ) {
+    ai_real s = (a + b + c) / 2;
+    ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), (ai_real)0.5 );
+    return area;
+}
 
-    // -------------------------------------------------------------------
-    /** Returns whether the processing step is present in the given flag field.
-    * @param pFlags The processing flags the importer was called with. A bitwise
-    *   combination of #aiPostProcessSteps.
-    * @return true if the process is present in this flag fields, false if not.
-    */
-    bool IsActive( unsigned int pFlags) const override;
+ai_real GeometryUtils::distance3D( const aiVector3D &vA, aiVector3D &vB ) {
+    const ai_real lx = ( vB.x - vA.x );
+    const ai_real ly = ( vB.y - vA.y );
+    const ai_real lz = ( vB.z - vA.z );
+    ai_real a = lx*lx + ly*ly + lz*lz;
+    ai_real d = pow( a, (ai_real)0.5 );
 
-    // -------------------------------------------------------------------
-    /** Executes the post processing step on the given imported data.
-    * At the moment a process is not supposed to fail.
-    * @param pScene The imported data to work at.
-    */
-    void Execute( aiScene* pScene) override;
+    return d;
+}
 
-private:
-    bool GenMeshFaceNormals(aiMesh* pcMesh);
-    mutable bool force_ = false;
-    mutable bool flippedWindingOrder_ = false;
-    mutable bool leftHanded_ = false;
-};
+ai_real GeometryUtils::calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh ) {
+    ai_real area = 0;
 
-} // end of namespace Assimp
+    aiVector3D vA( mesh->mVertices[ face.mIndices[ 0 ] ] );
+    aiVector3D vB( mesh->mVertices[ face.mIndices[ 1 ] ] );
+    aiVector3D vC( mesh->mVertices[ face.mIndices[ 2 ] ] );
 
-#endif // !!AI_GENFACENORMALPROCESS_H_INC
+    ai_real a( distance3D( vA, vB ) );
+    ai_real b( distance3D( vB, vC ) );
+    ai_real c( distance3D( vC, vA ) );
+    area = heron( a, b, c );
+
+    return area;
+}
+
+} // namespace Assimp

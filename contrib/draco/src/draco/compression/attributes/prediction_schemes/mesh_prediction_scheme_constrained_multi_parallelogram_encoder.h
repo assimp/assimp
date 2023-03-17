@@ -392,7 +392,7 @@ bool MeshPredictionSchemeConstrainedMultiParallelogramEncoder<
       RAnsBitEncoder encoder;
       encoder.StartEncoding();
       // Encode the crease edge flags in the reverse vertex order that is needed
-      // be the decoder. Note that for the currently supported mode, each vertex
+      // by the decoder. Note that for the currently supported mode, each vertex
       // has exactly |num_used_parallelograms| edges that need to be encoded.
       for (int j = static_cast<int>(is_crease_edge_[i].size()) -
                    num_used_parallelograms;

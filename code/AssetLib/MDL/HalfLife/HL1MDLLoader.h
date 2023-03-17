@@ -143,6 +143,14 @@ private:
      */
     static bool get_num_blend_controllers(const int num_blend_animations, int &num_blend_controllers);
 
+    /**
+     *  \brief Build a bone's node children hierarchy.
+     *
+     * \param[in] bone The bone for which we must build all children hierarchy.
+     */
+    struct TempBone;
+    void build_bone_children_hierarchy(const TempBone& bone);
+
     /** Output scene to be filled */
     aiScene *scene_;
 
@@ -198,11 +206,13 @@ private:
         TempBone() :
             node(nullptr),
             absolute_transform(),
-            offset_matrix() {}
+            offset_matrix(),
+            children() {}
 
         aiNode *node;
         aiMatrix4x4 absolute_transform;
         aiMatrix4x4 offset_matrix;
+        std::vector<int> children; // Bone children
     };
 
     std::vector<TempBone> temp_bones_;

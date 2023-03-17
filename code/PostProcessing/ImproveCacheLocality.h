@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** The ImproveCacheLocalityProcess reorders all faces for improved vertex
@@ -61,26 +60,24 @@ namespace Assimp
  *
  *  @note This step expects triagulated input data.
  */
-class ImproveCacheLocalityProcess : public BaseProcess
-{
+class ImproveCacheLocalityProcess : public BaseProcess {
 public:
-
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     ImproveCacheLocalityProcess();
-    ~ImproveCacheLocalityProcess();
-
-public:
+    ~ImproveCacheLocalityProcess() override = default;
 
     // -------------------------------------------------------------------
     // Check whether the pp step is active
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     // Executes the pp step on a given scene
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
     // Configures the pp step
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
 protected:
     // -------------------------------------------------------------------

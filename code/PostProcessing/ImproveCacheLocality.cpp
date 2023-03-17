@@ -69,10 +69,6 @@ ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool ImproveCacheLocalityProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_ImproveCacheLocality) != 0;

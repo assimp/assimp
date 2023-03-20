@@ -56,33 +56,24 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-TextureTransformStep::TextureTransformStep() :
-    configFlags()
-{
+TextureTransformStep::TextureTransformStep() : configFlags()  {
     // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-TextureTransformStep::~TextureTransformStep() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool TextureTransformStep::IsActive( unsigned int pFlags) const
-{
+bool TextureTransformStep::IsActive( unsigned int pFlags) const {
     return  (pFlags & aiProcess_TransformUVCoords) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup properties
-void TextureTransformStep::SetupProperties(const Importer* pImp)
-{
+void TextureTransformStep::SetupProperties(const Importer* pImp) {
     configFlags = pImp->GetPropertyInteger(AI_CONFIG_PP_TUV_EVALUATE,AI_UVTRAFO_ALL);
 }
 
 // ------------------------------------------------------------------------------------------------
-void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
-{
+void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info) {
     /*  This function tries to simplify the input UV transformation.
      *  That's very important as it allows us to reduce the number
      *  of output UV channels. The order in which the transformations
@@ -90,7 +81,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      */
 
 	int rounded;
-	char szTemp[512];
+	char szTemp[512] = {};
 
     /* Optimize the rotation angle. That's slightly difficult as
      * we have an inprecise floating-point number (when comparing
@@ -98,12 +89,10 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
      * an epsilon of 5 degrees). If there is a rotation value, we can't
      * perform any further optimizations.
      */
-    if (info.mRotation)
-    {
+    if (info.mRotation) {
         float out = info.mRotation;
         rounded = static_cast<int>((info.mRotation / static_cast<float>(AI_MATH_TWO_PI)));
-        if (rounded)
-        {
+        if (rounded) {
             out -= rounded * static_cast<float>(AI_MATH_PI);
             ASSIMP_LOG_INFO("Texture coordinate rotation ", info.mRotation, " can be simplified to ", out);
         }
@@ -187,8 +176,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 }
 
 // ------------------------------------------------------------------------------------------------
-void UpdateUVIndex(const std::list<TTUpdateInfo>& l, unsigned int n)
-{
+void UpdateUVIndex(const std::list<TTUpdateInfo>& l, unsigned int n) {
     // Don't set if == 0 && wasn't set before
     for (std::list<TTUpdateInfo>::const_iterator it = l.begin();it != l.end(); ++it) {
         const TTUpdateInfo& info = *it;
@@ -203,8 +191,7 @@ void UpdateUVIndex(const std::list<TTUpdateInfo>& l, unsigned int n)
 }
 
 // ------------------------------------------------------------------------------------------------
-inline const char* MappingModeToChar(aiTextureMapMode map)
-{
+inline static const char* MappingModeToChar(aiTextureMapMode map) {
     if (aiTextureMapMode_Wrap == map)
         return "-w";
 
@@ -215,8 +202,7 @@ inline const char* MappingModeToChar(aiTextureMapMode map)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TextureTransformStep::Execute( aiScene* pScene)
-{
+void TextureTransformStep::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("TransformUVCoordsProcess begin");
 
 

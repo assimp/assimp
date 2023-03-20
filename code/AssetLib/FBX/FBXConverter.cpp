@@ -873,8 +873,12 @@ void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
             data->Set(index++, prop.first, interpretedBool->Value());
         } else if (const TypedProperty<int> *interpretedInt = prop.second->As<TypedProperty<int>>()) {
             data->Set(index++, prop.first, interpretedInt->Value());
+        } else if (const TypedProperty<uint32_t> *interpretedUInt = prop.second->As<TypedProperty<uint32_t>>()) {
+            data->Set(index++, prop.first, interpretedUInt->Value());
         } else if (const TypedProperty<uint64_t> *interpretedUint64 = prop.second->As<TypedProperty<uint64_t>>()) {
             data->Set(index++, prop.first, interpretedUint64->Value());
+        } else if (const TypedProperty<int64_t> *interpretedint64 = prop.second->As<TypedProperty<int64_t>>()) {
+            data->Set(index++, prop.first, interpretedint64->Value());
         } else if (const TypedProperty<float> *interpretedFloat = prop.second->As<TypedProperty<float>>()) {
             data->Set(index++, prop.first, interpretedFloat->Value());
         } else if (const TypedProperty<std::string> *interpretedString = prop.second->As<TypedProperty<std::string>>()) {

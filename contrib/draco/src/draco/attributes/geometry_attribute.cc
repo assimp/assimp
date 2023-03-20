@@ -26,7 +26,7 @@ GeometryAttribute::GeometryAttribute()
       unique_id_(0) {}
 
 void GeometryAttribute::Init(GeometryAttribute::Type attribute_type,
-                             DataBuffer *buffer, int8_t num_components,
+                             DataBuffer *buffer, uint8_t num_components,
                              DataType data_type, bool normalized,
                              int64_t byte_stride, int64_t byte_offset) {
   buffer_ = buffer;

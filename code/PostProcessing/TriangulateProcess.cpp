@@ -156,15 +156,6 @@ namespace {
 
 }
 
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-TriangulateProcess::TriangulateProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-TriangulateProcess::~TriangulateProcess() = default;
-
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool TriangulateProcess::IsActive( unsigned int pFlags) const
@@ -465,6 +456,21 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
                     // Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
                     if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1)) {
+                        continue;
+                    }
+
+                    // Skip when three point is in a line
+                    aiVector2D left = *pnt0 - *pnt1;
+                    aiVector2D right = *pnt2 - *pnt1;
+
+                    left.Normalize();
+                    right.Normalize();
+                    auto mul = left * right;
+
+                    // if the angle is 0 or 180
+                    if (std::abs(mul - 1.f) < ai_epsilon || std::abs(mul + 1.f) < ai_epsilon) {
+                        // skip this ear
+                        ASSIMP_LOG_WARN("Skip a ear, due to its angle is near 0 or 180.");
                         continue;
                     }
 

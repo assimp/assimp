@@ -62,7 +62,7 @@ public:
     /// @param name     The name instance
     /// @param doc      The document instance
     Geometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
-    
+
     /// @brief The class destructor, default.
     virtual ~Geometry() = default;
 
@@ -72,11 +72,12 @@ public:
 
     /// @brief Get the BlendShape attached to this geometry or nullptr
     /// @return The blendshape arrays.
-    const std::vector<const BlendShape*>& GetBlendShapes() const;
+    const std::unordered_set<const BlendShape*>& GetBlendShapes() const;
 
 private:
     const Skin* skin;
-    std::vector<const BlendShape*> blendShapes;
+    std::unordered_set<const BlendShape*> blendShapes;
+
 };
 
 typedef std::vector<int> MatIndexArray;
@@ -112,7 +113,7 @@ public:
     /// @return The binomal vector.
     const std::vector<aiVector3D>& GetBinormals() const;
 
-    /// @brief Return list of faces - each entry denotes a face and specifies how many vertices it has. 
+    /// @brief Return list of faces - each entry denotes a face and specifies how many vertices it has.
     ///        Vertices are taken from the vertex data arrays in sequential order.
     /// @return The face indices vector.
     const std::vector<unsigned int>& GetFaceIndexCounts() const;

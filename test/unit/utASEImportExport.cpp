@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -62,4 +63,113 @@ public:
 
 TEST_F(utASEImportExport, importACFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+
+TEST_F(utASEImportExport, importAnim1) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/anim.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importAnim2) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/anim2.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importCameraRollAnim) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/CameraRollAnim.ase", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importMotionCaptureROM) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/MotionCaptureROM.ase", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importRotatingCube) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/RotatingCube.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importTargetCameraAnim) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TargetCameraAnim.ase", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importTestFormatDetection) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TestFormatDetection", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importThreeCubesGreen) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+
+    ::Assimp::Importer importerLE;
+    const aiScene *sceneLE = importerLE.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen_UTF16LE.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, sceneLE);
+
+    ::Assimp::Importer importerBE;
+    const aiScene *sceneBE = importerBE.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/ThreeCubesGreen_UTF16BE.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, sceneBE);
+
+    // TODO: these scenes should probably be identical
+    // verify that is the case and then add tests to check it
+}
+
+
+TEST_F(utASEImportExport, importUVTransform_Normal) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TestUVTransform/UVTransform_Normal.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importUVTransform_ScaleUV1_2_OffsetUV0_0_9_Rotate_72_mirrorU) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TestUVTransform/UVTransform_ScaleUV1-2_OffsetUV0-0.9_Rotate-72_mirrorU.ase", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importUVTransform_ScaleUV2x) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TestUVTransform/UVTransform_ScaleUV2x.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utASEImportExport, importUVTransform_ScaleUV2x_Rotate45) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/TestUVTransform/UVTransform_ScaleUV2x_Rotate45.ASE", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
 }

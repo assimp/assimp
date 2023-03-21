@@ -61,8 +61,8 @@ public:
     void flatShadeTexture() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "chrome_sphere.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        EXPECT_NE(nullptr, scene->mMaterials);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene->mMaterials);
 
         aiShadingMode shading_mode = aiShadingMode_Flat;
         scene->mMaterials[0]->Get(AI_MATKEY_SHADING_MODEL, shading_mode);
@@ -74,8 +74,8 @@ public:
     void chromeTexture() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "chrome_sphere.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        EXPECT_NE(nullptr, scene->mMaterials);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene->mMaterials);
 
         int chrome;
         scene->mMaterials[0]->Get(AI_MDL_HL1_MATKEY_CHROME(aiTextureType_DIFFUSE, 0), chrome);
@@ -87,8 +87,8 @@ public:
     void additiveBlendTexture() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "blend_additive.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        EXPECT_NE(nullptr, scene->mMaterials);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene->mMaterials);
 
         aiBlendMode blend_mode = aiBlendMode_Default;
         scene->mMaterials[0]->Get(AI_MATKEY_BLEND_FUNC, blend_mode);
@@ -101,8 +101,8 @@ public:
     void textureWithColorMask() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "alpha_test.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        EXPECT_NE(nullptr, scene->mMaterials);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene->mMaterials);
 
         int texture_flags = 0;
         scene->mMaterials[0]->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(0), texture_flags);

@@ -1180,15 +1180,23 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto &curVertices = shapeGeometry->GetVertices();
+                const auto &curNormals = shapeGeometry->GetNormals();
+                const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                animMesh->mName.Set(FixAnimMeshName(blendShapeChannel->Name()));
+                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                auto aniName = FixAnimMeshName(blendShapeChannel->Name());
+                auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
+                if (aniName.empty()) {
+                    aniName = geoMetryName;
+                }
+                else if (aniName.find('.') == aniName.npos) {
+                    aniName += "." + geoMetryName;
+                }
+                animMesh->mName.Set(aniName);
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
@@ -1410,13 +1418,12 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto& curVertices = shapeGeometry->GetVertices();
+                const auto& curNormals = shapeGeometry->GetNormals();
+                const auto& curIndices = shapeGeometry->GetIndices();
                 animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     unsigned int curIndex = curIndices.at(j);

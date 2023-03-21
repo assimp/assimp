@@ -58,14 +58,6 @@ namespace {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-ComputeUVMappingProcess::ComputeUVMappingProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ComputeUVMappingProcess::~ComputeUVMappingProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool ComputeUVMappingProcess::IsActive( unsigned int pFlags) const
 {

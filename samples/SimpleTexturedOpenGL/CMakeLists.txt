@@ -30,8 +30,6 @@ LINK_DIRECTORIES(
 
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
   SimpleTexturedOpenGL/src/model_loading.cpp
-  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.cpp
-  ${SAMPLES_SHARED_CODE_DIR}/UTFConverter.h
 )
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_simpletexturedogl)

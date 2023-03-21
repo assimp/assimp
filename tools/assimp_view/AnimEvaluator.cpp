@@ -56,12 +56,6 @@ AnimEvaluator::AnimEvaluator(const aiAnimation *pAnim) :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor.
-AnimEvaluator::~AnimEvaluator() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
 // Evaluates the animation tracks for a given time stamp.
 void AnimEvaluator::Evaluate(double pTime) {
     // extract ticks per second. Assume default value if not given

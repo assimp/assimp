@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -156,6 +157,27 @@ TEST(utBlenderImporter, importSuzanneSubdiv_252) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/SuzanneSubdiv_252.blend", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+
+    // check approximate shape by averaging together all vertices
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    aiVector3D vertexAvg(0.0, 0.0, 0.0);
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+        const aiMesh *mesh = scene->mMeshes[i];
+        ASSERT_NE(mesh, nullptr);
+
+        ai_real invVertexCount = 1.0 / mesh->mNumVertices;
+        for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+            vertexAvg += mesh->mVertices[j] * invVertexCount;
+        }
+    }
+
+    // must not be inf or nan
+    ASSERT_TRUE(std::isfinite(vertexAvg.x));
+    ASSERT_TRUE(std::isfinite(vertexAvg.y));
+    ASSERT_TRUE(std::isfinite(vertexAvg.z));
+    EXPECT_NEAR(vertexAvg.x, 6.4022515289252624e-08, 0.0001);
+    EXPECT_NEAR(vertexAvg.y, 0.060569953173398972, 0.0001);
+    EXPECT_NEAR(vertexAvg.z, 0.31429031491279602, 0.0001);
 }
 
 TEST(utBlenderImporter, importTexturedCube_ImageGlob_248) {

@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BASE64_HPP_INC
 #define AI_BASE64_HPP_INC
 
+#include <assimp/defs.h>
+
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -54,35 +56,35 @@ namespace Base64 {
 /// @param in           The UTF-64 buffer.
 /// @param inLength     The size of the buffer
 /// @param out          The encoded ASCII string.
-void Encode(const uint8_t *in, size_t inLength, std::string &out);
+ASSIMP_API void Encode(const uint8_t *in, size_t inLength, std::string &out);
 
 /// @brief Will encode the given character buffer from UTF64 to ASCII.
 /// @param in   A vector, which contains the buffer for encoding.
 /// @param out  The encoded ASCII string.
-void Encode(const std::vector<uint8_t>& in, std::string &out);
+ASSIMP_API void Encode(const std::vector<uint8_t> &in, std::string &out);
 
 /// @brief Will encode the given character buffer from UTF64 to ASCII.
 /// @param in   A vector, which contains the buffer for encoding.
 /// @return The encoded ASCII string.
-std::string Encode(const std::vector<uint8_t>& in);
+ASSIMP_API std::string Encode(const std::vector<uint8_t> &in);
 
 /// @brief Will decode the given character buffer from ASCII to UTF64.
 /// @param in           The ASCII buffer to decode.
 /// @param inLength     The size of the buffer.
 /// @param out          The decoded buffer.
 /// @return The new buffer size.
-size_t Decode(const char *in, size_t inLength, uint8_t *&out);
+ASSIMP_API size_t Decode(const char *in, size_t inLength, uint8_t *&out);
 
 /// @brief Will decode the given character buffer from ASCII to UTF64.
 /// @param in   The ASCII buffer to decode as a std::string.
 /// @param out  The decoded buffer.
 /// @return The new buffer size.
-size_t Decode(const std::string& in, std::vector<uint8_t>& out);
+ASSIMP_API size_t Decode(const std::string &in, std::vector<uint8_t> &out);
 
 /// @brief Will decode the given character buffer from ASCII to UTF64.
 /// @param in   The ASCII string.
 /// @return The decoded buffer in a vector.
-std::vector<uint8_t> Decode(const std::string& in);
+ASSIMP_API std::vector<uint8_t> Decode(const std::string &in);
 
 } // namespace Base64
 } // namespace Assimp

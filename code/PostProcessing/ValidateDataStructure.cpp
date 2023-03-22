@@ -911,7 +911,12 @@ void ValidateDSProcess::Validate(const aiNode *pNode) {
                     nodeName, pNode->mNumChildren);
         }
         for (unsigned int i = 0; i < pNode->mNumChildren; ++i) {
-            Validate(pNode->mChildren[i]);
+            const aiNode *pChild = pNode->mChildren[i];
+            Validate(pChild);
+            if (pChild->mParent != pNode) {
+                const char *parentName = (pChild->mParent != nullptr) ? pChild->mParent->mName.C_Str() : "null";
+                ReportError("aiNode \"%s\" child %i \"%s\" parent is someone else: \"%s\"", pNode->mName.C_Str(), i, pChild->mName.C_Str(), parentName);
+            }
         }
     }
 }

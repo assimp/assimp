@@ -115,6 +115,10 @@ def _init(self, target = None, parent = None):
         if m.startswith("_"):
             continue
 
+        # We should not be accessing `mPrivate` according to structs.Scene.
+        if m == 'mPrivate':
+            continue
+
         if m.startswith('mNum'):
             if 'm' + m[4:] in dirself:
                 continue # will be processed later on
@@ -211,7 +215,7 @@ def _init(self, target = None, parent = None):
 
 
             else: # starts with 'm' but not iterable
-                setattr(target, m, obj)
+                setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
 
                 if _is_init_type(obj):

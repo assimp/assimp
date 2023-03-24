@@ -111,7 +111,7 @@ TEST_F(RemoveVCProcessTest, testMeshRemove) {
     piProcess->SetDeleteFlags(aiComponent_MESHES);
     piProcess->Execute(pScene);
 
-    EXPECT_TRUE(NULL == pScene->mMeshes);
+    EXPECT_TRUE(nullptr == pScene->mMeshes);
     EXPECT_EQ(0U, pScene->mNumMeshes);
     EXPECT_TRUE(pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE);
 }
@@ -121,7 +121,7 @@ TEST_F(RemoveVCProcessTest, testAnimRemove) {
     piProcess->SetDeleteFlags(aiComponent_ANIMATIONS);
     piProcess->Execute(pScene);
 
-    EXPECT_TRUE(NULL == pScene->mAnimations);
+    EXPECT_TRUE(nullptr == pScene->mAnimations);
     EXPECT_EQ(0U, pScene->mNumAnimations);
     EXPECT_EQ(0U, pScene->mFlags);
 }
@@ -143,7 +143,7 @@ TEST_F(RemoveVCProcessTest, testTextureRemove) {
     piProcess->SetDeleteFlags(aiComponent_TEXTURES);
     piProcess->Execute(pScene);
 
-    EXPECT_TRUE(NULL == pScene->mTextures);
+    EXPECT_TRUE(nullptr == pScene->mTextures);
     EXPECT_EQ(0U, pScene->mNumTextures);
     EXPECT_EQ(0U, pScene->mFlags);
 }
@@ -153,7 +153,7 @@ TEST_F(RemoveVCProcessTest, testCameraRemove) {
     piProcess->SetDeleteFlags(aiComponent_CAMERAS);
     piProcess->Execute(pScene);
 
-    EXPECT_TRUE(NULL == pScene->mCameras);
+    EXPECT_TRUE(nullptr == pScene->mCameras);
     EXPECT_EQ(0U, pScene->mNumCameras);
     EXPECT_EQ(0U, pScene->mFlags);
 }
@@ -163,7 +163,7 @@ TEST_F(RemoveVCProcessTest, testLightRemove) {
     piProcess->SetDeleteFlags(aiComponent_LIGHTS);
     piProcess->Execute(pScene);
 
-    EXPECT_TRUE(NULL == pScene->mLights);
+    EXPECT_TRUE(nullptr == pScene->mLights);
     EXPECT_EQ(0U, pScene->mNumLights);
     EXPECT_EQ(0U, pScene->mFlags);
 }

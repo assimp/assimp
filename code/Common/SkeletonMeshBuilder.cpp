@@ -131,32 +131,33 @@ void SkeletonMeshBuilder::CreateGeometry(const aiNode *pNode) {
         // if the node has no children, it's an end node. Put a little knob there instead
         aiVector3D ownpos(pNode->mTransformation.a4, pNode->mTransformation.b4, pNode->mTransformation.c4);
         ai_real sizeEstimate = ownpos.Length() * ai_real(0.18);
+        const ai_real zero(0.0);
 
-        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
-        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
-        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
-        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
-        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
-        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, 0.0, -sizeEstimate);
+        mVertices.emplace_back(-sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, sizeEstimate, zero);
+        mVertices.emplace_back(zero, zero, -sizeEstimate);
+        mVertices.emplace_back(zero, sizeEstimate, zero);
+        mVertices.emplace_back(sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, zero, -sizeEstimate);
+        mVertices.emplace_back(sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, -sizeEstimate, zero);
+        mVertices.emplace_back(zero, zero, -sizeEstimate);
+        mVertices.emplace_back(zero, -sizeEstimate, zero);
+        mVertices.emplace_back(-sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, zero, -sizeEstimate);
 
-        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
-        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
-        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(sizeEstimate, 0.0, 0.0);
-        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
-        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, -sizeEstimate, 0.0);
-        mVertices.emplace_back(0.0, 0.0, sizeEstimate);
-        mVertices.emplace_back(-sizeEstimate, 0.0, 0.0);
+        mVertices.emplace_back(-sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, zero, sizeEstimate);
+        mVertices.emplace_back(zero, sizeEstimate, zero);
+        mVertices.emplace_back(zero, sizeEstimate, zero);
+        mVertices.emplace_back(zero, zero, sizeEstimate);
+        mVertices.emplace_back(sizeEstimate, zero, zero);
+        mVertices.emplace_back(sizeEstimate, zero, zero);
+        mVertices.emplace_back(zero, zero, sizeEstimate);
+        mVertices.emplace_back(zero, -sizeEstimate, zero);
+        mVertices.emplace_back(zero, -sizeEstimate, zero);
+        mVertices.emplace_back(zero, zero, sizeEstimate);
+        mVertices.emplace_back(-sizeEstimate, zero, zero);
 
         mFaces.emplace_back(vertexStartIndex + 0, vertexStartIndex + 1, vertexStartIndex + 2);
         mFaces.emplace_back(vertexStartIndex + 3, vertexStartIndex + 4, vertexStartIndex + 5);

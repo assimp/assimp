@@ -93,9 +93,7 @@ public:
     }
 
     /** Destructor. */
-    ~FileSystemFilter() {
-        // empty
-    }
+    ~FileSystemFilter() = default;
 
     // -------------------------------------------------------------------
     /** Tests for the existence of a file at the given path. */

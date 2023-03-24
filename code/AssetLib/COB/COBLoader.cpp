@@ -158,7 +158,7 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // sort faces by material indices
     for (std::shared_ptr<Node> &n : scene.nodes) {
         if (n->type == Node::TYPE_MESH) {
-            Mesh &mesh = (Mesh &)(*n.get());
+            Mesh &mesh = (Mesh &)(*n);
             for (Face &f : mesh.faces) {
                 mesh.temp_map[f.material].push_back(&f);
             }
@@ -168,7 +168,7 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // count meshes
     for (std::shared_ptr<Node> &n : scene.nodes) {
         if (n->type == Node::TYPE_MESH) {
-            Mesh &mesh = (Mesh &)(*n.get());
+            Mesh &mesh = (Mesh &)(*n);
             if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
                 pScene->mNumMeshes += static_cast<unsigned int>(mesh.temp_map.size());
             }
@@ -211,7 +211,7 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
     }
 
-    pScene->mRootNode = BuildNodes(*root.get(), scene, pScene);
+    pScene->mRootNode = BuildNodes(*root, scene, pScene);
     //flip normals after import
     FlipWindingOrderProcess flip;
     flip.Execute(pScene);
@@ -868,7 +868,7 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
         return;
     }
 
-    while (1) {
+    while (true) {
         std::string type;
         type += reader->GetI1();
         type += reader->GetI1();
@@ -1054,7 +1054,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
     id[0] = reader.GetI1(), id[1] = reader.GetI1();
 
     if (id[0] == 'e' && id[1] == ':') {
-        mat.tex_env.reset(new Texture());
+        mat.tex_env = std::make_shared<Texture>();
 
         reader.GetI1();
         ReadString_Binary(mat.tex_env->path, reader);
@@ -1064,7 +1064,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
     }
 
     if (id[0] == 't' && id[1] == ':') {
-        mat.tex_color.reset(new Texture());
+        mat.tex_color = std::make_shared<Texture>();
 
         reader.GetI1();
         ReadString_Binary(mat.tex_color->path, reader);
@@ -1080,7 +1080,7 @@ void COBImporter::ReadMat1_Binary(COB::Scene &out, StreamReaderLE &reader, const
     }
 
     if (id[0] == 'b' && id[1] == ':') {
-        mat.tex_bump.reset(new Texture());
+        mat.tex_bump = std::make_shared<Texture>();
 
         reader.GetI1();
         ReadString_Binary(mat.tex_bump->path, reader);

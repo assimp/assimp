@@ -120,7 +120,11 @@ TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionMultiplyTest) {
     result_c = result_cpp = random_quat();
     result_cpp = result_cpp * temp;
     aiQuaternionMultiply(&result_c, &temp);
-    EXPECT_EQ(result_cpp, result_c);
+
+    EXPECT_FLOAT_EQ(result_cpp.x, result_c.x);
+    EXPECT_FLOAT_EQ(result_cpp.y, result_c.y);
+    EXPECT_FLOAT_EQ(result_cpp.z, result_c.z);
+    EXPECT_FLOAT_EQ(result_cpp.w, result_c.w);
 }
 
 TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionInterpolateTest) {
@@ -131,5 +135,9 @@ TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionInterpolateTest) {
     const auto q2 = aiQuaternion(aiVector3D(1,2,1).Normalize(), Math::aiPi<float>() / 2.0f);
     aiQuaternion::Interpolate(result_cpp, q1, q2, INTERPOLATION);
     aiQuaternionInterpolate(&result_c, &q1, &q2, INTERPOLATION);
-    EXPECT_EQ(result_cpp, result_c);
+
+    EXPECT_FLOAT_EQ(result_cpp.x, result_c.x);
+    EXPECT_FLOAT_EQ(result_cpp.y, result_c.y);
+    EXPECT_FLOAT_EQ(result_cpp.z, result_c.z);
+    EXPECT_FLOAT_EQ(result_cpp.w, result_c.w);
 }

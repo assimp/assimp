@@ -371,7 +371,7 @@ template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
         mDictId(dictId),
         mExtId(extId),
-        mDict(0),
+        mDict(nullptr),
         mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
@@ -903,7 +903,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;
-        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : 0);
+        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : nullptr);
         sparse->PatchData(elementSize);
     }
 }
@@ -1922,7 +1922,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     std::vector<char> sceneData;
     rapidjson::Document doc = ReadDocument(*stream, isBinary, sceneData);
 
-    // If a schemaDocumentProvider is available, see if the glTF schema is present. 
+    // If a schemaDocumentProvider is available, see if the glTF schema is present.
     // If so, use it to validate the document.
     if (mSchemaDocumentProvider) {
         if (const rapidjson::SchemaDocument *gltfSchema = mSchemaDocumentProvider->GetRemoteDocument("glTF.schema.json", 16)) {

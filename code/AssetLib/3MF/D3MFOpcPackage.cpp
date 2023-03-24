@@ -160,7 +160,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
                     // deal with zip-bug
                     rootFile = rootFile.substr(1);
                 }
-            } 
+            }
 
             ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
 

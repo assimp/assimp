@@ -86,8 +86,7 @@ void GetWriterInfo(int &id, String &appname) {
 
 namespace Assimp {
     template<> const char* LogFunctions<C4DImporter>::Prefix() {
-        static auto prefix = "C4D: ";
-        return prefix;
+        return "C4D: ";
     }
 }
 
@@ -106,15 +105,10 @@ static const aiImporterDesc desc = {
 
 
 // ------------------------------------------------------------------------------------------------
-C4DImporter::C4DImporter()
-: BaseImporter() {
-    // empty
-}
+C4DImporter::C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
-C4DImporter::~C4DImporter() {
-    // empty
-}
+C4DImporter::~C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const {
@@ -124,7 +118,7 @@ bool C4DImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, b
     } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // TODO
     }
-    
+
     return false;
 }
 

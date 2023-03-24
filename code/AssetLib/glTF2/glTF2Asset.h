@@ -366,16 +366,7 @@ struct CustomExtension {
 
     ~CustomExtension() = default;
 
-    CustomExtension(const CustomExtension &other) :
-            name(other.name),
-            mStringValue(other.mStringValue),
-            mDoubleValue(other.mDoubleValue),
-            mUint64Value(other.mUint64Value),
-            mInt64Value(other.mInt64Value),
-            mBoolValue(other.mBoolValue),
-            mValues(other.mValues) {
-        // empty
-    }
+    CustomExtension(const CustomExtension &other) = default;
 
     CustomExtension& operator=(const CustomExtension&) = default;
 };
@@ -1070,7 +1061,7 @@ class LazyDict : public LazyDictBase {
     Ref<T> Add(T *obj);
 
 public:
-    LazyDict(Asset &asset, const char *dictId, const char *extId = 0);
+    LazyDict(Asset &asset, const char *dictId, const char *extId = nullptr);
     ~LazyDict();
 
     Ref<T> Retrieve(unsigned int i);
@@ -1101,8 +1092,7 @@ struct AssetMetadata {
 
     void Read(Document &doc);
 
-    AssetMetadata() :
-            version() {}
+    AssetMetadata() = default;
 };
 
 //

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_DOCUMENT_H
 
 #include <numeric>
+#include <unordered_set>
 #include <stdint.h>
 #include <assimp/mesh.h>
 #include "FBXProperties.h"
@@ -168,7 +169,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 private:
@@ -432,7 +433,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     /** Get material links */
@@ -503,7 +504,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     // return a 4-tuple
@@ -618,7 +619,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const uint8_t* Content() const {
@@ -632,7 +633,7 @@ public:
 
     uint8_t* RelinquishContent() {
         uint8_t* ptr = content;
-        content = 0;
+        content = nullptr;
         return ptr;
     }
 
@@ -663,7 +664,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const TextureMap& Textures() const {
@@ -735,7 +736,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 
@@ -780,7 +781,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     /* the optional white list specifies a list of property names for which the caller
@@ -808,7 +809,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const AnimationLayerList& Layers() const {
@@ -829,7 +830,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
 private:
@@ -855,14 +856,14 @@ public:
         return fullWeights;
     }
 
-    const std::vector<const ShapeGeometry*>& GetShapeGeometries() const {
+    const std::unordered_set<const ShapeGeometry*>& GetShapeGeometries() const {
         return shapeGeometries;
     }
 
 private:
     float percent;
     WeightArray fullWeights;
-    std::vector<const ShapeGeometry*> shapeGeometries;
+    std::unordered_set<const ShapeGeometry*> shapeGeometries;
 };
 
 /** DOM class for BlendShape deformers */
@@ -872,12 +873,12 @@ public:
 
     virtual ~BlendShape();
 
-    const std::vector<const BlendShapeChannel*>& BlendShapeChannels() const {
+    const std::unordered_set<const BlendShapeChannel*>& BlendShapeChannels() const {
         return blendShapeChannels;
     }
 
 private:
-    std::vector<const BlendShapeChannel*> blendShapeChannels;
+    std::unordered_set<const BlendShapeChannel*> blendShapeChannels;
 };
 
 /** DOM class for skin deformer clusters (aka sub-deformers) */
@@ -1018,7 +1019,7 @@ public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
-        return *props.get();
+        return *props;
     }
 
     const Document& GetDocument() const {
@@ -1097,7 +1098,7 @@ public:
 
     const FileGlobalSettings& GlobalSettings() const {
         ai_assert(globals.get());
-        return *globals.get();
+        return *globals;
     }
 
     const PropertyTemplateMap& Templates() const {

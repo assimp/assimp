@@ -61,10 +61,6 @@ FindInvalidDataProcess::FindInvalidDataProcess() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-FindInvalidDataProcess::~FindInvalidDataProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool FindInvalidDataProcess::IsActive(unsigned int pFlags) const {
     return 0 != (pFlags & aiProcess_FindInvalidData);

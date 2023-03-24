@@ -1175,7 +1175,7 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int *method, int *level, in
             pfile_in_zip_read_info->stream.zalloc = (alloc_func)0;
             pfile_in_zip_read_info->stream.zfree = (free_func)0;
             pfile_in_zip_read_info->stream.opaque = (voidpf)s;
-            pfile_in_zip_read_info->stream.next_in = 0;
+            pfile_in_zip_read_info->stream.next_in = (voidpf)0;
             pfile_in_zip_read_info->stream.avail_in = 0;
 
 #ifdef HAVE_APPLE_COMPRESSION

@@ -83,12 +83,11 @@ static const aiImporterDesc desc = {
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter() :
         configFrameID(), 
-        mBuffer(), 
         pScene( nullptr ), 
         iFileSize( 0 ), 
         iSmallestFrame( INT_MAX ),
         dLengthOfAnim( 0.0 ),
-        bHasUVs(false ), 
+        bHasUVs(false ),
         iLineNumber((unsigned int)-1)  {
     // empty
 }
@@ -535,7 +534,7 @@ void SMDImporter::GetAnimationFileList(const std::string &pFile, IOSystem* pIOHa
     auto path = base + "/" + name + "_animation.txt";
 
     std::unique_ptr<IOStream> file(pIOHandler->Open(path.c_str(), "rb"));
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         return;
     }
 
@@ -591,7 +590,7 @@ void SMDImporter::CreateOutputMaterials() {
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
-        szName.length = (size_t)ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat);
+        szName.length = static_cast<ai_uint32>(ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat));
         pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
         if (aszTextures[iMat].length())
@@ -675,7 +674,7 @@ void SMDImporter::ReadSmd(const std::string &pFile, IOSystem* pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open SMD/VTA file ", pFile, ".");
     }
 

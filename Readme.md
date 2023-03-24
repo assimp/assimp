@@ -14,7 +14,6 @@ A library to import and export various 3d-model-formats including scene-post-pro
 [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Percentage of issues still open")
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/assimp/assimp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/assimp/assimp/alerts/)
 <br>
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
@@ -76,10 +75,13 @@ The source code is organized in the following way:
 	code/AssetLib/<FormatName>	Implementation for import and export for the format
 
 ### Where to get help ###
-For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
-(CHMs for Windows are included in some release packages and should be located right here in the root folder).
+To find our documentation, visit [our website](https://assimp.org/) or check out [Wiki](https://github.com/assimp/assimp/wiki)
 
-If the docs don't solve your problem, ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
+If the docs don't solve your problem, you can:
+- Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
+- Ask on [Assimp-Community on Reddit](https://www.reddit.com/r/Assimp/)
+- Ask a question at [The Assimp-Discussion Board](https://github.com/assimp/assimp/discussions)
+- Nothing has worked? File a question or an issue-report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
 
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 

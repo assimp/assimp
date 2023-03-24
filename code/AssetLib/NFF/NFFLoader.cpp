@@ -129,7 +129,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
     std::unique_ptr<IOStream> file(pIOHandler->Open(path, "rb"));
 
     // Check whether we can read from the file
-    if (!file.get()) {
+    if (!file) {
         ASSIMP_LOG_ERROR("NFF2: Unable to open material library ", path, ".");
         return;
     }
@@ -211,7 +211,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (!file.get())
+    if (!file)
         throw DeadlyImportError("Failed to open NFF file ", pFile, ".");
 
     // allocate storage and copy the contents of the file to a memory buffer

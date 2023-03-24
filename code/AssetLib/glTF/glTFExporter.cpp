@@ -111,7 +111,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     mScene.reset(sceneCopy_tmp);
 
-    mAsset.reset( new glTF::Asset( pIOSystem ) );
+    mAsset = std::make_shared<glTF::Asset>(pIOSystem);
 
     if (isBinary) {
         mAsset->SetAsBinary();
@@ -322,7 +322,7 @@ void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
     prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
-void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, 
+void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop,
         const char* propName, int type, int idx, aiTextureType tt) {
     aiString tex;
     aiColor4D col;
@@ -370,9 +370,9 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
     }
 
     if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
-        prop.color[0] = col.r; 
+        prop.color[0] = col.r;
         prop.color[1] = col.g;
-        prop.color[2] = col.b; 
+        prop.color[2] = col.b;
         prop.color[3] = col.a;
     }
 }

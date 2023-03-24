@@ -138,6 +138,12 @@ class ExpertEncoder : public EncoderBase<EncoderOptions> {
 
   Status EncodeMeshToBuffer(const Mesh &m, EncoderBuffer *out_buffer);
 
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  // Applies compression options stored in |mesh|.
+  Status ApplyCompressionOptions(const Mesh &mesh);
+  Status ApplyGridQuantization(const Mesh &mesh, int attribute_index);
+#endif  // DRACO_TRANSCODER_SUPPORTED
+
   const PointCloud *point_cloud_;
   const Mesh *mesh_;
 };

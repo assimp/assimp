@@ -440,7 +440,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     const bool vt = (!m_pModel->mTextureCoord.empty());
     const bool vn = (!m_pModel->mNormals.empty());
     int iPos = 0;
-    while (m_DataIt != m_DataItEnd) {
+    while (m_DataIt < m_DataItEnd) {
         int iStep = 1;
 
         if (IsLineEnd(*m_DataIt)) {
@@ -458,7 +458,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             //OBJ USES 1 Base ARRAYS!!!!
             const char *token = &(*m_DataIt);
             const int iVal = ::atoi(token);
-            
+
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;
             if (iVal < 0) {

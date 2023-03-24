@@ -107,7 +107,7 @@ private:
 
         aiColor3D color, diffuse, specular, ambient, emissive;
         ai_real refracti;
-        std::string texFile;        
+        std::string texFile;
         bool twoSided; // For NFF2
         bool shaded;
         ai_real opacity, shininess;

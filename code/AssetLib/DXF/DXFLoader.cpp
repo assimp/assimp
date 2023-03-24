@@ -136,7 +136,7 @@ void DXFImporter::InternReadFile( const std::string& filename, aiScene* pScene, 
     std::shared_ptr<IOStream> file = std::shared_ptr<IOStream>( pIOHandler->Open( filename) );
 
     // Check whether we can read the file
-    if( file.get() == nullptr ) {
+    if (file == nullptr) {
         throw DeadlyImportError( "Failed to open DXF file ", filename, "");
     }
 
@@ -371,7 +371,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
                 ASSIMP_LOG_ERROR("DXF: PolyLine instance is nullptr, skipping.");
                 continue;
             }
-            
+
             std::shared_ptr<DXF::PolyLine> pl_out = std::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {

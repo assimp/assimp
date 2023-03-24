@@ -73,7 +73,7 @@ public:
     /// A shader is considered to be identical if it has the same input
     /// signature and takes the same number of texture channels.
     int CreateMaterial(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
-    
+
     ///	@brief  Setup the material for a given mesh.
     /// @param  pcMesh   Mesh to be rendered
     /// @param  pcProj   Projection matrix

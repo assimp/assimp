@@ -247,7 +247,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     }
 
     if (ext2 && !ASSIMP_stricmp(ext_real, ext2)) {
-        return true;        
+        return true;
     }
 
     return false;

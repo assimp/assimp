@@ -470,14 +470,16 @@ void HL1MDLLoader::read_bones() {
 
     temp_bones_.resize(header_->numbones);
 
+    // Create the main 'bones' node that will contain all MDL root bones.
     aiNode *bones_node = new aiNode(AI_MDL_HL1_NODE_BONES);
     rootnode_children_.push_back(bones_node);
-    bones_node->mNumChildren = static_cast<unsigned int>(header_->numbones);
-    bones_node->mChildren = new aiNode *[bones_node->mNumChildren];
+
+    // Store roots bones IDs temporarily.
+    std::vector<int> roots;
 
     // Create bone matrices in local space.
     for (int i = 0; i < header_->numbones; ++i) {
-        aiNode *bone_node = temp_bones_[i].node = bones_node->mChildren[i] = new aiNode(unique_bones_names[i]);
+        aiNode *bone_node = temp_bones_[i].node = new aiNode(unique_bones_names[i]);
 
         aiVector3D angles(pbone[i].value[3], pbone[i].value[4], pbone[i].value[5]);
         temp_bones_[i].absolute_transform = bone_node->mTransformation =
@@ -485,9 +487,11 @@ void HL1MDLLoader::read_bones() {
                         aiVector3D(pbone[i].value[0], pbone[i].value[1], pbone[i].value[2]));
 
         if (pbone[i].parent == -1) {
-            bone_node->mParent = scene_->mRootNode;
+            bone_node->mParent = bones_node;
+            roots.push_back(i); // This bone has no parent. Add it to the roots list.
         } else {
-            bone_node->mParent = bones_node->mChildren[pbone[i].parent];
+            bone_node->mParent = temp_bones_[pbone[i].parent].node;
+            temp_bones_[pbone[i].parent].children.push_back(i); // Add this bone to the parent bone's children list.
 
             temp_bones_[i].absolute_transform =
                     temp_bones_[pbone[i].parent].absolute_transform * bone_node->mTransformation;
@@ -495,6 +499,36 @@ void HL1MDLLoader::read_bones() {
 
         temp_bones_[i].offset_matrix = temp_bones_[i].absolute_transform;
         temp_bones_[i].offset_matrix.Inverse();
+    }
+
+    // Allocate memory for each MDL root bone.
+    bones_node->mNumChildren = static_cast<unsigned int>(roots.size());
+    bones_node->mChildren = new aiNode *[bones_node->mNumChildren];
+
+    // Build all bones children hierarchy starting from each MDL root bone.
+    for (size_t i = 0; i < roots.size(); ++i)
+    {
+        const TempBone &root_bone = temp_bones_[roots[i]];
+        bones_node->mChildren[i] = root_bone.node;
+        build_bone_children_hierarchy(root_bone);
+    }
+}
+
+void HL1MDLLoader::build_bone_children_hierarchy(const TempBone &bone)
+{
+    if (bone.children.empty())
+        return;
+
+    aiNode* bone_node = bone.node;
+    bone_node->mNumChildren = static_cast<unsigned int>(bone.children.size());
+    bone_node->mChildren = new aiNode *[bone_node->mNumChildren];
+
+    // Build each child bone's hierarchy recursively.
+    for (size_t i = 0; i < bone.children.size(); ++i)
+    {
+        const TempBone &child_bone = temp_bones_[bone.children[i]];
+        bone_node->mChildren[i] = child_bone.node;
+        build_bone_children_hierarchy(child_bone);
     }
 }
 

@@ -306,7 +306,7 @@ enum aiTextureType {
     aiTextureType_SHEEN = 19,
 
     /** Clearcoat
-    * Simulates a layer of 'polish' or 'laquer' layered on top of a PBR substrate
+    * Simulates a layer of 'polish' or 'lacquer' layered on top of a PBR substrate
     * https://autodesk.github.io/standard-surface/#closures/coating
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
     */

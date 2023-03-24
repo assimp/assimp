@@ -119,7 +119,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
             if (mat) {
 
                 if (materials_converted.find(mat) == materials_converted.end()) {
-                    ConvertMaterial(*mat, 0);
+                    ConvertMaterial(*mat, nullptr);
                 }
             }
         }
@@ -873,8 +873,12 @@ void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
             data->Set(index++, prop.first, interpretedBool->Value());
         } else if (const TypedProperty<int> *interpretedInt = prop.second->As<TypedProperty<int>>()) {
             data->Set(index++, prop.first, interpretedInt->Value());
+        } else if (const TypedProperty<uint32_t> *interpretedUInt = prop.second->As<TypedProperty<uint32_t>>()) {
+            data->Set(index++, prop.first, interpretedUInt->Value());
         } else if (const TypedProperty<uint64_t> *interpretedUint64 = prop.second->As<TypedProperty<uint64_t>>()) {
             data->Set(index++, prop.first, interpretedUint64->Value());
+        } else if (const TypedProperty<int64_t> *interpretedint64 = prop.second->As<TypedProperty<int64_t>>()) {
+            data->Set(index++, prop.first, interpretedint64->Value());
         } else if (const TypedProperty<float> *interpretedFloat = prop.second->As<TypedProperty<float>>()) {
             data->Set(index++, prop.first, interpretedFloat->Value());
         } else if (const TypedProperty<std::string> *interpretedString = prop.second->As<TypedProperty<std::string>>()) {
@@ -1176,15 +1180,23 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto &curVertices = shapeGeometry->GetVertices();
+                const auto &curNormals = shapeGeometry->GetNormals();
+                const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                animMesh->mName.Set(FixAnimMeshName(blendShapeChannel->Name()));
+                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                auto aniName = FixAnimMeshName(blendShapeChannel->Name());
+                auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
+                if (aniName.empty()) {
+                    aniName = geoMetryName;
+                }
+                else if (aniName.find('.') == aniName.npos) {
+                    aniName += "." + geoMetryName;
+                }
+                animMesh->mName.Set(aniName);
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
@@ -1406,13 +1418,12 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto& curVertices = shapeGeometry->GetVertices();
+                const auto& curNormals = shapeGeometry->GetNormals();
+                const auto& curIndices = shapeGeometry->GetIndices();
                 animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     unsigned int curIndex = curIndices.at(j);
@@ -1455,7 +1466,9 @@ static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *s
     skeletonBone->mWeights = bone->mWeights;
     skeletonBone->mOffsetMatrix = bone->mOffsetMatrix;
     skeletonBone->mMeshId = mesh;
+#ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
     skeletonBone->mNode = bone->mNode;
+#endif
     skeletonBone->mParent = -1;
 }
 
@@ -1563,7 +1576,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
         out->mBones = nullptr;
         out->mNumBones = 0;
         return;
-    } 
+    }
 
     out->mBones = new aiBone *[bones.size()]();
     out->mNumBones = static_cast<unsigned int>(bones.size());
@@ -3228,7 +3241,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     bool ok = false;
-    
+
     const auto zero_epsilon = ai_epsilon;
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);

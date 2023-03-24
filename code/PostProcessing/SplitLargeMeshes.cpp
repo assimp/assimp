@@ -56,9 +56,6 @@ SplitLargeMeshesProcess_Triangle::SplitLargeMeshesProcess_Triangle() {
 }
 
 // ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_SplitLargeMeshes) != 0;
@@ -328,9 +325,6 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 SplitLargeMeshesProcess_Vertex::SplitLargeMeshesProcess_Vertex() {
     LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
 }
-
-// ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

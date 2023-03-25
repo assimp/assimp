@@ -22,6 +22,9 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 ### Latest Doc's ###
 Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
 
+### Prebuild binaries ###
+Please check our [Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib)
+
 ### Get involved ###
 This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
 <br>

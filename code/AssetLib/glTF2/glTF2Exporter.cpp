@@ -642,13 +642,7 @@ aiReturn glTF2Exporter::GetMatColor(const aiMaterial &mat, vec3 &prop, const cha
 
 // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
 bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG) {
-    int usePbrSpecGloss;
-    if (mat.Get(AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS, usePbrSpecGloss) != AI_SUCCESS) {
-        return false;
-    }
-    
     bool result = false;
-    
     // If has Glossiness, a Specular Color or Specular Texture, use the KHR_materials_pbrSpecularGlossiness extension
     if (mat.Get(AI_MATKEY_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) == AI_SUCCESS) {
         result = true;
@@ -681,15 +675,21 @@ bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlo
 
 bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular) {
     // Specular requires either/or, default factors of zero disables specular, so do not export
-    bool result = false;
-    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) == AI_SUCCESS && specular.specularFactor != 0.0f) {
-        GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-        result = true;
-    } else if (mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) == AI_SUCCESS && !(specular.specularColorFactor[0] == defaultSpecularColorFactor[0] && specular.specularColorFactor[1] == defaultSpecularColorFactor[1] && specular.specularColorFactor[2] == defaultSpecularColorFactor[2])) {
-        GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
-        result = true;
+    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) != AI_SUCCESS || mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
+        return false;
     }
-    return result;
+    // The spec states that the default is 1.0 and [1.0, 1.0, 1.0]. We if both are 0, which should disable specular. Otherwise, if one is 0, set to 1.0
+    const bool colorFactorIsZero = specular.specularColorFactor[0] == defaultSpecularColorFactor[0] && specular.specularColorFactor[1] == defaultSpecularColorFactor[1] && specular.specularColorFactor[2] == defaultSpecularColorFactor[2];
+    if (specular.specularFactor == 0.0f && colorFactorIsZero) {
+        return false;
+    } else if (specular.specularFactor == 0.0f) {
+        specular.specularFactor = 1.0f;
+    } else if (colorFactorIsZero) {
+        specular.specularColorFactor[0] = specular.specularColorFactor[1] = specular.specularColorFactor[2] = 1.0f;
+    }
+    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
+    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+    return true;
 }
 
 bool glTF2Exporter::GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen) {
@@ -755,7 +755,7 @@ bool glTF2Exporter::GetMatEmissiveStrength(const aiMaterial &mat, glTF2::Materia
     return mat.Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength.emissiveStrength) == aiReturn_SUCCESS;
 }
 
-void glTF2Exporter::ExportMaterials() {
+void glTF2Exporter::ExportMaterials(ExportProperties *pProperties) {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         ai_assert(mScene->mMaterials[i] != nullptr);
@@ -836,9 +836,9 @@ void glTF2Exporter::ExportMaterials() {
             m->alphaMode = alphaMode.C_Str();
         }
 
-        {
+        // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
+        if (pProperties->GetPropertyBool(AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS)) {
             // KHR_materials_pbrSpecularGlossiness extension
-            // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
             PbrSpecularGlossiness pbrSG;
             if (GetMatSpecGloss(mat, pbrSG)) {
                 mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;

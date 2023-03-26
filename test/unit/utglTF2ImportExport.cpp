@@ -220,7 +220,9 @@ TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_pbrSpecularGlossi
             aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     // Export
-    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb"));
+    ExportProperties props;
+    props.SetPropertyBool(, true);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", 0, &props));
 
     // And re-import
     EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", true));

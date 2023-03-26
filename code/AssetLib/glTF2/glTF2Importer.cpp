@@ -292,7 +292,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         // pbrSpecularGlossiness
         else if (mat.pbrSpecularGlossiness.isPresent) {
             PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
-            aimat->AddProperty(new int(1), 1, AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS);
 
             SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
             SetMaterialColorProperty(r, pbrSG.specularFactor, aimat, AI_MATKEY_COLOR_SPECULAR);

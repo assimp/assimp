@@ -221,7 +221,7 @@ TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_pbrSpecularGlossi
     EXPECT_NE(nullptr, scene);
     // Export
     ExportProperties props;
-    props.SetPropertyBool(, true);
+    props.SetPropertyBool(AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS, true);
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", 0, &props));
 
     // And re-import

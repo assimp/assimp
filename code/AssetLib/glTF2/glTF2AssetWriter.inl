@@ -424,7 +424,7 @@ namespace glTF2 {
 
             MaterialSpecular &specular = m.materialSpecular.value;
 
-            if (specular.specularFactor != 0.f) {
+            if (specular.specularFactor != 0.0f) {
                 WriteFloat(materialSpecular, specular.specularFactor, "specularFactor", w.mAl);
                 WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
             }

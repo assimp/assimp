@@ -755,7 +755,7 @@ bool glTF2Exporter::GetMatEmissiveStrength(const aiMaterial &mat, glTF2::Materia
     return mat.Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength.emissiveStrength) == aiReturn_SUCCESS;
 }
 
-void glTF2Exporter::ExportMaterials(ExportProperties *pProperties) {
+void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         ai_assert(mScene->mMaterials[i] != nullptr);
@@ -837,7 +837,7 @@ void glTF2Exporter::ExportMaterials(ExportProperties *pProperties) {
         }
 
         // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
-        if (pProperties->GetPropertyBool(AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS)) {
+        if (mProperties->GetPropertyBool(AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS)) {
             // KHR_materials_pbrSpecularGlossiness extension
             PbrSpecularGlossiness pbrSG;
             if (GetMatSpecGloss(mat, pbrSG)) {

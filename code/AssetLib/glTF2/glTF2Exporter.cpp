@@ -640,14 +640,16 @@ aiReturn glTF2Exporter::GetMatColor(const aiMaterial &mat, vec3 &prop, const cha
     return result;
 }
 
+// This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
 bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG) {
-    bool result = false;
-    // If has Glossiness, a Specular Color or Specular Texture, use the KHR_materials_pbrSpecularGlossiness extension
-    // NOTE: This extension is being considered for deprecation (Dec 2020), may be replaced by KHR_material_specular
-    // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
-    if (mat.Get(AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS) != AI_SUCCESS) {
+    int usePbrSpecGloss;
+    if (mat.Get(AI_MATKEY_USE_GLTF_PBR_SPECULAR_GLOSSINESS, usePbrSpecGloss) != AI_SUCCESS) {
         return false;
     }
+    
+    bool result = false;
+    
+    // If has Glossiness, a Specular Color or Specular Texture, use the KHR_materials_pbrSpecularGlossiness extension
     if (mat.Get(AI_MATKEY_GLOSSINESS_FACTOR, pbrSG.glossinessFactor) == AI_SUCCESS) {
         result = true;
     } else {
@@ -678,21 +680,16 @@ bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlo
 }
 
 bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular) {
-    // Specular requires either/or
-    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) != AI_SUCCESS && mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
-        return false;
+    // Specular requires either/or, default factors of zero disables specular, so do not export
+    bool result = false;
+    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) == AI_SUCCESS && specular.specularFactor != 0.0f) {
+        GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
+        result = true;
+    } else if (mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) == AI_SUCCESS && !(specular.specularColorFactor[0] == defaultSpecularColorFactor[0] && specular.specularColorFactor[1] == defaultSpecularColorFactor[1] && specular.specularColorFactor[2] == defaultSpecularColorFactor[2])) {
+        GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+        result = true;
     }
-
-    // default factors of zero disables specular, so do not export
-    if (specular.specularFactor == 0.0f && (specular.specularColorFactor[0] == defaultSpecularColorFactor[0] && specular.specularColorFactor[1] == defaultSpecularColorFactor[1] && specular.specularColorFactor[2] == defaultSpecularColorFactor[2])) {
-        return false;
-    }
-
-    // Add any appropriate textures
-    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
-    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-
-    return true;
+    return result;
 }
 
 bool glTF2Exporter::GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen) {

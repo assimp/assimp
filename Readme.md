@@ -24,14 +24,15 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 ### Latest Doc's ###
 Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
 
-### Get involved ###
-This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
-<br>
-You find a bug in the docs? Use [Doc-Repo](https://github.com/assimp/assimp-docs).
-<br>
-Please check our Wiki as well: https://github.com/assimp/assimp/wiki
-
 If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
+
+### Communities ###
+- Ask a question at [The Assimp-Discussion Board](https://github.com/assimp/assimp/discussions)
+- Ask on [Assimp-Community on Reddit](https://www.reddit.com/r/Assimp/)
+- Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
+- Nothing has worked? File a question or an issue-report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
+
+And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 #### Supported file formats ####
 You can find the complete list of supported file-formats [here](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
@@ -78,17 +79,6 @@ The source code is organized in the following way:
 	code/PBR                        An exporter for physical based models
 	code/PostProcessing		The post-processing steps
 	code/AssetLib/<FormatName>	Implementation for import and export for the format
-
-### Where to get help ###
-To find our documentation, visit [our website](https://assimp.org/) or check out [Wiki](https://github.com/assimp/assimp/wiki)
-
-### Communities ###
-- Ask a question at [The Assimp-Discussion Board](https://github.com/assimp/assimp/discussions)
-- Ask on [Assimp-Community on Reddit](https://www.reddit.com/r/Assimp/)
-- Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
-- Nothing has worked? File a question or an issue-report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
-
-And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit

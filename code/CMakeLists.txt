@@ -218,6 +218,12 @@ SET( CApi_SRCS
 )
 SOURCE_GROUP(CApi FILES ${CApi_SRCS})
 
+SET(Geometry_SRCS
+  Geometry/GeometryUtils.h
+  Geometry/GeometryUtils.cpp
+)
+SOURCE_GROUP(Geometry FILES ${Geometry_SRCS})
+
 SET( STEPParser_SRCS
   AssetLib/STEPParser/STEPFileReader.h
   AssetLib/STEPParser/STEPFileReader.cpp
@@ -1129,6 +1135,7 @@ SET( assimp_src
   ${Core_SRCS}
   ${CApi_SRCS}
   ${Common_SRCS}
+  ${Geometry_SRCS}
   ${Logging_SRCS}
   ${Exporter_SRCS}
   ${PostProcessing_SRCS}

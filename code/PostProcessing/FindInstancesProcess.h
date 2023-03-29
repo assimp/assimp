@@ -50,7 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/ProcessHelper.h"
 
 class FindInstancesProcessTest;
-namespace Assimp    {
+
+namespace Assimp {
 
 // -------------------------------------------------------------------------------
 /** @brief Get a pseudo(!)-hash representing a mesh.
@@ -60,8 +61,7 @@ namespace Assimp    {
  *  @param in Input mesh
  *  @return Hash.
  */
-inline
-uint64_t GetMeshHash(aiMesh* in) {
+inline uint64_t GetMeshHash(aiMesh* in) {
     ai_assert(nullptr != in);
 
     // ... get an unique value representing the vertex format of the mesh
@@ -83,8 +83,7 @@ uint64_t GetMeshHash(aiMesh* in) {
  *  @param e Epsilon
  *  @return true if the arrays are identical
  */
-inline
-bool CompareArrays(const aiVector3D* first, const aiVector3D* second,
+inline bool CompareArrays(const aiVector3D* first, const aiVector3D* second,
         unsigned int size, float e) {
     for (const aiVector3D* end = first+size; first != end; ++first,++second) {
         if ( (*first - *second).SquareLength() >= e)
@@ -107,31 +106,27 @@ inline bool CompareArrays(const aiColor4D* first, const aiColor4D* second,
 // ---------------------------------------------------------------------------
 /** @brief A post-processing steps to search for instanced meshes
 */
-class FindInstancesProcess : public BaseProcess
-{
+class FindInstancesProcess : public BaseProcess {
 public:
-
     FindInstancesProcess();
-    ~FindInstancesProcess();
+    ~FindInstancesProcess() override = default;
 
-public:
     // -------------------------------------------------------------------
     // Check whether step is active in given flags combination
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     // Execute step on a given scene
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
     // Setup properties prior to executing the process
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
 private:
-
     bool configSpeedFlag;
-
 }; // ! end class FindInstancesProcess
+
 }  // ! end namespace Assimp
 
 #endif // !! AI_FINDINSTANCES_H_INC

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_DOCUMENT_H
 
 #include <numeric>
+#include <unordered_set>
 #include <stdint.h>
 #include <assimp/mesh.h>
 #include "FBXProperties.h"
@@ -855,14 +856,14 @@ public:
         return fullWeights;
     }
 
-    const std::vector<const ShapeGeometry*>& GetShapeGeometries() const {
+    const std::unordered_set<const ShapeGeometry*>& GetShapeGeometries() const {
         return shapeGeometries;
     }
 
 private:
     float percent;
     WeightArray fullWeights;
-    std::vector<const ShapeGeometry*> shapeGeometries;
+    std::unordered_set<const ShapeGeometry*> shapeGeometries;
 };
 
 /** DOM class for BlendShape deformers */
@@ -872,12 +873,12 @@ public:
 
     virtual ~BlendShape();
 
-    const std::vector<const BlendShapeChannel*>& BlendShapeChannels() const {
+    const std::unordered_set<const BlendShapeChannel*>& BlendShapeChannels() const {
         return blendShapeChannels;
     }
 
 private:
-    std::vector<const BlendShapeChannel*> blendShapeChannels;
+    std::unordered_set<const BlendShapeChannel*> blendShapeChannels;
 };
 
 /** DOM class for skin deformer clusters (aka sub-deformers) */

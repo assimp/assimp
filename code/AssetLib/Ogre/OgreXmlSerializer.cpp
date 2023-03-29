@@ -490,7 +490,7 @@ bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *me
     OgreXmlSerializer serializer(xmlParser.get());
     XmlNode root = xmlParser->getRootNode();
     if (std::string(root.name()) != nnSkeleton) {
-        printf("\nSkeleton is not a valid root: %s\n", root.name());
+        ASSIMP_LOG_VERBOSE_DEBUG("nSkeleton is not a valid root: ", root.name(), ".");
         for (auto &a : root.children()) {
             if (std::string(a.name()) == nnSkeleton) {
                 root = a;

@@ -31,7 +31,7 @@ THE SOFTWARE.
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <windows.h>
+#include <Windows.h>
 #elif __APPLE__
 #include <mach/clock.h>
 #include <mach/mach.h>

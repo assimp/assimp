@@ -55,7 +55,7 @@
 #include <stdarg.h>
 
 #if GTEST_OS_WINDOWS
-#include <windows.h>
+#include <Windows.h>
 #else
 #include <sys/mman.h>
 #include <sys/wait.h>

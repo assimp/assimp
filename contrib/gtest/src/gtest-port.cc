@@ -41,7 +41,7 @@
 #if GTEST_OS_WINDOWS
 #include <io.h>
 #include <sys/stat.h>
-#include <windows.h>
+#include <Windows.h>
 
 #include <map>  // Used in ThreadLocal.
 #ifdef _MSC_VER

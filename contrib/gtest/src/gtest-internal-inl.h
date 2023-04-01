@@ -55,7 +55,7 @@
 #endif
 
 #if GTEST_OS_WINDOWS
-#include <windows.h>  // NOLINT
+#include <Windows.h>  // NOLINT
 #endif                // GTEST_OS_WINDOWS
 
 #include "gtest/gtest-spi.h"

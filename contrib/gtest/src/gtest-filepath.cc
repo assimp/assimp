@@ -35,7 +35,7 @@
 #include "gtest/internal/gtest-port.h"
 
 #if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>
+#include <Windows.h>
 #elif GTEST_OS_WINDOWS
 #include <direct.h>
 #include <io.h>

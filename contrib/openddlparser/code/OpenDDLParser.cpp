@@ -30,7 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif // _WIN32
 
 BEGIN_ODDLPARSER_NS

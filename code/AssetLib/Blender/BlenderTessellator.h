@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE
 
 #if defined( WIN32 ) || defined( _WIN32 ) || defined( _MSC_VER )
-#include <windows.h>
+#include <Windows.h>
 #endif
 #include <GL/glu.h>
 

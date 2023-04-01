@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 
 #include <assimp/LogStream.hpp>
-#include "windows.h"
+#include <Windows.h>
 
 namespace Assimp    {
 

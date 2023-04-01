@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef _WIN32
-#    include <windows.h>
+#    include <Windows.h>
 #endif
 
 using namespace Assimp;

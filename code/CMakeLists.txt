@@ -1239,7 +1239,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
-        -Wno-nonportable-system-include-path
         -Wno-undefined-reinterpret-cast
         -Wno-shift-sign-overflow
         -Wno-deprecated-copy-with-user-provided-dtor

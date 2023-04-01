@@ -1198,7 +1198,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
 
     IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
       TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
-        -Wno-unused-function
         -Wno-microsoft-enum-value
         -Wno-switch-enum
         -Wno-covered-switch-default

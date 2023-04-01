@@ -4112,7 +4112,7 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h,
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 
-#include <windows.h>
+#include <Windows.h>
 
 static wchar_t *str2wstr(const char *str) {
   int len = (int) strlen(str) + 1;

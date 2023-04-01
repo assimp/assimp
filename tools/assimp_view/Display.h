@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_DISPLAY_H_INCLUDED)
 #define AV_DISPLAY_H_INCLUDE
 
-#include <windows.h>
+#include <Windows.h>
 #include <shellapi.h>
 #include <commctrl.h>
 

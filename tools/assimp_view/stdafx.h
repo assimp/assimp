@@ -24,7 +24,7 @@
 #endif
 
 // Windows-Headerdateien:
-#include <windows.h>
+#include <Windows.h>
 
 // C RunTime-Headerdateien
 #include <assert.h>

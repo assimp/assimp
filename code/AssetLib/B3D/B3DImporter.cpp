@@ -418,7 +418,6 @@ void B3DImporter::ReadTRIS(int v0) {
             ASSIMP_LOG_ERROR("Bad triangle index: i0=", i0, ", i1=", i1, ", i2=", i2);
 #endif
             Fail("Bad triangle index");
-            continue;
         }
         face->mNumIndices = 3;
         face->mIndices = new unsigned[3];

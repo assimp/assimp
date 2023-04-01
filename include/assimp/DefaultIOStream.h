@@ -84,7 +84,7 @@ protected:
 
 public:
     /** Destructor public to allow simple deletion to close the file. */
-    ~DefaultIOStream ();
+    ~DefaultIOStream () override;
 
     // -------------------------------------------------------------------
     /// Read from stream

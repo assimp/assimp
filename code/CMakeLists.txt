@@ -1229,7 +1229,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-double-promotion
         -Wno-unused-macros
         -Wno-disabled-macro-expansion
-        -Wno-shadow-field-in-constructor
         -Wno-shadow-field
         -Wno-shadow
         -Wno-language-extension-token

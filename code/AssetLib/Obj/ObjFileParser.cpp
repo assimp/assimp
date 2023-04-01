@@ -236,7 +236,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             getNameNoSpace(m_DataIt, m_DataItEnd, name);
             insideCstype = name == "cstype";
             goto pf_skip_line;
-        } break;
+        }
 
         default: {
         pf_skip_line:

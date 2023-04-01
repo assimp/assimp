@@ -1236,7 +1236,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-header-hygiene
         -Wno-tautological-value-range-compare
         -Wno-tautological-type-limit-compare
-        -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
         -Wno-nonportable-system-include-path

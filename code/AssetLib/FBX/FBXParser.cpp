@@ -88,6 +88,7 @@ namespace {
 
 
     // ------------------------------------------------------------------------------------------------
+    AI_WONT_RETURN void ParseError(const std::string& message, TokenPtr token) AI_WONT_RETURN_SUFFIX;
     void ParseError(const std::string& message, TokenPtr token)
     {
         if(token) {

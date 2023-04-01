@@ -12,7 +12,7 @@
 // Thanks to NeHe on whose OpenGL tutorials this one's based on! :)
 // http://nehe.gamedev.net/
 // ----------------------------------------------------------------------------
-#include <windows.h>
+#include <Windows.h>
 #include <shellapi.h>
 #include <stdio.h>
 #include <GL/gl.h>

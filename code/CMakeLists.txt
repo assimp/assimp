@@ -1242,7 +1242,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-nonportable-system-include-path
         -Wno-undefined-reinterpret-cast
         -Wno-shift-sign-overflow
-        -Wno-deprecated-copy-with-user-provided-dtor
         -Wno-deprecated-copy-with-dtor
         -Wno-deprecated
         -Wno-format-nonliteral

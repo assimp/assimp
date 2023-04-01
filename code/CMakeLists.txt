@@ -1254,7 +1254,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template
-        -Wno-nested-anon-types
         -Wno-declaration-after-statement
       )
     ELSE()

@@ -1,4 +1,4 @@
-#include <windows.h>
+#include <Windows.h>
 
 #define IDR_VERSION1  1
 IDR_VERSION1	VERSIONINFO	MOVEABLE IMPURE LOADONCALL DISCARDABLE

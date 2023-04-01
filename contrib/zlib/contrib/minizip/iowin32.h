@@ -11,7 +11,7 @@
 
 */
 
-#include <windows.h>
+#include <Windows.h>
 
 
 #ifdef __cplusplus

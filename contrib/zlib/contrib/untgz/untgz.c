@@ -22,7 +22,7 @@
 #endif
 
 #ifdef WIN32
-#include <windows.h>
+#include <Windows.h>
 #  ifndef F_OK
 #    define F_OK  0
 #  endif

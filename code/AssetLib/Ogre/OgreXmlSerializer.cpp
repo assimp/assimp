@@ -128,7 +128,6 @@ bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) 
     }
 
     ThrowAttibuteError(xmlNode.name(), name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
-    return false;
 }
 
 // Mesh XML constants

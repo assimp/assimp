@@ -65,3 +65,24 @@ TEST(ut3DImportExport, importBoxUC) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box.uc", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
+
+
+TEST(ut3DImportExport, importMarRifle) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3D/mar_rifle.uc", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(ut3DImportExport, importMarRifleA) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3D/mar_rifle_a.3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST(ut3DImportExport, importMarRifleD) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3D/mar_rifle_d.3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}

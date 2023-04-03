@@ -569,7 +569,7 @@ void Structure ::Convert<MVert>(
         const FileDatabase &db) const {
 
     ReadFieldArray<ErrorPolicy_Fail>(dest.co, "co", db);
-    ReadFieldArray<ErrorPolicy_Fail>(dest.no, "no", db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.no, "no", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     //ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight, "bweight", db);

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -72,22 +71,18 @@ namespace Assimp    {
  *
  * @note RH-LH and LH-RH is the same, so this class can be used for both
  */
-class MakeLeftHandedProcess : public BaseProcess
-{
-
-
+class MakeLeftHandedProcess : public BaseProcess {
 public:
-    MakeLeftHandedProcess();
-    ~MakeLeftHandedProcess();
+    MakeLeftHandedProcess() = default;
+    ~MakeLeftHandedProcess() override = default;
 
     // -------------------------------------------------------------------
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Recursively converts a node and all of its children
      */
@@ -120,24 +115,22 @@ protected:
 // ---------------------------------------------------------------------------
 /** Postprocessing step to flip the face order of the imported data
  */
-class FlipWindingOrderProcess : public BaseProcess
-{
+class FlipWindingOrderProcess : public BaseProcess {
     friend class Importer;
 
 public:
     /** Constructor to be privately used by Importer */
-    FlipWindingOrderProcess();
+    FlipWindingOrderProcess() = default;
 
     /** Destructor, private as well */
-    ~FlipWindingOrderProcess();
+    ~FlipWindingOrderProcess() override = default;
 
     // -------------------------------------------------------------------
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
-public:
     /** Some other types of post-processing require winding order flips */
     static void ProcessMesh( aiMesh* pMesh);
 };

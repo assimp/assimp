@@ -57,7 +57,7 @@ namespace Assimp {
 namespace Ogre {
 
 //AI_WONT_RETURN void ThrowAttibuteError(const XmlParser *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
-
+AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) {
     if (!error.empty()) {
         throw DeadlyImportError(error, " in node '", nodeName, "' and attribute '", name, "'");

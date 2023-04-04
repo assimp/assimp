@@ -1229,7 +1229,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-double-promotion
         -Wno-unused-macros
         -Wno-disabled-macro-expansion
-        -Wno-shadow-field-in-constructor
         -Wno-shadow-field
         -Wno-shadow
         -Wno-language-extension-token
@@ -1253,7 +1252,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template
-        -Wno-nested-anon-types
         -Wno-declaration-after-statement
       )
     ELSE()

@@ -382,9 +382,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
     out.push_back(new IQMImporter());
 #endif
-    //#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
-    //     out.push_back(new StepFile::StepFileImporter());
-    //#endif
 }
 
 /** will delete all registered importers. */

@@ -1245,7 +1245,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-deprecated-copy-with-dtor
         -Wno-deprecated
         -Wno-format-nonliteral
-        -Wno-format-non-iso
         -Wno-comma
         -Wno-unreachable-code-break
         -Wno-unreachable-code-return

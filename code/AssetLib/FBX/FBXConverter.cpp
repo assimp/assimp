@@ -152,7 +152,7 @@ void FBXConverter::ConvertRootNode() {
     mSceneOut->mRootNode->mName.Set(unique_name);
 
     // root has ID 0
-    ConvertNodes(0L, mSceneOut->mRootNode, mSceneOut->mRootNode);
+    ConvertNodes(0L, mSceneOut->mRootNode, mSceneOut->mRootNode, aiMatrix4x4());
 }
 
 static std::string getAncestorBaseName(const aiNode *node) {
@@ -196,7 +196,7 @@ struct FBXConverter::PotentialNode {
 /// todo: get bone from stack
 /// todo: make map of aiBone* to aiNode*
 /// then update convert clusters to the new format
-void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) {
+void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node, const aiMatrix4x4 &globalTransform) {
     const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
     std::vector<PotentialNode> nodes;
@@ -290,14 +290,15 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             }
 
             // recursion call - child nodes
-            ConvertNodes(model->ID(), last_parent, root_node);
+            aiMatrix4x4 newGlobalMatrix = globalTransform * nodes_chain.front().mNode->mTransformation;
+            ConvertNodes(model->ID(), last_parent, root_node, newGlobalMatrix);
 
             if (doc.Settings().readLights) {
                 ConvertLights(*model, node_name);
             }
 
             if (doc.Settings().readCameras) {
-                ConvertCameras(*model, node_name);
+                ConvertCameras(*model, node_name, newGlobalMatrix);
             }
 
             nodes.push_back(std::move(nodes_chain.front()));
@@ -327,12 +328,14 @@ void FBXConverter::ConvertLights(const Model &model, const std::string &orig_nam
     }
 }
 
-void FBXConverter::ConvertCameras(const Model &model, const std::string &orig_name) {
+void FBXConverter::ConvertCameras(const Model &model,
+                                  const std::string &orig_name,
+                                  const aiMatrix4x4 &transform) {
     const std::vector<const NodeAttribute *> &node_attrs = model.GetAttributes();
     for (const NodeAttribute *attr : node_attrs) {
         const Camera *const cam = dynamic_cast<const Camera *>(attr);
         if (cam) {
-            ConvertCamera(*cam, orig_name);
+            ConvertCamera(*cam, orig_name, transform);
         }
     }
 }
@@ -413,7 +416,9 @@ void FBXConverter::ConvertLight(const Light &light, const std::string &orig_name
     }
 }
 
-void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name) {
+void FBXConverter::ConvertCamera(const Camera &cam,
+                                 const std::string &orig_name,
+                                 aiMatrix4x4 transform) {
     cameras.push_back(new aiCamera());
     aiCamera *const out_camera = cameras.back();
 
@@ -421,9 +426,16 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
+    aiVector3D pos = cam.Position();
+    out_camera->mLookAt = cam.InterestPosition();
+    out_camera->mUp = pos + cam.UpVector();
+    transform.Inverse();
+    pos *= transform;
+    out_camera->mLookAt *= transform;
+    out_camera->mUp *= transform;
+    out_camera->mLookAt -= pos;
+    out_camera->mUp -= pos;
     out_camera->mPosition = aiVector3D(0.0f);
-    out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
-    out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
 
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
 

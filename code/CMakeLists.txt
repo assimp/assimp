@@ -1248,7 +1248,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-comma
         -Wno-unreachable-code-break
         -Wno-unreachable-code-return
-        -Wno-unreachable-code
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template

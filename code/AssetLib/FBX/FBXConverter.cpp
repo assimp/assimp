@@ -421,6 +421,8 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
+    // NOTE: Camera mPosition, mLookAt and mUp must be set to default here.
+    // All transformations to the camera will be handled by its node in the scenegraph.
     out_camera->mPosition = aiVector3D(0.0f);
     out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
     out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);

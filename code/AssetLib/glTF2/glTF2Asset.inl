@@ -962,14 +962,15 @@ inline size_t Accessor::GetMaxByteSize() {
 }
 
 template <class T>
-void Accessor::ExtractData(T *&outData) {
+size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remappingIndices) {
     uint8_t *data = GetPointer();
     if (!data) {
         throw DeadlyImportError("GLTF2: data is null when extracting data from ", getContextForErrorMessages(id, name));
     }
 
+    const size_t usedCount = (remappingIndices != nullptr) ? remappingIndices->size() : count;
     const size_t elemSize = GetElementSize();
-    const size_t totalSize = elemSize * count;
+    const size_t totalSize = elemSize * usedCount;
 
     const size_t stride = GetStride();
 
@@ -980,18 +981,31 @@ void Accessor::ExtractData(T *&outData) {
     }
 
     const size_t maxSize = GetMaxByteSize();
-    if (count * stride > maxSize) {
-        throw DeadlyImportError("GLTF: count*stride ", (count * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
-    }
 
-    outData = new T[count];
-    if (stride == elemSize && targetElemSize == elemSize) {
-        memcpy(outData, data, totalSize);
-    } else {
-        for (size_t i = 0; i < count; ++i) {
-            memcpy(outData + i, data + i * stride, elemSize);
+    outData = new T[usedCount];
+
+    if (remappingIndices != nullptr) {
+        const unsigned int maxIndex = static_cast<unsigned int>(maxSize / stride - 1);
+        for (size_t i = 0; i < usedCount; ++i) {
+            size_t srcIdx = (*remappingIndices)[i];
+            if (srcIdx > maxIndex) {
+                throw DeadlyImportError("GLTF: index*stride ", (srcIdx * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+            }
+            memcpy(outData + i, data + srcIdx * stride, elemSize);
+        }
+    } else { // non-indexed cases
+        if (usedCount * stride > maxSize) {
+            throw DeadlyImportError("GLTF: count*stride ", (usedCount * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+        }
+        if (stride == elemSize && targetElemSize == elemSize) {
+            memcpy(outData, data, totalSize);
+        } else {
+            for (size_t i = 0; i < usedCount; ++i) {
+                memcpy(outData + i, data + i * stride, elemSize);
+            }
         }
     }
+    return usedCount;
 }
 
 inline void Accessor::WriteData(size_t _count, const void *src_buffer, size_t src_stride) {

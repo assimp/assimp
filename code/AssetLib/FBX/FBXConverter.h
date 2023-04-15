@@ -134,22 +134,19 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     // collect and assign child nodes
-    void ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node,
-                      const aiMatrix4x4 &globalTransform);
+    void ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node);
 
     // ------------------------------------------------------------------------------------------------
     void ConvertLights(const Model& model, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertCameras(const Model& model, const std::string &orig_name,
-                        const aiMatrix4x4 &transform);
+    void ConvertCameras(const Model& model, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
     void ConvertLight( const Light& light, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
-    void ConvertCamera(const Camera& cam, const std::string &orig_name,
-                       aiMatrix4x4 transform);
+    void ConvertCamera( const Camera& cam, const std::string &orig_name );
 
     // ------------------------------------------------------------------------------------------------
     void GetUniqueName( const std::string &name, std::string& uniqueName );

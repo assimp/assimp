@@ -76,4 +76,17 @@ ai_real GeometryUtils::calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh
     return area;
 }
 
+// ------------------------------------------------------------------------------------------------
+// Check whether a ray intersects a plane and find the intersection point
+bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, 
+        const aiVector3D& planeNormal, aiVector3D& pos) {
+    const ai_real b = planeNormal * (planePos - ray.pos);
+    ai_real h = ray.dir * planeNormal;
+    if ((h < 10e-5 && h > -10e-5) || (h = b/h) < 0)
+        return false;
+
+    pos = ray.pos + (ray.dir * h);
+    return true;
+}
+
 } // namespace Assimp

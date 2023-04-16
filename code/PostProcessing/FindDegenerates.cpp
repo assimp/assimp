@@ -236,8 +236,7 @@ evil_jump_outside:
                     face_src.mNumIndices = 0;
                     face_src.mIndices = nullptr;
                 }
-            }
-            else {
+            } else {
                 // Otherwise delete it if we don't need this face
                 delete[] face_src.mIndices;
                 face_src.mIndices = nullptr;

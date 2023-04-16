@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,10 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file GenUVCoords step */
 
-
 #include "ComputeUVMappingProcess.h"
 #include "ProcessHelper.h"
 #include <assimp/Exceptional.h>
+#include "Geometry/GeometryUtils.h"
 
 using namespace Assimp;
 
@@ -59,31 +58,17 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool ComputeUVMappingProcess::IsActive( unsigned int pFlags) const
-{
+bool ComputeUVMappingProcess::IsActive( unsigned int pFlags) const {
     return  (pFlags & aiProcess_GenUVCoords) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
-// Check whether a ray intersects a plane and find the intersection point
-inline bool PlaneIntersect(const aiRay& ray, const aiVector3D& planePos,
-    const aiVector3D& planeNormal, aiVector3D& pos)
-{
-    const ai_real b = planeNormal * (planePos - ray.pos);
-    ai_real h = ray.dir * planeNormal;
-    if ((h < 10e-5 && h > -10e-5) || (h = b/h) < 0)
-        return false;
-
-    pos = ray.pos + (ray.dir * h);
-    return true;
-}
-
-// ------------------------------------------------------------------------------------------------
 // Find the first empty UV channel in a mesh
-inline unsigned int FindEmptyUVChannel (aiMesh* mesh)
-{
+inline unsigned int FindEmptyUVChannel (aiMesh* mesh) {
     for (unsigned int m = 0; m < AI_MAX_NUMBER_OF_TEXTURECOORDS;++m)
-        if (!mesh->mTextureCoords[m])return m;
+        if (!mesh->mTextureCoords[m]) {
+            return m;
+        }
 
     ASSIMP_LOG_ERROR("Unable to compute UV coordinates, no free UV slot found");
     return UINT_MAX;
@@ -91,8 +76,7 @@ inline unsigned int FindEmptyUVChannel (aiMesh* mesh)
 
 // ------------------------------------------------------------------------------------------------
 // Try to remove UV seams
-void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
-{
+void RemoveUVSeams (aiMesh* mesh, aiVector3D* out) {
     // TODO: just a very rough algorithm. I think it could be done
     // much easier, but I don't know how and am currently too tired to
     // to think about a better solution.
@@ -103,10 +87,11 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
     const static ai_real LOWER_EPSILON = ai_real( 10e-3 );
     const static ai_real UPPER_EPSILON = ai_real( 1.0-10e-3 );
 
-    for (unsigned int fidx = 0; fidx < mesh->mNumFaces;++fidx)
-    {
+    for (unsigned int fidx = 0; fidx < mesh->mNumFaces;++fidx) {
         const aiFace& face = mesh->mFaces[fidx];
-        if (face.mNumIndices < 3) continue; // triangles and polygons only, please
+        if (face.mNumIndices < 3) {
+            continue; // triangles and polygons only, please
+        }
 
         unsigned int smallV = face.mNumIndices, large = smallV;
         bool zero = false, one = false, round_to_zero = false;

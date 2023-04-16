@@ -105,7 +105,7 @@ class Vertex {
     friend Vertex operator * (ai_real, const Vertex&);
 
 public:
-    Vertex() {}
+    Vertex() = default;
 
     // ----------------------------------------------------------------------------
     /** Extract a particular vertex from a mesh and interleave all components */

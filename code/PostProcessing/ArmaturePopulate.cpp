@@ -47,11 +47,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-/// The default class constructor.
-ArmaturePopulate::ArmaturePopulate() = default;
+static bool IsBoneNode(const aiString &bone_name, std::vector<aiBone *> &bones) {
+    for (aiBone *bone : bones) {
+        if (bone->mName == bone_name) {
+            return true;
+        }
+    }
 
-/// The class destructor.
-ArmaturePopulate::~ArmaturePopulate() = default;
+    return false;
+}
 
 bool ArmaturePopulate::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_PopulateArmatureData) != 0;
@@ -78,9 +82,8 @@ void ArmaturePopulate::Execute(aiScene *out) {
         aiBone *bone = kvp.first;
         aiNode *bone_node = kvp.second;
         ASSIMP_LOG_VERBOSE_DEBUG("active node lookup: ", bone->mName.C_Str());
+        
         // lcl transform grab - done in generate_nodes :)
-
-        // bone->mOffsetMatrix = bone_node->mTransformation;
         aiNode *armature = GetArmatureRoot(bone_node, bones);
 
         ai_assert(armature);
@@ -210,18 +213,6 @@ aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
     ASSIMP_LOG_ERROR("GetArmatureRoot() can't find armature!");
 
     return nullptr;
-}
-
-// Simple IsBoneNode check if this could be a bone
-bool ArmaturePopulate::IsBoneNode(const aiString &bone_name,
-                                  std::vector<aiBone *> &bones) {
-    for (aiBone *bone : bones) {
-        if (bone->mName == bone_name) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 // Pop this node by name from the stack if found

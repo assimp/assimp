@@ -397,10 +397,6 @@ struct Material {
 
     Material(const Material &other) = default;
 
-    Material(Material &&other) AI_NO_EXCEPT = default;
-
-    Material &operator=(Material &&other) AI_NO_EXCEPT = default;
-
     virtual ~Material() = default;
 
     //! Name of the material

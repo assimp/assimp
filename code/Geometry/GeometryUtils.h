@@ -62,6 +62,8 @@ public:
     /// @param mesh   The mesh containing the face
     /// @return The area.
     static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh );
+
+    static bool PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, const aiVector3D& planeNormal, aiVector3D& pos);
 };
 
 } // namespace Assimp

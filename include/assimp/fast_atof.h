@@ -39,7 +39,9 @@
 
 namespace Assimp {
 
-constexpr double fast_atof_table[16] =  {  // we write [16] here instead of [] to work around a swig bug
+static constexpr size_t NumItems = 16;
+
+constexpr double fast_atof_table[NumItems] =  {  // we write [16] here instead of [] to work around a swig bug
     0.0,
     0.1,
     0.01,
@@ -236,8 +238,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 // signed variant of strtoul10_64
 // ------------------------------------------------------------------------------------
 template<typename ExceptionType = DeadlyImportError>
-inline
-int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0) {
+inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0) {
     bool inv = (*in == '-');
     if ( inv || *in == '+' ) {
         ++in;
@@ -259,8 +260,7 @@ int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inou
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template<typename Real, typename ExceptionType = DeadlyImportError>
-inline
-const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true) {
+inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true) {
     Real f = 0;
 
     bool inv = (*c == '-');
@@ -349,8 +349,7 @@ const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
 // ------------------------------------------------------------------------------------
 // The same but more human.
 template<typename ExceptionType = DeadlyImportError>
-inline
-ai_real fast_atof(const char* c) {
+inline ai_real fast_atof(const char* c) {
     ai_real ret(0.0);
     fast_atoreal_move<ai_real, ExceptionType>(c, ret);
 
@@ -367,8 +366,7 @@ ai_real fast_atof( const char* c, const char** cout) {
 }
 
 template<typename ExceptionType = DeadlyImportError>
-inline
-ai_real fast_atof( const char** inout) {
+inline ai_real fast_atof( const char** inout) {
     ai_real ret(0.0);
     *inout = fast_atoreal_move<ai_real, ExceptionType>(*inout, ret);
 

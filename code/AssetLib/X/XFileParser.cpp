@@ -839,7 +839,6 @@ void XFileParser::ParseDataObjectAnimationKey(AnimBone *pAnimBone) {
 
         default:
             ThrowException("Unknown key type ", keyType, " in animation.");
-            break;
         } // end switch
 
         // key separator

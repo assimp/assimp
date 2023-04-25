@@ -184,6 +184,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __GNUC__
 #   define AI_WONT_RETURN_SUFFIX __attribute__((noreturn))
+#elif _MSC_VER
+#if defined(__clang__)
+#   define AI_WONT_RETURN_SUFFIX __attribute__((noreturn))
+#else
+#   define AI_WONT_RETURN_SUFFIX
+#endif
 #else
 #   define AI_WONT_RETURN_SUFFIX
 #endif // (defined __clang__)

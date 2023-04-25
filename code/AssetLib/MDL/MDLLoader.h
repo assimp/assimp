@@ -139,7 +139,7 @@ protected:
     // -------------------------------------------------------------------
     /** Import a CS:S/HL2 MDL file (not fully implemented)
     */
-    void InternReadFile_HL2( );
+    AI_WONT_RETURN void InternReadFile_HL2( ) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Check whether a given position is inside the valid range

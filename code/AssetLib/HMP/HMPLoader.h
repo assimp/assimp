@@ -86,7 +86,7 @@ protected:
     // -------------------------------------------------------------------
     /** Import a HMP4 file
     */
-    void InternReadFile_HMP4();
+    AI_WONT_RETURN void InternReadFile_HMP4() AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Import a HMP5 file

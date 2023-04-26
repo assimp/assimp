@@ -1211,7 +1211,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undef
         -Wno-suggest-destructor-override
         -Wno-suggest-override
-        -Wno-inconsistent-missing-destructor-override
         -Wno-zero-as-null-pointer-constant
         -Wno-global-constructors
         -Wno-exit-time-destructors
@@ -1235,7 +1234,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-header-hygiene
         -Wno-tautological-value-range-compare
         -Wno-tautological-type-limit-compare
-        -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
         -Wno-nonportable-system-include-path

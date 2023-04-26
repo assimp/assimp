@@ -11,7 +11,7 @@ f 0.0 0.0 1.0 0 1 1 1
 s 5.0 4.0 8.0 3.0
 
 #green
-f 1.0 1.0 1.0 0.5 0.5 45.2776 0 1 ./../../LWO/LWo2/MappingModes/EarthCylindric.jpg
+f 1.0 1.0 1.0 0.5 0.5 45.2776 0 1 earthCylindric.jpg
 
 # And another one
 s 1.0 -4.0 2.0 4.0 2 2

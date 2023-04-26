@@ -66,7 +66,7 @@ ASSIMP_API void setAiAssertHandler(AiAssertHandler handler);
  *
  *  @brief  This issues a message to stderr and calls abort.
  */
-ASSIMP_API void defaultAiAssertHandler(const char* failedExpression, const char* file, int line);
+AI_WONT_RETURN ASSIMP_API void defaultAiAssertHandler(const char* failedExpression, const char* file, int line) AI_WONT_RETURN_SUFFIX;
 
 // ---------------------------------------------------------------------------
 /**

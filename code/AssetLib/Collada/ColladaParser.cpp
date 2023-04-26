@@ -1855,7 +1855,6 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         default:
             // LineStrip is not supported due to expected index unmangling
             throw DeadlyImportError("Unsupported primitive type.");
-            break;
         }
 
         // store the face size to later reconstruct the face from

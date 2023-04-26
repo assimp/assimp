@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -84,7 +84,6 @@ ObjFileImporter::ObjFileImporter() :
 //  Destructor.
 ObjFileImporter::~ObjFileImporter() {
     delete m_pRootObject;
-    m_pRootObject = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -270,7 +269,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
     for (size_t i = 0; i < pObject->m_Meshes.size(); ++i) {
         unsigned int meshId = pObject->m_Meshes[i];
         aiMesh *pMesh = createTopology(pModel, pObject, meshId);
-        if (pMesh) {
+        if (pMesh != nullptr) {
             if (pMesh->mNumFaces > 0) {
                 MeshArray.push_back(pMesh);
             } else {
@@ -324,14 +323,13 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
         return nullptr;
     }
 
-    std::unique_ptr<aiMesh> pMesh(new aiMesh);
+    aiMesh *pMesh = new aiMesh;
     if (!pObjMesh->m_name.empty()) {
         pMesh->mName.Set(pObjMesh->m_name);
     }
 
     for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
         const ObjFile::Face *inp = pObjMesh->m_Faces[index];
-        //ai_assert(nullptr != inp);
 
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
             pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
@@ -387,9 +385,9 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
     }
 
     // Create mesh vertices
-    createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
+    createVertexArray(pModel, pData, meshIndex, pMesh, uiIdxCount);
 
-    return pMesh.release();
+    return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------

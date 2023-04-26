@@ -513,21 +513,22 @@ struct Camera : public Object {
     };
 
     Type type;
+    struct Perspective {
+        float aspectRatio; //!<The floating - point aspect ratio of the field of view. (0 = undefined = use the canvas one)
+        float yfov; //!<The floating - point vertical field of view in radians. (required)
+        float zfar; //!<The floating - point distance to the far clipping plane. (required)
+        float znear; //!< The floating - point distance to the near clipping plane. (required)
+    };
 
+    struct Ortographic {
+        float xmag; //! The floating-point horizontal magnification of the view. (required)
+        float ymag; //! The floating-point vertical magnification of the view. (required)
+        float zfar; //! The floating-point distance to the far clipping plane. (required)
+        float znear; //! The floating-point distance to the near clipping plane. (required)
+    };
     union {
-        struct {
-            float aspectRatio; //!<The floating - point aspect ratio of the field of view. (0 = undefined = use the canvas one)
-            float yfov; //!<The floating - point vertical field of view in radians. (required)
-            float zfar; //!<The floating - point distance to the far clipping plane. (required)
-            float znear; //!< The floating - point distance to the near clipping plane. (required)
-        } perspective;
-
-        struct {
-            float xmag; //! The floating-point horizontal magnification of the view. (required)
-            float ymag; //! The floating-point vertical magnification of the view. (required)
-            float zfar; //! The floating-point distance to the far clipping plane. (required)
-            float znear; //! The floating-point distance to the near clipping plane. (required)
-        } ortographic;
+        struct Perspective perspective;
+        struct Ortographic ortographic;
     };
 
     Camera() = default;

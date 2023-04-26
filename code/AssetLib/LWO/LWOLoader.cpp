@@ -1486,7 +1486,6 @@ void LWOImporter::LoadLWO2File() {
 
         if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWO2: Chunk length points behind the file");
-            break;
         }
         uint8_t *const next = mFileBuffer + head.length;
         mFileBuffer += bufOffset;

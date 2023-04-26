@@ -4,4 +4,4 @@ Ka 0.588235 0.588235 0.588235
 Ks 0.898039 0.898039 0.898039
 Ns 128
 Tr 0
-map_Kd ./../3DS/m_rifl.bmp
+map_Kd m_rifl.bmp

@@ -65,7 +65,6 @@ void LWOImporter::LoadLWOBFile()
         if (mFileBuffer + head.length > end)
         {
             throw DeadlyImportError("LWOB: Invalid chunk length");
-            break;
         }
         uint8_t* const next = mFileBuffer+head.length;
         switch (head.type)

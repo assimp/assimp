@@ -421,6 +421,8 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
+    // NOTE: Camera mPosition, mLookAt and mUp must be set to default here.
+    // All transformations to the camera will be handled by its node in the scenegraph.
     out_camera->mPosition = aiVector3D(0.0f);
     out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
     out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
@@ -640,7 +642,7 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
 bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
 
-    const auto zero_epsilon = ai_epsilon;
+    const auto zero_epsilon = Math::getEpsilon<ai_real>();
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);

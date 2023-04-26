@@ -1229,14 +1229,12 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-double-promotion
         -Wno-unused-macros
         -Wno-disabled-macro-expansion
-        -Wno-shadow-field-in-constructor
         -Wno-shadow-field
         -Wno-shadow
         -Wno-language-extension-token
         -Wno-header-hygiene
         -Wno-tautological-value-range-compare
         -Wno-tautological-type-limit-compare
-        -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
         -Wno-nonportable-system-include-path
@@ -1245,15 +1243,10 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-deprecated-copy-with-dtor
         -Wno-deprecated
         -Wno-format-nonliteral
-        -Wno-format-non-iso
         -Wno-comma
-        -Wno-unreachable-code-break
-        -Wno-unreachable-code-return
-        -Wno-unreachable-code
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template
-        -Wno-nested-anon-types
         -Wno-declaration-after-statement
       )
     ELSE()

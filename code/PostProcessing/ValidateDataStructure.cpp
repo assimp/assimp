@@ -290,7 +290,6 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
             switch (face.mNumIndices) {
             case 0:
                 ReportError("aiMesh::mFaces[%i].mNumIndices is 0", i);
-                break;
             case 1:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT)) {
                     ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimitiveTypes "

@@ -78,7 +78,7 @@
 #   pragma warning(disable : 4131 4244 4189 4245)
 #endif // _MSC_VER
 
-const char unz_copyright[] =
+static const char unz_copyright[] =
    " unzip 1.01 Copyright 1998-2004 Gilles Vollant - http://www.winimage.com/zLibDll";
 
 /* unz_file_info_internal contain internal info about a file in zipfile*/

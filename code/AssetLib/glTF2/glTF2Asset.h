@@ -483,7 +483,7 @@ private:
 
 public:
     Buffer();
-    ~Buffer();
+    ~Buffer() override;
 
     void Read(Value &obj, Asset &r);
 

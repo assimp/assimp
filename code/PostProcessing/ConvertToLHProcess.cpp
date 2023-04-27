@@ -80,14 +80,6 @@ void flipUVs(aiMeshType *pMesh) {
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-MakeLeftHandedProcess::MakeLeftHandedProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MakeLeftHandedProcess::~MakeLeftHandedProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool MakeLeftHandedProcess::IsActive(unsigned int pFlags) const {
     return 0 != (pFlags & aiProcess_MakeLeftHanded);
@@ -120,6 +112,12 @@ void MakeLeftHandedProcess::Execute(aiScene *pScene) {
             aiNodeAnim *nodeAnim = anim->mChannels[b];
             ProcessAnimation(nodeAnim);
         }
+    }
+
+    // process the cameras accordingly
+    for( unsigned int a = 0; a < pScene->mNumCameras; ++a)
+    {
+        ProcessCamera(pScene->mCameras[a]);
     }
     ASSIMP_LOG_DEBUG("MakeLeftHandedProcess finished");
 }
@@ -239,6 +237,13 @@ void MakeLeftHandedProcess::ProcessAnimation(aiNodeAnim *pAnim) {
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Converts a single camera to left handed coordinates.
+void MakeLeftHandedProcess::ProcessCamera( aiCamera* pCam)
+{
+    pCam->mLookAt = 2.0f * pCam->mPosition - pCam->mLookAt;
+}
+
 #endif // !!  ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS
 #ifndef ASSIMP_BUILD_NO_FLIPUVS_PROCESS
 // # FlipUVsProcess
@@ -304,14 +309,6 @@ void FlipUVsProcess::ProcessMesh(aiMesh *pMesh) {
 #endif // !ASSIMP_BUILD_NO_FLIPUVS_PROCESS
 #ifndef ASSIMP_BUILD_NO_FLIPWINDING_PROCESS
 // # FlipWindingOrderProcess
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-FlipWindingOrderProcess::FlipWindingOrderProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-FlipWindingOrderProcess::~FlipWindingOrderProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

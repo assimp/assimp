@@ -483,7 +483,7 @@ private:
 
 public:
     Buffer();
-    ~Buffer();
+    ~Buffer() override;
 
     void Read(Value &obj, Asset &r);
 
@@ -565,7 +565,7 @@ struct Accessor : public Object {
     inline size_t GetMaxByteSize();
 
     template <class T>
-    void ExtractData(T *&outData);
+    size_t ExtractData(T *&outData, const std::vector<unsigned int> *remappingIndices = nullptr);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
     void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);

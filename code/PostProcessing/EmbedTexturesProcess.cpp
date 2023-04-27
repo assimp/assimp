@@ -49,10 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-EmbedTexturesProcess::EmbedTexturesProcess() = default;
-
-EmbedTexturesProcess::~EmbedTexturesProcess() = default;
-
 bool EmbedTexturesProcess::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_EmbedTextures) != 0;
 }

@@ -460,14 +460,12 @@ void OpenGEXImporter::handleMetricNode(DDLNode *node, aiScene * /*pScene*/) {
 void OpenGEXImporter::handleNameNode(DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No current node for name.");
-        return;
     }
 
     Value *val(node->getValue());
     if (nullptr != val) {
         if (Value::ValueType::ddl_string != val->m_type) {
             throw DeadlyImportError("OpenGEX: invalid data type for value in node name.");
-            return;
         }
 
         const std::string name(val->getString());
@@ -508,7 +506,6 @@ static void getRefNames(DDLNode *node, std::vector<std::string> &names) {
 void OpenGEXImporter::handleObjectRefNode(DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     std::vector<std::string> objRefNames;
@@ -532,7 +529,6 @@ void OpenGEXImporter::handleObjectRefNode(DDLNode *node, aiScene * /*pScene*/) {
 void OpenGEXImporter::handleMaterialRefNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     std::vector<std::string> matRefNames;
@@ -672,14 +668,12 @@ static void setMatrix(aiNode *node, DataArrayList *transformData) {
 void OpenGEXImporter::handleTransformNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     DataArrayList *transformData(node->getDataArrayList());
     if (nullptr != transformData) {
         if (transformData->m_numItems != 16) {
             throw DeadlyImportError("Invalid number of data for transform matrix.");
-            return;
         }
         setMatrix(m_currentNode, transformData);
     }
@@ -835,7 +829,6 @@ static void copyColor4DArray(size_t numItems, DataArrayList *vaList, aiColor4D *
 void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == node) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     Property *prop = node->getProperties();
@@ -876,12 +869,10 @@ void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene *
 void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == node) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     if (nullptr == m_currentMesh) {
         throw DeadlyImportError("No current mesh for index data found.");
-        return;
     }
 
     DataArrayList *vaList = node->getDataArrayList();

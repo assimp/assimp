@@ -365,9 +365,7 @@ public:
     static void ReportWarning (const char* warn, unsigned int line);
 
 
-    void ReportError (const char* error) {
-        return ReportError(error, lineNumber);
-    }
+    AI_WONT_RETURN void ReportError (const char* error) AI_WONT_RETURN_SUFFIX;
 
     void ReportWarning (const char* warn) {
         return ReportWarning(warn, lineNumber);
@@ -404,6 +402,9 @@ private:
     unsigned int lineNumber;
 };
 
+inline void MD5Parser::ReportError(const char* error) {
+    ReportError(error, lineNumber);
+}
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipLine(const char* in, const char** out) {
     ++lineNumber;

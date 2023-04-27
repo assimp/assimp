@@ -68,7 +68,7 @@ class ZipFile : public IOStream {
 
 public:
     std::string m_Filename;
-    virtual ~ZipFile();
+    virtual ~ZipFile() override;
 
     // IOStream interface
     size_t Read(void *pvBuffer, size_t pSize, size_t pCount) override;

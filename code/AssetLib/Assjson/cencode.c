@@ -7,7 +7,7 @@ For details, see http://sourceforge.net/projects/libb64
 
 #include "cencode.h" // changed from <B64/cencode.h>
 
-const int CHARS_PER_LINE = 72;
+static const int CHARS_PER_LINE = 72;
 
 #ifdef _MSC_VER
 #pragma warning(push)

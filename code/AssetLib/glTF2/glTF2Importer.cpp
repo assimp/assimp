@@ -453,6 +453,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
     unsigned int k = 0;
     meshOffsets.clear();
 
+
+    std::vector<unsigned int> usedVertexIndices;
+    std::vector<unsigned int> reverseMappingIndices;
+    std::vector<unsigned int> indexBuffer;
+
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh &mesh = r.meshes[m];
 
@@ -461,6 +466,50 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             Mesh::Primitive &prim = mesh.primitives[p];
+
+            Mesh::Primitive::Attributes &attr = prim.attributes;
+
+            // Find out the maximum number of vertices:
+            size_t numAllVertices = 0;
+            if (!attr.position.empty() && attr.position[0]) {
+                numAllVertices = attr.position[0]->count;
+            }
+
+            // Extract used vertices:
+            bool useIndexBuffer = prim.indices;
+            std::vector<unsigned int>* vertexRemappingTable = nullptr;
+            if (useIndexBuffer) {
+                size_t count = prim.indices->count;
+                indexBuffer.resize(count);
+                usedVertexIndices.clear();
+                reverseMappingIndices.clear();
+                usedVertexIndices.reserve(count / 3); // this is a very rough heuristic to reduce re-allocations
+                vertexRemappingTable = &usedVertexIndices;
+                Accessor::Indexer data = prim.indices->GetIndexer();
+                if (!data.IsValid()) {
+                    throw DeadlyImportError("GLTF: Invalid accessor without data in mesh ", getContextForErrorMessages(mesh.id, mesh.name));
+                }
+
+                // Build the vertex remapping table and the modified index buffer (used later instead of the original one)
+                // In case no index buffer is used, the original vertex arrays are being used so no remapping is required in the first place.
+                const unsigned int unusedIndex = ~0u;
+                for (unsigned int i = 0; i < count; ++i) {
+                    unsigned int index = data.GetUInt(i);
+                    if (index >= numAllVertices) {
+                        // Out-of-range indices will be filtered out when adding the faces and then lead to a warning. At this stage, we just keep them.
+                        indexBuffer[i] = index;
+                        continue; 
+                    }
+                    if (index >= reverseMappingIndices.size()) {
+                        reverseMappingIndices.resize(index + 1, unusedIndex);
+                    }
+                    if (reverseMappingIndices[index] == unusedIndex) {
+                        reverseMappingIndices[index] = static_cast<unsigned int>(usedVertexIndices.size());
+                        usedVertexIndices.push_back(index);
+                    }
+                    indexBuffer[i] = reverseMappingIndices[index];
+                }
+            }
 
             aiMesh *aim = new aiMesh();
             meshes.push_back(std::unique_ptr<aiMesh>(aim));
@@ -491,28 +540,25 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 break;
             }
 
-            Mesh::Primitive::Attributes &attr = prim.attributes;
-
             if (!attr.position.empty() && attr.position[0]) {
-                aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->count);
-                attr.position[0]->ExtractData(aim->mVertices);
+                aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->ExtractData(aim->mVertices, vertexRemappingTable));
             }
 
             if (!attr.normal.empty() && attr.normal[0]) {
-                if (attr.normal[0]->count != aim->mNumVertices) {
+                    if (attr.normal[0]->count != numAllVertices) {
                     DefaultLogger::get()->warn("Normal count in mesh \"", mesh.name, "\" does not match the vertex count, normals ignored.");
                 } else {
-                    attr.normal[0]->ExtractData(aim->mNormals);
+                    attr.normal[0]->ExtractData(aim->mNormals, vertexRemappingTable);
 
                     // only extract tangents if normals are present
                     if (!attr.tangent.empty() && attr.tangent[0]) {
-                        if (attr.tangent[0]->count != aim->mNumVertices) {
+                        if (attr.tangent[0]->count != numAllVertices) {
                             DefaultLogger::get()->warn("Tangent count in mesh \"", mesh.name, "\" does not match the vertex count, tangents ignored.");
                         } else {
                             // generate bitangents from normals and tangents according to spec
                             Tangent *tangents = nullptr;
 
-                            attr.tangent[0]->ExtractData(tangents);
+                            attr.tangent[0]->ExtractData(tangents, vertexRemappingTable);
 
                             aim->mTangents = new aiVector3D[aim->mNumVertices];
                             aim->mBitangents = new aiVector3D[aim->mNumVertices];
@@ -529,7 +575,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             }
 
             for (size_t c = 0; c < attr.color.size() && c < AI_MAX_NUMBER_OF_COLOR_SETS; ++c) {
-                if (attr.color[c]->count != aim->mNumVertices) {
+                if (attr.color[c]->count != numAllVertices) {
                     DefaultLogger::get()->warn("Color stream size in mesh \"", mesh.name,
                             "\" does not match the vertex count");
                     continue;
@@ -537,7 +583,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 auto componentType = attr.color[c]->componentType;
                 if (componentType == glTF2::ComponentType_FLOAT) {
-                    attr.color[c]->ExtractData(aim->mColors[c]);
+                    attr.color[c]->ExtractData(aim->mColors[c], vertexRemappingTable);
                 } else {
                     if (componentType == glTF2::ComponentType_UNSIGNED_BYTE) {
                         aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c]);
@@ -552,13 +598,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     continue;
                 }
 
-                if (attr.texcoord[tc]->count != aim->mNumVertices) {
+                if (attr.texcoord[tc]->count != numAllVertices) {
                     DefaultLogger::get()->warn("Texcoord stream size in mesh \"", mesh.name,
                             "\" does not match the vertex count");
                     continue;
                 }
 
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc], vertexRemappingTable);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D *values = aim->mTextureCoords[tc];
@@ -583,11 +629,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     Mesh::Primitive::Target &target = targets[i];
 
                     if (needPositions) {
-                        if (target.position[0]->count != aim->mNumVertices) {
+                        if (target.position[0]->count != numAllVertices) {
                             ASSIMP_LOG_WARN("Positions of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *positionDiff = nullptr;
-                            target.position[0]->ExtractData(positionDiff);
+                            target.position[0]->ExtractData(positionDiff, vertexRemappingTable);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                                 aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
                             }
@@ -595,11 +641,11 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         }
                     }
                     if (needNormals) {
-                        if (target.normal[0]->count != aim->mNumVertices) {
+                        if (target.normal[0]->count != numAllVertices) {
                             ASSIMP_LOG_WARN("Normals of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             aiVector3D *normalDiff = nullptr;
-                            target.normal[0]->ExtractData(normalDiff);
+                            target.normal[0]->ExtractData(normalDiff, vertexRemappingTable);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
                                 aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
                             }
@@ -610,14 +656,14 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         if (!aiAnimMesh.HasNormals()) {
                             // prevent nullptr access to aiAnimMesh.mNormals below when no normals are available
                             ASSIMP_LOG_WARN("Bitangents of target ", i, " in mesh \"", mesh.name, "\" can't be computed, because mesh has no normals.");
-                        } else if (target.tangent[0]->count != aim->mNumVertices) {
+                        } else if (target.tangent[0]->count != numAllVertices) {
                             ASSIMP_LOG_WARN("Tangents of target ", i, " in mesh \"", mesh.name, "\" does not match the vertex count");
                         } else {
                             Tangent *tangent = nullptr;
-                            attr.tangent[0]->ExtractData(tangent);
+                            attr.tangent[0]->ExtractData(tangent, vertexRemappingTable);
 
                             aiVector3D *tangentDiff = nullptr;
-                            target.tangent[0]->ExtractData(tangentDiff);
+                            target.tangent[0]->ExtractData(tangentDiff, vertexRemappingTable);
 
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
                                 tangent[vertexId].xyz += tangentDiff[vertexId];
@@ -641,20 +687,15 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             aiFace *facePtr = nullptr;
             size_t nFaces = 0;
 
-            if (prim.indices) {
-                size_t count = prim.indices->count;
-
-                Accessor::Indexer data = prim.indices->GetIndexer();
-                if (!data.IsValid()) {
-                    throw DeadlyImportError("GLTF: Invalid accessor without data in mesh ", getContextForErrorMessages(mesh.id, mesh.name));
-                }
+            if (useIndexBuffer) {
+                size_t count = indexBuffer.size();
 
                 switch (prim.mode) {
                 case PrimitiveMode_POINTS: {
                     nFaces = count;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; ++i) {
-                        SetFaceAndAdvance1(facePtr, aim->mNumVertices, data.GetUInt(i));
+                        SetFaceAndAdvance1(facePtr, aim->mNumVertices, indexBuffer[i]);
                     }
                     break;
                 }
@@ -667,7 +708,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 2) {
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1));
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i], indexBuffer[i + 1]);
                     }
                     break;
                 }
@@ -676,12 +717,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 case PrimitiveMode_LINE_STRIP: {
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
-                    SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1));
+                    SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1]);
                     for (unsigned int i = 2; i < count; ++i) {
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(i - 1), data.GetUInt(i));
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i - 1], indexBuffer[i]);
                     }
                     if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, data.GetUInt(static_cast<int>(count) - 1), faces[0].mIndices[0]);
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[static_cast<int>(count) - 1], faces[0].mIndices[0]);
                     }
                     break;
                 }
@@ -694,7 +735,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     }
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < count; i += 3) {
-                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[i], indexBuffer[i + 1], indexBuffer[i + 2]);
                     }
                     break;
                 }
@@ -705,10 +746,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         // The ordering is to ensure that the triangles are all drawn with the same orientation
                         if ((i + 1) % 2 == 0) {
                             // For even n, vertices n + 1, n, and n + 2 define triangle n
-                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[i + 1], indexBuffer[i], indexBuffer[i + 2]);
                         } else {
                             // For odd n, vertices n, n+1, and n+2 define triangle n
-                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                            SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[i], indexBuffer[i + 1], indexBuffer[i + 2]);
                         }
                     }
                     break;
@@ -716,9 +757,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 case PrimitiveMode_TRIANGLE_FAN:
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
-                    SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+                    SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1], indexBuffer[2]);
                     for (unsigned int i = 1; i < nFaces; ++i) {
-                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                        SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[i + 1], indexBuffer[i + 2]);
                     }
                     break;
                 }
@@ -1172,11 +1213,6 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
         if (node.camera) {
             pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
-            if (node.translation.isPresent) {
-                aiVector3D trans;
-                CopyValue(node.translation.value, trans);
-                pScene->mCameras[node.camera.GetIndex()]->mPosition = trans;
-            }
         }
 
         if (node.light) {

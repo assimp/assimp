@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 
 using namespace Assimp;
+
 void mydummy() {}
 
 #ifdef _MSC_VER

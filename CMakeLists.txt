@@ -138,7 +138,7 @@ IF (WIN32)
 ELSE()
   OPTION( ASSIMP_BUILD_ZLIB
     "Build your own zlib"
-    OFF
+    ON
   )
 ENDIF()
 

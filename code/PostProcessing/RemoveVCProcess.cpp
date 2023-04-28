@@ -57,10 +57,6 @@ RemoveVCProcess::RemoveVCProcess() :
         configDeleteFlags(), mScene() {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-RemoveVCProcess::~RemoveVCProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool RemoveVCProcess::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_RemoveComponent) != 0;

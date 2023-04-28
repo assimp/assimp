@@ -266,8 +266,15 @@ void Discreet3DSImporter::ParseMainChunk() {
     };
 
     ASSIMP_3DS_END_CHUNK();
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code-return"
+#endif
     // recursively continue processing this hierarchy level
     return ParseMainChunk();
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------

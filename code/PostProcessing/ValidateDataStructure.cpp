@@ -60,12 +60,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ValidateDSProcess::ValidateDSProcess() :
-        mScene() {}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ValidateDSProcess::~ValidateDSProcess() = default;
+ValidateDSProcess::ValidateDSProcess() : mScene(nullptr) {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -295,7 +290,6 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
             switch (face.mNumIndices) {
             case 0:
                 ReportError("aiMesh::mFaces[%i].mNumIndices is 0", i);
-                break;
             case 1:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT)) {
                     ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimitiveTypes "
@@ -916,7 +910,12 @@ void ValidateDSProcess::Validate(const aiNode *pNode) {
                     nodeName, pNode->mNumChildren);
         }
         for (unsigned int i = 0; i < pNode->mNumChildren; ++i) {
-            Validate(pNode->mChildren[i]);
+            const aiNode *pChild = pNode->mChildren[i];
+            Validate(pChild);
+            if (pChild->mParent != pNode) {
+                const char *parentName = (pChild->mParent != nullptr) ? pChild->mParent->mName.C_Str() : "null";
+                ReportError("aiNode \"%s\" child %i \"%s\" parent is someone else: \"%s\"", pNode->mName.C_Str(), i, pChild->mName.C_Str(), parentName);
+            }
         }
     }
 }

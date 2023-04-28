@@ -85,7 +85,7 @@ static const aiImporterDesc desc = {
 struct SIBChunk {
     uint32_t Tag;
     uint32_t Size;
-} PACK_STRUCT;
+};
 
 enum {
     POS,

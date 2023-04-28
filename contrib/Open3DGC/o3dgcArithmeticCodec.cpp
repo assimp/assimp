@@ -92,6 +92,7 @@ namespace o3dgc
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // - - Static functions  - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    AI_WONT_RETURN static void AC_Error(const char * msg) AI_WONT_RETURN_SUFFIX;
     static void AC_Error(const char * msg)
     {
       fprintf(stderr, "\n\n -> Arithmetic coding error: ");

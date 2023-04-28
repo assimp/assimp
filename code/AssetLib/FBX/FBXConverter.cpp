@@ -421,6 +421,8 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 
+    // NOTE: Camera mPosition, mLookAt and mUp must be set to default here.
+    // All transformations to the camera will be handled by its node in the scenegraph.
     out_camera->mPosition = aiVector3D(0.0f);
     out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
     out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
@@ -640,7 +642,7 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
 bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     const PropertyTable &props = model.Props();
 
-    const auto zero_epsilon = ai_epsilon;
+    const auto zero_epsilon = Math::getEpsilon<ai_real>();
     const aiVector3D all_ones(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
@@ -873,8 +875,12 @@ void FBXConverter::SetupNodeMetadata(const Model &model, aiNode &nd) {
             data->Set(index++, prop.first, interpretedBool->Value());
         } else if (const TypedProperty<int> *interpretedInt = prop.second->As<TypedProperty<int>>()) {
             data->Set(index++, prop.first, interpretedInt->Value());
+        } else if (const TypedProperty<uint32_t> *interpretedUInt = prop.second->As<TypedProperty<uint32_t>>()) {
+            data->Set(index++, prop.first, interpretedUInt->Value());
         } else if (const TypedProperty<uint64_t> *interpretedUint64 = prop.second->As<TypedProperty<uint64_t>>()) {
             data->Set(index++, prop.first, interpretedUint64->Value());
+        } else if (const TypedProperty<int64_t> *interpretedint64 = prop.second->As<TypedProperty<int64_t>>()) {
+            data->Set(index++, prop.first, interpretedint64->Value());
         } else if (const TypedProperty<float> *interpretedFloat = prop.second->As<TypedProperty<float>>()) {
             data->Set(index++, prop.first, interpretedFloat->Value());
         } else if (const TypedProperty<std::string> *interpretedString = prop.second->As<TypedProperty<std::string>>()) {
@@ -1176,15 +1182,23 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto &curVertices = shapeGeometry->GetVertices();
+                const auto &curNormals = shapeGeometry->GetNormals();
+                const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                animMesh->mName.Set(FixAnimMeshName(blendShapeChannel->Name()));
+                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                auto aniName = FixAnimMeshName(blendShapeChannel->Name());
+                auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
+                if (aniName.empty()) {
+                    aniName = geoMetryName;
+                }
+                else if (aniName.find('.') == aniName.npos) {
+                    aniName += "." + geoMetryName;
+                }
+                animMesh->mName.Set(aniName);
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
@@ -1406,13 +1420,12 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     std::vector<aiAnimMesh *> animMeshes;
     for (const BlendShape *blendShape : mesh.GetBlendShapes()) {
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
-            const std::vector<const ShapeGeometry *> &shapeGeometries = blendShapeChannel->GetShapeGeometries();
-            for (size_t i = 0; i < shapeGeometries.size(); i++) {
+            const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
+            for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
                 aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const ShapeGeometry *shapeGeometry = shapeGeometries.at(i);
-                const std::vector<aiVector3D> &curVertices = shapeGeometry->GetVertices();
-                const std::vector<aiVector3D> &curNormals = shapeGeometry->GetNormals();
-                const std::vector<unsigned int> &curIndices = shapeGeometry->GetIndices();
+                const auto& curVertices = shapeGeometry->GetVertices();
+                const auto& curNormals = shapeGeometry->GetNormals();
+                const auto& curIndices = shapeGeometry->GetIndices();
                 animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     unsigned int curIndex = curIndices.at(j);

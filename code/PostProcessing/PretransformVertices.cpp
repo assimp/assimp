@@ -69,10 +69,6 @@ PretransformVertices::PretransformVertices() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-PretransformVertices::~PretransformVertices() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool PretransformVertices::IsActive(unsigned int pFlags) const {
 	return (pFlags & aiProcess_PreTransformVertices) != 0;
@@ -581,7 +577,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 		// multiply all properties of the camera with the absolute
 		// transformation of the corresponding node
 		cam->mPosition = nd->mTransformation * cam->mPosition;
-		cam->mLookAt = aiMatrix3x3(nd->mTransformation) * cam->mLookAt;
+		cam->mLookAt = nd->mTransformation * cam->mLookAt;
 		cam->mUp = aiMatrix3x3(nd->mTransformation) * cam->mUp;
 	}
 

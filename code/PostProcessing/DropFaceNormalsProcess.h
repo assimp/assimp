@@ -55,8 +55,8 @@ namespace Assimp {
 */
 class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess {
 public:
-    DropFaceNormalsProcess();
-    ~DropFaceNormalsProcess();
+    DropFaceNormalsProcess() = default;
+    ~DropFaceNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
@@ -64,15 +64,14 @@ public:
     *   combination of #aiPostProcessSteps.
     * @return true if the process is present in this flag fields, false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * At the moment a process is not supposed to fail.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
-
+    void Execute( aiScene* pScene) override;
 
 private:
     bool DropMeshFaceNormals(aiMesh* pcMesh);

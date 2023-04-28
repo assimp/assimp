@@ -282,11 +282,11 @@ public:
     bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
     bool Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const;
     bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;
-    void Throw_CloseNotFound(const std::string &nodeName);
-    void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName);
-    void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName);
-    void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription);
-    void Throw_ID_NotFound(const std::string &pID) const;
+    AI_WONT_RETURN void Throw_CloseNotFound(const std::string &nodeName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_ID_NotFound(const std::string &pID) const AI_WONT_RETURN_SUFFIX;
     void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
     bool XML_SearchNode(const std::string &nodeName);
     void ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString);

@@ -241,7 +241,7 @@ void MakeLeftHandedProcess::ProcessAnimation(aiNodeAnim *pAnim) {
 // Converts a single camera to left handed coordinates.
 void MakeLeftHandedProcess::ProcessCamera( aiCamera* pCam)
 {
-    pCam->mLookAt = 2.0f * pCam->mPosition - pCam->mLookAt;
+    pCam->mLookAt = ai_real(2.0f) * pCam->mPosition - pCam->mLookAt;
 }
 
 #endif // !!  ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS

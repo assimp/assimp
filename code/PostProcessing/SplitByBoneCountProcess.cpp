@@ -57,9 +57,7 @@ using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor
-SplitByBoneCountProcess::SplitByBoneCountProcess() : mMaxBoneCount(AI_SBBC_DEFAULT_MAX_BONES) {
-    // empty
-}
+SplitByBoneCountProcess::SplitByBoneCountProcess() : mMaxBoneCount(AI_SBBC_DEFAULT_MAX_BONES) {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag.

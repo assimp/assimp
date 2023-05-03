@@ -89,4 +89,12 @@ bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos,
     return true;
 }
 
+// ------------------------------------------------------------------------------------------------
+void GeometryUtils::normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, 
+        size_t numVectors) {
+    for (size_t i=0; i<numVectors; ++i) {
+		    vectorArrayOut[i] = vectorArrayIn[i].Normalize();
+	  }
+}
+
 } // namespace Assimp

@@ -99,8 +99,9 @@ void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node
     }
 
     // call all subnodes recursively
-    for (unsigned int m = 0; m < node->mNumChildren; ++m)
+    for (unsigned int m = 0; m < node->mNumChildren; ++m) {
         UpdateNodes(replaceMeshIndex, node->mChildren[m]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

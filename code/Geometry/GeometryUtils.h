@@ -47,7 +47,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /// @brief This helper class supports some basic geometry algorithms.
 // ---------------------------------------------------------------------------
-class GeometryUtils {
+class ASSIMP_API GeometryUtils {
 public:
     static ai_real heron( ai_real a, ai_real b, ai_real c );
     
@@ -63,7 +63,19 @@ public:
     /// @return The area.
     static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh );
 
+    /// @brief 
+    /// @param ray 
+    /// @param planePos 
+    /// @param planeNormal 
+    /// @param pos 
+    /// @return 
     static bool PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, const aiVector3D& planeNormal, aiVector3D& pos);
+
+    /// @brief 
+    /// @param vectorArrayIn 
+    /// @param vectorArrayOut 
+    /// @param numVectors 
+    static void normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors);
 };
 
 } // namespace Assimp

@@ -190,7 +190,7 @@ Scope::Scope(Parser& parser,bool topLevel)
         }
 
         auto *element = new_Element(*n, parser);
-        
+
         // Element() should stop at the next Key token (or right after a Close token)
         n = parser.CurrentToken();
         if (n == nullptr) {
@@ -198,8 +198,8 @@ Scope::Scope(Parser& parser,bool topLevel)
                 elements.insert(ElementMap::value_type(str, element));
                 return;
             }
-            ParseError("unexpected end of file",parser.LastToken());
             delete element;
+            ParseError("unexpected end of file",parser.LastToken());
         } else {
             elements.insert(ElementMap::value_type(str, element));
         }

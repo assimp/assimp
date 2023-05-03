@@ -309,7 +309,7 @@ void PbrtExporter::WriteCamera(int i) {
 
     // Get camera fov
     float hfov = AI_RAD_TO_DEG(camera->mHorizontalFOV);
-    float fov = (aspect >= 1.0) ? hfov : (hfov * aspect);
+    float fov = (aspect >= 1.0) ? hfov : (hfov / aspect);
     if (fov < 5) {
         std::cerr << fov << ": suspiciously low field of view specified by camera. Setting to 45 degrees.\n";
         fov = 45;

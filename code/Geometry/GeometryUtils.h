@@ -63,18 +63,18 @@ public:
     /// @return The area.
     static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh );
 
-    /// @brief 
-    /// @param ray 
-    /// @param planePos 
-    /// @param planeNormal 
-    /// @param pos 
-    /// @return 
+    /// @brief Will calculate the intersection between a ray and a plane
+    /// @param ray          The ray to test for
+    /// @param planePos     A point on the plane
+    /// @param planeNormal  The plane normal to describe its orientation
+    /// @param pos          The position of the intersection.
+    /// @return true is an intersection was detected, false if not.
     static bool PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, const aiVector3D& planeNormal, aiVector3D& pos);
 
-    /// @brief 
-    /// @param vectorArrayIn 
-    /// @param vectorArrayOut 
-    /// @param numVectors 
+    /// @brief Will normalize an array of vectors.
+    /// @param vectorArrayIn    The incoming arra of vectors.
+    /// @param vectorArrayOut   The normalized vectors.
+    /// @param numVectors       The array size.
     static void normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors);
 };
 

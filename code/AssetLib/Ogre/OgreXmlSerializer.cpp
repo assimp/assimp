@@ -57,7 +57,7 @@ namespace Assimp {
 namespace Ogre {
 
 //AI_WONT_RETURN void ThrowAttibuteError(const XmlParser *reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
-
+AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) AI_WONT_RETURN_SUFFIX;
 AI_WONT_RETURN void ThrowAttibuteError(const std::string &nodeName, const std::string &name, const std::string &error) {
     if (!error.empty()) {
         throw DeadlyImportError(error, " in node '", nodeName, "' and attribute '", name, "'");
@@ -128,7 +128,6 @@ bool OgreXmlSerializer::ReadAttribute<bool>(XmlNode &xmlNode, const char *name) 
     }
 
     ThrowAttibuteError(xmlNode.name(), name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
-    return false;
 }
 
 // Mesh XML constants

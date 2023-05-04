@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssetLib/IFC/IFCUtil.h"
 #include "Common/PolyTools.h"
+#include "Geometry/GeometryUtils.h"
 #include "PostProcessing/ProcessHelper.h"
 
 namespace Assimp {
@@ -235,7 +236,7 @@ IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const {
 struct CompareVector {
     bool operator () (const IfcVector3& a, const IfcVector3& b) const {
         IfcVector3 d = a - b;
-        IfcFloat eps = ai_epsilon;
+        constexpr IfcFloat eps = ai_epsilon;
         return d.x < -eps || (std::abs(d.x) < eps && d.y < -eps) || (std::abs(d.x) < eps && std::abs(d.y) < eps && d.z < -eps);
     }
 };

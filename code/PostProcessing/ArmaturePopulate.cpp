@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <iostream>
+//#include <iostream>
 
 namespace Assimp {
 
@@ -74,7 +74,7 @@ void ArmaturePopulate::Execute(aiScene *out) {
     BuildBoneList(out->mRootNode, out->mRootNode, out, bones);
     BuildNodeList(out->mRootNode, nodes);
 
-    BuildBoneStack(out->mRootNode, out->mRootNode, out, bones, bone_stack, nodes);
+    BuildBoneStack(out->mRootNode, out, bones, bone_stack, nodes);
 
     ASSIMP_LOG_DEBUG("Bone stack size: ", bone_stack.size());
 
@@ -162,8 +162,7 @@ void ArmaturePopulate::BuildNodeList(const aiNode *current_node,
 // A bone stack allows us to have multiple armatures, with the same bone names
 // A bone stack allows us also to retrieve bones true transform even with
 // duplicate names :)
-void ArmaturePopulate::BuildBoneStack(aiNode *,
-                                      const aiNode *root_node,
+void ArmaturePopulate::BuildBoneStack(const aiNode *root_node,
                                       const aiScene*,
                                       const std::vector<aiBone *> &bones,
                                       std::map<aiBone *, aiNode *> &bone_stack,
@@ -199,8 +198,7 @@ void ArmaturePopulate::BuildBoneStack(aiNode *,
 // This is required to be detected for a bone initially, it will recurse up
 // until it cannot find another bone and return the node No known failure
 // points. (yet)
-aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node,
-                                          std::vector<aiBone *> &bone_list) {
+aiNode *ArmaturePopulate::GetArmatureRoot(aiNode *bone_node, std::vector<aiBone *> &bone_list) {
     while (nullptr != bone_node) {
         if (!IsBoneNode(bone_node->mName, bone_list)) {
             ASSIMP_LOG_VERBOSE_DEBUG("GetArmatureRoot() Found valid armature: ", bone_node->mName.C_Str());

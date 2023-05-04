@@ -96,7 +96,7 @@ public:
                                  const aiScene *scene,
                                  std::vector<aiBone *> &bones);
 
-    static void BuildBoneStack(aiNode *current_node, const aiNode *root_node,
+    static void BuildBoneStack(const aiNode *root_node,
                                   const aiScene *scene,
                                   const std::vector<aiBone *> &bones,
                                   std::map<aiBone *, aiNode *> &bone_stack,

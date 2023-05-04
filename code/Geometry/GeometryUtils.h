@@ -55,7 +55,7 @@ public:
     /// @param vA  Vector a.
     /// @param vB  Vector b.
     /// @return The distance.
-    static ai_real distance3D( const aiVector3D &vA, aiVector3D &vB );
+    static ai_real distance3D( const aiVector3D &vA, const aiVector3D &vB );
 
     /// @brief Will calculate the area of a triangle described by a aiFace.
     /// @param face   The face

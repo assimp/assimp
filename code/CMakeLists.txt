@@ -1388,7 +1388,7 @@ ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
-  TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
+  TARGET_LINK_LIBRARIES(assimp rt)
 ENDIF ()
 
 

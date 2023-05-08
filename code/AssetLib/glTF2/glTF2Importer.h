@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_GLTF2IMPORTER_H_INC
 
 #include <assimp/BaseImporter.h>
+#include <AssetLib/glTF2/glTF2Asset.h>
 
 struct aiNode;
 
@@ -77,9 +78,12 @@ private:
     void ImportAnimations(glTF2::Asset &a);
     void ImportCommonMetadata(glTF2::Asset &a);
 
-private:
+    aiNode *ImportNode(glTF2::Asset &r, glTF2::Ref<glTF2::Node> &ptr);
+
+    private:
     std::vector<unsigned int> meshOffsets;
     std::vector<int> mEmbeddedTexIdxs;
+    std::vector<std::vector<unsigned int>> mVertexRemappingTables; // for each converted aiMesh in the scene, it stores a list of vertices that are actually used
     aiScene *mScene;
 
     /// An instance of rapidjson::IRemoteSchemaDocumentProvider

@@ -432,10 +432,10 @@ static inline bool CheckValidFacesIndices(aiFace *faces, unsigned nFaces, unsign
 #endif // ASSIMP_BUILD_DEBUG
 
 template <typename T>
-aiColor4D *GetVertexColorsForType(Ref<Accessor> input) {
+aiColor4D *GetVertexColorsForType(Ref<Accessor> input, std::vector<unsigned int> *vertexRemappingTable) {
     constexpr float max = std::numeric_limits<T>::max();
     aiColor4t<T> *colors;
-    input->ExtractData(colors);
+    input->ExtractData(colors, vertexRemappingTable);
     auto output = new aiColor4D[input->count];
     for (size_t i = 0; i < input->count; i++) {
         output[i] = aiColor4D(
@@ -450,19 +450,25 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
     ASSIMP_LOG_DEBUG("Importing ", r.meshes.Size(), " meshes");
     std::vector<std::unique_ptr<aiMesh>> meshes;
 
-    unsigned int k = 0;
     meshOffsets.clear();
+    meshOffsets.reserve(r.meshes.Size() + 1);
+    mVertexRemappingTables.clear();
 
+    // Count the number of aiMeshes
+    unsigned int num_aiMeshes = 0;
+    for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
+        meshOffsets.push_back(num_aiMeshes);
+        num_aiMeshes += unsigned(r.meshes[m].primitives.size());
+    }
+    meshOffsets.push_back(num_aiMeshes); // add a last element so we can always do meshOffsets[n+1] - meshOffsets[n]
 
-    std::vector<unsigned int> usedVertexIndices;
     std::vector<unsigned int> reverseMappingIndices;
     std::vector<unsigned int> indexBuffer;
+    meshes.reserve(num_aiMeshes);
+    mVertexRemappingTables.resize(num_aiMeshes);
 
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh &mesh = r.meshes[m];
-
-        meshOffsets.push_back(k);
-        k += unsigned(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             Mesh::Primitive &prim = mesh.primitives[p];
@@ -477,14 +483,14 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             // Extract used vertices:
             bool useIndexBuffer = prim.indices;
-            std::vector<unsigned int>* vertexRemappingTable = nullptr;
+            std::vector<unsigned int> *vertexRemappingTable = nullptr;
+            
             if (useIndexBuffer) {
                 size_t count = prim.indices->count;
                 indexBuffer.resize(count);
-                usedVertexIndices.clear();
                 reverseMappingIndices.clear();
-                usedVertexIndices.reserve(count / 3); // this is a very rough heuristic to reduce re-allocations
-                vertexRemappingTable = &usedVertexIndices;
+                vertexRemappingTable = &mVertexRemappingTables[meshes.size()];
+                vertexRemappingTable->reserve(count / 3); // this is a very rough heuristic to reduce re-allocations
                 Accessor::Indexer data = prim.indices->GetIndexer();
                 if (!data.IsValid()) {
                     throw DeadlyImportError("GLTF: Invalid accessor without data in mesh ", getContextForErrorMessages(mesh.id, mesh.name));
@@ -504,8 +510,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         reverseMappingIndices.resize(index + 1, unusedIndex);
                     }
                     if (reverseMappingIndices[index] == unusedIndex) {
-                        reverseMappingIndices[index] = static_cast<unsigned int>(usedVertexIndices.size());
-                        usedVertexIndices.push_back(index);
+                        reverseMappingIndices[index] = static_cast<unsigned int>(vertexRemappingTable->size());
+                        vertexRemappingTable->push_back(index);
                     }
                     indexBuffer[i] = reverseMappingIndices[index];
                 }
@@ -586,9 +592,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     attr.color[c]->ExtractData(aim->mColors[c], vertexRemappingTable);
                 } else {
                     if (componentType == glTF2::ComponentType_UNSIGNED_BYTE) {
-                        aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c]);
+                        aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c], vertexRemappingTable);
                     } else if (componentType == glTF2::ComponentType_UNSIGNED_SHORT) {
-                        aim->mColors[c] = GetVertexColorsForType<unsigned short>(attr.color[c]);
+                        aim->mColors[c] = GetVertexColorsForType<unsigned short>(attr.color[c], vertexRemappingTable);
                     }
                 }
             }
@@ -864,8 +870,6 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
         }
     }
 
-    meshOffsets.push_back(k);
-
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
@@ -998,7 +1002,8 @@ static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
     }
 }
 
-static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std::vector<aiVertexWeight>> &map) {
+static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std::vector<aiVertexWeight>> &map, std::vector<unsigned int>* vertexRemappingTablePtr) {
+
     Mesh::Primitive::Attributes &attr = primitive.attributes;
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
@@ -1007,14 +1012,14 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
         return;
     }
 
-    size_t num_vertices = attr.weight[0]->count;
+    size_t num_vertices = 0;
 
     struct Weights {
         float values[4];
     };
     Weights **weights = new Weights*[attr.weight.size()];
     for (size_t w = 0; w < attr.weight.size(); ++w) {
-        attr.weight[w]->ExtractData(weights[w]);
+        num_vertices = attr.weight[w]->ExtractData(weights[w], vertexRemappingTablePtr);
     }
 
     struct Indices8 {
@@ -1028,12 +1033,12 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     if (attr.joint[0]->GetElementSize() == 4) {
         indices8 = new Indices8*[attr.joint.size()];
         for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices8[j]);
+            attr.joint[j]->ExtractData(indices8[j], vertexRemappingTablePtr);
         }
     } else {
         indices16 = new Indices16 *[attr.joint.size()];
         for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices16[j]);
+            attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
         }
     }
     //
@@ -1100,7 +1105,7 @@ void ParseExtras(aiMetadata *metadata, const CustomExtension &extension) {
     }
 }
 
-aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &meshOffsets, glTF2::Ref<glTF2::Node> &ptr) {
+aiNode *glTF2Importer::ImportNode(glTF2::Asset &r, glTF2::Ref<glTF2::Node> &ptr) {
     Node &node = *ptr;
 
     aiNode *ainode = new aiNode(GetNodeName(node));
@@ -1112,7 +1117,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             std::fill(ainode->mChildren, ainode->mChildren + ainode->mNumChildren, nullptr);
 
             for (unsigned int i = 0; i < ainode->mNumChildren; ++i) {
-                aiNode *child = ImportNode(pScene, r, meshOffsets, node.children[i]);
+                aiNode *child = ImportNode(r, node.children[i]);
                 child->mParent = ainode;
                 ainode->mChildren[i] = child;
             }
@@ -1145,11 +1150,13 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
 
             if (node.skin) {
                 for (int primitiveNo = 0; primitiveNo < count; ++primitiveNo) {
-                    aiMesh *mesh = pScene->mMeshes[meshOffsets[mesh_idx] + primitiveNo];
+                    unsigned int aiMeshIdx = meshOffsets[mesh_idx] + primitiveNo;
+                    aiMesh *mesh = mScene->mMeshes[aiMeshIdx];
                     unsigned int numBones = static_cast<unsigned int>(node.skin->jointNames.size());
+                    std::vector<unsigned int> *vertexRemappingTablePtr = mVertexRemappingTables[aiMeshIdx].empty() ? nullptr : &mVertexRemappingTables[aiMeshIdx];
 
                     std::vector<std::vector<aiVertexWeight>> weighting(numBones);
-                    BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting);
+                    BuildVertexWeightMapping(node.meshes[0]->primitives[primitiveNo], weighting, vertexRemappingTablePtr);
 
                     mesh->mNumBones = static_cast<unsigned int>(numBones);
                     mesh->mBones = new aiBone *[mesh->mNumBones];
@@ -1166,7 +1173,7 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
                     // mapping which makes things doubly-slow.
 
                     mat4 *pbindMatrices = nullptr;
-                    node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
+                    node.skin->inverseBindMatrices->ExtractData(pbindMatrices, nullptr);
 
                     for (uint32_t i = 0; i < numBones; ++i) {
                         const std::vector<aiVertexWeight> &weights = weighting[i];
@@ -1212,11 +1219,11 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
         }
 
         if (node.camera) {
-            pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
+            mScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
         }
 
         if (node.light) {
-            pScene->mLights[node.light.GetIndex()]->mName = ainode->mName;
+            mScene->mLights[node.light.GetIndex()]->mName = ainode->mName;
 
             // range is optional - see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
             // it is added to meta data of parent node, because there is no other place to put it
@@ -1248,7 +1255,7 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
     // The root nodes
     unsigned int numRootNodes = unsigned(rootNodes.size());
     if (numRootNodes == 1) { // a single root node: use it
-        mScene->mRootNode = ImportNode(mScene, r, meshOffsets, rootNodes[0]);
+        mScene->mRootNode = ImportNode(r, rootNodes[0]);
     } else if (numRootNodes > 1) { // more than one root node: create a fake root
         aiNode *root = mScene->mRootNode = new aiNode("ROOT");
 
@@ -1256,7 +1263,7 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
         std::fill(root->mChildren, root->mChildren + numRootNodes, nullptr);
 
         for (unsigned int i = 0; i < numRootNodes; ++i) {
-            aiNode *node = ImportNode(mScene, r, meshOffsets, rootNodes[i]);
+            aiNode *node = ImportNode(r, rootNodes[i]);
             node->mParent = root;
             root->mChildren[root->mNumChildren++] = node;
         }
@@ -1657,6 +1664,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 
     // clean all member arrays
     meshOffsets.clear();
+    mVertexRemappingTables.clear();
     mEmbeddedTexIdxs.clear();
 
     this->mScene = pScene;

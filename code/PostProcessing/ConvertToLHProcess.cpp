@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -225,13 +223,6 @@ void MakeLeftHandedProcess::ProcessAnimation(aiNodeAnim *pAnim) {
 
     // rotation keys
     for (unsigned int a = 0; a < pAnim->mNumRotationKeys; a++) {
-        /* That's the safe version, but the float errors add up. So we try the short version instead
-        aiMatrix3x3 rotmat = pAnim->mRotationKeys[a].mValue.GetMatrix();
-        rotmat.a3 = -rotmat.a3; rotmat.b3 = -rotmat.b3;
-        rotmat.c1 = -rotmat.c1; rotmat.c2 = -rotmat.c2;
-        aiQuaternion rotquat( rotmat);
-        pAnim->mRotationKeys[a].mValue = rotquat;
-        */
         pAnim->mRotationKeys[a].mValue.x *= -1.0f;
         pAnim->mRotationKeys[a].mValue.y *= -1.0f;
     }

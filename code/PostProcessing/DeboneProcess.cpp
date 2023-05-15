@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -87,7 +86,7 @@ void DeboneProcess::Execute( aiScene* pScene) {
     if(!!mNumBonesCanDoWithout && (!mAllOrNone||mNumBonesCanDoWithout==mNumBones))  {
         for(unsigned int a = 0; a < pScene->mNumMeshes; a++)    {
             if(splitList[a]) {
-                numSplits++;
+                ++numSplits;
             }
         }
     }
@@ -119,8 +118,8 @@ void DeboneProcess::Execute( aiScene* pScene) {
                     aiNode *theNode = find ? pScene->mRootNode->FindNode(*find) : nullptr;
                     std::pair<unsigned int,aiNode*> push_pair(static_cast<unsigned int>(meshes.size()),theNode);
 
-                    mSubMeshIndices[a].push_back(push_pair);
-                    meshes.push_back(newMeshes[b].first);
+                    mSubMeshIndices[a].emplace_back(push_pair);
+                    meshes.emplace_back(newMeshes[b].first);
 
                     out+=newMeshes[b].first->mNumBones;
                 }
@@ -360,9 +359,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const {
     unsigned int m = static_cast<unsigned int>(pNode->mNumMeshes), n = static_cast<unsigned int>(mSubMeshIndices.size());
 
     // first pass, look for meshes which have not moved
-
     for(unsigned int a=0;a<m;a++)   {
-
         unsigned int srcIndex = pNode->mMeshes[a];
         const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[srcIndex];
         unsigned int nSubmeshes = static_cast<unsigned int>(subMeshes.size());
@@ -376,8 +373,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const {
 
     // second pass, collect deboned meshes
 
-    for(unsigned int a=0;a<n;a++)
-    {
+    for(unsigned int a=0;a<n;a++) {
         const std::vector< std::pair< unsigned int,aiNode* > > &subMeshes = mSubMeshIndices[a];
         unsigned int nSubmeshes = static_cast<unsigned int>(subMeshes.size());
 

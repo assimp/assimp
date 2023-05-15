@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -110,18 +108,21 @@ inline int HasNameMatch(const aiString &in, aiNode *node) {
 template <typename T>
 inline void ValidateDSProcess::DoValidation(T **parray, unsigned int size, const char *firstName, const char *secondName) {
     // validate all entries
-    if (size) {
-        if (!parray) {
-            ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
-                    firstName, secondName, size);
+    if (size == 0) {
+        return;
+    }
+
+    if (!parray) {
+        ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
+                firstName, secondName, size);
+    }
+
+    for (unsigned int i = 0; i < size; ++i) {
+        if (!parray[i]) {
+            ReportError("aiScene::%s[%i] is nullptr (aiScene::%s is %i)",
+                    firstName, i, secondName, size);
         }
-        for (unsigned int i = 0; i < size; ++i) {
-            if (!parray[i]) {
-                ReportError("aiScene::%s[%i] is nullptr (aiScene::%s is %i)",
-                        firstName, i, secondName, size);
-            }
-            Validate(parray[i]);
-        }
+        Validate(parray[i]);
     }
 }
 
@@ -130,25 +131,27 @@ template <typename T>
 inline void ValidateDSProcess::DoValidationEx(T **parray, unsigned int size,
         const char *firstName, const char *secondName) {
     // validate all entries
-    if (size) {
-        if (!parray) {
-            ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
-                    firstName, secondName, size);
+    if (size == 0) {
+        return;
+    }
+        
+    if (!parray) {
+        ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
+                firstName, secondName, size);
+    }
+    for (unsigned int i = 0; i < size; ++i) {
+        if (!parray[i]) {
+            ReportError("aiScene::%s[%u] is nullptr (aiScene::%s is %u)",
+                    firstName, i, secondName, size);
         }
-        for (unsigned int i = 0; i < size; ++i) {
-            if (!parray[i]) {
-                ReportError("aiScene::%s[%u] is nullptr (aiScene::%s is %u)",
-                        firstName, i, secondName, size);
-            }
-            Validate(parray[i]);
+        Validate(parray[i]);
 
-            // check whether there are duplicate names
-            for (unsigned int a = i + 1; a < size; ++a) {
-                if (parray[i]->mName == parray[a]->mName) {
-                    ReportError("aiScene::%s[%u] has the same name as "
-                                "aiScene::%s[%u]",
-                            firstName, i, secondName, a);
-                }
+        // check whether there are duplicate names
+        for (unsigned int a = i + 1; a < size; ++a) {
+            if (parray[i]->mName == parray[a]->mName) {
+                ReportError("aiScene::%s[%u] has the same name as "
+                            "aiScene::%s[%u]",
+                        firstName, i, secondName, a);
             }
         }
     }
@@ -229,12 +232,6 @@ void ValidateDSProcess::Execute(aiScene *pScene) {
     if (pScene->mNumMaterials) {
         DoValidation(pScene->mMaterials, pScene->mNumMaterials, "mMaterials", "mNumMaterials");
     }
-#if 0
-    // NOTE: ScenePreprocessor generates a default material if none is there
-    else if (!(mScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) {
-        ReportError("aiScene::mNumMaterials is 0. At least one material must be there");
-    }
-#endif
     else if (pScene->mMaterials) {
         ReportError("aiScene::mMaterials is non-null although there are no materials");
     }
@@ -267,8 +264,7 @@ void ValidateDSProcess::Validate(const aiCamera *pCamera) {
     if (pCamera->mClipPlaneFar <= pCamera->mClipPlaneNear)
         ReportError("aiCamera::mClipPlaneFar must be >= aiCamera::mClipPlaneNear");
 
-    // FIX: there are many 3ds files with invalid FOVs. No reason to
-    // reject them at all ... a warning is appropriate.
+    // There are many 3ds files with invalid FOVs. No reason to reject them at all ... a warning is appropriate.
     if (!pCamera->mHorizontalFOV || pCamera->mHorizontalFOV >= (float)AI_MATH_PI)
         ReportWarning("%f is not a valid value for aiCamera::mHorizontalFOV", pCamera->mHorizontalFOV);
 }
@@ -290,7 +286,6 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
             switch (face.mNumIndices) {
             case 0:
                 ReportError("aiMesh::mFaces[%i].mNumIndices is 0", i);
-                break;
             case 1:
                 if (0 == (pMesh->mPrimitiveTypes & aiPrimitiveType_POINT)) {
                     ReportError("aiMesh::mFaces[%i] is a POINT but aiMesh::mPrimitiveTypes "
@@ -362,15 +357,6 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
             if (face.mIndices[a] >= pMesh->mNumVertices) {
                 ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range", i, a);
             }
-            // the MSB flag is temporarily used by the extra verbose
-            // mode to tell us that the JoinVerticesProcess might have
-            // been executed already.
-            /*if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && !(this->mScene->mFlags & AI_SCENE_FLAGS_ALLOW_SHARED) &&
-				abRefList[face.mIndices[a]])
-            {
-                ReportError("aiMesh::mVertices[%i] is referenced twice - second "
-                    "time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
-            }*/
             abRefList[face.mIndices[a]] = true;
         }
     }
@@ -466,7 +452,7 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh, const aiBone *pBone, float
     this->Validate(&pBone->mName);
 
     if (!pBone->mNumWeights) {
-        //ReportError("aiBone::mNumWeights is zero");
+        ReportWarning("aiBone::mNumWeights is zero");
     }
 
     // check whether all vertices affected by this bone are valid

@@ -139,6 +139,7 @@ size_t Offset(const char* begin, const char* cursor) {
 }
 
 // ------------------------------------------------------------------------------------------------
+AI_WONT_RETURN void TokenizeError(const std::string& message, const char* begin, const char* cursor) AI_WONT_RETURN_SUFFIX;
 void TokenizeError(const std::string& message, const char* begin, const char* cursor) {
     TokenizeError(message, Offset(begin, cursor));
 }

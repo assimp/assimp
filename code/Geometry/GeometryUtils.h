@@ -47,7 +47,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /// @brief This helper class supports some basic geometry algorithms.
 // ---------------------------------------------------------------------------
-class GeometryUtils {
+class ASSIMP_API GeometryUtils {
 public:
     static ai_real heron( ai_real a, ai_real b, ai_real c );
     
@@ -55,13 +55,27 @@ public:
     /// @param vA  Vector a.
     /// @param vB  Vector b.
     /// @return The distance.
-    static ai_real distance3D( const aiVector3D &vA, aiVector3D &vB );
+    static ai_real distance3D( const aiVector3D &vA, const aiVector3D &vB );
 
     /// @brief Will calculate the area of a triangle described by a aiFace.
     /// @param face   The face
     /// @param mesh   The mesh containing the face
     /// @return The area.
     static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh );
+
+    /// @brief Will calculate the intersection between a ray and a plane
+    /// @param ray          The ray to test for
+    /// @param planePos     A point on the plane
+    /// @param planeNormal  The plane normal to describe its orientation
+    /// @param pos          The position of the intersection.
+    /// @return true is an intersection was detected, false if not.
+    static bool PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, const aiVector3D& planeNormal, aiVector3D& pos);
+
+    /// @brief Will normalize an array of vectors.
+    /// @param vectorArrayIn    The incoming arra of vectors.
+    /// @param vectorArrayOut   The normalized vectors.
+    /// @param numVectors       The array size.
+    static void normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors);
 };
 
 } // namespace Assimp

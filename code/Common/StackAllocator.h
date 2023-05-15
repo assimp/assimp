@@ -82,7 +82,8 @@ private:
     constexpr const static size_t g_startBytesPerBlock = 16 * 1024;  // Size of the first block. Next blocks will double in size until maximum size of g_maxBytesPerBlock
     size_t m_blockAllocationSize = g_startBytesPerBlock; // Block size of the current block
     size_t m_subIndex = g_maxBytesPerBlock; // The current byte offset in the current block
-    std::vector<uint8_t *> m_storageBlocks;  // A list of blocks
+    std::vector<std::unique_ptr<uint8_t[]>> m_storageBlocks;
+    //std::vector<uint8_t *> m_storageBlocks;  // A list of blocks
 };
 
 } // namespace Assimp

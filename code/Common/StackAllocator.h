@@ -47,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STACK_ALLOCATOR_H_INC
 #define AI_STACK_ALLOCATOR_H_INC
 
-
-#include <deque>
+#include <vector>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -83,9 +82,8 @@ private:
     constexpr const static size_t g_startBytesPerBlock = 16 * 1024;  // Size of the first block. Next blocks will double in size until maximum size of g_maxBytesPerBlock
     size_t m_blockAllocationSize = g_startBytesPerBlock; // Block size of the current block
     size_t m_subIndex = g_maxBytesPerBlock; // The current byte offset in the current block
-    std::deque<uint8_t *> m_storageBlocks;  // A list of blocks
+    std::vector<uint8_t *> m_storageBlocks;  // A list of blocks
 };
-
 
 } // namespace Assimp
 

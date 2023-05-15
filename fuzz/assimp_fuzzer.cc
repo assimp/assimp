@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <assimp/cimport.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
@@ -53,6 +54,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
     const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
         aiProcessPreset_TargetRealtime_Quality, nullptr );
 
+    if (sc == nullptr) {
+        return 0;
+    }
+
+    Exporter exporter;
+    exporter.ExportToBlob(sc, "fbx");
+    
     aiDetachLogStream(&stream);
 
     return 0;

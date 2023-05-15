@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-
 inline StackAllocator::StackAllocator() {
 }
 
@@ -60,7 +58,7 @@ inline void *StackAllocator::Allocate(size_t byteSize) {
         // Block size must be at least as large as byteSize, but we want to use this for small allocations anyway.
         m_blockAllocationSize = std::max(std::min(m_blockAllocationSize * 2, g_maxBytesPerBlock), byteSize);
         uint8_t *data = new uint8_t[m_blockAllocationSize];
-        m_storageBlocks.push_back(data);
+        m_storageBlocks.emplace_back(data);
         m_subIndex = byteSize;
         return data;
     }
@@ -76,7 +74,7 @@ inline void StackAllocator::FreeAll() {
     for (size_t i = 0; i < m_storageBlocks.size(); i++) {
         delete [] m_storageBlocks[i];
     }
-    std::deque<uint8_t *> empty;
+    std::vector<uint8_t *> empty;
     m_storageBlocks.swap(empty);
     // start over:
     m_blockAllocationSize = g_startBytesPerBlock;

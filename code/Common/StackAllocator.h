@@ -60,21 +60,21 @@ namespace Assimp {
 */
 class StackAllocator {
 public:
-    // Constructs the allocator
+    /// @brief Constructs the allocator
     inline StackAllocator();
-    // Destructs the allocator and frees all memory
+    /// @brief Destructs the allocator and frees all memory
     inline ~StackAllocator();
 
     // non copyable
     StackAllocator(const StackAllocator &) = delete;
     StackAllocator &operator=(const StackAllocator &) = delete;
 
-    // Returns a pointer to byteSize bytes of heap memory that persists
-    // for the lifetime of the allocator (or until FreeAll is called).
+    /// @brief Returns a pointer to byteSize bytes of heap memory that persists
+    ///        for the lifetime of the allocator (or until FreeAll is called).
     inline void *Allocate(size_t byteSize);
 
-    // Releases all the memory owned by this allocator.
-    // Memory provided through function Allocate is not valid anymore after this function has been called.
+    /// @brief Releases all the memory owned by this allocator.
+    //         Memory provided through function Allocate is not valid anymore after this function has been called.
     inline void FreeAll();
 
 private:
@@ -82,8 +82,7 @@ private:
     constexpr const static size_t g_startBytesPerBlock = 16 * 1024;  // Size of the first block. Next blocks will double in size until maximum size of g_maxBytesPerBlock
     size_t m_blockAllocationSize = g_startBytesPerBlock; // Block size of the current block
     size_t m_subIndex = g_maxBytesPerBlock; // The current byte offset in the current block
-    std::vector<std::unique_ptr<uint8_t[]>> m_storageBlocks;
-    //std::vector<uint8_t *> m_storageBlocks;  // A list of blocks
+    std::vector<uint8_t *> m_storageBlocks;  // A list of blocks
 };
 
 } // namespace Assimp

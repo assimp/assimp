@@ -81,6 +81,10 @@ class BlendShape;
 class Skin;
 class Cluster;
 
+#define new_LazyObject new (allocator.Allocate(sizeof(LazyObject))) LazyObject
+#define new_Connection new (allocator.Allocate(sizeof(Connection))) Connection
+#define delete_LazyObject(_p) (_p)->~LazyObject()
+#define delete_Connection(_p) (_p)->~Connection()
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
  *  are not needed by assimp, so it makes no sense to parse them
@@ -1073,7 +1077,7 @@ private:
 /** DOM root for a FBX file */
 class Document {
 public:
-    Document(const Parser& parser, const ImportSettings& settings);
+    Document(Parser& parser, const ImportSettings& settings);
 
     ~Document();
 
@@ -1157,7 +1161,7 @@ private:
     const ImportSettings& settings;
 
     ObjectMap objects;
-    const Parser& parser;
+    Parser& parser;
 
     PropertyTemplateMap templates;
     ConnectionMap src_connections;

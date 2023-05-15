@@ -483,7 +483,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                 }
 
                 pimpl->mProgressHandler->UpdateFileWrite(3, 4);
-
+            
                 if(must_join_again) {
                     JoinVerticesProcess proc;
                     proc.Execute(scenecopy.get());

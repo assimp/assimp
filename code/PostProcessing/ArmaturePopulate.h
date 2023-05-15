@@ -69,10 +69,10 @@ namespace Assimp {
 class ASSIMP_API ArmaturePopulate : public BaseProcess {
 public:
     /// The default class constructor.
-    ArmaturePopulate();
+    ArmaturePopulate() = default;
 
     /// The class destructor.
-    virtual ~ArmaturePopulate();
+    virtual ~ArmaturePopulate() = default;
 
     /// Overwritten, @see BaseProcess
     virtual bool IsActive( unsigned int pFlags ) const;
@@ -86,9 +86,6 @@ public:
     static aiNode *GetArmatureRoot(aiNode *bone_node,
                                       std::vector<aiBone *> &bone_list);
 
-    static bool IsBoneNode(const aiString &bone_name,
-                              std::vector<aiBone *> &bones);
-
     static aiNode *GetNodeFromStack(const aiString &node_name,
                                        std::vector<aiNode *> &nodes);
 
@@ -99,7 +96,7 @@ public:
                                  const aiScene *scene,
                                  std::vector<aiBone *> &bones);
 
-    static void BuildBoneStack(aiNode *current_node, const aiNode *root_node,
+    static void BuildBoneStack(const aiNode *root_node,
                                   const aiScene *scene,
                                   const std::vector<aiBone *> &bones,
                                   std::map<aiBone *, aiNode *> &bone_stack,
@@ -107,6 +104,5 @@ public:
 };
 
 } // Namespace Assimp
-
 
 #endif // SCALE_PROCESS_H_

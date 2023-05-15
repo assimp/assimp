@@ -58,8 +58,6 @@ class X3DExporter {
                 Value(value) {
             // empty
         }
-
-        SAttribute(SAttribute &&rhs) AI_NO_EXCEPT = default;
     };
 
     /***********************************************/

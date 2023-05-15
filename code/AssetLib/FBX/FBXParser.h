@@ -64,10 +64,9 @@ class Parser;
 class Element;
 
 // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-typedef std::vector< Scope* > ScopeList;
-typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
-
-typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+using ScopeList = std::vector<Scope*>;
+using ElementMap = std::fbx_unordered_multimap< std::string, Element*>;
+using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const_iterator>;
 
 #define new_Scope new (allocator.Allocate(sizeof(Scope))) Scope
 #define new_Element new (allocator.Allocate(sizeof(Element))) Element
@@ -84,12 +83,13 @@ typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> Element
  *  @endverbatim
  *
  *  As can be seen in this sample, elements can contain nested #Scope
- *  as their trailing member.  **/
+ *  as their trailing member.  
+**/
 class Element
 {
 public:
     Element(const Token& key_token, Parser& parser);
-    ~Element():
+    ~Element();
 
     const Scope* Compound() const {
         return compound;

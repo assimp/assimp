@@ -322,7 +322,6 @@ struct Texture {
     //! Default constructor
     Texture() AI_NO_EXCEPT
             : mTextureBlend(0.0f),
-              mMapName(),
               mOffsetU(0.0),
               mOffsetV(0.0),
               mScaleU(1.0),
@@ -334,51 +333,11 @@ struct Texture {
         mTextureBlend = get_qnan();
     }
 
-    Texture(const Texture &other) :
-            mTextureBlend(other.mTextureBlend),
-            mMapName(other.mMapName),
-            mOffsetU(other.mOffsetU),
-            mOffsetV(other.mOffsetV),
-            mScaleU(other.mScaleU),
-            mScaleV(other.mScaleV),
-            mRotation(other.mRotation),
-            mMapMode(other.mMapMode),
-            bPrivate(other.bPrivate),
-            iUVSrc(other.iUVSrc) {
-        // empty
-    }
+    Texture(const Texture &other) = default;
 
-    Texture(Texture &&other) AI_NO_EXCEPT : mTextureBlend(other.mTextureBlend),
-                                            mMapName(std::move(other.mMapName)),
-                                            mOffsetU(other.mOffsetU),
-                                            mOffsetV(other.mOffsetV),
-                                            mScaleU(other.mScaleU),
-                                            mScaleV(other.mScaleV),
-                                            mRotation(other.mRotation),
-                                            mMapMode(other.mMapMode),
-                                            bPrivate(other.bPrivate),
-                                            iUVSrc(other.iUVSrc) {
-        // empty
-    }
+    Texture(Texture &&other) AI_NO_EXCEPT = default;
 
-    Texture &operator=(Texture &&other) AI_NO_EXCEPT {
-        if (this == &other) {
-            return *this;
-        }
-
-        mTextureBlend = other.mTextureBlend;
-        mMapName = std::move(other.mMapName);
-        mOffsetU = other.mOffsetU;
-        mOffsetV = other.mOffsetV;
-        mScaleU = other.mScaleU;
-        mScaleV = other.mScaleV;
-        mRotation = other.mRotation;
-        mMapMode = other.mMapMode;
-        bPrivate = other.bPrivate;
-        iUVSrc = other.iUVSrc;
-
-        return *this;
-    }
+    Texture &operator=(Texture &&other) AI_NO_EXCEPT = default;
 
     //! Specifies the blend factor for the texture
     ai_real mTextureBlend;
@@ -436,83 +395,9 @@ struct Material {
         // empty
     }
 
-    Material(const Material &other) :
-            mName(other.mName),
-            mDiffuse(other.mDiffuse),
-            mSpecularExponent(other.mSpecularExponent),
-            mShininessStrength(other.mShininessStrength),
-            mSpecular(other.mSpecular),
-            mAmbient(other.mAmbient),
-            mShading(other.mShading),
-            mTransparency(other.mTransparency),
-            sTexDiffuse(other.sTexDiffuse),
-            sTexOpacity(other.sTexOpacity),
-            sTexSpecular(other.sTexSpecular),
-            sTexReflective(other.sTexReflective),
-            sTexBump(other.sTexBump),
-            sTexEmissive(other.sTexEmissive),
-            sTexShininess(other.sTexShininess),
-            mBumpHeight(other.mBumpHeight),
-            mEmissive(other.mEmissive),
-            sTexAmbient(other.sTexAmbient),
-            mTwoSided(other.mTwoSided) {
-        // empty
-    }
+    Material(const Material &other) = default;
 
-    //! Move constructor. This is explicitly written because MSVC doesn't support defaulting it
-    Material(Material &&other) AI_NO_EXCEPT : mName(std::move(other.mName)),
-                                              mDiffuse(other.mDiffuse),
-                                              mSpecularExponent(other.mSpecularExponent),
-                                              mShininessStrength(other.mShininessStrength),
-                                              mSpecular(other.mSpecular),
-                                              mAmbient(other.mAmbient),
-                                              mShading(other.mShading),
-                                              mTransparency(other.mTransparency),
-                                              sTexDiffuse(std::move(other.sTexDiffuse)),
-                                              sTexOpacity(std::move(other.sTexOpacity)),
-                                              sTexSpecular(std::move(other.sTexSpecular)),
-                                              sTexReflective(std::move(other.sTexReflective)),
-                                              sTexBump(std::move(other.sTexBump)),
-                                              sTexEmissive(std::move(other.sTexEmissive)),
-                                              sTexShininess(std::move(other.sTexShininess)),
-                                              mBumpHeight(other.mBumpHeight),
-                                              mEmissive(other.mEmissive),
-                                              sTexAmbient(std::move(other.sTexAmbient)),
-                                              mTwoSided(other.mTwoSided) {
-        // empty
-    }
-
-    Material &operator=(Material &&other) AI_NO_EXCEPT {
-        if (this == &other) {
-            return *this;
-        }
-
-        mName = std::move(other.mName);
-        mDiffuse = other.mDiffuse;
-        mSpecularExponent = other.mSpecularExponent;
-        mShininessStrength = other.mShininessStrength,
-        mSpecular = other.mSpecular;
-        mAmbient = other.mAmbient;
-        mShading = other.mShading;
-        mTransparency = other.mTransparency;
-        sTexDiffuse = std::move(other.sTexDiffuse);
-        sTexOpacity = std::move(other.sTexOpacity);
-        sTexSpecular = std::move(other.sTexSpecular);
-        sTexReflective = std::move(other.sTexReflective);
-        sTexBump = std::move(other.sTexBump);
-        sTexEmissive = std::move(other.sTexEmissive);
-        sTexShininess = std::move(other.sTexShininess);
-        mBumpHeight = other.mBumpHeight;
-        mEmissive = other.mEmissive;
-        sTexAmbient = std::move(other.sTexAmbient);
-        mTwoSided = other.mTwoSided;
-
-        return *this;
-    }
-
-    virtual ~Material() {
-        // empty
-    }
+    virtual ~Material() = default;
 
     //! Name of the material
     std::string mName;

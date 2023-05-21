@@ -214,7 +214,12 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     // Some importers may be unimplemented or otherwise unsuitable for general use
     // in their current state. Devs can set ASSIMP_ENABLE_DEV_IMPORTERS in their
     // local environment to enable them, otherwise they're left out of the registry.
+#if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
+    // not supported under uwp
     const char *envStr = std::getenv("ASSIMP_ENABLE_DEV_IMPORTERS");
+#else
+    const char *envStr = { "0" };
+#endif
     bool devImportersEnabled = envStr && strcmp(envStr, "0");
 
     // Ensure no unused var warnings if all uses are #ifndef'd away below:
@@ -377,9 +382,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
     out.push_back(new IQMImporter());
 #endif
-    //#ifndef ASSIMP_BUILD_NO_STEP_IMPORTER
-    //    out.push_back(new StepFile::StepFileImporter());
-    //#endif
 }
 
 /** will delete all registered importers. */

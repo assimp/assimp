@@ -128,9 +128,7 @@ public:
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOStream::IOStream() AI_NO_EXCEPT {
-    // empty
-}
+IOStream::IOStream() AI_NO_EXCEPT = default;
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE

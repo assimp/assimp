@@ -79,10 +79,6 @@ OptimizeGraphProcess::OptimizeGraphProcess() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-OptimizeGraphProcess::~OptimizeGraphProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool OptimizeGraphProcess::IsActive(unsigned int pFlags) const {
 	return (0 != (pFlags & aiProcess_OptimizeGraph));

@@ -290,11 +290,12 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
         sz = line; SkipSpaces(&sz);
         idx = strtoul10(sz,&sz);
         if(!idx || idx > 9) {
-	    ASSIMP_LOG_ERROR("OFF: Faces with zero indices aren't allowed");
+	        ASSIMP_LOG_ERROR("OFF: Faces with zero indices aren't allowed");
             --mesh->mNumFaces;
+            ++i;
             continue;
-	}
-	faces->mNumIndices = idx;
+	    }
+	    faces->mNumIndices = idx;
         faces->mIndices = new unsigned int[faces->mNumIndices];
         for (unsigned int m = 0; m < faces->mNumIndices;++m) {
             SkipSpaces(&sz);

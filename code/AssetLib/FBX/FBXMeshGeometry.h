@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -53,84 +52,101 @@ namespace Assimp {
 namespace FBX {
 
 /**
- *  DOM base class for all kinds of FBX geometry
+ *  @brief DOM base class for all kinds of FBX geometry
  */
 class Geometry : public Object {
 public:
     /// @brief The class constructor with all parameters.
     /// @param id       The id.
-    /// @param element  
-    /// @param name 
-    /// @param doc 
+    /// @param element  The element instance
+    /// @param name     The name instance
+    /// @param doc      The document instance
     Geometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
+
+    /// @brief The class destructor, default.
     virtual ~Geometry() = default;
 
-    /// Get the Skin attached to this geometry or nullptr
+    /// @brief Get the Skin attached to this geometry or nullptr.
+    /// @return The deformer skip instance as a pointer, nullptr if none.
     const Skin* DeformerSkin() const;
 
-    /// Get the BlendShape attached to this geometry or nullptr
-    const std::vector<const BlendShape*>& GetBlendShapes() const;
+    /// @brief Get the BlendShape attached to this geometry or nullptr
+    /// @return The blendshape arrays.
+    const std::unordered_set<const BlendShape*>& GetBlendShapes() const;
 
 private:
     const Skin* skin;
-    std::vector<const BlendShape*> blendShapes;
+    std::unordered_set<const BlendShape*> blendShapes;
+
 };
 
 typedef std::vector<int> MatIndexArray;
 
-
 /**
- *  DOM class for FBX geometry of type "Mesh"
+ *  @brief DOM class for FBX geometry of type "Mesh"
  */
 class MeshGeometry : public Geometry {
 public:
-    /** The class constructor */
+    /// @brief The class constructor
+    /// @param id       The id.
+    /// @param element  The element instance
+    /// @param name     The name instance
+    /// @param doc      The document instance
     MeshGeometry( uint64_t id, const Element& element, const std::string& name, const Document& doc );
 
-    /** The class destructor */
+    /// @brief The class destructor, default.
     virtual ~MeshGeometry() = default;
 
-    /** Get a list of all vertex points, non-unique*/
+    /// brief Get a vector of all vertex points, non-unique.
+    /// @return The vertices vector.
     const std::vector<aiVector3D>& GetVertices() const;
 
-    /** Get a list of all vertex normals or an empty array if
-    *  no normals are specified. */
+    /// @brief Get a vector of all vertex normals or an empty array if no normals are specified.
+    /// @return The normal vector.
     const std::vector<aiVector3D>& GetNormals() const;
 
-    /** Get a list of all vertex tangents or an empty array
-    *  if no tangents are specified */
+    /// @brief Get a vector of all vertex tangents or an empty array if no tangents are specified.
+    /// @return The vertex tangents vector.
     const std::vector<aiVector3D>& GetTangents() const;
 
-    /** Get a list of all vertex bi-normals or an empty array
-    *  if no bi-normals are specified */
+    /// @brief Get a vector of all vertex bi-normals or an empty array if no bi-normals are specified.
+    /// @return The binomal vector.
     const std::vector<aiVector3D>& GetBinormals() const;
 
-    /** Return list of faces - each entry denotes a face and specifies
-    *  how many vertices it has. Vertices are taken from the
-    *  vertex data arrays in sequential order. */
+    /// @brief Return list of faces - each entry denotes a face and specifies how many vertices it has.
+    ///        Vertices are taken from the vertex data arrays in sequential order.
+    /// @return The face indices vector.
     const std::vector<unsigned int>& GetFaceIndexCounts() const;
 
-    /** Get a UV coordinate slot, returns an empty array if
-    *  the requested slot does not exist. */
+    /// @brief Get a UV coordinate slot, returns an empty array if the requested slot does not exist.
+    /// @param index    The requested texture coordinate slot.
+    /// @return The texture coordinates.
     const std::vector<aiVector2D>& GetTextureCoords( unsigned int index ) const;
 
-    /** Get a UV coordinate slot, returns an empty array if
-    *  the requested slot does not exist. */
+    /// @brief Get a UV coordinate slot, returns an empty array if the requested slot does not exist.
+    /// @param index    The requested texture coordinate slot.
+    /// @return The texture coordinate channel name.
     std::string GetTextureCoordChannelName( unsigned int index ) const;
 
-    /** Get a vertex color coordinate slot, returns an empty array if
-    *  the requested slot does not exist. */
+    /// @brief Get a vertex color coordinate slot, returns an empty array if the requested slot does not exist.
+    /// @param index    The requested texture coordinate slot.
+    /// @return The vertex color vector.
     const std::vector<aiColor4D>& GetVertexColors( unsigned int index ) const;
 
-    /** Get per-face-vertex material assignments */
+    /// @brief Get per-face-vertex material assignments.
+    /// @return The Material indices Array.
     const MatIndexArray& GetMaterialIndices() const;
 
-    /** Convert from a fbx file vertex index (for example from a #Cluster weight) or nullptr
-    * if the vertex index is not valid. */
+    /// @brief Convert from a fbx file vertex index (for example from a #Cluster weight) or nullptr if the vertex index is not valid.
+    /// @param in_index   The requested input index.
+    /// @param count      The number of indices.
+    /// @return The indices.
     const unsigned int* ToOutputVertexIndex( unsigned int in_index, unsigned int& count ) const;
 
-    /** Determine the face to which a particular output vertex index belongs.
-    *  This mapping is always unique. */
+    /// @brief Determine the face to which a particular output vertex index belongs.
+    ///        This mapping is always unique.
+    /// @param in_index   The requested input index.
+    /// @return The face-to-vertex index.
     unsigned int FaceForVertexIndex( unsigned int in_index ) const;
 
 private:

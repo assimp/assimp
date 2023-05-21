@@ -1,6 +1,5 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
 # Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
@@ -94,6 +93,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/vector3.inl
   ${HEADER_PATH}/version.h
   ${HEADER_PATH}/cimport.h
+  ${HEADER_PATH}/AssertHandler.h
   ${HEADER_PATH}/importerdesc.h
   ${HEADER_PATH}/Importer.hpp
   ${HEADER_PATH}/DefaultLogger.hpp
@@ -194,6 +194,8 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
+  Common/StackAllocator.h
+  Common/StackAllocator.inl
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -217,6 +219,12 @@ SET( CApi_SRCS
   CApi/CInterfaceIOWrapper.h
 )
 SOURCE_GROUP(CApi FILES ${CApi_SRCS})
+
+SET(Geometry_SRCS
+  Geometry/GeometryUtils.h
+  Geometry/GeometryUtils.cpp
+)
+SOURCE_GROUP(Geometry FILES ${Geometry_SRCS})
 
 SET( STEPParser_SRCS
   AssetLib/STEPParser/STEPFileReader.h
@@ -270,8 +278,8 @@ if (NOT ASSIMP_NO_EXPORT)
   # ASSIMP_BUILD_XXX_EXPORTER to TRUE for each exporter
   OPTION(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_XXX_EXPORTER values" TRUE)
 
-  # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
-  # this way selective loaders can be compiled (reduces filesize + compile time)
+  # macro to add the CMake Option ADD_ASSIMP_EXPORTER_<name> which enables compilation of an exporter
+  # this way selective exporters can be compiled (reduces filesize + compile time)
   MACRO(ADD_ASSIMP_EXPORTER name)
     IF (ASSIMP_NO_EXPORT)
       set(ASSIMP_EXPORTER_ENABLED FALSE)
@@ -1129,6 +1137,7 @@ SET( assimp_src
   ${Core_SRCS}
   ${CApi_SRCS}
   ${Common_SRCS}
+  ${Geometry_SRCS}
   ${Logging_SRCS}
   ${Exporter_SRCS}
   ${PostProcessing_SRCS}
@@ -1188,7 +1197,61 @@ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
   IF (MSVC)
-    TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+
+    IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
+      TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
+        -Wno-unused-function
+        -Wno-microsoft-enum-value
+        -Wno-switch-enum
+        -Wno-covered-switch-default
+        -Wno-reserved-identifier
+        -Wno-c++98-compat-pedantic
+        -Wno-c++98-compat
+        -Wno-documentation
+        -Wno-documentation-unknown-command
+        -Wno-deprecated-dynamic-exception-spec
+        -Wno-undef
+        -Wno-suggest-destructor-override
+        -Wno-suggest-override
+        -Wno-zero-as-null-pointer-constant
+        -Wno-global-constructors
+        -Wno-exit-time-destructors
+        -Wno-extra-semi-stmt
+        -Wno-missing-prototypes
+        -Wno-old-style-cast
+        -Wno-cast-align
+        -Wno-cast-qual
+        -Wno-float-equal
+        -Wno-implicit-int-float-conversion
+        -Wno-sign-conversion
+        -Wno-implicit-float-conversion
+        -Wno-implicit-int-conversion
+        -Wno-float-conversion
+        -Wno-double-promotion
+        -Wno-unused-macros
+        -Wno-disabled-macro-expansion
+        -Wno-shadow-field
+        -Wno-shadow
+        -Wno-language-extension-token
+        -Wno-header-hygiene
+        -Wno-tautological-value-range-compare
+        -Wno-tautological-type-limit-compare
+        -Wno-missing-variable-declarations
+        -Wno-extra-semi
+        -Wno-nonportable-system-include-path
+        -Wno-undefined-reinterpret-cast
+        -Wno-shift-sign-overflow
+        -Wno-deprecated
+        -Wno-format-nonliteral
+        -Wno-comma
+        -Wno-implicit-fallthrough
+        -Wno-unused-template
+        -Wno-undefined-func-template
+        -Wno-declaration-after-statement
+      )
+    ELSE()
+      TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+    ENDIF()
   ELSE()
     TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror)
   ENDIF()

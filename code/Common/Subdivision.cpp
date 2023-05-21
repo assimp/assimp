@@ -50,7 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 
+#include <unordered_map>
+
 using namespace Assimp;
+
 void mydummy() {}
 
 #ifdef _MSC_VER
@@ -78,7 +81,7 @@ public:
     };
 
     typedef std::vector<unsigned int> UIntVector;
-    typedef std::map<uint64_t, Edge> EdgeMap;
+    typedef std::unordered_map<uint64_t, Edge> EdgeMap;
 
     // ---------------------------------------------------------------------------
     // Hashing function to derive an index into an #EdgeMap from two given

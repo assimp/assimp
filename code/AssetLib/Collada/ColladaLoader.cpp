@@ -92,15 +92,6 @@ inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
-        mFileName(),
-        mMeshIndexByID(),
-        mMaterialIndexByName(),
-        mMeshes(),
-        newMats(),
-        mCameras(),
-        mLights(),
-        mTextures(),
-        mAnims(),
         noSkeletonMesh(false),
         removeEmptyBones(false),
         ignoreUpDirection(false),
@@ -1523,7 +1514,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));        
+                map = strtoul10(&(*it));
                 break;
             }
         }

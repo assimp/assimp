@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -117,6 +115,9 @@ void MD5Parser::ParseHeader() {
         ReportError("MD5 version tag is unknown (10 is expected)");
     }
     SkipLine();
+    if (buffer == bufferEnd) {
+        return;
+    }
 
     // print the command line options to the console
     // FIX: can break the log length limit, so we need to be careful
@@ -135,8 +136,9 @@ bool MD5Parser::ParseSection(Section &out) {
 
     // first parse the name of the section
     char *sz = buffer;
-    while (!IsSpaceOrNewLine(*buffer))
-        buffer++;
+    while (!IsSpaceOrNewLine(*buffer)) {
+        ++buffer;
+    }
     out.mName = std::string(sz, (uintptr_t)(buffer - sz));
     SkipSpaces();
 
@@ -144,14 +146,14 @@ bool MD5Parser::ParseSection(Section &out) {
     while (running) {
         if ('{' == *buffer) {
             // it is a normal section so read all lines
-            buffer++;
+            ++buffer;
             bool run = true;
             while (run) {
                 if (!SkipSpacesAndLineEnd()) {
                     return false; // seems this was the last section
                 }
                 if ('}' == *buffer) {
-                    buffer++;
+                    ++buffer;
                     break;
                 }
 
@@ -163,7 +165,7 @@ bool MD5Parser::ParseSection(Section &out) {
 
                 // terminate the line with zero
                 while (!IsLineEnd(*buffer))
-                    buffer++;
+                    ++buffer;
                 if (*buffer) {
                     ++lineNumber;
                     *buffer++ = '\0';

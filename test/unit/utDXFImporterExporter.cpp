@@ -71,3 +71,17 @@ TEST_F(utDXFImporterExporter, issue2229) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/issue_2229.dxf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 }
+
+
+TEST_F(utDXFImporterExporter, importWuson) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/wuson.dxf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(utDXFImporterExporter, importRifle) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/DXF/rifle.dxf", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}

@@ -19,7 +19,7 @@ conditions are met:
   copyright notice, this list of conditions and the
   following disclaimer in the documentation and/or other
   materials provided with the distribution.
-
+s
 * Neither the name of the assimp team, nor the names of its
   contributors may be used to endorse or promote products
   derived from this software without specific prior
@@ -54,18 +54,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-/** Post-processing process to find axis-aligned bounding volumes for amm meshes
- *  used in a scene
+/** 
+ * @brief Post-processing process to find axis-aligned bounding volumes for amm meshes
+ *        used in a scene.
  */
 class ASSIMP_API GenBoundingBoxesProcess : public BaseProcess {
 public:
-    /// The class constructor.
-    GenBoundingBoxesProcess();
-    /// The class destructor.
-    ~GenBoundingBoxesProcess();
-    /// Will return true, if aiProcess_GenBoundingBoxes is defined.
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
+    GenBoundingBoxesProcess() = default;
+    ~GenBoundingBoxesProcess() override = default;
+
+    // -------------------------------------------------------------------
+    /// @brief Will return true, if aiProcess_GenBoundingBoxes is defined.
     bool IsActive(unsigned int pFlags) const override;
-    /// The execution callback.
+
+    // -------------------------------------------------------------------
+    /// @brief The execution callback.
     void Execute(aiScene* pScene) override;
 };
 

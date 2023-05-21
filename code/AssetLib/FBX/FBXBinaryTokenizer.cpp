@@ -139,6 +139,7 @@ size_t Offset(const char* begin, const char* cursor) {
 }
 
 // ------------------------------------------------------------------------------------------------
+AI_WONT_RETURN void TokenizeError(const std::string& message, const char* begin, const char* cursor) AI_WONT_RETURN_SUFFIX;
 void TokenizeError(const std::string& message, const char* begin, const char* cursor) {
     TokenizeError(message, Offset(begin, cursor));
 }
@@ -341,8 +342,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 
 // ------------------------------------------------------------------------------------------------
-bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor, const char* end, bool const is64bits)
-{
+bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const char *input, const char *&cursor, const char *end, bool const is64bits) {
     // the first word contains the offset at which this block ends
 	const uint64_t end_offset = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
@@ -408,7 +408,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
         // XXX this is vulnerable to stack overflowing ..
         while(Offset(input, cursor) < end_offset - sentinel_block_length) {
-			ReadScope(output_tokens, input, cursor, input + end_offset - sentinel_block_length, is64bits);
+            ReadScope(output_tokens, token_allocator, input, cursor, input + end_offset - sentinel_block_length, is64bits);
         }
         output_tokens.push_back(new_Token(cursor, cursor + 1, TokenType_CLOSE_BRACKET, Offset(input, cursor) ));
 
@@ -431,8 +431,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
 // ------------------------------------------------------------------------------------------------
 // TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
-void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
-{
+void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, StackAllocator &token_allocator) {
 	ai_assert(input);
 	ASSIMP_LOG_DEBUG("Tokenizing binary FBX file");
 
@@ -465,7 +464,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length)
     try
     {
         while (cursor < end ) {
-		    if (!ReadScope(output_tokens, input, cursor, input + length, is64bits)) {
+            if (!ReadScope(output_tokens, token_allocator, input, cursor, input + length, is64bits)) {
                 break;
             }
         }

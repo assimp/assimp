@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file OBJMATERIAL.h
  *  @brief Obj-specific material macros
- *  
+ *
  */
 
 #ifndef AI_OBJMATERIAL_H_INC
@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Pure key names for all obj texture-related properties
 //! @cond MATS_DOC_FULL
 
-// support for bump -bm 
+// support for bump -bm
 #define _AI_MATKEY_OBJ_BUMPMULT_BASE "$tex.bumpmult"
 //! @endcond
 

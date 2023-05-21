@@ -60,8 +60,10 @@ namespace Assimp {
 */
 class ASSIMP_API GenVertexNormalsProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     GenVertexNormalsProcess();
-    ~GenVertexNormalsProcess();
+    ~GenVertexNormalsProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
@@ -70,22 +72,21 @@ public:
     * @return true if the process is present in this flag fields,
     *   false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * At the moment a process is not supposed to fail.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
-
+    void Execute( aiScene* pScene) override;
 
     // setter for configMaxAngle
     inline void SetMaxSmoothAngle(ai_real f) {
@@ -105,6 +106,7 @@ private:
     ai_real configMaxAngle;
     mutable bool force_ = false;
     mutable bool flippedWindingOrder_ = false;
+    mutable bool leftHanded_ = false;
 };
 
 } // end of namespace Assimp

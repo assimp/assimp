@@ -52,20 +52,10 @@ class X3DExporter {
     struct SAttribute {
         const std::string Name;
         const std::string Value;
-        SAttribute() :
-                Name(),
-                Value() {
-            // empty
-        }
+        SAttribute() = default;
         SAttribute(const std::string &name, const std::string &value) :
                 Name(name),
                 Value(value) {
-            // empty
-        }
-
-        SAttribute(SAttribute &&rhs) AI_NO_EXCEPT :
-                Name(rhs.Name),
-                Value(rhs.Value) {
             // empty
         }
     };

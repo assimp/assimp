@@ -304,7 +304,6 @@ void Parser::Parse() {
         }
         AI_ASE_HANDLE_TOP_LEVEL_SECTION();
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -734,7 +733,6 @@ void Parser::ParseLV3MapBlock(Texture &map) {
         }
         AI_ASE_HANDLE_SECTION("3", "*MAP_XXXXXX");
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -859,7 +857,6 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
         }
         AI_ASE_HANDLE_TOP_LEVEL_SECTION();
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -883,7 +880,6 @@ void Parser::ParseLV2CameraSettingsBlock(ASE::Camera &camera) {
         }
         AI_ASE_HANDLE_SECTION("2", "CAMERA_SETTINGS");
     }
-    return;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1189,7 +1185,6 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
         }
         AI_ASE_HANDLE_SECTION("2", "*NODE_TM");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV2MeshBlock(ASE::Mesh &mesh) {
@@ -1310,7 +1305,6 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh &mesh) {
         }
         AI_ASE_HANDLE_SECTION("2", "*MESH");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh &mesh) {
@@ -1344,7 +1338,6 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh &mesh) {
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_WEIGHTS");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshBones(unsigned int iNumBones, ASE::Mesh &mesh) {
@@ -1414,7 +1407,6 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices, ASE::Mesh &mes
         }
         AI_ASE_HANDLE_SECTION("4", "*MESH_BONE_VERTEX");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshVertexListBlock(
@@ -1443,7 +1435,6 @@ void Parser::ParseLV3MeshVertexListBlock(
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_VERTEX_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh) {
@@ -1470,7 +1461,6 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh) 
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_FACE_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
@@ -1503,7 +1493,6 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_TVERT_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
@@ -1532,7 +1521,6 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_TFACE_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh &mesh) {
@@ -1567,7 +1555,6 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh &mesh) {
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_MAPPING_CHANNEL");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh &mesh) {
@@ -1595,7 +1582,6 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh &mesh) 
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_CVERTEX_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh) {
@@ -1623,7 +1609,6 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh)
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_CFACE_LIST");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh &sMesh) {
@@ -1681,7 +1666,6 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh &sMesh) {
         }
         AI_ASE_HANDLE_SECTION("3", "*MESH_NORMALS");
     }
-    return;
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFace(ASE::Face &out) {

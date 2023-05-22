@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/LWO/LWOLoader.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 #include "PostProcessing/ProcessHelper.h"
+#include "Geometry/GeometryUtils.h"
 
 #include <assimp/ByteSwapper.h>
 #include <assimp/SGSpatialSort.h>
@@ -528,7 +527,6 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                         continue;
                     vNormals += v;
                 }
-                mesh->mNormals[idx] = vNormals.Normalize();
             }
         }
     }
@@ -549,7 +547,6 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                     const aiVector3D &v = faceNormals[*a];
                     vNormals += v;
                 }
-                vNormals.Normalize();
                 for (std::vector<unsigned int>::const_iterator a = poResult.begin(); a != poResult.end(); ++a) {
                     mesh->mNormals[*a] = vNormals;
                     vertexDone[*a] = true;
@@ -557,6 +554,7 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
             }
         }
     }
+    GeometryUtils::normalizeVectorArray(mesh->mNormals, mesh->mNormals, mesh->mNumVertices);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1486,7 +1484,6 @@ void LWOImporter::LoadLWO2File() {
 
         if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWO2: Chunk length points behind the file");
-            break;
         }
         uint8_t *const next = mFileBuffer + head.length;
         mFileBuffer += bufOffset;

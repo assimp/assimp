@@ -194,6 +194,8 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
+  Common/StackAllocator.h
+  Common/StackAllocator.inl
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -1211,7 +1213,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undef
         -Wno-suggest-destructor-override
         -Wno-suggest-override
-        -Wno-inconsistent-missing-destructor-override
         -Wno-zero-as-null-pointer-constant
         -Wno-global-constructors
         -Wno-exit-time-destructors
@@ -1235,19 +1236,14 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-header-hygiene
         -Wno-tautological-value-range-compare
         -Wno-tautological-type-limit-compare
-        -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
         -Wno-nonportable-system-include-path
         -Wno-undefined-reinterpret-cast
         -Wno-shift-sign-overflow
-        -Wno-deprecated-copy-with-user-provided-dtor
-        -Wno-deprecated-copy-with-dtor
         -Wno-deprecated
         -Wno-format-nonliteral
         -Wno-comma
-        -Wno-unreachable-code-break
-        -Wno-unreachable-code-return
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template

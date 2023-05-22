@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -58,9 +57,7 @@ using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor
-SplitByBoneCountProcess::SplitByBoneCountProcess() : mMaxBoneCount(AI_SBBC_DEFAULT_MAX_BONES) {
-    // empty
-}
+SplitByBoneCountProcess::SplitByBoneCountProcess() : mMaxBoneCount(AI_SBBC_DEFAULT_MAX_BONES) {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag.
@@ -166,7 +163,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         unsigned int numBones = 0;
         std::vector<bool> isBoneUsed( pMesh->mNumBones, false);
         // indices of the faces which are going to go into this submesh
-        std::vector<unsigned int> subMeshFaces;
+        IndexArray subMeshFaces;
         subMeshFaces.reserve( pMesh->mNumFaces);
         // accumulated vertex count of all the faces in this submesh
         unsigned int numSubMeshVertices = 0;
@@ -202,7 +199,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
             for (std::set<unsigned int>::iterator it = newBonesAtCurrentFace.begin(); it != newBonesAtCurrentFace.end(); ++it) {
                 if (!isBoneUsed[*it]) {
                     isBoneUsed[*it] = true;
-                    numBones++;
+                    ++numBones;
                 }
             }
 
@@ -212,18 +209,17 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
             // remember that this face is handled
             isFaceHandled[a] = true;
-            numFacesHandled++;
+            ++numFacesHandled;
         }
 
         // create a new mesh to hold this subset of the source mesh
         aiMesh* newMesh = new aiMesh;
-        if( pMesh->mName.length > 0 )
-        {
+        if( pMesh->mName.length > 0 ) {
             newMesh->mName.Set( format() << pMesh->mName.data << "_sub" << poNewMeshes.size());
         }
         newMesh->mMaterialIndex = pMesh->mMaterialIndex;
         newMesh->mPrimitiveTypes = pMesh->mPrimitiveTypes;
-        poNewMeshes.push_back( newMesh);
+        poNewMeshes.emplace_back( newMesh);
 
         // create all the arrays for this mesh if the old mesh contained them
         newMesh->mNumVertices = numSubMeshVertices;
@@ -251,7 +247,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         // and copy over the data, generating faces with linear indices along the way
         newMesh->mFaces = new aiFace[subMeshFaces.size()];
         unsigned int nvi = 0; // next vertex index
-        std::vector<unsigned int> previousVertexIndices( numSubMeshVertices, std::numeric_limits<unsigned int>::max()); // per new vertex: its index in the source mesh
+        IndexArray previousVertexIndices( numSubMeshVertices, std::numeric_limits<unsigned int>::max()); // per new vertex: its index in the source mesh
         for( unsigned int a = 0; a < subMeshFaces.size(); ++a ) {
             const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
             aiFace& dstFace = newMesh->mFaces[a];
@@ -399,10 +395,10 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 void SplitByBoneCountProcess::UpdateNode( aiNode* pNode) const {
     // rebuild the node's mesh index list
     if( pNode->mNumMeshes == 0 ) {
-        std::vector<unsigned int> newMeshList;
+        IndexArray newMeshList;
         for( unsigned int a = 0; a < pNode->mNumMeshes; ++a) {
             unsigned int srcIndex = pNode->mMeshes[a];
-            const std::vector<unsigned int>& replaceMeshes = mSubMeshIndices[srcIndex];
+            const IndexArray& replaceMeshes = mSubMeshIndices[srcIndex];
             newMeshList.insert( newMeshList.end(), replaceMeshes.begin(), replaceMeshes.end());
         }
 

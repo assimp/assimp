@@ -1250,7 +1250,7 @@ inline void Material::Read(Value &material, Asset &r) {
     ReadMember(material, "alphaCutoff", this->alphaCutoff);
 
     if (Value *extensions = FindObject(material, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) { 
+        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
             if (Value *curPbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
                 PbrSpecularGlossiness pbrSG;
 

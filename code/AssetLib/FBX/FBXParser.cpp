@@ -116,8 +116,11 @@ namespace Assimp {
 namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
-Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) {
+Element::Element(const Token& key_token, Parser& parser) :
+    key_token(key_token), compound(nullptr)
+{
     TokenPtr n = nullptr;
+    StackAllocator &allocator = parser.GetAllocator();
     do {
         n = parser.AdvanceToNextToken();
         if(!n) {
@@ -146,7 +149,7 @@ Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) 
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            compound.reset(new Scope(parser));
+            compound = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
@@ -164,6 +167,15 @@ Element::Element(const Token& key_token, Parser& parser) : key_token(key_token) 
 }
 
 // ------------------------------------------------------------------------------------------------
+Element::~Element()
+{
+    if (compound) {
+        delete_Scope(compound);
+    }
+
+     // no need to delete tokens, they are owned by the parser
+}
+
 Scope::Scope(Parser& parser,bool topLevel)
 {
     if(!topLevel) {
@@ -173,6 +185,7 @@ Scope::Scope(Parser& parser,bool topLevel)
         }
     }
 
+    StackAllocator &allocator = parser.GetAllocator();
     TokenPtr n = parser.AdvanceToNextToken();
     if (n == nullptr) {
         ParseError("unexpected end of file");
@@ -207,22 +220,27 @@ Scope::Scope(Parser& parser,bool topLevel)
 }
 
 // ------------------------------------------------------------------------------------------------
-Scope::~Scope() {
-    for(ElementMap::value_type& v : elements) {
-        delete v.second;
+Scope::~Scope()
+{
+	// This collection does not own the memory for the elements, but we need to call their d'tor:
+
+    for (ElementMap::value_type &v : elements) {
+        delete_Element(v.second);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-Parser::Parser (const TokenList& tokens, bool is_binary)
-: tokens(tokens)
-, last()
-, current()
-, cursor(tokens.begin())
-, is_binary(is_binary)
+Parser::Parser(const TokenList &tokens, StackAllocator &allocator, bool is_binary) :
+        tokens(tokens), allocator(allocator), last(), current(), cursor(tokens.begin()), is_binary(is_binary)
 {
     ASSIMP_LOG_DEBUG("Parsing FBX tokens");
-    root.reset(new Scope(*this,true));
+    root = new_Scope(*this, true);
+}
+
+// ------------------------------------------------------------------------------------------------
+Parser::~Parser()
+{
+    delete_Scope(root);
 }
 
 // ------------------------------------------------------------------------------------------------

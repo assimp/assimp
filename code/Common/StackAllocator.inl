@@ -1,15 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -36,33 +35,48 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
-#include <assimp/cimport.h>
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+
+#include "StackAllocator.h"
+#include <assimp/ai_assert.h>
 
 using namespace Assimp;
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
-    aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
-    aiAttachLogStream(&stream);
-
-    Importer importer;
-    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
-        aiProcessPreset_TargetRealtime_Quality, nullptr );
-
-    if (sc == nullptr) {
-        return 0;
-    }
-
-    Exporter exporter;
-    exporter.ExportToBlob(sc, "fbx");
-    
-    aiDetachLogStream(&stream);
-
-    return 0;
+inline StackAllocator::StackAllocator() {
 }
 
+inline StackAllocator::~StackAllocator() {
+    FreeAll();
+}
+
+inline void *StackAllocator::Allocate(size_t byteSize) {
+    if (m_subIndex + byteSize > m_blockAllocationSize) // start a new block
+    {
+        // double block size every time, up to maximum of g_maxBytesPerBlock.
+        // Block size must be at least as large as byteSize, but we want to use this for small allocations anyway.
+        m_blockAllocationSize = std::max(std::min(m_blockAllocationSize * 2, g_maxBytesPerBlock), byteSize);
+        uint8_t *data = new uint8_t[m_blockAllocationSize];
+        m_storageBlocks.emplace_back(data);
+        m_subIndex = byteSize;
+        return data;
+    }
+
+    uint8_t *data = m_storageBlocks.back();
+    data += m_subIndex;
+    m_subIndex += byteSize;
+
+    return data;
+}
+
+inline void StackAllocator::FreeAll() {
+    for (size_t i = 0; i < m_storageBlocks.size(); i++) {
+        delete [] m_storageBlocks[i];
+    }
+    std::vector<uint8_t *> empty;
+    m_storageBlocks.swap(empty);
+    // start over:
+    m_blockAllocationSize = g_startBytesPerBlock;
+    m_subIndex = g_maxBytesPerBlock;
+}

@@ -100,6 +100,9 @@ private:
     //  A private set to keep track of which textures have been declared
     std::set<std::string> mTextureSet;
 
+    // Transform to apply to the root node and all root objects such as cameras, lights, etc.
+    aiMatrix4x4 mRootTransform;
+
     aiMatrix4x4 GetNodeTransform(const aiString& name) const;
     static std::string TransformAsString(const aiMatrix4x4& m);
 

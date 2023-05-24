@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
@@ -321,21 +320,6 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode *> &nodes) {
                 // <baseName>.Target.
                 aiNodeAnim *nd = pcAnim->mChannels[iNum++] = new aiNodeAnim();
                 nd->mNodeName.Set(me->mName + ".Target");
-
-                // If there is no input position channel we will need
-                // to supply the default position from the node's
-                // local transformation matrix.
-                /*TargetAnimationHelper helper;
-                if (me->mAnim.akeyPositions.empty())
-                {
-                    aiMatrix4x4& mat = (*i)->mTransform;
-                    helper.SetFixedMainAnimationChannel(aiVector3D(
-                        mat.a4, mat.b4, mat.c4));
-                }
-                else helper.SetMainAnimationChannel (&me->mAnim.akeyPositions);
-                helper.SetTargetAnimationChannel (&me->mTargetAnim.akeyPositions);
-
-                helper.Process(&me->mTargetAnim.akeyPositions);*/
 
                 // Allocate the key array and fill it
                 nd->mNumPositionKeys = (unsigned int)me->mTargetAnim.akeyPositions.size();

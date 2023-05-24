@@ -1065,6 +1065,17 @@ enum aiComponent
  */
 #define AI_CONFIG_EXPORT_POINT_CLOUDS "EXPORT_POINT_CLOUDS"
 
+/** @brief Specifies whether to use the deprecated KHR_materials_pbrSpecularGlossiness extension
+ * 
+ * When this flag is undefined any material with specularity will use the new KHR_materials_specular
+ * extension. Enabling this flag will revert to the deprecated extension. Note that exporting
+ * KHR_materials_pbrSpecularGlossiness with extensions other than KHR_materials_unlit is unsupported,
+ * including the basic pbrMetallicRoughness spec.
+ *
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS "USE_GLTF_PBR_SPECULAR_GLOSSINESS"
+
 /**
  * @brief Specifies the blob name, assimp uses for exporting.
  * 

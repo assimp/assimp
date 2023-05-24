@@ -278,8 +278,19 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         aimat->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
         aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 
+        // KHR_materials_specular
+        if (mat.materialSpecular.isPresent) {
+            MaterialSpecular &specular = mat.materialSpecular.value;
+            // Default values of zero disables Specular
+            if (std::memcmp(specular.specularColorFactor, defaultSpecularColorFactor, sizeof(glTFCommon::vec3)) != 0 || specular.specularFactor != 0.0f) {
+                SetMaterialColorProperty(r, specular.specularColorFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
+                aimat->AddProperty(&specular.specularFactor, 1, AI_MATKEY_SPECULAR_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularTexture, aimat, aiTextureType_SPECULAR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularColorTexture, aimat, aiTextureType_SPECULAR);
+            }
+        }
         // pbrSpecularGlossiness
-        if (mat.pbrSpecularGlossiness.isPresent) {
+        else if (mat.pbrSpecularGlossiness.isPresent) {
             PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
 
             SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);

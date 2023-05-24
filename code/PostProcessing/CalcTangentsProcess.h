@@ -59,14 +59,11 @@ namespace Assimp
  * because the joining of vertices also considers tangents and bitangents for
  * uniqueness.
  */
-class ASSIMP_API_WINONLY CalcTangentsProcess : public BaseProcess
-{
+class ASSIMP_API_WINONLY CalcTangentsProcess : public BaseProcess {
 public:
-
     CalcTangentsProcess();
-    ~CalcTangentsProcess();
+    ~CalcTangentsProcess() override = default;
 
-public:
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
     * @param pFlags The processing flags the importer was called with.
@@ -74,24 +71,21 @@ public:
     * @return true if the process is present in this flag fields,
     *   false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
-
+    void SetupProperties(const Importer* pImp) override;
 
     // setter for configMaxAngle
-    inline void SetMaxSmoothAngle(float f)
-    {
+    void SetMaxSmoothAngle(float f) {
         configMaxAngle =f;
     }
 
 protected:
-
     // -------------------------------------------------------------------
     /** Calculates tangents and bitangents for a specific mesh.
     * @param pMesh The mesh to process.
@@ -103,10 +97,9 @@ protected:
     /** Executes the post processing step on the given imported data.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 private:
-
     /** Configuration option: maximum smoothing angle, in radians*/
     float configMaxAngle;
     unsigned int configSourceUV;

@@ -103,7 +103,7 @@ int cryptrand(unsigned char *buf, unsigned int len)
     unsigned __int64 pentium_tsc[1];
     int result = 0;
 
-
+    #if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
     if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     {
         result = CryptGenRandom(provider, len, buf);
@@ -111,6 +111,7 @@ int cryptrand(unsigned char *buf, unsigned int len)
         if (result)
             return len;
     }
+    #endif
 
     for (rlen = 0; rlen < (int)len; ++rlen)
     {

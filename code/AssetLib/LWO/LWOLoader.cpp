@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/LWO/LWOLoader.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 #include "PostProcessing/ProcessHelper.h"
+#include "Geometry/GeometryUtils.h"
 
 #include <assimp/ByteSwapper.h>
 #include <assimp/SGSpatialSort.h>
@@ -178,7 +177,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     mLayers->push_back(Layer());
     mCurLayer = &mLayers->back();
     mCurLayer->mName = "<LWODefault>";
-    mCurLayer->mIndex = (uint16_t) -1;
+    mCurLayer->mIndex = 1;
 
     // old lightwave file format (prior to v6)
     mIsLWO2 = false;
@@ -398,14 +397,6 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                             pvVC[w]++;
                         }
 
-#if 0
-                        // process vertex weights. We can't properly reconstruct the whole skeleton for now,
-                        // but we can create dummy bones for all weight channels which we have.
-                        for (unsigned int w = 0; w < layer.mWeightChannels.size();++w)
-                        {
-                        }
-#endif
-
                         face.mIndices[q] = vert;
                     }
                     pf->mIndices = face.mIndices;
@@ -429,7 +420,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         // Generate nodes to render the mesh. Store the source layer in the mParent member of the nodes
         unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
-            aiNode *pcNode = new aiNode();
+            std::unique_ptr<aiNode> pcNode(new aiNode());
             pcNode->mName.Set(layer.mName);
             pcNode->mParent = (aiNode *)&layer;
             pcNode->mNumMeshes = num;
@@ -439,7 +430,8 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                 for (unsigned int p = 0; p < pcNode->mNumMeshes; ++p)
                     pcNode->mMeshes[p] = p + meshStart;
             }
-            apcNodes[layer.mIndex] = pcNode;
+            ASSIMP_LOG_DEBUG("insert apcNode for layer ", layer.mIndex, " \"", layer.mName, "\"");
+            apcNodes[layer.mIndex] = pcNode.release();
         }
     }
 
@@ -535,7 +527,6 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                         continue;
                     vNormals += v;
                 }
-                mesh->mNormals[idx] = vNormals.Normalize();
             }
         }
     }
@@ -556,7 +547,6 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                     const aiVector3D &v = faceNormals[*a];
                     vNormals += v;
                 }
-                vNormals.Normalize();
                 for (std::vector<unsigned int>::const_iterator a = poResult.begin(); a != poResult.end(); ++a) {
                     mesh->mNormals[*a] = vNormals;
                     vertexDone[*a] = true;
@@ -564,6 +554,7 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
             }
         }
     }
+    GeometryUtils::normalizeVectorArray(mesh->mNormals, mesh->mNormals, mesh->mNumVertices);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -572,40 +563,64 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
     aiNode *root = mScene->mRootNode = new aiNode();
     root->mName.Set("<LWORoot>");
 
-    //Set parent of all children, inserting pivots
-    std::map<uint16_t, aiNode *> mapPivot;
-    for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
-
-        //Get the parent index
-        LWO::Layer *nodeLayer = (LWO::Layer *)(itapcNodes->second->mParent);
-        uint16_t parentIndex = nodeLayer->mParent;
-
-        //Create pivot node, store it into the pivot map, and set the parent as the pivot
-        aiNode *pivotNode = new aiNode();
-        pivotNode->mName.Set("Pivot-" + std::string(itapcNodes->second->mName.data));
-        itapcNodes->second->mParent = pivotNode;
-
-        //Look for the parent node to attach the pivot to
-        if (apcNodes.find(parentIndex) != apcNodes.end()) {
-            pivotNode->mParent = apcNodes[parentIndex];
-        } else {
-            //If not, attach to the root node
-            pivotNode->mParent = root;
-        }
-
-        //Set the node and the pivot node transformation
-        itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
-        itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
-        itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
-        pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
-        pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
-        pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
-        mapPivot[-(itapcNodes->first + 2)] = pivotNode;
+    ASSIMP_LOG_DEBUG("apcNodes initial size: ", apcNodes.size());
+    if (!apcNodes.empty()) {
+        ASSIMP_LOG_DEBUG("first apcNode is: ", apcNodes.begin()->first, " \"", apcNodes.begin()->second->mName.C_Str(), "\"");
     }
 
-    //Merge pivot map into node map
-    for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end(); ++itMapPivot) {
-        apcNodes[itMapPivot->first] = itMapPivot->second;
+    //Set parent of all children, inserting pivots
+    {
+        std::map<uint16_t, aiNode *> mapPivot;
+        for (auto itapcNodes = apcNodes.begin(); itapcNodes != apcNodes.end(); ++itapcNodes) {
+
+            //Get the parent index
+            LWO::Layer *nodeLayer = (LWO::Layer *)(itapcNodes->second->mParent);
+            uint16_t parentIndex = nodeLayer->mParent;
+
+            //Create pivot node, store it into the pivot map, and set the parent as the pivot
+            std::unique_ptr<aiNode> pivotNode(new aiNode());
+            pivotNode->mName.Set("Pivot-" + std::string(itapcNodes->second->mName.data));
+            itapcNodes->second->mParent = pivotNode.get();
+
+            //Look for the parent node to attach the pivot to
+            if (apcNodes.find(parentIndex) != apcNodes.end()) {
+                pivotNode->mParent = apcNodes[parentIndex];
+            } else {
+                //If not, attach to the root node
+                pivotNode->mParent = root;
+            }
+
+            //Set the node and the pivot node transformation
+            itapcNodes->second->mTransformation.a4 = -nodeLayer->mPivot.x;
+            itapcNodes->second->mTransformation.b4 = -nodeLayer->mPivot.y;
+            itapcNodes->second->mTransformation.c4 = -nodeLayer->mPivot.z;
+            pivotNode->mTransformation.a4 = nodeLayer->mPivot.x;
+            pivotNode->mTransformation.b4 = nodeLayer->mPivot.y;
+            pivotNode->mTransformation.c4 = nodeLayer->mPivot.z;
+            uint16_t pivotNodeId = static_cast<uint16_t>(-(itapcNodes->first + 2));
+            ASSIMP_LOG_DEBUG("insert pivot node: ", pivotNodeId);
+            auto oldNodeIt = mapPivot.find(pivotNodeId);
+            if (oldNodeIt != mapPivot.end()) {
+                ASSIMP_LOG_ERROR("attempted to insert pivot node which already exists in pivot map ", pivotNodeId, " \"", pivotNode->mName.C_Str(), "\"");
+            } else {
+                mapPivot.emplace(pivotNodeId, pivotNode.release());
+            }
+        }
+
+        ASSIMP_LOG_DEBUG("pivot nodes: ", mapPivot.size());
+        //Merge pivot map into node map
+        for (auto itMapPivot = mapPivot.begin(); itMapPivot != mapPivot.end();) {
+            uint16_t pivotNodeId = itMapPivot->first;
+            auto oldApcNodeIt = apcNodes.find(pivotNodeId);
+            if (oldApcNodeIt != apcNodes.end()) {
+                ASSIMP_LOG_ERROR("attempted to insert pivot node which already exists in apc nodes ", pivotNodeId, " \"", itMapPivot->second->mName.C_Str(), "\"");
+            } else {
+                apcNodes.emplace(pivotNodeId, itMapPivot->second);
+            }
+            itMapPivot->second = nullptr;
+            itMapPivot = mapPivot.erase(itMapPivot);
+        }
+        ASSIMP_LOG_DEBUG("total nodes: ", apcNodes.size());
     }
 
     //Set children of all parents
@@ -627,8 +642,15 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes) {
         }
     }
 
-    if (!mScene->mRootNode->mNumChildren)
+    if (!mScene->mRootNode->mNumChildren) {
+        ASSIMP_LOG_DEBUG("All apcNodes:");
+        for (auto nodeIt = apcNodes.begin(); nodeIt != apcNodes.end(); ) {
+            ASSIMP_LOG_DEBUG("Node ", nodeIt->first, " \"", nodeIt->second->mName.C_Str(), "\"");
+            nodeIt->second = nullptr;
+            nodeIt = apcNodes.erase(nodeIt);
+        }
         throw DeadlyImportError("LWO: Unable to build a valid node graph");
+    }
 
     // Remove a single root node with no meshes assigned to it ...
     if (1 == mScene->mRootNode->mNumChildren) {
@@ -1462,7 +1484,6 @@ void LWOImporter::LoadLWO2File() {
 
         if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWO2: Chunk length points behind the file");
-            break;
         }
         uint8_t *const next = mFileBuffer + head.length;
         mFileBuffer += bufOffset;

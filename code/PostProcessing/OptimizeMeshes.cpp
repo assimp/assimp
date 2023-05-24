@@ -70,10 +70,6 @@ OptimizeMeshesProcess::OptimizeMeshesProcess()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-OptimizeMeshesProcess::~OptimizeMeshesProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool OptimizeMeshesProcess::IsActive( unsigned int pFlags) const
 {

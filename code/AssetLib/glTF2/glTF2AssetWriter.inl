@@ -418,6 +418,26 @@ namespace glTF2 {
           exts.AddMember("KHR_materials_unlit", unlit, w.mAl);
         }
 
+        if (m.materialSpecular.isPresent) {
+            Value materialSpecular(rapidjson::Type::kObjectType);
+            materialSpecular.SetObject();
+
+            MaterialSpecular &specular = m.materialSpecular.value;
+
+            if (specular.specularFactor != 0.0f) {
+                WriteFloat(materialSpecular, specular.specularFactor, "specularFactor", w.mAl);
+                WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
+            }
+            if (specular.specularColorFactor[0] != defaultSpecularColorFactor[0] && specular.specularColorFactor[1] != defaultSpecularColorFactor[1] && specular.specularColorFactor[2] != defaultSpecularColorFactor[2]) {
+                WriteVec(materialSpecular, specular.specularColorFactor, "specularColorFactor", w.mAl);
+                WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
+            }
+
+            if (!materialSpecular.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_specular", materialSpecular, w.mAl);
+            }
+        }
+
         if (m.materialSheen.isPresent) {
             Value materialSheen(rapidjson::Type::kObjectType);
 
@@ -550,7 +570,7 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Mesh& m, AssetWriter& w)
     {
-		/****************** Primitives *******************/
+        /****************** Primitives *******************/
         Value primitives;
         primitives.SetArray();
         primitives.Reserve(unsigned(m.primitives.size()), w.mAl);
@@ -929,6 +949,10 @@ namespace glTF2 {
               exts.PushBack(StringRef("KHR_materials_unlit"), mAl);
             }
 
+            if (this->mAsset.extensionsUsed.KHR_materials_specular) {
+                exts.PushBack(StringRef("KHR_materials_specular"), mAl);
+            }
+
             if (this->mAsset.extensionsUsed.KHR_materials_sheen) {
                 exts.PushBack(StringRef("KHR_materials_sheen"), mAl);
             }
@@ -980,7 +1004,7 @@ namespace glTF2 {
         if (d.mObjs.empty()) return;
 
         Value* container = &mDoc;
-		const char* context = "Document";
+        const char* context = "Document";
 
         if (d.mExtId) {
             Value* exts = FindObject(mDoc, "extensions");

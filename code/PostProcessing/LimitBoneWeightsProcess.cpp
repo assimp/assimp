@@ -53,11 +53,9 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-LimitBoneWeightsProcess::~LimitBoneWeightsProcess() = default;
+LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

@@ -13,6 +13,7 @@ jobs:
   build:
     name: ${{ matrix.name }}-build-and-test
     runs-on: ${{ matrix.os }}
+    environment: production
     strategy:
       fail-fast: false
       matrix:
@@ -56,16 +57,14 @@ jobs:
     
     - name: Set Compiler Environment
       if: endsWith(matrix.name, 'hunter') != true
-      uses: lukka/set-shell-env@v1
-      with:
-        CXX: ${{ matrix.cxx }}
-        CC: ${{ matrix.cc }}
+      run: |
+        echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
+        echo "CC=${{ matrix.cc }}" >> $GITHUB_ENV
 
     - name: Set Compiler Environment for Hunter on Windows
       if: startsWith(matrix.name, 'windows') && endsWith(matrix.name, 'hunter')
-      uses: lukka/set-shell-env@v1
-      with:
-        VS160COMNTOOLS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools
+      run: |
+        echo "VS160COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools" >> $GITHUB_ENV
 
     - name: Checkout Hunter toolchains
       if: endsWith(matrix.name, 'hunter')

@@ -55,7 +55,7 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
     
     - name: Set Compiler Environment
-      if: "!endsWith(matrix.name, 'hunter')"
+      if: endsWith(matrix.name, 'hunter') != true
       uses: lukka/set-shell-env@v1
       with:
         CXX: ${{ matrix.cxx }}

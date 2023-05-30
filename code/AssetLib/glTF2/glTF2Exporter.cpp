@@ -443,6 +443,61 @@ inline Ref<Accessor> ExportData(Asset &a, std::string &meshName, Ref<Buffer> &bu
     return acc;
 }
 
+inline void ExportNodeExtras(const aiMetadataEntry &metadataEntry, aiString name, CustomExtension &value) {
+
+    value.name = name.C_Str();
+    switch (metadataEntry.mType) {
+    case AI_BOOL:
+        value.mBoolValue.value = *static_cast<bool *>(metadataEntry.mData);
+        value.mBoolValue.isPresent = true;
+        break;
+    case AI_INT32:
+        value.mInt64Value.value = *static_cast<int32_t *>(metadataEntry.mData);
+        value.mInt64Value.isPresent = true;
+        break;
+    case AI_UINT64:
+        value.mUint64Value.value = *static_cast<uint64_t *>(metadataEntry.mData);
+        value.mUint64Value.isPresent = true;
+        break;
+    case AI_FLOAT:
+        value.mDoubleValue.value = *static_cast<float *>(metadataEntry.mData);
+        value.mDoubleValue.isPresent = true;
+        break;
+    case AI_DOUBLE:
+        value.mDoubleValue.value = *static_cast<double *>(metadataEntry.mData);
+        value.mDoubleValue.isPresent = true;
+        break;
+    case AI_AISTRING:
+        value.mStringValue.value = static_cast<aiString *>(metadataEntry.mData)->C_Str();
+        value.mStringValue.isPresent = true;
+        break;
+    case AI_AIMETADATA: {
+        const aiMetadata *subMetadata = static_cast<aiMetadata *>(metadataEntry.mData);
+        value.mValues.value.resize(subMetadata->mNumProperties);
+        value.mValues.isPresent = true;
+
+        for (unsigned i = 0; i < subMetadata->mNumProperties; ++i) {
+            ExportNodeExtras(subMetadata->mValues[i], subMetadata->mKeys[i], value.mValues.value.at(i));
+        }
+        break;
+    }
+    default:
+        // AI_AIVECTOR3D not handled
+        break;
+    }
+}
+
+inline void ExportNodeExtras(const aiMetadata *metadata, Extras &extras) {
+    if (metadata == nullptr || metadata->mNumProperties == 0) {
+        return;
+    }
+
+    extras.mValues.resize(metadata->mNumProperties);
+    for (unsigned int i = 0; i < metadata->mNumProperties; ++i) {
+        ExportNodeExtras(metadata->mValues[i], metadata->mKeys[i], extras.mValues.at(i));
+    }
+}
+
 inline void SetSamplerWrap(SamplerWrap &wrap, aiTextureMapMode map) {
     switch (map) {
     case aiTextureMapMode_Clamp:
@@ -1375,7 +1430,7 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode *n) {
     return node.GetIndex();
 }
 
-/*
+ /*
  * Export node and recursively calls ExportNode for all children.
  * Since these nodes are not the root node, we also export the parent Ref<Node>
  */
@@ -1385,6 +1440,8 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
 
     node->parent = parent;
     node->name = name;
+
+    ExportNodeExtras(n->mMetaData, node->extras);
 
     if (!n->mTransformation.IsIdentity()) {
         if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {

@@ -1103,11 +1103,9 @@ void ParseExtensions(aiMetadata *metadata, const CustomExtension &extension) {
     }
 }
 
-void ParseExtras(aiMetadata *metadata, const CustomExtension &extension) {
-    if (extension.mValues.isPresent) {
-        for (auto const &subExtension : extension.mValues.value) {
-            ParseExtensions(metadata, subExtension);
-        }
+void ParseExtras(aiMetadata* metadata, const Extras& extras) {
+    for (auto const &value : extras.mValues) {
+        ParseExtensions(metadata, value);
     }
 }
 
@@ -1129,12 +1127,12 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
             }
         }
 
-        if (node.customExtensions || node.extras) {
+        if (node.customExtensions || node.extras.HasExtras()) {
             ainode->mMetaData = new aiMetadata;
             if (node.customExtensions) {
                 ParseExtensions(ainode->mMetaData, node.customExtensions);
             }
-            if (node.extras) {
+            if (node.extras.HasExtras()) {
                 ParseExtras(ainode->mMetaData, node.extras);
             }
         }

@@ -138,18 +138,31 @@ bool MD5Parser::ParseSection(Section &out) {
     char *sz = buffer;
     while (!IsSpaceOrNewLine(*buffer)) {
         ++buffer;
+        if (buffer == bufferEnd)
+            return false;
     }
     out.mName = std::string(sz, (uintptr_t)(buffer - sz));
-    SkipSpaces();
+    while (IsSpace(*buffer)) {
+        ++buffer;
+        if (buffer == bufferEnd)
+            return false;
+    }
 
     bool running = true;
     while (running) {
         if ('{' == *buffer) {
             // it is a normal section so read all lines
             ++buffer;
+            if (buffer == bufferEnd)
+                return false;
             bool run = true;
             while (run) {
-                if (!SkipSpacesAndLineEnd()) {
+                while (IsSpaceOrNewLine(*buffer)) {
+                    ++buffer;
+                    if (buffer == bufferEnd)
+                        return false;
+                }
+                if ('\0' == *buffer) {
                     return false; // seems this was the last section
                 }
                 if ('}' == *buffer) {
@@ -164,25 +177,39 @@ bool MD5Parser::ParseSection(Section &out) {
                 elem.szStart = buffer;
 
                 // terminate the line with zero
-                while (!IsLineEnd(*buffer))
+                while (!IsLineEnd(*buffer)) {
                     ++buffer;
+                    if (buffer == bufferEnd)
+                        return false;
+                }
                 if (*buffer) {
                     ++lineNumber;
                     *buffer++ = '\0';
+                    if (buffer == bufferEnd)
+                        return false;
                 }
             }
             break;
         } else if (!IsSpaceOrNewLine(*buffer)) {
             // it is an element at global scope. Parse its value and go on
             sz = buffer;
-            while (!IsSpaceOrNewLine(*buffer++))
-                ;
+            while (!IsSpaceOrNewLine(*buffer++)) {
+                if (buffer == bufferEnd)
+                    return false;
+            }
             out.mGlobalValue = std::string(sz, (uintptr_t)(buffer - sz));
             continue;
         }
         break;
     }
-    return SkipSpacesAndLineEnd();
+    if (buffer == bufferEnd)
+        return false;
+    while (IsSpaceOrNewLine(*buffer)) {
+        ++buffer;
+        if (buffer == bufferEnd)
+            return false;
+    }
+    return '\0' != *buffer;
 }
 
 // ------------------------------------------------------------------------------------------------

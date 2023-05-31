@@ -456,8 +456,16 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
-            const int iVal(::atoi(number.c_str()));
+            int iVal;
+            auto end = m_DataIt;
+            while (end < m_DataItEnd && *end != '\0')
+                ++end;
+            if (end != m_DataItEnd) {
+                iVal = ::atoi(&(*m_DataIt));
+            } else {
+                std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
+                iVal = ::atoi(number.c_str());
+            }
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;

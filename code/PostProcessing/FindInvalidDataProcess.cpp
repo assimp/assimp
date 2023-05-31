@@ -82,6 +82,9 @@ void UpdateMeshReferences(aiNode *node, const std::vector<unsigned int> &meshMap
         for (unsigned int a = 0; a < node->mNumMeshes; ++a) {
 
             unsigned int ref = node->mMeshes[a];
+            if (ref >= meshMapping.size())
+                throw DeadlyImportError("Invalid mesh ref");
+
             if (UINT_MAX != (ref = meshMapping[ref])) {
                 node->mMeshes[out++] = ref;
             }
@@ -143,7 +146,13 @@ void FindInvalidDataProcess::Execute(aiScene *pScene) {
             // we need to remove some meshes.
             // therefore we'll also need to remove all references
             // to them from the scenegraph
-            UpdateMeshReferences(pScene->mRootNode, meshMapping);
+            try {
+                UpdateMeshReferences(pScene->mRootNode, meshMapping);
+            } catch (const std::exception&) {
+                // fix the real number of meshes otherwise we'll get double free in the scene destructor
+                pScene->mNumMeshes = real;
+                throw;
+            }
             pScene->mNumMeshes = real;
         }
 

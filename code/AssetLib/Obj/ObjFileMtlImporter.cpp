@@ -371,6 +371,7 @@ void ObjFileMtlImporter::getTexture() {
     if (m_pModel->mCurrentMaterial == nullptr) {
         m_pModel->mCurrentMaterial = new ObjFile::Material();
         m_pModel->mCurrentMaterial->MaterialName.Set("Empty_Material");
+        m_pModel->mMaterialMap["Empty_Material"] = m_pModel->mCurrentMaterial;
     }
 
     const char *pPtr(&(*m_DataIt));

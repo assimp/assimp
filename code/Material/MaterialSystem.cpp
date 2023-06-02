@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
+#include <memory>
 
 using namespace Assimp;
 

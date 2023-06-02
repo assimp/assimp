@@ -458,11 +458,14 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             //OBJ USES 1 Base ARRAYS!!!!
             int iVal;
             auto end = m_DataIt;
+            // find either the buffer end or the '\0'
             while (end < m_DataItEnd && *end != '\0')
                 ++end;
+            // avoid temporary string allocation if there is a zero
             if (end != m_DataItEnd) {
                 iVal = ::atoi(&(*m_DataIt));
             } else {
+                // otherwise make a zero terminated copy, which is safe to pass to atoi
                 std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
                 iVal = ::atoi(number.c_str());
             }

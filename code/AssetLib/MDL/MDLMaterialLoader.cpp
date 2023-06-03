@@ -481,6 +481,10 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         pcNew->achFormatHint[2] = 's';
         pcNew->achFormatHint[3] = '\0';
 
+        if (szCurrent + pcNew->mWidth > this->mBuffer + this->iFileSize) {
+            throw DeadlyImportError("Invalid MDL file. Unexpected EOF");
+        }
+
         pcNew->pcData = (aiTexel *)new unsigned char[pcNew->mWidth];
         memcpy(pcNew->pcData, szCurrent, pcNew->mWidth);
         szCurrent += iWidth;

@@ -115,7 +115,9 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         throw DeadlyImportError("HMP File is too small.");
 
     // Allocate storage and copy the contents of the file to a memory buffer
-    mBuffer = new uint8_t[fileSize];
+    auto deleter=[this](uint8_t* ptr){ delete[] ptr; mBuffer = nullptr; };
+    std::unique_ptr<uint8_t[], decltype(deleter)> buffer(new uint8_t[fileSize], deleter);
+    mBuffer = buffer.get();
     file->Read((void *)mBuffer, 1, fileSize);
     iFileSize = (unsigned int)fileSize;
 
@@ -143,9 +145,6 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         // Print the magic word to the logger
         std::string szBuffer = ai_str_toprintable((const char *)&iMagic, sizeof(iMagic));
 
-        delete[] mBuffer;
-        mBuffer = nullptr;
-
         // We're definitely unable to load this file
         throw DeadlyImportError("Unknown HMP subformat ", pFile,
                                 ". Magic word (", szBuffer, ") is not known");
@@ -153,9 +152,6 @@ void HMPImporter::InternReadFile(const std::string &pFile,
 
     // Set the AI_SCENE_FLAGS_TERRAIN bit
     pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;
-
-    delete[] mBuffer;
-    mBuffer = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -445,11 +441,11 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
     szCursor += sizeof(uint32_t);
 
     // allocate an output material
-    aiMaterial *pcMat = new aiMaterial();
+    std::unique_ptr<aiMaterial> pcMat(new aiMaterial());
 
     // read the skin, this works exactly as for MDL7
     ParseSkinLump_3DGS_MDL7(szCursor, &szCursor,
-            pcMat, iType, iWidth, iHeight);
+            pcMat.get(), iType, iWidth, iHeight);
 
     // now we need to skip any other skins ...
     for (unsigned int i = 1; i < iNumSkins; ++i) {
@@ -468,7 +464,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
     // setup the material ...
     pScene->mNumMaterials = 1;
     pScene->mMaterials = new aiMaterial *[1];
-    pScene->mMaterials[0] = pcMat;
+    pScene->mMaterials[0] = pcMat.release();
 
     *szCursorOut = szCursor;
 }

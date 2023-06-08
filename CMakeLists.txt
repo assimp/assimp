@@ -49,8 +49,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.24.0.tar.gz"
-    SHA1 "a3d7f4372b1dcd52faa6ff4a3bd5358e1d0e5efd"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.17.tar.gz"
+    SHA1 "e6396699e414120e32557fe92db097b7655b760b"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)

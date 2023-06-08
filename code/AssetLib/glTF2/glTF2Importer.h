@@ -60,7 +60,7 @@ namespace Assimp {
 class glTF2Importer : public BaseImporter {
 public:
     glTF2Importer();
-    ~glTF2Importer() override;
+    ~glTF2Importer() override = default;
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
@@ -77,10 +77,9 @@ private:
     void ImportNodes(glTF2::Asset &a);
     void ImportAnimations(glTF2::Asset &a);
     void ImportCommonMetadata(glTF2::Asset &a);
-
     aiNode *ImportNode(glTF2::Asset &r, glTF2::Ref<glTF2::Node> &ptr);
 
-    private:
+private:
     std::vector<unsigned int> meshOffsets;
     std::vector<int> mEmbeddedTexIdxs;
     std::vector<std::vector<unsigned int>> mVertexRemappingTables; // for each converted aiMesh in the scene, it stores a list of vertices that are actually used

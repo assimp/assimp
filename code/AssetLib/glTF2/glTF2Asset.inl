@@ -139,6 +139,18 @@ inline CustomExtension ReadExtensions(const char *name, Value &obj) {
     return ret;
 }
 
+inline Extras ReadExtras(Value &obj) {
+    Extras ret;
+
+    ret.mValues.reserve(obj.MemberCount());
+    for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+        auto &val = it->value;
+        ret.mValues.emplace_back(ReadExtensions(it->name.GetString(), val));
+    }
+
+    return ret;
+}
+
 inline void CopyData(size_t count, const uint8_t *src, size_t src_stride,
         uint8_t *dst, size_t dst_stride) {
     if (src_stride == dst_stride) {
@@ -248,7 +260,7 @@ inline void Object::ReadExtensions(Value &val) {
 
 inline void Object::ReadExtras(Value &val) {
     if (Value *curExtras = FindObject(val, "extras")) {
-        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+        this->extras = glTF2::ReadExtras(*curExtras);
     }
 }
 

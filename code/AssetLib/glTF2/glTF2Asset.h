@@ -371,6 +371,15 @@ struct CustomExtension {
     CustomExtension& operator=(const CustomExtension&) = default;
 };
 
+//! Represents metadata in an glTF2 object
+struct Extras {
+    std::vector<CustomExtension> mValues;
+
+    inline bool HasExtras() const {
+        return !mValues.empty();
+    }
+};
+
 //! Base class for all glTF top-level objects
 struct Object {
     int index; //!< The index of this object within its property container
@@ -379,7 +388,7 @@ struct Object {
     std::string name; //!< The user-defined name of this object
 
     CustomExtension customExtensions;
-    CustomExtension extras;
+    Extras extras;
 
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }

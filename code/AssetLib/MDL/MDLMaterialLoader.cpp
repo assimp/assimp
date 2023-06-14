@@ -703,7 +703,14 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
             tex.pcData = bad_texel;
             tex.mHeight = iHeight;
             tex.mWidth = iWidth;
-            ParseTextureColorData(szCurrent, iMasked, &iSkip, &tex);
+
+            try {
+                ParseTextureColorData(szCurrent, iMasked, &iSkip, &tex);
+            } catch (...) {
+                // FIX: Important, otherwise the destructor will crash
+                tex.pcData = nullptr;
+                throw;
+            }
 
             // FIX: Important, otherwise the destructor will crash
             tex.pcData = nullptr;

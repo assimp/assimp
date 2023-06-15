@@ -55,8 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _AI_CONCAT(a,b)  a ## b
 #define  AI_CONCAT(a,b)  _AI_CONCAT(a,b)
 
+/* Use an 'illegal' default FOV value to detect if the FBX camera has set the FOV. */
+#define FBX_FOV_UNKNOWN -1.0f
+
 namespace Assimp {
 namespace FBX {
+
 
 class Parser;
 class Object;
@@ -247,7 +251,7 @@ public:
     fbx_simple_property(FilmAspectRatio, float, 1.0f)
     fbx_simple_property(ApertureMode, int, 0)
 
-    fbx_simple_property(FieldOfView, float, 1.0f)
+    fbx_simple_property(FieldOfView, float, FBX_FOV_UNKNOWN)
     fbx_simple_property(FocalLength, float, 1.0f)
 };
 

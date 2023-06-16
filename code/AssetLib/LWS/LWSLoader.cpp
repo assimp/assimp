@@ -863,10 +863,13 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         master->mCameras = new aiCamera *[master->mNumCameras = num_camera];
     }
     aiCamera **cams = master->mCameras;
+    master->mCameras = nullptr;
+    
     if (num_light) {
         master->mLights = new aiLight *[master->mNumLights = num_light];
     }
     aiLight **lights = master->mLights;
+    master->mLights = nullptr;
 
     std::vector<AttachmentInfo> attach;
     std::vector<aiNodeAnim *> anims;
@@ -888,6 +891,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (anims.size()) {
         master->mAnimations = new aiAnimation *[master->mNumAnimations = 1];
         aiAnimation *anim = master->mAnimations[0] = new aiAnimation();
+        master->mAnimations[0] = nullptr;
         anim->mName.Set("LWSMasterAnim");
 
         // LWS uses seconds as time units, but we convert to frames

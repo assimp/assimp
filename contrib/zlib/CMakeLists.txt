@@ -77,13 +77,13 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
+        #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
     endif()
 
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 else()
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
+        S#ET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
     endif()
 endif()
 

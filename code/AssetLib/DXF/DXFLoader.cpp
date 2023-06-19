@@ -583,7 +583,7 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 static constexpr unsigned int DXF_POLYLINE_FLAG_CLOSED = 0x1;
 // Currently unused
 //static constexpr unsigned int DXF_POLYLINE_FLAG_3D_POLYLINE = 0x8;
-static constexpr unsigned int DXF_POLYLINE_FLAG_3D_POLYMESH = 0x10;
+//static constexpr unsigned int DXF_POLYLINE_FLAG_3D_POLYMESH = 0x10;
 static constexpr unsigned int DXF_POLYLINE_FLAG_POLYFACEMESH = 0x40;
 
 // ------------------------------------------------------------------------------------------------

@@ -83,7 +83,7 @@ if(MSVC)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 else()
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
-        S#ET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
+        #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
     endif()
 endif()
 

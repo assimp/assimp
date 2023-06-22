@@ -259,7 +259,7 @@ public: // static utilities
             std::size_t numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,
-            bool noAlphaBeforeTokens = false);
+            bool noGraphBeforeTokens = false);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has a specific file extension

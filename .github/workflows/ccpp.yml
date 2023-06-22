@@ -56,14 +56,14 @@ jobs:
     
     - name: Set Compiler Environment
       if: "!endsWith(matrix.name, 'hunter')"
-      uses: lukka/set-shell-env@v1
+      uses: lukka/set-shell-env@v3
       with:
         CXX: ${{ matrix.cxx }}
         CC: ${{ matrix.cc }}
 
     - name: Set Compiler Environment for Hunter on Windows
       if: startsWith(matrix.name, 'windows') && endsWith(matrix.name, 'hunter')
-      uses: lukka/set-shell-env@v1
+      uses: lukka/set-shell-env@v3
       with:
         VS160COMNTOOLS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools
 

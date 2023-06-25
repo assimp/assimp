@@ -284,7 +284,7 @@ void OFFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     for (unsigned int i = 0; i < numFaces; ) {
         if(!GetNextLine(buffer,line)) {
             ASSIMP_LOG_ERROR("OFF: The number of faces in the header is incorrect");
-            break;
+            throw DeadlyImportError("OFF: The number of faces in the header is incorrect");
         }
         unsigned int idx;
         sz = line; SkipSpaces(&sz);

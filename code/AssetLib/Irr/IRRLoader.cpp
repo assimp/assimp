@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Irr importer class
  */
 
+#include "assimp/StringComparison.h"
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
 #include "AssetLib/Irr/IRRLoader.h"
@@ -62,7 +63,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include <csignal>
+#include <iostream>
 #include <memory>
+#include <queue>
+#include <stack>
 
 using namespace Assimp;
 
@@ -835,11 +840,381 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
     }
 }
 
+void IRRImporter::ParseNodeAttributes(pugi::xml_node &attributesNode, IRRImporter::Node *nd, BatchLoader &batch) {
+    ai_assert(!ASSIMP_stricmp(attributesNode.name(), "attributes")); // Node must be <attributes>
+    ai_assert(nd != nullptr); // dude
+
+    // Big switch statement that tests for various tags inside <attributes>
+    // and applies them to nd
+    // I don't believe nodes have boolean attributes
+    for (pugi::xml_node &attribute : attributesNode.children()) {
+        if (attribute.type() != pugi::node_element) continue;
+        if (!ASSIMP_stricmp(attribute.name(), "vector3d")) { // <vector3d />
+            VectorProperty prop;
+            ReadVectorProperty(prop, attribute);
+            if (prop.name == "Position") {
+                nd->position = prop.value;
+            } else if (prop.name == "Rotation") {
+                nd->rotation = prop.value;
+            } else if (prop.name == "Scale") {
+                nd->scaling = prop.value;
+            } else if (Node::CAMERA == nd->type) {
+                aiCamera *cam = cameras.back();
+                if (prop.name == "Target") {
+                    cam->mLookAt = prop.value;
+                } else if (prop.name == "UpVector") {
+                    cam->mUp = prop.value;
+                }
+            }
+        } else if (!ASSIMP_stricmp(attribute.name(), "float")) { // <float />
+            FloatProperty prop;
+            ReadFloatProperty(prop, attribute);
+            if (prop.name == "FramesPerSecond" && Node::ANIMMESH == nd->type) {
+                nd->framesPerSecond = prop.value;
+            } else if (Node::CAMERA == nd->type) {
+                /*  This is the vertical, not the horizontal FOV.
+                 *  We need to compute the right FOV from the
+                 *  screen aspect which we don't know yet.
+                 */
+                if (prop.name == "Fovy") {
+                    cameras.back()->mHorizontalFOV = prop.value;
+                } else if (prop.name == "Aspect") {
+                    cameras.back()->mAspect = prop.value;
+                } else if (prop.name == "ZNear") {
+                    cameras.back()->mClipPlaneNear = prop.value;
+                } else if (prop.name == "ZFar") {
+                    cameras.back()->mClipPlaneFar = prop.value;
+                }
+            } else if (Node::LIGHT == nd->type) {
+                /*  Additional light information
+                 */
+                if (prop.name == "Attenuation") {
+                    lights.back()->mAttenuationLinear = prop.value;
+                } else if (prop.name == "OuterCone") {
+                    lights.back()->mAngleOuterCone = AI_DEG_TO_RAD(prop.value);
+                } else if (prop.name == "InnerCone") {
+                    lights.back()->mAngleInnerCone = AI_DEG_TO_RAD(prop.value);
+                }
+            }
+            // radius of the sphere to be generated -
+            // or alternatively, size of the cube
+            else if ((Node::SPHERE == nd->type && prop.name == "Radius") ||
+                     (Node::CUBE == nd->type && prop.name == "Size")) {
+                nd->sphereRadius = prop.value;
+            }
+        } else if (!ASSIMP_stricmp(attribute.name(), "int")) { // <int />
+            // Only sphere nodes make use of integer attributes
+            if (Node::SPHERE == nd->type) {
+                IntProperty prop;
+                ReadIntProperty(prop, attribute);
+                if (prop.name == "PolyCountX") {
+                    nd->spherePolyCountX = prop.value;
+                } else if (prop.name == "PolyCountY") {
+                    nd->spherePolyCountY = prop.value;
+                }
+            }
+        } else if (!ASSIMP_stricmp(attribute.name(), "string") || !ASSIMP_stricmp(attribute.name(), "enum")) { // <string /> or < enum />
+            StringProperty prop;
+            ReadStringProperty(prop, attribute);
+            if (prop.value.length() == 0) continue; // skip empty strings
+            if (prop.name == "Name") {
+                nd->name = prop.value;
+
+                /*  If we're either a camera or a light source
+                 *  we need to update the name in the aiLight/
+                 *  aiCamera structure, too.
+                 */
+                if (Node::CAMERA == nd->type) {
+                    cameras.back()->mName.Set(prop.value);
+                } else if (Node::LIGHT == nd->type) {
+                    lights.back()->mName.Set(prop.value);
+                }
+            } else if (Node::LIGHT == nd->type && "LightType" == prop.name) {
+                if (prop.value == "Spot")
+                    lights.back()->mType = aiLightSource_SPOT;
+                else if (prop.value == "Point")
+                    lights.back()->mType = aiLightSource_POINT;
+                else if (prop.value == "Directional")
+                    lights.back()->mType = aiLightSource_DIRECTIONAL;
+                else {
+                    // We won't pass the validation with aiLightSourceType_UNDEFINED,
+                    // so we remove the light and replace it with a silly dummy node
+                    delete lights.back();
+                    lights.pop_back();
+                    nd->type = Node::DUMMY;
+
+                    ASSIMP_LOG_ERROR("Ignoring light of unknown type: ", prop.value);
+                }
+            } else if ((prop.name == "Mesh" && Node::MESH == nd->type) ||
+                       Node::ANIMMESH == nd->type) {
+                /*  This is the file name of the mesh - either
+                 *  animated or not. We need to make sure we setup
+                 *  the correct post-processing settings here.
+                 */
+                unsigned int pp = 0;
+                BatchLoader::PropertyMap map;
+
+                /* If the mesh is a static one remove all animations from the impor data
+                 */
+                if (Node::ANIMMESH != nd->type) {
+                    pp |= aiProcess_RemoveComponent;
+                    SetGenericProperty<int>(map.ints, AI_CONFIG_PP_RVC_FLAGS,
+                            aiComponent_ANIMATIONS | aiComponent_BONEWEIGHTS);
+                }
+
+                /*  TODO: maybe implement the protection against recursive
+                 *  loading calls directly in BatchLoader? The current
+                 *  implementation is not absolutely safe. A LWS and an IRR
+                 *  file referencing each other *could* cause the system to
+                 *  recurse forever.
+                 */
+
+                const std::string extension = GetExtension(prop.value);
+                if ("irr" == extension) {
+                    ASSIMP_LOG_ERROR("IRR: Can't load another IRR file recursively");
+                } else {
+                    nd->id = batch.AddLoadRequest(prop.value, pp, &map);
+                    nd->meshPath = prop.value;
+                }
+            }
+        }
+    }
+}
+
+void IRRImporter::ParseAnimators(pugi::xml_node &animatorNode, IRRImporter::Node *nd) {
+    Animator *curAnim = nullptr;
+    // Make empty animator
+    nd->animators.emplace_back();
+    curAnim = &nd->animators.back(); // Push it back
+    pugi::xml_node attributes = animatorNode.child("attributes");
+    if (!attributes) {
+        ASSIMP_LOG_WARN("Animator node does not contain attributes. ");
+        return;
+    }
+
+    for (pugi::xml_node attrib : attributes.children()) {
+        // XML may contain useless noes like CDATA
+        if (!ASSIMP_stricmp(attrib.name(), "vector3d")) {
+            VectorProperty prop;
+            ReadVectorProperty(prop, attrib);
+
+            if (curAnim->type == Animator::ROTATION && prop.name == "Rotation") {
+                // We store the rotation euler angles in 'direction'
+                curAnim->direction = prop.value;
+            } else if (curAnim->type == Animator::FOLLOW_SPLINE) {
+                // Check whether the vector follows the PointN naming scheme,
+                // here N is the ONE-based index of the point
+                if (prop.name.length() >= 6 && prop.name.substr(0, 5) == "Point") {
+                    // Add a new key to the list
+                    curAnim->splineKeys.emplace_back();
+                    aiVectorKey &key = curAnim->splineKeys.back();
+
+                    // and parse its properties
+                    key.mValue = prop.value;
+                    key.mTime = strtoul10(&prop.name[5]);
+                }
+            } else if (curAnim->type == Animator::FLY_CIRCLE) {
+                if (prop.name == "Center") {
+                    curAnim->circleCenter = prop.value;
+                } else if (prop.name == "Direction") {
+                    curAnim->direction = prop.value;
+
+                    // From Irrlicht's source - a workaround for backward compatibility with Irrlicht 1.1
+                    if (curAnim->direction == aiVector3D()) {
+                        curAnim->direction = aiVector3D(0.f, 1.f, 0.f);
+                    } else
+                        curAnim->direction.Normalize();
+                }
+            } else if (curAnim->type == Animator::FLY_STRAIGHT) {
+                if (prop.name == "Start") {
+                    // We reuse the field here
+                    curAnim->circleCenter = prop.value;
+                } else if (prop.name == "End") {
+                    // We reuse the field here
+                    curAnim->direction = prop.value;
+                }
+            }
+
+            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "bool")) {
+        } else if (!ASSIMP_stricmp(attrib.name(), "bool")) {
+            BoolProperty prop;
+            ReadBoolProperty(prop, attrib);
+
+            if (curAnim->type == Animator::FLY_CIRCLE && prop.name == "Loop") {
+                curAnim->loop = prop.value;
+            }
+            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "float")) {
+        } else if (!ASSIMP_stricmp(attrib.name(), "float")) {
+            FloatProperty prop;
+            ReadFloatProperty(prop, attrib);
+
+            // The speed property exists for several animators
+            if (prop.name == "Speed") {
+                curAnim->speed = prop.value;
+            } else if (curAnim->type == Animator::FLY_CIRCLE && prop.name == "Radius") {
+                curAnim->circleRadius = prop.value;
+            } else if (curAnim->type == Animator::FOLLOW_SPLINE && prop.name == "Tightness") {
+                curAnim->tightness = prop.value;
+            }
+            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "int")) {
+        } else if (!ASSIMP_stricmp(attrib.name(), "int")) {
+            IntProperty prop;
+            ReadIntProperty(prop, attrib);
+
+            if (curAnim->type == Animator::FLY_STRAIGHT && prop.name == "TimeForWay") {
+                curAnim->timeForWay = prop.value;
+            }
+            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "string") || !ASSIMP_stricmp(reader->getNodeName(), "enum")) {
+        } else if (!ASSIMP_stricmp(attrib.name(), "string") || !ASSIMP_stricmp(attrib.name(), "enum")) {
+            StringProperty prop;
+            ReadStringProperty(prop, attrib);
+
+            if (prop.name == "Type") {
+                // type of the animator
+                if (prop.value == "rotation") {
+                    curAnim->type = Animator::ROTATION;
+                } else if (prop.value == "flyCircle") {
+                    curAnim->type = Animator::FLY_CIRCLE;
+                } else if (prop.value == "flyStraight") {
+                    curAnim->type = Animator::FLY_CIRCLE;
+                } else if (prop.value == "followSpline") {
+                    curAnim->type = Animator::FOLLOW_SPLINE;
+                } else {
+                    ASSIMP_LOG_WARN("IRR: Ignoring unknown animator: ", prop.value);
+
+                    curAnim->type = Animator::UNKNOWN;
+                }
+            }
+        }
+    }
+}
+
+IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &batch) {
+    // Parse <node> tags.
+    // <node> tags have various types
+    // <node> tags can contain <attribute>, <material>
+    // they can also contain other <node> tags, (and can reference other files as well?)
+    // ***********************************************************************
+    /*  What we're going to do with the node depends
+     *  on its type:
+     *
+     *  "mesh" - Load a mesh from an external file
+     *  "cube" - Generate a cube
+     *  "skybox" - Generate a skybox
+     *  "light" - A light source
+     *  "sphere" - Generate a sphere mesh
+     *  "animatedMesh" - Load an animated mesh from an external file
+     *    and join its animation channels with ours.
+     *  "empty" - A dummy node
+     *  "camera" - A camera
+     *  "terrain" - a terrain node (data comes from a heightmap)
+     *  "billboard", ""
+     *
+     *  Each of these nodes can be animated and all can have multiple
+     *  materials assigned (except lights, cameras and dummies, of course).
+     *  Said materials and animators are all collected at the bottom
+     */
+    // ***********************************************************************
+    Node *nd;
+    pugi::xml_attribute nodeTypeAttrib = node.attribute("type");
+    if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "mesh") || !ASSIMP_stricmp(nodeTypeAttrib.value(), "octTree")) {
+        // OctTree's and meshes are treated equally
+        nd = new Node(Node::MESH);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "cube")) {
+        nd = new Node(Node::CUBE);
+        guessedMeshCnt += 1; // Cube is only one mesh
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "skybox")) {
+        nd = new Node(Node::SKYBOX);
+        guessedMeshCnt += 6; // Skybox is a box, with 6 meshes?
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "camera")) {
+        nd = new Node(Node::CAMERA);
+        // Setup a temporary name for the camera
+        aiCamera *cam = new aiCamera();
+        cam->mName.Set(nd->name);
+        cameras.push_back(cam);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "light")) {
+        nd = new Node(Node::LIGHT);
+        // Setup a temporary name for the light
+        aiLight *cam = new aiLight();
+        cam->mName.Set(nd->name);
+        lights.push_back(cam);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "sphere")) {
+        nd = new Node(Node::SPHERE);
+        guessedMeshCnt += 1;
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "animatedMesh")) {
+        nd = new Node(Node::ANIMMESH);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "empty")) {
+        nd = new Node(Node::DUMMY);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "terrain")) {
+        nd = new Node(Node::TERRAIN);
+    } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "billBoard")) {
+        // We don't support billboards, so ignore them
+        ASSIMP_LOG_ERROR("IRR: Billboards are not supported by Assimp");
+        nd = new Node(Node::DUMMY);
+    } else {
+        ASSIMP_LOG_WARN("IRR: Found unknown node: ", nodeTypeAttrib.value());
+
+        /*  We skip the contents of nodes we don't know.
+         *  We parse the transformation and all animators
+         *  and skip the rest.
+         */
+        nd = new Node(Node::DUMMY);
+    }
+
+    // TODO: consolidate all into one loop
+    // Collect node attributes first
+    for (pugi::xml_node attr_node : node.children()) {
+        if (!ASSIMP_stricmp(attr_node.name(), "attributes")) {
+            ParseNodeAttributes(attr_node, nd, batch); // Parse attributes into this node
+        }
+    }
+
+    // Then parse any materials
+    // Materials are available to almost all node types
+    if (nd->type != Node::DUMMY) {
+        for (pugi::xml_node materialNode : node.children()) {
+            if (!ASSIMP_stricmp(materialNode.name(), "materials")) {
+                // Parse material description directly
+                // Each material should contain an <attributes> node
+                // with everything specified
+                nd->materials.emplace_back();
+                std::pair<aiMaterial *, unsigned int> &p = nd->materials.back();
+                p.first = ParseMaterial(materialNode, p.second);
+                guessedMatCnt += 1;
+            }
+        }
+    }
+
+    // Then parse any animators
+    for (pugi::xml_node animatorNode : node.children()) {
+        if (!ASSIMP_stricmp(animatorNode.name(), "animators")) {
+            // All animators should contain an <attributes> tag
+            //  This is an animation path - add a new animator
+            //  to the list.
+            ParseAnimators(animatorNode, nd); // Function modifies nd's animator vector
+            guessedAnimCnt += 1;
+        }
+    }
+    // Then parse any child nodes
+    /* Attach the newly created node to the scene-graph
+     */
+    // curNode = nd;
+    // nd->parent = curParent;
+    // curParent->children.push_back(nd);
+    for (pugi::xml_node child : node.children()) {
+        if (!ASSIMP_stricmp(child.name(), "node")) { // Is a child node
+            Node *childNd = ParseNode(child, batch); // Repeat this function for all children
+            nd->children.push_back(childNd);
+        };
+    }
+
+    return nd;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
-
     // Check whether we can read from the file
     if (file == nullptr) {
         throw DeadlyImportError("Failed to open IRR file ", pFile);
@@ -852,405 +1227,47 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     pugi::xml_node rootElement = st.getRootNode();
 
+    std::stringstream ss;
+    ss << "Document name: " << rootElement.name() << std::endl;
+    ss << "Document content: " << std::endl;
+    rootElement.print(ss);
+    ss << std::endl;
+    std::cout << "IrrImporter with";
+    std::cout << ss.str() << std::endl;
     // The root node of the scene
+    // TODO: Appearantly root node is specified somewhere?
     Node *root = new Node(Node::DUMMY);
     root->parent = nullptr;
     root->name = "<IRRSceneRoot>";
-
-    // Current node parent
-    Node *curParent = root;
-
-    // Scene-graph node we're currently working on
-    Node *curNode = nullptr;
-
-    // List of output cameras
-    std::vector<aiCamera *> cameras;
-
-    // List of output lights
-    std::vector<aiLight *> lights;
 
     // Batch loader used to load external models
     BatchLoader batch(pIOHandler);
     // batch.SetBasePath(pFile);
 
-    cameras.reserve(5);
+    cameras.reserve(1); // Probably only one camera in entire scene
     lights.reserve(5);
 
-    bool inMaterials = false, inAnimator = false;
-    unsigned int guessedAnimCnt = 0, guessedMeshCnt = 0, guessedMatCnt = 0;
+    this->guessedAnimCnt = 0;
+    this->guessedMeshCnt = 0;
+    this->guessedMatCnt = 0;
 
-    // Parse the XML file
-
-    // while (reader->read())  {
-    for (pugi::xml_node child : rootElement.children())
-        switch (child.type()) {
-        case pugi::node_element:
-            if (!ASSIMP_stricmp(child.name(), "node")) {
-                // ***********************************************************************
-                /*  What we're going to do with the node depends
-                 *  on its type:
-                 *
-                 *  "mesh" - Load a mesh from an external file
-                 *  "cube" - Generate a cube
-                 *  "skybox" - Generate a skybox
-                 *  "light" - A light source
-                 *  "sphere" - Generate a sphere mesh
-                 *  "animatedMesh" - Load an animated mesh from an external file
-                 *    and join its animation channels with ours.
-                 *  "empty" - A dummy node
-                 *  "camera" - A camera
-                 *  "terrain" - a terrain node (data comes from a heightmap)
-                 *  "billboard", ""
-                 *
-                 *  Each of these nodes can be animated and all can have multiple
-                 *  materials assigned (except lights, cameras and dummies, of course).
-                 */
-                // ***********************************************************************
-                // const char *sz = reader->getAttributeValueSafe("type");
-                pugi::xml_attribute attrib = child.attribute("type");
-                Node *nd;
-                if (!ASSIMP_stricmp(attrib.name(), "mesh") || !ASSIMP_stricmp(attrib.name(), "octTree")) {
-                    // OctTree's and meshes are treated equally
-                    nd = new Node(Node::MESH);
-                } else if (!ASSIMP_stricmp(attrib.name(), "cube")) {
-                    nd = new Node(Node::CUBE);
-                    ++guessedMeshCnt;
-                } else if (!ASSIMP_stricmp(attrib.name(), "skybox")) {
-                    nd = new Node(Node::SKYBOX);
-                    guessedMeshCnt += 6;
-                } else if (!ASSIMP_stricmp(attrib.name(), "camera")) {
-                    nd = new Node(Node::CAMERA);
-
-                    // Setup a temporary name for the camera
-                    aiCamera *cam = new aiCamera();
-                    cam->mName.Set(nd->name);
-                    cameras.push_back(cam);
-                } else if (!ASSIMP_stricmp(attrib.name(), "light")) {
-                    nd = new Node(Node::LIGHT);
-
-                    // Setup a temporary name for the light
-                    aiLight *cam = new aiLight();
-                    cam->mName.Set(nd->name);
-                    lights.push_back(cam);
-                } else if (!ASSIMP_stricmp(attrib.name(), "sphere")) {
-                    nd = new Node(Node::SPHERE);
-                    ++guessedMeshCnt;
-                } else if (!ASSIMP_stricmp(attrib.name(), "animatedMesh")) {
-                    nd = new Node(Node::ANIMMESH);
-                } else if (!ASSIMP_stricmp(attrib.name(), "empty")) {
-                    nd = new Node(Node::DUMMY);
-                } else if (!ASSIMP_stricmp(attrib.name(), "terrain")) {
-                    nd = new Node(Node::TERRAIN);
-                } else if (!ASSIMP_stricmp(attrib.name(), "billBoard")) {
-                    // We don't support billboards, so ignore them
-                    ASSIMP_LOG_ERROR("IRR: Billboards are not supported by Assimp");
-                    nd = new Node(Node::DUMMY);
-                } else {
-                    ASSIMP_LOG_WARN("IRR: Found unknown node: ", attrib.name());
-
-                    /*  We skip the contents of nodes we don't know.
-                     *  We parse the transformation and all animators
-                     *  and skip the rest.
-                     */
-                    nd = new Node(Node::DUMMY);
-                }
-
-                /* Attach the newly created node to the scene-graph
-                 */
-                curNode = nd;
-                nd->parent = curParent;
-                curParent->children.push_back(nd);
-            } else if (!ASSIMP_stricmp(child.name(), "materials")) {
-                inMaterials = true;
-            } else if (!ASSIMP_stricmp(child.name(), "animators")) {
-                inAnimator = true;
-            } else if (!ASSIMP_stricmp(child.name(), "attributes")) {
-                //  We should have a valid node here
-                //  FIX: no ... the scene root node is also contained in an attributes block
-                if (!curNode) {
-                    continue;
-                }
-
-                Animator *curAnim = nullptr;
-
-                // Materials can occur for nearly any type of node
-                if (inMaterials && curNode->type != Node::DUMMY) {
-                    //  This is a material description - parse it!
-                    curNode->materials.emplace_back();
-                    std::pair<aiMaterial *, unsigned int> &p = curNode->materials.back();
-
-                    p.first = ParseMaterial(p.second);
-                    ++guessedMatCnt;
-                    continue;
-                } else if (inAnimator) {
-                    //  This is an animation path - add a new animator
-                    //  to the list.
-                    curNode->animators.emplace_back();
-                    curAnim = &curNode->animators.back();
-
-                    ++guessedAnimCnt;
-                }
-
-                /*  Parse all elements in the attributes block
-                 *  and process them.
-                 */
-                //					while (reader->read()) {
-                for (pugi::xml_node attrib : child.children()) {
-                    if (attrib.type() == pugi::node_element) {
-                        // if (reader->getNodeType() == EXN_ELEMENT) {
-                        // if (!ASSIMP_stricmp(reader->getNodeName(), "vector3d")) {
-                        if (!ASSIMP_stricmp(attrib.name(), "vector3d")) {
-                            VectorProperty prop;
-                            ReadVectorProperty(prop);
-
-                            if (inAnimator) {
-                                if (curAnim->type == Animator::ROTATION && prop.name == "Rotation") {
-                                    // We store the rotation euler angles in 'direction'
-                                    curAnim->direction = prop.value;
-                                } else if (curAnim->type == Animator::FOLLOW_SPLINE) {
-                                    // Check whether the vector follows the PointN naming scheme,
-                                    // here N is the ONE-based index of the point
-                                    if (prop.name.length() >= 6 && prop.name.substr(0, 5) == "Point") {
-                                        // Add a new key to the list
-                                        curAnim->splineKeys.emplace_back();
-                                        aiVectorKey &key = curAnim->splineKeys.back();
-
-                                        // and parse its properties
-                                        key.mValue = prop.value;
-                                        key.mTime = strtoul10(&prop.name[5]);
-                                    }
-                                } else if (curAnim->type == Animator::FLY_CIRCLE) {
-                                    if (prop.name == "Center") {
-                                        curAnim->circleCenter = prop.value;
-                                    } else if (prop.name == "Direction") {
-                                        curAnim->direction = prop.value;
-
-                                        // From Irrlicht's source - a workaround for backward compatibility with Irrlicht 1.1
-                                        if (curAnim->direction == aiVector3D()) {
-                                            curAnim->direction = aiVector3D(0.f, 1.f, 0.f);
-                                        } else
-                                            curAnim->direction.Normalize();
-                                    }
-                                } else if (curAnim->type == Animator::FLY_STRAIGHT) {
-                                    if (prop.name == "Start") {
-                                        // We reuse the field here
-                                        curAnim->circleCenter = prop.value;
-                                    } else if (prop.name == "End") {
-                                        // We reuse the field here
-                                        curAnim->direction = prop.value;
-                                    }
-                                }
-                            } else {
-                                if (prop.name == "Position") {
-                                    curNode->position = prop.value;
-                                } else if (prop.name == "Rotation") {
-                                    curNode->rotation = prop.value;
-                                } else if (prop.name == "Scale") {
-                                    curNode->scaling = prop.value;
-                                } else if (Node::CAMERA == curNode->type) {
-                                    aiCamera *cam = cameras.back();
-                                    if (prop.name == "Target") {
-                                        cam->mLookAt = prop.value;
-                                    } else if (prop.name == "UpVector") {
-                                        cam->mUp = prop.value;
-                                    }
-                                }
-                            }
-                            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "bool")) {
-                        } else if (!ASSIMP_stricmp(attrib.name(), "bool")) {
-                            BoolProperty prop;
-                            ReadBoolProperty(prop);
-
-                            if (inAnimator && curAnim->type == Animator::FLY_CIRCLE && prop.name == "Loop") {
-                                curAnim->loop = prop.value;
-                            }
-                            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "float")) {
-                        } else if (!ASSIMP_stricmp(attrib.name(), "float")) {
-                            FloatProperty prop;
-                            ReadFloatProperty(prop);
-
-                            if (inAnimator) {
-                                // The speed property exists for several animators
-                                if (prop.name == "Speed") {
-                                    curAnim->speed = prop.value;
-                                } else if (curAnim->type == Animator::FLY_CIRCLE && prop.name == "Radius") {
-                                    curAnim->circleRadius = prop.value;
-                                } else if (curAnim->type == Animator::FOLLOW_SPLINE && prop.name == "Tightness") {
-                                    curAnim->tightness = prop.value;
-                                }
-                            } else {
-                                if (prop.name == "FramesPerSecond" && Node::ANIMMESH == curNode->type) {
-                                    curNode->framesPerSecond = prop.value;
-                                } else if (Node::CAMERA == curNode->type) {
-                                    /*  This is the vertical, not the horizontal FOV.
-                                     *  We need to compute the right FOV from the
-                                     *  screen aspect which we don't know yet.
-                                     */
-                                    if (prop.name == "Fovy") {
-                                        cameras.back()->mHorizontalFOV = prop.value;
-                                    } else if (prop.name == "Aspect") {
-                                        cameras.back()->mAspect = prop.value;
-                                    } else if (prop.name == "ZNear") {
-                                        cameras.back()->mClipPlaneNear = prop.value;
-                                    } else if (prop.name == "ZFar") {
-                                        cameras.back()->mClipPlaneFar = prop.value;
-                                    }
-                                } else if (Node::LIGHT == curNode->type) {
-                                    /*  Additional light information
-                                     */
-                                    if (prop.name == "Attenuation") {
-                                        lights.back()->mAttenuationLinear = prop.value;
-                                    } else if (prop.name == "OuterCone") {
-                                        lights.back()->mAngleOuterCone = AI_DEG_TO_RAD(prop.value);
-                                    } else if (prop.name == "InnerCone") {
-                                        lights.back()->mAngleInnerCone = AI_DEG_TO_RAD(prop.value);
-                                    }
-                                }
-                                // radius of the sphere to be generated -
-                                // or alternatively, size of the cube
-                                else if ((Node::SPHERE == curNode->type && prop.name == "Radius") || (Node::CUBE == curNode->type && prop.name == "Size")) {
-
-                                    curNode->sphereRadius = prop.value;
-                                }
-                            }
-                            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "int")) {
-                        } else if (!ASSIMP_stricmp(attrib.name(), "int")) {
-                            IntProperty prop;
-                            ReadIntProperty(prop);
-
-                            if (inAnimator) {
-                                if (curAnim->type == Animator::FLY_STRAIGHT && prop.name == "TimeForWay") {
-                                    curAnim->timeForWay = prop.value;
-                                }
-                            } else {
-                                // sphere polygon numbers in each direction
-                                if (Node::SPHERE == curNode->type) {
-
-                                    if (prop.name == "PolyCountX") {
-                                        curNode->spherePolyCountX = prop.value;
-                                    } else if (prop.name == "PolyCountY") {
-                                        curNode->spherePolyCountY = prop.value;
-                                    }
-                                }
-                            }
-                            //} else if (!ASSIMP_stricmp(reader->getNodeName(), "string") || !ASSIMP_stricmp(reader->getNodeName(), "enum")) {
-                        } else if (!ASSIMP_stricmp(attrib.name(), "string") || !ASSIMP_stricmp(attrib.name(), "enum")) {
-                            StringProperty prop;
-                            ReadStringProperty(prop);
-                            if (prop.value.length()) {
-                                if (prop.name == "Name") {
-                                    curNode->name = prop.value;
-
-                                    /*  If we're either a camera or a light source
-                                     *  we need to update the name in the aiLight/
-                                     *  aiCamera structure, too.
-                                     */
-                                    if (Node::CAMERA == curNode->type) {
-                                        cameras.back()->mName.Set(prop.value);
-                                    } else if (Node::LIGHT == curNode->type) {
-                                        lights.back()->mName.Set(prop.value);
-                                    }
-                                } else if (Node::LIGHT == curNode->type && "LightType" == prop.name) {
-                                    if (prop.value == "Spot")
-                                        lights.back()->mType = aiLightSource_SPOT;
-                                    else if (prop.value == "Point")
-                                        lights.back()->mType = aiLightSource_POINT;
-                                    else if (prop.value == "Directional")
-                                        lights.back()->mType = aiLightSource_DIRECTIONAL;
-                                    else {
-                                        // We won't pass the validation with aiLightSourceType_UNDEFINED,
-                                        // so we remove the light and replace it with a silly dummy node
-                                        delete lights.back();
-                                        lights.pop_back();
-                                        curNode->type = Node::DUMMY;
-
-                                        ASSIMP_LOG_ERROR("Ignoring light of unknown type: ", prop.value);
-                                    }
-                                } else if ((prop.name == "Mesh" && Node::MESH == curNode->type) ||
-                                           Node::ANIMMESH == curNode->type) {
-                                    /*  This is the file name of the mesh - either
-                                     *  animated or not. We need to make sure we setup
-                                     *  the correct post-processing settings here.
-                                     */
-                                    unsigned int pp = 0;
-                                    BatchLoader::PropertyMap map;
-
-                                    /* If the mesh is a static one remove all animations from the impor data
-                                     */
-                                    if (Node::ANIMMESH != curNode->type) {
-                                        pp |= aiProcess_RemoveComponent;
-                                        SetGenericProperty<int>(map.ints, AI_CONFIG_PP_RVC_FLAGS,
-                                                aiComponent_ANIMATIONS | aiComponent_BONEWEIGHTS);
-                                    }
-
-                                    /*  TODO: maybe implement the protection against recursive
-                                     *  loading calls directly in BatchLoader? The current
-                                     *  implementation is not absolutely safe. A LWS and an IRR
-                                     *  file referencing each other *could* cause the system to
-                                     *  recurse forever.
-                                     */
-
-                                    const std::string extension = GetExtension(prop.value);
-                                    if ("irr" == extension) {
-                                        ASSIMP_LOG_ERROR("IRR: Can't load another IRR file recursively");
-                                    } else {
-                                        curNode->id = batch.AddLoadRequest(prop.value, pp, &map);
-                                        curNode->meshPath = prop.value;
-                                    }
-                                } else if (inAnimator && prop.name == "Type") {
-                                    // type of the animator
-                                    if (prop.value == "rotation") {
-                                        curAnim->type = Animator::ROTATION;
-                                    } else if (prop.value == "flyCircle") {
-                                        curAnim->type = Animator::FLY_CIRCLE;
-                                    } else if (prop.value == "flyStraight") {
-                                        curAnim->type = Animator::FLY_CIRCLE;
-                                    } else if (prop.value == "followSpline") {
-                                        curAnim->type = Animator::FOLLOW_SPLINE;
-                                    } else {
-                                        ASSIMP_LOG_WARN("IRR: Ignoring unknown animator: ", prop.value);
-
-                                        curAnim->type = Animator::UNKNOWN;
-                                    }
-                                }
-                            }
-                        }
-                        //} else if (reader->getNodeType() == EXN_ELEMENT_END && !ASSIMP_stricmp(reader->getNodeName(), "attributes")) {
-                    } else if (attrib.type() == pugi::node_null && !ASSIMP_stricmp(attrib.name(), "attributes")) {
-                        break;
-                    }
-                }
-            }
-            break;
-
-            /*case EXN_ELEMENT_END:
-
-            // If we reached the end of a node, we need to continue processing its parent
-            if (!ASSIMP_stricmp(reader->getNodeName(), "node")) {
-                if (!curNode) {
-                    // currently is no node set. We need to go
-                    // back in the node hierarchy
-                    if (!curParent) {
-                        curParent = root;
-                        ASSIMP_LOG_ERROR("IRR: Too many closing <node> elements");
-                    } else
-                        curParent = curParent->parent;
-                } else
-                    curNode = nullptr;
-            }
-            // clear all flags
-            else if (!ASSIMP_stricmp(reader->getNodeName(), "materials")) {
-                inMaterials = false;
-            } else if (!ASSIMP_stricmp(reader->getNodeName(), "animators")) {
-                inAnimator = false;
-            }
-            break;*/
-
-        default:
-            // GCC complains that not all enumeration values are handled
-            break;
+    // Parse the XML
+    // First node is the xml header. Awkwardly skip to sibling's children
+    // I don't like recursion
+    std::vector<pugi::xml_node> nextNodes;
+    for (auto &node : rootElement.children().begin()->next_sibling().children()) {
+        nextNodes.push_back(node); // Find second node, <irr_scene>, and push it's children to queue
+    }
+    for (pugi::xml_node &child : nextNodes) {
+        if (child.type() != pugi::node_element) continue; // Only semantically valuable nodes
+        // XML elements are either nodes, animators, attributes, or materials
+        if (!ASSIMP_stricmp(child.name(), "node")) {
+            // Recursive ollect subtree children
+            Node *nd = ParseNode(child, batch);
+            // Attach to root
+            root->children.push_back(nd);
         }
-    //}
+    }
 
     //  Now iterate through all cameras and compute their final (horizontal) FOV
     for (aiCamera *cam : cameras) {
@@ -1336,8 +1353,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     //  Now merge all sub scenes and attach them to the correct
     //  attachment points in the scenegraph.
     SceneCombiner::MergeScenes(&pScene, tempScene, attach,
-            AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
-                                                                              AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
+            AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
                                                                       0));
 
     // If we have no meshes | no materials now set the INCOMPLETE

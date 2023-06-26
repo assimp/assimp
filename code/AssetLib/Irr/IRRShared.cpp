@@ -63,34 +63,34 @@ const aiMatrix4x4 Assimp::AI_TO_IRR_MATRIX = aiMatrix4x4(
 
 // ------------------------------------------------------------------------------------------------
 // read a property in hexadecimal format (i.e. ffffffff)
-void IrrlichtBase::ReadHexProperty(HexProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadHexProperty(HexProperty &out, pugi::xml_node& hexnode) {
+    for (pugi::xml_attribute attrib : hexnode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
         } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
             // parse the hexadecimal value
-            out.value = strtoul16(attrib.name());
+            out.value = strtoul16(attrib.value());
         }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // read a decimal property
-void IrrlichtBase::ReadIntProperty(IntProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadIntProperty(IntProperty &out, pugi::xml_node& intnode) {
+    for (pugi::xml_attribute attrib : intnode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
-        } else if (!ASSIMP_stricmp(attrib.value(), "value")) {
+        } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
             // parse the int value
-            out.value = strtol10(attrib.name());
+            out.value = strtol10(attrib.value());
         }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // read a string property
-void IrrlichtBase::ReadStringProperty(StringProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadStringProperty(StringProperty &out, pugi::xml_node& stringnode) {
+    for (pugi::xml_attribute attrib : stringnode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
         } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
@@ -102,8 +102,8 @@ void IrrlichtBase::ReadStringProperty(StringProperty &out) {
 
 // ------------------------------------------------------------------------------------------------
 // read a boolean property
-void IrrlichtBase::ReadBoolProperty(BoolProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadBoolProperty(BoolProperty &out, pugi::xml_node& boolnode) {
+    for (pugi::xml_attribute attrib : boolnode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
         } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
@@ -115,8 +115,8 @@ void IrrlichtBase::ReadBoolProperty(BoolProperty &out) {
 
 // ------------------------------------------------------------------------------------------------
 // read a float property
-void IrrlichtBase::ReadFloatProperty(FloatProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadFloatProperty(FloatProperty &out, pugi::xml_node &floatnode) {
+    for (pugi::xml_attribute attrib : floatnode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
         } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
@@ -128,8 +128,8 @@ void IrrlichtBase::ReadFloatProperty(FloatProperty &out) {
 
 // ------------------------------------------------------------------------------------------------
 // read a vector property
-void IrrlichtBase::ReadVectorProperty(VectorProperty &out) {
-    for (pugi::xml_attribute attrib : mNode->attributes()) {
+void IrrlichtBase::ReadVectorProperty(VectorProperty &out, pugi::xml_node& vectornode) {
+    for (pugi::xml_attribute attrib : vectornode.attributes()) {
         if (!ASSIMP_stricmp(attrib.name(), "name")) {
             out.name = std::string(attrib.value());
         } else if (!ASSIMP_stricmp(attrib.name(), "value")) {
@@ -170,7 +170,7 @@ int ConvertMappingMode(const std::string &mode) {
 
 // ------------------------------------------------------------------------------------------------
 // Parse a material from the XML file
-aiMaterial *IrrlichtBase::ParseMaterial(unsigned int &matFlags) {
+aiMaterial *IrrlichtBase::ParseMaterial(pugi::xml_node& materialNode, unsigned int &matFlags) {
     aiMaterial *mat = new aiMaterial();
     aiColor4D clr;
     aiString s;
@@ -179,10 +179,10 @@ aiMaterial *IrrlichtBase::ParseMaterial(unsigned int &matFlags) {
     int cnt = 0; // number of used texture channels
     unsigned int nd = 0;
 
-    for (pugi::xml_node child : mNode->children()) {
+    for (pugi::xml_node child : materialNode.children()) {
         if (!ASSIMP_stricmp(child.name(), "color")) { // Hex properties
             HexProperty prop;
-            ReadHexProperty(prop);
+            ReadHexProperty(prop, child);
             if (prop.name == "Diffuse") {
                 ColorFromARGBPacked(prop.value, clr);
                 mat->AddProperty(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -206,13 +206,13 @@ aiMaterial *IrrlichtBase::ParseMaterial(unsigned int &matFlags) {
 #endif
         } else if (!ASSIMP_stricmp(child.name(), "float")) { // Float properties
             FloatProperty prop;
-            ReadFloatProperty(prop);
+            ReadFloatProperty(prop, child);
             if (prop.name == "Shininess") {
                 mat->AddProperty(&prop.value, 1, AI_MATKEY_SHININESS);
             }
         } else if (!ASSIMP_stricmp(child.name(), "bool")) { // Bool properties
             BoolProperty prop;
-            ReadBoolProperty(prop);
+            ReadBoolProperty(prop, child);
             if (prop.name == "Wireframe") {
                 int val = (prop.value ? true : false);
                 mat->AddProperty(&val, 1, AI_MATKEY_ENABLE_WIREFRAME);
@@ -226,7 +226,7 @@ aiMaterial *IrrlichtBase::ParseMaterial(unsigned int &matFlags) {
         } else if (!ASSIMP_stricmp(child.name(), "texture") ||
                    !ASSIMP_stricmp(child.name(), "enum")) { // String properties - textures and texture related properties
             StringProperty prop;
-            ReadStringProperty(prop);
+            ReadStringProperty(prop, child);
             if (prop.value.length()) {
                 // material type (shader)
                 if (prop.name == "Type") {
@@ -379,7 +379,7 @@ aiMaterial *IrrlichtBase::ParseMaterial(unsigned int &matFlags) {
         }
     }*/
     }
-    ASSIMP_LOG_ERROR("IRRMESH: Unexpected end of file. Material is not complete");
+    //ASSIMP_LOG_ERROR("IRRMESH: Unexpected end of file. Material is not complete");
 
     return mat;
 }

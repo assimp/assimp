@@ -208,6 +208,24 @@ private:
     };
 
     // -------------------------------------------------------------------
+    // Parse <node> tag from XML file and extract child node
+    // @param node XML node
+    // @param guessedMeshesContained number of extra guessed meshes
+    IRRImporter::Node *ParseNode(pugi::xml_node &node, BatchLoader& batch);
+
+    // -------------------------------------------------------------------
+    // Parse <attributes> tags within <node> tags and apply to scene node
+    // @param attributeNode XML child node
+    // @param nd Attributed scene node
+    void ParseNodeAttributes(pugi::xml_node &attributeNode, IRRImporter::Node *nd, BatchLoader& batch);
+
+    // -------------------------------------------------------------------
+    // Parse an <animator> node and attach an animator to a node
+    // @param animatorNode XML animator node
+    // @param nd Animated scene node
+    void ParseAnimators(pugi::xml_node &animatorNode, IRRImporter::Node *nd);
+
+    // -------------------------------------------------------------------
     /// Fill the scene-graph recursively
     void GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             BatchLoader &batch,
@@ -261,6 +279,12 @@ private:
 
     /// Configuration option: speed flag was set?
     bool configSpeedFlag;
+
+    std::vector<aiCamera*> cameras;
+    std::vector<aiLight*> lights;
+    unsigned int guessedMeshCnt;
+    unsigned int guessedMatCnt;
+    unsigned int guessedAnimCnt;
 };
 
 } // end of namespace Assimp

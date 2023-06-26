@@ -85,6 +85,8 @@ protected:
      */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
             IOSystem *pIOHandler) override;
+ private:
+    void ParseMaterialBuffer(pugi::xml_node& bufferNode);
 };
 
 } // end of namespace Assimp

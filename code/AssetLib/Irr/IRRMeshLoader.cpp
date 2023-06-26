@@ -176,7 +176,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                     ASSIMP_LOG_WARN("IRRMESH: Only one material description per buffer, please");
                     releaseMaterial(&curMat);
                 }
-                curMat = ParseMaterial(curMatFlags);
+                // curMat = ParseMaterial(curMatFlags);
             }
             /* no else here! */ if (!ASSIMP_stricmp(child.name(), "vertices")) {
                 pugi::xml_attribute attr = child.attribute("vertexCount");
@@ -493,6 +493,10 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         pScene->mRootNode->mMeshes[i] = i;
     }
+}
+
+void IRRMeshImporter::ParseMaterialBuffer(pugi::xml_node& bufferNode) {
+
 }
 
 #endif // !! ASSIMP_BUILD_NO_IRRMESH_IMPORTER

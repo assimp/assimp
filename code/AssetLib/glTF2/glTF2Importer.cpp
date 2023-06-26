@@ -113,7 +113,7 @@ bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, b
     if (pIOHandler) {
         glTF2::Asset asset(pIOHandler);
         return asset.CanRead(filename, CheckMagicToken(pIOHandler, filename, AI_GLB_MAGIC_NUMBER,
-                                                       AI_COUNT_OF(AI_GLB_MAGIC_NUMBER)));
+                                                       strlen(AI_GLB_MAGIC_NUMBER)));
     }
 
     return false;
@@ -1679,7 +1679,7 @@ void glTF2Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 
     // read the asset file
     glTF2::Asset asset(pIOHandler, static_cast<rapidjson::IRemoteSchemaDocumentProvider *>(mSchemaDocumentProvider));
-    asset.Load(pFile, CheckMagicToken(pIOHandler, pFile, AI_GLB_MAGIC_NUMBER, AI_COUNT_OF(AI_GLB_MAGIC_NUMBER)));
+    asset.Load(pFile, CheckMagicToken(pIOHandler, pFile, AI_GLB_MAGIC_NUMBER, strlen(AI_GLB_MAGIC_NUMBER)));
     if (asset.scene) {
         pScene->mName = asset.scene->name;
     }

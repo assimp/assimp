@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
+#include <memory>
 
 using namespace Assimp;
 
@@ -473,7 +474,7 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     }
 
     // Allocate a new material property
-    aiMaterialProperty *pcNew = new aiMaterialProperty();
+    std::unique_ptr<aiMaterialProperty> pcNew(new aiMaterialProperty());
 
     // .. and fill it
     pcNew->mType = pType;
@@ -489,7 +490,7 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     strcpy(pcNew->mKey.data, pKey);
 
     if (UINT_MAX != iOutIndex) {
-        mProperties[iOutIndex] = pcNew;
+        mProperties[iOutIndex] = pcNew.release();
         return AI_SUCCESS;
     }
 
@@ -502,7 +503,6 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
         try {
             ppTemp = new aiMaterialProperty *[mNumAllocated];
         } catch (std::bad_alloc &) {
-            delete pcNew;
             return AI_OUTOFMEMORY;
         }
 
@@ -513,7 +513,7 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
         mProperties = ppTemp;
     }
     // push back ...
-    mProperties[mNumProperties++] = pcNew;
+    mProperties[mNumProperties++] = pcNew.release();
 
     return AI_SUCCESS;
 }

@@ -456,8 +456,19 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            const char *token = &(*m_DataIt);
-            const int iVal = ::atoi(token);
+            int iVal;
+            auto end = m_DataIt;
+            // find either the buffer end or the '\0'
+            while (end < m_DataItEnd && *end != '\0')
+                ++end;
+            // avoid temporary string allocation if there is a zero
+            if (end != m_DataItEnd) {
+                iVal = ::atoi(&(*m_DataIt));
+            } else {
+                // otherwise make a zero terminated copy, which is safe to pass to atoi
+                std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
+                iVal = ::atoi(number.c_str());
+            }
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;

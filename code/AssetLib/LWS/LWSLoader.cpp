@@ -632,18 +632,17 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     nodes.push_back(d);
                 }
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'Channel\'");
+            } else {
+                // important: index of channel
+                nodes.back().channels.emplace_back();
+                LWO::Envelope &env = nodes.back().channels.back();
+
+                env.index = strtoul10(c);
+
+                // currently we can just interpret the standard channels 0...9
+                // (hack) assume that index-i yields the binary channel type from LWO
+                env.type = (LWO::EnvelopeType)(env.index + 1);
             }
-
-            // important: index of channel
-            nodes.back().channels.emplace_back();
-            LWO::Envelope &env = nodes.back().channels.back();
-
-            env.index = strtoul10(c);
-
-            // currently we can just interpret the standard channels 0...9
-            // (hack) assume that index-i yields the binary channel type from LWO
-            env.type = (LWO::EnvelopeType)(env.index + 1);
-
         }
         // 'Envelope': a single animation channel
         else if ((*it).tokens[0] == "Envelope") {

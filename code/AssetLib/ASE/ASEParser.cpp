@@ -479,6 +479,11 @@ void Parser::ParseLV1MaterialListBlock() {
             if (TokenMatch(filePtr, "MATERIAL_COUNT", 14)) {
                 ParseLV4MeshLong(iMaterialCount);
 
+                if (UINT_MAX - iOldMaterialCount < iMaterialCount) {
+                    LogWarning("Out of range: material index is too large");
+                    return;
+                }
+
                 // now allocate enough storage to hold all materials
                 m_vMaterials.resize(iOldMaterialCount + iMaterialCount, Material("INVALID"));
                 continue;

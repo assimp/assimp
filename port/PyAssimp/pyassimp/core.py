@@ -401,7 +401,7 @@ def available_formats():
     from ctypes import byref
     extension_list = structs.String()
     _assimp_lib.dll.aiGetExtensionList(byref(extension_list))
-    return [e[2:].upper() for e in str(extension_list.data, "utf-8").split(";") if e]
+    return [e[2:].upper() for e in str(extension_list.data, "utf-8").split(";")]
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)

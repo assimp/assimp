@@ -297,7 +297,7 @@ private:
         }
 
         const char separator = getOsSeparator();
-        for (it = in.begin(); it != in.end(); ++it) {
+        for (it = in.begin(); it < in.end(); ++it) {
             const size_t remaining = std::distance(in.end(), it);
             // Exclude :// and \\, which remain untouched.
             // https://sourceforge.net/tracker/?func=detail&aid=3031725&group_id=226462&atid=1067632

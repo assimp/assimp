@@ -1038,7 +1038,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
             /* ZIP64 extra fields */
             if (headerId == 0x0001)
             {
-                                                        uLong uL;
+                                                        uLong uL1;
 
                                                                 if(file_info.uncompressed_size == MAXU32)
                                                                 {
@@ -1062,7 +1062,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
                                                                 if(file_info.disk_num_start == MAXU32)
                                                                 {
                                                                         /* Disk Start Number */
-                                                                        if (unz64local_getLong(&s->z_filefunc, s->filestream,&uL) != UNZ_OK)
+                                                                        if (unz64local_getLong(&s->z_filefunc, s->filestream,&uL1) != UNZ_OK)
                                                                                 err=UNZ_ERRNO;
                                                                 }
 

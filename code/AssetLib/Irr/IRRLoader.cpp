@@ -66,8 +66,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <csignal>
 #include <iostream>
 #include <memory>
-#include <queue>
-#include <stack>
 
 using namespace Assimp;
 
@@ -1254,6 +1252,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Parse the XML
     // First node is the xml header. Awkwardly skip to sibling's children
     // I don't like recursion
+    // TODO clean up
     std::vector<pugi::xml_node> nextNodes;
     for (auto &node : rootElement.children().begin()->next_sibling().children()) {
         nextNodes.push_back(node); // Find second node, <irr_scene>, and push it's children to queue

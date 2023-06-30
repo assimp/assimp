@@ -311,6 +311,7 @@ def load(filename,
     Scene object with model data
     '''
 
+    from ctypes import c_char_p
     if hasattr(filename, 'read'):
         # This is the case where a file object has been passed to load.
         # It is calling the following function:
@@ -324,7 +325,7 @@ def load(filename,
         model = _assimp_lib.load_mem(data,
                                      len(data),
                                      processing,
-                                     file_type)
+                                     c_char_p(file_type.encode(sys.getfilesystemencoding())))
     else:
         # a filename string has been passed
         model = _assimp_lib.load(filename.encode(sys.getfilesystemencoding()), processing)

@@ -157,8 +157,8 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     */
 
     // Parse the XML file
-    // FIXME get <mesh> not root
-    for (pugi::xml_node bufferNode : root.children()) {
+    pugi::xml_node const &meshNode = root.child("mesh");
+    for (pugi::xml_node bufferNode : meshNode.children()) {
         if (ASSIMP_stricmp(bufferNode.name(), "buffer")) {
             // Might be a useless warning
             ASSIMP_LOG_WARN("IRRMESH: Ignoring non buffer node <", bufferNode.name(), "> in mesh declaration");

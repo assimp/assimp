@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Irr importer class
  */
 
+#include "assimp/Exceptional.h"
 #include "assimp/StringComparison.h"
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
@@ -62,10 +63,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
-
-#include <csignal>
-#include <iostream>
-#include <memory>
 
 using namespace Assimp;
 
@@ -1160,45 +1157,37 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
     }
 
     // TODO: consolidate all into one loop
-    // Collect node attributes first
-    for (pugi::xml_node attr_node : node.children()) {
-        if (!ASSIMP_stricmp(attr_node.name(), "attributes")) {
-            ParseNodeAttributes(attr_node, nd, batch); // Parse attributes into this node
-        }
-    }
+    for (pugi::xml_node subNode : node.children()) {
+        // Collect node attributes first
+        if (!ASSIMP_stricmp(subNode.name(), "attributes")) {
+            ParseNodeAttributes(subNode, nd, batch); // Parse attributes into this node
+        } else if (!ASSIMP_stricmp(subNode.name(), "animators")) {
+            // Then parse any animators
+            // All animators should contain an <attributes> tag
 
-    // Then parse any materials
-    // Materials are available to almost all node types
-    if (nd->type != Node::DUMMY) {
-        for (pugi::xml_node materialNode : node.children()) {
-            if (!ASSIMP_stricmp(materialNode.name(), "materials")) {
+            //  This is an animation path - add a new animator
+            //  to the list.
+            ParseAnimators(subNode, nd); // Function modifies nd's animator vector
+            guessedAnimCnt += 1;
+        }
+
+        // Then parse any materials
+        // Materials are available to almost all node types
+        if (nd->type != Node::DUMMY) {
+            if (!ASSIMP_stricmp(subNode.name(), "materials")) {
                 // Parse material description directly
                 // Each material should contain an <attributes> node
                 // with everything specified
                 nd->materials.emplace_back();
                 std::pair<aiMaterial *, unsigned int> &p = nd->materials.back();
-                p.first = ParseMaterial(materialNode, p.second);
+                p.first = ParseMaterial(subNode, p.second);
                 guessedMatCnt += 1;
             }
         }
     }
 
-    // Then parse any animators
-    for (pugi::xml_node animatorNode : node.children()) {
-        if (!ASSIMP_stricmp(animatorNode.name(), "animators")) {
-            // All animators should contain an <attributes> tag
-            //  This is an animation path - add a new animator
-            //  to the list.
-            ParseAnimators(animatorNode, nd); // Function modifies nd's animator vector
-            guessedAnimCnt += 1;
-        }
-    }
     // Then parse any child nodes
-    /* Attach the newly created node to the scene-graph
-     */
-    // curNode = nd;
-    // nd->parent = curParent;
-    // curParent->children.push_back(nd);
+    // Attach the newly created node to the scene-graph
     for (pugi::xml_node child : node.children()) {
         if (!ASSIMP_stricmp(child.name(), "node")) { // Is a child node
             Node *childNd = ParseNode(child, batch); // Repeat this function for all children
@@ -1206,6 +1195,7 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
         };
     }
 
+    // Return fully specified node
     return nd;
 }
 
@@ -1223,17 +1213,9 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (!st.parse(file.get())) {
         throw DeadlyImportError("XML parse error while loading IRR file ", pFile);
     }
-    pugi::xml_node rootElement = st.getRootNode();
+    pugi::xml_node documentRoot = st.getRootNode();
 
-    std::stringstream ss;
-    ss << "Document name: " << rootElement.name() << std::endl;
-    ss << "Document content: " << std::endl;
-    rootElement.print(ss);
-    ss << std::endl;
-    std::cout << "IrrImporter with";
-    std::cout << ss.str() << std::endl;
     // The root node of the scene
-    // TODO: Appearantly root node is specified somewhere?
     Node *root = new Node(Node::DUMMY);
     root->parent = nullptr;
     root->name = "<IRRSceneRoot>";
@@ -1250,18 +1232,13 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     this->guessedMatCnt = 0;
 
     // Parse the XML
-    // First node is the xml header. Awkwardly skip to sibling's children
-    // I don't like recursion
-    // TODO clean up
-    std::vector<pugi::xml_node> nextNodes;
-    for (auto &node : rootElement.children().begin()->next_sibling().children()) {
-        nextNodes.push_back(node); // Find second node, <irr_scene>, and push it's children to queue
-    }
-    for (pugi::xml_node &child : nextNodes) {
-        if (child.type() != pugi::node_element) continue; // Only semantically valuable nodes
+    // Find the scene root from document root.
+    const pugi::xml_node &sceneRoot = documentRoot.child("irr_scene");
+    if (!sceneRoot) throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    for (pugi::xml_node &child : sceneRoot.children()) {
         // XML elements are either nodes, animators, attributes, or materials
         if (!ASSIMP_stricmp(child.name(), "node")) {
-            // Recursive ollect subtree children
+            // Recursive collect subtree children
             Node *nd = ParseNode(child, batch);
             // Attach to root
             root->children.push_back(nd);

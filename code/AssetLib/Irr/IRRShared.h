@@ -92,7 +92,7 @@ protected:
     // -------------------------------------------------------------------
     /** Read a property of the specified type from the current XML element.
      *  @param out Receives output data
-     *  @param node XML attribute element data
+     *  @param node XML attribute element containing data
      */
     void ReadHexProperty(HexProperty &out, pugi::xml_node& hexnode);
     void ReadStringProperty(StringProperty &out, pugi::xml_node& stringnode);

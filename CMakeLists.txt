@@ -268,6 +268,11 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW)
     SET(CMAKE_CXX_STANDARD 17)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
+  
+  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+    MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
+    ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
+  ENDIF()
   # hide all not-exported symbols
   IF(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "mips64" )
     SET(CMAKE_CXX_FLAGS "-mxgot -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")

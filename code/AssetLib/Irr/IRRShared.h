@@ -1,8 +1,8 @@
 
 
 /** @file  IRRShared.h
-  * @brief Shared utilities for the IRR and IRRMESH loaders
-  */
+ * @brief Shared utilities for the IRR and IRRMESH loaders
+ */
 
 #ifndef INCLUDED_AI_IRRSHARED_H
 #define INCLUDED_AI_IRRSHARED_H

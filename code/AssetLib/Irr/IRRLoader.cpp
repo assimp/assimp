@@ -1258,7 +1258,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     batch.LoadAll();
 
     // Allocate a temporary scene data structure
-    aiScene *tempScene = new aiScene();
+	std::unique_ptr<aiScene> tempScene(new aiScene());
     tempScene->mRootNode = new aiNode();
     tempScene->mRootNode->mName.Set("<IRRRoot>");
 

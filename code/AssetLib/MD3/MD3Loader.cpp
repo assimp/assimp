@@ -554,7 +554,7 @@ bool MD3Importer::ReadMultipartFile() {
         batch.LoadAll();
 
         // now construct a dummy scene to place these three parts in
-        aiScene *master = new aiScene();
+        std::unique_ptr<aiScene> master(new aiScene());
         aiNode *nd = master->mRootNode = new aiNode();
         nd->mName.Set("<MD3_Player>");
 
@@ -633,7 +633,6 @@ bool MD3Importer::ReadMultipartFile() {
         delete scene_upper;
         delete scene_lower;
         delete scene_head;
-        delete master;
 
         if (failure == mod_filename) {
             throw DeadlyImportError("MD3: failure to read multipart host file");

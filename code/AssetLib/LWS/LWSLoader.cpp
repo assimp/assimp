@@ -854,7 +854,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // and build the final output graph by attaching the loaded external
     // files to ourselves. first build a master graph
-    aiScene *master = new aiScene();
+    std::unique_ptr<aiScene> master(new aiScene());
     aiNode *nd = master->mRootNode = new aiNode();
 
     // allocate storage for cameras&lights
@@ -899,11 +899,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // convert the master scene to RH
     MakeLeftHandedProcess monster_cheat;
-    monster_cheat.Execute(master);
+    monster_cheat.Execute(master.get());
 
     // .. ccw
     FlipWindingOrderProcess flipper;
-    flipper.Execute(master);
+    flipper.Execute(master.get());
 
     // OK ... finally build the output graph
     SceneCombiner::MergeScenes(&pScene, master, attach,

@@ -1290,7 +1290,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Now process our scene-graph recursively: generate final
     // meshes and generate animation channels for all nodes.
     unsigned int defMatIdx = UINT_MAX;
-    GenerateGraph(root, tempScene->mRootNode, tempScene,
+    GenerateGraph(root, tempScene->mRootNode, tempScene.get(),
             batch, meshes, anims, attach, materials, defMatIdx);
 
     if (!anims.empty()) {

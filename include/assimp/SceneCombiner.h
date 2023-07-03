@@ -223,7 +223,7 @@ public:
      *    deletes the input scenes afterwards. There may be duplicate scenes.
      *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
      */
-    static void MergeScenes(aiScene **dest, std::unique_ptr<aiScene>& master,
+    static void MergeScenes(aiScene **dest, aiScene *master,
             std::vector<AttachmentInfo> &src,
             unsigned int flags = 0);
 

@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/anim.h>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** Irr importer class.
@@ -71,13 +71,13 @@ public:
     /** Returns whether the class can handle the format of the given file.
      *  See BaseImporter::CanRead() for details.
      */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const override;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
+            bool checkSig) const override;
 
 protected:
-    const aiImporterDesc* GetInfo () const override;
-    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
-    void SetupProperties(const Importer* pImp) override;
+    const aiImporterDesc *GetInfo() const override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+    void SetupProperties(const Importer *pImp) override;
 
 private:
     /** Data structure for a scene-graph node animator
@@ -85,26 +85,18 @@ private:
     struct Animator {
         // Type of the animator
         enum AT {
-            UNKNOWN       = 0x0,
-            ROTATION      = 0x1,
-            FLY_CIRCLE    = 0x2,
-            FLY_STRAIGHT  = 0x3,
+            UNKNOWN = 0x0,
+            ROTATION = 0x1,
+            FLY_CIRCLE = 0x2,
+            FLY_STRAIGHT = 0x3,
             FOLLOW_SPLINE = 0x4,
-            OTHER         = 0x5
+            OTHER = 0x5
 
         } type;
 
-        explicit Animator(AT t = UNKNOWN)
-            : type              (t)
-            , speed             ( ai_real( 0.001 ) )
-            , direction         ( ai_real( 0.0 ), ai_real( 1.0 ), ai_real( 0.0 ) )
-            , circleRadius      ( ai_real( 1.0) )
-            , tightness         ( ai_real( 0.5 ) )
-            , loop              (true)
-            , timeForWay        (100)
-        {
+        explicit Animator(AT t = UNKNOWN) :
+                type(t), speed(ai_real(0.001)), direction(ai_real(0.0), ai_real(1.0), ai_real(0.0)), circleRadius(ai_real(1.0)), tightness(ai_real(0.5)), loop(true), timeForWay(100) {
         }
-
 
         // common parameters
         ai_real speed;
@@ -128,11 +120,9 @@ private:
 
     /** Data structure for a scene-graph node in an IRR file
      */
-    struct Node
-    {
+    struct Node {
         // Type of the node
-        enum ET
-        {
+        enum ET {
             LIGHT,
             CUBE,
             MESH,
@@ -144,21 +134,20 @@ private:
             ANIMMESH
         } type;
 
-        explicit Node(ET t)
-            :   type                (t)
-            ,   scaling             (1.0,1.0,1.0) // assume uniform scaling by default
-            ,   parent()
-            ,   framesPerSecond     (0.0)
-            ,   id()
-            ,   sphereRadius        (1.0)
-            ,   spherePolyCountX    (100)
-            ,   spherePolyCountY    (100)
-        {
+        explicit Node(ET t) :
+                type(t), scaling(1.0, 1.0, 1.0) // assume uniform scaling by default
+                ,
+                parent(),
+                framesPerSecond(0.0),
+                id(),
+                sphereRadius(1.0),
+                spherePolyCountX(100),
+                spherePolyCountY(100) {
 
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ai_snprintf(buffer, 128, "IrrNode_%i",cnt++);
+            ai_snprintf(buffer, 128, "IrrNode_%i", cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials
@@ -175,10 +164,10 @@ private:
         std::string name;
 
         // List of all child nodes
-        std::vector<Node*> children;
+        std::vector<Node *> children;
 
         // Parent node
-        Node* parent;
+        Node *parent;
 
         // Animated meshes: frames per second
         // 0.f if not specified
@@ -190,13 +179,13 @@ private:
 
         // Meshes: List of materials to be assigned
         // along with their corresponding material flags
-        std::vector< std::pair<aiMaterial*, unsigned int> > materials;
+        std::vector<std::pair<aiMaterial *, unsigned int>> materials;
 
         // Spheres: radius of the sphere to be generates
         ai_real sphereRadius;
 
         // Spheres: Number of polygons in the x,y direction
-        unsigned int spherePolyCountX,spherePolyCountY;
+        unsigned int spherePolyCountX, spherePolyCountY;
 
         // List of all animators assigned to the node
         std::list<Animator> animators;
@@ -204,40 +193,54 @@ private:
 
     /** Data structure for a vertex in an IRR skybox
      */
-    struct SkyboxVertex
-    {
+    struct SkyboxVertex {
         SkyboxVertex() = default;
 
         //! Construction from single vertex components
         SkyboxVertex(ai_real px, ai_real py, ai_real pz,
-            ai_real nx, ai_real ny, ai_real nz,
-            ai_real uvx, ai_real uvy)
+                ai_real nx, ai_real ny, ai_real nz,
+                ai_real uvx, ai_real uvy)
 
-            :   position    (px,py,pz)
-            ,   normal      (nx,ny,nz)
-            ,   uv          (uvx,uvy,0.0)
-        {}
+                :
+                position(px, py, pz), normal(nx, ny, nz), uv(uvx, uvy, 0.0) {}
 
         aiVector3D position, normal, uv;
     };
 
+    // -------------------------------------------------------------------
+    // Parse <node> tag from XML file and extract child node
+    // @param node XML node
+    // @param guessedMeshesContained number of extra guessed meshes
+    IRRImporter::Node *ParseNode(pugi::xml_node &node, BatchLoader& batch);
+
+    // -------------------------------------------------------------------
+    // Parse <attributes> tags within <node> tags and apply to scene node
+    // @param attributeNode XML child node
+    // @param nd Attributed scene node
+    void ParseNodeAttributes(pugi::xml_node &attributeNode, IRRImporter::Node *nd, BatchLoader& batch);
+
+    // -------------------------------------------------------------------
+    // Parse an <animator> node and attach an animator to a node
+    // @param animatorNode XML animator node
+    // @param nd Animated scene node
+    void ParseAnimators(pugi::xml_node &animatorNode, IRRImporter::Node *nd);
 
     // -------------------------------------------------------------------
     /// Fill the scene-graph recursively
-    void GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
-        BatchLoader& batch,
-        std::vector<aiMesh*>& meshes,
-        std::vector<aiNodeAnim*>& anims,
-        std::vector<AttachmentInfo>& attach,
-        std::vector<aiMaterial*>& materials,
-        unsigned int& defaultMatIdx);
+    void GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
+            BatchLoader &batch,
+            std::vector<aiMesh *> &meshes,
+            std::vector<aiNodeAnim *> &anims,
+            std::vector<AttachmentInfo> &attach,
+            std::vector<aiMaterial *> &materials,
+            unsigned int &defaultMatIdx);
 
     // -------------------------------------------------------------------
     /// Generate a mesh that consists of just a single quad
-    aiMesh* BuildSingleQuadMesh(const SkyboxVertex& v1,
-        const SkyboxVertex& v2,
-        const SkyboxVertex& v3,
-        const SkyboxVertex& v4);
+    aiMesh *BuildSingleQuadMesh(const SkyboxVertex &v1,
+            const SkyboxVertex &v2,
+            const SkyboxVertex &v3,
+            const SkyboxVertex &v4);
 
     // -------------------------------------------------------------------
     /// Build a sky-box
@@ -245,8 +248,8 @@ private:
     /// @param meshes Receives 6 output meshes
     /// @param materials The last 6 materials are assigned to the newly
     ///                  created meshes. The names of the materials are adjusted.
-    void BuildSkybox(std::vector<aiMesh*>& meshes,
-        std::vector<aiMaterial*> materials);
+    void BuildSkybox(std::vector<aiMesh *> &meshes,
+            std::vector<aiMaterial *> materials);
 
     // -------------------------------------------------------------------
     /** Copy a material for a mesh to the output material list
@@ -256,10 +259,10 @@ private:
      *  @param defMatIdx Default material index - UINT_MAX if not present
      *  @param mesh Mesh to work on
      */
-    void CopyMaterial(std::vector<aiMaterial*>&  materials,
-        std::vector< std::pair<aiMaterial*, unsigned int> >& inmaterials,
-        unsigned int& defMatIdx,
-        aiMesh* mesh);
+    void CopyMaterial(std::vector<aiMaterial *> &materials,
+            std::vector<std::pair<aiMaterial *, unsigned int>> &inmaterials,
+            unsigned int &defMatIdx,
+            aiMesh *mesh);
 
     // -------------------------------------------------------------------
     /** Compute animations for a specific node
@@ -267,8 +270,8 @@ private:
      *  @param root Node to be processed
      *  @param anims The list of output animations
      */
-    void ComputeAnimations(Node* root, aiNode* real,
-        std::vector<aiNodeAnim*>& anims);
+    void ComputeAnimations(Node *root, aiNode *real,
+            std::vector<aiNodeAnim *> &anims);
 
 private:
     /// Configuration option: desired output FPS
@@ -276,6 +279,12 @@ private:
 
     /// Configuration option: speed flag was set?
     bool configSpeedFlag;
+
+    std::vector<aiCamera*> cameras;
+    std::vector<aiLight*> lights;
+    unsigned int guessedMeshCnt;
+    unsigned int guessedMatCnt;
+    unsigned int guessedAnimCnt;
 };
 
 } // end of namespace Assimp

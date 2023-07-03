@@ -906,7 +906,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     flipper.Execute(master.get());
 
     // OK ... finally build the output graph
-    SceneCombiner::MergeScenes(&pScene, master, attach,
+    SceneCombiner::MergeScenes(&pScene, master.release(), attach,
             AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (
                                                                               AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
                                                                       0));

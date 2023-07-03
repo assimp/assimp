@@ -200,7 +200,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, std::vector<aiScene *> &src, un
     }
 
     // 'master' will be deleted afterwards
-    MergeScenes(_dest, master, srcList, flags);
+    MergeScenes(_dest, master.release(), srcList, flags);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -250,7 +250,8 @@ void SceneCombiner::AttachToGraph(aiScene *master, std::vector<NodeAttachmentInf
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::MergeScenes(aiScene **_dest, std::unique_ptr<aiScene>& master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
+void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
+    std::unique_ptr<aiScene> masterAutoPtr(master);
     if (nullptr == _dest) {
         return;
     }
@@ -258,9 +259,9 @@ void SceneCombiner::MergeScenes(aiScene **_dest, std::unique_ptr<aiScene>& maste
     // if _dest points to nullptr allocate a new scene. Otherwise clear the old and reuse it
     if (srcList.empty()) {
         if (*_dest) {
-            SceneCombiner::CopySceneFlat(_dest, master.get());
+            SceneCombiner::CopySceneFlat(_dest, master);
         } else
-            *_dest = master.release();
+            *_dest = masterAutoPtr.release();
         return;
     }
     if (*_dest) {
@@ -272,7 +273,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, std::unique_ptr<aiScene>& maste
     aiScene *dest = *_dest;
 
     std::vector<SceneHelper> src(srcList.size() + 1);
-    src[0].scene = master.release();
+    src[0].scene = masterAutoPtr.release();
     for (unsigned int i = 0; i < srcList.size(); ++i) {
         src[i + 1] = SceneHelper(srcList[i].scene);
     }
@@ -608,7 +609,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, std::unique_ptr<aiScene>& maste
     }
 
     // Now build the output graph
-    AttachToGraph(master.get(), nodes);
+    AttachToGraph(master, nodes);
     dest->mRootNode = master->mRootNode;
 
     // Check whether we succeeded at building the output graph

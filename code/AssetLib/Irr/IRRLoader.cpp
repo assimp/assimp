@@ -1328,7 +1328,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     //  Now merge all sub scenes and attach them to the correct
     //  attachment points in the scenegraph.
-    SceneCombiner::MergeScenes(&pScene, tempScene, attach,
+    SceneCombiner::MergeScenes(&pScene, tempScene.release(), attach,
             AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES | (!configSpeedFlag ? (AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY | AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES) :
                                                                       0));
 

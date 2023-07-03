@@ -617,7 +617,7 @@ bool MD3Importer::ReadMultipartFile() {
         scene_upper->mRootNode->mTransformation = aiMatrix4x4();
 
         // and merge the scenes
-        SceneCombiner::MergeScenes(&mScene, master, attach,
+        SceneCombiner::MergeScenes(&mScene, master.release(), attach,
                 AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES |
                         AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES |
                         AI_INT_MERGE_SCENE_RESOLVE_CROSS_ATTACHMENTS |

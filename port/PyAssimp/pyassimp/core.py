@@ -391,6 +391,19 @@ def export_blob(scene,
         raise AssimpError('Could not export scene to blob!')
     return exportBlobPtr
 
+def available_formats():
+    """
+    Return a list of file format extensions supported to import.
+
+    Returns
+    ---------
+    A list of upper-case file extensions, e.g. [3DS, OBJ]
+    """
+    from ctypes import byref
+    extension_list = structs.String()
+    _assimp_lib.dll.aiGetExtensionList(byref(extension_list))
+    return [e[2:].upper() for e in str(extension_list.data, sys.getfilesystemencoding()).split(";")]
+
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
     if numpy:

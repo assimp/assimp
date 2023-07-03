@@ -840,6 +840,10 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent, const char** szCurrentOut
         LogErrorNoThrow("Unexpected EOF/EOL while parsing bone index");
         SMDI_PARSE_RETURN;
     }
+    if (iBone == UINT_MAX) {
+        LogErrorNoThrow("Invalid bone number while parsing bone index");
+        SMDI_PARSE_RETURN;
+    }
     // add our bone to the list
     if (iBone >= asBones.size()) {
         asBones.resize(iBone+1);

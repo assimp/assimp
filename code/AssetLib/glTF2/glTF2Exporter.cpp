@@ -870,6 +870,7 @@ void glTF2Exporter::ExportMaterials() {
             }
         }
 
+        GetMatTex(mat, m->normalTexture, aiTextureType_DIFFUSE_ROUGHNESS);
         GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
         GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
         GetMatTex(mat, m->emissiveTexture, aiTextureType_EMISSIVE);

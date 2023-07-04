@@ -276,6 +276,16 @@ public: // static utilities
             const char *ext2 = nullptr);
 
     // -------------------------------------------------------------------
+    /** @brief Check whether a file has one of the passed file extensions
+     *  @param pFile Input file
+     *  @param extensions Extensions to check for. Lowercase characters only, no dot!
+     *  @note Case-insensitive
+     */
+    static bool HasExtension(
+            const std::string &pFile,
+            const std::set<std::string> &extensions);
+
+    // -------------------------------------------------------------------
     /** @brief Extract file extension from a string
      *  @param pFile Input file
      *  @return Extension without trailing dot, all lowercase

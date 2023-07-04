@@ -244,7 +244,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     // GetExtension() returns the part after the *last* dot, but some extensions
     // have dots inside them, e.g. ogre.mesh.xml. Compare the entire end of the
     // string.
-    for (std::set<std::string>::const_iterator it = extensions.cbegin(); it != extensions.cend(); ++it) {
+    for (auto it = extensions.cbegin(); it != extensions.cend(); ++it) {
         // Yay for C++<20 not having std::string::ends_with()
         const std::string extension = "." + *it;
         if (extension.length() > pFile.length()) continue;

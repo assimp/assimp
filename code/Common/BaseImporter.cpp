@@ -244,12 +244,12 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     // GetExtension() returns the part after the *last* dot, but some extensions
     // have dots inside them, e.g. ogre.mesh.xml. Compare the entire end of the
     // string.
-    for (auto it = extensions.cbegin(); it != extensions.cend(); ++it) {
+    for (const std::string& ext : extensions) {
         // Yay for C++<20 not having std::string::ends_with()
-        const std::string extension = "." + *it;
-        if (extension.length() > pFile.length()) continue;
+        const std::string dotExt = "." + ext;
+        if (dotExt.length() > pFile.length()) continue;
         // Possible optimization: Fetch the lowercase filename!
-        if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - extension.length(), extension.c_str())) {
+        if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - dotExt.length(), dotExt.c_str())) {
             return true;
         }
     }

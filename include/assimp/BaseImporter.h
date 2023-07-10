@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <assimp/ProgressHandler.hpp>
+#include <exception>
 #include <set>
 #include <vector>
 #include <memory>
@@ -258,7 +259,7 @@ public: // static utilities
             std::size_t numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,
-            bool noAlphaBeforeTokens = false);
+            bool noGraphBeforeTokens = false);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has a specific file extension

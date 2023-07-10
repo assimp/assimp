@@ -239,8 +239,6 @@ struct Mesh {
     unsigned int m_uiMaterialIndex;
     /// True, if normals are stored.
     bool m_hasNormals;
-    /// True, if vertex colors are stored.
-    bool m_hasVertexColors;
 
     /// Constructor
     explicit Mesh(const std::string &name) :

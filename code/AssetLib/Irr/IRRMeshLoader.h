@@ -85,6 +85,19 @@ protected:
      */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
             IOSystem *pIOHandler) override;
+
+private:
+    enum class VertexFormat {
+        standard = 0, // "standard" - also noted as 'normal' format elsewhere
+        t2coord = 1, // "2tcoord" - standard + 2 UV maps
+        tangent = 2, // "tangents" - standard + tangents and bitangents
+    };
+
+    void ParseBufferVertices(const char *sz, VertexFormat vertexFormat,
+            std::vector<aiVector3D> &vertices, std::vector<aiVector3D> &normals,
+            std::vector<aiVector3D> &tangents, std::vector<aiVector3D> &bitangents,
+            std::vector<aiVector3D> &UVs, std::vector<aiVector3D> &UV2s,
+            std::vector<aiColor4D> &colors, bool &useColors);
 };
 
 } // end of namespace Assimp

@@ -158,7 +158,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
         std::size_t numTokens,
         unsigned int searchBytes /* = 200 */,
         bool tokensSol /* false */,
-        bool noAlphaBeforeTokens /* false */) {
+        bool noGraphBeforeTokens /* false */) {
     ai_assert(nullptr != tokens);
     ai_assert(0 != numTokens);
     ai_assert(0 != searchBytes);
@@ -207,8 +207,9 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
                 continue;
             }
             // We need to make sure that we didn't accidentally identify the end of another token as our token,
-            // e.g. in a previous version the "gltf " present in some gltf files was detected as "f "
-            if (noAlphaBeforeTokens && (r != buffer && isalpha(static_cast<unsigned char>(r[-1])))) {
+            // e.g. in a previous version the "gltf " present in some gltf files was detected as "f ", or a
+            // Blender-exported glb file containing "Khronos glTF Blender I/O " was detected as "o "
+            if (noGraphBeforeTokens && (r != buffer && isgraph(static_cast<unsigned char>(r[-1])))) {
                 continue;
             }
             // We got a match, either we don't care where it is, or it happens to
@@ -229,27 +230,30 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
         const char *ext0,
         const char *ext1,
         const char *ext2) {
-    std::string::size_type pos = pFile.find_last_of('.');
-
-    // no file extension - can't read
-    if (pos == std::string::npos) {
-        return false;
+    std::set<std::string> extensions;
+    for (const char* ext : {ext0, ext1, ext2}) {
+        if (ext == nullptr) continue;
+        extensions.emplace(ext);
     }
+    return HasExtension(pFile, extensions);
+}
 
-    const char *ext_real = &pFile[pos + 1];
-    if (!ASSIMP_stricmp(ext_real, ext0)) {
-        return true;
+// ------------------------------------------------------------------------------------------------
+// Check for file extension
+/*static*/ bool BaseImporter::HasExtension(const std::string &pFile, const std::set<std::string> &extensions) {
+    // CAUTION: Do not just search for the extension!
+    // GetExtension() returns the part after the *last* dot, but some extensions
+    // have dots inside them, e.g. ogre.mesh.xml. Compare the entire end of the
+    // string.
+    for (const std::string& ext : extensions) {
+        // Yay for C++<20 not having std::string::ends_with()
+        const std::string dotExt = "." + ext;
+        if (dotExt.length() > pFile.length()) continue;
+        // Possible optimization: Fetch the lowercase filename!
+        if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - dotExt.length(), dotExt.c_str())) {
+            return true;
+        }
     }
-
-    // check for other, optional, file extensions
-    if (ext1 && !ASSIMP_stricmp(ext_real, ext1)) {
-        return true;
-    }
-
-    if (ext2 && !ASSIMP_stricmp(ext_real, ext2)) {
-        return true;
-    }
-
     return false;
 }
 

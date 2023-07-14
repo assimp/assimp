@@ -60,7 +60,7 @@ using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerMatTest(const char *file, bool spec, bool gloss, std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap }) {
+    bool importerMatTest(const char *file, bool spec, bool gloss, std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap }) override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
         EXPECT_NE(scene, nullptr);
@@ -124,7 +124,7 @@ public:
         return true;
     }
 
-    virtual bool binaryImporterTest() {
+    bool binaryImporterTest() override {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/2CylinderEngine-glTF-Binary/2CylinderEngine.glb",
                 aiProcess_ValidateDataStructure);
@@ -132,7 +132,7 @@ public:
     }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-    virtual bool exporterTest() {
+    bool exporterTest() override {
         Assimp::Importer importer;
         Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
@@ -146,7 +146,10 @@ public:
 };
 
 TEST_F(utglTF2ImportExport, importglTF2FromFileTest) {
-    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", false, false, {aiTextureMapMode_Mirror, aiTextureMapMode_Clamp}));
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", false, false, {
+            aiTextureMapMode_Mirror, 
+            aiTextureMapMode_Clamp
+        }));
 }
 
 TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
@@ -158,13 +161,12 @@ TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {
 }
 
 void VerifyClearCoatScene(const aiScene *scene) {
-        ASSERT_NE(nullptr, scene);
-
+    ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->HasMaterials());
 
     // Find a specific Clearcoat material and check the values
     const aiString partial_coated("Partial_Coated");
-    bool found_partial_coat = false;
+    bool found_partial_coat{false};
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         const aiMaterial *material = scene->mMaterials[i];
         ASSERT_NE(nullptr, material);
@@ -618,7 +620,6 @@ TEST_F(utglTF2ImportExport, sceneMetadata) {
 }
 
 TEST_F(utglTF2ImportExport, texcoords) {
-
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTexcoords-glTF/boxTexcoords.gltf", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);

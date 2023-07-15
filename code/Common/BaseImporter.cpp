@@ -59,6 +59,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <sstream>
 
+namespace {
+// Checks whether the passed string is a gcs version.
+bool IsGcsVersion(const std::string &s) {
+    if (s.empty()) return false;
+    return std::all_of(s.cbegin(), s.cend(), [](const char c) {
+        // gcs only permits numeric characters.
+        return std::isdigit(static_cast<int>(c));
+    });
+}
+
+// Removes a possible version hash from a filename, as found for example in
+// gcs uris (e.g. `gs://bucket/model.glb#1234`), see also
+// https://github.com/GoogleCloudPlatform/gsutil/blob/c80f329bc3c4011236c78ce8910988773b2606cb/gslib/storage_url.py#L39.
+std::string StripVersionHash(const std::string &filename) {
+    const std::string::size_type pos = filename.find_last_of('#');
+    // Only strip if the hash is behind a possible file extension and the part
+    // behind the hash is a version string.
+    if (pos != std::string::npos && pos > filename.find_last_of('.') &&
+        IsGcsVersion(filename.substr(pos + 1))) {
+        return filename.substr(0, pos);
+    }
+    return filename;
+}
+}  // namespace
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -241,6 +266,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 // ------------------------------------------------------------------------------------------------
 // Check for file extension
 /*static*/ bool BaseImporter::HasExtension(const std::string &pFile, const std::set<std::string> &extensions) {
+    const std::string file = StripVersionHash(pFile);
     // CAUTION: Do not just search for the extension!
     // GetExtension() returns the part after the *last* dot, but some extensions
     // have dots inside them, e.g. ogre.mesh.xml. Compare the entire end of the
@@ -248,9 +274,9 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
     for (const std::string& ext : extensions) {
         // Yay for C++<20 not having std::string::ends_with()
         const std::string dotExt = "." + ext;
-        if (dotExt.length() > pFile.length()) continue;
+        if (dotExt.length() > file.length()) continue;
         // Possible optimization: Fetch the lowercase filename!
-        if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - dotExt.length(), dotExt.c_str())) {
+        if (0 == ASSIMP_stricmp(file.c_str() + file.length() - dotExt.length(), dotExt.c_str())) {
             return true;
         }
     }
@@ -259,7 +285,8 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension from path
-std::string BaseImporter::GetExtension(const std::string &file) {
+std::string BaseImporter::GetExtension(const std::string &pFile) {
+    const std::string file = StripVersionHash(pFile);
     std::string::size_type pos = file.find_last_of('.');
 
     // no file extension at all

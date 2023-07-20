@@ -637,24 +637,10 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
             std::set<std::string> extensions;
             pimpl->mImporter[a]->GetExtensionList(extensions);
 
-            // CAUTION: Do not just search for the extension!
-            // GetExtension() returns the part after the *last* dot, but some extensions have dots
-            // inside them, e.g. ogre.mesh.xml. Compare the entire end of the string.
-            for (std::set<std::string>::const_iterator it = extensions.cbegin(); it != extensions.cend(); ++it) {
-
-                // Yay for C++<20 not having std::string::ends_with()
-                std::string extension = "." + *it;
-                if (extension.length() <= pFile.length()) {
-                    // Possible optimization: Fetch the lowercase filename!
-                    if (0 == ASSIMP_stricmp(pFile.c_str() + pFile.length() - extension.length(), extension.c_str())) {
-                        ImporterAndIndex candidate = { pimpl->mImporter[a], a };
-                        possibleImporters.push_back(candidate);
-                        break;
-                    }
-                }
-
+            if (BaseImporter::HasExtension(pFile, extensions)) {
+                ImporterAndIndex candidate = { pimpl->mImporter[a], a };
+                possibleImporters.push_back(candidate);
             }
-
         }
 
         // If just one importer supports this extension, pick it and close the case.

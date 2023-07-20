@@ -27,12 +27,12 @@
 			<float name="ZFar" value="3000.000000" />
 		</attributes>
 
-		<animators>
-			<attributes>
-				<string name="Type" value="rotation" />
-				<vector3d name="Rotation" value="0.200000, 0.000000, 0.000000" />
-			</attributes>
-		</animators>
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.200000, 0.000000, 0.000000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
 	</node>
 
 	<node type="light">
@@ -55,12 +55,12 @@
 			<enum name="LightType" value="Spot" />
 		</attributes>
 
-		<animators>
-			<attributes>
-				<string name="Type" value="rotation" />
-				<vector3d name="Rotation" value="0.200000, 0.500000, 0.400000" />
-			</attributes>
-		</animators>
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.200000, 0.500000, 0.400000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
 	</node>
 
 	<node type="light">
@@ -185,7 +185,7 @@
 
 	</node>
 
-	<node type="Mesh">
+	<node type="animatedMesh">
 
 		<attributes>
 			<string name="Name" value="" />
@@ -542,12 +542,12 @@
 				<enum name="TextureWrap4" value="texture_clamp_repeat" />
 			</attributes>
 		</materials>
-		<animators>
-			<attributes>
-				<string name="Type" value="rotation" />
-				<vector3d name="Rotation" value="0.300000, 0.300000, 0.300000" />
-			</attributes>
-		</animators>
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.300000, 0.300000, 0.300000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
 	</node>
 
 </irr_scene>

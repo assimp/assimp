@@ -361,3 +361,37 @@ TEST_F(ImporterTest, unexpectedException) {
         EXPECT_TRUE(false);
     }
 }
+
+// ------------------------------------------------------------------------------------------------
+
+struct ExtensionTestCase {
+    std::string testName;
+    std::string filename;
+    std::string getExtensionResult;
+    std::string hasExtension;
+    bool hasExtensionResult;
+};
+
+using ExtensionTest = ::testing::TestWithParam<ExtensionTestCase>;
+
+TEST_P(ExtensionTest, testGetAndHasExtension) {
+    const ExtensionTestCase& testCase = GetParam();
+    EXPECT_EQ(testCase.getExtensionResult, BaseImporter::GetExtension(testCase.filename));
+    EXPECT_EQ(testCase.hasExtensionResult, BaseImporter::HasExtension(testCase.filename, {testCase.hasExtension}));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ExtensionTests, ExtensionTest,
+    ::testing::ValuesIn<ExtensionTestCase>({
+        {"NoExtension", "name", "", "glb", false},
+        {"NoExtensionAndEmptyVersion", "name#", "", "glb", false},
+        {"WithExtensionAndEmptyVersion", "name.glb#", "glb#", "glb", false},
+        {"WithExtensionAndVersion", "name.glb#1234", "glb", "glb", true},
+        {"WithExtensionAndHashInStem", "name#1234.glb", "glb", "glb", true},
+        {"WithExtensionAndInvalidVersion", "name.glb#_", "glb#_", "glb", false},
+        {"WithExtensionAndDotAndHashInStem", "name.glb#.abc", "abc", "glb", false},
+        {"WithTwoExtensions", "name.abc.def", "def", "abc.def", true},
+    }),
+    [](const ::testing::TestParamInfo<ExtensionTest::ParamType>& info) {
+        return info.param.testName;
+    });

@@ -312,12 +312,7 @@ std::string BaseImporter::GetExtension(const std::string &pFile) {
     if (!pIOHandler) {
         return false;
     }
-    union {
-        const char *magic;
-        const uint16_t *magic_u16;
-        const uint32_t *magic_u32;
-    };
-    magic = reinterpret_cast<const char *>(_magic);
+    const char *magic = reinterpret_cast<const char *>(_magic);
     std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile));
     if (pStream) {
 
@@ -339,15 +334,15 @@ std::string BaseImporter::GetExtension(const std::string &pFile) {
             // that's just for convenience, the chance that we cause conflicts
             // is quite low and it can save some lines and prevent nasty bugs
             if (2 == size) {
-                uint16_t rev = *magic_u16;
-                ByteSwap::Swap(&rev);
-                if (data_u16[0] == *magic_u16 || data_u16[0] == rev) {
+                uint16_t magic_u16;
+                memcpy(&magic_u16, magic, 2);
+                if (data_u16[0] == magic_u16 || data_u16[0] == ByteSwap::Swapped(magic_u16)) {
                     return true;
                 }
             } else if (4 == size) {
-                uint32_t rev = *magic_u32;
-                ByteSwap::Swap(&rev);
-                if (data_u32[0] == *magic_u32 || data_u32[0] == rev) {
+                uint32_t magic_u32;
+                memcpy(&magic_u32, magic, 4);
+                if (data_u32[0] == magic_u32 || data_u32[0] == ByteSwap::Swapped(magic_u32)) {
                     return true;
                 }
             } else {

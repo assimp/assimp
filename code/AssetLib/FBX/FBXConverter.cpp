@@ -438,7 +438,7 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
 
     float fov_deg = cam.FieldOfView();
     // If FOV not specified in file, compute using FilmWidth and FocalLength.
-    if (fov_deg == FBX_FOV_UNKNOWN) {
+    if (fov_deg == kFovUnknown) {
         float film_width_inches = cam.FilmWidth();
         float focal_length_mm = cam.FocalLength();
         ASSIMP_LOG_VERBOSE_DEBUG("FBX FOV unspecified. Computing from FilmWidth (", film_width_inches, "inches) and FocalLength (", focal_length_mm, "mm).");

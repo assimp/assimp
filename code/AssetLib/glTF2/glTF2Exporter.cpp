@@ -838,6 +838,16 @@ void glTF2Exporter::ExportMaterials() {
 
         GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, aiTextureType_DIFFUSE_ROUGHNESS);
 
+        if (!m->pbrMetallicRoughness.metallicRoughnessTexture.texture) {
+            //if there wasn't a aiTextureType_DIFFUSE_ROUGHNESS defined in the source, fallback to aiTextureType_METALNESS
+            GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, aiTextureType_METALNESS);
+        }
+
+        if (!m->pbrMetallicRoughness.metallicRoughnessTexture.texture) {
+            //if there still wasn't a aiTextureType_METALNESS defined in the source, fallback to unknown texture
+            GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
+        }
+
         if (GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_BASE_COLOR) != AI_SUCCESS) {
             // if baseColorFactor wasn't defined, then the source is likely not a metallic roughness material.
             //a fallback to any diffuse color should be used instead

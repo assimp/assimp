@@ -62,6 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/commonMetaData.h>
 
+#include <assimp/ProgressTracker.h>
 #include <stdlib.h>
 #include <cstdint>
 #include <iomanip>
@@ -94,23 +95,49 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
         doc(doc),
         mRemoveEmptyBones(removeEmptyBones) {
 
+    Assimp::ProgressScope progScope("FBX Converter");
+    {
+        progScope.AddStep();        // Converting Animations
+
+        if (doc.Settings().readTextures)
+            progScope.AddStep();    // Converting Embedded Textures
+
+        progScope.AddStep(2);       // Converting Root Node
+
+        if (doc.Settings().readAllMaterials)
+            progScope.AddStep();    // Reading Materials
+
+        progScope.AddStep();        // Transferring Data to Scene
+    }
 
     // animations need to be converted first since this will
     // populate the node_anim_chain_bits map, which is needed
     // to determine which nodes need to be generated.
+    progScope.StartStep("Converting Animations");
     ConvertAnimations();
+
     // Embedded textures in FBX could be connected to nothing but to itself,
     // for instance Texture -> Video connection only but not to the main graph,
     // The idea here is to traverse all objects to find these Textures and convert them,
     // so later during material conversion it will find converted texture in the textures_converted array.
     if (doc.Settings().readTextures) {
+        progScope.StartStep("Converting Embedded Textures");
         ConvertOrphanedEmbeddedTextures();
     }
+
+    progScope.StartStep("Converting Root Node");
     ConvertRootNode();
 
     if (doc.Settings().readAllMaterials) {
+        progScope.StartStep("Reading Materials");
+
+        Assimp::ProgressScope materialProgScope("Read All Materials");
+        materialProgScope.AddSteps(doc.Objects().size());
+
         // unfortunately this means we have to evaluate all objects
         for (const ObjectMap::value_type &v : doc.Objects()) {
+
+            materialProgScope.StartStep("Converting Material");
 
             const Object *ob = v.second->Get();
             if (!ob) {
@@ -126,6 +153,8 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
             }
         }
     }
+
+    progScope.StartStep("Transferring Data to Scene");
 
     ConvertGlobalSettings();
     TransferDataToScene();
@@ -207,7 +236,13 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
     std::vector<PotentialNode> nodes_chain;
     std::vector<PotentialNode> post_nodes_chain;
 
+    Assimp::ProgressScope progScope("Convert FBX Nodes");
+    progScope.AddSteps(conns.size());
+
     for (const Connection *con : conns) {
+
+        progScope.StartStep("Converting Node");
+
         // ignore object-property links
         if (con->PropertyName().length()) {
             // really important we document why this is ignored.

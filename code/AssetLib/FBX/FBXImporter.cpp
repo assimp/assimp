@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 
 #include <assimp/MemoryIOWrapper.h>
+#include <assimp/ProgressTracker.h>
 #include <assimp/StreamReader.h>
 #include <assimp/importerdesc.h>
 #include <assimp/Importer.hpp>
@@ -137,6 +138,12 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	}
 
     ASSIMP_LOG_DEBUG("Reading FBX file");
+    Assimp::ProgressScope progScope("Read FBX File");
+    progScope.AddStep(5);  // Reading FBX File Content
+    progScope.AddStep();   // Tokenizing FBX
+    progScope.AddStep(24); // Converting FBX to aiScene
+
+    progScope.StartStep("Reading FBX File Content");
 
 	// read entire file into memory - no streaming for this, fbx
 	// files can grow large, but the assimp output data structure
@@ -154,6 +161,8 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	TokenList tokens;
     Assimp::StackAllocator tempAllocator;
     try {
+        progScope.StartStep("Tokenizing FBX");
+
 		bool is_binary = false;
 		if (!strncmp(begin, "Kaydara FBX Binary", 18)) {
 			is_binary = true;
@@ -161,6 +170,8 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		} else {
             Tokenize(tokens, begin, tempAllocator);
 		}
+
+        progScope.StartStep("Converting FBX to aiScene");
 
 		// use this information to construct a very rudimentary
 		// parse-tree representing the FBX scope structure

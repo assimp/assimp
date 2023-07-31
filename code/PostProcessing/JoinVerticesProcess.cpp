@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
 #include <assimp/Vertex.h>
+#include <assimp/ProgressTracker.h>
 #include <assimp/TinyFormatter.h>
 
 #include <stdio.h>
@@ -65,6 +66,8 @@ bool JoinVerticesProcess::IsActive( unsigned int pFlags) const {
 // Executes the post processing step on the given imported data.
 void JoinVerticesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("JoinVerticesProcess begin");
+    Assimp::ProgressScope progScope("Join Vertices");
+    progScope.AddSteps(pScene->mNumMeshes);
 
     // get the total number of vertices BEFORE the step is executed
     int iNumOldVertices = 0;
@@ -76,8 +79,9 @@ void JoinVerticesProcess::Execute( aiScene* pScene) {
 
     // execute the step
     int iNumVertices = 0;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++) {
-        iNumVertices += ProcessMesh( pScene->mMeshes[a],a);
+    for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
+        progScope.StartStep("Joining Mesh Vertices");
+        iNumVertices += ProcessMesh(pScene->mMeshes[a], a);
     }
 
     pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;

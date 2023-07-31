@@ -844,7 +844,7 @@ void glTF2Exporter::ExportMaterials() {
         }
 
         if (!m->pbrMetallicRoughness.metallicRoughnessTexture.texture) {
-            // if there still wasn't a aiTextureType_METALNESS defined in the source, fallback to unknown texture
+            // if there still wasn't a aiTextureType_METALNESS defined in the source, fallback to AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE
             GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
         }
 

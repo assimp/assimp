@@ -57,6 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+class ProgressScope;
+
 // -------------------------------------------------------------------------------
 /**
  * Abstract base class for receiving progress information.

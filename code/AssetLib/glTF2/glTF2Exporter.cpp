@@ -730,7 +730,7 @@ bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlo
 
 bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular) {
     // Specular requires either/or, default factors of zero disables specular, so do not export
-    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) != AI_SUCCESS || mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
+    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) != AI_SUCCESS && mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
         return false;
     }
     // The spec states that the default is 1.0 and [1.0, 1.0, 1.0]. We if both are 0, which should disable specular. Otherwise, if one is 0, set to 1.0

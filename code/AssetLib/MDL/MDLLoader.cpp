@@ -273,7 +273,7 @@ void MDLImporter::InternReadFile(const std::string &pFile,
 
 // ------------------------------------------------------------------------------------------------
 // Check whether we're still inside the valid file range
-bool MDLImporter::IsPosValid(const void *szPos) {
+bool MDLImporter::IsPosValid(const void *szPos) const {
     return szPos && (const unsigned char *)szPos <= this->mBuffer + this->iFileSize && szPos >= this->mBuffer;
 }
 

@@ -446,7 +446,7 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
         out_camera->mHorizontalFOV = static_cast<float>(half_fov_rad);
     } else {
         // FBX fov is full-view degrees. We want half-view radians.
-        out_camera->mHorizontalFOV = AI_DEG_TO_RAD(fov_deg) * 0.5;
+        out_camera->mHorizontalFOV = AI_DEG_TO_RAD(fov_deg) * 0.5f;
     }
 
     out_camera->mClipPlaneNear = cam.NearPlane();

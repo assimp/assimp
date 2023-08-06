@@ -338,20 +338,26 @@ char *OpenDDLParser::parseStructure(char *in, char *end) {
 
     bool error(false);
     in = lookForNextToken(in, end);
-    if (*in == *Grammar::OpenBracketToken) {
-        // loop over all children ( data and nodes )
-        do {
-            in = parseStructureBody(in, end, error);
-            if (in == nullptr) {
-                return nullptr;
+    if (in != end) {
+        if (*in == *Grammar::OpenBracketToken) {
+            // loop over all children ( data and nodes )
+            do {
+                in = parseStructureBody(in, end, error);
+                if (in == nullptr) {
+                    return nullptr;
+                }
+            } while (in  != end &&
+                     *in != *Grammar::CloseBracketToken);
+
+            if (in != end) {
+                ++in;
             }
-        } while (*in != *Grammar::CloseBracketToken);
-        ++in;
-    } else {
-        ++in;
-        logInvalidTokenError(in, std::string(Grammar::OpenBracketToken), m_logCallback);
-        error = true;
-        return nullptr;
+        } else {
+            ++in;
+            logInvalidTokenError(in, std::string(Grammar::OpenBracketToken), m_logCallback);
+            error = true;
+            return nullptr;
+        }
     }
     in = lookForNextToken(in, end);
 

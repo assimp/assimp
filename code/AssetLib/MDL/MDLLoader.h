@@ -150,6 +150,7 @@ protected:
     */
     void SizeCheck(const void* szPos);
     void SizeCheck(const void* szPos, const char* szFile, unsigned int iLine);
+    bool IsPosValid(const void* szPos) const;
 
     // -------------------------------------------------------------------
     /** Validate the header data structure of a game studio MDL7 file

@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/StreamReader.h>
 #include <map>
+#include <limits>
 
 using namespace Assimp;
 
@@ -160,6 +161,9 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
         temp = file_format >= 12 ? reader.GetU4() : reader.GetU2();
         head = (const char*)reader.GetPtr();
+        if (std::numeric_limits<unsigned int>::max() - 76 < temp) {
+            throw DeadlyImportError("Invalid name length");
+        }
         reader.IncPtr(temp + 76); /* skip unknown stuff */
 
         obj.name = std::string(head, temp);

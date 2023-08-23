@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -66,12 +66,6 @@ OptimizeMeshesProcess::OptimizeMeshesProcess()
     , pts(false)
     , max_verts( NotSet )
     , max_faces( NotSet ) {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-OptimizeMeshesProcess::~OptimizeMeshesProcess() {
     // empty
 }
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -263,9 +263,7 @@ inline Logger::Logger() AI_NO_EXCEPT :
 }
 
 // ----------------------------------------------------------------------------------
-inline Logger::~Logger() {
-    // empty
-}
+inline Logger::~Logger() = default;
 
 // ----------------------------------------------------------------------------------
 inline Logger::Logger(LogSeverity severity) :

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -61,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_USE_HUNTER
 #include <utf8.h>
 #else
-//#  include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
 #endif
 #include <assimp/importerdesc.h>
@@ -88,7 +85,7 @@ static const aiImporterDesc desc = {
 struct SIBChunk {
     uint32_t Tag;
     uint32_t Size;
-} PACK_STRUCT;
+};
 
 enum {
     POS,
@@ -205,20 +202,16 @@ static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SIBImporter::SIBImporter() {
-    // empty
-}
+SIBImporter::SIBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SIBImporter::~SIBImporter() {
-    // empty
-}
+SIBImporter::~SIBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool SIBImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-    return SimpleExtensionCheck(pFile, "sib");
+bool SIBImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+    return SimpleExtensionCheck(filename, "sib");
 }
 
 // ------------------------------------------------------------------------------------------------

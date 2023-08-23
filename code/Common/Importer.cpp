@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -329,7 +329,7 @@ bool Importer::IsDefaultIOHandler() const {
 
 // ------------------------------------------------------------------------------------------------
 // Supplies a custom progress handler to get regular callbacks during importing
-void Importer::SetProgressHandler ( ProgressHandler* pHandler ) {
+void Importer::SetProgressHandler(ProgressHandler* pHandler) {
     ai_assert(nullptr != pimpl);
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -482,37 +482,43 @@ bool Importer::ValidateFlags(unsigned int pFlags) const {
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
-    size_t pLength,
-    unsigned int pFlags,
-    const char* pHint /*= ""*/) {
+const aiScene* Importer::ReadFileFromMemory(const void* pBuffer, size_t pLength, unsigned int pFlags, const char* pHint ) {
     ai_assert(nullptr != pimpl);
 
-    ASSIMP_BEGIN_EXCEPTION_REGION();
-    if (!pHint) {
-        pHint = "";
-    }
-
-    if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
-        pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
-        return nullptr;
-    }
-
-    // prevent deletion of the previous IOHandler
     IOSystem* io = pimpl->mIOHandler;
-    pimpl->mIOHandler = nullptr;
+    try {
+        if (pHint == nullptr) {
+            pHint = "";
+        }
+        if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
+            pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
+            return nullptr;
+        }
+        // prevent deletion of the previous IOHandler
+        pimpl->mIOHandler = nullptr;
 
-    SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength,io));
+        SetIOHandler(new MemoryIOSystem((const uint8_t*)pBuffer,pLength,io));
 
-    // read the file and recover the previous IOSystem
-    static const size_t BufSize(Importer::MaxLenHint + 28);
-    char fbuff[BufSize];
-    ai_snprintf(fbuff, BufSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
+        // read the file and recover the previous IOSystem
+        static const size_t BufSize(Importer::MaxLenHint + 28);
+        char fbuff[BufSize];
+        ai_snprintf(fbuff, BufSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
 
-    ReadFile(fbuff,pFlags);
-    SetIOHandler(io);
+        ReadFile(fbuff,pFlags);
+        SetIOHandler(io);
+    } catch(const DeadlyImportError &e) {
+        pimpl->mErrorString = e.what();
+        pimpl->mException = std::current_exception();
+        SetIOHandler(io);
+        return ExceptionSwallower<const aiScene*>()();                                                                                                    \
+    } catch(...) {
+        pimpl->mErrorString = "Unknown exception";
+        pimpl->mException = std::current_exception();
+        SetIOHandler(io);
+        return ExceptionSwallower<const aiScene*>()();                                                                                                    \
 
-    ASSIMP_END_EXCEPTION_REGION_WITH_ERROR_STRING(const aiScene*, pimpl->mErrorString, pimpl->mException);
+    }
+
     return pimpl->mScene;
 }
 
@@ -617,29 +623,57 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
             profiler->BeginRegion("total");
         }
 
-        // Find an worker class which can handle the file
-        BaseImporter* imp = nullptr;
+        // Find an worker class which can handle the file extension.
+        // Multiple importers may be able to handle the same extension (.xml!); gather them all.
         SetPropertyInteger("importerIndex", -1);
-        for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
+        struct ImporterAndIndex {
+            BaseImporter * importer;
+            unsigned int   index;
+        };
+        std::vector<ImporterAndIndex> possibleImporters;
+        for (unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
 
-            if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, false)) {
-                imp = pimpl->mImporter[a];
-                SetPropertyInteger("importerIndex", a);
-                break;
+            // Every importer has a list of supported extensions.
+            std::set<std::string> extensions;
+            pimpl->mImporter[a]->GetExtensionList(extensions);
+
+            if (BaseImporter::HasExtension(pFile, extensions)) {
+                ImporterAndIndex candidate = { pimpl->mImporter[a], a };
+                possibleImporters.push_back(candidate);
             }
+        }
+
+        // If just one importer supports this extension, pick it and close the case.
+        BaseImporter* imp = nullptr;
+        if (1 == possibleImporters.size()) {
+            imp = possibleImporters[0].importer;
+            SetPropertyInteger("importerIndex", possibleImporters[0].index);
+        }
+        // If multiple importers claim this file extension, ask them to look at the actual file data to decide.
+        // This can happen e.g. with XML (COLLADA vs. Irrlicht).
+        else {
+            for (std::vector<ImporterAndIndex>::const_iterator it = possibleImporters.begin(); it < possibleImporters.end(); ++it) {
+                BaseImporter & importer = *it->importer;
+
+                ASSIMP_LOG_INFO("Found a possible importer: " + std::string(importer.GetInfo()->mName) + "; trying signature-based detection");
+                if (importer.CanRead( pFile, pimpl->mIOHandler, true)) {
+                    imp = &importer;
+                    SetPropertyInteger("importerIndex", it->index);
+                    break;
+                }
+
+            }
+
         }
 
         if (!imp)   {
             // not so bad yet ... try format auto detection.
-            const std::string::size_type s = pFile.find_last_of('.');
-            if (s != std::string::npos) {
-                ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
-                for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
-                    if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
-                        imp = pimpl->mImporter[a];
-                        SetPropertyInteger("importerIndex", a);
-                        break;
-                    }
+            ASSIMP_LOG_INFO("File extension not known, trying signature-based detection");
+            for( unsigned int a = 0; a < pimpl->mImporter.size(); a++)  {
+                if( pimpl->mImporter[a]->CanRead( pFile, pimpl->mIOHandler, true)) {
+                    imp = pimpl->mImporter[a];
+                    SetPropertyInteger("importerIndex", a);
+                    break;
                 }
             }
             // Put a proper error message if no suitable importer was found
@@ -1073,6 +1107,18 @@ bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
+bool Importer::SetPropertyPointer(const char* szName, void* value) {
+    ai_assert(nullptr != pimpl);
+
+    bool existing;
+    ASSIMP_BEGIN_EXCEPTION_REGION();
+        existing = SetGenericProperty<void*>(pimpl->mPointerProperties, szName,value);
+    ASSIMP_END_EXCEPTION_REGION(bool);
+    return existing;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetPropertyInteger(const char* szName, int iErrorReturn /*= 0xffffffff*/) const {
     ai_assert(nullptr != pimpl);
@@ -1102,6 +1148,14 @@ aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, const aiMatrix4x4& i
     ai_assert(nullptr != pimpl);
 
     return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+void* Importer::GetPropertyPointer(const char* szName, void* iErrorReturn /*= nullptr*/) const {
+    ai_assert(nullptr != pimpl);
+
+    return GetGenericProperty<void*>(pimpl->mPointerProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

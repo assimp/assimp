@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -81,19 +81,17 @@ static const aiImporterDesc desc = {
 
 //#define DEBUG_B3D
 
-template <typename T>
+template<typename T>
 void DeleteAllBarePointers(std::vector<T> &x) {
     for (auto p : x) {
         delete p;
     }
 }
 
-B3DImporter::~B3DImporter() {
-}
+B3DImporter::~B3DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool B3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
-
     size_t pos = pFile.find_last_of('.');
     if (pos == string::npos) {
         return false;
@@ -118,7 +116,7 @@ void B3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open B3D file ", pFile, ".");
     }
 
@@ -152,7 +150,7 @@ AI_WONT_RETURN void B3DImporter::Fail(const string &str) {
 
 // ------------------------------------------------------------------------------------------------
 int B3DImporter::ReadByte() {
-    if (_pos > _buf.size()) {
+    if (_pos >= _buf.size()) {
         Fail("EOF");
     }
 
@@ -255,7 +253,7 @@ size_t B3DImporter::ChunkSize() {
 template <class T>
 T *B3DImporter::to_array(const vector<T> &v) {
     if (v.empty()) {
-        return 0;
+        return nullptr;
     }
     T *p = new T[v.size()];
     for (size_t i = 0; i < v.size(); ++i) {
@@ -268,7 +266,7 @@ T *B3DImporter::to_array(const vector<T> &v) {
 template <class T>
 T **unique_to_array(vector<std::unique_ptr<T>> &v) {
     if (v.empty()) {
-        return 0;
+        return nullptr;
     }
     T **p = new T *[v.size()];
     for (size_t i = 0; i < v.size(); ++i) {
@@ -420,7 +418,6 @@ void B3DImporter::ReadTRIS(int v0) {
             ASSIMP_LOG_ERROR("Bad triangle index: i0=", i0, ", i1=", i1, ", i2=", i2);
 #endif
             Fail("Bad triangle index");
-            continue;
         }
         face->mNumIndices = 3;
         face->mIndices = new unsigned[3];
@@ -479,13 +476,13 @@ void B3DImporter::ReadKEYS(aiNodeAnim *nodeAnim) {
     while (ChunkSize()) {
         int frame = ReadInt();
         if (flags & 1) {
-            trans.push_back(aiVectorKey(frame, ReadVec3()));
+            trans.emplace_back(frame, ReadVec3());
         }
         if (flags & 2) {
-            scale.push_back(aiVectorKey(frame, ReadVec3()));
+            scale.emplace_back(frame, ReadVec3());
         }
         if (flags & 4) {
-            rot.push_back(aiQuatKey(frame, ReadQuat()));
+            rot.emplace_back(frame, ReadQuat());
         }
     }
 
@@ -619,7 +616,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
             } else if (chunk == "BRUS") {
                 ReadBRUS();
             } else if (chunk == "NODE") {
-                ReadNODE(0);
+                ReadNODE(nullptr);
             }
             ExitChunk();
         }
@@ -644,7 +641,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
             int n_tris = mesh->mNumFaces;
             int n_verts = mesh->mNumVertices = n_tris * 3;
 
-            aiVector3D *mv = mesh->mVertices = new aiVector3D[n_verts], *mn = 0, *mc = 0;
+            aiVector3D *mv = mesh->mVertices = new aiVector3D[n_verts], *mn = nullptr, *mc = nullptr;
             if (_vflags & 1) {
                 mn = mesh->mNormals = new aiVector3D[n_verts];
             }
@@ -673,7 +670,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
                         int bone = v.bones[k];
                         float weight = v.weights[k];
 
-                        vweights[bone].push_back(aiVertexWeight(vertIdx + faceIndex, weight));
+                        vweights[bone].emplace_back(vertIdx + faceIndex, weight);
                     }
                 }
                 ++face;

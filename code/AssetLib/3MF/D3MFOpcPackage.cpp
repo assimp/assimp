@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -149,7 +149,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 
             IOStream *fileStream = mZipArchive->Open(file.c_str());
             if (nullptr == fileStream) {
-                ai_assert(fileStream != nullptr);
+                ASSIMP_LOG_ERROR("Filestream is nullptr.");
                 continue;
             }
 
@@ -160,7 +160,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
                     // deal with zip-bug
                     rootFile = rootFile.substr(1);
                 }
-            } 
+            }
 
             ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
 
@@ -186,6 +186,9 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 D3MFOpcPackage::~D3MFOpcPackage() {
     mZipArchive->Close(mRootStream);
     delete mZipArchive;
+    for (auto tex : mEmbeddedTextures) {
+        delete tex;
+    }
 }
 
 IOStream *D3MFOpcPackage::RootStream() const {

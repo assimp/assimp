@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -63,22 +63,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 
 #include <cctype>
+#include <memory>
+#include <utility>
 
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-#  ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include "Common/Compression.h"
+/* #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #    include <zlib.h>
 #  else
 #    include "../contrib/zlib/zlib.h"
-#  endif
+#  endif*/
 #endif
 
 namespace Assimp {
 
 template <>
 const char *LogFunctions<BlenderImporter>::Prefix() {
-    static auto prefix = "BLEND: ";
-    return prefix;
+    return "BLEND: ";
 }
 
 } // namespace Assimp
@@ -113,23 +115,12 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char *Tokens[] = { "BLENDER" };
-static const char *TokensForSearch[] = { "blender" };
+static const char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string &extension = GetExtension(pFile);
-    if (extension == "blend") {
-        return true;
-    }
-
-    if ((!extension.length() || checkSig) && pIOHandler) {
-        // note: this won't catch compressed files
-        return SearchFileHeaderForToken(pIOHandler, pFile, TokensForSearch, 1);
-    }
-
-    return false;
+bool BlenderImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    return ParseMagicToken(pFile, pIOHandler).error.empty();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -148,98 +139,25 @@ void BlenderImporter::SetupProperties(const Importer * /*pImp*/) {
 // Imports the given file into the given scene structure.
 void BlenderImporter::InternReadFile(const std::string &pFile,
         aiScene *pScene, IOSystem *pIOHandler) {
-#ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-    std::vector<Bytef> uncompressed;
-#endif
-
     FileDatabase file;
-    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
-    if (!stream) {
-        ThrowException("Could not open file for reading");
+    StreamOrError streamOrError = ParseMagicToken(pFile, pIOHandler);
+    if (!streamOrError.error.empty()) {
+        ThrowException(streamOrError.error);
     }
+    std::shared_ptr<IOStream> stream = std::move(streamOrError.stream);
 
-    char magic[8] = { 0 };
-    stream->Read(magic, 7, 1);
-    if (strcmp(magic, Tokens[0])) {
-        // Check for presence of the gzip header. If yes, assume it is a
-        // compressed blend file and try uncompressing it, else fail. This is to
-        // avoid uncompressing random files which our loader might end up with.
-#ifdef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-        ThrowException("BLENDER magic bytes are missing, is this file compressed (Assimp was built without decompression support)?");
-#else
+    char version[4] = { 0 };
+    file.i64bit = (stream->Read(version, 1, 1), version[0] == '-');
+    file.little = (stream->Read(version, 1, 1), version[0] == 'v');
 
-        if (magic[0] != 0x1f || static_cast<uint8_t>(magic[1]) != 0x8b) {
-            ThrowException("BLENDER magic bytes are missing, couldn't find GZIP header either");
-        }
+    stream->Read(version, 3, 1);
+    version[3] = '\0';
 
-        LogDebug("Found no BLENDER magic word but a GZIP header, might be a compressed file");
-        if (magic[2] != 8) {
-            ThrowException("Unsupported GZIP compression method");
-        }
-
-        // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
-        stream->Seek(0L, aiOrigin_SET);
-        std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
-
-        // build a zlib stream
-        z_stream zstream;
-        zstream.opaque = Z_NULL;
-        zstream.zalloc = Z_NULL;
-        zstream.zfree = Z_NULL;
-        zstream.data_type = Z_BINARY;
-
-        // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-        inflateInit2(&zstream, 16 + MAX_WBITS);
-
-        zstream.next_in = reinterpret_cast<Bytef *>(reader->GetPtr());
-        zstream.avail_in = (uInt)reader->GetRemainingSize();
-
-        size_t total = 0l;
-
-        // TODO: be smarter about this, decompress directly into heap buffer
-        // and decompress the data .... do 1k chunks in the hope that we won't kill the stack
-#define MYBLOCK 1024
-        Bytef block[MYBLOCK];
-        int ret;
-        do {
-            zstream.avail_out = MYBLOCK;
-            zstream.next_out = block;
-            ret = inflate(&zstream, Z_NO_FLUSH);
-
-            if (ret != Z_STREAM_END && ret != Z_OK) {
-                ThrowException("Failure decompressing this file using gzip, seemingly it is NOT a compressed .BLEND file");
-            }
-            const size_t have = MYBLOCK - zstream.avail_out;
-            total += have;
-            uncompressed.resize(total);
-            memcpy(uncompressed.data() + total - have, block, have);
-        } while (ret != Z_STREAM_END);
-
-        // terminate zlib
-        inflateEnd(&zstream);
-
-        // replace the input stream with a memory stream
-        stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t *>(uncompressed.data()), total));
-
-        // .. and retry
-        stream->Read(magic, 7, 1);
-        if (strcmp(magic, "BLENDER")) {
-            ThrowException("Found no BLENDER magic word in decompressed GZIP file");
-        }
-#endif
-    }
-
-    file.i64bit = (stream->Read(magic, 1, 1), magic[0] == '-');
-    file.little = (stream->Read(magic, 1, 1), magic[0] == 'v');
-
-    stream->Read(magic, 3, 1);
-    magic[3] = '\0';
-
-    LogInfo("Blender version is ", magic[0], ".", magic + 1,
+    LogInfo("Blender version is ", version[0], ".", version + 1,
             " (64bit: ", file.i64bit ? "true" : "false",
             ", little endian: ", file.little ? "true" : "false", ")");
 
-    ParseBlendFile(file, stream);
+    ParseBlendFile(file, std::move(stream));
 
     Scene scene;
     ExtractScene(scene, file);
@@ -256,7 +174,7 @@ void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream
 
     out.entries.reserve(128);
     { // even small BLEND files tend to consist of many file blocks
-        SectionParser parser(*out.reader.get(), out.i64bit);
+        SectionParser parser(*out.reader, out.i64bit);
 
         // first parse the file in search for the DNA and insert all other sections into the database
         while ((parser.Next(), 1)) {
@@ -319,41 +237,80 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
 }
 
 // ------------------------------------------------------------------------------------------------
+void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root, const std::shared_ptr<Collection>& collection, ConversionData &conv_data) {
+
+    std::deque<Object *> root_objects;
+    // Count number of objects
+    for (std::shared_ptr<CollectionObject> cur = std::static_pointer_cast<CollectionObject>(collection->gobject.first); cur; cur = cur->next) {
+        if (cur->ob) {
+            root_objects.push_back(cur->ob);
+        }
+    }
+    std::deque<Collection *> root_children;
+    // Count number of child nodes
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root_children.push_back(cur->collection.get());
+        }
+    }
+    root->mNumChildren = static_cast<unsigned int>(root_objects.size() + root_children.size());
+    root->mChildren = new aiNode *[root->mNumChildren]();
+
+    for (unsigned int i = 0; i < static_cast<unsigned int>(root_objects.size()); ++i) {
+        root->mChildren[i] = ConvertNode(in, root_objects[i], conv_data, aiMatrix4x4());
+        root->mChildren[i]->mParent = root;
+    }
+
+    // For each subcollection create a new node to represent it
+    unsigned int iterator = static_cast<unsigned int>(root_objects.size());
+    for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
+        if (cur->collection) {
+            root->mChildren[iterator] = new aiNode(cur->collection->id.name + 2); // skip over the name prefix 'OB'
+            root->mChildren[iterator]->mParent = root;
+            ParseSubCollection(in, root->mChildren[iterator], cur->collection, conv_data);
+        }
+        iterator += 1;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file) {
     ConversionData conv(file);
 
-    // FIXME it must be possible to take the hierarchy directly from
-    // the file. This is terrible. Here, we're first looking for
-    // all objects which don't have parent objects at all -
-    std::deque<const Object *> no_parents;
-    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
-        if (cur->object) {
-            if (!cur->object->parent) {
-                no_parents.push_back(cur->object.get());
-            } else {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-    for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
-        if (cur->object) {
-            if (cur->object->parent) {
-                conv.objects.insert(cur->object.get());
-            }
-        }
-    }
-
-    if (no_parents.empty()) {
-        ThrowException("Expected at least one object with no parent");
-    }
-
     aiNode *root = out->mRootNode = new aiNode("<BlenderRoot>");
+    // Iterate over all objects directly under master_collection,
+    // If in.master_collection == null, then we're parsing something older.
+    if (in.master_collection) {
+        ParseSubCollection(in, root, in.master_collection, conv);
+    } else {
+        std::deque<const Object *> no_parents;
+        for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base>(in.base.first); cur; cur = cur->next) {
+            if (cur->object) {
+                if (!cur->object->parent) {
+                    no_parents.push_back(cur->object.get());
+                } else {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
+        for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
+            if (cur->object) {
+                if (cur->object->parent) {
+                    conv.objects.insert(cur->object.get());
+                }
+            }
+        }
 
-    root->mNumChildren = static_cast<unsigned int>(no_parents.size());
-    root->mChildren = new aiNode *[root->mNumChildren]();
-    for (unsigned int i = 0; i < root->mNumChildren; ++i) {
-        root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
-        root->mChildren[i]->mParent = root;
+        if (no_parents.empty()) {
+            ThrowException("Expected at least one object with no parent");
+        }
+
+        root->mNumChildren = static_cast<unsigned int>(no_parents.size());
+        root->mChildren = new aiNode *[root->mNumChildren]();
+        for (unsigned int i = 0; i < root->mNumChildren; ++i) {
+            root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
+            root->mChildren[i]->mParent = root;
+        }
     }
 
     BuildMaterials(conv);
@@ -988,7 +945,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
     // key is material number, value is the TextureUVMapping for the material
     typedef std::map<uint32_t, TextureUVMapping> MaterialTextureUVMappings;
     MaterialTextureUVMappings matTexUvMappings;
-    const uint32_t maxMat = static_cast<const uint32_t>(mesh->mat.size());
+    const uint32_t maxMat = static_cast<uint32_t>(mesh->mat.size());
     for (uint32_t m = 0; m < maxMat; ++m) {
         // get material by index
         const std::shared_ptr<Material> pMat = mesh->mat[m];
@@ -1342,6 +1299,57 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
     modifier_cache->ApplyModifiers(*node, conv_data, in, *obj);
 
     return node.release();
+}
+
+BlenderImporter::StreamOrError BlenderImporter::ParseMagicToken(const std::string &pFile, IOSystem *pIOHandler) const {
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
+    if (stream == nullptr) {
+        return {{}, {}, "Could not open file for reading"};
+    }
+
+    char magic[8] = { 0 };
+    stream->Read(magic, 7, 1);
+    if (strcmp(magic, Token) == 0) {
+        return {stream, {}, {}};
+    }
+
+    // Check for presence of the gzip header. If yes, assume it is a
+    // compressed blend file and try uncompressing it, else fail. This is to
+    // avoid uncompressing random files which our loader might end up with.
+#ifdef ASSIMP_BUILD_NO_COMPRESSED_BLEND
+    return {{}, {}, "BLENDER magic bytes are missing, is this file compressed (Assimp was built without decompression support)?"};
+#else
+    if (magic[0] != 0x1f || static_cast<uint8_t>(magic[1]) != 0x8b) {
+        return {{}, {}, "BLENDER magic bytes are missing, couldn't find GZIP header either"};
+    }
+
+    LogDebug("Found no BLENDER magic word but a GZIP header, might be a compressed file");
+    if (magic[2] != 8) {
+        return {{}, {}, "Unsupported GZIP compression method"};
+    }
+
+    // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+    stream->Seek(0L, aiOrigin_SET);
+    std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+
+    size_t total = 0;
+    Compression compression;
+    auto uncompressed = std::make_shared<std::vector<char>>();
+    if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, 16 + Compression::MaxWBits)) {
+        total = compression.decompress((unsigned char *)reader->GetPtr(), reader->GetRemainingSize(), *uncompressed);
+        compression.close();
+    }
+
+    // replace the input stream with a memory stream
+    stream = std::make_shared<MemoryIOStream>(reinterpret_cast<uint8_t *>(uncompressed->data()), total);
+
+    // .. and retry
+    stream->Read(magic, 7, 1);
+    if (strcmp(magic, Token) == 0) {
+        return {stream, uncompressed, {}};
+    }
+    return {{}, {}, "Found no BLENDER magic word in decompressed GZIP file"};
+#endif
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

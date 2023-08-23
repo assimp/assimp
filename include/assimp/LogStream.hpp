@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -99,13 +99,9 @@ public:
 
 }; // !class LogStream
 
-inline LogStream::LogStream() AI_NO_EXCEPT {
-    // empty
-}
+inline LogStream::LogStream() AI_NO_EXCEPT = default;
 
-inline LogStream::~LogStream() {
-    // empty
-}
+inline LogStream::~LogStream() = default;
 
 } // Namespace Assimp
 

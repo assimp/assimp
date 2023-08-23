@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -125,7 +125,7 @@ public:
 
     // ----------------------------------------------------------------------------
     /** Calculates the node transformations for the scene. Call this to get
-     * uptodate results before calling one of the getters.
+     * up-to-date results before calling one of the getters.
      * @param pTime Current time. Can be an arbitrary range.
      */
     void Calculate(double pTime);

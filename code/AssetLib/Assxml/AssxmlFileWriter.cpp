@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -168,7 +168,7 @@ static void WriteNode(const aiNode *node, IOStream *io, unsigned int depth) {
 }
 
 // -----------------------------------------------------------------------------------
-// Some chuncks of text will need to be encoded for XML
+// Some chunks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
 static std::string encodeXML(const std::string &data) {
     std::string buffer;
@@ -365,7 +365,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
 
                 ioprintf(io, "\t\t\t<MatProperty key=\"%s\" \n\t\t\ttype=\"%s\" tex_usage=\"%s\" tex_index=\"%u\"",
                         prop->mKey.data, sz,
-                        ::TextureTypeToString((aiTextureType)prop->mSemantic), prop->mIndex);
+                        ::aiTextureTypeToString((aiTextureType)prop->mSemantic), prop->mIndex);
 
                 if (prop->mType == aiPTI_Float) {
                     ioprintf(io, " size=\"%i\">\n\t\t\t\t",
@@ -601,7 +601,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
                 ioprintf(io, "\t\t<TextureCoords num=\"%u\" set=\"%u\" name=\"%s\" num_components=\"%u\"> \n",
                          mesh->mNumVertices,
                          a,
-                         mesh->mTextureCoordsNames[a].C_Str(),
+                         (mesh->HasTextureCoordsName(a) ? mesh->GetTextureCoordsName(a)->C_Str() : ""),
                          mesh->mNumUVComponents[a]);
 
                 if (!shortened) {
@@ -652,7 +652,7 @@ void DumpSceneToAssxml(
         const char *pFile, const char *cmd, IOSystem *pIOSystem,
         const aiScene *pScene, bool shortened) {
     std::unique_ptr<IOStream> file(pIOSystem->Open(pFile, "wt"));
-    if (!file.get()) {
+    if (!file) {
         throw std::runtime_error("Unable to open output file " + std::string(pFile) + '\n');
     }
 

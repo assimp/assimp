@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -65,6 +65,8 @@ const char *AICMD_MSG_DUMP_HELP =
 
 FILE *out = nullptr;
 bool shortened = false;
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
 
 // -----------------------------------------------------------------------------------
 int Assimp_Dump(const char *const *params, unsigned int num) {
@@ -162,3 +164,9 @@ int Assimp_Dump(const char *const *params, unsigned int num) {
     printf("assimp dump: Wrote output dump %s\n", cur_out.c_str());
     return AssimpCmdError::Success;
 }
+#else
+int Assimp_Dump(const char *const *, unsigned int ) {
+    printf("assimp dump: Export disabled.\n");
+    return AssimpCmdError::UnrecognizedCommand;
+}
+#endif

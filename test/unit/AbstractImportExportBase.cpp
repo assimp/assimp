@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -44,6 +44,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ::Assimp;
 
-AbstractImportExportBase::~AbstractImportExportBase() {
-    // empty
-}
+AbstractImportExportBase::~AbstractImportExportBase() = default;

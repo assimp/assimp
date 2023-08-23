@@ -1,7 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
-# Copyright (c) 2006-2021, assimp team
+# Copyright (c) 2006-2022, assimp team
 #
 # All rights reserved.
 #
@@ -78,7 +77,9 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/matrix4x4.h
   ${HEADER_PATH}/matrix4x4.inl
   ${HEADER_PATH}/mesh.h
+  ${HEADER_PATH}/ObjMaterial.h
   ${HEADER_PATH}/pbrmaterial.h
+  ${HEADER_PATH}/GltfMaterial.h
   ${HEADER_PATH}/postprocess.h
   ${HEADER_PATH}/quaternion.h
   ${HEADER_PATH}/quaternion.inl
@@ -92,6 +93,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/vector3.inl
   ${HEADER_PATH}/version.h
   ${HEADER_PATH}/cimport.h
+  ${HEADER_PATH}/AssertHandler.h
   ${HEADER_PATH}/importerdesc.h
   ${HEADER_PATH}/Importer.hpp
   ${HEADER_PATH}/DefaultLogger.hpp
@@ -141,13 +143,14 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/MathFunctions.h
   ${HEADER_PATH}/Exceptional.h
   ${HEADER_PATH}/ByteSwapper.h
+  ${HEADER_PATH}/Base64.hpp
 )
 
 SET( Core_SRCS
   Common/Assimp.cpp
 )
 
-IF(MSVC)
+IF(MSVC OR (MINGW AND BUILD_SHARED_LIBS))
   list(APPEND Core_SRCS "res/assimp.rc")
 ENDIF()
 
@@ -164,6 +167,9 @@ SET( Logging_SRCS
 SOURCE_GROUP(Logging FILES ${Logging_SRCS})
 
 SET( Common_SRCS
+  Common/StbCommon.h
+  Common/Compression.cpp
+  Common/Compression.h
   Common/BaseImporter.cpp
   Common/BaseProcess.cpp
   Common/BaseProcess.h
@@ -173,9 +179,11 @@ SET( Common_SRCS
   Common/ImporterRegistry.cpp
   Common/DefaultProgressHandler.h
   Common/DefaultIOStream.cpp
+  Common/IOSystem.cpp
   Common/DefaultIOSystem.cpp
   Common/ZipArchiveIOSystem.cpp
   Common/PolyTools.h
+  Common/Maybe.h
   Common/Importer.cpp
   Common/IFF.h
   Common/SGSpatialSort.cpp
@@ -186,6 +194,8 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
+  Common/StackAllocator.h
+  Common/StackAllocator.inl
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -200,6 +210,7 @@ SET( Common_SRCS
   Common/material.cpp
   Common/AssertHandler.cpp
   Common/Exceptional.cpp
+  Common/Base64.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -208,6 +219,12 @@ SET( CApi_SRCS
   CApi/CInterfaceIOWrapper.h
 )
 SOURCE_GROUP(CApi FILES ${CApi_SRCS})
+
+SET(Geometry_SRCS
+  Geometry/GeometryUtils.h
+  Geometry/GeometryUtils.cpp
+)
+SOURCE_GROUP(Geometry FILES ${Geometry_SRCS})
 
 SET( STEPParser_SRCS
   AssetLib/STEPParser/STEPFileReader.h
@@ -261,8 +278,8 @@ if (NOT ASSIMP_NO_EXPORT)
   # ASSIMP_BUILD_XXX_EXPORTER to TRUE for each exporter
   OPTION(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_XXX_EXPORTER values" TRUE)
 
-  # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
-  # this way selective loaders can be compiled (reduces filesize + compile time)
+  # macro to add the CMake Option ADD_ASSIMP_EXPORTER_<name> which enables compilation of an exporter
+  # this way selective exporters can be compiled (reduces filesize + compile time)
   MACRO(ADD_ASSIMP_EXPORTER name)
     IF (ASSIMP_NO_EXPORT)
       set(ASSIMP_EXPORTER_ENABLED FALSE)
@@ -370,6 +387,12 @@ ADD_ASSIMP_IMPORTER( IRRMESH
   AssetLib/Irr/IRRMeshLoader.h
   AssetLib/Irr/IRRShared.cpp
   AssetLib/Irr/IRRShared.h
+)
+
+ADD_ASSIMP_IMPORTER( IQM
+  AssetLib/IQM/IQMImporter.cpp
+  AssetLib/IQM/iqm.h
+  AssetLib/IQM/IQMImporter.h
 )
 
 ADD_ASSIMP_IMPORTER( IRR
@@ -556,7 +579,7 @@ ADD_ASSIMP_IMPORTER( IFC
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
     set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
-  elseif(CMAKE_COMPILER_IS_MINGW)
+  elseif(MINGW)
     set_source_files_properties(Importer/IFC/IFCReaderGen1_2x3.cpp Importer/IFC/IFCReaderGen2_2x3.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
   endif()
 endif ()
@@ -799,7 +822,23 @@ ADD_ASSIMP_IMPORTER( X
 
 ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter.cpp
+  AssetLib/X3D/X3DImporter_Geometry2D.cpp
+  AssetLib/X3D/X3DImporter_Geometry3D.cpp
+  AssetLib/X3D/X3DImporter_Group.cpp
+  AssetLib/X3D/X3DImporter_Light.cpp
+  AssetLib/X3D/X3DImporter_Metadata.cpp
+  AssetLib/X3D/X3DImporter_Networking.cpp
+  AssetLib/X3D/X3DImporter_Postprocess.cpp
+  AssetLib/X3D/X3DImporter_Rendering.cpp
+  AssetLib/X3D/X3DImporter_Shape.cpp
+  AssetLib/X3D/X3DImporter_Texturing.cpp
   AssetLib/X3D/X3DImporter.hpp
+  AssetLib/X3D/X3DImporter_Macro.hpp
+  AssetLib/X3D/X3DImporter_Node.hpp
+  AssetLib/X3D/X3DGeoHelper.cpp
+  AssetLib/X3D/X3DGeoHelper.h
+  AssetLib/X3D/X3DXmlHelper.cpp
+  AssetLib/X3D/X3DXmlHelper.h
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -845,7 +884,7 @@ ADD_ASSIMP_IMPORTER( MMD
 # optimizations that take up extra space. Given that the issue is a string table overflowing, -Os seemed appropriate
 # Also, I'm not positive if both link & compile flags are needed, but this hopefully ensures that the issue should not
 # recur for edge cases such as static builds.
-if ((CMAKE_COMPILER_IS_MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
+if ((MINGW) AND (CMAKE_BUILD_TYPE MATCHES Debug))
   message("-- Applying MinGW StepFileGen1.cpp Debug Workaround")
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES COMPILE_FLAGS -Os )
   SET_SOURCE_FILES_PROPERTIES(Importer/StepFile/StepFileGen1.cpp PROPERTIES LINK_FLAGS -Os )
@@ -926,7 +965,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   SET( unzip_SRCS
-    ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
     ../contrib/unzip/ioapi.h
@@ -937,24 +975,27 @@ ELSE()
 ENDIF()
 
 # zip (https://github.com/kuba--/zip)
-IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(zip)
-  find_package(zip CONFIG REQUIRED)
-ELSE()
-  SET( ziplib_SRCS
-    ../contrib/zip/src/miniz.h
-    ../contrib/zip/src/zip.c
-    ../contrib/zip/src/zip.h
-  )
+separate_arguments(ASSIMP_EXPORTERS_LIST UNIX_COMMAND ${ASSIMP_EXPORTERS_ENABLED})
+IF(3MF IN_LIST ASSIMP_EXPORTERS_LIST)
+  IF(ASSIMP_HUNTER_ENABLED)
+    hunter_add_package(zip)
+    find_package(zip CONFIG REQUIRED)
+  ELSE()
+    SET( ziplib_SRCS
+      ../contrib/zip/src/miniz.h
+      ../contrib/zip/src/zip.c
+      ../contrib/zip/src/zip.h
+    )
 
-  # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-  	add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  else()
-  	add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
-  endif()
+    # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
+    if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+      add_definitions(-DMINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+    else()
+      add_compile_definitions(MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0)
+    endif()
 
-  SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
+    SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
+  ENDIF()
 ENDIF()
 
 # openddlparser
@@ -1021,7 +1062,9 @@ ENDIF()
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
-FIND_PACKAGE(RT QUIET)
+IF (NOT WIN32)
+  FIND_PACKAGE(RT QUIET)
+ENDIF ()
 IF (NOT ASSIMP_HUNTER_ENABLED AND (RT_FOUND OR WIN32))
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
@@ -1064,8 +1107,6 @@ if(MSVC10)
   endif()
 endif()
 
-ADD_DEFINITIONS( -DASSIMP_BUILD_DLL_EXPORT )
-
 IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
   ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
   ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
@@ -1095,6 +1136,7 @@ SET( assimp_src
   ${Core_SRCS}
   ${CApi_SRCS}
   ${Common_SRCS}
+  ${Geometry_SRCS}
   ${Logging_SRCS}
   ${Exporter_SRCS}
   ${PostProcessing_SRCS}
@@ -1142,22 +1184,84 @@ ENDIF()
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
 
+# Add or remove dllexport tags depending on the library type.
+IF (BUILD_SHARED_LIBS)
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
+ELSE ()
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY)
+ENDIF ()
+
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 
-# enable warnings as errors ########################################
-IF (MSVC)
-  TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
-ELSE()
-  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
+  IF (MSVC)
+
+    IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
+      TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
+        -Wno-microsoft-enum-value
+        -Wno-switch-enum
+        -Wno-covered-switch-default
+        -Wno-reserved-identifier
+        -Wno-c++98-compat-pedantic
+        -Wno-c++98-compat
+        -Wno-documentation
+        -Wno-documentation-unknown-command
+        -Wno-deprecated-dynamic-exception-spec
+        -Wno-undef
+        -Wno-suggest-destructor-override
+        -Wno-suggest-override
+        -Wno-zero-as-null-pointer-constant
+        -Wno-global-constructors
+        -Wno-exit-time-destructors
+        -Wno-extra-semi-stmt
+        -Wno-missing-prototypes
+        -Wno-old-style-cast
+        -Wno-cast-align
+        -Wno-cast-qual
+        -Wno-float-equal
+        -Wno-implicit-int-float-conversion
+        -Wno-sign-conversion
+        -Wno-implicit-float-conversion
+        -Wno-implicit-int-conversion
+        -Wno-float-conversion
+        -Wno-double-promotion
+        -Wno-unused-macros
+        -Wno-disabled-macro-expansion
+        -Wno-shadow-field
+        -Wno-shadow
+        -Wno-language-extension-token
+        -Wno-header-hygiene
+        -Wno-tautological-value-range-compare
+        -Wno-tautological-type-limit-compare
+        -Wno-missing-variable-declarations
+        -Wno-extra-semi
+        -Wno-nonportable-system-include-path
+        -Wno-undefined-reinterpret-cast
+        -Wno-shift-sign-overflow
+        -Wno-deprecated
+        -Wno-format-nonliteral
+        -Wno-comma
+        -Wno-implicit-fallthrough
+        -Wno-unused-template
+        -Wno-undefined-func-template
+        -Wno-declaration-after-statement
+      )
+    ELSE()
+      TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
+    ENDIF()
+  ELSE()
+    TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror)
+  ENDIF()
 ENDIF()
 
 # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
-TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
+TARGET_COMPILE_FEATURES(assimp PRIVATE c_std_99)
 
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
-  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:${ASSIMP_INCLUDE_INSTALL_DIR}>
 )
 
 IF(ASSIMP_HUNTER_ENABLED)
@@ -1170,10 +1274,12 @@ IF(ASSIMP_HUNTER_ENABLED)
       ZLIB::zlib
       RapidJSON::rapidjson
       utf8cpp
-      zip::zip
       pugixml
       stb::stb
   )
+  if(TARGET zip::zip)
+    target_link_libraries(assimp PUBLIC zip::zip)
+  endif()
 
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
@@ -1229,6 +1335,16 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
+if (MINGW)
+  set(LIBRARY_SUFFIX "-${ASSIMP_SOVERSION}" CACHE STRING "the suffix for the assimp MinGW shared library")
+  SET_TARGET_PROPERTIES( assimp PROPERTIES
+    ARCHIVE_OUTPUT_NAME assimp
+  )
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_LINK_LIBRARIES ( assimp -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread ) # winpthread is for libminizip.
+  endif ()
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
     target_compile_definitions(assimp PUBLIC WindowsStore)
     TARGET_LINK_LIBRARIES(assimp advapi32)
@@ -1272,18 +1388,17 @@ ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
-  TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
+  TARGET_LINK_LIBRARIES(assimp rt)
 ENDIF ()
 
 
 INSTALL( TARGETS assimp
   EXPORT "${TARGETS_EXPORT_NAME}"
-  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
-  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-  COMPONENT ${LIBASSIMP_COMPONENT}
-  INCLUDES DESTINATION include
+  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP-DEV_COMPONENT}
+  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+  INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
 )
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)

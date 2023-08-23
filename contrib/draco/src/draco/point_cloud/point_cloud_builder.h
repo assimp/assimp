@@ -15,6 +15,8 @@
 #ifndef DRACO_POINT_CLOUD_POINT_CLOUD_BUILDER_H_
 #define DRACO_POINT_CLOUD_POINT_CLOUD_BUILDER_H_
 
+#include <utility>
+
 #include "draco/point_cloud/point_cloud.h"
 
 namespace draco {
@@ -37,6 +39,9 @@ namespace draco {
 
 class PointCloudBuilder {
  public:
+  // Index type of the inserted element.
+  typedef PointIndex ElementIndex;
+
   PointCloudBuilder();
 
   // Starts collecting point cloud data.
@@ -70,6 +75,12 @@ class PointCloudBuilder {
   // Once this function is called, the builder becomes invalid and cannot be
   // used until the method Start() is called again.
   std::unique_ptr<PointCloud> Finalize(bool deduplicate_points);
+
+  // Add metadata for an attribute.
+  void AddAttributeMetadata(int32_t att_id,
+                            std::unique_ptr<AttributeMetadata> metadata) {
+    point_cloud_->AddAttributeMetadata(att_id, std::move(metadata));
+  }
 
  private:
   std::unique_ptr<PointCloud> point_cloud_;

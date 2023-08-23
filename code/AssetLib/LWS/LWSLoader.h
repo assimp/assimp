@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -69,7 +69,7 @@ namespace LWS {
  */
 class Element {
 public:
-    Element() {}
+    Element() = default;
 
     // first: name, second: rest
     std::string tokens[2];

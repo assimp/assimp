@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -101,9 +101,11 @@ private:
     std::vector<OpcPackageRelationship*> mRelations;
 };
 
-#endif // ASSIMP_BUILD_NO_3MF_EXPORTER
-#endif // ASSIMP_BUILD_NO_EXPORT
 
 } // Namespace D3MF
 } // Namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_3MF_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 

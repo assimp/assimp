@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderSceneGen.h"
 
-using namespace Assimp;
-using namespace Assimp::Blender;
+namespace Assimp {
+namespace Blender {
 
 //--------------------------------------------------------------------------------
 template <>
@@ -90,6 +90,52 @@ void Structure ::Convert<Group>(
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
     ReadField<ErrorPolicy_Igno>(dest.layer, "layer", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.gobject, "*gobject", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<CollectionObject>(
+        CollectionObject &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    {
+        //std::shared_ptr<CollectionObject> prev;
+        //ReadFieldPtr<ErrorPolicy_Fail>(prev, "*prev", db);
+        //dest.prev = prev.get();
+
+        std::shared_ptr<Object> ob;
+        ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
+        dest.ob = ob.get();
+    }
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<CollectionChild>(
+        CollectionChild &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.prev, "*prev", db);
+    ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.collection, "*collection", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<Collection>(
+        Collection &dest,
+        const FileDatabase &db) const {
+
+    ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Fail>(dest.gobject, "gobject", db);
+    ReadField<ErrorPolicy_Fail>(dest.children, "children", db);
 
     db.reader->IncPtr(size);
 }
@@ -523,7 +569,7 @@ void Structure ::Convert<MVert>(
         const FileDatabase &db) const {
 
     ReadFieldArray<ErrorPolicy_Fail>(dest.co, "co", db);
-    ReadFieldArray<ErrorPolicy_Fail>(dest.no, "no", db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.no, "no", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     //ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight, "bweight", db);
@@ -578,7 +624,9 @@ void Structure ::Convert<ListBase>(
         const FileDatabase &db) const {
 
     ReadFieldPtr<ErrorPolicy_Igno>(dest.first, "*first", db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.last, "*last", db);
+    std::shared_ptr<ElemBase> last;
+    ReadFieldPtr<ErrorPolicy_Igno>(last, "*last", db);
+    dest.last = last;
 
     db.reader->IncPtr(size);
 }
@@ -602,7 +650,9 @@ void Structure ::Convert<ModifierData>(
         const FileDatabase &db) const {
 
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
-    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
+    std::shared_ptr<ElemBase> prev;
+    ReadFieldPtr<ErrorPolicy_Warn>(prev, "*prev", db);
+    dest.prev = prev;
     ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
     ReadField<ErrorPolicy_Igno>(dest.mode, "mode", db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
@@ -660,6 +710,7 @@ void Structure ::Convert<Scene>(
     ReadFieldPtr<ErrorPolicy_Warn>(dest.camera, "*camera", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.world, "*world", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.basact, "*basact", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.master_collection, "*master_collection", db);
     ReadField<ErrorPolicy_Igno>(dest.base, "base", db);
 
     db.reader->IncPtr(size);
@@ -725,7 +776,9 @@ void Structure ::Convert<MirrorModifierData>(
     ReadField<ErrorPolicy_Igno>(dest.axis, "axis", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     ReadField<ErrorPolicy_Igno>(dest.tolerance, "tolerance", db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.mirror_ob, "*mirror_ob", db);
+    std::shared_ptr<Object> mirror_ob;
+    ReadFieldPtr<ErrorPolicy_Igno>(mirror_ob, "*mirror_ob", db);
+    dest.mirror_ob = mirror_ob;
 
     db.reader->IncPtr(size);
 }
@@ -786,9 +839,9 @@ void Structure::Convert<CustomDataLayer>(
     ReadField<ErrorPolicy_Fail>(dest.flag, "flag", db);
     ReadField<ErrorPolicy_Fail>(dest.active, "active", db);
     ReadField<ErrorPolicy_Fail>(dest.active_rnd, "active_rnd", db);
-    ReadField<ErrorPolicy_Fail>(dest.active_clone, "active_clone", db);
-    ReadField<ErrorPolicy_Fail>(dest.active_mask, "active_mask", db);
-    ReadField<ErrorPolicy_Fail>(dest.uid, "uid", db);
+    ReadField<ErrorPolicy_Warn>(dest.active_clone, "active_clone", db);
+    ReadField<ErrorPolicy_Warn>(dest.active_mask, "active_mask", db);
+    ReadField<ErrorPolicy_Warn>(dest.uid, "uid", db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
     ReadCustomDataPtr<ErrorPolicy_Fail>(dest.data, dest.type, "*data", db);
 
@@ -833,6 +886,12 @@ void DNA::RegisterConverters() {
     converters["Image"] = DNA::FactoryPair(&Structure::Allocate<Image>, &Structure::Convert<Image>);
     converters["CustomData"] = DNA::FactoryPair(&Structure::Allocate<CustomData>, &Structure::Convert<CustomData>);
     converters["CustomDataLayer"] = DNA::FactoryPair(&Structure::Allocate<CustomDataLayer>, &Structure::Convert<CustomDataLayer>);
+    converters["Collection"] = DNA::FactoryPair(&Structure::Allocate<Collection>, &Structure::Convert<Collection>);
+    converters["CollectionChild"] = DNA::FactoryPair(&Structure::Allocate<CollectionChild>, &Structure::Convert<CollectionChild>);
+    converters["CollectionObject"] = DNA::FactoryPair(&Structure::Allocate<CollectionObject>, &Structure::Convert<CollectionObject>);
 }
+
+} // namespace Blender
+} //namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -52,25 +52,22 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 SGSpatialSort::SGSpatialSort()
 {
-    // define the reference plane. We choose some arbitrary vector away from all basic axises
+    // define the reference plane. We choose some arbitrary vector away from all basic axes
     // in the hope that no model spreads all its vertices along this plane.
     mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
     mPlaneNormal.Normalize();
 }
 // ------------------------------------------------------------------------------------------------
 // Destructor
-SGSpatialSort::~SGSpatialSort()
-{
-    // nothing to do here, everything destructs automatically
-}
+SGSpatialSort::~SGSpatialSort() = default;
 // ------------------------------------------------------------------------------------------------
 void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
     unsigned int smoothingGroup)
 {
     // store position by index and distance
     float distance = vPosition * mPlaneNormal;
-    mPositions.push_back( Entry( index, vPosition,
-        distance, smoothingGroup));
+    mPositions.emplace_back( index, vPosition,
+        distance, smoothingGroup);
 }
 // ------------------------------------------------------------------------------------------------
 void SGSpatialSort::Prepare()
@@ -121,7 +118,7 @@ void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
         index++;
 
     // Mow start iterating from there until the first position lays outside of the distance range.
-    // Add all positions inside the distance range within the given radius to the result aray
+    // Add all positions inside the distance range within the given radius to the result array
 
     float squareEpsilon = pRadius * pRadius;
     std::vector<Entry>::const_iterator it  = mPositions.begin() + index;

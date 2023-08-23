@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -232,43 +232,10 @@ struct DataURI {
 //! Check if a uri is a data URI
 bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out);
 
-template <bool B>
-struct DATA {
-    static const uint8_t tableDecodeBase64[128];
-};
-
-template <bool B>
-const uint8_t DATA<B>::tableDecodeBase64[128] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 64, 0, 0,
-    0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0,
-    0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0
-};
-
-inline char EncodeCharBase64(uint8_t b) {
-    return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[size_t(b)];
-}
-
-inline uint8_t DecodeCharBase64(char c) {
-    if (c & 0x80) {
-        throw DeadlyImportError("Invalid base64 char value: ", size_t(c));
-    }
-    return DATA<true>::tableDecodeBase64[size_t(c & 0x7F)]; // TODO faster with lookup table or ifs?
-}
-
-size_t DecodeBase64(const char *in, size_t inLength, uint8_t *&out);
-
-void EncodeBase64(const uint8_t *in, size_t inLength, std::string &out);
 } // namespace Util
 
 #define CHECK_EXT(EXT) \
     if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
-
-
 
 //! Helper struct to represent values that might not be present
 template <class T>
@@ -292,7 +259,7 @@ class Ref {
 
 public:
     Ref() :
-            vector(0),
+            vector(nullptr),
             index(0) {}
     Ref(std::vector<T *> &vec, unsigned int idx) :
             vector(&vec),
@@ -300,7 +267,7 @@ public:
 
     inline unsigned int GetIndex() const { return index; }
 
-    operator bool() const { return vector != 0; }
+    operator bool() const { return vector != nullptr && index < vector->size(); }
 
     T *operator->() { return (*vector)[index]; }
 
@@ -528,22 +495,22 @@ inline Value *FindExtension(Value &val, const char *extensionId) {
 
 inline Value *FindString(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : nullptr;
 }
 
 inline Value *FindObject(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : nullptr;
 }
 
 inline Value *FindArray(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : nullptr;
 }
 
 inline Value *FindNumber(Value &val, const char *id) {
     Value::MemberIterator it = val.FindMember(id);
-    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+    return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : nullptr;
 }
 
 } // namespace glTFCommon

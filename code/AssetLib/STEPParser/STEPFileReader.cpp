@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -325,7 +325,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
                 std::transform(s.begin(),s.end(),s.begin(),&ai_tolower<char> );
                 if (schema->IsKnownToken(s)) {
                     for(cur = t+1;*cur++ != '(';);
-                    const std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
+                    std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
                     inout = *cur ? cur+1 : cur;
                     return dt;
                 }

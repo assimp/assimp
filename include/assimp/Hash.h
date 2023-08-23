@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -48,7 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+#include <cmath>
 
 // ------------------------------------------------------------------------------------------------
 // Hashing function taken from
@@ -64,21 +65,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
   || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
-#define get16bits(d) (*((const uint16_t *) (d)))
+#  define get16bits(d) (*((const uint16_t *) (d)))
 #endif
 
 #if !defined (get16bits)
-#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
+#  define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
                        +(uint32_t)(((const uint8_t *)(d))[0]) )
 #endif
 
 // ------------------------------------------------------------------------------------------------
 inline uint32_t SuperFastHash (const char * data, uint32_t len = 0, uint32_t hash = 0) {
-uint32_t tmp;
-int rem;
+    uint32_t tmp;
+    int rem;
 
-    if (!data) return 0;
-    if (!len)len = (uint32_t)::strlen(data);
+    if (data == NULL) return 0;
+    if (len == 0)len = (uint32_t)::strlen(data);
 
     rem = len & 3;
     len >>= 2;
@@ -96,7 +97,7 @@ int rem;
     switch (rem) {
         case 3: hash += get16bits (data);
                 hash ^= hash << 16;
-                hash ^= data[sizeof (uint16_t)] << 18;
+                hash ^= abs(data[sizeof(uint16_t)]) << 18;
                 hash += hash >> 11;
                 break;
         case 2: hash += get16bits (data);

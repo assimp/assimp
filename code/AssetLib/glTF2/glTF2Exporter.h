@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -66,7 +66,9 @@ class Ref;
 }
 
 namespace glTF2 {
+
 class Asset;
+
 struct TexProperty;
 struct TextureInfo;
 struct NormalTextureInfo;
@@ -74,14 +76,19 @@ struct OcclusionTextureInfo;
 struct Node;
 struct Texture;
 struct PbrSpecularGlossiness;
+struct MaterialSpecular;
 struct MaterialSheen;
 struct MaterialClearcoat;
 struct MaterialTransmission;
+struct MaterialVolume;
+struct MaterialIOR;
+struct MaterialEmissiveStrength;
 
 // Vec/matrix types, as raw float arrays
 typedef float(vec2)[2];
 typedef float(vec3)[3];
 typedef float(vec4)[4];
+
 } // namespace glTF2
 
 namespace Assimp {
@@ -111,9 +118,13 @@ protected:
     aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec4 &prop, const char *propName, int type, int idx) const;
     aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec3 &prop, const char *propName, int type, int idx) const;
     bool GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG);
+    bool GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular);
     bool GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen);
     bool GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearcoat &clearcoat);
     bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
+    bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
+    bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
+    bool GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength);
     void ExportMetadata();
     void ExportMaterials();
     void ExportMeshes();

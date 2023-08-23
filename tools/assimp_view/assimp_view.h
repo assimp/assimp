@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -98,6 +98,12 @@ namespace AssimpView {
 //-------------------------------------------------------------------------------
 // Function prototypes
 //-------------------------------------------------------------------------------
+class AssimpVew {
+public:
+    AssimpVew();
+    ~AssimpVew();
+};
+
 int InitD3D(void);
 int ShutdownD3D(void);
 int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW = true);

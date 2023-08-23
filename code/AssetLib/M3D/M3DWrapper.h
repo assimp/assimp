@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_M3DWRAPPER_H_INC
 #define AI_M3DWRAPPER_H_INC
 
-#if !(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER
+#if !defined ASSIMP_BUILD_NO_M3D_IMPORTER || !(defined ASSIMP_BUILD_NO_EXPORT || defined ASSIMP_BUILD_NO_M3D_EXPORTER)
 
 #include <memory>
 #include <vector>
@@ -56,9 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Assimp specific M3D configuration. Comment out these defines to remove functionality
 //#define ASSIMP_USE_M3D_READFILECB
 
-// Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
-#define STBI_ONLY_PNG
-#include <stb/stb_image.h>
+#include "Common/StbCommon.h"
 
 #include "m3d.h"
 
@@ -127,6 +125,6 @@ inline m3d_t *M3DWrapper::M3D() const {
 
 } // namespace Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_M3D_IMPORTER
 
 #endif // AI_M3DWRAPPER_H_INC

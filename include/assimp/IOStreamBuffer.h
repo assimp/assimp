@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -141,9 +141,7 @@ AI_FORCE_INLINE IOStreamBuffer<T>::IOStreamBuffer(size_t cache) :
 }
 
 template <class T>
-AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() {
-    // empty
-}
+AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() = default;
 
 template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::open(IOStream *stream) {
@@ -261,6 +259,11 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextDataLine(std::vector<T> &buffer, 
         buffer[i] = m_cache[m_cachePos];
         ++m_cachePos;
         ++i;
+
+        if(i == buffer.size()) {
+            buffer.resize(buffer.size() * 2);
+        }
+
         if (m_cachePos >= size()) {
             break;
         }
@@ -308,6 +311,11 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         buffer[i] = m_cache[m_cachePos];
         ++m_cachePos;
         ++i;
+
+        if(i == buffer.size()) {
+            buffer.resize(buffer.size() * 2);
+        }
+
         if (m_cachePos >= m_cacheSize) {
             if (!readNextBlock()) {
                 return false;
@@ -315,7 +323,9 @@ AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
         }
     }
     buffer[i] = '\n';
-    ++m_cachePos;
+    while (m_cachePos < m_cacheSize && (m_cache[m_cachePos] == '\r' || m_cache[m_cachePos] == '\n')) {
+        ++m_cachePos;
+    }
 
     return true;
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -39,12 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include <assimp/StringUtils.h>
 #include <assimp/MemoryIOWrapper.h>
+#include <assimp/StringUtils.h>
 #include <iomanip>
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/Base64.hpp>
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 // Header files, Open3DGC.
@@ -52,15 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 using namespace Assimp;
-using namespace glTFCommon;
 
 namespace glTF {
+using namespace glTFCommon;
 
 #if _MSC_VER
-#    pragma warning(push)
-#    pragma warning(disable : 4706)
+#pragma warning(push)
+#pragma warning(disable : 4706)
 #endif // _MSC_VER
-
 
 //
 // LazyDict methods
@@ -68,7 +68,7 @@ namespace glTF {
 
 template <class T>
 inline LazyDict<T>::LazyDict(Asset &asset, const char *dictId, const char *extId) :
-        mDictId(dictId), mExtId(extId), mDict(0), mAsset(asset) {
+        mDictId(dictId), mExtId(extId), mDict(nullptr), mAsset(asset) {
     asset.mDicts.push_back(this); // register to the list of dictionaries
 }
 
@@ -81,7 +81,7 @@ inline LazyDict<T>::~LazyDict() {
 
 template <class T>
 inline void LazyDict<T>::AttachToDocument(Document &doc) {
-    Value *container = 0;
+    Value *container = nullptr;
 
     if (mExtId) {
         if (Value *exts = FindObject(doc, "extensions")) {
@@ -98,7 +98,7 @@ inline void LazyDict<T>::AttachToDocument(Document &doc) {
 
 template <class T>
 inline void LazyDict<T>::DetachFromDocument() {
-    mDict = 0;
+    mDict = nullptr;
 }
 
 template <class T>
@@ -194,8 +194,8 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     glTFCommon::Util::DataURI dataURI;
     if (ParseDataURI(uri, it->GetStringLength(), dataURI)) {
         if (dataURI.base64) {
-            uint8_t *data = 0;
-            this->byteLength = Util::DecodeBase64(dataURI.data, dataURI.dataLength, data);
+            uint8_t *data = nullptr;
+            this->byteLength = Base64::Decode(dataURI.data, dataURI.dataLength, data);
             this->mData.reset(data, std::default_delete<uint8_t[]>());
 
             if (statedLength > 0 && this->byteLength != statedLength) {
@@ -214,9 +214,10 @@ inline void Buffer::Read(Value &obj, Asset &r) {
     } else { // Local file
         if (byteLength > 0) {
             std::string dir = !r.mCurrentAssetDir.empty() ? (
-                r.mCurrentAssetDir.back() == '/' ?
-                   r.mCurrentAssetDir : r.mCurrentAssetDir + '/'
-            ) : "";
+                                                                    r.mCurrentAssetDir.back() == '/' ?
+                                                                            r.mCurrentAssetDir :
+                                                                            r.mCurrentAssetDir + '/') :
+                                                            "";
 
             IOStream *file = r.OpenFile(dir + uri, "rb");
             if (file) {
@@ -382,9 +383,9 @@ inline unsigned int Accessor::GetElementSize() {
 }
 
 inline uint8_t *Accessor::GetPointer() {
-    if (!bufferView || !bufferView->buffer) return 0;
+    if (!bufferView || !bufferView->buffer) return nullptr;
     uint8_t *basePtr = bufferView->buffer->GetPointer();
-    if (!basePtr) return 0;
+    if (!basePtr) return nullptr;
 
     size_t offset = byteOffset + bufferView->byteOffset;
 
@@ -513,7 +514,7 @@ inline void Image::Read(Value &obj, Asset &r) {
                 mimeType = dataURI.mediaType;
                 if (dataURI.base64) {
                     uint8_t *ptr = nullptr;
-                    mDataLength = glTFCommon::Util::DecodeBase64(dataURI.data, dataURI.dataLength, ptr);
+                    mDataLength = Base64::Decode(dataURI.data, dataURI.dataLength, ptr);
                     mData.reset(ptr);
                 }
             } else {
@@ -697,7 +698,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
-                    Mesh::AccessorList *vec = 0;
+                    Mesh::AccessorList *vec = nullptr;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
@@ -734,8 +735,8 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             ASSIMP_LOG_INFO("GLTF: Decompressing Open3DGC data.");
 
 /************** Read data from JSON-document **************/
-#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut)                                                  \
-    if (!ReadMember(*comp_data, pFieldName, pOut)) {                                                       \
+#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut)                                   \
+    if (!ReadMember(*comp_data, pFieldName, pOut)) {                                        \
         throw DeadlyImportError("GLTF: \"compressedData\" must has \"", pFieldName, "\"."); \
     }
 
@@ -771,8 +772,7 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
             Decode_O3DGC(*ext_o3dgc, pAsset_Root);
             Extension.push_back(ext_o3dgc); // store info in mesh extensions list.
         } // if(it_memb->name.GetString() == "Open3DGC-compression")
-        else
-        {
+        else {
             throw DeadlyImportError("GLTF: Unknown mesh extension: \"", it_memb->name.GetString(), "\".");
         }
     } // for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
@@ -842,21 +842,21 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
         size_t tval = ifs.GetNFloatAttribute(static_cast<unsigned long>(idx));
 
         switch (ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))) {
-            case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-                // Check situation when encoded data contain texture coordinates but primitive not.
-                if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
-                    if (primitives[0].attributes.texcoord[idx]->count != tval)
-                        throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (", ai_to_string(tval),
-                                ") not equal to uncompressed (", ai_to_string(primitives[0].attributes.texcoord[idx]->count), ").");
+        case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
+            // Check situation when encoded data contain texture coordinates but primitive not.
+            if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
+                if (primitives[0].attributes.texcoord[idx]->count != tval)
+                    throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (", ai_to_string(tval),
+                            ") not equal to uncompressed (", ai_to_string(primitives[0].attributes.texcoord[idx]->count), ").");
 
-                    idx_texcoord++;
-                } else {
-                    ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul); // Disable decoding this attribute.
-                }
+                idx_texcoord++;
+            } else {
+                ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul); // Disable decoding this attribute.
+            }
 
-                break;
-            default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+            break;
+        default:
+            throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real); // After checking count of objects we can get size of array.
@@ -868,14 +868,14 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
         // size = number_of_elements * components_per_element * size_of_component. See float attributes note.
         size_t tval = ifs.GetNIntAttribute(static_cast<unsigned long>(idx));
         switch (ifs.GetIntAttributeType(static_cast<unsigned long>(idx))) {
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+            break;
 
-            default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+        default:
+            throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
 
         tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long); // See float attributes note.
@@ -891,40 +891,40 @@ inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC &pCompression_Open3DG
     auto get_buf_offset = [](Ref<Accessor> &pAccessor) -> size_t { return pAccessor->byteOffset + pAccessor->bufferView->byteOffset; };
 
     // Indices
-    ifs.SetCoordIndex((IndicesType *const)(decoded_data + get_buf_offset(primitives[0].indices)));
+    ifs.SetCoordIndex((IndicesType *)(decoded_data + get_buf_offset(primitives[0].indices)));
     // Coordinates
-    ifs.SetCoord((o3dgc::Real *const)(decoded_data + get_buf_offset(primitives[0].attributes.position[0])));
+    ifs.SetCoord((o3dgc::Real *)(decoded_data + get_buf_offset(primitives[0].attributes.position[0])));
     // Normals
     if (size_normal) {
-        ifs.SetNormal((o3dgc::Real *const)(decoded_data + get_buf_offset(primitives[0].attributes.normal[0])));
+        ifs.SetNormal((o3dgc::Real *)(decoded_data + get_buf_offset(primitives[0].attributes.normal[0])));
     }
 
     for (size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++) {
         switch (ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))) {
-            case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-                if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
-                    // See above about absent attributes.
-                    ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real *const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
-                    idx_texcoord++;
-                }
+        case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
+            if (idx_texcoord < primitives[0].attributes.texcoord.size()) {
+                // See above about absent attributes.
+                ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real *)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
+                idx_texcoord++;
+            }
 
-                break;
-            default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+            break;
+        default:
+            throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: ", ai_to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
     for (size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
         switch (ifs.GetIntAttributeType(static_cast<unsigned int>(idx))) {
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+        case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+            break;
 
-            // ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
-            default:
-                throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+        // ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
+        default:
+            throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: ", ai_to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
         }
     }
 
@@ -1114,10 +1114,6 @@ inline void AssetMetadata::Read(Document &doc) {
             ReadMember(*curProfile, "version", this->profile.version);
         }
     }
-
-    if (version.empty() || version[0] != '1') {
-        throw DeadlyImportError("GLTF: Unsupported glTF version: ", version);
-    }
 }
 
 //
@@ -1148,7 +1144,8 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
     AI_SWAP4(header.length);
     AI_SWAP4(header.sceneLength);
 
-    mSceneLength = static_cast<size_t>(header.sceneLength);
+    static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
+    mSceneLength = static_cast<size_t>(header.sceneLength); // Can't be larger than 4GB (max. uint32_t)
 
     mBodyOffset = sizeof(header) + mSceneLength;
     mBodyOffset = (mBodyOffset + 3) & ~3; // Round up to next multiple of 4
@@ -1179,8 +1176,17 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
         mBodyLength = 0;
     }
 
-    // read the scene data
+    // Smallest legal JSON file is "{}" Smallest loadable glTF file is larger than that but catch it later
+    if (mSceneLength < 2) {
+        throw DeadlyImportError("GLTF: No JSON file contents");
+    }
 
+    // Binary format only supports up to 4GB of JSON so limit it there to avoid extreme memory allocation
+    if (mSceneLength >= std::numeric_limits<uint32_t>::max()) {
+        throw DeadlyImportError("GLTF: JSON size greater than 4GB");
+    }
+
+    // read the scene data, ensure null termination
     std::vector<char> sceneData(mSceneLength + 1);
     sceneData[mSceneLength] = '\0';
 
@@ -1212,6 +1218,10 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
 
     // Load the metadata
     asset.Read(doc);
+    if (!asset) {
+        return;
+    }
+
     ReadExtensionsUsed(doc);
 
     // Prepare the dictionaries
@@ -1258,7 +1268,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
 #undef CHECK_EXT
 }
 
-inline IOStream *Asset::OpenFile(const std::string& path, const char *mode, bool absolute) {
+inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool absolute) {
 #ifdef ASSIMP_API
     (void)absolute;
     return mIOSystem->Open(path, mode);
@@ -1300,7 +1310,7 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 }
 
 #if _MSC_VER
-#    pragma warning(pop)
+#pragma warning(pop)
 #endif // _MSC_VER
 
 } // namespace glTF

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -83,11 +83,7 @@ void AMFImporter::Clear() {
 
 AMFImporter::AMFImporter() AI_NO_EXCEPT :
         mNodeElement_Cur(nullptr),
-        mXmlParser(nullptr),
-        mUnit(),
-        mVersion(),
-        mMaterial_Converted(),
-        mTexture_Converted() {
+        mXmlParser(nullptr) {
     // empty
 }
 
@@ -261,7 +257,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open AMF file ", pFile, ".");
     }
 
@@ -503,19 +499,9 @@ void AMFImporter::ParseNode_Metadata(XmlNode &node) {
     mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
-bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "amf") {
-        return true;
-    }
-
-    if (extension.empty() || pCheckSig) {
-        const char *tokens[] = { "<amf" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+bool AMFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*pCheckSig*/) const {
+    static const char *tokens[] = { "<amf" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 const aiImporterDesc *AMFImporter::GetInfo() const {

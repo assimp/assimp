@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -78,6 +78,7 @@ struct ElemBase;
 namespace Blender {
 struct Scene;
 struct Object;
+struct Collection;
 struct Mesh;
 struct Camera;
 struct Lamp;
@@ -116,6 +117,7 @@ protected:
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
     void ParseBlendFile(Blender::FileDatabase &out, std::shared_ptr<IOStream> stream);
     void ExtractScene(Blender::Scene &out, const Blender::FileDatabase &file);
+    void ParseSubCollection(const Blender::Scene &in, aiNode *root, const std::shared_ptr<Blender::Collection>& collection, Blender::ConversionData &conv_data);
     void ConvertBlendFile(aiScene *out, const Blender::Scene &in, const Blender::FileDatabase &file);
 
 private:
@@ -177,6 +179,19 @@ private:
             const Blender::Material *mat,
             const Blender::MTex *tex,
             Blender::ConversionData &conv_data);
+
+    // TODO: Move to a std::variant, once c++17 is supported.
+    struct StreamOrError {
+        std::shared_ptr<IOStream> stream;
+        std::shared_ptr<std::vector<char>> input;
+        std::string error;
+    };
+
+    // Returns either a stream (and optional input data for the stream) or
+    // an error if it can't parse the magic token.
+    StreamOrError ParseMagicToken(
+            const std::string &pFile,
+            IOSystem *pIOHandler) const;
 
 private: // static stuff, mostly logging and error reporting.
     // --------------------

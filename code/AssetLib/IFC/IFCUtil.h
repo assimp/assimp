@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -307,7 +307,6 @@ void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedArea
 // IFCOpenings.cpp
 
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-                      const std::vector<IfcVector3>& nors,
                       TempMesh& curmesh,
                       bool check_intersection,
                       bool generate_connection_geometry,
@@ -345,8 +344,7 @@ protected:
 public:
     typedef std::pair<IfcFloat, IfcFloat> ParamRange;
 
-    virtual ~Curve() {}
-
+    virtual ~Curve() = default;
 
     // check if a curve is closed
     virtual bool IsClosed() const = 0;

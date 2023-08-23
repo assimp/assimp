@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -86,7 +86,7 @@ protected:
     // -------------------------------------------------------------------
     /** Import a HMP4 file
     */
-    void InternReadFile_HMP4();
+    AI_WONT_RETURN void InternReadFile_HMP4() AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Import a HMP5 file

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -437,7 +437,7 @@ public:
     void CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton);
 
     /// Convert to Assimp node (animation nodes).
-    aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = 0);
+    aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = nullptr);
 
     /// Convert to Assimp bone (mesh bones).
     aiBone *ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights);
@@ -555,7 +555,7 @@ public:
         should be 0 after this reset. */
     void Reset();
 
-    /// Covert to Assimp mesh.
+    /// Convert to Assimp mesh.
     aiMesh *ConvertToAssimpMesh(Mesh *parent);
 
     /// Vertex data.

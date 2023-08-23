@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -53,12 +53,6 @@ AnimEvaluator::AnimEvaluator(const aiAnimation *pAnim) :
         mLastTime(0.0) {
     ai_assert(nullptr != pAnim);
     mLastPositions.resize(pAnim->mNumChannels, std::make_tuple(0, 0, 0));
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor.
-AnimEvaluator::~AnimEvaluator() {
-    // empty
 }
 
 // ------------------------------------------------------------------------------------------------

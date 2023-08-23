@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -66,12 +66,6 @@ using namespace Assimp;
 ImproveCacheLocalityProcess::ImproveCacheLocalityProcess()
 : mConfigCacheDepth(PP_ICL_PTCACHE_SIZE) {
     // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ImproveCacheLocalityProcess::~ImproveCacheLocalityProcess() {
-    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------

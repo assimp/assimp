@@ -1,9 +1,7 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2021, assimp team
-
-
+# Copyright (c) 2006-2022, assimp team
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -47,17 +45,28 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${Assimp_BINARY_DIR}/lib )
 
+if(WIN32)
+  set ( ASSIMP_CMD_RC assimp_cmd.rc)
+endif()
+
 ADD_EXECUTABLE( assimp_cmd
-  assimp_cmd.rc
   CompareDump.cpp
   ImageExtractor.cpp
   Main.cpp
   Main.h
-  resource.h
   WriteDump.cpp
   Info.cpp
   Export.cpp
+  ${ASSIMP_CMD_RC}
 )
+
+IF (ASSIMP_WARNINGS_AS_ERRORS)
+  IF (MSVC)
+    TARGET_COMPILE_OPTIONS(assimp_cmd PRIVATE /W4 /WX)
+  ELSE()
+    TARGET_COMPILE_OPTIONS(assimp_cmd PRIVATE -Wall -Werror)
+  ENDIF()
+ENDIF()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_cmd)
 

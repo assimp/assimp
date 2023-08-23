@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/defs.h>
 #include <string>
 #include <vector>
+#include "Common/Maybe.h"
 
 struct aiColor3D;
 struct aiString;
@@ -81,10 +82,12 @@ private:
     void load();
     /// Get color data.
     void getColorRGBA(aiColor3D *pColor);
+    void getColorRGBA(Maybe<aiColor3D> &value);
     /// Get illumination model from loaded data
     void getIlluminationModel(int &illum_model);
     /// Gets a float value from data.
     void getFloatValue(ai_real &value);
+    void getFloatValue(Maybe<ai_real> &value);
     /// Creates a new material from loaded data.
     void createMaterial();
     /// Get texture name from loaded data.

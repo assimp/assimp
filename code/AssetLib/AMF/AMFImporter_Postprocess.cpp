@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -690,7 +690,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
         if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
-        // create alias for conveniance
+        // create alias for convenience
         AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
         if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);
@@ -815,6 +815,7 @@ nl_clean_loop:
             for (; next_it != nodeArray.end(); ++next_it) {
                 if ((*next_it)->FindNode((*nl_it)->mName) != nullptr) {
                     // if current top node(nl_it) found in another top node then erase it from node_list and restart search loop.
+                    // FIXME: this leaks memory on test models test8.amf and test9.amf
                     nodeArray.erase(nl_it);
 
                     goto nl_clean_loop;

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -56,11 +56,6 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 FindInstancesProcess::FindInstancesProcess()
 :   configSpeedFlag (false)
-{}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-FindInstancesProcess::~FindInstancesProcess()
 {}
 
 // ------------------------------------------------------------------------------------------------

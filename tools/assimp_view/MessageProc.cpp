@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -116,7 +116,7 @@ void MakeFileAssociations() {
     RegSetValueEx(hRegistry,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
     RegCloseKey(hRegistry);
 
-    CLogDisplay::Instance().AddEntry("[OK] File assocations have been registered",
+    CLogDisplay::Instance().AddEntry("[OK] File associations have been registered",
         D3DCOLOR_ARGB(0xFF,0,0xFF,0));
 
     CLogDisplay::Instance().AddEntry(tmp.data,D3DCOLOR_ARGB(0xFF,0,0xFF,0));
@@ -1508,7 +1508,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sRect.right -= sRect.left;
             sRect.bottom -= sRect.top;
 
-            // if the mouse klick was inside the viewer panel
+            // if the mouse click was inside the viewer panel
             // give the focus to it
             if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom)
                 {
@@ -1710,13 +1710,13 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
                 CLogWindow::Instance().Show();
             } else if (ID__WEBSITE == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","http://assimp.sourceforge.net","","",SW_SHOW);
-            } else if (ID__WEBSITESF == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/projects/assimp","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://assimp.org","","",SW_SHOW);
+            } else if (ID__WEBSITEGH == LOWORD(wParam)) {
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp","","",SW_SHOW);
             }  else if (ID_REPORTBUG == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/tracker/?func=add&group_id=226462&atid=1067632","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp/issues/new?assignees=&labels=Bug&template=bug_report.md&title=Bug%3A","","",SW_SHOW);
             } else if (ID_FR == LOWORD(wParam)) {
-                ShellExecute(nullptr,"open","https://sourceforge.net/forum/forum.php?forum_id=817653","","",SW_SHOW);
+                ShellExecute(nullptr,"open","https://github.com/assimp/assimp/issues/new?assignees=&labels=Feature-Request&template=feature_request.md","","",SW_SHOW);
             } else if (ID_TOOLS_CLEARLOG == LOWORD(wParam)) {
                 CLogWindow::Instance().Clear();
             } else if (ID_TOOLS_SAVELOGTOFILE == LOWORD(wParam)) {

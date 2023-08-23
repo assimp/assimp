@@ -28,8 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
 #include "sample1.h"
 
@@ -43,7 +41,7 @@ int Factorial(int n) {
   return result;
 }
 
-// Returns true iff n is a prime number.
+// Returns true if and only if n is a prime number.
 bool IsPrime(int n) {
   // Trivial case 1: small numbers
   if (n <= 1) return false;
@@ -54,9 +52,9 @@ bool IsPrime(int n) {
   // Now, we have that n is odd and n >= 3.
 
   // Try to divide n by every odd number i, starting from 3
-  for (int i = 3; ; i += 2) {
-    // We only have to try i up to the squre root of n
-    if (i > n/i) break;
+  for (int i = 3;; i += 2) {
+    // We only have to try i up to the square root of n
+    if (i > n / i) break;
 
     // Now, we have i <= n/i < n.
     // If n is divisible by i, n is not prime.

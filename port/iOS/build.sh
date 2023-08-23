@@ -76,7 +76,7 @@ build_arch()
 
     rm CMakeCache.txt
     
-    CMAKE_CLI_INPUT="-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
+    CMAKE_CLI_INPUT="-DCMAKE_C_COMPILER=$CMAKE_C_COMPILER -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
     
     echo "[!] Running CMake with -G 'Unix Makefiles' $CMAKE_CLI_INPUT"
     
@@ -190,12 +190,8 @@ if [[ "$DEPLOY_FAT" -eq 1 ]]; then
     
     if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
     	make_fat_static_or_shared_binary 'libassimpd'
-	    make_fat_static_binary 'libIrrXMLd'
-	    make_fat_static_binary 'libzlibstaticd'
 	else
 		make_fat_static_or_shared_binary 'libassimp'
-	    make_fat_static_binary 'libIrrXML'
-	    make_fat_static_binary 'libzlibstatic'
 	fi
     
     echo "[!] Done! The fat binaries can be found at $BUILD_DIR"

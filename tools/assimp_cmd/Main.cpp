@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -47,7 +45,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
-const char* AICMD_MSG_ABOUT =
+#include <assimp/ProgressHandler.hpp>
+#include <iostream>
+
+class ConsoleProgressHandler : public ProgressHandler {
+public:
+	ConsoleProgressHandler() :
+			ProgressHandler() {
+		// empty
+	}
+
+	~ConsoleProgressHandler() override = default;
+
+	bool Update(float percentage) override {
+        std::cout << "\r" << percentage * 100.0f << " %";
+		return true;
+    }
+};
+
+constexpr char AICMD_MSG_ABOUT[] =
 "------------------------------------------------------ \n"
 "Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
 " -- Commandline toolchain --\n"
@@ -55,7 +71,7 @@ const char* AICMD_MSG_ABOUT =
 
 "Version %i.%i %s%s%s%s%s(GIT commit %x)\n\n";
 
-const char* AICMD_MSG_HELP =
+constexpr char AICMD_MSG_HELP[] =
 "assimp <verb> <parameters>\n\n"
 " verbs:\n"
 " \tinfo       - Quick file stats\n"
@@ -73,16 +89,15 @@ const char* AICMD_MSG_HELP =
 "\n Use \'assimp <verb> --help\' for detailed help on a command.\n"
 ;
 
-/*extern*/ Assimp::Importer* globalImporter = NULL;
+/*extern*/ Assimp::Importer* globalImporter = nullptr;
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-/*extern*/ Assimp::Exporter* globalExporter = NULL;
+/*extern*/ Assimp::Exporter* globalExporter = nullptr;
 #endif
 
 // ------------------------------------------------------------------------------
 // Application entry point
-int main (int argc, char* argv[])
-{
+int main (int argc, char* argv[]) {
 	if (argc <= 1)	{
 		printf("assimp: No command specified. Use \'assimp help\' for a detailed command list\n");
 		return AssimpCmdError::Success;
@@ -276,7 +291,7 @@ const aiScene* ImportModel(
 	// Now validate this flag combination
 	if(!globalImporter->ValidateFlags(imp.ppFlags)) {
 		printf("ERROR: Unsupported post-processing flags \n");
-		return NULL;
+		return nullptr;
 	}
 	printf("Validating postprocessing flags ...  OK\n");
 	if (imp.showLog) {
@@ -286,6 +301,9 @@ const aiScene* ImportModel(
 
 	// do the actual import, measure time
 	const clock_t first = clock();
+    ConsoleProgressHandler *ph = new ConsoleProgressHandler;
+    globalImporter->SetProgressHandler(ph);
+
 	const aiScene* scene = globalImporter->ReadFile(path,imp.ppFlags);
 
 	if (imp.showLog) {
@@ -293,7 +311,7 @@ const aiScene* ImportModel(
 	}
 	if (!scene) {
 		printf("ERROR: Failed to load file: %s\n", globalImporter->GetErrorString());
-		return NULL;
+		return nullptr;
 	}
 
 	const clock_t second = ::clock();
@@ -305,6 +323,9 @@ const aiScene* ImportModel(
 	if (imp.log) {
 		FreeLogStreams();
 	}
+    globalImporter->SetProgressHandler(nullptr);
+    delete ph;
+
 	return scene;
 }
 
@@ -529,10 +550,7 @@ int ProcessStandardArguments(
 }
 
 // ------------------------------------------------------------------------------
-int Assimp_TestBatchLoad (
-	const char* const* params,
-	unsigned int num)
-{
+int Assimp_TestBatchLoad(const char* const* params, unsigned int num) {
 	for(unsigned int i = 0; i < num; ++i) {
 		globalImporter->ReadFile(params[i],aiProcessPreset_TargetRealtime_MaxQuality);
 		// we're totally silent. scene destructs automatically.

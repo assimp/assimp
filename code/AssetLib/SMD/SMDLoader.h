@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -87,10 +87,10 @@ struct Vertex {
 */
 struct Face {
     Face() AI_NO_EXCEPT :
-            iTexture(0x0), avVertices{} {
+            iTexture(0x0) {
         // empty
     }
-    
+
     //! Texture index for the face
     unsigned int iTexture;
 

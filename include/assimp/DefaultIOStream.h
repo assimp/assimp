@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -74,7 +74,7 @@ class ASSIMP_API DefaultIOStream : public IOStream {
 #endif // __ANDROID__
 
 protected:
-    /// @brief 
+    /// @brief
     DefaultIOStream() AI_NO_EXCEPT;
 
     /// @brief The class constructor with the file name and the stream.
@@ -84,7 +84,7 @@ protected:
 
 public:
     /** Destructor public to allow simple deletion to close the file. */
-    ~DefaultIOStream ();
+    ~DefaultIOStream () override;
 
     // -------------------------------------------------------------------
     /// Read from stream

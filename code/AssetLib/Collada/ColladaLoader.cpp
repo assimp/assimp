@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -92,16 +92,8 @@ inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
-        mFileName(),
-        mMeshIndexByID(),
-        mMaterialIndexByName(),
-        mMeshes(),
-        newMats(),
-        mCameras(),
-        mLights(),
-        mTextures(),
-        mAnims(),
         noSkeletonMesh(false),
+        removeEmptyBones(false),
         ignoreUpDirection(false),
         useColladaName(false),
         mNodeNameCounter(0) {
@@ -110,48 +102,25 @@ ColladaLoader::ColladaLoader() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-ColladaLoader::~ColladaLoader() {
-    // empty
-}
+ColladaLoader::~ColladaLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    // check file extension
-    const std::string extension = GetExtension(pFile);
-    const bool readSig = checkSig && (pIOHandler != nullptr);
-    if (!readSig) {
-        if (extension == "dae" || extension == "zae") {
-            return true;
-        }
-    } else {
-        // Look for a DAE file inside, but don't extract it
-        ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
-        if (zip_archive.isOpen()) {
-            return !ColladaParser::ReadZaeManifest(zip_archive).empty();
-        }
+bool ColladaLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // Look for a DAE file inside, but don't extract it
+    ZipArchiveIOSystem zip_archive(pIOHandler, pFile);
+    if (zip_archive.isOpen()) {
+        return !ColladaParser::ReadZaeManifest(zip_archive).empty();
     }
 
-    // XML - too generic, we need to open the file and search for typical keywords
-    if (extension == "xml" || !extension.length() || checkSig) {
-        //  If CanRead() is called in order to check whether we
-        //  support a specific file extension in general pIOHandler
-        //  might be nullptr and it's our duty to return true here.
-        if (nullptr == pIOHandler) {
-            return true;
-        }
-        static const char* tokens[] = {
-            "<collada"
-        };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-    }
-
-    return false;
+    static const char *tokens[] = { "<collada" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
 void ColladaLoader::SetupProperties(const Importer *pImp) {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
+    removeEmptyBones = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION, 0) != 0;
     useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES, 0) != 0;
 }
@@ -379,9 +348,9 @@ void ColladaLoader::BuildLightsForNode(const ColladaParser &pParser, const Node 
             out->mAngleInnerCone = AI_DEG_TO_RAD(srcLight->mFalloffAngle);
 
             // ... some extension magic.
-            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+            if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                 // ... some deprecation magic.
-                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - 1e-6f)) {
+                if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET * (1 - ai_epsilon)) {
                     // Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
                     // epsilon chosen to be 0.1
                     float f = 1.0f;
@@ -820,9 +789,10 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         // count the number of bones which influence vertices of the current submesh
         size_t numRemainingBones = 0;
         for (const auto & dstBone : dstBones) {
-            if (!dstBone.empty()) {
-                ++numRemainingBones;
+            if (dstBone.empty() && removeEmptyBones) {
+                continue;
             }
+            ++numRemainingBones;
         }
 
         // create bone array and copy bone weights one by one
@@ -831,7 +801,7 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         size_t boneCount = 0;
         for (size_t a = 0; a < numBones; ++a) {
             // omit bones without weights
-            if (dstBones[a].empty()) {
+            if (dstBones[a].empty() && removeEmptyBones) {
                 continue;
             }
 
@@ -1087,7 +1057,7 @@ void insertMorphTimeValue(std::vector<MorphTimeValues> &values, float time, floa
         return;
     }
     for (unsigned int i = 0; i < values.size(); i++) {
-        if (std::abs(time - values[i].mTime) < 1e-6f) {
+        if (std::abs(time - values[i].mTime) < ai_epsilon) {
             values[i].mKeys.push_back(k);
             return;
         } else if (time > values[i].mTime && time < values[i + 1].mTime) {
@@ -1285,12 +1255,12 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             // now for every unique point in time, find or interpolate the key values for that time
             // and apply them to the transform chain. Then the node's present transformation can be calculated.
             ai_real time = startTime;
-            while (1) {
+            while (true) {
                 for (ChannelEntry & e : entries) {
                     // find the keyframe behind the current point in time
                     size_t pos = 0;
                     ai_real postTime = 0.0;
-                    while (1) {
+                    while (true) {
                         if (pos >= e.mTimeAccessor->mCount) {
                             break;
                         }
@@ -1544,7 +1514,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));        
+                map = strtoul10(&(*it));
                 break;
             }
         }
@@ -1701,7 +1671,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
 
     // recurse through the param references until we end up at an image
     std::string name = pName;
-    while (1) {
+    while (true) {
         // the given string is a param entry. Find it
         Effect::ParamLibrary::const_iterator it = pEffect.mParams.find(name);
         // if not found, we're at the end of the recursion. The resulting string should be the image ID

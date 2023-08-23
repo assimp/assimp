@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -50,14 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::MakeVerboseFormatProcess() {
-    // nothing to do here
-}
-// ------------------------------------------------------------------------------------------------
-MakeVerboseFormatProcess::~MakeVerboseFormatProcess() {
-    // nothing to do here
-}
-// ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
     ai_assert(nullptr != pScene);
@@ -97,8 +89,8 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
         pvBitangents = new aiVector3D[iNumVerts];
     }
 
-    aiVector3D *apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = { 0 };
-    aiColor4D *apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = { 0 };
+    aiVector3D *apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = { nullptr };
+    aiColor4D *apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = { nullptr };
 
     unsigned int p = 0;
     while (pcMesh->HasTextureCoords(p))
@@ -161,6 +153,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
         delete[] pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
+            pcMesh->mBones[i]->mNumWeights = static_cast<unsigned int>(newWeights[i].size());
             aiVertexWeight *weightToCopy = &(newWeights[i][0]);
             memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
                     sizeof(aiVertexWeight) * newWeights[i].size());

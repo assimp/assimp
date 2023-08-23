@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -245,9 +245,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 }
 
 // ------------------------------------------------------------------------------------------------
-PlyExporter::~PlyExporter() {
-    // empty
-}
+PlyExporter::~PlyExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)

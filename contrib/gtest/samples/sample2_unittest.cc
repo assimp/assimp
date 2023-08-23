@@ -28,9 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
-
 
 // This sample shows how to write a more complex unit test for a class
 // that has multiple member functions.
@@ -41,8 +38,9 @@
 // needed.
 
 #include "sample2.h"
-#include "gtest/gtest.h"
 
+#include "gtest/gtest.h"
+namespace {
 // In this example, we test the MyString class (a simple string).
 
 // Tests the default c'tor.
@@ -69,7 +67,7 @@ TEST(MyString, DefaultConstructor) {
   // we have to live with this fact.
   //
   // </TechnicalDetails>
-  EXPECT_STREQ(NULL, s.c_string());
+  EXPECT_STREQ(nullptr, s.c_string());
 
   EXPECT_EQ(0u, s.Length());
 }
@@ -80,8 +78,7 @@ const char kHelloString[] = "Hello, world!";
 TEST(MyString, ConstructorFromCString) {
   const MyString s(kHelloString);
   EXPECT_EQ(0, strcmp(s.c_string(), kHelloString));
-  EXPECT_EQ(sizeof(kHelloString)/sizeof(kHelloString[0]) - 1,
-            s.Length());
+  EXPECT_EQ(sizeof(kHelloString) / sizeof(kHelloString[0]) - 1, s.Length());
 }
 
 // Tests the copy c'tor.
@@ -104,6 +101,7 @@ TEST(MyString, Set) {
   EXPECT_EQ(0, strcmp(s.c_string(), kHelloString));
 
   // Can we set the MyString to NULL?
-  s.Set(NULL);
-  EXPECT_STREQ(NULL, s.c_string());
+  s.Set(nullptr);
+  EXPECT_STREQ(nullptr, s.c_string());
 }
+}  // namespace

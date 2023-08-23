@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -105,25 +105,13 @@ MDCImporter::MDCImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-MDCImporter::~MDCImporter() {
-    // empty
-}
+MDCImporter::~MDCImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool MDCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "mdc") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[1];
-        tokens[0] = AI_MDC_MAGIC_NUMBER_LE;
-        return CheckMagicToken(pIOHandler, pFile, tokens, 1);
-    }
-    return false;
+bool MDCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = { AI_MDC_MAGIC_NUMBER_LE };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -211,7 +199,7 @@ void MDCImporter::InternReadFile(
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MDC file ", pFile, ".");
     }
 
@@ -281,13 +269,13 @@ void MDCImporter::InternReadFile(
             pcMesh->mMaterialIndex = (unsigned int)aszShaders.size();
 
             // create a new shader
-            aszShaders.push_back(std::string(pcShader->ucName,
-                    ::strnlen(pcShader->ucName, sizeof(pcShader->ucName))));
+            aszShaders.emplace_back(pcShader->ucName,
+                    ::strnlen(pcShader->ucName, sizeof(pcShader->ucName)));
         }
         // need to create a default material
         else if (UINT_MAX == iDefaultMatIndex) {
             pcMesh->mMaterialIndex = iDefaultMatIndex = (unsigned int)aszShaders.size();
-            aszShaders.push_back(std::string());
+            aszShaders.emplace_back();
         }
         // otherwise assign a reference to the default material
         else

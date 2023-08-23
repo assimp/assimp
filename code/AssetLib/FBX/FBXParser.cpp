@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -46,11 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#   include <zlib.h>
-#else
-#   include "../contrib/zlib/zlib.h"
-#endif
+//#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#include "Common/Compression.h"
+//#   include <zlib.h>
+//#else
+//#   include "../contrib/zlib/zlib.h"
+//#endif
 
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
@@ -88,6 +88,7 @@ namespace {
 
 
     // ------------------------------------------------------------------------------------------------
+    AI_WONT_RETURN void ParseError(const std::string& message, TokenPtr token) AI_WONT_RETURN_SUFFIX;
     void ParseError(const std::string& message, TokenPtr token)
     {
         if(token) {
@@ -115,10 +116,11 @@ namespace Assimp {
 namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
-Element::Element(const Token& key_token, Parser& parser)
-: key_token(key_token)
+Element::Element(const Token& key_token, Parser& parser) :
+    key_token(key_token), compound(nullptr)
 {
     TokenPtr n = nullptr;
+    StackAllocator &allocator = parser.GetAllocator();
     do {
         n = parser.AdvanceToNextToken();
         if(!n) {
@@ -147,7 +149,7 @@ Element::Element(const Token& key_token, Parser& parser)
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            compound.reset(new Scope(parser));
+            compound = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
@@ -167,10 +169,13 @@ Element::Element(const Token& key_token, Parser& parser)
 // ------------------------------------------------------------------------------------------------
 Element::~Element()
 {
+    if (compound) {
+        delete_Scope(compound);
+    }
+
      // no need to delete tokens, they are owned by the parser
 }
 
-// ------------------------------------------------------------------------------------------------
 Scope::Scope(Parser& parser,bool topLevel)
 {
     if(!topLevel) {
@@ -180,6 +185,7 @@ Scope::Scope(Parser& parser,bool topLevel)
         }
     }
 
+    StackAllocator &allocator = parser.GetAllocator();
     TokenPtr n = parser.AdvanceToNextToken();
     if (n == nullptr) {
         ParseError("unexpected end of file");
@@ -195,16 +201,20 @@ Scope::Scope(Parser& parser,bool topLevel)
         if (str.empty()) {
             ParseError("unexpected content: empty string.");
         }
-        
-        elements.insert(ElementMap::value_type(str,new_Element(*n,parser)));
+
+        auto *element = new_Element(*n, parser);
 
         // Element() should stop at the next Key token (or right after a Close token)
         n = parser.CurrentToken();
         if (n == nullptr) {
             if (topLevel) {
+                elements.insert(ElementMap::value_type(str, element));
                 return;
             }
+            delete_Element(element);
             ParseError("unexpected end of file",parser.LastToken());
+        } else {
+            elements.insert(ElementMap::value_type(str, element));
         }
     }
 }
@@ -212,27 +222,25 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
-    for(ElementMap::value_type& v : elements) {
-        delete v.second;
+	// This collection does not own the memory for the elements, but we need to call their d'tor:
+
+    for (ElementMap::value_type &v : elements) {
+        delete_Element(v.second);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-Parser::Parser (const TokenList& tokens, bool is_binary)
-: tokens(tokens)
-, last()
-, current()
-, cursor(tokens.begin())
-, is_binary(is_binary)
+Parser::Parser(const TokenList &tokens, StackAllocator &allocator, bool is_binary) :
+        tokens(tokens), allocator(allocator), last(), current(), cursor(tokens.begin()), is_binary(is_binary)
 {
     ASSIMP_LOG_DEBUG("Parsing FBX tokens");
-    root.reset(new Scope(*this,true));
+    root = new_Scope(*this, true);
 }
 
 // ------------------------------------------------------------------------------------------------
 Parser::~Parser()
 {
-    // empty
+    delete_Scope(root);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -527,9 +535,7 @@ void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uin
 // ------------------------------------------------------------------------------------------------
 // read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
 void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end,
-    std::vector<char>& buff,
-    const Element& /*el*/)
-{
+        std::vector<char>& buff, const Element& /*el*/) {
     BE_NCONST uint32_t encmode = SafeParse<uint32_t>(data, end);
     AI_SWAP4(encmode);
     data += 4;
@@ -571,31 +577,11 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
     else if(encmode == 1) {
         // zlib/deflate, next comes ZIP head (0x78 0x01)
         // see http://www.ietf.org/rfc/rfc1950.txt
-
-        z_stream zstream;
-        zstream.opaque = Z_NULL;
-        zstream.zalloc = Z_NULL;
-        zstream.zfree  = Z_NULL;
-        zstream.data_type = Z_BINARY;
-
-        // http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-        if(Z_OK != inflateInit(&zstream)) {
-            ParseError("failure initializing zlib");
+         Compression compress;
+        if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish, 0)) {
+            compress.decompress(data, comp_len, buff);
+            compress.close();
         }
-
-        zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
-        zstream.avail_in  = comp_len;
-
-        zstream.avail_out = static_cast<uInt>(buff.size());
-        zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
-        const int ret = inflate(&zstream, Z_FINISH);
-
-        if (ret != Z_STREAM_END && ret != Z_OK) {
-            ParseError("failure decompressing compressed data section");
-        }
-
-        // terminate zlib
-        inflateEnd(&zstream);
     }
 #ifdef ASSIMP_BUILD_DEBUG
     else {
@@ -656,9 +642,9 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, d += 3) {
-                out.push_back(aiVector3D(static_cast<ai_real>(d[0]),
+                out.emplace_back(static_cast<ai_real>(d[0]),
                     static_cast<ai_real>(d[1]),
-                    static_cast<ai_real>(d[2])));
+                    static_cast<ai_real>(d[2]));
             }
             // for debugging
             /*for ( size_t i = 0; i < out.size(); i++ ) {
@@ -671,7 +657,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, f += 3) {
-                out.push_back(aiVector3D(f[0],f[1],f[2]));
+                out.emplace_back(f[0],f[1],f[2]);
             }
         }
 
@@ -700,7 +686,6 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         out.push_back(v);
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // read an array of color4 tuples
@@ -746,16 +731,16 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, d += 4) {
-                out.push_back(aiColor4D(static_cast<float>(d[0]),
+                out.emplace_back(static_cast<float>(d[0]),
                     static_cast<float>(d[1]),
                     static_cast<float>(d[2]),
-                    static_cast<float>(d[3])));
+                    static_cast<float>(d[3]));
             }
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, f += 4) {
-                out.push_back(aiColor4D(f[0],f[1],f[2],f[3]));
+                out.emplace_back(f[0],f[1],f[2],f[3]);
             }
         }
         return;
@@ -786,8 +771,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of float2 tuples
-void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -828,14 +812,13 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, d += 2) {
-                out.push_back(aiVector2D(static_cast<float>(d[0]),
-                    static_cast<float>(d[1])));
+                out.emplace_back(static_cast<float>(d[0]),
+                    static_cast<float>(d[1]));
             }
-        }
-        else if (type == 'f') {
+        } else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, f += 2) {
-                out.push_back(aiVector2D(f[0],f[1]));
+                out.emplace_back(f[0],f[1]);
             }
         }
 
@@ -865,8 +848,7 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of ints
-void ParseVectorDataArray(std::vector<int>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<int>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -990,8 +972,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 
 // ------------------------------------------------------------------------------------------------
 // read an array of uints
-void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
-{
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el) {
     out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -1214,7 +1195,6 @@ aiMatrix4x4 ReadMatrix(const Element& element)
     result.Transpose();
     return result;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsString() with ParseError handling

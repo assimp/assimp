@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -64,8 +65,7 @@ TEST_F(utBlenderImporterExporter, importBlenFromFileTest) {
 TEST(utBlenderImporter, import4cubes) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/4Cubes4Mats_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, import269_regress1) {
@@ -77,22 +77,19 @@ TEST(utBlenderImporter, import269_regress1) {
 TEST(utBlenderImporter, importBlenderDefault248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importBlenderDefault250) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_250.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importBlenderDefault250Compressed) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_250_Compressed.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importBlenderDefault262) {
@@ -114,95 +111,109 @@ TEST(utBlenderImporter, importBlenderDefault271) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utBlenderImporter, importBlenderDefault293) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_276.blend", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
 TEST(utBlenderImporter, importCubeHierarchy_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/CubeHierarchy_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importHuman) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/HUMAN.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+	ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importMirroredCube_252) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/MirroredCube_252.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importNoisyTexturedCube_VoronoiGlob_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/NoisyTexturedCube_VoronoiGlob_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importSmoothVsSolidCube_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/SmoothVsSolidCube_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importSuzanne_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/Suzanne_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importSuzanneSubdiv_252) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/SuzanneSubdiv_252.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
+
+    // check approximate shape by averaging together all vertices
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    aiVector3D vertexAvg(0.0, 0.0, 0.0);
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+        const aiMesh *mesh = scene->mMeshes[i];
+        ASSERT_NE(mesh, nullptr);
+
+        ai_real invVertexCount = 1.0 / mesh->mNumVertices;
+        for (unsigned int j = 0; j < mesh->mNumVertices; j++) {
+            vertexAvg += mesh->mVertices[j] * invVertexCount;
+        }
+    }
+
+    // must not be inf or nan
+    ASSERT_TRUE(std::isfinite(vertexAvg.x));
+    ASSERT_TRUE(std::isfinite(vertexAvg.y));
+    ASSERT_TRUE(std::isfinite(vertexAvg.z));
+    EXPECT_NEAR(vertexAvg.x, 6.4022515289252624e-08, 0.0001);
+    EXPECT_NEAR(vertexAvg.y, 0.060569953173398972, 0.0001);
+    EXPECT_NEAR(vertexAvg.z, 0.31429031491279602, 0.0001);
 }
 
 TEST(utBlenderImporter, importTexturedCube_ImageGlob_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/TexturedCube_ImageGlob_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importTexturedPlane_ImageUv_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/TexturedPlane_ImageUv_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importTexturedPlane_ImageUvPacked_248) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/TexturedPlane_ImageUvPacked_248.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importTorusLightsCams_250_compressed) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/TorusLightsCams_250_compressed.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, import_yxa_1) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/yxa_1.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importBob) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/BLEND/Bob.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utBlenderImporter, importFleurOptonl) {

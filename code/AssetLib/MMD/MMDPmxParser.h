@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <assimp/types.h>
 #include "MMDCpp14.h"
 
 namespace pmx
@@ -88,7 +89,7 @@ namespace pmx
 	{
 	public:
 		virtual void Read(std::istream *stream, PmxSetting *setting) = 0;
-		virtual ~PmxVertexSkinning() {}
+		virtual ~PmxVertexSkinning() = default;
 	};
 
 	class PmxVertexSkinningBDEF1 : public PmxVertexSkinning
@@ -357,6 +358,8 @@ namespace pmx
 	{
 	public:
 		void virtual Read(std::istream *stream, PmxSetting *setting) = 0;
+
+        virtual ~PmxMorphOffset() = default;
 	};
 
 	class PmxMorphVertexOffset : public PmxMorphOffset
@@ -728,7 +731,7 @@ namespace pmx
 		std::unique_ptr<PmxAncherRigidBody []> anchers;
 		int pin_vertex_count;
 		std::unique_ptr<int []> pin_vertices;
-		void Read(std::istream *stream, PmxSetting *setting);
+		AI_WONT_RETURN void Read(std::istream *stream, PmxSetting *setting) AI_WONT_RETURN_SUFFIX;
 	};
 
 	class PmxModel

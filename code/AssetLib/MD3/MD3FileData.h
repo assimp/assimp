@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -271,7 +271,7 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, ai_real* p_afOut)
 
 
 // -------------------------------------------------------------------------------
-/** @brief Pack a Q3 normal into 16bit latitute/longitude representation
+/** @brief Pack a Q3 normal into 16bit latitude/longitude representation
  *  @param p_vIn Input vector
  *  @param p_iOut Output normal
  *

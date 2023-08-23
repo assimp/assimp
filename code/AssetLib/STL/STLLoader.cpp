@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 // 1) 80 byte header
 // 2) 4 byte face count
 // 3) 50 bytes per face
-static bool IsBinarySTL(const char *buffer, unsigned int fileSize) {
+static bool IsBinarySTL(const char *buffer, size_t fileSize) {
     if (fileSize < 84) {
         return false;
     }
@@ -92,7 +92,7 @@ static const char UnicodeBoundary = 127;
 // An ascii STL buffer will begin with "solid NAME", where NAME is optional.
 // Note: The "solid NAME" check is necessary, but not sufficient, to determine
 // if the buffer is ASCII; a binary header could also begin with "solid NAME".
-static bool IsAsciiSTL(const char *buffer, unsigned int fileSize) {
+static bool IsAsciiSTL(const char *buffer, size_t fileSize) {
     if (IsBinarySTL(buffer, fileSize))
         return false;
 
@@ -134,28 +134,13 @@ STLImporter::STLImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-STLImporter::~STLImporter() {
-    // empty
-}
+STLImporter::~STLImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-
-    if (extension == "stl") {
-        return true;
-    }
-
-    if (!extension.length() || checkSig) {
-        if (!pIOHandler) {
-            return true;
-        }
-        const char *tokens[] = { "STL", "solid" };
-        return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
-    }
-
-    return false;
+bool STLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const char *tokens[] = { "STL", "solid" };
+    return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -181,11 +166,11 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open STL file ", pFile, ".");
     }
 
-    mFileSize = (unsigned int)file->FileSize();
+    mFileSize = file->FileSize();
 
     // allocate storage and copy the contents of the file to a memory buffer
     // (terminate it with zero)
@@ -246,7 +231,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
 
     // try to guess how many vertices we could have
     // assume we'll need 160 bytes for each face
-    size_t sizeEstimate = std::max(1u, mFileSize / 160u) * 3;
+    size_t sizeEstimate = std::max(1ull, mFileSize / 160ull) * 3ull;
     positionBuffer.reserve(sizeEstimate);
     normalBuffer.reserve(sizeEstimate);
 
@@ -297,8 +282,6 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     ASSIMP_LOG_WARN("STL: A new facet begins but the old is not yet complete");
                 }
                 faceVertexCounter = 0;
-                normalBuffer.push_back(aiVector3D());
-                aiVector3D *vn = &normalBuffer.back();
 
                 sz += 6;
                 SkipSpaces(&sz);
@@ -308,15 +291,17 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     if (sz[6] == '\0') {
                         throw DeadlyImportError("STL: unexpected EOF while parsing facet");
                     }
+                    aiVector3D vn;
                     sz += 7;
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->x);
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.x);
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->y);
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.y);
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->z);
-                    normalBuffer.push_back(*vn);
-                    normalBuffer.push_back(*vn);
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.z);
+                    normalBuffer.emplace_back(vn);
+                    normalBuffer.emplace_back(vn);
+                    normalBuffer.emplace_back(vn);
                 }
             } else if (!strncmp(sz, "vertex", 6) && ::IsSpaceOrNewLine(*(sz + 6))) { // vertex 1.50000 1.50000 0.00000
                 if (faceVertexCounter >= 3) {
@@ -328,7 +313,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     }
                     sz += 7;
                     SkipSpaces(&sz);
-                    positionBuffer.push_back(aiVector3D());
+                    positionBuffer.emplace_back();
                     aiVector3D *vn = &positionBuffer.back();
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->x);
                     SkipSpaces(&sz);
@@ -452,7 +437,7 @@ bool STLImporter::LoadBinaryFile() {
     pMesh->mNumFaces = *((uint32_t *)sz);
     sz += 4;
 
-    if (mFileSize < 84 + pMesh->mNumFaces * 50) {
+    if (mFileSize < 84ull + pMesh->mNumFaces * 50ull) {
         throw DeadlyImportError("STL: file is too small to hold all facets");
     }
 
@@ -530,13 +515,13 @@ bool STLImporter::LoadBinaryFile() {
             const ai_real invVal((ai_real)1.0 / (ai_real)31.0);
             if (bIsMaterialise) // this is reversed
             {
-                clr->r = (color & 0x31u) * invVal;
-                clr->g = ((color & (0x31u << 5)) >> 5u) * invVal;
-                clr->b = ((color & (0x31u << 10)) >> 10u) * invVal;
+                clr->r = (color & 0x1fu) * invVal;
+                clr->g = ((color & (0x1fu << 5)) >> 5u) * invVal;
+                clr->b = ((color & (0x1fu << 10)) >> 10u) * invVal;
             } else {
-                clr->b = (color & 0x31u) * invVal;
-                clr->g = ((color & (0x31u << 5)) >> 5u) * invVal;
-                clr->r = ((color & (0x31u << 10)) >> 10u) * invVal;
+                clr->b = (color & 0x1fu) * invVal;
+                clr->g = ((color & (0x1fu << 5)) >> 5u) * invVal;
+                clr->r = ((color & (0x1fu << 10)) >> 10u) * invVal;
             }
             // assign the color to all vertices of the face
             *(clr + 1) = *clr;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -63,7 +63,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
                     return;
                 }
             }
-            out.push_back(std::string(base, (size_t)(s - base)));
+            out.emplace_back(base, (size_t)(s - base));
             ++s;
         } else {
             out.push_back(GetNextToken(s));
@@ -175,10 +175,9 @@ unsigned int GetMeshVFormatUnique(const aiMesh *pcMesh) {
     // tangents and bitangents
     if (pcMesh->HasTangentsAndBitangents()) iRet |= 0x4;
 
-#ifdef BOOST_STATIC_ASSERT
-    BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
-    BOOST_STATIC_ASSERT(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
-#endif
+
+    static_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
+    static_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
     // texture coordinates
     unsigned int p = 0;
@@ -208,7 +207,7 @@ VertexWeightTable *ComputeVertexBoneWeightTable(const aiMesh *pMesh) {
         aiBone *bone = pMesh->mBones[i];
         for (unsigned int a = 0; a < bone->mNumWeights; ++a) {
             const aiVertexWeight &weight = bone->mWeights[a];
-            avPerVertexWeights[weight.mVertexId].push_back(std::pair<unsigned int, float>(i, weight.mWeight));
+            avPerVertexWeights[weight.mVertexId].emplace_back(i, weight.mWeight);
         }
     }
     return avPerVertexWeights;

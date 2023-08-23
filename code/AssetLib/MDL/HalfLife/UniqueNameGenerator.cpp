@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -68,8 +68,7 @@ UniqueNameGenerator::UniqueNameGenerator(const char *template_name, const char *
     separator_(separator) {
 }
 
-UniqueNameGenerator::~UniqueNameGenerator() {
-}
+UniqueNameGenerator::~UniqueNameGenerator() = default;
 
 void UniqueNameGenerator::make_unique(std::vector<std::string> &names) {
     struct DuplicateInfo {

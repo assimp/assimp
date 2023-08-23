@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -74,6 +74,8 @@ namespace XmlTag {
     const char* const pid = "pid";
     const char* const pindex = "pindex";
     const char* const p1 = "p1";
+    const char *const p2 = "p2";
+    const char *const p3 = "p3";
     const char* const name = "name";
     const char* const type = "type";
     const char* const build = "build";

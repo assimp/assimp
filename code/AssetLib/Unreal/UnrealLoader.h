@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -56,7 +56,7 @@ namespace Assimp {
 class UnrealImporter : public BaseImporter {
 public:
     UnrealImporter();
-    ~UnrealImporter();
+    ~UnrealImporter() override;
 
     // -------------------------------------------------------------------
     /** @brief Returns whether we can handle the format of the given file

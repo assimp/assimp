@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -105,26 +105,13 @@ Discreet3DSImporter::Discreet3DSImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-Discreet3DSImporter::~Discreet3DSImporter() {
-    // empty
-}
+Discreet3DSImporter::~Discreet3DSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    std::string extension = GetExtension(pFile);
-    if (extension == "3ds" || extension == "prj") {
-        return true;
-    }
-
-    if (!extension.length() || checkSig) {
-        uint16_t token[3];
-        token[0] = 0x4d4d;
-        token[1] = 0x3dc2;
-        //token[2] = 0x3daa;
-        return CheckMagicToken(pIOHandler, pFile, token, 2, 0, 2);
-    }
-    return false;
+bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };
+    return CheckMagicToken(pIOHandler, pFile, token, AI_COUNT_OF(token), 0, sizeof token[0]);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -279,8 +266,15 @@ void Discreet3DSImporter::ParseMainChunk() {
     };
 
     ASSIMP_3DS_END_CHUNK();
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code-return"
+#endif
     // recursively continue processing this hierarchy level
     return ParseMainChunk();
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -330,7 +324,7 @@ void Discreet3DSImporter::ParseObjectChunk() {
     case Discreet3DS::CHUNK_MAT_MATERIAL:
 
         // Add a new material to the list
-        mScene->mMaterials.push_back(D3DS::Material(std::string("UNNAMED_" + ai_to_string(mScene->mMaterials.size()))));
+        mScene->mMaterials.emplace_back(std::string("UNNAMED_" + ai_to_string(mScene->mMaterials.size())));
         ParseMaterialChunk();
         break;
 
@@ -381,7 +375,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num) {
     switch (chunk.Flag) {
     case Discreet3DS::CHUNK_TRIMESH: {
         // this starts a new triangle mesh
-        mScene->mMeshes.push_back(D3DS::Mesh(std::string(name, num)));
+        mScene->mMeshes.emplace_back(std::string(name, num));
 
         // Read mesh chunks
         ParseMeshChunk();
@@ -1010,7 +1004,7 @@ void Discreet3DSImporter::ParseMeshChunk() {
         mMesh.mFaces.reserve(num);
         while (num-- > 0) {
             // 3DS faces are ALWAYS triangles
-            mMesh.mFaces.push_back(D3DS::Face());
+            mMesh.mFaces.emplace_back();
             D3DS::Face &sFace = mMesh.mFaces.back();
 
             sFace.mIndices[0] = (uint16_t)stream->GetI2();
@@ -1295,7 +1289,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
     switch (chunk.Flag) {
     case Discreet3DS::CHUNK_LINRGBF:
         bGamma = true;
-
+    // fallthrough
     case Discreet3DS::CHUNK_RGBF:
         if (sizeof(float) * 3 > diff) {
             *out = clrError;
@@ -1308,6 +1302,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
 
     case Discreet3DS::CHUNK_LINRGBB:
         bGamma = true;
+            // fallthrough
     case Discreet3DS::CHUNK_RGBB: {
         if (sizeof(char) * 3 > diff) {
             *out = clrError;

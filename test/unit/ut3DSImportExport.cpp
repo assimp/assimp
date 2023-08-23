@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -67,6 +67,118 @@ TEST_F(ut3DSImportExport, import3DSFromFileTest) {
 TEST_F(ut3DSImportExport, import3DSformatdetection) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/testFormatDetection", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCameraRollAnim) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/CameraRollAnim.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCameraRollAnimWithChildObject) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/CameraRollAnimWithChildObject.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCubesWithAlpha) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/cubes_with_alpha.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCubeWithDiffuseTexture) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/cube_with_diffuse_texture.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCubeWithSpecularTexture) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/cube_with_specular_texture.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importRotatingCube) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importTargetCameraAnim) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/TargetCameraAnim.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importTest1) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/test1.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importCartWheel) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/cart_wheel.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importGranate) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/Granate.3DS", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importJeep1) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/jeep1.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importMarRifle) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/mar_rifle.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importMp5Sil) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/mp5_sil.3ds", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}
+
+
+TEST_F(ut3DSImportExport, importPyramob) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/3DS/pyramob.3DS", aiProcess_ValidateDataStructure);
 
     EXPECT_NE(nullptr, scene);
 }

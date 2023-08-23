@@ -59,7 +59,7 @@ extern "C" {
 #ifndef M3D_DOUBLE
 typedef float M3D_FLOAT;
 #ifndef M3D_EPSILON
-/* carefully choosen for IEEE 754 don't change */
+/* carefully chosen for IEEE 754 don't change */
 #define M3D_EPSILON ((M3D_FLOAT)1e-7)
 #endif
 #else
@@ -121,7 +121,7 @@ typedef uint16_t M3D_INDEX;
  *      TMAP texture map chunk (optional)
  *      VRTS vertex data chunk (optional if it's a material library)
  *      BONE bind-pose skeleton, bone hierarchy chunk (optional)
- *          n x m3db_t contains propably more, but at least one bone
+ *          n x m3db_t contains probably more, but at least one bone
  *          n x m3ds_t skin group records
  *      MTRL* material chunk(s), can be more (optional)
  *          n x m3dp_t each material contains propapbly more, but at least one property
@@ -896,7 +896,7 @@ char *_m3d_safestr(char *in, int morelines) {
         if (!out) return NULL;
         while (*i == ' ' || *i == '\t' || *i == '\r' || (morelines && *i == '\n'))
             i++;
-        for (; *i && (morelines || (*i != '\r' && *i != '\n')); i++) {
+        for (; *i && (morelines || (*i != '\r' && *i != '\n')) && o - out < l; i++) {
             if (*i == '\r') continue;
             if (*i == '\n') {
                 if (morelines >= 3 && o > out && *(o - 1) == '\n') break;
@@ -1109,7 +1109,7 @@ void _m3d_inv(M3D_FLOAT *m) {
     r[15] = det * (m[0] * (m[5] * m[10] - m[6] * m[9]) + m[1] * (m[6] * m[8] - m[4] * m[10]) + m[2] * (m[4] * m[9] - m[5] * m[8]));
     memcpy(m, &r, sizeof(r));
 }
-/* compose a coloumn major 4 x 4 matrix from vec3 position and vec4 orientation/rotation quaternion */
+/* compose a column major 4 x 4 matrix from vec3 position and vec4 orientation/rotation quaternion */
 void _m3d_mat(M3D_FLOAT *r, m3dv_t *p, m3dv_t *q) {
     if (q->x == (M3D_FLOAT)0.0 && q->y == (M3D_FLOAT)0.0 && q->z >= (M3D_FLOAT)0.7071065 && q->z <= (M3D_FLOAT)0.7071075 &&
             q->w == (M3D_FLOAT)0.0) {
@@ -4033,7 +4033,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         out[len] = 0;
     } else
     {
-        /* stricly only use LF (newline) in binary */
+        /* strictly only use LF (newline) in binary */
         sd = _m3d_safestr(model->desc, 3);
         if (!sd) goto memerr;
         /* header */
@@ -4608,7 +4608,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 h = (m3dhdr_t *)z;
             }
         }
-        /* add file header at the begining */
+        /* add file header at the beginning */
         len += 8;
         out = (unsigned char *)M3D_MALLOC(len);
         if (!out) goto memerr;

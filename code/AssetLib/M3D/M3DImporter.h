@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -65,7 +65,7 @@ class M3DImporter : public BaseImporter {
 public:
 	/// \brief  Default constructor
 	M3DImporter();
-    ~M3DImporter() override {}
+    ~M3DImporter() override = default;
 
 	/// \brief  Returns whether the class can handle the format of the given file.
 	/// \remark See BaseImporter::CanRead() for details.

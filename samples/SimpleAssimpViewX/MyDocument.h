@@ -40,7 +40,7 @@
     NSMutableArray* modelMeshes;
     BOOL builtBuffers;
 
-    NSMutableDictionary* textureDictionary;	// Array of Dicionaries that map image filenames to textureIds
+    NSMutableDictionary* textureDictionary;	// Array of Dictionaries that map image filenames to textureIds
 }
 
 @property (retain) IBOutlet NSView* _view;

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -128,15 +128,11 @@ public:
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOStream::IOStream() AI_NO_EXCEPT {
-    // empty
-}
+IOStream::IOStream() AI_NO_EXCEPT = default;
 
 // ----------------------------------------------------------------------------------
 AI_FORCE_INLINE
-IOStream::~IOStream() {
-    // empty
-}
+IOStream::~IOStream() = default;
 // ----------------------------------------------------------------------------------
 
 } //!namespace Assimp

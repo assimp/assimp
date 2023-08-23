@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -174,7 +174,7 @@ TEST_F(ImporterTest, testMemoryRead) {
     const aiScene *sc = pImp->ReadFileFromMemory(InputData_abRawBlock, InputData_BLOCK_SIZE,
             aiProcessPreset_TargetRealtime_Quality, "3ds");
 
-    ASSERT_TRUE(sc != NULL);
+    ASSERT_TRUE(sc != nullptr);
     EXPECT_EQ(aiString("<3DSRoot>"), sc->mRootNode->mName);
     EXPECT_EQ(1U, sc->mNumMeshes);
     EXPECT_EQ(24U, sc->mMeshes[0]->mNumVertices);
@@ -220,10 +220,10 @@ TEST_F(ImporterTest, testPluginInterface) {
     EXPECT_FALSE(pImp->IsExtensionSupported("."));
 
     TestPlugin *p = (TestPlugin *)pImp->GetImporter(".windows");
-    ASSERT_TRUE(NULL != p);
+    ASSERT_TRUE(nullptr != p);
 
     try {
-        p->InternReadFile("", 0, NULL);
+        p->InternReadFile("", nullptr, nullptr);
     } catch (const DeadlyImportError &dead) {
         EXPECT_TRUE(!strcmp(dead.what(), AIUT_DEF_ERROR_TEXT));
 
@@ -361,3 +361,37 @@ TEST_F(ImporterTest, unexpectedException) {
         EXPECT_TRUE(false);
     }
 }
+
+// ------------------------------------------------------------------------------------------------
+
+struct ExtensionTestCase {
+    std::string testName;
+    std::string filename;
+    std::string getExtensionResult;
+    std::string hasExtension;
+    bool hasExtensionResult;
+};
+
+using ExtensionTest = ::testing::TestWithParam<ExtensionTestCase>;
+
+TEST_P(ExtensionTest, testGetAndHasExtension) {
+    const ExtensionTestCase& testCase = GetParam();
+    EXPECT_EQ(testCase.getExtensionResult, BaseImporter::GetExtension(testCase.filename));
+    EXPECT_EQ(testCase.hasExtensionResult, BaseImporter::HasExtension(testCase.filename, {testCase.hasExtension}));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ExtensionTests, ExtensionTest,
+    ::testing::ValuesIn<ExtensionTestCase>({
+        {"NoExtension", "name", "", "glb", false},
+        {"NoExtensionAndEmptyVersion", "name#", "", "glb", false},
+        {"WithExtensionAndEmptyVersion", "name.glb#", "glb#", "glb", false},
+        {"WithExtensionAndVersion", "name.glb#1234", "glb", "glb", true},
+        {"WithExtensionAndHashInStem", "name#1234.glb", "glb", "glb", true},
+        {"WithExtensionAndInvalidVersion", "name.glb#_", "glb#_", "glb", false},
+        {"WithExtensionAndDotAndHashInStem", "name.glb#.abc", "abc", "glb", false},
+        {"WithTwoExtensions", "name.abc.def", "def", "abc.def", true},
+    }),
+    [](const ::testing::TestParamInfo<ExtensionTest::ParamType>& info) {
+        return info.param.testName;
+    });

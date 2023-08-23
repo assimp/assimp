@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -107,7 +107,7 @@ struct Node : public ChunkInfo
         TYPE_MESH,TYPE_GROUP,TYPE_LIGHT,TYPE_CAMERA,TYPE_BONE
     };
 
-    virtual ~Node() {}
+    virtual ~Node() = default;
     Node(Type type) : type(type), unit_scale(1.f){}
 
     Type type;

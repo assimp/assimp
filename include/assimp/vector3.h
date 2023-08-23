@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -70,17 +70,17 @@ class aiVector3t {
 public:
     /// @brief  The default class constructor.
     aiVector3t() AI_NO_EXCEPT : x(), y(), z() {}
-    
+
     /// @brief  The class constructor with the components.
     /// @param  _x  The x-component for the vector.
     /// @param  _y  The y-component for the vector.
     /// @param  _z  The z-component for the vector.
     aiVector3t(TReal _x, TReal _y, TReal _z) : x(_x), y(_y), z(_z) {}
-    
+
     /// @brief  The class constructor with a default value.
     /// @param  _xyz  The value for x, y and z.
     explicit aiVector3t (TReal _xyz ) : x(_xyz), y(_xyz), z(_xyz) {}
-    
+
     /// @brief  The copy constructor.
     /// @param  o The instance to copy from.
     aiVector3t( const aiVector3t& o ) = default;
@@ -113,8 +113,8 @@ public:
     bool operator!= (const aiVector3t& other) const;
     bool operator < (const aiVector3t& other) const;
 
-    /// @brief  
-    bool Equal(const aiVector3t& other, TReal epsilon = 1e-6) const;
+    /// @brief
+    bool Equal(const aiVector3t &other, TReal epsilon = ai_epsilon) const;
 
     template <typename TOther>
     operator aiVector3t<TOther> () const;

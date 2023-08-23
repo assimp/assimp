@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -510,7 +510,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
             OffsetNodeMeshIndices(node, offset[n]);
         }
         if (n) // src[0] is the master node
-            nodes.push_back(NodeAttachmentInfo(node, srcList[n - 1].attachToNode, n));
+            nodes.emplace_back(node, srcList[n - 1].attachToNode, n);
 
         // add name prefixes?
         if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
@@ -685,19 +685,19 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
 
             for (; it2 != end2; ++it2) {
                 if ((*it2).first == itml) {
-                    (*it2).pSrcBones.push_back(BoneSrcIndex(p, iOffset));
+                    (*it2).pSrcBones.emplace_back(p, iOffset);
                     break;
                 }
             }
             if (end2 == it2) {
                 // need to begin a new bone entry
-                asBones.push_back(BoneWithHash());
+                asBones.emplace_back();
                 BoneWithHash &btz = asBones.back();
 
                 // setup members
                 btz.first = itml;
                 btz.second = &p->mName;
-                btz.pSrcBones.push_back(BoneSrcIndex(p, iOffset));
+                btz.pSrcBones.emplace_back(p, iOffset);
             }
         }
         iOffset += (*it)->mNumVertices;
@@ -1101,6 +1101,14 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);
+
+    // make a deep copy of all texture coordinate names
+    if (src->mTextureCoordsNames != nullptr) {
+        dest->mTextureCoordsNames = new aiString *[AI_MAX_NUMBER_OF_TEXTURECOORDS] {};
+        for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            Copy(&dest->mTextureCoordsNames[i], src->mTextureCoordsNames[i]);
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1341,11 +1349,26 @@ void SceneCombiner::Copy(aiMetadata **_dest, const aiMetadata *src) {
         case AI_AIVECTOR3D:
             out.mData = new aiVector3D(*static_cast<aiVector3D *>(in.mData));
             break;
+        case AI_AIMETADATA:
+            out.mData = new aiMetadata(*static_cast<aiMetadata *>(in.mData));
+            break;
         default:
             ai_assert(false);
             break;
         }
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+void SceneCombiner::Copy(aiString **_dest, const aiString *src) {
+    if (nullptr == _dest || nullptr == src) {
+        return;
+    }
+
+    aiString *dest = *_dest = new aiString();
+
+    // get a flat copy
+    *dest = *src;
 }
 
 #if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)

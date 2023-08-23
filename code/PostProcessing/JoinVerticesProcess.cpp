@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -45,41 +43,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * for all imported meshes
  */
 
-
 #ifndef ASSIMP_BUILD_NO_JOINVERTICES_PROCESS
 
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
 #include <assimp/Vertex.h>
 #include <assimp/TinyFormatter.h>
+
 #include <stdio.h>
 #include <unordered_set>
+#include <unordered_map>
 
 using namespace Assimp;
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-JoinVerticesProcess::JoinVerticesProcess()
-{
-    // nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess()
-{
-    // nothing to do here
-}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool JoinVerticesProcess::IsActive( unsigned int pFlags) const
-{
+bool JoinVerticesProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_JoinIdenticalVertices) != 0;
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void JoinVerticesProcess::Execute( aiScene* pScene)
-{
+void JoinVerticesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("JoinVerticesProcess begin");
 
     // get the total number of vertices BEFORE the step is executed
@@ -92,27 +76,33 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 
     // execute the step
     int iNumVertices = 0;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++) {
         iNumVertices += ProcessMesh( pScene->mMeshes[a],a);
+    }
+
+    pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 
     // if logging is active, print detailed statistics
     if (!DefaultLogger::isNullLogger()) {
         if (iNumOldVertices == iNumVertices) {
             ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
-        } else {
-            ASSIMP_LOG_INFO("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
-                " out: ", iNumVertices, " | ~",
-                ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
+            return;
         }
-    }
 
-    pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+        // Show statistics
+        ASSIMP_LOG_INFO("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
+            " out: ", iNumVertices, " | ~",
+            ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f );
+    }
 }
 
 namespace {
 
-bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
-{
+bool areVerticesEqual(
+    const Vertex &lhs,
+    const Vertex &rhs,
+    unsigned numUVChannels,
+    unsigned numColorChannels) {
     // A little helper to find locally close vertices faster.
     // Try to reuse the lookup table from the last step.
     const static float epsilon = 1e-5f;
@@ -131,10 +121,6 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
         return false;
     }
 
-    if ((lhs.texcoords[0] - rhs.texcoords[0]).SquareLength() > squareEpsilon) {
-        return false;
-    }
-
     if ((lhs.tangent - rhs.tangent).SquareLength() > squareEpsilon) {
         return false;
     }
@@ -143,19 +129,18 @@ bool areVerticesEqual(const Vertex &lhs, const Vertex &rhs, bool complex)
         return false;
     }
 
-    // Usually we won't have vertex colors or multiple UVs, so we can skip from here
-    // Actually this increases runtime performance slightly, at least if branch
-    // prediction is on our side.
-    if (complex) {
-        for (int i = 0; i < 8; i++) {
-            if (i > 0 && (lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
-                return false;
-            }
-            if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
-                return false;
-            }
+    for (unsigned i = 0; i < numUVChannels; i++) {
+        if ((lhs.texcoords[i] - rhs.texcoords[i]).SquareLength() > squareEpsilon) {
+            return false;
         }
     }
+
+    for (unsigned i = 0; i < numColorChannels; i++) {
+        if (GetColorDifference(lhs.colors[i], rhs.colors[i]) > squareEpsilon) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -171,8 +156,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
     // ----------------------------------------------------------------------------
 
     // Position, if present (check made for aiAnimMesh)
-    if (pMesh->mVertices)
-    {
+    if (pMesh->mVertices) {
         delete [] pMesh->mVertices;
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
@@ -181,8 +165,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
     }
 
     // Normals, if present
-    if (pMesh->mNormals)
-    {
+    if (pMesh->mNormals) {
         delete [] pMesh->mNormals;
         pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
         for( unsigned int a = 0; a < pMesh->mNumVertices; a++) {
@@ -190,8 +173,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
         }
     }
     // Tangents, if present
-    if (pMesh->mTangents)
-    {
+    if (pMesh->mTangents) {
         delete [] pMesh->mTangents;
         pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
@@ -199,8 +181,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
         }
     }
     // Bitangents as well
-    if (pMesh->mBitangents)
-    {
+    if (pMesh->mBitangents) {
         delete [] pMesh->mBitangents;
         pMesh->mBitangents = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
@@ -208,8 +189,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
         }
     }
     // Vertex colors
-    for (unsigned int a = 0; pMesh->HasVertexColors(a); a++)
-    {
+    for (unsigned int a = 0; pMesh->HasVertexColors(a); a++) {
         delete [] pMesh->mColors[a];
         pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
         for( unsigned int b = 0; b < pMesh->mNumVertices; b++) {
@@ -217,8 +197,7 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
         }
     }
     // Texture coords
-    for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++)
-    {
+    for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++) {
         delete [] pMesh->mTextureCoords[a];
         pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int b = 0; b < pMesh->mNumVertices; b++) {
@@ -226,12 +205,50 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<Vertex> &uniqueVertices) {
         }
     }
 }
+
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
 // Unites identical vertices in the given mesh
-int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
-{
+// combine hashes
+inline void hash_combine(std::size_t &) {
+    // empty
+}
+
+template <typename T, typename... Rest>
+inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    hash_combine(seed, rest...);
+}
+//template specialization for std::hash for Vertex
+template<>
+struct std::hash<Vertex> {
+    std::size_t operator()(Vertex const& v) const noexcept {
+        size_t seed = 0;
+        hash_combine(seed, v.position.x ,v.position.y,v.position.z);
+        return seed;
+    }
+};
+//template specialization for std::equal_to for Vertex
+template<>
+struct std::equal_to<Vertex> {
+    equal_to(unsigned numUVChannels, unsigned numColorChannels) :
+            mNumUVChannels(numUVChannels),
+            mNumColorChannels(numColorChannels) {}
+    bool operator()(const Vertex &lhs, const Vertex &rhs) const {
+        return areVerticesEqual(lhs, rhs, mNumUVChannels, mNumColorChannels);
+    }
+
+private:
+    unsigned mNumUVChannels;
+    unsigned mNumColorChannels;
+};
+
+static constexpr size_t JOINED_VERTICES_MARK = 0x80000000u;
+
+// now start the JoinVerticesProcess
+int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
 	static_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8, "AI_MAX_NUMBER_OF_TEXTURECOORDS == 8");
 
@@ -243,13 +260,12 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     // We should care only about used vertices, not all of them
     // (this can happen due to original file vertices buffer being used by
     // multiple meshes)
-    std::unordered_set<unsigned int> usedVertexIndices;
-    usedVertexIndices.reserve(pMesh->mNumVertices);
-    for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
-    {
+    std::vector<bool> usedVertexIndicesMask;
+    usedVertexIndicesMask.resize(pMesh->mNumVertices, false);
+    for (unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
-        for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            usedVertexIndices.insert(face.mIndices[b]);
+        for (unsigned int b = 0; b < face.mNumIndices; b++) {
+            usedVertexIndicesMask[face.mIndices[b]] = true;
         }
     }
 
@@ -292,7 +308,6 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
     // Run an optimized code path if we don't have multiple UVs or vertex colors.
     // This should yield false in more than 99% of all imports ...
-    const bool complex = ( pMesh->GetNumColorChannels() > 0 || pMesh->GetNumUVChannels() > 1);
     const bool hasAnimMeshes = pMesh->mNumAnimMeshes > 0;
 
     // We'll never have more vertices afterwards.
@@ -303,72 +318,43 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             uniqueAnimatedVertices[animMeshIndex].reserve(pMesh->mNumVertices);
         }
     }
-
+    // a map that maps a vertex to its new index
+    const auto numBuckets = pMesh->mNumVertices;
+    const auto hasher = std::hash<Vertex>();
+    const auto comparator = std::equal_to<Vertex>(
+            pMesh->GetNumUVChannels(),
+            pMesh->GetNumColorChannels());
+    std::unordered_map<Vertex, int> vertex2Index(numBuckets, hasher, comparator);
+    // we can not end up with more vertices than we started with
+    vertex2Index.reserve(pMesh->mNumVertices);
     // Now check each vertex if it brings something new to the table
+    int newIndex = 0;
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
-        if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
+        // if the vertex is unused Do nothing
+        if (!usedVertexIndicesMask[a]) {
             continue;
         }
-
         // collect the vertex data
         Vertex v(pMesh,a);
-
-        // collect all vertices that are close enough to the given position
-        vertexFinder->FindIdenticalPositions( v.position, verticesFound);
-        unsigned int matchIndex = 0xffffffff;
-
-        // check all unique vertices close to the position if this vertex is already present among them
-        for( unsigned int b = 0; b < verticesFound.size(); b++) {
-            const unsigned int vidx = verticesFound[b];
-            const unsigned int uidx = replaceIndex[ vidx];
-            if( uidx & 0x80000000)
-                continue;
-
-            const Vertex& uv = uniqueVertices[ uidx];
-
-            if (!areVerticesEqual(v, uv, complex)) {
-                continue;
-            }
-
-            if (hasAnimMeshes) {
-                // If given vertex is animated, then it has to be preserver 1 to 1 (base mesh and animated mesh require same topology)
-                // NOTE: not doing this totaly breaks anim meshes as they don't have their own faces (they use pMesh->mFaces)
-                bool breaksAnimMesh = false;
-                for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
-                    const Vertex& animatedUV = uniqueAnimatedVertices[animMeshIndex][ uidx];
-                    Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    if (!areVerticesEqual(aniMeshVertex, animatedUV, complex)) {
-                        breaksAnimMesh = true;
-                        break;
-                    }
-                }
-                if (breaksAnimMesh) {
-                    continue;
-                }
-            }
-
-            // we're still here -> this vertex perfectly matches our given vertex
-            matchIndex = uidx;
-            break;
-        }
-
-        // found a replacement vertex among the uniques?
-        if( matchIndex != 0xffffffff)
-        {
-            // store where to found the matching unique vertex
-            replaceIndex[a] = matchIndex | 0x80000000;
-        }
-        else
-        {
-            // no unique vertex matches it up to now -> so add it
-            replaceIndex[a] = (unsigned int)uniqueVertices.size();
-            uniqueVertices.push_back( v);
+        // is the vertex already in the map?
+        auto it = vertex2Index.find(v);
+        // if the vertex is not in the map then it is a new vertex add it.
+        if (it == vertex2Index.end()) {
+            // this is a new vertex give it a new index
+            vertex2Index[v] = newIndex;
+            //keep track of its index and increment 1
+            replaceIndex[a] = newIndex++;
+            // add the vertex to the unique vertices
+            uniqueVertices.push_back(v);
             if (hasAnimMeshes) {
                 for (unsigned int animMeshIndex = 0; animMeshIndex < pMesh->mNumAnimMeshes; animMeshIndex++) {
-                    Vertex aniMeshVertex(pMesh->mAnimMeshes[animMeshIndex], a);
-                    uniqueAnimatedVertices[animMeshIndex].push_back(aniMeshVertex);
+                    uniqueAnimatedVertices[animMeshIndex].emplace_back(pMesh->mAnimMeshes[animMeshIndex], a);
                 }
             }
+        } else{
+            // if the vertex is already there just find the replace index that is appropriate to it
+			// mark it with JOINED_VERTICES_MARK
+            replaceIndex[a] = it->second | JOINED_VERTICES_MARK;
         }
     }
 
@@ -394,11 +380,10 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     // adjust the indices in all faces
-    for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
-    {
+    for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
         for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~0x80000000;
+            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~JOINED_VERTICES_MARK;
         }
     }
 
@@ -412,7 +397,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
                 // if the vertex is a unique one, translate it
-                if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
+				// filter out joined vertices by JOINED_VERTICES_MARK.
+                if ( !( replaceIndex[ ow.mVertexId ] & JOINED_VERTICES_MARK ) ) {
                     aiVertexWeight nw;
                     nw.mVertexId = replaceIndex[ ow.mVertexId ];
                     nw.mWeight = ow.mWeight;

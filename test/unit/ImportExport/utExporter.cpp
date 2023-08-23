@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 class TestProgressHandler : public ProgressHandler {
 public:
     TestProgressHandler() :
@@ -53,9 +55,7 @@ public:
         // empty
     }
 
-    virtual ~TestProgressHandler() {
-        // empty
-    }
+    virtual ~TestProgressHandler() = default;
 
     bool Update(float percentage = -1.f) override {
         mPercentage = percentage;
@@ -101,3 +101,5 @@ TEST_F(ExporterTest, ExporterIdTest) {
     const aiExportFormatDesc *desc = exporter.GetExportFormatDescription(exportFormatCount);
     EXPECT_EQ(nullptr, desc) << "More exporters than claimed";
 }
+
+#endif

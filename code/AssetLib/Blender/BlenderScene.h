@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -107,6 +107,7 @@ namespace Blender {
 struct Object;
 struct MTex;
 struct Image;
+struct Collection;
 
 #include <memory>
 
@@ -123,7 +124,7 @@ struct ID : ElemBase {
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
     std::shared_ptr<ElemBase> first;
-    std::shared_ptr<ElemBase> last;
+    std::weak_ptr<ElemBase> last;
 };
 
 // -------------------------------------------------------------------------------
@@ -148,6 +149,26 @@ struct Group : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct CollectionObject : ElemBase {
+    //CollectionObject* prev;
+    std::shared_ptr<CollectionObject> next;
+    Object *ob;
+};
+
+// -------------------------------------------------------------------------------
+struct CollectionChild : ElemBase {
+    std::shared_ptr<CollectionChild> next, prev;
+    std::shared_ptr<Collection> collection;
+};
+
+// -------------------------------------------------------------------------------
+struct Collection : ElemBase {
+    ID id FAIL;
+    ListBase gobject; // CollectionObject
+    ListBase children; // CollectionChild
+};
+
+// -------------------------------------------------------------------------------
 struct World : ElemBase {
     ID id FAIL;
 };
@@ -161,7 +182,7 @@ struct MVert : ElemBase {
     int bweight;
 
     MVert() :
-            ElemBase(), flag(0), mat_nr(0), bweight(0) {}
+            flag(0), mat_nr(0), bweight(0) {}
 };
 
 // -------------------------------------------------------------------------------
@@ -396,7 +417,6 @@ struct CustomDataLayer : ElemBase {
     std::shared_ptr<ElemBase> data; // must be converted to real type according type member
 
     CustomDataLayer() :
-            ElemBase(),
             type(0),
             offset(0),
             flag(0),
@@ -621,14 +641,21 @@ struct ModifierData : ElemBase {
     };
 
     std::shared_ptr<ElemBase> next WARN;
-    std::shared_ptr<ElemBase> prev WARN;
+    std::weak_ptr<ElemBase> prev WARN;
 
     int type, mode;
     char name[32];
 };
 
+
+// ------------------------------------------------------------------------------------------------
+struct SharedModifierData : ElemBase {
+    ModifierData modifier;
+};
+
+
 // -------------------------------------------------------------------------------
-struct SubsurfModifierData : ElemBase {
+struct SubsurfModifierData : SharedModifierData {
 
     enum Type {
 
@@ -641,7 +668,6 @@ struct SubsurfModifierData : ElemBase {
         FLAGS_SubsurfUV = 1 << 3
     };
 
-    ModifierData modifier FAIL;
     short subdivType WARN;
     short levels FAIL;
     short renderLevels;
@@ -649,7 +675,7 @@ struct SubsurfModifierData : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MirrorModifierData : ElemBase {
+struct MirrorModifierData : SharedModifierData {
 
     enum Flags {
         Flags_CLIPPING = 1 << 0,
@@ -661,11 +687,9 @@ struct MirrorModifierData : ElemBase {
         Flags_VGROUP = 1 << 6
     };
 
-    ModifierData modifier FAIL;
-
     short axis, flag;
     float tolerance;
-    std::shared_ptr<Object> mirror_ob;
+    std::weak_ptr<Object> mirror_ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -704,7 +728,7 @@ struct Object : ElemBase {
     ListBase modifiers;
 
     Object() :
-            ElemBase(), type(Type_EMPTY), parent(nullptr), track(), proxy(), proxy_from(), data() {
+            type(Type_EMPTY), parent(nullptr) {
         // empty
     }
 };
@@ -716,8 +740,7 @@ struct Base : ElemBase {
     std::shared_ptr<Object> object WARN;
 
     Base() :
-            ElemBase(), prev(nullptr), next(), object() {
-        // empty
+            prev(nullptr) {
         // empty
     }
 };
@@ -729,13 +752,11 @@ struct Scene : ElemBase {
     std::shared_ptr<Object> camera WARN;
     std::shared_ptr<World> world WARN;
     std::shared_ptr<Base> basact WARN;
+    std::shared_ptr<Collection> master_collection WARN;
 
     ListBase base;
 
-    Scene() :
-            ElemBase(), camera(), world(), basact() {
-        // empty
-    }
+    Scene() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -765,10 +786,7 @@ struct Image : ElemBase {
 
     short gen_x, gen_y, gen_type;
 
-    Image() :
-            ElemBase() {
-        // empty
-    }
+    Image() = default;
 };
 
 // -------------------------------------------------------------------------------
@@ -858,7 +876,7 @@ struct Tex : ElemBase {
     //char use_nodes;
 
     Tex() :
-            ElemBase(), imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS), ima() {
+            imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS) {
         // empty
     }
 };
@@ -950,10 +968,7 @@ struct MTex : ElemBase {
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
 
-    MTex() :
-            ElemBase() {
-        // empty
-    }
+    MTex() = default;
 };
 
 } // namespace Blender

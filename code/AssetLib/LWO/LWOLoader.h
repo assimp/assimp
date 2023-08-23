@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -116,6 +116,8 @@ private:
     */
     inline void GetS0(std::string &out, unsigned int max);
     inline float GetF4();
+    inline float GetF8();
+    inline uint64_t GetU8();
     inline uint32_t GetU4();
     inline uint16_t GetU2();
     inline uint8_t GetU1();
@@ -131,6 +133,7 @@ private:
      *  @param size Maximum size to be read, in bytes.
      */
     void LoadLWO2Surface(unsigned int size);
+    void LoadLWO3Surface(unsigned int size);
 
     // -------------------------------------------------------------------
     /** Loads a texture block from a LWO2 file.
@@ -197,12 +200,23 @@ private:
      *  @param length Size of the chunk
     */
     void LoadLWO2Clip(unsigned int length);
+    void LoadLWO3Clip(unsigned int length);
 
     // -------------------------------------------------------------------
     /** Load an envelope from an EVL chunk
      *  @param length Size of the chunk
     */
     void LoadLWO2Envelope(unsigned int length);
+    void LoadLWO3Envelope(unsigned int length);
+
+    // -------------------------------------------------------------------
+    /** Load an nodal blocks from surface form
+     *  @param length Size of the chunk
+    */
+    void LoadNodalBlocks(unsigned int length);
+    void LoadNodes(unsigned int length);
+    void LoadNodeTag(unsigned int length);
+    void LoadNodeData(unsigned int length);
 
     // -------------------------------------------------------------------
     /** Count vertices and faces in a LWOB/LWO2 file
@@ -347,6 +361,8 @@ protected:
     /** true if the file is a LXOB file*/
     bool mIsLXOB;
 
+    bool mIsLWO3;
+
     /** Temporary list of layers from the file */
     LayerList *mLayers;
 
@@ -397,6 +413,22 @@ inline float LWOImporter::GetF4() {
     ::memcpy(&f, mFileBuffer, 4);
     mFileBuffer += 4;
     AI_LSWAP4(f);
+    return f;
+}
+
+inline float LWOImporter::GetF8() {
+    double f;
+    ::memcpy(&f, mFileBuffer, 8);
+    mFileBuffer += 8;
+    AI_LSWAP8(f);
+    return (float)f;
+}
+
+inline uint64_t LWOImporter::GetU8() {
+    uint64_t f;
+    ::memcpy(&f, mFileBuffer, 8);
+    mFileBuffer += 8;
+    AI_LSWAP8(f);
     return f;
 }
 

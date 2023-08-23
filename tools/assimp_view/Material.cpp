@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -175,33 +175,29 @@ VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
         pOut->x = pOut->y = 1.0f;
         pOut->z = 0.0f;
     }
-    return;
 }
 
 //-------------------------------------------------------------------------------
-int CMaterialManager::UpdateSpecularMaterials()
-    {
-    if (g_pcAsset && g_pcAsset->pcScene)
-        {
-        for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-            {
-            if (aiShadingMode_Phong == g_pcAsset->apcMeshes[i]->eShadingMode)
-                {
+int CMaterialManager::UpdateSpecularMaterials() {
+    if (g_pcAsset && g_pcAsset->pcScene) {
+        for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i) {
+            if (aiShadingMode_Phong == g_pcAsset->apcMeshes[i]->eShadingMode) {
                 this->DeleteMaterial(g_pcAsset->apcMeshes[i]);
                 this->CreateMaterial(g_pcAsset->apcMeshes[i],g_pcAsset->pcScene->mMeshes[i]);
-                }
             }
         }
-    return 1;
     }
+    return 1;
+}
+
 //-------------------------------------------------------------------------------
-int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
-{
+int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut) {
     if  (sDefaultTexture) {
         sDefaultTexture->AddRef();
         *p_ppiOut = sDefaultTexture;
         return 1;
     }
+
     if(FAILED(g_piDevice->CreateTexture(
         256,
         256,
@@ -1483,7 +1479,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     pcMesh->piEffect->EndPass();
     pcMesh->piEffect->End();
 
-    // reenable culling if necessary
+    // re-enable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
     }

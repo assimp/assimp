@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -75,12 +75,6 @@ OptimizeGraphProcess::OptimizeGraphProcess() :
 		nodes_in(),
 		nodes_out(),
 		count_merged() {
-	// empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-OptimizeGraphProcess::~OptimizeGraphProcess() {
 	// empty
 }
 

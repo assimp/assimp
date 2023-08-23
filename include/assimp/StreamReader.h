@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -207,7 +207,7 @@ public:
 
     // ---------------------------------------------------------------------
     /** Set current file pointer (Get it from #GetPtr). This is if you
-     *  prefer to do pointer arithmetics on your own or want to copy
+     *  prefer to do pointer arithmetic on your own or want to copy
      *  large chunks of data at once.
      *  @param p The new pointer, which is validated against the size
      *    limit and buffer boundaries. */

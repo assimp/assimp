@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -106,9 +106,7 @@ struct ElemBase {
         // empty
     }
 
-    virtual ~ElemBase() {
-        // empty
-    }
+    virtual ~ElemBase() = default;
 
     /** Type name of the element. The type
      * string points is the `c_str` of the `name` attribute of the
@@ -416,10 +414,10 @@ template <>
 struct Structure::_defaultInitializer<ErrorPolicy_Fail> {
 
     template <typename T>
-    void operator()(T & /*out*/, const char * = "") {
+    void operator()(T & /*out*/, const char *message = "") {
         // obviously, it is crucial that _DefaultInitializer is used
         // only from within a catch clause.
-        throw DeadlyImportError("Constructing BlenderDNA Structure encountered an error");
+        throw DeadlyImportError("Constructing BlenderDNA Structure encountered an error: ", message);
     }
 };
 
@@ -430,6 +428,17 @@ inline bool Structure ::ResolvePointer<std::shared_ptr, ElemBase>(std::shared_pt
         const FileDatabase &db,
         const Field &f,
         bool) const;
+
+template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(
+    std::shared_ptr<ElemBase>& out, const Pointer & ptrval,
+    const FileDatabase& db, const Field&, bool) const;
+template <> inline void Structure :: Convert<int>    (int& dest,const FileDatabase& db) const;
+template<> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<char>   (char& dest,const FileDatabase& db) const;
+template <> inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const;
+template <> inline void Structure :: Convert<float>  (float& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<double> (double& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<Pointer> (Pointer& dest,const FileDatabase& db) const;
 
 // -------------------------------------------------------------------------------
 /** Represents the full data structure information for a single BLEND file.
@@ -476,7 +485,7 @@ public:
      *  in BlenderScene.cpp and is machine-generated.
      *  Converters are used to quickly handle objects whose
      *  exact data type is a runtime-property and not yet
-     *  known at compile time (consier Object::data).*/
+     *  known at compile time (consider Object::data).*/
     void RegisterConverters();
 
     // --------------------------------------------------------

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -55,9 +55,7 @@ public:
         // empty
     }
 
-    ~TestObjFileParser() {
-        // empty
-    }
+    ~TestObjFileParser() = default;
 
     void testCopyNextWord(char *pBuffer, size_t length) {
         copyNextWord(pBuffer, length);

@@ -1,0 +1,554 @@
+﻿<?xml version="1.0"?>
+<irr_scene>
+
+	<attributes>
+		<string name="Name" value="root" />
+		<int name="Id" value="-1" />
+		<colorf name="AmbientLight" value="0.000000, 0.000000, 0.000000, 0.000000" />
+	</attributes>
+
+	<node type="camera">
+
+		<attributes>
+			<string name="Name" value="" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="3.333332, 1.666666, -3.333332" />
+			<vector3d name="Rotation" value="14426.697266, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="-1" />
+			<bool name="IsDebugObject" value="false" />
+			<vector3d name="Target" value="0.000000, 0.000000, 100.000000" />
+			<vector3d name="UpVector" value="0.000000, 1.000000, 0.000000" />
+			<float name="Fovy" value="1.256637" />
+			<float name="Aspect" value="1.333333" />
+			<float name="ZNear" value="1.000000" />
+			<float name="ZFar" value="3000.000000" />
+		</attributes>
+
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.200000, 0.000000, 0.000000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
+	</node>
+
+	<node type="light">
+
+		<attributes>
+			<string name="Name" value="SpotLightAnim" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="3.333332, 1.666666, -3.333332" />
+			<vector3d name="Rotation" value="15721.575195, 37111.304688, 29682.550781" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="-1" />
+			<bool name="IsDebugObject" value="false" />
+			<colorf name="AmbientColor" value="0.000000, 0.000000, 0.000000, 1.000000" />
+			<colorf name="DiffuseColor" value="1.000000, 1.000000, 1.000000, 1.000000" />
+			<colorf name="SpecularColor" value="1.000000, 1.000000, 1.000000, 1.000000" />
+			<float name="Radius" value="100.000000" />
+			<bool name="CastShadows" value="true" />
+			<enum name="LightType" value="Spot" />
+		</attributes>
+
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.200000, 0.500000, 0.400000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
+	</node>
+
+	<node type="light">
+
+		<attributes>
+			<string name="Name" value="PointLight" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="3.333332, 1.666666, -3.333332" />
+			<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="-1" />
+			<bool name="IsDebugObject" value="false" />
+			<colorf name="AmbientColor" value="0.000000, 0.000000, 0.000000, 1.000000" />
+			<colorf name="DiffuseColor" value="1.000000, 1.000000, 1.000000, 1.000000" />
+			<colorf name="SpecularColor" value="1.000000, 1.000000, 1.000000, 1.000000" />
+			<float name="Radius" value="100.000000" />
+			<bool name="CastShadows" value="true" />
+			<enum name="LightType" value="Point" />
+		</attributes>
+
+	</node>
+
+	<node type="empty">
+
+		<attributes>
+			<string name="Name" value="ChildOfRoot" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="18.573780, 14.000406, -10.178408" />
+			<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="false" />
+			<int name="DebugDataVisible" value="0" />
+			<bool name="IsDebugObject" value="false" />
+		</attributes>
+
+		<node type="sphere">
+
+			<attributes>
+				<string name="Name" value="Sphere_ChildOfDummy" />
+				<int name="Id" value="-1" />
+				<vector3d name="Position" value="22.607138, 0.000000, -19.720987" />
+				<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+				<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+				<bool name="Visible" value="true" />
+				<enum name="AutomaticCulling" value="box" />
+				<int name="DebugDataVisible" value="0" />
+				<bool name="IsDebugObject" value="false" />
+				<float name="Radius" value="5.000000" />
+				<int name="PolyCountX" value="16" />
+				<int name="PolyCountY" value="16" />
+			</attributes>
+
+			<materials>
+				<attributes>
+					<enum name="Type" value="solid" />
+					<color name="Ambient" value="ffffffff" />
+					<color name="Diffuse" value="ffffffff" />
+					<color name="Emissive" value="00000000" />
+					<color name="Specular" value="ffffffff" />
+					<float name="Shininess" value="0.000000" />
+					<float name="Param1" value="0.000000" />
+					<float name="Param2" value="0.000000" />
+					<texture name="Texture1" value="UVTransformTestImg.png" />
+					<texture name="Texture2" value="" />
+					<texture name="Texture3" value="" />
+					<texture name="Texture4" value="" />
+					<bool name="Wireframe" value="false" />
+					<bool name="GouraudShading" value="true" />
+					<bool name="Lighting" value="false" />
+					<bool name="ZWriteEnable" value="true" />
+					<int name="ZBuffer" value="1" />
+					<bool name="BackfaceCulling" value="true" />
+					<bool name="FogEnable" value="false" />
+					<bool name="NormalizeNormals" value="false" />
+					<bool name="BilinearFilter1" value="true" />
+					<bool name="BilinearFilter2" value="true" />
+					<bool name="BilinearFilter3" value="true" />
+					<bool name="BilinearFilter4" value="true" />
+					<bool name="TrilinearFilter1" value="false" />
+					<bool name="TrilinearFilter2" value="false" />
+					<bool name="TrilinearFilter3" value="false" />
+					<bool name="TrilinearFilter4" value="false" />
+					<bool name="AnisotropicFilter1" value="false" />
+					<bool name="AnisotropicFilter2" value="false" />
+					<bool name="AnisotropicFilter3" value="false" />
+					<bool name="AnisotropicFilter4" value="false" />
+					<enum name="TextureWrap1" value="texture_clamp_repeat" />
+					<enum name="TextureWrap2" value="texture_clamp_repeat" />
+					<enum name="TextureWrap3" value="texture_clamp_repeat" />
+					<enum name="TextureWrap4" value="texture_clamp_repeat" />
+				</attributes>
+			</materials>
+			<animators>
+				<attributes>
+					<string name="Type" value="flyCircle" />
+					<vector3d name="Center" value="0.000000, 0.000000, 0.000000" />
+					<float name="Radius" value="30.000000" />
+					<float name="Speed" value="0.001000" />
+					<vector3d name="Direction" value="0.000000, 1.000000, 0.000000" />
+				</attributes>
+			</animators>
+			<node type="empty">
+
+				<attributes>
+					<string name="Name" value="ChildOfSphere" />
+					<int name="Id" value="-1" />
+					<vector3d name="Position" value="18.573780, 14.000406, -10.178408" />
+					<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+					<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+					<bool name="Visible" value="true" />
+					<enum name="AutomaticCulling" value="false" />
+					<int name="DebugDataVisible" value="0" />
+					<bool name="IsDebugObject" value="false" />
+				</attributes>
+
+			</node>
+
+		</node>
+
+	</node>
+
+	<node type="animatedMesh">
+
+		<attributes>
+			<string name="Name" value="" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="18.573780, 14.000406, -10.178408" />
+			<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="0" />
+			<bool name="IsDebugObject" value="false" />
+			<string name="Mesh" value="dwarf.x" />
+			<bool name="Looping" value="true" />
+			<bool name="ReadOnlyMaterials" value="false" />
+			<float name="FramesPerSecond" value="0.025000" />
+		</attributes>
+
+		<materials>
+			<attributes>
+				<enum name="Type" value="solid" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffcccccc" />
+				<color name="Emissive" value="ff5d5d5d" />
+				<color name="Specular" value="ff000000" />
+				<float name="Shininess" value="0.000000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture2" value="" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+			<attributes>
+				<enum name="Type" value="solid" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffcccccc" />
+				<color name="Emissive" value="ff4d4d4d" />
+				<color name="Specular" value="ff000000" />
+				<float name="Shininess" value="0.000000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture2" value="" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+			<attributes>
+				<enum name="Type" value="solid" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffcccccc" />
+				<color name="Emissive" value="ff505050" />
+				<color name="Specular" value="ff000000" />
+				<float name="Shininess" value="0.000000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="" />
+				<texture name="Texture2" value="" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+		</materials>
+	</node>
+
+	<node type="mesh">
+
+		<attributes>
+			<string name="Name" value="" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="42.392685, 54.034889, -80.052681" />
+			<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="0" />
+			<bool name="IsDebugObject" value="false" />
+			<string name="Mesh" value="cellar.irrmesh" />
+			<bool name="ReadOnlyMaterials" value="false" />
+		</attributes>
+
+		<materials>
+			<attributes>
+				<enum name="Type" value="lightmap_m4" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffffffff" />
+				<color name="Emissive" value="00000000" />
+				<color name="Specular" value="ffffffff" />
+				<float name="Shininess" value="0.750000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="brownground_1-1.jpg" />
+				<texture name="Texture2" value="1.png" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+			<attributes>
+				<enum name="Type" value="lightmap_m4" />
+				<color name="Ambient" value="ffdfdfdf" />
+				<color name="Diffuse" value="ffdfdfdf" />
+				<color name="Emissive" value="00000000" />
+				<color name="Specular" value="ffffffff" />
+				<float name="Shininess" value="0.750000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="crackedground_1-6.jpg" />
+				<texture name="Texture2" value="1.png" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+		</materials>
+	</node>
+
+	<node type="cube">
+
+		<attributes>
+			<string name="Name" value="JumpingCube" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="16.565477, 21.458202, 15.451395" />
+			<vector3d name="Rotation" value="0.000000, 0.000000, 0.000000" />
+			<vector3d name="Scale" value="1.000000, 1.000000, 1.000000" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="0" />
+			<bool name="IsDebugObject" value="false" />
+			<float name="Size" value="10.000000" />
+		</attributes>
+
+		<materials>
+			<attributes>
+				<enum name="Type" value="solid" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffffffff" />
+				<color name="Emissive" value="00000000" />
+				<color name="Specular" value="ffffffff" />
+				<float name="Shininess" value="0.000000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="UVTransformTestImg.png" />
+				<texture name="Texture2" value="" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+		</materials>
+		<animators>
+			<attributes>
+				<string name="Type" value="followSpline" />
+				<float name="Speed" value="1.000000" />
+				<float name="Tightness" value="0.500000" />
+				<vector3d name="Point1" value="0.000000, 0.000000, 0.000000" />
+				<vector3d name="Point2" value="20.000000, 20.000000, 20.000000" />
+				<vector3d name="Point3" value="0.000000, 40.000000, 0.000000" />
+				<vector3d name="Point4" value="32.000000, 0.000000, 30.000000" />
+			</attributes>
+		</animators>
+	</node>
+
+	<node type="sphere">
+
+		<attributes>
+			<string name="Name" value="SillySphere" />
+			<int name="Id" value="-1" />
+			<vector3d name="Position" value="-52.105640, 35.426533, -57.016262" />
+			<vector3d name="Rotation" value="994.501831, 732.416443, 732.416443" />
+			<vector3d name="Scale" value="3.048931, 7.026268, 6.031934" />
+			<bool name="Visible" value="true" />
+			<enum name="AutomaticCulling" value="box" />
+			<int name="DebugDataVisible" value="0" />
+			<bool name="IsDebugObject" value="false" />
+			<float name="Radius" value="5.000000" />
+			<int name="PolyCountX" value="16" />
+			<int name="PolyCountY" value="16" />
+		</attributes>
+
+		<materials>
+			<attributes>
+				<enum name="Type" value="solid" />
+				<color name="Ambient" value="ffffffff" />
+				<color name="Diffuse" value="ffffffff" />
+				<color name="Emissive" value="00000000" />
+				<color name="Specular" value="ffffffff" />
+				<float name="Shininess" value="0.000000" />
+				<float name="Param1" value="0.000000" />
+				<float name="Param2" value="0.000000" />
+				<texture name="Texture1" value="UVTransformTestImg.png" />
+				<texture name="Texture2" value="" />
+				<texture name="Texture3" value="" />
+				<texture name="Texture4" value="" />
+				<bool name="Wireframe" value="false" />
+				<bool name="GouraudShading" value="true" />
+				<bool name="Lighting" value="false" />
+				<bool name="ZWriteEnable" value="true" />
+				<int name="ZBuffer" value="1" />
+				<bool name="BackfaceCulling" value="true" />
+				<bool name="FogEnable" value="false" />
+				<bool name="NormalizeNormals" value="false" />
+				<bool name="BilinearFilter1" value="true" />
+				<bool name="BilinearFilter2" value="true" />
+				<bool name="BilinearFilter3" value="true" />
+				<bool name="BilinearFilter4" value="true" />
+				<bool name="TrilinearFilter1" value="false" />
+				<bool name="TrilinearFilter2" value="false" />
+				<bool name="TrilinearFilter3" value="false" />
+				<bool name="TrilinearFilter4" value="false" />
+				<bool name="AnisotropicFilter1" value="false" />
+				<bool name="AnisotropicFilter2" value="false" />
+				<bool name="AnisotropicFilter3" value="false" />
+				<bool name="AnisotropicFilter4" value="false" />
+				<enum name="TextureWrap1" value="texture_clamp_repeat" />
+				<enum name="TextureWrap2" value="texture_clamp_repeat" />
+				<enum name="TextureWrap3" value="texture_clamp_repeat" />
+				<enum name="TextureWrap4" value="texture_clamp_repeat" />
+			</attributes>
+		</materials>
+<!--		<animators>-->
+<!--			<attributes>-->
+<!--				<string name="Type" value="rotation" />-->
+<!--				<vector3d name="Rotation" value="0.300000, 0.300000, 0.300000" />-->
+<!--			</attributes>-->
+<!--		</animators>-->
+	</node>
+
+</irr_scene>
+

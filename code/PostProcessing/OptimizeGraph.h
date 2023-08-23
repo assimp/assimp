@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 All rights reserved.
@@ -71,8 +71,10 @@ namespace Assimp    {
  */
 class OptimizeGraphProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     OptimizeGraphProcess();
-    ~OptimizeGraphProcess();
+    ~OptimizeGraphProcess() override = default;
 
     // -------------------------------------------------------------------
     bool IsActive( unsigned int pFlags) const override;

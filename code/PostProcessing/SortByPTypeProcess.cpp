@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -54,16 +52,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SortByPTypeProcess::SortByPTypeProcess() :
-        mConfigRemoveMeshes(0) {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-SortByPTypeProcess::~SortByPTypeProcess() {
-    // nothing to do here
-}
+SortByPTypeProcess::SortByPTypeProcess() : mConfigRemoveMeshes(0) {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -110,8 +99,9 @@ void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node
     }
 
     // call all subnodes recursively
-    for (unsigned int m = 0; m < node->mNumChildren; ++m)
+    for (unsigned int m = 0; m < node->mNumChildren; ++m) {
         UpdateNodes(replaceMeshIndex, node->mChildren[m]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -161,7 +151,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         if (1 == num) {
             if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>(outMeshes.size());
-                outMeshes.push_back(mesh);
+                outMeshes.emplace_back(mesh);
             } else {
                 delete mesh;
                 pScene->mMeshes[i] = nullptr;
@@ -311,27 +301,29 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                         VertexWeightTable &tbl = avw[idx];
                         for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
                                 it != end; ++it) {
-                            tempBones[(*it).first].push_back(aiVertexWeight(outIdx, (*it).second));
+                            tempBones[(*it).first].emplace_back(outIdx, (*it).second);
                         }
                     }
 
                     if (vert) {
                         *vert++ = mesh->mVertices[idx];
-                        //mesh->mVertices[idx].x = get_qnan();
                     }
-                    if (nor) *nor++ = mesh->mNormals[idx];
+                    if (nor) 
+                        *nor++ = mesh->mNormals[idx];
                     if (tan) {
                         *tan++ = mesh->mTangents[idx];
                         *bit++ = mesh->mBitangents[idx];
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++pp) {
-                        if (!uv[pp]) break;
+                        if (!uv[pp]) 
+                            break;
                         *uv[pp]++ = mesh->mTextureCoords[pp][idx];
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_COLOR_SETS; ++pp) {
-                        if (!cols[pp]) break;
+                        if (!cols[pp]) 
+                            break;
                         *cols[pp]++ = mesh->mColors[pp][idx];
                     }
 
@@ -357,7 +349,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                         }
                     }
                     if (pp == mesh->mNumAnimMeshes)
-                        amIdx++;
+                        ++amIdx;
 
                     in.mIndices[q] = outIdx++;
                 }

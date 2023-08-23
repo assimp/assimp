@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -153,7 +153,9 @@ int Assimp_Export(const char *const *params, unsigned int num) {
     }
 
     // derive the final file name
-    out += "." + outext;
+    if (!outext.empty()) {
+        out += "." + outext;
+    }
 
     // and call the export routine
     if (!ExportModel(scene, import, out, e->id)) {

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -190,7 +190,7 @@ private:
         Assimp::Importer importer;
         importer.SetPropertyBool(setting_key, setting_value);
         const aiScene *scene = importer.ReadFile(file_path, aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
+        ASSERT_NE(nullptr, scene);
         func(scene);
     }
 
@@ -205,7 +205,7 @@ private:
             const char *key_name) {
         aiNode *global_info = get_global_info(scene);
         EXPECT_NE(nullptr, global_info);
-        T temp;
+        T temp = 0;
         EXPECT_TRUE(global_info->mMetaData->Get(key_name, temp));
         EXPECT_EQ(expected_value, temp);
     }
@@ -216,7 +216,7 @@ private:
         aiNode *global_info = get_global_info(scene);
         EXPECT_NE(nullptr, global_info);
         for (auto it = p_kv.begin(); it != p_kv.end(); ++it) {
-            T temp;
+            T temp = 0;
             EXPECT_TRUE(global_info->mMetaData->Get(it->second, temp));
             EXPECT_EQ(it->first, temp);
         }

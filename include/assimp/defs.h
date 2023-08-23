@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -184,13 +184,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __GNUC__
 #   define AI_WONT_RETURN_SUFFIX __attribute__((noreturn))
+#elif _MSC_VER
+#if defined(__clang__)
+#   define AI_WONT_RETURN_SUFFIX __attribute__((noreturn))
+#else
+#   define AI_WONT_RETURN_SUFFIX
+#endif
 #else
 #   define AI_WONT_RETURN_SUFFIX
 #endif // (defined __clang__)
 
 #ifdef __cplusplus
 /* No explicit 'struct' and 'enum' tags for C++, this keeps showing up
- * in doxydocs. 
+ * in doxydocs.
  */
 #define C_STRUCT
 #define C_ENUM
@@ -279,11 +285,15 @@ typedef unsigned int ai_uint;
 #define AI_MATH_HALF_PI_F (AI_MATH_PI_F * 0.5f)
 
 /* Tiny macro to convert from radians to degrees and back */
-#define AI_DEG_TO_RAD(x) ((x) * (ai_real)0.0174532925)
-#define AI_RAD_TO_DEG(x) ((x) * (ai_real)57.2957795)
+#define AI_DEG_TO_RAD(x) ((x) * (ai_real) 0.0174532925)
+#define AI_RAD_TO_DEG(x) ((x) * (ai_real) 57.2957795)
 
 /* Numerical limits */
-static const ai_real ai_epsilon = (ai_real)0.00001;
+#ifdef __cplusplus
+constexpr ai_real ai_epsilon = (ai_real) 1e-6;
+#else
+const ai_real ai_epsilon = (ai_real) 1e-6;
+#endif
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)
@@ -330,5 +340,7 @@ static const ai_real ai_epsilon = (ai_real)0.00001;
 #else
 #define AI_DEBUG_INVALIDATE_PTR(x)
 #endif
+
+#define AI_COUNT_OF(X) (sizeof(X) / sizeof((X)[0]))
 
 #endif // !! AI_DEFINES_H_INC

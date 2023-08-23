@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -49,7 +49,7 @@ class utMatrix4x4 : public ::testing::Test {
 TEST_F(utMatrix4x4, badIndexOperatorTest) {
     aiMatrix4x4 m;
     ai_real *a0 = m[4];
-    EXPECT_EQ(NULL, a0);
+    EXPECT_EQ(nullptr, a0);
 }
 
 TEST_F(utMatrix4x4, indexOperatorTest) {

@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
-
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -116,7 +115,7 @@ struct Material : public D3DS::Material {
         return *this;
     }
 
-    ~Material() {}
+    ~Material() = default;
 
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;
@@ -385,12 +384,10 @@ struct Dummy : public BaseNode {
 /** \brief Class to parse ASE files
  */
 class Parser {
-private:
-    Parser() AI_NO_EXCEPT {
-        // empty
-    }
-
 public:
+    /// @brief No default constructor.
+    Parser() = delete;
+
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is
     //! guaranteed to be terminated with zero.

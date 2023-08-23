@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -90,7 +90,7 @@ void LWS::Element::Parse(const char *&buffer) {
         } else if (*buffer == '}')
             return;
 
-        children.push_back(Element());
+        children.emplace_back();
 
         // copy data line - read token per token
 
@@ -141,26 +141,16 @@ LWSImporter::LWSImporter() :
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-LWSImporter::~LWSImporter() {
-    // nothing to do here
-}
+LWSImporter::~LWSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "lws" || extension == "mot") {
-        return true;
-    }
-
-    // if check for extension is not enough, check for the magic tokens LWSC and LWMO
-    if (!extension.length() || checkSig) {
-        uint32_t tokens[2];
-        tokens[0] = AI_MAKE_MAGIC("LWSC");
-        tokens[1] = AI_MAKE_MAGIC("LWMO");
-        return CheckMagicToken(pIOHandler, pFile, tokens, 2);
-    }
-    return false;
+bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_MAKE_MAGIC("LWSC"),
+        AI_MAKE_MAGIC("LWMO")
+    };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -207,7 +197,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
         const char *c = (*it).tokens[1].c_str();
 
         if ((*it).tokens[0] == "Key") {
-            fill.keys.push_back(LWO::Key());
+            fill.keys.emplace_back();
             LWO::Key &key = fill.keys.back();
 
             float f;
@@ -270,7 +260,7 @@ void LWSImporter::ReadEnvelope_Old(
     num = strtoul10((*it).tokens[0].c_str());
     for (unsigned int i = 0; i < num; ++i) {
 
-        nodes.channels.push_back(LWO::Envelope());
+        nodes.channels.emplace_back();
         LWO::Envelope &envl = nodes.channels.back();
 
         envl.index = i;
@@ -321,6 +311,9 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
             std::string::size_type t = src.path.substr(s).find_last_of('.');
 
             nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
+            if (nd->mName.length > MAXLEN) {
+                nd->mName.length = MAXLEN;
+            }
             return;
         }
     }
@@ -389,7 +382,7 @@ void LWSImporter::BuildGraph(aiNode *nd, LWS::NodeDesc &src, std::vector<Attachm
 
         //Push attachment, if the object came from an external file
         if (obj) {
-            attach.push_back(AttachmentInfo(obj, nd));
+            attach.emplace_back(obj, nd);
         }
     }
 
@@ -501,7 +494,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open LWS file ", pFile, ".");
     }
 
@@ -521,7 +514,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::list<LWS::NodeDesc> nodes;
 
     unsigned int cur_light = 0, cur_camera = 0, cur_object = 0;
-    unsigned int num_light = 0, num_camera = 0, num_object = 0;
+    unsigned int num_light = 0, num_camera = 0;
 
     // check magic identifier, 'LWSC'
     bool motion_file = false;
@@ -537,6 +530,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // get file format version and print to log
     ++it;
+
+    if (it == root.children.end() || (*it).tokens[0].empty()) {
+        ASSIMP_LOG_ERROR("Invalid LWS file detectedm abort import.");
+        return;
+    }
     unsigned int version = strtoul10((*it).tokens[0].c_str());
     ASSIMP_LOG_INFO("LWS file format version is ", (*it).tokens[0]);
     first = 0.;
@@ -586,7 +584,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             d.id = batch.AddLoadRequest(path, 0, &props);
 
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "LoadObject") { // 'LoadObject': load a LWO file into the scene-graph
 
             // add node to list
@@ -604,7 +601,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             d.path = path;
             nodes.push_back(d);
-            ++num_object;
         } else if ((*it).tokens[0] == "AddNullObject") { // 'AddNullObject': add a dummy node to the hierarchy
 
             // add node to list
@@ -618,8 +614,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
             d.name = c;
             nodes.push_back(d);
-
-            num_object++;
         }
         // 'NumChannels': Number of envelope channels assigned to last layer
         else if ((*it).tokens[0] == "NumChannels") {
@@ -638,18 +632,17 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     nodes.push_back(d);
                 }
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'Channel\'");
+            } else {
+                // important: index of channel
+                nodes.back().channels.emplace_back();
+                LWO::Envelope &env = nodes.back().channels.back();
+
+                env.index = strtoul10(c);
+
+                // currently we can just interpret the standard channels 0...9
+                // (hack) assume that index-i yields the binary channel type from LWO
+                env.type = (LWO::EnvelopeType)(env.index + 1);
             }
-
-            // important: index of channel
-            nodes.back().channels.push_back(LWO::Envelope());
-            LWO::Envelope &env = nodes.back().channels.back();
-
-            env.index = strtoul10(c);
-
-            // currently we can just interpret the standard channels 0...9
-            // (hack) assume that index-i yields the binary channel type from LWO
-            env.type = (LWO::EnvelopeType)(env.index + 1);
-
         }
         // 'Envelope': a single animation channel
         else if ((*it).tokens[0] == "Envelope") {

@@ -318,7 +318,8 @@ static const unsigned char chartype_table[256] = {
 
 template <class T>
 inline bool isNumeric(const T in) {
-    return (chartype_table[static_cast<size_t>(in)] == 1);
+    size_t idx = static_cast<size_t>(in);
+    return idx < sizeof(chartype_table) && (chartype_table[idx] == 1);
 }
 
 template <class T>

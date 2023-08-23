@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Public ASSIMP data structures
 #include <assimp/types.h>
 
-//#include <exception>
+#include <exception>
 
 namespace Assimp {
 // =======================================================================
@@ -113,7 +113,7 @@ namespace Assimp {
 * If you need the Importer to do custom file handling to access the files,
 * implement IOSystem and IOStream and supply an instance of your custom
 * IOSystem implementation by calling SetIOHandler() before calling ReadFile().
-* If you do not assign a custion IO handler, a default handler using the
+* If you do not assign a custom IO handler, a default handler using the
 * standard C++ IO logic will be used.
 *
 * @note One Importer instance is not thread-safe. If you use multiple
@@ -246,6 +246,12 @@ public:
     bool SetPropertyMatrix(const char *szName, const aiMatrix4x4 &sValue);
 
     // -------------------------------------------------------------------
+    /** Set a pointer configuration property.
+     * @see SetPropertyInteger()
+     */
+    bool SetPropertyPointer(const char *szName, void *sValue);
+
+    // -------------------------------------------------------------------
     /** Get a configuration property.
      * @param szName Name of the property. All supported properties
      *   are defined in the aiConfig.g header (all constants share the
@@ -296,6 +302,15 @@ public:
      */
     aiMatrix4x4 GetPropertyMatrix(const char *szName,
             const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
+
+    // -------------------------------------------------------------------
+    /** Get a pointer configuration property
+     *
+     *  The return value remains valid until the property is modified.
+     * @see GetPropertyInteger()
+     */
+    void* GetPropertyPointer(const char *szName,
+        void *sErrorReturn = nullptr) const;
 
     // -------------------------------------------------------------------
     /** Supplies a custom IO handler to the importer to use to open and

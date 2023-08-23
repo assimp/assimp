@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 
 
@@ -53,9 +53,7 @@ SceneDiffer::SceneDiffer()
     // empty
 }
 
-SceneDiffer::~SceneDiffer() {
-    // empty
-}
+SceneDiffer::~SceneDiffer() = default;
 
 bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     if ( expected == toCompare ) {

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -72,32 +72,21 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-HMPImporter::HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-HMPImporter::~HMPImporter() {
-    // nothing to do here
-}
+HMPImporter::~HMPImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const {
-    const std::string extension = GetExtension(pFile);
-    if (extension == "hmp")
-        return true;
-
-    // if check for extension is not enough, check for the magic tokens
-    if (!extension.length() || cs) {
-        uint32_t tokens[3];
-        tokens[0] = AI_HMP_MAGIC_NUMBER_LE_4;
-        tokens[1] = AI_HMP_MAGIC_NUMBER_LE_5;
-        tokens[2] = AI_HMP_MAGIC_NUMBER_LE_7;
-        return CheckMagicToken(pIOHandler, pFile, tokens, 3, 0);
-    }
-    return false;
+bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    static const uint32_t tokens[] = {
+        AI_HMP_MAGIC_NUMBER_LE_4,
+        AI_HMP_MAGIC_NUMBER_LE_5,
+        AI_HMP_MAGIC_NUMBER_LE_7
+    };
+    return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -115,7 +104,7 @@ void HMPImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(mIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open HMP file ", pFile, ".");
     }
 
@@ -126,7 +115,9 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         throw DeadlyImportError("HMP File is too small.");
 
     // Allocate storage and copy the contents of the file to a memory buffer
-    mBuffer = new uint8_t[fileSize];
+    auto deleter=[this](uint8_t* ptr){ delete[] ptr; mBuffer = nullptr; };
+    std::unique_ptr<uint8_t[], decltype(deleter)> buffer(new uint8_t[fileSize], deleter);
+    mBuffer = buffer.get();
     file->Read((void *)mBuffer, 1, fileSize);
     iFileSize = (unsigned int)fileSize;
 
@@ -154,9 +145,6 @@ void HMPImporter::InternReadFile(const std::string &pFile,
         // Print the magic word to the logger
         std::string szBuffer = ai_str_toprintable((const char *)&iMagic, sizeof(iMagic));
 
-        delete[] mBuffer;
-        mBuffer = nullptr;
-
         // We're definitely unable to load this file
         throw DeadlyImportError("Unknown HMP subformat ", pFile,
                                 ". Magic word (", szBuffer, ") is not known");
@@ -164,9 +152,6 @@ void HMPImporter::InternReadFile(const std::string &pFile,
 
     // Set the AI_SCENE_FLAGS_TERRAIN bit
     pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;
-
-    delete[] mBuffer;
-    mBuffer = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -282,7 +267,9 @@ void HMPImporter::InternReadFile_HMP7() {
 
     // now load all vertices from the file
     aiVector3D *pcVertOut = pcMesh->mVertices;
+    ai_assert(pcVertOut != nullptr);
     aiVector3D *pcNorOut = pcMesh->mNormals;
+    ai_assert(pcNorOut != nullptr);
     const HMP::Vertex_HMP7 *src = (const HMP::Vertex_HMP7 *)szCurrent;
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
@@ -334,29 +321,31 @@ void HMPImporter::CreateMaterial(const unsigned char *szCurrent,
 
         // now read the first skin and skip all others
         ReadFirstSkin(pcHeader->numskins, szCurrent, &szCurrent);
-    } else {
-        // generate a default material
-        const int iMode = (int)aiShadingMode_Gouraud;
-        aiMaterial *pcHelper = new aiMaterial();
-        pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
-
-        aiColor3D clr;
-        clr.b = clr.g = clr.r = 0.6f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
-
-        clr.b = clr.g = clr.r = 0.05f;
-        pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
-
-        aiString szName;
-        szName.Set(AI_DEFAULT_MATERIAL_NAME);
-        pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
-
-        // add the material to the scene
-        pScene->mNumMaterials = 1;
-        pScene->mMaterials = new aiMaterial *[1];
-        pScene->mMaterials[0] = pcHelper;
+        *szCurrentOut = szCurrent;
+        return;
     }
+
+    // generate a default material
+    const int iMode = (int)aiShadingMode_Gouraud;
+    aiMaterial *pcHelper = new aiMaterial();
+    pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
+
+    aiColor3D clr;
+    clr.b = clr.g = clr.r = 0.6f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
+
+    clr.b = clr.g = clr.r = 0.05f;
+    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
+
+    aiString szName;
+    szName.Set(AI_DEFAULT_MATERIAL_NAME);
+    pcHelper->AddProperty(&szName, AI_MATKEY_NAME);
+
+    // add the material to the scene
+    pScene->mNumMaterials = 1;
+    pScene->mMaterials = new aiMaterial *[1];
+    pScene->mMaterials[0] = pcHelper;
     *szCurrentOut = szCurrent;
 }
 
@@ -380,27 +369,36 @@ void HMPImporter::CreateOutputFaceList(unsigned int width, unsigned int height) 
     aiVector3D *pcUVOut(pcUVs);
 
     // Build the terrain square
+    const unsigned int upperBound = pcMesh->mNumVertices;
     unsigned int iCurrent = 0;
     for (unsigned int y = 0; y < height - 1; ++y) {
+        const size_t offset0 = y * width;
+        const size_t offset1 = (y + 1) * width;
         for (unsigned int x = 0; x < width - 1; ++x, ++pcFaceOut) {
             pcFaceOut->mNumIndices = 4;
             pcFaceOut->mIndices = new unsigned int[4];
+            if ((offset0 + x + 1) >= upperBound){
+                continue;
+            }
+            if ((offset1 + x + 1) >= upperBound){
+                continue;
+            }
 
-            *pcVertOut++ = pcMesh->mVertices[y * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x];
-            *pcVertOut++ = pcMesh->mVertices[(y + 1) * width + x + 1];
-            *pcVertOut++ = pcMesh->mVertices[y * width + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x];
+            *pcVertOut++ = pcMesh->mVertices[offset1 + x + 1];
+            *pcVertOut++ = pcMesh->mVertices[offset0 + x + 1];
 
-            *pcNorOut++ = pcMesh->mNormals[y * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x];
-            *pcNorOut++ = pcMesh->mNormals[(y + 1) * width + x + 1];
-            *pcNorOut++ = pcMesh->mNormals[y * width + x + 1];
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x];
+            *pcNorOut++ = pcMesh->mNormals[offset1 + x + 1];
+            *pcNorOut++ = pcMesh->mNormals[offset0 + x + 1];
 
             if (pcMesh->mTextureCoords[0]) {
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][(y + 1) * width + x + 1];
-                *pcUVOut++ = pcMesh->mTextureCoords[0][y * width + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset1 + x + 1];
+                *pcUVOut++ = pcMesh->mTextureCoords[0][offset0 + x + 1];
             }
 
             for (unsigned int i = 0; i < 4; ++i)
@@ -443,14 +441,15 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
     szCursor += sizeof(uint32_t);
 
     // allocate an output material
-    aiMaterial *pcMat = new aiMaterial();
+    std::unique_ptr<aiMaterial> pcMat(new aiMaterial());
 
     // read the skin, this works exactly as for MDL7
     ParseSkinLump_3DGS_MDL7(szCursor, &szCursor,
-            pcMat, iType, iWidth, iHeight);
+            pcMat.get(), iType, iWidth, iHeight);
 
     // now we need to skip any other skins ...
     for (unsigned int i = 1; i < iNumSkins; ++i) {
+        SizeCheck(szCursor + 3 * sizeof(uint32_t));
         iType = *((uint32_t *)szCursor);
         szCursor += sizeof(uint32_t);
         iWidth = *((uint32_t *)szCursor);
@@ -465,23 +464,29 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char *szC
     // setup the material ...
     pScene->mNumMaterials = 1;
     pScene->mMaterials = new aiMaterial *[1];
-    pScene->mMaterials[0] = pcMat;
+    pScene->mMaterials[0] = pcMat.release();
 
     *szCursorOut = szCursor;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Generate proepr texture coords
-void HMPImporter::GenerateTextureCoords(
-        const unsigned int width, const unsigned int height) {
+void HMPImporter::GenerateTextureCoords(const unsigned int width, const unsigned int height) {
     ai_assert(nullptr != pScene->mMeshes);
     ai_assert(nullptr != pScene->mMeshes[0]);
     ai_assert(nullptr != pScene->mMeshes[0]->mTextureCoords[0]);
 
     aiVector3D *uv = pScene->mMeshes[0]->mTextureCoords[0];
+    if (uv == nullptr) {
+        return;
+    }
 
-    const float fY = (1.0f / height) + (1.0f / height) / (height - 1);
-    const float fX = (1.0f / width) + (1.0f / width) / (width - 1);
+    if (height == 0.0f || width == 0.0) {
+        return;
+    }
+
+    const float fY = (1.0f / height) + (1.0f / height) / height;
+    const float fX = (1.0f / width) + (1.0f / width) / width;
 
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x, ++uv) {

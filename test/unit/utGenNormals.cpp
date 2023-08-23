@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -82,5 +82,5 @@ void GenNormalsTest::TearDown() {
 // ------------------------------------------------------------------------------------------------
 TEST_F(GenNormalsTest, testSimpleTriangle) {
     piProcess->GenMeshVertexNormals(pcMesh, 0);
-    EXPECT_TRUE(pcMesh->mNormals != NULL);
+    EXPECT_TRUE(pcMesh->mNormals != nullptr);
 }

@@ -1,8 +1,8 @@
 
 
 /** @file  IRRShared.h
-  * @brief Shared utilities for the IRR and IRRMESH loaders
-  */
+ * @brief Shared utilities for the IRR and IRRMESH loaders
+ */
 
 #ifndef INCLUDED_AI_IRRSHARED_H
 #define INCLUDED_AI_IRRSHARED_H
@@ -58,14 +58,11 @@ extern const aiMatrix4x4 AI_TO_IRR_MATRIX;
  */
 class IrrlichtBase {
 protected:
-    IrrlichtBase() :
-            mNode(nullptr) {
+    IrrlichtBase() {
         // empty
     }
 
-    ~IrrlichtBase() {
-        // empty
-    }
+    ~IrrlichtBase() = default;
 
     /** @brief Data structure for a simple name-value property
      */
@@ -84,25 +81,25 @@ protected:
 
     /// XML reader instance
     XmlParser mParser;
-    pugi::xml_node *mNode;
 
     // -------------------------------------------------------------------
     /** Parse a material description from the XML
      *  @return The created material
      *  @param matFlags Receives AI_IRRMESH_MAT_XX flags
      */
-    aiMaterial *ParseMaterial(unsigned int &matFlags);
+    aiMaterial *ParseMaterial(pugi::xml_node &materialNode, unsigned int &matFlags);
 
     // -------------------------------------------------------------------
     /** Read a property of the specified type from the current XML element.
      *  @param out Receives output data
+     *  @param node XML attribute element containing data
      */
-    void ReadHexProperty(HexProperty &out);
-    void ReadStringProperty(StringProperty &out);
-    void ReadBoolProperty(BoolProperty &out);
-    void ReadFloatProperty(FloatProperty &out);
-    void ReadVectorProperty(VectorProperty &out);
-    void ReadIntProperty(IntProperty &out);
+    void ReadHexProperty(HexProperty &out, pugi::xml_node& hexnode);
+    void ReadStringProperty(StringProperty &out, pugi::xml_node& stringnode);
+    void ReadBoolProperty(BoolProperty &out, pugi::xml_node& boolnode);
+    void ReadFloatProperty(FloatProperty &out, pugi::xml_node& floatnode);
+    void ReadVectorProperty(VectorProperty &out, pugi::xml_node& vectornode);
+    void ReadIntProperty(IntProperty &out, pugi::xml_node& intnode);
 };
 
 // ------------------------------------------------------------------------------------------------

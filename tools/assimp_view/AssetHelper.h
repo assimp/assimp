@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -76,6 +76,13 @@ public:
         apcMeshes = NULL;
         pcScene = NULL;
     }
+
+    // set the normal set to be used
+    void SetNormalSet(unsigned int iSet);
+
+    // flip all normal vectors
+    void FlipNormals();
+    void FlipNormalsInt();
 
     //---------------------------------------------------------------
     // default vertex data structure
@@ -221,16 +228,8 @@ public:
 
     // Specifies the normal set to be used
     unsigned int iNormalSet;
-
-    // ------------------------------------------------------------------
-    // set the normal set to be used
-    void SetNormalSet(unsigned int iSet);
-
-    // ------------------------------------------------------------------
-    // flip all normal vectors
-    void FlipNormals();
-    void FlipNormalsInt();
 };
+
 } // namespace AssimpView
 
 #endif // !! IG

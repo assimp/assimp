@@ -27,15 +27,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Injection point for custom user configurations.
-// The following macros can be defined:
-//
-// GTEST_OS_STACK_TRACE_GETTER_  - The name of an implementation of
-//                                 OsStackTraceGetterInterface.
+// Injection point for custom user configurations. See README for details
 //
 // ** Custom implementation starts here **
 
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 
-#endif  // GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_

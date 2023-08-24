@@ -443,10 +443,10 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
         float focal_length_mm = cam.FocalLength();
         ASSIMP_LOG_VERBOSE_DEBUG("FBX FOV unspecified. Computing from FilmWidth (", film_width_inches, "inches) and FocalLength (", focal_length_mm, "mm).");
         double half_fov_rad = std::atan2(film_width_inches * 25.4 * 0.5, focal_length_mm);
-        out_camera->mHorizontalFOV = half_fov_rad;
+        out_camera->mHorizontalFOV = static_cast<float>(half_fov_rad);
     } else {
         // FBX fov is full-view degrees. We want half-view radians.
-        out_camera->mHorizontalFOV = AI_DEG_TO_RAD(fov_deg) * 0.5;
+        out_camera->mHorizontalFOV = AI_DEG_TO_RAD(fov_deg) * 0.5f;
     }
 
     out_camera->mClipPlaneNear = cam.NearPlane();

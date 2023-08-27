@@ -40,15 +40,6 @@ struct Identifier;
 struct Reference;
 struct Property;
 
-template <class T>
-inline bool isEmbeddedCommentOpenTag(T *in, T *end) {
-    if (in == '/' && in + 1 == '*') {
-        return true;
-    }
-
-    return false;
-}
-
 ///	@brief  Utility function to search for the next token or the end of the buffer.
 /// @param  in      [in] The start position in the buffer.
 /// @param  end     [in] The end position in the buffer.

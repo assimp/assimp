@@ -5,13 +5,15 @@ The OpenDDL-Parser is a small and easy to use library for OpenDDL-file-format-pa
 
 Build status
 ============
-Linux build status: [![Build Status](https://travis-ci.org/kimkulling/openddl-parser.png)](https://travis-ci.org/kimkulling/openddl-parser)
+
+Linux build status: [![Build Status](https://travis-ci.com/kimkulling/openddl-parser.svg?branch=master)](https://travis-ci.com/kimkulling/openddl-parser)
 Current coverity check status:
 <a href="https://scan.coverity.com/projects/5606">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5606/badge.svg"/>
 </a>
 Current test coverage:[![Coverage Status](https://coveralls.io/repos/github/kimkulling/openddl-parser/badge.svg?branch=master)](https://coveralls.io/github/kimkulling/openddl-parser?branch=cpp_coveralls)
+
 Get the source code
 ===================
 You can get the code from our git repository, which is located at GitHub. You can clone the repository with the following command:
@@ -57,11 +59,11 @@ USE_ODDLPARSER_NS;
 
 int main( int argc, char *argv[] ) {
     if( argc < 3 ) {
-        return 1;
+        return Error;
     }
 
     char *filename( nullptr );
-    if( 0 == strncmp( FileOption, argv[ 1 ], strlen( FileOption ) ) ) {
+    if( 0 == strncmp( FileOption, argv[1], strlen( FileOption ) ) ) {
         filename = argv[ 2 ];
     }
     std::cout << "file to import: " << filename << std::endl;   
@@ -73,24 +75,27 @@ int main( int argc, char *argv[] ) {
     FILE *fileStream = fopen( filename, "r+" );
     if( NULL == filename ) {
         std::cerr << "Cannot open file " << filename << std::endl;
-        return 1;
+        return Error;
     }
 
     // obtain file size:
     fseek( fileStream, 0, SEEK_END );
-    const size_t size( ftell( fileStream ) );   
+    const size_t size = ftell( fileStream );   
     rewind( fileStream );   
     if( size > 0 ) {
         char *buffer = new char[ size ];
-        const size_t readSize( fread( buffer, sizeof( char ), size, fileStream ) );
+        const size_t readSize = fread( buffer, sizeof( char ), size, fileStream );
         assert( readSize == size );
+
+        // Set the memory buffer
         OpenDDLParser theParser;
         theParser.setBuffer( buffer, size );
-        const bool result( theParser.parse() );
-        if( !result ) {
+        if( !theParser.parse() ) {
             std::cerr << "Error while parsing file " << filename << "." << std::endl;
+            return Error;
         }
     }
+  
     return 0;
 }
 
@@ -106,9 +111,9 @@ theParser.setBuffer( buffer, size );
 const bool result( theParser.parse() );
 if ( result ) {
     DDLNode *root = theParser.getRoot();
-    DDLNode::DllNodeList childs = root->getChildNodeList();
-    for ( size_t i=0; i<childs.size(); i++ ) {
-        DDLNode *child = childs[ i ];
+    DDLNode::DllNodeList children = root->getChildNodeList();
+    for ( size_t i=0; i<children.size(); i++ ) {
+        DDLNode *child = children[ i ];
         Property *prop   = child->getProperty(); // to get properties
         std::string type = child->getType();     // to get the node type
         Value *values    = child->getValue();    // to get the data;

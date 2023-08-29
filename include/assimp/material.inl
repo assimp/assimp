@@ -211,7 +211,8 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx,aiColor3D& pOut) const {
     aiColor4D c;
     const aiReturn ret = aiGetMaterialColor(this,pKey,type,idx,&c);
-    pOut = aiColor3D(c.r,c.g,c.b);
+    if (ret == aiReturn_SUCCESS)
+        pOut = aiColor3D(c.r,c.g,c.b);
     return ret;
 }
 // ---------------------------------------------------------------------------

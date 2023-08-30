@@ -234,7 +234,8 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
-        mat->AddProperty(&prop.strength, 1, AI_MATKEY_GLTF_TEXTURE_STRENGTH(texType, texSlot));
+        std::string textureStrengthKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + "strength";
+        mat->AddProperty(&prop.strength, 1, textureStrengthKey.c_str(), texType, texSlot);
     }
 }
 

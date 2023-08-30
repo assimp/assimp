@@ -133,6 +133,7 @@ public:
 
     /** Maximum number of bones influencing any single vertex. */
     unsigned int mMaxWeights;
+    bool mRemoveEmptyBones;
 };
 
 } // end of namespace Assimp

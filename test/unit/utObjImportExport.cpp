@@ -286,6 +286,54 @@ TEST_F(utObjImportExport, issue1923_vertex_color_Test) {
     delete scene;
 }
 
+TEST_F(utObjImportExport, only_a_part_of_vertex_colors_Test) {
+    ::Assimp::Importer importer;
+    const aiScene *const scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/only_a_part_of_vertexcolors.obj", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    const aiMesh *const mesh = scene->mMeshes[0];
+    EXPECT_EQ(mesh->mNumVertices, 9U);
+    EXPECT_EQ(mesh->mNumFaces, 3U);
+    EXPECT_TRUE(mesh->HasVertexColors(0));
+
+    const aiVector3D *const vertices = mesh->mVertices;
+    const aiColor4D *const colors = mesh->mColors[0];
+    EXPECT_EQ(aiVector3D(0.0f, 0.0f, 0.0f), vertices[0]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 0.0f, 1.0f), colors[0]);
+    EXPECT_EQ(aiVector3D(0.0f, 0.0f, 1.0f), vertices[1]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 1.0f, 1.0f), colors[1]);
+    EXPECT_EQ(aiVector3D(0.0f, 1.0f, 0.0f), vertices[2]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 0.0f, 1.0f), colors[2]);
+    EXPECT_EQ(aiVector3D(0.0f, 0.0f, 0.0f), vertices[3]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 0.0f, 1.0f), colors[3]);
+    EXPECT_EQ(aiVector3D(1.0f, 0.0f, 0.0f), vertices[4]);
+    EXPECT_EQ(aiColor4D(1.0f, 0.6f, 0.3f, 1.0f), colors[4]);
+    EXPECT_EQ(aiVector3D(0.0f, 1.0f, 0.0f), vertices[5]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 0.0f, 1.0f), colors[5]);
+    EXPECT_EQ(aiVector3D(0.0f, 0.0f, 1.0f), vertices[6]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 1.0f, 1.0f), colors[6]);
+    EXPECT_EQ(aiVector3D(1.0f, 1.0f, 0.0f), vertices[7]);
+    EXPECT_EQ(aiColor4D(0.0f, 0.0f, 0.0f, 1.0f), colors[7]);
+    EXPECT_EQ(aiVector3D(1.0f, 0.0f, 0.0f), vertices[8]);
+    EXPECT_EQ(aiColor4D(1.0f, 0.6f, 0.3f, 1.0f), colors[8]);
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    ::Assimp::Exporter exporter;
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test_out.obj"));
+#endif // ASSIMP_BUILD_NO_EXPORT
+}
+
+TEST_F(utObjImportExport, no_vertex_colors_Test) {
+    ::Assimp::Importer importer;
+    const aiScene *const scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/box.obj", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMeshes, 1U);
+    const aiMesh *const mesh = scene->mMeshes[0];
+    EXPECT_FALSE(mesh->HasVertexColors(0));
+}
+
 TEST_F(utObjImportExport, issue1453_segfault) {
     static const char *curObjModel =
             "v  0.0  0.0  0.0\n"

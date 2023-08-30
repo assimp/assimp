@@ -323,7 +323,7 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
         return nullptr;
     }
 
-    aiMesh *pMesh = new aiMesh;
+    std::unique_ptr<aiMesh> pMesh(new aiMesh);
     if (!pObjMesh->m_name.empty()) {
         pMesh->mName.Set(pObjMesh->m_name);
     }
@@ -385,9 +385,9 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
     }
 
     // Create mesh vertices
-    createVertexArray(pModel, pData, meshIndex, pMesh, uiIdxCount);
+    createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
 
-    return pMesh;
+    return pMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -498,6 +498,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
 
                 if (vertexIndex) {
                     if (!last) {
+                        if (pMesh->mNumVertices <= newIndex + 1) {
+                            throw DeadlyImportError("OBJ: bad vertex index");
+                        }
+
                         pMesh->mVertices[newIndex + 1] = pMesh->mVertices[newIndex];
                         if (!sourceFace->m_normals.empty() && !pModel->mNormals.empty()) {
                             pMesh->mNormals[newIndex + 1] = pMesh->mNormals[newIndex];

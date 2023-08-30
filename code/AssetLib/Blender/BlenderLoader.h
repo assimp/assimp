@@ -180,6 +180,19 @@ private:
             const Blender::MTex *tex,
             Blender::ConversionData &conv_data);
 
+    // TODO: Move to a std::variant, once c++17 is supported.
+    struct StreamOrError {
+        std::shared_ptr<IOStream> stream;
+        std::shared_ptr<std::vector<char>> input;
+        std::string error;
+    };
+
+    // Returns either a stream (and optional input data for the stream) or
+    // an error if it can't parse the magic token.
+    StreamOrError ParseMagicToken(
+            const std::string &pFile,
+            IOSystem *pIOHandler) const;
+
 private: // static stuff, mostly logging and error reporting.
     // --------------------
     static void CheckActualType(const Blender::ElemBase *dt,

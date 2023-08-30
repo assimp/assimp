@@ -26,8 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #ifndef _WIN32
 #include <inttypes.h>
 #endif

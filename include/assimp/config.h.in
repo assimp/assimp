@@ -1036,6 +1036,15 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
+/** @brief Specifies whether the Collada loader will ignore the provided unit size.
+ *
+ * If this property is set to true, the unit size provided in the file header will
+ * be ignored and the file will be loaded without scaling the assets.
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_COLLADA_IGNORE_UNIT_SIZE "IMPORT_COLLADA_IGNORE_UNIT_SIZE"
+
+// ---------------------------------------------------------------------------
 /** @brief Specifies whether the Collada loader should use Collada names.
  *
  * If this property is set to true, the Collada names will be used as the node and

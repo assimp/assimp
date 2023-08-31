@@ -965,7 +965,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   SET( unzip_SRCS
-    ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
     ../contrib/unzip/ioapi.h
@@ -1200,7 +1199,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
 
     IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
       TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
-        -Wno-unused-function
         -Wno-microsoft-enum-value
         -Wno-switch-enum
         -Wno-covered-switch-default
@@ -1420,25 +1418,29 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
       COMPILE_PDB_NAME assimp${LIBRARY_SUFFIX}
       COMPILE_PDB_NAME_DEBUG assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}
     )
-  ENDIF()
 
-  IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
-    install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS Debug
-    )
-    install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS RelWithDebInfo
-    )
+    IF(GENERATOR_IS_MULTI_CONFIG)
+      install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS Debug
+      )
+      install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS RelWithDebInfo
+      )
+    ELSE()
+      install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS Debug
+      )
+      install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS RelWithDebInfo
+      )
+    ENDIF()
   ELSE()
-    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+    install(FILES $<TARGET_PDB_FILE:assimp>
       DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS Debug
-    )
-    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS RelWithDebInfo
     )
   ENDIF()
 ENDIF ()

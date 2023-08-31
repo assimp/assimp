@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.12
+ * pugixml parser - version 1.13
  * --------------------------------------------------------
  * Copyright (C) 2006-2022, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
@@ -14,7 +14,7 @@
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
 // Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
 #ifndef PUGIXML_VERSION
-#	define PUGIXML_VERSION 1120 // 1.12
+#	define PUGIXML_VERSION 1130 // 1.13
 #endif
 
 // Include user configuration file (this can define various configuration macros)
@@ -114,6 +114,8 @@
 // If C++ is 2011 or higher, use 'nullptr'
 #ifndef PUGIXML_NULL
 #	if __cplusplus >= 201103
+#		define PUGIXML_NULL nullptr
+#	elif defined(_MSC_VER) && _MSC_VER >= 1600
 #		define PUGIXML_NULL nullptr
 #	else
 #		define PUGIXML_NULL 0
@@ -416,6 +418,7 @@ namespace pugi
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
+		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
@@ -550,6 +553,7 @@ namespace pugi
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(const char_t* rhs);
+		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
@@ -775,6 +779,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
+		bool set(const char_t* rhs, size_t sz);
 		bool set(const char_t* rhs);
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")

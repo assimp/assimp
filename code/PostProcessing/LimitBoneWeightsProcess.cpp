@@ -81,6 +81,7 @@ void LimitBoneWeightsProcess::Execute( aiScene* pScene) {
 // Executes the post processing step on the given imported data.
 void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp) {
     this->mMaxWeights = pImp->GetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS,AI_LMW_MAX_WEIGHTS);
+    this->mRemoveEmptyBones = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, 1) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -172,9 +173,9 @@ void LimitBoneWeightsProcess::ProcessMesh(aiMesh* pMesh) {
     }
 
     // remove empty bones
-#ifdef AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES 
-    pMesh->mNumBones = removeEmptyBones(pMesh);
-#endif // AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES 
+    if (mRemoveEmptyBones) {
+        pMesh->mNumBones = removeEmptyBones(pMesh);
+    }
 
     if (!DefaultLogger::isNullLogger()) {
         ASSIMP_LOG_INFO("Removed ", removed, " weights. Input bones: ", old_bones, ". Output bones: ", pMesh->mNumBones);

@@ -75,9 +75,7 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-XFileImporter::XFileImporter() : mBuffer() {
-    // empty
-}
+XFileImporter::XFileImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -580,7 +578,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
                 aiString name;
                 pScene->mMaterials[b]->Get( AI_MATKEY_NAME, name);
                 if( strcmp( name.C_Str(), oldMat.mName.data()) == 0 ) {
-                    oldMat.sceneIndex = a;
+                    oldMat.sceneIndex = b;
                     break;
                 }
             }

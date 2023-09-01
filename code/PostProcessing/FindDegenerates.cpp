@@ -41,10 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file  FindDegenerates.cpp
  *  @brief Implementation of the FindDegenerates post-process step.
-*/
+ */
 
-#include "ProcessHelper.h"
 #include "FindDegenerates.h"
+#include "Geometry/GeometryUtils.h"
+#include "ProcessHelper.h"
 
 #include <assimp/Exceptional.h>
 
@@ -53,39 +54,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // Correct node indices to meshes and remove references to deleted mesh
-static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned int, unsigned int>& meshMap);
+static void updateSceneGraph(aiNode *pNode, const std::unordered_map<unsigned int, unsigned int> &meshMap);
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 FindDegeneratesProcess::FindDegeneratesProcess() :
-        mConfigRemoveDegenerates( false ),
-        mConfigCheckAreaOfTriangle( false ){
+        mConfigRemoveDegenerates(false),
+        mConfigCheckAreaOfTriangle(false) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-FindDegeneratesProcess::~FindDegeneratesProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool FindDegeneratesProcess::IsActive( unsigned int pFlags) const {
+bool FindDegeneratesProcess::IsActive(unsigned int pFlags) const {
     return 0 != (pFlags & aiProcess_FindDegenerates);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup import configuration
-void FindDegeneratesProcess::SetupProperties(const Importer* pImp) {
+void FindDegeneratesProcess::SetupProperties(const Importer *pImp) {
     // Get the current value of AI_CONFIG_PP_FD_REMOVE
-    mConfigRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE,0));
-    mConfigCheckAreaOfTriangle = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_CHECKAREA) );
+    mConfigRemoveDegenerates = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_REMOVE, 0));
+    mConfigCheckAreaOfTriangle = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_FD_CHECKAREA));
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void FindDegeneratesProcess::Execute( aiScene* pScene) {
+void FindDegeneratesProcess::Execute(aiScene *pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess begin");
-    if ( nullptr == pScene) {
+    if (nullptr == pScene) {
         return;
     }
 
@@ -115,7 +112,7 @@ void FindDegeneratesProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("FindDegeneratesProcess finished");
 }
 
-static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned int, unsigned int>& meshMap) {
+static void updateSceneGraph(aiNode *pNode, const std::unordered_map<unsigned int, unsigned int> &meshMap) {
     unsigned int targetIndex = 0;
     for (unsigned i = 0; i < pNode->mNumMeshes; ++i) {
         const unsigned int sourceMeshIndex = pNode->mMeshes[i];
@@ -126,56 +123,25 @@ static void updateSceneGraph(aiNode* pNode, const std::unordered_map<unsigned in
         }
     }
     pNode->mNumMeshes = targetIndex;
-    //recurse to all children
+    // recurse to all children
     for (unsigned i = 0; i < pNode->mNumChildren; ++i) {
         updateSceneGraph(pNode->mChildren[i], meshMap);
     }
 }
 
-static ai_real heron( ai_real a, ai_real b, ai_real c ) {
-    ai_real s = (a + b + c) / 2;
-    ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), (ai_real)0.5 );
-    return area;
-}
-
-static ai_real distance3D( const aiVector3D &vA, aiVector3D &vB ) {
-    const ai_real lx = ( vB.x - vA.x );
-    const ai_real ly = ( vB.y - vA.y );
-    const ai_real lz = ( vB.z - vA.z );
-    ai_real a = lx*lx + ly*ly + lz*lz;
-    ai_real d = pow( a, (ai_real)0.5 );
-
-    return d;
-}
-
-static ai_real calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh ) {
-    ai_real area = 0;
-
-    aiVector3D vA( mesh->mVertices[ face.mIndices[ 0 ] ] );
-    aiVector3D vB( mesh->mVertices[ face.mIndices[ 1 ] ] );
-    aiVector3D vC( mesh->mVertices[ face.mIndices[ 2 ] ] );
-
-    ai_real a( distance3D( vA, vB ) );
-    ai_real b( distance3D( vB, vC ) );
-    ai_real c( distance3D( vC, vA ) );
-    area = heron( a, b, c );
-
-    return area;
-}
-
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported mesh
-bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
+bool FindDegeneratesProcess::ExecuteOnMesh(aiMesh *mesh) {
     mesh->mPrimitiveTypes = 0;
 
     std::vector<bool> remove_me;
     if (mConfigRemoveDegenerates) {
-        remove_me.resize( mesh->mNumFaces, false );
+        remove_me.resize(mesh->mNumFaces, false);
     }
 
     unsigned int deg = 0, limit;
-    for ( unsigned int a = 0; a < mesh->mNumFaces; ++a ) {
-        aiFace& face = mesh->mFaces[a];
+    for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
+        aiFace &face = mesh->mFaces[a];
         bool first = true;
 
         // check whether the face contains degenerated entries
@@ -185,43 +151,43 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
             // double points may not come directly after another.
             limit = face.mNumIndices;
             if (face.mNumIndices > 4) {
-                limit = std::min( limit, i+2 );
+                limit = std::min(limit, i + 2);
             }
 
-            for (unsigned int t = i+1; t < limit; ++t) {
-                if (mesh->mVertices[face.mIndices[ i ] ] == mesh->mVertices[ face.mIndices[ t ] ]) {
+            for (unsigned int t = i + 1; t < limit; ++t) {
+                if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]]) {
                     // we have found a matching vertex position
                     // remove the corresponding index from the array
                     --face.mNumIndices;
                     --limit;
                     for (unsigned int m = t; m < face.mNumIndices; ++m) {
-                        face.mIndices[ m ] = face.mIndices[ m+1 ];
+                        face.mIndices[m] = face.mIndices[m + 1];
                     }
                     --t;
 
                     // NOTE: we set the removed vertex index to an unique value
                     // to make sure the developer gets notified when his
                     // application attempts to access this data.
-                    face.mIndices[ face.mNumIndices ] = 0xdeadbeef;
+                    face.mIndices[face.mNumIndices] = 0xdeadbeef;
 
-                    if(first) {
+                    if (first) {
                         ++deg;
                         first = false;
                     }
 
-                    if ( mConfigRemoveDegenerates ) {
-                        remove_me[ a ] = true;
+                    if (mConfigRemoveDegenerates) {
+                        remove_me[a] = true;
                         goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
                     }
                 }
             }
 
-            if ( mConfigCheckAreaOfTriangle ) {
-                if ( face.mNumIndices == 3 ) {
-                    ai_real area = calculateAreaOfTriangle( face, mesh );
+            if (mConfigCheckAreaOfTriangle) {
+                if (face.mNumIndices == 3) {
+                    ai_real area = GeometryUtils::calculateAreaOfTriangle(face, mesh);
                     if (area < ai_epsilon) {
-                        if ( mConfigRemoveDegenerates ) {
-                            remove_me[ a ] = true;
+                        if (mConfigRemoveDegenerates) {
+                            remove_me[a] = true;
                             ++deg;
                             goto evil_jump_outside;
                         }
@@ -233,8 +199,7 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
         }
 
         // We need to update the primitive flags array of the mesh.
-        switch (face.mNumIndices)
-        {
+        switch (face.mNumIndices) {
         case 1u:
             mesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
             break;
@@ -248,30 +213,28 @@ bool FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh) {
             mesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             break;
         };
-evil_jump_outside:
+    evil_jump_outside:
         continue;
     }
 
     // If AI_CONFIG_PP_FD_REMOVE is true, remove degenerated faces from the import
     if (mConfigRemoveDegenerates && deg) {
         unsigned int n = 0;
-        for (unsigned int a = 0; a < mesh->mNumFaces; ++a)
-        {
-            aiFace& face_src = mesh->mFaces[a];
+        for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
+            aiFace &face_src = mesh->mFaces[a];
             if (!remove_me[a]) {
-                aiFace& face_dest = mesh->mFaces[n++];
+                aiFace &face_dest = mesh->mFaces[n++];
 
                 // Do a manual copy, keep the index array
                 face_dest.mNumIndices = face_src.mNumIndices;
-                face_dest.mIndices    = face_src.mIndices;
+                face_dest.mIndices = face_src.mIndices;
 
                 if (&face_src != &face_dest) {
                     // clear source
                     face_src.mNumIndices = 0;
                     face_src.mIndices = nullptr;
                 }
-            }
-            else {
+            } else {
                 // Otherwise delete it if we don't need this face
                 delete[] face_src.mIndices;
                 face_src.mIndices = nullptr;
@@ -281,15 +244,15 @@ evil_jump_outside:
         // Just leave the rest of the array unreferenced, we don't care for now
         mesh->mNumFaces = n;
         if (!mesh->mNumFaces) {
-            //The whole mesh consists of degenerated faces
-            //signal upward, that this mesh should be deleted.
+            // The whole mesh consists of degenerated faces
+            // signal upward, that this mesh should be deleted.
             ASSIMP_LOG_VERBOSE_DEBUG("FindDegeneratesProcess removed a mesh full of degenerated primitives");
             return true;
         }
     }
 
     if (deg && !DefaultLogger::isNullLogger()) {
-        ASSIMP_LOG_WARN( "Found ", deg, " degenerated primitives");
+        ASSIMP_LOG_WARN("Found ", deg, " degenerated primitives");
     }
     return false;
 }

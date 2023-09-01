@@ -97,9 +97,12 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         if (prop->mType != aiPTI_Buffer) {
             return AI_FAILURE;
         }
-
+// std::min has in some cases a conflict with a defined min
+#ifdef min
+#   undef min
+#endif
         iNum = static_cast<unsigned int>(std::min(static_cast<size_t>(iNum),prop->mDataLength / sizeof(Type)));
-        ::memcpy(pOut,prop->mData,iNum * sizeof(Type));
+        std::memcpy(pOut,prop->mData,iNum * sizeof(Type));
         if (pMax) {
             *pMax = iNum;
         }
@@ -208,7 +211,8 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx,aiColor3D& pOut) const {
     aiColor4D c;
     const aiReturn ret = aiGetMaterialColor(this,pKey,type,idx,&c);
-    pOut = aiColor3D(c.r,c.g,c.b);
+    if (ret == aiReturn_SUCCESS)
+        pOut = aiColor3D(c.r,c.g,c.b);
     return ret;
 }
 // ---------------------------------------------------------------------------
@@ -224,8 +228,8 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 
 // ---------------------------------------------------------------------------
 template<class TYPE>
-aiReturn aiMaterial::AddProperty (const TYPE* pInput, 
-        const unsigned int pNumValues, const char* pKey, unsigned int type, 
+aiReturn aiMaterial::AddProperty (const TYPE* pInput,
+        const unsigned int pNumValues, const char* pKey, unsigned int type,
         unsigned int index) {
     return AddBinaryProperty((const void*)pInput, pNumValues * sizeof(TYPE),
         pKey,type,index,aiPTI_Buffer);

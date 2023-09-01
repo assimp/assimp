@@ -92,18 +92,10 @@ inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
-        mFileName(),
-        mMeshIndexByID(),
-        mMaterialIndexByName(),
-        mMeshes(),
-        newMats(),
-        mCameras(),
-        mLights(),
-        mTextures(),
-        mAnims(),
         noSkeletonMesh(false),
         removeEmptyBones(false),
         ignoreUpDirection(false),
+        ignoreUnitSize(false),
         useColladaName(false),
         mNodeNameCounter(0) {
     // empty
@@ -131,6 +123,7 @@ void ColladaLoader::SetupProperties(const Importer *pImp) {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
     removeEmptyBones = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, true) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION, 0) != 0;
+    ignoreUnitSize = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UNIT_SIZE, 0) != 0;
     useColladaName = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_USE_COLLADA_NAMES, 0) != 0;
 }
 
@@ -179,12 +172,15 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
     // ... then fill the materials with the now adjusted settings
     FillMaterials(parser, pScene);
 
-    // Apply unit-size scale calculation
-
-    pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0, 0, 0,
-            0, parser.mUnitSize, 0, 0,
-            0, 0, parser.mUnitSize, 0,
-            0, 0, 0, 1);
+    if (!ignoreUnitSize) {
+        // Apply unit-size scale calculation
+        pScene->mRootNode->mTransformation *= aiMatrix4x4(
+                parser.mUnitSize, 0, 0, 0,
+                0, parser.mUnitSize, 0, 0,
+                0, 0, parser.mUnitSize, 0,
+                0, 0, 0, 1);
+    }
+    
     if (!ignoreUpDirection) {
         // Convert to Y_UP, if different orientation
         if (parser.mUpDirection == ColladaParser::UP_X) {
@@ -1523,7 +1519,7 @@ void ColladaLoader::AddTexture(aiMaterial &mat,
         map = -1;
         for (std::string::const_iterator it = sampler.mUVChannel.begin(); it != sampler.mUVChannel.end(); ++it) {
             if (IsNumeric(*it)) {
-                map = strtoul10(&(*it));        
+                map = strtoul10(&(*it));
                 break;
             }
         }

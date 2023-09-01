@@ -227,7 +227,9 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             }
         } else if (TokenMatch(buffer, "texture", 7)) {
             SkipSpaces(&buffer);
-            buffer = AcGetString(buffer, obj.texture);
+            std::string texture;
+            buffer = AcGetString(buffer, texture);
+            obj.textures.push_back(texture);
         } else if (TokenMatch(buffer, "texrep", 6)) {
             SkipSpaces(&buffer);
             buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 2, &obj.texRepeat);
@@ -351,8 +353,8 @@ void AC3DImporter::ConvertMaterial(const Object &object,
         s.Set(matSrc.name);
         matDest.AddProperty(&s, AI_MATKEY_NAME);
     }
-    if (object.texture.length()) {
-        s.Set(object.texture);
+    if (!object.textures.empty()) {
+        s.Set(object.textures[0]);
         matDest.AddProperty(&s, AI_MATKEY_TEXTURE_DIFFUSE(0));
 
         // UV transformation
@@ -532,7 +534,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 // allocate UV coordinates, but only if the texture name for the
                 // surface is not empty
                 aiVector3D *uv = nullptr;
-                if (object.texture.length()) {
+                if (!object.textures.empty()) {
                     uv = mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
                     mesh->mNumUVComponents[0] = 2;
                 }

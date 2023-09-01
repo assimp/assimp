@@ -252,9 +252,9 @@ void ObjFileMtlImporter::load() {
             case 'a': // Anisotropy
             {
                 ++m_DataIt;
-                getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
                 if (m_pModel->mCurrentMaterial != nullptr)
-                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+                    getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
             default: {
@@ -371,6 +371,7 @@ void ObjFileMtlImporter::getTexture() {
     if (m_pModel->mCurrentMaterial == nullptr) {
         m_pModel->mCurrentMaterial = new ObjFile::Material();
         m_pModel->mCurrentMaterial->MaterialName.Set("Empty_Material");
+        m_pModel->mMaterialMap["Empty_Material"] = m_pModel->mCurrentMaterial;
     }
 
     const char *pPtr(&(*m_DataIt));
@@ -514,16 +515,16 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
             DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
             getFloat(it, m_DataItEnd, m_pModel->mCurrentMaterial->bump_multiplier);
             skipToken = 2;
-        } else if (!ASSIMP_strincmp(pPtr, BlendUOption, static_cast<unsigned int>(strlen(BlendUOption))) || 
+        } else if (!ASSIMP_strincmp(pPtr, BlendUOption, static_cast<unsigned int>(strlen(BlendUOption))) ||
                 !ASSIMP_strincmp(pPtr, BlendVOption, static_cast<unsigned int>(strlen(BlendVOption))) ||
-                !ASSIMP_strincmp(pPtr, BoostOption, static_cast<unsigned int>(strlen(BoostOption))) || 
-                !ASSIMP_strincmp(pPtr, ResolutionOption, static_cast<unsigned int>(strlen(ResolutionOption))) || 
+                !ASSIMP_strincmp(pPtr, BoostOption, static_cast<unsigned int>(strlen(BoostOption))) ||
+                !ASSIMP_strincmp(pPtr, ResolutionOption, static_cast<unsigned int>(strlen(ResolutionOption))) ||
                 !ASSIMP_strincmp(pPtr, ChannelOption, static_cast<unsigned int>(strlen(ChannelOption)))) {
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption, static_cast<unsigned int>(strlen(ModifyMapOption)))) {
             skipToken = 3;
-        } else if (!ASSIMP_strincmp(pPtr, OffsetOption, static_cast<unsigned int>(strlen(OffsetOption))) || 
-                !ASSIMP_strincmp(pPtr, ScaleOption, static_cast<unsigned int>(strlen(ScaleOption))) || 
+        } else if (!ASSIMP_strincmp(pPtr, OffsetOption, static_cast<unsigned int>(strlen(OffsetOption))) ||
+                !ASSIMP_strincmp(pPtr, ScaleOption, static_cast<unsigned int>(strlen(ScaleOption))) ||
                 !ASSIMP_strincmp(pPtr, TurbulenceOption, static_cast<unsigned int>(strlen(TurbulenceOption)))) {
             skipToken = 4;
         }

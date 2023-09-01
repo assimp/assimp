@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogAux.h>
 #include <assimp/fast_atof.h>
 
+#include "Common/StackAllocator.h"
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
 
@@ -63,14 +64,14 @@ class Parser;
 class Element;
 
 // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-typedef std::vector< Scope* > ScopeList;
-typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+using ScopeList = std::vector<Scope*>;
+using ElementMap = std::fbx_unordered_multimap< std::string, Element*>;
+using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const_iterator>;
 
-typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
-
-#   define new_Scope new Scope
-#   define new_Element new Element
-
+#define new_Scope new (allocator.Allocate(sizeof(Scope))) Scope
+#define new_Element new (allocator.Allocate(sizeof(Element))) Element
+#define delete_Scope(_p) (_p)->~Scope()
+#define delete_Element(_p) (_p)->~Element()
 
 /** FBX data entity that consists of a key:value tuple.
  *
@@ -82,15 +83,16 @@ typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> Element
  *  @endverbatim
  *
  *  As can be seen in this sample, elements can contain nested #Scope
- *  as their trailing member.  **/
+ *  as their trailing member.  
+**/
 class Element
 {
 public:
     Element(const Token& key_token, Parser& parser);
-    ~Element() = default;
+    ~Element();
 
     const Scope* Compound() const {
-        return compound.get();
+        return compound;
     }
 
     const Token& KeyToken() const {
@@ -104,7 +106,7 @@ public:
 private:
     const Token& key_token;
     TokenList tokens;
-    std::unique_ptr<Scope> compound;
+    Scope* compound;
 };
 
 /** FBX data entity that consists of a 'scope', a collection
@@ -159,8 +161,8 @@ class Parser
 public:
     /** Parse given a token list. Does not take ownership of the tokens -
      *  the objects must persist during the entire parser lifetime */
-    Parser (const TokenList& tokens,bool is_binary);
-    ~Parser() = default;
+    Parser(const TokenList &tokens, StackAllocator &allocator, bool is_binary);
+    ~Parser();
 
     const Scope& GetRootScope() const {
         return *root;
@@ -168,6 +170,10 @@ public:
 
     bool IsBinary() const {
         return is_binary;
+    }
+
+    StackAllocator &GetAllocator() {
+        return allocator;
     }
 
 private:
@@ -180,10 +186,10 @@ private:
 
 private:
     const TokenList& tokens;
-
+    StackAllocator &allocator;
     TokenPtr last, current;
     TokenList::const_iterator cursor;
-    std::unique_ptr<Scope> root;
+    Scope *root;
 
     const bool is_binary;
 };

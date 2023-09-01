@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,14 +45,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+// ------------------------------------------------------------------------------------------------
 CIOStreamWrapper::~CIOStreamWrapper() {
-    /* Various places depend on this destructor to close the file */
-    if (mFile) {
+    // Various places depend on this destructor to close the file
+    if (mFile != nullptr) {
+        
         mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
     }
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 size_t CIOStreamWrapper::Read(void *pvBuffer,
         size_t pSize,
         size_t pCount) {
@@ -62,7 +62,7 @@ size_t CIOStreamWrapper::Read(void *pvBuffer,
     return mFile->ReadProc(mFile, (char *)pvBuffer, pSize, pCount);
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 size_t CIOStreamWrapper::Write(const void *pvBuffer,
         size_t pSize,
         size_t pCount) {
@@ -70,23 +70,23 @@ size_t CIOStreamWrapper::Write(const void *pvBuffer,
     return mFile->WriteProc(mFile, (const char *)pvBuffer, pSize, pCount);
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 aiReturn CIOStreamWrapper::Seek(size_t pOffset,
         aiOrigin pOrigin) {
     return mFile->SeekProc(mFile, pOffset, pOrigin);
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 size_t CIOStreamWrapper::Tell() const {
     return mFile->TellProc(mFile);
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 size_t CIOStreamWrapper::FileSize() const {
     return mFile->FileSizeProc(mFile);
 }
 
-// ...................................................................
+// ------------------------------------------------------------------------------------------------
 void CIOStreamWrapper::Flush() {
     return mFile->FlushProc(mFile);
 }

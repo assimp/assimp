@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_TOKENIZER_H
 
 #include "FBXCompileConfig.h"
+#include "Common/StackAllocator.h"
 #include <assimp/ai_assert.h>
 #include <assimp/defs.h>
 #include <vector>
@@ -154,11 +155,11 @@ private:
     const unsigned int column;
 };
 
-// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
 typedef const Token* TokenPtr;
 typedef std::vector< TokenPtr > TokenList;
 
-#define new_Token new Token
+#define new_Token new (token_allocator.Allocate(sizeof(Token))) Token
+#define delete_Token(_p) (_p)->~Token()
 
 
 /** Main FBX tokenizer function. Transform input buffer into a list of preprocessed tokens.
@@ -168,7 +169,7 @@ typedef std::vector< TokenPtr > TokenList;
  * @param output_tokens Receives a list of all tokens in the input data.
  * @param input_buffer Textual input buffer to be processed, 0-terminated.
  * @throw DeadlyImportError if something goes wrong */
-void Tokenize(TokenList& output_tokens, const char* input);
+void Tokenize(TokenList &output_tokens, const char *input, StackAllocator &tokenAllocator);
 
 
 /** Tokenizer function for binary FBX files.
@@ -179,7 +180,7 @@ void Tokenize(TokenList& output_tokens, const char* input);
  * @param input_buffer Binary input buffer to be processed.
  * @param length Length of input buffer, in bytes. There is no 0-terminal.
  * @throw DeadlyImportError if something goes wrong */
-void TokenizeBinary(TokenList& output_tokens, const char* input, size_t length);
+void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, StackAllocator &tokenAllocator);
 
 
 } // ! FBX

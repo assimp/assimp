@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2023, assimp team
 #
 # All rights reserved.
 #
@@ -49,8 +49,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.24.0.tar.gz"
-    SHA1 "a3d7f4372b1dcd52faa6ff4a3bd5358e1d0e5efd"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.17.tar.gz"
+    SHA1 "e6396699e414120e32557fe92db097b7655b760b"
   )
 
   add_definitions(-DASSIMP_USE_HUNTER)
@@ -82,10 +82,6 @@ OPTION( ASSIMP_ANDROID_JNIIOSYSTEM
 )
 OPTION( ASSIMP_NO_EXPORT
   "Disable Assimp's export functionality."
-  OFF
-)
-OPTION( ASSIMP_BUILD_ZLIB
-  "Build your own zlib"
   OFF
 )
 OPTION( ASSIMP_BUILD_ASSIMP_TOOLS
@@ -133,6 +129,18 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
    "Don't call git to get the hash."
    OFF
 )
+
+IF (WIN32)
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    ON
+  )
+ELSE()
+  OPTION( ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    ON
+  )
+ENDIF()
 
 IF (WIN32)
   # Use subset of Windows.h
@@ -260,30 +268,37 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW)
     SET(CMAKE_CXX_STANDARD 17)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
+  
+  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+    MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
+    ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
+  ENDIF()
   # hide all not-exported symbols
   IF(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "mips64" )
-	SET(CMAKE_CXX_FLAGS "-mxgot -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
-	SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-	SET(LIBSTDC++_LIBRARIES -lstdc++)
+    SET(CMAKE_CXX_FLAGS "-mxgot -fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+    SET(LIBSTDC++_LIBRARIES -lstdc++)
   ELSE()
-	SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
-	SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
-	SET(LIBSTDC++_LIBRARIES -lstdc++)
+    SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall ${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+    SET(LIBSTDC++_LIBRARIES -lstdc++)
   ENDIF()
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
-    ADD_COMPILE_OPTIONS(/bigobj /W4 /WX )
+    ADD_COMPILE_OPTIONS(/bigobj)
   ELSE() # msvc
-    ADD_COMPILE_OPTIONS(/MP /bigobj /W4 /WX)
+    ADD_COMPILE_OPTIONS(/MP /bigobj)
   ENDIF()
+  
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)	
   ENDIF()
-  ADD_COMPILE_OPTIONS(/wd4244) #supress warning for double to float conversion if Double precission is activated
+  # supress warning for double to float conversion if Double precission is activated
+  ADD_COMPILE_OPTIONS(/wd4244) 
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
-  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
 ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
@@ -388,14 +403,6 @@ IF (NOT TARGET uninstall AND ASSIMP_INSTALL)
   ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 ENDIF()
 
-# cmake configuration files
-if(${BUILD_SHARED_LIBS})
-  set(BUILD_LIB_TYPE SHARED)
-else()
-  set(BUILD_LIB_TYPE STATIC)
-  add_definitions(-DDDL_STATIC_LIBRARY=OFF)
-endif()
-
 IF( UNIX )
   # Use GNUInstallDirs for Unix predefined directories
   INCLUDE(GNUInstallDirs)
@@ -488,7 +495,11 @@ ELSE()
     FIND_PACKAGE(ZLIB)
   ENDIF()
 
-  IF( NOT ZLIB_FOUND )
+  IF ( NOT ZLIB_FOUND AND NOT ASSIMP_BUILD_ZLIB )
+    message( FATAL_ERROR
+      "Build configured with -DASSIMP_BUILD_ZLIB=OFF but unable to find zlib"
+    )
+  ELSEIF( NOT ZLIB_FOUND )
     MESSAGE(STATUS "compiling zlib from sources")
     INCLUDE(CheckIncludeFile)
     INCLUDE(CheckTypeSize)

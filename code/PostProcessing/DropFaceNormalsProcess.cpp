@@ -42,35 +42,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Implementation of the post processing step to drop face
-* normals for all imported faces.
-*/
-
+ * normals for all imported faces.
+ */
 
 #include "DropFaceNormalsProcess.h"
+#include <assimp/Exceptional.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/Exceptional.h>
 
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-DropFaceNormalsProcess::DropFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-DropFaceNormalsProcess::~DropFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool DropFaceNormalsProcess::IsActive( unsigned int pFlags) const {
-    return  (pFlags & aiProcess_DropNormals) != 0;
+bool DropFaceNormalsProcess::IsActive(unsigned int pFlags) const {
+    return (pFlags & aiProcess_DropNormals) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void DropFaceNormalsProcess::Execute( aiScene* pScene) {
+void DropFaceNormalsProcess::Execute(aiScene *pScene) {
     ASSIMP_LOG_DEBUG("DropFaceNormalsProcess begin");
 
     if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
@@ -78,21 +69,21 @@ void DropFaceNormalsProcess::Execute( aiScene* pScene) {
     }
 
     bool bHas = false;
-    for( unsigned int a = 0; a < pScene->mNumMeshes; a++) {
-        bHas |= this->DropMeshFaceNormals( pScene->mMeshes[a]);
+    for (unsigned int a = 0; a < pScene->mNumMeshes; a++) {
+        bHas |= this->DropMeshFaceNormals(pScene->mMeshes[a]);
     }
-    if (bHas)   {
+    if (bHas) {
         ASSIMP_LOG_INFO("DropFaceNormalsProcess finished. "
-            "Face normals have been removed");
+                        "Face normals have been removed");
     } else {
         ASSIMP_LOG_DEBUG("DropFaceNormalsProcess finished. "
-            "No normals were present");
+                         "No normals were present");
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* mesh) {
+bool DropFaceNormalsProcess::DropMeshFaceNormals(aiMesh *mesh) {
     ai_assert(nullptr != mesh);
 
     if (nullptr == mesh->mNormals) {

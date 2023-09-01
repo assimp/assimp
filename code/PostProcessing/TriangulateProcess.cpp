@@ -156,26 +156,15 @@ namespace {
 
 }
 
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-TriangulateProcess::TriangulateProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-TriangulateProcess::~TriangulateProcess() = default;
-
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool TriangulateProcess::IsActive( unsigned int pFlags) const
-{
+bool TriangulateProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_Triangulate) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void TriangulateProcess::Execute( aiScene* pScene)
-{
+void TriangulateProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("TriangulateProcess begin");
 
     bool bHas = false;
@@ -196,8 +185,7 @@ void TriangulateProcess::Execute( aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Triangulates the given mesh.
-bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
-{
+bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
     // Now we have aiMesh::mPrimitiveTypes, so this is only here for test cases
     if (!pMesh->mPrimitiveTypes)    {
         bool bNeed = false;
@@ -227,8 +215,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         if( face.mNumIndices <= 3) {
             numOut++;
 
-        }
-        else {
+        } else {
             numOut += face.mNumIndices-2;
             max_out = std::max(max_out,face.mNumIndices);
         }
@@ -464,7 +451,22 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                         *pnt2 = &temp_verts[next];
 
                     // Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
-                    if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1)) {
+                    if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1) == 1) {
+                        continue;
+                    }
+
+                    // Skip when three point is in a line
+                    aiVector2D left = *pnt0 - *pnt1;
+                    aiVector2D right = *pnt2 - *pnt1;
+
+                    left.Normalize();
+                    right.Normalize();
+                    auto mul = left * right;
+
+                    // if the angle is 0 or 180
+                    if (std::abs(mul - 1.f) < ai_epsilon || std::abs(mul + 1.f) < ai_epsilon) {
+                        // skip this ear
+                        ASSIMP_LOG_WARN("Skip a ear, due to its angle is near 0 or 180.");
                         continue;
                     }
 
@@ -505,22 +507,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 #endif
                     num = 0;
                     break;
-
-                    /*curOut -= (max-num); // undo all previous work
-                    for (tmp = 0; tmp < max-2; ++tmp) {
-                        aiFace& nface = *curOut++;
-
-                        nface.mNumIndices = 3;
-                        if (!nface.mIndices)
-                            nface.mIndices = new unsigned int[3];
-
-                        nface.mIndices[0] = 0;
-                        nface.mIndices[1] = tmp+1;
-                        nface.mIndices[2] = tmp+2;
-
-                    }
-                    num = 0;
-                    break;*/
                 }
 
                 aiFace& nface = *curOut++;
@@ -573,23 +559,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
         for(aiFace* f = last_face; f != curOut; ) {
             unsigned int* i = f->mIndices;
-
-            //  drop dumb 0-area triangles - deactivated for now:
-            //FindDegenerates post processing step can do the same thing
-            //if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
-            //    ASSIMP_LOG_VERBOSE_DEBUG("Dropping triangle with area 0");
-            //    --curOut;
-
-            //    delete[] f->mIndices;
-            //    f->mIndices = nullptr;
-
-            //    for(aiFace* ff = f; ff != curOut; ++ff) {
-            //        ff->mNumIndices = (ff+1)->mNumIndices;
-            //        ff->mIndices = (ff+1)->mIndices;
-            //        (ff+1)->mIndices = nullptr;
-            //    }
-            //    continue;
-            //}
 
             i[0] = idx[i[0]];
             i[1] = idx[i[1]];

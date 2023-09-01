@@ -433,7 +433,7 @@ struct aiScene
         for (unsigned int i = 0; i < mNumTextures; i++) {
             const char* shortTextureFilename = GetShortFilename(mTextures[i]->mFilename.C_Str());
             if (strcmp(shortTextureFilename, shortFilename) == 0) {
-                return std::make_pair(mTextures[i], i);
+                return std::make_pair(mTextures[i], static_cast<int>(i));
             }
         }
         return std::make_pair(nullptr, -1);
@@ -450,7 +450,7 @@ struct aiScene
 };
 
 #ifdef __cplusplus
-} 
+}
 #endif //! extern "C"
 
 #endif // AI_SCENE_H_INC

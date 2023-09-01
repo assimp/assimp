@@ -101,7 +101,7 @@ protected:
     void WritePointLight(const aiLight *const light);
     void WriteDirectionalLight(const aiLight *const light);
     void WriteSpotLight(const aiLight *const light);
-    void WriteAmbienttLight(const aiLight *const light);
+    void WriteAmbientLight(const aiLight *const light);
 
     /// Writes the controller library
     void WriteControllerLibrary();

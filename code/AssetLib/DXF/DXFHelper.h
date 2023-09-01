@@ -65,7 +65,6 @@ public:
     LineReader(StreamReaderLE& reader)
     : splitter(reader,false,true)
     , groupcode( 0 )
-    , value()
     , end() {
         // empty
     }
@@ -186,8 +185,7 @@ struct InsertBlock {
     InsertBlock()
     : pos()
     , scale(1.f,1.f,1.f)
-    , angle()
-    , name() {
+    , angle() {
         // empty
     }
 

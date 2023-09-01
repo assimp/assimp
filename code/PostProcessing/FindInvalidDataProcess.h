@@ -64,35 +64,37 @@ namespace Assimp {
  *  which have zero normal vectors. */
 class ASSIMP_API FindInvalidDataProcess : public BaseProcess {
 public:
+    // -------------------------------------------------------------------
+    /// The default class constructor / destructor.
     FindInvalidDataProcess();
-    ~FindInvalidDataProcess();
+    ~FindInvalidDataProcess() override = default;
 
     // -------------------------------------------------------------------
-    //
-    bool IsActive(unsigned int pFlags) const;
+    /// Returns active state.
+    bool IsActive(unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    // Setup import settings
-    void SetupProperties(const Importer *pImp);
+    /// Setup import settings
+    void SetupProperties(const Importer *pImp) override;
 
     // -------------------------------------------------------------------
-    // Run the step
-    void Execute(aiScene *pScene);
+    /// Run the step
+    void Execute(aiScene *pScene) override;
 
     // -------------------------------------------------------------------
-    /** Executes the post-processing step on the given mesh
-     * @param pMesh The mesh to process.
-     * @return 0 - nothing, 1 - removed sth, 2 - please delete me  */
+    /// Executes the post-processing step on the given mesh
+    /// @param pMesh The mesh to process.
+    /// @return 0 - nothing, 1 - removed sth, 2 - please delete me  */
     int ProcessMesh(aiMesh *pMesh);
 
     // -------------------------------------------------------------------
-    /** Executes the post-processing step on the given animation
-     * @param anim The animation to process.  */
+    /// Executes the post-processing step on the given animation
+    /// @param anim The animation to process.  */
     void ProcessAnimation(aiAnimation *anim);
 
     // -------------------------------------------------------------------
-    /** Executes the post-processing step on the given anim channel
-     * @param anim The animation channel to process.*/
+    /// Executes the post-processing step on the given anim channel
+    /// @param anim The animation channel to process.*/
     void ProcessAnimationChannel(aiNodeAnim *anim);
 
 private:

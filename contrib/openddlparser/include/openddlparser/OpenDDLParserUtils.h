@@ -54,7 +54,9 @@ inline bool isSeparator(T in) {
     return false;
 }
 
-static const unsigned char chartype_table[256] = {
+const size_t CharTableSize = 256;
+
+static const unsigned char chartype_table[CharTableSize] = {
     0,
     0,
     0,
@@ -318,6 +320,10 @@ static const unsigned char chartype_table[256] = {
 
 template <class T>
 inline bool isNumeric(const T in) {
+    if (static_cast<size_t>(in) >= CharTableSize) {
+        return '\0';
+    }
+
     size_t idx = static_cast<size_t>(in);
     return idx < sizeof(chartype_table) && (chartype_table[idx] == 1);
 }
@@ -433,7 +439,7 @@ inline bool isEndofLine(const T in) {
 
 template <class T>
 inline static T *getNextSeparator(T *in, T *end) {
-    while (!isSeparator(*in) || in == end) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
     }
     return in;

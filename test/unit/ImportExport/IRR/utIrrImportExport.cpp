@@ -48,19 +48,23 @@ using namespace Assimp;
 
 class utIrrImportExport : public AbstractImportExportBase {
 public:
-	virtual bool importerTest() {
-		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box.irr", aiProcess_ValidateDataStructure);
-		return nullptr != scene;
-	}
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box.irr", aiProcess_ValidateDataStructure);
+        // Only one box thus only one mesh
+        return nullptr != scene && scene->mNumMeshes == 1;
+    }
 };
 
 TEST_F(utIrrImportExport, importSimpleIrrTest) {
-	EXPECT_TRUE(importerTest());
+    EXPECT_TRUE(importerTest());
 }
 
 TEST_F(utIrrImportExport, importSGIrrTest) {
-	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_SameHierarchy.irr", aiProcess_ValidateDataStructure);
-	EXPECT_NE( nullptr,scene);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_SameHierarchy.irr", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mNumMeshes, 2);
+    EXPECT_EQ(scene->mNumMaterials, 2);
+    EXPECT_GT(scene->mMeshes[0]->mNumVertices, 0);
 }

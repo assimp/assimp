@@ -55,6 +55,20 @@ public:
     }
 };
 
-TEST_F(utBVHImportExport, importBlenFromFileTest) {
+TEST_F(utBVHImportExport, import01_01) {
     EXPECT_TRUE(importerTest());
+}
+
+
+TEST_F(utBVHImportExport, import01_03) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BVH/01_03.bvh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utBVHImportExport, importBoxingToes) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BVH/Boxing_Toes.bvh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }

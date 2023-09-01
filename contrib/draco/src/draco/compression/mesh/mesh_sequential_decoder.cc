@@ -96,7 +96,7 @@ bool MeshSequentialDecoder::DecodeConnectivity() {
         }
         mesh()->AddFace(face);
       }
-    } else if (mesh()->num_points() < (1 << 21) &&
+    } else if (num_points < (1 << 21) &&
                bitstream_version() >= DRACO_BITSTREAM_VERSION(2, 2)) {
       // Decode indices as uint32_t.
       for (uint32_t i = 0; i < num_faces; ++i) {
@@ -158,6 +158,10 @@ bool MeshSequentialDecoder::DecodeAndDecompressIndices(uint32_t num_faces) {
         index_diff = -index_diff;
       }
       const int32_t index_value = index_diff + last_index_value;
+      if (index_value < 0) {
+        // Negative indices are not allowed.
+        return false;
+      }
       face[j] = index_value;
       last_index_value = index_value;
     }

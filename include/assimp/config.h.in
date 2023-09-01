@@ -241,7 +241,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /**
  *  @brief  Configures the #aiProcess_FindDegenerates to check the area of a
- *  trinagle to be greates than e-6. If this is not the case the triangle will
+ *  triangle to be greater than e-6. If this is not the case the triangle will
  *  be removed if #AI_CONFIG_PP_FD_REMOVE is set to true.
  */
 #define AI_CONFIG_PP_FD_CHECKAREA \
@@ -662,7 +662,7 @@ enum aiComponent
     "AI_CONFIG_FBX_CONVERT_TO_M"
 
 // ---------------------------------------------------------------------------
-/** @brief  Will enable the skeleton structo to store bone data.
+/** @brief  Will enable the skeleton struct to store bone data.
  *
  *  This will decouple the bone coupling to the mesh. This feature is
  *  experimental.
@@ -1036,6 +1036,15 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
+/** @brief Specifies whether the Collada loader will ignore the provided unit size.
+ *
+ * If this property is set to true, the unit size provided in the file header will
+ * be ignored and the file will be loaded without scaling the assets.
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_COLLADA_IGNORE_UNIT_SIZE "IMPORT_COLLADA_IGNORE_UNIT_SIZE"
+
+// ---------------------------------------------------------------------------
 /** @brief Specifies whether the Collada loader should use Collada names.
  *
  * If this property is set to true, the Collada names will be used as the node and
@@ -1065,6 +1074,17 @@ enum aiComponent
  */
 #define AI_CONFIG_EXPORT_POINT_CLOUDS "EXPORT_POINT_CLOUDS"
 
+/** @brief Specifies whether to use the deprecated KHR_materials_pbrSpecularGlossiness extension
+ * 
+ * When this flag is undefined any material with specularity will use the new KHR_materials_specular
+ * extension. Enabling this flag will revert to the deprecated extension. Note that exporting
+ * KHR_materials_pbrSpecularGlossiness with extensions other than KHR_materials_unlit is unsupported,
+ * including the basic pbrMetallicRoughness spec.
+ *
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS "USE_GLTF_PBR_SPECULAR_GLOSSINESS"
+
 /**
  * @brief Specifies the blob name, assimp uses for exporting.
  * 
@@ -1083,7 +1103,7 @@ enum aiComponent
 #define AI_CONFIG_EXPORT_BLOB_NAME "EXPORT_BLOB_NAME"
 
 /**
- *  @brief  Specifies a gobal key factor for scale, float value
+ *  @brief  Specifies a global key factor for scale, float value
  */
 #define AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY "GLOBAL_SCALE_FACTOR"
 

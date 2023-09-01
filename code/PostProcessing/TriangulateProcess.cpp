@@ -451,7 +451,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
                         *pnt2 = &temp_verts[next];
 
                     // Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
-                    if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1)) {
+                    if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1) == 1) {
                         continue;
                     }
 

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -86,9 +85,9 @@ void ScaleProcess::Execute( aiScene* pScene ) {
         return; // nothing to scale
     }
 
-    ai_assert( mScale != 0 );
-    ai_assert( nullptr != pScene );
-    ai_assert( nullptr != pScene->mRootNode );
+    ai_assert(mScale != 0 );
+    ai_assert(nullptr != pScene );
+    ai_assert(nullptr != pScene->mRootNode );
 
     if ( nullptr == pScene ) {
         return;
@@ -140,7 +139,7 @@ void ScaleProcess::Execute( aiScene* pScene ) {
             aiMatrix4x4 scaling;
             aiMatrix4x4::Scaling( aiVector3D(scale), scaling );
 
-            aiMatrix4x4 RotMatrix = aiMatrix4x4 (rotation.GetMatrix());
+            const aiMatrix4x4 RotMatrix = aiMatrix4x4(rotation.GetMatrix());
 
             bone->mOffsetMatrix = translation * RotMatrix * scaling;
         }

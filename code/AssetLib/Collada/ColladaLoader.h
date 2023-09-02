@@ -239,6 +239,7 @@ protected:
     bool noSkeletonMesh;
     bool removeEmptyBones;
     bool ignoreUpDirection;
+    bool ignoreUnitSize;
     bool useColladaName;
 
     /** Used by FindNameForNode() to generate unique node names */

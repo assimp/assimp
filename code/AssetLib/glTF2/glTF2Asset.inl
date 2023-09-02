@@ -45,6 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Base64.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/schema.h>
+#include <rapidjson/stringbuffer.h>
 
 // clang-format off
 #ifdef ASSIMP_ENABLE_DRACO
@@ -136,6 +139,18 @@ inline CustomExtension ReadExtensions(const char *name, Value &obj) {
         ret.mBoolValue.value = obj.GetBool();
         ret.mBoolValue.isPresent = true;
     }
+    return ret;
+}
+
+inline Extras ReadExtras(Value &obj) {
+    Extras ret;
+
+    ret.mValues.reserve(obj.MemberCount());
+    for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+        auto &val = it->value;
+        ret.mValues.emplace_back(ReadExtensions(it->name.GetString(), val));
+    }
+
     return ret;
 }
 
@@ -248,7 +263,7 @@ inline void Object::ReadExtensions(Value &val) {
 
 inline void Object::ReadExtras(Value &val) {
     if (Value *curExtras = FindObject(val, "extras")) {
-        this->extras = glTF2::ReadExtensions("extras", *curExtras);
+        this->extras = glTF2::ReadExtras(*curExtras);
     }
 }
 
@@ -1263,6 +1278,19 @@ inline void Material::Read(Value &material, Asset &r) {
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
+        
+        if (r.extensionsUsed.KHR_materials_specular) {
+            if (Value *curMatSpecular = FindObject(*extensions, "KHR_materials_specular")) {
+                MaterialSpecular specular;
+
+                ReadMember(*curMatSpecular, "specularFactor", specular.specularFactor);
+                ReadTextureProperty(r, *curMatSpecular, "specularTexture", specular.specularTexture);
+                ReadMember(*curMatSpecular, "specularColorFactor", specular.specularColorFactor);
+                ReadTextureProperty(r, *curMatSpecular, "specularColorTexture", specular.specularColorTexture);
+
+                this->materialSpecular = Nullable<MaterialSpecular>(specular);
+            }
+        }
 
         // Extension KHR_texture_transform is handled in ReadTextureProperty
 
@@ -1359,6 +1387,12 @@ inline void PbrSpecularGlossiness::SetDefaults() {
     SetVector(diffuseFactor, defaultDiffuseFactor);
     SetVector(specularFactor, defaultSpecularFactor);
     glossinessFactor = 1.0f;
+}
+
+inline void MaterialSpecular::SetDefaults() {
+    //KHR_materials_specular properties
+    SetVector(specularColorFactor, defaultSpecularColorFactor);
+    specularFactor = 0.f;
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -2047,6 +2081,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     }
 
     CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
+    CHECK_EXT(KHR_materials_specular);
     CHECK_EXT(KHR_materials_unlit);
     CHECK_EXT(KHR_lights_punctual);
     CHECK_EXT(KHR_texture_transform);

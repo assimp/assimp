@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,8 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file A helper class that processes texture transformations */
-
-
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -494,8 +491,9 @@ void TextureTransformStep::Execute( aiScene* pScene) {
             ai_assert(nullptr != src);
 
             // Copy the data to the destination array
-            if (dest != src)
+            if (dest != src) {
                 ::memcpy(dest,src,sizeof(aiVector3D)*mesh->mNumVertices);
+            }
 
             end = dest + mesh->mNumVertices;
 

@@ -302,7 +302,9 @@ bool TXmlParser<TNodeType>::parse(IOStream *stream) {
     stream->Read(&mData[0], 1, len);
 
     mDoc = new pugi::xml_document();
-    pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
+    // load_string assumes native encoding (aka always utf-8 per build options)
+    //pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
+     pugi::xml_parse_result parse_result = mDoc->load_buffer(&mData[0], mData.size(), pugi::parse_full);
     if (parse_result.status == pugi::status_ok) {
         return true;
     }

@@ -76,6 +76,10 @@ public:
     /// basing on the Importer's configuration property list.
     virtual void SetupProperties(const Importer* pImp) override;
 
+    /// @brief Will return the maximal number of bones.
+    /// @return The maximal number of bones.
+    size_t getMaxNumberOfBones() const;
+
 protected:
     /// Executes the post processing step on the given imported data.
     /// At the moment a process is not supposed to fail.
@@ -90,13 +94,18 @@ protected:
     /// Recursively updates the node's mesh list to account for the changed mesh list
     void UpdateNode( aiNode* pNode) const;
 
-public:
+private:
     /// Max bone count. Splitting occurs if a mesh has more than that number of bones.
     size_t mMaxBoneCount;
 
     /// Per mesh index: Array of indices of the new submeshes.
-    std::vector< std::vector<unsigned int> > mSubMeshIndices;
+    using IndexArray = std::vector<unsigned int>;
+    std::vector<IndexArray> mSubMeshIndices;
 };
+
+inline size_t SplitByBoneCountProcess::getMaxNumberOfBones() const {
+    return mMaxBoneCount;
+}
 
 } // end of namespace Assimp
 

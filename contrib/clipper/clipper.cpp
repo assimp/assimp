@@ -3208,7 +3208,7 @@ void Clipper::BuildResult(Paths &polys)
     int cnt = PointCount(p);
     if (cnt < 2) continue;
     pg.reserve(cnt);
-    for (int i = 0; i < cnt; ++i)
+    for (int j = 0; j < cnt; ++j)
     {
       pg.push_back(p->Pt);
       p = p->Prev;

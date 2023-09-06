@@ -459,8 +459,7 @@ void CleanupWindowContour(ProjectedWindowContour& window) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void CleanupWindowContours(ContourVector& contours)
-{
+void CleanupWindowContours(ContourVector& contours) {
     // Use PolyClipper to clean up window contours
     try {
         for(ProjectedWindowContour& window : contours) {
@@ -482,7 +481,6 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 
     // Fix the outer contour using polyclipper
     try {
-
         ClipperLib::Path subject;
         ClipperLib::Clipper clipper;
         ClipperLib::Paths clipped;

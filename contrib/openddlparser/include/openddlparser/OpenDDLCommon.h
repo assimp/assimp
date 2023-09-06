@@ -32,19 +32,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <inttypes.h>
 #endif
 
-#if defined(_MSC_VER) && !defined(OPENDDL_STATIC_LIBARY)
-
-#define TAG_DLL_EXPORT __declspec(dllexport)
-#define TAG_DLL_IMPORT __declspec(dllimport)
-#ifdef OPENDDLPARSER_BUILD
-#define DLL_ODDLPARSER_EXPORT TAG_DLL_EXPORT
+#ifdef OPENDDL_STATIC_LIBARY
+#  define DLL_ODDLPARSER_EXPORT
 #else
-#define DLL_ODDLPARSER_EXPORT TAG_DLL_IMPORT
-#endif // OPENDDLPARSER_BUILD
-#pragma warning(disable : 4251)
-#else
-#define DLL_ODDLPARSER_EXPORT
-#endif // _WIN32
+#  ifdef _WIN32
+#    ifdef openddlparser_EXPORTS
+#      define DLL_ODDLPARSER_EXPORT __declspec(dllexport)
+#    else
+#      define DLL_ODDLPARSER_EXPORT __declspec(dllimport)
+#    endif // openddlparser_EXPORTS
+#    ifdef _MSC_VER
+#      pragma warning(disable : 4251)
+#    endif // _MSC_VER
+#  else
+#    define DLL_ODDLPARSER_EXPORT __attribute__((visibility("default")))
+#  endif // _WIN32
+#endif // OPENDDL_STATIC_LIBARY
 
 // Namespace declarations, override this to avoid any conflicts
 #define BEGIN_ODDLPARSER_NS namespace ODDLParser {

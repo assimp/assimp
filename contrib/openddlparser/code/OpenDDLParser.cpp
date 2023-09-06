@@ -30,9 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 #ifdef _WIN32
-#   ifndef WIN32_LEAN_AND_MEAN
-#     define WIN32_LEAN_AND_MEAN
-#   endif
+#   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #endif // _WIN32
 

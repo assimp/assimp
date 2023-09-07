@@ -144,11 +144,7 @@ namespace Assimp
 
 #if ASSIMP_BLEND_WITH_POLY_2_TRI
 
-#ifdef ASSIMP_USE_HUNTER
-#  include <poly2tri/poly2tri.h>
-#else
-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
-#endif
+#include "../contrib/poly2tri/poly2tri/poly2tri.h"
 
 namespace Assimp
 {

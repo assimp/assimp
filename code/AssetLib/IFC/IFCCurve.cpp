@@ -98,7 +98,7 @@ protected:
 // --------------------------------------------------------------------------------
 // Circle
 // --------------------------------------------------------------------------------
-class Circle final : public Conic {
+class Circle : public Conic {
 public:
     // --------------------------------------------------
     Circle(const Schema_2x3::IfcCircle& entity, ConversionData& conv) : Conic(entity,conv) , entity(entity) {}

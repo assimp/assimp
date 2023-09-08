@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -144,7 +143,7 @@ namespace Assimp
 
 #if ASSIMP_BLEND_WITH_POLY_2_TRI
 
-#include "../contrib/poly2tri/poly2tri/poly2tri.h"
+#include "contrib/poly2tri/poly2tri/poly2tri.h"
 
 namespace Assimp
 {

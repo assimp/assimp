@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,9 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  IFCLoad.cpp
- *  @brief Implementation of the Industry Foundation Classes loader.
- */
+/// @file  IFCLoad.cpp
+/// @brief Implementation of the Industry Foundation Classes loader.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
@@ -92,7 +90,6 @@ using namespace Assimp::IFC;
   IfcUnitAssignment
   IfcClosedShell
   IfcDoor
-
  */
 
 namespace {
@@ -118,14 +115,6 @@ static const aiImporterDesc desc = {
     0,
     "ifc ifczip step stp"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-IFCImporter::IFCImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-IFCImporter::~IFCImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -256,7 +245,12 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // tell the reader for which types we need to simulate STEPs reverse indices
     static const char *const inverse_indices_to_track[] = {
-        "ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcreldefinesbyproperties", "ifcpropertyset", "ifcstyleditem"
+        "ifcrelcontainedinspatialstructure", 
+        "ifcrelaggregates", 
+        "ifcrelvoidselement", 
+        "ifcreldefinesbyproperties", 
+        "ifcpropertyset", 
+        "ifcstyleditem"
     };
 
     // feed the IFC schema into the reader and pre-parse all lines
@@ -928,4 +922,4 @@ void MakeTreeRelative(ConversionData &conv) {
 
 } // namespace
 
-#endif
+#endif // ASSIMP_BUILD_NO_IFC_IMPORTER

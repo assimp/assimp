@@ -39,15 +39,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  IFCProfile.cpp
- *  @brief Read profile and curves entities from IFC files
- */
+/// @file  IFCProfile.cpp
+/// @brief Read profile and curves entities from IFC files
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
 
 namespace Assimp {
 namespace IFC {
+
 namespace {
 
 // --------------------------------------------------------------------------------
@@ -56,8 +56,7 @@ namespace {
 class Conic : public Curve {
 public:
     // --------------------------------------------------
-    Conic(const Schema_2x3::IfcConic& entity, ConversionData& conv)
-    : Curve(entity,conv) {
+    Conic(const Schema_2x3::IfcConic& entity, ConversionData& conv) : Curve(entity,conv) {
         IfcMatrix4 trafo;
         ConvertAxisPlacement(trafo,*entity.Position,conv);
 
@@ -99,15 +98,14 @@ protected:
 // --------------------------------------------------------------------------------
 // Circle
 // --------------------------------------------------------------------------------
-class Circle : public Conic {
+class Circle final : public Conic {
 public:
     // --------------------------------------------------
-    Circle(const Schema_2x3::IfcCircle& entity, ConversionData& conv)
-        : Conic(entity,conv)
-        , entity(entity)
-    {
-    }
-
+    Circle(const Schema_2x3::IfcCircle& entity, ConversionData& conv) : Conic(entity,conv) , entity(entity) {}
+    
+    // --------------------------------------------------
+    ~Circle() override = default;
+    
     // --------------------------------------------------
     IfcVector3 Eval(IfcFloat u) const {
         u = -conv.angle_scale * u;

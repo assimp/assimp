@@ -14,6 +14,8 @@
 //
 #include "draco/point_cloud/point_cloud_builder.h"
 
+#include <utility>
+
 namespace draco {
 
 PointCloudBuilder::PointCloudBuilder() {}

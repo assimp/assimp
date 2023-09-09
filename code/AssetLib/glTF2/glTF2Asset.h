@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * glTF Extensions Support:
  *   KHR_materials_pbrSpecularGlossiness full
+ *   KHR_materials_specular full
  *   KHR_materials_unlit full
  *   KHR_lights_punctual full
  *   KHR_materials_sheen full
@@ -370,6 +371,15 @@ struct CustomExtension {
     CustomExtension& operator=(const CustomExtension&) = default;
 };
 
+//! Represents metadata in an glTF2 object
+struct Extras {
+    std::vector<CustomExtension> mValues;
+
+    inline bool HasExtras() const {
+        return !mValues.empty();
+    }
+};
+
 //! Base class for all glTF top-level objects
 struct Object {
     int index; //!< The index of this object within its property container
@@ -378,7 +388,7 @@ struct Object {
     std::string name; //!< The user-defined name of this object
 
     CustomExtension customExtensions;
-    CustomExtension extras;
+    Extras extras;
 
     //! Objects marked as special are not exported (used to emulate the binary body buffer)
     virtual bool IsSpecial() const { return false; }
@@ -483,7 +493,7 @@ private:
 
 public:
     Buffer();
-    ~Buffer();
+    ~Buffer() override;
 
     void Read(Value &obj, Asset &r);
 
@@ -565,7 +575,7 @@ struct Accessor : public Object {
     inline size_t GetMaxByteSize();
 
     template <class T>
-    void ExtractData(T *&outData);
+    size_t ExtractData(T *&outData, const std::vector<unsigned int> *remappingIndices = nullptr);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
     void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
@@ -710,6 +720,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
+const vec3 defaultSpecularColorFactor = { 0, 0, 0 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
 const vec3 defaultAttenuationColor = { 1, 1, 1 };
 
@@ -750,6 +761,16 @@ struct PbrSpecularGlossiness {
     TextureInfo specularGlossinessTexture;
 
     PbrSpecularGlossiness() { SetDefaults(); }
+    void SetDefaults();
+};
+
+struct MaterialSpecular {
+    float specularFactor;
+    vec3 specularColorFactor;
+    TextureInfo specularTexture;
+    TextureInfo specularColorTexture;
+
+    MaterialSpecular() { SetDefaults(); }
     void SetDefaults();
 };
 
@@ -816,6 +837,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_pbrSpecularGlossiness
     Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
+
+    //extension: KHR_materials_specular
+    Nullable<MaterialSpecular> materialSpecular;
 
     //extension: KHR_materials_sheen
     Nullable<MaterialSheen> materialSheen;
@@ -1099,6 +1123,7 @@ public:
     //! Keeps info about the enabled extensions
     struct Extensions {
         bool KHR_materials_pbrSpecularGlossiness;
+        bool KHR_materials_specular;
         bool KHR_materials_unlit;
         bool KHR_lights_punctual;
         bool KHR_texture_transform;
@@ -1113,13 +1138,14 @@ public:
         bool KHR_texture_basisu;
 
         Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false),
-                KHR_materials_unlit(false),
-                KHR_lights_punctual(false),
-                KHR_texture_transform(false),
-                KHR_materials_sheen(false),
-                KHR_materials_clearcoat(false),
-                KHR_materials_transmission(false),
+                KHR_materials_pbrSpecularGlossiness(false), 
+                KHR_materials_specular(false), 
+                KHR_materials_unlit(false), 
+                KHR_lights_punctual(false), 
+                KHR_texture_transform(false), 
+                KHR_materials_sheen(false), 
+                KHR_materials_clearcoat(false), 
+                KHR_materials_transmission(false), 
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),
                 KHR_materials_emissive_strength(false),

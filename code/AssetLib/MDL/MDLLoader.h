@@ -139,7 +139,7 @@ protected:
     // -------------------------------------------------------------------
     /** Import a CS:S/HL2 MDL file (not fully implemented)
     */
-    void InternReadFile_HL2( );
+    AI_WONT_RETURN void InternReadFile_HL2( ) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Check whether a given position is inside the valid range
@@ -150,6 +150,7 @@ protected:
     */
     void SizeCheck(const void* szPos);
     void SizeCheck(const void* szPos, const char* szFile, unsigned int iLine);
+    bool IsPosValid(const void* szPos) const;
 
     // -------------------------------------------------------------------
     /** Validate the header data structure of a game studio MDL7 file

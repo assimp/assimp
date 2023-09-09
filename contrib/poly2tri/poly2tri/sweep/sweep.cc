@@ -118,8 +118,8 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
   Point* p1 = triangle->PointCCW(point);
   Orientation o1 = Orient2d(eq, *p1, ep);
   if (o1 == COLLINEAR) {
-	  // ASSIMP_CHANGE (aramis_acg)
-	  throw std::runtime_error("EdgeEvent - collinear points not supported");
+
+
     if( triangle->Contains(&eq, p1)) {
       triangle->MarkConstrainedEdge(&eq, p1 );
       // We are modifying the constraint maybe it would be better to
@@ -137,8 +137,8 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
   Point* p2 = triangle->PointCW(point);
   Orientation o2 = Orient2d(eq, *p2, ep);
   if (o2 == COLLINEAR) {
-	  // ASSIMP_CHANGE (aramis_acg)
-	  throw std::runtime_error("EdgeEvent - collinear points not supported");
+
+
 
     if( triangle->Contains(&eq, p2)) {
       triangle->MarkConstrainedEdge(&eq, p2 );

@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #endif
 
+#include <assimp/quaternion.h>
+
 // -------------------------------------------------------------------------------
 /**
   * Enum used to distinguish data types
@@ -70,7 +72,9 @@ typedef enum aiMetadataType {
     AI_AISTRING = 5,
     AI_AIVECTOR3D = 6,
     AI_AIMETADATA = 7,
-    AI_META_MAX = 8,
+    AI_INT64 = 8,
+    AI_UINT32 = 9,
+    AI_META_MAX = 10,
 
 #ifndef SWIG
     FORCE_32BIT = INT_MAX
@@ -132,6 +136,12 @@ inline aiMetadataType GetAiType(const aiVector3D &) {
 }
 inline aiMetadataType GetAiType(const aiMetadata &) {
     return AI_AIMETADATA;
+}
+inline aiMetadataType GetAiType(int64_t) {
+    return AI_INT64;
+}
+inline aiMetadataType GetAiType(uint32_t) {
+    return AI_UINT32;
 }
 
 #endif // __cplusplus
@@ -215,6 +225,16 @@ struct aiMetadata {
                 rhs.Get<aiMetadata>(static_cast<unsigned int>(i), v);
                 mValues[i].mData = new aiMetadata(v);
             } break;
+            case AI_INT64: {
+                int64_t v;
+                ::memcpy(&v, rhs.mValues[i].mData, sizeof(int64_t));
+                mValues[i].mData = new int64_t(v);
+            } break;
+            case AI_UINT32: {
+                uint32_t v;
+                ::memcpy(&v, rhs.mValues[i].mData, sizeof(uint32_t));
+                mValues[i].mData = new uint32_t(v);
+            } break;
 #ifndef SWIG
             case FORCE_32BIT:
 #endif
@@ -266,6 +286,12 @@ struct aiMetadata {
                     break;
                 case AI_AIMETADATA:
                     delete static_cast<aiMetadata *>(data);
+                    break;
+                case AI_INT64:
+                    delete static_cast<int64_t *>(data);
+                    break;
+                case AI_UINT32:
+                    delete static_cast<uint32_t *>(data);
                     break;
 #ifndef SWIG
                 case FORCE_32BIT:
@@ -507,6 +533,16 @@ struct aiMetadata {
             } break;
             case AI_AIMETADATA: {
                 if (*static_cast<aiMetadata *>(lhs.mValues[i].mData) != *static_cast<aiMetadata *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_INT64: {
+                if (*static_cast<int64_t *>(lhs.mValues[i].mData) != *static_cast<int64_t *>(rhs.mValues[i].mData)) {
+                    return false;
+                }
+            } break;
+            case AI_UINT32: {
+                if (*static_cast<uint32_t *>(lhs.mValues[i].mData) != *static_cast<uint32_t *>(rhs.mValues[i].mData)) {
                     return false;
                 }
             } break;

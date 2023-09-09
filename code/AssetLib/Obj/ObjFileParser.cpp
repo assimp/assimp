@@ -156,8 +156,16 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
                     // read in vertex definition (homogeneous coords)
                     getHomogeneousVector3(m_pModel->mVertices);
                 } else if (numComponents == 6) {
+                    // fill previous omitted vertex-colors by default
+                    if (m_pModel->mVertexColors.size() < m_pModel->mVertices.size()) {
+                        m_pModel->mVertexColors.resize(m_pModel->mVertices.size(), aiVector3D(0, 0, 0));
+                    }
                     // read vertex and vertex-color
                     getTwoVectors3(m_pModel->mVertices, m_pModel->mVertexColors);
+                }
+                // append omitted vertex-colors as default for the end if any vertex-color exists
+                if (!m_pModel->mVertexColors.empty() && m_pModel->mVertexColors.size() < m_pModel->mVertices.size()) {
+                    m_pModel->mVertexColors.resize(m_pModel->mVertices.size(), aiVector3D(0, 0, 0));
                 }
             } else if (*m_DataIt == 't') {
                 // read in texture coordinate ( 2D or 3D )
@@ -236,7 +244,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             getNameNoSpace(m_DataIt, m_DataItEnd, name);
             insideCstype = name == "cstype";
             goto pf_skip_line;
-        } break;
+        }
 
         default: {
         pf_skip_line:
@@ -456,8 +464,19 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            const char *token = &(*m_DataIt);
-            const int iVal = ::atoi(token);
+            int iVal;
+            auto end = m_DataIt;
+            // find either the buffer end or the '\0'
+            while (end < m_DataItEnd && *end != '\0')
+                ++end;
+            // avoid temporary string allocation if there is a zero
+            if (end != m_DataItEnd) {
+                iVal = ::atoi(&(*m_DataIt));
+            } else {
+                // otherwise make a zero terminated copy, which is safe to pass to atoi
+                std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
+                iVal = ::atoi(number.c_str());
+            }
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;

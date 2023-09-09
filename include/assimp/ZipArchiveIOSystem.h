@@ -63,7 +63,7 @@ public:
     //! Open a Zip using the proffered IOSystem
     ZipArchiveIOSystem(IOSystem* pIOHandler, const char *pFilename, const char* pMode = "r");
     ZipArchiveIOSystem(IOSystem* pIOHandler, const std::string& rFilename, const char* pMode = "r");
-    virtual ~ZipArchiveIOSystem();
+    virtual ~ZipArchiveIOSystem() override;
     bool Exists(const char* pFilename) const override;
     char getOsSeparator() const override;
     IOStream* Open(const char* pFilename, const char* pMode = "rb") override;

@@ -48,6 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 #ifndef STB_USE_HUNTER
 /*  Use prefixed names for the symbols from stb_image as it is a very commonly embedded library.
     Including vanilla stb_image symbols causes duplicate symbol problems if assimp is linked
@@ -114,3 +119,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma GCC diagnostic pop
 #endif
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif

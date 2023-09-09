@@ -102,10 +102,6 @@ void Structure::Convert<CollectionObject>(
 
     ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
     {
-        //std::shared_ptr<CollectionObject> prev;
-        //ReadFieldPtr<ErrorPolicy_Fail>(prev, "*prev", db);
-        //dest.prev = prev.get();
-
         std::shared_ptr<Object> ob;
         ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
         dest.ob = ob.get();
@@ -569,7 +565,7 @@ void Structure ::Convert<MVert>(
         const FileDatabase &db) const {
 
     ReadFieldArray<ErrorPolicy_Fail>(dest.co, "co", db);
-    ReadFieldArray<ErrorPolicy_Fail>(dest.no, "no", db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.no, "no", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     //ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight, "bweight", db);

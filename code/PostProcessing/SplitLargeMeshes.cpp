@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -40,9 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/**
- *  @file Implementation of the SplitLargeMeshes postprocessing step
- */
+ ///  @file Implementation of the SplitLargeMeshes postprocessing step
 
 // internal headers of the post-processing framework
 #include "SplitLargeMeshes.h"
@@ -54,9 +51,6 @@ using namespace Assimp;
 SplitLargeMeshesProcess_Triangle::SplitLargeMeshesProcess_Triangle() {
     LIMIT = AI_SLM_DEFAULT_MAX_TRIANGLES;
 }
-
-// ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Triangle::~SplitLargeMeshesProcess_Triangle() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -78,22 +72,22 @@ void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene) {
         this->SplitMesh(a, pScene->mMeshes[a],avList);
     }
 
-    if (avList.size() != pScene->mNumMeshes) {
-        // it seems something has been split. rebuild the mesh list
-        delete[] pScene->mMeshes;
-        pScene->mNumMeshes = (unsigned int)avList.size();
-        pScene->mMeshes = new aiMesh*[avList.size()];
-
-        for (unsigned int i = 0; i < avList.size();++i) {
-            pScene->mMeshes[i] = avList[i].first;
-        }
-
-        // now we need to update all nodes
-        this->UpdateNode(pScene->mRootNode,avList);
-        ASSIMP_LOG_INFO("SplitLargeMeshesProcess_Triangle finished. Meshes have been split");
-    } else {
+    if (avList.size() == pScene->mNumMeshes) {
         ASSIMP_LOG_DEBUG("SplitLargeMeshesProcess_Triangle finished. There was nothing to do");
     }
+
+    // it seems something has been split. rebuild the mesh list
+    delete[] pScene->mMeshes;
+    pScene->mNumMeshes = (unsigned int)avList.size();
+    pScene->mMeshes = new aiMesh*[avList.size()];
+
+    for (unsigned int i = 0; i < avList.size();++i) {
+        pScene->mMeshes[i] = avList[i].first;
+    }
+
+    // now we need to update all nodes
+    this->UpdateNode(pScene->mRootNode,avList);
+    ASSIMP_LOG_INFO("SplitLargeMeshesProcess_Triangle finished. Meshes have been split");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -105,8 +99,7 @@ void SplitLargeMeshesProcess_Triangle::SetupProperties( const Importer* pImp) {
 
 // ------------------------------------------------------------------------------------------------
 // Update a node after some meshes have been split
-void SplitLargeMeshesProcess_Triangle::UpdateNode(aiNode* pcNode,
-        const std::vector<std::pair<aiMesh*, unsigned int> >& avList) {
+void SplitLargeMeshesProcess_Triangle::UpdateNode(aiNode* pcNode, const std::vector<std::pair<aiMesh*, unsigned int> >& avList) {
     // for every index in out list build a new entry
     std::vector<unsigned int> aiEntries;
     aiEntries.reserve(pcNode->mNumMeshes + 1);
@@ -328,9 +321,6 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 SplitLargeMeshesProcess_Vertex::SplitLargeMeshesProcess_Vertex() {
     LIMIT = AI_SLM_DEFAULT_MAX_VERTICES;
 }
-
-// ------------------------------------------------------------------------------------------------
-SplitLargeMeshesProcess_Vertex::~SplitLargeMeshesProcess_Vertex() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.

@@ -55,14 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-GenFaceNormalsProcess::GenFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-GenFaceNormalsProcess::~GenFaceNormalsProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenFaceNormalsProcess::IsActive(unsigned int pFlags) const {
     force_ = (pFlags & aiProcess_ForceGenNormals) != 0;

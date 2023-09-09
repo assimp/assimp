@@ -94,6 +94,7 @@ enum aiPostProcessSteps
      * indexed geometry, this step is compulsory or you'll just waste rendering
      * time. <b>If this flag is not specified</b>, no vertices are referenced by
      * more than one face and <b>no index buffer is required</b> for rendering.
+     * Unless the importer (like ply) had to split vertices. Then you need one regardless.
      */
     aiProcess_JoinIdenticalVertices = 0x2,
 

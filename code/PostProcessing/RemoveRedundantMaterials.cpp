@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // internal headers
-
 #include "RemoveRedundantMaterials.h"
 #include <assimp/ParsingUtils.h>
 #include "ProcessHelper.h"
@@ -57,39 +54,28 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
-: mConfigFixedMaterials() {
-    // nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-RemoveRedundantMatsProcess::~RemoveRedundantMatsProcess() = default;
+RemoveRedundantMatsProcess::RemoveRedundantMatsProcess() : mConfigFixedMaterials() {}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
-bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const
-{
+bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const {
     return (pFlags & aiProcess_RemoveRedundantMaterials) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup import properties
-void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp)
-{
+void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp) {
     // Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
     mConfigFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
-void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
-{
+void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
     ASSIMP_LOG_DEBUG("RemoveRedundantMatsProcess begin");
 
     unsigned int redundantRemoved = 0, unreferencedRemoved = 0;
-    if (pScene->mNumMaterials)
-    {
+    if (pScene->mNumMaterials) {
         // Find out which materials are referenced by meshes
         std::vector<bool> abReferenced(pScene->mNumMaterials,false);
         for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
@@ -138,8 +124,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
         // we do already have a specific hash. This allows us to
         // determine which materials are identical.
         uint32_t *aiHashes = new uint32_t[ pScene->mNumMaterials ];;
-        for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-        {
+        for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
             // No mesh is referencing this material, remove it.
             if (!abReferenced[i]) {
                 ++unreferencedRemoved;
@@ -151,8 +136,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             // Check all previously mapped materials for a matching hash.
             // On a match we can delete this material and just make it ref to the same index.
             uint32_t me = aiHashes[i] = ComputeMaterialHash(pScene->mMaterials[i]);
-            for (unsigned int a = 0; a < i;++a)
-            {
+            for (unsigned int a = 0; a < i;++a) {
                 if (abReferenced[a] && me == aiHashes[a]) {
                     ++redundantRemoved;
                     me = 0;
@@ -209,12 +193,9 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
         delete[] aiHashes;
         delete[] aiMappingTable;
     }
-    if (redundantRemoved == 0 && unreferencedRemoved == 0)
-    {
+    if (redundantRemoved == 0 && unreferencedRemoved == 0) {
         ASSIMP_LOG_DEBUG("RemoveRedundantMatsProcess finished ");
-    }
-    else
-    {
+    } else {
         ASSIMP_LOG_INFO("RemoveRedundantMatsProcess finished. Removed ", redundantRemoved, " redundant and ",
             unreferencedRemoved, " unused materials.");
     }

@@ -107,7 +107,7 @@ public:
     ~Circle() override = default;
     
     // --------------------------------------------------
-    IfcVector3 Eval(IfcFloat u) const {
+    IfcVector3 Eval(IfcFloat u) override const {
         u = -conv.angle_scale * u;
         return location + static_cast<IfcFloat>(entity.Radius)*(static_cast<IfcFloat>(std::cos(u))*p[0] +
             static_cast<IfcFloat>(std::sin(u))*p[1]);

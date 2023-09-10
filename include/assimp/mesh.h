@@ -987,7 +987,7 @@ struct aiMesh {
 
         if (mTextureCoordsNames == nullptr) {
             // Construct and null-init array
-            mTextureCoordsNames = new aiString *[AI_MAX_NUMBER_OF_TEXTURECOORDS] {};
+            mTextureCoordsNames = new aiString *[AI_MAX_NUMBER_OF_TEXTURECOORDS];
         }
 
         if (texCoordsName.length == 0) {

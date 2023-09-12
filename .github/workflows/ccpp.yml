@@ -46,7 +46,7 @@ jobs:
             toolchain: ninja-vs-win64-cxx17
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
           submodules: true
           
@@ -69,7 +69,7 @@ jobs:
 
     - name: Checkout Hunter toolchains
       if: endsWith(matrix.name, 'hunter')
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: cpp-pm/polly
         path: cmake/polly

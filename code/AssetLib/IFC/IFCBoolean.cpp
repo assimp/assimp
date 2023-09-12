@@ -38,16 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  IFCBoolean.cpp
- *  @brief Implements a subset of Ifc boolean operations
- */
+/// @file  IFCBoolean.cpp
+/// @brief Implements a subset of Ifc boolean operations
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
 #include "AssetLib/IFC/IFCUtil.h"
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
-
 
 #include <iterator>
 #include <tuple>
@@ -67,8 +65,9 @@ bool IntersectSegmentPlane(const IfcVector3 &p, const IfcVector3 &n, const IfcVe
 
     // if segment ends on plane, do not report a hit. We stay on that side until a following segment starting at this
     // point leaves the plane through the other side
-    if (std::abs(dotOne + dotTwo) < ai_epsilon)
+    if (std::abs(dotOne + dotTwo) < ai_epsilon) {
         return false;
+    }
 
     // if segment starts on the plane, report a hit only if the end lies on the *other* side
     if (std::abs(dotTwo) < ai_epsilon) {
@@ -82,13 +81,15 @@ bool IntersectSegmentPlane(const IfcVector3 &p, const IfcVector3 &n, const IfcVe
 
     // ignore if segment is parallel to plane and far away from it on either side
     // Warning: if there's a few thousand of such segments which slowly accumulate beyond the epsilon, no hit would be registered
-    if (std::abs(dotOne) < ai_epsilon)
+    if (std::abs(dotOne) < ai_epsilon) {
         return false;
+    }
 
     // t must be in [0..1] if the intersection point is within the given segment
     const IfcFloat t = dotTwo / dotOne;
-    if (t > 1.0 || t < 0.0)
+    if (t > 1.0 || t < 0.0) {
         return false;
+    }
 
     out = e0 + t * seg;
     return true;
@@ -110,11 +111,13 @@ void FilterPolygon(std::vector<IfcVector3> &resultpoly) {
     FuzzyVectorCompare fz(epsilon);
     std::vector<IfcVector3>::iterator e = std::unique(resultpoly.begin(), resultpoly.end(), fz);
 
-    if (e != resultpoly.end())
+    if (e != resultpoly.end()) {
         resultpoly.erase(e, resultpoly.end());
+    }
 
-    if (!resultpoly.empty() && fz(resultpoly.front(), resultpoly.back()))
+    if (!resultpoly.empty() && fz(resultpoly.front(), resultpoly.back())) {
         resultpoly.pop_back();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -291,8 +294,9 @@ bool IntersectsBoundaryProfile(const IfcVector3 &e0, const IfcVector3 &e1, const
         }
 
         // Line segment ends at boundary -> ignore any hit, it will be handled by possibly following segments
-        if (endsAtSegment && !halfOpen)
+        if (endsAtSegment && !halfOpen) {
             continue;
+        }
 
         // Line segment starts at boundary -> generate a hit only if following that line would change the INSIDE/OUTSIDE
         // state. This should catch the case where a connected set of segments has a point directly on the boundary,
@@ -301,15 +305,17 @@ bool IntersectsBoundaryProfile(const IfcVector3 &e0, const IfcVector3 &e1, const
         if (startsAtSegment) {
             IfcVector3 inside_dir = IfcVector3(b.y, -b.x, 0.0) * windingOrder;
             bool isGoingInside = (inside_dir * e) > 0.0;
-            if (isGoingInside == isStartAssumedInside)
+            if (isGoingInside == isStartAssumedInside) {
                 continue;
+            }
 
             // only insert the point into the list if it is sufficiently far away from the previous intersection point.
             // This way, we avoid duplicate detection if the intersection is directly on the vertex between two segments.
             if (!intersect_results.empty() && intersect_results.back().first == i - 1) {
                 const IfcVector3 diff = intersect_results.back().second - e0;
-                if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10)
+                if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10) {
                     continue;
+                }
             }
             intersect_results.emplace_back(i, e0);
             continue;
@@ -322,8 +328,9 @@ bool IntersectsBoundaryProfile(const IfcVector3 &e0, const IfcVector3 &e1, const
             // This way, we avoid duplicate detection if the intersection is directly on the vertex between two segments.
             if (!intersect_results.empty() && intersect_results.back().first == i - 1) {
                 const IfcVector3 diff = intersect_results.back().second - p;
-                if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10)
+                if (IfcVector2(diff.x, diff.y).SquareLength() < 1e-10) {
                     continue;
+                }
             }
             intersect_results.emplace_back(i, p);
         }
@@ -662,7 +669,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as, TempMesh &result,
+void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as, 
+        TempMesh &result,
         const TempMesh &first_operand,
         ConversionData &conv) {
     ai_assert(as != nullptr);
@@ -763,4 +771,4 @@ void ProcessBoolean(const Schema_2x3::IfcBooleanResult &boolean, TempMesh &resul
 } // namespace IFC
 } // namespace Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_IFC_IMPORTER

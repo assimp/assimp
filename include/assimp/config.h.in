@@ -1085,6 +1085,19 @@ enum aiComponent
  */
 #define AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS "USE_GLTF_PBR_SPECULAR_GLOSSINESS"
 
+/** @brief Specifies whether to apply a limit on the number of four bones per vertex in skinning
+ *
+ * When this flag is not defined, all bone weights and indices are limited to a
+ * maximum of four bones for each vertex (attributes JOINT_0 and WEIGHT_0 only).
+ * By enabling this flag, the number of bones per vertex is unlimited.
+ * In both cases, indices and bone weights are sorted by weight in descending order.
+ * In the case of the limit of up to four bones, a maximum of the four largest values are exported.
+ * Weights are not normalized.
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX \
+        "USE_UNLIMITED_BONES_PER VERTEX"
+
 /**
  * @brief Specifies the blob name, assimp uses for exporting.
  * 

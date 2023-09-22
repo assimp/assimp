@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h>
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
@@ -502,6 +503,144 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf",
             aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
+}
+
+bool checkSkinnedScene(const aiScene *scene){
+    float eps = 0.001;
+    bool result = true;
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
+
+    uint numWeights[] = {4u, 4u, 4u, 4u, 2u , 1u, 1u, 2u, 1u, 1u};
+    float weights[10][4] = {{0.207, 0.291, 0.057, 0.303},
+                        {0.113, 0.243, 0.499, 0.251},
+                        {0.005, 0.010, 0.041, 0.093},
+                        {0.090, 0.234, 0.404, 0.243},
+                        {0.090, 0.222, 0.000, 0.000},
+                        {0.216, 0.000, 0.000, 0.000},
+                        {0.058, 0.000, 0.000, 0.000},
+                        {0.086, 0.000, 0.000, 0.111},
+                        {0.088, 0.000, 0.000, 0.000},
+                        {0.049, 0.000, 0.000, 0.000}};
+    for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
+        EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
+        std::map<uint, float> map;
+        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
+            auto key = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mVertexId;
+            auto weight = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mWeight;
+            map[key] = weight;
+        }
+
+        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+            auto weight = map[jointIndex];
+            EXPECT_LT(abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
+        }
+
+    }
+
+    return result;
+}
+
+void checkSkinnedSceneLimited(const aiScene *scene){
+    float eps = 0.001;
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
+
+    uint numWeights[] = {4u, 4u, 1u, 4u, 1u , 1u, 1u, 1u, 1u, 1u};
+    float weights[10][4] = {{0.207, 0.291, 0.057, 0.303},
+                            {0.113, 0.243, 0.499, 0.251},
+                            {0.000, 0.000, 0.041, 0.000},
+                            {0.090, 0.234, 0.404, 0.243},
+                            {0.000, 0.222, 0.000, 0.000},
+                            {0.216, 0.000, 0.000, 0.000},
+                            {0.000, 0.000, 0.000, 0.000},
+                            {0.000, 0.000, 0.000, 0.111},
+                            {0.000, 0.000, 0.000, 0.000},
+                            {0.000, 0.000, 0.000, 0.000}};
+    for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
+        EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
+        std::map<uint, float> map;
+        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
+            auto key = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mVertexId;
+            auto weight = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mWeight;
+            map[key] = weight;
+        }
+        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+            auto weight = map[jointIndex];
+            EXPECT_LT(std::abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
+        }
+    }
+}
+
+TEST_F(utglTF2ImportExport, bug_import_simple_skin2) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_skin.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(scene);
+
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.glb"));
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.gltf"));
+
+    // enable more than four bones per vertex
+    Assimp::ExportProperties properties = Assimp::ExportProperties();
+    properties.SetPropertyBool(
+      AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX, true);
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.glb", 0u, &properties));
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.gltf", 0u, &properties));
+
+    // check skinning data of both exported files for limited number bones per vertex
+    const aiScene *limitedSceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.gltf",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedSceneLimited(limitedSceneImported);
+    limitedSceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedSceneLimited(limitedSceneImported);
+
+    // check skinning data of both exported files for unlimited number bones per vertex
+    const aiScene *sceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.gltf",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(sceneImported);
+    sceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(sceneImported);
+
+
 }
 
 TEST_F(utglTF2ImportExport, import_cameras) {

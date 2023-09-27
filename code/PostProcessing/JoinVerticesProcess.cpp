@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <unordered_set>
 #include <unordered_map>
+#include <memory>
 
 using namespace Assimp;
 

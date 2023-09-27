@@ -156,53 +156,47 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<int> &uniqueVertices) {
     // ----------------------------------------------------------------------------
 
     // Position, if present (check made for aiAnimMesh)
-    if (pMesh->mVertices) {
-        aiVector3D *oldVertices = pMesh->mVertices;
+    if (pMesh->mVertices) {  
+        std::unique_ptr<aiVector3D[]> oldVertices(pMesh->mVertices);
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
             pMesh->mVertices[a] = oldVertices[uniqueVertices[a]];
-        delete [] oldVertices;
     }
 
     // Normals, if present
     if (pMesh->mNormals) {
-        aiVector3D *oldNormals = pMesh->mNormals;
+        std::unique_ptr<aiVector3D[]> oldNormals(pMesh->mNormals);
         pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
             pMesh->mNormals[a] = oldNormals[uniqueVertices[a]];
-        delete oldNormals;
     }
     // Tangents, if present
     if (pMesh->mTangents) {
-        aiVector3D *oldTangents = pMesh->mTangents;
+        std::unique_ptr<aiVector3D[]> oldTangents(pMesh->mTangents);
         pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
             pMesh->mTangents[a] = oldTangents[uniqueVertices[a]];
-        delete oldTangents;
     }
     // Bitangents as well
     if (pMesh->mBitangents) {
-        aiVector3D *oldBitangents = pMesh->mBitangents;
+        std::unique_ptr<aiVector3D[]> oldBitangents(pMesh->mBitangents);
         pMesh->mBitangents = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
             pMesh->mBitangents[a] = oldBitangents[uniqueVertices[a]];
-        delete oldBitangents;
     }
     // Vertex colors
     for (unsigned int a = 0; pMesh->HasVertexColors(a); a++) {
-        aiColor4D *oldColors = pMesh->mColors[a];
+        std::unique_ptr<aiColor4D[]> oldColors(pMesh->mColors[a]);
         pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
         for (unsigned int b = 0; b < pMesh->mNumVertices; b++)
             pMesh->mColors[a][b] = oldColors[uniqueVertices[b]];
-        delete [] oldColors;
     }
     // Texture coords
     for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++) {
-        aiVector3D *oldTextureCoords = pMesh->mTextureCoords[a];
+        std::unique_ptr<aiVector3D[]> oldTextureCoords(pMesh->mTextureCoords[a]);
         pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
         for (unsigned int b = 0; b < pMesh->mNumVertices; b++)
             pMesh->mTextureCoords[a][b] = oldTextureCoords[uniqueVertices[b]];
-        delete [] oldTextureCoords;
     }
 }
 

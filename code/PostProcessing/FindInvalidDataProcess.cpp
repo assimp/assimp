@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -273,7 +273,8 @@ void FindInvalidDataProcess::ProcessAnimation(aiAnimation *anim) {
 void FindInvalidDataProcess::ProcessAnimationChannel(aiNodeAnim *anim) {
     ai_assert(nullptr != anim);
     if (anim->mNumPositionKeys == 0 && anim->mNumRotationKeys == 0 && anim->mNumScalingKeys == 0) {
-        ai_assert_entry();
+        ASSIMP_LOG_ERROR("Invalid node anuimation instance detected.");
+
         return;
     }
 

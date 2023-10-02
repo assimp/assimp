@@ -18,7 +18,7 @@
 #else
 #define VER_FILEVERSION_STR         STR(VER_MAJOR) "." STR(VER_MINOR) "." STR(VER_PATCH) "." STR(VER_BUILD) " (Commit @GIT_COMMIT_HASH@)"
 #endif
-#define VER_COPYRIGHT_STR           "\xA9 2006-2022"
+#define VER_COPYRIGHT_STR           "\xA9 2006-2023"
 
 #ifdef  NDEBUG
 #define VER_ORIGINAL_FILENAME_STR   "@CMAKE_SHARED_LIBRARY_PREFIX@assimp@LIBRARY_SUFFIX@.dll"

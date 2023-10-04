@@ -29,6 +29,8 @@ jobs:
         cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_ASAN=ON'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
+        # This is the name of the CMakePresets.json's configuration to build the project.
+        buildPreset: 'ninja-multi-vcpkg'
     
     - name: test
       run: cd build/bin && ./unit
@@ -53,6 +55,8 @@ jobs:
         cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_UBSAN=ON'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
+        # This is the name of the CMakePresets.json's configuration to build the project.
+        buildPreset: 'ninja-multi-vcpkg'
     
     - name: test
       run: cd build/bin && ./unit

@@ -1391,7 +1391,7 @@ void FBXExporter::WriteObjects ()
         aiMaterial* m = mScene->mMaterials[i];
 
         // these are used to receive material data
-        float f; aiColor3D c;
+        ai_real f; aiColor3D c;
 
         // start the node record
         FBX::Node n("Material");

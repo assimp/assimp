@@ -78,6 +78,7 @@ struct aiVectorKey {
     }
 
     /// @brief  Construction from a given time and key value.
+
     aiVectorKey(double time, const aiVector3D &value) :
             mTime(time), mValue(value) {
         // empty

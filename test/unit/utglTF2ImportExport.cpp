@@ -524,7 +524,7 @@ bool checkSkinnedScene(const aiScene *scene){
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
 
-    uint numWeights[] = {4u, 4u, 4u, 4u, 2u , 1u, 1u, 2u, 1u, 1u};
+    unsigned int numWeights[] = {4u, 4u, 4u, 4u, 2u , 1u, 1u, 2u, 1u, 1u};
     float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
                         {0.113f, 0.243f, 0.499f, 0.251f},
                         {0.005f, 0.010f, 0.041f, 0.093f},
@@ -571,7 +571,7 @@ void checkSkinnedSceneLimited(const aiScene *scene){
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
 
-    uint numWeights[] = {4u, 4u, 1u, 4u, 1u , 1u, 1u, 1u, 1u, 1u};
+    unsigned int numWeights[] = {4u, 4u, 1u, 4u, 1u , 1u, 1u, 1u, 1u, 1u};
     float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
                             {0.113f, 0.243f, 0.499f, 0.251f},
                             {0.000f, 0.000f, 0.041f, 0.000f},

@@ -506,7 +506,7 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
 }
 
 bool checkSkinnedScene(const aiScene *scene){
-    float eps = 0.001;
+    float eps = 0.001f;
     bool result = true;
     EXPECT_EQ(scene->mNumMeshes, 1u);
     EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
@@ -525,16 +525,16 @@ bool checkSkinnedScene(const aiScene *scene){
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
 
     uint numWeights[] = {4u, 4u, 4u, 4u, 2u , 1u, 1u, 2u, 1u, 1u};
-    float weights[10][4] = {{0.207, 0.291, 0.057, 0.303},
-                        {0.113, 0.243, 0.499, 0.251},
-                        {0.005, 0.010, 0.041, 0.093},
-                        {0.090, 0.234, 0.404, 0.243},
-                        {0.090, 0.222, 0.000, 0.000},
-                        {0.216, 0.000, 0.000, 0.000},
-                        {0.058, 0.000, 0.000, 0.000},
-                        {0.086, 0.000, 0.000, 0.111},
-                        {0.088, 0.000, 0.000, 0.000},
-                        {0.049, 0.000, 0.000, 0.000}};
+    float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
+                        {0.113f, 0.243f, 0.499f, 0.251f},
+                        {0.005f, 0.010f, 0.041f, 0.093f},
+                        {0.090f, 0.234f, 0.404f, 0.243f},
+                        {0.090f, 0.222f, 0.000f, 0.000f},
+                        {0.216f, 0.000f, 0.000f, 0.000f},
+                        {0.058f, 0.000f, 0.000f, 0.000f},
+                        {0.086f, 0.000f, 0.000f, 0.111f},
+                        {0.088f, 0.000f, 0.000f, 0.000f},
+                        {0.049f, 0.000f, 0.000f, 0.000f}};
     for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
         EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
         std::map<uint, float> map;
@@ -548,14 +548,13 @@ bool checkSkinnedScene(const aiScene *scene){
             auto weight = map[jointIndex];
             EXPECT_LT(abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
         }
-
     }
 
     return result;
 }
 
 void checkSkinnedSceneLimited(const aiScene *scene){
-    float eps = 0.001;
+    float eps = 0.001f;
     EXPECT_EQ(scene->mNumMeshes, 1u);
     EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
@@ -573,16 +572,16 @@ void checkSkinnedSceneLimited(const aiScene *scene){
     EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
 
     uint numWeights[] = {4u, 4u, 1u, 4u, 1u , 1u, 1u, 1u, 1u, 1u};
-    float weights[10][4] = {{0.207, 0.291, 0.057, 0.303},
-                            {0.113, 0.243, 0.499, 0.251},
-                            {0.000, 0.000, 0.041, 0.000},
-                            {0.090, 0.234, 0.404, 0.243},
-                            {0.000, 0.222, 0.000, 0.000},
-                            {0.216, 0.000, 0.000, 0.000},
-                            {0.000, 0.000, 0.000, 0.000},
-                            {0.000, 0.000, 0.000, 0.111},
-                            {0.000, 0.000, 0.000, 0.000},
-                            {0.000, 0.000, 0.000, 0.000}};
+    float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
+                            {0.113f, 0.243f, 0.499f, 0.251f},
+                            {0.000f, 0.000f, 0.041f, 0.000f},
+                            {0.090f, 0.234f, 0.404f, 0.243f},
+                            {0.000f, 0.222f, 0.000f, 0.000f},
+                            {0.216f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.111f},
+                            {0.000f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.000f}};
     for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
         EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
         std::map<uint, float> map;

@@ -51,10 +51,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /**
- *  An axis-aligned bounding box.
+ *  @brief An axis-aligned bounding box.
  */
 struct aiAABB {
+    /**
+     *  @brief The minimum edge position of the axis-aligned bounding-box.
+     */
     C_STRUCT aiVector3D mMin;
+
+    /**
+     *  @brief The maximum edge position of the axis-aligned bounding-box.
+     */
     C_STRUCT aiVector3D mMax;
 
 #ifdef __cplusplus

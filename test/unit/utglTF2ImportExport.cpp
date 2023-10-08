@@ -582,15 +582,15 @@ void checkSkinnedSceneLimited(const aiScene *scene){
                             {0.000f, 0.000f, 0.000f, 0.111f},
                             {0.000f, 0.000f, 0.000f, 0.000f},
                             {0.000f, 0.000f, 0.000f, 0.000f}};
-    for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
+    for (unsigned int boneIndex = 0; boneIndex < 10u; ++boneIndex) {
         EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
         std::map<unsigned int, float> map;
-        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
             auto key = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mVertexId;
             auto weight = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mWeight;
             map[key] = weight;
         }
-        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
             auto weight = map[jointIndex];
             EXPECT_LT(std::abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
         }

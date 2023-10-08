@@ -544,7 +544,7 @@ bool checkSkinnedScene(const aiScene *scene){
             map[key] = weight;
         }
 
-        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
             auto weight = map[jointIndex];
             EXPECT_LT(abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
         }

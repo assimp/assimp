@@ -60,16 +60,16 @@ build_arch()
 
     unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS CMAKE_CLI_INPUT
            
-	export CC="$(xcrun -sdk iphoneos -find clang)"
+    export CC="$(xcrun -sdk iphoneos -find clang)"
     export CPP="$CC -E"
     export DEVROOT=$XCODE_ROOT_DIR/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
-    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"
-     if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
+    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -isysroot $SDKROOT -I$SDKROOT/usr/include/ -miphoneos-version-min=$IOS_SDK_TARGET"
+    if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
       export CFLAGS="$CFLAGS -Og"
-     else
+    else
 	     export CFLAGS="$CFLAGS -O3"
-     fi
+    fi
     export LDFLAGS="-arch $1 -isysroot $SDKROOT -L$SDKROOT/usr/lib/"
     export CPPFLAGS="$CFLAGS"
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
@@ -147,7 +147,7 @@ cd ../../
 rm -rf $BUILD_DIR
 
 for ARCH_TARGET in $DEPLOY_ARCHS; do
-	echo "Creating folder: $BUILD_DIR/$ARCH_TARGET"
+    echo "Creating folder: $BUILD_DIR/$ARCH_TARGET"
     mkdir -p $BUILD_DIR/$ARCH_TARGET
     echo "Building for arc: $ARCH_TARGET" 
     build_arch $ARCH_TARGET
@@ -157,8 +157,8 @@ done
 
 make_fat_static_or_shared_binary()
 {
-	LIB_NAME=$1
-	LIPO_ARGS=''
+    LIB_NAME=$1
+    LIPO_ARGS=''
     for ARCH_TARGET in $DEPLOY_ARCHS; do
         if [[ "$BUILD_SHARED_LIBS" =~ "ON" ]]; then
             LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.dylib "
@@ -176,8 +176,8 @@ make_fat_static_or_shared_binary()
 
 make_fat_static_binary()
 {
-	LIB_NAME=$1
-	LIPO_ARGS=''
+    LIB_NAME=$1
+    LIPO_ARGS=''
     for ARCH_TARGET in $DEPLOY_ARCHS; do
         LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/$LIB_NAME.a "
     done
@@ -196,6 +196,3 @@ if [[ "$DEPLOY_FAT" -eq 1 ]]; then
     
     echo "[!] Done! The fat binaries can be found at $BUILD_DIR"
 fi
-
-
-

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -82,6 +82,9 @@ void UpdateMeshReferences(aiNode *node, const std::vector<unsigned int> &meshMap
         for (unsigned int a = 0; a < node->mNumMeshes; ++a) {
 
             unsigned int ref = node->mMeshes[a];
+            if (ref >= meshMapping.size())
+                throw DeadlyImportError("Invalid mesh ref");
+
             if (UINT_MAX != (ref = meshMapping[ref])) {
                 node->mMeshes[out++] = ref;
             }
@@ -143,7 +146,13 @@ void FindInvalidDataProcess::Execute(aiScene *pScene) {
             // we need to remove some meshes.
             // therefore we'll also need to remove all references
             // to them from the scenegraph
-            UpdateMeshReferences(pScene->mRootNode, meshMapping);
+            try {
+                UpdateMeshReferences(pScene->mRootNode, meshMapping);
+            } catch (const std::exception&) {
+                // fix the real number of meshes otherwise we'll get double free in the scene destructor
+                pScene->mNumMeshes = real;
+                throw;
+            }
             pScene->mNumMeshes = real;
         }
 
@@ -264,7 +273,8 @@ void FindInvalidDataProcess::ProcessAnimation(aiAnimation *anim) {
 void FindInvalidDataProcess::ProcessAnimationChannel(aiNodeAnim *anim) {
     ai_assert(nullptr != anim);
     if (anim->mNumPositionKeys == 0 && anim->mNumRotationKeys == 0 && anim->mNumScalingKeys == 0) {
-        ai_assert_entry();
+        ASSIMP_LOG_ERROR("Invalid node anuimation instance detected.");
+
         return;
     }
 

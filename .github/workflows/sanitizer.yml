@@ -14,7 +14,7 @@ jobs:
     name: adress-sanitizer
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:
@@ -38,7 +38,7 @@ jobs:
     name: undefined-behavior-sanitizer
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
       with:
@@ -46,7 +46,7 @@ jobs:
         CC: clang
     
     - name: configure and build
-      uses: lukka/run-cmake@v2
+      uses: lukka/run-cmake@v3
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
@@ -62,7 +62,7 @@ jobs:
     name: printf-sanitizer
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: run scan_printf script
       run: ./scripts/scan_printf.sh

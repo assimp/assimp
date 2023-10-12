@@ -93,6 +93,8 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
         mSceneOut(out),
         doc(doc),
         mRemoveEmptyBones(removeEmptyBones) {
+
+
     // animations need to be converted first since this will
     // populate the node_anim_chain_bits map, which is needed
     // to determine which nodes need to be generated.
@@ -427,12 +429,26 @@ void FBXConverter::ConvertCamera(const Camera &cam, const std::string &orig_name
     out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
     out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
 
-    out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
+    // NOTE: Some software (maya) does not put FieldOfView in FBX, so we compute
+    // mHorizontalFOV from FocalLength and FilmWidth with unit conversion.
 
-    out_camera->mClipPlaneNear = cam.NearPlane();
-    out_camera->mClipPlaneFar = cam.FarPlane();
+    // TODO: This is not a complete solution for how FBX cameras can be stored.
+    // TODO: Incorporate non-square pixel aspect ratio.
+    // TODO: FBX aperture mode might be storing vertical FOV in need of conversion with aspect ratio.
 
-    out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
+    float fov_deg = cam.FieldOfView();
+    // If FOV not specified in file, compute using FilmWidth and FocalLength.
+    if (fov_deg == kFovUnknown) {
+        float film_width_inches = cam.FilmWidth();
+        float focal_length_mm = cam.FocalLength();
+        ASSIMP_LOG_VERBOSE_DEBUG("FBX FOV unspecified. Computing from FilmWidth (", film_width_inches, "inches) and FocalLength (", focal_length_mm, "mm).");
+        double half_fov_rad = std::atan2(film_width_inches * 25.4 * 0.5, focal_length_mm);
+        out_camera->mHorizontalFOV = static_cast<float>(half_fov_rad);
+    } else {
+        // FBX fov is full-view degrees. We want half-view radians.
+        out_camera->mHorizontalFOV = AI_DEG_TO_RAD(fov_deg) * 0.5f;
+    }
+
     out_camera->mClipPlaneNear = cam.NearPlane();
     out_camera->mClipPlaneFar = cam.FarPlane();
 }

@@ -481,6 +481,8 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         pcNew->achFormatHint[2] = 's';
         pcNew->achFormatHint[3] = '\0';
 
+        SizeCheck(szCurrent + pcNew->mWidth);
+
         pcNew->pcData = (aiTexel *)new unsigned char[pcNew->mWidth];
         memcpy(pcNew->pcData, szCurrent, pcNew->mWidth);
         szCurrent += iWidth;
@@ -493,12 +495,12 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
         aiString szFile;
         const size_t iLen = strlen((const char *)szCurrent);
-        size_t iLen2 = iLen + 1;
-        iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
+        size_t iLen2 = iLen > (MAXLEN - 1) ? (MAXLEN - 1) : iLen;
         memcpy(szFile.data, (const char *)szCurrent, iLen2);
+        szFile.data[iLen2] = '\0';
         szFile.length = static_cast<ai_uint32>(iLen2);
 
-        szCurrent += iLen2;
+        szCurrent += iLen2 + 1;
 
         // place this as diffuse texture
         pcMatOut->AddProperty(&szFile, AI_MATKEY_TEXTURE_DIFFUSE(0));
@@ -703,7 +705,14 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
             tex.pcData = bad_texel;
             tex.mHeight = iHeight;
             tex.mWidth = iWidth;
-            ParseTextureColorData(szCurrent, iMasked, &iSkip, &tex);
+
+            try {
+                ParseTextureColorData(szCurrent, iMasked, &iSkip, &tex);
+            } catch (...) {
+                // FIX: Important, otherwise the destructor will crash
+                tex.pcData = nullptr;
+                throw;
+            }
 
             // FIX: Important, otherwise the destructor will crash
             tex.pcData = nullptr;

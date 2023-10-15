@@ -923,7 +923,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
   find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
-  # utf8 is header-only, so Assimp doesn't need to do anything.
+  INCLUDE_DIRECTORIES("../contrib/utf8cpp/source")
 ENDIF()
 
 # polyclipping

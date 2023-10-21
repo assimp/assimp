@@ -59,6 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 #ifdef __cplusplus
+#include <unordered_set>
+
 extern "C" {
 #endif
 
@@ -872,10 +874,14 @@ struct aiMesh {
 
         // DO NOT REMOVE THIS ADDITIONAL CHECK
         if (mNumBones && mBones) {
+            std::unordered_set<const aiBone *> bones;
             for (unsigned int a = 0; a < mNumBones; a++) {
                 if (mBones[a]) {
-                    delete mBones[a];
+                    bones.insert(mBones[a]);
                 }
+            }
+            for (const aiBone *bone: bones) {
+                delete bone;
             }
             delete[] mBones;
         }

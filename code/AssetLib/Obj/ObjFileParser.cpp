@@ -605,7 +605,8 @@ void ObjFileParser::getMaterialDesc() {
         }
 
         if (needsNewMesh(strName)) {
-            createMesh(strName);
+            auto newMeshName = m_pModel->mActiveGroup.empty() ? strName : m_pModel->mActiveGroup;
+            createMesh(newMeshName);
         }
 
         m_pModel->mCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);

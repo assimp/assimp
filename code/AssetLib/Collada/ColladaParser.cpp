@@ -814,38 +814,38 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 if (!pImage.mFileName.length()) {
                     pImage.mFileName = "unknown_texture";
                 }
-            }
-        } else if (mFormat == FV_1_5_n) {
-            std::string value;
-            XmlNode refChild = currentNode.child("ref");
-            XmlNode hexChild = currentNode.child("hex");
-            if (refChild) {
-                // element content is filename - hopefully
-                if (XmlParser::getValueAsString(refChild, value)) {
-                    aiString filepath(value);
-                    UriDecodePath(filepath);
-                    pImage.mFileName = filepath.C_Str();
-                }
-            } else if (hexChild && !pImage.mFileName.length()) {
-                // embedded image. get format
-                pImage.mEmbeddedFormat = hexChild.attribute("format").as_string();
-                if (pImage.mEmbeddedFormat.empty()) {
-                    ASSIMP_LOG_WARN("Collada: Unknown image file format");
-                }
+            } else if (mFormat == FV_1_5_n) {
+                std::string value;
+                XmlNode refChild = currentNode.child("ref");
+                XmlNode hexChild = currentNode.child("hex");
+                if (refChild) {
+                    // element content is filename - hopefully
+                    if (XmlParser::getValueAsString(refChild, value)) {
+                        aiString filepath(value);
+                        UriDecodePath(filepath);
+                        pImage.mFileName = filepath.C_Str();
+                    }
+                } else if (hexChild && !pImage.mFileName.length()) {
+                    // embedded image. get format
+                    pImage.mEmbeddedFormat = hexChild.attribute("format").as_string();
+                    if (pImage.mEmbeddedFormat.empty()) {
+                        ASSIMP_LOG_WARN("Collada: Unknown image file format");
+                    }
 
-                XmlParser::getValueAsString(hexChild, value);
-                const char *data = value.c_str();
-                // hexadecimal-encoded binary octets. First of all, find the
-                // required buffer size to reserve enough storage.
-                const char *cur = data;
-                while (!IsSpaceOrNewLine(*cur)) {
-                    ++cur;
-                }
+                    XmlParser::getValueAsString(hexChild, value);
+                    const char *data = value.c_str();
+                    // hexadecimal-encoded binary octets. First of all, find the
+                    // required buffer size to reserve enough storage.
+                    const char *cur = data;
+                    while (!IsSpaceOrNewLine(*cur)) {
+                        ++cur;
+                    }
 
-                const unsigned int size = (unsigned int)(cur - data) * 2;
-                pImage.mImageData.resize(size);
-                for (unsigned int i = 0; i < size; ++i) {
-                    pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+                    const unsigned int size = (unsigned int)(cur - data) * 2;
+                    pImage.mImageData.resize(size);
+                    for (unsigned int i = 0; i < size; ++i) {
+                        pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+                    }
                 }
             }
         }

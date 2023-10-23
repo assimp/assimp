@@ -1274,9 +1274,7 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
         return;
     }
 
-    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
-    XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
+    for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "surface") {
             // image ID given inside <init_from> tags
@@ -1289,22 +1287,24 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
             }
         } else if (currentName == "sampler2D" && (FV_1_4_n == mFormat || FV_1_3_n == mFormat)) {
             // surface ID is given inside <source> tags
-            const char *content = currentNode.value();
-            pParam.mType = Param_Sampler;
-            pParam.mReference = content;
+            XmlNode source = currentNode.child("source");
+            if (source) {
+                std::string v;
+                XmlParser::getValueAsString(source, v);
+                pParam.mType = Param_Sampler;
+                pParam.mReference = v.c_str();
+            }
         } else if (currentName == "sampler2D") {
             // surface ID is given inside <instance_image> tags
-            std::string url;
-            XmlParser::getStdStrAttribute(currentNode, "url", url);
-            if (url[0] != '#') {
-                throw DeadlyImportError("Unsupported URL format in instance_image");
-            }
-            pParam.mType = Param_Sampler;
-            pParam.mReference = url.c_str() + 1;
-        } else if (currentName == "source") {
-            const char *source = currentNode.child_value();
-            if (nullptr != source) {
-                pParam.mReference = source;
+            XmlNode instance_image = currentNode.child("instance_image");
+            if (instance_image) {
+                std::string url;
+                XmlParser::getStdStrAttribute(instance_image, "url", url);
+                if (url[0] != '#') {
+                    throw DeadlyImportError("Unsupported URL format in instance_image");
+                }
+                pParam.mType = Param_Sampler;
+                pParam.mReference = url.c_str() + 1;
             }
         }
     }

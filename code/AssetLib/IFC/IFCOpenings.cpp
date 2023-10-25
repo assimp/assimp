@@ -1372,7 +1372,7 @@ std::vector<IfcVector2> GetContourInPlane2D(const std::shared_ptr<TempMesh>& mes
     const std::vector<IfcVector3>& va = mesh->mVerts;
     if(va.size() <= 2) {
         std::stringstream msg;
-        msg << "Skipping: Only " << va.size() << " verticies in opening mesh.";
+        msg << "Skipping: Only " << va.size() << " vertices in opening mesh.";
         IFCImporter::LogDebug(msg.str().c_str());
         ok = false;
         return contour;

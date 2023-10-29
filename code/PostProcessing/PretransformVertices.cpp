@@ -290,12 +290,6 @@ void PretransformVertices::ComputeAbsoluteTransform(aiNode *pcNode) {
 	}
 }
 
-static void normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors) {
-	for (size_t i=0; i<numVectors; ++i) {
-		vectorArrayOut[i] = vectorArrayIn[i].Normalize();
-	}
-}
-
 // ------------------------------------------------------------------------------------------------
 // Apply the node transformation to a mesh
 void PretransformVertices::ApplyTransform(aiMesh *mesh, const aiMatrix4x4 &mat) const {
@@ -322,8 +316,11 @@ void PretransformVertices::ApplyTransform(aiMesh *mesh, const aiMatrix4x4 &mat) 
 		const aiMatrix3x3 m = aiMatrix3x3(mat).Inverse().Transpose();
 
 		if (mesh->HasNormals()) {
-			normalizeVectorArray(mesh->mNormals, mesh->mNormals, mesh->mNumVertices);
+			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+                mesh->mNormals[i] = (m * mesh->mNormals[i]).Normalize();
+            }
 		}
+
 		if (mesh->HasTangentsAndBitangents()) {
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 				mesh->mTangents[i] = (m * mesh->mTangents[i]).Normalize();

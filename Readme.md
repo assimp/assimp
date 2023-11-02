@@ -6,20 +6,14 @@ Open Asset Import Library is a library to load various 3d file formats into a sh
 ### Current project status ###
 [![Financial Contributors on Open Collective](https://opencollective.com/assimp/all/badge.svg?label=financial+contributors)](https://opencollective.com/assimp) 
 ![C/C++ CI](https://github.com/assimp/assimp/workflows/C/C++%20CI/badge.svg)
-<a href="https://scan.coverity.com/projects/5607">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/5607/badge.svg"/>
-</a>
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
-
-[![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Percentage of issues still open")
 <br>
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
-Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
+Additionally, assimp features various __mesh post-processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
 ### Latest Doc's ###
 Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
@@ -58,20 +52,21 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 
 ### Other tools ###
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
+[Assimp-Viewer(]https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
 #### Repository structure ####
-Open Asset Import Library is implemented in C++. The directory structure looks like:
+Open Asset Import Library is implemented in C++. The directory structure looks like this:
 
 	/code		Source code
 	/contrib	Third-party libraries
 	/doc		Documentation (doxysource and pre-compiled docs)
-	/fuzz           Contains the test-code for the Google-Fuzzer project
+	/fuzz           Contains the test code for the Google Fuzzer project
 	/include	Public header C and C++ header files
-	/scripts 	Scripts used to generate the loading code for some formats
+	/scripts 	Scripts are used to generate the loading code for some formats
 	/port		Ports to other languages and scripts to maintain those.
 	/test		Unit- and regression tests, test suite of models
 	/tools		Tools (old assimp viewer, command line `assimp`)
-	/samples	A small number of samples to illustrate possible use-cases for Assimp
+	/samples	A small number of samples to illustrate possible use cases for Assimp
 
 The source code is organized in the following way:
 
@@ -79,9 +74,9 @@ The source code is organized in the following way:
 	code/CApi                       Special implementations which are only used for the C-API
 	code/Geometry                   A collection of geometry tools
 	code/Material                   The material system
-	code/PBR                        An exporter for physical based models
+	code/PBR                        An exporter for physical-based models
 	code/PostProcessing		The post-processing steps
-	code/AssetLib/<FormatName>	Implementation for import and export for the format
+	code/AssetLib/<FormatName>	Implementation for import and export of the format
 
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
@@ -118,4 +113,4 @@ and don't sue us if our code doesn't work. Note that, unlike LGPLed code, you ma
 For the legal details, see the `LICENSE` file.
 
 ### Why this name ###
-Sorry, we're germans :-), no english native speakers ...
+Sorry, we're germans :-), no English native speakers ...

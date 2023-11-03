@@ -1181,6 +1181,14 @@ inline void Texture::Read(Value &obj, Asset &r) {
     if (Value *samplerVal = FindUInt(obj, "sampler")) {
         sampler = r.samplers.Retrieve(samplerVal->GetUint());
     }
+
+    if (r.extensionsUsed.KHR_texture_basisu) {
+        if (Value *pKHR_texture_basisu = FindExtension(obj, "KHR_texture_basisu")) {
+            if (Value *sourceVal = FindUInt(*pKHR_texture_basisu, "source")) {
+                source = r.images.Retrieve(sourceVal->GetUint());
+            }
+        }
+    }
 }
 
 void Material::SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {

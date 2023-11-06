@@ -41,11 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#   include <zlib.h>
-#else
-#   include "../contrib/zlib/zlib.h"
-#endif
+#include "zlib.h"
 
 #include <vector>
 #include <cstddef> // size_t

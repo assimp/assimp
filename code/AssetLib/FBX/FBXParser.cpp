@@ -45,12 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-//#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #include "Common/Compression.h"
-//#   include <zlib.h>
-//#else
-//#   include "../contrib/zlib/zlib.h"
-//#endif
 
 #include "FBXTokenizer.h"
 #include "FBXParser.h"

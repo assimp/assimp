@@ -43,6 +43,7 @@ cd assimp
 cmake CMakeLists.txt 
 cmake --build .
 ```
+Note that by default this builds a shared library into the `bin` directory. If you want to build it as a static library see the build options at the bottom of this file.
 
 ### Build instructions for Windows with Visual-Studio
 

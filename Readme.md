@@ -52,7 +52,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 
 ### Other tools ###
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
-[Assimp-Viewer(]https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
+[Assimp-Viewer](https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure looks like this:

@@ -923,7 +923,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(utf8)
   find_package(utf8cpp CONFIG REQUIRED)
 ELSE()
-  # utf8 is header-only, so Assimp doesn't need to do anything.
+  INCLUDE_DIRECTORIES("../contrib/utf8cpp/source")
 ENDIF()
 
 # polyclipping
@@ -1380,7 +1380,12 @@ ENDIF()
 IF(NOT ASSIMP_HUNTER_ENABLED)
   if (UNZIP_FOUND)
     INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
-    TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+    # TODO if cmake required version has been updated to >3.12.0, collapse this to the second case only
+    if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+      TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+    else()
+      TARGET_LINK_LIBRARIES(assimp ${UNZIP_LINK_LIBRARIES})
+    endif()
   else ()
     INCLUDE_DIRECTORIES("../")
   endif ()

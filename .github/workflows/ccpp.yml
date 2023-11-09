@@ -46,7 +46,7 @@ jobs:
             toolchain: ninja-vs-win64-cxx17
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
           submodules: true
           
@@ -69,16 +69,10 @@ jobs:
 
     - name: Checkout Hunter toolchains
       if: endsWith(matrix.name, 'hunter')
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: cpp-pm/polly
         path: cmake/polly
-
-    - name: Remove contrib directory for Hunter builds
-      if: contains(matrix.name, 'hunter')
-      uses: JesseTG/rm@v1.0.3
-      with:
-        path: contrib
 
     - name: Cache DX SDK
       id: dxcache

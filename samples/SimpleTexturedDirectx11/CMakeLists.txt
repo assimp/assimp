@@ -19,6 +19,7 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/include
   ${Assimp_SOURCE_DIR}/code
   ${SAMPLES_SHARED_CODE_DIR}
+  ${Assimp_SOURCE_DIR}/contrib/utf8cpp/source
 )
 
 LINK_DIRECTORIES(

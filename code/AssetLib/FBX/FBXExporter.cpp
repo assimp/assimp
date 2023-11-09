@@ -74,8 +74,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
 // https://wiki.blender.org/index.php/User:Mont29/Foundation/FBX_File_Structure
 
-const ai_real DEG = ai_real( 57.29577951308232087679815481 ); // degrees per radian
-
 using namespace Assimp;
 using namespace Assimp::FBX;
 
@@ -1391,7 +1389,7 @@ void FBXExporter::WriteObjects ()
         aiMaterial* m = mScene->mMaterials[i];
 
         // these are used to receive material data
-        float f; aiColor3D c;
+        ai_real f; aiColor3D c;
 
         // start the node record
         FBX::Node n("Material");
@@ -2434,7 +2432,7 @@ void FBXExporter::WriteObjects ()
                 aiMatrix4x4 m(k.mValue.GetMatrix());
                 aiVector3D qs, qr, qt;
                 m.Decompose(qs, qr, qt);
-                qr *= DEG;
+                qr = AI_RAD_TO_DEG(qr);
                 xval.push_back(qr.x);
                 yval.push_back(qr.y);
                 zval.push_back(qr.z);
@@ -2515,9 +2513,10 @@ void FBXExporter::WriteModelNode(
             );
         }
         if (r != zero) {
+            r = AI_RAD_TO_DEG(r);
             p.AddP70(
                 "Lcl Rotation", "Lcl Rotation", "", "A",
-                double(DEG*r.x), double(DEG*r.y), double(DEG*r.z)
+                double(r.x), double(r.y), double(r.z)
             );
         }
         if (s != one) {
@@ -2601,8 +2600,7 @@ void FBXExporter::WriteModelNodes(
             transform_chain.emplace_back(elem->first, t);
             break;
         case 'r': // rotation
-            r *= float(DEG);
-            transform_chain.emplace_back(elem->first, r);
+            transform_chain.emplace_back(elem->first, AI_RAD_TO_DEG(r));
             break;
         case 's': // scale
             transform_chain.emplace_back(elem->first, s);

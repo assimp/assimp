@@ -102,10 +102,6 @@ void Structure::Convert<CollectionObject>(
 
     ReadFieldPtr<ErrorPolicy_Fail>(dest.next, "*next", db);
     {
-        //std::shared_ptr<CollectionObject> prev;
-        //ReadFieldPtr<ErrorPolicy_Fail>(prev, "*prev", db);
-        //dest.prev = prev.get();
-
         std::shared_ptr<Object> ob;
         ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
         dest.ob = ob.get();

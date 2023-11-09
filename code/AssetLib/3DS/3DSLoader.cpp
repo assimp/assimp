@@ -104,10 +104,6 @@ Discreet3DSImporter::Discreet3DSImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-Discreet3DSImporter::~Discreet3DSImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };

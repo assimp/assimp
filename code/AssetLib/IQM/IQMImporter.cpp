@@ -100,13 +100,6 @@ bool IQMImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        /*
-         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-
-        const char* tokens[] = {"3DMO", "3dmo"};
-        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
-        */
         std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
         unsigned char data[15];
         if (!pStream || 15 != pStream->Read(data, 1, 15)) {

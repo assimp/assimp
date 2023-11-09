@@ -66,6 +66,10 @@ Compression::Compression() :
 Compression::~Compression() {
     ai_assert(mImpl != nullptr);
 
+    if (mImpl->mOpen) {
+        close();
+    }
+
     delete mImpl;
 }
 
@@ -124,7 +128,7 @@ static int getFlushMode(Compression::FlushMode flush) {
     return z_flush;
 }
 
-constexpr size_t MYBLOCK = 32786;
+static constexpr size_t MYBLOCK = 32786;
 
 size_t Compression::decompress(const void *data, size_t in, std::vector<char> &uncompressed) {
     ai_assert(mImpl != nullptr);

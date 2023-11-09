@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -109,6 +107,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals(aiMesh *pMesh, unsigned int m
             return false;
         }
         delete[] pMesh->mNormals;
+        pMesh->mNormals = nullptr;
     }
 
     // If the mesh consists of lines and/or points but not of

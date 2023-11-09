@@ -78,7 +78,9 @@ using namespace std;
 ObjFileImporter::ObjFileImporter() :
         m_Buffer(),
         m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -102,7 +104,7 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
     // Read file into memory
-    static const std::string mode = "rb";
+    static constexpr char mode[] = "rb";
     auto streamCloser = [&](IOStream *pStream) {
         pIOHandler->Close(pStream);
     };

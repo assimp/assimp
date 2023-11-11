@@ -65,7 +65,7 @@ using namespace Assimp;
 using namespace Assimp::COB;
 using namespace Assimp::Formatter;
 
-static const float units[] = {
+static constexpr float units[] = {
     1000.f,
     100.f,
     1.f,
@@ -76,7 +76,7 @@ static const float units[] = {
     1.f / 1609.344f
 };
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "TrueSpace Object Importer",
     "",
     "",
@@ -88,14 +88,6 @@ static const aiImporterDesc desc = {
     0,
     "cob scn"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-COBImporter::COBImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-COBImporter::~COBImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

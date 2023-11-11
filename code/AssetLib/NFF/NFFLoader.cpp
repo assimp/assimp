@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Neutral File Format Importer",
     "",
     "",
@@ -70,14 +70,6 @@ static const aiImporterDesc desc = {
     0,
     "enff nff"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-NFFImporter::NFFImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-NFFImporter::~NFFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -94,7 +86,7 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
     SkipSpaces(&sz);          \
-    if (!::IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
+    if (!IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -338,8 +330,8 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         break;
                 }
 
-                // read the numbr of vertices
-                unsigned int num = ::strtoul10(sz, &sz);
+                // read the number of vertices
+                unsigned int num = strtoul10(sz, &sz);
 
                 // temporary storage
                 std::vector<aiColor4D> tempColors;
@@ -365,7 +357,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         // color definition
                         if (TokenMatch(sz, "0x", 2)) {
                             hasColor = true;
-                            unsigned int numIdx = ::strtoul16(sz, &sz);
+                            unsigned int numIdx = strtoul16(sz, &sz);
                             aiColor4D clr;
                             clr.a = 1.f;
 
@@ -403,15 +395,16 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                 }
 
                 AI_NFF2_GET_NEXT_TOKEN();
-                if (!num) throw DeadlyImportError("NFF2: There are zero vertices");
-                num = ::strtoul10(sz, &sz);
+                if (!num)
+                    throw DeadlyImportError("NFF2: There are zero vertices");
+                num = strtoul10(sz, &sz);
 
                 std::vector<unsigned int> tempIdx;
                 tempIdx.reserve(10);
                 for (unsigned int i = 0; i < num; ++i) {
                     AI_NFF2_GET_NEXT_TOKEN();
                     SkipSpaces(line, &sz);
-                    unsigned int numIdx = ::strtoul10(sz, &sz);
+                    unsigned int numIdx = strtoul10(sz, &sz);
 
                     // read all faces indices
                     if (numIdx) {
@@ -421,7 +414,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
                         for (unsigned int a = 0; a < numIdx; ++a) {
                             SkipSpaces(sz, &sz);
-                            unsigned int m = ::strtoul10(sz, &sz);
+                            unsigned int m = strtoul10(sz, &sz);
                             if (m >= (unsigned int)tempPositions.size()) {
                                 ASSIMP_LOG_ERROR("NFF2: Vertex index overflow");
                                 m = 0;
@@ -446,7 +439,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         if (TokenMatch(sz, "0x", 2)) {
                             hasColor = true;
                             const char *sz2 = sz;
-                            numIdx = ::strtoul16(sz, &sz);
+                            numIdx = strtoul16(sz, &sz);
                             const unsigned int diff = (unsigned int)(sz - sz2);
 
                             // 0xRRGGBB
@@ -518,7 +511,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         // Material ID?
                         else if (!materialTable.empty() && TokenMatch(sz, "matid", 5)) {
                             SkipSpaces(&sz);
-                            matIdx = ::strtoul10(sz, &sz);
+                            matIdx = strtoul10(sz, &sz);
                             if (matIdx >= materialTable.size()) {
                                 ASSIMP_LOG_ERROR("NFF2: Material index overflow.");
                                 matIdx = 0;
@@ -1164,5 +1157,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
     }
     pScene->mRootNode = root;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_NFF_IMPORTER

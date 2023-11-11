@@ -66,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::ASE;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "ASE Importer",
     "",
     "",

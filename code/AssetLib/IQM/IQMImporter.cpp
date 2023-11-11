@@ -59,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // http://sauerbraten.org/iqm/
 // https://github.com/lsalzman/iqm
 
-
 inline void swap_block( uint32_t *block, size_t size ){
     (void)block; // suppress 'unreferenced formal parameter' MSVC warning
     size >>= 2;
@@ -67,7 +66,7 @@ inline void swap_block( uint32_t *block, size_t size ){
         AI_SWAP4( block[ i ] );
 }
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Inter-Quake Model Importer",
     "",
     "",

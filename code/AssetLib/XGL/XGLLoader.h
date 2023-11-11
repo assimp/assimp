@@ -81,6 +81,8 @@ public:
             bool checkSig) const override;
 
 protected:
+    void clear();
+
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details  */

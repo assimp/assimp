@@ -52,11 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
 namespace {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Stereolithography (STL) Importer",
     "",
     "",
@@ -129,7 +129,7 @@ STLImporter::STLImporter() :
         mBuffer(),
         mFileSize(0),
         mScene() {
-   // empty
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -250,13 +250,13 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         sz += 5; // skip the "solid"
         SkipSpaces(&sz);
         const char *szMe = sz;
-        while (!::IsSpaceOrNewLine(*sz)) {
+        while (!IsSpaceOrNewLine(*sz)) {
             sz++;
         }
 
         size_t temp = (size_t)(sz - szMe);
         // setup the name of the node
-        if ( temp ) {
+        if (temp) {
             if (temp >= MAXLEN) {
                 throw DeadlyImportError("STL: Node name too long");
             }
@@ -303,7 +303,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
                 }
-            } else if (!strncmp(sz, "vertex", 6) && ::IsSpaceOrNewLine(*(sz + 6))) { // vertex 1.50000 1.50000 0.00000
+            } else if (!strncmp(sz, "vertex", 6) && IsSpaceOrNewLine(*(sz + 6))) { // vertex 1.50000 1.50000 0.00000
                 if (faceVertexCounter >= 3) {
                     ASSIMP_LOG_ERROR("STL: a facet with more than 3 vertices has been found");
                     ++sz;
@@ -325,14 +325,14 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             } else if (!::strncmp(sz, "endsolid", 8)) {
                 do {
                     ++sz;
-                } while (!::IsLineEnd(*sz));
+                } while (!IsLineEnd(*sz));
                 SkipSpacesAndLineEnd(&sz);
                 // finished!
                 break;
             } else { // else skip the whole identifier
                 do {
                     ++sz;
-                } while (!::IsSpaceOrNewLine(*sz));
+                } while (!IsSpaceOrNewLine(*sz));
             }
         }
 
@@ -349,14 +349,14 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
             throw DeadlyImportError("Normal buffer size does not match position buffer size");
         }
 
-        // only process positionbuffer when filled, else exception when accessing with index operator
+        // only process position buffer when filled, else exception when accessing with index operator
         // see line 353: only warning is triggered
-        // see line 373(now): access to empty positionbuffer with index operator forced exception
+        // see line 373(now): access to empty position buffer with index operator forced exception
         if (!positionBuffer.empty()) {
             pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
             pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
             pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-            for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
+            for (size_t i = 0; i < pMesh->mNumVertices; ++i) {
                 pMesh->mVertices[i].x = positionBuffer[i].x;
                 pMesh->mVertices[i].y = positionBuffer[i].y;
                 pMesh->mVertices[i].z = positionBuffer[i].z;
@@ -366,7 +366,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         // also only process normalBuffer when filled, else exception when accessing with index operator
         if (!normalBuffer.empty()) {
             pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-            for (size_t i=0; i<pMesh->mNumVertices; ++i ) {
+            for (size_t i = 0; i < pMesh->mNumVertices; ++i) {
                 pMesh->mNormals[i].x = normalBuffer[i].x;
                 pMesh->mNormals[i].y = normalBuffer[i].y;
                 pMesh->mNormals[i].z = normalBuffer[i].z;
@@ -450,9 +450,8 @@ bool STLImporter::LoadBinaryFile() {
     aiVector3D *vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
     aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-    typedef aiVector3t<float> aiVector3F;
-    aiVector3F *theVec;
-    aiVector3F theVec3F;
+    aiVector3f *theVec;
+    aiVector3f theVec3F;
 
     for (unsigned int i = 0; i < pMesh->mNumFaces; ++i) {
         // NOTE: Blender sometimes writes empty normals ... this is not
@@ -460,8 +459,8 @@ bool STLImporter::LoadBinaryFile() {
 
         // There's one normal for the face in the STL; use it three times
         // for vertex normals
-        theVec = (aiVector3F *)sz;
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3F));
+        theVec = (aiVector3f *)sz;
+        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
         vn->x = theVec3F.x;
         vn->y = theVec3F.y;
         vn->z = theVec3F.z;
@@ -471,7 +470,7 @@ bool STLImporter::LoadBinaryFile() {
         vn += 3;
 
         // vertex 1
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3F));
+        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -479,7 +478,7 @@ bool STLImporter::LoadBinaryFile() {
         ++vp;
 
         // vertex 2
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3F));
+        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -487,7 +486,7 @@ bool STLImporter::LoadBinaryFile() {
         ++vp;
 
         // vertex 3
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3F));
+        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -569,5 +568,7 @@ void STLImporter::pushMeshesToNode(std::vector<unsigned int> &meshIndices, aiNod
     }
     meshIndices.clear();
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_STL_IMPORTER

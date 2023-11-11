@@ -81,10 +81,6 @@ static constexpr aiImporterDesc desc = {
     "3mf"
 };
 
-D3MFImporter::D3MFImporter() = default;
-
-D3MFImporter::~D3MFImporter() = default;
-
 bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bool /*checkSig*/) const {
     if (!ZipArchiveIOSystem::isZipArchive(pIOHandler, filename)) {
         return false;

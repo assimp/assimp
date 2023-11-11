@@ -49,12 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace D3MF {
 
-static const int IdNotSet = -1;
+static constexpr int IdNotSet = -1;
 
 namespace {
 
-static const size_t ColRGBA_Len = 9;
-static const size_t ColRGB_Len = 7;
+static constexpr size_t ColRGBA_Len = 9;
+static constexpr size_t ColRGB_Len = 7;
 
 // format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
 bool validateColorString(const char *color) {

@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 using namespace Assimp::COB;
 using namespace Assimp::Formatter;
 
@@ -1162,6 +1162,8 @@ void COBImporter::ReadUnit_Binary(COB::Scene &out, StreamReaderLE &reader, const
         }
     }
     ASSIMP_LOG_WARN("`Unit` chunk ", nfo.id, " is a child of ", nfo.parent_id, " which does not exist");
+}
+
 }
 
 #endif // ASSIMP_BUILD_NO_COB_IMPORTER

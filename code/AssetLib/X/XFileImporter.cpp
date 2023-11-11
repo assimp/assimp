@@ -61,7 +61,7 @@ namespace Assimp {
 
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Direct3D XFile Importer",
     "",
     "",

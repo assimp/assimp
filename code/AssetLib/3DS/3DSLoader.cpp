@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
-using namespace Assimp;
+namespace Assimp {
 
 static constexpr aiImporterDesc desc = {
     "Discreet 3DS Importer",
@@ -1334,5 +1334,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
     };
     (void)bGamma;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

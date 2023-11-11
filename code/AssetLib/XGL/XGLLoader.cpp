@@ -78,7 +78,7 @@ XGLImporter::XGLImporter() : mXmlParser(nullptr), m_scene(nullptr) {
 
 // ------------------------------------------------------------------------------------------------
 XGLImporter::~XGLImporter() {
-	delete mXmlParser;
+    clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -94,7 +94,8 @@ const aiImporterDesc *XGLImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
- #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
+    clear();
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 	std::vector<char> uncompressed;
 #endif
 
@@ -164,6 +165,13 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	scope.dismiss();
 }
+
+// ------------------------------------------------------------------------------------------------
+void XGLImporter::clear() {
+    delete mXmlParser;
+    mXmlParser = nullptr;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {

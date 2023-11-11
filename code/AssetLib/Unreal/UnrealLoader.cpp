@@ -152,7 +152,7 @@ inline void DecompressVertex(aiVector3D &v, int32_t in) {
 
 } // end namespace Unreal
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Unreal Mesh Importer",
     "",
     "",

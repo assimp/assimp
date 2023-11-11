@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::MDC;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Return To Castle Wolfenstein Mesh Importer",
     "",
     "",
@@ -102,10 +102,6 @@ MDCImporter::MDCImporter() :
         fileSize() {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MDCImporter::~MDCImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

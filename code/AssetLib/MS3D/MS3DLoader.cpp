@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Milkshape 3D Importer",
     "",
     "",
@@ -84,9 +84,6 @@ MS3DImporter::MS3DImporter()
     : mScene()
 {}
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MS3DImporter::~MS3DImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const

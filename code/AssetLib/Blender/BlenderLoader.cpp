@@ -69,11 +69,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
 #include "Common/Compression.h"
-/* #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#    include <zlib.h>
-#  else
-#    include "../contrib/zlib/zlib.h"
-#  endif*/
 #endif
 
 namespace Assimp {
@@ -89,7 +84,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc blenderDesc = {
+static constexpr aiImporterDesc blenderDesc = {
     "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",

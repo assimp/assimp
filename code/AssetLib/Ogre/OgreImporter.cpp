@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <memory>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Ogre3D Mesh Importer",
     "",
     "",

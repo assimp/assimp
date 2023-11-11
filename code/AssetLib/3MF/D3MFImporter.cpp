@@ -68,7 +68,7 @@ namespace Assimp {
 
 using namespace D3MF;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "3mf Importer",
     "",
     "",

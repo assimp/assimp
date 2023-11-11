@@ -103,7 +103,7 @@ void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType &dt, ConversionData &co
 
 } // namespace
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Industry Foundation Classes (IFC) Importer",
     "",
     "",

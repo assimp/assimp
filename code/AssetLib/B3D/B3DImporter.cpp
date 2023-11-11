@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace std;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "BlitzBasic 3D Importer",
     "",
     "",

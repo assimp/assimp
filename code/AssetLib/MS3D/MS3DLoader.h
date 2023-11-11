@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/BaseImporter.h>
 #include <assimp/StreamReader.h>
+
 struct aiNode;
 
 namespace Assimp {
@@ -58,7 +59,7 @@ namespace Assimp {
 class MS3DImporter : public BaseImporter {
 public:
     MS3DImporter();
-    ~MS3DImporter() override;
+    ~MS3DImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

@@ -72,24 +72,19 @@ using namespace Assimp::Formatter;
 using namespace Assimp::FBX;
 
 namespace {
-
-static const aiImporterDesc desc = {
-	"Autodesk FBX Importer",
-	"",
-	"",
-	"",
-	aiImporterFlags_SupportTextFlavour,
-	0,
-	0,
-	0,
-	0,
-	"fbx"
-};
+    static constexpr aiImporterDesc desc = {
+	    "Autodesk FBX Importer",
+	    "",
+	    "",
+	    "",
+	    aiImporterFlags_SupportTextFlavour,
+	    0,
+	    0,
+	    0,
+	    0,
+	    "fbx"
+    };
 }
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by #Importer
-FBXImporter::FBXImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

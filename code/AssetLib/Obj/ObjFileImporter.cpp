@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ObjMaterial.h>
 #include <memory>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Wavefront Object Importer",
     "",
     "",
@@ -103,6 +103,11 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
+    if (m_pRootObject != nullptr) {
+        delete m_pRootObject;
+        m_pRootObject = nullptr;
+    }
+
     // Read file into memory
     static constexpr char mode[] = "rb";
     auto streamCloser = [&](IOStream *pStream) {

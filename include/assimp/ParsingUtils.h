@@ -70,7 +70,6 @@ namespace Assimp {
 
 static const unsigned int BufferSize = 4096;
 
-
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsUpper(char_t in) {

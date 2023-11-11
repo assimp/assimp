@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Raw Importer",
     "",
     "",
@@ -69,14 +69,6 @@ static const aiImporterDesc desc = {
     0,
     "raw"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-RAWImporter::RAWImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-RAWImporter::~RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -294,5 +286,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
         }
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_RAW_IMPORTER

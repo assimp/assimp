@@ -63,6 +63,7 @@ struct aiImporterDesc;
 
 namespace Assimp {
 
+// Forward declarations
 class Importer;
 class IOSystem;
 class BaseProcess;
@@ -72,6 +73,9 @@ class IOStream;
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
                                           (string[1] << 16) + (string[2] << 8) + string[3]))
+
+using UByteBuffer = std::vector<uint8_t>;
+using ByteBuffer = std::vector<int8_t>;
 
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface

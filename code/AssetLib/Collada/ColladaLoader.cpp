@@ -64,7 +64,7 @@ namespace Assimp {
 using namespace Assimp::Formatter;
 using namespace Assimp::Collada;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Collada Importer",
     "",
     "",
@@ -100,10 +100,6 @@ ColladaLoader::ColladaLoader() :
         mNodeNameCounter(0) {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-ColladaLoader::~ColladaLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

@@ -62,11 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace glTF;
 
-//
-// glTFImporter
-//
-
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "glTF Importer",
     "",
     "",

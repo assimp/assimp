@@ -65,8 +65,8 @@ class Importer;
 */
 class NDOImporter : public BaseImporter {
 public:
-    NDOImporter();
-    ~NDOImporter() override;
+    NDOImporter() = default; 
+    ~NDOImporter() override = default;
 
     //! Represents a single edge
     struct Edge {

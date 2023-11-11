@@ -70,7 +70,7 @@ static const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
 
 // color indices for DXF - 16 are supported, the table is
 // taken directly from the DXF spec.
-static aiColor4D g_aclrDxfIndexColors[] = {
+static const aiColor4D g_aclrDxfIndexColors[] = {
     aiColor4D(0.6f, 0.6f, 0.6f, 1.0f),
     aiColor4D (1.0f, 0.0f, 0.0f, 1.0f), // red
     aiColor4D (0.0f, 1.0f, 0.0f, 1.0f), // green
@@ -97,7 +97,7 @@ static const int GroupCode_XComp = 10;
 static const int GroupCode_YComp = 20;
 static const int GroupCode_ZComp = 30;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Drawing Interchange Format (DXF) Importer",
     "",
     "",

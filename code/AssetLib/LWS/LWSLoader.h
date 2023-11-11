@@ -174,7 +174,7 @@ struct NodeDesc {
 class LWSImporter : public BaseImporter {
 public:
     LWSImporter();
-    ~LWSImporter() override;
+    ~LWSImporter() override = default;
 
     // -------------------------------------------------------------------
     // Check whether we can read a specific file

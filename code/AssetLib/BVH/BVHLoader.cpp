@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "BVH Importer (MoCap)",
     "",
     "",

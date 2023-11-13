@@ -367,7 +367,9 @@ Video::Video(uint64_t id, const Element &element, const Document &doc, const std
 }
 
 Video::~Video() {
-    delete[] content;
+    if (contentLength > 0) {
+        delete[] content;
+    }
 }
 
 } //!FBX

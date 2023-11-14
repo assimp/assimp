@@ -56,16 +56,16 @@ class LineSplitter;
 
 // TinyFormatter.h
 namespace Formatter {
-template <typename T, typename TR, typename A>
-class basic_formatter;
-typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>> format;
+    template <typename T, typename TR, typename A>
+    class basic_formatter;
+    typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>> format;
 } // namespace Formatter
 
 // COBScene.h
 namespace COB {
-struct ChunkInfo;
-struct Node;
-struct Scene;
+    struct ChunkInfo;
+    struct Node;
+    struct Scene;
 } // namespace COB
 
 // -------------------------------------------------------------------------------------------
@@ -75,8 +75,8 @@ struct Scene;
 // -------------------------------------------------------------------------------------------
 class COBImporter : public BaseImporter {
 public:
-    COBImporter();
-    ~COBImporter() override;
+    COBImporter() = default;
+    ~COBImporter() override = default;
 
     // --------------------
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,

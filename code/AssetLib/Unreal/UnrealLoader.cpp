@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdint>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
 namespace Unreal {
 
@@ -152,7 +152,7 @@ inline void DecompressVertex(aiVector3D &v, int32_t in) {
 
 } // end namespace Unreal
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Unreal Mesh Importer",
     "",
     "",
@@ -178,7 +178,7 @@ UnrealImporter::~UnrealImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool UnrealImporter::CanRead(const std::string & filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+bool UnrealImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
     return SimpleExtensionCheck(filename, "3d", "uc");
 }
 
@@ -336,12 +336,12 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                         tempTextures.emplace_back();
                         std::pair<std::string, std::string> &me = tempTextures.back();
                         for (; !IsLineEnd(*data); ++data) {
-                            if (!::ASSIMP_strincmp(data, "NAME=", 5)) {
+                            if (!ASSIMP_strincmp(data, "NAME=", 5)) {
                                 const char *d = data += 5;
                                 for (; !IsSpaceOrNewLine(*data); ++data)
                                     ;
                                 me.first = std::string(d, (size_t)(data - d));
-                            } else if (!::ASSIMP_strincmp(data, "FILE=", 5)) {
+                            } else if (!ASSIMP_strincmp(data, "FILE=", 5)) {
                                 const char *d = data += 5;
                                 for (; !IsSpaceOrNewLine(*data); ++data)
                                     ;
@@ -363,10 +363,10 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                         std::pair<unsigned int, std::string> &me = textures.back();
 
                         for (; !IsLineEnd(*data); ++data) {
-                            if (!::ASSIMP_strincmp(data, "NUM=", 4)) {
+                            if (!ASSIMP_strincmp(data, "NUM=", 4)) {
                                 data += 4;
                                 me.first = strtoul10(data, &data);
-                            } else if (!::ASSIMP_strincmp(data, "TEXTURE=", 8)) {
+                            } else if (!ASSIMP_strincmp(data, "TEXTURE=", 8)) {
                                 data += 8;
                                 const char *d = data;
                                 for (; !IsSpaceOrNewLine(*data); ++data)
@@ -515,5 +515,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     FlipWindingOrderProcess flipper;
     flipper.Execute(pScene);
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3D_IMPORTER

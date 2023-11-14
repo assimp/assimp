@@ -66,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Irrlicht Scene Reader",
     "",
     "",
@@ -575,8 +575,8 @@ void SetupMapping(aiMaterial *mat, aiTextureMapping mode, const aiVector3D &axis
                 m->mSemantic = prop->mSemantic;
                 m->mType = aiPTI_Float;
 
-                m->mDataLength = 12;
-                m->mData = new char[12];
+                m->mDataLength = sizeof(aiVector3D);
+                m->mData = new char[m->mDataLength];
                 *((aiVector3D *)m->mData) = axis;
                 p.push_back(m);
             }

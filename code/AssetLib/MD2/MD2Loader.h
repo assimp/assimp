@@ -63,7 +63,7 @@ using namespace MD2;
 class MD2Importer : public BaseImporter {
 public:
     MD2Importer();
-    ~MD2Importer() override;
+    ~MD2Importer() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

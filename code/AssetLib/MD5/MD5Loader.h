@@ -65,7 +65,7 @@ using namespace Assimp::MD5;
 class MD5Importer : public BaseImporter {
 public:
     MD5Importer();
-    ~MD5Importer() override;
+    ~MD5Importer() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

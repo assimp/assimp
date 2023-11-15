@@ -65,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <vector>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Quake III BSP Importer",
     "",
     "",
@@ -146,7 +146,11 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPFileImporter::~Q3BSPFileImporter() {
-    // Clear face-to-material map
+    clear();
+}
+
+// ------------------------------------------------------------------------------------------------
+void Q3BSPFileImporter::clear() {
     for (FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it) {
         const std::string &matName = it->first;
         if (!matName.empty()) {
@@ -173,6 +177,7 @@ const aiImporterDesc *Q3BSPFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Import method.
 void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene *scene, IOSystem *ioHandler) {
+    clear();
     ZipArchiveIOSystem Archive(ioHandler, rFile);
     if (!Archive.isOpen()) {
         throw DeadlyImportError("Failed to open file ", rFile, ".");

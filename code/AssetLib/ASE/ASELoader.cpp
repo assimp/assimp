@@ -63,10 +63,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // utilities
 #include <assimp/fast_atof.h>
 
-using namespace Assimp;
+namespace Assimp {
 using namespace Assimp::ASE;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "ASE Importer",
     "",
     "",
@@ -1260,6 +1260,8 @@ bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
     // The array is reused.
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
     return false;
+}
+
 }
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER

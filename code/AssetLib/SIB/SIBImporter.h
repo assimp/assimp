@@ -57,8 +57,8 @@ namespace Assimp {
 */
 class ASSIMP_API SIBImporter : public BaseImporter {
 public:
-    SIBImporter();
-    ~SIBImporter() override;
+    SIBImporter() = default;
+    ~SIBImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

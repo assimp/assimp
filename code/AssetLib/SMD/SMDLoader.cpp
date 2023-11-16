@@ -64,9 +64,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define strtok_s strtok_r
 #endif
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Valve SMD Importer",
     "",
     "",
@@ -1075,6 +1075,8 @@ void SMDImporter::ParseVertex(const char* szCurrent,
 
     // go to the beginning of the next line
     SMDI_PARSE_RETURN;
+}
+
 }
 
 #endif // !! ASSIMP_BUILD_NO_SMD_IMPORTER

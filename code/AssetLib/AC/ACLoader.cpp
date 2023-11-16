@@ -60,9 +60,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "AC3D Importer",
     "",
     "",
@@ -861,5 +861,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
         ::memcpy(pScene->mLights, &lights[0], lights.size() * sizeof(void *));
     }
 }
+
+} // namespace Assimp
 
 #endif //!defined ASSIMP_BUILD_NO_AC_IMPORTER

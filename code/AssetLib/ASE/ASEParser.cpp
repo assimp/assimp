@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
 
-using namespace Assimp;
+namespace Assimp {
 using namespace Assimp::ASE;
 
 // ------------------------------------------------------------------------------------------------
@@ -1862,6 +1862,8 @@ void Parser::ParseLV4MeshLong(unsigned int &iOut) {
     }
     // parse the value
     iOut = strtoul10(filePtr, &filePtr);
+}
+
 }
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER

@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <utf8.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100) // Disable warning 'unreferenced formal parameter'

@@ -44,9 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  CSMLoader.cpp
  *  Implementation of the CSM importer class.
  */
-
-
-
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
 
 #include "CSMLoader.h"
@@ -63,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "CharacterStudio Motion Importer (MoCap)",
     "",
     "",
@@ -79,13 +76,9 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-CSMImporter::CSMImporter()
-: noSkeletonMesh()
-{}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-CSMImporter::~CSMImporter() = default;
+CSMImporter::CSMImporter() : noSkeletonMesh(){
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

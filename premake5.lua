@@ -27,6 +27,9 @@ project "Assimp"
 
         "code/PostProcessing/*.h",
         "code/PostProcessing/*.cpp",
+
+        "contrib/pugixml/src/*.h",
+        "contrib/pugixml/src/*.cpp",
     }
 
     defines

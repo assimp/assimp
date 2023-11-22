@@ -52,9 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cctype>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const unsigned int NotSet = 0xcdcdcdcd;
+static constexpr unsigned int NotSet = 0xcdcdcdcd;
 
 // ------------------------------------------------------------------------------------------------
 // Setup final material indices, generae a default material if necessary
@@ -68,7 +68,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     unsigned int idx(NotSet);
     for (unsigned int i = 0; i < mScene->mMaterials.size(); ++i) {
         std::string s = mScene->mMaterials[i].mName;
-        for (char & it : s) {
+        for (char &it : s) {
             it = static_cast<char>(::tolower(static_cast<unsigned char>(it)));
         }
 
@@ -262,7 +262,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
         unsigned int iWire = 1;
         mat.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
-    [[fallthrough]];
+        [[fallthrough]];
 
     case D3DS::Discreet3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
@@ -804,5 +804,7 @@ void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
         ::memcpy(pcOut->mCameras, &mScene->mCameras[0], sizeof(void *) * pcOut->mNumCameras);
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

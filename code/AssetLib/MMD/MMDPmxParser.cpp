@@ -93,7 +93,7 @@ namespace pmx
 		{
 			return std::string();
 		}
-		buffer.reserve(size);
+		buffer.resize(size);
 		stream->read((char*) buffer.data(), size);
 		if (encoding == 0)
 		{

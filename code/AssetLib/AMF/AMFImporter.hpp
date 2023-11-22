@@ -98,29 +98,17 @@ namespace Assimp {
 ///            old - <map> and children <u1>, <u2>, <u3>, <v1>, <v2>, <v3>
 ///
 class AMFImporter : public BaseImporter {
-private:
-    struct SPP_Material; // forward declaration
+    using AMFMetaDataArray = std::vector<AMFMetadata *>;
+    using MeshArray = std::vector<aiMesh *>;
+    using NodeArray = std::vector<aiNode *>;
+
+public:
+    struct SPP_Material;
 
     /// Data type for post-processing step. More suitable container for part of material's composition.
     struct SPP_Composite {
         SPP_Material *Material; ///< Pointer to material - part of composition.
         std::string Formula; ///< Formula for calculating ratio of \ref Material.
-    };
-
-    /// \struct SPP_Material
-    /// Data type for post-processing step. More suitable container for material.
-    struct SPP_Material {
-        std::string ID; ///< Material ID.
-        std::list<AMFMetadata *> Metadata; ///< Metadata of material.
-        AMFColor *Color; ///< Color of material.
-        std::list<SPP_Composite> Composition; ///< List of child materials if current material is composition of few another.
-
-        /// Return color calculated for specified coordinate.
-        /// \param [in] pX - "x" coordinate.
-        /// \param [in] pY - "y" coordinate.
-        /// \param [in] pZ - "z" coordinate.
-        /// \return calculated color.
-        aiColor4D GetColor(const float pX, const float pY, const float pZ) const;
     };
 
     /// Data type for post-processing step. More suitable container for texture.
@@ -139,10 +127,52 @@ private:
         const AMFTexMap *TexMap; ///< Face texture mapping data. Equal to nullptr if texture mapping is not set for the face.
     };
 
-    using AMFMetaDataArray = std::vector<AMFMetadata*>;
-    using MeshArray = std::vector<aiMesh*>;
-    using NodeArray = std::vector<aiNode*>;
+    /// Data type for post-processing step. More suitable container for material.
+    struct SPP_Material {
+        std::string ID; ///< Material ID.
+        std::list<AMFMetadata *> Metadata; ///< Metadata of material.
+        AMFColor *Color; ///< Color of material.
+        std::list<SPP_Composite> Composition; ///< List of child materials if current material is composition of few another.
 
+        /// Return color calculated for specified coordinate.
+        /// \param [in] pX - "x" coordinate.
+        /// \param [in] pY - "y" coordinate.
+        /// \param [in] pZ - "z" coordinate.
+        /// \return calculated color.
+        aiColor4D GetColor(const float pX, const float pY, const float pZ) const;
+    };
+
+    /// Default constructor.
+    AMFImporter() AI_NO_EXCEPT;
+
+    /// Default destructor.
+    ~AMFImporter() override;
+
+    /// Parse AMF file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
+    /// Also exception can be thrown if trouble will found.
+    /// \param [in] pFile - name of file to be parsed.
+    /// \param [in] pIOHandler - pointer to IO helper object.
+    void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
+    void ParseHelper_Node_Enter(AMFNodeElementBase *child);
+    void ParseHelper_Node_Exit();
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+    const aiImporterDesc *GetInfo() const override;
+    bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
+    bool Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const;
+    bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;
+    AI_WONT_RETURN void Throw_CloseNotFound(const std::string &nodeName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Throw_ID_NotFound(const std::string &pID) const AI_WONT_RETURN_SUFFIX;
+    void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
+    bool XML_SearchNode(const std::string &nodeName);
+    void ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString);
+    AMFImporter(const AMFImporter &pScene) = delete;
+    AMFImporter &operator=(const AMFImporter &pScene) = delete;
+
+private:
     /// Clear all temporary data.
     void Clear();
 
@@ -262,40 +292,9 @@ private:
     /// \param [in] pUseOldName - if true then use old name of node(and children) - <map>, instead of new name - <texmap>.
     void ParseNode_TexMap(XmlNode &node, const bool pUseOldName = false);
 
-public:
-    /// Default constructor.
-    AMFImporter() AI_NO_EXCEPT;
 
-    /// Default destructor.
-    ~AMFImporter() override;
-
-    /// Parse AMF file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
-    /// Also exception can be thrown if trouble will found.
-    /// \param [in] pFile - name of file to be parsed.
-    /// \param [in] pIOHandler - pointer to IO helper object.
-    void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
-    void ParseHelper_Node_Enter(AMFNodeElementBase *child);
-    void ParseHelper_Node_Exit();
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const override;
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
-    const aiImporterDesc *GetInfo() const override;
-    bool Find_NodeElement(const std::string &pID, const AMFNodeElementBase::EType pType, AMFNodeElementBase **pNodeElement) const;
-    bool Find_ConvertedNode(const std::string &pID, NodeArray &nodeArray, aiNode **pNode) const;
-    bool Find_ConvertedMaterial(const std::string &pID, const SPP_Material **pConvertedMaterial) const;
-    AI_WONT_RETURN void Throw_CloseNotFound(const std::string &nodeName) AI_WONT_RETURN_SUFFIX;
-    AI_WONT_RETURN void Throw_IncorrectAttr(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
-    AI_WONT_RETURN void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) AI_WONT_RETURN_SUFFIX;
-    AI_WONT_RETURN void Throw_MoreThanOnceDefined(const std::string &nodeName, const std::string &pNodeType, const std::string &pDescription) AI_WONT_RETURN_SUFFIX;
-    AI_WONT_RETURN void Throw_ID_NotFound(const std::string &pID) const AI_WONT_RETURN_SUFFIX;
-    void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
-    bool XML_SearchNode(const std::string &nodeName);
-    void ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString);
-    AMFImporter(const AMFImporter &pScene) = delete;
-    AMFImporter &operator=(const AMFImporter &pScene) = delete;
 
 private:
-    static const aiImporterDesc Description;
-
     AMFNodeElementBase *mNodeElement_Cur; ///< Current element.
     std::list<AMFNodeElementBase *> mNodeElement_List; ///< All elements of scene graph.
     XmlParser *mXmlParser;

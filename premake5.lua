@@ -5,6 +5,9 @@ project "Assimp"
     staticruntime "off"
     warnings "off"
 
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
     files 
     {
         "code/AssetLib/**.h",
@@ -26,12 +29,23 @@ project "Assimp"
         "code/PostProcessing/*.cpp",
     }
 
+    defines
+    {
+        #"ASSIMP_DOUBLE_PRECISION"
+    }
+    
+    includedirs
+    {
+        "%{prj.location}/code",
+        "%{prj.location}/include"
+    }
+
     filter "system:linux"
         pic "On"
-		systemversion "latest"
+		    systemversion "latest"
 
     filter "system:macosx"
-		pic "On"
+		    pic "On"
 
     filter "system:windows"
-		systemversion "latest"
+		    systemversion "latest"

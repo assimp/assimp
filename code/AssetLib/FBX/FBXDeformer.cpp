@@ -84,7 +84,7 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
     transform = ReadMatrix(Transform);
     transformLink = ReadMatrix(TransformLink);
 
-    // it is actually possible that there be Deformer's with no weights
+    // it is actually possible that there are Deformer's with no weights
     if (!!Indexes != !!Weights) {
         DOMError("either Indexes or Weights are missing from Cluster",&element);
     }

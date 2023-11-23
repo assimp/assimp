@@ -1204,7 +1204,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 const auto &curNormals = shapeGeometry->GetNormals();
                 const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                // if blendShapeChannel Name is empty or doesn't have a ".", add geoMetryName;
                 auto aniName = FixAnimMeshName(blendShapeChannel->Name());
                 auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
                 if (aniName.empty()) {

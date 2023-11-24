@@ -1,54 +1,70 @@
+include "code/assimp_code.lua"
+include "contrib/assimp_contrib.lua"
+
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+group "Dependencies"
+    include "contrib/zlib"
+    include "contrib/zip"
+    include "contrib/pugixml"
+    include "contrib/openddlparser"
+group ""
+
 project "Assimp"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++17"
     staticruntime "off"
     warnings "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+
     files 
     {
-        "code/AssetLib/**.h",
-        "code/AssetLib/**.cpp",
+        AssimpSourceFiles,
+        AssimpImporterSourceFiles,
 
-        "code/Common/*.h",
-        "code/Common/*.cpp",
-
-        "code/Geometry/*.h",
-        "code/Geometry/*.cpp",
-        
-        "code/Material/*.h",
-        "code/Material/*.cpp",
-
-        "code/Pbrt/*.h",
-        "code/Pbrt/*.cpp",
-
-        "code/PostProcessing/*.h",
-        "code/PostProcessing/*.cpp",
-
-        "contrib/pugixml/src/*.h",
-        "contrib/pugixml/src/*.cpp",
+        ContribSourceFiles
     }
 
-    defines
+    links
     {
-        #"ASSIMP_DOUBLE_PRECISION"
+        "zlib",
+        "zip",
+        "pugixml"
     }
     
     includedirs
     {
         "%{prj.location}/code",
-        "%{prj.location}/include"
+        "%{prj.location}/include",
+        "%{prj.location}",
+        
+        ContribIncludeDirs
+    }
+
+    defines
+    {
+        --"ASSIMP_DOUBLE_PRECISION"
+        "RAPIDJSON_HAS_STDSTRING"
     }
 
     filter "system:linux"
         pic "On"
-		    systemversion "latest"
+		systemversion "latest"
 
     filter "system:macosx"
-		    pic "On"
+		pic "On"
 
     filter "system:windows"
-		    systemversion "latest"
+		systemversion "latest"
+
+    filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"

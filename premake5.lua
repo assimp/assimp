@@ -63,7 +63,7 @@ project "Assimp"
 
     filter "system:linux"
         pic "On"
-        systemversion "latest"
+		systemversion "latest"
 
     filter "system:macosx"
 		pic "On"

@@ -22,7 +22,8 @@ project "openddlparser"
 
     defines
     {
-        "OPENDDL_STATIC_LIBARY"
+        "OPENDDL_STATIC_LIBARY",
+        "OPENDDLPARSER_BUILD"
     }
 
     filter "system:linux"

@@ -7,7 +7,7 @@ group "Dependencies"
     include "contrib/zlib"
     include "contrib/zip"
     include "contrib/pugixml"
-    include "contrib/openddlparser"
+    --include "contrib/openddlparser"
 group ""
 
 workspace "Assimp Test"
@@ -58,7 +58,8 @@ project "Assimp"
     defines
     {
         --"ASSIMP_DOUBLE_PRECISION"
-        "RAPIDJSON_HAS_STDSTRING"
+        "RAPIDJSON_HAS_STDSTRING",
+        "OPENDDLPARSER_BUILD"
     }
 
     filter "system:linux"

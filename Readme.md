@@ -15,10 +15,10 @@ Open Asset Import Library is a library to load various 3d file formats into a sh
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
 Additionally, assimp features various __mesh post-processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
-### Latest Doc's ###
+### Documentation ###
 Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
 
-### Prebuild binaries ###
+### Pre-built binaries ###
 Please check our [Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib)
 
 If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb

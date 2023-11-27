@@ -7,18 +7,8 @@ group "Dependencies"
     include "contrib/zlib"
     include "contrib/zip"
     include "contrib/pugixml"
-    --include "contrib/openddlparser"
+    include "contrib/openddlparser"
 group ""
-
-workspace "Assimp Test"
-    architecture "x86_64"
-    
-    configurations
-    {
-        "Debug",
-        "Release"
-    }
-
 
 project "Assimp"
     kind "StaticLib"
@@ -43,7 +33,8 @@ project "Assimp"
     {
         "zlib",
         "zip",
-        "pugixml"
+        "pugixml",
+        "openddlparser"
     }
     
     includedirs
@@ -61,6 +52,13 @@ project "Assimp"
         "RAPIDJSON_HAS_STDSTRING",
         "OPENDDLPARSER_BUILD"
     }
+
+    if (AssimpEnableNoneFreeC4DImporter == false) then
+        defines
+        {
+            "ASSIMP_BUILD_NO_C4D_IMPORTER"
+        }
+    end
 
     filter "system:linux"
         pic "On"

@@ -414,6 +414,7 @@ OFFImporter = {
     "%{CodePath}/AssetLib/OFF/OFFLoader.cpp",
     "%{CodePath}/AssetLib/OFF/OFFLoader.h"
 }
+AddAssimpImporter(OFFImporter)
 
 OBJImporter = {
     "%{CodePath}/AssetLib/Obj/ObjFileData.h",

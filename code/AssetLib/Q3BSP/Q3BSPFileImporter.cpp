@@ -395,7 +395,10 @@ void Q3BSPFileImporter::createTriangleTopology(const Q3BSP::Q3BSPModel *pModel, 
                 m_pCurrentFace->mIndices = new unsigned int[3];
                 m_pCurrentFace->mIndices[idx] = vertIdx;
             }
-        }
+		} else {
+			m_pCurrentFace->mIndices[idx] = vertIdx;
+		}
+
 
         pMesh->mVertices[vertIdx].Set(pVertex->vPosition.x, pVertex->vPosition.y, pVertex->vPosition.z);
         pMesh->mNormals[vertIdx].Set(pVertex->vNormal.x, pVertex->vNormal.y, pVertex->vNormal.z);

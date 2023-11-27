@@ -60,6 +60,7 @@ project "Assimp"
         }
     end
 
+    -- OS specific
     filter "system:linux"
         pic "On"
 		systemversion "latest"
@@ -70,10 +71,16 @@ project "Assimp"
     filter "system:windows"
 		systemversion "latest"
 
+    -- Configuration stuff
     filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "Speed"
+
+    filter "configurations:Dist"
+		runtime "Release"
+		symbols "off"
+		optimize "Speed"

@@ -1,4 +1,5 @@
 AssimpIncludeExporters = false
+AssimpEnableNoneFreeC4DImporter = false
 
 HeaderPath = "%{prj.location}/include/assimp"
 CodePath = "%{prj.location}/code"
@@ -10,6 +11,7 @@ AssimpImporterSourceFilesIndex = 0
 
 AssimpExporterSourceFiles = {}
 AssimpExporterSourceFilesIndex = 0
+
 
 
 function AddSourceFilesCode(sourceFiles)
@@ -208,6 +210,13 @@ AssimpSTEPParserSourceFiles = {
 AddSourceFilesCode(AssimpSTEPParserSourceFiles)
 
 -- C4D Importer not supported
+if(AssimpEnableNoneFreeC4DImporter) then
+    C4DImporter = {
+        "AssetLib/C4D/C4DImporter.cpp",
+        "AssetLib/C4D/C4DImporter.h"
+    }
+    AddSourceFilesCode(C4DImporter)
+end
 
 
 AMFImporter = {
@@ -414,6 +423,7 @@ OFFImporter = {
     "%{CodePath}/AssetLib/OFF/OFFLoader.cpp",
     "%{CodePath}/AssetLib/OFF/OFFLoader.h"
 }
+AddAssimpImporter(OFFImporter)
 
 OBJImporter = {
     "%{CodePath}/AssetLib/Obj/ObjFileData.h",

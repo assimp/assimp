@@ -77,7 +77,7 @@ OppenddlparserSourceFiles = {
     "%{ContribPath}/openddlparser/include/openddlparser/DDLNode.h",
     "%{ContribPath}/openddlparser/include/openddlparser/Value.h"
 }
-AddSourceFilesContrib(OppenddlparserSourceFiles)
+--AddSourceFilesContrib(OppenddlparserSourceFiles)
 
 
 Open3dgcSourceFiles = {

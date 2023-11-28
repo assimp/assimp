@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "LightWave Scene Importer",
     "",
     "",
@@ -138,10 +138,6 @@ LWSImporter::LWSImporter() :
         noSkeletonMesh() {
     // nothing to do here
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-LWSImporter::~LWSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

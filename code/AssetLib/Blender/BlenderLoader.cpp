@@ -84,7 +84,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc blenderDesc = {
+static constexpr aiImporterDesc blenderDesc = {
     "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",

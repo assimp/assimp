@@ -1552,6 +1552,22 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                     }
                 }
             }
+
+            if(this->targetNames.empty())
+            {
+                Value *curExtras = FindObject(primitive, "extras");
+                if (nullptr != curExtras) {
+                    if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
+                        this->targetNames.resize(curTargetNames->Size());
+                        for (unsigned int j = 0; j < curTargetNames->Size(); ++j) {
+                            Value &targetNameValue = (*curTargetNames)[j];
+                            if (targetNameValue.IsString()) {
+                                this->targetNames[j] = targetNameValue.GetString();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

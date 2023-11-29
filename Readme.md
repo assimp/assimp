@@ -35,7 +35,7 @@ And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/a
 You can find the complete list of supported file-formats [here](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
 
 ### Building ###
-Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
+Take a look [here](https://github.com/assimp/assimp/blob/master/Build.md) to get started. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)
@@ -52,7 +52,7 @@ Take a look into the https://github.com/assimp/assimp/blob/master/Build.md file.
 
 ### Other tools ###
 [open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
-[Assimp-Viewer(]https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
+[Assimp-Viewer](https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure looks like this:

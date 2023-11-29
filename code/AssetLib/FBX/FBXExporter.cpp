@@ -1061,14 +1061,14 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
     return transform;
 }
 
-int64_t to_ktime(double ticks, const aiAnimation* anim) {
+inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (anim->mTicksPerSecond <= 0) {
         return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
-    return (static_cast<int64_t>(ticks) / static_cast<int64_t>(anim->mTicksPerSecond)) * FBX::SECOND;
+    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
 }
 
-int64_t to_ktime(double time) {
+inline int64_t to_ktime(double time) {
     return (static_cast<int64_t>(time * FBX::SECOND));
 }
 
@@ -2413,7 +2413,7 @@ void FBXExporter::WriteObjects ()
             // position/translation
             for (size_t ki = 0; ki < na->mNumPositionKeys; ++ki) {
                 const aiVectorKey& k = na->mPositionKeys[ki];
-                times.push_back(to_ktime(k.mTime));
+                times.push_back(to_ktime(k.mTime, anim));
                 xval.push_back(k.mValue.x);
                 yval.push_back(k.mValue.y);
                 zval.push_back(k.mValue.z);
@@ -2427,7 +2427,7 @@ void FBXExporter::WriteObjects ()
             times.clear(); xval.clear(); yval.clear(); zval.clear();
             for (size_t ki = 0; ki < na->mNumRotationKeys; ++ki) {
                 const aiQuatKey& k = na->mRotationKeys[ki];
-                times.push_back(to_ktime(k.mTime));
+                times.push_back(to_ktime(k.mTime, anim));
                 // TODO: aiQuaternion method to convert to Euler...
                 aiMatrix4x4 m(k.mValue.GetMatrix());
                 aiVector3D qs, qr, qt;
@@ -2445,7 +2445,7 @@ void FBXExporter::WriteObjects ()
             times.clear(); xval.clear(); yval.clear(); zval.clear();
             for (size_t ki = 0; ki < na->mNumScalingKeys; ++ki) {
                 const aiVectorKey& k = na->mScalingKeys[ki];
-                times.push_back(to_ktime(k.mTime));
+                times.push_back(to_ktime(k.mTime, anim));
                 xval.push_back(k.mValue.x);
                 yval.push_back(k.mValue.y);
                 zval.push_back(k.mValue.z);

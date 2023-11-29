@@ -142,7 +142,7 @@ AssimpLoggingSourceFiles = {
 AddSourceFilesCode(AssimpLoggingSourceFiles)
 
 AssimpCommonSourceFiles = {
-    "%{CodePath}/Common/Assimp.h",
+    "%{CodePath}/Common/Assimp.cpp",
     "%{CodePath}/Common/StbCommon.h",
     "%{CodePath}/Common/Compression.cpp",
     "%{CodePath}/Common/Compression.h",

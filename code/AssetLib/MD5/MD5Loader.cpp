@@ -64,7 +64,7 @@ using namespace Assimp;
 // Minimum weight value. Weights inside [-n ... n] are ignored
 #define AI_MD5_WEIGHT_EPSILON Math::getEpsilon<float>()
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Doom 3 / MD5 Mesh Importer",
     "",
     "",
@@ -91,10 +91,6 @@ MD5Importer::MD5Importer() :
         mCconfigNoAutoLoad(false) {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MD5Importer::~MD5Importer() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

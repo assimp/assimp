@@ -425,7 +425,8 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
             break;
         } else {
             // ignore unknown header elements
-            streamBuffer.getNextLine(buffer);
+            if (!streamBuffer.getNextLine(buffer))
+              return false;
         }
     }
 

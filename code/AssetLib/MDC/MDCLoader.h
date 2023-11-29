@@ -62,7 +62,7 @@ using namespace MDC;
 class MDCImporter : public BaseImporter {
 public:
     MDCImporter();
-    ~MDCImporter() override;
+    ~MDCImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

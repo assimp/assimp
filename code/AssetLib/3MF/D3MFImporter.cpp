@@ -68,7 +68,7 @@ namespace Assimp {
 
 using namespace D3MF;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "3mf Importer",
     "",
     "",
@@ -80,10 +80,6 @@ static const aiImporterDesc desc = {
     0,
     "3mf"
 };
-
-D3MFImporter::D3MFImporter() = default;
-
-D3MFImporter::~D3MFImporter() = default;
 
 bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bool /*checkSig*/) const {
     if (!ZipArchiveIOSystem::isZipArchive(pIOHandler, filename)) {

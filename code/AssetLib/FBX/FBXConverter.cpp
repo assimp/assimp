@@ -55,9 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/MathFunctions.h>
 #include <assimp/StringComparison.h>
-
 #include <assimp/scene.h>
-
 #include <assimp/CreateAnimMesh.h>
 #include <assimp/StringUtils.h>
 #include <assimp/commonMetaData.h>
@@ -1604,7 +1602,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
 
 void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Cluster *cluster,
         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
-        std::vector<size_t> &count_out_indices, const aiMatrix4x4 & /* absolute_transform*/,
+        std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
         aiNode *) {
     ai_assert(cluster != nullptr); // make sure cluster valid
 
@@ -1621,16 +1619,16 @@ void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const 
         bone = new aiBone();
         bone->mName = bone_name;
 
-        bone->mOffsetMatrix = cluster->Transform();
+        //bone->mOffsetMatrix = cluster->Transform();
         // store local transform link for post processing
-        /*
+        
         bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
-        aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
+        const aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
 
         bone->mOffsetMatrix = bone->mOffsetMatrix * matrix; // * mesh_offset
-        */
+        
         //
         // Now calculate the aiVertexWeights
         //

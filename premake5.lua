@@ -48,7 +48,6 @@ project "Assimp"
 
     defines
     {
-        --"ASSIMP_DOUBLE_PRECISION"
         "RAPIDJSON_HAS_STDSTRING",
         "OPENDDLPARSER_BUILD"
     }
@@ -57,6 +56,13 @@ project "Assimp"
         defines
         {
             "ASSIMP_BUILD_NO_C4D_IMPORTER"
+        }
+    end
+    
+    if (AssimpIncludeExporters == true) then
+        defines
+        {
+            "ASSIMP_BUILD_NO_EXPORT"
         }
     end
 

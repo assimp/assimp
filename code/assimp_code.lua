@@ -12,8 +12,6 @@ AssimpImporterSourceFilesIndex = 0
 AssimpExporterSourceFiles = {}
 AssimpExporterSourceFilesIndex = 0
 
-
-
 function AddSourceFilesCode(sourceFiles)
     for _, file in ipairs(sourceFiles) do 
         AssimpSourceFiles[AssimpSourceFilesIndex] = file

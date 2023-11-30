@@ -99,6 +99,12 @@ TEST(utACImportExport, importSphereWithLight) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utACImportExport, importSphereWithLightACC) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight.acc", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
 TEST(utACImportExport, importSphereWithLightUTF16) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight_UTF16LE.ac", aiProcess_ValidateDataStructure);

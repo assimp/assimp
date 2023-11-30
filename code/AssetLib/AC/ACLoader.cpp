@@ -170,9 +170,9 @@ bool AC3DImporter::GetNextLine() {
 
 // ------------------------------------------------------------------------------------------------
 // Parse an object section in an AC file
-void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
+bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
     if (!TokenMatch(buffer, "OBJECT", 6))
-        return;
+        return false;
 
     SkipSpaces(&buffer);
 
@@ -212,10 +212,14 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             if (num) {
                 // load the children of this object recursively
                 obj.children.reserve(num);
-                for (unsigned int i = 0; i < num; ++i)
-                    LoadObjectSection(obj.children);
+                for (unsigned int i = 0; i < num; ++i) {
+                    if (!LoadObjectSection(obj.children)) {
+                        ASSIMP_LOG_WARN("AC3D: wrong number of kids");
+                        break;
+                    }
+                }
             }
-            return;
+            return true;
         } else if (TokenMatch(buffer, "name", 4)) {
             SkipSpaces(&buffer);
             buffer = AcGetString(buffer, obj.name);
@@ -227,9 +231,16 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             }
         } else if (TokenMatch(buffer, "texture", 7)) {
             SkipSpaces(&buffer);
-            std::string texture;
-            buffer = AcGetString(buffer, texture);
-            obj.textures.push_back(texture);
+            // skip empty acc texture
+            if (*buffer != '\"') {
+                if (!TokenMatch(buffer, "empty_texture_no_mapping", 24)) {
+                    ASSIMP_LOG_ERROR("AC3D: Unquoted texture string");
+                }
+            } else {
+                std::string texture;
+                buffer = AcGetString(buffer, texture);
+                obj.textures.push_back(texture);
+            }
         } else if (TokenMatch(buffer, "texrep", 6)) {
             SkipSpaces(&buffer);
             buffer = TAcCheckedLoadFloatArray(buffer, "", 0, 2, &obj.texRepeat);
@@ -340,6 +351,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         }
     }
     ASSIMP_LOG_ERROR("AC3D: Unexpected EOF: \'kids\' line was expected");
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -445,7 +457,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     idx = 0;
                 }
                 if ((*it).entries.empty()) {
-                    ASSIMP_LOG_WARN("AC3D: surface her zero vertex references");
+                    ASSIMP_LOG_WARN("AC3D: surface has zero vertex references");
                 }
 
                 // validate all vertex indices to make sure we won't crash here
@@ -573,15 +585,6 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                 const Surface::SurfaceEntry &entry1 = src.entries[i];
                                 const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
                                 const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
-
-                                // skip degenerate triangles
-                                if (object.vertices[entry1.first] == object.vertices[entry2.first] ||
-                                        object.vertices[entry1.first] == object.vertices[entry3.first] ||
-                                        object.vertices[entry2.first] == object.vertices[entry3.first]) {
-                                    mesh->mNumFaces--;
-                                    mesh->mNumVertices -= 3;
-                                    continue;
-                                }
 
                                 aiFace &face = *faces++;
                                 face.mNumIndices = 3;
@@ -804,8 +807,9 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
             buffer = TAcCheckedLoadFloatArray(buffer, "spec", 4, 3, &mat.spec);
             buffer = TAcCheckedLoadFloatArray(buffer, "shi", 3, 1, &mat.shin);
             buffer = TAcCheckedLoadFloatArray(buffer, "trans", 5, 1, &mat.trans);
+        } else {
+            LoadObjectSection(rootObjects);
         }
-        LoadObjectSection(rootObjects);
     }
 
     if (rootObjects.empty() || !mNumMeshes) {

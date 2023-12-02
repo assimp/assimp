@@ -59,7 +59,7 @@ project "Assimp"
         }
     end
     
-    if (AssimpIncludeExporters == true) then
+    if (AssimpIncludeExporters == false) then
         defines
         {
             "ASSIMP_BUILD_NO_EXPORT"

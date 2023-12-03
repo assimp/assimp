@@ -21,6 +21,7 @@ public:
     static void polylineIdx_to_lineIdx(const std::list<int32_t> &pPolylineCoordIdx, std::list<int32_t> &pLineCoordIdx);
     static void rect_parallel_epiped(const aiVector3D &pSize, std::list<aiVector3D> &pVertices);
     static void coordIdx_str2faces_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces, unsigned int &pPrimitiveTypes);
+    static void coordIdx_str2lines_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces);
     static void add_color(aiMesh &pMesh, const std::list<aiColor3D> &pColors, const bool pColorPerVertex);
     static void add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors, const bool pColorPerVertex);
     static void add_color(aiMesh &pMesh, const std::vector<int32_t> &pCoordIdx, const std::vector<int32_t> &pColorIdx,
@@ -34,6 +35,7 @@ public:
             const std::list<aiVector2D> &pTexCoords);
     static void add_tex_coord(aiMesh &pMesh, const std::list<aiVector2D> &pTexCoords);
     static aiMesh *make_mesh(const std::vector<int32_t> &pCoordIdx, const std::list<aiVector3D> &pVertices);
+    static aiMesh *make_line_mesh(const std::vector<int32_t> &pCoordIdx, const std::list<aiVector3D> &pVertices);
 };
 
 } // namespace Assimp

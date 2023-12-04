@@ -16,26 +16,27 @@ APIs are provided for C and C++. There are various bindings to other languages (
 Additionally, assimp features various __mesh post-processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
 ### Documentation ###
-Please check the latest documents at [Asset-Importer-Lib-Doc](https://assimp-docs.readthedocs.io/en/latest/). 
+Read [our latest documentation](https://assimp-docs.readthedocs.io/en/latest/).
 
 ### Pre-built binaries ###
-Please check our [Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib)
+Download binaries from [our Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib).
 
-If you want to check our Model-Database, use the following repo: https://github.com/assimp/assimp-mdb
+### Test data ###
+Clone [our model database](https://github.com/assimp/assimp-mdb).
 
 ### Communities ###
-- Ask a question at [The Assimp-Discussion Board](https://github.com/assimp/assimp/discussions)
-- Ask on [Assimp-Community on Reddit](https://www.reddit.com/r/Assimp/)
+- Ask questions at [the Assimp Discussion Board](https://github.com/assimp/assimp/discussions).
+- Ask [the Assimp community on Reddit](https://www.reddit.com/r/Assimp/).
 - Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
 - Nothing has worked? File a question or an issue-report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
 
 And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 #### Supported file formats ####
-You can find the complete list of supported file-formats [here](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
+See [the complete list of supported formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md).
 
 ### Building ###
-Take a look [here](https://github.com/assimp/assimp/blob/master/Build.md) to get started. We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
+Start by reading [our build instructions](https://github.com/assimp/assimp/blob/master/Build.md). We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)

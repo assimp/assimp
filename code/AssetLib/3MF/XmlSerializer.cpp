@@ -353,12 +353,12 @@ void XmlSerializer::ReadObject(XmlNode &node) {
                             }
 
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
-                            for (int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
                                 mesh->mTextureCoords[0][vertex_idx] =
                                         aiVector3D(group->mTex2dCoords[pindex].x, group->mTex2dCoords[pindex].y, 0.0f);
                             }
                         } else {
-                            for (int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
                                 if (mesh->mTextureCoords[0][vertex_idx].z < 0) {
                                     // use default
                                     mesh->mTextureCoords[0][vertex_idx] =
@@ -371,7 +371,7 @@ void XmlSerializer::ReadObject(XmlNode &node) {
                             mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
 
                             ColorGroup *group = static_cast<ColorGroup *>(it->second);
-                            for (int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
                                 mesh->mColors[0][vertex_idx] = group->mColors[pindex];
                             }
                         }
@@ -494,7 +494,7 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                                 }
                             }
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
-                            for (int vertex_index = 0; vertex_index < mesh->mNumVertices; vertex_index++) {
+                            for (unsigned int vertex_index = 0; vertex_index < mesh->mNumVertices; vertex_index++) {
                                 mesh->mTextureCoords[0][vertex_index].z = IdNotSet;//mark not set
                             }
                         }

@@ -726,6 +726,8 @@ SET( PostProcessing_SRCS
   PostProcessing/GenFaceNormalsProcess.h
   PostProcessing/GenVertexNormalsProcess.cpp
   PostProcessing/GenVertexNormalsProcess.h
+  PostProcessing/GenerateMikkTSpaceTangents.cpp
+  PostProcessing/GenerateMikkTSpaceTangents.h
   PostProcessing/PretransformVertices.cpp
   PostProcessing/PretransformVertices.h
   PostProcessing/ImproveCacheLocality.cpp

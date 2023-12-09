@@ -364,7 +364,7 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                     // TODO  causes massive breakage as detailed in:
                     // TODO      https://github.com/assimp/assimp/issues/5332
                     // TODO  In cases like this unit tests are less useful, since the model still has
-                    // TODO  meshes, textures, animations etc. and assets against these values may pass;
+                    // TODO  meshes, textures, animations etc. and asserts against these values may pass;
                     // TODO  when touching importer code, it is crucial that developers also run manual, visual
                     // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch
                     //const unsigned int boneIdx = obone.mWeights[d].mVertex;

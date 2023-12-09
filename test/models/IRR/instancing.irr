@@ -33,7 +33,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -71,7 +71,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -153,7 +153,7 @@
 			<enum name="AutomaticCulling" value="box" />
 			<int name="DebugDataVisible" value="0" />
 			<bool name="IsDebugObject" value="false" />
-			<string name="Mesh" value="dwarf.x" />
+			<string name="Mesh" value="assets/dwarf.x" />
 			<bool name="ReadOnlyMaterials" value="false" />
 		</attributes>
 
@@ -167,7 +167,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -205,7 +205,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -287,7 +287,7 @@
 			<enum name="AutomaticCulling" value="box" />
 			<int name="DebugDataVisible" value="0" />
 			<bool name="IsDebugObject" value="false" />
-			<string name="Mesh" value="dwarf.x" />
+			<string name="Mesh" value="assets/dwarf.x" />
 			<bool name="ReadOnlyMaterials" value="false" />
 		</attributes>
 
@@ -301,7 +301,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -339,7 +339,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -421,7 +421,7 @@
 			<enum name="AutomaticCulling" value="box" />
 			<int name="DebugDataVisible" value="0" />
 			<bool name="IsDebugObject" value="false" />
-			<string name="Mesh" value="dwarf.x" />
+			<string name="Mesh" value="assets/dwarf.x" />
 			<bool name="ReadOnlyMaterials" value="false" />
 		</attributes>
 
@@ -435,7 +435,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -473,7 +473,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -555,7 +555,7 @@
 			<enum name="AutomaticCulling" value="box" />
 			<int name="DebugDataVisible" value="0" />
 			<bool name="IsDebugObject" value="false" />
-			<string name="Mesh" value="dwarf.x" />
+			<string name="Mesh" value="assets/dwarf.x" />
 			<bool name="ReadOnlyMaterials" value="false" />
 		</attributes>
 
@@ -569,7 +569,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -607,7 +607,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -689,7 +689,7 @@
 			<enum name="AutomaticCulling" value="box" />
 			<int name="DebugDataVisible" value="0" />
 			<bool name="IsDebugObject" value="false" />
-			<string name="Mesh" value="dwarf.x" />
+			<string name="Mesh" value="assets/dwarf.x" />
 			<bool name="ReadOnlyMaterials" value="false" />
 		</attributes>
 
@@ -703,7 +703,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="axe.jpg" />
+				<texture name="Texture1" value="assets/axe.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />
@@ -741,7 +741,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="dwarf.jpg" />
+				<texture name="Texture1" value="assets/dwarf.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />

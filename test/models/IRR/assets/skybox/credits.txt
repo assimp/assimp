@@ -1,0 +1,11 @@
+This skybox is basing on a skydome texture from
+
+http://mikepan.homeip.net/earth
+
+Downloaded November 22th, 08
+Distribution note:
+"These royalty-free skydome textures work best when applied to a sphere or hemisphere"
+
+
+
+Thanks for your great work!

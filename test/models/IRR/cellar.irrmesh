@@ -13,8 +13,8 @@
 			<float name="Shininess" value="0.750000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="brownground_1-1.jpg" />
-			<texture name="Texture2" value="1.png" />
+			<texture name="Texture1" value="assets/brownground_1-1.jpg" />
+			<texture name="Texture2" value="assets/1.png" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
 			<bool name="Wireframe" value="false" />
@@ -870,8 +870,8 @@
 			<float name="Shininess" value="0.750000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="crackedground_1-6.jpg" />
-			<texture name="Texture2" value="1.png" />
+			<texture name="Texture1" value="assets/crackedground_1-6.jpg" />
+			<texture name="Texture2" value="assets/1.png" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
 			<bool name="Wireframe" value="false" />

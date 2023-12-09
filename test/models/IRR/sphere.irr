@@ -34,7 +34,7 @@
 				<float name="Shininess" value="0.000000" />
 				<float name="Param1" value="0.000000" />
 				<float name="Param2" value="0.000000" />
-				<texture name="Texture1" value="earthSpherical.jpg" />
+				<texture name="Texture1" value="assets/earthSpherical.jpg" />
 				<texture name="Texture2" value="" />
 				<texture name="Texture3" value="" />
 				<texture name="Texture4" value="" />

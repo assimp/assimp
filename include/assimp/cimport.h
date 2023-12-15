@@ -58,6 +58,7 @@ extern "C" {
 #endif
 
 struct aiScene;
+struct aiTexture;
 struct aiFileIO;
 
 typedef void (*aiLogStreamCallback)(const char * /* message */, char * /* user */);
@@ -372,6 +373,13 @@ ASSIMP_API void aiGetExtensionList(
 ASSIMP_API void aiGetMemoryRequirements(
         const C_STRUCT aiScene *pIn,
         C_STRUCT aiMemoryInfo *in);
+
+// --------------------------------------------------------------------------------
+/** Returns an embedded texture, or nullptr.
+ * @param pIn Input asset.
+ * @param filename Texture path extracted from aiGetMaterialString.
+ */
+ASSIMP_API const C_STRUCT aiTexture *aiGetEmbeddedTexture(const C_STRUCT aiScene *pIn, const char *filename);
 
 // --------------------------------------------------------------------------------
 /** Create an empty property store. Property stores are used to collect import

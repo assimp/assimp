@@ -69,13 +69,16 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
         }
         const BlendShape* const bsp = ProcessSimpleConnection<BlendShape>(*con, false, "BlendShape -> Geometry", element);
         if (bsp) {
-            blendShapes.push_back(bsp);
+            auto pr = blendShapes.insert(bsp);
+            if (!pr.second) {
+                FBXImporter::LogWarn("there is the same blendShape id ", bsp->ID());
+            }
         }
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-const std::vector<const BlendShape*>& Geometry::GetBlendShapes() const {
+const std::unordered_set<const BlendShape*>& Geometry::GetBlendShapes() const {
     return blendShapes;
 }
 
@@ -464,9 +467,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
-        if (uvIndices.size() != vertex_count) {
+        if (uvIndices.size() != mapping_offsets.size()) {
             FBXImporter::LogError("length of input data unexpected for ByVertice mapping: ",
-                                  uvIndices.size(), ", expected ", vertex_count);
+                                  uvIndices.size(), ", expected ", mapping_offsets.size());
             return;
         }
 

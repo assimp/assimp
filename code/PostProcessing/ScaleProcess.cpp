@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,25 +46,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-ScaleProcess::ScaleProcess()
-: BaseProcess()
-, mScale( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT ) {
+// ------------------------------------------------------------------------------------------------
+ScaleProcess::ScaleProcess() : BaseProcess(), mScale( AI_CONFIG_GLOBAL_SCALE_FACTOR_DEFAULT ) {
+    // empty
 }
 
-ScaleProcess::~ScaleProcess() = default;
-
+// ------------------------------------------------------------------------------------------------
 void ScaleProcess::setScale( ai_real scale ) {
     mScale = scale;
 }
 
+// ------------------------------------------------------------------------------------------------
 ai_real ScaleProcess::getScale() const {
     return mScale;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool ScaleProcess::IsActive( unsigned int pFlags ) const {
     return ( pFlags & aiProcess_GlobalScale ) != 0;
 }
 
+// ------------------------------------------------------------------------------------------------
 void ScaleProcess::SetupProperties( const Importer* pImp ) {
     // User scaling
     mScale = pImp->GetPropertyFloat( AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, 1.0f );
@@ -78,14 +79,15 @@ void ScaleProcess::SetupProperties( const Importer* pImp ) {
     mScale *= importerScale;
 }
 
+// ------------------------------------------------------------------------------------------------
 void ScaleProcess::Execute( aiScene* pScene ) {
     if(mScale == 1.0f)  {
         return; // nothing to scale
     }
 
-    ai_assert( mScale != 0 );
-    ai_assert( nullptr != pScene );
-    ai_assert( nullptr != pScene->mRootNode );
+    ai_assert(mScale != 0 );
+    ai_assert(nullptr != pScene );
+    ai_assert(nullptr != pScene->mRootNode );
 
     if ( nullptr == pScene ) {
         return;
@@ -96,37 +98,30 @@ void ScaleProcess::Execute( aiScene* pScene ) {
     }
 
     // Process animations and update position transform to new unit system
-    for( unsigned int animationID = 0; animationID < pScene->mNumAnimations; animationID++ )
-    {
+    for( unsigned int animationID = 0; animationID < pScene->mNumAnimations; animationID++ ) {
         aiAnimation* animation = pScene->mAnimations[animationID];
 
-        for( unsigned int animationChannel = 0; animationChannel < animation->mNumChannels; animationChannel++)
-        {
+        for( unsigned int animationChannel = 0; animationChannel < animation->mNumChannels; animationChannel++) {
             aiNodeAnim* anim = animation->mChannels[animationChannel];
 
-            for( unsigned int posKey = 0; posKey < anim->mNumPositionKeys; posKey++)
-            {
+            for( unsigned int posKey = 0; posKey < anim->mNumPositionKeys; posKey++) {
                 aiVectorKey& vectorKey = anim->mPositionKeys[posKey];
                 vectorKey.mValue *= mScale;
             }
         }
     }
 
-    for( unsigned int meshID = 0; meshID < pScene->mNumMeshes; meshID++)
-    {
+    for( unsigned int meshID = 0; meshID < pScene->mNumMeshes; meshID++) {
         aiMesh *mesh = pScene->mMeshes[meshID];
 
         // Reconstruct mesh vertices to the new unit system
-        for( unsigned int vertexID = 0; vertexID < mesh->mNumVertices; vertexID++)
-        {
+        for( unsigned int vertexID = 0; vertexID < mesh->mNumVertices; vertexID++) {
             aiVector3D& vertex = mesh->mVertices[vertexID];
             vertex *= mScale;
         }
 
-
         // bone placement / scaling
-        for( unsigned int boneID = 0; boneID < mesh->mNumBones; boneID++)
-        {
+        for( unsigned int boneID = 0; boneID < mesh->mNumBones; boneID++) {
             // Reconstruct matrix by transform rather than by scale
             // This prevent scale values being changed which can
             // be meaningful in some cases
@@ -144,7 +139,7 @@ void ScaleProcess::Execute( aiScene* pScene ) {
             aiMatrix4x4 scaling;
             aiMatrix4x4::Scaling( aiVector3D(scale), scaling );
 
-            aiMatrix4x4 RotMatrix = aiMatrix4x4 (rotation.GetMatrix());
+            const aiMatrix4x4 RotMatrix = aiMatrix4x4(rotation.GetMatrix());
 
             bone->mOffsetMatrix = translation * RotMatrix * scaling;
         }
@@ -152,12 +147,10 @@ void ScaleProcess::Execute( aiScene* pScene ) {
 
         // animation mesh processing
         // convert by position rather than scale.
-        for( unsigned int animMeshID = 0; animMeshID < mesh->mNumAnimMeshes; animMeshID++)
-        {
+        for( unsigned int animMeshID = 0; animMeshID < mesh->mNumAnimMeshes; animMeshID++) {
             aiAnimMesh * animMesh = mesh->mAnimMeshes[animMeshID];
 
-            for( unsigned int vertexID = 0; vertexID < animMesh->mNumVertices; vertexID++)
-            {
+            for( unsigned int vertexID = 0; vertexID < animMesh->mNumVertices; vertexID++) {
                 aiVector3D& vertex = animMesh->mVertices[vertexID];
                 vertex *= mScale;
             }
@@ -167,16 +160,17 @@ void ScaleProcess::Execute( aiScene* pScene ) {
     traverseNodes( pScene->mRootNode );
 }
 
+// ------------------------------------------------------------------------------------------------
 void ScaleProcess::traverseNodes( aiNode *node, unsigned int nested_node_id ) {
     applyScaling( node );
 
-    for( size_t i = 0; i < node->mNumChildren; i++)
-    {
+    for( size_t i = 0; i < node->mNumChildren; i++) {
         // recurse into the tree until we are done!
         traverseNodes( node->mChildren[i], nested_node_id+1 );
     }
 }
 
+// ------------------------------------------------------------------------------------------------
 void ScaleProcess::applyScaling( aiNode *currentNode ) {
     if ( nullptr != currentNode ) {
         // Reconstruct matrix by transform rather than by scale

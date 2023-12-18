@@ -72,30 +72,25 @@ using namespace Assimp::Formatter;
 using namespace Assimp::FBX;
 
 namespace {
-
-static const aiImporterDesc desc = {
-	"Autodesk FBX Importer",
-	"",
-	"",
-	"",
-	aiImporterFlags_SupportTextFlavour,
-	0,
-	0,
-	0,
-	0,
-	"fbx"
-};
+    static constexpr aiImporterDesc desc = {
+	    "Autodesk FBX Importer",
+	    "",
+	    "",
+	    "",
+	    aiImporterFlags_SupportTextFlavour,
+	    0,
+	    0,
+	    0,
+	    0,
+	    "fbx"
+    };
 }
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by #Importer
-FBXImporter::FBXImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool FBXImporter::CanRead(const std::string & pFile, IOSystem * pIOHandler, bool /*checkSig*/) const {
 	// at least ASCII-FBX files usually have a 'FBX' somewhere in their head
-	static const char *tokens[] = { "fbx" };
+	static const char *tokens[] = { " \n\r\n " };
 	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
@@ -152,19 +147,19 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 	// broad-phase tokenized pass in which we identify the core
 	// syntax elements of FBX (brackets, commas, key:value mappings)
 	TokenList tokens;
-	try {
-
+    Assimp::StackAllocator tempAllocator;
+    try {
 		bool is_binary = false;
 		if (!strncmp(begin, "Kaydara FBX Binary", 18)) {
 			is_binary = true;
-			TokenizeBinary(tokens, begin, contents.size());
+            TokenizeBinary(tokens, begin, contents.size(), tempAllocator);
 		} else {
-			Tokenize(tokens, begin);
+            Tokenize(tokens, begin, tempAllocator);
 		}
 
 		// use this information to construct a very rudimentary
 		// parse-tree representing the FBX scope structure
-		Parser parser(tokens, is_binary);
+        Parser parser(tokens, tempAllocator, is_binary);
 
 		// take the raw parse-tree and convert it to a FBX DOM
 		Document doc(parser, mSettings);
@@ -183,10 +178,12 @@ void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		// assimp universal format (M)
 		SetFileScale(size_relative_to_cm * 0.01f);
 
-		std::for_each(tokens.begin(), tokens.end(), Util::delete_fun<Token>());
-	} catch (std::exception &) {
-		std::for_each(tokens.begin(), tokens.end(), Util::delete_fun<Token>());
-		throw;
+		// This collection does not own the memory for the tokens, but we need to call their d'tor
+        std::for_each(tokens.begin(), tokens.end(), Util::destructor_fun<Token>());
+
+    } catch (std::exception &) {
+        std::for_each(tokens.begin(), tokens.end(), Util::destructor_fun<Token>());
+        throw;
 	}
 }
 

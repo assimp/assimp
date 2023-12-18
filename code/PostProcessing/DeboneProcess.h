@@ -70,7 +70,7 @@ namespace Assimp {
 class DeboneProcess : public BaseProcess {
 public:
     DeboneProcess();
-    ~DeboneProcess();
+    ~DeboneProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag.
@@ -79,14 +79,14 @@ public:
     * @return true if the process is present in this flag fields,
     *   false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Called prior to ExecuteOnScene().
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
-    void SetupProperties(const Importer* pImp);
+    void SetupProperties(const Importer* pImp) override;
 
 protected:
     // -------------------------------------------------------------------
@@ -94,7 +94,7 @@ protected:
     * At the moment a process is not supposed to fail.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
     /** Counts bones total/removable in a given mesh.

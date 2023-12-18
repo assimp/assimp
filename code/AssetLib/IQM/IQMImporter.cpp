@@ -59,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // http://sauerbraten.org/iqm/
 // https://github.com/lsalzman/iqm
 
-
 inline void swap_block( uint32_t *block, size_t size ){
     (void)block; // suppress 'unreferenced formal parameter' MSVC warning
     size >>= 2;
@@ -67,7 +66,7 @@ inline void swap_block( uint32_t *block, size_t size ){
         AI_SWAP4( block[ i ] );
 }
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Inter-Quake Model Importer",
     "",
     "",
@@ -100,13 +99,6 @@ bool IQMImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
         if (!pIOHandler) {
             return true;
         }
-        /*
-         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-
-        const char* tokens[] = {"3DMO", "3dmo"};
-        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
-        */
         std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
         unsigned char data[15];
         if (!pStream || 15 != pStream->Read(data, 1, 15)) {

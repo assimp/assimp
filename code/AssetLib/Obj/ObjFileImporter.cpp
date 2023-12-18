@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ObjMaterial.h>
 #include <memory>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Wavefront Object Importer",
     "",
     "",
@@ -78,13 +78,14 @@ using namespace std;
 ObjFileImporter::ObjFileImporter() :
         m_Buffer(),
         m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 ObjFileImporter::~ObjFileImporter() {
     delete m_pRootObject;
-    m_pRootObject = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -102,8 +103,13 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
+    if (m_pRootObject != nullptr) {
+        delete m_pRootObject;
+        m_pRootObject = nullptr;
+    }
+
     // Read file into memory
-    static const std::string mode = "rb";
+    static constexpr char mode[] = "rb";
     auto streamCloser = [&](IOStream *pStream) {
         pIOHandler->Close(pStream);
     };
@@ -270,7 +276,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
     for (size_t i = 0; i < pObject->m_Meshes.size(); ++i) {
         unsigned int meshId = pObject->m_Meshes[i];
         aiMesh *pMesh = createTopology(pModel, pObject, meshId);
-        if (pMesh) {
+        if (pMesh != nullptr) {
             if (pMesh->mNumFaces > 0) {
                 MeshArray.push_back(pMesh);
             } else {
@@ -331,7 +337,6 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
 
     for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
         const ObjFile::Face *inp = pObjMesh->m_Faces[index];
-        //ai_assert(nullptr != inp);
 
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
             pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
@@ -500,6 +505,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
 
                 if (vertexIndex) {
                     if (!last) {
+                        if (pMesh->mNumVertices <= newIndex + 1) {
+                            throw DeadlyImportError("OBJ: bad vertex index");
+                        }
+
                         pMesh->mVertices[newIndex + 1] = pMesh->mVertices[newIndex];
                         if (!sourceFace->m_normals.empty() && !pModel->mNormals.empty()) {
                             pMesh->mNormals[newIndex + 1] = pMesh->mNormals[newIndex];

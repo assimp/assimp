@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h>
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
@@ -60,7 +61,7 @@ using namespace Assimp;
 
 class utglTF2ImportExport : public AbstractImportExportBase {
 public:
-    virtual bool importerMatTest(const char *file, bool spec_gloss, std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap }) {
+    virtual bool importerMatTest(const char *file, bool spec, bool gloss, std::array<aiTextureMapMode, 2> exp_modes = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap }) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(file, aiProcess_ValidateDataStructure);
         EXPECT_NE(scene, nullptr);
@@ -105,16 +106,19 @@ public:
 
         aiColor3D spec_color = { 0, 0, 0 };
         ai_real glossiness = ai_real(0.5);
-        if (spec_gloss) {
+        if (spec) {
             EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_COLOR_SPECULAR, spec_color));
             constexpr ai_real spec_val(0.20000000298023225); // From the file
             EXPECT_EQ(spec_val, spec_color.r);
             EXPECT_EQ(spec_val, spec_color.g);
             EXPECT_EQ(spec_val, spec_color.b);
+        } else {
+            EXPECT_EQ(aiReturn_FAILURE, material->Get(AI_MATKEY_COLOR_SPECULAR, spec_color));
+        }
+        if (gloss) {
             EXPECT_EQ(aiReturn_SUCCESS, material->Get(AI_MATKEY_GLOSSINESS_FACTOR, glossiness));
             EXPECT_EQ(ai_real(1.0), glossiness);
         } else {
-            EXPECT_EQ(aiReturn_FAILURE, material->Get(AI_MATKEY_COLOR_SPECULAR, spec_color));
             EXPECT_EQ(aiReturn_FAILURE, material->Get(AI_MATKEY_GLOSSINESS_FACTOR, glossiness));
         }
 
@@ -143,7 +147,7 @@ public:
 };
 
 TEST_F(utglTF2ImportExport, importglTF2FromFileTest) {
-    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", false, {aiTextureMapMode_Mirror, aiTextureMapMode_Clamp}));
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", false, false, {aiTextureMapMode_Mirror, aiTextureMapMode_Clamp}));
 }
 
 TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
@@ -151,7 +155,7 @@ TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
 }
 
 TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {
-    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured.gltf", true));
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured.gltf", true, true));
 }
 
 void VerifyClearCoatScene(const aiScene *scene) {
@@ -219,11 +223,20 @@ TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_pbrSpecularGlossi
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured.gltf",
             aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
-    // Export
+    
+    // Export with specular glossiness disabled
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb"));
+    
+    // And re-import
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", true, false));
+
+    // Export with specular glossiness enabled
+    ExportProperties props;
+    props.SetPropertyBool(AI_CONFIG_USE_GLTF_PBR_SPECULAR_GLOSSINESS, true);
+    EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", 0, &props));
 
     // And re-import
-    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", true));
+    EXPECT_TRUE(importerMatTest(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-pbrSpecularGlossiness/BoxTextured_out.glb", true, true));
 }
 
 TEST_F(utglTF2ImportExport, importglTF2AndExportToOBJ) {
@@ -380,7 +393,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLines) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_08.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = { { 0u, 3u, 2u, 1u, 0u } };
+    std::array<unsigned int, 5> l1 = { { 0u, 1u, 2u, 3u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
@@ -394,7 +407,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineLoop) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_09.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = { { 0, 3u, 2u, 1u, 0u } };
+    std::array<unsigned int, 5> l1 = { { 0, 1u, 2u, 3u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
@@ -408,7 +421,7 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeLineStrip) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Asset-Generator/Mesh_PrimitiveMode/Mesh_PrimitiveMode_10.gltf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 5> l1 = { { 0u, 3u, 2u, 1u, 0u } };
+    std::array<unsigned int, 5> l1 = { { 0u, 1u, 2u, 3u, 0u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 2u);
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[i].mIndices[0], l1[i]);
@@ -423,13 +436,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesStrip) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    std::array<unsigned int, 3> f1 = { { 0u, 3u, 1u } };
+    std::array<unsigned int, 3> f1 = { { 0u, 1u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = { { 1u, 3u, 2u } };
+    std::array<unsigned int, 3> f2 = { { 2u, 1u, 3u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -443,13 +456,13 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
     EXPECT_NE(nullptr, scene);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
-    std::array<unsigned int, 3> f1 = { { 0u, 3u, 2u } };
+    std::array<unsigned int, 3> f1 = { { 0u, 1u, 2u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[0].mIndices[i], f1[i]);
     }
 
-    std::array<unsigned int, 3> f2 = { { 0u, 2u, 1u } };
+    std::array<unsigned int, 3> f2 = { { 0u, 2u, 3u } };
     EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mNumIndices, 3u);
     for (size_t i = 0; i < 3; ++i) {
         EXPECT_EQ(scene->mMeshes[0]->mFaces[1].mIndices[i], f2[i]);
@@ -490,6 +503,143 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf",
             aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
+}
+
+bool checkSkinnedScene(const aiScene *scene){
+    float eps = 0.001f;
+    bool result = true;
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
+
+    unsigned int numWeights[] = {4u, 4u, 4u, 4u, 2u , 1u, 1u, 2u, 1u, 1u};
+    float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
+                        {0.113f, 0.243f, 0.499f, 0.251f},
+                        {0.005f, 0.010f, 0.041f, 0.093f},
+                        {0.090f, 0.234f, 0.404f, 0.243f},
+                        {0.090f, 0.222f, 0.000f, 0.000f},
+                        {0.216f, 0.000f, 0.000f, 0.000f},
+                        {0.058f, 0.000f, 0.000f, 0.000f},
+                        {0.086f, 0.000f, 0.000f, 0.111f},
+                        {0.088f, 0.000f, 0.000f, 0.000f},
+                        {0.049f, 0.000f, 0.000f, 0.000f}};
+    for (size_t boneIndex = 0; boneIndex < 10u; ++boneIndex) {
+        EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
+        std::map<unsigned int, float> map;
+        for (size_t jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
+            auto key = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mVertexId;
+            auto weight = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mWeight;
+            map[key] = weight;
+        }
+
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+            auto weight = map[jointIndex];
+            EXPECT_LT(abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
+        }
+    }
+
+    return result;
+}
+
+void checkSkinnedSceneLimited(const aiScene *scene){
+    float eps = 0.001f;
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumBones, 10u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[0].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].y - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[1].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].x - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[2].z - 0), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].x - -1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].y - 1), eps);
+    EXPECT_LT(abs(scene->mMeshes[0]->mVertices[3].z - 0), eps);
+
+    unsigned int numWeights[] = {4u, 4u, 1u, 4u, 1u , 1u, 1u, 1u, 1u, 1u};
+    float weights[10][4] = {{0.207f, 0.291f, 0.057f, 0.303f},
+                            {0.113f, 0.243f, 0.499f, 0.251f},
+                            {0.000f, 0.000f, 0.041f, 0.000f},
+                            {0.090f, 0.234f, 0.404f, 0.243f},
+                            {0.000f, 0.222f, 0.000f, 0.000f},
+                            {0.216f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.111f},
+                            {0.000f, 0.000f, 0.000f, 0.000f},
+                            {0.000f, 0.000f, 0.000f, 0.000f}};
+    for (unsigned int boneIndex = 0; boneIndex < 10u; ++boneIndex) {
+        EXPECT_EQ(scene->mMeshes[0]->mBones[boneIndex]->mNumWeights, numWeights[boneIndex]);
+        std::map<unsigned int, float> map;
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex){
+            auto key = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mVertexId;
+            auto weight = scene->mMeshes[0]->mBones[boneIndex]->mWeights[jointIndex].mWeight;
+            map[key] = weight;
+        }
+        for (unsigned int jointIndex = 0; jointIndex < scene->mMeshes[0]->mBones[boneIndex]->mNumWeights; ++jointIndex) {
+            auto weight = map[jointIndex];
+            EXPECT_LT(std::abs(ai_real(weight) - ai_real(weights[boneIndex][jointIndex])), 0.002);
+        }
+    }
+}
+
+TEST_F(utglTF2ImportExport, bug_import_simple_skin2) {
+    Assimp::Importer importer;
+    Assimp::Exporter exporter;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_skin.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(scene);
+
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.glb"));
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.gltf"));
+
+    // enable more than four bones per vertex
+    Assimp::ExportProperties properties = Assimp::ExportProperties();
+    properties.SetPropertyBool(
+      AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX, true);
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.glb", 0u, &properties));
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2",
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.gltf", 0u, &properties));
+
+    // check skinning data of both exported files for limited number bones per vertex
+    const aiScene *limitedSceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.gltf",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedSceneLimited(limitedSceneImported);
+    limitedSceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_four_out.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedSceneLimited(limitedSceneImported);
+
+    // check skinning data of both exported files for unlimited number bones per vertex
+    const aiScene *sceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.gltf",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(sceneImported);
+    sceneImported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/quad_all_out.glb",
+            aiProcess_ValidateDataStructure);
+    checkSkinnedScene(sceneImported);
+
+
 }
 
 TEST_F(utglTF2ImportExport, import_cameras) {

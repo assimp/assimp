@@ -54,9 +54,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Discreet 3DS Importer",
     "",
     "",
@@ -102,10 +102,6 @@ Discreet3DSImporter::Discreet3DSImporter() :
         stream(), mLastNodeIndex(), mCurrentNode(), mRootNode(), mScene(), mMasterScale(), bHasBG(), bIsPrj() {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-Discreet3DSImporter::~Discreet3DSImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -266,8 +262,15 @@ void Discreet3DSImporter::ParseMainChunk() {
     };
 
     ASSIMP_3DS_END_CHUNK();
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code-return"
+#endif
     // recursively continue processing this hierarchy level
     return ParseMainChunk();
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -362,7 +365,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num) {
     // IMPLEMENTATION NOTE;
     // Cameras or lights define their transformation in their parent node and in the
     // corresponding light or camera chunks. However, we read and process the latter
-    // to to be able to return valid cameras/lights even if no scenegraph is given.
+    // to be able to return valid cameras/lights even if no scenegraph is given.
 
     // get chunk type
     switch (chunk.Flag) {
@@ -1331,5 +1334,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D *out, bool acceptPercent) {
     };
     (void)bGamma;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

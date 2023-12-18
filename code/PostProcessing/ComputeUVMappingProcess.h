@@ -59,13 +59,10 @@ namespace Assimp {
 /** ComputeUVMappingProcess - converts special mappings, such as spherical,
  *  cylindrical or boxed to proper UV coordinates for rendering.
 */
-class ComputeUVMappingProcess : public BaseProcess
-{
+class ComputeUVMappingProcess : public BaseProcess {
 public:
-    ComputeUVMappingProcess();
-    ~ComputeUVMappingProcess();
-
-public:
+    ComputeUVMappingProcess() = default;
+    ~ComputeUVMappingProcess() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the processing step is present in the given flag field.
@@ -73,14 +70,14 @@ public:
     *   combination of #aiPostProcessSteps.
     * @return true if the process is present in this flag fields, false if not.
     */
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
     /** Executes the post processing step on the given imported data.
     * At the moment a process is not supposed to fail.
     * @param pScene The imported data to work at.
     */
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 protected:
 
@@ -125,8 +122,7 @@ protected:
 private:
 
     // temporary structure to describe a mapping
-    struct MappingInfo
-    {
+    struct MappingInfo {
         explicit MappingInfo(aiTextureMapping _type)
             : type  (_type)
             , axis  (0.f,1.f,0.f)
@@ -137,8 +133,7 @@ private:
         aiVector3D axis;
         unsigned int uv;
 
-        bool operator== (const MappingInfo& other)
-        {
+        bool operator== (const MappingInfo& other) {
             return type == other.type && axis == other.axis;
         }
     };

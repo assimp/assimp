@@ -74,7 +74,7 @@ typedef uint32_t ai_uint32;
 #ifdef __cplusplus
 
 #include <cstring>
-#include <new> // for std::nothrow_t
+#include <new>    // for std::nothrow_t
 #include <string> // for aiString::Set(const std::string&)
 
 namespace Assimp {
@@ -82,16 +82,16 @@ namespace Assimp {
 namespace Intern {
 // --------------------------------------------------------------------
 /** @brief Internal helper class to utilize our internal new/delete
-     *    routines for allocating object of this and derived classes.
-     *
-     * By doing this you can safely share class objects between Assimp
-     * and the application - it works even over DLL boundaries. A good
-     * example is the #IOSystem where the application allocates its custom
-     * #IOSystem, then calls #Importer::SetIOSystem(). When the Importer
-     * destructs, Assimp calls operator delete on the stored #IOSystem.
-     * If it lies on a different heap than Assimp is working with,
-     * the application is determined to crash.
-     */
+ *    routines for allocating object of this and derived classes.
+ *
+ * By doing this you can safely share class objects between Assimp
+ * and the application - it works even over DLL boundaries. A good
+ * example is the #IOSystem where the application allocates its custom
+ * #IOSystem, then calls #Importer::SetIOSystem(). When the Importer
+ * destructs, Assimp calls operator delete on the stored #IOSystem.
+ * If it lies on a different heap than Assimp is working with,
+ * the application is determined to crash.
+ */
 // --------------------------------------------------------------------
 #ifndef SWIG
 struct ASSIMP_API AllocateFromAssimpHeap {

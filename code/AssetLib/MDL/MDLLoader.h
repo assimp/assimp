@@ -39,10 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/**  @file MDLLoader.h
- *   @brief Declaration of the loader for MDL files
- */
+/// @file MDLLoader.h
+/// @brief Declaration of the loader for MDL files
 #pragma once
 #ifndef AI_MDLLOADER_H_INCLUDED
 #define AI_MDLLOADER_H_INCLUDED
@@ -83,11 +81,10 @@ using namespace MDL;
  *  them all with a single 1000-line function-beast. However, it has been
  *  split into several code paths to make the code easier to read and maintain.
 */
-class MDLImporter : public BaseImporter
-{
+class MDLImporter : public BaseImporter {
 public:
     MDLImporter();
-    ~MDLImporter() override;
+    ~MDLImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -139,7 +136,7 @@ protected:
     // -------------------------------------------------------------------
     /** Import a CS:S/HL2 MDL file (not fully implemented)
     */
-    void InternReadFile_HL2( );
+    AI_WONT_RETURN void InternReadFile_HL2( ) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Check whether a given position is inside the valid range
@@ -150,6 +147,7 @@ protected:
     */
     void SizeCheck(const void* szPos);
     void SizeCheck(const void* szPos, const char* szFile, unsigned int iLine);
+    bool IsPosValid(const void* szPos) const;
 
     // -------------------------------------------------------------------
     /** Validate the header data structure of a game studio MDL7 file

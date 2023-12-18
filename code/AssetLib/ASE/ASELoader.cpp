@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
@@ -64,10 +63,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // utilities
 #include <assimp/fast_atof.h>
 
-using namespace Assimp;
+namespace Assimp {
 using namespace Assimp::ASE;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "ASE Importer",
     "",
     "",
@@ -321,21 +320,6 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode *> &nodes) {
                 // <baseName>.Target.
                 aiNodeAnim *nd = pcAnim->mChannels[iNum++] = new aiNodeAnim();
                 nd->mNodeName.Set(me->mName + ".Target");
-
-                // If there is no input position channel we will need
-                // to supply the default position from the node's
-                // local transformation matrix.
-                /*TargetAnimationHelper helper;
-                if (me->mAnim.akeyPositions.empty())
-                {
-                    aiMatrix4x4& mat = (*i)->mTransform;
-                    helper.SetFixedMainAnimationChannel(aiVector3D(
-                        mat.a4, mat.b4, mat.c4));
-                }
-                else helper.SetMainAnimationChannel (&me->mAnim.akeyPositions);
-                helper.SetTargetAnimationChannel (&me->mTargetAnim.akeyPositions);
-
-                helper.Process(&me->mTargetAnim.akeyPositions);*/
 
                 // Allocate the key array and fill it
                 nd->mNumPositionKeys = (unsigned int)me->mTargetAnim.akeyPositions.size();
@@ -920,7 +904,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
         ASSIMP_LOG_WARN("Material index is out of range");
     }
 
-    // If the material the mesh is assigned to is consisting of submeshes, split it
+    // If the material the mesh is assigned to consists of submeshes, split it
     if (!mParser->m_vMaterials[mesh.iMaterialIndex].avSubMaterials.empty()) {
         std::vector<ASE::Material> vSubMaterials = mParser->m_vMaterials[mesh.iMaterialIndex].avSubMaterials;
 
@@ -1276,6 +1260,8 @@ bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
     // The array is reused.
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
     return false;
+}
+
 }
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER

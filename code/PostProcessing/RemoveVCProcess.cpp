@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2022, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,10 +55,6 @@ RemoveVCProcess::RemoveVCProcess() :
         configDeleteFlags(), mScene() {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-RemoveVCProcess::~RemoveVCProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool RemoveVCProcess::IsActive(unsigned int pFlags) const {
     return (pFlags & aiProcess_RemoveComponent) != 0;
@@ -77,63 +71,6 @@ inline void ArrayDelete(T **&in, unsigned int &num) {
     in = nullptr;
     num = 0;
 }
-
-#if 0
-// ------------------------------------------------------------------------------------------------
-// Updates the node graph - removes all nodes which have the "remove" flag set and the
-// "don't remove" flag not set. Nodes with meshes are never deleted.
-bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
-{
-    bool b = false;
-
-    std::list<aiNode*> mine;
-    for (unsigned int i = 0; i < node->mNumChildren;++i)
-    {
-        if(UpdateNodeGraph(node->mChildren[i],mine,false))
-            b = true;
-    }
-
-    // somewhat tricky ... mNumMeshes must be originally 0 and MSB2 may not be set,
-    // so we can do a simple comparison against MSB here
-    if (!root && AI_RC_UINT_MSB == node->mNumMeshes )
-    {
-        // this node needs to be removed
-        if(node->mNumChildren)
-        {
-            childsOfParent.insert(childsOfParent.end(),mine.begin(),mine.end());
-
-            // set all children to nullptr to make sure they are not deleted when we delete ourself
-            for (unsigned int i = 0; i < node->mNumChildren;++i)
-                node->mChildren[i] = nullptr;
-        }
-        b = true;
-        delete node;
-    }
-    else
-    {
-        AI_RC_UNMASK(node->mNumMeshes);
-        childsOfParent.push_back(node);
-
-        if (b)
-        {
-            // reallocate the array of our children here
-            node->mNumChildren = (unsigned int)mine.size();
-            aiNode** const children = new aiNode*[mine.size()];
-            aiNode** ptr = children;
-
-            for (std::list<aiNode*>::iterator it = mine.begin(), end = mine.end();
-                 it != end; ++it)
-            {
-                *ptr++ = *it;
-            }
-            delete[] node->mChildren;
-            node->mChildren = children;
-            return false;
-        }
-    }
-    return b;
-}
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.

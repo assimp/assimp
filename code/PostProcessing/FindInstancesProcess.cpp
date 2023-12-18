@@ -59,10 +59,6 @@ FindInstancesProcess::FindInstancesProcess()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-FindInstancesProcess::~FindInstancesProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool FindInstancesProcess::IsActive( unsigned int pFlags) const
 {

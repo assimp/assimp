@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Milkshape 3D Importer",
     "",
     "",
@@ -84,9 +84,6 @@ MS3DImporter::MS3DImporter()
     : mScene()
 {}
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MS3DImporter::~MS3DImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
@@ -486,7 +483,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
         for (unsigned int j = 0,n = 0; j < m->mNumFaces; ++j) {
             aiFace& f = m->mFaces[j];
-            if (g.triangles[j]>triangles.size()) {
+            if (g.triangles[j] >= triangles.size()) {
                 throw DeadlyImportError("MS3D: Encountered invalid triangle index, file is malformed");
             }
 
@@ -494,7 +491,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             f.mIndices = new unsigned int[f.mNumIndices=3];
 
             for (unsigned int k = 0; k < 3; ++k,++n) {
-                if (t.indices[k]>vertices.size()) {
+                if (t.indices[k] >= vertices.size()) {
                     throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
                 }
 

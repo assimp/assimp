@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <assimp/ProgressHandler.hpp>
+#include <exception>
 #include <set>
 #include <vector>
 #include <memory>
@@ -62,6 +63,7 @@ struct aiImporterDesc;
 
 namespace Assimp {
 
+// Forward declarations
 class Importer;
 class IOSystem;
 class BaseProcess;
@@ -71,6 +73,9 @@ class IOStream;
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
                                           (string[1] << 16) + (string[2] << 8) + string[3]))
+
+using UByteBuffer = std::vector<uint8_t>;
+using ByteBuffer = std::vector<int8_t>;
 
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
@@ -258,7 +263,7 @@ public: // static utilities
             std::size_t numTokens,
             unsigned int searchBytes = 200,
             bool tokensSol = false,
-            bool noAlphaBeforeTokens = false);
+            bool noGraphBeforeTokens = false);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has a specific file extension
@@ -273,6 +278,16 @@ public: // static utilities
             const char *ext0,
             const char *ext1 = nullptr,
             const char *ext2 = nullptr);
+
+    // -------------------------------------------------------------------
+    /** @brief Check whether a file has one of the passed file extensions
+     *  @param pFile Input file
+     *  @param extensions Extensions to check for. Lowercase characters only, no dot!
+     *  @note Case-insensitive
+     */
+    static bool HasExtension(
+            const std::string &pFile,
+            const std::set<std::string> &extensions);
 
     // -------------------------------------------------------------------
     /** @brief Extract file extension from a string

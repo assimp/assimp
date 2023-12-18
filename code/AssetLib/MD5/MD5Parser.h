@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -93,7 +92,7 @@ struct Section {
     std::string mName;
 
     //! For global elements: the value of the element as string
-    //! Iif !length() the section is not a global element
+    //! if !length() the section is not a global element
     std::string mGlobalValue;
 };
 
@@ -185,7 +184,7 @@ using FrameList = std::vector<FrameDesc>;
 */
 struct VertexDesc {
     VertexDesc() AI_NO_EXCEPT
-    : mFirstWeight(0), mNumWeights(0) {
+            : mFirstWeight(0), mNumWeights(0) {
         // empty
     }
 
@@ -349,60 +348,60 @@ public:
      */
     MD5Parser(char* buffer, unsigned int fileSize);
 
-
     // -------------------------------------------------------------------
     /** Report a specific error message and throw an exception
      *  @param error Error message to be reported
      *  @param line Index of the line where the error occurred
      */
-    AI_WONT_RETURN static void ReportError (const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN static void ReportError(const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Report a specific warning
      *  @param warn Warn message to be reported
      *  @param line Index of the line where the error occurred
      */
-    static void ReportWarning (const char* warn, unsigned int line);
+    static void ReportWarning(const char* warn, unsigned int line);
 
+    // -------------------------------------------------------------------
+    /** Report a specific error
+     *  @param error Error message to be reported
+     */
+    AI_WONT_RETURN void ReportError (const char* error) AI_WONT_RETURN_SUFFIX;
 
-    void ReportError (const char* error) {
-        return ReportError(error, lineNumber);
-    }
-
-    void ReportWarning (const char* warn) {
-        return ReportWarning(warn, lineNumber);
-    }
+    // -------------------------------------------------------------------
+    /** Report a specific warning
+     *  @param error Warn message to be reported
+     */
+    void ReportWarning (const char* warn);
 
     //! List of all sections which have been read
     SectionList mSections;
 
 private:
-    // -------------------------------------------------------------------
-    /** Parses a file section. The current file pointer must be outside
-     *  of a section.
-     *  @param out Receives the section data
-     *  @return true if the end of the file has been reached
-     *  @throws ImportErrorException if an error occurs
-     */
     bool ParseSection(Section& out);
-
-    // -------------------------------------------------------------------
-    /** Parses the file header
-     *  @throws ImportErrorException if an error occurs
-     */
     void ParseHeader();
-
     bool SkipLine(const char* in, const char** out);
     bool SkipLine( );
     bool SkipSpacesAndLineEnd( const char* in, const char** out);
     bool SkipSpacesAndLineEnd();
     bool SkipSpaces();
 
+private:
     char* buffer;
     char* bufferEnd;
     unsigned int fileSize;
     unsigned int lineNumber;
 };
+
+// -------------------------------------------------------------------
+inline void MD5Parser::ReportWarning (const char* warn) {
+    return ReportWarning(warn, lineNumber);
+}
+
+// -------------------------------------------------------------------
+inline void MD5Parser::ReportError(const char* error) {
+    ReportError(error, lineNumber);
+}
 
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipLine(const char* in, const char** out) {
@@ -417,18 +416,24 @@ inline bool MD5Parser::SkipLine( ) {
 
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipSpacesAndLineEnd( const char* in, const char** out) {
-    bool bHad = false;
-    bool running = true;
+    if (in == bufferEnd) {
+        *out = in;
+        return false;
+    }
+    
+    bool bHad = false, running = true;
     while (running) {
         if( *in == '\r' || *in == '\n') {
-                // we open files in binary mode, so there could be \r\n sequences ...
+            // we open files in binary mode, so there could be \r\n sequences ...
             if (!bHad)  {
                 bHad = true;
                 ++lineNumber;
             }
+        } else if (*in == '\t' || *in == ' ') {
+            bHad = false;
+        } else {
+            break;
         }
-        else if (*in == '\t' || *in == ' ')bHad = false;
-        else break;
         ++in;
         if (in == bufferEnd) {
             break;

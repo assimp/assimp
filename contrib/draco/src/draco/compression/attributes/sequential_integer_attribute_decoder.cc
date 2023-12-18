@@ -148,8 +148,9 @@ bool SequentialIntegerAttributeDecoder::DecodeIntegerValues(
         return false;
       }
       for (size_t i = 0; i < num_values; ++i) {
-        if (!in_buffer->Decode(portable_attribute_data + i, num_bytes))
+        if (!in_buffer->Decode(portable_attribute_data + i, num_bytes)) {
           return false;
+        }
       }
     }
   }
@@ -228,12 +229,13 @@ void SequentialIntegerAttributeDecoder::StoreTypedValues(uint32_t num_values) {
 
 void SequentialIntegerAttributeDecoder::PreparePortableAttribute(
     int num_entries, int num_components) {
-  GeometryAttribute va;
-  va.Init(attribute()->attribute_type(), nullptr, num_components, DT_INT32,
+  GeometryAttribute ga;
+  ga.Init(attribute()->attribute_type(), nullptr, num_components, DT_INT32,
           false, num_components * DataTypeLength(DT_INT32), 0);
-  std::unique_ptr<PointAttribute> port_att(new PointAttribute(va));
+  std::unique_ptr<PointAttribute> port_att(new PointAttribute(ga));
   port_att->SetIdentityMapping();
   port_att->Reset(num_entries);
+  port_att->set_unique_id(attribute()->unique_id());
   SetPortableAttribute(std::move(port_att));
 }
 

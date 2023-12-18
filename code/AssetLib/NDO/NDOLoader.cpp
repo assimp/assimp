@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Implementation of the NDO importer class.
  */
 
-
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
+
 #include "NDOLoader.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
@@ -52,10 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/StreamReader.h>
 #include <map>
+#include <limits>
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Nendo Mesh Importer",
     "",
     "",
@@ -67,14 +68,6 @@ static const aiImporterDesc desc = {
     0,
     "ndo"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-NDOImporter::NDOImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-NDOImporter::~NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -160,6 +153,9 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
         temp = file_format >= 12 ? reader.GetU4() : reader.GetU2();
         head = (const char*)reader.GetPtr();
+        if (std::numeric_limits<unsigned int>::max() - 76 < temp) {
+            throw DeadlyImportError("Invalid name length");
+        }
         reader.IncPtr(temp + 76); /* skip unknown stuff */
 
         obj.name = std::string(head, temp);

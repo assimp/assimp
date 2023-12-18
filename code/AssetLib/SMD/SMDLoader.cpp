@@ -64,9 +64,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define strtok_s strtok_r
 #endif
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Valve SMD Importer",
     "",
     "",
@@ -590,7 +590,7 @@ void SMDImporter::CreateOutputMaterials() {
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
-        szName.length = (size_t)ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat);
+        szName.length = static_cast<ai_uint32>(ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat));
         pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
         if (aszTextures[iMat].length())
@@ -837,7 +837,10 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent, const char** szCurrentOut
     unsigned int iBone  = 0;
     SkipSpacesAndLineEnd(szCurrent,&szCurrent);
     if ( !ParseUnsignedInt(szCurrent,&szCurrent,iBone) || !SkipSpaces(szCurrent,&szCurrent)) {
-        LogErrorNoThrow("Unexpected EOF/EOL while parsing bone index");
+        throw DeadlyImportError("Unexpected EOF/EOL while parsing bone index");
+    }
+    if (iBone == UINT_MAX) {
+        LogErrorNoThrow("Invalid bone number while parsing bone index");
         SMDI_PARSE_RETURN;
     }
     // add our bone to the list
@@ -1072,6 +1075,8 @@ void SMDImporter::ParseVertex(const char* szCurrent,
 
     // go to the beginning of the next line
     SMDI_PARSE_RETURN;
+}
+
 }
 
 #endif // !! ASSIMP_BUILD_NO_SMD_IMPORTER

@@ -730,8 +730,8 @@ bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecula
     } else if (colorFactorIsZero) {
         specular.specularColorFactor[0] = specular.specularColorFactor[1] = specular.specularColorFactor[2] = 1.0f;
     }
-    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR, 0);
+    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR, 1);
     return true;
 }
 

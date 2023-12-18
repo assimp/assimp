@@ -50,7 +50,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.25.3.tar.gz"
-    SHA1 "0dfbc2cb5c4cf7e83533733bdfd2125ff96680cb"
+    SHA1 "798501e983f14b28b10cda16afa4de69eee1da1d"
   )
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()

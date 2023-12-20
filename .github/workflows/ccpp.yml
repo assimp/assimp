@@ -98,8 +98,8 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v3
-      if: contains(matrix.name,'windows')
+    - uses: actions/upload-artifact@v4
+      if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}'
         path: build/bin/assimp*.exe

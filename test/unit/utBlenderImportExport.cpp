@@ -223,17 +223,13 @@ TEST(utBlenderImporter, importFleurOptonl) {
     ASSERT_NE(nullptr, scene);
 }
 
-
-/*
-This test contains a default cube with subdivision surface modifier
-and a default cube with subdivision surface applied.
-Vertices should be identical.
-*/
+/// This test contains a default cube with subdivision surface modifier and a default cube with subdivision surface applied.
+/// Vertices should be identical.
 TEST_F(utBlenderImporterExporter, importBlendWithSubdivisionSurface) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/subdivision_test_277.blend", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
-    EXPECT_EQ(scene->mNumMeshes, 2);
+    EXPECT_EQ(scene->mNumMeshes, 2u);
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, scene->mMeshes[1]->mNumVertices);
 
     SpatialSort spatialSortVertices0;

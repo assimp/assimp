@@ -5,6 +5,7 @@ Some fancy helper functions.
 """
 
 import os
+import platform
 import ctypes
 import operator
 
@@ -35,6 +36,10 @@ if os.name=='posix':
 
     if 'LD_LIBRARY_PATH' in os.environ:
         additional_dirs.extend([item for item in os.environ['LD_LIBRARY_PATH'].split(':') if item])
+    
+    if platform.system() == 'Darwin':
+        if 'DYLD_LIBRARY_PATH' in os.environ:
+            additional_dirs.extend([item for item in os.environ['DYLD_LIBRARY_PATH'].split(':') if item])
 
     # check if running from anaconda.
     anaconda_keywords = ("conda", "continuum")

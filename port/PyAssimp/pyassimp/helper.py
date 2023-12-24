@@ -8,9 +8,12 @@ import os
 import ctypes
 import operator
 
-from distutils.sysconfig import get_python_lib
 import re
 import sys
+
+have_distutils = sys.version_info[0] < 3 and sys.version_info[1] < 12
+if have_distutils:
+    from distutils.sysconfig import get_python_lib
 
 try: import numpy
 except ImportError: numpy = None
@@ -35,7 +38,7 @@ if os.name=='posix':
 
     # check if running from anaconda.
     anaconda_keywords = ("conda", "continuum")
-    if any(k in sys.version.lower() for k in anaconda_keywords):
+    if have_distutils and any(k in sys.version.lower() for k in anaconda_keywords):
       cur_path = get_python_lib()
       pattern = re.compile('.*\/lib\/')
       conda_lib = pattern.match(cur_path).group()

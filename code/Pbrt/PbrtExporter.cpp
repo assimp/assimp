@@ -89,15 +89,11 @@ using namespace Assimp;
 
 namespace Assimp {
 
-void ExportScenePbrt (
-    const char* pFile,
-    IOSystem* pIOSystem,
-    const aiScene* pScene,
-    const ExportProperties* /*pProperties*/
-){
+void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pScene,
+        const ExportProperties *) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-    path = path + file + ".brt";
+    path = path + file + ".pbrt";
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file);
 }
@@ -114,7 +110,6 @@ static void create_embedded_textures_folder(const aiScene *scene, IOSystem *pIOS
     }
 }
 
-// Constructor
 PbrtExporter::PbrtExporter(
         const aiScene *pScene, IOSystem *pIOSystem,
         const std::string &path, const std::string &file) :
@@ -185,9 +180,6 @@ PbrtExporter::PbrtExporter(
     }
     outfile->Write(mOutput.str().c_str(), mOutput.str().length(), 1);
 }
-
-// Destructor
-PbrtExporter::~PbrtExporter() = default;
 
 void PbrtExporter::WriteMetaData() {
     mOutput << "#############################\n";

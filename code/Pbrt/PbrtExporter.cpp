@@ -97,12 +97,22 @@ void ExportScenePbrt (
 ){
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-
+    path = path + file + ".brt";
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file);
 }
 
 } // end of namespace Assimp
+
+static void create_embedded_textures_folder(const aiScene *scene, IOSystem *pIOSystem) {
+    if (scene->mNumTextures > 0) {
+        if (!pIOSystem->Exists("textures")) {
+            if (!pIOSystem->CreateDirectory("textures")) {
+                throw DeadlyExportError("Could not create textures/ directory.");
+            }
+        }
+    }
+}
 
 // Constructor
 PbrtExporter::PbrtExporter(
@@ -127,10 +137,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
+    
     // Export embedded textures.
-    if (mScene->mNumTextures > 0)
-        if (!mIOSystem->CreateDirectory("textures"))
-            throw DeadlyExportError("Could not create textures/ directory.");
+    create_embedded_textures_folder(mScene, mIOSystem);
+    
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);

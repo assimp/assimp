@@ -720,7 +720,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
-const vec3 defaultSpecularColorFactor = { 0, 0, 0 };
+const vec3 defaultSpecularColorFactor = { 1, 1, 1 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
 const vec3 defaultAttenuationColor = { 1, 1, 1 };
 

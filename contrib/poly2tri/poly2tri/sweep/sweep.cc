@@ -111,6 +111,9 @@ void Sweep::EdgeEvent(SweepContext& tcx, Edge* edge, Node* node)
 
 void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangle, Point& point)
 {
+  if (triangle == nullptr)
+   return;
+
   if (IsEdgeSideOfTriangle(*triangle, ep, eq)) {
     return;
   }

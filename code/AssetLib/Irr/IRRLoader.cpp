@@ -66,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Irrlicht Scene Reader",
     "",
     "",
@@ -575,8 +575,8 @@ void SetupMapping(aiMaterial *mat, aiTextureMapping mode, const aiVector3D &axis
                 m->mSemantic = prop->mSemantic;
                 m->mType = aiPTI_Float;
 
-                m->mDataLength = 12;
-                m->mData = new char[12];
+                m->mDataLength = sizeof(aiVector3D);
+                m->mData = new char[m->mDataLength];
                 *((aiVector3D *)m->mData) = axis;
                 p.push_back(m);
             }
@@ -1234,7 +1234,10 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Parse the XML
     // Find the scene root from document root.
     const pugi::xml_node &sceneRoot = documentRoot.child("irr_scene");
-    if (!sceneRoot) throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    if (!sceneRoot) {
+        delete root;
+        throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    }
     for (pugi::xml_node &child : sceneRoot.children()) {
         // XML elements are either nodes, animators, attributes, or materials
         if (!ASSIMP_stricmp(child.name(), "node")) {

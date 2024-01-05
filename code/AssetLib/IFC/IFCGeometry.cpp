@@ -38,24 +38,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  IFCGeometry.cpp
- *  @brief Geometry conversion and synthesis for IFC
- */
-
-
+/// @file  IFCGeometry.cpp
+/// @brief Geometry conversion and synthesis for IFC
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
-
-#ifdef ASSIMP_USE_HUNTER
-#  include <poly2tri/poly2tri.h>
-#  include <polyclipping/clipper.hpp>
-#else
-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
-#  include "../contrib/clipper/clipper.hpp"
-#endif
+#include "contrib/poly2tri/poly2tri/poly2tri.h"
+#include "contrib/clipper/clipper.hpp"
 
 #include <iterator>
 #include <memory>
@@ -65,8 +56,7 @@ namespace Assimp {
 namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessPolyloop(const Schema_2x3::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
-{
+bool ProcessPolyloop(const Schema_2x3::IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/) {
     size_t cnt = 0;
     for(const Schema_2x3::IfcCartesianPoint& c : loop.Polygon) {
         IfcVector3 tmp;
@@ -91,8 +81,7 @@ bool ProcessPolyloop(const Schema_2x3::IfcPolyLoop& loop, TempMesh& meshout, Con
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1)
-{
+void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1) {
     // handle all trivial cases
     if(inmesh.mVertcnt.empty()) {
         return;
@@ -127,8 +116,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
     if (master_bounds != (size_t)-1) {
         ai_assert(master_bounds < inmesh.mVertcnt.size());
         outer_polygon_it = begin + master_bounds;
-    }
-    else {
+    } else {
         for(iit = begin; iit != end; ++iit) {
             // find the polygon with the largest area and take it as the outer bound.
             IfcVector3& n = normals[std::distance(begin,iit)];
@@ -139,7 +127,8 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             }
         }
     }
-	if (outer_polygon_it == end) {
+	
+    if (outer_polygon_it == end) {
 		return;
 	}
 
@@ -205,40 +194,20 @@ void ProcessConnectedFaceSet(const Schema_2x3::IfcConnectedFaceSet& fset, TempMe
 
             if(const Schema_2x3::IfcPolyLoop* const polyloop = bound.Bound->ToPtr<Schema_2x3::IfcPolyLoop>()) {
                 if(ProcessPolyloop(*polyloop, meshout,conv)) {
-
                     // The outer boundary is better determined by checking which
                     // polygon covers the largest area.
-
-                    //if(bound.ToPtr<IfcFaceOuterBound>()) {
-                    //  ob = cnt;
-                    //}
-                    //++cnt;
-
                 }
-            }
-            else {
+            } else {
                 IFCImporter::LogWarn("skipping unknown IfcFaceBound entity, type is ", bound.Bound->GetClassName());
                 continue;
             }
-
-            // And this, even though it is sometimes TRUE and sometimes FALSE,
-            // does not really improve results.
-
-            /*if(!IsTrue(bound.Orientation)) {
-                size_t c = 0;
-                for(unsigned int& c : meshout.vertcnt) {
-                    std::reverse(result.verts.begin() + cnt,result.verts.begin() + cnt + c);
-                    cnt += c;
-                }
-            }*/
         }
         ProcessPolygonBoundaries(result, meshout);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, TempMesh& result, ConversionData& conv)
-{
+void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, TempMesh& result, ConversionData& conv) {
     TempMesh meshout;
 
     // first read the profile description
@@ -265,7 +234,8 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
         return;
     }
 
-    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
+    const unsigned int cnt_segments = 
+        std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
     const IfcFloat delta = max_angle/cnt_segments;
 
     has_area = has_area && std::fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
@@ -324,8 +294,9 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh& result, ConversionData& conv)
-{
+void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, 
+        TempMesh& result, 
+        ConversionData& conv) {
     const Curve* const curve = Curve::Convert(*solid.Directrix, conv);
     if(!curve) {
         IFCImporter::LogError("failed to convert Directrix curve (IfcSweptDiskSolid)");
@@ -460,8 +431,7 @@ void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, TempMesh&
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut)
-{
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut) {
     const std::vector<IfcVector3>& out = curmesh.mVerts;
     IfcMatrix3 m;
 
@@ -504,10 +474,6 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
     IfcVector3 r = (out[idx]-any_point);
     r.Normalize();
 
-    //if(d) {
-    //  *d = -any_point * nor;
-    //}
-
     // Reconstruct orthonormal basis
     // XXX use Gram Schmidt for increased robustness
     IfcVector3 u = r ^ nor;
@@ -531,8 +497,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 const auto closeDistance = ai_epsilon;
 
 bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt2) {
-    if(pt1.Coordinates.size() != pt2.Coordinates.size())
-    {
+    if(pt1.Coordinates.size() != pt2.Coordinates.size()) {
         IFCImporter::LogWarn("unable to compare differently-dimensioned points");
         return false;
     }
@@ -540,10 +505,10 @@ bool areClose(Schema_2x3::IfcCartesianPoint pt1,Schema_2x3::IfcCartesianPoint pt
     auto coord2 = pt2.Coordinates.begin();
     // we're just testing each dimension separately rather than doing euclidean distance, as we're
     // looking for very close coordinates
-    for(; coord1 != pt1.Coordinates.end(); coord1++,coord2++)
-    {
-        if(std::fabs(*coord1 - *coord2) > closeDistance)
+    for(; coord1 != pt1.Coordinates.end(); coord1++,coord2++) {
+        if(std::fabs(*coord1 - *coord2) > closeDistance) {
             return false;
+        }
     }
     return true;
 }
@@ -553,6 +518,7 @@ bool areClose(IfcVector3 pt1,IfcVector3 pt2) {
         std::fabs(pt1.y - pt2.y) < closeDistance &&
         std::fabs(pt1.z - pt2.z) < closeDistance);
 }
+
 // Extrudes the given polygon along the direction, converts it into an opening or applies all openings as necessary.
 void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const TempMesh& curve,
     const IfcVector3& extrusionDir, TempMesh& result, ConversionData &conv, bool collect_openings)
@@ -590,8 +556,9 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
 
     // reverse profile polygon if it's winded in the wrong direction in relation to the extrusion direction
     IfcVector3 profileNormal = TempMesh::ComputePolygonNormal(in.data(), in.size());
-    if( profileNormal * dir < 0.0 )
+    if( profileNormal * dir < 0.0 ) {
         std::reverse(in.begin(), in.end());
+    }
 
     std::vector<IfcVector3> nors;
     const bool openings = !!conv.apply_openings && conv.apply_openings->size();
@@ -678,8 +645,7 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
             if(n > 0) {
                 for(size_t i = 0; i < in.size(); ++i)
                     out.push_back(in[i] + dir);
-            }
-            else {
+            } else {
                 for(size_t i = in.size(); i--; )
                     out.push_back(in[i]);
             }
@@ -721,9 +687,10 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid, TempMesh& result,
-    ConversionData& conv, bool collect_openings)
-{
+void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid, 
+        TempMesh& result,
+        ConversionData& conv, 
+        bool collect_openings) {
     TempMesh meshout;
 
     // First read the profile description.
@@ -761,24 +728,23 @@ void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid, Tem
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, TempMesh& meshout,
-    ConversionData& conv)
-{
+void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, 
+        TempMesh& meshout,
+        ConversionData& conv) {
     if(const Schema_2x3::IfcExtrudedAreaSolid* const solid = swept.ToPtr<Schema_2x3::IfcExtrudedAreaSolid>()) {
         ProcessExtrudedAreaSolid(*solid,meshout,conv, !!conv.collect_openings);
-    }
-    else if(const Schema_2x3::IfcRevolvedAreaSolid* const rev = swept.ToPtr<Schema_2x3::IfcRevolvedAreaSolid>()) {
+    } else if(const Schema_2x3::IfcRevolvedAreaSolid* const rev = swept.ToPtr<Schema_2x3::IfcRevolvedAreaSolid>()) {
         ProcessRevolvedAreaSolid(*rev,meshout,conv);
-    }
-    else {
+    } else {
         IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is ", swept.GetClassName());
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned int matid, std::set<unsigned int>& mesh_indices,
-    ConversionData& conv)
-{
+bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, 
+        unsigned int matid, 
+        std::set<unsigned int>& mesh_indices,
+        ConversionData& conv) {
     bool fix_orientation = false;
     std::shared_ptr< TempMesh > meshtmp = std::make_shared<TempMesh>();
     if(const Schema_2x3::IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<Schema_2x3::IfcShellBasedSurfaceModel>()) {
@@ -788,41 +754,32 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
                 const Schema_2x3::IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<Schema_2x3::IfcConnectedFaceSet>();
 
                 ProcessConnectedFaceSet(fs, *meshtmp, conv);
-            }
-            catch(std::bad_cast&) {
+            } catch(std::bad_cast&) {
                 IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
             }
         }
         fix_orientation = true;
-    }
-    else  if(const Schema_2x3::IfcConnectedFaceSet* fset = geo.ToPtr<Schema_2x3::IfcConnectedFaceSet>()) {
+    } else  if(const Schema_2x3::IfcConnectedFaceSet* fset = geo.ToPtr<Schema_2x3::IfcConnectedFaceSet>()) {
         ProcessConnectedFaceSet(*fset, *meshtmp, conv);
         fix_orientation = true;
-    }
-    else  if(const Schema_2x3::IfcSweptAreaSolid* swept = geo.ToPtr<Schema_2x3::IfcSweptAreaSolid>()) {
+    } else  if(const Schema_2x3::IfcSweptAreaSolid* swept = geo.ToPtr<Schema_2x3::IfcSweptAreaSolid>()) {
         ProcessSweptAreaSolid(*swept, *meshtmp, conv);
-    }
-    else  if(const Schema_2x3::IfcSweptDiskSolid* disk = geo.ToPtr<Schema_2x3::IfcSweptDiskSolid>()) {
+    } else  if(const Schema_2x3::IfcSweptDiskSolid* disk = geo.ToPtr<Schema_2x3::IfcSweptDiskSolid>()) {
         ProcessSweptDiskSolid(*disk, *meshtmp, conv);
-    }
-    else if(const Schema_2x3::IfcManifoldSolidBrep* brep = geo.ToPtr<Schema_2x3::IfcManifoldSolidBrep>()) {
+    } else if(const Schema_2x3::IfcManifoldSolidBrep* brep = geo.ToPtr<Schema_2x3::IfcManifoldSolidBrep>()) {
         ProcessConnectedFaceSet(brep->Outer, *meshtmp, conv);
         fix_orientation = true;
-    }
-    else if(const Schema_2x3::IfcFaceBasedSurfaceModel* surf = geo.ToPtr<Schema_2x3::IfcFaceBasedSurfaceModel>()) {
+    } else if(const Schema_2x3::IfcFaceBasedSurfaceModel* surf = geo.ToPtr<Schema_2x3::IfcFaceBasedSurfaceModel>()) {
         for(const Schema_2x3::IfcConnectedFaceSet& fc : surf->FbsmFaces) {
             ProcessConnectedFaceSet(fc, *meshtmp, conv);
         }
         fix_orientation = true;
-    }
-    else  if(const Schema_2x3::IfcBooleanResult* boolean = geo.ToPtr<Schema_2x3::IfcBooleanResult>()) {
+    } else  if(const Schema_2x3::IfcBooleanResult* boolean = geo.ToPtr<Schema_2x3::IfcBooleanResult>()) {
         ProcessBoolean(*boolean, *meshtmp, conv);
-    }
-    else if(geo.ToPtr<Schema_2x3::IfcBoundingBox>()) {
+    } else if(geo.ToPtr<Schema_2x3::IfcBoundingBox>()) {
         // silently skip over bounding boxes
         return false;
-    }
-    else {
+    } else {
         std::stringstream toLog;
         toLog << "skipping unknown IfcGeometricRepresentationItem entity, type is " << geo.GetClassName() << " id is " << geo.GetID();
         IFCImporter::LogWarn(toLog.str().c_str());
@@ -868,9 +825,7 @@ bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, unsigned
 }
 
 // ------------------------------------------------------------------------------------------------
-void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd,
-    ConversionData& /*conv*/)
-{
+void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd, ConversionData& /*conv*/) {
     if (!mesh_indices.empty()) {
 		std::set<unsigned int>::const_iterator it = mesh_indices.cbegin();
 		std::set<unsigned int>::const_iterator end = mesh_indices.cend();
@@ -886,9 +841,9 @@ void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd,
 
 // ------------------------------------------------------------------------------------------------
 bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-    std::set<unsigned int>& mesh_indices, unsigned int mat_index,
-    ConversionData& conv)
-{
+        std::set<unsigned int>& mesh_indices, 
+        unsigned int mat_index,
+        ConversionData& conv) {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
     ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(idx);
     if (it != conv.cached_meshes.end()) {
@@ -900,18 +855,18 @@ bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 void PopulateMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-    const std::set<unsigned int>& mesh_indices, unsigned int mat_index,
-    ConversionData& conv)
-{
+        const std::set<unsigned int>& mesh_indices, 
+        unsigned int mat_index,
+        ConversionData& conv) {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
     conv.cached_meshes[idx] = mesh_indices;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, unsigned int matid,
-    std::set<unsigned int>& mesh_indices,
-    ConversionData& conv)
-{
+bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, 
+        unsigned int matid,
+        std::set<unsigned int>& mesh_indices,
+        ConversionData& conv) {
     // determine material
     unsigned int localmatid = ProcessMaterials(item.GetID(), matid, conv, true);
 
@@ -920,8 +875,9 @@ bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, un
             if(mesh_indices.size()) {
                 PopulateMeshCache(item,mesh_indices,localmatid,conv);
             }
+        } else {
+            return false;
         }
-        else return false;
     }
     return true;
 }
@@ -930,4 +886,4 @@ bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, un
 } // ! IFC
 } // ! Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_IFC_IMPORTER

@@ -55,9 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/MathFunctions.h>
 #include <assimp/StringComparison.h>
-
 #include <assimp/scene.h>
-
 #include <assimp/CreateAnimMesh.h>
 #include <assimp/StringUtils.h>
 #include <assimp/commonMetaData.h>
@@ -577,16 +575,17 @@ void FBXConverter::GetRotationMatrix(Model::RotOrder mode, const aiVector3D &rot
     bool is_id[3] = { true, true, true };
 
     aiMatrix4x4 temp[3];
-    if (std::fabs(rotation.z) > angle_epsilon) {
-        aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z), temp[2]);
+    const auto rot = AI_DEG_TO_RAD(rotation);
+    if (std::fabs(rot.z) > angle_epsilon) {
+        aiMatrix4x4::RotationZ(rot.z, temp[2]);
         is_id[2] = false;
     }
-    if (std::fabs(rotation.y) > angle_epsilon) {
-        aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y), temp[1]);
+    if (std::fabs(rot.y) > angle_epsilon) {
+        aiMatrix4x4::RotationY(rot.y, temp[1]);
         is_id[1] = false;
     }
-    if (std::fabs(rotation.x) > angle_epsilon) {
-        aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x), temp[0]);
+    if (std::fabs(rot.x) > angle_epsilon) {
+        aiMatrix4x4::RotationX(rot.x, temp[0]);
         is_id[0] = false;
     }
 
@@ -1205,7 +1204,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 const auto &curNormals = shapeGeometry->GetNormals();
                 const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                // if blendShapeChannel Name is empty or doesn't have a ".", add geoMetryName;
                 auto aniName = FixAnimMeshName(blendShapeChannel->Name());
                 auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
                 if (aniName.empty()) {
@@ -1603,7 +1602,7 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
 
 void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const Cluster *cluster,
         std::vector<size_t> &out_indices, std::vector<size_t> &index_out_indices,
-        std::vector<size_t> &count_out_indices, const aiMatrix4x4 & /* absolute_transform*/,
+        std::vector<size_t> &count_out_indices, const aiMatrix4x4 &absolute_transform,
         aiNode *) {
     ai_assert(cluster != nullptr); // make sure cluster valid
 
@@ -1620,16 +1619,16 @@ void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const 
         bone = new aiBone();
         bone->mName = bone_name;
 
-        bone->mOffsetMatrix = cluster->Transform();
+        //bone->mOffsetMatrix = cluster->Transform();
         // store local transform link for post processing
-        /*
+        
         bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
-        aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
+        const aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
 
         bone->mOffsetMatrix = bone->mOffsetMatrix * matrix; // * mesh_offset
-        */
+        
         //
         // Now calculate the aiVertexWeights
         //
@@ -3225,7 +3224,6 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     aiVector3D defTranslate = PropertyGet(props, "Lcl Translation", aiVector3D(0.f, 0.f, 0.f));
     aiVector3D defRotation = PropertyGet(props, "Lcl Rotation", aiVector3D(0.f, 0.f, 0.f));
     aiVector3D defScale = PropertyGet(props, "Lcl Scaling", aiVector3D(1.f, 1.f, 1.f));
-    aiQuaternion defQuat = EulerToQuaternion(defRotation, rotOrder);
 
     aiVectorKey* outTranslations = new aiVectorKey[keyCount];
     aiQuatKey* outRotations = new aiQuatKey[keyCount];
@@ -3241,8 +3239,9 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     if (keyframeLists[TransformationComp_Rotation].size() > 0) {
-        InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], defRotation, maxTime, minTime, rotOrder);
+        InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], AI_DEG_TO_RAD(defRotation), maxTime, minTime, rotOrder);
     } else {
+        aiQuaternion defQuat = EulerToQuaternion(AI_DEG_TO_RAD(defRotation), rotOrder);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
             outRotations[i].mValue = defQuat;
@@ -3264,7 +3263,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
     if (ok && preRotation.SquareLength() > zero_epsilon) {
-        const aiQuaternion preQuat = EulerToQuaternion(preRotation, Model::RotOrder_EulerXYZ);
+        const aiQuaternion preQuat = EulerToQuaternion(AI_DEG_TO_RAD(preRotation), Model::RotOrder_EulerXYZ);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mValue = preQuat * outRotations[i].mValue;
         }
@@ -3272,7 +3271,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
 
     const aiVector3D& postRotation = PropertyGet<aiVector3D>(props, "PostRotation", ok);
     if (ok && postRotation.SquareLength() > zero_epsilon) {
-        const aiQuaternion postQuat = EulerToQuaternion(postRotation, Model::RotOrder_EulerXYZ);
+        const aiQuaternion postQuat = EulerToQuaternion(AI_DEG_TO_RAD(postRotation), Model::RotOrder_EulerXYZ);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mValue = outRotations[i].mValue * postQuat;
         }

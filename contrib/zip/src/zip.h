@@ -83,9 +83,9 @@ typedef long ssize_t; /* byte count or error */
 #define ZIP_EFWRITE -29     // fwrite error
 
 /**
- * Looks up the error message string coresponding to an error number.
+ * Looks up the error message string corresponding to an error number.
  * @param errnum error number
- * @return error message string coresponding to errnum or NULL if error is not
+ * @return error message string corresponding to errnum or NULL if error is not
  * found.
  */
 extern const char *zip_strerror(int errnum);

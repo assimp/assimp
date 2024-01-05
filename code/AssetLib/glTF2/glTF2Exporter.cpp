@@ -172,22 +172,6 @@ static void IdentityMatrix4(mat4 &o) {
     o[15] = 1;
 }
 
-static bool IsBoneWeightFitted(vec4 &weight) {
-    return weight[0] + weight[1] + weight[2] + weight[3] >= 1.f;
-}
-
-static int FitBoneWeight(vec4 &weight, float value) {
-    int i = 0;
-    for (; i < 4; ++i) {
-        if (weight[i] < value) {
-            weight[i] = value;
-            return i;
-        }
-    }
-
-    return -1;
-}
-
 template <typename T>
 void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
         unsigned int numCompsIn, unsigned int numCompsOut) {
@@ -575,7 +559,11 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
     aiString tex;
 
     // Read texcoord (UV map index)
-    mat.Get(AI_MATKEY_UVWSRC(tt, slot), texCoord);
+    // Note: must be an int to be successful.
+    int tmp = 0;
+    const auto ok = mat.Get(AI_MATKEY_UVWSRC(tt, slot), tmp);
+    if (ok == aiReturn_SUCCESS) texCoord = tmp;
+
 
     if (mat.Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
         std::string path = tex.C_Str();
@@ -742,8 +730,8 @@ bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecula
     } else if (colorFactorIsZero) {
         specular.specularColorFactor[0] = specular.specularColorFactor[1] = specular.specularColorFactor[2] = 1.0f;
     }
-    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR, 0);
+    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR, 1);
     return true;
 }
 
@@ -924,6 +912,7 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatSpecular(mat, specular)) {
                     mAsset->extensionsUsed.KHR_materials_specular = true;
                     m->materialSpecular = Nullable<MaterialSpecular>(specular);
+                    GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
                 }
 
                 MaterialSheen sheen;
@@ -1009,23 +998,29 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin> &skinRef) {
     return parentNodeRef;
 }
 
+struct boneIndexWeightPair {
+    unsigned int indexJoint;
+    float weight;
+    bool operator()(boneIndexWeightPair &a, boneIndexWeightPair &b) {
+        return a.weight > b.weight;
+    }
+};
+
 void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buffer> &bufferRef, Ref<Skin> &skinRef,
-        std::vector<aiMatrix4x4> &inverseBindMatricesData) {
+        std::vector<aiMatrix4x4> &inverseBindMatricesData, bool unlimitedBonesPerVertex) {
     if (aimesh->mNumBones < 1) {
         return;
     }
 
     // Store the vertex joint and weight data.
     const size_t NumVerts(aimesh->mNumVertices);
-    vec4 *vertexJointData = new vec4[NumVerts];
-    vec4 *vertexWeightData = new vec4[NumVerts];
     int *jointsPerVertex = new int[NumVerts];
+    std::vector<std::vector<boneIndexWeightPair>> allVerticesPairs;
+    int maxJointsPerVertex = 0;
     for (size_t i = 0; i < NumVerts; ++i) {
         jointsPerVertex[i] = 0;
-        for (size_t j = 0; j < 4; ++j) {
-            vertexJointData[i][j] = 0;
-            vertexWeightData[i][j] = 0;
-        }
+        std::vector<boneIndexWeightPair> vertexPair;
+        allVerticesPairs.push_back(vertexPair);
     }
 
     for (unsigned int idx_bone = 0; idx_bone < aimesh->mNumBones; ++idx_bone) {
@@ -1055,61 +1050,88 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
             jointNamesIndex = static_cast<unsigned int>(inverseBindMatricesData.size() - 1);
         }
 
-        // aib->mWeights   =====>  vertexWeightData
-        for (unsigned int idx_weights = 0; idx_weights < aib->mNumWeights; ++idx_weights) {
+        // aib->mWeights   =====>  temp pairs data
+        for (unsigned int idx_weights = 0; idx_weights < aib->mNumWeights;
+              ++idx_weights) {
             unsigned int vertexId = aib->mWeights[idx_weights].mVertexId;
             float vertWeight = aib->mWeights[idx_weights].mWeight;
-
-            // A vertex can only have at most four joint weights, which ideally sum up to 1
-            if (IsBoneWeightFitted(vertexWeightData[vertexId])) {
-                continue;
-            }
-            if (jointsPerVertex[vertexId] > 3) {
-                int boneIndexFitted = FitBoneWeight(vertexWeightData[vertexId], vertWeight);
-                if (boneIndexFitted != -1) {
-                    vertexJointData[vertexId][boneIndexFitted] = static_cast<float>(jointNamesIndex);
-                }
-            } else {
-                vertexJointData[vertexId][jointsPerVertex[vertexId]] = static_cast<float>(jointNamesIndex);
-                vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
-
-                jointsPerVertex[vertexId] += 1;
-            }
+            allVerticesPairs[vertexId].push_back({jointNamesIndex, vertWeight});
+            jointsPerVertex[vertexId] += 1;
+            maxJointsPerVertex =
+                    std::max(maxJointsPerVertex, jointsPerVertex[vertexId]);
         }
-
     } // End: for-loop mNumMeshes
 
-    Mesh::Primitive &p = meshRef->primitives.back();
-    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices,
-            vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-    if (vertexJointAccessor) {
-        size_t offset = vertexJointAccessor->bufferView->byteOffset;
-        size_t bytesLen = vertexJointAccessor->bufferView->byteLength;
-        unsigned int s_bytesPerComp = ComponentTypeSize(ComponentType_UNSIGNED_SHORT);
-        unsigned int bytesPerComp = ComponentTypeSize(vertexJointAccessor->componentType);
-        size_t s_bytesLen = bytesLen * s_bytesPerComp / bytesPerComp;
-        Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
-        uint8_t *arrys = new uint8_t[bytesLen];
-        unsigned int i = 0;
-        for (unsigned int j = 0; j < bytesLen; j += bytesPerComp) {
-            size_t len_p = offset + j;
-            float f_value = *(float *)&buf->GetPointer()[len_p];
-            unsigned short c = static_cast<unsigned short>(f_value);
-            memcpy(&arrys[i * s_bytesPerComp], &c, s_bytesPerComp);
-            ++i;
-        }
-        buf->ReplaceData_joint(offset, bytesLen, arrys, bytesLen);
-        vertexJointAccessor->componentType = ComponentType_UNSIGNED_SHORT;
-        vertexJointAccessor->bufferView->byteLength = s_bytesLen;
-
-        p.attributes.joint.push_back(vertexJointAccessor);
-        delete[] arrys;
+    if (!unlimitedBonesPerVertex){
+        // skinning limited only for 4 bones per vertex, default
+        maxJointsPerVertex = 4;
     }
 
-    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices,
-            vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-    if (vertexWeightAccessor) {
-        p.attributes.weight.push_back(vertexWeightAccessor);
+    // temp pairs data  =====>  vertexWeightData
+    size_t numGroups = (maxJointsPerVertex - 1) / 4 + 1;
+    vec4 *vertexJointData = new vec4[NumVerts * numGroups];
+    vec4 *vertexWeightData = new vec4[NumVerts * numGroups];
+    for (size_t indexVertex = 0; indexVertex < NumVerts; ++indexVertex) {
+        // order pairs by weight for each vertex
+        std::sort(allVerticesPairs[indexVertex].begin(),
+                allVerticesPairs[indexVertex].end(),
+                boneIndexWeightPair());
+        for (size_t indexGroup = 0; indexGroup < numGroups; ++indexGroup) {
+            for (size_t indexJoint = 0; indexJoint < 4; ++indexJoint) {
+                size_t indexBone = indexGroup * 4 + indexJoint;
+                size_t indexData = indexVertex + NumVerts * indexGroup;
+                if (indexBone >= allVerticesPairs[indexVertex].size()) {
+                    vertexJointData[indexData][indexJoint] = 0.f;
+                    vertexWeightData[indexData][indexJoint] = 0.f;
+                } else {
+                    vertexJointData[indexData][indexJoint] =
+                    static_cast<float>(
+                            allVerticesPairs[indexVertex][indexBone].indexJoint);
+                    vertexWeightData[indexData][indexJoint] =
+                            allVerticesPairs[indexVertex][indexBone].weight;
+                }
+            }
+        }
+    }
+
+    for (size_t idx_group = 0; idx_group < numGroups; ++idx_group) {
+        Mesh::Primitive &p = meshRef->primitives.back();
+        Ref<Accessor> vertexJointAccessor = ExportData(
+            mAsset, skinRef->id, bufferRef, aimesh->mNumVertices,
+            vertexJointData + idx_group * NumVerts,
+            AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        if (vertexJointAccessor) {
+            size_t offset = vertexJointAccessor->bufferView->byteOffset;
+            size_t bytesLen = vertexJointAccessor->bufferView->byteLength;
+            unsigned int s_bytesPerComp =
+                ComponentTypeSize(ComponentType_UNSIGNED_SHORT);
+            unsigned int bytesPerComp =
+                ComponentTypeSize(vertexJointAccessor->componentType);
+            size_t s_bytesLen = bytesLen * s_bytesPerComp / bytesPerComp;
+            Ref<Buffer> buf = vertexJointAccessor->bufferView->buffer;
+            uint8_t *arrys = new uint8_t[bytesLen];
+            unsigned int i = 0;
+            for (unsigned int j = 0; j < bytesLen; j += bytesPerComp) {
+                size_t len_p = offset + j;
+                float f_value = *(float *)&buf->GetPointer()[len_p];
+                unsigned short c = static_cast<unsigned short>(f_value);
+                memcpy(&arrys[i * s_bytesPerComp], &c, s_bytesPerComp);
+                ++i;
+            }
+            buf->ReplaceData_joint(offset, bytesLen, arrys, bytesLen);
+            vertexJointAccessor->componentType = ComponentType_UNSIGNED_SHORT;
+            vertexJointAccessor->bufferView->byteLength = s_bytesLen;
+
+            p.attributes.joint.push_back(vertexJointAccessor);
+            delete[] arrys;
+        }
+        Ref<Accessor> vertexWeightAccessor = ExportData(
+            mAsset, skinRef->id, bufferRef, aimesh->mNumVertices,
+            vertexWeightData + idx_group * NumVerts,
+            AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        if (vertexWeightAccessor) {
+            p.attributes.weight.push_back(vertexWeightAccessor);
+        }
     }
     delete[] jointsPerVertex;
     delete[] vertexWeightData;
@@ -1247,9 +1269,19 @@ void glTF2Exporter::ExportMeshes() {
             break;
         }
 
+//        /*************** Skins ****************/
+//        if (aim->HasBones()) {
+//            ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
+//        }
         /*************** Skins ****************/
         if (aim->HasBones()) {
-            ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
+            bool unlimitedBonesPerVertex =
+                this->mProperties->HasPropertyBool(
+                        AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX) &&
+                this->mProperties->GetPropertyBool(
+                        AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX);
+            ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData,
+                    unlimitedBonesPerVertex);
         }
 
         /*************** Targets for blendshapes ****************/

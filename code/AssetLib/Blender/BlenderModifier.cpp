@@ -283,6 +283,11 @@ void BlenderModifier_Subdivision ::DoIt(aiNode &out, ConversionData &conv_data, 
     if (conv_data.meshes->empty()) {
         return;
     }
+    const size_t meshIndex = conv_data.meshes->size() - out.mNumMeshes;
+    if (meshIndex >= conv_data.meshes->size()) {
+        ASSIMP_LOG_ERROR("Invalid index detected.");
+        return;
+    }
     aiMesh **const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];
     std::unique_ptr<aiMesh *[]> tempmeshes(new aiMesh *[out.mNumMeshes]());
 

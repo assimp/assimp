@@ -426,12 +426,13 @@ namespace glTF2 {
 
             if (specular.specularFactor != 0.0f) {
                 WriteFloat(materialSpecular, specular.specularFactor, "specularFactor", w.mAl);
-                WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
             }
             if (specular.specularColorFactor[0] != defaultSpecularColorFactor[0] && specular.specularColorFactor[1] != defaultSpecularColorFactor[1] && specular.specularColorFactor[2] != defaultSpecularColorFactor[2]) {
                 WriteVec(materialSpecular, specular.specularColorFactor, "specularColorFactor", w.mAl);
-                WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
             }
+
+            WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
+            WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
 
             if (!materialSpecular.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_specular", materialSpecular, w.mAl);

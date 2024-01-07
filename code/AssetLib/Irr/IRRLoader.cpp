@@ -1234,7 +1234,10 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Parse the XML
     // Find the scene root from document root.
     const pugi::xml_node &sceneRoot = documentRoot.child("irr_scene");
-    if (!sceneRoot) throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    if (!sceneRoot) {
+        delete root;
+        throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    }
     for (pugi::xml_node &child : sceneRoot.children()) {
         // XML elements are either nodes, animators, attributes, or materials
         if (!ASSIMP_stricmp(child.name(), "node")) {

@@ -814,38 +814,38 @@ void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) {
                 if (!pImage.mFileName.length()) {
                     pImage.mFileName = "unknown_texture";
                 }
-            }
-        } else if (mFormat == FV_1_5_n) {
-            std::string value;
-            XmlNode refChild = currentNode.child("ref");
-            XmlNode hexChild = currentNode.child("hex");
-            if (refChild) {
-                // element content is filename - hopefully
-                if (XmlParser::getValueAsString(refChild, value)) {
-                    aiString filepath(value);
-                    UriDecodePath(filepath);
-                    pImage.mFileName = filepath.C_Str();
-                }
-            } else if (hexChild && !pImage.mFileName.length()) {
-                // embedded image. get format
-                pImage.mEmbeddedFormat = hexChild.attribute("format").as_string();
-                if (pImage.mEmbeddedFormat.empty()) {
-                    ASSIMP_LOG_WARN("Collada: Unknown image file format");
-                }
+            } else if (mFormat == FV_1_5_n) {
+                std::string value;
+                XmlNode refChild = currentNode.child("ref");
+                XmlNode hexChild = currentNode.child("hex");
+                if (refChild) {
+                    // element content is filename - hopefully
+                    if (XmlParser::getValueAsString(refChild, value)) {
+                        aiString filepath(value);
+                        UriDecodePath(filepath);
+                        pImage.mFileName = filepath.C_Str();
+                    }
+                } else if (hexChild && !pImage.mFileName.length()) {
+                    // embedded image. get format
+                    pImage.mEmbeddedFormat = hexChild.attribute("format").as_string();
+                    if (pImage.mEmbeddedFormat.empty()) {
+                        ASSIMP_LOG_WARN("Collada: Unknown image file format");
+                    }
 
-                XmlParser::getValueAsString(hexChild, value);
-                const char *data = value.c_str();
-                // hexadecimal-encoded binary octets. First of all, find the
-                // required buffer size to reserve enough storage.
-                const char *cur = data;
-                while (!IsSpaceOrNewLine(*cur)) {
-                    ++cur;
-                }
+                    XmlParser::getValueAsString(hexChild, value);
+                    const char *data = value.c_str();
+                    // hexadecimal-encoded binary octets. First of all, find the
+                    // required buffer size to reserve enough storage.
+                    const char *cur = data;
+                    while (!IsSpaceOrNewLine(*cur)) {
+                        ++cur;
+                    }
 
-                const unsigned int size = (unsigned int)(cur - data) * 2;
-                pImage.mImageData.resize(size);
-                for (unsigned int i = 0; i < size; ++i) {
-                    pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+                    const unsigned int size = (unsigned int)(cur - data) * 2;
+                    pImage.mImageData.resize(size);
+                    for (unsigned int i = 0; i < size; ++i) {
+                        pImage.mImageData[i] = HexOctetToDecimal(data + (i << 1));
+                    }
                 }
             }
         }
@@ -1274,9 +1274,7 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
         return;
     }
 
-    XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
-    XmlNode currentNode;
-    while (xmlIt.getNext(currentNode)) {
+    for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "surface") {
             // image ID given inside <init_from> tags
@@ -1289,22 +1287,24 @@ void ColladaParser::ReadEffectParam(XmlNode &node, Collada::EffectParam &pParam)
             }
         } else if (currentName == "sampler2D" && (FV_1_4_n == mFormat || FV_1_3_n == mFormat)) {
             // surface ID is given inside <source> tags
-            const char *content = currentNode.value();
-            pParam.mType = Param_Sampler;
-            pParam.mReference = content;
+            XmlNode source = currentNode.child("source");
+            if (source) {
+                std::string v;
+                XmlParser::getValueAsString(source, v);
+                pParam.mType = Param_Sampler;
+                pParam.mReference = v.c_str();
+            }
         } else if (currentName == "sampler2D") {
             // surface ID is given inside <instance_image> tags
-            std::string url;
-            XmlParser::getStdStrAttribute(currentNode, "url", url);
-            if (url[0] != '#') {
-                throw DeadlyImportError("Unsupported URL format in instance_image");
-            }
-            pParam.mType = Param_Sampler;
-            pParam.mReference = url.c_str() + 1;
-        } else if (currentName == "source") {
-            const char *source = currentNode.child_value();
-            if (nullptr != source) {
-                pParam.mReference = source;
+            XmlNode instance_image = currentNode.child("instance_image");
+            if (instance_image) {
+                std::string url;
+                XmlParser::getStdStrAttribute(instance_image, "url", url);
+                if (url[0] != '#') {
+                    throw DeadlyImportError("Unsupported URL format in instance_image");
+                }
+                pParam.mType = Param_Sampler;
+                pParam.mReference = url.c_str() + 1;
             }
         }
     }
@@ -1867,7 +1867,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
 
 ///@note This function won't work correctly if both PerIndex and PerVertex channels have same channels.
 ///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
-///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
+///It's not clear from COLLADA documentation whether this is allowed or not. For now only exporter fixed to avoid such behavior
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh &pMesh,
         std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
     // calculate the base offset of the vertex whose attributes we ant to copy

@@ -52,9 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cctype>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const unsigned int NotSet = 0xcdcdcdcd;
+static constexpr unsigned int NotSet = 0xcdcdcdcd;
 
 // ------------------------------------------------------------------------------------------------
 // Setup final material indices, generae a default material if necessary
@@ -68,7 +68,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     unsigned int idx(NotSet);
     for (unsigned int i = 0; i < mScene->mMaterials.size(); ++i) {
         std::string s = mScene->mMaterials[i].mName;
-        for (char & it : s) {
+        for (char &it : s) {
             it = static_cast<char>(::tolower(static_cast<unsigned char>(it)));
         }
 
@@ -262,7 +262,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
         unsigned int iWire = 1;
         mat.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
-    [[fallthrough]];
+        [[fallthrough]];
 
     case D3DS::Discreet3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
@@ -593,7 +593,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
 
         // Cameras or lights define their transformation in their parent node and in the
         // corresponding light or camera chunks. However, we read and process the latter
-        // to to be able to return valid cameras/lights even if no scenegraph is given.
+        // to be able to return valid cameras/lights even if no scenegraph is given.
         for (unsigned int n = 0; n < pcSOut->mNumCameras; ++n) {
             if (pcSOut->mCameras[n]->mName == pcOut->mName) {
                 pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f, 0.f, 1.f);
@@ -804,5 +804,7 @@ void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
         ::memcpy(pcOut->mCameras, &mScene->mCameras[0], sizeof(void *) * pcOut->mNumCameras);
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER

@@ -13,7 +13,7 @@
 			<float name="Shininess" value="0.000000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="wal67ar_small.jpg" />
+			<texture name="Texture1" value="assets/wal67ar_small.jpg" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -354,7 +354,7 @@
 			<float name="Shininess" value="0.000000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="SpiderTex.jpg" />
+			<texture name="Texture1" value="assets/SpiderTex.jpg" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -485,7 +485,7 @@
 			<float name="Shininess" value="0.000000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="drkwood2.jpg" />
+			<texture name="Texture1" value="assets/drkwood2.jpg" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -1609,7 +1609,7 @@
 			<float name="Shininess" value="0.000000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="engineflare1.jpg" />
+			<texture name="Texture1" value="assets/engineflare1.jpg" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />

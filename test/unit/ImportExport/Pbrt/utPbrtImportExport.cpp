@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2020, assimp team
 
 All rights reserved.
 
@@ -38,38 +38,33 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
-
 #include <assimp/postprocess.h>
-#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
-class utX3DImportExport : public AbstractImportExportBase {
+class utPbrtImportExport : public AbstractImportExportBase {
 public:
-    bool importerTest() override {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/HelloX3dTrademark.x3d", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+#ifndef ASSIMP_BUILD_NO_EXPORT
+	bool exporterTest() override {
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
+		EXPECT_NE(scene, nullptr );
+
+        ::Assimp::Exporter exporter;
+		return AI_SUCCESS == exporter.Export(scene, "pbrt", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_out.pbrt");
     }
+#endif
 };
 
-TEST_F(utX3DImportExport, importX3DFromFileTest) {
-    EXPECT_TRUE(importerTest());
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utPbrtImportExport, exportTest_Success) {
+    EXPECT_TRUE(exporterTest());
 }
 
-TEST_F(utX3DImportExport, importX3DIndexedLineSet) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/IndexedLineSet.x3d", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-    ASSERT_EQ(scene->mNumMeshes, 1u);
-    ASSERT_EQ(scene->mMeshes[0]->mNumFaces, 4u);
-    ASSERT_EQ(scene->mMeshes[0]->mPrimitiveTypes, aiPrimitiveType_LINE);
-    ASSERT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
-    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; i++) {
-        ASSERT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2u);
-    }
-}
+#endif // ASSIMP_BUILD_NO_EXPORT

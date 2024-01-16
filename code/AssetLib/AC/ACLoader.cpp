@@ -212,8 +212,12 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
             if (num) {
                 // load the children of this object recursively
                 obj.children.reserve(num);
-                for (unsigned int i = 0; i < num; ++i)
-                    LoadObjectSection(obj.children);
+                for (unsigned int i = 0; i < num; ++i) {
+                    if (!LoadObjectSection(obj.children)) {
+                        ASSIMP_LOG_WARN("AC3D: wrong number of kids");
+                        break;
+                    }
+                }
             }
             return;
         } else if (TokenMatch(mBuffer.data, "name", 4)) {
@@ -340,6 +344,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         }
     }
     ASSIMP_LOG_ERROR("AC3D: Unexpected EOF: \'kids\' line was expected");
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -445,7 +450,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     idx = 0;
                 }
                 if ((*it).entries.empty()) {
-                    ASSIMP_LOG_WARN("AC3D: surface her zero vertex references");
+                    ASSIMP_LOG_WARN("AC3D: surface has zero vertex references");
                 }
 
                 // validate all vertex indices to make sure we won't crash here
@@ -573,15 +578,6 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                 const Surface::SurfaceEntry &entry1 = src.entries[i];
                                 const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
                                 const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
-
-                                // skip degenerate triangles
-                                if (object.vertices[entry1.first] == object.vertices[entry2.first] ||
-                                        object.vertices[entry1.first] == object.vertices[entry3.first] ||
-                                        object.vertices[entry2.first] == object.vertices[entry3.first]) {
-                                    mesh->mNumFaces--;
-                                    mesh->mNumVertices -= 3;
-                                    continue;
-                                }
 
                                 aiFace &face = *faces++;
                                 face.mNumIndices = 3;
@@ -806,7 +802,6 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
             mBuffer.data = TAcCheckedLoadFloatArray(mBuffer.data, mBuffer.end, "shi", 3, 1, &mat.shin);
             mBuffer.data = TAcCheckedLoadFloatArray(mBuffer.data, mBuffer.end, "trans", 5, 1, &mat.trans);
         }
-        LoadObjectSection(rootObjects);
     }
 
     if (rootObjects.empty() || mNumMeshes == 0u) {

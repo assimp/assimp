@@ -216,7 +216,7 @@ private:
      *  load subobjects, the method returns after a 'kids 0' was
      *  encountered.
      *  @objects List of output objects*/
-    void LoadObjectSection(std::vector<Object> &objects);
+    bool LoadObjectSection(std::vector<Object> &objects);
 
     // -------------------------------------------------------------------
     /** Convert all objects into meshes and nodes.

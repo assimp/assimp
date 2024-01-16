@@ -242,7 +242,8 @@ private:
 
 private:
     // points to the next data line
-    const char *buffer;
+    //const char *buffer;
+    aiBuffer mBuffer;
 
     // Configuration option: if enabled, up to two meshes
     // are generated per material: those faces who have

@@ -93,7 +93,7 @@ private:
         tangent = 2, // "tangents" - standard + tangents and bitangents
     };
 
-    void ParseBufferVertices(const char *sz, VertexFormat vertexFormat,
+    void ParseBufferVertices(const char *sz, const char *end, VertexFormat vertexFormat,
             std::vector<aiVector3D> &vertices, std::vector<aiVector3D> &normals,
             std::vector<aiVector3D> &tangents, std::vector<aiVector3D> &bitangents,
             std::vector<aiVector3D> &UVs, std::vector<aiVector3D> &UV2s,

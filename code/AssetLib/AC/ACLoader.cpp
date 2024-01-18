@@ -170,9 +170,9 @@ bool AC3DImporter::GetNextLine() {
 
 // ------------------------------------------------------------------------------------------------
 // Parse an object section in an AC file
-void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
+bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
     if (!TokenMatch(mBuffer.data, "OBJECT", 6))
-        return;
+        return false;
 
     SkipSpaces(&mBuffer.data, mBuffer.end);
 
@@ -219,7 +219,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
                     }
                 }
             }
-            return;
+            return true;
         } else if (TokenMatch(mBuffer.data, "name", 4)) {
             SkipSpaces(&mBuffer.data, mBuffer.data);
             mBuffer.data = AcGetString(mBuffer.data, mBuffer.end, obj.name);

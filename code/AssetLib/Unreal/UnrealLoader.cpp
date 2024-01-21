@@ -318,9 +318,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     if (pb) {
 
         std::vector<char> _data;
-        const char *end = &_data[_data.size() - 1] + 1;
         TextFileToBuffer(pb.get(), _data);
         const char *data = &_data[0];
+        const char *end = &_data[_data.size() - 1] + 1;
 
         std::vector<std::pair<std::string, std::string>> tempTextures;
 

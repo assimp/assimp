@@ -120,6 +120,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     while (streamBuffer.getNextDataLine(buffer, '\\')) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
+        mEnd = &buffer[buffer.size() - 1] + 1;
 
         // Handle progress reporting
         const size_t filePos(streamBuffer.getFilePos());
@@ -129,7 +130,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             m_progress->UpdateFileRead(processed, progressTotal);
         }
 
-        // handle cstype section end (http://paulbourke.net/dataformats/obj/)
+        // handle c-stype section end (http://paulbourke.net/dataformats/obj/)
         if (insideCstype) {
             switch (*m_DataIt) {
             case 'e': {
@@ -293,7 +294,6 @@ static bool isNanOrInf(const char *in) {
 size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents(0);
     const char *tmp(&m_DataIt[0]);
-    const char *end = &(*m_DataItEnd);
     bool end_of_definition = false;
     while (!end_of_definition) {
         if (isDataDefinitionEnd(tmp)) {
@@ -301,15 +301,15 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         } else if (IsLineEnd(*tmp)) {
             end_of_definition = true;
         }
-        if (!SkipSpaces(&tmp, end)) {
+        if (!SkipSpaces(&tmp, mEnd)) {
             break;
         }
         const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
-        SkipToken(tmp, end);
+        SkipToken(tmp, mEnd);
         if (isNum) {
             ++numComponents;
         }
-        if (!SkipSpaces(&tmp, end)) {
+        if (!SkipSpaces(&tmp, mEnd)) {
             break;
         }
     }

@@ -200,8 +200,8 @@ bool CalcTangentsProcess::ProcessMesh(aiMesh *pMesh, unsigned int meshIndex) {
             localBitangent.NormalizeSafe();
 
             // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z) || localTangent == aiVector3D(0f, 0f, 0f);
-            bool invalid_bitangent = is_special_float(localBitangent.x) || is_special_float(localBitangent.y) || is_special_float(localBitangent.z) || localBitangent == aiVector3D(0f, 0f, 0f);
+            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z) || localTangent == aiVector3D(0.0f, 0.0f, 0.0f);
+            bool invalid_bitangent = is_special_float(localBitangent.x) || is_special_float(localBitangent.y) || is_special_float(localBitangent.z) || localBitangent == aiVector3D(0.0f, 0.0f, 0.0f);
             if (invalid_tangent != invalid_bitangent) {
                 if (invalid_tangent) {
                     localTangent = meshNorm[p] ^ localBitangent;

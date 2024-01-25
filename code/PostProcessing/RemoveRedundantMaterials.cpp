@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -153,36 +153,38 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
         }
         // If the new material count differs from the original,
         // we need to rebuild the material list and remap mesh material indexes.
-        if(iNewNum < 1)
-          throw DeadlyImportError("No materials remaining");
         if (iNewNum != pScene->mNumMaterials) {
-            ai_assert(iNewNum > 0);
-            aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
-            ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
-            for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
-            {
-                // if the material is not referenced ... remove it
-                if (!abReferenced[p]) {
-                    continue;
-                }
-
-                // generate new names for modified materials that had no names
-                const unsigned int idx = aiMappingTable[p];
-                if (ppcMaterials[idx]) {
-                    aiString sz;
-                    if( ppcMaterials[idx]->Get(AI_MATKEY_NAME, sz) != AI_SUCCESS ) {
-                        sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
-                        ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
+            aiMaterial** ppcMaterials;
+            if (iNewNum == 0) {
+                ppcMaterials = nullptr;
+            } else {
+                ppcMaterials = new aiMaterial*[iNewNum];
+                ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
+                for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
+                {
+                    // if the material is not referenced ... remove it
+                    if (!abReferenced[p]) {
+                        continue;
                     }
-                } else {
-                    ppcMaterials[idx] = pScene->mMaterials[p];
+
+                    // generate new names for modified materials that had no names
+                    const unsigned int idx = aiMappingTable[p];
+                    if (ppcMaterials[idx]) {
+                        aiString sz;
+                        if( ppcMaterials[idx]->Get(AI_MATKEY_NAME, sz) != AI_SUCCESS ) {
+                            sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
+                            ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
+                        }
+                    } else {
+                        ppcMaterials[idx] = pScene->mMaterials[p];
+                    }
                 }
-            }
-            // update all material indices
-            for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
-                aiMesh* mesh = pScene->mMeshes[p];
-                ai_assert(nullptr != mesh);
-                mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
+                // update all material indices
+                for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
+                    aiMesh* mesh = pScene->mMeshes[p];
+                    ai_assert(nullptr != mesh);
+                    mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
+                }
             }
             // delete the old material list
             delete[] pScene->mMaterials;

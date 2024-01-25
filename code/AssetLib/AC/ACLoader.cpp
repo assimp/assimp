@@ -92,7 +92,7 @@ inline const char *AcGetString(const char *buffer, const char *end, std::string 
     }
     ++buffer;
     const char *sz = buffer;
-    while ('\"' != *buffer || buffer != end) {
+    while ('\"' != *buffer && buffer != end) {
         if (IsLineEnd(*buffer)) {
             ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL in string");
             out = "ERROR";
@@ -801,6 +801,8 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
             mBuffer.data = TAcCheckedLoadFloatArray(mBuffer.data, mBuffer.end, "spec", 4, 3, &mat.spec);
             mBuffer.data = TAcCheckedLoadFloatArray(mBuffer.data, mBuffer.end, "shi", 3, 1, &mat.shin);
             mBuffer.data = TAcCheckedLoadFloatArray(mBuffer.data, mBuffer.end, "trans", 5, 1, &mat.trans);
+        } else {
+            LoadObjectSection(rootObjects);
         }
     }
 

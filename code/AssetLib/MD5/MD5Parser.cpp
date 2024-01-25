@@ -138,14 +138,16 @@ bool MD5Parser::ParseSection(Section &out) {
     char *sz = buffer;
     while (!IsSpaceOrNewLine(*buffer)) {
         ++buffer;
-        if (buffer == bufferEnd)
+        if (buffer == bufferEnd) {
             return false;
+	}
     }
     out.mName = std::string(sz, (uintptr_t)(buffer - sz));
     while (IsSpace(*buffer)) {
         ++buffer;
-        if (buffer == bufferEnd)
+        if (buffer == bufferEnd) {
             return false;
+	}
     }
 
     bool running = true;
@@ -153,14 +155,16 @@ bool MD5Parser::ParseSection(Section &out) {
         if ('{' == *buffer) {
             // it is a normal section so read all lines
             ++buffer;
-            if (buffer == bufferEnd)
+            if (buffer == bufferEnd) {
                 return false;
+	    }
             bool run = true;
             while (run) {
                 while (IsSpaceOrNewLine(*buffer)) {
                     ++buffer;
-                    if (buffer == bufferEnd)
+                    if (buffer == bufferEnd) {
                         return false;
+		    }
                 }
                 if ('\0' == *buffer) {
                     return false; // seems this was the last section
@@ -180,14 +184,16 @@ bool MD5Parser::ParseSection(Section &out) {
                 // terminate the line with zero
                 while (!IsLineEnd(*buffer)) {
                     ++buffer;
-                    if (buffer == bufferEnd)
+                    if (buffer == bufferEnd) {
                         return false;
+		    }
                 }
                 if (*buffer) {
                     ++lineNumber;
                     *buffer++ = '\0';
-                    if (buffer == bufferEnd)
+                    if (buffer == bufferEnd) {
                         return false;
+		    }
                 }
             }
             break;
@@ -195,8 +201,9 @@ bool MD5Parser::ParseSection(Section &out) {
             // it is an element at global scope. Parse its value and go on
             sz = buffer;
             while (!IsSpaceOrNewLine(*buffer++)) {
-                if (buffer == bufferEnd)
+                if (buffer == bufferEnd) {
                     return false;
+		}
             }
             out.mGlobalValue = std::string(sz, (uintptr_t)(buffer - sz));
             continue;
@@ -206,8 +213,9 @@ bool MD5Parser::ParseSection(Section &out) {
     if (buffer == bufferEnd)
         return false;
     while (IsSpaceOrNewLine(*buffer)) {
-        if (buffer == bufferEnd)
+        if (buffer == bufferEnd) {
             break;
+	}
         ++buffer;
     }
     return '\0' != *buffer;
@@ -226,8 +234,11 @@ inline void AI_MD5_SKIP_SPACES(const char **sz, const char *bufferEnd, int linen
 // read a triple float in brackets: (1.0 1.0 1.0)
 inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *bufferEnd, int linenumber) {
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    if ('(' != **sz++)
+    if ('(' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ( was expected", linenumber);
+        ++*sz;
+    }
+    ++*sz;
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     *sz = fast_atoreal_move<float>(*sz, (float &)vec.x);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
@@ -235,17 +246,20 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     *sz = fast_atoreal_move<float>(*sz, (float &)vec.z);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    if (')' != **sz++) {
+    if (')' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ) was expected", linenumber);
     }
+    ++*sz;
 }
 
 // parse a string, enclosed in quotation marks or not
-inline bool AI_MD5_PARSE_STRING(const char **sz, aiString &out, int linenumber) {
+inline bool AI_MD5_PARSE_STRING(const char **sz, const char *bufferEnd, aiString &out, int linenumber) {
     bool bQuota = (**sz == '\"');
     const char *szStart = *sz;
-    while (!IsSpaceOrNewLine(*sz))
-        ++sz;
+    while (!IsSpaceOrNewLine(*sz)) {
+        ++*sz;
+        if (*sz == bufferEnd) break;
+    }
     const char *szEnd = *sz;
     if (bQuota) {
         szStart++;
@@ -260,15 +274,18 @@ inline bool AI_MD5_PARSE_STRING(const char **sz, aiString &out, int linenumber) 
 }
 
 // parse a string, enclosed in quotation marks
-inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, aiString &out) {
+inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *bufferEnd, aiString &out) {
     out.length = 0u;
-    while ('\"' != **sz && '\0' != *sz)
-        ++sz;
-    if ('\0' != *sz) {
+    while (('\"' != **sz && '\0' != **sz) && *sz != bufferEnd) {
+        ++*sz;
+    }
+    if ('\0' != **sz) {
         const char *szStart = ++(*sz);
-        while ('\"' != **sz && '\0' != *sz)
-            ++sz;
-        if ('\0' != *sz) {
+        
+        while (('\"' != **sz && '\0' != **sz) && *sz != bufferEnd) {
+            ++*sz;
+        }
+        if ('\0' != **sz) {
             const char *szEnd = (*sz++);
             out.length = (ai_uint32)(szEnd - szStart);
             ::memcpy(out.data, szStart, out.length);
@@ -294,7 +311,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                 BoneDesc &desc = mJoints.back();
 
                 const char *sz = elem.szStart;
-                AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, desc.mName);
+                AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, elem.end, desc.mName);
                 
                 AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
 
@@ -314,7 +331,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                 // shader attribute
                 if (TokenMatch(sz, "shader", 6)) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, desc.mShader);
+                    AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, elem.end, desc.mShader);
                 }
                 // numverts attribute
                 else if (TokenMatch(sz, "numverts", 8)) {
@@ -406,7 +423,7 @@ MD5AnimParser::MD5AnimParser(SectionArray &mSections) {
                 AnimBoneDesc &desc = mAnimatedBones.back();
 
                 const char *sz = elem.szStart;
-                AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, desc.mName);
+                AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, elem.end, desc.mName);
                 AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
 
                 // parent index - negative values are allowed (at least -1)

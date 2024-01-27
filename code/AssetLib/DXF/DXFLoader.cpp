@@ -71,7 +71,7 @@ static const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
 // taken directly from the AutoCad Index (ACI) table
 // https://gohtx.com/acadcolors.php
 //STH 2024-0126
-static constexpr aiColor4D g_aclrDxfIndexColors[256] = {
+static const aiColor4D g_aclrDxfIndexColors[256] = {
     aiColor4D (0.0f, 0.0f ,0.0f, 1.0f), //dxf color code 0
     aiColor4D (1.0f, 0.0f ,0.0f, 1.0f), //dxf color code 1
     aiColor4D (1.0f, 1.0f ,0.0f, 1.0f), //dxf color code 2

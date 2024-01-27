@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the DXF importer class
  */
 
-
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 
 #include "AssetLib/DXF/DXFLoader.h"
@@ -72,7 +71,7 @@ static const aiColor4D AI_DXF_DEFAULT_COLOR(aiColor4D(0.6f, 0.6f, 0.6f, 0.6f));
 // taken directly from the AutoCad Index (ACI) table
 // https://gohtx.com/acadcolors.php
 //STH 2024-0126
-static const aiColor4D g_aclrDxfIndexColors[] = {
+static constexpr aiColor4D g_aclrDxfIndexColors[256] = {
     aiColor4D (0.0f, 0.0f ,0.0f, 1.0f), //dxf color code 0
     aiColor4D (1.0f, 0.0f ,0.0f, 1.0f), //dxf color code 1
     aiColor4D (1.0f, 1.0f ,0.0f, 1.0f), //dxf color code 2

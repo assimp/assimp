@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -140,14 +140,14 @@ bool MD5Parser::ParseSection(Section &out) {
         ++buffer;
         if (buffer == bufferEnd) {
             return false;
-	}
+	    }
     }
     out.mName = std::string(sz, (uintptr_t)(buffer - sz));
     while (IsSpace(*buffer)) {
         ++buffer;
         if (buffer == bufferEnd) {
             return false;
-	}
+	    }
     }
 
     bool running = true;
@@ -157,14 +157,14 @@ bool MD5Parser::ParseSection(Section &out) {
             ++buffer;
             if (buffer == bufferEnd) {
                 return false;
-	    }
+	        }
             bool run = true;
             while (run) {
                 while (IsSpaceOrNewLine(*buffer)) {
                     ++buffer;
                     if (buffer == bufferEnd) {
                         return false;
-		    }
+		            }
                 }
                 if ('\0' == *buffer) {
                     return false; // seems this was the last section
@@ -186,14 +186,14 @@ bool MD5Parser::ParseSection(Section &out) {
                     ++buffer;
                     if (buffer == bufferEnd) {
                         return false;
-		    }
+		            }
                 }
                 if (*buffer) {
                     ++lineNumber;
                     *buffer++ = '\0';
                     if (buffer == bufferEnd) {
                         return false;
-		    }
+		            }
                 }
             }
             break;
@@ -203,26 +203,24 @@ bool MD5Parser::ParseSection(Section &out) {
             while (!IsSpaceOrNewLine(*buffer++)) {
                 if (buffer == bufferEnd) {
                     return false;
-		}
+		        }
             }
             out.mGlobalValue = std::string(sz, (uintptr_t)(buffer - sz));
             continue;
         }
         break;
     }
-    if (buffer == bufferEnd)
+    if (buffer == bufferEnd) {
         return false;
+    }
     while (IsSpaceOrNewLine(*buffer)) {
         if (buffer == bufferEnd) {
             break;
-	}
+	    }
         ++buffer;
     }
     return '\0' != *buffer;
 }
-
-// ------------------------------------------------------------------------------------------------
-// Some dirty macros just because they're so funny and easy to debug
 
 // skip all spaces ... handle EOL correctly
 inline void AI_MD5_SKIP_SPACES(const char **sz, const char *bufferEnd, int linenumber) {
@@ -256,7 +254,7 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
 inline bool AI_MD5_PARSE_STRING(const char **sz, const char *bufferEnd, aiString &out, int linenumber) {
     bool bQuota = (**sz == '\"');
     const char *szStart = *sz;
-    while (!IsSpaceOrNewLine(*sz)) {
+    while (!IsSpaceOrNewLine(**sz)) {
         ++*sz;
         if (*sz == bufferEnd) break;
     }
@@ -293,6 +291,7 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
     }
     out.data[out.length] = '\0';
 }
+
 // ------------------------------------------------------------------------------------------------
 // .MD5MESH parsing function
 MD5MeshParser::MD5MeshParser(SectionArray &mSections) {

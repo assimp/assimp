@@ -545,9 +545,10 @@ aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromEulerAnglesXYZ(TReal x, TReal y, T
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE
-bool aiMatrix4x4t<TReal>::IsIdentity() const {
+bool aiMatrix4x4t<TReal>::IsIdentity(const TReal epsilon) const {
     // Use a small epsilon to solve floating-point inaccuracies
-    const static TReal epsilon = 10e-3f;
+    // Default value for backward compatibility with legacy code:
+    // const static TReal epsilon = 10e-3f;
 
     return (a2 <= epsilon && a2 >= -epsilon &&
             a3 <= epsilon && a3 >= -epsilon &&

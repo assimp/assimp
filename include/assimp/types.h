@@ -540,28 +540,6 @@ struct aiBuffer {
 #endif //!  __cplusplus
 };
 
-#ifdef __cplusplus
-}
-#endif //!  __cplusplus
-
-/**
- *  @brief  Type to store a in-memory data buffer.
- */
-struct aiBuffer {
-    const char *data; ///< Begin poiner
-    const char *end;    ///< End pointer
-
-#ifdef __cplusplus
-    /// @brief  The class constructor.
-    aiBuffer() :
-            data(nullptr), end(nullptr) {}
-
-    /// @brief  The class destructor.
-    ~aiBuffer() = default;
-#endif //!  __cplusplus
-}
-;
-
 // Include implementation files
 #include "vector2.inl"
 #include "vector3.inl"

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -242,7 +242,7 @@ private:
 
 private:
     // points to the next data line
-    const char *buffer;
+    aiBuffer mBuffer;
 
     // Configuration option: if enabled, up to two meshes
     // are generated per material: those faces who have

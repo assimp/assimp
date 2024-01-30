@@ -120,7 +120,7 @@ private:
     void ReadChunkInfo_Ascii(COB::ChunkInfo &out, const LineSplitter &splitter);
     void ReadBasicNodeInfo_Ascii(COB::Node &msh, LineSplitter &splitter, const COB::ChunkInfo &nfo);
     template <typename T>
-    void ReadFloat3Tuple_Ascii(T &fill, const char **in);
+    void ReadFloat3Tuple_Ascii(T &fill, const char **in, const char *end);
 
     void ReadPolH_Ascii(COB::Scene &out, LineSplitter &splitter, const COB::ChunkInfo &nfo);
     void ReadBitM_Ascii(COB::Scene &out, LineSplitter &splitter, const COB::ChunkInfo &nfo);

@@ -620,6 +620,9 @@ public:
     //! Pointer to current data
     const char *filePtr;
 
+    /// The end pointer of the file data
+    const char *mEnd;
+
     //! background color to be passed to the viewer
     //! QNAN if none was found
     aiColor3D m_clrBackground;

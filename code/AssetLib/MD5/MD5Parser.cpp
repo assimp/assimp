@@ -263,7 +263,8 @@ inline bool AI_MD5_PARSE_STRING(const char **sz, const char *bufferEnd, aiString
         szStart++;
         if ('\"' != *(szEnd -= 1)) {
             MD5Parser::ReportWarning("Expected closing quotation marks in string", linenumber);
-            return false;
+            ++*sz;
+            //return false;
         }
     }
     out.length = (ai_uint32)(szEnd - szStart);
@@ -284,7 +285,8 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
             ++*sz;
         }
         if ('\0' != **sz) {
-            const char *szEnd = (*sz++);
+            const char *szEnd = *sz;
+            ++*sz;
             out.length = (ai_uint32)(szEnd - szStart);
             ::memcpy(out.data, szStart, out.length);
         }

@@ -468,16 +468,15 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 }
 
                 switch ((*it).GetType()) {
-                    // closed line
-                case Surface::ClosedLine:
-                    needMat[idx].first += (unsigned int)(*it).entries.size();
-                    needMat[idx].second += (unsigned int)(*it).entries.size() << 1u;
+                case Surface::ClosedLine: // closed line
+                    needMat[idx].first += static_cast<unsigned int>((*it).entries.size());
+                    needMat[idx].second += static_cast<unsigned int>((*it).entries.size() << 1u);
                     break;
 
                     // unclosed line
                 case Surface::OpenLine:
-                    needMat[idx].first += (unsigned int)(*it).entries.size() - 1;
-                    needMat[idx].second += ((unsigned int)(*it).entries.size() - 1) << 1u;
+                    needMat[idx].first += static_cast<unsigned int>((*it).entries.size() - 1);
+                    needMat[idx].second += static_cast<unsigned int>(((*it).entries.size() - 1) << 1u);
                     break;
 
                     // triangle strip

@@ -540,6 +540,10 @@ struct aiBuffer {
 #endif //!  __cplusplus
 };
 
+#ifdef __cplusplus
+}
+#endif //!  __cplusplus
+
 // Include implementation files
 #include "vector2.inl"
 #include "vector3.inl"

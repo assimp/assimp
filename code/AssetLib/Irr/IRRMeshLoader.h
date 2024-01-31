@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -62,8 +62,11 @@ namespace Assimp {
  */
 class IRRMeshImporter : public BaseImporter, public IrrlichtBase {
 public:
-    IRRMeshImporter();
-    ~IRRMeshImporter() override;
+    /// @brief The class constructor.
+    IRRMeshImporter() = default;
+
+    /// @brief The class destructor.
+    ~IRRMeshImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

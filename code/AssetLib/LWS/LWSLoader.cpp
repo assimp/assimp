@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -155,7 +155,8 @@ const aiImporterDesc *LWSImporter::GetInfo() const {
 }
 
 static constexpr int MagicHackNo = 150392;
-        // ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void LWSImporter::SetupProperties(const Importer *pImp) {
     // AI_CONFIG_FAVOUR_SPEED
@@ -248,13 +249,12 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 // Read animation channels in the old LightWave animation format
 void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt, 
         LWS::NodeDesc &nodes, unsigned int) {
-    unsigned int num=0, sub_num=0;
     if (++it == endIt) {
         ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
         return;
     }
 
-    num = strtoul10((*it).tokens[0].c_str());
+    const unsigned int num = strtoul10((*it).tokens[0].c_str());
     for (unsigned int i = 0; i < num; ++i) {
         nodes.channels.emplace_back();
         LWO::Envelope &envl = nodes.channels.back();
@@ -266,8 +266,8 @@ void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,c
             ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
             return;
         }
-        sub_num = strtoul10((*it).tokens[0].c_str());
-
+        
+        const unsigned int sub_num = strtoul10((*it).tokens[0].c_str());
         for (unsigned int n = 0; n < sub_num; ++n) {
             if (++it == endIt) {
                 ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
@@ -283,7 +283,7 @@ void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,c
             fast_atoreal_move<float>((*it).tokens[0].c_str(), f);
             key.time = f;
 
-            envl.keys.push_back(key);
+            envl.keys.emplace_back(key);
         }
     }
 }

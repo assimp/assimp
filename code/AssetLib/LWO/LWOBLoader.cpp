@@ -152,7 +152,7 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
+void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator &it,
     LE_NCONST uint16_t*& cursor,
     const uint16_t* const end,
     unsigned int max) {

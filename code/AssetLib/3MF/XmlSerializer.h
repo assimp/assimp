@@ -57,6 +57,7 @@ class D3MFOpcPackage;
 class Object;
 class Texture2DGroup;
 class EmbeddedTexture;
+class ColorGroup;
 
 class XmlSerializer {
 public:
@@ -78,6 +79,8 @@ private:
     void ReadTextureGroup(XmlNode &node);
     aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId);
     void StoreMaterialsInScene(aiScene *scene);
+    void ReadColorGroup(XmlNode &node);
+    void ReadColor(XmlNode &node, ColorGroup *colorGroup);
 
 private:
     struct MetaEntry {

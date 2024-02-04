@@ -119,9 +119,9 @@ public:
 
 static bool IsEmbeddedTexture( const std::string &filename ) {
     const std::string extension = BaseImporter::GetExtension(filename);
-    if (extension == "jpg" || extension == "png") {
+    if (extension == "jpg" || extension == "png" || extension == "jpeg") {
         std::string::size_type pos = filename.find("thumbnail");
-        if (pos == std::string::npos) {
+        if (pos != std::string::npos) {
             return false;
         }
         return true;

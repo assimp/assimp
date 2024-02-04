@@ -98,6 +98,11 @@ namespace XmlTag {
     const char *const texture_cuurd_u = "u";
     const char *const texture_cuurd_v = "v";
 
+    // vertex color definitions
+    const char *const colorgroup = "m:colorgroup";
+    const char *const color_item = "m:color";
+    const char *const color_vaule = "color";
+
     // Meta info tags
     const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
     const char* const ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";

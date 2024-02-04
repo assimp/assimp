@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -68,12 +68,14 @@ struct Element {
     //! Elements are terminated with \0
     char* szStart;
 
+    const char *end;
+
     //! Original line number (can be used in error messages
     //! if a parsing error occurs)
     unsigned int iLineNumber;
 };
 
-using ElementList = std::vector<Element>;
+using ElementArray = std::vector<Element>;
 
 // ---------------------------------------------------------------------------
 /** Represents a section of a MD5 file (such as the mesh or the joints section)
@@ -86,7 +88,7 @@ struct Section {
     unsigned int iLineNumber;
 
     //! List of all elements which have been parsed in this section.
-    ElementList mElements;
+    ElementArray mElements;
 
     //! Name of the section
     std::string mName;
@@ -96,7 +98,7 @@ struct Section {
     std::string mGlobalValue;
 };
 
-using SectionList = std::vector<Section>;
+using SectionArray = std::vector<Section>;
 
 // ---------------------------------------------------------------------------
 /** Basic information about a joint
@@ -132,7 +134,7 @@ struct BoneDesc : BaseJointDescription {
     unsigned int mMap;
 };
 
-using BoneList = std::vector<BoneDesc>;
+using BoneArray = std::vector<BoneDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a bone (joint) descriptor in a MD5Anim file
@@ -145,7 +147,7 @@ struct AnimBoneDesc : BaseJointDescription {
     unsigned int iFirstKeyIndex;
 };
 
-using AnimBoneList = std::vector< AnimBoneDesc >;
+using AnimBoneArray = std::vector< AnimBoneDesc >;
 
 // ---------------------------------------------------------------------------
 /** Represents a base frame descriptor in a MD5Anim file
@@ -155,7 +157,7 @@ struct BaseFrameDesc {
     aiVector3D vRotationQuat;
 };
 
-using BaseFrameList = std::vector<BaseFrameDesc>;
+using BaseFrameArray = std::vector<BaseFrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a camera animation frame in a MDCamera file
@@ -164,7 +166,7 @@ struct CameraAnimFrameDesc : BaseFrameDesc {
     float fFOV;
 };
 
-using CameraFrameList = std::vector<CameraAnimFrameDesc>;
+using CameraFrameArray = std::vector<CameraAnimFrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a frame descriptor in a MD5Anim file
@@ -177,7 +179,7 @@ struct FrameDesc {
     std::vector< float > mValues;
 };
 
-using FrameList = std::vector<FrameDesc>;
+using FrameArray = std::vector<FrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a vertex  descriptor in a MD5 file
@@ -199,7 +201,7 @@ struct VertexDesc {
     unsigned int mNumWeights;
 };
 
-using VertexList = std::vector<VertexDesc>;
+using VertexArray = std::vector<VertexDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a vertex weight descriptor in a MD5 file
@@ -216,27 +218,27 @@ struct WeightDesc {
     aiVector3D vOffsetPosition;
 };
 
-using WeightList = std::vector<WeightDesc>;
-using FaceList   = std::vector<aiFace>;
+using WeightArray = std::vector<WeightDesc>;
+using FaceArray   = std::vector<aiFace>;
 
 // ---------------------------------------------------------------------------
 /** Represents a mesh in a MD5 file
 */
 struct MeshDesc {
     //! Weights of the mesh
-    WeightList mWeights;
+    WeightArray mWeights;
 
     //! Vertices of the mesh
-    VertexList mVertices;
+    VertexArray mVertices;
 
     //! Faces of the mesh
-    FaceList mFaces;
+    FaceArray mFaces;
 
     //! Name of the shader (=texture) to be assigned to the mesh
     aiString mShader;
 };
 
-using MeshList = std::vector<MeshDesc>;
+using MeshArray = std::vector<MeshDesc>;
 
 // ---------------------------------------------------------------------------
 // Convert a quaternion to its usual representation
@@ -269,13 +271,13 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5MeshParser(SectionList& mSections);
+    explicit MD5MeshParser(SectionArray& mSections);
 
     //! List of all meshes
-    MeshList mMeshes;
+    MeshArray mMeshes;
 
     //! List of all joints
-    BoneList mJoints;
+    BoneArray mJoints;
 };
 
 // remove this flag if you need to the bounding box data
@@ -292,20 +294,20 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5AnimParser(SectionList& mSections);
+    explicit MD5AnimParser(SectionArray& mSections);
 
 
     //! Output frame rate
     float fFrameRate;
 
     //! List of animation bones
-    AnimBoneList mAnimatedBones;
+    AnimBoneArray mAnimatedBones;
 
     //! List of base frames
-    BaseFrameList mBaseFrames;
+    BaseFrameArray mBaseFrames;
 
     //! List of animation frames
-    FrameList mFrames;
+    FrameArray mFrames;
 
     //! Number of animated components
     unsigned int mNumAnimatedComponents;
@@ -322,7 +324,7 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5CameraParser(SectionList& mSections);
+    explicit MD5CameraParser(SectionArray& mSections);
 
     //! Output frame rate
     float fFrameRate;
@@ -331,7 +333,7 @@ public:
     std::vector<unsigned int> cuts;
 
     //! Frames
-    CameraFrameList frames;
+    CameraFrameArray frames;
 };
 
 // ---------------------------------------------------------------------------
@@ -375,7 +377,7 @@ public:
     void ReportWarning (const char* warn);
 
     //! List of all sections which have been read
-    SectionList mSections;
+    SectionArray mSections;
 
 private:
     bool ParseSection(Section& out);
@@ -388,7 +390,7 @@ private:
 
 private:
     char* buffer;
-    char* bufferEnd;
+    const char* bufferEnd;
     unsigned int fileSize;
     unsigned int lineNumber;
 };
@@ -406,7 +408,7 @@ inline void MD5Parser::ReportError(const char* error) {
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipLine(const char* in, const char** out) {
     ++lineNumber;
-    return Assimp::SkipLine(in ,out);
+    return Assimp::SkipLine(in, out, bufferEnd);
 }
 
 // -------------------------------------------------------------------
@@ -450,7 +452,7 @@ inline bool MD5Parser::SkipSpacesAndLineEnd() {
 
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipSpaces() {
-    return Assimp::SkipSpaces((const char**)&buffer);
+    return Assimp::SkipSpaces((const char**)&buffer, bufferEnd);
 }
 
 } // namespace Assimp

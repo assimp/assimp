@@ -1748,7 +1748,7 @@ void FBXExporter::WriteObjects ()
         int64_t blendshape_uid = generate_uid();
         mesh_uids.push_back(blendshape_uid);
         bsnode.AddProperty(blendshape_uid);
-        bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Blendshape");
+        bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Geometry");
         bsnode.AddProperty("Shape");
         bsnode.AddChild("Version", int32_t(100));
         bsnode.Begin(outstream, binary, indent);

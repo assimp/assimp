@@ -54,7 +54,7 @@ jobs:
     - name: Cache DX SDK
       id: dxcache
       if: contains(matrix.name, 'windows')
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: '${{ github.workspace }}/DX_SDK'
         key: ${{ runner.os }}-DX_SDK

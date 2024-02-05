@@ -912,6 +912,7 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatSpecular(mat, specular)) {
                     mAsset->extensionsUsed.KHR_materials_specular = true;
                     m->materialSpecular = Nullable<MaterialSpecular>(specular);
+                    GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
                 }
 
                 MaterialSheen sheen;

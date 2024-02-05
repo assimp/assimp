@@ -52,8 +52,9 @@ namespace Assimp {
 // -------------------------------------------------------------------------------
 void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
     const char *s = in.c_str();
+    const char *end = in.c_str() + in.size();
     while (*s) {
-        SkipSpacesAndLineEnd(&s);
+        SkipSpacesAndLineEnd(&s, end);
         if (*s == '\'') {
             const char *base = ++s;
             while (*s != '\'') {
@@ -66,7 +67,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
             out.emplace_back(base, (size_t)(s - base));
             ++s;
         } else {
-            out.push_back(GetNextToken(s));
+            out.push_back(GetNextToken(s, end));
         }
     }
 }

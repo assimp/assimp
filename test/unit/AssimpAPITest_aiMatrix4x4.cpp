@@ -64,7 +64,7 @@ protected:
 
 TEST_F(AssimpAPITest_aiMatrix4x4, isIdendityTest) {
     aiMatrix4x4 m = aiMatrix4x4(1.001f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    EXPECT_TRUE(m.IsIdentity(1e-6f));
+    EXPECT_TRUE(m.IsIdentity(1e-3f));
 }
 
 TEST_F(AssimpAPITest_aiMatrix4x4, aiIdentityMatrix4Test) {

@@ -12,7 +12,6 @@ __Importers__:
 - ASE
 - ASK
 - B3D
-- [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format))
 - [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
 - CSM
 - COB
@@ -65,6 +64,9 @@ __Importers__:
 - [X3D](https://en.wikipedia.org/wiki/X3D)
 - XGL
 - ZGL
+
+Note: support for [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) is deprecated.
+It is too time-consuming to maintain an undocumented format which contains so much more than we need.
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 

@@ -226,6 +226,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     "PP_PTV_ROOT_TRANSFORMATION"
 
 // ---------------------------------------------------------------------------
+/** @brief Set epsilon to check the identity of the matrix 4x4.
+ *
+ * This is used by aiMatrix4x4t<TReal>::IsIdentity(const TReal epsilon).
+ * @note The default value is 10e-3f for backward compatibility of legacy code.
+ * Property type: Float.
+ */
+#define AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON \
+    "CHECK_IDENTITY_MATRIX_EPSILON"
+
+// default value for AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON
+#if (!defined AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT)
+#   define AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT 10e-3f
+#endif
+
+// ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_FindDegenerates step to
  *  remove degenerated primitives from the import - immediately.
  *

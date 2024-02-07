@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -242,7 +242,7 @@ aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Inverse() {
     const TReal det = Determinant();
     if(det == static_cast<TReal>(0.0))
     {
-        // Matrix not invertible. Setting all elements to nan is not really
+        // Matrix is not invertible. Setting all elements to nan is not really
         // correct in a mathematical sense but it is easy to debug for the
         // programmer.
         const TReal nan = std::numeric_limits<TReal>::quiet_NaN();
@@ -545,10 +545,7 @@ aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromEulerAnglesXYZ(TReal x, TReal y, T
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE
-bool aiMatrix4x4t<TReal>::IsIdentity() const {
-    // Use a small epsilon to solve floating-point inaccuracies
-    const static TReal epsilon = 10e-3f;
-
+bool aiMatrix4x4t<TReal>::IsIdentity(const TReal epsilon) const {
     return (a2 <= epsilon && a2 >= -epsilon &&
             a3 <= epsilon && a3 >= -epsilon &&
             a4 <= epsilon && a4 >= -epsilon &&
@@ -657,7 +654,7 @@ aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Scaling( const aiVector3t<TReal>& v, a
 /** A function for creating a rotation matrix that rotates a vector called
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors
- * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
+ * Output: mtx[3][3] -- a 3x3 matrix in column-major form
  * Authors: Tomas Möller, John Hughes
  *          "Efficiently Building a Matrix to Rotate One Vector to Another"
  *          Journal of Graphics Tools, 4(4):1-4, 1999

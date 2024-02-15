@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -1786,7 +1786,8 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         const Accessor *acc = input.mResolved;
         if (!acc->mData) {
             acc->mData = &ResolveLibraryReference(mDataLibrary, acc->mSource);
-            if (acc->mOffset + acc->mCount * acc->mStride > acc->mData->mValues.size()) {
+            const size_t dataSize = acc->mOffset + acc->mCount * acc->mStride;
+            if (dataSize > acc->mData->mValues.size()) {
                 throw DeadlyImportError("Not enough data for accessor");
             }
         }
@@ -1813,7 +1814,8 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         const Accessor *acc = input.mResolved;
         if (!acc->mData) {
             acc->mData = &ResolveLibraryReference(mDataLibrary, acc->mSource);
-            if (acc->mOffset + acc->mCount * acc->mStride > acc->mData->mValues.size()) {
+            const size_t dataSize = acc->mOffset + acc->mCount * acc->mStride;
+            if (dataSize > acc->mData->mValues.size()) {
                 throw DeadlyImportError("Not enough data for accessor");
             }
         }

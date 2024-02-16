@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -45,13 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_QUATERNION_H_INC
 #define AI_QUATERNION_H_INC
 
+#include <assimp/defs.h>
+
 #ifdef __cplusplus
 
 #ifdef __GNUC__
 #   pragma GCC system_header
 #endif
-
-#include <assimp/defs.h>
 
 // Forward declarations
 template <typename TReal> class aiVector3t;

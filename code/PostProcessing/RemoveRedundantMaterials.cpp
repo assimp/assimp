@@ -157,6 +157,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
     // If the new material count differs from the original,
     // we need to rebuild the material list and remap mesh material indexes.
     if (iNewNum < 1) {
+        pScene->mNumMaterials = 0;
         //throw DeadlyImportError("No materials remaining");
         return;
     }

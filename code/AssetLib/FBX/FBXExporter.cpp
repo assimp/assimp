@@ -69,6 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <cmath>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -1062,7 +1063,7 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
-    if (anim->mTicksPerSecond <= 0) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {    
         return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
     return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;

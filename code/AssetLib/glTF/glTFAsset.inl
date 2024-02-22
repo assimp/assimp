@@ -242,7 +242,7 @@ inline bool Buffer::LoadFromStream(IOStream &stream, size_t length, size_t baseO
 
     mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
 
-    if (stream.Read(mData.get(), byteLength, 1) != 1) {
+    if (stream.Read(mData.get(), byteLength, 1) != byteLength) {
         return false;
     }
     return true;

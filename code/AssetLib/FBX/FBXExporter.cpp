@@ -1089,6 +1089,8 @@ void FBXExporter::WriteObjects ()
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
     std::vector<std::vector<int32_t>> vVertexIndice;//save vertex_indices as it is needed later
 
+    const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
+
     // geometry (aiMesh)
     mesh_uids.clear();
     indent = 1;
@@ -1445,13 +1447,21 @@ void FBXExporter::WriteObjects ()
             // "TransparentColor" / "TransparencyFactor"...
             // thanks FBX, for your insightful interpretation of consistency
             p.AddP70colorA("TransparentColor", c.r, c.g, c.b);
-            // TransparencyFactor defaults to 0.0, so set it to 1.0.
-            // note: Maya always sets this to 1.0,
-            // so we can't use it sensibly as "Opacity".
-            // In stead we rely on the legacy "Opacity" value, below.
-            // Blender also relies on "Opacity" not "TransparencyFactor",
-            // probably for a similar reason.
-            p.AddP70numberA("TransparencyFactor", 1.0);
+
+            if (!bTransparencyFactorReferencedToOpacity) {
+                // TransparencyFactor defaults to 0.0, so set it to 1.0.
+                // note: Maya always sets this to 1.0,
+                // so we can't use it sensibly as "Opacity".
+                // In stead we rely on the legacy "Opacity" value, below.
+                // Blender also relies on "Opacity" not "TransparencyFactor",
+                // probably for a similar reason.
+                p.AddP70numberA("TransparencyFactor", 1.0);
+            }
+        }
+        if (bTransparencyFactorReferencedToOpacity) {
+            if (m->Get(AI_MATKEY_OPACITY, f) == aiReturn_SUCCESS) {
+                p.AddP70numberA("TransparencyFactor", 1.0 - f);
+            }
         }
         if (m->Get(AI_MATKEY_COLOR_REFLECTIVE, c) == aiReturn_SUCCESS) {
             p.AddP70colorA("ReflectionColor", c.r, c.g, c.b);

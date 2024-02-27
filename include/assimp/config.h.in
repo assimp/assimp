@@ -1113,6 +1113,16 @@ enum aiComponent
 #define AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX \
         "USE_UNLIMITED_BONES_PER VERTEX"
 
+/** @brief Specifies whether to write the value referenced to opacity in TransparencyFactor of each material. 
+ *
+ * When this flag is not defined, the TransparencyFactor value of each meterial is 1.0.
+ * By enabling this flag, the value is 1.0 - opacity;
+
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY \
+        "EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY"
+
 /**
  * @brief Specifies the blob name, assimp uses for exporting.
  * 

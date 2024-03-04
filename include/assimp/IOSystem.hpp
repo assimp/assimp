@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -97,7 +97,7 @@ public:
      *  Create an instance of your derived class and assign it to an
      *  #Assimp::Importer instance by calling Importer::SetIOHandler().
      */
-    IOSystem() AI_NO_EXCEPT;
+    IOSystem() AI_NO_EXCEPT = default;
 
     // -------------------------------------------------------------------
     /** @brief Virtual destructor.
@@ -105,7 +105,7 @@ public:
      *  It is safe to be called from within DLL Assimp, we're constructed
      *  on Assimp's heap.
      */
-    virtual ~IOSystem();
+    virtual ~IOSystem() = default;
 
     // -------------------------------------------------------------------
     /** @brief For backward compatibility
@@ -235,12 +235,6 @@ public:
 private:
     std::vector<std::string> m_pathStack;
 };
-
-// ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem() AI_NO_EXCEPT = default;
-
-// ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::~IOSystem() = default;
 
 // ----------------------------------------------------------------------------
 // For compatibility, the interface of some functions taking a std::string was

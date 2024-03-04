@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/version.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/config.h>
 
 // Header files, standard library.
 #include <cinttypes>
@@ -89,6 +90,10 @@ glTF2Exporter::glTF2Exporter(const char *filename, IOSystem *pIOSystem, const ai
         mFilename(filename), mIOSystem(pIOSystem), mScene(pScene), mProperties(pProperties), mAsset(new Asset(pIOSystem)) {
     // Always on as our triangulation process is aware of this type of encoding
     mAsset->extensionsUsed.FB_ngon_encoding = true;
+
+    configEpsilon = mProperties->GetPropertyFloat(
+            AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON,
+                    (ai_real)AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT);
 
     if (isBinary) {
         mAsset->SetAsBinary();
@@ -730,8 +735,8 @@ bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecula
     } else if (colorFactorIsZero) {
         specular.specularColorFactor[0] = specular.specularColorFactor[1] = specular.specularColorFactor[2] = 1.0f;
     }
-    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR, 0);
+    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR, 1);
     return true;
 }
 
@@ -912,6 +917,7 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatSpecular(mat, specular)) {
                     mAsset->extensionsUsed.KHR_materials_specular = true;
                     m->materialSpecular = Nullable<MaterialSpecular>(specular);
+                    GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
                 }
 
                 MaterialSheen sheen;
@@ -1454,7 +1460,7 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode *n) {
 
     node->name = n->mName.C_Str();
 
-    if (!n->mTransformation.IsIdentity()) {
+    if (!n->mTransformation.IsIdentity(configEpsilon)) {
         node->matrix.isPresent = true;
         CopyValue(n->mTransformation, node->matrix.value);
     }
@@ -1484,7 +1490,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
 
     ExportNodeExtras(n->mMetaData, node->extras);
 
-    if (!n->mTransformation.IsIdentity()) {
+    if (!n->mTransformation.IsIdentity(configEpsilon)) {
         if (mScene->mNumAnimations > 0 || (mProperties && mProperties->HasPropertyBool("GLTF2_NODE_IN_TRS"))) {
             aiQuaternion quaternion;
             n->mTransformation.Decompose(*reinterpret_cast<aiVector3D *>(&node->scale.value), quaternion, *reinterpret_cast<aiVector3D *>(&node->translation.value));

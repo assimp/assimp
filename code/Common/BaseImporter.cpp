@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -357,11 +357,7 @@ std::string BaseImporter::GetExtension(const std::string &pFile) {
     return false;
 }
 
-#ifdef ASSIMP_USE_HUNTER
-#include <utf8.h>
-#else
-#include "../contrib/utf8cpp/source/utf8.h"
-#endif
+#include "utf8.h"
 
 // ------------------------------------------------------------------------------------------------
 // Convert to UTF8 data

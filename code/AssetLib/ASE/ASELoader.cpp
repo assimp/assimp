@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -904,7 +904,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
         ASSIMP_LOG_WARN("Material index is out of range");
     }
 
-    // If the material the mesh is assigned to is consisting of submeshes, split it
+    // If the material the mesh is assigned to consists of submeshes, split it
     if (!mParser->m_vMaterials[mesh.iMaterialIndex].avSubMaterials.empty()) {
         std::vector<ASE::Material> vSubMaterials = mParser->m_vMaterials[mesh.iMaterialIndex].avSubMaterials;
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -593,7 +593,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
 
         // Cameras or lights define their transformation in their parent node and in the
         // corresponding light or camera chunks. However, we read and process the latter
-        // to to be able to return valid cameras/lights even if no scenegraph is given.
+        // to be able to return valid cameras/lights even if no scenegraph is given.
         for (unsigned int n = 0; n < pcSOut->mNumCameras; ++n) {
             if (pcSOut->mCameras[n]->mName == pcOut->mName) {
                 pcSOut->mCameras[n]->mLookAt = aiVector3D(0.f, 0.f, 1.f);

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -785,12 +785,14 @@ inline void BufferView::Read(Value &obj, Asset &r) {
     }
 }
 
-inline uint8_t *BufferView::GetPointer(size_t accOffset) {
+inline uint8_t *BufferView::GetPointerAndTailSize(size_t accOffset, size_t& outTailSize) {
     if (!buffer) {
+        outTailSize = 0;
         return nullptr;
     }
-    uint8_t *basePtr = buffer->GetPointer();
+    uint8_t * const basePtr = buffer->GetPointer();
     if (!basePtr) {
+        outTailSize = 0;
         return nullptr;
     }
 
@@ -799,17 +801,25 @@ inline uint8_t *BufferView::GetPointer(size_t accOffset) {
         const size_t begin = buffer->EncodedRegion_Current->Offset;
         const size_t end = begin + buffer->EncodedRegion_Current->DecodedData_Length;
         if ((offset >= begin) && (offset < end)) {
+            outTailSize = end - offset;
             return &buffer->EncodedRegion_Current->DecodedData[offset - begin];
         }
     }
 
+    if (offset >= buffer->byteLength)
+    {
+        outTailSize = 0;
+        return nullptr;
+    }
+    
+    outTailSize = buffer->byteLength - offset;
     return basePtr + offset;
 }
 
 //
 // struct Accessor
 //
-inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
+inline void Accessor::Sparse::PopulateData(size_t numBytes, const uint8_t *bytes) {
     if (bytes) {
         data.assign(bytes, bytes + numBytes);
     } else {
@@ -818,11 +828,21 @@ inline void Accessor::Sparse::PopulateData(size_t numBytes, uint8_t *bytes) {
 }
 
 inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
-    uint8_t *pIndices = indices->GetPointer(indicesByteOffset);
+    size_t indicesTailDataSize;
+    uint8_t *pIndices = indices->GetPointerAndTailSize(indicesByteOffset, indicesTailDataSize);
     const unsigned int indexSize = int(ComponentTypeSize(indicesType));
     uint8_t *indicesEnd = pIndices + count * indexSize;
 
-    uint8_t *pValues = values->GetPointer(valuesByteOffset);
+    if ((uint64_t)indicesEnd > (uint64_t)pIndices + indicesTailDataSize) {
+        throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");
+    }
+
+    size_t valuesTailDataSize;
+    uint8_t* pValues = values->GetPointerAndTailSize(valuesByteOffset, valuesTailDataSize);
+
+    if (elementSize * count > valuesTailDataSize) {
+        throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");
+    }
     while (pIndices != indicesEnd) {
         size_t offset;
         switch (indicesType) {
@@ -894,6 +914,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
         if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
             //indices bufferView
             Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
+            if (!indiceViewID) {
+                throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+            }			
             sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
             //indices byteOffset
             sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
@@ -909,6 +932,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
         if (Value *valuesValue = FindObject(*sparseValue, "values")) {
             //value bufferView
             Value *valueViewID = FindUInt(*valuesValue, "bufferView");
+            if (!valueViewID) {
+                throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+            }
             sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
             //value byteOffset
             sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
@@ -918,8 +944,18 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;
-        sparse->PopulateData(dataSize, bufferView ? bufferView->GetPointer(byteOffset) : nullptr);
-        sparse->PatchData(elementSize);
+        if (bufferView) {
+            size_t bufferViewTailSize;
+            const uint8_t* bufferViewPointer = bufferView->GetPointerAndTailSize(byteOffset, bufferViewTailSize);
+            if (dataSize > bufferViewTailSize) {
+                throw DeadlyImportError("Invalid buffer when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+            }
+            sparse->PopulateData(dataSize, bufferViewPointer);
+        }
+        else {
+            sparse->PopulateData(dataSize, nullptr);
+        }        
+		sparse->PatchData(elementSize);
     }
 }
 
@@ -1392,7 +1428,7 @@ inline void PbrSpecularGlossiness::SetDefaults() {
 inline void MaterialSpecular::SetDefaults() {
     //KHR_materials_specular properties
     SetVector(specularColorFactor, defaultSpecularColorFactor);
-    specularFactor = 0.f;
+    specularFactor = 1.f;
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -1548,6 +1584,22 @@ inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
                                 (*vec).resize(idx + 1);
                             }
                             (*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
+                        }
+                    }
+                }
+            }
+
+            if(this->targetNames.empty())
+            {
+                Value *curExtras = FindObject(primitive, "extras");
+                if (nullptr != curExtras) {
+                    if (Value *curTargetNames = FindArray(*curExtras, "targetNames")) {
+                        this->targetNames.resize(curTargetNames->Size());
+                        for (unsigned int j = 0; j < curTargetNames->Size(); ++j) {
+                            Value &targetNameValue = (*curTargetNames)[j];
+                            if (targetNameValue.IsString()) {
+                                this->targetNames[j] = targetNameValue.GetString();
+                            }
                         }
                     }
                 }

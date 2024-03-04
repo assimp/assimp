@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -48,11 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultLogger.hpp>
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include "../contrib/zlib/zlib.h"
-#endif
+#include "zlib.h"
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/StringComparison.h>
@@ -399,7 +395,10 @@ void Q3BSPFileImporter::createTriangleTopology(const Q3BSP::Q3BSPModel *pModel, 
                 m_pCurrentFace->mIndices = new unsigned int[3];
                 m_pCurrentFace->mIndices[idx] = vertIdx;
             }
-        }
+		} else {
+			m_pCurrentFace->mIndices[idx] = vertIdx;
+		}
+
 
         pMesh->mVertices[vertIdx].Set(pVertex->vPosition.x, pVertex->vPosition.y, pVertex->vPosition.z);
         pMesh->mNormals[vertIdx].Set(pVertex->vNormal.x, pVertex->vNormal.y, pVertex->vNormal.z);

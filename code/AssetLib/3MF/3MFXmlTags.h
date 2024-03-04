@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -97,6 +97,11 @@ namespace XmlTag {
     const char *const texture_2d_coord = "m:tex2coord";
     const char *const texture_cuurd_u = "u";
     const char *const texture_cuurd_v = "v";
+
+    // vertex color definitions
+    const char *const colorgroup = "m:colorgroup";
+    const char *const color_item = "m:color";
+    const char *const color_vaule = "color";
 
     // Meta info tags
     const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";

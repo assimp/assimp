@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 
@@ -136,9 +136,13 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Returns true of the matrix is the identity matrix.
+     *  @param epsilon Value of epsilon. Default value is 10e-3 for backward
+     *  compatibility with legacy code.
+     *  @return Returns true of the matrix is the identity matrix.
      *  The check is performed against a not so small epsilon.
      */
-    inline bool IsIdentity() const;
+    inline bool IsIdentity(const TReal
+            epsilon = AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT) const;
 
     // -------------------------------------------------------------------
     /** @brief Decompose a trafo matrix into its original components

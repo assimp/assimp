@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -365,7 +365,7 @@ void Discreet3DSImporter::ParseChunk(const char *name, unsigned int num) {
     // IMPLEMENTATION NOTE;
     // Cameras or lights define their transformation in their parent node and in the
     // corresponding light or camera chunks. However, we read and process the latter
-    // to to be able to return valid cameras/lights even if no scenegraph is given.
+    // to be able to return valid cameras/lights even if no scenegraph is given.
 
     // get chunk type
     switch (chunk.Flag) {

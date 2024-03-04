@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -84,10 +84,10 @@ const aiImporterDesc *OFFImporter::GetInfo() const {
 
 // skip blank space, lines and comments
 static void NextToken(const char **car, const char *end) {
-    SkipSpacesAndLineEnd(car);
+    SkipSpacesAndLineEnd(car, end);
     while (*car < end && (**car == '#' || **car == '\n' || **car == '\r')) {
-        SkipLine(car);
-        SkipSpacesAndLineEnd(car);
+        SkipLine(car, end);
+        SkipSpacesAndLineEnd(car, end);
     }
 }
 
@@ -195,6 +195,7 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     char line[4096];
     buffer = car;
     const char *sz = car;
+    const char *lineEnd = &line[4096];
 
     // now read all vertex lines
     for (unsigned int i = 0; i < numVertices; ++i) {
@@ -210,13 +211,13 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         // stop at dimensions: this allows loading 1D or 2D coordinate vertices
         for (unsigned int dim = 0; dim < dimensions; ++dim) {
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             sz = fast_atoreal_move<ai_real>(sz, *vec[dim]);
         }
 
         // if has homogeneous coordinate, divide others by this one
         if (hasHomogenous) {
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             ai_real w = 1.;
             sz = fast_atoreal_move<ai_real>(sz, w);
             for (unsigned int dim = 0; dim < dimensions; ++dim) {
@@ -227,11 +228,11 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         // read optional normals
         if (hasNormals) {
             aiVector3D &n = mesh->mNormals[i];
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             sz = fast_atoreal_move<ai_real>(sz, (ai_real &)n.x);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             sz = fast_atoreal_move<ai_real>(sz, (ai_real &)n.y);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             fast_atoreal_move<ai_real>(sz, (ai_real &)n.z);
         }
 
@@ -241,22 +242,22 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         // in theory should be testing type !
         if (hasColors) {
             aiColor4D &c = mesh->mColors[0][i];
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.r);
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, lineEnd);
                 sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.g);
             } else {
                 c.g = 0.;
             }
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, lineEnd);
                 sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.b);
             } else {
                 c.b = 0.;
             }
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, lineEnd);
                 sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.a);
             } else {
                 c.a = 1.;
@@ -264,9 +265,9 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
         if (hasTexCoord) {
             aiVector3D &t = mesh->mTextureCoords[0][i];
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             sz = fast_atoreal_move<ai_real>(sz, (ai_real &)t.x);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             fast_atoreal_move<ai_real>(sz, (ai_real &)t.y);
         }
     }
@@ -280,7 +281,7 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
         unsigned int idx;
         sz = line;
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, lineEnd);
         idx = strtoul10(sz, &sz);
         if (!idx || idx > 9) {
             ASSIMP_LOG_ERROR("OFF: Faces with zero indices aren't allowed");
@@ -291,7 +292,7 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         faces->mNumIndices = idx;
         faces->mIndices = new unsigned int[faces->mNumIndices];
         for (unsigned int m = 0; m < faces->mNumIndices; ++m) {
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, lineEnd);
             idx = strtoul10(sz, &sz);
             if (idx >= numVertices) {
                 ASSIMP_LOG_ERROR("OFF: Vertex index is out of range");

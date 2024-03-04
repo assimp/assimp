@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -291,7 +291,7 @@ int LoadAsset() {
 
 //-------------------------------------------------------------------------------
 // Delete the loaded asset
-// The function does nothing is no asset is loaded
+// The function does nothing if no asset is loaded
 //-------------------------------------------------------------------------------
 int DeleteAsset(void) {
     if (!g_pcAsset) {

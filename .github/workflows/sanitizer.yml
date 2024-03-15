@@ -17,15 +17,13 @@ jobs:
     - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
-    - uses: lukka/run-vcpkg@v11 # Always specify the specific _version_ of the
-                                  # action you need, `v11` in this case to stay up
-                                  # to date with fixes on the v11 branch.
+
       with:
         CXX: clang++
         CC: clang
     
     - name: configure and build
-      uses: lukka/run-cmake@v10
+      uses: lukka/run-cmake@v10.1
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
@@ -44,15 +42,13 @@ jobs:
     - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
     - uses: lukka/set-shell-env@v1
-    - uses: lukka/run-vcpkg@v11 # Always specify the specific _version_ of the
-                                  # action you need, `v11` in this case to stay up
-                                  # to date with fixes on the v11 branch.
+
       with:
         CXX: clang++
         CC: clang
     
     - name: configure and build
-      uses: lukka/run-cmake@v10
+      uses: lukka/run-cmake@v10.1
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'

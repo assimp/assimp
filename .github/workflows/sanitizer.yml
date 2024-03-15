@@ -23,7 +23,7 @@ jobs:
         CC: clang
     
     - name: configure and build
-      uses: lukka/run-cmake@v10.1
+      uses: lukka/run-cmake@v10.2
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
@@ -48,7 +48,7 @@ jobs:
         CC: clang
     
     - name: configure and build
-      uses: lukka/run-cmake@v10.1
+      uses: lukka/run-cmake@v10.2
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'

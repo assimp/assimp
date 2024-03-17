@@ -76,6 +76,53 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000LL
 
+static void correctRootTransform(const aiScene *scene) {
+    if (scene == nullptr) {
+        return;
+    }
+
+    if (scene->mMetaData == nullptr) {
+        return;
+    }
+
+    int32_t UpAxis = 1, UpAxisSign = 1, FrontAxis = 2, FrontAxisSign = 1, CoordAxis = 0, CoordAxisSign = 1;
+    double UnitScaleFactor = 1.0;
+    for (unsigned MetadataIndex = 0; MetadataIndex < scene->mMetaData->mNumProperties; ++MetadataIndex) {
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "UpAxis") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, UpAxis);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "UpAxisSign") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, UpAxisSign);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "FrontAxis") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, FrontAxis);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "FrontAxisSign") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, FrontAxisSign);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "CoordAxis") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, CoordAxis);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "CoordAxisSign") == 0) {
+            scene->mMetaData->Get<int32_t>(MetadataIndex, CoordAxisSign);
+        }
+        if (strcmp(scene->mMetaData->mKeys[MetadataIndex].C_Str(), "UnitScaleFactor") == 0) {
+            scene->mMetaData->Get<double>(MetadataIndex, UnitScaleFactor);
+        }
+    }
+
+    aiVector3D upVec, forwardVec, rightVec;
+    upVec[UpAxis] = UpAxisSign * static_cast<float>(UnitScaleFactor);
+    forwardVec[FrontAxis] = FrontAxisSign * static_cast<float>(UnitScaleFactor);
+    rightVec[CoordAxis] = CoordAxisSign * (float)UnitScaleFactor;
+
+    aiMatrix4x4 mat(rightVec.x, rightVec.y, rightVec.z, 0.0f,
+                    upVec.x, upVec.y, upVec.z, 0.0f,
+                    forwardVec.x, forwardVec.y, forwardVec.z, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f);
+    scene->mRootNode->mTransformation *= mat;
+}
+
 FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBones) :
         defaultMaterialIndex(),
         mMeshes(),
@@ -133,6 +180,8 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     // need not contain geometry (i.e. camera animations, raw armatures).
     if (out->mNumMeshes == 0) {
         out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+    } else {
+        correctRootTransform(mSceneOut);
     }
 }
 

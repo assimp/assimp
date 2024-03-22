@@ -1,23 +1,25 @@
-### A portable (OSX/Linux/Windows), simple zip library written in C
-This is done by hacking awesome [miniz](https://code.google.com/p/miniz) library and layering functions on top of the miniz v1.15 API.
+## A portable (OSX/Linux/Windows/Android/iOS), simple zip library written in C
+
+This is done by hacking awesome [miniz](https://github.com/richgel999/miniz) library and layering functions on top of the miniz v3.0.2 API.
 
 [![Build](https://github.com/kuba--/zip/workflows/build/badge.svg)](https://github.com/kuba--/zip/actions?query=workflow%3Abuild)
 
+### The Idea
 
-# The Idea
 <img src="zip.png" name="zip" />
 ... Some day, I was looking for zip library written in C for my project, but I could not find anything simple enough and lightweight.
 Everything what I tried required 'crazy mental gymnastics' to integrate or had some limitations or was too heavy.
 I hate frameworks, factories and adding new dependencies. If I must to install all those dependencies and link new library, I'm getting almost sick.
-I wanted something powerfull and small enough, so I could add just a few files and compile them into my project.
+I wanted something powerful and small enough, so I could add just a few files and compile them into my project.
 And finally I found miniz.
 Miniz is a lossless, high performance data compression library in a single source file. I only needed simple interface to append buffers or files to the current zip-entry. Thanks to this feature I'm able to merge many files/buffers and compress them on-the-fly.
 
 It was the reason, why I decided to write zip module on top of the miniz. It required a little bit hacking and wrapping some functions, but I kept simplicity. So, you can grab these 3 files and compile them into your project. I hope that interface is also extremely simple, so you will not have any problems to understand it.
 
-# Examples
+### Examples
 
 * Create a new zip archive with default compression level.
+
 ```c
 struct zip_t *zip = zip_open("foo.zip", ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
 {
@@ -41,6 +43,7 @@ zip_close(zip);
 ```
 
 * Append to the existing zip archive.
+
 ```c
 struct zip_t *zip = zip_open("foo.zip", ZIP_DEFAULT_COMPRESSION_LEVEL, 'a');
 {
@@ -55,6 +58,7 @@ zip_close(zip);
 ```
 
 * Extract a zip archive into a folder.
+
 ```c
 int on_extract_entry(const char *filename, void *arg) {
     static int i = 0;
@@ -69,6 +73,7 @@ zip_extract("foo.zip", "/tmp", on_extract_entry, &arg);
 ```
 
 * Extract a zip entry into memory.
+
 ```c
 void *buf = NULL;
 size_t bufsize;
@@ -87,6 +92,7 @@ free(buf);
 ```
 
 * Extract a zip entry into memory (no internal allocation).
+
 ```c
 unsigned char *buf;
 size_t bufsize;
@@ -108,6 +114,7 @@ free(buf);
 ```
 
 * Extract a zip entry into memory using callback.
+
 ```c
 struct buffer_t {
     char *data;
@@ -140,8 +147,8 @@ zip_close(zip);
 free(buf.data);
 ```
 
-
 * Extract a zip entry into a file.
+
 ```c
 struct zip_t *zip = zip_open("foo.zip", 0, 'r');
 {
@@ -181,7 +188,7 @@ free(outbuf);
 
 ```c
 char *buf = NULL;
-ssize_t bufsize = 0;
+size_t bufsize = 0;
 
 struct zip_t *zip = zip_stream_open(zipstream, zipstreamsize, 0, 'r');
 {
@@ -197,6 +204,7 @@ free(buf);
 ```
 
 * List of all zip entries
+
 ```c
 struct zip_t *zip = zip_open("foo.zip", 0, 'r');
 int i, n = zip_entries_total(zip);
@@ -214,6 +222,7 @@ zip_close(zip);
 ```
 
 * Compress folder (recursively)
+
 ```c
 void zip_walk(struct zip_t *zip, const char *path) {
     DIR *dir;
@@ -245,27 +254,36 @@ void zip_walk(struct zip_t *zip, const char *path) {
 }
 ```
 
-* Deletes zip archive entries.
+* Delete zip archive entries.
+
 ```c
 char *entries[] = {"unused.txt", "remove.ini", "delete.me"};
+// size_t indices[] = {0, 1, 2};
 
 struct zip_t *zip = zip_open("foo.zip", 0, 'd');
 {
     zip_entries_delete(zip, entries, 3);
+
+    // you can also delete by index, instead of by name
+    // zip_entries_deletebyindex(zip, indices, 3);
 }
 zip_close(zip);
 ```
 
-# Bindings
+### Bindings
+
 Compile zip library as a dynamic library.
+
 ```shell
 $ mkdir build
 $ cd build
 $ cmake -DBUILD_SHARED_LIBS=true ..
-$ make
+$ cmake --build .
 ```
 
-### [Go](https://golang.org) (cgo)
+#### [Go](https://golang.org) (cgo)
+> Third party binding: [kuba--/c-go-zip](https://github.com/kuba--/c-go-zip)
+
 ```go
 package main
 
@@ -278,24 +296,25 @@ import "C"
 import "unsafe"
 
 func main() {
-	path := C.CString("/tmp/go.zip")
-	zip := C.zip_open(path, 6, 'w')
+    path := C.CString("/tmp/go.zip")
+    zip := C.zip_open(path, 6, 'w')
 
-	entryname := C.CString("test")
-	C.zip_entry_open(zip, entryname)
+    entryname := C.CString("test")
+    C.zip_entry_open(zip, entryname)
 
-	content := "test content"
-	buf := unsafe.Pointer(C.CString(content))
-	bufsize := C.size_t(len(content))
-	C.zip_entry_write(zip, buf, bufsize)
+    content := "test content"
+    buf := unsafe.Pointer(C.CString(content))
+    bufsize := C.size_t(len(content))
+    C.zip_entry_write(zip, buf, bufsize)
 
-	C.zip_entry_close(zip)
+    C.zip_entry_close(zip)
 
-	C.zip_close(zip)
+    C.zip_close(zip)
 }
 ```
 
-### [Rust](https://www.rust-lang.org) (ffi)
+#### [Rust](https://www.rust-lang.org) (ffi)
+
 ```rust
 extern crate libc;
 use std::ffi::CString;
@@ -342,13 +361,16 @@ fn main() {
 }
 ```
 
-### [Ruby](http://www.ruby-lang.org) (ffi)
+#### [Ruby](http://www.ruby-lang.org) (ffi)
+
 Install _ffi_ gem.
+
 ```shell
 $ gem install ffi
 ```
 
 Bind in your module.
+
 ```ruby
 require 'ffi'
 
@@ -375,13 +397,16 @@ Zip.zip_entry_close(ptr)
 Zip.zip_close(ptr)
 ```
 
-### [Python](https://www.python.org) (cffi)
+#### [Python](https://www.python.org) (cffi)
+
 Install _cffi_ package
+
 ```shell
 $ pip install cffi
 ```
 
 Bind in your package.
+
 ```python
 import ctypes.util
 from cffi import FFI
@@ -409,7 +434,8 @@ Zip.zip_entry_close(ptr)
 Zip.zip_close(ptr)
 ```
 
-### [Never](https://never-lang.readthedocs.io/) (ffi)
+#### [Never](https://never-lang.readthedocs.io/) (ffi)
+
 ```never
 extern "libzip.so" func zip_open(zipname: string, level: int, mode: char) -> c_ptr
 extern "libzip.so" func zip_close(zip: c_ptr) -> void
@@ -438,8 +464,10 @@ func main() -> int
 }
 ```
 
-### [Ring](http://ring-lang.net)
+#### [Ring](http://ring-lang.net)
+
 The language comes with RingZip based on this library
+
 ```ring
 load "ziplib.ring"
 
@@ -455,15 +483,159 @@ new Zip {
 }
 ```
 
-# Check out more cool projects which use this library:
-- [Filament](https://github.com/google/filament): Filament is a real-time physically based rendering engine for Android, iOS, Linux, macOS, Windows, and WebGL. It is designed to be as small as possible and as efficient as possible on Android.
-- [Hermes JS Engine](https://github.com/facebook/hermes): Hermes is a JavaScript engine optimized for fast start-up of React Native apps on Android. It features ahead-of-time static optimization and compact bytecode.
-- [Open Asset Import Library](https://github.com/assimp/assimp): A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data.
-- [PowerToys](https://github.com/microsoft/PowerToys): Set of utilities for power users to tune and streamline their Windows 10 experience for greater productivity.
-- [The Ring Programming Language](https://ring-lang.github.io): Innovative and practical general-purpose multi-paradigm language.
-- [The V Programming Language](https://github.com/vlang/v): Simple, fast, safe, compiled. For developing maintainable software.
-- [TIC-80](https://github.com/nesbox/TIC-80): TIC-80 is a FREE and OPEN SOURCE fantasy computer for making, playing and sharing tiny games.
-- [Urho3D](https://github.com/urho3d/Urho3D): Urho3D is a free lightweight, cross-platform 2D and 3D game engine implemented in C++ and released under the MIT license. Greatly inspired by OGRE and Horde3D.
-- [Vcpkg](https://github.com/microsoft/vcpkg): Vcpkg helps you manage C and C++ libraries on Windows, Linux and MacOS.
-- [and more...](https://grep.app/search?q=kuba--/zip)
+#### [Zig](https://ziglang.org)
 
+```shell
+$ zig build-exe main.zig -lc -lzip
+```
+
+```zig
+const c = @cImport({
+    @cInclude("zip.h");
+});
+
+pub fn main() void {
+    var zip = c.zip_open("/tmp/zig.zip", 6, 'w');
+    defer c.zip_close(zip);
+
+    _ = c.zip_entry_open(zip, "test");
+    defer _ = c.zip_entry_close(zip);
+
+    const content = "test content";
+    _ = c.zip_entry_write(zip, content, content.len);
+}
+```
+
+#### [Odin](https://odin-lang.org)
+> Third party binding: [thechampagne/zip-odin](https://github.com/thechampagne/zip-odin)
+
+```odin
+package main
+
+foreign import lib "system:zip"
+
+import "core:c"
+
+foreign lib {
+    zip_open :: proc(zipname : cstring, level : c.int, mode : c.char) -> rawptr ---
+
+    zip_close :: proc(zip : rawptr) ---
+
+    zip_entry_open :: proc(zip : rawptr, entryname : cstring) -> c.int ---
+
+    zip_entry_close :: proc(zip : rawptr) -> c.int ---
+
+    zip_entry_write :: proc(zip : rawptr, buf : rawptr, bufsize : c.size_t) -> c.int ---
+}
+
+main :: proc() {
+    zip_file := zip_open("odin.zip", 6, 'w')
+    defer zip_close(zip_file)
+
+    zip_entry_open(zip_file, "test")
+    defer zip_entry_close(zip_file)
+
+    content := "test content"
+    zip_entry_write(zip_file, &content, len(content))
+}
+```
+
+#### [Nim](https://nim-lang.org)
+> Third party binding: [thechampagne/nimzip](https://github.com/thechampagne/nimzip)
+
+```shell
+$ nim c --passL:-lzip main.nim
+```
+
+```nim
+proc zip_open(zipname: cstring, level: cint, mode: char): pointer {.importc.}
+proc zip_close(zip: pointer) {.importc.}
+proc zip_entry_open(zip: pointer, entryname: cstring): cint {.importc.}
+proc zip_entry_close(zip: pointer): cint {.importc.}
+proc zip_entry_write(zip: pointer, buf: pointer, bufsize: csize_t): cint {.importc.}
+
+when isMainModule:
+  var zip = zip_open("/tmp/nim.zip", 6, 'w')
+
+  discard zip_entry_open(zip, "test")
+
+  let content: cstring = "test content"
+  discard zip_entry_write(zip, content, csize_t(len(content)))
+
+  discard zip_entry_close(zip)
+  zip_close(zip)
+```
+
+#### [D](https://dlang.org)
+> Third party binding: [thechampagne/zip-d](https://github.com/thechampagne/zip-d)
+
+```shell
+$ dmd -L-lzip main.d
+```
+
+```d
+extern(C) void* zip_open(const(char)* zipname, int level, char mode);
+extern(C) void zip_close(void* zip);
+extern(C) int zip_entry_open(void* zip, const(char)* entryname);
+extern(C) int zip_entry_close(void* zip);
+extern(C) int zip_entry_write(void* zip, const(void)* buf, size_t bufsize);
+
+void main()
+{
+  void* zip = zip_open("/tmp/d.zip", 6, 'w');
+  scope(exit) zip_close(zip);
+
+  zip_entry_open(zip, "test");
+  scope(exit) zip_entry_close(zip);
+
+  string content = "test content";
+  zip_entry_write(zip, content.ptr, content.length);
+}
+```
+
+#### [Pascal](https://en.wikipedia.org/wiki/Pascal_(programming_language))
+> Third party binding: [thechampagne/zip-pascal](https://github.com/thechampagne/zip-pascal)
+
+```pas
+program main;
+
+{$linklib c}
+{$linklib zip}
+
+uses ctypes;
+
+function zip_open(zipname:Pchar; level:longint; mode:char):pointer;cdecl;external;
+procedure zip_close(zip:pointer);cdecl;external;
+function zip_entry_open(zip:pointer; entryname:Pchar):longint;cdecl;external;
+function zip_entry_close(zip:pointer):longint;cdecl;external;
+function zip_entry_write(zip:pointer; buf:pointer; bufsize:csize_t):longint;cdecl;external;
+
+const
+   content: Pchar = 'test content';
+var
+   zip : pointer;
+
+begin
+   zip := zip_open('/tmp/pascal.zip', 6, 'w');
+
+   zip_entry_open(zip, 'test');
+
+   zip_entry_write(zip, content, strlen(content));
+   zip_entry_close(zip);
+   zip_close(zip);
+end.
+```
+
+### Check out more cool projects which use this library
+
+* [Filament](https://github.com/google/filament): Filament is a real-time physically based rendering engine for Android, iOS, Linux, macOS, Windows, and WebGL. It is designed to be as small as possible and as efficient as possible on Android.
+* [Hermes JS Engine](https://github.com/facebook/hermes): Hermes is a JavaScript engine optimized for fast start-up of React Native apps on Android. It features ahead-of-time static optimization and compact bytecode.
+* [Monster Mash](https://github.com/google/monster-mash): New Sketch-Based Modeling and Animation Tool.
+* [Object-Oriented Graphics Rendering Engine](https://github.com/OGRECave/ogre): OGRE is a scene-oriented, flexible 3D engine written in C++ designed to make it easier and more intuitive for developers to produce games and demos utilising 3D hardware.
+* [Open Asset Import Library](https://github.com/assimp/assimp): A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data.
+* [PowerToys](https://github.com/microsoft/PowerToys): Set of utilities for power users to tune and streamline their Windows 10 experience for greater productivity.
+* [The Ring Programming Language](https://ring-lang.github.io): Innovative and practical general-purpose multi-paradigm language.
+* [The V Programming Language](https://github.com/vlang/v): Simple, fast, safe, compiled. For developing maintainable software.
+* [TIC-80](https://github.com/nesbox/TIC-80): TIC-80 is a FREE and OPEN SOURCE fantasy computer for making, playing and sharing tiny games.
+* [Urho3D](https://github.com/urho3d/Urho3D): Urho3D is a free lightweight, cross-platform 2D and 3D game engine implemented in C++ and released under the MIT license. Greatly inspired by OGRE and Horde3D.
+* [and more...](https://grep.app/search?q=kuba--/zip)

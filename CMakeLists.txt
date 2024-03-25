@@ -284,7 +284,7 @@ ELSEIF(MSVC)
   ELSE() # msvc
     ADD_COMPILE_OPTIONS(/MP /bigobj)
   ENDIF()
-  
+
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)	

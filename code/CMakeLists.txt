@@ -1250,6 +1250,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-unused-template
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
+        -Wno-deprecated-declarations
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
@@ -1271,9 +1272,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson

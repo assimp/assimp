@@ -3288,9 +3288,9 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
     }
 
     if (keyframeLists[TransformationComp_Rotation].size() > 0) {
-        InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], AI_DEG_TO_RAD(defRotation), maxTime, minTime, rotOrder);
+        InterpolateKeys(outRotations, keytimes, keyframeLists[TransformationComp_Rotation], defRotation, maxTime, minTime, rotOrder);
     } else {
-        aiQuaternion defQuat = EulerToQuaternion(AI_DEG_TO_RAD(defRotation), rotOrder);
+        aiQuaternion defQuat = EulerToQuaternion(defRotation, rotOrder);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mTime = CONVERT_FBX_TIME(keytimes[i]) * anim_fps;
             outRotations[i].mValue = defQuat;
@@ -3312,7 +3312,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
 
     const aiVector3D& preRotation = PropertyGet<aiVector3D>(props, "PreRotation", ok);
     if (ok && preRotation.SquareLength() > zero_epsilon) {
-        const aiQuaternion preQuat = EulerToQuaternion(AI_DEG_TO_RAD(preRotation), Model::RotOrder_EulerXYZ);
+        const aiQuaternion preQuat = EulerToQuaternion(preRotation, Model::RotOrder_EulerXYZ);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mValue = preQuat * outRotations[i].mValue;
         }
@@ -3320,7 +3320,7 @@ aiNodeAnim* FBXConverter::GenerateSimpleNodeAnim(const std::string& name,
 
     const aiVector3D& postRotation = PropertyGet<aiVector3D>(props, "PostRotation", ok);
     if (ok && postRotation.SquareLength() > zero_epsilon) {
-        const aiQuaternion postQuat = EulerToQuaternion(AI_DEG_TO_RAD(postRotation), Model::RotOrder_EulerXYZ);
+        const aiQuaternion postQuat = EulerToQuaternion(postRotation, Model::RotOrder_EulerXYZ);
         for (size_t i = 0; i < keyCount; ++i) {
             outRotations[i].mValue = outRotations[i].mValue * postQuat;
         }

@@ -1,0 +1,9 @@
+#usda 1.0
+
+def Shader "TexCoordReader"
+{
+    uniform token info:id = "UsdPrimvarReader_string"
+    # UsdPreviewSurface spec 2.3 changes type for varname from `token` to `string`.
+    string inputs:varname = "st"
+    string outputs:result
+}

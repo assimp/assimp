@@ -1,0 +1,9 @@
+#usda 1.0
+
+def "sphere1" (
+  # this is possible, but referencing subtree is not recomended?
+  references = @scene-001.usda@</xform0/mesh0>
+)
+{
+
+}

@@ -1,0 +1,15 @@
+#usda 1.0
+( subLayers = [@bora-005.usda@] )
+
+# overrite Prim metadatum
+over Xform "bora"
+( customData = {
+    dictionary boradict = {
+      int a = 3
+    }
+  }
+)
+{
+    
+}
+

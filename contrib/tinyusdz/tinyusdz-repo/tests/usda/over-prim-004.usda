@@ -1,0 +1,10 @@
+#usda 1.0
+( subLayers = [@bora-001.usda@] )
+
+# overrite Prim metadatum
+over Xform "bora"
+( doc = "over-bora" )
+{
+    
+}
+

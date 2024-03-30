@@ -1,0 +1,6 @@
+#usda 1.0
+
+# https://github.com/PixarAnimationStudios/OpenUSD/issues/2560
+def "foo" {
+    asset test = @響@
+}

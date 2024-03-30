@@ -1,0 +1,7 @@
+#usda 1.0
+
+def BlendShape "bs0" {
+
+  uniform float inbetweens:val = 1.0 ( weight = 0.5 )
+
+}

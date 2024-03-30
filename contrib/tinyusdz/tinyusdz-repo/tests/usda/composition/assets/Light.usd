@@ -1,0 +1,16 @@
+#usda 1.0
+(
+    defaultPrim = "Light"
+    upAxis = "Z"
+)
+
+def Xform "Light" (
+    assetInfo = {
+        asset identifier = @assets/Light.usd@
+        string name = "Light"
+    }
+    kind = "component"
+    payload = @./Light_payload.usd@</Light>
+)
+{
+}

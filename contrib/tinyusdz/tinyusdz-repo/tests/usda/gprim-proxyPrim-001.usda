@@ -1,0 +1,10 @@
+#usda 1.0
+
+def Sphere "world"
+{
+}
+
+def Xform "hello"
+{
+    rel proxyPrim = </world>
+}

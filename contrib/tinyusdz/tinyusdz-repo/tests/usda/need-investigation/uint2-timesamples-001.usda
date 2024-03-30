@@ -1,0 +1,10 @@
+#usda 1.0
+
+def "bora"
+{
+  # uint2 is represented as UnregisteredValue(string data) in Crate.
+  # pxrUSD cannot parse the following
+  # https://github.com/PixarAnimationStudios/USD/issues/2148
+  uint2 sample.timeSamples = {0: (0, 1), 7.2: (5, 8)}
+}
+

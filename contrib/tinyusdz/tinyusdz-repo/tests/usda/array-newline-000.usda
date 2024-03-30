@@ -1,0 +1,5 @@
+#usda 1.0
+def Cube "cube0" {
+    custom double[] mysize = [4.0, 2.0,
+ ]
+}

@@ -1,0 +1,10 @@
+#usda 1.0
+
+def "sphere1" (
+  payload = [@sphere.usda@,
+		@suzanne.usda@,
+		]
+)
+{
+
+}

@@ -1,0 +1,48 @@
+name: Windows ARM
+
+# TODO: Run unittest on Native ARM64 Windows11
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+
+  # Windows(ARM64) + Visual Studio 2022 build
+  build-windows-arm64-msvc:
+
+    runs-on: windows-latest
+    name: Build for Windows(ARM64, MSVC)
+
+    # Use system installed cmake
+    # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Configure
+        run: |
+          mkdir build_arm64
+          cmake -G "Visual Studio 17 2022" -A ARM64 -Bbuild_arm64 -DTINYUSDZ_WITH_EXR=1 -DTINYUSDZ_WITH_TIFF=1 -S.
+      - name: Build
+        run: cmake --build build_arm64 --config Release
+
+  # Windows(ARM32) + Visual Studio 2022 build
+  build-windows-arm32-msvc:
+
+    runs-on: windows-latest
+    name: Build for Windows(ARM32, MSVC)
+
+    # Use system installed cmake
+    # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Configure
+        run: |
+          mkdir build_arm32
+          cmake -G "Visual Studio 17 2022" -A ARM -Bbuild_arm32  -DTINYUSDZ_WITH_EXR=1 -DTINYUSDZ_WITH_TIFF=1 -S.
+      - name: Build
+        run: cmake --build build_arm32 --config Release
+

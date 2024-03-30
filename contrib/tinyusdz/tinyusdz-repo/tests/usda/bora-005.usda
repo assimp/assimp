@@ -1,0 +1,10 @@
+#usda 1.0
+
+def Xform "bora" (
+  customData = {
+    int a = 3
+  }
+)
+{
+
+}

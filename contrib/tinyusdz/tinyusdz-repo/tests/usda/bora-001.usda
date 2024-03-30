@@ -1,0 +1,7 @@
+#usda 1.0
+
+def Xform "bora" (
+  doc = "bora-001" )
+{
+
+}

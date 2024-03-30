@@ -1,0 +1,12 @@
+#usda 1.0
+
+class "bora" {
+ float myval = 2.3
+}
+
+def "muda" (
+  inherits = </bora> 
+  ) {
+
+}
+

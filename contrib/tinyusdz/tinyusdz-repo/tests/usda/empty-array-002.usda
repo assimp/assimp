@@ -1,0 +1,8 @@
+#usda 1.0
+
+def "bora" 
+{
+  vector3f[] primvars:myvecs = [] (
+    interpolation = "faceVarying"
+  )
+}

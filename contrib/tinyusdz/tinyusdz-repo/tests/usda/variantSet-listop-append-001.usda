@@ -1,0 +1,15 @@
+#usda 1.0
+
+def Xform "Implicits" (
+    variants = { string shapeVariant = "Capsule" }
+    append variantSets = "shapeVariant"
+)
+{
+    float myval = 1.0
+
+    variantSet "shapeVariant" = {
+        "Capsule" {
+            float myval = 2.0
+        }
+    }
+}

@@ -1,0 +1,20 @@
+#usda 1.0
+def Scope "MaterialX" (
+        references = [
+		@./materials/standard_surface_brass_tiled.mtlx@</MaterialX>,
+		@./materials/standard_surface_metal_brushed.mtlx@</MaterialX>,
+                @./materials/standard_surface_marble_solid.mtlx@</MaterialX>,
+                @./materials/standard_surface_thin_film.mtlx@</MaterialX>,
+                @./materials/standard_surface_carpaint.mtlx@</MaterialX>,
+                @./materials/standard_surface_velvet.mtlx@</MaterialX>,
+                @./materials/standard_surface_chrome.mtlx@</MaterialX>,
+                @./materials/standard_surface_copper.mtlx@</MaterialX>,
+                @./materials/standard_surface_jade.mtlx@</MaterialX>,
+                @./materials/standard_surface_wood_tiled.mtlx@</MaterialX>,
+                @./materials/standard_surface_glass.mtlx@</MaterialX>,
+	 ]
+)
+{
+}
+
+

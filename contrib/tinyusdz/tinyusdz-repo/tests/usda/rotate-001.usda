@@ -1,0 +1,8 @@
+#usda 1.0
+
+def Xform "hello"
+{
+  double xformOp:rotateX = 90
+  uniform token[] xformOpOrder = ["xformOp:rotateX"]
+}
+

@@ -1,0 +1,9 @@
+#usda 1.0
+
+def Xform "hello" (
+  displayName = "こんにちは"
+  )
+{
+   # https://github.com/PixarAnimationStudios/OpenUSD/issues/2560
+   asset myasset = "響"
+}

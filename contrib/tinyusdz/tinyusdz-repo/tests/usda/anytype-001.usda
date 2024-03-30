@@ -1,0 +1,6 @@
+#usda 1.0
+
+# __AnyType__ = Old syntax for 'generic' Prim type.
+def __AnyType__ "bora" {
+
+}

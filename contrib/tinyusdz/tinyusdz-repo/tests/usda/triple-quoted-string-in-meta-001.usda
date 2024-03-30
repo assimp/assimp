@@ -1,0 +1,17 @@
+#usda 1.0
+(
+)
+
+def Xform "hello"
+(
+"""
+bora
+dora
+"""
+)
+{
+    def Sphere "world"
+    {
+	double radius = 1.2
+    }
+}

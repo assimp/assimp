@@ -1,0 +1,13 @@
+#usda 1.0
+def "bora (
+    variantSets = ["y"]
+    variantSet "y" = {
+        "a" {
+            double x = 10.0
+        }
+        "b" {
+            double x = 20.0
+        }
+    }
+}
+

@@ -1,0 +1,7 @@
+#usda 1.0
+
+def Shader "bora" {
+  uniform token info:id = "myShader"
+
+  float myval = 1.0
+}

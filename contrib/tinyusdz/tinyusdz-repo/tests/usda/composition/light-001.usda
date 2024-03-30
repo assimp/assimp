@@ -1,0 +1,13 @@
+#usda 1.0
+def Xform "grp" (
+    kind = "group"
+)
+{
+    def "Light_1" (
+	prepend references = @./assets/Light.usd@
+    )
+    {
+	double3 xformOp:translate = (-10, -2, 3)
+	uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}

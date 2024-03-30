@@ -1,0 +1,10 @@
+#usda1.0
+(
+  defaultPrim = "bora"
+)
+
+def Sphere "bora"
+{
+  double radius = 1.2
+}
+

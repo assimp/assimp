@@ -1,0 +1,7 @@
+#usda 1.0
+def Cone "hello"
+(
+)
+{
+  asset myval = @bora.jpg@ ( colorSpace  = "srgb_displayp3" )
+}

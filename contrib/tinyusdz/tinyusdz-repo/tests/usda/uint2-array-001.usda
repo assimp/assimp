@@ -1,0 +1,7 @@
+#usda 1.0
+
+def "bora"
+{
+  # uint2 is represented as UnregisteredValue(string data) in Crate.
+  uint2[] v = [(0, 1), (2, 3)]
+}

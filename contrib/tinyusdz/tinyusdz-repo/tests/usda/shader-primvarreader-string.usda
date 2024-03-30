@@ -1,0 +1,8 @@
+#usda 1.0
+
+def Shader "TexCoordReader"
+{
+    uniform token info:id = "UsdPrimvarReader_string"
+    token inputs:varname = "st_string"
+    string outputs:result
+}

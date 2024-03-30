@@ -1,0 +1,14 @@
+#usda 1.0
+( defaultPrim = "xform0" )
+
+def Xform "xform0" {
+  float radius = 2.2 
+
+  def Mesh "mesh0" {
+    float radius = 3.3
+  }
+}
+
+def Sphere "sphere0" {
+  double radius =  1.3
+}

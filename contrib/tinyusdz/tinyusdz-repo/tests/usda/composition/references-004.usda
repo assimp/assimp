@@ -1,0 +1,10 @@
+#usda 1.0
+
+# Prim type does not change.
+def Scope "sphere1" (
+  # use defaultPrim in scene-001.usda
+  references = @scene-001.usda@
+)
+{
+
+}

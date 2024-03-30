@@ -1,0 +1,7 @@
+#usda 1.0
+(
+  subLayers = [
+    @cube-000.usda@,
+    @cube-001.usda@,
+  ]
+)

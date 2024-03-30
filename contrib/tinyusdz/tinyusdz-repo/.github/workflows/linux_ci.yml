@@ -1,0 +1,115 @@
+name: Linux
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+
+  # Disable gcc4.9 and gcc5 since its too obsolete and failed to do apt-get
+  ## compile with oldest gcc4.9 which supports (most of)C++14
+  #build-gcc49:
+
+  #  runs-on: ubuntu-latest
+  #  name: Build with gcc 4.9 
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          sudo apt-add-repository -y 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial main'
+  #          sudo apt-add-repository -y 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe'
+  #          sudo apt-get update
+  #          sudo apt-get install -y build-essential
+  #          sudo apt-get install -y gcc-4.9 g++-4.9 gcc-4.9-multilib
+  #          ./scripts/bootstrap-gcc-49.sh
+  #          cd build-gcc49
+  #          make VERBOSE=1
+
+  ## compile with older gcc5
+  #build-gcc5:
+
+  #  runs-on: ubuntu-latest
+  #  name: Build with gcc 5
+
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          sudo apt-add-repository -y 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial main'
+  #          sudo apt-add-repository -y 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe'
+  #          sudo apt-get update
+  #          sudo apt-get install -y build-essential
+  #          sudo apt-get install -y gcc-5 g++-5
+  #          ./scripts/bootstrap-gcc-5.sh
+  #          cd build-gcc5
+  #          make VERBOSE=1
+
+  # Cross-compile for aarch64 linux target
+  build-cross-aarch64:
+
+    runs-on: ubuntu-latest
+    name: Build on cross aarch64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeAndBuild
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            ./scripts/bootstrap-gcc-aarch64-cross-ci.sh
+            cd build-cross
+            make VERBOSE=1
+
+  # Build with OpenSubdiv
+  build-osd:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+      run: ./scripts/bootstrap-cmake-linux-with-osd.sh
+    - name: make
+      run: cd build && make
+    - name: test
+      run: cd build && ctest --output-on-failure
+
+  # 32bit build(Linux only)
+  build-32bit:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup
+      run: |
+          sudo apt update
+          sudo apt-get install -y gcc-multilib g++-multilib
+    - name: configure
+      run: ./scripts/bootstrap-cmake-linux-32bit.sh
+    - name: make
+      run: cd build_m32 && make
+    - name: test
+      run: cd build_m32 && ctest --output-on-failure
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    # ubuntu-latest(Ubuntu 22.04 as of 2024/01/03) has clang installed,
+    # so use clang
+    # TODO: Use libc++ for STL?
+    - name: configure
+      run: CXX=clang++ CC=clang ./scripts/bootstrap-cmake-linux.sh
+    - name: make
+      run: cd build && make
+    - name: tests
+      run: cd build && ctest --output-on-failure

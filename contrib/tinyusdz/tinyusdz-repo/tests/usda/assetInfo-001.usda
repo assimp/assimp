@@ -1,0 +1,18 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+    defaultPrim = "hello"
+)
+
+def Cone "hello"
+(
+  assetInfo = {
+      asset bora = @boraC:\Users@
+      string name = "baked_mesh"
+  }
+)
+{
+  uniform token axis = "X"
+  double height = 1.2
+}

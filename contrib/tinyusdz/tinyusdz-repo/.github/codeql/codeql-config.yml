@@ -1,0 +1,10 @@
+name: "TinyUSDZ CodeQL config"
+
+paths:
+  - src 
+paths-ignore:
+  - src/external
+  - src/osd
+  - src/lz4
+  - src/blender
+

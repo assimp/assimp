@@ -1,0 +1,49 @@
+#usda 1.0
+(
+    defaultPrim = "mesh"
+    metersPerUnit = 0.01
+    timeCodesPerSecond = 24
+    upAxis = "Y"
+)
+
+def Mesh "mesh"
+{
+    rel material:binding = </mat>
+
+    int[] faceVertexCounts = [4]
+    int[] faceVertexIndices = [0, 1, 2, 3]
+
+    texCoord2f[] primvars:st = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)] (
+        interpolation = "faceVarying"
+    )
+}
+
+def Material "mat"
+{
+    token inputs:varname = "st"
+    token outputs:surface.connect = </mat/pbr.outputs:surface>
+
+    def Shader "pbr"
+    {
+         uniform token info:id = "UsdPreviewSurface"
+         color3f inputs:diffuseColor.connect = </mat/difftex.outputs:rgb>
+         token outputs:surface
+    
+    }
+
+    def Shader "difftex"
+    {
+	uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @@
+	float2 inputs:st.connect = </mat/difftex/uvreader.outputs:result>
+	float3 outputs:rgb
+
+        def Shader "uvreader"
+        {
+    	   uniform token info:id = "UsdPrimvarReader_float2"
+    	   token inputs:varname.connect = </mat.inputs:varname>
+    	   float2 outputs:result
+        }
+    }
+}
+

@@ -1,0 +1,9 @@
+#usda 1.0
+
+def "muda"
+{
+    def "bora"
+    {
+      rel mypath = <../../dora>
+    }
+}

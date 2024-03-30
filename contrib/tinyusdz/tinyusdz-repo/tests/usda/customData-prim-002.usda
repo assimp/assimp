@@ -1,0 +1,24 @@
+#usda 1.0
+
+def Xform "teapot" (
+    kind = "component"
+)
+{
+    def Mesh "Teapot" (
+        customData = {
+            bool zUp = 1
+            int2 i2val = (1, 2)
+            int3 i3val = (1, 2, 3)
+            int4 i4val = (1, 2, 3, 4)
+            dictionary Maya = {
+                bool generated = 1
+            }
+        }
+    )
+    {
+
+        color3f[] primvars:displayColor = [(1, 1, 1)] (
+        )
+
+    }
+}

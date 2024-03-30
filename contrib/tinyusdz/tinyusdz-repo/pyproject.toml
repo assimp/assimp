@@ -1,0 +1,40 @@
+#
+# It seeems pyproject(python-build) is still not mature to build native modules.
+# So we don't use pyton-buold at the moment.
+# This file is just provided for future possible use of `python-build`.
+#
+[build-system]
+requires = [
+    # NOTE: setuptools_scm>=8 is not supported in py3.6 cibuildwheel env.
+    # so use older setuptools_scm for a while
+    #"setuptools>=64",
+    #"setuptools_scm>=8",
+    "setuptools>=45",
+    "setuptools_scm[toml]>=6.2",
+    "wheel", "scikit-build", "cmake>=3.16", "ninja"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 140
+
+[project]
+name = "tinyusdz"
+
+#version = "0.8.0rc5"
+# Use setuptools_scm
+dynamic = ["version"]
+
+description = "Python binding of TinyUSDZ"
+license = {file = "LICENSE"}
+authors = [{ name = "Syoyo Fujita", email = "syoyofujtia@gmail.com"},
+           { name = "Light Transport Entertainment, Inc.", email = "syoyo@lighttransport.com"}
+          ]
+readme = {file = "README.md", content-type = "text/markdown"}
+
+[tool.setuptools_scm]
+# setuptools_scm>=8
+#version_file = "python/tinyusdz/_version.py"
+
+# setuptools_scm<8
+write_to = "python/tinyusdz/_version.py"
+

@@ -1,0 +1,9 @@
+#usda 1.0
+
+def "bora" (
+   customData = {
+     dictionary "/bora" = {
+       string val = "muda"
+     }
+   }
+) {}

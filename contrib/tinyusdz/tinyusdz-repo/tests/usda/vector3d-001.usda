@@ -1,0 +1,5 @@
+#usda 1.0
+
+def "bora" {
+  vector3d dora = (1, 2, 3)
+}

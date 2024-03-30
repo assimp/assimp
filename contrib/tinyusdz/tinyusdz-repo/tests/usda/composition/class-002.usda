@@ -1,0 +1,14 @@
+#usda 1.0
+( subLayers = [@class-base.usda@] )
+
+# `over` to `class` is allowed.  
+over "myclass" {
+ float myval = 2.3
+}
+
+def "muda" (
+  inherits = </myclass> 
+  ) {
+
+}
+

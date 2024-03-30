@@ -1,0 +1,11 @@
+#usda 1.0
+(
+    customLayerData = {
+        bool zUp = 1
+        string bora = "my string"
+        dictionary Maya = {
+            bool generated
+        }
+    }
+
+)

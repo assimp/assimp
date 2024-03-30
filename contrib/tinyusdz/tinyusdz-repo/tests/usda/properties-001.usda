@@ -1,0 +1,13 @@
+#usda 1.0
+
+# USDA pprint should print properties according to the order of the appearance
+def Sphere "world"
+{
+  double3 xformOp:translate = (0, 1, 2)
+  double radius = 1.2
+  double3 xformOp:scale = (1, 2, 3)
+
+  uniform token[] xformOpOrder = ["!invert!xformOp:translate", "xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+
+  double3 xformOp:rotateXYZ = (90, 30, 15)
+}

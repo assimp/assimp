@@ -1,0 +1,10 @@
+#usda 1.0
+class Xform "ShaderBall"
+{
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def "model" (
+                references = @./shaderballRef.usda@
+        ){}
+}
+

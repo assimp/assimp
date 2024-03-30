@@ -1,0 +1,6 @@
+#usda 1.0
+
+# when USDAReaderConfig::allow_unknown_prims is true, unknown Prim type is treated as Model Prim.
+def UnknownMyPrim "bora" {
+  float myval = 1.0
+}

@@ -1,0 +1,101 @@
+name: Build and upload to PyPI
+
+# Build on every branch push, tag push, and pull request change:
+on: [push, pull_request]
+  
+jobs:
+
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+        # Disable building PyPy wheels on all platforms
+        env:
+            CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+            CIBW_ARCHS_WINDOWS: "AMD64 x86"
+            # aarch64 build takes too much time, so aarch64 build is delegated to Cirrus CI.
+            CIBW_ARCHS_LINUX: "x86_64 i686"
+            CIBW_SKIP: pp*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  # It looks cibuildwheels did not clean build folder(CMake), and it results to Windows arm64 build failure(trying to reuse x86 build of .obj)
+  # So supply separated build job for Windows ARM64 build
+  # TODO: clean build folder using CIBW_BEFORE_ALL?
+  build_win_arm64_wheels:
+    name: Build ARM64 wheels on Windows.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+        # Disable building PyPy wheels on all platforms
+        env:
+            CIBW_ARCHS_WINDOWS: "ARM64"
+            CIBW_SKIP: pp*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Optional, use if you use setuptools_scm
+        submodules: true  # Optional, use if you have submodules
+
+    - name: Build SDist
+      run: pipx run build --sdist
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cibw-sdist
+        path: dist/*.tar.gz
+
+  upload_all:
+    needs: [build_wheels, build_wheels, make_sdist]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    # # upload to PyPI on every tag starting with 'v'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    # alternatively, to publish when a GitHub Release is created, use the following rule:
+    # if: github.event_name == 'push' && github.event.action == 'published'
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: cibw-*
+        path: dist
+        merge-multiple: true
+
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        # Use Trusted Publishing so no use of PYPI_API_TOKEN
+        # user: __token__
+        # password: ${{ secrets.PYPI_API_TOKEN }}
+        skip-existing: true
+        verbose: true

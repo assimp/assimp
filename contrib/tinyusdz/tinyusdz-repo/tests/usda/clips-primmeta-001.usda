@@ -1,0 +1,14 @@
+#usda 1.0
+            over "GEO" (
+                clips = {
+                    dictionary geo = {
+                        double2[] active = [(1004, 0)]
+                        asset[] assetPaths = [@payload/animated_data.1004.usdc@]
+                        asset manifestAssetPath = @./clip.manifest.usda@
+                        string primPath = "/root/remi/body_M_hrc/GEO"
+                        double2[] times = []
+                    }
+                }
+            )
+{ } 
+

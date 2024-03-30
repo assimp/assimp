@@ -1,0 +1,18 @@
+#usda 1.0
+
+def "bora" (
+)
+{
+    variantSet "shapeVariant" = {
+        "Capsule" {
+	    def Skeleketon "myskel" {
+            }
+        }
+        "Cone" {
+	    def Xform "myxform" {
+               def Mesh "mymesh" {
+               }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+#usda 1.0
+
+def "bora" 
+(
+   # Seems we need to specify </MaterialX> prim path
+   references = @usd_preview_surface_default.mtlx@</MaterialX>
+) {
+
+}

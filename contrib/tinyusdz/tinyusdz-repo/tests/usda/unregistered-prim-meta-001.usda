@@ -1,0 +1,7 @@
+#usda 1.0
+
+def "bora" (
+  aa = a
+) {
+
+}

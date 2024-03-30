@@ -1,0 +1,8 @@
+#usda 1.0
+
+def "sphere1" (
+  references = [@sphere.usda@</sphere>, @suzanne.usda@</Suzanne>]
+)
+{
+
+}

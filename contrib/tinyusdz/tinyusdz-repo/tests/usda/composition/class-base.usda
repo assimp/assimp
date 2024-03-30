@@ -1,0 +1,5 @@
+#usda 1.0
+
+class "myclass" {
+  int a = 3
+}

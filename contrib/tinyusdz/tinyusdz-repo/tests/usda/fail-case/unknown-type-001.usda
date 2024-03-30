@@ -1,0 +1,6 @@
+#usda 1.0
+
+def "bora" {
+  # FYI pxrUSD does not claim syntax error: https://github.com/PixarAnimationStudios/USD/issues/2201
+  r a = </dora>
+}

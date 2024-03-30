@@ -1,0 +1,29 @@
+name: macOS
+
+# TODO: Build with Python.
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+
+  build-macos:
+
+    runs-on: macos-latest
+    name: Build for macOS
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeAndBuild
+        run: |
+            ./scripts/bootstrap-cmake-macos.sh
+            cd build
+            make VERBOSE=1
+      - name: Ctest
+        run: |
+            cd build
+            ctest --output-on-failure

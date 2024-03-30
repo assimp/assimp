@@ -1,0 +1,5 @@
+#usda 1.0
+
+# Seems ok to use `class` to existing Prim type(e.g. Xform, GeomMesh) 
+class Xform "bora"
+() {}

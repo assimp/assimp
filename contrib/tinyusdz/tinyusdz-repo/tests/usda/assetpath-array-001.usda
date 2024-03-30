@@ -1,0 +1,7 @@
+#usda 1.0
+def Cone "hello"
+(
+)
+{
+  asset[] myvals = ['bora.jpg', 'dora.png']
+}

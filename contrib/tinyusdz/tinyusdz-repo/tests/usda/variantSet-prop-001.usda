@@ -1,0 +1,18 @@
+#usda 1.0
+
+def "bora" (
+    variants = {
+        string shapeVariant = "Capsule"
+    }
+    append variantSets = "shapeVariant"
+)
+{
+    variantSet "shapeVariant" = {
+        "Capsule" {
+            double myval = 2.0
+        }
+        "Cone" {
+            int myval = 3
+        }
+    }
+}

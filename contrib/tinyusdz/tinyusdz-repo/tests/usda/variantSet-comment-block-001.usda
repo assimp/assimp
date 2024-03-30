@@ -1,0 +1,31 @@
+#usda 1.0
+(
+    defaultPrim = "isCoral"
+    metersPerUnit = 0.0254
+    upAxis = "Y"
+)
+
+def Xform "isCoral"
+{
+    def Xform "geometry" (
+        variants = {
+            string model = "isCoral"
+        }
+        prepend variantSets = "model"
+    )
+    {
+        variantSet "model" = {
+            "isCoral" (
+                kind = "component"
+                #prepend payload = @./isCoral.usd@</isCoral>
+            ) {
+                string geomname = "./isCoral.usd"
+
+            }
+            #"isCoral1" (
+            #    kind = "component"
+            #    prepend payload = @./isCoral1.usd@</isCoral1>
+            #) {
+        }
+    }
+}

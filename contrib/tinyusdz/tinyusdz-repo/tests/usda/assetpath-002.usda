@@ -1,0 +1,8 @@
+#usda 1.0
+def Cone "hello"
+(
+)
+{
+  # looks double quotes are allowd for asset path in pxrUSD.
+  asset myval = 'b@ora.jpg'
+}

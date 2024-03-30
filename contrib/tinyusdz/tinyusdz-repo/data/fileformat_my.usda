@@ -1,0 +1,10 @@
+#usda 1.0
+
+# example USDA for fileformat example: "my" custom fileformat.
+def "muda" (
+	references = @bora.my@
+	)
+{
+
+}
+

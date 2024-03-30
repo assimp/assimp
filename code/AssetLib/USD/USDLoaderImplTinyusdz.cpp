@@ -106,6 +106,7 @@ void USDImporterImplTinyusdz::InternReadFile(
         pScene->mMeshes[i] = new aiMesh();
         verticesForMesh(render_scene, pScene, i);
         facesForMesh(render_scene, pScene, i);
+        uvsForMesh(render_scene, pScene, i);
         pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 }
@@ -141,6 +142,22 @@ void USDImporterImplTinyusdz::facesForMesh(
     }
 }
 
+void USDImporterImplTinyusdz::uvsForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx) {
+    if (render_scene.meshes[meshIdx].facevaryingTexcoords.size() < 1) {
+        return;
+    }
+    const auto uvsForSlot0 = render_scene.meshes[meshIdx].facevaryingTexcoords.at(0);
+    if (render_scene.meshes[meshIdx].points.size() != uvsForSlot0.size()) {
+        return;
+    }
+    pScene->mMeshes[meshIdx]->mTextureCoords[0] = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+    for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
+        pScene->mMeshes[meshIdx]->mTextureCoords[0][j].x = uvsForSlot0[j][0];
+        pScene->mMeshes[meshIdx]->mTextureCoords[0][j].y = uvsForSlot0[j][1];
+    }
 } // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_USD_IMPORTER

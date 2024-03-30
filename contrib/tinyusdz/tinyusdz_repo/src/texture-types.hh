@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
+namespace tinyusdz {
 enum ColorSpace {
   COLORSPACE_NONE, // No explicit colorspace
   COLORSPACE_SRGB,
@@ -65,4 +66,4 @@ struct TextureSampler {
   bool Sample(const Texture &tex, float u, float v, float w);
 
 };
-
+} // namespace tinyusdz

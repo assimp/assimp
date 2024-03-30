@@ -53,5 +53,7 @@ Copyright (c) 2006-2024, assimp team
 namespace Assimp {
 bool isUsda(const std::string &pFile);
 bool isUsdc(const std::string &pFile);
+bool isUsdz(const std::string &pFile);
+bool isUsd(const std::string &pFile);
 } // namespace Assimp
 #endif // AI_USDLOADER_UTIL_H_INCLUDED

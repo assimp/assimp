@@ -60,6 +60,9 @@ Copyright (c) 2006-2024, assimp team
 #include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
 
+#include "tydra/render-data.hh"
+#include "tydra/scene-access.hh"
+#include "tydra/shader-network.hh"
 #include "USDLoaderImplTinyusdz.h"
 #include "USDLoaderUtil.h"
 
@@ -70,15 +73,39 @@ void USDImporterImplTinyusdz::InternReadFile(
         const std::string &pFile,
         aiScene *pScene,
         IOSystem *pIOHandler) {
-    DefaultLogger::create("AssimpLog.txt", Logger::VERBOSE);
+    bool ret{false};
+    tinyusdz::USDLoadOptions options;
+    tinyusdz::Stage stage;
+    std::string warn, err;
     if (isUsdc(pFile)) {
-        tinyusdz::USDLoadOptions options;
-        tinyusdz::Stage stage;
-        std::string warn, err;
-        bool ret = LoadUSDCFromFile(pFile, &stage, &warn, &err, options);
-        if (!ret) {
-            pScene = nullptr;
-        }
+        ret = LoadUSDCFromFile(pFile, &stage, &warn, &err, options);
+    } else if(isUsda(pFile)) {
+        ret = LoadUSDAFromFile(pFile, &stage, &warn, &err, options);
+    } else if(isUsdz(pFile)) {
+        ret = LoadUSDZFromFile(pFile, &stage, &warn, &err, options);
+    } else if(isUsd(pFile)) {
+        ret = LoadUSDFromFile(pFile, &stage, &warn, &err, options);
+    }
+    if (!ret) {
+        return;
+    }
+    tinyusdz::tydra::RenderScene render_scene;
+    tinyusdz::tydra::RenderSceneConverter converter;
+    ret = converter.ConvertToRenderScene(stage, &render_scene);
+    if (!ret) {
+        return;
+    }
+    pScene->mNumMeshes = render_scene.meshes.size();
+    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes]();
+    // Create root node
+    pScene->mRootNode = new aiNode();
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
+
+    // Export meshes
+    for (size_t i = 0; i < pScene->mNumMeshes; i++) {
+        pScene->mMeshes[i] = new aiMesh();
+        pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 }
 

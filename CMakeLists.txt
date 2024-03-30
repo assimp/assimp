@@ -262,7 +262,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
-  
+
   IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
     MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
     ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
@@ -284,13 +284,13 @@ ELSEIF(MSVC)
   ELSE() # msvc
     ADD_COMPILE_OPTIONS(/MP /bigobj)
   ENDIF()
-  
+
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
-    ADD_COMPILE_OPTIONS(/wd4351)	
+    ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
   # supress warning for double to float conversion if Double precission is activated
-  ADD_COMPILE_OPTIONS(/wd4244) 
+  ADD_COMPILE_OPTIONS(/wd4244)
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
@@ -330,7 +330,7 @@ ENDIF()
 
 IF (ASSIMP_COVERALLS)
   MESSAGE(STATUS "Coveralls enabled")
-  
+
   INCLUDE(Coveralls)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
@@ -338,7 +338,7 @@ ENDIF()
 
 IF (ASSIMP_ASAN)
   MESSAGE(STATUS "AddressSanitizer enabled")
-  
+
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
   SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fsanitize=address")
 ENDIF()
@@ -695,6 +695,9 @@ ELSE()
     ENDIF()
   ENDIF()
 ENDIF()
+
+# USD/USDA/USDC/USDZ support
+option(ASSIMP_TINYUSDZ_ENABLED "Enable tinyusdz support" OFF)
 
 # Main assimp code
 ADD_SUBDIRECTORY( code/ )

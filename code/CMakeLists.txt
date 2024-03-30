@@ -905,6 +905,80 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
+# USD/USDA/USDC/USDZ support
+# tinyusdz
+IF(ASSIMP_TINYUSDZ_ENABLED)
+    set(Tinyusdz_SRC_RELPATH "../contrib/tinyusdz/tinyusdz_repo/src")
+    set(Tinyusdz_SRCS
+            ${Tinyusdz_SRC_RELPATH}/tinyusdz.cc
+            ${Tinyusdz_SRC_RELPATH}/asset-resolution.cc
+            ${Tinyusdz_SRC_RELPATH}/composition.cc
+            ${Tinyusdz_SRC_RELPATH}/prim-types.cc
+            ${Tinyusdz_SRC_RELPATH}/ascii-parser.cc
+            ${Tinyusdz_SRC_RELPATH}/ascii-parser-basetype.cc
+            ${Tinyusdz_SRC_RELPATH}/ascii-parser-timesamples.cc
+            ${Tinyusdz_SRC_RELPATH}/ascii-parser-timesamples-array.cc
+            ${Tinyusdz_SRC_RELPATH}/usda-reader.cc
+            ${Tinyusdz_SRC_RELPATH}/usdc-reader.cc
+            ${Tinyusdz_SRC_RELPATH}/usdc-writer.cc
+            ${Tinyusdz_SRC_RELPATH}/crate-reader.cc
+            ${Tinyusdz_SRC_RELPATH}/crate-format.cc
+            ${Tinyusdz_SRC_RELPATH}/crate-pprint.cc
+            ${Tinyusdz_SRC_RELPATH}/io-util.cc
+            ${Tinyusdz_SRC_RELPATH}/pprinter.cc
+            ${Tinyusdz_SRC_RELPATH}/tiny-format.cc
+            ${Tinyusdz_SRC_RELPATH}/value-types.cc
+            ${Tinyusdz_SRC_RELPATH}/value-pprint.cc
+            ${Tinyusdz_SRC_RELPATH}/primvar.cc
+            ${Tinyusdz_SRC_RELPATH}/prim-reconstruct.cc
+            ${Tinyusdz_SRC_RELPATH}/prim-composition.cc
+            ${Tinyusdz_SRC_RELPATH}/image-loader.cc
+            ${Tinyusdz_SRC_RELPATH}/usda-writer.cc
+            ${Tinyusdz_SRC_RELPATH}/usdGeom.cc
+            ${Tinyusdz_SRC_RELPATH}/usdSkel.cc
+            ${Tinyusdz_SRC_RELPATH}/usdShade.cc
+            ${Tinyusdz_SRC_RELPATH}/usdMtlx.cc
+            ${Tinyusdz_SRC_RELPATH}/usdLux.cc
+            ${Tinyusdz_SRC_RELPATH}/xform.cc
+            ${Tinyusdz_SRC_RELPATH}/stage.cc
+            ${Tinyusdz_SRC_RELPATH}/str-util.cc
+            ${Tinyusdz_SRC_RELPATH}/path-util.cc
+            ${Tinyusdz_SRC_RELPATH}/image-util.cc
+            ${Tinyusdz_SRC_RELPATH}/image-writer.cc
+            ${Tinyusdz_SRC_RELPATH}/linear-algebra.cc
+            ${Tinyusdz_SRC_RELPATH}/tydra/facial.cc
+            ${Tinyusdz_SRC_RELPATH}/tydra/scene-access.cc
+            ${Tinyusdz_SRC_RELPATH}/tydra/render-data.cc
+            ${Tinyusdz_SRC_RELPATH}/tydra/prim-apply.cc
+            ${Tinyusdz_SRC_RELPATH}/tydra/shader-network.cc
+    )
+
+    set(Tinyusdz_DEP_SOURCES
+            ${Tinyusdz_SRC_RELPATH}/integerCoding.cpp
+            ${Tinyusdz_SRC_RELPATH}/lz4-compression.cc
+            ${Tinyusdz_SRC_RELPATH}/lz4/lz4.c
+            #${Tinyusdz_SRC_RELPATH}/external/string_id/database.cpp
+            #${Tinyusdz_SRC_RELPATH}/external/string_id/string_id.cpp
+            #${Tinyusdz_SRC_RELPATH}/external/string_id/error.cpp
+            ${Tinyusdz_SRC_RELPATH}/external/fpng.cpp
+            #${Tinyusdz_SRC_RELPATH}/external/staticstruct.cc
+            #${Tinyusdz_SRC_RELPATH}/external/tinyxml2/tinyxml2.cpp
+    )
+
+    set(tinyusdz_INCLUDE_DIRS "../contrib/tinyusdz/tinyusdz_repo/src")
+    INCLUDE_DIRECTORIES(${tinyusdz_INCLUDE_DIRS})
+    SOURCE_GROUP( Contrib\\Tinyusdz
+            FILES
+            ${Tinyusdz_SRCS}
+            ${Tinyusdz_DEP_SOURCES}
+    )
+    MESSAGE(STATUS "tinyusdz enabled")
+ELSE()
+    set(Tinyusdz_SRCS "")
+    set(Tinyusdz_DEP_SOURCES "")
+    MESSAGE(STATUS "tinyusdz disabled")
+ENDIF()
+
 # pugixml
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
@@ -1155,6 +1229,8 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Tinyusdz_SRCS}
+  ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
   ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:

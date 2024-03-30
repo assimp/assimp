@@ -60,7 +60,6 @@ Copyright (c) 2006-2024, assimp team
 #include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
 
-#include "tydra/render-data.hh"
 #include "tydra/scene-access.hh"
 #include "tydra/shader-network.hh"
 #include "USDLoaderImplTinyusdz.h"
@@ -105,14 +104,21 @@ void USDImporterImplTinyusdz::InternReadFile(
     // Export meshes
     for (size_t i = 0; i < pScene->mNumMeshes; i++) {
         pScene->mMeshes[i] = new aiMesh();
-        pScene->mMeshes[i]->mNumVertices = render_scene.meshes[i].points.size();
-        pScene->mMeshes[i]->mVertices = new aiVector3D[pScene->mMeshes[i]->mNumVertices];
-        for (size_t j = 0; j < pScene->mMeshes[i]->mNumVertices; ++j) {
-            pScene->mMeshes[i]->mVertices[j].x = render_scene.meshes[i].points[j][0];
-            pScene->mMeshes[i]->mVertices[j].y = render_scene.meshes[i].points[j][1];
-            pScene->mMeshes[i]->mVertices[j].z = render_scene.meshes[i].points[j][2];
-        }
+        verticesForMesh(render_scene, pScene, i);
         pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
+    }
+}
+
+void USDImporterImplTinyusdz::verticesForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx) {
+    pScene->mMeshes[meshIdx]->mNumVertices = render_scene.meshes[meshIdx].points.size();
+    pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+    for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
+        pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
+        pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
+        pScene->mMeshes[meshIdx]->mVertices[j].z = render_scene.meshes[meshIdx].points[j][2];
     }
 }
 

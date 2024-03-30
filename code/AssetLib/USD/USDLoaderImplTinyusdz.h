@@ -50,6 +50,7 @@ Copyright (c) 2006-2024, assimp team
 #include <vector>
 #include <cstdint>
 #include "tinyusdz.hh"
+#include "tydra/render-data.hh"
 
 namespace Assimp {
 class USDImporterImplTinyusdz {
@@ -61,6 +62,11 @@ public:
             const std::string &pFile,
             aiScene *pScene,
             IOSystem *pIOHandler);
+
+    void verticesForMesh(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx);
 };
 } // namespace Assimp
 #endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

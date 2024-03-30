@@ -73,6 +73,11 @@ public:
             aiScene *pScene,
             size_t meshIdx);
 
+    void normalsForMesh(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx);
+
     void uvsForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,

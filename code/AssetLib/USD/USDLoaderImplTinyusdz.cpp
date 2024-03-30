@@ -106,6 +106,7 @@ void USDImporterImplTinyusdz::InternReadFile(
         pScene->mMeshes[i] = new aiMesh();
         verticesForMesh(render_scene, pScene, i);
         facesForMesh(render_scene, pScene, i);
+        normalsForMesh(render_scene, pScene, i);
         uvsForMesh(render_scene, pScene, i);
         pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
@@ -137,6 +138,24 @@ void USDImporterImplTinyusdz::facesForMesh(
         for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices; ++j) {
             pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices[j] =
                     render_scene.meshes[meshIdx].faceVertexIndices[j + faceVertIdxOffset];
+        }
+        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
+    }
+}
+
+void USDImporterImplTinyusdz::normalsForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx) {
+    pScene->mMeshes[meshIdx]->mNormals = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+    size_t faceVertIdxOffset = 0;
+    for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
+        size_t vertIdx;
+        for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices; ++j) {
+            vertIdx = pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices[j];
+            pScene->mMeshes[meshIdx]->mNormals[vertIdx].x = render_scene.meshes[meshIdx].facevaryingNormals[faceVertIdxOffset + j][0];
+            pScene->mMeshes[meshIdx]->mNormals[vertIdx].y = render_scene.meshes[meshIdx].facevaryingNormals[faceVertIdxOffset + j][1];
+            pScene->mMeshes[meshIdx]->mNormals[vertIdx].z = render_scene.meshes[meshIdx].facevaryingNormals[faceVertIdxOffset + j][2];
         }
         faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
     }

@@ -122,12 +122,14 @@ void USDImporterImplTinyusdz::verticesForMesh(
     }
     pScene->mMeshes[meshIdx]->mNumFaces = render_scene.meshes[meshIdx].faceVertexCounts.size();
     pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
+    size_t faceVertIdxOffset = 0;
     for (size_t i = 0; i < pScene->mMeshes[meshIdx]->mNumFaces; ++i) {
-        pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices = render_scene.meshes[meshIdx].faceVertexIndices.size();
+        pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices = render_scene.meshes[meshIdx].faceVertexCounts[i];
         pScene->mMeshes[meshIdx]->mFaces[i].mIndices = new unsigned int[pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices];
         for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices; ++j) {
-            pScene->mMeshes[meshIdx]->mFaces[i].mIndices[j] = render_scene.meshes[meshIdx].faceVertexIndices[j];
+            pScene->mMeshes[meshIdx]->mFaces[i].mIndices[j] = render_scene.meshes[meshIdx].faceVertexIndices[j + faceVertIdxOffset];
         }
+        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices;
     }
 }
 

@@ -812,6 +812,11 @@ ADD_ASSIMP_IMPORTER( 3D
   AssetLib/Unreal/UnrealLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( USD
+  AssetLib/USD/USDLoader.cpp
+  AssetLib/USD/USDLoader.h
+)
+
 ADD_ASSIMP_IMPORTER( X
   AssetLib/X/XFileHelper.h
   AssetLib/X/XFileImporter.cpp

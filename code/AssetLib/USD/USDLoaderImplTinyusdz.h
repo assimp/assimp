@@ -42,37 +42,25 @@ Copyright (c) 2006-2024, assimp team
  *  @brief Declaration of the USD importer class.
  */
 #pragma once
-#ifndef AI_USDLOADER_H_INCLUDED
-#define AI_USDLOADER_H_INCLUDED
+#ifndef AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
+#define AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
 #include <assimp/types.h>
 #include <vector>
 #include <cstdint>
-
-#include "USDLoaderImplTinyusdz.h"
+#include "tinyusdz.hh"
 
 namespace Assimp {
-class USDImporter : public BaseImporter {
+class USDImporterImplTinyusdz {
 public:
-    USDImporter();
-    ~USDImporter() override = default;
-
-    /// \brief  Returns whether the class can handle the format of the given file.
-    /// \remark See BaseImporter::CanRead() for details.
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
-
-protected:
-    //! \brief  Appends the supported extension.
-    const aiImporterDesc *GetInfo() const override;
+    USDImporterImplTinyusdz() = default;
+    ~USDImporterImplTinyusdz() = default;
 
     void InternReadFile(
             const std::string &pFile,
             aiScene *pScene,
-            IOSystem *pIOHandler) override;
-private:
-    USDImporterImplTinyusdz impl;
+            IOSystem *pIOHandler);
 };
-
 } // namespace Assimp
-#endif // AI_USDLOADER_H_INCLUDED
+#endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

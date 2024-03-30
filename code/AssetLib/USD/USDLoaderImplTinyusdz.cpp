@@ -1,14 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2024, assimp team
 
                           All rights reserved.
 
                           Redistribution and use of this software in source and binary forms,
-        with or without modification, are permitted provided that the
-        following conditions are met:
+        with or without modification, are permitted provided that the following
+        conditions are met:
 
         * Redistributions of source code must retain the above
         copyright notice, this list of conditions and the
@@ -35,44 +36,52 @@ Copyright (c) 2006-2024, assimp team
         THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
         (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
         OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-                ----------------------------------------------------------------------
+                ---------------------------------------------------------------------------
                 */
 
-/** @file  USDLoader.h
- *  @brief Declaration of the USD importer class.
+/** @file  USDLoader.cpp
+ *  @brief Implementation of the USD importer class
  */
-#pragma once
-#ifndef AI_USDLOADER_H_INCLUDED
-#define AI_USDLOADER_H_INCLUDED
 
-#include <assimp/BaseImporter.h>
-#include <assimp/types.h>
-#include <vector>
-#include <cstdint>
+#ifndef ASSIMP_BUILD_NO_USD_IMPORTER
+#include <memory>
+
+// internal headers
+#include <assimp/ai_assert.h>
+#include <assimp/anim.h>
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/fast_atof.h>
+#include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
+#include <assimp/IOStreamBuffer.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/StringUtils.h>
+#include <assimp/StreamReader.h>
 
 #include "USDLoaderImplTinyusdz.h"
+#include "USDLoaderUtil.h"
 
 namespace Assimp {
-class USDImporter : public BaseImporter {
-public:
-    USDImporter();
-    ~USDImporter() override = default;
+using namespace std;
 
-    /// \brief  Returns whether the class can handle the format of the given file.
-    /// \remark See BaseImporter::CanRead() for details.
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
-
-protected:
-    //! \brief  Appends the supported extension.
-    const aiImporterDesc *GetInfo() const override;
-
-    void InternReadFile(
-            const std::string &pFile,
-            aiScene *pScene,
-            IOSystem *pIOHandler) override;
-private:
-    USDImporterImplTinyusdz impl;
-};
+void USDImporterImplTinyusdz::InternReadFile(
+        const std::string &pFile,
+        aiScene *pScene,
+        IOSystem *pIOHandler) {
+    DefaultLogger::create("AssimpLog.txt", Logger::VERBOSE);
+    if (isUsdc(pFile)) {
+        tinyusdz::USDLoadOptions options;
+        tinyusdz::Stage stage;
+        std::string warn, err;
+        bool ret = LoadUSDCFromFile(pFile, &stage, &warn, &err, options);
+        if (!ret) {
+            pScene = nullptr;
+        }
+    }
+}
 
 } // namespace Assimp
-#endif // AI_USDLOADER_H_INCLUDED
+
+#endif // !! ASSIMP_BUILD_NO_USD_IMPORTER

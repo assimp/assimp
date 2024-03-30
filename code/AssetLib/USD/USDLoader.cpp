@@ -61,6 +61,7 @@ Copyright (c) 2006-2024, assimp team
 #include <assimp/StreamReader.h>
 
 #include "USDLoader.h"
+#include "USDLoaderUtil.h"
 
 static constexpr aiImporterDesc desc = {
     "USD Object Importer",
@@ -79,8 +80,9 @@ namespace Assimp {
 using namespace std;
 
 // Constructor to be privately used by Importer
-//USDImporter::USDImporter() {
-//}
+USDImporter::USDImporter() :
+    impl(USDImporterImplTinyusdz()) {
+}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -107,17 +109,11 @@ void USDImporter::InternReadFile(
         const std::string &pFile,
         aiScene *pScene,
         IOSystem *pIOHandler) {
-    DefaultLogger::create("AssimpLog.txt", Logger::VERBOSE);
-    if (isUsdc(pFile)) {
-        tinyusdz::USDLoadOptions options;
-        tinyusdz::Stage stage;
-        std::string warn, err;
-        bool ret = LoadUSDCFromFile(pFile, &stage, &warn, &err, options);
-        if (!ret) {
-            pScene = nullptr;
-        }
-    }
-};
+    impl.InternReadFile(
+            pFile,
+            pScene,
+            pIOHandler);
+}
 
 } // namespace Assimp
 

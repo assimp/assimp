@@ -815,6 +815,8 @@ ADD_ASSIMP_IMPORTER( 3D
 ADD_ASSIMP_IMPORTER( USD
   AssetLib/USD/USDLoader.cpp
   AssetLib/USD/USDLoader.h
+  AssetLib/USD/USDLoaderUtil.cpp
+  AssetLib/USD/USDLoaderUtil.h
 )
 
 ADD_ASSIMP_IMPORTER( X

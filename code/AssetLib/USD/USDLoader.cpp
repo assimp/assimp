@@ -99,30 +99,6 @@ bool USDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     return true;
 }
 
-bool USDImporter::isUsda(const std::string &pFile) const {
-    size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
-        return false;
-    }
-    string ext = pFile.substr(pos + 1);
-    if (ext.size() != 4) {
-        return false;
-    }
-    return (ext[0] == 'u' || ext[0] == 'U') && (ext[1] == 's' || ext[1] == 'S') && (ext[2] == 'd' || ext[2] == 'D') && (ext[3] == 'a' || ext[3] == 'A');
-}
-
-bool USDImporter::isUsdc(const std::string &pFile) const {
-    size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
-        return false;
-    }
-    string ext = pFile.substr(pos + 1);
-    if (ext.size() != 4) {
-        return false;
-    }
-    return (ext[0] == 'u' || ext[0] == 'U') && (ext[1] == 's' || ext[1] == 'S') && (ext[2] == 'd' || ext[2] == 'D') && (ext[3] == 'c' || ext[3] == 'C');
-}
-
 const aiImporterDesc *USDImporter::GetInfo() const {
     return &desc;
 }

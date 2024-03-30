@@ -105,6 +105,13 @@ void USDImporterImplTinyusdz::InternReadFile(
     // Export meshes
     for (size_t i = 0; i < pScene->mNumMeshes; i++) {
         pScene->mMeshes[i] = new aiMesh();
+        pScene->mMeshes[i]->mNumVertices = render_scene.meshes[i].points.size();
+        pScene->mMeshes[i]->mVertices = new aiVector3D[pScene->mMeshes[i]->mNumVertices];
+        for (size_t j = 0; j < pScene->mMeshes[i]->mNumVertices; ++j) {
+            pScene->mMeshes[i]->mVertices[j].x = render_scene.meshes[i].points[j][0];
+            pScene->mMeshes[i]->mVertices[j].y = render_scene.meshes[i].points[j][1];
+            pScene->mMeshes[i]->mVertices[j].z = render_scene.meshes[i].points[j][2];
+        }
         pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 }

@@ -67,6 +67,11 @@ public:
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx);
+
+    void facesForMesh(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx);
 };
 } // namespace Assimp
 #endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

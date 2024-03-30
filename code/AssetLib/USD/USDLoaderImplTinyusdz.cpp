@@ -72,17 +72,17 @@ void USDImporterImplTinyusdz::InternReadFile(
         const std::string &pFile,
         aiScene *pScene,
         IOSystem *pIOHandler) {
-    bool ret{false};
+    bool ret{ false };
     tinyusdz::USDLoadOptions options;
     tinyusdz::Stage stage;
     std::string warn, err;
     if (isUsdc(pFile)) {
         ret = LoadUSDCFromFile(pFile, &stage, &warn, &err, options);
-    } else if(isUsda(pFile)) {
+    } else if (isUsda(pFile)) {
         ret = LoadUSDAFromFile(pFile, &stage, &warn, &err, options);
-    } else if(isUsdz(pFile)) {
+    } else if (isUsdz(pFile)) {
         ret = LoadUSDZFromFile(pFile, &stage, &warn, &err, options);
-    } else if(isUsd(pFile)) {
+    } else if (isUsd(pFile)) {
         ret = LoadUSDFromFile(pFile, &stage, &warn, &err, options);
     }
     if (!ret) {
@@ -105,6 +105,7 @@ void USDImporterImplTinyusdz::InternReadFile(
     for (size_t i = 0; i < pScene->mNumMeshes; i++) {
         pScene->mMeshes[i] = new aiMesh();
         verticesForMesh(render_scene, pScene, i);
+        facesForMesh(render_scene, pScene, i);
         pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 }
@@ -120,16 +121,23 @@ void USDImporterImplTinyusdz::verticesForMesh(
         pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
         pScene->mMeshes[meshIdx]->mVertices[j].z = render_scene.meshes[meshIdx].points[j][2];
     }
+}
+
+void USDImporterImplTinyusdz::facesForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx) {
     pScene->mMeshes[meshIdx]->mNumFaces = render_scene.meshes[meshIdx].faceVertexCounts.size();
     pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
     size_t faceVertIdxOffset = 0;
-    for (size_t i = 0; i < pScene->mMeshes[meshIdx]->mNumFaces; ++i) {
-        pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices = render_scene.meshes[meshIdx].faceVertexCounts[i];
-        pScene->mMeshes[meshIdx]->mFaces[i].mIndices = new unsigned int[pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices];
-        for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices; ++j) {
-            pScene->mMeshes[meshIdx]->mFaces[i].mIndices[j] = render_scene.meshes[meshIdx].faceVertexIndices[j + faceVertIdxOffset];
+    for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
+        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices = render_scene.meshes[meshIdx].faceVertexCounts[faceIdx];
+        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices = new unsigned int[pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices];
+        for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices; ++j) {
+            pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices[j] =
+                    render_scene.meshes[meshIdx].faceVertexIndices[j + faceVertIdxOffset];
         }
-        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[i].mNumIndices;
+        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
     }
 }
 

@@ -102,13 +102,14 @@ void USDImporterImplTinyusdz::InternReadFile(
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
 
     // Export meshes
-    for (size_t i = 0; i < pScene->mNumMeshes; i++) {
-        pScene->mMeshes[i] = new aiMesh();
-        verticesForMesh(render_scene, pScene, i);
-        facesForMesh(render_scene, pScene, i);
-        normalsForMesh(render_scene, pScene, i);
-        uvsForMesh(render_scene, pScene, i);
-        pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
+    for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
+        pScene->mMeshes[meshIdx] = new aiMesh();
+        verticesForMesh(render_scene, pScene, meshIdx);
+        facesForMesh(render_scene, pScene, meshIdx);
+        normalsForMesh(render_scene, pScene, meshIdx);
+        materialsForMesh(render_scene, pScene, meshIdx);
+        uvsForMesh(render_scene, pScene, meshIdx);
+        pScene->mRootNode->mMeshes[meshIdx] = static_cast<unsigned int>(meshIdx);
     }
 }
 
@@ -159,6 +160,12 @@ void USDImporterImplTinyusdz::normalsForMesh(
         }
         faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
     }
+}
+
+void USDImporterImplTinyusdz::materialsForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx) {
 }
 
 void USDImporterImplTinyusdz::uvsForMesh(

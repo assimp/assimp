@@ -1,8 +1,0 @@
-#usda 1.0
-
-def Shader "knight_rig_file9"
-{
-  uniform token info:id = "UsdUVTexture"
-  float4 inputs:fallback = (0.5, 0.5, 0.5, 1)
-  asset inputs:file = @./Textures/brushed_metal_rough_F.png@ (                                                                                                       colorSpace = "Raw"                                                                                                                                         )
-}

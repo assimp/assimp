@@ -1,6 +1,0 @@
-#usda 1.0
-
-def Mesh "bora"
-{
-	int[] primvars:displayColor:indices = []
-}

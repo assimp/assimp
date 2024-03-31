@@ -1,7 +1,0 @@
-#usda 1.0
-(
-  upAxis = "Y"
-  framesPerSecond = 10
-  startTimeCode = 3
-  endTimeCode = 21
-)

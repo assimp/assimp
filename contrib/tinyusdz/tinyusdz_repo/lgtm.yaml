@@ -1,4 +1,0 @@
-path_classifiers:
-  legacy:
-    - exclude: src/miniz.c
-    - exclude: src/miniz.h

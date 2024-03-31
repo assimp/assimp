@@ -1,9 +1,0 @@
-#usda 1.0
-# -*- coding: utf-8 -*-
-
-def Xform "hello" (
-  # omniverse extension. utf8 ready
-  displayName = "無駄"
-  )
-{
-}

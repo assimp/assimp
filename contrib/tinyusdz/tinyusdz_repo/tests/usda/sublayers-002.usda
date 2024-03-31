@@ -1,7 +1,0 @@
-#usda 1.0
-(
-  # Stage metas are not imported from subLayer USD.
-  subLayers = [
-    @stage-meta-001.usda@, 
-  ]
-)

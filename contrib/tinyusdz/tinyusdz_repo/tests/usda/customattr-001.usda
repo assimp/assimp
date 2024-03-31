@@ -1,6 +1,0 @@
-#usda 1.0
-
-def Xform "hello"
-{
-  custom uniform token mystring	= "world";
-}

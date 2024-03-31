@@ -1,5 +1,0 @@
-PySide6
-numpy
-scipy
-opencv-python
-matplotlib

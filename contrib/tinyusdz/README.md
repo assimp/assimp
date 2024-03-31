@@ -6,7 +6,7 @@ Couldn't leverage tinyusdz CMakeLists.txt.  Fell back to compiling source files 
 
 ## Assimp update history
 ### Mar 2024
-Cloned github project [tinyusdz](https://github.com/syoyo/tinyusdz) at commit `912d27e8b632d2352e7284feb86584832c6015d5`
+Cloned github project [tinyusdz](https://github.com/syoyo/tinyusdz) at 10 Mar 2024 commit `912d27e8b632d2352e7284feb86584832c6015d5`
 
 Removed folders:
 - [.clusterfuzzlite](tinyusdz_repo%2F.clusterfuzzlite)

@@ -45,6 +45,7 @@ Copyright (c) 2006-2024, assimp team
 
 #ifndef ASSIMP_BUILD_NO_USD_IMPORTER
 #include <memory>
+#include <sstream>
 
 // internal headers
 #include <assimp/ai_assert.h>
@@ -65,6 +66,10 @@ Copyright (c) 2006-2024, assimp team
 #include "USDLoaderImplTinyusdz.h"
 #include "USDLoaderUtil.h"
 
+namespace {
+    const char *const TAG = "USDLoaderImplTinyusdz (C++)";
+}
+
 namespace Assimp {
 using namespace std;
 
@@ -72,6 +77,10 @@ void USDImporterImplTinyusdz::InternReadFile(
         const std::string &pFile,
         aiScene *pScene,
         IOSystem *pIOHandler) {
+    // Grab filename for logging purposes
+    size_t pos = pFile.find_last_of('/');
+    string nameWExt = pFile.substr(pos + 1);
+
     bool ret{ false };
     tinyusdz::USDLoadOptions options;
     tinyusdz::Stage stage;

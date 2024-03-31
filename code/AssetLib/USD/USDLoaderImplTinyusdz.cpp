@@ -104,6 +104,7 @@ void USDImporterImplTinyusdz::InternReadFile(
     // Export meshes
     for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mMeshes[meshIdx] = new aiMesh();
+        pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].element_name);
         verticesForMesh(render_scene, pScene, meshIdx);
         facesForMesh(render_scene, pScene, meshIdx);
         normalsForMesh(render_scene, pScene, meshIdx);

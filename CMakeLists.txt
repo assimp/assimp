@@ -696,9 +696,6 @@ ELSE()
   ENDIF()
 ENDIF()
 
-# USD/USDA/USDC/USDZ support
-option(ASSIMP_TINYUSDZ_ENABLED "Enable tinyusdz support" OFF)
-
 # Main assimp code
 ADD_SUBDIRECTORY( code/ )
 

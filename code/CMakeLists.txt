@@ -916,7 +916,7 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
 # USD/USDA/USDC/USDZ support
 # tinyusdz
-IF(ASSIMP_TINYUSDZ_ENABLED)
+IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     set(Tinyusdz_SRC_RELPATH "../contrib/tinyusdz/tinyusdz_repo/src")
     set(Tinyusdz_SRCS
             ${Tinyusdz_SRC_RELPATH}/ascii-parser.cc

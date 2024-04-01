@@ -25,6 +25,13 @@ Removed folders:
 - [scripts](tinyusdz_repo%2Fscripts)
 - [tests](tinyusdz_repo%2Ftests)
 
+Removed folders in `src`:
+- [attic](tinyusdz_repo%2Fsrc%2Fattic)
+- [blender](tinyusdz_repo%2Fsrc%2Fblender)
+- [osd](tinyusdz_repo%2Fsrc%2Fosd)
+
+Removed unused `.cc` files in `src`, `external` etc
+
 Removed all files at root level except
 - [LICENSE](tinyusdz_repo%2FLICENSE)
 - [README.md](tinyusdz_repo%2FREADME.md)

@@ -80,6 +80,7 @@ void USDImporterImplTinyusdz::InternReadFile(
     // Grab filename for logging purposes
     size_t pos = pFile.find_last_of('/');
     string nameWExt = pFile.substr(pos + 1);
+    (void) TAG; // Ignore unused variable when -Werror enabled
 
     bool ret{ false };
     tinyusdz::USDLoadOptions options;
@@ -213,36 +214,42 @@ void USDImporterImplTinyusdz::nodes(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numNodes{render_scene.nodes.size()};
+    (void) numNodes; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::materials(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numMaterials{render_scene.materials.size()};
+    (void) numMaterials; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::textures(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numTextures{render_scene.textures.size()};
+    (void) numTextures; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::textureImages(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numTextureImages{render_scene.images.size()};
+    (void) numTextureImages; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::buffers(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numBuffers{render_scene.buffers.size()};
+    (void) numBuffers; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::animations(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
     const size_t numAnimations{render_scene.animations.size()};
+    (void) numAnimations; // Ignore unused variable when -Werror enabled
 }
 
 } // namespace Assimp

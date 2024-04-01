@@ -63,6 +63,26 @@ public:
             aiScene *pScene,
             IOSystem *pIOHandler);
 
+    void nodes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
+    void materials(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
+    void textures(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
+    void textureImages(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
+    void buffers(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
     void verticesForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
@@ -87,6 +107,10 @@ public:
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx);
+
+    void animations(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
 };
 } // namespace Assimp
 #endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

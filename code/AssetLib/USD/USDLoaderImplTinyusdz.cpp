@@ -121,6 +121,37 @@ void USDImporterImplTinyusdz::InternReadFile(
         uvsForMesh(render_scene, pScene, meshIdx);
         pScene->mRootNode->mMeshes[meshIdx] = static_cast<unsigned int>(meshIdx);
     }
+    nodes(render_scene, pScene);
+    materials(render_scene, pScene);
+    textures(render_scene, pScene);
+    textureImages(render_scene, pScene);
+    buffers(render_scene, pScene);
+    animations(render_scene, pScene);
+}
+
+void USDImporterImplTinyusdz::nodes(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+}
+
+void USDImporterImplTinyusdz::materials(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+}
+
+void USDImporterImplTinyusdz::textures(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+}
+
+void USDImporterImplTinyusdz::textureImages(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+}
+
+void USDImporterImplTinyusdz::buffers(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
 }
 
 void USDImporterImplTinyusdz::verticesForMesh(
@@ -201,6 +232,11 @@ void USDImporterImplTinyusdz::uvsForMesh(
             faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
         }
     }
+}
+
+void USDImporterImplTinyusdz::animations(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
 }
 
 } // namespace Assimp

@@ -129,31 +129,6 @@ void USDImporterImplTinyusdz::InternReadFile(
     animations(render_scene, pScene);
 }
 
-void USDImporterImplTinyusdz::nodes(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
-}
-
-void USDImporterImplTinyusdz::materials(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
-}
-
-void USDImporterImplTinyusdz::textures(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
-}
-
-void USDImporterImplTinyusdz::textureImages(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
-}
-
-void USDImporterImplTinyusdz::buffers(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
-}
-
 void USDImporterImplTinyusdz::verticesForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
@@ -234,9 +209,40 @@ void USDImporterImplTinyusdz::uvsForMesh(
     }
 }
 
+void USDImporterImplTinyusdz::nodes(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+    const size_t numNodes{render_scene.nodes.size()};
+}
+
+void USDImporterImplTinyusdz::materials(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+    const size_t numMaterials{render_scene.materials.size()};
+}
+
+void USDImporterImplTinyusdz::textures(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+    const size_t numTextures{render_scene.textures.size()};
+}
+
+void USDImporterImplTinyusdz::textureImages(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+    const size_t numTextureImages{render_scene.images.size()};
+}
+
+void USDImporterImplTinyusdz::buffers(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene) {
+    const size_t numBuffers{render_scene.buffers.size()};
+}
+
 void USDImporterImplTinyusdz::animations(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene) {
+    const size_t numAnimations{render_scene.animations.size()};
 }
 
 } // namespace Assimp

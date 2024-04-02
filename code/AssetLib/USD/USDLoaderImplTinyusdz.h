@@ -83,36 +83,44 @@ public:
     void materialsForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
-            size_t meshIdx);
+            size_t meshIdx,
+            const std::string &nameWExt);
 
     void uvsForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
-            size_t meshIdx);
+            size_t meshIdx,
+            const std::string &nameWExt);
 
     void nodes(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void materials(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void textures(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void textureImages(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void buffers(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void animations(
             const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
+            aiScene *pScene,
+            const std::string &nameWExt);
 };
 } // namespace Assimp
 #endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

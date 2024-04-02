@@ -115,19 +115,19 @@ void USDImporterImplTinyusdz::InternReadFile(
     for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mMeshes[meshIdx] = new aiMesh();
         pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].element_name);
-        verticesForMesh(render_scene, pScene, meshIdx, nameWExt));
-        facesForMesh(render_scene, pScene, meshIdx, nameWExt));
-        normalsForMesh(render_scene, pScene, meshIdx);
-        materialsForMesh(render_scene, pScene, meshIdx);
-        uvsForMesh(render_scene, pScene, meshIdx);
+        verticesForMesh(render_scene, pScene, meshIdx, nameWExt);
+        facesForMesh(render_scene, pScene, meshIdx, nameWExt);
+        normalsForMesh(render_scene, pScene, meshIdx, nameWExt);
+        materialsForMesh(render_scene, pScene, meshIdx, nameWExt);
+        uvsForMesh(render_scene, pScene, meshIdx, nameWExt);
         pScene->mRootNode->mMeshes[meshIdx] = static_cast<unsigned int>(meshIdx);
     }
-    nodes(render_scene, pScene);
-    materials(render_scene, pScene);
-    textures(render_scene, pScene);
-    textureImages(render_scene, pScene);
-    buffers(render_scene, pScene);
-    animations(render_scene, pScene);
+    nodes(render_scene, pScene, nameWExt);
+    materials(render_scene, pScene, nameWExt);
+    textures(render_scene, pScene, nameWExt);
+    textureImages(render_scene, pScene, nameWExt);
+    buffers(render_scene, pScene, nameWExt);
+    animations(render_scene, pScene, nameWExt);
 }
 
 void USDImporterImplTinyusdz::verticesForMesh(
@@ -166,7 +166,8 @@ void USDImporterImplTinyusdz::facesForMesh(
 void USDImporterImplTinyusdz::normalsForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        size_t meshIdx) {
+        size_t meshIdx,
+        const std::string &nameWExt) {
     pScene->mMeshes[meshIdx]->mNormals = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     size_t faceVertIdxOffset = 0;
     for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
@@ -184,13 +185,15 @@ void USDImporterImplTinyusdz::normalsForMesh(
 void USDImporterImplTinyusdz::materialsForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        size_t meshIdx) {
+        size_t meshIdx,
+        const std::string &nameWExt) {
 }
 
 void USDImporterImplTinyusdz::uvsForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        size_t meshIdx) {
+        size_t meshIdx,
+        const std::string &nameWExt) {
     const size_t uvSlotsCount = render_scene.meshes[meshIdx].facevaryingTexcoords.size();
     if (uvSlotsCount < 1) {
         return;
@@ -214,42 +217,48 @@ void USDImporterImplTinyusdz::uvsForMesh(
 
 void USDImporterImplTinyusdz::nodes(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numNodes{render_scene.nodes.size()};
     (void) numNodes; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::materials(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numMaterials{render_scene.materials.size()};
     (void) numMaterials; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::textures(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numTextures{render_scene.textures.size()};
     (void) numTextures; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::textureImages(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numTextureImages{render_scene.images.size()};
     (void) numTextureImages; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::buffers(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numBuffers{render_scene.buffers.size()};
     (void) numBuffers; // Ignore unused variable when -Werror enabled
 }
 
 void USDImporterImplTinyusdz::animations(
         const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene) {
+        aiScene *pScene,
+        const std::string &nameWExt) {
     const size_t numAnimations{render_scene.animations.size()};
     (void) numAnimations; // Ignore unused variable when -Werror enabled
 }

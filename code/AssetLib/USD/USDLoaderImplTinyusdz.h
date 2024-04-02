@@ -66,12 +66,14 @@ public:
     void verticesForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
-            size_t meshIdx);
+            size_t meshIdx,
+            const std::string &nameWExt);
 
     void facesForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
-            size_t meshIdx);
+            size_t meshIdx,
+            const std::string &nameWExt);
 
     void normalsForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,

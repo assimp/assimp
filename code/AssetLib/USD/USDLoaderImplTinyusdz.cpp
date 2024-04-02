@@ -115,8 +115,8 @@ void USDImporterImplTinyusdz::InternReadFile(
     for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mMeshes[meshIdx] = new aiMesh();
         pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].element_name);
-        verticesForMesh(render_scene, pScene, meshIdx);
-        facesForMesh(render_scene, pScene, meshIdx);
+        verticesForMesh(render_scene, pScene, meshIdx, nameWExt));
+        facesForMesh(render_scene, pScene, meshIdx, nameWExt));
         normalsForMesh(render_scene, pScene, meshIdx);
         materialsForMesh(render_scene, pScene, meshIdx);
         uvsForMesh(render_scene, pScene, meshIdx);
@@ -133,7 +133,8 @@ void USDImporterImplTinyusdz::InternReadFile(
 void USDImporterImplTinyusdz::verticesForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        size_t meshIdx) {
+        size_t meshIdx,
+        const std::string &nameWExt) {
     pScene->mMeshes[meshIdx]->mNumVertices = render_scene.meshes[meshIdx].points.size();
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
@@ -146,7 +147,8 @@ void USDImporterImplTinyusdz::verticesForMesh(
 void USDImporterImplTinyusdz::facesForMesh(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        size_t meshIdx) {
+        size_t meshIdx,
+        const std::string &nameWExt) {
     pScene->mMeshes[meshIdx]->mNumFaces = render_scene.meshes[meshIdx].faceVertexCounts.size();
     pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
     size_t faceVertIdxOffset = 0;

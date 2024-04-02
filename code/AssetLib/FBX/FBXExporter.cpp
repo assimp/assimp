@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -69,6 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <cmath>
 
 // RESOURCES:
 // https://code.blender.org/2013/08/fbx-binary-file-format-specification/
@@ -1062,7 +1063,7 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
-    if (anim->mTicksPerSecond <= 0) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {    
         return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
     return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
@@ -1087,6 +1088,8 @@ void FBXExporter::WriteObjects ()
 
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
     std::vector<std::vector<int32_t>> vVertexIndice;//save vertex_indices as it is needed later
+
+    const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
     // geometry (aiMesh)
     mesh_uids.clear();
@@ -1444,13 +1447,21 @@ void FBXExporter::WriteObjects ()
             // "TransparentColor" / "TransparencyFactor"...
             // thanks FBX, for your insightful interpretation of consistency
             p.AddP70colorA("TransparentColor", c.r, c.g, c.b);
-            // TransparencyFactor defaults to 0.0, so set it to 1.0.
-            // note: Maya always sets this to 1.0,
-            // so we can't use it sensibly as "Opacity".
-            // In stead we rely on the legacy "Opacity" value, below.
-            // Blender also relies on "Opacity" not "TransparencyFactor",
-            // probably for a similar reason.
-            p.AddP70numberA("TransparencyFactor", 1.0);
+
+            if (!bTransparencyFactorReferencedToOpacity) {
+                // TransparencyFactor defaults to 0.0, so set it to 1.0.
+                // note: Maya always sets this to 1.0,
+                // so we can't use it sensibly as "Opacity".
+                // In stead we rely on the legacy "Opacity" value, below.
+                // Blender also relies on "Opacity" not "TransparencyFactor",
+                // probably for a similar reason.
+                p.AddP70numberA("TransparencyFactor", 1.0);
+            }
+        }
+        if (bTransparencyFactorReferencedToOpacity) {
+            if (m->Get(AI_MATKEY_OPACITY, f) == aiReturn_SUCCESS) {
+                p.AddP70numberA("TransparencyFactor", 1.0 - f);
+            }
         }
         if (m->Get(AI_MATKEY_COLOR_REFLECTIVE, c) == aiReturn_SUCCESS) {
             p.AddP70colorA("ReflectionColor", c.r, c.g, c.b);
@@ -1748,7 +1759,7 @@ void FBXExporter::WriteObjects ()
         int64_t blendshape_uid = generate_uid();
         mesh_uids.push_back(blendshape_uid);
         bsnode.AddProperty(blendshape_uid);
-        bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Blendshape");
+        bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Geometry");
         bsnode.AddProperty("Shape");
         bsnode.AddChild("Version", int32_t(100));
         bsnode.Begin(outstream, binary, indent);
@@ -1807,7 +1818,7 @@ void FBXExporter::WriteObjects ()
         p.AddP70numberA("DeformPercent", 0.0);
         sdnode.AddChild(p);
         // TODO: Normally just one weight per channel, adding stub for later development
-        std::vector<float>fFullWeights;
+        std::vector<double>fFullWeights;
         fFullWeights.push_back(100.);
         sdnode.AddChild("FullWeights", fFullWeights);
         sdnode.Dump(outstream, binary, indent);

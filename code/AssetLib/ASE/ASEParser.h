@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -619,6 +619,9 @@ private:
 public:
     //! Pointer to current data
     const char *filePtr;
+
+    /// The end pointer of the file data
+    const char *mEnd;
 
     //! background color to be passed to the viewer
     //! QNAN if none was found

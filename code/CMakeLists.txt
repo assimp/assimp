@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -1192,6 +1192,10 @@ ELSE ()
 ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+
+add_compile_options(
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
 
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")

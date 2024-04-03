@@ -1927,7 +1927,7 @@ void FBXExporter::WriteObjects ()
             // or else the node containing the mesh,
             // or else the parent of a node containing the mesh.
             for (
-                const aiNode* parent = n->mParent;
+                aiNode* parent = n->mParent;
                 parent && parent != mScene->mRootNode;
                 parent = parent->mParent
             ) {
@@ -1942,10 +1942,10 @@ void FBXExporter::WriteObjects ()
                     continue;
                 }
                 //not a bone in scene && no effect in transform
-                if(setAllBoneNamesInScene.find(node_name)==setAllBoneNamesInScene.end()
-                   && parent->mTransformation == mxTransIdentity) {
-                        continue;
-                }
+                //if(setAllBoneNamesInScene.find(node_name)==setAllBoneNamesInScene.end()
+                //   && parent->mTransformation == mxTransIdentity) {
+                //        continue;
+                //}
                 // otherwise check if this is the root of the skeleton
                 bool end = false;
                 // is the mesh part of this node?
@@ -1969,6 +1969,12 @@ void FBXExporter::WriteObjects ()
 
                 // if it was the skeleton root we can finish here
                 if (end) { break; }
+
+				if (node_by_bone.count(node_name) == 0)
+					node_by_bone[node_name] = parent;
+				if (limbnodes.count(parent) == 0)
+					limbnodes.insert(parent);
+                skeleton.insert(parent);
             }
         }
         skeleton_by_mesh[mi] = skeleton;

@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 
+#include <assimp/Exporter.hpp>
+
 struct aiScene;
 struct aiNode;
 struct aiMesh;
@@ -63,7 +65,7 @@ namespace Assimp {
 class ObjExporter {
 public:
     /// Constructor for a specific scene to export
-    ObjExporter(const char* filename, const aiScene* pScene, bool noMtl=false);
+    ObjExporter(const char* filename, const aiScene* pScene, bool noMtl=false, const ExportProperties* props = nullptr);
     ~ObjExporter();
     std::string GetMaterialLibName();
     std::string GetMaterialLibFileName();
@@ -97,10 +99,10 @@ private:
 
     void WriteHeader(std::ostringstream& out);
     void WriteMaterialFile();
-    void WriteGeometryFile(bool noMtl=false);
+    void WriteGeometryFile(bool noMtl=false, bool merge_identical_vertices = false);
     std::string GetMaterialName(unsigned int index);
-    void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat);
-    void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
+    void AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat, bool merge_identical_vertices);
+    void AddNode(const aiNode* nd, const aiMatrix4x4& mParent, bool merge_identical_vertices);
 
 private:
     std::string filename;
@@ -109,6 +111,7 @@ private:
     struct vertexData {
         aiVector3D vp;
         aiColor3D vc; // OBJ does not support 4D color
+        uint32_t index = 0;
     };
 
     std::vector<aiVector3D> vn, vt;
@@ -133,7 +136,7 @@ private:
             if (a.vc.g > b.vc.g) return false;
             if (a.vc.b < b.vc.b) return true;
             if (a.vc.b > b.vc.b) return false;
-            return false;
+            return a.index < b.index;
         }
     };
 

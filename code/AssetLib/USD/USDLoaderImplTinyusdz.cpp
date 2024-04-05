@@ -229,6 +229,19 @@ void USDImporterImplTinyusdz::materials(
         const std::string &nameWExt) {
     const size_t numMaterials{render_scene.materials.size()};
     (void) numMaterials; // Ignore unused variable when -Werror enabled
+    pScene->mMaterials = 0;
+    if (render_scene.materials.empty()) {
+        return;
+    }
+    pScene->mMaterials = new aiMaterial *[render_scene.materials.size()];
+    for (const auto &material : render_scene.materials) {
+        aiMaterial *mat = new aiMaterial;
+        aiString *materialName = new aiString();
+        materialName->Set(material.name);
+        mat->AddProperty(materialName, AI_MATKEY_NAME);
+        pScene->mMaterials[pScene->mNumMaterials] = mat;
+        ++pScene->mNumMaterials;
+    }
 }
 
 void USDImporterImplTinyusdz::textures(

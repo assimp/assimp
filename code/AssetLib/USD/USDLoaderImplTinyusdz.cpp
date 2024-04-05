@@ -115,6 +115,9 @@ void USDImporterImplTinyusdz::InternReadFile(
     for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mMeshes[meshIdx] = new aiMesh();
         pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].element_name);
+        if (!render_scene.meshes[meshIdx].materialIds.empty()) {
+            pScene->mMeshes[meshIdx]->mMaterialIndex = render_scene.meshes[meshIdx].materialIds[0];
+        }
         verticesForMesh(render_scene, pScene, meshIdx, nameWExt);
         facesForMesh(render_scene, pScene, meshIdx, nameWExt);
         normalsForMesh(render_scene, pScene, meshIdx, nameWExt);
@@ -223,6 +226,14 @@ void USDImporterImplTinyusdz::nodes(
     (void) numNodes; // Ignore unused variable when -Werror enabled
 }
 
+static aiColor3D *ownedColorPtrFor(const std::array<float, 3> &color) {
+    aiColor3D *colorPtr = new aiColor3D();
+    colorPtr->r = color[0];
+    colorPtr->g = color[1];
+    colorPtr->b = color[2];
+    return colorPtr;
+}
+
 void USDImporterImplTinyusdz::materials(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
@@ -236,9 +247,21 @@ void USDImporterImplTinyusdz::materials(
     pScene->mMaterials = new aiMaterial *[render_scene.materials.size()];
     for (const auto &material : render_scene.materials) {
         aiMaterial *mat = new aiMaterial;
+
         aiString *materialName = new aiString();
         materialName->Set(material.name);
         mat->AddProperty(materialName, AI_MATKEY_NAME);
+
+        mat->AddProperty(
+                ownedColorPtrFor(material.surfaceShader.diffuseColor.value),
+                1, AI_MATKEY_COLOR_DIFFUSE);
+        mat->AddProperty(
+                ownedColorPtrFor(material.surfaceShader.specularColor.value),
+                1, AI_MATKEY_COLOR_SPECULAR);
+        mat->AddProperty(
+                ownedColorPtrFor(material.surfaceShader.emissiveColor.value),
+                1, AI_MATKEY_COLOR_EMISSIVE);
+
         pScene->mMaterials[pScene->mNumMaterials] = mat;
         ++pScene->mNumMaterials;
     }

@@ -563,9 +563,9 @@ SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
 )
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
-  IF ( MSVC )
-    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/includes")
+  SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/includes")
 
+  IF (WIN32)
     # pick the correct prebuilt library
     IF(MSVC143)
       SET(C4D_LIB_POSTFIX "_2022")
@@ -583,7 +583,7 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
       SET(C4D_LIB_POSTFIX "_2010")
     ELSE()
       MESSAGE( FATAL_ERROR
-        "C4D is currently only supported with MSVC 10, 11, 12, 14, 14.2, 14.3"
+        "C4D for Windows is currently only supported with MSVC 10, 11, 12, 14, 14.2, 14.3"
       )
     ENDIF()
 
@@ -601,9 +601,20 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
     # winsock and winmm are necessary (and undocumented) dependencies of Cineware SDK because
     # it can be used to communicate with a running Cinema 4D instance
     SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
+  ELSEIF (APPLE)
+    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Cineware/libraries/osx")
+
+    SET(C4D_DEBUG_LIBRARIES
+      "${C4D_LIB_BASE_PATH}/debug/libcinewarelib.a"
+      "${C4D_LIB_BASE_PATH}/debug/libjpeglib.a"
+    )
+    SET(C4D_RELEASE_LIBRARIES
+      "${C4D_LIB_BASE_PATH}/release/libcinewarelib.a"
+      "${C4D_LIB_BASE_PATH}/release/libjpeglib.a"
+    )
   ELSE ()
     MESSAGE( FATAL_ERROR
-      "C4D is currently only available on Windows with Cineware SDK installed in contrib/Cineware"
+      "C4D is currently only available on Windows and macOS with Cineware SDK installed in contrib/Cineware"
     )
   ENDIF ()
 ELSE ()

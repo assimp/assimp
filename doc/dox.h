@@ -1545,7 +1545,7 @@ Don't trust the input data! Check all offsets!
 Mixed stuff for internal use by loaders, mostly documented (most of them are already included by <i>AssimpPCH.h</i>):
 <ul>
 <li><b>ByteSwapper</b> (<i>ByteSwapper.h</i>) - manual byte swapping stuff for binary loaders.</li>
-<li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianess-correct, binary reading.</li>
+<li><b>StreamReader</b> (<i>StreamReader.h</i>) - safe, endianness-correct, binary reading.</li>
 <li><b>IrrXML</b> (<i>irrXMLWrapper.h</i>)  - for XML-parsing (SAX.</li>
 <li><b>CommentRemover</b> (<i>RemoveComments.h</i>) - remove single-line and multi-line comments from a text file.</li>
 <li>fast_atof, strtoul10, strtoul16, SkipSpaceAndLineEnd, SkipToNextToken .. large family of low-level

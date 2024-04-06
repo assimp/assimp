@@ -263,7 +263,7 @@ struct ByteSwapper<T,false> {
 };
 
 // --------------------------------------------------------------------------------------------
-template <bool SwapEndianess, typename T, bool RuntimeSwitch>
+template <bool SwapEndianness, typename T, bool RuntimeSwitch>
 struct Getter {
     void operator() (T* inout, bool le) {
 #ifdef AI_BUILD_BIG_ENDIAN
@@ -278,12 +278,12 @@ struct Getter {
     }
 };
 
-template <bool SwapEndianess, typename T>
-struct Getter<SwapEndianess,T,false> {
+template <bool SwapEndianness, typename T>
+struct Getter<SwapEndianness,T,false> {
 
     void operator() (T* inout, bool /*le*/) {
         // static branch
-        ByteSwapper<T,(SwapEndianess && sizeof(T)>1)> () (inout);
+        ByteSwapper<T,(SwapEndianness && sizeof(T)>1)> () (inout);
     }
 };
 } // end Intern

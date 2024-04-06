@@ -12,6 +12,8 @@
 
 namespace tinyusdz {
 
+constexpr size_t kMaxUTF8Codepoint = 0x10ffff;
+
 enum class CharEncoding
 {
   None,
@@ -240,29 +242,41 @@ std::string unescapeControlSequence(const std::string &str);
 
 std::string buildEscapedAndQuotedStringForUSDA(const std::string &str);
 
+///
+/// Determine if input UTF-8 string is Unicode Identifier
+/// (UAX31 Default Identifier)
+///
+bool is_valid_utf8_identifier(const std::string &str);
+
 // TfIsValidIdentifier in pxrUSD equivalanet
-// TODO: support UTF-8
-inline bool isValidIdentifier(const std::string &str) {
+// Supports UTF-8 identifier(UAX31 Default Identifier. pxrUSD supports UTF8 Identififer from 24.03)
+inline bool isValidIdentifier(const std::string &str, bool is_utf8 = true) {
 
   if (str.empty()) {
     return false;
   }
 
-  // first char
-  // [a-ZA-Z_]
-  if ((('a' <= str[0]) && (str[0] <= 'z')) || (('A' <= str[0]) && (str[0] <= 'Z')) || (str[0] == '_')) {
-    // ok
+  if (is_utf8) {
+    return is_valid_utf8_identifier(str);
   } else {
-    return false;
-  }
-
-  // remain chars
-  // [a-ZA-Z0-9_]
-  for (size_t i = 1; i < str.length(); i++) {
-    if ((('a' <= str[i]) && (str[i] <= 'z')) || (('A' <= str[i]) && (str[i] <= 'Z')) || (('0' <= str[i]) && (str[i] <= '9')) || (str[i] == '_')) {
+    // legacy
+    
+    // first char
+    // [a-ZA-Z_]
+    if ((('a' <= str[0]) && (str[0] <= 'z')) || (('A' <= str[0]) && (str[0] <= 'Z')) || (str[0] == '_')) {
       // ok
     } else {
       return false;
+    }
+
+    // remaining chars
+    // [a-ZA-Z0-9_]
+    for (size_t i = 1; i < str.length(); i++) {
+      if ((('a' <= str[i]) && (str[i] <= 'z')) || (('A' <= str[i]) && (str[i] <= 'Z')) || (('0' <= str[i]) && (str[i] <= '9')) || (str[i] == '_')) {
+        // ok
+      } else {
+        return false;
+      }
     }
   }
 
@@ -272,7 +286,9 @@ inline bool isValidIdentifier(const std::string &str) {
 
 // TfMakeValidIdentifier in pxrUSD equivalanet
 // TODO: support UTF-8
-inline std::string makeIdentifierValid(const std::string &str) {
+inline std::string makeIdentifierValid(const std::string &str, bool is_utf8 = true) {
+  (void)is_utf8;
+
   std::string s;
 
   if (str.empty()) {
@@ -312,7 +328,11 @@ inline std::string makeIdentifierValid(const std::string &str) {
 bool makeUniqueName(std::multiset<std::string> &nameSet, const std::string &name, std::string *unique_name);
 
 
+///
+/// Determine if input string is valid UTF-8 string.
+///
 bool is_valid_utf8(const std::string &str);
+
 
 ///
 /// Convert string buffer to list of UTF-8 chars.
@@ -325,6 +345,13 @@ std::vector<std::string> to_utf8_chars(const std::string &str);
 /// Return ~0u(0xffffffff) when input `u8char` is not a valid UTF-8 charcter.
 ///
 uint32_t to_utf8_code(const std::string &u8char);
+
+///
+/// Convert UTF-8 string to codepoint values.
+///
+/// Return empty array when input is not a valid UTF-8 string.
+///
+std::vector<uint32_t> to_codepoints(const std::string &str);
 
 ///
 /// Convert UTF-8 codepoint to UTF-8 string.

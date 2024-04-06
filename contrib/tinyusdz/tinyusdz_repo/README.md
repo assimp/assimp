@@ -8,7 +8,7 @@
   * Working on the branch: https://github.com/syoyo/tinyusdz/tree/rendermesh-refactor 
   * [ ] USD to RenderScene(OpenGL/Vulkan) conversion https://github.com/syoyo/tinyusdz/issues/109
   * [ ] GeomSubset/Material Binding API support for shading/texturing https://github.com/syoyo/tinyusdz/issues/103 
- 
+  * [ ] UTF8 Identifier support https://github.com/syoyo/tinyusdz/issues/47
  
 ## Mid-term todo
 
@@ -22,10 +22,12 @@
   * [x] variantSet
   * [ ] Validate composition is correctly operated.
 * Better usdLux support https://github.com/syoyo/tinyusdz/issues/101 
+* [ ] Support parsing usd-wg USD aasets
+  * https://github.com/syoyo/tinyusdz/issues/135
 * Support reading & compose some production USD scenes
   * [ ] Moana island v2.1 https://github.com/syoyo/tinyusdz/issues/90
   * [ ] ALAB USD production scene https://github.com/syoyo/tinyusdz/issues/91
- 
+  
 * MaterialX https://github.com/syoyo/tinyusdz/issues/86
   * USD + MateriralX + PBR rendering example using https://github.com/lighttransport/pbrlab
 * Improve interoperability with Blender USD export/import https://github.com/syoyo/tinyusdz/issues/98

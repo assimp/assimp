@@ -792,12 +792,12 @@ bool AsciiParser::MaybeCustom() {
 }
 
 bool AsciiParser::ParseDict(std::map<std::string, MetaVariable> *out_dict) {
-  // '{' (type name '=' value)+ '}'
+  // '{' comment | (type name '=' value)+ '}'
   if (!Expect('{')) {
     return false;
   }
 
-  if (!SkipWhitespaceAndNewline()) {
+  if (!SkipCommentAndWhitespaceAndNewline()) {
     return false;
   }
 
@@ -820,7 +820,7 @@ bool AsciiParser::ParseDict(std::map<std::string, MetaVariable> *out_dict) {
         PUSH_ERROR_AND_RETURN("Failed to parse dict element.");
       }
 
-      if (!SkipWhitespaceAndNewline()) {
+      if (!SkipCommentAndWhitespaceAndNewline()) {
         return false;
       }
 
@@ -833,7 +833,7 @@ bool AsciiParser::ParseDict(std::map<std::string, MetaVariable> *out_dict) {
     }
   }
 
-  if (!SkipWhitespaceAndNewline()) {
+  if (!SkipCommentAndWhitespaceAndNewline()) {
     return false;
   }
 
@@ -1834,7 +1834,7 @@ bool AsciiParser::ParseStageMetaOpt() {
 }
 
 // Parse Stage meta
-// meta = ( metadata_opt )
+// meta = '(' (comment | metadata_opt)+ ')'
 //      ;
 bool AsciiParser::ParseStageMetas() {
   if (!Expect('(')) {
@@ -1866,7 +1866,7 @@ bool AsciiParser::ParseStageMetas() {
       return true;
 
     } else {
-      if (!SkipWhitespace()) {
+      if (!SkipCommentAndWhitespaceAndNewline()) {
         // eof
         return false;
       }
@@ -3361,7 +3361,7 @@ bool AsciiParser::ParseRelationship(Relationship *result) {
       PUSH_ERROR_AND_RETURN("Failed to parse None.");
     }
 
-    // Should be empty.
+    // Should be empty for None.
     if (value.has_value()) {
       PUSH_ERROR_AND_RETURN("Failed to parse None.");
     }
@@ -3620,10 +3620,6 @@ bool AsciiParser::ParsePrimProps(std::map<std::string, Property> *props, std::ve
 
     if (!SkipWhitespaceAndNewline()) {
       return false;
-    }
-
-    if (MaybeNone()) {
-      return true;
     }
 
     Relationship rel;

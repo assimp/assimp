@@ -525,8 +525,9 @@ bool LoadUSDZFromMemory(const uint8_t *addr, const size_t length,
         return false;
       }
 
-      if (asset_size > (options.max_allowed_asset_size_in_mb * 1024 * 1024)) {
-        PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, "Asset file size too large.");
+      if (asset_size > (options.max_allowed_asset_size_in_mb * 1024ull * 1024ull)) {
+        PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, fmt::format("Asset no[{}] file size too large. {} bytes (max_allowed_asset_size {})",
+          i, asset_size, options.max_allowed_asset_size_in_mb * 1024ull * 1024ull));
       }
 
       DCOUT("Image asset size: " << asset_size);
@@ -537,26 +538,26 @@ bool LoadUSDZFromMemory(const uint8_t *addr, const size_t length,
 
         if (info) {
           if (info->width == 0) {
-            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, "Image has zero width.");
+            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, fmt::format("Assset no[{}] Image has zero width.", i));
           }
 
           if (info->width > options.max_image_width) {
             PUSH_ERROR_AND_RETURN_TAG(
-                kTagUSDZ, fmt::format("Asset no[{}] Image width too large", i));
+                kTagUSDZ, fmt::format("Asset no[{}] Image width too large. {} (max_image_width {})", i, info->width, options.max_image_width));
           }
 
           if (info->height == 0) {
-            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, "Image has zero height.");
+            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, fmt::format("Asset no[{}] Image has zero height.", i));
           }
 
           if (info->height > options.max_image_height) {
             PUSH_ERROR_AND_RETURN_TAG(
                 kTagUSDZ,
-                fmt::format("Asset no[{}] Image height too large", i));
+                fmt::format("Asset no[{}] Image height too large. {} (max_image_height {})", i, info->height, options.max_image_height));
           }
 
           if (info->channels == 0) {
-            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, "Image has zero channels.");
+            PUSH_ERROR_AND_RETURN_TAG(kTagUSDZ, fmt::format("Asset no[{}] Image has zero channels.", i));
           }
 
           if (info->channels > options.max_image_channels) {

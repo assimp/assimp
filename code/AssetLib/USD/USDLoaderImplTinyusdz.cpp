@@ -275,12 +275,51 @@ void USDImporterImplTinyusdz::textures(
     (void) numTextures; // Ignore unused variable when -Werror enabled
 }
 
+/**
+ * "owned" as in, used "new" to allocate and aiScene now responsible for "delete"
+ *
+ * @param render_scene  renderScene object
+ * @param image         textureImage object
+ * @param nameWExt      filename w/ext (use to extract file type hint)
+ * @return              aiTexture ptr
+ */
+static aiTexture *ownedEmbeddedTextureFor(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        const tinyusdz::tydra::TextureImage &image,
+        const std::string &nameWExt) {
+    aiTexture *tex = new aiTexture();
+    tex->mFilename.Set(image.asset_identifier.c_str());
+    size_t pos = nameWExt.find_last_of('.');
+    strncpy(tex->achFormatHint, nameWExt.substr(pos + 1).c_str(), 3);
+    tex->mHeight = 0;
+    tex->mWidth = render_scene.buffers[image.buffer_id].data.size();
+    tex->pcData = (aiTexel *) new char[tex->mWidth];
+    memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], tex->mWidth);
+    return tex;
+}
+
 void USDImporterImplTinyusdz::textureImages(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
     const size_t numTextureImages{render_scene.images.size()};
     (void) numTextureImages; // Ignore unused variable when -Werror enabled
+    pScene->mTextures = nullptr; // Need to iterate over images before knowing if valid textures available
+    pScene->mNumTextures = 0;
+    for (const auto &image : render_scene.images) {
+        if (image.buffer_id > -1 &&
+            image.buffer_id < render_scene.buffers.size() &&
+            !render_scene.buffers[image.buffer_id].data.empty()) {
+            aiTexture *tex = ownedEmbeddedTextureFor(
+                    render_scene,
+                    image,
+                    nameWExt);
+            if (pScene->mTextures == nullptr) {
+                pScene->mTextures = new aiTexture *[render_scene.images.size()];
+            }
+            pScene->mTextures[pScene->mNumTextures++] = tex;
+        }
+    }
 }
 
 void USDImporterImplTinyusdz::buffers(

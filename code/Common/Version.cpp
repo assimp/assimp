@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static constexpr char LEGAL_INFORMATION[] =
         "Open Asset Import Library (Assimp).\n"
         "A free C/C++ library to import various 3D file formats into applications\n\n"
-        "(c) 2006-2023, Assimp team\n"
+        "(c) 2006-2024, Assimp team\n"
         "License under the terms and conditions of the 3-clause BSD license\n"
         "https://www.assimp.org\n";
 

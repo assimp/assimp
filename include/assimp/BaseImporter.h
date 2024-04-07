@@ -95,7 +95,7 @@ public:
     BaseImporter() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
-    virtual ~BaseImporter();
+    virtual ~BaseImporter() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

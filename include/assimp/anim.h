@@ -90,6 +90,7 @@ struct aiVectorKey {
     bool operator==(const aiVectorKey &rhs) const {
         return rhs.mValue == this->mValue;
     }
+
     bool operator!=(const aiVectorKey &rhs) const {
         return rhs.mValue != this->mValue;
     }

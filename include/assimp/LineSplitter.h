@@ -86,7 +86,7 @@ public:
     */
     LineSplitter(StreamReaderLE& stream, bool skip_empty_lines = true, bool trim = true);
 
-    ~LineSplitter();
+    ~LineSplitter() = default;
 
     // -----------------------------------------
     /** pseudo-iterator increment */
@@ -159,8 +159,6 @@ AI_FORCE_INLINE LineSplitter::LineSplitter(StreamReaderLE& stream, bool skip_emp
     operator++();
     mIdx = 0;
 }
-
-AI_FORCE_INLINE LineSplitter::~LineSplitter() = default;
 
 AI_FORCE_INLINE LineSplitter& LineSplitter::operator++() {
     if (mSwallow) {

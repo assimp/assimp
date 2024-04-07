@@ -93,10 +93,6 @@ BaseImporter::BaseImporter() AI_NO_EXCEPT
     // empty
 }
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseImporter::~BaseImporter() = default;
-
 void BaseImporter::UpdateImporterScale(Importer *pImp) {
     ai_assert(pImp != nullptr);
     ai_assert(importerScale != 0.0);

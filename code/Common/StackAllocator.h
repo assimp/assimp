@@ -61,9 +61,10 @@ namespace Assimp {
 class StackAllocator {
 public:
     /// @brief Constructs the allocator
-    inline StackAllocator();
+    StackAllocator();
+
     /// @brief Destructs the allocator and frees all memory
-    inline ~StackAllocator();
+    ~StackAllocator();
 
     // non copyable
     StackAllocator(const StackAllocator &) = delete;

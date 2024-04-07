@@ -1433,6 +1433,10 @@ class TypedAttribute {
   void set_value_empty() { _value_empty = true; }
 
   bool is_value_empty() const {
+    if (is_connection()) {
+      return false;
+    }
+
     if (_value_empty) {
       return true;
     }

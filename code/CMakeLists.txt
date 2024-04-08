@@ -1286,7 +1286,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   endif()
 
   if (ASSIMP_BUILD_DRACO)
-    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+    target_link_libraries(assimp PRIVATE ${draco_LIBRARIES})
   endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})

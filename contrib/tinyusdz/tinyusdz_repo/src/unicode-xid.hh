@@ -18,28 +18,23 @@ constexpr uint32_t kMaxCodepoint = 0x10FFFF;
 
 namespace detail {
 
-// Assume table is sorted by the first key(lower)
+// Assume table is sorted by the first key(range_begin)
 #include "unicode-xid-table.inc"
 
 }
-
 
 inline bool is_xid_start(uint32_t codepoint) {
   if (codepoint > kMaxCodepoint) {
     return false;
   }
 
-  // first find lower location based on the first key, then test with second key with linear search for (lower <= codepoint <= upper) range check.
-  // NOTE: second item in query is not used. fill it T::min just in case.
-  auto it = std::lower_bound(detail::kXID_StartTable.begin(), detail::kXID_StartTable.end(), std::make_pair(int(codepoint), (std::numeric_limits<int>::min)()));
+  // first a range(range_begin <= codepoint <= range_end) by comparing the second key(range end).
+  auto it = std::lower_bound(detail::kXID_StartTable.begin(), detail::kXID_StartTable.end(), int(codepoint), [](const std::pair<int, int> &a, const int b) {
+    return a.second < b;
+  });
 
-  // subtract 1 to get the first entry of possible hit(lower <= codepoint <= upper)
-  if ((it != detail::kXID_StartTable.begin() && (int(codepoint) < it->second))) {
-    it--;
-  }
-
-  for (; it != detail::kXID_StartTable.end(); it++) {
-    if ((int(codepoint) >= it->first) && (int(codepoint) <= it->second)) { // range end is inclusive.  
+  if (it != detail::kXID_StartTable.end()) {
+    if ((int(codepoint) >= it->first) && (int(codepoint) <= it->second)) { // range end is inclusive.
       return true;
     }
   }
@@ -52,15 +47,12 @@ inline bool is_xid_continue(uint32_t codepoint) {
     return false;
   }
 
-  auto it = std::lower_bound(detail::kXID_ContinueTable.begin(), detail::kXID_ContinueTable.end(), std::make_pair(int(codepoint), (std::numeric_limits<int>::min)()));
+  auto it = std::lower_bound(detail::kXID_ContinueTable.begin(), detail::kXID_ContinueTable.end(), int(codepoint), [](const std::pair<int, int> &a, const int b) {
+    return a.second < b;
+  });
 
-  // subtract 1 to get the first entry of possible hit(lower <= codepoint <= upper)
-  if ((it != detail::kXID_ContinueTable.begin() && (int(codepoint) < it->second))) {
-    it--;
-  }
-
-  for (; it != detail::kXID_ContinueTable.end(); it++) {
-    if ((int(codepoint) >= it->first) && (int(codepoint) <= it->second)) { // range end is inclusive.  
+  if (it != detail::kXID_ContinueTable.end()) {
+    if ((int(codepoint) >= it->first) && (int(codepoint) <= it->second)) { // range end is inclusive.
       return true;
     }
   }

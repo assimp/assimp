@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,16 +48,13 @@ the 3ds loader handling smooth groups correctly  */
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-SGSpatialSort::SGSpatialSort()
-{
+SGSpatialSort::SGSpatialSort() {
     // define the reference plane. We choose some arbitrary vector away from all basic axes
     // in the hope that no model spreads all its vertices along this plane.
     mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
     mPlaneNormal.Normalize();
 }
-// ------------------------------------------------------------------------------------------------
-// Destructor
-SGSpatialSort::~SGSpatialSort() = default;
+
 // ------------------------------------------------------------------------------------------------
 void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
     unsigned int smoothingGroup)

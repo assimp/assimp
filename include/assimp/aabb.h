@@ -59,18 +59,12 @@ struct aiAABB {
 
 #ifdef __cplusplus
     /// @brief The default class constructor.
-    aiAABB() :
-            mMin(), mMax() {
-        // empty
-    }
+    aiAABB() = default;
 
     /// @brief The class constructor with the minimum and maximum.
     /// @param min  The minimum dimension.
     /// @param max  The maximum dimension.
-    aiAABB(const aiVector3D &min, const aiVector3D &max) :
-            mMin(min), mMax(max) {
-        // empty
-    }
+    aiAABB(const aiVector3D &min, const aiVector3D &max) : mMin(min), mMax(max) {}
 
     ///	@brief  The class destructor.
     ~aiAABB() = default;

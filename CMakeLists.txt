@@ -621,6 +621,10 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
+if(ASSIMP_BUILD_DRACO_STATIC)
+  set(ASSIMP_BUILD_DRACO ON)
+endif()
+
 # Draco requires cmake 3.12
 IF (DEFINED CMAKE_VERSION AND "${CMAKE_VERSION}" VERSION_LESS "3.12")
   message(NOTICE "draco requires cmake 3.12 or newer, cmake is ${CMAKE_VERSION} . Draco is disabled")
@@ -656,22 +660,29 @@ ELSE()
           "-Wno-sign-compare"
           "-Wno-unused-local-typedefs"
         )
-        # Draco 1.4.1 does not explicitly export any symbols under GCC/clang
-        list(APPEND DRACO_CXX_FLAGS
-          "-fvisibility=default"
-        )
+
+        if(NOT ASSIMP_BUILD_DRACO_STATIC)
+          # Draco 1.4.1 does not explicitly export any symbols under GCC/clang
+          list(APPEND DRACO_CXX_FLAGS
+            "-fvisibility=default"
+          )
+        endif()
       ENDIF()
 
       # Don't build or install all of Draco by default
       ADD_SUBDIRECTORY( "contrib/draco" EXCLUDE_FROM_ALL )
 
+      if(ASSIMP_BUILD_DRACO_STATIC)
+        set_property(DIRECTORY "contrib/draco" PROPERTY BUILD_SHARED_LIBS OFF)
+      endif()
+
       if(MSVC OR WIN32)
         set(draco_LIBRARIES "draco")
       else()
-        if(BUILD_SHARED_LIBS)
-          set(draco_LIBRARIES "draco_shared")
-        else()
+        if(ASSIMP_BUILD_DRACO_STATIC)
           set(draco_LIBRARIES "draco_static")
+        else()
+          set(draco_LIBRARIES "draco_shared")
         endif()
       endif()
 

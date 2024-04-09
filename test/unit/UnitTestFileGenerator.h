@@ -45,13 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <gtest/gtest.h>
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-#define TMP_PATH "./"
+#   define TMP_PATH "./"
 #elif defined(__GNUC__) || defined(__clang__)
-#define TMP_PATH "/tmp/"
+#   define TMP_PATH "/tmp/"
 #endif
 
 #if defined(_MSC_VER)
-#define _CRT_SECURE_NO_WARNINGS
+#   ifndef _CRT_SECURE_NO_WARNINGS
+#       define _CRT_SECURE_NO_WARNINGS
+#   endif
 #include <io.h>
 inline FILE* MakeTmpFile(char* tmplate)
 {

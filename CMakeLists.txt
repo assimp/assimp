@@ -38,9 +38,9 @@ SET(CMAKE_POLICY_DEFAULT_CMP0012 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
-CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
-# Disabled importers: m3d for 5.1
+# Disabled importers: m3d for 5.1 or later
 ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
 ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
 # Toggles the use of the hunter package manager
@@ -49,13 +49,13 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.3.tar.gz"
-    SHA1 "3319fe6a3b08090df7df98dee75134d68e2ef5a3"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.5.tar.gz"
+    SHA1 "a20151e4c0740ee7d0f9994476856d813cdead29"
   )
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.3.0)
+PROJECT(Assimp VERSION 5.4.0)
 
 # All supported options ###############################################
 
@@ -131,18 +131,18 @@ OPTION ( ASSIMP_IGNORE_GIT_HASH
 
 IF (WIN32)
   OPTION( ASSIMP_BUILD_ZLIB
-    "Build your own zlib"
+    "Build your zlib"
     ON
   )
 ELSE()
   OPTION( ASSIMP_BUILD_ZLIB
-    "Build your own zlib"
+    "Build your zlib"
     OFF
   )
 ENDIF()
 
 IF (WIN32)
-  # Use subset of Windows.h
+  # Use a subset of Windows.h
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 
   IF(MSVC)
@@ -150,16 +150,16 @@ IF (WIN32)
       "Install MSVC debug files."
       ON )
     IF(NOT (MSVC_VERSION LESS 1900))
-      # Multibyte character set is deprecated since at least MSVC2015 (possibly earlier)
+      # Multibyte character set has been deprecated since at least MSVC2015 (possibly earlier)
       ADD_DEFINITIONS( -DUNICODE -D_UNICODE )
     ENDIF()
 
-    # Link statically against c/c++ lib to avoid missing redistriburable such as
+    # Link statically against c/c++ lib to avoid missing redistributable such as
     # "VCRUNTIME140.dll not found. Try reinstalling the app.", but give users
     # a choice to opt for the shared runtime if they want.
     option(USE_STATIC_CRT "Link against the static runtime libraries." OFF)
 
-    # The CMAKE_CXX_FLAGS vars can be overriden by some Visual Studio generators, so we use an alternative
+    # The CMAKE_CXX_FLAGS vars can be overridden by some Visual Studio generators, so we use an alternative
     # global method here:
     if (${USE_STATIC_CRT})
       add_compile_options(
@@ -249,9 +249,9 @@ SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 IF( UNIX )
   # Use GNUInstallDirs for Unix predefined directories
   INCLUDE(GNUInstallDirs)
-  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
+  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit Linux
   IF(NOT ${OPERATING_SYSTEM} MATCHES "Android")
-    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
+    IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit Linux
       ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
     ENDIF()
   ENDIF()
@@ -289,7 +289,7 @@ ELSEIF(MSVC)
   IF(MSVC12)
     ADD_COMPILE_OPTIONS(/wd4351)	
   ENDIF()
-  # supress warning for double to float conversion if Double precission is activated
+  # supress warning for double to float conversion if Double precision is activated
   ADD_COMPILE_OPTIONS(/wd4244) 
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
@@ -621,6 +621,10 @@ ELSE ()
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF ()
 
+if(ASSIMP_BUILD_DRACO_STATIC)
+  set(ASSIMP_BUILD_DRACO ON)
+endif()
+
 # Draco requires cmake 3.12
 IF (DEFINED CMAKE_VERSION AND "${CMAKE_VERSION}" VERSION_LESS "3.12")
   message(NOTICE "draco requires cmake 3.12 or newer, cmake is ${CMAKE_VERSION} . Draco is disabled")
@@ -656,22 +660,29 @@ ELSE()
           "-Wno-sign-compare"
           "-Wno-unused-local-typedefs"
         )
-        # Draco 1.4.1 does not explicitly export any symbols under GCC/clang
-        list(APPEND DRACO_CXX_FLAGS
-          "-fvisibility=default"
-        )
+
+        if(NOT ASSIMP_BUILD_DRACO_STATIC)
+          # Draco 1.4.1 does not explicitly export any symbols under GCC/clang
+          list(APPEND DRACO_CXX_FLAGS
+            "-fvisibility=default"
+          )
+        endif()
       ENDIF()
 
       # Don't build or install all of Draco by default
       ADD_SUBDIRECTORY( "contrib/draco" EXCLUDE_FROM_ALL )
 
+      if(ASSIMP_BUILD_DRACO_STATIC)
+        set_property(DIRECTORY "contrib/draco" PROPERTY BUILD_SHARED_LIBS OFF)
+      endif()
+
       if(MSVC OR WIN32)
         set(draco_LIBRARIES "draco")
       else()
-        if(BUILD_SHARED_LIBS)
-          set(draco_LIBRARIES "draco_shared")
-        else()
+        if(ASSIMP_BUILD_DRACO_STATIC)
           set(draco_LIBRARIES "draco_static")
+        else()
+          set(draco_LIBRARIES "draco_shared")
         endif()
       endif()
 

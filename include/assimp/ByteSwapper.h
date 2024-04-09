@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -66,10 +65,10 @@ namespace Assimp    {
  * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
 // --------------------------------------------------------------------------------------
 class ByteSwap {
-    ByteSwap() AI_NO_EXCEPT {}
+    ByteSwap() AI_NO_EXCEPT = default;
+    ~ByteSwap() = default;
 
 public:
-
     // ----------------------------------------------------------------------
     /** Swap two bytes of data
      *  @param[inout] _szOut A void* to save the reintcasts for the caller. */
@@ -89,8 +88,7 @@ public:
     // ----------------------------------------------------------------------
     /** Swap four bytes of data
      *  @param[inout] _szOut A void* to save the reintcasts for the caller. */
-    static inline void Swap4(void* _szOut)
-    {
+    static inline void Swap4(void* _szOut) {
         ai_assert(_szOut);
 
 #if _MSC_VER >= 1400

@@ -54,15 +54,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <io.h>
 inline FILE* MakeTmpFile(char* tmplate)
 {
-    auto err = _mktemp_s(tmplate, std::strlen(tmplate));
-    EXPECT_NE(tmplate, nullptr);
-    if(tmplate == nullptr)
+    auto pathtemplate = _mktemp(tmplate);
+    EXPECT_NE(pathtemplate, nullptr);
+    if(pathtemplate == nullptr)
     {
         return nullptr;
     }
-    FILE *fs = nullptr;
-    err = fopen_s(&fs, tmplate, "w+");
-    EXPECT_EQ(err, 0);
+    auto* fs = std::fopen(pathtemplate, "w+");
+    EXPECT_NE(fs, nullptr);    return fs;
+
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)

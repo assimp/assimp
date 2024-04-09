@@ -61,7 +61,7 @@ inline FILE* MakeTmpFile(char* tmplate)
         return nullptr;
     }
     FILE *fs = nullptr;
-    auto err = fopen_s(&fs, tmplate, "w+");
+    err = fopen_s(&fs, tmplate, "w+");
     EXPECT_EQ(err, 0);
     return fs;
 }

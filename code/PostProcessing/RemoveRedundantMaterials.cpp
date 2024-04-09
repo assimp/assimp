@@ -81,27 +81,26 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
         
     // Find out which materials are referenced by meshes
     std::vector<bool> abReferenced(pScene->mNumMaterials,false);
-    for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
+    for (unsigned int i = 0;i < pScene->mNumMeshes;++i) {
         abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
+    }
 
     // If a list of materials to be excluded was given, match the list with
     // our imported materials and 'salt' all positive matches to ensure that
     // we get unique hashes later.
     if (mConfigFixedMaterials.length()) {
-
         std::list<std::string> strings;
         ConvertListToStrings(mConfigFixedMaterials,strings);
 
         for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
             aiMaterial* mat = pScene->mMaterials[i];
-
+            ai_assert(mat != nullptr);
             aiString name;
             mat->Get(AI_MATKEY_NAME,name);
 
-            if (name.length) {
+            if (name.length != 0) {
                 std::list<std::string>::const_iterator it = std::find(strings.begin(), strings.end(), name.data);
                 if (it != strings.end()) {
-
                     // Our brilliant 'salt': A single material property with ~ as first
                     // character to mark it as internal and temporary.
                     const int dummy = 1;
@@ -126,7 +125,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
     // store all hashes in a list and so a quick search whether
     // we do already have a specific hash. This allows us to
     // determine which materials are identical.
-    uint32_t *aiHashes = new uint32_t[ pScene->mNumMaterials ];;
+    uint32_t *aiHashes = new uint32_t[ pScene->mNumMaterials ];
     for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
         // No mesh is referencing this material, remove it.
         if (!abReferenced[i]) {
@@ -157,15 +156,16 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
     // If the new material count differs from the original,
     // we need to rebuild the material list and remap mesh material indexes.
     if (iNewNum < 1) {
-        //throw DeadlyImportError("No materials remaining");
+        delete [] aiMappingTable;
+        delete [] aiHashes;
+        pScene->mNumMaterials = 0;
         return;
     }
     if (iNewNum != pScene->mNumMaterials) {
         ai_assert(iNewNum > 0);
         aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
         ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
-        for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
-        {
+        for (unsigned int p = 0; p < pScene->mNumMaterials;++p) {
             // if the material is not referenced ... remove it
             if (!abReferenced[p]) {
                 continue;

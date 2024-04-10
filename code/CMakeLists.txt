@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -42,7 +42,7 @@
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.22 )
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -1193,6 +1193,10 @@ ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 
+add_compile_options(
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
+
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
   IF (MSVC)
@@ -1282,7 +1286,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   endif()
 
   if (ASSIMP_BUILD_DRACO)
-    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+    target_link_libraries(assimp PRIVATE ${draco_LIBRARIES})
   endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})

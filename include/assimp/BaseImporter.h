@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -95,7 +95,7 @@ public:
     BaseImporter() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
-    virtual ~BaseImporter();
+    virtual ~BaseImporter() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

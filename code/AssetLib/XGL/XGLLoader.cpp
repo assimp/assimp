@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -700,13 +700,14 @@ unsigned int XGLImporter::ReadIDAttr(XmlNode &node) {
 float XGLImporter::ReadFloat(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
-    const char *s = v.c_str(), *se;
-	if (!SkipSpaces(&s)) {
+    const char *s = v.c_str();
+    const char *end = v.c_str() + v.size();
+	if (!SkipSpaces(&s, end)) {
 		LogError("unexpected EOL, failed to parse index element");
 		return 0.f;
 	}
-	float t;
-	se = fast_atoreal_move(s, t);
+    float t{ 0.0f };
+	const char *se = fast_atoreal_move(s, t);
 	if (se == s) {
 		LogError("failed to read float text");
 		return 0.f;
@@ -720,7 +721,8 @@ unsigned int XGLImporter::ReadIndexFromText(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
     const char *s = v.c_str();
-	if (!SkipSpaces(&s)) {
+    const char *end = v.c_str() + v.size();
+    if (!SkipSpaces(&s, end)) {
 		LogError("unexpected EOL, failed to parse index element");
         return ErrorId;
 	}
@@ -741,16 +743,17 @@ aiVector2D XGLImporter::ReadVec2(XmlNode &node) {
     std::string val;
     XmlParser::getValueAsString(node, val);
     const char *s = val.c_str();
+    const char *end = val.c_str() + val.size();
     ai_real v[2] = {};
 	for (int i = 0; i < 2; ++i) {
-		if (!SkipSpaces(&s)) {
+		if (!SkipSpaces(&s, end)) {
 			LogError("unexpected EOL, failed to parse vec2");
 			return vec;
 		}
 
 		v[i] = fast_atof(&s);
 
-		SkipSpaces(&s);
+		SkipSpaces(&s, end);
 		if (i != 1 && *s != ',') {
 			LogError("expected comma, failed to parse vec2");
 			return vec;
@@ -769,14 +772,15 @@ aiVector3D XGLImporter::ReadVec3(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
 	const char *s = v.c_str();
+    const char *end = v.c_str() + v.size();
 	for (int i = 0; i < 3; ++i) {
-		if (!SkipSpaces(&s)) {
+		if (!SkipSpaces(&s, end)) {
 			LogError("unexpected EOL, failed to parse vec3");
 			return vec;
 		}
 		vec[i] = fast_atof(&s);
 
-		SkipSpaces(&s);
+		SkipSpaces(&s, end);
 		if (i != 2 && *s != ',') {
 			LogError("expected comma, failed to parse vec3");
 			return vec;

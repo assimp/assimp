@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -99,12 +99,12 @@ bool DefaultIOSystem::Exists(const char *pFile) const {
         return false;
     }
 #else
-    FILE *file = ::fopen(pFile, "rb");
-    if (!file) {
+	struct stat statbuf;
+    stat(pFile, &statbuf);
+    // test for a regular file
+    if (!S_ISREG(statbuf.st_mode)) {
         return false;
     }
-
-    ::fclose(file);
 #endif
 
     return true;
@@ -116,6 +116,7 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
     ai_assert(strFile != nullptr);
     ai_assert(strMode != nullptr);
     FILE *file;
+	
 #ifdef _WIN32
     std::wstring name = Utf8ToWide(strFile);
     if (name.empty()) {
@@ -126,6 +127,7 @@ IOStream *DefaultIOSystem::Open(const char *strFile, const char *strMode) {
 #else
     file = ::fopen(strFile, strMode);
 #endif
+	
     if (!file) {
         return nullptr;
     }

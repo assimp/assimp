@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -320,17 +320,18 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         std::vector<char> _data;
         TextFileToBuffer(pb.get(), _data);
         const char *data = &_data[0];
+        const char *end = &_data[_data.size() - 1] + 1;
 
         std::vector<std::pair<std::string, std::string>> tempTextures;
 
         // do a quick search in the UC file for some known, usually texture-related, tags
         for (; *data; ++data) {
             if (TokenMatchI(data, "#exec", 5)) {
-                SkipSpacesAndLineEnd(&data);
+                SkipSpacesAndLineEnd(&data, end);
 
                 // #exec TEXTURE IMPORT [...] NAME=jjjjj [...] FILE=jjjj.pcx [...]
                 if (TokenMatchI(data, "TEXTURE", 7)) {
-                    SkipSpacesAndLineEnd(&data);
+                    SkipSpacesAndLineEnd(&data, end);
 
                     if (TokenMatchI(data, "IMPORT", 6)) {
                         tempTextures.emplace_back();
@@ -348,14 +349,15 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                 me.second = std::string(d, (size_t)(data - d));
                             }
                         }
-                        if (!me.first.length() || !me.second.length())
+                        if (!me.first.length() || !me.second.length()) {
                             tempTextures.pop_back();
+                        }
                     }
                 }
                 // #exec MESHMAP SETTEXTURE MESHMAP=box NUM=1 TEXTURE=Jtex1
                 // #exec MESHMAP SCALE MESHMAP=box X=0.1 Y=0.1 Z=0.2
                 else if (TokenMatchI(data, "MESHMAP", 7)) {
-                    SkipSpacesAndLineEnd(&data);
+                    SkipSpacesAndLineEnd(&data, end);
 
                     if (TokenMatchI(data, "SETTEXTURE", 10)) {
 
@@ -369,8 +371,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                             } else if (!ASSIMP_strincmp(data, "TEXTURE=", 8)) {
                                 data += 8;
                                 const char *d = data;
-                                for (; !IsSpaceOrNewLine(*data); ++data)
-                                    ;
+                                for (; !IsSpaceOrNewLine(*data); ++data);
                                 me.second = std::string(d, (size_t)(data - d));
 
                                 // try to find matching path names, doesn't care if we don't find them
@@ -408,7 +409,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     // find out how many output meshes and materials we'll have and build material indices
     for (Unreal::Triangle &tri : triangles) {
         Unreal::TempMat mat(tri);
-        std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(), materials.end(), mat);
+        auto nt = std::find(materials.begin(), materials.end(), mat);
         if (nt == materials.end()) {
             // add material
             tri.matIndex = static_cast<unsigned int>(materials.size());

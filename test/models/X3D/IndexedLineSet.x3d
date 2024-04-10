@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D profile='Interchange' version='3.0' xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'>
+  <head>
+  </head>
+  <Scene>
+    <WorldInfo title='vertices.x3d'/>
+    <NavigationInfo type='"EXAMINE" "WALK" "FLY" "ANY"'/>
+    <Viewpoint description='vertices' position='0 0 10'/>
+    <Shape>
+      <Appearance>
+        <Material emissiveColor='1 0 0'/>
+      </Appearance>
+      <IndexedLineSet coordIndex='0 1 2 3 0 -1'>
+        <Coordinate point='1 0 0 1 1 0 0 1 0 0 0 0'/>
+      </IndexedLineSet>
+    </Shape>
+  </Scene>
+</X3D>

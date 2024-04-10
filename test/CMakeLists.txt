@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -165,6 +165,7 @@ SET( IMPORTERS
   unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
   unit/ImportExport/RAW/utRAWImportExport.cpp
   unit/ImportExport/Terragen/utTerragenImportExport.cpp
+  unit/ImportExport/Pbrt/utPbrtImportExport.cpp
 )
 
 SET( MATERIAL

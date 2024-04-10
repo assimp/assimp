@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -518,20 +518,19 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
     return 1;
 }
 //-------------------------------------------------------------------------------
-int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
-    unsigned int iIndex)
-{
+int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot, unsigned int iIndex) {
     ai_assert(nullptr != hRoot);
 
     aiMaterial* pcMat = g_pcAsset->pcScene->mMaterials[iIndex];
 
+    if (g_pcAsset->pcScene->mNumMeshes == 0) {
+        return -1;
+    }
 
     // find the first mesh using this material index
     unsigned int iMesh = 0;
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
-    {
-        if (iIndex == g_pcAsset->pcScene->mMeshes[i]->mMaterialIndex)
-        {
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i) {
+        if (iIndex == g_pcAsset->pcScene->mMeshes[i]->mMaterialIndex) {
             iMesh = i;
             break;
         }
@@ -540,12 +539,9 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     // use the name of the material, if possible
     char chTemp[512];
     aiString szOut;
-    if (AI_SUCCESS != aiGetMaterialString(pcMat,AI_MATKEY_NAME,&szOut))
-    {
+    if (AI_SUCCESS != aiGetMaterialString(pcMat,AI_MATKEY_NAME,&szOut)) {
         ai_snprintf(chTemp,512,"Material %i",iIndex+1);
-    }
-    else
-    {
+    } else {
         ai_snprintf(chTemp,512,"%s (%i)",szOut.data,iIndex+1);
     }
     TVITEMEXW tvi;
@@ -577,17 +573,15 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     aiTextureOp eOp;
     aiString szPath;
     bool bNoOpacity = true;
-    for (unsigned int i = 0; i <= AI_TEXTURE_TYPE_MAX;++i)
-    {
+    for (unsigned int i = 0; i <= AI_TEXTURE_TYPE_MAX;++i) {
         unsigned int iNum = 0;
-        while (true)
-        {
-            if (AI_SUCCESS != aiGetMaterialTexture(pcMat,(aiTextureType)i,iNum,
-                &szPath,nullptr, &iUV,&fBlend,&eOp))
-            {
+        while (true) {
+            if (AI_SUCCESS != aiGetMaterialTexture(pcMat,(aiTextureType)i,iNum, &szPath,nullptr, &iUV,&fBlend,&eOp)) {
                 break;
             }
-            if (aiTextureType_OPACITY == i)bNoOpacity = false;
+            if (aiTextureType_OPACITY == i) {
+                bNoOpacity = false;
+            }
             AddTextureToDisplayList(i,iNum,&szPath,hTexture,iUV,fBlend,eOp,iMesh);
             ++iNum;
         }
@@ -595,8 +589,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 
     AssetHelper::MeshHelper* pcMesh = g_pcAsset->apcMeshes[iMesh];
 
-    if (pcMesh->piDiffuseTexture && pcMesh->piDiffuseTexture == pcMesh->piOpacityTexture && bNoOpacity)
-    {
+    if (pcMesh->piDiffuseTexture && pcMesh->piDiffuseTexture == pcMesh->piOpacityTexture && bNoOpacity) {
         // check whether the diffuse texture is not a default texture
 
         // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
@@ -606,9 +599,7 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
 
         uint32_t iData = 0;
         DWORD dwSize = 4;
-        if(FAILED( pcMesh->piDiffuseTexture->GetPrivateData(guidPrivateData,&iData,&dwSize) ||
-            0xffffffff == iData))
-        {
+        if(FAILED( pcMesh->piDiffuseTexture->GetPrivateData(guidPrivateData,&iData,&dwSize) || 0xffffffff == iData)) {
             // seems the diffuse texture contains alpha, therefore it has been
             // added to the opacity channel, too. Add a special value ...
             AddTextureToDisplayList(aiTextureType_OPACITY | 0x40000000,
@@ -625,33 +616,26 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     this->AddMaterial(info);
     return 1;
 }
+
 //-------------------------------------------------------------------------------
 // Expand all elements in the tree-view
-int CDisplay::ExpandTree()
-{
+int CDisplay::ExpandTree() {
     // expand all materials
-    for (std::vector< MaterialInfo >::iterator
-        i =  m_asMaterials.begin();
-        i != m_asMaterials.end();++i)
-    {
+    for (std::vector< MaterialInfo >::iterator i =  m_asMaterials.begin();  i != m_asMaterials.end();++i) {
         TreeView_Expand(GetDlgItem(g_hDlg,IDC_TREE1),(*i).hTreeItem,TVE_EXPAND);
     }
     // expand all nodes
-    for (std::vector< NodeInfo >::iterator
-        i =  m_asNodes.begin();
-        i != m_asNodes.end();++i)
-    {
+    for (std::vector< NodeInfo >::iterator i =  m_asNodes.begin(); i != m_asNodes.end();++i) {
         TreeView_Expand(GetDlgItem(g_hDlg,IDC_TREE1),(*i).hTreeItem,TVE_EXPAND);
     }
     TreeView_Expand(GetDlgItem(g_hDlg,IDC_TREE1),m_hRoot,TVE_EXPAND);
     return 1;
 }
+
 //-------------------------------------------------------------------------------
 // Get image list for tree view
-int CDisplay::LoadImageList(void)
-{
-    if (!m_hImageList)
-    {
+int CDisplay::LoadImageList() {
+    if (!m_hImageList) {
         // First, create the image list we will need.
         // FIX: Need RGB888 color space to display all colors correctly
         HIMAGELIST hIml = ImageList_Create( 16,16,ILC_COLOR24, 5, 0 );
@@ -682,12 +666,13 @@ int CDisplay::LoadImageList(void)
 
         m_hImageList = hIml;
     }
+
     return 1;
 }
+
 //-------------------------------------------------------------------------------
 // Fill tree view
-int CDisplay::FillDisplayList(void)
-{
+int CDisplay::FillDisplayList(void) {
     LoadImageList();
 
     // Initialize the tree view window.
@@ -713,11 +698,11 @@ int CDisplay::FillDisplayList(void)
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
     // add each loaded material to the tree
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMaterials;++i)
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMaterials; ++i)
         AddMaterialToDisplayList(m_hRoot,i);
 
     // add each mesh to the tree
-    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
+    for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes; ++i)
         AddMeshToDisplayList(i,m_hRoot);
 
     // now add all loaded nodes recursively
@@ -729,8 +714,10 @@ int CDisplay::FillDisplayList(void)
     // everything reacts a little bit slowly if D3D is rendering,
     // so give GDI a small hint to leave the couch and work ;-)
     UpdateWindow(g_hDlg);
+    
     return 1;
 }
+
 //-------------------------------------------------------------------------------
 // Main render loop
 int CDisplay::OnRender()

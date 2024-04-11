@@ -357,7 +357,7 @@ void ComputeUVMappingProcess::Execute(aiScene *pScene) {
         mappingStack.clear();
         aiMaterial *mat = pScene->mMaterials[i];
         if (mat == nullptr) {
-            ASSIMP_LOG_INFO("Material pointer in nullptr, skipping.);
+            ASSIMP_LOG_INFO("Material pointer in nullptr, skipping.");
             continue;
         }
         for (unsigned int a = 0; a < mat->mNumProperties; ++a) {

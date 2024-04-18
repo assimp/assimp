@@ -55,12 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #       define _CRT_SECURE_NO_WARNINGS
 #   endif
 #include <io.h>
-inline FILE* MakeTmpFile(char* tmplate)
-{
-    auto pathtemplate = _mktemp(tmplate);
+inline FILE* MakeTmpFile(char* tmplate) {
+    auto pathtemplate = template;
+    int err = _mktemp_s(pathtemplate, std::strlen(pathtemplate));
+    EXPECT_EQ(err, 0);
     EXPECT_NE(pathtemplate, nullptr);
-    if(pathtemplate == nullptr)
-    {
+    if(pathtemplate == nullptr) {
         return nullptr;
     }
     auto* fs = std::fopen(pathtemplate, "w+");
@@ -69,12 +69,10 @@ inline FILE* MakeTmpFile(char* tmplate)
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)
-inline FILE* MakeTmpFile(char* tmplate)
-{
+inline FILE* MakeTmpFile(char* tmplate) {
     auto fd = mkstemp(tmplate);
     EXPECT_NE(-1, fd);
-    if(fd == -1)
-    {
+    if(fd == -1) {
         return nullptr;
     }
     auto fs = fdopen(fd, "w+");

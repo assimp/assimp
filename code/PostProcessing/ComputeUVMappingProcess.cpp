@@ -346,16 +346,20 @@ void ComputeUVMappingProcess::Execute(aiScene *pScene) {
     ASSIMP_LOG_DEBUG("GenUVCoordsProcess begin");
     char buffer[1024];
 
-    if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT)
+    if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
         throw DeadlyImportError("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
+    }
 
     std::list<MappingInfo> mappingStack;
 
-    /*  Iterate through all materials and search for non-UV mapped textures
-     */
+    // Iterate through all materials and search for non-UV mapped textures
     for (unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
         mappingStack.clear();
         aiMaterial *mat = pScene->mMaterials[i];
+        if (mat == nullptr) {
+            ASSIMP_LOG_INFO("Material pointer in nullptr, skipping.");
+            continue;
+        }
         for (unsigned int a = 0; a < mat->mNumProperties; ++a) {
             aiMaterialProperty *prop = mat->mProperties[a];
             if (!::strcmp(prop->mKey.data, "$tex.mapping")) {

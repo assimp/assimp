@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #include <io.h>
 inline FILE* MakeTmpFile(char* tmplate) {
-    auto pathtemplate = template;
+    char *pathtemplate = tmplate;
     int err = _mktemp_s(pathtemplate, std::strlen(pathtemplate));
     EXPECT_EQ(err, 0);
     EXPECT_NE(pathtemplate, nullptr);

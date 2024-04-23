@@ -38,6 +38,10 @@
 #include <stdexcept>
 #include <vector>
 
+
+#if defined(_WIN32)
+#  pragma warning( disable: 4273)
+#endif
 namespace p2t {
 
 struct Edge;

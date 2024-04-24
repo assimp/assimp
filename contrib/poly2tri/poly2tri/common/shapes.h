@@ -40,7 +40,7 @@
 
 
 #if defined(_WIN32)
-#  pragma warning( disable: 4273)
+#  pragma warning( disable: 4251)
 #endif
 namespace p2t {
 

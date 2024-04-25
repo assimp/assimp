@@ -195,7 +195,7 @@ bool CalcTangentsProcess::ProcessMesh(aiMesh *pMesh, unsigned int meshIndex) {
 
             // project tangent and bitangent into the plane formed by the vertex' normal
             aiVector3D localTangent = tangent - meshNorm[p] * (tangent * meshNorm[p]);
-            aiVector3D localBitangent = bitangent - meshNorm[p] * (bitangent * meshNorm[p])
+            aiVector3D localBitangent = bitangent - meshNorm[p] * (bitangent * meshNorm[p]);
             localTangent.NormalizeSafe();
             localBitangent.NormalizeSafe();
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -75,7 +75,7 @@ aiFace ReadTriangle(XmlNode &node, int &texId0, int &texId1, int &texId2) {
     face.mIndices[1] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v2).as_string()));
     face.mIndices[2] = static_cast<unsigned int>(std::atoi(node.attribute(XmlTag::v3).as_string()));
 
-    texId0 = texId1 = texId2 = -1;
+    texId0 = texId1 = texId2 = IdNotSet;
     XmlParser::getIntAttribute(node, XmlTag::p1, texId0);
     XmlParser::getIntAttribute(node, XmlTag::p2, texId1);
     XmlParser::getIntAttribute(node, XmlTag::p3, texId2);
@@ -236,6 +236,8 @@ void XmlSerializer::ImportXml(aiScene *scene) {
             ReadBaseMaterials(currentNode);
         } else if (currentNodeName == XmlTag::meta) {
             ReadMetadata(currentNode);
+        } else if (currentNodeName == XmlTag::colorgroup) {
+            ReadColorGroup(currentNode);
         }
     }
     StoreMaterialsInScene(scene);
@@ -331,9 +333,49 @@ void XmlSerializer::ReadObject(XmlNode &node) {
 
             if (hasPid) {
                 auto it = mResourcesDictionnary.find(pid);
-                if (hasPindex && it != mResourcesDictionnary.end() && it->second->getType() == ResourceType::RT_BaseMaterials) {
-                    BaseMaterials *materials = static_cast<BaseMaterials *>(it->second);
-                    mesh->mMaterialIndex = materials->mMaterialIndex[pindex];
+                if (hasPindex && it != mResourcesDictionnary.end()) {
+                    if (it->second->getType() == ResourceType::RT_BaseMaterials) {
+                        BaseMaterials *materials = static_cast<BaseMaterials *>(it->second);
+                        mesh->mMaterialIndex = materials->mMaterialIndex[pindex];
+                    } else if (it->second->getType() == ResourceType::RT_Texture2DGroup) {
+                        Texture2DGroup *group = static_cast<Texture2DGroup *>(it->second);
+                        if (mesh->mTextureCoords[0] == nullptr) {
+                            mesh->mNumUVComponents[0] = 2;
+                            for (unsigned int i = 1; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+                                mesh->mNumUVComponents[i] = 0;
+                            }
+
+                            const std::string name = ai_to_string(group->mTexId);
+                            for (size_t i = 0; i < mMaterials.size(); ++i) {
+                                if (name == mMaterials[i]->GetName().C_Str()) {
+                                    mesh->mMaterialIndex = static_cast<unsigned int>(i);
+                                }
+                            }
+
+                            mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                                mesh->mTextureCoords[0][vertex_idx] =
+                                        aiVector3D(group->mTex2dCoords[pindex].x, group->mTex2dCoords[pindex].y, 0.0f);
+                            }
+                        } else {
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                                if (mesh->mTextureCoords[0][vertex_idx].z < 0) {
+                                    // use default
+                                    mesh->mTextureCoords[0][vertex_idx] =
+                                            aiVector3D(group->mTex2dCoords[pindex].x, group->mTex2dCoords[pindex].y, 0.0f);
+                                }
+                            }
+                        }
+                    }else if (it->second->getType() == ResourceType::RT_ColorGroup) {
+                        if (mesh->mColors[0] == nullptr) {
+                            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
+
+                            ColorGroup *group = static_cast<ColorGroup *>(it->second);
+                            for (unsigned int vertex_idx = 0; vertex_idx < mesh->mNumVertices; vertex_idx++) {
+                                mesh->mColors[0][vertex_idx] = group->mColors[pindex];
+                            }
+                        }
+                    }
                 }
             }
 
@@ -415,27 +457,36 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
     for (XmlNode &currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == XmlTag::triangle) {
-            int pid = IdNotSet, p1 = IdNotSet;
+            int pid = IdNotSet;
             bool hasPid = getNodeAttribute(currentNode, D3MF::XmlTag::pid, pid);
-            bool hasP1 = getNodeAttribute(currentNode, D3MF::XmlTag::p1, p1);
 
-            int texId[3];
-            Texture2DGroup *group = nullptr;
-            aiFace face = ReadTriangle(currentNode, texId[0], texId[1], texId[2]);
-            if (hasPid && hasP1) {
+            int pindex[3];
+            aiFace face = ReadTriangle(currentNode, pindex[0], pindex[1], pindex[2]);
+            if (hasPid && (pindex[0] != IdNotSet || pindex[1] != IdNotSet || pindex[2] != IdNotSet)) {
                 auto it = mResourcesDictionnary.find(pid);
                 if (it != mResourcesDictionnary.end()) {
                     if (it->second->getType() == ResourceType::RT_BaseMaterials) {
                         BaseMaterials *baseMaterials = static_cast<BaseMaterials *>(it->second);
-                        mesh->mMaterialIndex = baseMaterials->mMaterialIndex[p1];
+
+                        auto update_material = [&](int idx) {
+                            if (pindex[idx] != IdNotSet) {
+                                mesh->mMaterialIndex = baseMaterials->mMaterialIndex[pindex[idx]];
+                            }
+                        };
+
+                        update_material(0);
+                        update_material(1);
+                        update_material(2);
+
                     } else if (it->second->getType() == ResourceType::RT_Texture2DGroup) {
+                        // Load texture coordinates into mesh, when any
+                        Texture2DGroup *group = static_cast<Texture2DGroup *>(it->second); // fix bug
                         if (mesh->mTextureCoords[0] == nullptr) {
                             mesh->mNumUVComponents[0] = 2;
                             for (unsigned int i = 1; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
                                 mesh->mNumUVComponents[i] = 0;
                             }
 
-                            group = static_cast<Texture2DGroup *>(it->second);
                             const std::string name = ai_to_string(group->mTexId);
                             for (size_t i = 0; i < mMaterials.size(); ++i) {
                                 if (name == mMaterials[i]->GetName().C_Str()) {
@@ -443,19 +494,42 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                                 }
                             }
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
+                            for (unsigned int vertex_index = 0; vertex_index < mesh->mNumVertices; vertex_index++) {
+                                mesh->mTextureCoords[0][vertex_index].z = IdNotSet;//mark not set
+                            }
                         }
+
+                        auto update_texture = [&](int idx) {
+                            if (pindex[idx] != IdNotSet) {
+                                size_t vertex_index = face.mIndices[idx];
+                                mesh->mTextureCoords[0][vertex_index] =
+                                        aiVector3D(group->mTex2dCoords[pindex[idx]].x, group->mTex2dCoords[pindex[idx]].y, 0.0f);
+                            }
+                        };
+
+                        update_texture(0);
+                        update_texture(1);
+                        update_texture(2);
+
+                    } else if (it->second->getType() == ResourceType::RT_ColorGroup) {
+                        // Load vertex color into mesh, when any
+                        ColorGroup *group = static_cast<ColorGroup *>(it->second);
+                        if (mesh->mColors[0] == nullptr) {
+                            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
+                        }
+
+                        auto update_color = [&](int idx) {
+                            if (pindex[idx] != IdNotSet) {
+                                size_t vertex_index = face.mIndices[idx];
+                                mesh->mColors[0][vertex_index] = group->mColors[pindex[idx]];
+                            }
+                        };
+
+                        update_color(0);
+                        update_color(1);
+                        update_color(2);
                     }
                 }
-            }
-
-            // Load texture coordinates into mesh, when any
-            if (group != nullptr) {
-                size_t i0 = face.mIndices[0];
-                size_t i1 = face.mIndices[1];
-                size_t i2 = face.mIndices[2];
-                mesh->mTextureCoords[0][i0] = aiVector3D(group->mTex2dCoords[texId[0]].x, group->mTex2dCoords[texId[0]].y, 0.0f);
-                mesh->mTextureCoords[0][i1] = aiVector3D(group->mTex2dCoords[texId[1]].x, group->mTex2dCoords[texId[1]].y, 0.0f);
-                mesh->mTextureCoords[0][i2] = aiVector3D(group->mTex2dCoords[texId[2]].x, group->mTex2dCoords[texId[2]].y, 0.0f);
             }
 
             faces.push_back(face);
@@ -596,6 +670,38 @@ aiMaterial *XmlSerializer::readMaterialDef(XmlNode &node, unsigned int basemater
     assignDiffuseColor(node, material);
 
     return material;
+}
+
+void XmlSerializer::ReadColor(XmlNode &node, ColorGroup *colorGroup) {
+    if (node.empty() || nullptr == colorGroup) {
+        return;
+    }
+
+    for (XmlNode currentNode : node.children()) {
+        const std::string currentName = currentNode.name();
+        if (currentName == XmlTag::color_item) {
+            const char *color = currentNode.attribute(XmlTag::color_vaule).as_string();
+            aiColor4D color_value;
+            if (parseColor(color, color_value)) {
+                colorGroup->mColors.push_back(color_value);
+            }
+        }
+    }
+}
+
+void XmlSerializer::ReadColorGroup(XmlNode &node) {
+    if (node.empty()) {
+        return;
+    }
+
+    int id = IdNotSet;
+    if (!XmlParser::getIntAttribute(node, XmlTag::id, id)) {
+        return;
+    }
+
+    ColorGroup *group = new ColorGroup(id);
+    ReadColor(node, group);
+    mResourcesDictionnary.insert(std::make_pair(id, group));
 }
 
 void XmlSerializer::StoreMaterialsInScene(aiScene *scene) {

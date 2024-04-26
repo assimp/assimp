@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -48,16 +48,16 @@ TEST_F( utVersion, aiGetLegalStringTest ) {
     EXPECT_NE( lv, nullptr );
     std::string text( lv );
 
-    size_t pos = text.find(std::string("2023"));
+    size_t pos = text.find(std::string("2024"));
     EXPECT_NE(pos, std::string::npos);
-}
-
-TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ(aiGetVersionMinor(), 3U);
 }
 
 TEST_F( utVersion, aiGetVersionMajorTest ) {
     EXPECT_EQ( aiGetVersionMajor(), 5U );
+}
+
+TEST_F( utVersion, aiGetVersionMinorTest ) {
+    EXPECT_EQ(aiGetVersionMinor(), 4U);
 }
 
 TEST_F( utVersion, aiGetVersionPatchTest ) {

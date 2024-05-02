@@ -247,7 +247,9 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
 
     // add children. first the *real* ones
     node->mNumChildren = static_cast<unsigned int>(pNode->mChildren.size() + instances.size());
-    node->mChildren = new aiNode *[node->mNumChildren];
+    if (node->mNumChildren != 0) {
+        node->mChildren = new aiNode * [node->mNumChildren];
+    }
 
     for (size_t a = 0; a < pNode->mChildren.size(); ++a) {
         node->mChildren[a] = BuildHierarchy(pParser, pNode->mChildren[a]);

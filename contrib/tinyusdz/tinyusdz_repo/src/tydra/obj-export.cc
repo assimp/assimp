@@ -209,8 +209,9 @@ bool export_to_obj(const RenderScene &scene, const int mesh_id,
     uint32_t mat_id = uint32_t(std::get<0>(group.second));
     ss << "newmtl " << scene.materials[mat_id].name << "\n";
 
-    // Diffuse only
-    // TODO: Emit more PBR material
+    // Original MTL spec: https://paulbourke.net/dataformats/mtl/
+    // Emit PBR material: https://github.com/tinyobjloader/tinyobjloader/blob/release/pbr-mtl.md
+    
     if (scene.materials[mat_id].surfaceShader.diffuseColor.is_texture()) {
       int32_t texId = scene.materials[mat_id].surfaceShader.diffuseColor.textureId;
       if ((texId < 0) || (texId >= int(scene.textures.size()))) {
@@ -231,6 +232,226 @@ bool export_to_obj(const RenderScene &scene, const int mesh_id,
       const auto col = scene.materials[mat_id].surfaceShader.diffuseColor.value;
       ss << "Kd " << col[0] << " " << col[1] << " " << col[2] << "\n";
     }
+
+    if (scene.materials[mat_id].surfaceShader.useSpecularWorkFlow) {
+      if (scene.materials[mat_id].surfaceShader.specularColor.is_texture()) {
+        int32_t texId = scene.materials[mat_id].surfaceShader.specularColor.textureId;
+        if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+        }
+
+        int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+        if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+        }
+
+        std::string texname = scene.images[size_t(imageId)].asset_identifier;
+        if (texname.empty()) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+        }
+        ss << "map_Ks " << texname << "\n";
+      } else {
+        const auto col = scene.materials[mat_id].surfaceShader.specularColor.value;
+        ss << "Ks " << col[0] << " " << col[1] << " " << col[2] << "\n";
+      }
+    } else {
+
+      if (scene.materials[mat_id].surfaceShader.metallic.is_texture()) {
+        int32_t texId = scene.materials[mat_id].surfaceShader.metallic.textureId;
+        if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+        }
+
+        int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+        if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+        }
+
+        std::string texname = scene.images[size_t(imageId)].asset_identifier;
+        if (texname.empty()) {
+          PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+        }
+        ss << "map_Pm " << texname << "\n";
+      } else {
+        const auto f = scene.materials[mat_id].surfaceShader.metallic.value;
+        ss << "Pm " << f << "\n";
+      }
+    }
+
+    if (scene.materials[mat_id].surfaceShader.roughness.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.roughness.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      ss << "map_Pr " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.roughness.value;
+      ss << "Pr " << f << "\n";
+    }
+
+    if (scene.materials[mat_id].surfaceShader.emissiveColor.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.emissiveColor.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      ss << "map_Ke " << texname << "\n";
+    } else {
+      const auto col = scene.materials[mat_id].surfaceShader.emissiveColor.value;
+      ss << "Ke " << col[0] << " " << col[1] << " " << col[2] << "\n";
+    }
+
+
+    if (scene.materials[mat_id].surfaceShader.opacity.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.opacity.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      ss << "map_d " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.opacity.value;
+      ss << "d " << f << "\n";
+    }
+
+    // emit as cleacoat thickness
+    if (scene.materials[mat_id].surfaceShader.clearcoat.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.clearcoat.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      ss << "map_Pc " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.clearcoat.value;
+      ss << "Pc " << f << "\n";
+    }
+
+    if (scene.materials[mat_id].surfaceShader.clearcoatRoughness.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.clearcoatRoughness.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      ss << "map_Pcr " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.clearcoatRoughness.value;
+      ss << "Pcr " << f << "\n";
+    }
+
+    if (scene.materials[mat_id].surfaceShader.ior.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.ior.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      // map_Ni is not in original mtl definition
+      ss << "map_Ni " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.clearcoatRoughness.value;
+      ss << "Ni " << f << "\n";
+    }
+
+    if (scene.materials[mat_id].surfaceShader.occlusion.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.occlusion.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      // Use map_ao?
+      ss << "map_Ka " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.occlusion.value;
+      ss << "Ka " << f << "\n";
+    }
+
+    if (scene.materials[mat_id].surfaceShader.ior.is_texture()) {
+      int32_t texId = scene.materials[mat_id].surfaceShader.ior.textureId;
+      if ((texId < 0) || (texId >= int(scene.textures.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid texture id {}. scene.textures.size = {}", texId, scene.textures.size()));
+      }
+
+      int64_t imageId = scene.textures[size_t(texId)].texture_image_id;
+      if ((imageId < 0) || (imageId >= int64_t(scene.images.size()))) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Invalid image id {}. scene.images.size = {}", imageId, scene.images.size()));
+      }
+
+      std::string texname = scene.images[size_t(imageId)].asset_identifier;
+      if (texname.empty()) {
+        PUSH_ERROR_AND_RETURN(fmt::format("Filename for image id {} is empty.", imageId));
+      }
+      // map_Ni is not in original mtl definition
+      ss << "map_Ni " << texname << "\n";
+    } else {
+      const auto f = scene.materials[mat_id].surfaceShader.clearcoatRoughness.value;
+      ss << "Ni " << f << "\n";
+    }
+
+    // TODO: opacityThreshold
 
     ss << "\n";
   }

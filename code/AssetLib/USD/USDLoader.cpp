@@ -95,10 +95,13 @@ bool USDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool c
     }
 
     // Based on extension
-    if (isUsda(pFile) || isUsdc(pFile)) {
-        return true;
+    // TODO: confirm OK to replace this w/SimpleExtensionCheck() below
+    canRead = isUsd(pFile) || isUsda(pFile) || isUsdc(pFile) || isUsdz(pFile);
+    if (canRead) {
+        return canRead;
     }
-    return true;
+    canRead = SimpleExtensionCheck(pFile, "usd", "usda", "usdc", "usdz");
+    return canRead;
 }
 
 const aiImporterDesc *USDImporter::GetInfo() const {

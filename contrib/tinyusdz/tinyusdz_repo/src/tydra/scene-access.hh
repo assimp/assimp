@@ -517,46 +517,40 @@ bool IsPathIncluded(const CollectionMembershipQuery &query, const Stage &stage,
 //
 
 struct SkelNode {
-  std::string jointElementName;  // elementName(leaf node name) of jointPath.
-  std::string jointPath;         // joints in UsdSkel. Relative or Absolute Prim
+  //std::string jointElementName;  // elementName(leaf node name) of jointPath.
+  std::string joint_path;         // joints in UsdSkel. Relative or Absolute Prim
                                  // path(e.g. "root/head", "/root/head")
-  std::string jointName;         // jointNames in UsdSkel
-  int jointId{-1};               // jointIndex(array index in UsdSkel joints)
-  value::matrix4d bindTransform{value::matrix4d::identity()};
-  value::matrix4d restTransform{value::matrix4d::identity()};
-  int parentNodeIndex{-1};
+  std::string joint_name;         // jointNames in UsdSkel
+  int joint_id{-1};               // jointIndex(array index in UsdSkel joints)
 
-  std::vector<int> childNodeIndices;
+  value::matrix4d bind_transform{value::matrix4d::identity()};
+  value::matrix4d rest_transform{value::matrix4d::identity()};
+  //int parentNodeIndex{-1};
+
+  std::vector<SkelNode> children;
 };
 
 class SkelHierarchy {
  public:
   SkelHierarchy() = default;
 
-  const std::string &name() const { return _name; }
+  std::string prim_name;                  // Skeleleton Prim name
+  std::string abs_path;                   // Absolute path to Skeleleton Prim
+  std::string display_name;               // `displayName` Prim meta
 
-  bool get_root(SkelNode &dst) {
-    if (_skel_nodes.empty()) {
-      _err += "SkelNode is Empty\n";
-      return false;
-    }
+  SkelNode root_node; 
 
-    dst = _skel_nodes[0];
-    return true;
-  }
+  int anim_id{-1};                        // Default animation(SkelAnimation) attached to Skeleton
 
  private:
-  std::string _warm;
-  std::string _err;
-  std::string _name;                  // Skeleleton Prim name
-  std::vector<SkelNode> _skel_nodes;  // [0] = root node.
+
 };
 
 ///
 /// Extract skeleleton info from Skeleton and build skeleton(bone) hierarchy.
 ///
-bool BuildSkelHierarchy(const Stage &stage, const Skeleton &skel,
-                        SkelHierarchy &dst, std::string *err = nullptr);
+bool BuildSkelHierarchy(const Skeleton &skel,
+                        SkelNode &dst, std::string *err = nullptr);
 
 //
 // For USDZ AR extensions

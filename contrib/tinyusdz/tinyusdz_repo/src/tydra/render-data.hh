@@ -659,9 +659,16 @@ struct AnimationSampler {
   Interpolation interpolation{Interpolation::Linear};
 };
 
-// TODO: Supprot more data types(e.g. float2)
+// We store animation data in AoS(array of structure) approach(glTF-like), i.e. animation channel is provided per joint, instead of
+// SoA(structure of array) approach(USD SkelAnimation)
+// TODO: Use VertexAttribute-like data structure
 struct AnimationChannel {
   enum class ChannelType { Transform, Translation, Rotation, Scale, Weight };
+
+  AnimationChannel() = default;
+
+  AnimationChannel(ChannelType ty) : type(ty) {
+  } 
 
   ChannelType type;
   // The following AnimationSampler is filled depending on ChannelType.
@@ -670,14 +677,15 @@ struct AnimationChannel {
   // Matrix precision is reduced to float-precision
   // NOTE: transform is not supported in glTF(you need to decompose transform
   // matrix into TRS)
-  AnimationSampler<std::vector<mat4>> transforms;
+  AnimationSampler<mat4> transforms;
 
-  AnimationSampler<std::vector<vec3>> translations;
-  AnimationSampler<std::vector<quat>> rotations;  // Rotation is represented as quaternions
-  AnimationSampler<std::vector<vec3>> scales; // half-types are upcasted to float precision
-  AnimationSampler<std::vector<float>> weights;
+  AnimationSampler<vec3> translations;
+  AnimationSampler<quat> rotations;  // Rotation is represented as quaternions
+  AnimationSampler<vec3> scales; // half-types are upcasted to float precision
+  AnimationSampler<float> weights;
 
-  int64_t taget_node{-1};  // array index to RenderScene::nodes
+  //std::string joint_name; // joint name(UsdSkel::joints)
+  //int64_t joint_id{-1};  // joint index in SkelHierarchy
 };
 
 // USD SkelAnimation
@@ -685,7 +693,14 @@ struct Animation {
   std::string prim_name; // Prim name(element name)
   std::string abs_path;  // Target USD Prim path
   std::string display_name;  // `displayName` prim meta
-  std::vector<AnimationChannel> channels;
+
+  // key = joint, value = (key: channel_type, value: channel_value)
+  std::map<std::string, std::map<AnimationChannel::ChannelType, AnimationChannel>> channels_map;
+
+  // For blendshapes
+  // key = blendshape name, value = timesamped weights
+  // TODO: in-between weight
+  std::map<std::string, std::vector<AnimationSample<float>>> blendshape_weights_map;
 };
 
 struct Node {
@@ -795,6 +810,7 @@ struct MaterialSubset {
 
 // Currently normals and texcoords are converted as facevarying attribute.
 struct RenderMesh {
+#if 0 // deprecated.
   //
   // Type of Vertex attributes of this mesh.
   //
@@ -810,14 +826,19 @@ struct RenderMesh {
                   // Facevaring(no VertexArray indices). This would impact
                   // rendering performance.
   };
+#endif
 
   std::string prim_name;     // Prim name
   std::string abs_path;      // Absolute Prim path in Stage
   std::string display_name;  // `displayName` Prim metadataum
 
-  VertexArrayType vertexArrayType{VertexArrayType::Facevarying};
+  // true: all vertex attributes are 'vertex'-varying. i.e, an App can simply use faceVertexIndices to draw mesh.
+  // false: some vertex attributes are 'facevarying'-varying. An app need to decompose 'points' and 'vertex'-varying attribute to 'facevarying' variability to draw a mesh.
+  bool is_single_indexable{false};
 
-  std::vector<vec3> points;  // varying is 'vertex'.
+  //VertexArrayType vertexArrayType{VertexArrayType::Facevarying};
+
+  std::vector<vec3> points;  // varying is always 'vertex'.
 
   ///
   /// Initialized with USD faceVertexIndices/faceVertexCounts in GeomMesh.
@@ -905,6 +926,7 @@ struct RenderMesh {
 
   // For vertex skinning
   JointAndWeight joint_and_weights;
+  int skel_id{-1}; // index to RenderScene::skeletons
 
   // BlendShapes
   // key = USD BlendShape prim name.
@@ -938,6 +960,7 @@ enum class UVReaderFloatComponentType {
 
 std::string to_string(UVReaderFloatComponentType ty);
 
+// TODO: Deprecate UVReaderFloat.
 // float, float2, float3 or float4 only
 struct UVReaderFloat {
   UVReaderFloatComponentType componentType{
@@ -945,11 +968,11 @@ struct UVReaderFloat {
   int64_t mesh_id{-1};   // index to RenderMesh
   int64_t coord_id{-1};  // index to RenderMesh::facevaryingTexcoords
 
-  // mat2 transform; // UsdTransform2d
-
+#if 0
   // Returns interpolated UV coordinate with UV transform
   // # of components filled are equal to `componentType`.
   vec4 fetchUV(size_t faceId, float varyu, float varyv);
+#endif
 };
 
 struct UVTexture {
@@ -1590,6 +1613,7 @@ class RenderSceneConverter {
   StringAndIdMap textureMap;
   StringAndIdMap imageMap;
   StringAndIdMap bufferMap;
+  StringAndIdMap animationMap;
 
   int default_node{-1};
 
@@ -1602,6 +1626,7 @@ class RenderSceneConverter {
   std::vector<TextureImage> images;
   std::vector<BufferData> buffers;
   std::vector<SkelHierarchy> skeletons;
+  std::vector<Animation> animations;
 
   ///
   /// Convert GeomMesh to renderer-friendly mesh.
@@ -1716,8 +1741,8 @@ class RenderSceneConverter {
   /// Convert SkelAnimation to Tydra Animation.
   ///
   /// @param[in] abs_path USD Path to SkelAnimation Prim
-  /// @param[in] skelAnim SkelAnimation
-  /// @param[in] anim_out UVTexture
+  /// @param[in] skelAnim SkelAnimatio
+  /// @param[in] anim_out Animation
   ///
   bool ConvertSkelAnimation(const RenderSceneConverterEnv &env,
                         const Path &abs_path, const SkelAnimation &skelAnim,
@@ -1764,10 +1789,11 @@ class RenderSceneConverter {
   bool BuildVertexIndicesImpl(RenderMesh &mesh);
 
   //
-  // Get Skeleton assigned to this GeomMesh Prim
+  // Get Skeleton assigned to the GeomMesh Prim and convert it to SkelHierarchy.
+  // Also get SkelAnimation attached to Skeleton(if exists)
   //
-  bool GetSkeletonImpl(const tinyusdz::Prim &prim,
-                       const tinyusdz::Skeleton *&out_skeleton);
+  bool ConvertSkeletonImpl(const RenderSceneConverterEnv &env, const tinyusdz::GeomMesh &mesh,
+                       SkelHierarchy *out_skel, nonstd::optional<Animation> *out_anim);
 
   bool BuildNodeHierarchyImpl(
     const RenderSceneConverterEnv &env,

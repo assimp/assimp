@@ -137,15 +137,12 @@ bool BuildSkelTopology(
   }
 
   // path name <-> index map
-  std::map<Path, int> pathMap;
+  std::map<std::string, int> pathMap;
   for (size_t i = 0; i < paths.size(); i++) {
-    pathMap[paths[i]] = int(i); 
+    pathMap[paths[i].prim_part()] = int(i); 
   }
 
-  std::vector<int> parentIndices;
-  parentIndices.assign(paths.size(), -1);
-
-  auto GetParentIndex = [](const std::map<Path, int> &_pathMap, const Path &path) -> int {
+  auto GetParentIndex = [](const std::map<std::string, int> &_pathMap, const Path &path) -> int {
     if (path.is_root_path()) {
       return -1;
     }
@@ -163,8 +160,9 @@ bool BuildSkelTopology(
     uint32_t depth = 0;
     while (parentPath.is_valid() && !parentPath.is_root_path()) {
 
-      if (_pathMap.count(parentPath)) {
-        return _pathMap.at(parentPath);
+      if (_pathMap.count(parentPath.prim_part())) {
+        return _pathMap.at(parentPath.prim_part());
+      } else {
       }
 
       parentPath = parentPath.get_parent_prim_path();

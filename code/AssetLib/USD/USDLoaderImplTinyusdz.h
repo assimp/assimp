@@ -46,6 +46,7 @@ Copyright (c) 2006-2024, assimp team
 #define AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
+#include <assimp/scene.h>
 #include <assimp/types.h>
 #include <vector>
 #include <cstdint>
@@ -62,6 +63,11 @@ public:
             const std::string &pFile,
             aiScene *pScene,
             IOSystem *pIOHandler);
+
+    void meshes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            const std::string &nameWExt);
 
     void verticesForMesh(
             const tinyusdz::tydra::RenderScene &render_scene,
@@ -93,11 +99,6 @@ public:
             size_t meshIdx,
             const std::string &nameWExt);
 
-    void nodes(
-            const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene,
-            const std::string &nameWExt);
-
     void materials(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
@@ -118,9 +119,35 @@ public:
             aiScene *pScene,
             const std::string &nameWExt);
 
-    void animations(
+    void setupNodes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
+            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+            const std::string &nameWExt
+            );
+
+    aiNode *nodes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+            const std::string &nameWExt);
+
+    aiNode *nodesRecursive(
+            aiNode *pNodeParent,
+            const tinyusdz::tydra::Node &node,
+            std::map<size_t, tinyusdz::tydra::Node> &meshNodes);
+
+    void sanityCheckNodesRecursive(
+            aiNode *pNode);
+
+    void setupBlendShapes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            const std::string &nameWExt);
+
+    void blendShapesForMesh(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx,
             const std::string &nameWExt);
 };
 } // namespace Assimp

@@ -827,29 +827,29 @@ bool GeomSubset::ValidateSubsets(
         valid = false;
       }
     }
+  }
 
-    // Make sure every index appears exactly once if it's a partition.
-    if ((familyType == FamilyType::Partition) && (indicesInFamily.size() != elementCount)) {
-      ss << fmt::format("ValidateSubsets: The number of unique indices {} must be equal to input elementCount {}\n", indicesInFamily.size(), elementCount);
-      valid = false;
-    }
 
-    // Ensure that the indices are in the range [0, faceCount)
-    size_t maxIndex = static_cast<size_t>(*indicesInFamily.rbegin());
-    int minIndex = *indicesInFamily.begin();
+  // Make sure every index appears exactly once if it's a partition.
+  if ((familyType == FamilyType::Partition) && (indicesInFamily.size() != elementCount)) {
+    ss << fmt::format("ValidateSubsets: The number of unique indices {} must be equal to input elementCount {}\n", indicesInFamily.size(), elementCount);
+    valid = false;
+  }
 
-    if (maxIndex >= elementCount) {
-      ss << fmt::format("ValidateSubsets: All indices must be in range [0, elementSize {}), but one or more indices are greater than elementSize. Maximum = {}\n", elementCount, maxIndex);
+  // Ensure that the indices are in the range [0, faceCount)
+  size_t maxIndex = static_cast<size_t>(*indicesInFamily.rbegin());
+  int minIndex = *indicesInFamily.begin();
 
-      valid = false;
-    }
+  if (maxIndex >= elementCount) {
+    ss << fmt::format("ValidateSubsets: All indices must be in range [0, elementSize {}), but one or more indices are greater than elementSize. Maximum = {}\n", elementCount, maxIndex);
 
-    if (minIndex < 0) {
-      ss << fmt::format("ValidateSubsets: Found one or more indices that are less than 0. Minumum = {}\n", minIndex);
+    valid = false;
+  }
 
-      valid = false;
-    }
+  if (minIndex < 0) {
+    ss << fmt::format("ValidateSubsets: Found one or more indices that are less than 0. Minumum = {}\n", minIndex);
 
+    valid = false;
   }
 
   if (!valid) {

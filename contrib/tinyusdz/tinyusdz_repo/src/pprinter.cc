@@ -2834,7 +2834,7 @@ std::string to_string(const GeomMesh &mesh, const uint32_t indent,
   if (mesh.skeleton) {
     ss << print_relationship(mesh.skeleton.value(),
                              mesh.skeleton.value().get_listedit_qual(),
-                             /* custom */ false, "skel:skeketon", indent + 1);
+                             /* custom */ false, "skel:skeleton", indent + 1);
   }
 
   ss << print_typed_attr(mesh.blendShapes, "skel:blendShapes", indent + 1);

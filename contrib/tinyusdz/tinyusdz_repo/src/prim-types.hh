@@ -1481,6 +1481,8 @@ class TypedAttribute {
     return (*this);
   }
 
+  // TODO: Move constructor, Move assignment 
+
   void set_value(const T &v) { _attrib = v; _value_empty = false; }
 
   const nonstd::optional<T> get_value() const {

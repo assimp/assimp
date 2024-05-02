@@ -17,10 +17,8 @@
 #include "value-pprint.hh"
 
 // src/tydra
-#include "scene-access.hh"
 #include "attribute-eval.hh"
-
-#include "../../../assimp_tinyusdz_logging.inc"
+#include "scene-access.hh"
 
 namespace tinyusdz {
 namespace tydra {
@@ -177,13 +175,15 @@ bool ListShaders(const tinyusdz::Stage &stage,
                  PathShaderMap<T> &m /* output */) {
   // Concrete Shader type(e.g. UsdPreviewSurface) is classified as Imaging
   // Should report error at compilation stege.
-  static_assert(
-      (value::TypeId::TYPE_ID_IMAGING_BEGIN <= value::TypeTraits<T>::type_id()) &&
-          (value::TypeId::TYPE_ID_IMAGING_END > value::TypeTraits<T>::type_id()),
-      "Not a Shader type.");
+  static_assert((value::TypeId::TYPE_ID_IMAGING_BEGIN <=
+                 value::TypeTraits<T>::type_id()) &&
+                    (value::TypeId::TYPE_ID_IMAGING_END >
+                     value::TypeTraits<T>::type_id()),
+                "Not a Shader type.");
 
   // Check at runtime. Just in case...
-  if ((value::TypeId::TYPE_ID_IMAGING_BEGIN <= value::TypeTraits<T>::type_id()) &&
+  if ((value::TypeId::TYPE_ID_IMAGING_BEGIN <=
+       value::TypeTraits<T>::type_id()) &&
       (value::TypeId::TYPE_ID_IMAGING_END > value::TypeTraits<T>::type_id())) {
     // Ok
   } else {
@@ -246,7 +246,7 @@ const Prim *GetParentPrim(const tinyusdz::Stage &stage,
 // Template Instanciations
 //
 #define LISTPRIMS_INSTANCIATE(__ty) \
-template bool ListPrims(const tinyusdz::Stage &stage, PathPrimMap<__ty> &m);
+  template bool ListPrims(const tinyusdz::Stage &stage, PathPrimMap<__ty> &m);
 
 APPLY_FUNC_TO_PRIM_TYPES(LISTPRIMS_INSTANCIATE)
 
@@ -274,9 +274,10 @@ template bool ListShaders(const tinyusdz::Stage &stage,
 
 namespace {
 
-bool VisitPrimsRec(const tinyusdz::Path &root_abs_path, const tinyusdz::Prim &root, int32_t level,
-                   VisitPrimFunction visitor_fun, void *userdata, std::string *err) {
-
+bool VisitPrimsRec(const tinyusdz::Path &root_abs_path,
+                   const tinyusdz::Prim &root, int32_t level,
+                   VisitPrimFunction visitor_fun, void *userdata,
+                   std::string *err) {
   std::string fun_error;
   bool ret = visitor_fun(root_abs_path, root, level, userdata, &fun_error);
   if (!ret) {
@@ -285,7 +286,9 @@ bool VisitPrimsRec(const tinyusdz::Path &root_abs_path, const tinyusdz::Prim &ro
       DCOUT("Early termination requested");
     } else {
       if (err) {
-        (*err) += fmt::format("Visit function returned an error for Prim {} (id {}). err = {}", root_abs_path.full_path_name(), root.prim_id(), fun_error);
+        (*err) += fmt::format(
+            "Visit function returned an error for Prim {} (id {}). err = {}",
+            root_abs_path.full_path_name(), root.prim_id(), fun_error);
       }
     }
     return false;
@@ -295,7 +298,8 @@ bool VisitPrimsRec(const tinyusdz::Path &root_abs_path, const tinyusdz::Prim &ro
   if (root.metas().primChildren.size() == root.children().size()) {
     std::map<std::string, const Prim *> primNameTable;
     for (size_t i = 0; i < root.children().size(); i++) {
-      primNameTable.emplace(root.children()[i].element_name(), &root.children()[i]);
+      primNameTable.emplace(root.children()[i].element_name(),
+                            &root.children()[i]);
     }
 
     for (size_t i = 0; i < root.metas().primChildren.size(); i++) {
@@ -303,26 +307,30 @@ bool VisitPrimsRec(const tinyusdz::Path &root_abs_path, const tinyusdz::Prim &ro
       const auto it = primNameTable.find(nameTok.str());
       if (it != primNameTable.end()) {
         const Path child_abs_path = root_abs_path.AppendPrim(nameTok.str());
-        if (!VisitPrimsRec(child_abs_path, *it->second, level + 1, visitor_fun, userdata, err)) {
+        if (!VisitPrimsRec(child_abs_path, *it->second, level + 1, visitor_fun,
+                           userdata, err)) {
           return false;
         }
       } else {
         if (err) {
-          (*err) += fmt::format("Prim name `{}` in `primChildren` metadatum not found in this Prim's children", nameTok.str());
+          (*err) += fmt::format(
+              "Prim name `{}` in `primChildren` metadatum not found in this "
+              "Prim's children",
+              nameTok.str());
         }
         return false;
       }
     }
 
   } else {
-
     for (const auto &child : root.children()) {
-      const Path child_abs_path = root_abs_path.AppendPrim(child.element_name());
-      if (!VisitPrimsRec(child_abs_path, child, level + 1, visitor_fun, userdata, err)) {
+      const Path child_abs_path =
+          root_abs_path.AppendPrim(child.element_name());
+      if (!VisitPrimsRec(child_abs_path, child, level + 1, visitor_fun,
+                         userdata, err)) {
         return false;
       }
     }
-
   }
 
   return true;
@@ -372,7 +380,8 @@ void ToProperty(
 // Scalar-valued attribute.
 // TypedAttribute* => Attribute defined in USD schema, so not a custom attr.
 template <typename T>
-bool ToProperty(const TypedAttribute<T> &input, Property &output, std::string *err) {
+bool ToProperty(const TypedAttribute<T> &input, Property &output,
+                std::string *err) {
   if (input.is_blocked()) {
     Attribute attr;
     attr.set_blocked(input.is_blocked());
@@ -381,7 +390,8 @@ bool ToProperty(const TypedAttribute<T> &input, Property &output, std::string *e
     output = Property(std::move(attr), /*custom*/ false);
   } else if (input.is_value_empty()) {
     // type info only
-    output = Property::MakeEmptyAttrib(value::TypeTraits<T>::type_name(), /* custom */ false);
+    output = Property::MakeEmptyAttrib(value::TypeTraits<T>::type_name(),
+                                       /* custom */ false);
   } else if (input.is_connection()) {
     // Use Relation for Connection(as typed relationshipTarget)
     // Single connection targetPath only.
@@ -389,7 +399,8 @@ bool ToProperty(const TypedAttribute<T> &input, Property &output, std::string *e
     std::vector<Path> paths = input.get_connections();
     if (paths.empty()) {
       if (err) {
-        (*err) += fmt::format("[InternalError] Connection attribute but empty targetPaths.");
+        (*err) += fmt::format(
+            "[InternalError] Connection attribute but empty targetPaths.");
       }
       return false;
     } else if (paths.size() == 1) {
@@ -412,7 +423,9 @@ bool ToProperty(const TypedAttribute<T> &input, Property &output, std::string *e
       output = Property(attr, /* custom */ false);
     } else {
       if (err) {
-        (*err) += fmt::format("[InternalError] Invalid TypedAttribute<{}> value.", value::TypeTraits<T>::type_name());
+        (*err) +=
+            fmt::format("[InternalError] Invalid TypedAttribute<{}> value.",
+                        value::TypeTraits<T>::type_name());
       }
 
       return false;
@@ -427,7 +440,8 @@ bool ToProperty(const TypedAttribute<T> &input, Property &output, std::string *e
 //
 // TODO: Support timeSampled attribute.
 template <typename T>
-bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, std::string *err) {
+bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output,
+                std::string *err) {
   if (input.is_blocked()) {
     DCOUT("Value is blocked");
     Attribute attr;
@@ -439,7 +453,8 @@ bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, st
   } else if (input.is_value_empty()) {
     DCOUT("Value is empty");
     // type info only
-    output = Property::MakeEmptyAttrib(value::TypeTraits<T>::type_name(), /* custom */ false);
+    output = Property::MakeEmptyAttrib(value::TypeTraits<T>::type_name(),
+                                       /* custom */ false);
     return true;
   } else if (input.is_connection()) {
     DCOUT("IsConnection");
@@ -451,7 +466,8 @@ bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, st
       DCOUT("??? Empty connectionTarget.");
 
       if (err) {
-        (*err) += fmt::format("[InternalError] Connection attribute but empty targetPaths.");
+        (*err) += fmt::format(
+            "[InternalError] Connection attribute but empty targetPaths.");
       }
       return false;
     }
@@ -466,7 +482,10 @@ bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, st
     } else {
       DCOUT("??? GetConnection failue.");
       if (err) {
-        (*err) += fmt::format("[InternalError] get_connection() to TypedAttribute<Animatable<{}>> failed.", value::TypeTraits<T>::type_name());
+        (*err) += fmt::format(
+            "[InternalError] get_connection() to "
+            "TypedAttribute<Animatable<{}>> failed.",
+            value::TypeTraits<T>::type_name());
       }
       return false;
     }
@@ -484,13 +503,13 @@ bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, st
         T a;
         if (aval.value().get_scalar(&a)) {
           DCOUT("Value get ok");
-          //value::Value val(a);
+          // value::Value val(a);
           Attribute attr;
-          //attr.set_type_name(value::TypeTraits<T>::type_name());
+          // attr.set_type_name(value::TypeTraits<T>::type_name());
           primvar::PrimVar pvar;
           pvar.set_value(a);
           attr.set_var(std::move(pvar));
-          //attr.set_value(val);
+          // attr.set_value(val);
           attr.variability() = Variability::Varying;
           output = Property(attr, /* custom */ false);
           return true;
@@ -508,7 +527,10 @@ bool ToProperty(const TypedAttribute<Animatable<T>> &input, Property &output, st
       } else if (aval.value().is_timesamples()) {
         DCOUT("TODO: Convert typed TimeSamples to value::TimeSamples");
         if (err) {
-          (*err) += fmt::format("[TODO] TimeSamples value of TypedAttribute<Animatable<{}>> is not yet implemented.", value::TypeTraits<T>::type_name());
+          (*err) += fmt::format(
+              "[TODO] TimeSamples value of TypedAttribute<Animatable<{}>> is "
+              "not yet implemented.",
+              value::TypeTraits<T>::type_name());
         }
         return false;
       }
@@ -771,7 +793,8 @@ bool ToTokenProperty(const TypedAttributeWithFallback<T> &input,
 }
 
 template <typename T>
-nonstd::optional<Property> TypedTerminalAttributeToProperty(const TypedTerminalAttribute<T> &input) {
+nonstd::optional<Property> TypedTerminalAttributeToProperty(
+    const TypedTerminalAttribute<T> &input) {
   if (!input.authored()) {
     // nothing to do
     return nonstd::nullopt;
@@ -782,14 +805,14 @@ nonstd::optional<Property> TypedTerminalAttributeToProperty(const TypedTerminalA
   // type info only
   if (input.has_actual_type()) {
     // type info only
-    output = Property::MakeEmptyAttrib(input.get_actual_type_name(), /* custom */ false);
+    output = Property::MakeEmptyAttrib(input.get_actual_type_name(),
+                                       /* custom */ false);
   } else {
     output = Property::MakeEmptyAttrib(input.type_name(), /* custom */ false);
   }
 
   return output;
 }
-
 
 bool XformOpToProperty(const XformOp &x, Property &prop) {
   primvar::PrimVar pv;
@@ -826,27 +849,29 @@ bool XformOpToProperty(const XformOp &x, Property &prop) {
   return true;
 }
 
-#define TO_PROPERTY(__prop_name, __v) \
-  if (prop_name == __prop_name) { \
-    if (!ToProperty(__v, *out_prop, &err)) { \
-      return nonstd::make_unexpected(fmt::format("Convert Property {} failed: {}\n", __prop_name, err)); \
-    } \
+#define TO_PROPERTY(__prop_name, __v)                                         \
+  if (prop_name == __prop_name) {                                             \
+    if (!ToProperty(__v, *out_prop, &err)) {                                  \
+      return nonstd::make_unexpected(                                         \
+          fmt::format("Convert Property {} failed: {}\n", __prop_name, err)); \
+    }                                                                         \
   } else
 
-#define TO_TOKEN_PROPERTY(__prop_name, __v) \
-  if (prop_name == __prop_name) { \
-    if (!ToTokenProperty(__v, *out_prop, &err)) { \
-      return nonstd::make_unexpected(fmt::format("Convert Property {} failed: {}\n", __prop_name, err)); \
-    } \
+#define TO_TOKEN_PROPERTY(__prop_name, __v)                                   \
+  if (prop_name == __prop_name) {                                             \
+    if (!ToTokenProperty(__v, *out_prop, &err)) {                             \
+      return nonstd::make_unexpected(                                         \
+          fmt::format("Convert Property {} failed: {}\n", __prop_name, err)); \
+    }                                                                         \
   } else
 
 // Return false: something went wrong
 // `attr_prop` true: Include Attribute property.
 // `rel_prop` true: Include Relationship property.
 template <typename T>
-bool GetPrimPropertyNamesImpl(
-    const T &prim, std::vector<std::string> *prop_names, bool attr_prop=true, bool rel_prop=true);
-
+bool GetPrimPropertyNamesImpl(const T &prim,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop = true, bool rel_prop = true);
 
 // Return true: Property found(`out_prop` filled)
 // Return false: Property not found
@@ -964,7 +989,8 @@ nonstd::expected<bool, std::string> GetPrimProperty(
   TO_PROPERTY("holeIndices", mesh.holeIndices)
   TO_TOKEN_PROPERTY("interpolateBoundary", mesh.interpolateBoundary)
   TO_TOKEN_PROPERTY("subdivisionScheme", mesh.subdivisionScheme)
-  TO_TOKEN_PROPERTY("faceVaryingLinearInterpolation", mesh.faceVaryingLinearInterpolation)
+  TO_TOKEN_PROPERTY("faceVaryingLinearInterpolation",
+                    mesh.faceVaryingLinearInterpolation)
 
   if (prop_name == "skeleton") {
     if (mesh.skeleton) {
@@ -1005,13 +1031,13 @@ nonstd::expected<bool, std::string> GetPrimProperty(
   DCOUT("prop_name = " << prop_name);
   TO_PROPERTY("indices", subset.indices);
   TO_TOKEN_PROPERTY("elementType", subset.elementType);
-  //TO_TOKEN_PROPERTY("familyType", subset.familyType);
+  // TO_TOKEN_PROPERTY("familyType", subset.familyType);
   TO_PROPERTY("familyName", subset.familyName);
 
   if (prop_name == "material:binding") {
     if (subset.materialBinding) {
       const Relationship &rel = subset.materialBinding.value();
-      (*out_prop) = Property(rel, /* custom */false);
+      (*out_prop) = Property(rel, /* custom */ false);
     } else {
       return false;
     }
@@ -1068,8 +1094,7 @@ nonstd::expected<bool, std::string> GetPrimProperty(
   DCOUT("prop_name = " << prop_name);
   std::string err;
 
-  TO_PROPERTY("inputs:varname", preader.varname)
-  {
+  TO_PROPERTY("inputs:varname", preader.varname) {
     const auto it = preader.props.find(prop_name);
     if (it == preader.props.end()) {
       // Attribute not found.
@@ -1189,7 +1214,9 @@ nonstd::expected<bool, std::string> GetPrimProperty(
     }
 
     // empty. type info only
-    std::string typeName = tx.result.has_actual_type() ? tx.result.get_actual_type_name() : tx.result.type_name();
+    std::string typeName = tx.result.has_actual_type()
+                               ? tx.result.get_actual_type_name()
+                               : tx.result.type_name();
     (*out_prop) = Property::MakeEmptyAttrib(typeName, /* custom */ false);
   } else {
     const auto it = tx.props.find(prop_name);
@@ -1233,8 +1260,9 @@ nonstd::expected<bool, std::string> GetPrimProperty(
 
   if (prop_name == "outputs:surface") {
     if (surface.outputsSurface.authored()) {
-        // empty. type info only
-        (*out_prop) = Property::MakeEmptyAttrib(value::kToken, /* custom */ false);
+      // empty. type info only
+      (*out_prop) =
+          Property::MakeEmptyAttrib(value::kToken, /* custom */ false);
     } else {
       // Not authored
       return false;
@@ -1242,7 +1270,8 @@ nonstd::expected<bool, std::string> GetPrimProperty(
   } else if (prop_name == "outputs:displacement") {
     if (surface.outputsDisplacement.authored()) {
       // empty. type info only
-      (*out_prop) = Property::MakeEmptyAttrib(value::kToken, /* custom */ false);
+      (*out_prop) =
+          Property::MakeEmptyAttrib(value::kToken, /* custom */ false);
     } else {
       // Not authored
       return false;
@@ -1279,8 +1308,7 @@ nonstd::expected<bool, std::string> GetPrimProperty(
       attr.set_type_name(value::TypeTraits<value::token>::type_name());
       attr.set_connections(material.surface.get_connections());
       attr.metas() = material.surface.metas();
-      (*out_prop) =
-            Property(attr, /* custom */ false);
+      (*out_prop) = Property(attr, /* custom */ false);
       out_prop->set_listedit_qual(material.surface.get_listedit_qual());
     } else {
       // Not authored
@@ -1292,8 +1320,7 @@ nonstd::expected<bool, std::string> GetPrimProperty(
       attr.set_type_name(value::TypeTraits<value::token>::type_name());
       attr.set_connections(material.displacement.get_connections());
       attr.metas() = material.displacement.metas();
-      (*out_prop) =
-            Property(attr, /* custom */ false);
+      (*out_prop) = Property(attr, /* custom */ false);
       out_prop->set_listedit_qual(material.displacement.get_listedit_qual());
     } else {
       // Not authored
@@ -1305,8 +1332,7 @@ nonstd::expected<bool, std::string> GetPrimProperty(
       attr.set_type_name(value::TypeTraits<value::token>::type_name());
       attr.set_connections(material.volume.get_connections());
       attr.metas() = material.volume.metas();
-      (*out_prop) =
-            Property(attr, /* custom */ false);
+      (*out_prop) = Property(attr, /* custom */ false);
       out_prop->set_listedit_qual(material.volume.get_listedit_qual());
     } else {
       // Not authored
@@ -1484,9 +1510,9 @@ nonstd::expected<bool, std::string> GetPrimProperty(
 }
 
 template <>
-bool GetPrimPropertyNamesImpl(
-    const Model &model, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
-
+bool GetPrimPropertyNamesImpl(const Model &model,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop, bool rel_prop) {
   if (!prop_names) {
     return false;
   }
@@ -1497,7 +1523,7 @@ bool GetPrimPropertyNamesImpl(
       if (rel_prop) {
         prop_names->push_back(prop.first);
       }
-    } else { // assume attribute
+    } else {  // assume attribute
       if (attr_prop) {
         prop_names->push_back(prop.first);
       }
@@ -1508,8 +1534,9 @@ bool GetPrimPropertyNamesImpl(
 }
 
 template <>
-bool GetPrimPropertyNamesImpl(
-    const Scope &scope, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
+bool GetPrimPropertyNamesImpl(const Scope &scope,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop, bool rel_prop) {
   if (!prop_names) {
     return false;
   }
@@ -1520,7 +1547,7 @@ bool GetPrimPropertyNamesImpl(
       if (rel_prop) {
         prop_names->push_back(prop.first);
       }
-    } else { // assume attribute
+    } else {  // assume attribute
       if (attr_prop) {
         prop_names->push_back(prop.first);
       }
@@ -1530,8 +1557,9 @@ bool GetPrimPropertyNamesImpl(
   return true;
 }
 
-bool GetGPrimPropertyNamesImpl(
-    const GPrim *gprim, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
+bool GetGPrimPropertyNamesImpl(const GPrim *gprim,
+                               std::vector<std::string> *prop_names,
+                               bool attr_prop, bool rel_prop) {
   if (!gprim) {
     return false;
   }
@@ -1541,7 +1569,6 @@ bool GetGPrimPropertyNamesImpl(
   }
 
   if (attr_prop) {
-
     if (gprim->doubleSided.authored()) {
       prop_names->push_back("doubleSided");
     }
@@ -1577,7 +1604,6 @@ bool GetGPrimPropertyNamesImpl(
   }
 
   if (rel_prop) {
-
     if (gprim->materialBinding) {
       prop_names->push_back(kMaterialBinding);
     }
@@ -1606,7 +1632,8 @@ bool GetGPrimPropertyNamesImpl(
         if (collection.first.empty()) {
           rel_name = kMaterialBindingCollection + purpose_name;
         } else {
-          rel_name = kMaterialBindingCollection + std::string(":") + coll_name + purpose_name;
+          rel_name = kMaterialBindingCollection + std::string(":") + coll_name +
+                     purpose_name;
         }
 
         prop_names->push_back(rel_name);
@@ -1616,8 +1643,6 @@ bool GetGPrimPropertyNamesImpl(
     if (gprim->proxyPrim.authored()) {
       prop_names->push_back("proxyPrim");
     }
-
-
   }
 
   // other props
@@ -1626,7 +1651,7 @@ bool GetGPrimPropertyNamesImpl(
       if (rel_prop) {
         prop_names->push_back(prop.first);
       }
-    } else { // assume attribute
+    } else {  // assume attribute
       if (attr_prop) {
         prop_names->push_back(prop.first);
       }
@@ -1637,8 +1662,9 @@ bool GetGPrimPropertyNamesImpl(
 }
 
 template <>
-bool GetPrimPropertyNamesImpl(
-    const Xform &xform, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
+bool GetPrimPropertyNamesImpl(const Xform &xform,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop, bool rel_prop) {
   if (!prop_names) {
     return false;
   }
@@ -1647,8 +1673,9 @@ bool GetPrimPropertyNamesImpl(
 }
 
 template <>
-bool GetPrimPropertyNamesImpl(
-    const GeomMesh &mesh, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
+bool GetPrimPropertyNamesImpl(const GeomMesh &mesh,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop, bool rel_prop) {
   if (!prop_names) {
     return false;
   }
@@ -1673,9 +1700,9 @@ bool GetPrimPropertyNamesImpl(
 }
 
 template <>
-bool GetPrimPropertyNamesImpl(
-    const GeomSubset &subset, std::vector<std::string> *prop_names, bool attr_prop, bool rel_prop) {
-
+bool GetPrimPropertyNamesImpl(const GeomSubset &subset,
+                              std::vector<std::string> *prop_names,
+                              bool attr_prop, bool rel_prop) {
   (void)rel_prop;
 
   if (!prop_names) {
@@ -1704,17 +1731,16 @@ bool GetPrimPropertyNamesImpl(
 #undef TO_PROPERTY
 #undef TO_TOKEN_PROPERTY
 
-
 }  // namespace
 
 bool VisitPrims(const tinyusdz::Stage &stage, VisitPrimFunction visitor_fun,
                 void *userdata, std::string *err) {
-
   // if `primChildren` is available, use it
   if (stage.metas().primChildren.size() == stage.root_prims().size()) {
     std::map<std::string, const Prim *> primNameTable;
     for (size_t i = 0; i < stage.root_prims().size(); i++) {
-      primNameTable.emplace(stage.root_prims()[i].element_name(), &stage.root_prims()[i]);
+      primNameTable.emplace(stage.root_prims()[i].element_name(),
+                            &stage.root_prims()[i]);
     }
 
     for (size_t i = 0; i < stage.metas().primChildren.size(); i++) {
@@ -1722,12 +1748,16 @@ bool VisitPrims(const tinyusdz::Stage &stage, VisitPrimFunction visitor_fun,
       const auto it = primNameTable.find(nameTok.str());
       if (it != primNameTable.end()) {
         const Path root_abs_path("/" + nameTok.str(), "");
-        if (!VisitPrimsRec(root_abs_path, *it->second, 0, visitor_fun, userdata, err)) {
+        if (!VisitPrimsRec(root_abs_path, *it->second, 0, visitor_fun, userdata,
+                           err)) {
           return false;
         }
       } else {
         if (err) {
-          (*err) += fmt::format("Prim name `{}` in root Layer's `primChildren` metadatum not found in Layer root.", nameTok.str());
+          (*err) += fmt::format(
+              "Prim name `{}` in root Layer's `primChildren` metadatum not "
+              "found in Layer root.",
+              nameTok.str());
         }
         return false;
       }
@@ -1735,8 +1765,9 @@ bool VisitPrims(const tinyusdz::Stage &stage, VisitPrimFunction visitor_fun,
 
   } else {
     for (const auto &root : stage.root_prims()) {
-      const Path root_abs_path("/" + root.element_name(), /* prop part */"");
-      if (!VisitPrimsRec(root_abs_path, root, /* root level */ 0, visitor_fun, userdata, err)) {
+      const Path root_abs_path("/" + root.element_name(), /* prop part */ "");
+      if (!VisitPrimsRec(root_abs_path, root, /* root level */ 0, visitor_fun,
+                         userdata, err)) {
         return false;
       }
     }
@@ -1781,13 +1812,18 @@ bool GetProperty(const tinyusdz::Prim &prim, const std::string &attr_name,
   return true;
 }
 
-bool GetPropertyNames(const tinyusdz::Prim &prim, std::vector<std::string> *out_prop_names, std::string *err) {
-#define GET_PRIM_PROPERTY_NAMES(__ty)                                         \
-  if (prim.is<__ty>()) {                                                \
-    auto ret = GetPrimPropertyNamesImpl(*prim.as<__ty>(), out_prop_names, true, true);  \
-    if (!ret) {                                                          \
-      PUSH_ERROR_AND_RETURN(fmt::format("Failed to list up Property names of Prim type {}", value::TypeTraits<__ty>::type_name()));                               \
-    }                                                                   \
+bool GetPropertyNames(const tinyusdz::Prim &prim,
+                      std::vector<std::string> *out_prop_names,
+                      std::string *err) {
+#define GET_PRIM_PROPERTY_NAMES(__ty)                                     \
+  if (prim.is<__ty>()) {                                                  \
+    auto ret = GetPrimPropertyNamesImpl(*prim.as<__ty>(), out_prop_names, \
+                                        true, true);                      \
+    if (!ret) {                                                           \
+      PUSH_ERROR_AND_RETURN(                                              \
+          fmt::format("Failed to list up Property names of Prim type {}", \
+                      value::TypeTraits<__ty>::type_name()));             \
+    }                                                                     \
   } else
 
   GET_PRIM_PROPERTY_NAMES(Model)
@@ -1796,12 +1832,12 @@ bool GetPropertyNames(const tinyusdz::Prim &prim, std::vector<std::string> *out_
   GET_PRIM_PROPERTY_NAMES(GeomMesh)
   GET_PRIM_PROPERTY_NAMES(GeomSubset)
   // TODO
-  //GET_PRIM_PROPERTY_NAMES(Shader)
-  //GET_PRIM_PROPERTY_NAMES(Material)
-  //GET_PRIM_PROPERTY_NAMES(SkelRoot)
-  //GET_PRIM_PROPERTY_NAMES(BlendShape)
-  //GET_PRIM_PROPERTY_NAMES(Skeleton)
-  //GET_PRIM_PROPERTY_NAMES(SkelAnimation)
+  // GET_PRIM_PROPERTY_NAMES(Shader)
+  // GET_PRIM_PROPERTY_NAMES(Material)
+  // GET_PRIM_PROPERTY_NAMES(SkelRoot)
+  // GET_PRIM_PROPERTY_NAMES(BlendShape)
+  // GET_PRIM_PROPERTY_NAMES(Skeleton)
+  // GET_PRIM_PROPERTY_NAMES(SkelAnimation)
   {
     PUSH_ERROR_AND_RETURN("TODO: Prim type " << prim.type_name());
   }
@@ -1811,26 +1847,31 @@ bool GetPropertyNames(const tinyusdz::Prim &prim, std::vector<std::string> *out_
   return true;
 }
 
-bool GetRelationshipNames(const tinyusdz::Prim &prim, std::vector<std::string> *out_rel_names, std::string *err) {
-#define GET_PRIM_RELATIONSHIP_NAMES(__ty)                                         \
-  if (prim.is<__ty>()) {                                                \
-    auto ret = GetPrimPropertyNamesImpl(*prim.as<__ty>(), out_rel_names, false, true);  \
-    if (!ret) {                                                          \
-      PUSH_ERROR_AND_RETURN(fmt::format("Failed to list up Property names of Prim type {}", value::TypeTraits<__ty>::type_name()));                               \
-    }                                                                   \
+bool GetRelationshipNames(const tinyusdz::Prim &prim,
+                          std::vector<std::string> *out_rel_names,
+                          std::string *err) {
+#define GET_PRIM_RELATIONSHIP_NAMES(__ty)                                 \
+  if (prim.is<__ty>()) {                                                  \
+    auto ret = GetPrimPropertyNamesImpl(*prim.as<__ty>(), out_rel_names,  \
+                                        false, true);                     \
+    if (!ret) {                                                           \
+      PUSH_ERROR_AND_RETURN(                                              \
+          fmt::format("Failed to list up Property names of Prim type {}", \
+                      value::TypeTraits<__ty>::type_name()));             \
+    }                                                                     \
   } else
 
   GET_PRIM_RELATIONSHIP_NAMES(Model)
   GET_PRIM_RELATIONSHIP_NAMES(Xform)
   GET_PRIM_RELATIONSHIP_NAMES(Scope)
   GET_PRIM_RELATIONSHIP_NAMES(GeomMesh)
-  //GET_PRIM_RELATIONSHIP_NAMES(GeomSubset)
-  //GET_PRIM_RELATIONSHIP_NAMES(Shader)
-  //GET_PRIM_RELATIONSHIP_NAMES(Material)
-  //GET_PRIM_RELATIONSHIP_NAMES(SkelRoot)
-  //GET_PRIM_RELATIONSHIP_NAMES(BlendShape)
-  //GET_PRIM_RELATIONSHIP_NAMES(Skeleton)
-  //GET_PRIM_RELATIONSHIP_NAMES(SkelAnimation)
+  // GET_PRIM_RELATIONSHIP_NAMES(GeomSubset)
+  // GET_PRIM_RELATIONSHIP_NAMES(Shader)
+  // GET_PRIM_RELATIONSHIP_NAMES(Material)
+  // GET_PRIM_RELATIONSHIP_NAMES(SkelRoot)
+  // GET_PRIM_RELATIONSHIP_NAMES(BlendShape)
+  // GET_PRIM_RELATIONSHIP_NAMES(Skeleton)
+  // GET_PRIM_RELATIONSHIP_NAMES(SkelAnimation)
   {
     PUSH_ERROR_AND_RETURN("TODO: Prim type " << prim.type_name());
   }
@@ -1839,7 +1880,6 @@ bool GetRelationshipNames(const tinyusdz::Prim &prim, std::vector<std::string> *
 
   return true;
 }
-
 
 bool GetAttribute(const tinyusdz::Prim &prim, const std::string &attr_name,
                   Attribute *out_attr, std::string *err) {
@@ -1912,13 +1952,10 @@ bool ListSceneNames(const tinyusdz::Prim &root,
 namespace {
 
 bool BuildXformNodeFromStageRec(
-  const tinyusdz::Stage &stage,
-  const Path &parent_abs_path,
-  const Prim *prim,
-  XformNode *nodeOut, /* out */
-  value::matrix4d rootMat,
-  const double t, const tinyusdz::value::TimeSampleInterpolationType tinterp) {
-
+    const tinyusdz::Stage &stage, const Path &parent_abs_path, const Prim *prim,
+    XformNode *nodeOut, /* out */
+    value::matrix4d rootMat, const double t,
+    const tinyusdz::value::TimeSampleInterpolationType tinterp) {
   if (!nodeOut) {
     return false;
   }
@@ -1932,14 +1969,15 @@ bool BuildXformNodeFromStageRec(
   node.element_name = prim->element_name();
   node.absolute_path = parent_abs_path.AppendPrim(prim->element_name());
   node.prim_id = prim->prim_id();
-  node.prim = prim; // Assume Prim's address does not change.
+  node.prim = prim;  // Assume Prim's address does not change.
 
   DCOUT(prim->element_name() << ": IsXformablePrim" << IsXformablePrim(*prim));
 
   if (IsXformablePrim(*prim)) {
     bool resetXformStack{false};
 
-    value::matrix4d localMat = GetLocalTransform(*prim, &resetXformStack, t, tinterp);
+    value::matrix4d localMat =
+        GetLocalTransform(*prim, &resetXformStack, t, tinterp);
     DCOUT("local mat = " << localMat);
 
     value::matrix4d worldMat = rootMat;
@@ -1970,7 +2008,9 @@ bool BuildXformNodeFromStageRec(
 
   for (const auto &childPrim : prim->children()) {
     XformNode childNode;
-    if (!BuildXformNodeFromStageRec(stage, node.absolute_path, &childPrim, &childNode, node.get_world_matrix(), t, tinterp)) {
+    if (!BuildXformNodeFromStageRec(stage, node.absolute_path, &childPrim,
+                                    &childNode, node.get_world_matrix(), t,
+                                    tinterp)) {
       return false;
     }
 
@@ -1980,47 +2020,47 @@ bool BuildXformNodeFromStageRec(
 
   (*nodeOut) = node;
 
-
   return true;
 }
 
-std::string DumpXformNodeRec(
-  const XformNode &node,
-  uint32_t indent)
-{
+std::string DumpXformNodeRec(const XformNode &node, uint32_t indent) {
   std::stringstream ss;
 
-  ss << pprint::Indent(indent) << "Prim name: " << node.element_name << " PrimID: " << node.prim_id << " (Path " << node.absolute_path << ") Xformable? " << node.has_xform() << " resetXformStack? " << node.has_resetXformStack() << " {\n";
-  ss << pprint::Indent(indent+1) << "parent_world: " << node.get_parent_world_matrix() << "\n";
-  ss << pprint::Indent(indent+1) << "world: " << node.get_world_matrix() << "\n";
-  ss << pprint::Indent(indent+1) << "local: " << node.get_local_matrix() << "\n";
+  ss << pprint::Indent(indent) << "Prim name: " << node.element_name
+     << " PrimID: " << node.prim_id << " (Path " << node.absolute_path
+     << ") Xformable? " << node.has_xform() << " resetXformStack? "
+     << node.has_resetXformStack() << " {\n";
+  ss << pprint::Indent(indent + 1)
+     << "parent_world: " << node.get_parent_world_matrix() << "\n";
+  ss << pprint::Indent(indent + 1) << "world: " << node.get_world_matrix()
+     << "\n";
+  ss << pprint::Indent(indent + 1) << "local: " << node.get_local_matrix()
+     << "\n";
 
   for (const auto &child : node.children) {
-    ss << DumpXformNodeRec(child, indent+1);
+    ss << DumpXformNodeRec(child, indent + 1);
   }
-  ss << pprint::Indent(indent+1) << "}\n";
+  ss << pprint::Indent(indent + 1) << "}\n";
 
   return ss.str();
 }
 
-
-} // namespace local
+}  // namespace local
 
 bool BuildXformNodeFromStage(
-  const tinyusdz::Stage &stage,
-  XformNode *rootNode, /* out */
-  const double t, const tinyusdz::value::TimeSampleInterpolationType tinterp) {
-
+    const tinyusdz::Stage &stage, XformNode *rootNode, /* out */
+    const double t,
+    const tinyusdz::value::TimeSampleInterpolationType tinterp) {
   if (!rootNode) {
     return false;
   }
 
   XformNode stage_root;
-  stage_root.element_name = ""; // Stage root element name is empty.
+  stage_root.element_name = "";  // Stage root element name is empty.
   stage_root.absolute_path = Path("/", "");
   stage_root.has_xform() = false;
   stage_root.parent = nullptr;
-  stage_root.prim = nullptr; // No prim for stage root.
+  stage_root.prim = nullptr;  // No prim for stage root.
   stage_root.prim_id = -1;
   stage_root.has_resetXformStack() = false;
   stage_root.set_parent_world_matrix(value::matrix4d::identity());
@@ -2032,7 +2072,8 @@ bool BuildXformNodeFromStage(
 
     value::matrix4d rootMat{value::matrix4d::identity()};
 
-    if (!BuildXformNodeFromStageRec(stage, stage_root.absolute_path, &root, &node, rootMat, t, tinterp)) {
+    if (!BuildXformNodeFromStageRec(stage, stage_root.absolute_path, &root,
+                                    &node, rootMat, t, tinterp)) {
       return false;
     }
 
@@ -2044,17 +2085,14 @@ bool BuildXformNodeFromStage(
   return true;
 }
 
-std::string DumpXformNode(
-  const XformNode &node)
-{
+std::string DumpXformNode(const XformNode &node) {
   return DumpXformNodeRec(node, 0);
-
 }
 
-template<typename T>
+template <typename T>
 bool PrimToPrimSpecImpl(const T &p, PrimSpec &ps, std::string *err);
 
-template<>
+template <>
 bool PrimToPrimSpecImpl(const Model &p, PrimSpec &ps, std::string *err) {
   (void)err;
 
@@ -2065,12 +2103,12 @@ bool PrimToPrimSpecImpl(const Model &p, PrimSpec &ps, std::string *err) {
   ps.metas() = p.meta;
 
   // TODO: variantSet
-  //ps.variantSets
+  // ps.variantSets
 
   return true;
 }
 
-template<>
+template <>
 bool PrimToPrimSpecImpl(const Xform &p, PrimSpec &ps, std::string *err) {
   (void)err;
 
@@ -2083,48 +2121,48 @@ bool PrimToPrimSpecImpl(const Xform &p, PrimSpec &ps, std::string *err) {
   std::vector<value::token> toks;
   Attribute xformOpOrderAttr;
   xformOpOrderAttr.set_value(toks);
-  ps.props().emplace("xformOpOrder", Property(xformOpOrderAttr, /* custom */false));
+  ps.props().emplace("xformOpOrder",
+                     Property(xformOpOrderAttr, /* custom */ false));
 
   ps.metas() = p.meta;
 
   // TODO: variantSet
-  //ps.variantSets
+  // ps.variantSets
 
   return true;
 }
 
-bool PrimToPrimSpec(const Prim &prim, PrimSpec &ps, std::string *err)
-{
-
-#define TO_PRIMSPEC(__ty) \
-  if (prim.as<__ty>()) { \
+bool PrimToPrimSpec(const Prim &prim, PrimSpec &ps, std::string *err) {
+#define TO_PRIMSPEC(__ty)                                   \
+  if (prim.as<__ty>()) {                                    \
     return PrimToPrimSpecImpl(*(prim.as<__ty>()), ps, err); \
   } else
 
-
-  TO_PRIMSPEC(Model)
-  {
+  TO_PRIMSPEC(Model) {
     if (err) {
-      (*err) += "Unsupported/unimplemented Prim type: " + prim.prim_type_name() + "\n";
+      (*err) +=
+          "Unsupported/unimplemented Prim type: " + prim.prim_type_name() +
+          "\n";
     }
     return false;
   }
 
 #undef TO_PRIMSPEC
-
 }
 
-bool ShaderToPrimSpec(const UsdTransform2d &node, PrimSpec &ps, std::string *warn, std::string *err)
-{
+bool ShaderToPrimSpec(const UsdTransform2d &node, PrimSpec &ps,
+                      std::string *warn, std::string *err) {
   (void)warn;
 
-#define TO_PROPERTY(__prop_name, __v) { \
-  Property prop; \
-  if (!ToProperty(__v, prop, err)) { \
-    PUSH_ERROR_AND_RETURN(fmt::format("Convert {} to Property failed.\n", __prop_name)); \
-  } \
-  ps.props()[__prop_name] = prop; \
-}
+#define TO_PROPERTY(__prop_name, __v)                                    \
+  {                                                                      \
+    Property prop;                                                       \
+    if (!ToProperty(__v, prop, err)) {                                   \
+      PUSH_ERROR_AND_RETURN(                                             \
+          fmt::format("Convert {} to Property failed.\n", __prop_name)); \
+    }                                                                    \
+    ps.props()[__prop_name] = prop;                                      \
+  }
 
   // inputs
   TO_PROPERTY("inputs:in", node.in)
@@ -2141,7 +2179,8 @@ bool ShaderToPrimSpec(const UsdTransform2d &node, PrimSpec &ps, std::string *war
     ps.props()[prop.first] = prop.second;
   }
 
-  ps.props()[kInfoId] = Property(Attribute::Uniform(value::token(kUsdTransform2d)));
+  ps.props()[kInfoId] =
+      Property(Attribute::Uniform(value::token(kUsdTransform2d)));
   ps.metas() = node.metas();
   ps.name() = node.name;
   ps.specifier() = node.spec;
@@ -2149,7 +2188,9 @@ bool ShaderToPrimSpec(const UsdTransform2d &node, PrimSpec &ps, std::string *war
   return true;
 }
 
-std::vector<const GeomSubset *> GetGeomSubsets(const tinyusdz::Stage &stage, const tinyusdz::Path &prim_path, const tinyusdz::value::token &familyName, bool prim_must_be_geommesh) {
+std::vector<const GeomSubset *> GetGeomSubsets(
+    const tinyusdz::Stage &stage, const tinyusdz::Path &prim_path,
+    const tinyusdz::value::token &familyName, bool prim_must_be_geommesh) {
   std::vector<const GeomSubset *> result;
 
   const Prim *pprim{nullptr};
@@ -2169,7 +2210,6 @@ std::vector<const GeomSubset *> GetGeomSubsets(const tinyusdz::Stage &stage, con
   for (const auto &p : pprim->children()) {
     if (auto pv = p.as<GeomSubset>()) {
       if (familyName.valid()) {
-
         if (pv->familyName.authored()) {
           if (pv->familyName.get_value().has_value()) {
             const value::token &tok = pv->familyName.get_value().value();
@@ -2192,7 +2232,9 @@ std::vector<const GeomSubset *> GetGeomSubsets(const tinyusdz::Stage &stage, con
   return result;
 }
 
-std::vector<const GeomSubset *> GetGeomSubsetChildren(const tinyusdz::Prim &prim, const tinyusdz::value::token &familyName, bool prim_must_be_geommesh) {
+std::vector<const GeomSubset *> GetGeomSubsetChildren(
+    const tinyusdz::Prim &prim, const tinyusdz::value::token &familyName,
+    bool prim_must_be_geommesh) {
   std::vector<const GeomSubset *> result;
 
   if (prim_must_be_geommesh && !prim.is<GeomMesh>()) {
@@ -2203,7 +2245,6 @@ std::vector<const GeomSubset *> GetGeomSubsetChildren(const tinyusdz::Prim &prim
   for (const auto &p : prim.children()) {
     if (auto pv = p.as<GeomSubset>()) {
       if (familyName.valid()) {
-
         if (pv->familyName.authored()) {
           if (pv->familyName.get_value().has_value()) {
             const value::token &tok = pv->familyName.get_value().value();
@@ -2231,13 +2272,15 @@ bool ShaderToPrimSpec(const UsdUVTexture &node, PrimSpec &ps, std::string *warn,
 {
   (void)warn;
 
-#define TO_PROPERTY(__prop_name, __v) { \
-  Property prop; \
-  if (!ToProperty(__v, prop, err)) { \
-    PUSH_ERROR_AND_RETURN(fmt::format("Convert {} to Property failed.\n", __prop_name)); \
-  } \
-  ps.props()[__prop_name] = prop; \
-}
+#define TO_PROPERTY(__prop_name, __v)                                    \
+  {                                                                      \
+    Property prop;                                                       \
+    if (!ToProperty(__v, prop, err)) {                                   \
+      PUSH_ERROR_AND_RETURN(                                             \
+          fmt::format("Convert {} to Property failed.\n", __prop_name)); \
+    }                                                                    \
+    ps.props()[__prop_name] = prop;                                      \
+  }
 
   // inputs
   TO_PROPERTY("inputs:in", node.in)
@@ -2277,8 +2320,9 @@ bool GetCollection(const Prim &prim, const Collection **dst) {
   return ret;
 }
 
-bool IsPathIncluded(const CollectionMembershipQuery &query, const Stage &stage, const Path &abs_path, const CollectionInstance::ExpansionRule expansionRule) {
-
+bool IsPathIncluded(const CollectionMembershipQuery &query, const Stage &stage,
+                    const Path &abs_path,
+                    const CollectionInstance::ExpansionRule expansionRule) {
   (void)query;
   (void)stage;
   (void)expansionRule;
@@ -2294,14 +2338,11 @@ bool IsPathIncluded(const CollectionMembershipQuery &query, const Stage &stage, 
   }
 
   return false;
-
 }
 
 std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>
-GetBlendShapes(
-  const tinyusdz::Stage &stage,
-    const tinyusdz::Prim &prim, std::string *err) {
-
+GetBlendShapes(const tinyusdz::Stage &stage, const tinyusdz::Prim &prim,
+               std::string *err) {
   std::vector<std::pair<std::string, const tinyusdz::BlendShape *>> dst;
 
   auto *pmesh = prim.as<GeomMesh>();
@@ -2324,26 +2365,33 @@ GetBlendShapes(
       if (err) {
         (*err) += "Failed to get `skel:blendShapes` attribute.\n";
       }
-      return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+      return std::vector<
+          std::pair<std::string, const tinyusdz::BlendShape *>>{};
     }
 
     if (pmesh->blendShapeTargets.value().is_path()) {
       if (blendShapeNames.size() != 1) {
         if (err) {
-          (*err) += "Array size mismatch with `skel:blendShapes` and "
-            "`skel:blendShapeTargets`.\n";
+          (*err) +=
+              "Array size mismatch with `skel:blendShapes` and "
+              "`skel:blendShapeTargets`.\n";
         }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
 
       const Path &targetPath = pmesh->blendShapeTargets.value().targetPath;
       const Prim *bsprim{nullptr};
       if (!stage.find_prim_at_path(targetPath, bsprim, err)) {
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
       if (!bsprim) {
-        if (err) { (*err) += "Internal error. BlendShape Prim is nullptr.\n"; }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        if (err) {
+          (*err) += "Internal error. BlendShape Prim is nullptr.\n";
+        }
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
 
       if (const auto *bs = bsprim->as<BlendShape>()) {
@@ -2351,24 +2399,31 @@ GetBlendShapes(
       } else {
         if (err) {
           (*err) += fmt::format("{} is not BlendShape Prim.\n",
-                                          targetPath.full_path_name());
+                                targetPath.full_path_name());
         }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
 
     } else if (pmesh->blendShapeTargets.value().is_pathvector()) {
       if (blendShapeNames.size() !=
           pmesh->blendShapeTargets.value().targetPathVector.size()) {
-        if (err) { (*err) +=
-            "Array size mismatch with `skel:blendShapes` and "
-            "`skel:blendShapeTargets`.\n"; }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        if (err) {
+          (*err) +=
+              "Array size mismatch with `skel:blendShapes` and "
+              "`skel:blendShapeTargets`.\n";
+        }
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
     } else {
-      if (err) { (*err) +=
-          "Invalid or unsupported definition of `skel:blendShapeTargets` "
-          "relationship.\n"; }
-      return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+      if (err) {
+        (*err) +=
+            "Invalid or unsupported definition of `skel:blendShapeTargets` "
+            "relationship.\n";
+      }
+      return std::vector<
+          std::pair<std::string, const tinyusdz::BlendShape *>>{};
     }
 
     for (size_t i = 0;
@@ -2377,19 +2432,26 @@ GetBlendShapes(
           pmesh->blendShapeTargets.value().targetPathVector[i];
       const Prim *bsprim{nullptr};
       if (!stage.find_prim_at_path(targetPath, bsprim, err)) {
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
       if (!bsprim) {
-        if (err) { (*err) += "Internal error. BlendShape Prim is nullptr."; }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        if (err) {
+          (*err) += "Internal error. BlendShape Prim is nullptr.";
+        }
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
 
       if (const auto *bs = bsprim->as<BlendShape>()) {
         dst.push_back(std::make_pair(blendShapeNames[0].str(), bs));
       } else {
-        if (err) { (*err) += fmt::format("{} is not BlendShape Prim.",
-                                          targetPath.full_path_name()); }
-        return std::vector<std::pair<std::string, const tinyusdz::BlendShape *>>{};
+        if (err) {
+          (*err) += fmt::format("{} is not BlendShape Prim.",
+                                targetPath.full_path_name());
+        }
+        return std::vector<
+            std::pair<std::string, const tinyusdz::BlendShape *>>{};
       }
     }
   }
@@ -2397,7 +2459,9 @@ GetBlendShapes(
   return dst;
 }
 
-bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &varname, GeomPrimvar *out_primvar, std::string *err) {
+bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim,
+                    const std::string &varname, GeomPrimvar *out_primvar,
+                    std::string *err) {
   if (!out_primvar) {
     PUSH_ERROR_AND_RETURN("Output GeomPrimvar is nullptr.");
   }
@@ -2410,7 +2474,7 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
 
   constexpr auto kPrimvars = "primvars:";
   constexpr auto kIndices = ":indices";
-  
+
   std::string primvar_name = kPrimvars + varname;
 
   const auto it = gprim->props.find(primvar_name);
@@ -2422,9 +2486,10 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
     const Attribute &attr = it->second.get_attribute();
 
     if (attr.is_connection()) {
-      // follow targetPath to get Attribute 
+      // follow targetPath to get Attribute
       Attribute terminal_attr;
-      bool ret = tydra::GetTerminalAttribute(stage, attr, primvar_name, &terminal_attr, err);
+      bool ret = tydra::GetTerminalAttribute(stage, attr, primvar_name,
+                                             &terminal_attr, err);
       if (!ret) {
         return false;
       }
@@ -2440,13 +2505,14 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
     if (attr.metas().interpolation.has_value()) {
       primvar.set_interpolation(attr.metas().interpolation.value());
     }
-     if (attr.metas().elementSize.has_value()) {
+    if (attr.metas().elementSize.has_value()) {
       primvar.set_elementSize(attr.metas().elementSize.value());
     }
     // TODO: copy other attribute metas?
 
   } else {
-    PUSH_ERROR_AND_RETURN(fmt::format("{} is not Attribute(Maybe Relationship?).", primvar_name));
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("{} is not Attribute(Maybe Relationship?).", primvar_name));
   }
 
   // has indices?
@@ -2459,13 +2525,16 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
 
       if (!(primvar.get_attribute().type_id() & value::TYPE_ID_1D_ARRAY_BIT)) {
         PUSH_ERROR_AND_RETURN(
-            fmt::format("Indexed GeomPrimVar with scalar PrimVar Attribute is not supported. PrimVar name: {}", primvar_name));
+            fmt::format("Indexed GeomPrimVar with scalar PrimVar Attribute is "
+                        "not supported. PrimVar name: {}",
+                        primvar_name));
       }
 
       if (indexAttr.is_connection()) {
-        // follow targetPath to get Attribute 
+        // follow targetPath to get Attribute
         Attribute terminal_indexAttr;
-        bool ret = tydra::GetTerminalAttribute(stage, indexAttr, index_name, &terminal_indexAttr, err);
+        bool ret = tydra::GetTerminalAttribute(stage, indexAttr, index_name,
+                                               &terminal_indexAttr, err);
         if (!ret) {
           return false;
         }
@@ -2474,12 +2543,13 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
           const auto &ts = terminal_indexAttr.get_var().ts_raw();
           TypedTimeSamples<std::vector<int32_t>> tss;
           if (!tss.from_timesamples(ts)) {
-            PUSH_ERROR_AND_RETURN(fmt::format("Index Attribute seems not an timesamples with int[] type: {}", index_name));
+            PUSH_ERROR_AND_RETURN(fmt::format(
+                "Index Attribute seems not an timesamples with int[] type: {}",
+                index_name));
           }
-        
+
           primvar.set_indices(tss);
         } else if (terminal_indexAttr.is_value()) {
-
           // TODO: Support uint[]?
           std::vector<int32_t> indices;
           if (!terminal_indexAttr.get_value(&indices)) {
@@ -2489,16 +2559,17 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
           }
 
           primvar.set_indices(indices);
-
         }
-      
+
       } else if (indexAttr.is_timesamples()) {
         const auto &ts = indexAttr.get_var().ts_raw();
         TypedTimeSamples<std::vector<int32_t>> tss;
         if (!tss.from_timesamples(ts)) {
-          PUSH_ERROR_AND_RETURN(fmt::format("Index Attribute seems not an timesamples with int[] type: {}", index_name));
+          PUSH_ERROR_AND_RETURN(fmt::format(
+              "Index Attribute seems not an timesamples with int[] type: {}",
+              index_name));
         }
-      
+
         primvar.set_indices(tss);
       } else if (indexAttr.is_blocked()) {
         // Value blocked. e.g. `float2[] primvars:st:indices = None`
@@ -2513,7 +2584,6 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
                           indexAttr.type_name()));
         }
 
-
         primvar.set_indices(indices);
       } else {
         PUSH_ERROR_AND_RETURN("[Internal Error] Invalid Index Attribute.");
@@ -2526,8 +2596,6 @@ bool GetGeomPrimvar(const Stage &stage, const GPrim *gprim, const std::string &v
   (*out_primvar) = primvar;
 
   return true;
-
-
 }
 
 namespace {
@@ -2535,11 +2603,11 @@ namespace {
 //
 // visited_paths : To prevent circular referencing of attribute connection.
 //
-bool GetTerminalAttributeImpl(
-    const tinyusdz::Stage &stage, const tinyusdz::Prim &prim,
-    const std::string &attr_name, Attribute *value,
-    std::string *err, std::set<std::string> &visited_paths) {
-
+bool GetTerminalAttributeImpl(const tinyusdz::Stage &stage,
+                              const tinyusdz::Prim &prim,
+                              const std::string &attr_name, Attribute *value,
+                              std::string *err,
+                              std::set<std::string> &visited_paths) {
   DCOUT("Prim : " << prim.element_path().element_name() << "("
                   << prim.type_name() << ") attr_name " << attr_name);
 
@@ -2552,7 +2620,8 @@ bool GetTerminalAttributeImpl(
     // Follow connection target Path(singple targetPath only).
     std::vector<Path> pv = prop.get_attribute().connections();
     if (pv.empty()) {
-      PUSH_ERROR_AND_RETURN(fmt::format("Connection targetPath is empty for Attribute {}.", attr_name));
+      PUSH_ERROR_AND_RETURN(fmt::format(
+          "Connection targetPath is empty for Attribute {}.", attr_name));
     }
 
     if (pv.size() > 1) {
@@ -2584,7 +2653,7 @@ bool GetTerminalAttributeImpl(
       visited_paths.insert(abs_path);
 
       return GetTerminalAttributeImpl(stage, *targetPrim, targetPrimPropName,
-                                   value, err, visited_paths);
+                                      value, err, visited_paths);
 
     } else {
       PUSH_ERROR_AND_RETURN(targetPrimRet.error());
@@ -2597,9 +2666,8 @@ bool GetTerminalAttributeImpl(
         "Attribute `{}` is a define-only attribute(no value assigned).",
         attr_name));
   } else if (prop.is_attribute()) {
-
     (*value) = prop.get_attribute();
-    
+
   } else {
     // ???
     PUSH_ERROR_AND_RETURN(
@@ -2609,13 +2677,12 @@ bool GetTerminalAttributeImpl(
   return true;
 }
 
-} // namespace
+}  // namespace
 
-bool GetTerminalAttribute(
-    const tinyusdz::Stage &stage, const tinyusdz::Attribute &attr,
-    const std::string &attr_name, Attribute *value,
-    std::string *err) {
-
+bool GetTerminalAttribute(const tinyusdz::Stage &stage,
+                          const tinyusdz::Attribute &attr,
+                          const std::string &attr_name, Attribute *value,
+                          std::string *err) {
   if (!value) {
     PUSH_ERROR_AND_RETURN("`value` arg is nullptr.");
   }
@@ -2623,10 +2690,10 @@ bool GetTerminalAttribute(
   std::set<std::string> visited_paths;
 
   if (attr.is_connection()) {
-
     std::vector<Path> pv = attr.connections();
     if (pv.empty()) {
-      PUSH_ERROR_AND_RETURN(fmt::format("Connection targetPath is empty for Attribute {}.", attr_name));
+      PUSH_ERROR_AND_RETURN(fmt::format(
+          "Connection targetPath is empty for Attribute {}.", attr_name));
     }
 
     if (pv.size() > 1) {
@@ -2658,8 +2725,8 @@ bool GetTerminalAttribute(
       visited_paths.insert(abs_path);
 
       return GetTerminalAttributeImpl(stage, *targetPrim, targetPrimPropName,
-                                   value, err, visited_paths);
-    
+                                      value, err, visited_paths);
+
     } else {
       PUSH_ERROR_AND_RETURN(targetPrimRet.error());
     }
@@ -2670,9 +2737,181 @@ bool GetTerminalAttribute(
   }
 
   return false;
-
 }
 
+namespace detail {
+
+static bool BuildSkelHierarchyImpl(
+    /* inout */ std::set<size_t> &visitSet,
+    /* inout */ SkelNode &parentNode,
+    const std::vector<int> &parentJointIds,
+    const std::vector<value::token> &joints,
+    const std::vector<value::token> &jointNames,
+    const std::vector<value::matrix4d> bindTransforms,
+    const std::vector<value::matrix4d> &restTransforms,
+    std::string *err = nullptr) {
+  // Simple linear search
+  for (size_t i = 0; i < parentJointIds.size(); i++) {
+    if (visitSet.count(i)) {
+      continue;
+    }
+
+    int parentJointIdOfCurrIdx = parentJointIds[i];
+    if (parentNode.joint_id == parentJointIdOfCurrIdx) {
+      DCOUT("add joint " << i << "(parent = " << parentJointIdOfCurrIdx << ")");
+      SkelNode node;
+      node.joint_id = int(i);
+      node.joint_path = joints[i].str();
+      node.joint_name = jointNames[i].str();
+      node.bind_transform = bindTransforms[i];
+      node.rest_transform = restTransforms[i];
+
+      visitSet.insert(i);
+
+      // Recursively traverse children
+      if (!BuildSkelHierarchyImpl(visitSet, node,
+                                  parentJointIds, joints, jointNames, bindTransforms,
+                                  restTransforms, err)) {
+        return false;
+      }
+
+      parentNode.children.emplace_back(std::move(node));
+    }
+  }
+
+  return true;
+}
+
+}  // namespace detail
+
+bool BuildSkelHierarchy(const Skeleton &skel, SkelNode &dst, std::string *err) {
+  if (!skel.joints.authored()) {
+    PUSH_ERROR_AND_RETURN(fmt::format(
+        "Skeleton.joints attrbitue is not authored: {}", skel.name));
+  }
+
+  std::vector<value::token> joints;
+  if (!skel.joints.get_value(&joints)) {
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("Failed to get Skeleton.joints attrbitue: {}", skel.name));
+  }
+
+  if (joints.empty()) {
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("Skeleton.joints attrbitue is empty: {}", skel.name));
+  }
+
+  std::vector<value::token> jointNames;
+
+  if (skel.jointNames.authored()) {
+    if (!skel.jointNames.get_value(&jointNames)) {
+      PUSH_ERROR_AND_RETURN(fmt::format(
+          "Failed to get Skeleton.jointNames attrbitue: {}", skel.name));
+    }
+
+    if (joints.size() != jointNames.size()) {
+      PUSH_ERROR_AND_RETURN(
+          fmt::format("Skeleton.joints.size {} must be equal to "
+                      "Skeleton.jointNames.size {}: {}",
+                      joints.size(), jointNames.size(), skel.name));
+    }
+  } else {
+    // Use joints 
+    jointNames.resize(joints.size());
+    for (size_t i = 0; i < joints.size(); i++) {
+      jointNames[i] = joints[i];
+    }
+  }
+
+
+  std::vector<value::matrix4d> restTransforms;
+  if (skel.restTransforms.authored()) {
+    if (!skel.restTransforms.get_value(&restTransforms)) {
+      PUSH_ERROR_AND_RETURN(fmt::format(
+          "Failed to get Skeleton.restTransforms attrbitue: {}", skel.name));
+    }
+  } else {
+    // TODO: Report error when `restTransforms` attribute is omitted?
+    restTransforms.assign(joints.size(), value::matrix4d::identity());
+  }
+
+  if (joints.size() != restTransforms.size()) {
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("Skeleton.joints.size {} must be equal to "
+                    "Skeleton.restTransforms.size {}: {}",
+                    joints.size(), restTransforms.size(), skel.name));
+  }
+
+  std::vector<value::matrix4d> bindTransforms;
+  if (skel.bindTransforms.authored()) {
+    if (!skel.bindTransforms.get_value(&bindTransforms)) {
+      PUSH_ERROR_AND_RETURN(fmt::format(
+          "Failed to get Skeleton.bindTransforms attrbitue: {}", skel.name));
+    }
+  } else {
+    // TODO: Report error when `restTransforms` attribute is omitted?
+    restTransforms.assign(joints.size(), value::matrix4d::identity());
+  }
+
+  if (joints.size() != bindTransforms.size()) {
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("Skeleton.joints.size {} must be equal to "
+                    "Skeleton.bindTransforms.size {}: {}",
+                    joints.size(), bindTransforms.size(), skel.name));
+  }
+
+  // Get flattened representation of joint hierarchy with BuildSkelTopology.
+  // For root node, parentJointId = -1.
+  std::vector<int> parentJointIds;
+  if (!BuildSkelTopology(joints, parentJointIds, err)) {
+    return false;
+  }
+
+  // Just in case. Chek if topology is single-rooted.
+  auto nroots = std::count_if(parentJointIds.begin(), parentJointIds.end(),
+                              [](int x) { return x == -1; });
+
+  if (nroots == 0) {
+    PUSH_ERROR_AND_RETURN(fmt::format(
+        "Invalid Skel topology. No root joint found: {}", skel.name));
+  }
+
+  if (nroots != 1) {
+    PUSH_ERROR_AND_RETURN(
+        fmt::format("Invalid Skel topology. Topology must be single-rooted, "
+                    "but it has {} roots: {}",
+                    nroots, skel.name));
+  }
+
+  std::set<size_t> visitSet;
+
+  SkelNode root;
+
+  auto it = std::find(parentJointIds.begin(), parentJointIds.end(), -1);
+  if (it == parentJointIds.end()) {
+    PUSH_ERROR_AND_RETURN("Internal error.");
+  }
+  size_t rootIdx = size_t(std::distance(parentJointIds.begin(), it));
+
+  root.joint_name = jointNames[rootIdx].str();
+  root.joint_path = joints[rootIdx].str();
+  root.joint_id = int(rootIdx);
+  root.bind_transform = bindTransforms[rootIdx];
+  root.rest_transform = restTransforms[rootIdx];
+
+  DCOUT("parentJointIds = " << parentJointIds);
+ 
+  // Construct hierachy from flattened id array.
+  if (!detail::BuildSkelHierarchyImpl(visitSet, root, parentJointIds, joints, jointNames,
+                                      bindTransforms, restTransforms,
+                                      err)) {
+    return false;
+  }
+
+  dst = root;
+
+  return true;
+}
 
 }  // namespace tydra
 }  // namespace tinyusdz

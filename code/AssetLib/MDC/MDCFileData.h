@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -61,7 +61,7 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 namespace Assimp {
 namespace MDC {
 
-// to make it easier for us, we test the magic word against both "endianesses"
+// to make it easier for us, we test the magic word against both "endiannesses"
 #define AI_MDC_MAGIC_NUMBER_BE  AI_MAKE_MAGIC("CPDI")
 #define AI_MDC_MAGIC_NUMBER_LE  AI_MAKE_MAGIC("IDPC")
 

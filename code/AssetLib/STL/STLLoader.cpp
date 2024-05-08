@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -98,7 +98,7 @@ static bool IsAsciiSTL(const char *buffer, size_t fileSize) {
 
     const char *bufferEnd = buffer + fileSize;
 
-    if (!SkipSpaces(&buffer)) {
+    if (!SkipSpaces(&buffer, bufferEnd)) {
         return false;
     }
 
@@ -244,11 +244,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         aiNode *node = new aiNode;
         node->mParent = root;
         nodes.push_back(node);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, bufferEnd);
         ai_assert(!IsLineEnd(sz));
 
         sz += 5; // skip the "solid"
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, bufferEnd);
         const char *szMe = sz;
         while (!IsSpaceOrNewLine(*sz)) {
             sz++;
@@ -270,7 +270,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         unsigned int faceVertexCounter = 3;
         for (;;) {
             // go to the next token
-            if (!SkipSpacesAndLineEnd(&sz)) {
+            if (!SkipSpacesAndLineEnd(&sz, bufferEnd)) {
                 // seems we're finished although there was no end marker
                 ASSIMP_LOG_WARN("STL: unexpected EOF. \'endsolid\' keyword was expected");
                 break;
@@ -284,7 +284,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                 faceVertexCounter = 0;
 
                 sz += 6;
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, bufferEnd);
                 if (strncmp(sz, "normal", 6)) {
                     ASSIMP_LOG_WARN("STL: a facet normal vector was expected but not found");
                 } else {
@@ -293,11 +293,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     }
                     aiVector3D vn;
                     sz += 7;
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.x);
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.y);
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.z);
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
@@ -312,13 +312,13 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                         throw DeadlyImportError("STL: unexpected EOF while parsing facet");
                     }
                     sz += 7;
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     positionBuffer.emplace_back();
                     aiVector3D *vn = &positionBuffer.back();
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->x);
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->y);
-                    SkipSpaces(&sz);
+                    SkipSpaces(&sz, bufferEnd);
                     sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->z);
                     faceVertexCounter++;
                 }
@@ -326,7 +326,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                 do {
                     ++sz;
                 } while (!IsLineEnd(*sz));
-                SkipSpacesAndLineEnd(&sz);
+                SkipSpacesAndLineEnd(&sz, bufferEnd);
                 // finished!
                 break;
             } else { // else skip the whole identifier

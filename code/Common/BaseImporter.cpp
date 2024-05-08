@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -92,10 +92,6 @@ BaseImporter::BaseImporter() AI_NO_EXCEPT
         : m_progress() {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseImporter::~BaseImporter() = default;
 
 void BaseImporter::UpdateImporterScale(Importer *pImp) {
     ai_assert(pImp != nullptr);

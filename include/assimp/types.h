@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -522,6 +522,23 @@ struct aiMemoryInfo {
     /** Total storage allocated for the full import. */
     unsigned int total;
 }; // !struct aiMemoryInfo
+
+/**
+ *  @brief  Type to store a in-memory data buffer.
+ */
+struct aiBuffer {
+    const char *data; ///< Begin poiner
+    const char *end;    ///< End pointer
+
+#ifdef __cplusplus
+    /// @brief  The class constructor.
+    aiBuffer() :
+            data(nullptr), end(nullptr) {}
+
+    /// @brief  The class destructor.
+    ~aiBuffer() = default;
+#endif //!  __cplusplus
+};
 
 #ifdef __cplusplus
 }

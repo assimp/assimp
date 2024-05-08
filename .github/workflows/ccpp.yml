@@ -54,7 +54,7 @@ jobs:
     - name: Cache DX SDK
       id: dxcache
       if: contains(matrix.name, 'windows')
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: '${{ github.workspace }}/DX_SDK'
         key: ${{ runner.os }}-DX_SDK
@@ -98,7 +98,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'

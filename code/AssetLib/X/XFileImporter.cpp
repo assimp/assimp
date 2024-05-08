@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -359,10 +359,18 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                 // set up a vertex-linear array of the weights for quick searching if a bone influences a vertex
                 std::vector<ai_real> oldWeights(sourceMesh->mPositions.size(), 0.0);
                 for (unsigned int d = 0; d < obone.mWeights.size(); ++d) {
-                    const unsigned int boneIdx = obone.mWeights[d].mVertex;
-                    if (boneIdx < obone.mWeights.size()) {
+                    // TODO  The conditional against boneIdx which was added in commit f844c33
+                    // TODO      (https://github.com/assimp/assimp/commit/f844c3397d7726477ab0fdca8efd3df56c18366b)
+                    // TODO  causes massive breakage as detailed in:
+                    // TODO      https://github.com/assimp/assimp/issues/5332
+                    // TODO  In cases like this unit tests are less useful, since the model still has
+                    // TODO  meshes, textures, animations etc. and asserts against these values may pass;
+                    // TODO  when touching importer code, it is crucial that developers also run manual, visual
+                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch 
+                    //const unsigned int boneIdx = obone.mWeights[d].mVertex;
+                    //if (boneIdx < obone.mWeights.size()) {
                         oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;
-                    }
+                    //}
                 }
 
                 // collect all vertex weights that influence a vertex in the new mesh

@@ -60,3 +60,12 @@ TEST_F( AssimpAPITest, aiGetLastErrorTest ) {
     const char *error = aiGetErrorString();
     EXPECT_NE(nullptr, error);
 }
+
+TEST_F(AssimpAPITest, aiImportFileFromMemoryTest) {
+    const aiScene *scene_null_buffer = aiImportFileFromMemory(nullptr, 0u, 0u, nullptr);
+    EXPECT_EQ(nullptr, scene_null_buffer);
+
+    char buffer[1024] = {'\0'};
+    const aiScene *scene_null_size = aiImportFileFromMemory(buffer, 0u, 0u, nullptr);
+    EXPECT_EQ(nullptr, scene_null_size);
+}

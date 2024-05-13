@@ -233,8 +233,13 @@ const aiScene *aiImportFileFromMemoryWithProperties(
         unsigned int pFlags,
         const char *pHint,
         const aiPropertyStore *props) {
-    ai_assert(nullptr != pBuffer);
-    ai_assert(0 != pLength);
+    if (pBuffer == nullptr) {
+        return nullptr;
+    }
+
+    if (pLength == 0u) {
+        return nullptr;
+    }
 
     const aiScene *scene = nullptr;
     ASSIMP_BEGIN_EXCEPTION_REGION();

@@ -92,7 +92,7 @@ static constexpr aiImporterDesc desc = {
     0,
     0,
     0,
-    "gltf glb"
+    "gltf glb vrm"
 };
 
 glTF2Importer::glTF2Importer() :
@@ -106,7 +106,7 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
 
 bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(filename);
-    if (!checkSig && (extension != "gltf") && (extension != "glb")) {
+    if (!checkSig && (extension != "gltf") && (extension != "glb") && (extension != "vrm")) {
         return false;
     }
 

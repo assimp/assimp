@@ -793,8 +793,10 @@ int CDisplay::FillDefaultStatistics(void)
         SetDlgItemText(g_hDlg,IDC_EVERT,"0");
         SetDlgItemText(g_hDlg,IDC_EFACE,"0");
         SetDlgItemText(g_hDlg,IDC_EMAT,"0");
-        SetDlgItemText(g_hDlg,IDC_ENODE,"0");
+        SetDlgItemText(g_hDlg,IDC_EMESH,"0");
+        SetDlgItemText(g_hDlg,IDC_ENODEWND,"0");
         SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
+        SetDlgItemText(g_hDlg,IDC_ELOAD,"");
         SetDlgItemText(g_hDlg,IDC_ETEX,"0");
         return 1;
     }
@@ -877,7 +879,7 @@ int CDisplay::OnSetupNormalView()
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMSHADERS),"Shaders:");
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Materials:");
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Meshes:");
-    SetWindowText(GetDlgItem(g_hDlg,IDC_LOADTIME),"Time:");
+    SetWindowText(GetDlgItem(g_hDlg,IDC_LOADTIME),"Loading Time:");
 
     FillDefaultStatistics();
     SetViewMode(VIEWMODE_FULL);

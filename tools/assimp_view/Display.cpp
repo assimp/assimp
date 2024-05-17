@@ -742,9 +742,9 @@ int CDisplay::OnRender()
             double time = g_dCurrent;
             aiAnimation* mAnim = g_pcAsset->mAnimator->CurrentAnim();
             if(  mAnim && mAnim->mDuration > 0.0) {
-                double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : 25.f;
+                double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
                 time = fmod( time, mAnim->mDuration/tps);
-                SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,LPARAM(10000 * (time/(mAnim->mDuration/tps))));
+                SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_SETPOS, TRUE, LPARAM(ANIM_SLIDER_MAX * (time / (mAnim->mDuration / tps))));
             }
 
             g_pcAsset->mAnimator->Calculate( time );

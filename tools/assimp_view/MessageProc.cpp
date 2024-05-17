@@ -1198,7 +1198,7 @@ void InitUI() {
     LoadCheckerPatternColors();
 
     SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMIN,TRUE,0);
-    SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,10000);
+    SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,ANIM_SLIDER_MAX);
 }
 
 //-------------------------------------------------------------------------------
@@ -1277,9 +1277,13 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             {
                 double num = (double)SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_GETPOS,0,0);
                 const aiAnimation* anim = g_pcAsset->pcScene->mAnimations[ g_pcAsset->mAnimator->CurrentAnimIndex() ];
+                if (anim && anim->mDuration > 0.0)
+                {
+                    double tps = anim->mTicksPerSecond ? anim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
 
-                g_dCurrent = (anim->mDuration/anim->mTicksPerSecond) * num/10000;
-                g_pcAsset->mAnimator->Calculate(g_dCurrent);
+                    g_dCurrent = (anim->mDuration / tps) * num / ANIM_SLIDER_MAX;
+                    g_pcAsset->mAnimator->Calculate(g_dCurrent);
+                }
             }
             break;
 

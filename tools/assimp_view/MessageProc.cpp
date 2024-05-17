@@ -874,9 +874,10 @@ void OpenAsset() {
     RegSetValueExA(g_hRegistry,"CurrentApp",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
 
     if (0 != strcmp(g_szFileName,szFileName)) {
-        strcpy(g_szFileName, szFileName);
         DeleteAssetData();
         DeleteAsset();
+
+        strcpy(g_szFileName, szFileName);
         LoadAsset();
 
         // update the history
@@ -1666,10 +1667,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         }
                         fclose(pFile);
                     } else {
-                        strcpy(g_szFileName,szFile);
-
                         DeleteAsset();
+
+                        strcpy(g_szFileName, szFile);
                         LoadAsset();
+
                         UpdateHistory();
                         SaveHistory();
                     }
@@ -1827,7 +1829,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             }
             else if (ID_VIEWER_RELOAD == LOWORD(wParam))
             {
+                // Save the filename to reload and clear
+                char toReloadFileName[MAX_PATH];
+                strcpy(toReloadFileName, g_szFileName);
                 DeleteAsset();
+
+                strcpy(g_szFileName, toReloadFileName);
                 LoadAsset();
             }
             else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
@@ -2036,9 +2043,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             {
                 if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam))
                 {
-                    strcpy(g_szFileName,g_aPreviousFiles[i].c_str());
                     DeleteAssetData();
                     DeleteAsset();
+
+                    strcpy(g_szFileName, g_aPreviousFiles[i].c_str());
                     LoadAsset();
 
                     // update and safe the history

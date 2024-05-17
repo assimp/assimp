@@ -191,8 +191,8 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
 }
 
 //-------------------------------------------------------------------------------
-// load the current asset
-// THe path to the asset is specified in the global path variable
+// Load the current asset
+// The path to the asset is specified in the global variable g_szFileName
 //-------------------------------------------------------------------------------
 int LoadAsset() {
     // set the world and world rotation matrices to the identity
@@ -311,6 +311,8 @@ int DeleteAsset(void) {
     delete g_pcAsset->mAnimator;
     delete g_pcAsset;
     g_pcAsset = nullptr;
+
+    g_szFileName[0] = '\0';
 
     // reset the caption of the viewer window
     SetWindowText(g_hDlg, AI_VIEW_CAPTION_BASE);

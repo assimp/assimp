@@ -81,7 +81,7 @@ float g_fWheelPos = -10.0f;
 bool g_bLoadingCanceled = false;
 IDirect3DTexture9 *g_pcTexture = nullptr;
 bool g_bPlay = false;
-double g_dCurrent = 0.;
+double g_dCurrent = 0.; // Animation time
 
 // default pp steps
 unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible

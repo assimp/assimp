@@ -106,6 +106,11 @@ int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
 
+    if (hm == FALSE) {
+        g_dCurrent = 0.0;
+        SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_SETPOS, TRUE, LPARAM(0));
+    }
+
     return 1;
 }
 
@@ -733,23 +738,25 @@ int CDisplay::OnRender()
     // update possible animation
     if( g_pcAsset)
     {
-        static double lastPlaying = 0.;
+        static double lastRenderTime = 0.;
 
         ai_assert( g_pcAsset->mAnimator);
+        double currentTime = clock() / double(CLOCKS_PER_SEC);
         if (g_bPlay) {
-            g_dCurrent += clock()/ double( CLOCKS_PER_SEC)   -lastPlaying;
+            g_dCurrent += currentTime - lastRenderTime;
 
             double time = g_dCurrent;
             aiAnimation* mAnim = g_pcAsset->mAnimator->CurrentAnim();
-            if(  mAnim && mAnim->mDuration > 0.0) {
+            if (mAnim && mAnim->mDuration > 0.0) {
                 double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
-                time = fmod( time, mAnim->mDuration/tps);
+                time = fmod(time, mAnim->mDuration/tps);
                 SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_SETPOS, TRUE, LPARAM(ANIM_SLIDER_MAX * (time / (mAnim->mDuration / tps))));
             }
 
             g_pcAsset->mAnimator->Calculate( time );
-            lastPlaying = g_dCurrent;
         }
+
+        lastRenderTime = currentTime;
     }
     // begin the frame
     g_piDevice->BeginScene();

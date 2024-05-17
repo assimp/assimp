@@ -1275,13 +1275,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             // XXX quick and dirty fix for #3029892
             if (GetDlgItem(g_hDlg, IDC_SLIDERANIM) == (HWND)lParam && g_pcAsset && g_pcAsset->pcScene->mAnimations)
             {
-                double num = (double)SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_GETPOS,0,0);
                 const aiAnimation* anim = g_pcAsset->pcScene->mAnimations[ g_pcAsset->mAnimator->CurrentAnimIndex() ];
                 if (anim && anim->mDuration > 0.0)
                 {
                     double tps = anim->mTicksPerSecond ? anim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
-
-                    g_dCurrent = (anim->mDuration / tps) * num / ANIM_SLIDER_MAX;
+                    double sliderValue = (double)SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_GETPOS, 0, 0);
+                    g_dCurrent = (anim->mDuration / tps) * sliderValue / ANIM_SLIDER_MAX;
                     g_pcAsset->mAnimator->Calculate(g_dCurrent);
                 }
             }

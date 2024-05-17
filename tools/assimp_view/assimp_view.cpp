@@ -267,14 +267,6 @@ int LoadAsset() {
     if (1 != CreateAssetData())
         return 0;
 
-    if (!g_pcAsset->pcScene->HasAnimations()) {
-        EnableWindow(GetDlgItem(g_hDlg, IDC_PLAY), FALSE);
-        EnableWindow(GetDlgItem(g_hDlg, IDC_SLIDERANIM), FALSE);
-    } else {
-        EnableWindow(GetDlgItem(g_hDlg, IDC_PLAY), TRUE);
-        EnableWindow(GetDlgItem(g_hDlg, IDC_SLIDERANIM), TRUE);
-    }
-
     CLogDisplay::Instance().AddEntry("[OK] The asset has been loaded successfully");
     CDisplay::Instance().FillDisplayList();
     CDisplay::Instance().FillAnimList();

@@ -1692,6 +1692,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         g_pcAsset->mAnimator->SetAnimIndex(sel);
                         SendDlgItemMessage(hwndDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,0);
                     }
+
+                    const size_t count = static_cast<size_t>(ComboBox_GetCount(GetDlgItem(hwndDlg, IDC_COMBO1)));
+                    CDisplay::Instance().EnableAnimTools(g_pcAsset && count > 0 && sel < count - 1 ? TRUE : FALSE);
                 }
             } else if (ID_VIEWER_RESETVIEW == LOWORD(wParam)) {
                 g_sCamera.vPos = aiVector3D(0.0f,0.0f,-10.0f);
@@ -2217,6 +2220,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
 
+    CDisplay::Instance().EnableAnimTools(FALSE);
+
     // create the log window
     CLogWindow::Instance().Init();
     // set the focus to the main window
@@ -2404,7 +2409,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     }
                 }
             }
-
 
         // render the scene
         CDisplay::Instance().OnRender();

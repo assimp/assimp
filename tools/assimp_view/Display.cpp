@@ -106,6 +106,11 @@ int CDisplay::EnableAnimTools(BOOL hm) {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
 
+    if (hm == FALSE) {
+        g_dCurrent = 0.0;
+        SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_SETPOS, TRUE, LPARAM(0));
+    }
+
     return 1;
 }
 
@@ -115,9 +120,16 @@ int CDisplay::FillAnimList(void) {
     if (0 != g_pcAsset->pcScene->mNumAnimations)
     {
         // now fill in all animation names
-        for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumAnimations;++i)    {
+        for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumAnimations; ++i)
+        {
+            std::string animationLabel(g_pcAsset->pcScene->mAnimations[i]->mName.data);
+            if (animationLabel.empty())
+            {
+                animationLabel = std::string("Animation ") + std::to_string(i) + " (UNNAMED)";
+            }
+
             SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_ADDSTRING,0,
-                ( LPARAM ) g_pcAsset->pcScene->mAnimations[i]->mName.data);
+                    (LPARAM)animationLabel.c_str());
         }
 
         // also add a dummy - 'none'
@@ -139,6 +151,7 @@ int CDisplay::ClearAnimList(void)
 {
     // clear the combo box
     SendDlgItemMessage(g_hDlg,IDC_COMBO1,CB_RESETCONTENT,0,0);
+    EnableAnimTools(FALSE);
     return 1;
 }
 //-------------------------------------------------------------------------------
@@ -725,23 +738,25 @@ int CDisplay::OnRender()
     // update possible animation
     if( g_pcAsset)
     {
-        static double lastPlaying = 0.;
+        static double lastRenderTime = 0.;
 
         ai_assert( g_pcAsset->mAnimator);
+        double currentTime = clock() / double(CLOCKS_PER_SEC);
         if (g_bPlay) {
-            g_dCurrent += clock()/ double( CLOCKS_PER_SEC)   -lastPlaying;
+            g_dCurrent += currentTime - lastRenderTime;
 
             double time = g_dCurrent;
             aiAnimation* mAnim = g_pcAsset->mAnimator->CurrentAnim();
-            if(  mAnim && mAnim->mDuration > 0.0) {
-                double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : 25.f;
-                time = fmod( time, mAnim->mDuration/tps);
-                SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,LPARAM(10000 * (time/(mAnim->mDuration/tps))));
+            if (mAnim && mAnim->mDuration > 0.0) {
+                double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
+                time = fmod(time, mAnim->mDuration/tps);
+                SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_SETPOS, TRUE, LPARAM(ANIM_SLIDER_MAX * (time / (mAnim->mDuration / tps))));
             }
 
             g_pcAsset->mAnimator->Calculate( time );
-            lastPlaying = g_dCurrent;
         }
+
+        lastRenderTime = currentTime;
     }
     // begin the frame
     g_piDevice->BeginScene();
@@ -793,8 +808,10 @@ int CDisplay::FillDefaultStatistics(void)
         SetDlgItemText(g_hDlg,IDC_EVERT,"0");
         SetDlgItemText(g_hDlg,IDC_EFACE,"0");
         SetDlgItemText(g_hDlg,IDC_EMAT,"0");
-        SetDlgItemText(g_hDlg,IDC_ENODE,"0");
+        SetDlgItemText(g_hDlg,IDC_EMESH,"0");
+        SetDlgItemText(g_hDlg,IDC_ENODEWND,"0");
         SetDlgItemText(g_hDlg,IDC_ESHADER,"0");
+        SetDlgItemText(g_hDlg,IDC_ELOAD,"");
         SetDlgItemText(g_hDlg,IDC_ETEX,"0");
         return 1;
     }
@@ -877,7 +894,7 @@ int CDisplay::OnSetupNormalView()
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMSHADERS),"Shaders:");
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMATS),"Materials:");
     SetWindowText(GetDlgItem(g_hDlg,IDC_NUMMESHES),"Meshes:");
-    SetWindowText(GetDlgItem(g_hDlg,IDC_LOADTIME),"Time:");
+    SetWindowText(GetDlgItem(g_hDlg,IDC_LOADTIME),"Loading Time:");
 
     FillDefaultStatistics();
     SetViewMode(VIEWMODE_FULL);

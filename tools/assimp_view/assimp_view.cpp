@@ -81,7 +81,7 @@ float g_fWheelPos = -10.0f;
 bool g_bLoadingCanceled = false;
 IDirect3DTexture9 *g_pcTexture = nullptr;
 bool g_bPlay = false;
-double g_dCurrent = 0.;
+double g_dCurrent = 0.; // Animation time
 
 // default pp steps
 unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
@@ -191,8 +191,8 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
 }
 
 //-------------------------------------------------------------------------------
-// load the current asset
-// THe path to the asset is specified in the global path variable
+// Load the current asset
+// The path to the asset is specified in the global variable g_szFileName
 //-------------------------------------------------------------------------------
 int LoadAsset() {
     // set the world and world rotation matrices to the identity
@@ -267,14 +267,6 @@ int LoadAsset() {
     if (1 != CreateAssetData())
         return 0;
 
-    if (!g_pcAsset->pcScene->HasAnimations()) {
-        EnableWindow(GetDlgItem(g_hDlg, IDC_PLAY), FALSE);
-        EnableWindow(GetDlgItem(g_hDlg, IDC_SLIDERANIM), FALSE);
-    } else {
-        EnableWindow(GetDlgItem(g_hDlg, IDC_PLAY), TRUE);
-        EnableWindow(GetDlgItem(g_hDlg, IDC_SLIDERANIM), TRUE);
-    }
-
     CLogDisplay::Instance().AddEntry("[OK] The asset has been loaded successfully");
     CDisplay::Instance().FillDisplayList();
     CDisplay::Instance().FillAnimList();
@@ -311,6 +303,8 @@ int DeleteAsset(void) {
     delete g_pcAsset->mAnimator;
     delete g_pcAsset;
     g_pcAsset = nullptr;
+
+    g_szFileName[0] = '\0';
 
     // reset the caption of the viewer window
     SetWindowText(g_hDlg, AI_VIEW_CAPTION_BASE);

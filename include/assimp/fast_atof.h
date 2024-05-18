@@ -150,7 +150,7 @@ inline uint8_t HexOctetToDecimal(const char* in) {
 // ------------------------------------------------------------------------------------
 // signed variant of strtoul10
 // ------------------------------------------------------------------------------------
-inline int strtol10( const char* in, const char** out=0) {
+inline int strtol10( const char* in, const char** out = 0) {
     bool inv = (*in=='-');
     if ( inv || *in == '+' ) {
         ++in;
@@ -158,7 +158,7 @@ inline int strtol10( const char* in, const char** out=0) {
 
     int value = strtoul10(in,out);
     if (inv) {
-        if (value < INT_MAX) {
+        if (value < INT_MAX && value > INT_MIN) {
             value = -value;
         } else {
             ASSIMP_LOG_WARN( "Converting the string \"", in, "\" into an inverted value resulted in overflow." );

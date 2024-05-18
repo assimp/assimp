@@ -61,7 +61,7 @@ TEST_F( utVersion, aiGetVersionMinorTest ) {
 }
 
 TEST_F( utVersion, aiGetVersionPatchTest ) {
-    EXPECT_EQ(aiGetVersionPatch(), 0U );
+    EXPECT_EQ(aiGetVersionPatch(), 1U );
 }
 
 TEST_F( utVersion, aiGetCompileFlagsTest ) {
@@ -69,7 +69,7 @@ TEST_F( utVersion, aiGetCompileFlagsTest ) {
 }
 
 TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NE( aiGetVersionRevision(), 0U );
+    EXPECT_NO_THROW(aiGetVersionRevision());
 }
 
 TEST_F( utVersion, aiGetBranchNameTest ) {

@@ -471,6 +471,14 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/HalfLife/UniqueNameGenerator.h
 )
 
+IF(((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for
+      AssetLib/MDL/MDLLoader.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/MDL/MDLLoader.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-array-bounds -Wno-stringop-overflow"
+  )
+endif()
+
 SET( MaterialSystem_SRCS
   Material/MaterialSystem.cpp
   Material/MaterialSystem.h

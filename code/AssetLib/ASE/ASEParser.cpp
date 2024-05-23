@@ -500,6 +500,13 @@ void Parser::ParseLV1MaterialListBlock() {
                 continue;
             }
             if (TokenMatch(filePtr, "MATERIAL", 8)) {
+                // ensure we have at least one material allocated
+                if (iMaterialCount == 0) {
+                    LogWarning("*MATERIAL_COUNT unspecified or 0");
+                    iMaterialCount = 1;
+                    m_vMaterials.resize(iOldMaterialCount + iMaterialCount, Material("INVALID"));
+                }
+
                 unsigned int iIndex = 0;
                 ParseLV4MeshLong(iIndex);
 
@@ -653,6 +660,12 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
             }
             // submaterial chunks
             if (TokenMatch(filePtr, "SUBMATERIAL", 11)) {
+                // ensure we have at least one material allocated
+                if (iNumSubMaterials == 0) {
+                    LogWarning("*NUMSUBMTLS unspecified or 0");
+                    iNumSubMaterials = 1;
+                    mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
+                }
 
                 unsigned int iIndex = 0;
                 ParseLV4MeshLong(iIndex);

@@ -6673,7 +6673,10 @@ static mz_bool mz_zip_reader_extract_to_mem_no_alloc1(
     /* Temporarily allocate a read buffer. */
     read_buf_size =
         MZ_MIN(file_stat.m_comp_size, (mz_uint64)MZ_ZIP_MAX_IO_BUF_SIZE);
-    if (((sizeof(size_t) == sizeof(mz_uint32))) && (read_buf_size > 0x7FFFFFFF))
+#ifdef _MSC_VER
+#pragma warning ( disable : 4127 )
+#endif
+  if (((sizeof(size_t) == sizeof(mz_uint32))) && (read_buf_size > 0x7FFFFFFF))
       return mz_zip_set_error(pZip, MZ_ZIP_INTERNAL_ERROR);
 
     if (NULL == (pRead_buf = pZip->m_pAlloc(pZip->m_pAlloc_opaque, 1,

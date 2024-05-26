@@ -582,11 +582,13 @@ void ObjFileParser::getMaterialDesc() {
         skip = true;
     }
 
-    // If the current mesh has the same material, we simply ignore that 'usemtl' command
+    // If the current mesh has the same material, we will ignore that 'usemtl' command
     // There is no need to create another object or even mesh here
-    if (m_pModel->mCurrentMaterial->MaterialName == aiString(strName)) {
-        if (m_pModel->mCurrentMaterial != nullptr) {
-            skip = true;
+    if (!skip) {
+        if (m_pModel->mCurrentMaterial->MaterialName == aiString(strName)) {
+            if (m_pModel->mCurrentMaterial != nullptr) {
+                skip = true;
+            }
         }
     }
 

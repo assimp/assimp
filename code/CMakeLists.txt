@@ -471,9 +471,9 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/HalfLife/UniqueNameGenerator.h
 )
 
-IF(((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
-  message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for
-      AssetLib/MDL/MDLLoader.cpp as it appears to be a false positive")
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for"
+      " AssetLib/MDL/MDLLoader.cpp as it appears to be a false positive")
   set_source_files_properties(AssetLib/MDL/MDLLoader.cpp PROPERTIES
       COMPILE_FLAGS "-Wno-array-bounds -Wno-stringop-overflow"
   )
@@ -510,6 +510,14 @@ ADD_ASSIMP_IMPORTER( OBJ
   AssetLib/Obj/ObjFileParser.h
   AssetLib/Obj/ObjTools.h
 )
+
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION EQUAL 14)
+  message(STATUS "GCC14 detected disabling \"-Wmaybe-uninitialized\" for"
+      " AssetLib/Obj/ObjFileParser.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/Obj/ObjFileParser.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-maybe-uninitialized"
+  )
+endif()
 
 ADD_ASSIMP_IMPORTER( OGRE
   AssetLib/Ogre/OgreImporter.h

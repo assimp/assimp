@@ -78,6 +78,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // default movement speed
 #define MOVE_SPEED 3.f
 
+// Anim constants
+#define ANIM_DEFAULT_TICKS_PER_SECOND 25.f
+#define ANIM_SLIDER_MAX 10000
+
 #include "AssetHelper.h"
 #include "Background.h"
 #include "Camera.h"

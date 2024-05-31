@@ -390,8 +390,8 @@ void TextureTransformStep::Execute( aiScene* pScene) {
         cnt = 0;
         for (it = trafo.begin();it != trafo.end(); ++it,++cnt) {
             if ((*it).lockedPos != AI_TT_UV_IDX_LOCK_NONE && (*it).lockedPos != cnt) {
-                it2 = trafo.begin();unsigned int t = 0;
-                while (t != (*it).lockedPos)
+                it2 = trafo.begin();
+                while ((*it2).lockedPos != (*it).lockedPos)
                     ++it2;
 
                 if ((*it2).lockedPos != AI_TT_UV_IDX_LOCK_NONE) {

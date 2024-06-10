@@ -1239,7 +1239,7 @@ int zip_entry_openbyindex(struct zip_t *zip, size_t index) {
   if (!(pHeader = &MZ_ZIP_ARRAY_ELEMENT(
             &pZip->m_pState->m_central_dir, mz_uint8,
             MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets,
-                                 mz_uint32, index)))) {
+                                 mz_uint32, (mz_uint)index)))) {
     // cannot find header in central directory
     return ZIP_ENOHDR;
   }

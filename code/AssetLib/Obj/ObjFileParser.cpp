@@ -577,7 +577,7 @@ void ObjFileParser::getMaterialDesc() {
 
     // Get name
     std::string strName(pStart, &(*m_DataIt));
-    strName = trim_whitespaces(strName);
+    strName = ai_trim(strName);
     if (strName.empty()) {
         skip = true;
     }

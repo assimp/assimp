@@ -761,8 +761,8 @@ IF ( ASSIMP_INSTALL )
 ENDIF()
 
 CONFIGURE_FILE(
-  ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/revision.h
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/revision.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/revision.h
 )
 
 CONFIGURE_FILE(

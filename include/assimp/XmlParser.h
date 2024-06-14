@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 #include <assimp/ai_assert.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
 #include "BaseImporter.h"
@@ -447,6 +448,7 @@ inline bool TXmlParser<TNodeType>::getValueAsString(XmlNode &node, std::string &
     }
 
     text = node.text().as_string();
+    text = ai_trim(text);
 
     return true;
 }

@@ -730,7 +730,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     // if an ASCII effect description (HLSL?) is contained in the file,
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
-        int32_t iMe = *((int32_t *)szCurrent);
+        ::memcpy(&iMe, szCurrent, sizeof(int32_t));
         AI_SWAP4(iMe);
         szCurrent += sizeof(char) * iMe + sizeof(int32_t);
     }

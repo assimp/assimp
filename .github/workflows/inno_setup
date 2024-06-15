@@ -1,0 +1,51 @@
+name: Build Windows Installer
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build the Inno Setup Installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+      - uses: ilammy/msvc-dev-cmd@v1
+
+
+      - name: Cache DX SDK
+        id: dxcache
+        uses: actions/cache@v4
+        with:
+          path: '${{ github.workspace }}/DX_SDK'
+          key: ${{ runner.os }}-DX_SDK
+          restore-keys: |
+            ${{ runner.os }}-DX_SDK
+
+      - name: Download DXSetup
+        run: |
+          curl -s -o DXSDK_Jun10.exe --location https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+          cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
+
+      - name: Set Windows specific CMake arguments
+        id: windows_extra_cmake_args
+        run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1 -DASSIMP_BUILD_ZLIB=1"
+
+      - name: configure and build
+        uses: lukka/run-cmake@v3
+        env:
+          DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
+
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
+          buildWithCMakeArgs: '--parallel 24 -v'
+          buildDirectory: '${{ github.workspace }}/build/'
+
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: packaging/windows-innosetup/script_x64.iss
+          options: /O+

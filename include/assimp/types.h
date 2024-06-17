@@ -344,7 +344,7 @@ struct aiString {
     /** Comparison operator */
     bool operator==(const aiString &other) const {
         if (length == other.length) {
-            return memcmp(data, other.data, length);
+            return memcmp(data, other.data, length) == 0;
         }
         return false;
     }

@@ -494,7 +494,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
         aiString szFile;
         const size_t iLen = strlen((const char *)szCurrent);
-        size_t iLen2 = iLen > (MAXLEN - 1) ? (MAXLEN - 1) : iLen;
+        size_t iLen2 = iLen > (AI_MAXLEN - 1) ? (AI_MAXLEN - 1) : iLen;
         memcpy(szFile.data, (const char *)szCurrent, iLen2);
         szFile.data[iLen2] = '\0';
         szFile.length = static_cast<ai_uint32>(iLen2);

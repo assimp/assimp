@@ -283,9 +283,6 @@ struct aiString {
         memcpy(data, rOther.data, length);
         data[length] = '\0';
     }
-
-    /** Default move constructor */
-    aiString(const aiString &&rhs) = default;
     
     /** Constructor from std::string */
     explicit aiString(const std::string &pString) :

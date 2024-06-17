@@ -70,7 +70,7 @@ class String(Structure):
     See 'types.h' for details.
     """
 
-    MAXLEN = 1024
+    AI_MAXLEN = 1024
 
     _fields_ = [
             # Binary length of the string excluding the terminal 0. This is NOT the
@@ -79,7 +79,7 @@ class String(Structure):
             ("length", c_uint32),
 
             # String buffer. Size limit is MAXLEN
-            ("data", c_char*MAXLEN),
+            ("data", c_char*AI_MAXLEN),
         ]
 
 class MaterialPropertyString(Structure):
@@ -90,7 +90,7 @@ class MaterialPropertyString(Structure):
     material property (see MaterialSystem.cpp aiMaterial::AddProperty() for details).
     """
 
-    MAXLEN = 1024
+    AI_MAXLEN = 1024
 
     _fields_ = [
             # Binary length of the string excluding the terminal 0. This is NOT the
@@ -98,8 +98,8 @@ class MaterialPropertyString(Structure):
             #  the number of bytes from the beginning of the string to its end.
             ("length", c_uint32),
 
-            # String buffer. Size limit is MAXLEN
-            ("data", c_char*MAXLEN),
+            # String buffer. Size limit is AI_MAXLEN
+            ("data", c_char*AI_MAXLEN),
         ]
 
 class MemoryInfo(Structure):

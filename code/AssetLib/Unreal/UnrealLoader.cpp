@@ -452,7 +452,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         aiColor3D color(1.f, 1.f, 1.f);
 
         aiString s;
-        ::ai_snprintf(s.data, MAXLEN, "mat%u_tx%u_", i, materials[i].tex);
+        ::ai_snprintf(s.data, AI_MAXLEN, "mat%u_tx%u_", i, materials[i].tex);
 
         // set the two-sided flag
         if (materials[i].type == Unreal::MF_NORMAL_TS) {
@@ -472,7 +472,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
         // a special name for the weapon attachment point
         if (materials[i].type == Unreal::MF_WEAPON_PLACEHOLDER) {
-            s.length = ::ai_snprintf(s.data, MAXLEN, "$WeaponTag$");
+            s.length = ::ai_snprintf(s.data, AI_MAXLEN, "$WeaponTag$");
             color = aiColor3D(0.f, 0.f, 0.f);
         }
 

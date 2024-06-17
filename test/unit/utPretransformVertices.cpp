@@ -68,7 +68,7 @@ void AddNodes(unsigned int num, aiNode *father, unsigned int depth) {
     for (unsigned int i = 0; i < 5; ++i) {
         aiNode *nd = father->mChildren[i] = new aiNode();
 
-        nd->mName.length = snprintf(nd->mName.data, MAXLEN, "%i%i", depth, i);
+        nd->mName.length = snprintf(nd->mName.data, AI_MAXLEN, "%i%i", depth, i);
 
         // spawn two meshes
         nd->mMeshes = new unsigned int[nd->mNumMeshes = 2];

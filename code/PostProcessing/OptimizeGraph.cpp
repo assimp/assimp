@@ -164,7 +164,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode *nd, std::list<aiNode *> &n
 			++it;
 		}
 		if (join_master && !join.empty()) {
-			join_master->mName.length = ::ai_snprintf(join_master->mName.data, MAXLEN, "$MergedNode_%u", count_merged++);
+            join_master->mName.length = ::ai_snprintf(join_master->mName.data, AI_MAXLEN, "$MergedNode_%u", count_merged++);
 
 			unsigned int out_meshes = 0;
 			for (std::list<aiNode *>::const_iterator it = join.cbegin(); it != join.cend(); ++it) {

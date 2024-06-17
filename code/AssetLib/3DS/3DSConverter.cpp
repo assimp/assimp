@@ -709,7 +709,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
             pcNode->mNumMeshes = 1;
 
             // Build a name for the node
-            pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "3DSMesh_%u", i);
+            pcNode->mName.length = ai_snprintf(pcNode->mName.data, AI_MAXLEN, "3DSMesh_%u", i);
         }
 
         // Build dummy nodes for all cameras

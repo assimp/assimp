@@ -281,7 +281,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                             // copy the result string back to the aiString
                             const size_t iLen = strlen(szTempB);
                             size_t iLen2 = iLen+1;
-                            iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
+                            iLen2 = iLen2 > AI_MAXLEN ? AI_MAXLEN : iLen2;
                             memcpy(p_szString->data,szTempB,iLen2);
                             p_szString->length = static_cast<ai_uint32>(iLen);
                             return true;
@@ -295,7 +295,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                         // copy the result string back to the aiString
                         const size_t iLen = strlen(szTempB);
                         size_t iLen2 = iLen+1;
-                        iLen2 = iLen2 > MAXLEN ? MAXLEN : iLen2;
+                        iLen2 = iLen2 > AI_MAXLEN ? AI_MAXLEN : iLen2;
                         memcpy(p_szString->data,szTempB,iLen2);
                         p_szString->length = static_cast<ai_uint32>(iLen);
                         return true;
@@ -402,7 +402,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
         // copy the result string back to the aiStr
         const size_t len = strlen(szTemp);
         size_t len2 = len+1;
-        len2 = len2 > MAXLEN ? MAXLEN : len2;
+        len2 = len2 > AI_MAXLEN ? AI_MAXLEN : len2;
         memcpy(p_szString->data, szTemp, len2);
         p_szString->length = static_cast<ai_uint32>(len);
     }

@@ -134,7 +134,7 @@ public:
 		const char* elementNameCStr = elementName.c_str();
 		for (auto element = elements.begin(); element != elements.end(); ++element)
 		{
-			if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, MAXLEN)) {
+            if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, AI_MAXLEN)) {
 				return element->second;
 			}
 		}

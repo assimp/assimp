@@ -305,7 +305,7 @@ struct aiString {
     /** Copy a const char* to the aiString */
     void Set(const char *sz) {
         ai_int32 len = (ai_uint32)::strlen(sz);
-        if (len > static_cast<ai_int32>(AI_MAXLEN - 1) {
+        if (len > static_cast<ai_int32>(AI_MAXLEN - 1)) {
             len = static_cast<ai_int32>(AI_MAXLEN - 1);
         }
         length = len;
@@ -320,7 +320,7 @@ struct aiString {
         }
 
         length = rOther.length;
-        if (length >(AI_MAXLEN - 1)) {
+        if (length > (AI_MAXLEN - 1)) {
             length = static_cast<ai_int32>(AI_MAXLEN - 1);
         }
 

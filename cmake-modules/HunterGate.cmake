@@ -22,37 +22,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# This is a gate file to Hunter package manager.
-# Include this file using `include` command and add package you need, example:
-#
-#     cmake_minimum_required(VERSION 3.2)
-#
-#     include("cmake/HunterGate.cmake")
-#     HunterGate(
-#         URL "https://github.com/path/to/hunter/archive.tar.gz"
-#         SHA1 "798501e983f14b28b10cda16afa4de69eee1da1d"
-#     )
-#
-#     project(MyProject)
-#
-#     hunter_add_package(Foo)
-#     hunter_add_package(Boo COMPONENTS Bar Baz)
-#
-# Projects:
-#     * https://github.com/hunter-packages/gate/
-#     * https://github.com/ruslo/hunter
 
 option(HUNTER_ENABLED "Enable Hunter package manager support" ON)
-
-if(HUNTER_ENABLED)
-  if(CMAKE_VERSION VERSION_LESS "3.2")
-    message(
-        FATAL_ERROR
-        "At least CMake version 3.2 required for Hunter dependency management."
-        " Update CMake or set HUNTER_ENABLED to OFF."
-    )
-  endif()
-endif()
 
 include(CMakeParseArguments) # cmake_parse_arguments
 

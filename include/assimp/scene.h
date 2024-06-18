@@ -141,25 +141,28 @@ struct ASSIMP_API aiNode {
     /** Destructor */
     ~aiNode();
 
-    /** Searches for a node with a specific name, beginning at this
+    /**
+     *  @brief Searches for a node with a specific name, beginning at this
      *  nodes. Normally you will call this method on the root node
      *  of the scene.
      *
      *  @param name Name to search for
      *  @return nullptr or a valid Node if the search was successful.
      */
-    inline
-    const aiNode* FindNode(const aiString& name) const {
+    inline const aiNode* FindNode(const aiString& name) const {
         return FindNode(name.data);
     }
 
-    inline
-    aiNode* FindNode(const aiString& name) {
+    inline aiNode* FindNode(const aiString& name) {
         return FindNode(name.data);
     }
 
+    /**
+     * @brief Will search for a node described by its name.
+     * @param[in] name  The name for the node to look for.
+     * @return Pointer showing to the node or nullptr if not found.
+     */
     const aiNode* FindNode(const char* name) const;
-
     aiNode* FindNode(const char* name);
 
     /**
@@ -240,8 +243,7 @@ struct ASSIMP_API aiNode {
  *  delete a given scene on your own.
  */
 // -------------------------------------------------------------------------------
-struct aiScene
-{
+struct ASSIMP_API aiScene {
     /** Any combination of the AI_SCENE_FLAGS_XXX flags. By default
     * this value is 0, no flags are set. Most applications will
     * want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE
@@ -355,10 +357,10 @@ struct aiScene
 #ifdef __cplusplus
 
     //! Default constructor - set everything to 0/nullptr
-    ASSIMP_API aiScene();
+    aiScene();
 
     //! Destructor
-    ASSIMP_API ~aiScene();
+    ~aiScene();
 
     //! Check whether the scene contains meshes
     //! Unless no special scene flags are set this will always be true.

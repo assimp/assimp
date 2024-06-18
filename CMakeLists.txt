@@ -55,7 +55,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.4.0)
+PROJECT(Assimp VERSION 5.4.1)
 
 # All supported options ###############################################
 
@@ -761,8 +761,8 @@ IF ( ASSIMP_INSTALL )
 ENDIF()
 
 CONFIGURE_FILE(
-  ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/revision.h
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/revision.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/revision.h
 )
 
 CONFIGURE_FILE(

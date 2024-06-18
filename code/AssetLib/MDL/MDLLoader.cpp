@@ -962,7 +962,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
 
                 if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size) {
                     // no real name for our poor bone is specified :-(
-                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, MAXLEN,
+                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, AI_MAXLEN,
                             "UnnamedBone_%i", iBone);
                 } else {
                     // Make sure we won't run over the buffer's end if there is no
@@ -1567,7 +1567,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
             } else {
                 pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
             }
-            ::strncpy(pcNode->mName.data, szBuffer, MAXLEN - 1);
+            ::strncpy(pcNode->mName.data, szBuffer, AI_MAXLEN - 1);
             ++p;
         }
     }

@@ -305,14 +305,14 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
             }
             std::string::size_type t = src.path.substr(s).find_last_of('.');
 
-            nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
-            if (nd->mName.length > MAXLEN) {
-                nd->mName.length = MAXLEN;
+            nd->mName.length = ::ai_snprintf(nd->mName.data, AI_MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
+            if (nd->mName.length > AI_MAXLEN) {
+                nd->mName.length = AI_MAXLEN;
             }
             return;
         }
     }
-    nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.name, combined);
+    nd->mName.length = ::ai_snprintf(nd->mName.data, AI_MAXLEN, "%s_(%08X)", src.name, combined);
 }
 
 // ------------------------------------------------------------------------------------------------

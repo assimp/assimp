@@ -577,15 +577,17 @@ void ObjFileParser::getMaterialDesc() {
 
     // Get name
     std::string strName(pStart, &(*m_DataIt));
-    strName = trim_whitespaces(strName);
+    strName = ai_trim(strName);
     if (strName.empty()) {
         skip = true;
     }
 
-    // If the current mesh has the same material, we simply ignore that 'usemtl' command
+    // If the current mesh has the same material, we will ignore that 'usemtl' command
     // There is no need to create another object or even mesh here
-    if (m_pModel->mCurrentMaterial && m_pModel->mCurrentMaterial->MaterialName == aiString(strName)) {
-        skip = true;
+    if (!skip) {
+        if (m_pModel->mCurrentMaterial && m_pModel->mCurrentMaterial->MaterialName == aiString(strName)) {
+            skip = true;
+        }
     }
 
     if (!skip) {

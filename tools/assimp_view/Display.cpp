@@ -174,7 +174,7 @@ int CDisplay::AddNodeToDisplayList(
     ai_assert(nullptr != pcNode);
     ai_assert(nullptr != hRoot);
 
-    char chTemp[MAXLEN];
+    char chTemp[AI_MAXLEN];
 
     if(0 == pcNode->mName.length)   {
         if (iIndex >= 100)  {
@@ -186,12 +186,12 @@ int CDisplay::AddNodeToDisplayList(
         }
         else
 			iIndex += iDepth  * 10;
-        ai_snprintf(chTemp, MAXLEN,"Node %u",iIndex);
+        ai_snprintf(chTemp,AI_MAXLEN,"Node %u",iIndex);
     }
     else {
-        ai_snprintf(chTemp, MAXLEN,"%s",pcNode->mName.data);
+        ai_snprintf(chTemp, AI_MAXLEN, "%s", pcNode->mName.data);
     }
-    ai_snprintf(chTemp+strlen(chTemp), MAXLEN- strlen(chTemp),  iIndex ? " (%i)" : " (%i meshes)",pcNode->mNumMeshes);
+    ai_snprintf(chTemp + strlen(chTemp), AI_MAXLEN - strlen(chTemp), iIndex ? " (%i)" : " (%i meshes)", pcNode->mNumMeshes);
 
     TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
@@ -236,15 +236,15 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
 {
     aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
 
-    char chTemp[MAXLEN];
+    char chTemp[AI_MAXLEN];
 
     if(0 == pcMesh->mName.length)   {
-        ai_snprintf(chTemp,MAXLEN,"Mesh %u",iIndex);
+        ai_snprintf(chTemp, AI_MAXLEN, "Mesh %u", iIndex);
     }
     else {
-        ai_snprintf(chTemp,MAXLEN,"%s",pcMesh->mName.data);
+        ai_snprintf(chTemp, AI_MAXLEN, "%s", pcMesh->mName.data);
     }
-    ai_snprintf(chTemp+strlen(chTemp),MAXLEN-strlen(chTemp),  iIndex ? " (%i)" : " (%i faces)",pcMesh->mNumFaces);
+    ai_snprintf(chTemp + strlen(chTemp), AI_MAXLEN - strlen(chTemp), iIndex ? " (%i)" : " (%i faces)", pcMesh->mNumFaces);
 
     TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
@@ -280,8 +280,7 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
 
 //-------------------------------------------------------------------------------
 // Replace the currently selected texture by another one
-int CDisplay::ReplaceCurrentTexture(const char* szPath)
-{
+int CDisplay::ReplaceCurrentTexture(const char* szPath) {
     ai_assert(nullptr != szPath);
 
     // well ... try to load it

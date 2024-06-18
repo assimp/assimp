@@ -842,7 +842,7 @@ void OpenAsset() {
     aiString sz;
     aiGetExtensionList(&sz);
 
-    char szList[MAXLEN + 100];
+    char szList[AI_MAXLEN + 100];
     strcpy(szList,"ASSIMP assets");
     char* szCur = szList + 14;
     strcpy(szCur,sz.data);

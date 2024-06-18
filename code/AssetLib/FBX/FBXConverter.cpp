@@ -1860,7 +1860,7 @@ aiString FBXConverter::GetTexturePath(const Texture *tex) {
                 // We need to load all textures before referencing them, as FBX file format order may reference a texture before loading it
                 // This may occur on this case too, it has to be studied
                 path.data[0] = '*';
-                path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+                path.length = 1 + ASSIMP_itoa10(path.data + 1, AI_MAXLEN - 1, index);
             }
         }
     }
@@ -2440,7 +2440,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial *out_mat, const PropertyTa
 
                 // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
                 path.data[0] = '*';
-                path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+                path.length = 1 + ASSIMP_itoa10(path.data + 1, AI_MAXLEN - 1, index);
             }
 
             out_mat->AddProperty(&path, (name + "|file").c_str(), aiTextureType_UNKNOWN, 0);
@@ -2806,7 +2806,7 @@ void FBXConverter::ProcessMorphAnimDatas(std::map<std::string, morphAnimData *> 
                                 auto geoIt = std::find(model->GetGeometry().begin(), model->GetGeometry().end(), geo);
                                 auto geoIndex = static_cast<unsigned int>(std::distance(model->GetGeometry().begin(), geoIt));
                                 auto name = aiString(FixNodeName(model->Name() + "*"));
-                                name.length = 1 + ASSIMP_itoa10(name.data + name.length, MAXLEN - 1, geoIndex);
+                                name.length = 1 + ASSIMP_itoa10(name.data + name.length, AI_MAXLEN - 1, geoIndex);
                                 morphAnimData *animData;
                                 auto animIt = morphAnimDatas->find(name.C_Str());
                                 if (animIt == morphAnimDatas->end()) {

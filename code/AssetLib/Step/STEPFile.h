@@ -520,7 +520,7 @@ public:
     }
 
     const Object &operator*() const {
-        if (obj != nullptr) {
+        if (!obj) {
             LazyInit();
             ai_assert(obj);
         }

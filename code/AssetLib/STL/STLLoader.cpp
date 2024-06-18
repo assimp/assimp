@@ -257,7 +257,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         size_t temp = (size_t)(sz - szMe);
         // setup the name of the node
         if (temp) {
-            if (temp >= MAXLEN) {
+            if (temp >= AI_MAXLEN) {
                 throw DeadlyImportError("STL: Node name too long");
             }
             std::string name(szMe, temp);

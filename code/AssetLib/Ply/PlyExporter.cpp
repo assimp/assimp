@@ -346,10 +346,22 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
 
         for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
             if (m->HasVertexColors(c)) {
-                mOutput.write(reinterpret_cast<const char*>(&m->mColors[c][i].r), 16);
+                unsigned char rgba[4] = {
+                    static_cast<unsigned char>(m->mColors[c][i].r * 255),
+                    static_cast<unsigned char>(m->mColors[c][i].g * 255),
+                    static_cast<unsigned char>(m->mColors[c][i].b * 255),
+                    static_cast<unsigned char>(m->mColors[c][i].a * 255)
+                };
+                mOutput.write(reinterpret_cast<const char*>(&rgba), 4);
             }
             else {
-                mOutput.write(reinterpret_cast<const char*>(&defaultColor.r), 16);
+                unsigned char rgba[4] = {
+                    static_cast<unsigned char>(defaultColor.r * 255),
+                    static_cast<unsigned char>(defaultColor.g * 255),
+                    static_cast<unsigned char>(defaultColor.b * 255), 
+                    static_cast<unsigned char>(defaultColor.a * 255)
+                };
+                mOutput.write(reinterpret_cast<const char*>(&rgba), 4);
             }
         }
 

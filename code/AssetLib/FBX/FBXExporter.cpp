@@ -1051,7 +1051,7 @@ aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
 aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 {
     std::vector<const aiNode*> node_chain;
-    while (node != scene->mRootNode) {
+    while (node != scene->mRootNode && node != nullptr) {
         node_chain.push_back(node);
         node = node->mParent;
     }

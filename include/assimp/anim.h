@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -90,6 +90,7 @@ struct aiVectorKey {
     bool operator==(const aiVectorKey &rhs) const {
         return rhs.mValue == this->mValue;
     }
+
     bool operator!=(const aiVectorKey &rhs) const {
         return rhs.mValue != this->mValue;
     }

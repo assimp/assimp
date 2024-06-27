@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -486,7 +486,7 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     memcpy(pcNew->mData, pInput, pSizeInBytes);
 
     pcNew->mKey.length = static_cast<ai_uint32>(::strlen(pKey));
-    ai_assert(MAXLEN > pcNew->mKey.length);
+    ai_assert(AI_MAXLEN > pcNew->mKey.length);
     strcpy(pcNew->mKey.data, pKey);
 
     if (UINT_MAX != iOutIndex) {

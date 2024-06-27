@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -42,7 +42,7 @@
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.22 )
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -471,6 +471,14 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/HalfLife/UniqueNameGenerator.h
 )
 
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for"
+      " AssetLib/MDL/MDLLoader.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/MDL/MDLLoader.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-array-bounds -Wno-stringop-overflow"
+  )
+endif()
+
 SET( MaterialSystem_SRCS
   Material/MaterialSystem.cpp
   Material/MaterialSystem.h
@@ -502,6 +510,14 @@ ADD_ASSIMP_IMPORTER( OBJ
   AssetLib/Obj/ObjFileParser.h
   AssetLib/Obj/ObjTools.h
 )
+
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION EQUAL 14)
+  message(STATUS "GCC14 detected disabling \"-Wmaybe-uninitialized\" for"
+      " AssetLib/Obj/ObjFileParser.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/Obj/ObjFileParser.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-maybe-uninitialized"
+  )
+endif()
 
 ADD_ASSIMP_IMPORTER( OGRE
   AssetLib/Ogre/OgreImporter.h
@@ -1193,6 +1209,10 @@ ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
 
+add_compile_options(
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
+
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
   IF (MSVC)
@@ -1282,7 +1302,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   endif()
 
   if (ASSIMP_BUILD_DRACO)
-    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+    target_link_libraries(assimp PRIVATE ${draco_LIBRARIES})
   endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
@@ -1396,19 +1416,20 @@ IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp rt)
 ENDIF ()
 
+IF(ASSIMP_INSTALL)
+  INSTALL( TARGETS assimp
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP-DEV_COMPONENT}
+    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
+  )
+  INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
+  INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
+ENDIF()
 
-INSTALL( TARGETS assimp
-  EXPORT "${TARGETS_EXPORT_NAME}"
-  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP-DEV_COMPONENT}
-  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
-)
-INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
-INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
-
-if (ASSIMP_ANDROID_JNIIOSYSTEM)
+if (ASSIMP_ANDROID_JNIIOSYSTEM AND ASSIMP_INSTALL)
   INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
     COMPONENT assimp-dev)

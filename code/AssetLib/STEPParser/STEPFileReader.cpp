@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -40,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  STEPFileReader.cpp
+/** 
+ * @file  STEPFileReader.cpp
  *  @brief Implementation of the STEP file parser, which fills a
- *     STEP::DB with data read from a file.
+ *         STEP::DB with data read from a file.
  */
 
 #include "STEPFileReader.h"
@@ -58,34 +58,28 @@ using namespace Assimp;
 namespace EXPRESS = STEP::EXPRESS;
 
 // ------------------------------------------------------------------------------------------------
-std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = std::string())
-{
+std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = std::string()) {
     return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,") ",s) );
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = std::string())
-{
+std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = std::string()) {
     return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(entity #",entity,") ",s));
 }
 
 
 // ------------------------------------------------------------------------------------------------
-STEP::SyntaxError::SyntaxError (const std::string& s,uint64_t line /* = LINE_NOT_SPECIFIED */)
-: DeadlyImportError(AddLineNumber(s,line))
-{
-
+STEP::SyntaxError::SyntaxError (const std::string& s,uint64_t line) : DeadlyImportError(AddLineNumber(s,line)) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT_SPECIFIED */,uint64_t line /*= LINE_NOT_SPECIFIED*/)
-: DeadlyImportError(AddLineNumber(AddEntityID(s,entity),line))
-{
-
+STEP::TypeError::TypeError (const std::string& s,uint64_t entity, uint64_t line) : DeadlyImportError(AddLineNumber(AddEntityID(s,entity),line)) {
+    // empty
 }
 
-static const char *ISO_Token         = "ISO-10303-21;";
-static const char *FILE_SCHEMA_Token = "FILE_SCHEMA";
+static constexpr char ISO_Token[]         = "ISO-10303-21;";
+static constexpr char FILE_SCHEMA_Token[] = "FILE_SCHEMA";
 // ------------------------------------------------------------------------------------------------
 STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
     std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(std::move(stream)));
@@ -110,8 +104,9 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
 
         if (s.substr(0,11) == FILE_SCHEMA_Token) {
             const char* sz = s.c_str()+11;
-            SkipSpaces(sz,&sz);
-            std::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz);
+            const char *end = s.c_str() + s.size();
+            SkipSpaces(sz,&sz, end);
+            std::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz, end);
 
             // the file schema should be a regular list entity, although it usually contains exactly one entry
             // since the list itself is contained in a regular parameter list, we actually have
@@ -304,10 +299,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 }
 
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= nullptr*/)
+std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout, const char *end, uint64_t line, const EXPRESS::ConversionSchema* schema /*= nullptr*/)
 {
     const char* cur = inout;
-    SkipSpaces(&cur);
+    SkipSpaces(&cur, end);
     if (*cur == ',' || IsSpaceOrNewLine(*cur)) {
         throw STEP::SyntaxError("unexpected token, expected parameter",line);
     }
@@ -325,7 +320,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
                 std::transform(s.begin(),s.end(),s.begin(),&ai_tolower<char> );
                 if (schema->IsKnownToken(s)) {
                     for(cur = t+1;*cur++ != '(';);
-                    std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur);
+                    std::shared_ptr<const EXPRESS::DataType> dt = Parse(cur, end);
                     inout = *cur ? cur+1 : cur;
                     return dt;
                 }
@@ -348,7 +343,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
     else if (*cur == '(' ) {
         // start of an aggregate, further parsing is done by the LIST factory constructor
         inout = cur;
-        return EXPRESS::LIST::Parse(inout,line,schema);
+        return EXPRESS::LIST::Parse(inout, end, line, schema);
     }
     else if (*cur == '.' ) {
         // enum (includes boolean)
@@ -427,9 +422,10 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
 }
 
 // ------------------------------------------------------------------------------------------------
-std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= nullptr*/) {
+std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout, const char *end,
+        uint64_t line, const EXPRESS::ConversionSchema* schema) {
     const std::shared_ptr<EXPRESS::LIST> list = std::make_shared<EXPRESS::LIST>();
-    EXPRESS::LIST::MemberList& members = list->members;
+    EXPRESS::LIST::MemberList& cur_members = list->members;
 
     const char* cur = inout;
     if (*cur++ != '(') {
@@ -442,19 +438,19 @@ std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uin
         count += (*c == ',' ? 1 : 0);
     }
 
-    members.reserve(count);
+    cur_members.reserve(count);
 
     for(;;++cur) {
         if (!*cur) {
             throw STEP::SyntaxError("unexpected end of line while reading list");
         }
-        SkipSpaces(cur,&cur);
+        SkipSpaces(cur,&cur, end);
         if (*cur == ')') {
             break;
         }
 
-        members.push_back( EXPRESS::DataType::Parse(cur,line,schema));
-        SkipSpaces(cur,&cur);
+        cur_members.push_back(EXPRESS::DataType::Parse(cur, end, line, schema));
+        SkipSpaces(cur, &cur, end);
 
         if (*cur != ',') {
             if (*cur == ')') {
@@ -464,7 +460,7 @@ std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,uin
         }
     }
 
-    inout = cur+1;
+    inout = cur + 1;
     return list;
 }
 
@@ -543,7 +539,8 @@ void STEP::LazyObject::LazyInit() const {
     }
 
     const char* acopy = args;
-    std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy,(uint64_t)STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
+    const char *end = acopy + std::strlen(args);
+    std::shared_ptr<const EXPRESS::LIST> conv_args = EXPRESS::LIST::Parse(acopy, end, (uint64_t)STEP::SyntaxError::LINE_NOT_SPECIFIED,&db.GetSchema());
     delete[] args;
     args = nullptr;
 

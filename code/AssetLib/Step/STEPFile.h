@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -81,8 +81,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // uncomment this to have the loader evaluate all entities upon loading.
 // this is intended as stress test - by default, entities are evaluated
 // lazily and therefore not unless needed.
-
-//#define ASSIMP_IFC_TEST
 
 namespace Assimp {
 
@@ -199,35 +197,27 @@ public:
     }
 
 public:
-    /** parse a variable from a string and set 'inout' to the character
-     *  behind the last consumed character. An optional schema enables,
-     *  if specified, automatic conversion of custom data types.
-     *
-     *  @throw SyntaxError
-     */
-    static std::shared_ptr<const EXPRESS::DataType> Parse(const char *&inout,
-            uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
-            const EXPRESS::ConversionSchema *schema = nullptr);
+    /// @brief Parse a variable from a string and set 'inout' to the character behind the last consumed character.
+    ///
+    ///  An optional schema enables, if specified, automatic conversion of custom data types.
+    ///
+    /// @throw SyntaxError
+    static std::shared_ptr<const EXPRESS::DataType> Parse(const char *&inout, const char *end,
+            uint64_t line = SyntaxError::LINE_NOT_SPECIFIED, const EXPRESS::ConversionSchema *schema = nullptr);
 };
 
 typedef DataType SELECT;
 typedef DataType LOGICAL;
 
 // -------------------------------------------------------------------------------
-/** Sentinel class to represent explicitly unset (optional) fields ($) */
+/// Sentinel class to represent explicitly unset (optional) fields ($)
 // -------------------------------------------------------------------------------
-class UNSET : public DataType {
-public:
-private:
-};
+class UNSET : public DataType {};
 
 // -------------------------------------------------------------------------------
-/** Sentinel class to represent explicitly derived fields (*) */
+/// Sentinel class to represent explicitly derived fields (*)
 // -------------------------------------------------------------------------------
-class ISDERIVED : public DataType {
-public:
-private:
-};
+class ISDERIVED : public DataType {};
 
 // -------------------------------------------------------------------------------
 /** Shared implementation for some of the primitive data type, i.e. int, float
@@ -304,7 +294,7 @@ public:
 public:
     /** @see DaraType::Parse
      */
-    static std::shared_ptr<const EXPRESS::LIST> Parse(const char *&inout,
+    static std::shared_ptr<const EXPRESS::LIST> Parse(const char *&inout, const char *end,
             uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
             const EXPRESS::ConversionSchema *schema = nullptr);
 
@@ -539,6 +529,7 @@ public:
 
     template <typename T>
     const T &To() const {
+
         return dynamic_cast<const T &>(**this);
     }
 
@@ -589,12 +580,12 @@ private:
 };
 
 template <typename T>
-inline bool operator==(const std::shared_ptr<LazyObject> &lo, T whatever) {
+inline bool operator == (const std::shared_ptr<LazyObject> &lo, T whatever) {
     return *lo == whatever; // XXX use std::forward if we have 0x
 }
 
 template <typename T>
-inline bool operator==(const std::pair<uint64_t, std::shared_ptr<LazyObject>> &lo, T whatever) {
+inline bool operator == (const std::pair<uint64_t, std::shared_ptr<LazyObject>> &lo, T whatever) {
     return *(lo.second) == whatever; // XXX use std::forward if we have 0x
 }
 
@@ -607,18 +598,30 @@ struct Lazy {
     Lazy(const LazyObject *obj = nullptr) : obj(obj) {}
 
     operator const T *() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->ToPtr<T>();
     }
 
     operator const T &() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->To<T>();
     }
 
     const T &operator*() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->To<T>();
     }
 
     const T *operator->() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return &obj->To<T>();
     }
 

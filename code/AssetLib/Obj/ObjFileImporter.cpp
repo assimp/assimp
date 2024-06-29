@@ -193,7 +193,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
         pScene->mRootNode->mChildren = new aiNode *[childCount];
 
         // Create nodes for the whole scene
-        std::vector<aiMesh *> MeshArray;
+        std::vector<std::unique_ptr<aiMesh>> MeshArray;
         MeshArray.reserve(meshCount);
         for (size_t index = 0; index < pModel->mObjects.size(); ++index) {
             createNodes(pModel, pModel->mObjects[index], pScene->mRootNode, pScene, MeshArray);
@@ -205,7 +205,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
         if (pScene->mNumMeshes > 0) {
             pScene->mMeshes = new aiMesh *[MeshArray.size()];
             for (size_t index = 0; index < MeshArray.size(); ++index) {
-                pScene->mMeshes[index] = MeshArray[index];
+                pScene->mMeshes[index] = MeshArray[index].release();
             }
         }
 
@@ -257,7 +257,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
 //  Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile::Object *pObject,
         aiNode *pParent, aiScene *pScene,
-        std::vector<aiMesh *> &MeshArray) {
+        std::vector<std::unique_ptr<aiMesh>> &MeshArray) {
     ai_assert(nullptr != pModel);
     if (nullptr == pObject) {
         return nullptr;
@@ -275,12 +275,10 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 
     for (size_t i = 0; i < pObject->m_Meshes.size(); ++i) {
         unsigned int meshId = pObject->m_Meshes[i];
-        aiMesh *pMesh = createTopology(pModel, pObject, meshId);
+        std::unique_ptr<aiMesh> pMesh = createTopology(pModel, pObject, meshId);
         if (pMesh != nullptr) {
             if (pMesh->mNumFaces > 0) {
-                MeshArray.push_back(pMesh);
-            } else {
-                delete pMesh;
+                MeshArray.push_back(std::move(pMesh));
             }
         }
     }
@@ -312,7 +310,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
-aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
+std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
     // Checking preconditions
     ai_assert(nullptr != pModel);
 
@@ -394,7 +392,7 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
     // Create mesh vertices
     createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
 
-    return pMesh.release();
+    return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------

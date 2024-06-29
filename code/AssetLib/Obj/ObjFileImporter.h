@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/BaseImporter.h>
 #include <assimp/material.h>
+#include <memory>
 #include <vector>
 
 struct aiMesh;
@@ -84,10 +85,10 @@ protected:
 
     //! \brief  Creates all nodes stored in imported content.
     aiNode *createNodes(const ObjFile::Model *pModel, const ObjFile::Object *pData,
-            aiNode *pParent, aiScene *pScene, std::vector<aiMesh *> &MeshArray);
+            aiNode *pParent, aiScene *pScene, std::vector<std::unique_ptr<aiMesh>> &MeshArray);
 
     //! \brief  Creates topology data like faces and meshes for the geometry.
-    aiMesh *createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData,
+    std::unique_ptr<aiMesh> createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData,
             unsigned int uiMeshIndex);
 
     //! \brief  Creates vertices from model.

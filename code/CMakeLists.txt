@@ -79,6 +79,7 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/mesh.h
   ${HEADER_PATH}/ObjMaterial.h
   ${HEADER_PATH}/pbrmaterial.h
+  ${HEADER_PATH}/ProgressTracker.h
   ${HEADER_PATH}/GltfMaterial.h
   ${HEADER_PATH}/postprocess.h
   ${HEADER_PATH}/quaternion.h
@@ -211,6 +212,7 @@ SET( Common_SRCS
   Common/AssertHandler.cpp
   Common/Exceptional.cpp
   Common/Base64.cpp
+  Common/ProgressTracker.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

@@ -729,8 +729,9 @@ struct aiMesh {
     /**
      * @brief Vertex texture coordinates, also known as UV channels.
      * 
-     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
-     * vertex. nullptr if not present. The array is mNumVertices in size.
+     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS channels per
+     * vertex. Used and unused (nullptr) channels may go in any order.
+     * The array is mNumVertices in size.
      */
     C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
@@ -950,8 +951,10 @@ struct aiMesh {
     //! @return the number of stored uv-channels.
     unsigned int GetNumUVChannels() const {
         unsigned int n(0);
-        while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mTextureCoords[n]) {
-            ++n;
+        for (unsigned i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
+            if (mTextureCoords[i]) {
+                ++n;
+            }
         }
 
         return n;

@@ -940,7 +940,7 @@ namespace glTF2 {
             if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
                 throw DeadlyExportError("Failed to write body data!");
             }
-            if (curPaddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            if (curPaddingLength && outfile->Write(&padding, 1, curPaddingLength) != curPaddingLength) {
                 throw DeadlyExportError("Failed to write body data padding!");
             }
         }

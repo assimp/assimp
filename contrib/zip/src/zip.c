@@ -13,10 +13,14 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#if defined(_MSC_VER)
+/* For Visual Studio only, NOT MinGW (GCC) -- ThatOSDev */
+#pragma warning( disable : 4706 )
+#endif
+
 #if defined(_WIN32) || defined(__WIN32__) || defined(_MSC_VER) ||              \
     defined(__MINGW32__)
-/* Win32, DOS, MSVC, MSVS */
-#pragma warning( disable : 4706 )
+/* Win32, DOS, MSVC, MSVS, MinGW(GCC for windows) */
 #include <direct.h>
 
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)

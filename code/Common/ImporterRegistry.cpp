@@ -55,6 +55,9 @@ corresponding preprocessor flag to selectively disable formats.
 // Importers
 // (include_new_importers_here)
 // ------------------------------------------------------------------------------------------------
+#if !defined(ASSIMP_BUILD_NO_USD_IMPORTER)
+#include "AssetLib/USD/USDLoader.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 #include "AssetLib/X/XFileImporter.h"
 #endif
@@ -230,6 +233,9 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
     // (register_new_importers_here)
     // ----------------------------------------------------------------------------
     out.reserve(64);
+#if !defined(ASSIMP_BUILD_NO_USD_IMPORTER)
+    out.push_back(new USDImporter());
+#endif
 #if (!defined ASSIMP_BUILD_NO_X_IMPORTER)
     out.push_back(new XFileImporter());
 #endif

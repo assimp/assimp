@@ -230,10 +230,10 @@ if [[ "$DEPLOY_XCFramework" -eq 1 ]]; then
     echo '[+] Creating XCFramework ...'
 
     if [[ "$BUILD_TYPE" =~ "Debug" ]]; then
-    	make_xcframework 'libassimpd'
-	else
-		make_xcframework 'libassimp'
-	fi
+        make_xcframework 'libassimpd'
+    else
+        make_xcframework 'libassimp'
+    fi
 
     echo "[!] Done! The XCFramework can be found at $BUILD_DIR"
 fi

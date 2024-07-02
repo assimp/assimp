@@ -53,7 +53,8 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {
+LimitBoneWeightsProcess::LimitBoneWeightsProcess() :
+        mMaxWeights(AI_LMW_MAX_WEIGHTS), mRemoveEmptyBones(true) {
     // empty
 }
 

@@ -224,7 +224,14 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     }
 
     // Create format hint.
-    strncpy(converted_texture.FormatHint, "rgba", 4); // copy initial string.
+    converted_texture.FormatHint[0] = 'r';
+    converted_texture.FormatHint[1] = 'g';
+    converted_texture.FormatHint[2] = 'b';
+    converted_texture.FormatHint[3] = 'a';
+    converted_texture.FormatHint[4] = '0';
+    converted_texture.FormatHint[5] = '0';
+    converted_texture.FormatHint[6] = '0';
+    converted_texture.FormatHint[7] = '0';
     if (!r.empty()) converted_texture.FormatHint[4] = '8';
     if (!g.empty()) converted_texture.FormatHint[5] = '8';
     if (!b.empty()) converted_texture.FormatHint[6] = '8';

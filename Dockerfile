@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y ninja-build \
+RUN apt-get update && apt-get install --no-install-recommends -y ninja-build \
     git cmake build-essential software-properties-common
 
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update 

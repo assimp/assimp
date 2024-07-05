@@ -447,9 +447,9 @@ void ASEImporter::BuildLights() {
 
 // ------------------------------------------------------------------------------------------------
 void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
-        aiNode *pcParent, const char *szName) {
+        aiNode *pcParent, const std::string &name) {
     aiMatrix4x4 m;
-    AddNodes(nodes, pcParent, szName, m);
+    AddNodes(nodes, pcParent, name, m);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -506,10 +506,9 @@ void ASEImporter::AddMeshes(const ASE::BaseNode *snode, aiNode *node) {
 
 // ------------------------------------------------------------------------------------------------
 // Add child nodes to a given parent node
-void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
-        aiNode *pcParent, const char *szName,
+void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParent, const std::string &name,
         const aiMatrix4x4 &mat) {
-    const size_t len = szName ? ::strlen(szName) : 0;
+    const size_t len = name.size();
     ai_assert(4 <= AI_MAX_NUMBER_OF_COLOR_SETS);
 
     // Receives child nodes for the pcParent node
@@ -519,16 +518,18 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
     // which has *us* as parent.
     for (std::vector<BaseNode *>::const_iterator it = nodes.begin(), end = nodes.end(); it != end; ++it) {
         const BaseNode *snode = *it;
-        if (szName) {
-            if (len != snode->mParent.length() || ::strcmp(szName, snode->mParent.c_str()))
+        if (!name.empty()) {
+            if (len != snode->mParent.length() || name != snode->mParent.c_str()) {
                 continue;
-        } else if (snode->mParent.length())
+            }
+        } else if (snode->mParent.length()) {
             continue;
+        }
 
         (*it)->mProcessed = true;
 
         // Allocate a new node and add it to the output data structure
-        apcNodes.push_back(new aiNode());
+        apcNodes.push_back(new aiNode);
         aiNode *node = apcNodes.back();
 
         node->mName.Set((snode->mName.length() ? snode->mName.c_str() : "Unnamed_Node"));
@@ -541,7 +542,7 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
 
         // Add sub nodes - prevent stack overflow due to recursive parenting
         if (node->mName != node->mParent->mName && node->mName != node->mParent->mParent->mName) {
-            AddNodes(nodes, node, node->mName.data, snode->mTransform);
+            AddNodes(nodes, node, node->mName.C_Str(), snode->mTransform);
         }
 
         // Further processing depends on the type of the node

@@ -391,11 +391,11 @@ public:
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is
     //! guaranteed to be terminated with zero.
-    //! @param szFile Input file
+    //! @param file              The name of the input file.
     //! @param fileFormatDefault Assumed file format version. If the
     //!   file format is specified in the file the new value replaces
     //!   the default value.
-    Parser(const char *szFile, unsigned int fileFormatDefault);
+    Parser(const std::string &file, unsigned int fileFormatDefault);
 
     // -------------------------------------------------------------------
     //! Parses the file into the parsers internal representation

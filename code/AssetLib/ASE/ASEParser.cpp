@@ -110,12 +110,12 @@ using namespace Assimp::ASE;
     ++filePtr;
 
 // ------------------------------------------------------------------------------------------------
-Parser::Parser(const char *szFile, unsigned int fileFormatDefault) :
+Parser::Parser(const std::string &file, unsigned int fileFormatDefault) :
         filePtr(nullptr), mEnd (nullptr) {
-    ai_assert(nullptr != szFile);
+    ai_assert(!file.empty());
 
-    filePtr = szFile;
-    mEnd = filePtr + std::strlen(filePtr);
+    filePtr = file.c_str();
+    mEnd = filePtr + file.size();
     iFileFormat = fileFormatDefault;
 
     // make sure that the color values are invalid

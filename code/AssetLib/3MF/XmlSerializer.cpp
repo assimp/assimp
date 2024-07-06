@@ -57,8 +57,8 @@ static constexpr size_t ColRGBA_Len = 9;
 static constexpr size_t ColRGB_Len = 7;
 
 // format of the color string: #RRGGBBAA or #RRGGBB (3MF Core chapter 5.1.1)
-bool validateColorString(const char *color) {
-    const size_t len = strlen(color);
+bool validateColorString(const std::string color) {
+    const size_t len = color.size();
     if (ColRGBA_Len != len && ColRGB_Len != len) {
         return false;
     }
@@ -157,8 +157,8 @@ aiMatrix4x4 parseTransformMatrix(const std::string& matrixStr) {
     return transformMatrix;
 }
 
-bool parseColor(const char *color, aiColor4D &diffuse) {
-    if (nullptr == color) {
+bool parseColor(const std::string &color, aiColor4D &diffuse) {
+    if (color.empty()) {
         return false;
     }
 
@@ -178,7 +178,7 @@ bool parseColor(const char *color, aiColor4D &diffuse) {
 
     char b[3] = { color[5], color[6], '\0' };
     diffuse.b = static_cast<ai_real>(strtol(b, nullptr, 16)) / ai_real(255.0);
-    const size_t len = strlen(color);
+    const size_t len = color.size();
     if (ColRGB_Len == len) {
         return true;
     }

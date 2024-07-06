@@ -234,8 +234,12 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     if ('(' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ( was expected", linenumber);
+        if (*sz == bufferEnd)
+            return;
         ++*sz;
     }
+    if (*sz == bufferEnd)
+        return;
     ++*sz;
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     *sz = fast_atoreal_move<float>(*sz, (float &)vec.x);
@@ -247,6 +251,8 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
     if (')' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ) was expected", linenumber);
     }
+    if (*sz == bufferEnd)
+        return;
     ++*sz;
 }
 

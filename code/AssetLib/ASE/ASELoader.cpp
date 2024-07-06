@@ -124,7 +124,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     // Allocate storage and copy the contents of the file to a memory buffer
     std::vector<char> mBuffer2;
     TextFileToBuffer(file.get(), mBuffer2);
-
+    const size_t fileSize = mBuffer2.size();
     this->mBuffer = &mBuffer2[0];
     this->pcScene = pScene;
 
@@ -146,7 +146,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     };
 
     // Construct an ASE parser and parse the file
-    ASE::Parser parser(mBuffer, defaultFormat);
+    ASE::Parser parser(mBuffer, fileSize, defaultFormat);
     mParser = &parser;
     mParser->Parse();
 
@@ -446,8 +446,7 @@ void ASEImporter::BuildLights() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
-        aiNode *pcParent, const std::string &name) {
+void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParent, const std::string &name) {
     aiMatrix4x4 m;
     AddNodes(nodes, pcParent, name, m);
 }
@@ -620,7 +619,8 @@ void ASEImporter::BuildNodes(std::vector<BaseNode *> &nodes) {
     }
 
     // add all nodes
-    AddNodes(nodes, ch, nullptr);
+    static const std::string none = "";
+    AddNodes(nodes, ch, none);
 
     // now iterate through al nodes and find those that have not yet
     // been added to the nodegraph (= their parent could not be recognized)

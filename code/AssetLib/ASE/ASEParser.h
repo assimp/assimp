@@ -395,7 +395,7 @@ public:
     //! @param fileFormatDefault Assumed file format version. If the
     //!   file format is specified in the file the new value replaces
     //!   the default value.
-    Parser(const std::string &file, unsigned int fileFormatDefault);
+    Parser(const char *file, size_t fileLen, unsigned int fileFormatDefault);
 
     // -------------------------------------------------------------------
     //! Parses the file into the parsers internal representation
@@ -617,11 +617,8 @@ private:
     bool ParseString(std::string &out, const char *szName);
 
 public:
-    //! Pointer to current data
-    const char *filePtr;
-
-    /// The end pointer of the file data
-    const char *mEnd;
+    const char *mFilePtr; ////< Pointer to current data
+    const char *mEnd;     ///< The end pointer of the file data
 
     //! background color to be passed to the viewer
     //! QNAN if none was found

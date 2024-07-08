@@ -1440,7 +1440,7 @@ inline void MaterialSheen::SetDefaults() {
 inline void MaterialVolume::SetDefaults() {
     //KHR_materials_volume properties
     thicknessFactor = 0.f;
-    attenuationDistance = INFINITY;
+    attenuationDistance = std::numeric_limits<float>::infinity();
     SetVector(attenuationColor, defaultAttenuationColor);
 }
 

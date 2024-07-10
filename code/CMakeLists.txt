@@ -935,69 +935,98 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 # USD/USDA/USDC/USDZ support
 # tinyusdz
 IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
-    set(Tinyusdz_SRC_RELPATH "../contrib/tinyusdz/tinyusdz_repo/src")
+    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
+    # relative to top-level/main project)
+    set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")
+    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/tinyusdz_repo")
+
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
+    #       name can lead to non-deterministic (unpredictable) results since the code is potentially
+    #       in flux
+    # "rendermesh-refactor" branch, 27 Apr 2024 03:10:57
+    set(TINYUSDZ_GIT_TAG "21401538740b1a698a7cd179ccc143f9c5e4459a")
+    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+
+    # Patch required to build arm32 on android
+    set(TINYUSDZ_PATCH_CMD git apply ${Tinyusdz_BASE_ABSPATH}/patches/tinyusdz.patch)
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
+    FetchContent_Declare(
+            tinyusdzExtProj
+            GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
+            GIT_TAG        ${TINYUSDZ_GIT_TAG}
+            SOURCE_DIR     ${Tinyusdz_REPO_ABSPATH}
+            PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(tinyusdzExtProj)
+
+    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/src")
     set(Tinyusdz_SRCS
-            ${Tinyusdz_SRC_RELPATH}/ascii-parser.cc
-            ${Tinyusdz_SRC_RELPATH}/ascii-parser-basetype.cc
-            ${Tinyusdz_SRC_RELPATH}/ascii-parser-timesamples.cc
-            ${Tinyusdz_SRC_RELPATH}/ascii-parser-timesamples-array.cc
-            ${Tinyusdz_SRC_RELPATH}/asset-resolution.cc
-            ${Tinyusdz_SRC_RELPATH}/composition.cc
-            ${Tinyusdz_SRC_RELPATH}/crate-format.cc
-            ${Tinyusdz_SRC_RELPATH}/crate-pprint.cc
-            ${Tinyusdz_SRC_RELPATH}/crate-reader.cc
-            ${Tinyusdz_SRC_RELPATH}/image-loader.cc
-            ${Tinyusdz_SRC_RELPATH}/image-util.cc
-            ${Tinyusdz_SRC_RELPATH}/image-writer.cc
-            ${Tinyusdz_SRC_RELPATH}/io-util.cc
-            ${Tinyusdz_SRC_RELPATH}/linear-algebra.cc
-            ${Tinyusdz_SRC_RELPATH}/path-util.cc
-            ${Tinyusdz_SRC_RELPATH}/pprinter.cc
-            ${Tinyusdz_SRC_RELPATH}/prim-composition.cc
-            ${Tinyusdz_SRC_RELPATH}/prim-reconstruct.cc
-            ${Tinyusdz_SRC_RELPATH}/prim-types.cc
-            ${Tinyusdz_SRC_RELPATH}/primvar.cc
-            ${Tinyusdz_SRC_RELPATH}/stage.cc
-            ${Tinyusdz_SRC_RELPATH}/str-util.cc
-            ${Tinyusdz_SRC_RELPATH}/tiny-format.cc
-            ${Tinyusdz_SRC_RELPATH}/tinyusdz.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/attribute-eval.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/attribute-eval-typed.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/attribute-eval-typed-animatable.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/attribute-eval-typed-fallback.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/facial.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/prim-apply.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/render-data.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/scene-access.cc
-            ${Tinyusdz_SRC_RELPATH}/tydra/shader-network.cc
-            ${Tinyusdz_SRC_RELPATH}/usda-reader.cc
-            ${Tinyusdz_SRC_RELPATH}/usda-writer.cc
-            ${Tinyusdz_SRC_RELPATH}/usdc-reader.cc
-            ${Tinyusdz_SRC_RELPATH}/usdc-writer.cc
-            ${Tinyusdz_SRC_RELPATH}/usdGeom.cc
-            ${Tinyusdz_SRC_RELPATH}/usdLux.cc
-            ${Tinyusdz_SRC_RELPATH}/usdMtlx.cc
-            ${Tinyusdz_SRC_RELPATH}/usdShade.cc
-            ${Tinyusdz_SRC_RELPATH}/usdSkel.cc
-            ${Tinyusdz_SRC_RELPATH}/value-pprint.cc
-            ${Tinyusdz_SRC_RELPATH}/value-types.cc
-            ${Tinyusdz_SRC_RELPATH}/xform.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples-array.cc
+            ${Tinyusdz_SRC_ABSPATH}/asset-resolution.cc
+            ${Tinyusdz_SRC_ABSPATH}/composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-loader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/io-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/linear-algebra.cc
+            ${Tinyusdz_SRC_ABSPATH}/path-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/pprinter.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/primvar.cc
+            ${Tinyusdz_SRC_ABSPATH}/stage.cc
+            ${Tinyusdz_SRC_ABSPATH}/str-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/tiny-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/tinyusdz.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/facial.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/prim-apply.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/render-data.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/shader-network.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdGeom.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdLux.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdMtlx.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdShade.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdSkel.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/xform.cc
     )
 
     set(Tinyusdz_DEP_SOURCES
-            ${Tinyusdz_SRC_RELPATH}/external/fpng.cpp
-            #${Tinyusdz_SRC_RELPATH}/external/staticstruct.cc
-            #${Tinyusdz_SRC_RELPATH}/external/string_id/database.cpp
-            #${Tinyusdz_SRC_RELPATH}/external/string_id/error.cpp
-            #${Tinyusdz_SRC_RELPATH}/external/string_id/string_id.cpp
-            #${Tinyusdz_SRC_RELPATH}/external/tinyxml2/tinyxml2.cpp
-            ${Tinyusdz_SRC_RELPATH}/integerCoding.cpp
-            ${Tinyusdz_SRC_RELPATH}/lz4-compression.cc
-            ${Tinyusdz_SRC_RELPATH}/lz4/lz4.c
+            ${Tinyusdz_SRC_ABSPATH}/external/fpng.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/staticstruct.cc
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/database.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/error.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/string_id.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/tinyxml2/tinyxml2.cpp
+            ${Tinyusdz_SRC_ABSPATH}/integerCoding.cpp
+            ${Tinyusdz_SRC_ABSPATH}/lz4-compression.cc
+            ${Tinyusdz_SRC_ABSPATH}/lz4/lz4.c
     )
 
-    set(tinyusdz_INCLUDE_DIRS "../contrib/tinyusdz/tinyusdz_repo/src")
+    set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")
     INCLUDE_DIRECTORIES(${tinyusdz_INCLUDE_DIRS})
     SOURCE_GROUP( Contrib\\Tinyusdz
             FILES

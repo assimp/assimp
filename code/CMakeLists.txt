@@ -943,8 +943,9 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
-    # "rendermesh-refactor" branch, 27 Apr 2024 03:10:57
-    set(TINYUSDZ_GIT_TAG "21401538740b1a698a7cd179ccc143f9c5e4459a")
+    # "rendermesh-refactor" branch, 10 May 2024 05:47:02
+    set(TINYUSDZ_GIT_TAG "b41e1ddb6837e53827d9c234c0ded59190fa6a0b")
+    message("****")
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 
     # Patch required to build arm32 on android
@@ -963,6 +964,8 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
             PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
     )
     FetchContent_MakeAvailable(tinyusdzExtProj)
+    message("**** Finished cloning tinyusdz repo")
+    message("****")
 
     set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/src")
     set(Tinyusdz_SRCS

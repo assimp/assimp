@@ -892,8 +892,8 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
 void Parser::ParseLV2CameraSettingsBlock(ASE::Camera &camera) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
             if (TokenMatch(mFilePtr, "CAMERA_NEAR", 11)) {
                 ParseLV4MeshReal(camera.mNear);
                 continue;
@@ -1895,7 +1895,7 @@ void Parser::ParseLV4MeshReal(ai_real &fOut) {
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloat(float &fOut) {
     // skip spaces and tabs
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
         // LOG
         LogWarning("Unable to parse float: unexpected EOL [#1]");
         fOut = 0.0;
@@ -1903,7 +1903,7 @@ void Parser::ParseLV4MeshFloat(float &fOut) {
         return;
     }
     // parse the first float
-    filePtr = fast_atoreal_move<float>(filePtr, fOut);
+    mFilePtr = fast_atoreal_move<float>(mFilePtr, fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int &iOut) {

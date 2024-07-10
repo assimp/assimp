@@ -1600,7 +1600,7 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh &mesh) 
                 aiColor4D vTemp;
                 vTemp.a = 1.0f;
                 unsigned int iIndex;
-                ParseLV4MeshRealTriple(&vTemp.r, iIndex);
+                ParseLV4MeshFloatTriple(&vTemp.r, iIndex);
 
                 if (iIndex >= iNumVertices) {
                     LogWarning("Vertex color has an invalid index. It will be ignored");

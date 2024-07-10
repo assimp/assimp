@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -61,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
-namespace Assimp    {
+namespace Assimp {
 
     ///////////////////////////////////////////////////////////////////////////
     // std::plus-family operates on operands with identical types - we need to
@@ -286,6 +285,10 @@ AI_FORCE_INLINE Vertex operator * (const Vertex& v0,ai_real f) {
 AI_FORCE_INLINE Vertex operator / (const Vertex& v0,ai_real f) {
     return Vertex::BinaryOp<Intern::multiplies>(v0,1.f/f);
 }
+
+#ifdef AI_DO
+
+#endif // AI_DO
 
 AI_FORCE_INLINE Vertex operator * (ai_real f,const Vertex& v0) {
     return Vertex::BinaryOp<Intern::multiplies>(f,v0);

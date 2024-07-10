@@ -371,20 +371,7 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
         ReportWarning("There are unreferenced vertices");
     }
 
-    // texture channel 2 may not be set if channel 1 is zero ...
-    {
-        unsigned int i = 0;
-        for (; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-            if (!pMesh->HasTextureCoords(i)) break;
-        }
-        for (; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
-            if (pMesh->HasTextureCoords(i)) {
-                ReportError("Texture coordinate channel %i exists "
-                            "although the previous channel was nullptr.",
-                        i);
-            }
-    }
-    // the same for the vertex colors
+    // vertex color channel 2 may not be set if channel 1 is zero ...
     {
         unsigned int i = 0;
         for (; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {

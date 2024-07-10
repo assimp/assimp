@@ -625,16 +625,14 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
     }
 
     // same for texture coords, as many as we have
-    // empty slots are not allowed, need to pack and adjust UV indexes accordingly
-    for (size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+    for (size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
         if (pSrcMesh->mTexCoords[a].size() >= pStartVertex + numVertices) {
-            dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
+            dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
             for (size_t b = 0; b < numVertices; ++b) {
-                dstMesh->mTextureCoords[real][b] = pSrcMesh->mTexCoords[a][pStartVertex + b];
+                dstMesh->mTextureCoords[a][b] = pSrcMesh->mTexCoords[a][pStartVertex + b];
             }
 
-            dstMesh->mNumUVComponents[real] = pSrcMesh->mNumUVComponents[a];
-            ++real;
+            dstMesh->mNumUVComponents[a] = pSrcMesh->mNumUVComponents[a];
         }
     }
 

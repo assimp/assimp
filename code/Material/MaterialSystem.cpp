@@ -227,7 +227,6 @@ aiReturn aiGetMaterialDoubleArray(const aiMaterial *pMat,
         iWrite = prop->mDataLength / sizeof(int32_t);
         if (pMax) {
             iWrite = std::min(*pMax, iWrite);
-            ;
         }
         for (unsigned int a = 0; a < iWrite; ++a) {
             pOut[a] = static_cast<ai_real>(reinterpret_cast<int32_t *>(prop->mData)[a]);
@@ -246,7 +245,7 @@ aiReturn aiGetMaterialDoubleArray(const aiMaterial *pMat,
         ai_assert(prop->mDataLength >= 5);
         ai_assert(!prop->mData[prop->mDataLength - 1]);
         for (unsigned int a = 0;; ++a) {
-            cur = fast_atoreal_move<ai_real>(cur, pOut[a]);
+            cur = fast_atoreal_move<double>(cur, pOut[a]);
             if (a == iWrite - 1) {
                 break;
             }

@@ -943,8 +943,8 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
-    # "rendermesh-refactor" branch, 10 May 2024 05:47:02
-    set(TINYUSDZ_GIT_TAG "b41e1ddb6837e53827d9c234c0ded59190fa6a0b")
+    # "dev" branch, 9 Jul 2024
+    set(TINYUSDZ_GIT_TAG "e2229f6e7d8a188001b3952c1b194d09997b4d80")
     message("****")
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 

@@ -230,7 +230,8 @@ private:
 
     // ----------------------------------------------------------------------------
     /// This time binary arithmetic of v0 with a floating-point number
-    template <template <typename, typename, typename> class op> static Vertex BinaryOp(const Vertex& v0, ai_real f) {
+    template <template <typename, typename, typename> class op>
+    static Vertex BinaryOp(const Vertex& v0, ai_real f) {
         // this is a heavy task for the compiler to optimize ... *pray*
 
         Vertex res;
@@ -243,14 +244,15 @@ private:
             res.texcoords[i] = op<aiVector3D,ai_real,aiVector3D>()(v0.texcoords[i],f);
         }
         for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
-            res.colors[i] = op<aiColor4D,ai_real,aiColor4D>()(v0.colors[i],f);
+            res.colors[i] = op<aiColor4D,float, aiColor4D>()(v0.colors[i],f);
         }
         return res;
     }
 
     // ----------------------------------------------------------------------------
     /** This time binary arithmetic of v0 with a floating-point number */
-    template <template <typename, typename, typename> class op> static Vertex BinaryOp(ai_real f, const Vertex& v0) {
+    template <template <typename, typename, typename> class op>
+    static Vertex BinaryOp(ai_real f, const Vertex& v0) {
         // this is a heavy task for the compiler to optimize ... *pray*
 
         Vertex res;
@@ -263,7 +265,7 @@ private:
             res.texcoords[i] = op<ai_real,aiVector3D,aiVector3D>()(f,v0.texcoords[i]);
         }
         for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
-            res.colors[i] = op<ai_real,aiColor4D,aiColor4D>()(f,v0.colors[i]);
+            res.colors[i] = op<float, aiColor4D,aiColor4D>()(f,v0.colors[i]);
         }
         return res;
     }
@@ -285,10 +287,6 @@ AI_FORCE_INLINE Vertex operator * (const Vertex& v0,ai_real f) {
 AI_FORCE_INLINE Vertex operator / (const Vertex& v0,ai_real f) {
     return Vertex::BinaryOp<Intern::multiplies>(v0,1.f/f);
 }
-
-#ifdef AI_DO
-
-#endif // AI_DO
 
 AI_FORCE_INLINE Vertex operator * (ai_real f,const Vertex& v0) {
     return Vertex::BinaryOp<Intern::multiplies>(f,v0);

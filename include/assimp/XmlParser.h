@@ -211,21 +211,27 @@ public:
     /// @return true, if the value can be read out.
     static inline bool getValueAsString(XmlNode &node, std::string &text);
 
+    /// @brief Will try to get the value of the node as a real.
+    /// @param[in]  node   The node to search in.
+    /// @param[out] v      The value as a ai_real.
+    /// @return true, if the value can be read out.
+    static inline bool getValueAsReal(XmlNode &node, ai_real &v);
+
     /// @brief Will try to get the value of the node as a float.
     /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a float.
+    /// @param[out]v        The value as a float.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsFloat(XmlNode &node, ai_real &v);
+    static inline bool getValueAsFloat(XmlNode &node, float &v);
 
     /// @brief Will try to get the value of the node as an integer.
-    /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a int.
+    /// @param[in]  node    The node to search in.
+    /// @param[out] i       The value as a int.
     /// @return true, if the value can be read out.
     static inline bool getValueAsInt(XmlNode &node, int &v);
 
     /// @brief Will try to get the value of the node as an bool.
-    /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a bool.
+    /// @param[in]  node    The node to search in.
+    /// @param[out] v       The value as a bool.
     /// @return true, if the value can be read out.
     static inline bool getValueAsBool(XmlNode &node, bool &v);
 
@@ -454,7 +460,19 @@ inline bool TXmlParser<TNodeType>::getValueAsString(XmlNode &node, std::string &
 }
 
 template <class TNodeType>
-inline bool TXmlParser<TNodeType>::getValueAsFloat(XmlNode &node, ai_real &v) {
+inline bool TXmlParser<TNodeType>::getValueAsReal(XmlNode& node, ai_real& v) {
+    if (node.empty()) {
+        return false;
+    }
+
+    v = node.text().as_float();
+
+    return true;
+}
+
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsFloat(XmlNode &node, float &v) {
     if (node.empty()) {
         return false;
     }

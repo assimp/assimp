@@ -944,7 +944,7 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
     # "dev" branch, 9 Jul 2024
-    set(TINYUSDZ_GIT_TAG "e2229f6e7d8a188001b3952c1b194d09997b4d80")
+    set(TINYUSDZ_GIT_TAG "bd2a1edbbf69f352a6c40730114db9918c384848")
     message("****")
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 

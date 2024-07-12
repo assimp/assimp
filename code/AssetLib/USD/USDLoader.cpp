@@ -62,6 +62,7 @@ Copyright (c) 2006-2024, assimp team
 
 #include "USDLoader.h"
 #include "USDLoaderUtil.h"
+#include "USDPreprocessor.h"
 
 static constexpr aiImporterDesc desc = {
     "USD Object Importer",
@@ -87,6 +88,7 @@ USDImporter::USDImporter() :
 // ------------------------------------------------------------------------------------------------
 
 bool USDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
+    UNUSED(checkSig);
     // Based on token
     static const uint32_t usdcTokens[] = { AI_MAKE_MAGIC("PXR-USDC") };
     bool canRead = CheckMagicToken(pIOHandler, pFile, usdcTokens, AI_COUNT_OF(usdcTokens));

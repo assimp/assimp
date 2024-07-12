@@ -67,6 +67,7 @@ Copyright (c) 2006-2024, assimp team
 #include "USDLoaderImplTinyusdzHelper.h"
 #include "USDLoaderImplTinyusdz.h"
 #include "USDLoaderUtil.h"
+#include "USDPreprocessor.h"
 
 #include "../../../contrib/tinyusdz/assimp_tinyusdz_logging.inc"
 
@@ -81,11 +82,12 @@ void USDImporterImplTinyusdz::InternReadFile(
         const std::string &pFile,
         aiScene *pScene,
         IOSystem *pIOHandler) {
+    UNUSED(pIOHandler);
+    UNUSED(TAG); // Ignore unused variable when -Werror enabled
     // Grab filename for logging purposes
     size_t pos = pFile.find_last_of('/');
     string basePath = pFile.substr(0, pos);
     string nameWExt = pFile.substr(pos + 1);
-    (void) TAG; // Ignore unused variable when -Werror enabled
     stringstream ss;
     ss.str("");
     ss << "InternReadFile(): model" << nameWExt;
@@ -246,6 +248,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     pScene->mMeshes[meshIdx]->mNumVertices = render_scene.meshes[meshIdx].points.size();
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
@@ -260,6 +263,7 @@ void USDImporterImplTinyusdz::facesForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     pScene->mMeshes[meshIdx]->mNumFaces = render_scene.meshes[meshIdx].faceVertexCounts().size();
     pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
     size_t faceVertIdxOffset = 0;
@@ -279,6 +283,7 @@ void USDImporterImplTinyusdz::normalsForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     pScene->mMeshes[meshIdx]->mNormals = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     const float *floatPtr = reinterpret_cast<const float *>(render_scene.meshes[meshIdx].normals.get_data().data());
     for (size_t vertIdx = 0, fpj = 0; vertIdx < pScene->mMeshes[meshIdx]->mNumVertices; ++vertIdx, fpj += 3) {
@@ -293,6 +298,7 @@ void USDImporterImplTinyusdz::materialsForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(render_scene); UNUSED(pScene); UNUSED(meshIdx); UNUSED(nameWExt);
 }
 
 void USDImporterImplTinyusdz::uvsForMesh(

@@ -1,5 +1,5 @@
-diff -rupN -x .git tinyusdz_repo/src/external/stb_image_resize2.h tinyusdz_repo_patch/src/external/stb_image_resize2.h
---- tinyusdz_repo/src/external/stb_image_resize2.h	2024-07-09 21:29:48.556969900 -0700
+diff -rupN -x .git autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h tinyusdz_repo_patch/src/external/stb_image_resize2.h
+--- autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h	2024-07-09 21:29:48.556969900 -0700
 +++ tinyusdz_repo_patch/src/external/stb_image_resize2.h	2024-07-09 23:03:47.379316700 -0700
 @@ -2404,6 +2404,38 @@ static stbir__inline stbir_uint8 stbir__
      }

@@ -45,6 +45,6 @@ Copyright (c) 2006-2024, assimp team
 #ifndef AI_USDPREPROCESSOR_H_INCLUDED
 #define AI_USDPREPROCESSOR_H_INCLUDED
 
-#define UNUSED(x) void(x)
+#define UNUSED(x) (void) x
 
 #endif // AI_USDPREPROCESSOR_H_INCLUDED

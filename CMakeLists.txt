@@ -40,6 +40,13 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
+# Experimental USD importer: disabled, need to opt-in
+# Note: assimp github PR automatic checks will fail the PR due to compiler warnings in
+# the external, 3rd party tinyusdz code which isn't technically part of the PR since it's
+# auto-cloned during build; so MUST disable the feature or the PR will be rejected
+option(ASSIMP_BUILD_USD_IMPORTER "Enable USD file import" off)
+option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" off)
+
 # Disabled importers: m3d for 5.1 or later
 ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
 ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
@@ -262,7 +269,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
-  
+
   IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
     MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
     ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
@@ -284,13 +291,13 @@ ELSEIF(MSVC)
   ELSE() # msvc
     ADD_COMPILE_OPTIONS(/MP /bigobj)
   ENDIF()
-  
+
   # disable "elements of array '' will be default initialized" warning on MSVC2013
   IF(MSVC12)
-    ADD_COMPILE_OPTIONS(/wd4351)	
+    ADD_COMPILE_OPTIONS(/wd4351)
   ENDIF()
   # supress warning for double to float conversion if Double precision is activated
-  ADD_COMPILE_OPTIONS(/wd4244) 
+  ADD_COMPILE_OPTIONS(/wd4244)
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")
   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")
@@ -330,7 +337,7 @@ ENDIF()
 
 IF (ASSIMP_COVERALLS)
   MESSAGE(STATUS "Coveralls enabled")
-  
+
   INCLUDE(Coveralls)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
@@ -338,7 +345,7 @@ ENDIF()
 
 IF (ASSIMP_ASAN)
   MESSAGE(STATUS "AddressSanitizer enabled")
-  
+
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
   SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fsanitize=address")
 ENDIF()

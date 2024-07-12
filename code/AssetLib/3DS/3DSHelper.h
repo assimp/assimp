@@ -365,14 +365,13 @@ struct Texture {
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // _MSC_VER
-
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */
 struct Material {
     //! Default constructor has been deleted
     Material() :
             mName(),
-            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            mDiffuse(0.6f, 0.6f, 0.6f),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
             mShading(Discreet3DS::Gouraud),
@@ -385,7 +384,7 @@ struct Material {
     //! Constructor with explicit name
     explicit Material(const std::string &name) :
             mName(name),
-            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            mDiffuse(0.6f, 0.6f, 0.6f),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
             mShading(Discreet3DS::Gouraud),

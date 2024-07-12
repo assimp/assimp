@@ -384,17 +384,17 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
         for (auto &currentNode : node.children()) {
             const std::string &currentName = currentNode.name();
             if (currentName == "deltax") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.x);
+                XmlParser::getValueAsReal(currentNode, als.Delta.x);
             } else if (currentName == "deltay") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.y);
+                XmlParser::getValueAsReal(currentNode, als.Delta.y);
             } else if (currentName == "deltaz") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.z);
+                XmlParser::getValueAsReal(currentNode, als.Delta.z);
             } else if (currentName == "rx") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.x);
+                XmlParser::getValueAsReal(currentNode, als.Delta.x);
             } else if (currentName == "ry") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.y);
+                XmlParser::getValueAsReal(currentNode, als.Delta.y);
             } else if (currentName == "rz") {
-                XmlParser::getValueAsFloat(currentNode, als.Delta.z);
+                XmlParser::getValueAsReal(currentNode, als.Delta.z);
             }
         }
         ParseHelper_Node_Exit();

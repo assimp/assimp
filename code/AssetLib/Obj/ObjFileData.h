@@ -199,12 +199,12 @@ struct Material {
 
     //! Constructor
     Material() :
-            diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            diffuse(0.6f, 0.6f, 0.6f),
             alpha(ai_real(1.0)),
             shineness(ai_real(0.0)),
             illumination_model(1),
             ior(ai_real(1.0)),
-            transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
+            transparent(1.0f, 1.0, 1.0),
             roughness(),
             metallic(),
             sheen(),

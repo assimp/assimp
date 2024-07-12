@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,21 +49,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-class utIssues : public ::testing::Test {
-    // empty
-};
+class utIssues : public ::testing::Test {};
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     float opacity;
-    aiScene *scene( TestModelFacttory::createDefaultTestModel( opacity ) );
+    aiScene *scene = TestModelFacttory::createDefaultTestModel(opacity);
     Assimp::Importer importer;
     Assimp::Exporter exporter;
 
-    std::string path = "dae";
     const aiExportFormatDesc *desc = exporter.GetExportFormatDescription( 0 );
-    EXPECT_NE( desc, nullptr );
+    ASSERT_NE( desc, nullptr );
+
+    std::string path = "dae";
     path.append(".");
     path.append( desc->fileExtension );
     EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
@@ -73,7 +70,6 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     ASSERT_NE( nullptr, newScene );
     float newOpacity;
     if ( newScene->mNumMaterials > 0 ) {
-        std::cout << "Desc = " << desc->description << "\n";
         EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
         EXPECT_FLOAT_EQ( opacity, newOpacity );
     }

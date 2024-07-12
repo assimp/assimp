@@ -47,7 +47,7 @@ using namespace Assimp;
 
 class AssimpAPITest_aiMatrix3x3 : public AssimpMathTest {
 protected:
-    virtual void SetUp() {
+    void SetUp() override {
         result_c = result_cpp = aiMatrix3x3();
     }
 
@@ -114,10 +114,19 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3InverseTest) {
     EXPECT_EQ(result_cpp, result_c);
 }
 
+inline void AI_EXPECT_REAL_EQ(ai_real val1, ai_real val2) {
+#ifdef ASSIMP_DOUBLE_PRECISION
+    EXPECT_DOUBLE_EQ((val1), (val2));
+#else
+    EXPECT_FLOAT_EQ((val1), (val2));
+#endif
+}
+
 TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3DeterminantTest) {
     result_c = result_cpp = random_mat3();
-    EXPECT_EQ(result_cpp.Determinant(),
-        aiMatrix3Determinant(&result_c));
+    const ai_real det_1 = result_cpp.Determinant();
+    const ai_real det_2 = aiMatrix3Determinant(&result_c);
+    AI_EXPECT_REAL_EQ(det_1, det_2);
 }
 
 TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3RotationZTest) {

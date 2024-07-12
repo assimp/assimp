@@ -181,7 +181,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     mBuffer = &buffer2[0];
 
     // the default vertex color is light gray.
-    mClrColorDefault.r = mClrColorDefault.g = mClrColorDefault.b = mClrColorDefault.a = (ai_real)0.6;
+    mClrColorDefault.r = mClrColorDefault.g = mClrColorDefault.b = mClrColorDefault.a = 0.6f;
 
     // allocate a single node
     mScene->mRootNode = new aiNode();
@@ -209,7 +209,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D(ai_real(0.05), ai_real(0.05), ai_real(0.05), ai_real(1.0));
+    clrDiffuse = aiColor4D(0.05f, 0.05f, 0.05f, 1.0f);
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_AMBIENT);
 
     mScene->mNumMaterials = 1;

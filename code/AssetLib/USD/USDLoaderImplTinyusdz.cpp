@@ -512,13 +512,13 @@ static aiTexture *ownedEmbeddedTextureFor(
     tex->mWidth = image.width;
     if (tex->mHeight == 0) {
         pos = embTexName.find_last_of('.');
-        string formatHint{embTexName.substr(pos + 1)};
-        strncpy(tex->achFormatHint, formatHint.c_str(), formatHint.length() + 1);
+        strncpy(tex->achFormatHint, embTexName.substr(pos + 1).c_str(), 3);
         const size_t imageBytesCount{render_scene.buffers[image.buffer_id].data.size()};
         tex->pcData = (aiTexel *) new char[imageBytesCount];
         memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], imageBytesCount);
     } else {
-        strncpy(tex->achFormatHint, "rgba8888", 8);
+        string formatHint{"rgba8888"};
+        strncpy(tex->achFormatHint, formatHint.c_str(), 8);
         const size_t imageTexelsCount{tex->mWidth * tex->mHeight};
         tex->pcData = (aiTexel *) new char[imageTexelsCount * image.channels];
         const float *floatPtr = reinterpret_cast<const float *>(&render_scene.buffers[image.buffer_id].data[0]);

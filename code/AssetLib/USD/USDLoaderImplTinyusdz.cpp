@@ -210,7 +210,7 @@ void USDImporterImplTinyusdz::meshes(
         aiScene *pScene,
         const std::string &nameWExt) {
     stringstream ss;
-    pScene->mNumMeshes = render_scene.meshes.size();
+    pScene->mNumMeshes = static_cast<unsigned int>(render_scene.meshes.size());
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes]();
     ss.str("");
     ss << "meshes(): pScene->mNumMeshes: " << pScene->mNumMeshes;
@@ -249,7 +249,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         size_t meshIdx,
         const std::string &nameWExt) {
     UNUSED(nameWExt);
-    pScene->mMeshes[meshIdx]->mNumVertices = render_scene.meshes[meshIdx].points.size();
+    pScene->mMeshes[meshIdx]->mNumVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
         pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
@@ -264,7 +264,7 @@ void USDImporterImplTinyusdz::facesForMesh(
         size_t meshIdx,
         const std::string &nameWExt) {
     UNUSED(nameWExt);
-    pScene->mMeshes[meshIdx]->mNumFaces = render_scene.meshes[meshIdx].faceVertexCounts().size();
+    pScene->mMeshes[meshIdx]->mNumFaces = static_cast<unsigned int>(render_scene.meshes[meshIdx].faceVertexCounts().size());
     pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
     size_t faceVertIdxOffset = 0;
     for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
@@ -306,6 +306,7 @@ void USDImporterImplTinyusdz::uvsForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     const size_t uvSlotsCount = render_scene.meshes[meshIdx].texcoords.size();
     if (uvSlotsCount < 1) {
         return;
@@ -359,6 +360,7 @@ static void assignTexture(
         aiMaterial *mat,
         const int textureId,
         const int aiTextureType) {
+    UNUSED(material);
     std::string name = nameForTextureWithId(render_scene, textureId);
     aiString *texName = new aiString();
     texName->Set(name);
@@ -468,16 +470,17 @@ void USDImporterImplTinyusdz::textures(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
+    UNUSED(pScene);
     const size_t numTextures{render_scene.textures.size()};
-    (void) numTextures; // Ignore unused variable when -Werror enabled
+    UNUSED(numTextures); // Ignore unused variable when -Werror enabled
     stringstream ss;
     ss.str("");
     ss << "textures(): model" << nameWExt << ", numTextures: " << numTextures;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
     size_t i{0};
-    (void) i;
+    UNUSED(i);
     for (const auto &texture : render_scene.textures) {
-        (void) texture;
+        UNUSED(texture);
         ss.str("");
         ss << "    texture[" << i << "]: id: " << texture.texture_image_id << ", disp name: |" << texture.display_name << "|, varname_uv: " <<
                 texture.varname_uv << ", prim_name: |" << texture.prim_name << "|, abs_path: |" << texture.abs_path << "|";
@@ -498,6 +501,7 @@ static aiTexture *ownedEmbeddedTextureFor(
         const tinyusdz::tydra::RenderScene &render_scene,
         const tinyusdz::tydra::TextureImage &image,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     stringstream ss;
     aiTexture *tex = new aiTexture();
     size_t pos = image.asset_identifier.find_last_of('/');
@@ -520,7 +524,7 @@ static aiTexture *ownedEmbeddedTextureFor(
         ss.str("");
         ss << "ownedEmbeddedTextureFor(): manual fill...";
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
-        for (int i = 0, fpi = 0; i < imageTexelsCount; ++i, fpi += 4) {
+        for (size_t i = 0, fpi = 0; i < imageTexelsCount; ++i, fpi += 4) {
             tex->pcData[i].b = static_cast<uint8_t>(floatPtr[fpi]     * 255);
             tex->pcData[i].g = static_cast<uint8_t>(floatPtr[fpi + 1] * 255);
             tex->pcData[i].r = static_cast<uint8_t>(floatPtr[fpi + 2] * 255);
@@ -539,7 +543,7 @@ void USDImporterImplTinyusdz::textureImages(
         const std::string &nameWExt) {
     stringstream ss;
     const size_t numTextureImages{render_scene.images.size()};
-    (void) numTextureImages; // Ignore unused variable when -Werror enabled
+    UNUSED(numTextureImages); // Ignore unused variable when -Werror enabled
     ss.str("");
     ss << "textureImages(): model" << nameWExt << ", numTextureImages: " << numTextureImages;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
@@ -552,7 +556,7 @@ void USDImporterImplTinyusdz::textureImages(
            "    buffers.size(): " << render_scene.buffers.size() << ", data empty? " << render_scene.buffers[image.buffer_id].data.empty();
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         if (image.buffer_id > -1 &&
-            image.buffer_id < render_scene.buffers.size() &&
+            image.buffer_id < static_cast<long int>(render_scene.buffers.size()) &&
             !render_scene.buffers[image.buffer_id].data.empty()) {
             aiTexture *tex = ownedEmbeddedTextureFor(
                     render_scene,
@@ -578,7 +582,7 @@ void USDImporterImplTinyusdz::buffers(
         aiScene *pScene,
         const std::string &nameWExt) {
     const size_t numBuffers{render_scene.buffers.size()};
-    (void) numBuffers; // Ignore unused variable when -Werror enabled
+    UNUSED(pScene); UNUSED(numBuffers); // Ignore unused variable when -Werror enabled
     stringstream ss;
     ss.str("");
     ss << "buffers(): model" << nameWExt << ", numBuffers: " << numBuffers;
@@ -609,7 +613,7 @@ void USDImporterImplTinyusdz::setupNodes(
     }
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
 
-    for (size_t meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
+    for (unsigned int meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mRootNode->mMeshes[meshIdx] = meshIdx;
     }
 
@@ -654,7 +658,7 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
     }
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
     if (!node.children.empty()) {
-        cNode->mNumChildren = node.children.size();
+        cNode->mNumChildren = static_cast<unsigned int>(node.children.size());
         cNode->mChildren = new aiNode *[cNode->mNumChildren];
     }
 
@@ -699,9 +703,10 @@ void USDImporterImplTinyusdz::blendShapesForMesh(
         aiScene *pScene,
         size_t meshIdx,
         const std::string &nameWExt) {
+    UNUSED(nameWExt);
     stringstream ss;
-    const size_t numBlendShapeTargets{render_scene.meshes[meshIdx].targets.size()};
-    (void) numBlendShapeTargets; // Ignore unused variable when -Werror enabled
+    const unsigned int numBlendShapeTargets{static_cast<unsigned int>(render_scene.meshes[meshIdx].targets.size())};
+    UNUSED(numBlendShapeTargets); // Ignore unused variable when -Werror enabled
     ss.str("");
     ss << "    blendShapesForMesh(): mesh[" << meshIdx << "], numBlendShapeTargets: " << numBlendShapeTargets;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());

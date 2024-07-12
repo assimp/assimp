@@ -962,6 +962,7 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
     set(FETCHCONTENT_BASE_DIR ${Tinyusdz_REPO_ABSPATH})
     set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
     FetchContent_Declare(
             tinyusdz_repo
             GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"

@@ -938,7 +938,7 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
     # relative to top-level/main project)
     set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")
-    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/tinyusdz_repo")
+    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/autoclone")
 
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
@@ -956,18 +956,20 @@ IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
     #       block (wait) as long as necessary until cloning is complete, so we immediately have full
     #       access to the cloned source files
     include(FetchContent)
+    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
+    set(FETCHCONTENT_BASE_DIR ${Tinyusdz_REPO_ABSPATH})
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
     FetchContent_Declare(
-            tinyusdzExtProj
+            tinyusdz_repo
             GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
             GIT_TAG        ${TINYUSDZ_GIT_TAG}
-            SOURCE_DIR     ${Tinyusdz_REPO_ABSPATH}
             PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
     )
-    FetchContent_MakeAvailable(tinyusdzExtProj)
+    FetchContent_MakeAvailable(tinyusdz_repo)
     message("**** Finished cloning tinyusdz repo")
     message("****")
 
-    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/src")
+    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/tinyusdz_repo-src/src")
     set(Tinyusdz_SRCS
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc

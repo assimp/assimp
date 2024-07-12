@@ -60,6 +60,7 @@ __Importers__:
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - TER
 - UC
+- [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description)
 - VTA
 - X
 - [X3D](https://en.wikipedia.org/wiki/X3D)

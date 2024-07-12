@@ -313,7 +313,7 @@ void USDImporterImplTinyusdz::uvsForMesh(
     }
     pScene->mMeshes[meshIdx]->mTextureCoords[0] = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
     pScene->mMeshes[meshIdx]->mNumUVComponents[0] = 2; // U and V stored in "x", "y" of aiVector3D.
-    for (size_t uvSlotIdx = 0; uvSlotIdx < uvSlotsCount; ++uvSlotIdx) {
+    for (unsigned int uvSlotIdx = 0; uvSlotIdx < uvSlotsCount; ++uvSlotIdx) {
         const auto uvsForSlot = render_scene.meshes[meshIdx].texcoords.at(uvSlotIdx);
         if (uvsForSlot.get_data().size() == 0) {
             continue;
@@ -512,7 +512,8 @@ static aiTexture *ownedEmbeddedTextureFor(
     tex->mWidth = image.width;
     if (tex->mHeight == 0) {
         pos = embTexName.find_last_of('.');
-        strncpy(tex->achFormatHint, embTexName.substr(pos + 1).c_str(), 3);
+        string formatHint{embTexName.substr(pos + 1)};
+        strncpy(tex->achFormatHint, formatHint.c_str(), formatHint.length() + 1);
         const size_t imageBytesCount{render_scene.buffers[image.buffer_id].data.size()};
         tex->pcData = (aiTexel *) new char[imageBytesCount];
         memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], imageBytesCount);

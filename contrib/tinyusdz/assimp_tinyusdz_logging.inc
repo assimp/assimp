@@ -29,6 +29,7 @@
 
 #if defined(TINYUSDZ_LOCAL_DEBUG_PRINT)
 #if defined(__ANDROID__)
+#if defined(ASSIMP_USD_VERBOSE_LOGS)
 // Works well but _extremely_ verbose
 #define DCOUT(x)                                               \
   do {                                                         \
@@ -37,14 +38,16 @@
               << std::to_string(__LINE__) << " " << x << "\n"; \
     TINYUSDZLOGE("tinyusdz", "%s", ss.str().c_str());          \
   } while (false)
+#else // defined(ASSIMP_USD_VERBOSE_LOGS)
 // Silent version
-//#define DCOUT(x)                                               \
-//  do {                                                         \
-//    std::stringstream ss;                                      \
-//    ss << __FILE__ << ":" << __func__ << ":"                   \
-//              << std::to_string(__LINE__) << " " << x << "\n"; \
-//  } while (false)
-#else
+#define DCOUT(x)                                               \
+  do {                                                         \
+    std::stringstream ss;                                      \
+    ss << __FILE__ << ":" << __func__ << ":"                   \
+              << std::to_string(__LINE__) << " " << x << "\n"; \
+  } while (false)
+#endif // defined(ASSIMP_USD_VERBOSE_LOGS)
+#else // defined(__ANDROID__)
 #define DCOUT(x)                                               \
   do {                                                         \
     std::cout << __FILE__ << ":" << __func__ << ":"            \

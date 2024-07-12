@@ -935,6 +935,9 @@ SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 # USD/USDA/USDC/USDZ support
 # tinyusdz
 IF (NOT ASSIMP_BUILD_NO_USD_IMPORTER)
+    if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
+        ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
+    endif ()
     # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
     # relative to top-level/main project)
     set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")

@@ -79,7 +79,7 @@ public:
             unsigned int pElementOffset);
 
     /** Destructor */
-    ~SpatialSort();
+    ~SpatialSort() = default;
 
     // ------------------------------------------------------------------------------------
     /** Sets the input data for the SpatialSort. This replaces existing data, if any.

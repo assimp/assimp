@@ -60,6 +60,28 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
+/**
+ */
+enum aiAnimInterpolation {
+    /** */
+    aiAnimInterpolation_Step,
+
+    /** */
+    aiAnimInterpolation_Linear,
+
+    /** */
+    aiAnimInterpolation_Spherical_Linear,
+
+    /** */
+    aiAnimInterpolation_Cubic_Spline,
+
+/** */
+#ifndef SWIG
+    _aiAnimInterpolation_Force32Bit = INT_MAX
+#endif
+};
+
+// ---------------------------------------------------------------------------
 /** A time-value pair specifying a certain 3D vector for the given time. */
 struct aiVectorKey {
     /** The time of this key */
@@ -68,21 +90,18 @@ struct aiVectorKey {
     /** The value of this key */
     C_STRUCT aiVector3D mValue;
 
+     /** The interpolation setting of this key */
+    C_ENUM aiAnimInterpolation mInterpolation;
+
 #ifdef __cplusplus
 
     /// @brief  The default constructor.
     aiVectorKey() AI_NO_EXCEPT
-            : mTime(0.0),
-              mValue() {
-        // empty
-    }
+            : mTime(0.0), mValue(), mInterpolation(aiAnimInterpolation_Linear) {}
 
     /// @brief  Construction from a given time and key value.
-
     aiVectorKey(double time, const aiVector3D &value) :
-            mTime(time), mValue(value) {
-        // empty
-    }
+            mTime(time), mValue(value), mInterpolation(aiAnimInterpolation_Linear){}
 
     typedef aiVector3D elem_type;
 
@@ -116,16 +135,16 @@ struct aiQuatKey {
     /** The value of this key */
     C_STRUCT aiQuaternion mValue;
 
+    /** The interpolation setting of this key */
+    C_ENUM aiAnimInterpolation mInterpolation;
+
 #ifdef __cplusplus
     aiQuatKey() AI_NO_EXCEPT
-            : mTime(0.0),
-              mValue() {
-        // empty
-    }
+            : mTime(0.0), mValue(), mInterpolation(aiAnimInterpolation_Linear) {}
 
     /** Construction from a given time and key value */
     aiQuatKey(double time, const aiQuaternion &value) :
-            mTime(time), mValue(value) {}
+            mTime(time), mValue(value), mInterpolation(aiAnimInterpolation_Linear) {}
 
     typedef aiQuaternion elem_type;
 

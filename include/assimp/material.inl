@@ -67,7 +67,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::GetTexture( aiTextureType type,
        C_STRUCT aiString* path,
        aiTextureMapping* mapping    /*= NULL*/,
        unsigned int* uvindex        /*= NULL*/,
-       ai_real* blend               /*= NULL*/,
+       float* blend               /*= NULL*/,
        aiTextureOp* op              /*= NULL*/,
        aiTextureMapMode* mapmode    /*= NULL*/) const {
     return ::aiGetMaterialTexture(this,type,index,path,mapping,uvindex,blend,op,mapmode);
@@ -136,9 +136,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 // Specialisation for a single bool.
 // Casts floating point and integer to bool
 template <>
-AI_FORCE_INLINE
-        aiReturn
-        aiMaterial::Get(const char *pKey, unsigned int type,
+AI_FORCE_INLINE aiReturn aiMaterial::Get(const char *pKey, unsigned int type,
                 unsigned int idx, bool &pOut) const {
     const aiMaterialProperty *prop;
     const aiReturn ret = ::aiGetMaterialProperty(this, pKey, type, idx,
@@ -193,7 +191,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 }
 // ---------------------------------------------------------------------------
 AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-        unsigned int idx,ai_real& pOut) const {
+        unsigned int idx, float& pOut) const {
     return aiGetMaterialFloat(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
@@ -311,7 +309,6 @@ AI_FORCE_INLINE aiReturn aiMaterial::AddProperty(const int* pInput,
         pNumValues * sizeof(int),
         pKey,type,index,aiPTI_Integer);
 }
-
 
 // ---------------------------------------------------------------------------
 // The template specializations below are for backwards compatibility.

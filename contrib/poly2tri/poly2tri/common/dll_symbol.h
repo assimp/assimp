@@ -43,6 +43,9 @@
 #  define P2T_COMPILER_DLLIMPORT
 #endif
 
+#ifdef ASSIMP_DLL
+#  define P2T_SHARED_EXPORTS 1
+#endif
 #ifndef P2T_DLL_SYMBOL
 #  if defined(P2T_STATIC_EXPORTS)
 #    define P2T_DLL_SYMBOL

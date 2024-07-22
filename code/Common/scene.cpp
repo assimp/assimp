@@ -40,6 +40,87 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <assimp/scene.h>
 
+#include "ScenePrivate.h"
+
+aiScene::aiScene() :
+        mFlags(0),
+        mRootNode(nullptr),
+        mNumMeshes(0),
+        mMeshes(nullptr),
+        mNumMaterials(0),
+        mMaterials(nullptr),
+        mNumAnimations(0),
+        mAnimations(nullptr),
+        mNumTextures(0),
+        mTextures(nullptr),
+        mNumLights(0),
+        mLights(nullptr),
+        mNumCameras(0),
+        mCameras(nullptr),
+        mMetaData(nullptr),
+        mName(),
+        mNumSkeletons(0),
+        mSkeletons(nullptr),
+        mPrivate(new Assimp::ScenePrivateData()) {
+    // empty
+}
+
+aiScene::~aiScene() {
+    // delete all sub-objects recursively
+    delete mRootNode;
+
+    // To make sure we won't crash if the data is invalid it's
+    // much better to check whether both mNumXXX and mXXX are
+    // valid instead of relying on just one of them.
+    if (mNumMeshes && mMeshes) {
+        for (unsigned int a = 0; a < mNumMeshes; ++a) {
+            delete mMeshes[a];
+        }
+    }
+    delete[] mMeshes;
+
+    if (mNumMaterials && mMaterials) {
+        for (unsigned int a = 0; a < mNumMaterials; ++a) {
+            delete mMaterials[a];
+        }
+    }
+    delete[] mMaterials;
+
+    if (mNumAnimations && mAnimations) {
+        for (unsigned int a = 0; a < mNumAnimations; ++a) {
+            delete mAnimations[a];
+        }
+    }
+    delete[] mAnimations;
+
+    if (mNumTextures && mTextures) {
+        for (unsigned int a = 0; a < mNumTextures; ++a) {
+            delete mTextures[a];
+        }
+    }
+    delete[] mTextures;
+
+    if (mNumLights && mLights) {
+        for (unsigned int a = 0; a < mNumLights; ++a) {
+            delete mLights[a];
+        }
+    }
+    delete[] mLights;
+
+    if (mNumCameras && mCameras) {
+        for (unsigned int a = 0; a < mNumCameras; ++a) {
+            delete mCameras[a];
+        }
+    }
+    delete[] mCameras;
+
+    aiMetadata::Dealloc(mMetaData);
+
+    delete[] mSkeletons;
+
+    delete static_cast<Assimp::ScenePrivateData *>(mPrivate);
+}
+
 aiNode::aiNode() :
         mName(""),
         mParent(nullptr),

@@ -248,22 +248,6 @@ inline char_t getFloat(char_t it, char_t end, ai_real &value) {
 }
 
 /**
- *  @brief  Will remove white-spaces for a string.
- *  @param[in] str  The string to clean
- *  @return The trimmed string.
- */
-template <class string_type>
-inline string_type trim_whitespaces(string_type str) {
-    while (!str.empty() && IsSpace(str[0])) {
-        str.erase(0);
-    }
-    while (!str.empty() && IsSpace(str[str.length() - 1])) {
-        str.erase(str.length() - 1);
-    }
-    return str;
-}
-
-/**
  *  @brief  Checks for a line-end.
  *  @param[in] it   Current iterator in string.
  *  @param[in] end  End of the string.

@@ -56,6 +56,6 @@ public:
     }
 };
 
-TEST_F(utB3DImportExport, importACFromFileTest) {
+TEST_F(utB3DImportExport, importB3DFromFileTest) {
     EXPECT_TRUE(importerTest());
 }

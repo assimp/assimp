@@ -220,7 +220,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(std::move(stream)));
     const STEP::HeaderInfo &head = static_cast<const STEP::DB &>(*db).GetHeader();
 
-    if (!head.fileSchema.size() || head.fileSchema.substr(0, 3) != "IFC") {
+    if (!head.fileSchema.size() || head.fileSchema.substr(0, 4) != "IFC2") {
         ThrowException("Unrecognized file schema: " + head.fileSchema);
     }
 
@@ -259,6 +259,8 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (!proj) {
         ThrowException("missing IfcProject entity");
     }
+
+    
 
     ConversionData conv(*db, proj->To<Schema_2x3::IfcProject>(), pScene, settings);
     SetUnits(conv);
@@ -352,6 +354,11 @@ void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType &dt, ConversionData &co
 
 // ------------------------------------------------------------------------------------------------
 void SetUnits(ConversionData &conv) {
+    if (conv.proj.UnitsInContext == nullptr) {
+        IFCImporter::LogError("Skipping conversion data, nullptr.");
+        return;
+    }
+
     // see if we can determine the coordinate space used to express.
     for (size_t i = 0; i < conv.proj.UnitsInContext->Units.size(); ++i) {
         ConvertUnit(*conv.proj.UnitsInContext->Units[i], conv);

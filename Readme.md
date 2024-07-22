@@ -26,11 +26,10 @@ Clone [our model database](https://github.com/assimp/assimp-mdb).
 
 ### Communities ###
 - Ask questions at [the Assimp Discussion Board](https://github.com/assimp/assimp/discussions).
+- Find us on [https://discord.gg/s9KJfaem](https://discord.gg/kKazXMXDy2)
 - Ask [the Assimp community on Reddit](https://www.reddit.com/r/Assimp/).
 - Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
 - Nothing has worked? File a question or an issue-report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
-
-And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 #### Supported file formats ####
 See [the complete list of supported formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md).

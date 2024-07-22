@@ -13,10 +13,14 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#if defined(_MSC_VER)
+/* For Visual Studio only, NOT MinGW (GCC) -- ThatOSDev */
+#pragma warning( disable : 4706 )
+#endif
+
 #if defined(_WIN32) || defined(__WIN32__) || defined(_MSC_VER) ||              \
     defined(__MINGW32__)
-/* Win32, DOS, MSVC, MSVS */
-#pragma warning( disable : 4706 )
+/* Win32, DOS, MSVC, MSVS, MinGW(GCC for windows) */
 #include <direct.h>
 
 #define STRCLONE(STR) ((STR) ? _strdup(STR) : NULL)
@@ -1239,7 +1243,7 @@ int zip_entry_openbyindex(struct zip_t *zip, size_t index) {
   if (!(pHeader = &MZ_ZIP_ARRAY_ELEMENT(
             &pZip->m_pState->m_central_dir, mz_uint8,
             MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets,
-                                 mz_uint32, index)))) {
+                                 mz_uint32, (mz_uint)index)))) {
     // cannot find header in central directory
     return ZIP_ENOHDR;
   }

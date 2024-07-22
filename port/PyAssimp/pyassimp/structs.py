@@ -765,6 +765,12 @@ class Mesh(Structure):
             # Method of morphing when animeshes are specified.
             ("mMethod", c_uint),
 
+            # The bounding box.
+            ("mAABB", 2 * Vector3D),
+
+            # Vertex UV stream names. Pointer to array of size AI_MAX_NUMBER_OF_TEXTURECOORDS
+            ("mTextureCoordsNames", POINTER(POINTER(String)))
+
         ]
 
 class Camera(Structure):

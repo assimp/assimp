@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2022, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -34,13 +34,13 @@
 
 namespace p2t {
 
-SweepContext::SweepContext(const std::vector<Point*>& polyline) : points_(polyline),
-  front_(0),
-  head_(0),
-  tail_(0),
-  af_head_(0),
-  af_middle_(0),
-  af_tail_(0)
+SweepContext::SweepContext(std::vector<Point*> polyline) : points_(std::move(polyline)),
+  front_(nullptr),
+  head_(nullptr),
+  tail_(nullptr),
+  af_head_(nullptr),
+  af_middle_(nullptr),
+  af_tail_(nullptr)
 {
   InitEdges(points_);
 }
@@ -48,8 +48,8 @@ SweepContext::SweepContext(const std::vector<Point*>& polyline) : points_(polyli
 void SweepContext::AddHole(const std::vector<Point*>& polyline)
 {
   InitEdges(polyline);
-  for(unsigned int i = 0; i < polyline.size(); i++) {
-    points_.push_back(polyline[i]);
+  for (auto i : polyline) {
+    points_.push_back(i);
   }
 }
 
@@ -73,8 +73,8 @@ void SweepContext::InitTriangulation()
   double ymax(points_[0]->y), ymin(points_[0]->y);
 
   // Calculate bounds.
-  for (unsigned int i = 0; i < points_.size(); i++) {
-    Point& p = *points_[i];
+  for (auto& point : points_) {
+    Point& p = *point;
     if (p.x > xmax)
       xmax = p.x;
     if (p.x < xmin)
@@ -87,8 +87,8 @@ void SweepContext::InitTriangulation()
 
   double dx = kAlpha * (xmax - xmin);
   double dy = kAlpha * (ymax - ymin);
-  head_ = new Point(xmax + dx, ymin - dy);
-  tail_ = new Point(xmin - dx, ymin - dy);
+  head_ = new Point(xmin - dx, ymin - dy);
+  tail_ = new Point(xmax + dx, ymin - dy);
 
   // Sort points along y-axis
   std::sort(points_.begin(), points_.end(), cmp);
@@ -114,18 +114,17 @@ void SweepContext::AddToMap(Triangle* triangle)
   map_.push_back(triangle);
 }
 
-Node& SweepContext::LocateNode(const Point& point)
+Node* SweepContext::LocateNode(const Point& point)
 {
   // TODO implement search tree
-  return *front_->LocateNode(point.x);
+  return front_->LocateNode(point.x);
 }
 
-void SweepContext::CreateAdvancingFront(const std::vector<Node*>& nodes)
+void SweepContext::CreateAdvancingFront()
 {
 
-  (void) nodes;
   // Initial triangle
-  Triangle* triangle = new Triangle(*points_[0], *tail_, *head_);
+  Triangle* triangle = new Triangle(*points_[0], *head_, *tail_);
 
   map_.push_back(triangle);
 
@@ -172,7 +171,7 @@ void SweepContext::MeshClean(Triangle& triangle)
 	Triangle *t = triangles.back();
 	triangles.pop_back();
 
-    if (t != NULL && !t->IsInterior()) {
+    if (t != nullptr && !t->IsInterior()) {
       t->IsInterior(true);
       triangles_.push_back(t);
       for (int i = 0; i < 3; i++) {
@@ -195,17 +194,13 @@ SweepContext::~SweepContext()
     delete af_middle_;
     delete af_tail_;
 
-    typedef std::list<Triangle*> type_list;
-
-    for(type_list::iterator iter = map_.begin(); iter != map_.end(); ++iter) {
-        Triangle* ptr = *iter;
-        delete ptr;
+    for (auto ptr : map_) {
+      delete ptr;
     }
 
-     for(unsigned int i = 0; i < edge_list.size(); i++) {
-        delete edge_list[i];
+    for (auto& i : edge_list) {
+      delete i;
     }
-
 }
 
-}
+} // namespace p2t

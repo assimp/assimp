@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -247,7 +247,9 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
 
     // add children. first the *real* ones
     node->mNumChildren = static_cast<unsigned int>(pNode->mChildren.size() + instances.size());
-    node->mChildren = new aiNode *[node->mNumChildren];
+    if (node->mNumChildren != 0) {
+        node->mChildren = new aiNode * [node->mNumChildren];
+    }
 
     for (size_t a = 0; a < pNode->mChildren.size(); ++a) {
         node->mChildren[a] = BuildHierarchy(pParser, pNode->mChildren[a]);
@@ -623,16 +625,14 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
     }
 
     // same for texture coords, as many as we have
-    // empty slots are not allowed, need to pack and adjust UV indexes accordingly
-    for (size_t a = 0, real = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
+    for (size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
         if (pSrcMesh->mTexCoords[a].size() >= pStartVertex + numVertices) {
-            dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
+            dstMesh->mTextureCoords[a] = new aiVector3D[numVertices];
             for (size_t b = 0; b < numVertices; ++b) {
-                dstMesh->mTextureCoords[real][b] = pSrcMesh->mTexCoords[a][pStartVertex + b];
+                dstMesh->mTextureCoords[a][b] = pSrcMesh->mTexCoords[a][pStartVertex + b];
             }
 
-            dstMesh->mNumUVComponents[real] = pSrcMesh->mNumUVComponents[a];
-            ++real;
+            dstMesh->mNumUVComponents[a] = pSrcMesh->mNumUVComponents[a];
         }
     }
 

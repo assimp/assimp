@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -159,7 +159,8 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     mBuffer = (unsigned char *)&mBuffer2[0];
 
     char *szMe = (char *)&this->mBuffer[0];
-    SkipSpacesAndLineEnd(szMe, (const char **)&szMe);
+    const char *end = &mBuffer2[0] + mBuffer2.size();
+    SkipSpacesAndLineEnd(szMe, (const char **)&szMe, end);
 
     // determine the format of the file data and construct the aiMesh
     PLY::DOM sPlyDom;
@@ -167,7 +168,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     if (TokenMatch(szMe, "format", 6)) {
         if (TokenMatch(szMe, "ascii", 5)) {
-            SkipLine(szMe, (const char **)&szMe);
+            SkipLine(szMe, (const char **)&szMe, end);
             if (!PLY::DOM::ParseInstance(streamedBuffer, &sPlyDom, this)) {
                 if (mGeneratedMesh != nullptr) {
                     delete (mGeneratedMesh);
@@ -563,6 +564,10 @@ void PLYImporter::LoadFace(const PLY::Element *pcElement, const PLY::ElementInst
         if (mGeneratedMesh->mFaces == nullptr) {
             mGeneratedMesh->mNumFaces = pcElement->NumOccur;
             mGeneratedMesh->mFaces = new aiFace[mGeneratedMesh->mNumFaces];
+        } else {
+            if (mGeneratedMesh->mNumFaces < pcElement->NumOccur) {
+                throw DeadlyImportError("Invalid .ply file: Too many faces");
+            }
         }
 
         if (!bIsTriStrip) {

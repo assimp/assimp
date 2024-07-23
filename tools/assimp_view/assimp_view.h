@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -77,6 +77,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // default movement speed
 #define MOVE_SPEED 3.f
+
+// Anim constants
+#define ANIM_DEFAULT_TICKS_PER_SECOND 25.f
+#define ANIM_SLIDER_MAX 10000
 
 #include "AssetHelper.h"
 #include "Background.h"

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -88,12 +88,12 @@ public:
     TReal r, g, b, a;
 };  // !struct aiColor4D
 
-typedef aiColor4t<ai_real> aiColor4D;
+typedef aiColor4t<float> aiColor4D;
 
 #else
 
 struct aiColor4D {
-    ai_real r, g, b, a;
+    float r, g, b, a;
 };
 
 #endif // __cplusplus

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -56,10 +56,6 @@ BaseProcess::BaseProcess() AI_NO_EXCEPT
           progress() {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseProcess::~BaseProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 void BaseProcess::ExecuteOnScene(Importer *pImp) {

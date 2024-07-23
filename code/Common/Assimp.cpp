@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -233,8 +233,13 @@ const aiScene *aiImportFileFromMemoryWithProperties(
         unsigned int pFlags,
         const char *pHint,
         const aiPropertyStore *props) {
-    ai_assert(nullptr != pBuffer);
-    ai_assert(0 != pLength);
+    if (pBuffer == nullptr) {
+        return nullptr;
+    }
+
+    if (pLength == 0u) {
+        return nullptr;
+    }
 
     const aiScene *scene = nullptr;
     ASSIMP_BEGIN_EXCEPTION_REGION();
@@ -738,14 +743,14 @@ ASSIMP_API void aiVector2DivideByVector(
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector2Length(
+ASSIMP_API ai_real aiVector2Length(
         const C_STRUCT aiVector2D *v) {
     ai_assert(nullptr != v);
     return v->Length();
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector2SquareLength(
+ASSIMP_API ai_real aiVector2SquareLength(
         const C_STRUCT aiVector2D *v) {
     ai_assert(nullptr != v);
     return v->SquareLength();
@@ -759,7 +764,7 @@ ASSIMP_API void aiVector2Negate(
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector2DotProduct(
+ASSIMP_API ai_real aiVector2DotProduct(
         const C_STRUCT aiVector2D *a,
         const C_STRUCT aiVector2D *b) {
     ai_assert(nullptr != a);
@@ -854,14 +859,14 @@ ASSIMP_API void aiVector3DivideByVector(
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector3Length(
+ASSIMP_API ai_real aiVector3Length(
         const C_STRUCT aiVector3D *v) {
     ai_assert(nullptr != v);
     return v->Length();
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector3SquareLength(
+ASSIMP_API ai_real aiVector3SquareLength(
         const C_STRUCT aiVector3D *v) {
     ai_assert(nullptr != v);
     return v->SquareLength();
@@ -875,7 +880,7 @@ ASSIMP_API void aiVector3Negate(
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiVector3DotProduct(
+ASSIMP_API ai_real aiVector3DotProduct(
         const C_STRUCT aiVector3D *a,
         const C_STRUCT aiVector3D *b) {
     ai_assert(nullptr != a);
@@ -961,7 +966,7 @@ ASSIMP_API void aiMatrix3Inverse(C_STRUCT aiMatrix3x3 *mat) {
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiMatrix3Determinant(const C_STRUCT aiMatrix3x3 *mat) {
+ASSIMP_API ai_real aiMatrix3Determinant(const C_STRUCT aiMatrix3x3 *mat) {
     ai_assert(nullptr != mat);
     return mat->Determinant();
 }
@@ -1061,7 +1066,7 @@ ASSIMP_API void aiMatrix4Inverse(C_STRUCT aiMatrix4x4 *mat) {
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API float aiMatrix4Determinant(const C_STRUCT aiMatrix4x4 *mat) {
+ASSIMP_API ai_real aiMatrix4Determinant(const C_STRUCT aiMatrix4x4 *mat) {
     ai_assert(nullptr != mat);
     return mat->Determinant();
 }

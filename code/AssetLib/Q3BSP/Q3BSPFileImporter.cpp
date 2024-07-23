@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -588,7 +588,7 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
 
             aiString name;
             name.data[0] = '*';
-            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
             archive->Close(pTextureStream);
 
@@ -641,7 +641,7 @@ bool Q3BSPFileImporter::importLightmap(const Q3BSP::Q3BSPModel *pModel, aiScene 
 
     aiString name;
     name.data[0] = '*';
-    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
     pMatHelper->AddProperty(&name, AI_MATKEY_TEXTURE_LIGHTMAP(1));
     mTextures.push_back(pTexture);

@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -148,6 +148,7 @@ SET( IMPORTERS
   #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
+  unit/utUSDImport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
   unit/ImportExport/utCOBImportExport.cpp
   unit/ImportExport/utOgreImportExport.cpp

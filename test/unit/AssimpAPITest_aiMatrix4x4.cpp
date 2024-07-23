@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -42,12 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
+#include <assimp/MathFunctions.h>
 
 using namespace Assimp;
 
 class AssimpAPITest_aiMatrix4x4 : public AssimpMathTest {
 protected:
-    virtual void SetUp() {
+    void SetUp() override {
         result_c = result_cpp = aiMatrix4x4();
     }
 
@@ -63,6 +62,12 @@ protected:
 
     aiMatrix4x4 result_c, result_cpp;
 };
+
+TEST_F(AssimpAPITest_aiMatrix4x4, isIdendityTest) {
+    aiMatrix4x4 m = aiMatrix4x4(1 + Math::getEpsilon<ai_real>(), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    const bool result = m.IsIdentity(Math::getEpsilon<ai_real>());
+    EXPECT_TRUE(result);
+}
 
 TEST_F(AssimpAPITest_aiMatrix4x4, aiIdentityMatrix4Test) {
     // Force a non-identity matrix.

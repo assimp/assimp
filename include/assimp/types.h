@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -118,9 +118,9 @@ extern "C" {
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated. */
 #ifdef __cplusplus
-static const size_t MAXLEN = 1024;
+static const size_t AI_MAXLEN = 1024;
 #else
-#define MAXLEN 1024
+#define AI_MAXLEN 1024
 #endif
 
 // ----------------------------------------------------------------------------------
@@ -165,9 +165,9 @@ struct aiRay {
 struct aiColor3D {
 #ifdef __cplusplus
     aiColor3D() AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
-    aiColor3D(ai_real _r, ai_real _g, ai_real _b) :
+    aiColor3D(float _r, float _g, float _b) :
             r(_r), g(_g), b(_b) {}
-    explicit aiColor3D(ai_real _r) :
+    explicit aiColor3D(float _r) :
             r(_r), g(_r), b(_r) {}
     aiColor3D(const aiColor3D &o) :
             r(o.r), g(o.g), b(o.b) {}
@@ -214,12 +214,12 @@ struct aiColor3D {
     }
 
     /** Access a specific color component */
-    ai_real operator[](unsigned int i) const {
+    float operator[](unsigned int i) const {
         return *(&r + i);
     }
 
     /** Access a specific color component */
-    ai_real &operator[](unsigned int i) {
+    float &operator[](unsigned int i) {
         if (0 == i) {
             return r;
         } else if (1 == i) {
@@ -232,18 +232,19 @@ struct aiColor3D {
 
     /** Check whether a color is black */
     bool IsBlack() const {
-        static const ai_real epsilon = ai_real(10e-3);
+        static const float epsilon = float(10e-3);
         return std::fabs(r) < epsilon && std::fabs(g) < epsilon && std::fabs(b) < epsilon;
     }
 
 #endif // !__cplusplus
 
     //! Red, green and blue color values
-    ai_real r, g, b;
+    float r, g, b;
 }; // !struct aiColor3D
 
 // ----------------------------------------------------------------------------------
-/** Represents an UTF-8 string, zero byte terminated.
+/** 
+ * @brief Represents an UTF-8 string, zero byte terminated.
  *
  *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
  *  transformation was chosen in the belief that most strings in 3d files are limited
@@ -260,42 +261,40 @@ struct aiColor3D {
  *  UTF-8 strings to their working character set (i.e. MBCS, WideChar).
  *
  *  We use this representation instead of std::string to be C-compatible. The
- *  (binary) length of such a string is limited to MAXLEN characters (including the
+ *  (binary) length of such a string is limited to AI_MAXLEN characters (including the
  *  the terminating zero).
-*/
+ */
 struct aiString {
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
-    aiString() AI_NO_EXCEPT
-            : length(0) {
-        data[0] = '\0';
-
+    aiString() AI_NO_EXCEPT : 
+            length(0), data{'\0'} {
 #ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
-        memset(data + 1, 27, MAXLEN - 1);
+        memset(data + 1, 27, AI_MAXLEN - 1);
 #endif
     }
 
     /** Copy constructor */
     aiString(const aiString &rOther) :
-            length(rOther.length) {
+            length(rOther.length), data{'\0'} {
         // Crop the string to the maximum length
-        length = length >= MAXLEN ? MAXLEN - 1 : length;
+        length = length >= AI_MAXLEN ? AI_MAXLEN - 1 : length;
         memcpy(data, rOther.data, length);
         data[length] = '\0';
     }
-
+    
     /** Constructor from std::string */
     explicit aiString(const std::string &pString) :
-            length((ai_uint32)pString.length()) {
-        length = length >= MAXLEN ? MAXLEN - 1 : length;
+            length((ai_uint32)pString.length()), data{'\0'} {
+        length = length >= AI_MAXLEN ? AI_MAXLEN - 1 : length;
         memcpy(data, pString.c_str(), length);
         data[length] = '\0';
     }
 
     /** Copy a std::string to the aiString */
     void Set(const std::string &pString) {
-        if (pString.length() > MAXLEN - 1) {
+        if (pString.length() > AI_MAXLEN - 1) {
             return;
         }
         length = (ai_uint32)pString.length();
@@ -306,8 +305,8 @@ struct aiString {
     /** Copy a const char* to the aiString */
     void Set(const char *sz) {
         ai_int32 len = (ai_uint32)::strlen(sz);
-        if (len > (ai_int32)MAXLEN - 1) {
-            len = (ai_int32) MAXLEN - 1;
+        if (len > static_cast<ai_int32>(AI_MAXLEN - 1)) {
+            len = static_cast<ai_int32>(AI_MAXLEN - 1);
         }
         length = len;
         memcpy(data, sz, len);
@@ -321,8 +320,8 @@ struct aiString {
         }
 
         length = rOther.length;
-        if (length >(MAXLEN - 1)) {
-            length = (ai_int32) MAXLEN - 1;
+        if (length > (AI_MAXLEN - 1)) {
+            length = static_cast<ai_int32>(AI_MAXLEN - 1);
         }
 
         memcpy(data, rOther.data, length);
@@ -344,21 +343,24 @@ struct aiString {
 
     /** Comparison operator */
     bool operator==(const aiString &other) const {
-        return (length == other.length && 0 == memcmp(data, other.data, length));
+        if (length == other.length) {
+            return memcmp(data, other.data, length) == 0;
+        }
+        return false;
     }
 
     /** Inverse comparison operator */
     bool operator!=(const aiString &other) const {
-        return (length != other.length || 0 != memcmp(data, other.data, length));
+        return !(*this == other);
     }
 
     /** Append a string to the string */
     void Append(const char *app) {
-        const ai_uint32 len = (ai_uint32)::strlen(app);
+        const ai_uint32 len = static_cast<ai_uint32>(::strlen(app));
         if (!len) {
             return;
         }
-        if (length + len >= MAXLEN) {
+        if (length + len >= AI_MAXLEN) {
             return;
         }
 
@@ -373,7 +375,7 @@ struct aiString {
 
 #ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
-        memset(data + 1, 27, MAXLEN - 1);
+        memset(data + 1, 27, AI_MAXLEN - 1);
 #endif
     }
 
@@ -389,8 +391,8 @@ struct aiString {
      *  the number of bytes from the beginning of the string to its end.*/
     ai_uint32 length;
 
-    /** String buffer. Size limit is MAXLEN */
-    char data[MAXLEN];
+    /** String buffer. Size limit is AI_MAXLEN */
+    char data[AI_MAXLEN];
 }; // !struct aiString
 
 // ----------------------------------------------------------------------------------
@@ -522,6 +524,23 @@ struct aiMemoryInfo {
     /** Total storage allocated for the full import. */
     unsigned int total;
 }; // !struct aiMemoryInfo
+
+/**
+ *  @brief  Type to store a in-memory data buffer.
+ */
+struct aiBuffer {
+    const char *data; ///< Begin poiner
+    const char *end;  ///< End pointer
+
+#ifdef __cplusplus
+    /// @brief  The class constructor.
+    aiBuffer() :
+            data(nullptr), end(nullptr) {}
+
+    /// @brief  The class destructor.
+    ~aiBuffer() = default;
+#endif //!  __cplusplus
+};
 
 #ifdef __cplusplus
 }

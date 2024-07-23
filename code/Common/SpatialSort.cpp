@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -70,10 +70,6 @@ SpatialSort::SpatialSort() :
         mFinalized(false) {
     mPlaneNormal.Normalize();
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor
-SpatialSort::~SpatialSort() = default;
 
 // ------------------------------------------------------------------------------------------------
 void SpatialSort::Fill(const aiVector3D *pPositions, unsigned int pNumPositions,

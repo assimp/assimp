@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -58,4 +59,17 @@ public:
 
 TEST_F(utX3DImportExport, importX3DFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utX3DImportExport, importX3DIndexedLineSet) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/IndexedLineSet.x3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    ASSERT_EQ(scene->mMeshes[0]->mNumFaces, 4u);
+    ASSERT_EQ(scene->mMeshes[0]->mPrimitiveTypes, aiPrimitiveType_LINE);
+    ASSERT_EQ(scene->mMeshes[0]->mNumVertices, 4u);
+    for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; i++) {
+        ASSERT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2u);
+    }
 }

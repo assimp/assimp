@@ -221,7 +221,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
     }
 
     // Just another check whether aiMesh::mPrimitiveTypes is correct
-    if (numOut != pMesh->mNumFaces) {
+    if (numOut == pMesh->mNumFaces) {
         ASSIMP_LOG_ERROR( "Invalidation detected in the number of indices: does not fit to the primitive type." );
         return false;
     }

@@ -43,9 +43,11 @@
 #  define P2T_COMPILER_DLLIMPORT
 #endif
 
-#ifdef ASSIMP_DLL
+// We need to enable shard linkage explicitely
+#ifdef ASSIMP_BUILD_DLL_EXPORT
 #  define P2T_SHARED_EXPORTS 1
 #endif
+
 #ifndef P2T_DLL_SYMBOL
 #  if defined(P2T_STATIC_EXPORTS)
 #    define P2T_DLL_SYMBOL

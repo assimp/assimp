@@ -93,10 +93,6 @@ BaseImporter::BaseImporter() AI_NO_EXCEPT
     // empty
 }
 
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseImporter::~BaseImporter() = default;
-
 void BaseImporter::UpdateImporterScale(Importer *pImp) {
     ai_assert(pImp != nullptr);
     ai_assert(importerScale != 0.0);
@@ -254,9 +250,10 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 /*static*/ bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
         const char *ext0,
         const char *ext1,
-        const char *ext2) {
+        const char *ext2,
+        const char *ext3) {
     std::set<std::string> extensions;
-    for (const char* ext : {ext0, ext1, ext2}) {
+    for (const char* ext : {ext0, ext1, ext2, ext3}) {
         if (ext == nullptr) continue;
         extensions.emplace(ext);
     }

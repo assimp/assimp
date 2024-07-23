@@ -92,7 +92,7 @@ static constexpr aiImporterDesc desc = {
     0,
     0,
     0,
-    "gltf glb"
+    "gltf glb vrm"
 };
 
 glTF2Importer::glTF2Importer() :
@@ -106,7 +106,7 @@ const aiImporterDesc *glTF2Importer::GetInfo() const {
 
 bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, bool checkSig) const {
     const std::string extension = GetExtension(filename);
-    if (!checkSig && (extension != "gltf") && (extension != "glb")) {
+    if (!checkSig && (extension != "gltf") && (extension != "glb") && (extension != "vrm")) {
         return false;
     }
 
@@ -161,7 +161,7 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
         if (texIdx != -1) { // embedded
             // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
             uri.data[0] = '*';
-            uri.length = 1 + ASSIMP_itoa10(uri.data + 1, MAXLEN - 1, texIdx);
+            uri.length = 1 + ASSIMP_itoa10(uri.data + 1, AI_MAXLEN - 1, texIdx);
         }
 
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
@@ -539,7 +539,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             if (mesh.primitives.size() > 1) {
                 ai_uint32 &len = aim->mName.length;
                 aim->mName.data[len] = '-';
-                len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
+                len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(AI_MAXLEN - len - 1), p);
             }
 
             switch (prim.mode) {

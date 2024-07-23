@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -525,7 +524,11 @@ void CatmullClarkSubdivider::InternSubdivide(
                                     }
                                 }
 
-                                ai_assert(adj[o] - moffsets[nidx].first < mp->mNumFaces);
+                                if (mp == nullptr) {
+                                    continue;
+                                }
+
+                                ai_assert(adj[o] - moffsets[nidx].first < mp->mNumFaces);                                
                                 const aiFace &f = mp->mFaces[adj[o] - moffsets[nidx].first];
                                 bool haveit = false;
 

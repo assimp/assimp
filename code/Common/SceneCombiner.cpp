@@ -78,7 +78,7 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
     if (string.length >= 1 && string.data[0] == '$')
         return;
 
-    if (len + string.length >= MAXLEN - 1) {
+    if (len + string.length >= AI_MAXLEN - 1) {
         ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
         ai_assert(false);
         return;
@@ -408,7 +408,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                             // where n is the index of the texture.
                             // Copy here because we overwrite the string data in-place and the buffer inside of aiString
                             // will be a lie if we just reinterpret from prop->mData. The size of mData is not guaranteed to be
-                            // MAXLEN in size.
+                            // AI_MAXLEN in size.
                             aiString s(*(aiString *)prop->mData);
                             if ('*' == s.data[0]) {
                                 // Offset the index and write it back ..

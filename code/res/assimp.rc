@@ -1,4 +1,4 @@
-#include "revision.h"
+#include <assimp/revision.h>
 #ifdef __GNUC__
 #include "winresrc.h"
 #else

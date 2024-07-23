@@ -63,7 +63,6 @@ class Scope;
 class Parser;
 class Element;
 
-// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
 using ScopeList = std::vector<Scope*>;
 using ElementMap = std::fbx_unordered_multimap< std::string, Element*>;
 using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const_iterator>;
@@ -135,7 +134,7 @@ public:
 		const char* elementNameCStr = elementName.c_str();
 		for (auto element = elements.begin(); element != elements.end(); ++element)
 		{
-			if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, MAXLEN)) {
+            if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, AI_MAXLEN)) {
 				return element->second;
 			}
 		}

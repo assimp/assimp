@@ -41,11 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StackAllocator.h"
 #include <assimp/ai_assert.h>
+#include <algorithm>
 
 using namespace Assimp;
 
-inline StackAllocator::StackAllocator() {
-}
+inline StackAllocator::StackAllocator() : m_storageBlocks() {}
 
 inline StackAllocator::~StackAllocator() {
     FreeAll();
@@ -56,7 +56,7 @@ inline void *StackAllocator::Allocate(size_t byteSize) {
     {
         // double block size every time, up to maximum of g_maxBytesPerBlock.
         // Block size must be at least as large as byteSize, but we want to use this for small allocations anyway.
-        m_blockAllocationSize = std::max(std::min(m_blockAllocationSize * 2, g_maxBytesPerBlock), byteSize);
+        m_blockAllocationSize = std::max<std::size_t>(std::min<std::size_t>(m_blockAllocationSize * 2, g_maxBytesPerBlock), byteSize);
         uint8_t *data = new uint8_t[m_blockAllocationSize];
         m_storageBlocks.emplace_back(data);
         m_subIndex = byteSize;

@@ -316,7 +316,7 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
     aiMaterial *pcMat = new aiMaterial();
 
-    aiColor4D clr(ai_real(0.6), ai_real(0.6), ai_real(0.6), ai_real(1.0));
+    aiColor4D clr(0.6f, 0.6f, 0.6f, 1.0f);
     pcMat->AddProperty(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
     pScene->mMaterials[0] = pcMat;
 

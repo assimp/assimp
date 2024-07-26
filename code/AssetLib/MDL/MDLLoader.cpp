@@ -147,6 +147,20 @@ const aiImporterDesc *MDLImporter::GetInfo() const {
 }
 
 // ------------------------------------------------------------------------------------------------
+static void transformCoordinateSystem(const aiScene *pScene) {
+    if (pScene == nullptr) {
+        return;
+    }
+
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+        0.f, -1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        -1.f, 0.f, 0.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    );
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void MDLImporter::InternReadFile(const std::string &pFile,
         aiScene *_pScene, IOSystem *pIOHandler) {
@@ -246,18 +260,16 @@ void MDLImporter::InternReadFile(const std::string &pFile,
                                     ". Magic word (", ai_str_toprintable((const char *)&iMagicWord, sizeof(iMagicWord)), ") is not known");
         }
 
-        if (is_half_life){
+        if (is_half_life && mHL1ImportSettings.transform_coord_system) {
             // Now rotate the whole scene 90 degrees around the z and x axes to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(
-                    0.f, -1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    -1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 0.f, 1.f);
-        }
-        else {
+            transformCoordinateSystem(pScene);
+        } else {
             // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+            pScene->mRootNode->mTransformation = aiMatrix4x4(
+                1.f,  0.f, 0.f, 0.f,
+                0.f,  0.f, 1.f, 0.f, 
+                0.f, -1.f, 0.f, 0.f, 
+                0.f,  0.f, 0.f, 1.f);
         }
 
         DeleteBufferAndCleanup();

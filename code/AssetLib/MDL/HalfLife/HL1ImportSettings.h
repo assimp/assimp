@@ -64,7 +64,7 @@ struct HL1ImportSettings {
         read_hitboxes(false),
         read_textures(false),
         read_misc_global_info(false),
-        transform_coord_system(false) {
+        transform_coord_system(true) {
     }
 
     bool read_animations;

@@ -99,7 +99,7 @@ MDLImporter::MDLImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MDLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_MDL_MAGIC_NUMBER_LE_HL2a,
         AI_MDL_MAGIC_NUMBER_LE_HL2b,
         AI_MDL_MAGIC_NUMBER_LE_GS7,
@@ -138,6 +138,7 @@ void MDLImporter::SetupProperties(const Importer *pImp) {
     mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
     mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
     mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
+    mHL1ImportSettings.transform_coord_system = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_TRANSFORM_COORD_SYSTEM);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -63,7 +63,8 @@ struct HL1ImportSettings {
         read_bone_controllers(false),
         read_hitboxes(false),
         read_textures(false),
-        read_misc_global_info(false) {
+        read_misc_global_info(false),
+        transform_coord_system(true) {
     }
 
     bool read_animations;
@@ -76,6 +77,7 @@ struct HL1ImportSettings {
     bool read_hitboxes;
     bool read_textures;
     bool read_misc_global_info;
+    bool transform_coord_system;
 };
 
 } // namespace HalfLife

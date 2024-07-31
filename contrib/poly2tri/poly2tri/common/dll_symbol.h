@@ -31,11 +31,11 @@
 
 #pragma once
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(ASSIMP_BUILD_DLL_EXPORT)
 #  pragma warning( disable: 4273)
 #  define P2T_COMPILER_DLLEXPORT __declspec(dllexport)
 #  define P2T_COMPILER_DLLIMPORT __declspec(dllimport)
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && defined(ASSIMP_BUILD_DLL_EXPORT)
 #  define P2T_COMPILER_DLLEXPORT __attribute__ ((visibility ("default")))
 #  define P2T_COMPILER_DLLIMPORT __attribute__ ((visibility ("default")))
 #else

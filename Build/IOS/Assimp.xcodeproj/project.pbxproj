@@ -246,10 +246,12 @@
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			fileType = pattern.proxy;
+			inputFiles = (
+			);
 			isEditable = 1;
 			outputFiles = (
 			);
-			script = "";
+			script = "# Type a script or drag a script file from your workspace to insert its path.\n";
 		};
 /* End PBXBuildRule section */
 
@@ -1155,7 +1157,6 @@
 		663BB4F945C449A1A2588634 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 0830;
 				TargetAttributes = {
 					9DFE61061F4C349A00418EC2 = {
@@ -1170,6 +1171,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = EFC117E048A34083AF04DFEF;
@@ -1525,7 +1527,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ZERO_CHECK;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1556,7 +1558,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ZERO_CHECK;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1587,7 +1589,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ALL_BUILD;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1618,7 +1620,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = install;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1654,7 +1656,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = uninstall;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1690,7 +1692,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = uninstall;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1721,7 +1723,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ZERO_CHECK;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1752,7 +1754,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ALL_BUILD;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1911,7 +1913,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1958,7 +1960,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1974,7 +1976,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/build;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Debug;
 		};
@@ -2121,7 +2123,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2152,7 +2154,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = install;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2311,7 +2313,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2359,7 +2361,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2390,7 +2392,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = install;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2406,7 +2408,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/build;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = MinSizeRel;
 		};
@@ -2430,7 +2432,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ALL_BUILD;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -2579,16 +2581,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -2596,6 +2594,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Debug;
 		};
@@ -2735,16 +2734,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -2752,6 +2747,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2892,16 +2888,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -2909,6 +2901,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = MinSizeRel;
@@ -3049,16 +3042,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -3066,6 +3055,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = RelWithDebInfo;
@@ -3107,7 +3097,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3138,7 +3128,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = install;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3186,7 +3176,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3344,7 +3334,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3375,7 +3365,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ALL_BUILD;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3406,7 +3396,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = ZERO_CHECK;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3422,7 +3412,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/build;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = RelWithDebInfo;
 		};
@@ -3451,7 +3441,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = uninstall;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3487,7 +3477,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = uninstall;
 				SECTORDER_FLAGS = "";
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS;
+				SYMROOT = "$(PROJECT_DIR)/build";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -3503,7 +3493,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
-				SYMROOT = /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/build;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Release;
 		};

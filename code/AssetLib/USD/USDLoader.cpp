@@ -121,3 +121,4 @@ void USDImporter::InternReadFile(
 } // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_USD_IMPORTER
+

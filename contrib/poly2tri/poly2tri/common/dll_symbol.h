@@ -53,7 +53,9 @@
 #    define P2T_DLL_SYMBOL
 #  elif defined(P2T_SHARED_EXPORTS)
 #    define P2T_DLL_SYMBOL P2T_COMPILER_DLLEXPORT
-#  else
+#  elif defined(BUILD_SHARED_LIBS)
 #    define P2T_DLL_SYMBOL P2T_COMPILER_DLLIMPORT
+#  else
+#    define P2T_DLL_SYMBOL
 #  endif
 #endif

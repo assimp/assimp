@@ -648,7 +648,7 @@ ELSE()
   IF ( ASSIMP_BUILD_DRACO )
     # Primarily for glTF v2
     # Enable Draco glTF feature set
-    set(DRACO_GLTF ON CACHE BOOL "" FORCE)
+    set(DRACO_GLTF_BITSTREAM ON CACHE BOOL "" FORCE)
     # Disable unnecessary or omitted components
     set(DRACO_JS_GLUE OFF CACHE BOOL "" FORCE)
     set(DRACO_WASM OFF CACHE BOOL "" FORCE)

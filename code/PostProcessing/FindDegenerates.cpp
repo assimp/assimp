@@ -143,9 +143,13 @@ bool FindDegeneratesProcess::ExecuteOnMesh(aiMesh *mesh) {
     for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
         aiFace &face = mesh->mFaces[a];
         bool first = true;
+        auto vertex_in_range = [numVertices = mesh->mNumVertices](unsigned int vertex_idx) { return vertex_idx < numVertices; };
 
         // check whether the face contains degenerated entries
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {
+            if (!std::all_of(face.mIndices, face.mIndices + face.mNumIndices, vertex_in_range))
+                continue;
+
             // Polygons with more than 4 points are allowed to have double points, that is
             // simulating polygons with holes just with concave polygons. However,
             // double points may not come directly after another.

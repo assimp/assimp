@@ -11,7 +11,6 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = FFB812EDB3AD42E98757B087 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
 			buildPhases = (
-				5562F20F405E41CBA2B4BD9D /* CMake Rules */,
 			);
 			dependencies = (
 			);
@@ -84,6 +83,7 @@
 		48282E4508754DA4813E7660 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 2F9D8A8640614A95BE25CFFC /* unzip.c */; };
 		4CC8AEB72BEF4BCEBB3A198D /* OpenDDLCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D55E6D6D1546A0B7B6298B /* OpenDDLCommon.cpp */; };
 		4D2F51BB8D2941A0B7267085 /* ImproveCacheLocality.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E115A60222824858B926D0FF /* ImproveCacheLocality.cpp */; };
+		501777C12C6C0120004BCF01 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 501777C02C6C0120004BCF01 /* libz.tbd */; };
 		53060592083943BA9939FC32 /* FBXUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 17C123CEEBF6489FBA50865E /* FBXUtil.cpp */; };
 		55582F8EC37E41DEBEFE7E49 /* StandardShapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95E51C5C93DC416C86F3D3AD /* StandardShapes.cpp */; };
 		59F553C3412144F9843E8AF3 /* irrXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DADC0BAE7441A4BE65BF55 /* irrXML.cpp */; };
@@ -108,7 +108,7 @@
 		98F027E453D340B39CFA9A17 /* PostStepRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD27A453AB241AEBAA69C5E /* PostStepRegistry.cpp */; };
 		9A461027A7514862B907EE67 /* ObjFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6105EC00D66E4DCCB62F1E17 /* ObjFileImporter.cpp */; };
 		9B2FC70EEBE542E4A7129034 /* Assimp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 055A2363A13B43689F7EB957 /* Assimp.cpp */; };
-		9DFE610C1F4C349A00418EC2 /* assimpIOS.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9DFE61091F4C349A00418EC2 /* assimpIOS.h */; };
+		9DFE610C1F4C349A00418EC2 /* assimpIOS.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 9DFE61091F4C349A00418EC2 /* assimpIOS.h */; };
 		9DFE61121F4C34ED00418EC2 /* Assimp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 055A2363A13B43689F7EB957 /* Assimp.cpp */; };
 		9DFE61131F4C34ED00418EC2 /* BaseImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 788550D05EB741DFA76CD060 /* BaseImporter.cpp */; };
 		9DFE61141F4C34ED00418EC2 /* BaseProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EA0E756ABE149A1B24EEF97 /* BaseProcess.cpp */; };
@@ -315,14 +315,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		9DFE61051F4C349A00418EC2 /* CopyFiles */ = {
+		9DFE61051F4C349A00418EC2 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				9DFE610C1F4C349A00418EC2 /* assimpIOS.h in CopyFiles */,
+				9DFE610C1F4C349A00418EC2 /* assimpIOS.h in Copy Files */,
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -403,6 +404,7 @@
 		4D63F0058A214D02B58DD1A2 /* OpenDDLStream.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OpenDDLStream.cpp; path = contrib/openddlparser/code/OpenDDLStream.cpp; sourceTree = SOURCE_ROOT; };
 		4ECE3A5339C541B791B6CC7D /* Vertex.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Vertex.h; path = code/Vertex.h; sourceTree = SOURCE_ROOT; };
 		4FA9308BDFDA4F2DB6959AE7 /* Profiler.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Profiler.h; path = code/Profiler.h; sourceTree = SOURCE_ROOT; };
+		501777C02C6C0120004BCF01 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		5025697DC5FC49FBA7412B5D /* StringComparison.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = StringComparison.h; path = code/StringComparison.h; sourceTree = SOURCE_ROOT; };
 		505A5825E66A43798BF07803 /* matrix4x4.inl */ = {isa = PBXFileReference; explicitFileType = sourcecode; fileEncoding = 4; name = matrix4x4.inl; path = include/assimp/matrix4x4.inl; sourceTree = SOURCE_ROOT; };
 		50E8A9ECC5D84D0AA46976C6 /* DDLNode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = DDLNode.cpp; path = contrib/openddlparser/code/DDLNode.cpp; sourceTree = SOURCE_ROOT; };
@@ -589,6 +591,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		501777BE2C6C0077004BCF01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				501777C12C6C0120004BCF01 /* libz.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9DFE61041F4C349A00418EC2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -804,6 +814,14 @@
 				2C23D13789EE4DC49D942737 /* NullLogger.hpp */,
 			);
 			name = Logging;
+			sourceTree = "<group>";
+		};
+		501777BF2C6C0120004BCF01 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				501777C02C6C0120004BCF01 /* libz.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		534FABD040834DDE9912B669 /* CMake Rules */ = {
@@ -1058,6 +1076,7 @@
 				FFD3B23DAFE64AD6A1B74DA7 /* assimp */,
 				9DFE61081F4C349A00418EC2 /* assimpIOS */,
 				54D1CCC9235F421F9A623C39 /* Products */,
+				501777BF2C6C0120004BCF01 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1104,7 +1123,7 @@
 			buildConfigurationList = C82ABD5499C14C60A9807355 /* Build configuration list for PBXNativeTarget "assimp" */;
 			buildPhases = (
 				77B89343CB554DB0BB22B64B /* Sources */,
-				A92E1816B79A426D8C488581 /* CMake PostBuild Rules */,
+				501777BE2C6C0077004BCF01 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1123,7 +1142,7 @@
 			buildPhases = (
 				9DFE61031F4C349A00418EC2 /* Sources */,
 				9DFE61041F4C349A00418EC2 /* Frameworks */,
-				9DFE61051F4C349A00418EC2 /* CopyFiles */,
+				9DFE61051F4C349A00418EC2 /* Copy Files */,
 			);
 			buildRules = (
 				9D1C72991FD586E600D4D986 /* PBXBuildRule */,
@@ -1190,20 +1209,6 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5562F20F405E41CBA2B4BD9D /* CMake Rules */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			name = "CMake Rules";
-			outputPaths = (
-				/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/CMakeFiles/ZERO_CHECK,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "make -C /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS -f /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION all";
-			showEnvVarsInLog = 0;
-		};
 		8FD5176E784745238A3D7C22 /* CMake Rules */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1216,19 +1221,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "make -C /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS -f /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/CMakeScripts/uninstall_cmakeRulesBuildPhase.make$CONFIGURATION all";
-			showEnvVarsInLog = 0;
-		};
-		A92E1816B79A426D8C488581 /* CMake PostBuild Rules */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			name = "CMake PostBuild Rules";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "make -C /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code -f /Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/code/CMakeScripts/assimp_postBuildPhase.make$CONFIGURATION all";
 			showEnvVarsInLog = 0;
 		};
 		B99F860DBCA245C89C92060E /* CMake PostBuild Rules */ = {
@@ -1875,16 +1867,12 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
@@ -1907,8 +1895,7 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					/usr/lib/libz.dylib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/MinSizeRel/libIrrXML.a,
+					"$(PROJECT_DIR)/Build/MinSizeRel/libIrrXML.a",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
@@ -1929,7 +1916,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				EXECUTABLE_SUFFIX = .a;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1941,13 +1927,14 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "";
-				LIBRARY_STYLE = STATIC;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-fvisibility=hidden",
 					"-fPIC",
@@ -1957,7 +1944,6 @@
 					"-std=c++11",
 				);
 				OTHER_LIBTOOLFLAGS = " ";
-				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
 				SYMROOT = "$(PROJECT_DIR)/build";
@@ -1975,7 +1961,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
+				SDKROOT = macosx;
 				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Debug;
@@ -2090,16 +2076,12 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
@@ -2117,8 +2099,7 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					/usr/lib/libz.dylib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/Debug/libIrrXML.a,
+					"$(PROJECT_DIR)/Build/Debug/libIrrXML.a",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
@@ -2275,16 +2256,12 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
@@ -2307,8 +2284,7 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					/usr/lib/libz.dylib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/Release/libIrrXML.a,
+					"$(PROJECT_DIR)/Build/Release/libIrrXML.a",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
@@ -2329,7 +2305,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				EXECUTABLE_SUFFIX = .a;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -2341,13 +2316,14 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "";
-				LIBRARY_STYLE = STATIC;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-fvisibility=hidden",
 					"-fPIC",
@@ -2358,7 +2334,6 @@
 					"-DNDEBUG",
 				);
 				OTHER_LIBTOOLFLAGS = " ";
-				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
 				SYMROOT = "$(PROJECT_DIR)/build";
@@ -2407,7 +2382,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
+				SDKROOT = macosx;
 				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = MinSizeRel;
@@ -3065,7 +3040,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				EXECUTABLE_SUFFIX = .a;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -3077,13 +3051,14 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "";
-				LIBRARY_STYLE = STATIC;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-fvisibility=hidden",
 					"-fPIC",
@@ -3094,7 +3069,6 @@
 					"-DNDEBUG",
 				);
 				OTHER_LIBTOOLFLAGS = " ";
-				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
 				SYMROOT = "$(PROJECT_DIR)/build";
@@ -3144,7 +3118,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				EXECUTABLE_SUFFIX = .a;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = 2;
@@ -3156,13 +3129,14 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "";
-				LIBRARY_STYLE = STATIC;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-fvisibility=hidden",
 					"-fPIC",
@@ -3173,7 +3147,6 @@
 					"-DNDEBUG",
 				);
 				OTHER_LIBTOOLFLAGS = " ";
-				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = IrrXML;
 				SECTORDER_FLAGS = "";
 				SYMROOT = "$(PROJECT_DIR)/build";
@@ -3297,16 +3270,12 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/.,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/rapidjson/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/unzip,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/contrib/irrXML,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/../contrib/openddlparser/include,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/code/..,
+					"$(PROJECT_DIR)/",
+					"$(PROJECT_DIR)/Build/IOS/include/",
+					"$(PROJECT_DIR)/include/assimp/",
+					"$(PROJECT_DIR)/include/",
+					"$(PROJECT_DIR)/contrib/",
+					"$(PROJECT_DIR)/contrib/openddlparser/include",
 				);
 				INSTALL_PATH = "@rpath/";
 				LIBRARY_SEARCH_PATHS = "";
@@ -3328,8 +3297,7 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					/usr/lib/libz.dylib,
-					/Users/m_lukyanov/GameDev/LIBS/Assimp/Build/IOS/contrib/irrXML/RelWithDebInfo/libIrrXML.a,
+					"$(PROJECT_DIR)/Build/RelWithDebInfo/libIrrXML.a",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = assimpMAC;
@@ -3411,7 +3379,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
+				SDKROOT = macosx;
 				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = RelWithDebInfo;
@@ -3492,7 +3460,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk;
+				SDKROOT = macosx;
 				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Release;

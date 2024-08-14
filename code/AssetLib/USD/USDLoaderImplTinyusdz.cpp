@@ -72,7 +72,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../../contrib/tinyusdz/assimp_tinyusdz_logging.inc"
 
 namespace {
-    static constexpr char Tag[] = "tinyusdz loader";
+    static constexpr char TAG[] = "tinyusdz loader";
 }
 
 namespace Assimp {

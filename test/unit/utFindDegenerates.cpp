@@ -206,3 +206,38 @@ TEST_F(FindDegeneratesProcessTest, meshRemoval) {
     EXPECT_EQ(scene->mRootNode->mNumMeshes, 1u);
     EXPECT_EQ(scene->mRootNode->mMeshes[0], 0u);
 }
+
+TEST_F(FindDegeneratesProcessTest, invalidVertexIndex) {
+    mProcess->EnableAreaCheck(true);
+    mProcess->EnableInstantRemoval(true);
+    mProcess->ExecuteOnMesh(mMesh);
+
+    std::unique_ptr<aiScene> scene(new aiScene);
+    scene->mNumMeshes = 1;
+    scene->mMeshes = new aiMesh *[1];
+
+    std::unique_ptr<aiMesh> mesh(new aiMesh);
+    mesh->mNumVertices = 1;
+    mesh->mVertices = new aiVector3D[1];
+    mesh->mVertices[0] = aiVector3D{ 0.0f, 0.0f, 0.0f };
+    mesh->mNumFaces = 1;
+    mesh->mFaces = new aiFace[1];
+    mesh->mFaces[0].mNumIndices = 3;
+    mesh->mFaces[0].mIndices = new unsigned int[3];
+    mesh->mFaces[0].mIndices[0] = 0;
+    mesh->mFaces[0].mIndices[1] = 1;
+    mesh->mFaces[0].mIndices[2] = 99999;
+
+    scene->mMeshes[0] = mesh.release();
+
+    scene->mRootNode = new aiNode;
+    scene->mRootNode->mNumMeshes = 1;
+    scene->mRootNode->mMeshes = new unsigned int[1];
+    scene->mRootNode->mMeshes[0] = 0;
+
+    mProcess->Execute(scene.get());
+
+    EXPECT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mRootNode->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mRootNode->mMeshes[0], 0u);
+}

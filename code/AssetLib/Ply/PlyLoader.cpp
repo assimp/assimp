@@ -242,6 +242,9 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mNumMeshes = 1;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
     pScene->mMeshes[0] = mGeneratedMesh;
+
+    delete mGeneratedMesh;
+    
     mGeneratedMesh = nullptr;
 
     // generate a simple node structure

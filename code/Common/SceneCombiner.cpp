@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
+#include <unordered_set>
 
 namespace Assimp {
 
@@ -252,9 +253,13 @@ void SceneCombiner::AttachToGraph(aiScene *master, std::vector<NodeAttachmentInf
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
     if (nullptr == _dest) {
-        delete master;
+        std::unordered_set<aiScene *> uniqueScenes;
+        uniqueScenes.insert(master);
         for (const auto &item : srcList) {
-            delete item.scene;
+            uniqueScenes.insert(item.scene);
+        }
+        for (const auto &item : uniqueScenes) {
+            delete item;
         }
         return;
     }

@@ -253,6 +253,9 @@ void SceneCombiner::AttachToGraph(aiScene *master, std::vector<NodeAttachmentInf
 void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
     if (nullptr == _dest) {
         delete master;
+        for (const auto &item : srcList) {
+            delete item.scene;
+        }
         return;
     }
 

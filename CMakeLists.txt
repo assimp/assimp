@@ -306,6 +306,8 @@ ELSEIF(MSVC)
   elseif((GENERATOR_IS_MULTI_CONFIG) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("-- MSVC PDB generation disabled. Release binary will not be debuggable.")
   endif()
+  # Source code is encoded in UTF-8
+  ADD_COMPILE_OPTIONS(/source-charset:utf-8)
 ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)

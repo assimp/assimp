@@ -842,7 +842,7 @@ void OpenAsset() {
     aiString sz;
     aiGetExtensionList(&sz);
 
-    char szList[MAXLEN + 100];
+    char szList[AI_MAXLEN + 100];
     strcpy(szList,"ASSIMP assets");
     char* szCur = szList + 14;
     strcpy(szCur,sz.data);
@@ -874,9 +874,10 @@ void OpenAsset() {
     RegSetValueExA(g_hRegistry,"CurrentApp",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
 
     if (0 != strcmp(g_szFileName,szFileName)) {
-        strcpy(g_szFileName, szFileName);
         DeleteAssetData();
         DeleteAsset();
+
+        strcpy(g_szFileName, szFileName);
         LoadAsset();
 
         // update the history
@@ -1197,7 +1198,7 @@ void InitUI() {
     LoadCheckerPatternColors();
 
     SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMIN,TRUE,0);
-    SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,10000);
+    SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETRANGEMAX,TRUE,ANIM_SLIDER_MAX);
 }
 
 //-------------------------------------------------------------------------------
@@ -1274,11 +1275,14 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             // XXX quick and dirty fix for #3029892
             if (GetDlgItem(g_hDlg, IDC_SLIDERANIM) == (HWND)lParam && g_pcAsset && g_pcAsset->pcScene->mAnimations)
             {
-                double num = (double)SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_GETPOS,0,0);
                 const aiAnimation* anim = g_pcAsset->pcScene->mAnimations[ g_pcAsset->mAnimator->CurrentAnimIndex() ];
-
-                g_dCurrent = (anim->mDuration/anim->mTicksPerSecond) * num/10000;
-                g_pcAsset->mAnimator->Calculate(g_dCurrent);
+                if (anim && anim->mDuration > 0.0)
+                {
+                    double tps = anim->mTicksPerSecond ? anim->mTicksPerSecond : ANIM_DEFAULT_TICKS_PER_SECOND;
+                    double sliderValue = (double)SendDlgItemMessage(g_hDlg, IDC_SLIDERANIM, TBM_GETPOS, 0, 0);
+                    g_dCurrent = (anim->mDuration / tps) * sliderValue / ANIM_SLIDER_MAX;
+                    g_pcAsset->mAnimator->Calculate(g_dCurrent);
+                }
             }
             break;
 
@@ -1666,10 +1670,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         }
                         fclose(pFile);
                     } else {
-                        strcpy(g_szFileName,szFile);
-
                         DeleteAsset();
+
+                        strcpy(g_szFileName, szFile);
                         LoadAsset();
+
                         UpdateHistory();
                         SaveHistory();
                     }
@@ -1690,6 +1695,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         g_pcAsset->mAnimator->SetAnimIndex(sel);
                         SendDlgItemMessage(hwndDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,0);
                     }
+
+                    const size_t count = static_cast<size_t>(ComboBox_GetCount(GetDlgItem(hwndDlg, IDC_COMBO1)));
+                    CDisplay::Instance().EnableAnimTools(g_pcAsset && count > 0 && sel < count - 1 ? TRUE : FALSE);
                 }
             } else if (ID_VIEWER_RESETVIEW == LOWORD(wParam)) {
                 g_sCamera.vPos = aiVector3D(0.0f,0.0f,-10.0f);
@@ -1827,7 +1835,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             }
             else if (ID_VIEWER_RELOAD == LOWORD(wParam))
             {
+                // Save the filename to reload and clear
+                char toReloadFileName[MAX_PATH];
+                strcpy(toReloadFileName, g_szFileName);
                 DeleteAsset();
+
+                strcpy(g_szFileName, toReloadFileName);
                 LoadAsset();
             }
             else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
@@ -2036,9 +2049,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             {
                 if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam))
                 {
-                    strcpy(g_szFileName,g_aPreviousFiles[i].c_str());
                     DeleteAssetData();
                     DeleteAsset();
+
+                    strcpy(g_szFileName, g_aPreviousFiles[i].c_str());
                     LoadAsset();
 
                     // update and safe the history
@@ -2208,6 +2222,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     }
 
     CLogDisplay::Instance().AddEntry("[OK] Here we go!");
+
+    CDisplay::Instance().EnableAnimTools(FALSE);
 
     // create the log window
     CLogWindow::Instance().Init();
@@ -2396,7 +2412,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     }
                 }
             }
-
 
         // render the scene
         CDisplay::Instance().OnRender();

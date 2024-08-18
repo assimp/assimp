@@ -1051,7 +1051,7 @@ aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
 aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
 {
     std::vector<const aiNode*> node_chain;
-    while (node != scene->mRootNode) {
+    while (node != scene->mRootNode && node != nullptr) {
         node_chain.push_back(node);
         node = node->mParent;
     }
@@ -1217,10 +1217,8 @@ void FBXExporter::WriteObjects ()
         }
 
         // colors, if any
-        // TODO only one color channel currently
-        const int32_t colorChannelIndex = 0;
-        if (m->HasVertexColors(colorChannelIndex)) {
-            FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
+            FBX::Node vertexcolors("LayerElementColor", int32_t(ci));
             vertexcolors.Begin(outstream, binary, indent);
             vertexcolors.DumpProperties(outstream, binary, indent);
             vertexcolors.EndProperties(outstream, binary, indent);
@@ -1230,7 +1228,7 @@ void FBXExporter::WriteObjects ()
                 "Version", int32_t(101), outstream, binary, indent
             );
             char layerName[8];
-            snprintf(layerName, sizeof(layerName), "COLOR_%d", colorChannelIndex);
+            snprintf(layerName, sizeof(layerName), "COLOR_%d", int32_t(ci));
             FBX::Node::WritePropertyNode(
                 "Name", (const char*)layerName, outstream, binary, indent
             );
@@ -1247,7 +1245,7 @@ void FBXExporter::WriteObjects ()
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiColor4D &c = m->mColors[colorChannelIndex][f.mIndices[pvi]];
+                    const aiColor4D &c = m->mColors[ci][f.mIndices[pvi]];
                     color_data.push_back(c.r);
                     color_data.push_back(c.g);
                     color_data.push_back(c.b);
@@ -1354,11 +1352,14 @@ void FBXExporter::WriteObjects ()
         le.AddChild("Type", "LayerElementNormal");
         le.AddChild("TypedIndex", int32_t(0));
         layer.AddChild(le);
-        // TODO only 1 color channel currently
-        le = FBX::Node("LayerElement");
-        le.AddChild("Type", "LayerElementColor");
-        le.AddChild("TypedIndex", int32_t(0));
-        layer.AddChild(le);
+
+        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
+            le = FBX::Node("LayerElement");
+            le.AddChild("Type", "LayerElementColor");
+            le.AddChild("TypedIndex", int32_t(ci));
+            layer.AddChild(le);
+        }
+
         le = FBX::Node("LayerElement");
         le.AddChild("Type", "LayerElementMaterial");
         le.AddChild("TypedIndex", int32_t(0));
@@ -1868,33 +1869,26 @@ void FBXExporter::WriteObjects ()
     // one sticky point is that the number of vertices may not match,
     // because assimp splits vertices by normal, uv, etc.
 
-    // functor for aiNode sorting
-    struct SortNodeByName
-    {
-        bool operator()(const aiNode *lhs, const aiNode *rhs) const
-        {
-            return strcmp(lhs->mName.C_Str(), rhs->mName.C_Str()) < 0;
-        }
-    };
 
     // first we should mark the skeleton for each mesh.
     // the skeleton must include not only the aiBones,
     // but also all their parent nodes.
     // anything that affects the position of any bone node must be included.
-    // Use SorNodeByName to make sure the exported result will be the same across all systems
-    // Otherwise the aiNodes of the skeleton would be sorted based on the pointer address, which isn't consistent
-    std::vector<std::set<const aiNode*, SortNodeByName>> skeleton_by_mesh(mScene->mNumMeshes);
+
+    // note that we want to preserve input order as much as possible here.
+    // previously, sorting by name lead to consistent output across systems, but was not
+    // suitable for downstream consumption by some applications.
+    std::vector<std::vector<const aiNode*>> skeleton_by_mesh(mScene->mNumMeshes);
     // at the same time we can build a list of all the skeleton nodes,
     // which will be used later to mark them as type "limbNode".
     std::unordered_set<const aiNode*> limbnodes;
 
     //actual bone nodes in fbx, without parenting-up
-    std::unordered_set<std::string> setAllBoneNamesInScene;
-    for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m)
-    {
+    std::vector<std::string> allBoneNames;
+    for(unsigned int m = 0; m < mScene->mNumMeshes; ++ m) {
         aiMesh* pMesh = mScene->mMeshes[m];
         for(unsigned int b = 0; b < pMesh->mNumBones; ++ b)
-            setAllBoneNamesInScene.insert(pMesh->mBones[b]->mName.data);
+            allBoneNames.push_back(pMesh->mBones[b]->mName.data);
     }
     aiMatrix4x4 mxTransIdentity;
 
@@ -1902,7 +1896,7 @@ void FBXExporter::WriteObjects ()
     std::map<std::string,aiNode*> node_by_bone;
     for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
         const aiMesh* m = mScene->mMeshes[mi];
-        std::set<const aiNode*, SortNodeByName> skeleton;
+        std::vector<const aiNode*> skeleton;
         for (size_t bi =0; bi < m->mNumBones; ++bi) {
             const aiBone* b = m->mBones[bi];
             const std::string name(b->mName.C_Str());
@@ -1921,7 +1915,7 @@ void FBXExporter::WriteObjects ()
                 node_by_bone[name] = n;
                 limbnodes.insert(n);
             }
-            skeleton.insert(n);
+            skeleton.push_back(n);
             // mark all parent nodes as skeleton as well,
             // up until we find the root node,
             // or else the node containing the mesh,
@@ -1932,7 +1926,7 @@ void FBXExporter::WriteObjects ()
                 parent = parent->mParent
             ) {
                 // if we've already done this node we can skip it all
-                if (skeleton.count(parent)) {
+                if (std::find(skeleton.begin(), skeleton.end(), parent) != skeleton.end()) {
                     break;
                 }
                 // ignore fbx transform nodes as these will be collapsed later
@@ -1942,7 +1936,7 @@ void FBXExporter::WriteObjects ()
                     continue;
                 }
                 //not a bone in scene && no effect in transform
-                if(setAllBoneNamesInScene.find(node_name)==setAllBoneNamesInScene.end()
+                if (std::find(allBoneNames.begin(), allBoneNames.end(), node_name) == allBoneNames.end()
                    && parent->mTransformation == mxTransIdentity) {
                         continue;
                 }
@@ -2027,7 +2021,7 @@ void FBXExporter::WriteObjects ()
         aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
         // now make a subdeformer for each bone in the skeleton
-        const std::set<const aiNode*, SortNodeByName> skeleton= skeleton_by_mesh[mi];
+        const auto & skeleton= skeleton_by_mesh[mi];
         for (const aiNode* bone_node : skeleton) {
             // if there's a bone for this node, find it
             const aiBone* b = nullptr;

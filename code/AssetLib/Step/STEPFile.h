@@ -82,8 +82,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // this is intended as stress test - by default, entities are evaluated
 // lazily and therefore not unless needed.
 
-//#define ASSIMP_IFC_TEST
-
 namespace Assimp {
 
 // ********************************************************************************
@@ -531,6 +529,7 @@ public:
 
     template <typename T>
     const T &To() const {
+
         return dynamic_cast<const T &>(**this);
     }
 
@@ -581,12 +580,12 @@ private:
 };
 
 template <typename T>
-inline bool operator==(const std::shared_ptr<LazyObject> &lo, T whatever) {
+inline bool operator == (const std::shared_ptr<LazyObject> &lo, T whatever) {
     return *lo == whatever; // XXX use std::forward if we have 0x
 }
 
 template <typename T>
-inline bool operator==(const std::pair<uint64_t, std::shared_ptr<LazyObject>> &lo, T whatever) {
+inline bool operator == (const std::pair<uint64_t, std::shared_ptr<LazyObject>> &lo, T whatever) {
     return *(lo.second) == whatever; // XXX use std::forward if we have 0x
 }
 
@@ -599,18 +598,30 @@ struct Lazy {
     Lazy(const LazyObject *obj = nullptr) : obj(obj) {}
 
     operator const T *() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->ToPtr<T>();
     }
 
     operator const T &() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->To<T>();
     }
 
     const T &operator*() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return obj->To<T>();
     }
 
     const T *operator->() const {
+        if (obj == nullptr) {
+            throw TypeError("Obj type is nullptr.");
+        }
         return &obj->To<T>();
     }
 

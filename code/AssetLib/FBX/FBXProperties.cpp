@@ -243,7 +243,6 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
 
         // Read the element's value.
         // Wrap the naked pointer (since the call site is required to acquire ownership)
-        // std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
         std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*currentElement.second));
 
         // Element could not be read. Skip it.

@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
+#include <assimp/MathFunctions.h>
 
 using namespace Assimp;
 
@@ -63,8 +64,9 @@ protected:
 };
 
 TEST_F(AssimpAPITest_aiMatrix4x4, isIdendityTest) {
-    aiMatrix4x4 m = aiMatrix4x4(1.001f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    EXPECT_TRUE(m.IsIdentity(1e-3f));
+    aiMatrix4x4 m = aiMatrix4x4(1 + Math::getEpsilon<ai_real>(), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    const bool result = m.IsIdentity(Math::getEpsilon<ai_real>());
+    EXPECT_TRUE(result);
 }
 
 TEST_F(AssimpAPITest_aiMatrix4x4, aiIdentityMatrix4Test) {

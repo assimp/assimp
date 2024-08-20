@@ -250,6 +250,10 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 c = stream.GetI1();
                 while (c) {
                     mat.name.data[mat.name.length++] = c;
+                    if (mat.name.length == AI_MAXLEN) {
+                        ASSIMP_LOG_ERROR("String ouverflow detected, skipped material name parsing.");
+                        break;
+                    }
                     c = stream.GetI1();
                 }
 

@@ -176,7 +176,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
             if (ppcMaterials[idx]) {
                 aiString sz;
                 if( ppcMaterials[idx]->Get(AI_MATKEY_NAME, sz) != AI_SUCCESS ) {
-                    sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
+                    sz.length = ::ai_snprintf(sz.data, AI_MAXLEN,"JoinedMaterial_#%u",p);
                     ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
                 }
             } else {

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -59,7 +59,6 @@ struct aiNode;
 
 namespace Assimp    {
 
-
 using namespace D3DS;
 
 // ---------------------------------------------------------------------------------
@@ -68,7 +67,7 @@ using namespace D3DS;
 class Discreet3DSImporter : public BaseImporter {
 public:
     Discreet3DSImporter();
-    ~Discreet3DSImporter() override;
+    ~Discreet3DSImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

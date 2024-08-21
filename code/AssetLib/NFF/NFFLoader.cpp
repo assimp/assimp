@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Neutral File Format Importer",
     "",
     "",
@@ -70,14 +70,6 @@ static const aiImporterDesc desc = {
     0,
     "enff nff"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-NFFImporter::NFFImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-NFFImporter::~NFFImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -93,8 +85,8 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
-    SkipSpaces(&sz);          \
-    if (!::IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
+    SkipSpaces(&sz, lineEnd);          \
+    if (!IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -119,7 +111,7 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
             ASSIMP_LOG_WARN("NFF2: Unexpected EOF, can't read next token"); \
             break;                                                          \
         }                                                                   \
-        SkipSpaces(line, &sz);                                              \
+        SkipSpaces(line, &sz, lineEnd);                                              \
     } while (IsLineEnd(*sz))
 
 // ------------------------------------------------------------------------------------------------
@@ -156,9 +148,9 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
     // No read the file line per line
     char line[4096];
-    const char *sz;
+    const char *sz, *lineEnd = &line[2095]+1;
     while (GetNextLine(buffer, line)) {
-        SkipSpaces(line, &sz);
+        SkipSpaces(line, &sz, lineEnd);
 
         // 'version' defines the version of the file format
         if (TokenMatch(sz, "version", 7)) {
@@ -206,18 +198,16 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo> &output,
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void NFFImporter::InternReadFile(const std::string &pFile,
-        aiScene *pScene, IOSystem *pIOHandler) {
-    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
-
-    // Check whether we can read from the file
-    if (!file)
-        throw DeadlyImportError("Failed to open NFF file ", pFile, ".");
+void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
+    std::unique_ptr<IOStream> stream(pIOHandler->Open(file, "rb"));
+    if (!stream) {
+        throw DeadlyImportError("Failed to open NFF file ", file, ".");
+    }
 
     // allocate storage and copy the contents of the file to a memory buffer
     // (terminate it with zero)
     std::vector<char> mBuffer2;
-    TextFileToBuffer(file.get(), mBuffer2);
+    TextFileToBuffer(stream.get(), mBuffer2);
     const char *buffer = &mBuffer2[0];
 
     // mesh arrays - separate here to make the handling of the pointers below easier.
@@ -227,7 +217,9 @@ void NFFImporter::InternReadFile(const std::string &pFile,
     std::vector<MeshInfo> meshesLocked;
 
     char line[4096];
+    const char *lineEnd = &line[4096];
     const char *sz;
+
 
     // camera parameters
     aiVector3D camPos, camUp(0.f, 1.f, 0.f), camLookAt(0.f, 0.f, 1.f);
@@ -273,7 +265,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
         CommentRemover::RemoveLineComments("//", &mBuffer2[0]);
 
         while (GetNextLine(buffer, line)) {
-            SkipSpaces(line, &sz);
+            SkipSpaces(line, &sz, lineEnd);
             if (TokenMatch(sz, "version", 7)) {
                 ASSIMP_LOG_INFO("NFF (Sense8) file format: ", sz);
             } else if (TokenMatch(sz, "viewpos", 7)) {
@@ -303,7 +295,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
                     // material table - an external file
                     if (TokenMatch(sz, "mtable", 6)) {
-                        SkipSpaces(&sz);
+                        SkipSpaces(&sz, lineEnd);
                         sz3 = sz;
                         while (!IsSpaceOrNewLine(*sz))
                             ++sz;
@@ -324,12 +316,12 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                             std::string::size_type sepPos;
                             if ((std::string::npos == (sepPos = path.find_last_of('\\')) || !sepPos) &&
                                     (std::string::npos == (sepPos = path.find_last_of('/')) || !sepPos)) {
-                                sepPos = pFile.find_last_of('\\');
+                                sepPos = file.find_last_of('\\');
                                 if (std::string::npos == sepPos) {
-                                    sepPos = pFile.find_last_of('/');
+                                    sepPos = file.find_last_of('/');
                                 }
                                 if (std::string::npos != sepPos) {
-                                    path = pFile.substr(0, sepPos + 1) + path;
+                                    path = file.substr(0, sepPos + 1) + path;
                                 }
                             }
                             LoadNFF2MaterialTable(materialTable, path, pIOHandler);
@@ -338,8 +330,8 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                         break;
                 }
 
-                // read the numbr of vertices
-                unsigned int num = ::strtoul10(sz, &sz);
+                // read the number of vertices
+                unsigned int num = strtoul10(sz, &sz);
 
                 // temporary storage
                 std::vector<aiColor4D> tempColors;
@@ -359,13 +351,13 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
                     // parse all other attributes in the line
                     while (true) {
-                        SkipSpaces(&sz);
+                        SkipSpaces(&sz, lineEnd);
                         if (IsLineEnd(*sz)) break;
 
                         // color definition
                         if (TokenMatch(sz, "0x", 2)) {
                             hasColor = true;
-                            unsigned int numIdx = ::strtoul16(sz, &sz);
+                            unsigned int numIdx = strtoul16(sz, &sz);
                             aiColor4D clr;
                             clr.a = 1.f;
 
@@ -403,30 +395,28 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                 }
 
                 AI_NFF2_GET_NEXT_TOKEN();
-                if (!num) throw DeadlyImportError("NFF2: There are zero vertices");
-                num = ::strtoul10(sz, &sz);
+                if (!num)
+                    throw DeadlyImportError("NFF2: There are zero vertices");
+                num = strtoul10(sz, &sz);
 
                 std::vector<unsigned int> tempIdx;
                 tempIdx.reserve(10);
                 for (unsigned int i = 0; i < num; ++i) {
                     AI_NFF2_GET_NEXT_TOKEN();
-                    SkipSpaces(line, &sz);
-                    unsigned int numIdx = ::strtoul10(sz, &sz);
+                    SkipSpaces(line, &sz, lineEnd);
+                    unsigned int numIdx = strtoul10(sz, &sz);
 
                     // read all faces indices
                     if (numIdx) {
-                        // mesh.faces.push_back(numIdx);
-                        // tempIdx.erase(tempIdx.begin(),tempIdx.end());
                         tempIdx.resize(numIdx);
 
                         for (unsigned int a = 0; a < numIdx; ++a) {
-                            SkipSpaces(sz, &sz);
-                            unsigned int m = ::strtoul10(sz, &sz);
+                            SkipSpaces(sz, &sz, lineEnd);
+                            unsigned int m = strtoul10(sz, &sz);
                             if (m >= (unsigned int)tempPositions.size()) {
                                 ASSIMP_LOG_ERROR("NFF2: Vertex index overflow");
                                 m = 0;
                             }
-                            // mesh.vertices.push_back (tempPositions[idx]);
                             tempIdx[a] = m;
                         }
                     }
@@ -439,14 +429,14 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     shader.color = aiColor3D(1.f, 1.f, 1.f);
                     aiColor4D c = aiColor4D(1.f, 1.f, 1.f, 1.f);
                     while (true) {
-                        SkipSpaces(sz, &sz);
+                        SkipSpaces(sz, &sz, lineEnd);
                         if (IsLineEnd(*sz)) break;
 
                         // per-polygon colors
                         if (TokenMatch(sz, "0x", 2)) {
                             hasColor = true;
                             const char *sz2 = sz;
-                            numIdx = ::strtoul16(sz, &sz);
+                            numIdx = strtoul16(sz, &sz);
                             const unsigned int diff = (unsigned int)(sz - sz2);
 
                             // 0xRRGGBB
@@ -517,8 +507,8 @@ void NFFImporter::InternReadFile(const std::string &pFile,
 
                         // Material ID?
                         else if (!materialTable.empty() && TokenMatch(sz, "matid", 5)) {
-                            SkipSpaces(&sz);
-                            matIdx = ::strtoul10(sz, &sz);
+                            SkipSpaces(&sz, lineEnd);
+                            matIdx = strtoul10(sz, &sz);
                             if (matIdx >= materialTable.size()) {
                                 ASSIMP_LOG_ERROR("NFF2: Material index overflow.");
                                 matIdx = 0;
@@ -534,7 +524,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                             shader.specular = mat.specular;
                             shader.shininess = mat.shininess;
                         } else
-                            SkipToken(sz);
+                            SkipToken(sz, lineEnd);
                     }
 
                     // search the list of all shaders we have for this object whether
@@ -656,7 +646,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     sz = &line[1];
                     out = currentMesh;
                 }
-                SkipSpaces(sz, &sz);
+                SkipSpaces(sz, &sz, lineEnd);
                 unsigned int m = strtoul10(sz);
 
                 // ---- flip the face order
@@ -684,13 +674,13 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                     }
                     if (out == currentMeshWithUVCoords) {
                         // FIX: in one test file this wraps over multiple lines
-                        SkipSpaces(&sz);
+                        SkipSpaces(&sz, lineEnd);
                         if (IsLineEnd(*sz)) {
                             GetNextLine(buffer, line);
                             sz = line;
                         }
                         AI_NFF_PARSE_FLOAT(v.x);
-                        SkipSpaces(&sz);
+                        SkipSpaces(&sz, lineEnd);
                         if (IsLineEnd(*sz)) {
                             GetNextLine(buffer, line);
                             sz = line;
@@ -724,7 +714,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                 // if the next one is NOT a number we assume it is a texture file name
                 // this feature is used by some NFF files on the internet and it has
                 // been implemented as it can be really useful
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, lineEnd);
                 if (!IsNumeric(*sz)) {
                     // TODO: Support full file names with spaces and quotation marks ...
                     const char *p = sz;
@@ -738,10 +728,8 @@ void NFFImporter::InternReadFile(const std::string &pFile,
                 } else {
                     AI_NFF_PARSE_FLOAT(s.ambient); // optional
                 }
-            }
-            // 'shader' - other way to specify a texture
-            else if (TokenMatch(sz, "shader", 6)) {
-                SkipSpaces(&sz);
+            } else if (TokenMatch(sz, "shader", 6)) { // 'shader' - other way to specify a texture
+                SkipSpaces(&sz, lineEnd);
                 const char *old = sz;
                 while (!IsSpaceOrNewLine(*sz))
                     ++sz;
@@ -896,7 +884,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             }
             // 'tess' - tessellation
             else if (TokenMatch(sz, "tess", 4)) {
-                SkipSpaces(&sz);
+                SkipSpaces(&sz, lineEnd);
                 iTesselation = strtoul10(sz);
             }
             // 'from' - camera position
@@ -936,7 +924,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
             // '' - comment
             else if ('#' == line[0]) {
                 const char *space;
-                SkipSpaces(&line[1], &space);
+                SkipSpaces(&line[1], &space, lineEnd);
                 if (!IsLineEnd(*space)) {
                     ASSIMP_LOG_INFO(space);
                 }
@@ -1164,5 +1152,7 @@ void NFFImporter::InternReadFile(const std::string &pFile,
     }
     pScene->mRootNode = root;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_NFF_IMPORTER

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -92,10 +92,6 @@ BaseImporter::BaseImporter() AI_NO_EXCEPT
         : m_progress() {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BaseImporter::~BaseImporter() = default;
 
 void BaseImporter::UpdateImporterScale(Importer *pImp) {
     ai_assert(pImp != nullptr);
@@ -254,9 +250,10 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 /*static*/ bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
         const char *ext0,
         const char *ext1,
-        const char *ext2) {
+        const char *ext2,
+        const char *ext3) {
     std::set<std::string> extensions;
-    for (const char* ext : {ext0, ext1, ext2}) {
+    for (const char* ext : {ext0, ext1, ext2, ext3}) {
         if (ext == nullptr) continue;
         extensions.emplace(ext);
     }
@@ -357,11 +354,7 @@ std::string BaseImporter::GetExtension(const std::string &pFile) {
     return false;
 }
 
-#ifdef ASSIMP_USE_HUNTER
-#include <utf8.h>
-#else
-#include "../contrib/utf8cpp/source/utf8.h"
-#endif
+#include "utf8.h"
 
 // ------------------------------------------------------------------------------------------------
 // Convert to UTF8 data

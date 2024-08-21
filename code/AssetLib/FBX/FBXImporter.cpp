@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -72,30 +72,25 @@ using namespace Assimp::Formatter;
 using namespace Assimp::FBX;
 
 namespace {
-
-static const aiImporterDesc desc = {
-	"Autodesk FBX Importer",
-	"",
-	"",
-	"",
-	aiImporterFlags_SupportTextFlavour,
-	0,
-	0,
-	0,
-	0,
-	"fbx"
-};
+    static constexpr aiImporterDesc desc = {
+	    "Autodesk FBX Importer",
+	    "",
+	    "",
+	    "",
+	    aiImporterFlags_SupportTextFlavour,
+	    0,
+	    0,
+	    0,
+	    0,
+	    "fbx"
+    };
 }
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by #Importer
-FBXImporter::FBXImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool FBXImporter::CanRead(const std::string & pFile, IOSystem * pIOHandler, bool /*checkSig*/) const {
 	// at least ASCII-FBX files usually have a 'FBX' somewhere in their head
-	static const char *tokens[] = { "fbx" };
+	static const char *tokens[] = { " \n\r\n " };
 	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 

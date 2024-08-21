@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
           - name: windows-latest-cl.exe
@@ -35,15 +35,6 @@ jobs:
             os: ubuntu-latest
             cxx: g++
             cc: gcc
-          - name: ubuntu-gcc-hunter
-            os: ubuntu-latest
-            toolchain: ninja-gcc-cxx17-fpic
-          - name: macos-clang-hunter
-            os: macos-latest
-            toolchain: ninja-clang-cxx17-fpic
-          - name: windows-msvc-hunter
-            os: windows-latest
-            toolchain: ninja-vs-win64-cxx17
 
     steps:
     - uses: actions/checkout@v4
@@ -55,29 +46,15 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
     
     - name: Set Compiler Environment
-      if: "!endsWith(matrix.name, 'hunter')"
       uses: lukka/set-shell-env@v1
       with:
         CXX: ${{ matrix.cxx }}
         CC: ${{ matrix.cc }}
 
-    - name: Set Compiler Environment for Hunter on Windows
-      if: startsWith(matrix.name, 'windows') && endsWith(matrix.name, 'hunter')
-      uses: lukka/set-shell-env@v1
-      with:
-        VS160COMNTOOLS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools
-
-    - name: Checkout Hunter toolchains
-      if: endsWith(matrix.name, 'hunter')
-      uses: actions/checkout@v4
-      with:
-        repository: cpp-pm/polly
-        path: cmake/polly
-
     - name: Cache DX SDK
       id: dxcache
       if: contains(matrix.name, 'windows')
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: '${{ github.workspace }}/DX_SDK'
         key: ${{ runner.os }}-DX_SDK
@@ -121,7 +98,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -63,7 +63,7 @@ using namespace MD2;
 class MD2Importer : public BaseImporter {
 public:
     MD2Importer();
-    ~MD2Importer() override;
+    ~MD2Importer() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

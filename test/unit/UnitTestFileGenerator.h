@@ -44,9 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <gtest/gtest.h>
 
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+#define TMP_PATH "./"
+#elif defined(__GNUC__) || defined(__clang__)
+#define TMP_PATH "/tmp/"
+#endif
+
 #if defined(_MSC_VER)
 #include <io.h>
-#define TMP_PATH "./"
 inline FILE* MakeTmpFile(char* tmplate)
 {
     auto pathtemplate = _mktemp(tmplate);
@@ -60,7 +65,6 @@ inline FILE* MakeTmpFile(char* tmplate)
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)
-#define TMP_PATH "/tmp/"
 inline FILE* MakeTmpFile(char* tmplate)
 {
     auto fd = mkstemp(tmplate);

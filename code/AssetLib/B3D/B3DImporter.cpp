@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -59,10 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 using namespace std;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "BlitzBasic 3D Importer",
     "",
     "",
@@ -79,9 +79,9 @@ static const aiImporterDesc desc = {
 #pragma warning(disable : 4018)
 #endif
 
-//#define DEBUG_B3D
+// #define DEBUG_B3D
 
-template<typename T>
+template <typename T>
 void DeleteAllBarePointers(std::vector<T> &x) {
     for (auto p : x) {
         delete p;
@@ -329,7 +329,7 @@ void B3DImporter::ReadBRUS() {
             mat->AddProperty(&i, 1, AI_MATKEY_TWOSIDED);
         }
 
-        //Textures
+        // Textures
         for (int i = 0; i < n_texs; ++i) {
             int texid = ReadInt();
             if (texid < -1 || (texid >= 0 && texid >= static_cast<int>(_textures.size()))) {
@@ -372,7 +372,7 @@ void B3DImporter::ReadVRTS() {
         }
 
         if (_vflags & 2) {
-            ReadQuat(); //skip v 4bytes...
+            ReadQuat(); // skip v 4bytes...
         }
 
         for (int j = 0; j < _tcsets; ++j) {
@@ -704,22 +704,22 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
         }
     }
 
-    //nodes
+    // nodes
     scene->mRootNode = _nodes[0];
     _nodes.clear(); // node ownership now belongs to scene
 
-    //material
+    // material
     if (!_materials.size()) {
         _materials.emplace_back(std::unique_ptr<aiMaterial>(new aiMaterial));
     }
     scene->mNumMaterials = static_cast<unsigned int>(_materials.size());
     scene->mMaterials = unique_to_array(_materials);
 
-    //meshes
+    // meshes
     scene->mNumMeshes = static_cast<unsigned int>(_meshes.size());
     scene->mMeshes = unique_to_array(_meshes);
 
-    //animations
+    // animations
     if (_animations.size() == 1 && _nodeAnims.size()) {
 
         aiAnimation *anim = _animations.back().get();
@@ -737,5 +737,7 @@ void B3DImporter::ReadBB3D(aiScene *scene) {
     FlipWindingOrderProcess flip;
     flip.Execute(scene);
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_B3D_IMPORTER

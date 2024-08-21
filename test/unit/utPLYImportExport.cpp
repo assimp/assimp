@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -195,4 +195,11 @@ TEST_F(utPLYImportExport, parseErrorTest) {
     //Could not use aiProcess_ValidateDataStructure since it's missing faces.
     const aiScene *scene = importer.ReadFileFromMemory(test_file, strlen(test_file), 0);
     EXPECT_NE(nullptr, scene);
+}
+
+// This file is invalid, we just want to ensure that the importer is not crashing
+TEST_F(utPLYImportExport, parseInvalid) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/crash-30d6d0f7c529b3b66b4131700b7a4580cd7082df.ply", 0);
+    EXPECT_EQ(nullptr, scene);
 }

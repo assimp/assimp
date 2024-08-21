@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -355,6 +355,14 @@ TEST_F(utColladaImportExport, exporterUniqueIdsTest) {
 
     ImportAndCheckIds(outFileNamed, scene);
     ImportAsNames(outFileNamed, scene);
+}
+
+// This file is invalid, we just want to ensure that the importer is not crashing
+// This was reported as GH#4286. The "count" parameter in "Cube-mesh-positions-array" is too small.
+TEST_F(utColladaImportExport, parseInvalid4286) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/box_nested_animation_4286.dae", 0);
+    EXPECT_EQ(nullptr, scene);
 }
 
 #endif

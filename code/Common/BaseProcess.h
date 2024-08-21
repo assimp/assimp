@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -179,11 +179,11 @@ class ASSIMP_API BaseProcess {
     friend class Importer;
 
 public:
-    /** @brief onstructor to be privately used by Importer */
+    /** @brief Constructor to be privately used by Importer */
     BaseProcess() AI_NO_EXCEPT;
 
-    /** @brief Destructor, private as well */
-    virtual ~BaseProcess();
+    /** @brief Destructor */
+    virtual ~BaseProcess() = default;
 
     // -------------------------------------------------------------------
     /**

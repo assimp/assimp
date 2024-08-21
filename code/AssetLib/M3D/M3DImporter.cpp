@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -85,7 +85,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       are listed in aiScene->mRootNode->children, but all without meshes
 */
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Model 3D Importer",
     "",
     "",

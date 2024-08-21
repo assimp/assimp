@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -69,16 +69,20 @@ namespace Assimp {
  */
 class XGLImporter : public BaseImporter, public LogFunctions<XGLImporter> {
 public:
+    /// @brief  The class constructor.
     XGLImporter();
+
+    /// @brief The class destructor.
     ~XGLImporter() override;
 
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     *  See BaseImporter::CanRead() for details.    */
+    /// @brief Returns whether the class can handle the format of the given file.
+    /// @see BaseImporter::CanRead() for details.    */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
             bool checkSig) const override;
 
 protected:
+    void clear();
+
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details  */
@@ -92,10 +96,7 @@ protected:
 
 private:
     struct TempScope {
-        TempScope() :
-                light() {
-            // empty
-        }
+        TempScope() : light() {}
 
         ~TempScope() {
             for (aiMesh *m : meshes_linear) {
@@ -145,9 +146,7 @@ private:
     };
 
     struct TempMaterialMesh {
-        TempMaterialMesh() :
-                pflags(),
-                matid() {
+        TempMaterialMesh() : pflags(), matid() {
             // empty
         }
 
@@ -160,9 +159,7 @@ private:
     };
 
     struct TempFace {
-        TempFace() :
-                has_uv(),
-                has_normal() {
+        TempFace() : has_uv(), has_normal() {
             // empty
         }
 
@@ -175,26 +172,25 @@ private:
 
 private:
     void Cleanup();
-
     std::string GetElementName();
     bool ReadElement();
     bool ReadElementUpToClosing(const char *closetag);
     bool SkipToText();
     unsigned int ReadIDAttr(XmlNode &node);
-
     void ReadWorld(XmlNode &node, TempScope &scope);
     void ReadLighting(XmlNode &node, TempScope &scope);
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope);
-    bool ReadMesh(XmlNode &node, TempScope &scope, bool &empty);
-    void ReadMaterial(XmlNode &node, TempScope &scope);
+    bool ReadMesh(XmlNode &node, TempScope &scope);
+    void AppendOutputMeshes(std::map<unsigned int, TempMaterialMesh> bymat, TempScope &scope, const unsigned int mesh_id);
+    unsigned int ReadVertices(XmlNode &child, TempMesh t, TempFace *tf, bool *has, unsigned int mid, TempScope &scope);
+    unsigned int ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);
     aiVector3D ReadVec3(XmlNode &node);
     aiColor3D ReadCol3(XmlNode &node);
     aiMatrix4x4 ReadTrafo(XmlNode &node);
     unsigned int ReadIndexFromText(XmlNode &node);
     float ReadFloat(XmlNode &node);
-
     aiMesh *ToOutputMesh(const TempMaterialMesh &m);
     void ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out);
     unsigned int ResolveMaterialRef(XmlNode &node, TempScope &scope);

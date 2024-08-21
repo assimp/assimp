@@ -466,8 +466,8 @@ class PyAssimp3DViewer:
         try:
             self.set_shaders_v130()
             self.prepare_shaders()
-        except RuntimeError, message:
-            sys.stderr.write("%s\n" % message)
+        except RuntimeError as e:
+            sys.stderr.write("%s\n" % e.message)
             sys.stdout.write("Could not compile shaders in version 1.30, trying version 1.20\n")
 
         if not shader_compilation_succeeded:

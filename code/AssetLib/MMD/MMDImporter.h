@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,46 +50,34 @@ struct aiMesh;
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
-/// \class  MMDImporter
-/// \brief  Imports MMD a pmx/pmd/vmd file
+/// @class  MMDImporter
+/// @brief  Imports MMD a pmx/pmd/vmd file
 // ------------------------------------------------------------------------------------------------
 class MMDImporter : public BaseImporter {
 public:
-    /// \brief  Default constructor
+    /// @brief  Default constructor
     MMDImporter();
 
-    /// \brief  Destructor
-    ~MMDImporter() override;
+    /// @brief  Destructor
+    ~MMDImporter() override = default;
 
 public:
-    /// \brief  Returns whether the class can handle the format of the given file.
-    /// \remark See BaseImporter::CanRead() for details.
+    /// @brief  Returns whether the class can handle the format of the given file.
+    /// @remark See BaseImporter::CanRead() for details.
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 private:
-    //! \brief  Appends the supported extension.
     const aiImporterDesc* GetInfo() const override;
-
-    //! \brief  File import implementation.
     void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
-
-    //! \brief  Create the data from imported content.
     void CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene);
-
-    //! \brief Create the mesh
     aiMesh* CreateMesh(const pmx::PmxModel* pModel, const int indexStart, const int indexCount);
-
-    //! \brief Create the material
     aiMaterial* CreateMaterial(const pmx::PmxMaterial* pMat, const pmx::PmxModel* pModel);
 
 private:
-    //! Data buffer
     std::vector<char> m_Buffer;
-    //! Absolute pathname of model in file system
     std::string m_strAbsPath;
 };
 
-// ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
 

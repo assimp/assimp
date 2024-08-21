@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <sstream>
 
-static const aiImporterDesc desc = { "MMD Importer",
+static constexpr aiImporterDesc desc = { "MMD Importer",
     "",
     "",
     "surfaces supported?",
@@ -80,10 +80,6 @@ MMDImporter::MMDImporter() :
     DefaultIOSystem io;
     m_strAbsPath = io.getOsSeparator();
 }
-
-// ------------------------------------------------------------------------------------------------
-//  Destructor.
-MMDImporter::~MMDImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an pmx file.

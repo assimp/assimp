@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -53,7 +53,8 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-LimitBoneWeightsProcess::LimitBoneWeightsProcess() : mMaxWeights(AI_LMW_MAX_WEIGHTS) {
+LimitBoneWeightsProcess::LimitBoneWeightsProcess() :
+        mMaxWeights(AI_LMW_MAX_WEIGHTS), mRemoveEmptyBones(true) {
     // empty
 }
 

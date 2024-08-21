@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -96,6 +96,12 @@ TEST(utACImportExport, importSampleSubdiv) {
 TEST(utACImportExport, importSphereWithLight) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+TEST(utACImportExport, importSphereWithLightACC) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/SphereWithLight.acc", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
 

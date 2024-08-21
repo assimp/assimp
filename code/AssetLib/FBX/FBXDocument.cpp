@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -390,7 +390,7 @@ void Document::ReadObjects() {
         const auto foundObject = objects.find(id);
         if(foundObject != objects.end()) {
             DOMWarning("encountered duplicate object id, ignoring first occurrence",el.second);
-            delete foundObject->second;
+            delete_LazyObject(foundObject->second);
         }
 
         objects[id] = new_LazyObject(id, *el.second, *this);

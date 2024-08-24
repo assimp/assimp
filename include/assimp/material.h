@@ -292,10 +292,13 @@ enum aiTextureType {
     aiTextureType_DIFFUSE_ROUGHNESS = 16,
     aiTextureType_AMBIENT_OCCLUSION = 17,
 
-    aiTextureType_MAYA_BASE = 22,
-    aiTextureType_MAYA_SPECULAR = 23,
-    aiTextureType_MAYA_SPECULAR_COLOR = 24,
-    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
+    /** Unknown texture
+     *
+     *  A texture reference that does not match any of the definitions
+     *  above is considered to be 'unknown'. It is still imported,
+     *  but is excluded from any further post-processing.
+    */
+    aiTextureType_UNKNOWN = 18,
 
     /** PBR Material Modifiers
     * Some modern renderers have further PBR modifiers that may be overlaid
@@ -323,20 +326,20 @@ enum aiTextureType {
     */
     aiTextureType_TRANSMISSION = 21,
 
-    /** Unknown texture
-     *
-     *  A texture reference that does not match any of the definitions
-     *  above is considered to be 'unknown'. It is still imported,
-     *  but is excluded from any further post-processing.
-    */
-    aiTextureType_UNKNOWN = 18,
+    /**
+     * Maya material declarations
+     */
+    aiTextureType_MAYA_BASE = 22,
+    aiTextureType_MAYA_SPECULAR = 23,
+    aiTextureType_MAYA_SPECULAR_COLOR = 24,
+    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_TRANSMISSION
+#define AI_TEXTURE_TYPE_MAX aiTextureType_MAYA_SPECULAR_ROUGHNESS
 
 // -------------------------------------------------------------------------------
 /**

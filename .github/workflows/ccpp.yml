@@ -177,7 +177,7 @@ jobs:
       - id: upload-url
         run: |
           echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v4
         with:
           name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
       - uses: actions/upload-release-asset@v1

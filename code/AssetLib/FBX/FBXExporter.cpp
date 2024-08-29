@@ -2487,6 +2487,57 @@ const std::map<std::string,std::pair<std::string,char>> transform_types = {
     {"GeometricScalingInverse", {"GeometricScalingInverse", 'i'}}
 };
 
+//add metadata to fbx property
+void add_meta(FBX::Node& fbx_node, const aiNode* node){
+    if(node->mMetaData == nullptr) return;
+    aiMetadata* meta = node->mMetaData;
+    for (unsigned int i = 0; i < meta->mNumProperties; ++i) {
+        aiString key = meta->mKeys[i];
+        aiMetadataEntry* entry = &meta->mValues[i];
+        switch (entry->mType) {
+        case AI_BOOL:{
+            bool val = *static_cast<bool *>(entry->mData);
+            fbx_node.AddP70bool(key.C_Str(), val);
+            break;
+        }
+        case AI_INT32:{
+            int32_t val = *static_cast<int32_t *>(entry->mData);
+            fbx_node.AddP70int(key.C_Str(), val);
+            break;
+        }
+        case AI_UINT64:{
+            //use string to add uint64
+            uint64_t val = *static_cast<uint64_t *>(entry->mData);
+            fbx_node.AddP70string(key.C_Str(), std::to_string(val).c_str());
+            break;
+        }
+        case AI_FLOAT:{
+            float val = *static_cast<float *>(entry->mData);
+            fbx_node.AddP70double(key.C_Str(), val);
+            break;
+        }
+        case AI_DOUBLE:{
+            double val = *static_cast<double *>(entry->mData);
+            fbx_node.AddP70double(key.C_Str(), val);
+            break;
+        }
+        case AI_AISTRING:{
+            aiString val = *static_cast<aiString *>(entry->mData);
+            fbx_node.AddP70string(key.C_Str(), val.C_Str());
+            break;
+        }
+        case AI_AIMETADATA: {
+            //ignore
+            break;
+        }
+        default:
+            break;
+        }
+        
+    }
+    
+}
+
 // write a single model node to the stream
 void FBXExporter::WriteModelNode(
     StreamWriterLE& outstream,
@@ -2554,6 +2605,7 @@ void FBXExporter::WriteModelNode(
             }
         }
     }
+    add_meta(p, node);
     m.AddChild(p);
 
     // not sure what these are for,

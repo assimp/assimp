@@ -192,13 +192,13 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
 
         for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
             const aiFace& face = pMesh->mFaces[a];
-
             if( face.mNumIndices != 3)  {
                 bNeed = true;
             }
         }
-        if (!bNeed)
+        if (!bNeed) {
             return false;
+        }
     }
     else if (!(pMesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
         return false;
@@ -213,8 +213,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
             get_normals = false;
         }
         if( face.mNumIndices <= 3) {
-            numOut++;
-
+            ++numOut;
         } else {
             numOut += face.mNumIndices-2;
             max_out = std::max(max_out,face.mNumIndices);
@@ -222,8 +221,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
     }
 
     // Just another check whether aiMesh::mPrimitiveTypes is correct
-    ai_assert(numOut != pMesh->mNumFaces);
-
+    if (numOut == pMesh->mNumFaces) {
+        ASSIMP_LOG_ERROR( "Invalidation detected in the number of indices: does not fit to the primitive type." );
+        return false;
+    }
+    
     aiVector3D *nor_out = nullptr;
 
     // if we don't have normals yet, but expect them to be a cheap side

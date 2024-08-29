@@ -725,6 +725,12 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS "IMPORT_MDL_HL1_READ_ANIMATION_EVENTS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether you want to convert the HS1 coordinate system in a special way.
+ * The default value is true (S1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_TRANSFORM_COORD_SYSTEM "TRANSFORM COORDSYSTEM FOR HS! MODELS"
+// ---------------------------------------------------------------------------
 /** @brief Set whether the MDL (HL1) importer will read blend controllers.
  * \note This property requires AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS to be set to true.
  *

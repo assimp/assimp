@@ -196,15 +196,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __cplusplus
 /* No explicit 'struct' and 'enum' tags for C++, this keeps showing up
- * in doxydocs.
- */
+ * in doxydocs. */
 #define C_STRUCT
 #define C_ENUM
 #else
 //////////////////////////////////////////////////////////////////////////
 /* To build the documentation, make sure ASSIMP_DOXYGEN_BUILD
-     * is defined by Doxygen's preprocessor. The corresponding
-     * entries in the DOXYFILE are: */
+ * is defined by Doxygen's preprocessor. The corresponding
+ * entries in the DOXYFILE are: */
 //////////////////////////////////////////////////////////////////////////
 #if 0
     ENABLE_PREPROCESSING   = YES
@@ -251,7 +250,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //////////////////////////////////////////////////////////////////////////
 /* Define ASSIMP_DOUBLE_PRECISION to compile assimp
-     * with double precision support (64-bit). */
+ * with double precision support (64-bit). */
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef ASSIMP_DOUBLE_PRECISION

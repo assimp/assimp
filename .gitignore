@@ -120,3 +120,7 @@ tools/assimp_qt_viewer/ui_mainwindow.h
 
 #Generated directory
 generated/*
+
+# 3rd party cloned repos/tarballs etc
+# tinyusdz repo, automatically cloned via CMake
+contrib/tinyusdz/autoclone

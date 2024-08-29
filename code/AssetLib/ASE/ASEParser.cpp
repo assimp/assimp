@@ -66,23 +66,24 @@ using namespace Assimp::ASE;
 // Handle a "top-level" section in the file. EOF is no error in this case.
 
 #define AI_ASE_HANDLE_TOP_LEVEL_SECTION()          \
-    else if ('{' == *filePtr) iDepth++;            \
-    else if ('}' == *filePtr) {                    \
+    else if ('{' == *mFilePtr)                     \
+        ++iDepth;                                  \
+    else if ('}' == *mFilePtr) {                   \
         if (0 == --iDepth) {                       \
-            ++filePtr;                             \
+            ++mFilePtr;                            \
             SkipToNextToken();                     \
             return;                                \
         }                                          \
     }                                              \
-    if ('\0' == *filePtr) {                        \
+    if ('\0' == *mFilePtr) {                       \
         return;                                    \
     }                                              \
-    if (IsLineEnd(*filePtr) && !bLastWasEndLine) { \
+    if (IsLineEnd(*mFilePtr) && !bLastWasEndLine) {\
         ++iLineNumber;                             \
         bLastWasEndLine = true;                    \
     } else                                         \
         bLastWasEndLine = false;                   \
-    ++filePtr;
+    ++mFilePtr;
 
 // ------------------------------------------------------------------------------------------------
 // Handle a nested section in the file. EOF is an error in this case
@@ -90,32 +91,32 @@ using namespace Assimp::ASE;
 // @param msg Full name of the section (including the asterisk)
 
 #define AI_ASE_HANDLE_SECTION(level, msg)                          \
-    if ('{' == *filePtr)                                           \
+    if ('{' == *mFilePtr)                                          \
         iDepth++;                                                  \
-    else if ('}' == *filePtr) {                                    \
+    else if ('}' == *mFilePtr) {                                   \
         if (0 == --iDepth) {                                       \
-            ++filePtr;                                             \
+            ++mFilePtr;                                            \
             SkipToNextToken();                                     \
             return;                                                \
         }                                                          \
-    } else if ('\0' == *filePtr) {                                 \
+    } else if ('\0' == *mFilePtr) {                                \
         LogError("Encountered unexpected EOL while parsing a " msg \
                  " chunk (Level " level ")");                      \
     }                                                              \
-    if (IsLineEnd(*filePtr) && !bLastWasEndLine) {                 \
+    if (IsLineEnd(*mFilePtr) && !bLastWasEndLine) {                \
         ++iLineNumber;                                             \
         bLastWasEndLine = true;                                    \
     } else                                                         \
         bLastWasEndLine = false;                                   \
-    ++filePtr;
+    ++mFilePtr;
 
 // ------------------------------------------------------------------------------------------------
-Parser::Parser(const char *szFile, unsigned int fileFormatDefault) :
-        filePtr(nullptr), mEnd (nullptr) {
-    ai_assert(nullptr != szFile);
+Parser::Parser(const char *file, size_t fileLen, unsigned int fileFormatDefault) :
+        mFilePtr(nullptr), mEnd (nullptr) {
+    ai_assert(file != nullptr);
 
-    filePtr = szFile;
-    mEnd = filePtr + std::strlen(filePtr);
+    mFilePtr = file;
+    mEnd = mFilePtr + fileLen;
     iFileFormat = fileFormatDefault;
 
     // make sure that the color values are invalid
@@ -179,9 +180,9 @@ AI_WONT_RETURN void Parser::LogError(const char *szWarn) {
 // ------------------------------------------------------------------------------------------------
 bool Parser::SkipToNextToken() {
     while (true) {
-        char me = *filePtr;
+        char me = *mFilePtr;
 
-        if (filePtr == mEnd) {
+        if (mFilePtr == mEnd) {
             return false;
         }
 
@@ -198,7 +199,7 @@ bool Parser::SkipToNextToken() {
             return false;
         }
 
-        ++filePtr;
+        ++mFilePtr;
     }
 }
 
@@ -207,22 +208,22 @@ bool Parser::SkipSection() {
     // must handle subsections ...
     int iCnt = 0;
     while (true) {
-        if ('}' == *filePtr) {
+        if ('}' == *mFilePtr) {
             --iCnt;
             if (0 == iCnt) {
                 // go to the next valid token ...
-                ++filePtr;
+                ++mFilePtr;
                 SkipToNextToken();
                 return true;
             }
-        } else if ('{' == *filePtr) {
+        } else if ('{' == *mFilePtr) {
             ++iCnt;
-        } else if ('\0' == *filePtr) {
+        } else if ('\0' == *mFilePtr) {
             LogWarning("Unable to parse block: Unexpected EOF, closing bracket \'}\' was expected [#1]");
             return false;
-        } else if (IsLineEnd(*filePtr))
+        } else if (IsLineEnd(*mFilePtr))
             ++iLineNumber;
-        ++filePtr;
+        ++mFilePtr;
     }
 }
 
@@ -230,11 +231,11 @@ bool Parser::SkipSection() {
 void Parser::Parse() {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Version should be 200. Validate this ...
-            if (TokenMatch(filePtr, "3DSMAX_ASCIIEXPORT", 18)) {
+            if (TokenMatch(mFilePtr, "3DSMAX_ASCIIEXPORT", 18)) {
                 unsigned int fmt;
                 ParseLV4MeshLong(fmt);
 
@@ -255,23 +256,23 @@ void Parser::Parse() {
                 continue;
             }
             // main scene information
-            if (TokenMatch(filePtr, "SCENE", 5)) {
+            if (TokenMatch(mFilePtr, "SCENE", 5)) {
                 ParseLV1SceneBlock();
                 continue;
             }
             // "group" - no implementation yet, in facte
             // we're just ignoring them for the moment
-            if (TokenMatch(filePtr, "GROUP", 5)) {
+            if (TokenMatch(mFilePtr, "GROUP", 5)) {
                 Parse();
                 continue;
             }
             // material list
-            if (TokenMatch(filePtr, "MATERIAL_LIST", 13)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_LIST", 13)) {
                 ParseLV1MaterialListBlock();
                 continue;
             }
             // geometric object (mesh)
-            if (TokenMatch(filePtr, "GEOMOBJECT", 10))
+            if (TokenMatch(mFilePtr, "GEOMOBJECT", 10))
 
             {
                 m_vMeshes.emplace_back("UNNAMED");
@@ -279,7 +280,7 @@ void Parser::Parse() {
                 continue;
             }
             // helper object = dummy in the hierarchy
-            if (TokenMatch(filePtr, "HELPEROBJECT", 12))
+            if (TokenMatch(mFilePtr, "HELPEROBJECT", 12))
 
             {
                 m_vDummies.emplace_back();
@@ -287,7 +288,7 @@ void Parser::Parse() {
                 continue;
             }
             // light object
-            if (TokenMatch(filePtr, "LIGHTOBJECT", 11))
+            if (TokenMatch(mFilePtr, "LIGHTOBJECT", 11))
 
             {
                 m_vLights.emplace_back("UNNAMED");
@@ -295,20 +296,20 @@ void Parser::Parse() {
                 continue;
             }
             // camera object
-            if (TokenMatch(filePtr, "CAMERAOBJECT", 12)) {
+            if (TokenMatch(mFilePtr, "CAMERAOBJECT", 12)) {
                 m_vCameras.emplace_back("UNNAMED");
                 ParseLV1ObjectBlock(m_vCameras.back());
                 continue;
             }
             // comment - print it on the console
-            if (TokenMatch(filePtr, "COMMENT", 7)) {
+            if (TokenMatch(mFilePtr, "COMMENT", 7)) {
                 std::string out = "<unknown>";
                 ParseString(out, "*COMMENT");
                 LogInfo(("Comment: " + out).c_str());
                 continue;
             }
             // ASC bone weights
-            if (AI_ASE_IS_OLD_FILE_FORMAT() && TokenMatch(filePtr, "MESH_SOFTSKINVERTS", 18)) {
+            if (AI_ASE_IS_OLD_FILE_FORMAT() && TokenMatch(mFilePtr, "MESH_SOFTSKINVERTS", 18)) {
                 ParseLV1SoftSkinBlock();
             }
         }
@@ -340,25 +341,25 @@ void Parser::ParseLV1SoftSkinBlock() {
     */
     // **************************************************************
     while (true) {
-        if (*filePtr == '}') {
-            ++filePtr;
+        if (*mFilePtr == '}') {
+            ++mFilePtr;
             return;
-        } else if (*filePtr == '\0')
+        } else if (*mFilePtr == '\0')
             return;
-        else if (*filePtr == '{')
-            ++filePtr;
+        else if (*mFilePtr == '{')
+            ++mFilePtr;
 
         else // if (!IsSpace(*filePtr) && !IsLineEnd(*filePtr))
         {
             ASE::Mesh *curMesh = nullptr;
             unsigned int numVerts = 0;
 
-            const char *sz = filePtr;
-            while (!IsSpaceOrNewLine(*filePtr)) {
-                ++filePtr;
+            const char *sz = mFilePtr;
+            while (!IsSpaceOrNewLine(*mFilePtr)) {
+                ++mFilePtr;
             }
 
-            const unsigned int diff = (unsigned int)(filePtr - sz);
+            const unsigned int diff = (unsigned int)(mFilePtr - sz);
             if (diff) {
                 std::string name = std::string(sz, diff);
                 for (std::vector<ASE::Mesh>::iterator it = m_vMeshes.begin();
@@ -374,24 +375,24 @@ void Parser::ParseLV1SoftSkinBlock() {
                     // Skip the mesh data - until we find a new mesh
                     // or the end of the *MESH_SOFTSKINVERTS section
                     while (true) {
-                        SkipSpacesAndLineEnd(&filePtr, mEnd);
-                        if (*filePtr == '}') {
-                            ++filePtr;
+                        SkipSpacesAndLineEnd(&mFilePtr, mEnd);
+                        if (*mFilePtr == '}') {
+                            ++mFilePtr;
                             return;
-                        } else if (!IsNumeric(*filePtr))
+                        } else if (!IsNumeric(*mFilePtr))
                             break;
 
-                        SkipLine(&filePtr, mEnd);
+                        SkipLine(&mFilePtr, mEnd);
                     }
                 } else {
-                    SkipSpacesAndLineEnd(&filePtr, mEnd);
+                    SkipSpacesAndLineEnd(&mFilePtr, mEnd);
                     ParseLV4MeshLong(numVerts);
 
                     // Reserve enough storage
                     curMesh->mBoneVertices.reserve(numVerts);
 
                     for (unsigned int i = 0; i < numVerts; ++i) {
-                        SkipSpacesAndLineEnd(&filePtr, mEnd);
+                        SkipSpacesAndLineEnd(&mFilePtr, mEnd);
                         unsigned int numWeights;
                         ParseLV4MeshLong(numWeights);
 
@@ -421,7 +422,7 @@ void Parser::ParseLV1SoftSkinBlock() {
                                 me.first = static_cast<int>(curMesh->mBones.size());
                                 curMesh->mBones.emplace_back(bone);
                             }
-                            ParseLV4MeshFloat(me.second);
+                            ParseLV4MeshReal(me.second);
 
                             // Add the new bone weight to list
                             vert.mBoneWeights.push_back(me);
@@ -430,10 +431,10 @@ void Parser::ParseLV1SoftSkinBlock() {
                 }
             }
         }
-        if (*filePtr == '\0')
+        if (*mFilePtr == '\0')
             return;
-        ++filePtr;
-        SkipSpacesAndLineEnd(&filePtr, mEnd);
+        ++mFilePtr;
+        SkipSpacesAndLineEnd(&mFilePtr, mEnd);
     }
 }
 
@@ -441,35 +442,35 @@ void Parser::ParseLV1SoftSkinBlock() {
 void Parser::ParseLV1SceneBlock() {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "SCENE_BACKGROUND_STATIC", 23))
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "SCENE_BACKGROUND_STATIC", 23))
 
             {
                 // parse a color triple and assume it is really the bg color
                 ParseLV4MeshFloatTriple(&m_clrBackground.r);
                 continue;
             }
-            if (TokenMatch(filePtr, "SCENE_AMBIENT_STATIC", 20))
+            if (TokenMatch(mFilePtr, "SCENE_AMBIENT_STATIC", 20))
 
             {
                 // parse a color triple and assume it is really the bg color
                 ParseLV4MeshFloatTriple(&m_clrAmbient.r);
                 continue;
             }
-            if (TokenMatch(filePtr, "SCENE_FIRSTFRAME", 16)) {
+            if (TokenMatch(mFilePtr, "SCENE_FIRSTFRAME", 16)) {
                 ParseLV4MeshLong(iFirstFrame);
                 continue;
             }
-            if (TokenMatch(filePtr, "SCENE_LASTFRAME", 15)) {
+            if (TokenMatch(mFilePtr, "SCENE_LASTFRAME", 15)) {
                 ParseLV4MeshLong(iLastFrame);
                 continue;
             }
-            if (TokenMatch(filePtr, "SCENE_FRAMESPEED", 16)) {
+            if (TokenMatch(mFilePtr, "SCENE_FRAMESPEED", 16)) {
                 ParseLV4MeshLong(iFrameSpeed);
                 continue;
             }
-            if (TokenMatch(filePtr, "SCENE_TICKSPERFRAME", 19)) {
+            if (TokenMatch(mFilePtr, "SCENE_TICKSPERFRAME", 19)) {
                 ParseLV4MeshLong(iTicksPerFrame);
                 continue;
             }
@@ -485,9 +486,9 @@ void Parser::ParseLV1MaterialListBlock() {
     unsigned int iMaterialCount = 0;
     unsigned int iOldMaterialCount = (unsigned int)m_vMaterials.size();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "MATERIAL_COUNT", 14)) {
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "MATERIAL_COUNT", 14)) {
                 ParseLV4MeshLong(iMaterialCount);
 
                 if (UINT_MAX - iOldMaterialCount < iMaterialCount) {
@@ -499,7 +500,7 @@ void Parser::ParseLV1MaterialListBlock() {
                 m_vMaterials.resize(iOldMaterialCount + iMaterialCount, Material("INVALID"));
                 continue;
             }
-            if (TokenMatch(filePtr, "MATERIAL", 8)) {
+            if (TokenMatch(mFilePtr, "MATERIAL", 8)) {
                 // ensure we have at least one material allocated
                 if (iMaterialCount == 0) {
                     LogWarning("*MATERIAL_COUNT unspecified or 0");
@@ -524,7 +525,7 @@ void Parser::ParseLV1MaterialListBlock() {
             if( iDepth == 1 ){
                 // CRUDE HACK: support missing brace after "Ascii Scene Exporter v2.51"
                 LogWarning("Missing closing brace in material list");
-                --filePtr;
+                --mFilePtr;
                 return;
             }
         }
@@ -538,37 +539,37 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
 
     unsigned int iNumSubMaterials = 0;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "MATERIAL_NAME", 13)) {
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "MATERIAL_NAME", 13)) {
                 if (!ParseString(mat.mName, "*MATERIAL_NAME"))
                     SkipToNextToken();
                 continue;
             }
             // ambient material color
-            if (TokenMatch(filePtr, "MATERIAL_AMBIENT", 16)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_AMBIENT", 16)) {
                 ParseLV4MeshFloatTriple(&mat.mAmbient.r);
                 continue;
             }
             // diffuse material color
-            if (TokenMatch(filePtr, "MATERIAL_DIFFUSE", 16)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_DIFFUSE", 16)) {
                 ParseLV4MeshFloatTriple(&mat.mDiffuse.r);
                 continue;
             }
             // specular material color
-            if (TokenMatch(filePtr, "MATERIAL_SPECULAR", 17)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_SPECULAR", 17)) {
                 ParseLV4MeshFloatTriple(&mat.mSpecular.r);
                 continue;
             }
             // material shading type
-            if (TokenMatch(filePtr, "MATERIAL_SHADING", 16)) {
-                if (TokenMatch(filePtr, "Blinn", 5)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_SHADING", 16)) {
+                if (TokenMatch(mFilePtr, "Blinn", 5)) {
                     mat.mShading = Discreet3DS::Blinn;
-                } else if (TokenMatch(filePtr, "Phong", 5)) {
+                } else if (TokenMatch(mFilePtr, "Phong", 5)) {
                     mat.mShading = Discreet3DS::Phong;
-                } else if (TokenMatch(filePtr, "Flat", 4)) {
+                } else if (TokenMatch(mFilePtr, "Flat", 4)) {
                     mat.mShading = Discreet3DS::Flat;
-                } else if (TokenMatch(filePtr, "Wire", 4)) {
+                } else if (TokenMatch(mFilePtr, "Wire", 4)) {
                     mat.mShading = Discreet3DS::Wire;
                 } else {
                     // assume gouraud shading
@@ -578,15 +579,15 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
                 continue;
             }
             // material transparency
-            if (TokenMatch(filePtr, "MATERIAL_TRANSPARENCY", 21)) {
-                ParseLV4MeshFloat(mat.mTransparency);
+            if (TokenMatch(mFilePtr, "MATERIAL_TRANSPARENCY", 21)) {
+                ParseLV4MeshReal(mat.mTransparency);
                 mat.mTransparency = ai_real(1.0) - mat.mTransparency;
                 continue;
             }
             // material self illumination
-            if (TokenMatch(filePtr, "MATERIAL_SELFILLUM", 18)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_SELFILLUM", 18)) {
                 ai_real f = 0.0;
-                ParseLV4MeshFloat(f);
+                ParseLV4MeshReal(f);
 
                 mat.mEmissive.r = f;
                 mat.mEmissive.g = f;
@@ -594,71 +595,71 @@ void Parser::ParseLV2MaterialBlock(ASE::Material &mat) {
                 continue;
             }
             // material shininess
-            if (TokenMatch(filePtr, "MATERIAL_SHINE", 14)) {
-                ParseLV4MeshFloat(mat.mSpecularExponent);
+            if (TokenMatch(mFilePtr, "MATERIAL_SHINE", 14)) {
+                ParseLV4MeshReal(mat.mSpecularExponent);
                 mat.mSpecularExponent *= 15;
                 continue;
             }
             // two-sided material
-            if (TokenMatch(filePtr, "MATERIAL_TWOSIDED", 17)) {
+            if (TokenMatch(mFilePtr, "MATERIAL_TWOSIDED", 17)) {
                 mat.mTwoSided = true;
                 continue;
             }
             // material shininess strength
-            if (TokenMatch(filePtr, "MATERIAL_SHINESTRENGTH", 22)) {
-                ParseLV4MeshFloat(mat.mShininessStrength);
+            if (TokenMatch(mFilePtr, "MATERIAL_SHINESTRENGTH", 22)) {
+                ParseLV4MeshReal(mat.mShininessStrength);
                 continue;
             }
             // diffuse color map
-            if (TokenMatch(filePtr, "MAP_DIFFUSE", 11)) {
+            if (TokenMatch(mFilePtr, "MAP_DIFFUSE", 11)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexDiffuse);
                 continue;
             }
             // ambient color map
-            if (TokenMatch(filePtr, "MAP_AMBIENT", 11)) {
+            if (TokenMatch(mFilePtr, "MAP_AMBIENT", 11)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexAmbient);
                 continue;
             }
             // specular color map
-            if (TokenMatch(filePtr, "MAP_SPECULAR", 12)) {
+            if (TokenMatch(mFilePtr, "MAP_SPECULAR", 12)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexSpecular);
                 continue;
             }
             // opacity map
-            if (TokenMatch(filePtr, "MAP_OPACITY", 11)) {
+            if (TokenMatch(mFilePtr, "MAP_OPACITY", 11)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexOpacity);
                 continue;
             }
             // emissive map
-            if (TokenMatch(filePtr, "MAP_SELFILLUM", 13)) {
+            if (TokenMatch(mFilePtr, "MAP_SELFILLUM", 13)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexEmissive);
                 continue;
             }
             // bump map
-            if (TokenMatch(filePtr, "MAP_BUMP", 8)) {
+            if (TokenMatch(mFilePtr, "MAP_BUMP", 8)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexBump);
             }
             // specular/shininess map
-            if (TokenMatch(filePtr, "MAP_SHINESTRENGTH", 17)) {
+            if (TokenMatch(mFilePtr, "MAP_SHINESTRENGTH", 17)) {
                 // parse the texture block
                 ParseLV3MapBlock(mat.sTexShininess);
                 continue;
             }
             // number of submaterials
-            if (TokenMatch(filePtr, "NUMSUBMTLS", 10)) {
+            if (TokenMatch(mFilePtr, "NUMSUBMTLS", 10)) {
                 ParseLV4MeshLong(iNumSubMaterials);
 
                 // allocate enough storage
                 mat.avSubMaterials.resize(iNumSubMaterials, Material("INVALID SUBMATERIAL"));
             }
             // submaterial chunks
-            if (TokenMatch(filePtr, "SUBMATERIAL", 11)) {
+            if (TokenMatch(mFilePtr, "SUBMATERIAL", 11)) {
                 // ensure we have at least one material allocated
                 if (iNumSubMaterials == 0) {
                     LogWarning("*NUMSUBMTLS unspecified or 0");
@@ -701,10 +702,10 @@ void Parser::ParseLV3MapBlock(Texture &map) {
     bool parsePath = true;
     std::string temp;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
             // type of map
-            if (TokenMatch(filePtr, "MAP_CLASS", 9)) {
+            if (TokenMatch(mFilePtr, "MAP_CLASS", 9)) {
                 temp.clear();
                 if (!ParseString(temp, "*MAP_CLASS"))
                     SkipToNextToken();
@@ -715,7 +716,7 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                 continue;
             }
             // path to the texture
-            if (parsePath && TokenMatch(filePtr, "BITMAP", 6)) {
+            if (parsePath && TokenMatch(mFilePtr, "BITMAP", 6)) {
                 if (!ParseString(map.mMapName, "*BITMAP"))
                     SkipToNextToken();
 
@@ -729,33 +730,33 @@ void Parser::ParseLV3MapBlock(Texture &map) {
                 continue;
             }
             // offset on the u axis
-            if (TokenMatch(filePtr, "UVW_U_OFFSET", 12)) {
-                ParseLV4MeshFloat(map.mOffsetU);
+            if (TokenMatch(mFilePtr, "UVW_U_OFFSET", 12)) {
+                ParseLV4MeshReal(map.mOffsetU);
                 continue;
             }
             // offset on the v axis
-            if (TokenMatch(filePtr, "UVW_V_OFFSET", 12)) {
-                ParseLV4MeshFloat(map.mOffsetV);
+            if (TokenMatch(mFilePtr, "UVW_V_OFFSET", 12)) {
+                ParseLV4MeshReal(map.mOffsetV);
                 continue;
             }
             // tiling on the u axis
-            if (TokenMatch(filePtr, "UVW_U_TILING", 12)) {
-                ParseLV4MeshFloat(map.mScaleU);
+            if (TokenMatch(mFilePtr, "UVW_U_TILING", 12)) {
+                ParseLV4MeshReal(map.mScaleU);
                 continue;
             }
             // tiling on the v axis
-            if (TokenMatch(filePtr, "UVW_V_TILING", 12)) {
-                ParseLV4MeshFloat(map.mScaleV);
+            if (TokenMatch(mFilePtr, "UVW_V_TILING", 12)) {
+                ParseLV4MeshReal(map.mScaleV);
                 continue;
             }
             // rotation around the z-axis
-            if (TokenMatch(filePtr, "UVW_ANGLE", 9)) {
-                ParseLV4MeshFloat(map.mRotation);
+            if (TokenMatch(mFilePtr, "UVW_ANGLE", 9)) {
+                ParseLV4MeshReal(map.mRotation);
                 continue;
             }
             // map blending factor
-            if (TokenMatch(filePtr, "MAP_AMOUNT", 10)) {
-                ParseLV4MeshFloat(map.mTextureBlend);
+            if (TokenMatch(mFilePtr, "MAP_AMOUNT", 10)) {
+                ParseLV4MeshReal(map.mTextureBlend);
                 continue;
             }
         }
@@ -766,14 +767,14 @@ void Parser::ParseLV3MapBlock(Texture &map) {
 // ------------------------------------------------------------------------------------------------
 bool Parser::ParseString(std::string &out, const char *szName) {
     char szBuffer[1024];
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
 
         ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Unexpected EOL", szName);
         LogWarning(szBuffer);
         return false;
     }
     // there must be '"'
-    if ('\"' != *filePtr) {
+    if ('\"' != *mFilePtr) {
 
         ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected "
                                     "to be enclosed in double quotation marks",
@@ -781,8 +782,8 @@ bool Parser::ParseString(std::string &out, const char *szName) {
         LogWarning(szBuffer);
         return false;
     }
-    ++filePtr;
-    const char *sz = filePtr;
+    ++mFilePtr;
+    const char *sz = mFilePtr;
     while (true) {
         if ('\"' == *sz)
             break;
@@ -796,8 +797,8 @@ bool Parser::ParseString(std::string &out, const char *szName) {
         }
         sz++;
     }
-    out = std::string(filePtr, (uintptr_t)sz - (uintptr_t)filePtr);
-    filePtr = sz + 1;
+    out = std::string(mFilePtr, (uintptr_t)sz - (uintptr_t)mFilePtr);
+    mFilePtr = sz + 1;
     return true;
 }
 
@@ -805,48 +806,48 @@ bool Parser::ParseString(std::string &out, const char *szName) {
 void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // first process common tokens such as node name and transform
             // name of the mesh/node
-            if (TokenMatch(filePtr, "NODE_NAME", 9)) {
+            if (TokenMatch(mFilePtr, "NODE_NAME", 9)) {
                 if (!ParseString(node.mName, "*NODE_NAME"))
                     SkipToNextToken();
                 continue;
             }
             // name of the parent of the node
-            if (TokenMatch(filePtr, "NODE_PARENT", 11)) {
+            if (TokenMatch(mFilePtr, "NODE_PARENT", 11)) {
                 if (!ParseString(node.mParent, "*NODE_PARENT"))
                     SkipToNextToken();
                 continue;
             }
             // transformation matrix of the node
-            if (TokenMatch(filePtr, "NODE_TM", 7)) {
+            if (TokenMatch(mFilePtr, "NODE_TM", 7)) {
                 ParseLV2NodeTransformBlock(node);
                 continue;
             }
             // animation data of the node
-            if (TokenMatch(filePtr, "TM_ANIMATION", 12)) {
+            if (TokenMatch(mFilePtr, "TM_ANIMATION", 12)) {
                 ParseLV2AnimationBlock(node);
                 continue;
             }
 
             if (node.mType == BaseNode::Light) {
                 // light settings
-                if (TokenMatch(filePtr, "LIGHT_SETTINGS", 14)) {
+                if (TokenMatch(mFilePtr, "LIGHT_SETTINGS", 14)) {
                     ParseLV2LightSettingsBlock((ASE::Light &)node);
                     continue;
                 }
                 // type of the light source
-                if (TokenMatch(filePtr, "LIGHT_TYPE", 10)) {
-                    if (!ASSIMP_strincmp("omni", filePtr, 4)) {
+                if (TokenMatch(mFilePtr, "LIGHT_TYPE", 10)) {
+                    if (!ASSIMP_strincmp("omni", mFilePtr, 4)) {
                         ((ASE::Light &)node).mLightType = ASE::Light::OMNI;
-                    } else if (!ASSIMP_strincmp("target", filePtr, 6)) {
+                    } else if (!ASSIMP_strincmp("target", mFilePtr, 6)) {
                         ((ASE::Light &)node).mLightType = ASE::Light::TARGET;
-                    } else if (!ASSIMP_strincmp("free", filePtr, 4)) {
+                    } else if (!ASSIMP_strincmp("free", mFilePtr, 4)) {
                         ((ASE::Light &)node).mLightType = ASE::Light::FREE;
-                    } else if (!ASSIMP_strincmp("directional", filePtr, 11)) {
+                    } else if (!ASSIMP_strincmp("directional", mFilePtr, 11)) {
                         ((ASE::Light &)node).mLightType = ASE::Light::DIRECTIONAL;
                     } else {
                         LogWarning("Unknown kind of light source");
@@ -855,13 +856,13 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
                 }
             } else if (node.mType == BaseNode::Camera) {
                 // Camera settings
-                if (TokenMatch(filePtr, "CAMERA_SETTINGS", 15)) {
+                if (TokenMatch(mFilePtr, "CAMERA_SETTINGS", 15)) {
                     ParseLV2CameraSettingsBlock((ASE::Camera &)node);
                     continue;
-                } else if (TokenMatch(filePtr, "CAMERA_TYPE", 11)) {
-                    if (!ASSIMP_strincmp("target", filePtr, 6)) {
+                } else if (TokenMatch(mFilePtr, "CAMERA_TYPE", 11)) {
+                    if (!ASSIMP_strincmp("target", mFilePtr, 6)) {
                         ((ASE::Camera &)node).mCameraType = ASE::Camera::TARGET;
-                    } else if (!ASSIMP_strincmp("free", filePtr, 4)) {
+                    } else if (!ASSIMP_strincmp("free", mFilePtr, 4)) {
                         ((ASE::Camera &)node).mCameraType = ASE::Camera::FREE;
                     } else {
                         LogWarning("Unknown kind of camera");
@@ -871,13 +872,13 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
             } else if (node.mType == BaseNode::Mesh) {
                 // mesh data
                 // FIX: Older files use MESH_SOFTSKIN
-                if (TokenMatch(filePtr, "MESH", 4) ||
-                        TokenMatch(filePtr, "MESH_SOFTSKIN", 13)) {
+                if (TokenMatch(mFilePtr, "MESH", 4) ||
+                        TokenMatch(mFilePtr, "MESH_SOFTSKIN", 13)) {
                     ParseLV2MeshBlock((ASE::Mesh &)node);
                     continue;
                 }
                 // mesh material index
-                if (TokenMatch(filePtr, "MATERIAL_REF", 12)) {
+                if (TokenMatch(mFilePtr, "MATERIAL_REF", 12)) {
                     ParseLV4MeshLong(((ASE::Mesh &)node).iMaterialIndex);
                     continue;
                 }
@@ -891,18 +892,18 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode &node) {
 void Parser::ParseLV2CameraSettingsBlock(ASE::Camera &camera) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "CAMERA_NEAR", 11)) {
-                ParseLV4MeshFloat(camera.mNear);
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "CAMERA_NEAR", 11)) {
+                ParseLV4MeshReal(camera.mNear);
                 continue;
             }
-            if (TokenMatch(filePtr, "CAMERA_FAR", 10)) {
-                ParseLV4MeshFloat(camera.mFar);
+            if (TokenMatch(mFilePtr, "CAMERA_FAR", 10)) {
+                ParseLV4MeshReal(camera.mFar);
                 continue;
             }
-            if (TokenMatch(filePtr, "CAMERA_FOV", 10)) {
-                ParseLV4MeshFloat(camera.mFOV);
+            if (TokenMatch(mFilePtr, "CAMERA_FOV", 10)) {
+                ParseLV4MeshReal(camera.mFOV);
                 continue;
             }
         }
@@ -914,22 +915,22 @@ void Parser::ParseLV2CameraSettingsBlock(ASE::Camera &camera) {
 void Parser::ParseLV2LightSettingsBlock(ASE::Light &light) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "LIGHT_COLOR", 11)) {
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "LIGHT_COLOR", 11)) {
                 ParseLV4MeshFloatTriple(&light.mColor.r);
                 continue;
             }
-            if (TokenMatch(filePtr, "LIGHT_INTENS", 12)) {
-                ParseLV4MeshFloat(light.mIntensity);
+            if (TokenMatch(mFilePtr, "LIGHT_INTENS", 12)) {
+                ParseLV4MeshReal(light.mIntensity);
                 continue;
             }
-            if (TokenMatch(filePtr, "LIGHT_HOTSPOT", 13)) {
-                ParseLV4MeshFloat(light.mAngle);
+            if (TokenMatch(mFilePtr, "LIGHT_HOTSPOT", 13)) {
+                ParseLV4MeshReal(light.mAngle);
                 continue;
             }
-            if (TokenMatch(filePtr, "LIGHT_FALLOFF", 13)) {
-                ParseLV4MeshFloat(light.mFalloff);
+            if (TokenMatch(mFilePtr, "LIGHT_FALLOFF", 13)) {
+                ParseLV4MeshReal(light.mFalloff);
                 continue;
             }
         }
@@ -943,9 +944,9 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode &mesh) {
 
     ASE::Animation *anim = &mesh.mAnim;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (TokenMatch(filePtr, "NODE_NAME", 9)) {
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (TokenMatch(mFilePtr, "NODE_NAME", 9)) {
                 std::string temp;
                 if (!ParseString(temp, "*NODE_NAME"))
                     SkipToNextToken();
@@ -967,9 +968,9 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode &mesh) {
             }
 
             // position keyframes
-            if (TokenMatch(filePtr, "CONTROL_POS_TRACK", 17) ||
-                    TokenMatch(filePtr, "CONTROL_POS_BEZIER", 18) ||
-                    TokenMatch(filePtr, "CONTROL_POS_TCB", 15)) {
+            if (TokenMatch(mFilePtr, "CONTROL_POS_TRACK", 17) ||
+                    TokenMatch(mFilePtr, "CONTROL_POS_BEZIER", 18) ||
+                    TokenMatch(mFilePtr, "CONTROL_POS_TCB", 15)) {
                 if (!anim)
                     SkipSection();
                 else
@@ -977,9 +978,9 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode &mesh) {
                 continue;
             }
             // scaling keyframes
-            if (TokenMatch(filePtr, "CONTROL_SCALE_TRACK", 19) ||
-                    TokenMatch(filePtr, "CONTROL_SCALE_BEZIER", 20) ||
-                    TokenMatch(filePtr, "CONTROL_SCALE_TCB", 17)) {
+            if (TokenMatch(mFilePtr, "CONTROL_SCALE_TRACK", 19) ||
+                    TokenMatch(mFilePtr, "CONTROL_SCALE_BEZIER", 20) ||
+                    TokenMatch(mFilePtr, "CONTROL_SCALE_TCB", 17)) {
                 if (!anim || anim == &mesh.mTargetAnim) {
                     // Target animation channels may have no rotation channels
                     ASSIMP_LOG_ERROR("ASE: Ignoring scaling channel in target animation");
@@ -989,9 +990,9 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode &mesh) {
                 continue;
             }
             // rotation keyframes
-            if (TokenMatch(filePtr, "CONTROL_ROT_TRACK", 17) ||
-                    TokenMatch(filePtr, "CONTROL_ROT_BEZIER", 18) ||
-                    TokenMatch(filePtr, "CONTROL_ROT_TCB", 15)) {
+            if (TokenMatch(mFilePtr, "CONTROL_ROT_TRACK", 17) ||
+                    TokenMatch(mFilePtr, "CONTROL_ROT_BEZIER", 18) ||
+                    TokenMatch(mFilePtr, "CONTROL_ROT_TCB", 15)) {
                 if (!anim || anim == &mesh.mTargetAnim) {
                     // Target animation channels may have no rotation channels
                     ASSIMP_LOG_ERROR("ASE: Ignoring rotation channel in target animation");
@@ -1010,8 +1011,8 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation &anim) {
     unsigned int iIndex;
 
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             bool b = false;
 
@@ -1019,25 +1020,25 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation &anim) {
             // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_SCALE_SAMPLE", 20)) {
+            if (TokenMatch(mFilePtr, "CONTROL_SCALE_SAMPLE", 20)) {
                 b = true;
                 anim.mScalingType = ASE::Animation::TRACK;
             }
 
             // Bezier scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_BEZIER_SCALE_KEY", 24)) {
+            if (TokenMatch(mFilePtr, "CONTROL_BEZIER_SCALE_KEY", 24)) {
                 b = true;
                 anim.mScalingType = ASE::Animation::BEZIER;
             }
             // TCB scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_TCB_SCALE_KEY", 21)) {
+            if (TokenMatch(mFilePtr, "CONTROL_TCB_SCALE_KEY", 21)) {
                 b = true;
                 anim.mScalingType = ASE::Animation::TCB;
             }
             if (b) {
                 anim.akeyScaling.emplace_back();
                 aiVectorKey &key = anim.akeyScaling.back();
-                ParseLV4MeshFloatTriple(&key.mValue.x, iIndex);
+                ParseLV4MeshRealTriple(&key.mValue.x, iIndex);
                 key.mTime = (double)iIndex;
             }
         }
@@ -1049,8 +1050,8 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation &anim) {
     AI_ASE_PARSER_INIT();
     unsigned int iIndex;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             bool b = false;
 
@@ -1058,25 +1059,25 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation &anim) {
             // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_POS_SAMPLE", 18)) {
+            if (TokenMatch(mFilePtr, "CONTROL_POS_SAMPLE", 18)) {
                 b = true;
                 anim.mPositionType = ASE::Animation::TRACK;
             }
 
             // Bezier scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_BEZIER_POS_KEY", 22)) {
+            if (TokenMatch(mFilePtr, "CONTROL_BEZIER_POS_KEY", 22)) {
                 b = true;
                 anim.mPositionType = ASE::Animation::BEZIER;
             }
             // TCB scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_TCB_POS_KEY", 19)) {
+            if (TokenMatch(mFilePtr, "CONTROL_TCB_POS_KEY", 19)) {
                 b = true;
                 anim.mPositionType = ASE::Animation::TCB;
             }
             if (b) {
                 anim.akeyPositions.emplace_back();
                 aiVectorKey &key = anim.akeyPositions.back();
-                ParseLV4MeshFloatTriple(&key.mValue.x, iIndex);
+                ParseLV4MeshRealTriple(&key.mValue.x, iIndex);
                 key.mTime = (double)iIndex;
             }
         }
@@ -1088,8 +1089,8 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation &anim) {
     AI_ASE_PARSER_INIT();
     unsigned int iIndex;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             bool b = false;
 
@@ -1097,18 +1098,18 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation &anim) {
             // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_ROT_SAMPLE", 18)) {
+            if (TokenMatch(mFilePtr, "CONTROL_ROT_SAMPLE", 18)) {
                 b = true;
                 anim.mRotationType = ASE::Animation::TRACK;
             }
 
             // Bezier scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_BEZIER_ROT_KEY", 22)) {
+            if (TokenMatch(mFilePtr, "CONTROL_BEZIER_ROT_KEY", 22)) {
                 b = true;
                 anim.mRotationType = ASE::Animation::BEZIER;
             }
             // TCB scaling keyframe
-            if (TokenMatch(filePtr, "CONTROL_TCB_ROT_KEY", 19)) {
+            if (TokenMatch(mFilePtr, "CONTROL_TCB_ROT_KEY", 19)) {
                 b = true;
                 anim.mRotationType = ASE::Animation::TCB;
             }
@@ -1117,8 +1118,8 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation &anim) {
                 aiQuatKey &key = anim.akeyRotations.back();
                 aiVector3D v;
                 ai_real f;
-                ParseLV4MeshFloatTriple(&v.x, iIndex);
-                ParseLV4MeshFloat(f);
+                ParseLV4MeshRealTriple(&v.x, iIndex);
+                ParseLV4MeshReal(f);
                 key.mTime = (double)iIndex;
                 key.mValue = aiQuaternion(v, f);
             }
@@ -1131,10 +1132,10 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
     AI_ASE_PARSER_INIT();
     int mode = 0;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
             // name of the node
-            if (TokenMatch(filePtr, "NODE_NAME", 9)) {
+            if (TokenMatch(mFilePtr, "NODE_NAME", 9)) {
                 std::string temp;
                 if (!ParseString(temp, "*NODE_NAME"))
                     SkipToNextToken();
@@ -1161,28 +1162,28 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
             if (mode) {
                 // fourth row of the transformation matrix - and also the
                 // only information here that is interesting for targets
-                if (TokenMatch(filePtr, "TM_ROW3", 7)) {
-                    ParseLV4MeshFloatTriple((mode == 1 ? mesh.mTransform[3] : &mesh.mTargetPosition.x));
+                if (TokenMatch(mFilePtr, "TM_ROW3", 7)) {
+                    ParseLV4MeshRealTriple((mode == 1 ? mesh.mTransform[3] : &mesh.mTargetPosition.x));
                     continue;
                 }
                 if (mode == 1) {
                     // first row of the transformation matrix
-                    if (TokenMatch(filePtr, "TM_ROW0", 7)) {
-                        ParseLV4MeshFloatTriple(mesh.mTransform[0]);
+                    if (TokenMatch(mFilePtr, "TM_ROW0", 7)) {
+                        ParseLV4MeshRealTriple(mesh.mTransform[0]);
                         continue;
                     }
                     // second row of the transformation matrix
-                    if (TokenMatch(filePtr, "TM_ROW1", 7)) {
-                        ParseLV4MeshFloatTriple(mesh.mTransform[1]);
+                    if (TokenMatch(mFilePtr, "TM_ROW1", 7)) {
+                        ParseLV4MeshRealTriple(mesh.mTransform[1]);
                         continue;
                     }
                     // third row of the transformation matrix
-                    if (TokenMatch(filePtr, "TM_ROW2", 7)) {
-                        ParseLV4MeshFloatTriple(mesh.mTransform[2]);
+                    if (TokenMatch(mFilePtr, "TM_ROW2", 7)) {
+                        ParseLV4MeshRealTriple(mesh.mTransform[2]);
                         continue;
                     }
                     // inherited position axes
-                    if (TokenMatch(filePtr, "INHERIT_POS", 11)) {
+                    if (TokenMatch(mFilePtr, "INHERIT_POS", 11)) {
                         unsigned int aiVal[3];
                         ParseLV4MeshLongTriple(aiVal);
 
@@ -1191,7 +1192,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
                         continue;
                     }
                     // inherited rotation axes
-                    if (TokenMatch(filePtr, "INHERIT_ROT", 11)) {
+                    if (TokenMatch(mFilePtr, "INHERIT_ROT", 11)) {
                         unsigned int aiVal[3];
                         ParseLV4MeshLongTriple(aiVal);
 
@@ -1200,7 +1201,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode &mesh) {
                         continue;
                     }
                     // inherited scaling axes
-                    if (TokenMatch(filePtr, "INHERIT_SCL", 11)) {
+                    if (TokenMatch(mFilePtr, "INHERIT_SCL", 11)) {
                         unsigned int aiVal[3];
                         ParseLV4MeshLongTriple(aiVal);
 
@@ -1225,75 +1226,75 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh &mesh) {
     unsigned int iNumCVertices = 0;
     unsigned int iNumCFaces = 0;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
             // Number of vertices in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMVERTEX", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMVERTEX", 14)) {
                 ParseLV4MeshLong(iNumVertices);
                 continue;
             }
             // Number of texture coordinates in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMTVERTEX", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMTVERTEX", 15)) {
                 ParseLV4MeshLong(iNumTVertices);
                 continue;
             }
             // Number of vertex colors in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMCVERTEX", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMCVERTEX", 15)) {
                 ParseLV4MeshLong(iNumCVertices);
                 continue;
             }
             // Number of regular faces in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMFACES", 13)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMFACES", 13)) {
                 ParseLV4MeshLong(iNumFaces);
                 continue;
             }
             // Number of UVWed faces in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMTVFACES", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMTVFACES", 15)) {
                 ParseLV4MeshLong(iNumTFaces);
                 continue;
             }
             // Number of colored faces in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMCVFACES", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMCVFACES", 15)) {
                 ParseLV4MeshLong(iNumCFaces);
                 continue;
             }
             // mesh vertex list block
-            if (TokenMatch(filePtr, "MESH_VERTEX_LIST", 16)) {
+            if (TokenMatch(mFilePtr, "MESH_VERTEX_LIST", 16)) {
                 ParseLV3MeshVertexListBlock(iNumVertices, mesh);
                 continue;
             }
             // mesh face list block
-            if (TokenMatch(filePtr, "MESH_FACE_LIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_FACE_LIST", 14)) {
                 ParseLV3MeshFaceListBlock(iNumFaces, mesh);
                 continue;
             }
             // mesh texture vertex list block
-            if (TokenMatch(filePtr, "MESH_TVERTLIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_TVERTLIST", 14)) {
                 ParseLV3MeshTListBlock(iNumTVertices, mesh);
                 continue;
             }
             // mesh texture face block
-            if (TokenMatch(filePtr, "MESH_TFACELIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_TFACELIST", 14)) {
                 ParseLV3MeshTFaceListBlock(iNumTFaces, mesh);
                 continue;
             }
             // mesh color vertex list block
-            if (TokenMatch(filePtr, "MESH_CVERTLIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_CVERTLIST", 14)) {
                 ParseLV3MeshCListBlock(iNumCVertices, mesh);
                 continue;
             }
             // mesh color face block
-            if (TokenMatch(filePtr, "MESH_CFACELIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_CFACELIST", 14)) {
                 ParseLV3MeshCFaceListBlock(iNumCFaces, mesh);
                 continue;
             }
             // mesh normals
-            if (TokenMatch(filePtr, "MESH_NORMALS", 12)) {
+            if (TokenMatch(mFilePtr, "MESH_NORMALS", 12)) {
                 ParseLV3MeshNormalListBlock(mesh);
                 continue;
             }
             // another mesh UV channel ...
-            if (TokenMatch(filePtr, "MESH_MAPPINGCHANNEL", 19)) {
+            if (TokenMatch(mFilePtr, "MESH_MAPPINGCHANNEL", 19)) {
                 unsigned int iIndex(0);
                 ParseLV4MeshLong(iIndex);
                 if (0 == iIndex) {
@@ -1318,7 +1319,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh &mesh) {
                 }
             }
             // mesh animation keyframe. Not supported
-            if (TokenMatch(filePtr, "MESH_ANIMATION", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_ANIMATION", 14)) {
 
                 LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
                            "Keyframe animation is not supported by Assimp, this element "
@@ -1326,7 +1327,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh &mesh) {
                 //SkipSection();
                 continue;
             }
-            if (TokenMatch(filePtr, "MESH_WEIGHTS", 12)) {
+            if (TokenMatch(mFilePtr, "MESH_WEIGHTS", 12)) {
                 ParseLV3MeshWeightsBlock(mesh);
                 continue;
             }
@@ -1340,26 +1341,26 @@ void Parser::ParseLV3MeshWeightsBlock(ASE::Mesh &mesh) {
 
     unsigned int iNumVertices = 0, iNumBones = 0;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Number of bone vertices ...
-            if (TokenMatch(filePtr, "MESH_NUMVERTEX", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMVERTEX", 14)) {
                 ParseLV4MeshLong(iNumVertices);
                 continue;
             }
             // Number of bones
-            if (TokenMatch(filePtr, "MESH_NUMBONE", 12)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMBONE", 12)) {
                 ParseLV4MeshLong(iNumBones);
                 continue;
             }
             // parse the list of bones
-            if (TokenMatch(filePtr, "MESH_BONE_LIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_BONE_LIST", 14)) {
                 ParseLV4MeshBones(iNumBones, mesh);
                 continue;
             }
             // parse the list of bones vertices
-            if (TokenMatch(filePtr, "MESH_BONE_VERTEX_LIST", 21)) {
+            if (TokenMatch(mFilePtr, "MESH_BONE_VERTEX_LIST", 21)) {
                 ParseLV4MeshBonesVertices(iNumVertices, mesh);
                 continue;
             }
@@ -1372,14 +1373,14 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones, ASE::Mesh &mesh) {
     AI_ASE_PARSER_INIT();
     mesh.mBones.resize(iNumBones, Bone("UNNAMED"));
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Mesh bone with name ...
-            if (TokenMatch(filePtr, "MESH_BONE_NAME", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_BONE_NAME", 14)) {
                 // parse an index ...
-                if (SkipSpaces(&filePtr, mEnd)) {
-                    unsigned int iIndex = strtoul10(filePtr, &filePtr);
+                if (SkipSpaces(&mFilePtr, mEnd)) {
+                    unsigned int iIndex = strtoul10(mFilePtr, &mFilePtr);
                     if (iIndex >= iNumBones) {
                         LogWarning("Bone index is out of bounds");
                         continue;
@@ -1398,13 +1399,13 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices, ASE::Mesh &mes
     AI_ASE_PARSER_INIT();
     mesh.mBoneVertices.resize(iNumVertices);
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Mesh bone vertex
-            if (TokenMatch(filePtr, "MESH_BONE_VERTEX", 16)) {
+            if (TokenMatch(mFilePtr, "MESH_BONE_VERTEX", 16)) {
                 // read the vertex index
-                unsigned int iIndex = strtoul10(filePtr, &filePtr);
+                unsigned int iIndex = strtoul10(mFilePtr, &mFilePtr);
                 if (iIndex >= mesh.mPositions.size()) {
                     iIndex = (unsigned int)mesh.mPositions.size() - 1;
                     LogWarning("Bone vertex index is out of bounds. Using the largest valid "
@@ -1413,17 +1414,17 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices, ASE::Mesh &mes
 
                 // --- ignored
                 ai_real afVert[3];
-                ParseLV4MeshFloatTriple(afVert);
+                ParseLV4MeshRealTriple(afVert);
 
                 std::pair<int, float> pairOut;
                 while (true) {
                     // first parse the bone index ...
-                    if (!SkipSpaces(&filePtr, mEnd)) break;
-                    pairOut.first = strtoul10(filePtr, &filePtr);
+                    if (!SkipSpaces(&mFilePtr, mEnd)) break;
+                    pairOut.first = strtoul10(mFilePtr, &mFilePtr);
 
                     // then parse the vertex weight
-                    if (!SkipSpaces(&filePtr, mEnd)) break;
-                    filePtr = fast_atoreal_move<float>(filePtr, pairOut.second);
+                    if (!SkipSpaces(&mFilePtr, mEnd)) break;
+                    mFilePtr = fast_atoreal_move<float>(mFilePtr, pairOut.second);
 
                     // -1 marks unused entries
                     if (-1 != pairOut.first) {
@@ -1444,15 +1445,15 @@ void Parser::ParseLV3MeshVertexListBlock(
     // allocate enough storage in the array
     mesh.mPositions.resize(iNumVertices);
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Vertex entry
-            if (TokenMatch(filePtr, "MESH_VERTEX", 11)) {
+            if (TokenMatch(mFilePtr, "MESH_VERTEX", 11)) {
 
                 aiVector3D vTemp;
                 unsigned int iIndex;
-                ParseLV4MeshFloatTriple(&vTemp.x, iIndex);
+                ParseLV4MeshRealTriple(&vTemp.x, iIndex);
 
                 if (iIndex >= iNumVertices) {
                     LogWarning("Invalid vertex index. It will be ignored");
@@ -1471,11 +1472,11 @@ void Parser::ParseLV3MeshFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh) 
     // allocate enough storage in the face array
     mesh.mFaces.resize(iNumFaces);
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Face entry
-            if (TokenMatch(filePtr, "MESH_FACE", 9)) {
+            if (TokenMatch(mFilePtr, "MESH_FACE", 9)) {
 
                 ASE::Face mFace;
                 ParseLV4MeshFace(mFace);
@@ -1498,14 +1499,14 @@ void Parser::ParseLV3MeshTListBlock(unsigned int iNumVertices,
     // allocate enough storage in the array
     mesh.amTexCoords[iChannel].resize(iNumVertices);
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Vertex entry
-            if (TokenMatch(filePtr, "MESH_TVERT", 10)) {
+            if (TokenMatch(mFilePtr, "MESH_TVERT", 10)) {
                 aiVector3D vTemp;
                 unsigned int iIndex;
-                ParseLV4MeshFloatTriple(&vTemp.x, iIndex);
+                ParseLV4MeshRealTriple(&vTemp.x, iIndex);
 
                 if (iIndex >= iNumVertices) {
                     LogWarning("Tvertex has an invalid index. It will be ignored");
@@ -1527,11 +1528,11 @@ void Parser::ParseLV3MeshTFaceListBlock(unsigned int iNumFaces,
         ASE::Mesh &mesh, unsigned int iChannel) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Face entry
-            if (TokenMatch(filePtr, "MESH_TFACE", 10)) {
+            if (TokenMatch(mFilePtr, "MESH_TFACE", 10)) {
                 unsigned int aiValues[3];
                 unsigned int iIndex = 0;
 
@@ -1557,26 +1558,26 @@ void Parser::ParseLV3MappingChannel(unsigned int iChannel, ASE::Mesh &mesh) {
     unsigned int iNumTVertices = 0;
     unsigned int iNumTFaces = 0;
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Number of texture coordinates in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMTVERTEX", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMTVERTEX", 15)) {
                 ParseLV4MeshLong(iNumTVertices);
                 continue;
             }
             // Number of UVWed faces in the mesh
-            if (TokenMatch(filePtr, "MESH_NUMTVFACES", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_NUMTVFACES", 15)) {
                 ParseLV4MeshLong(iNumTFaces);
                 continue;
             }
             // mesh texture vertex list block
-            if (TokenMatch(filePtr, "MESH_TVERTLIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_TVERTLIST", 14)) {
                 ParseLV3MeshTListBlock(iNumTVertices, mesh, iChannel);
                 continue;
             }
             // mesh texture face block
-            if (TokenMatch(filePtr, "MESH_TFACELIST", 14)) {
+            if (TokenMatch(mFilePtr, "MESH_TFACELIST", 14)) {
                 ParseLV3MeshTFaceListBlock(iNumTFaces, mesh, iChannel);
                 continue;
             }
@@ -1591,11 +1592,11 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh &mesh) 
     // allocate enough storage in the array
     mesh.mVertexColors.resize(iNumVertices);
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Vertex entry
-            if (TokenMatch(filePtr, "MESH_VERTCOL", 12)) {
+            if (TokenMatch(mFilePtr, "MESH_VERTCOL", 12)) {
                 aiColor4D vTemp;
                 vTemp.a = 1.0f;
                 unsigned int iIndex;
@@ -1615,11 +1616,11 @@ void Parser::ParseLV3MeshCListBlock(unsigned int iNumVertices, ASE::Mesh &mesh) 
 void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh &mesh) {
     AI_ASE_PARSER_INIT();
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
 
             // Face entry
-            if (TokenMatch(filePtr, "MESH_CFACE", 10)) {
+            if (TokenMatch(mFilePtr, "MESH_CFACE", 10)) {
                 unsigned int aiValues[3];
                 unsigned int iIndex = 0;
 
@@ -1652,11 +1653,11 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh &sMesh) {
     // Smooth the vertex and face normals together. The result
     // will be edgy then, but otherwise everything would be soft ...
     while (true) {
-        if ('*' == *filePtr) {
-            ++filePtr;
-            if (faceIdx != UINT_MAX && TokenMatch(filePtr, "MESH_VERTEXNORMAL", 17)) {
+        if ('*' == *mFilePtr) {
+            ++mFilePtr;
+            if (faceIdx != UINT_MAX && TokenMatch(mFilePtr, "MESH_VERTEXNORMAL", 17)) {
                 aiVector3D vNormal;
-                ParseLV4MeshFloatTriple(&vNormal.x, index);
+                ParseLV4MeshRealTriple(&vNormal.x, index);
                 if (faceIdx >= sMesh.mFaces.size())
                     continue;
 
@@ -1676,9 +1677,9 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh &sMesh) {
                 sMesh.mNormals[faceIdx * 3 + index] += vNormal;
                 continue;
             }
-            if (TokenMatch(filePtr, "MESH_FACENORMAL", 15)) {
+            if (TokenMatch(mFilePtr, "MESH_FACENORMAL", 15)) {
                 aiVector3D vNormal;
-                ParseLV4MeshFloatTriple(&vNormal.x, faceIdx);
+                ParseLV4MeshRealTriple(&vNormal.x, faceIdx);
 
                 if (faceIdx >= sMesh.mFaces.size()) {
                     ASSIMP_LOG_ERROR("ASE: Invalid vertex index in MESH_FACENORMAL section");
@@ -1698,34 +1699,34 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh &sMesh) {
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFace(ASE::Face &out) {
     // skip spaces and tabs
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
         LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL [#1]");
         SkipToNextToken();
         return;
     }
 
     // parse the face index
-    out.iFace = strtoul10(filePtr, &filePtr);
+    out.iFace = strtoul10(mFilePtr, &mFilePtr);
 
     // next character should be ':'
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
         // FIX: there are some ASE files which haven't got : here ....
         LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. \':\' expected [#2]");
         SkipToNextToken();
         return;
     }
     // FIX: There are some ASE files which haven't got ':' here
-    if (':' == *filePtr) ++filePtr;
+    if (':' == *mFilePtr) ++mFilePtr;
 
     // Parse all mesh indices
     for (unsigned int i = 0; i < 3; ++i) {
         unsigned int iIndex = 0;
-        if (!SkipSpaces(&filePtr, mEnd)) {
+        if (!SkipSpaces(&mFilePtr, mEnd)) {
             LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL");
             SkipToNextToken();
             return;
         }
-        switch (*filePtr) {
+        switch (*mFilePtr) {
         case 'A':
         case 'a':
             break;
@@ -1743,39 +1744,39 @@ void Parser::ParseLV4MeshFace(ASE::Face &out) {
             SkipToNextToken();
             return;
         };
-        ++filePtr;
+        ++mFilePtr;
 
         // next character should be ':'
-        if (!SkipSpaces(&filePtr, mEnd) || ':' != *filePtr) {
+        if (!SkipSpaces(&mFilePtr, mEnd) || ':' != *mFilePtr) {
             LogWarning("Unable to parse *MESH_FACE Element: "
                        "Unexpected EOL. \':\' expected [#2]");
             SkipToNextToken();
             return;
         }
 
-        ++filePtr;
-        if (!SkipSpaces(&filePtr, mEnd)) {
+        ++mFilePtr;
+        if (!SkipSpaces(&mFilePtr, mEnd)) {
             LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. "
                        "Vertex index expected [#4]");
             SkipToNextToken();
             return;
         }
-        out.mIndices[iIndex] = strtoul10(filePtr, &filePtr);
+        out.mIndices[iIndex] = strtoul10(mFilePtr, &mFilePtr);
     }
 
     // now we need to skip the AB, BC, CA blocks.
     while (true) {
-        if ('*' == *filePtr) break;
-        if (IsLineEnd(*filePtr)) {
+        if ('*' == *mFilePtr) break;
+        if (IsLineEnd(*mFilePtr)) {
             //iLineNumber++;
             return;
         }
-        filePtr++;
+        mFilePtr++;
     }
 
     // parse the smoothing group of the face
-    if (TokenMatch(filePtr, "*MESH_SMOOTHING", 15)) {
-        if (!SkipSpaces(&filePtr, mEnd)) {
+    if (TokenMatch(mFilePtr, "*MESH_SMOOTHING", 15)) {
+        if (!SkipSpaces(&mFilePtr, mEnd)) {
             LogWarning("Unable to parse *MESH_SMOOTHING Element: "
                        "Unexpected EOL. Smoothing group(s) expected [#5]");
             SkipToNextToken();
@@ -1785,43 +1786,43 @@ void Parser::ParseLV4MeshFace(ASE::Face &out) {
         // Parse smoothing groups until we don't anymore see commas
         // FIX: There needn't always be a value, sad but true
         while (true) {
-            if (*filePtr < '9' && *filePtr >= '0') {
-                uint32_t value = strtoul10(filePtr, &filePtr);
+            if (*mFilePtr < '9' && *mFilePtr >= '0') {
+                uint32_t value = strtoul10(mFilePtr, &mFilePtr);
                 if (value < 32) {
-                    out.iSmoothGroup |= (1 << strtoul10(filePtr, &filePtr));
+                    out.iSmoothGroup |= (1 << strtoul10(mFilePtr, &mFilePtr));
                 } else {
                     const std::string message = std::string("Unable to set smooth group, value with ") + ai_to_string(value) + std::string(" out of range");
                     LogWarning(message.c_str());
                 }
             }
-            SkipSpaces(&filePtr, mEnd);
-            if (',' != *filePtr) {
+            SkipSpaces(&mFilePtr, mEnd);
+            if (',' != *mFilePtr) {
                 break;
             }
-            ++filePtr;
-            SkipSpaces(&filePtr, mEnd);
+            ++mFilePtr;
+            SkipSpaces(&mFilePtr, mEnd);
         }
     }
 
     // *MESH_MTLID  is optional, too
     while (true) {
-        if ('*' == *filePtr) {
+        if ('*' == *mFilePtr) {
             break;
         }
-        if (IsLineEnd(*filePtr)) {
+        if (IsLineEnd(*mFilePtr)) {
             return;
         }
-        filePtr++;
+        mFilePtr++;
     }
 
-    if (TokenMatch(filePtr, "*MESH_MTLID", 11)) {
-        if (!SkipSpaces(&filePtr, mEnd)) {
+    if (TokenMatch(mFilePtr, "*MESH_MTLID", 11)) {
+        if (!SkipSpaces(&mFilePtr, mEnd)) {
             LogWarning("Unable to parse *MESH_MTLID Element: Unexpected EOL. "
                        "Material index expected [#6]");
             SkipToNextToken();
             return;
         }
-        out.iMaterial = strtoul10(filePtr, &filePtr);
+        out.iMaterial = strtoul10(mFilePtr, &mFilePtr);
     }
     return;
 }
@@ -1843,7 +1844,17 @@ void Parser::ParseLV4MeshLongTriple(unsigned int *apOut, unsigned int &rIndexOut
     ParseLV4MeshLongTriple(apOut);
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut) {
+void Parser::ParseLV4MeshRealTriple(ai_real *apOut, unsigned int &rIndexOut) {
+    ai_assert(nullptr != apOut);
+
+    // parse the index
+    ParseLV4MeshLong(rIndexOut);
+
+    // parse the three others
+    ParseLV4MeshRealTriple(apOut);
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut) {
     ai_assert(nullptr != apOut);
 
     // parse the index
@@ -1853,7 +1864,15 @@ void Parser::ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut) {
     ParseLV4MeshFloatTriple(apOut);
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloatTriple(ai_real *apOut) {
+void Parser::ParseLV4MeshRealTriple(ai_real *apOut) {
+    ai_assert(nullptr != apOut);
+
+    for (unsigned int i = 0; i < 3; ++i) {
+        ParseLV4MeshReal(apOut[i]);
+    }
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV4MeshFloatTriple(float* apOut) {
     ai_assert(nullptr != apOut);
 
     for (unsigned int i = 0; i < 3; ++i) {
@@ -1861,9 +1880,9 @@ void Parser::ParseLV4MeshFloatTriple(ai_real *apOut) {
     }
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloat(ai_real &fOut) {
+void Parser::ParseLV4MeshReal(ai_real &fOut) {
     // skip spaces and tabs
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
         // LOG
         LogWarning("Unable to parse float: unexpected EOL [#1]");
         fOut = 0.0;
@@ -1871,12 +1890,25 @@ void Parser::ParseLV4MeshFloat(ai_real &fOut) {
         return;
     }
     // parse the first float
-    filePtr = fast_atoreal_move<ai_real>(filePtr, fOut);
+    mFilePtr = fast_atoreal_move<ai_real>(mFilePtr, fOut);
+}
+// ------------------------------------------------------------------------------------------------
+void Parser::ParseLV4MeshFloat(float &fOut) {
+    // skip spaces and tabs
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
+        // LOG
+        LogWarning("Unable to parse float: unexpected EOL [#1]");
+        fOut = 0.0;
+        ++iLineNumber;
+        return;
+    }
+    // parse the first float
+    mFilePtr = fast_atoreal_move<float>(mFilePtr, fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int &iOut) {
     // Skip spaces and tabs
-    if (!SkipSpaces(&filePtr, mEnd)) {
+    if (!SkipSpaces(&mFilePtr, mEnd)) {
         // LOG
         LogWarning("Unable to parse long: unexpected EOL [#1]");
         iOut = 0;
@@ -1884,7 +1916,7 @@ void Parser::ParseLV4MeshLong(unsigned int &iOut) {
         return;
     }
     // parse the value
-    iOut = strtoul10(filePtr, &filePtr);
+    iOut = strtoul10(mFilePtr, &mFilePtr);
 }
 
 }

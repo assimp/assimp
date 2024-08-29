@@ -380,3 +380,4 @@ ai_real ImproveCacheLocalityProcess::ProcessMesh(aiMesh *pMesh, unsigned int mes
 }
 
 } // namespace Assimp
+

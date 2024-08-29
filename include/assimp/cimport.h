@@ -58,6 +58,7 @@ extern "C" {
 #endif
 
 struct aiScene;
+struct aiTexture;
 struct aiFileIO;
 
 typedef void (*aiLogStreamCallback)(const char * /* message */, char * /* user */);
@@ -374,6 +375,13 @@ ASSIMP_API void aiGetMemoryRequirements(
         C_STRUCT aiMemoryInfo *in);
 
 // --------------------------------------------------------------------------------
+/** Returns an embedded texture, or nullptr.
+ * @param pIn Input asset.
+ * @param filename Texture path extracted from aiGetMaterialString.
+ */
+ASSIMP_API const C_STRUCT aiTexture *aiGetEmbeddedTexture(const C_STRUCT aiScene *pIn, const char *filename);
+
+// --------------------------------------------------------------------------------
 /** Create an empty property store. Property stores are used to collect import
  *  settings.
  * @return New property store. Property stores need to be manually destroyed using
@@ -644,14 +652,14 @@ ASSIMP_API void aiVector2DivideByVector(
 /** Get the length of a 2D vector.
  *  @return v Vector to evaluate
  */
-ASSIMP_API float aiVector2Length(
+ASSIMP_API ai_real aiVector2Length(
         const C_STRUCT aiVector2D *v);
 
 // --------------------------------------------------------------------------------
 /** Get the squared length of a 2D vector.
  *  @return v Vector to evaluate
  */
-ASSIMP_API float aiVector2SquareLength(
+ASSIMP_API ai_real aiVector2SquareLength(
         const C_STRUCT aiVector2D *v);
 
 // --------------------------------------------------------------------------------
@@ -667,7 +675,7 @@ ASSIMP_API void aiVector2Negate(
  *  @param b Second vector
  *  @return The dot product of vectors
  */
-ASSIMP_API float aiVector2DotProduct(
+ASSIMP_API ai_real aiVector2DotProduct(
         const C_STRUCT aiVector2D *a,
         const C_STRUCT aiVector2D *b);
 
@@ -774,14 +782,14 @@ ASSIMP_API void aiVector3DivideByVector(
 /** Get the length of a 3D vector.
  *  @return v Vector to evaluate
  */
-ASSIMP_API float aiVector3Length(
+ASSIMP_API ai_real aiVector3Length(
         const C_STRUCT aiVector3D *v);
 
 // --------------------------------------------------------------------------------
 /** Get the squared length of a 3D vector.
  *  @return v Vector to evaluate
  */
-ASSIMP_API float aiVector3SquareLength(
+ASSIMP_API ai_real aiVector3SquareLength(
         const C_STRUCT aiVector3D *v);
 
 // --------------------------------------------------------------------------------
@@ -797,7 +805,7 @@ ASSIMP_API void aiVector3Negate(
  *  @param b Second vector
  *  @return The dot product of vectors
  */
-ASSIMP_API float aiVector3DotProduct(
+ASSIMP_API ai_real aiVector3DotProduct(
         const C_STRUCT aiVector3D *a,
         const C_STRUCT aiVector3D *b);
 
@@ -889,7 +897,7 @@ ASSIMP_API void aiMatrix3Inverse(
 /** Get the determinant of a 3x3 matrix.
  *  @param mat Matrix to get the determinant from
  */
-ASSIMP_API float aiMatrix3Determinant(
+ASSIMP_API ai_real aiMatrix3Determinant(
         const C_STRUCT aiMatrix3x3 *mat);
 
 // --------------------------------------------------------------------------------
@@ -999,7 +1007,7 @@ ASSIMP_API void aiMatrix4Inverse(
  *  @param mat Matrix to get the determinant from
  *  @return The determinant of the matrix
  */
-ASSIMP_API float aiMatrix4Determinant(
+ASSIMP_API ai_real aiMatrix4Determinant(
         const C_STRUCT aiMatrix4x4 *mat);
 
 // --------------------------------------------------------------------------------

@@ -46,6 +46,15 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 # auto-cloned during build; so MUST disable the feature or the PR will be rejected
 option(ASSIMP_BUILD_USD_IMPORTER "Enable USD file import" off)
 option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" off)
+option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)
+
+if(ASSIMP_BUILD_USE_CCACHE)
+  find_program(CCACHE_PATH ccache)
+  if (CCACHE_PATH)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PATH})
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_PATH})
+  endif()
+endif()
 
 # Disabled importers: m3d for 5.1 or later
 ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)

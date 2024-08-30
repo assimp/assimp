@@ -1217,10 +1217,8 @@ void FBXExporter::WriteObjects ()
         }
 
         // colors, if any
-        // TODO only one color channel currently
-        const int32_t colorChannelIndex = 0;
-        if (m->HasVertexColors(colorChannelIndex)) {
-            FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
+            FBX::Node vertexcolors("LayerElementColor", int32_t(ci));
             vertexcolors.Begin(outstream, binary, indent);
             vertexcolors.DumpProperties(outstream, binary, indent);
             vertexcolors.EndProperties(outstream, binary, indent);
@@ -1230,7 +1228,7 @@ void FBXExporter::WriteObjects ()
                 "Version", int32_t(101), outstream, binary, indent
             );
             char layerName[8];
-            snprintf(layerName, sizeof(layerName), "COLOR_%d", colorChannelIndex);
+            snprintf(layerName, sizeof(layerName), "COLOR_%d", int32_t(ci));
             FBX::Node::WritePropertyNode(
                 "Name", (const char*)layerName, outstream, binary, indent
             );
@@ -1247,7 +1245,7 @@ void FBXExporter::WriteObjects ()
             for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
                 const aiFace &f = m->mFaces[fi];
                 for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiColor4D &c = m->mColors[colorChannelIndex][f.mIndices[pvi]];
+                    const aiColor4D &c = m->mColors[ci][f.mIndices[pvi]];
                     color_data.push_back(c.r);
                     color_data.push_back(c.g);
                     color_data.push_back(c.b);
@@ -1354,11 +1352,14 @@ void FBXExporter::WriteObjects ()
         le.AddChild("Type", "LayerElementNormal");
         le.AddChild("TypedIndex", int32_t(0));
         layer.AddChild(le);
-        // TODO only 1 color channel currently
-        le = FBX::Node("LayerElement");
-        le.AddChild("Type", "LayerElementColor");
-        le.AddChild("TypedIndex", int32_t(0));
-        layer.AddChild(le);
+
+        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
+            le = FBX::Node("LayerElement");
+            le.AddChild("Type", "LayerElementColor");
+            le.AddChild("TypedIndex", int32_t(ci));
+            layer.AddChild(le);
+        }
+
         le = FBX::Node("LayerElement");
         le.AddChild("Type", "LayerElementMaterial");
         le.AddChild("TypedIndex", int32_t(0));
@@ -2486,6 +2487,57 @@ const std::map<std::string,std::pair<std::string,char>> transform_types = {
     {"GeometricScalingInverse", {"GeometricScalingInverse", 'i'}}
 };
 
+//add metadata to fbx property
+void add_meta(FBX::Node& fbx_node, const aiNode* node){
+    if(node->mMetaData == nullptr) return;
+    aiMetadata* meta = node->mMetaData;
+    for (unsigned int i = 0; i < meta->mNumProperties; ++i) {
+        aiString key = meta->mKeys[i];
+        aiMetadataEntry* entry = &meta->mValues[i];
+        switch (entry->mType) {
+        case AI_BOOL:{
+            bool val = *static_cast<bool *>(entry->mData);
+            fbx_node.AddP70bool(key.C_Str(), val);
+            break;
+        }
+        case AI_INT32:{
+            int32_t val = *static_cast<int32_t *>(entry->mData);
+            fbx_node.AddP70int(key.C_Str(), val);
+            break;
+        }
+        case AI_UINT64:{
+            //use string to add uint64
+            uint64_t val = *static_cast<uint64_t *>(entry->mData);
+            fbx_node.AddP70string(key.C_Str(), std::to_string(val).c_str());
+            break;
+        }
+        case AI_FLOAT:{
+            float val = *static_cast<float *>(entry->mData);
+            fbx_node.AddP70double(key.C_Str(), val);
+            break;
+        }
+        case AI_DOUBLE:{
+            double val = *static_cast<double *>(entry->mData);
+            fbx_node.AddP70double(key.C_Str(), val);
+            break;
+        }
+        case AI_AISTRING:{
+            aiString val = *static_cast<aiString *>(entry->mData);
+            fbx_node.AddP70string(key.C_Str(), val.C_Str());
+            break;
+        }
+        case AI_AIMETADATA: {
+            //ignore
+            break;
+        }
+        default:
+            break;
+        }
+        
+    }
+    
+}
+
 // write a single model node to the stream
 void FBXExporter::WriteModelNode(
     StreamWriterLE& outstream,
@@ -2553,6 +2605,7 @@ void FBXExporter::WriteModelNode(
             }
         }
     }
+    add_meta(p, node);
     m.AddChild(p);
 
     // not sure what these are for,

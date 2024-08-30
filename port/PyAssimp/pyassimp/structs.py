@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from ctypes import POINTER, c_void_p, c_uint, c_char, c_float, Structure, c_double, c_ubyte, c_size_t, c_uint32
+from ctypes import POINTER, c_void_p, c_uint, c_char, c_float, Structure, c_double, c_ubyte, c_size_t, c_uint32, c_int
 
 
 class Vector2D(Structure):
@@ -78,7 +78,7 @@ class String(Structure):
             #  the number of bytes from the beginning of the string to its end.
             ("length", c_uint32),
 
-            # String buffer. Size limit is MAXLEN
+            # String buffer. Size limit is AI_MAXLEN
             ("data", c_char*AI_MAXLEN),
         ]
 
@@ -765,6 +765,12 @@ class Mesh(Structure):
             # Method of morphing when animeshes are specified.
             ("mMethod", c_uint),
 
+            # The bounding box.
+            ("mAABB", 2 * Vector3D),
+
+            # Vertex UV stream names. Pointer to array of size AI_MAX_NUMBER_OF_TEXTURECOORDS
+            ("mTextureCoordsNames", POINTER(POINTER(String)))
+
         ]
 
 class Camera(Structure):
@@ -1004,6 +1010,54 @@ class Animation(Structure):
 
         ]
 
+class SkeletonBone(Structure):
+    """
+    See 'mesh.h' for details
+    """
+    _fields_ = [
+            # The parent bone index, is -1 one if this bone represents the root bone.
+            ("mParent", c_int),
+
+            # The number of weights
+            ("mNumnWeights", c_uint),
+
+            # The mesh index, which will get influenced by the weight
+            ("mMeshId", POINTER(Mesh)),
+
+            # The influence weights of this bone, by vertex index.
+            ("mWeights", POINTER(VertexWeight)),
+
+            #  Matrix that transforms from bone space to mesh space in bind pose.
+            #
+            #  This matrix describes the position of the mesh
+            #  in the local space of this bone when the skeleton was bound.
+            #  Thus it can be used directly to determine a desired vertex position,
+            #  given the world-space transform of the bone when animated,
+            #  and the position of the vertex in mesh space.
+            #
+            #  It is sometimes called an inverse-bind matrix,
+            #  or inverse bind pose matrix
+            ("mOffsetMatrix", Matrix4x4),
+
+            # Matrix that transforms the locale bone in bind pose.
+            ("mLocalMatrix", Matrix4x4)
+    ]
+
+class Skeleton(Structure):
+    """
+    See 'mesh.h' for details
+    """
+    _fields_ = [
+             # Name
+             ("mName", String),
+
+             # Number of bones
+             ("mNumBones", c_uint),
+
+             # Bones
+             ("mBones", POINTER(POINTER(SkeletonBone)))
+    ]
+
 class ExportDataBlob(Structure):
     """
     See 'cexport.h' for details.
@@ -1124,6 +1178,15 @@ class Scene(Structure):
             # unit-conversions, versions, vendors or other model-specific data. This
             # can be used to store format-specific metadata as well.
             ("mMetadata", POINTER(Metadata)),
+
+            # The name of the scene itself
+            ("mName", String),
+
+            # Number of skeletons
+            ("mNumSkeletons", c_uint),
+
+            # Skeletons
+            ("mSkeletons", POINTER(POINTER(Skeleton))),
 
             # Internal data, do not touch
             ("mPrivate", POINTER(c_char)),

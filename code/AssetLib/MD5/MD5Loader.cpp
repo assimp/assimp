@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -64,7 +64,7 @@ using namespace Assimp;
 // Minimum weight value. Weights inside [-n ... n] are ignored
 #define AI_MD5_WEIGHT_EPSILON Math::getEpsilon<float>()
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Doom 3 / MD5 Mesh Importer",
     "",
     "",
@@ -91,10 +91,6 @@ MD5Importer::MD5Importer() :
         mCconfigNoAutoLoad(false) {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MD5Importer::~MD5Importer() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -214,7 +210,7 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
     const unsigned int guess = (unsigned int)(fWeightsPerVert * iNewNum);
     meshSrc.mWeights.reserve(guess + (guess >> 3)); // + 12.5% as buffer
 
-    for (FaceList::const_iterator iter = meshSrc.mFaces.begin(), iterEnd = meshSrc.mFaces.end(); iter != iterEnd; ++iter) {
+    for (FaceArray::const_iterator iter = meshSrc.mFaces.begin(), iterEnd = meshSrc.mFaces.end(); iter != iterEnd; ++iter) {
         const aiFace &face = *iter;
         for (unsigned int i = 0; i < 3; ++i) {
             if (face.mIndices[0] >= meshSrc.mVertices.size()) {
@@ -235,7 +231,7 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
 
 // ------------------------------------------------------------------------------------------------
 // Recursive node graph construction from a MD5MESH
-void MD5Importer::AttachChilds_Mesh(int iParentID, aiNode *piParent, BoneList &bones) {
+void MD5Importer::AttachChilds_Mesh(int iParentID, aiNode *piParent, BoneArray &bones) {
     ai_assert(nullptr != piParent);
     ai_assert(!piParent->mNumChildren);
 
@@ -286,7 +282,7 @@ void MD5Importer::AttachChilds_Mesh(int iParentID, aiNode *piParent, BoneList &b
 
 // ------------------------------------------------------------------------------------------------
 // Recursive node graph construction from a MD5ANIM
-void MD5Importer::AttachChilds_Anim(int iParentID, aiNode *piParent, AnimBoneList &bones, const aiNodeAnim **node_anims) {
+void MD5Importer::AttachChilds_Anim(int iParentID, aiNode *piParent, AnimBoneArray &bones, const aiNodeAnim **node_anims) {
     ai_assert(nullptr != piParent);
     ai_assert(!piParent->mNumChildren);
 
@@ -406,7 +402,7 @@ void MD5Importer::LoadMD5MeshFile() {
 
         // copy texture coordinates
         aiVector3D *pv = mesh->mTextureCoords[0];
-        for (MD5::VertexList::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
+        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
             pv->x = (*iter).mUV.x;
             pv->y = 1.0f - (*iter).mUV.y; // D3D to OpenGL
             pv->z = 0.0f;
@@ -416,7 +412,7 @@ void MD5Importer::LoadMD5MeshFile() {
         unsigned int *piCount = new unsigned int[meshParser.mJoints.size()];
         ::memset(piCount, 0, sizeof(unsigned int) * meshParser.mJoints.size());
 
-        for (MD5::VertexList::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
+        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
             for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
                 MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
                 /* FIX for some invalid exporters */
@@ -451,7 +447,7 @@ void MD5Importer::LoadMD5MeshFile() {
             }
 
             pv = mesh->mVertices;
-            for (MD5::VertexList::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
+            for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
                 // compute the final vertex position from all single weights
                 *pv = aiVector3D();
 
@@ -589,14 +585,14 @@ void MD5Importer::LoadMD5AnimFile() {
         // 1 tick == 1 frame
         anim->mTicksPerSecond = animParser.fFrameRate;
 
-        for (FrameList::const_iterator iter = animParser.mFrames.begin(), iterEnd = animParser.mFrames.end(); iter != iterEnd; ++iter) {
+        for (FrameArray::const_iterator iter = animParser.mFrames.begin(), iterEnd = animParser.mFrames.end(); iter != iterEnd; ++iter) {
             double dTime = (double)(*iter).iIndex;
             aiNodeAnim **pcAnimNode = anim->mChannels;
             if (!(*iter).mValues.empty() || iter == animParser.mFrames.begin()) /* be sure we have at least one frame */
             {
                 // now process all values in there ... read all joints
                 MD5::BaseFrameDesc *pcBaseFrame = &animParser.mBaseFrames[0];
-                for (AnimBoneList::const_iterator iter2 = animParser.mAnimatedBones.begin(); iter2 != animParser.mAnimatedBones.end(); ++iter2,
+                for (AnimBoneArray::const_iterator iter2 = animParser.mAnimatedBones.begin(); iter2 != animParser.mAnimatedBones.end(); ++iter2,
                                                   ++pcAnimNode, ++pcBaseFrame) {
                     if ((*iter2).iFirstKeyIndex >= (*iter).mValues.size()) {
 
@@ -711,7 +707,7 @@ void MD5Importer::LoadMD5CameraFile() {
     for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end() - 1; ++it) {
 
         aiAnimation *anim = *tmp++ = new aiAnimation();
-        anim->mName.length = ::ai_snprintf(anim->mName.data, MAXLEN, "anim%u_from_%u_to_%u", (unsigned int)(it - cuts.begin()), (*it), *(it + 1));
+        anim->mName.length = ::ai_snprintf(anim->mName.data, AI_MAXLEN, "anim%u_from_%u_to_%u", (unsigned int)(it - cuts.begin()), (*it), *(it + 1));
 
         anim->mTicksPerSecond = cameraParser.fFrameRate;
         anim->mChannels = new aiNodeAnim *[anim->mNumChannels = 1];

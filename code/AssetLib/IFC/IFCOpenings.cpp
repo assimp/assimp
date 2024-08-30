@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -1372,7 +1372,7 @@ std::vector<IfcVector2> GetContourInPlane2D(const std::shared_ptr<TempMesh>& mes
     const std::vector<IfcVector3>& va = mesh->mVerts;
     if(va.size() <= 2) {
         std::stringstream msg;
-        msg << "Skipping: Only " << va.size() << " verticies in opening mesh.";
+        msg << "Skipping: Only " << va.size() << " vertices in opening mesh.";
         IFCImporter::LogDebug(msg.str().c_str());
         ok = false;
         return contour;

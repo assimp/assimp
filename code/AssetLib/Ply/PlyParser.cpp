@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <utility>
 
-using namespace Assimp;
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(std::vector<char> &buffer) {
@@ -296,7 +296,7 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
         return true;
     }
 
-    //parse the number of occurrences of this element
+    // parse the number of occurrences of this element
     const char *pCur = (char *)&buffer[0];
     pOut->NumOccur = strtoul10(pCur, &pCur);
 
@@ -321,13 +321,13 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
     return true;
 }
 
-// ------------------------------------------------------------------------------------------------
 bool PLY::DOM::SkipSpaces(std::vector<char> &buffer) {
     const char *pCur = buffer.empty() ? nullptr : (char *)&buffer[0];
+    const char *end = pCur + buffer.size();
     bool ret = false;
     if (pCur) {
         const char *szCur = pCur;
-        ret = Assimp::SkipSpaces(pCur, &pCur);
+        ret = Assimp::SkipSpaces(pCur, &pCur, end);
 
         uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
         buffer.erase(buffer.begin(), buffer.begin() + iDiff);
@@ -339,10 +339,11 @@ bool PLY::DOM::SkipSpaces(std::vector<char> &buffer) {
 
 bool PLY::DOM::SkipLine(std::vector<char> &buffer) {
     const char *pCur = buffer.empty() ? nullptr : (char *)&buffer[0];
+    const char *end = pCur + buffer.size();
     bool ret = false;
     if (pCur) {
         const char *szCur = pCur;
-        ret = Assimp::SkipLine(pCur, &pCur);
+        ret = Assimp::SkipLine(pCur, &pCur, end);
 
         uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
         buffer.erase(buffer.begin(), buffer.begin() + iDiff);
@@ -369,10 +370,11 @@ bool PLY::DOM::TokenMatch(std::vector<char> &buffer, const char *token, unsigned
 
 bool PLY::DOM::SkipSpacesAndLineEnd(std::vector<char> &buffer) {
     const char *pCur = buffer.empty() ? nullptr : (char *)&buffer[0];
+    const char *end = pCur + buffer.size();
     bool ret = false;
     if (pCur) {
         const char *szCur = pCur;
-        ret = Assimp::SkipSpacesAndLineEnd(pCur, &pCur);
+        ret = Assimp::SkipSpacesAndLineEnd(pCur, &pCur, end);
 
         uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
         buffer.erase(buffer.begin(), buffer.begin() + iDiff);
@@ -425,7 +427,8 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
             break;
         } else {
             // ignore unknown header elements
-            streamBuffer.getNextLine(buffer);
+            if (!streamBuffer.getNextLine(buffer))
+                return false;
         }
     }
 
@@ -445,7 +448,7 @@ bool PLY::DOM::ParseElementInstanceLists(IOStreamBuffer<char> &streamBuffer, std
     std::vector<PLY::ElementInstanceList>::iterator a = alElementData.begin();
 
     // parse all element instances
-    //construct vertices and faces
+    // construct vertices and faces
     for (; i != alElements.end(); ++i, ++a) {
         if ((*i).eSemantic == EEST_Vertex || (*i).eSemantic == EEST_Face || (*i).eSemantic == EEST_TriStrip) {
             PLY::ElementInstanceList::ParseInstanceList(streamBuffer, buffer, &(*i), nullptr, loader);
@@ -527,7 +530,7 @@ bool PLY::DOM::ParseInstance(IOStreamBuffer<char> &streamBuffer, DOM *p_pcOut, P
         return false;
     }
 
-    //get next line after header
+    // get next line after header
     streamBuffer.getNextLine(buffer);
     if (!p_pcOut->ParseElementInstanceLists(streamBuffer, buffer, loader)) {
         ASSIMP_LOG_VERBOSE_DEBUG("PLY::DOM::ParseInstance() failure");
@@ -557,23 +560,24 @@ bool PLY::ElementInstanceList::ParseInstanceList(
         }
     } else {
         const char *pCur = (const char *)&buffer[0];
+        const char *end = pCur + buffer.size();
         // be sure to have enough storage
         for (unsigned int i = 0; i < pcElement->NumOccur; ++i) {
             if (p_pcOut)
-                PLY::ElementInstance::ParseInstance(pCur, pcElement, &p_pcOut->alInstances[i]);
+                PLY::ElementInstance::ParseInstance(pCur, end, pcElement, &p_pcOut->alInstances[i]);
             else {
                 ElementInstance elt;
-                PLY::ElementInstance::ParseInstance(pCur, pcElement, &elt);
+                PLY::ElementInstance::ParseInstance(pCur, end, pcElement, &elt);
 
                 // Create vertex or face
                 if (pcElement->eSemantic == EEST_Vertex) {
-                    //call loader instance from here
+                    // call loader instance from here
                     loader->LoadVertex(pcElement, &elt, i);
                 } else if (pcElement->eSemantic == EEST_Face) {
-                    //call loader instance from here
+                    // call loader instance from here
                     loader->LoadFace(pcElement, &elt, i);
                 } else if (pcElement->eSemantic == EEST_TriStrip) {
-                    //call loader instance from here
+                    // call loader instance from here
                     loader->LoadFace(pcElement, &elt, i);
                 }
             }
@@ -610,13 +614,13 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary(
 
             // Create vertex or face
             if (pcElement->eSemantic == EEST_Vertex) {
-                //call loader instance from here
+                // call loader instance from here
                 loader->LoadVertex(pcElement, &elt, i);
             } else if (pcElement->eSemantic == EEST_Face) {
-                //call loader instance from here
+                // call loader instance from here
                 loader->LoadFace(pcElement, &elt, i);
             } else if (pcElement->eSemantic == EEST_TriStrip) {
-                //call loader instance from here
+                // call loader instance from here
                 loader->LoadFace(pcElement, &elt, i);
             }
         }
@@ -625,7 +629,7 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary(
 }
 
 // ------------------------------------------------------------------------------------------------
-bool PLY::ElementInstance::ParseInstance(const char *&pCur,
+bool PLY::ElementInstance::ParseInstance(const char *&pCur, const char *end,
         const PLY::Element *pcElement,
         PLY::ElementInstance *p_pcOut) {
     ai_assert(nullptr != pcElement);
@@ -637,7 +641,7 @@ bool PLY::ElementInstance::ParseInstance(const char *&pCur,
     std::vector<PLY::PropertyInstance>::iterator i = p_pcOut->alProperties.begin();
     std::vector<PLY::Property>::const_iterator a = pcElement->alProperties.begin();
     for (; i != p_pcOut->alProperties.end(); ++i, ++a) {
-        if (!(PLY::PropertyInstance::ParseInstance(pCur, &(*a), &(*i)))) {
+        if (!(PLY::PropertyInstance::ParseInstance(pCur, end, &(*a), &(*i)))) {
             ASSIMP_LOG_WARN("Unable to parse property instance. "
                             "Skipping this element instance");
 
@@ -677,13 +681,13 @@ bool PLY::ElementInstance::ParseInstanceBinary(
 }
 
 // ------------------------------------------------------------------------------------------------
-bool PLY::PropertyInstance::ParseInstance(const char *&pCur,
-        const PLY::Property *prop, PLY::PropertyInstance *p_pcOut) {
+bool PLY::PropertyInstance::ParseInstance(const char *&pCur, const char *end, const PLY::Property *prop,
+        PLY::PropertyInstance *p_pcOut) {
     ai_assert(nullptr != prop);
     ai_assert(nullptr != p_pcOut);
 
     // skip spaces at the beginning
-    if (!SkipSpaces(&pCur)) {
+    if (!SkipSpaces(&pCur, end)) {
         return false;
     }
 
@@ -698,7 +702,7 @@ bool PLY::PropertyInstance::ParseInstance(const char *&pCur,
         // parse all list elements
         p_pcOut->avList.resize(iNum);
         for (unsigned int i = 0; i < iNum; ++i) {
-            if (!SkipSpaces(&pCur))
+            if (!SkipSpaces(&pCur, end))
                 return false;
 
             PLY::PropertyInstance::ParseValue(pCur, prop->eType, &p_pcOut->avList[i]);
@@ -710,7 +714,7 @@ bool PLY::PropertyInstance::ParseInstance(const char *&pCur,
         PLY::PropertyInstance::ParseValue(pCur, prop->eType, &v);
         p_pcOut->avList.push_back(v);
     }
-    SkipSpacesAndLineEnd(&pCur);
+    SkipSpacesAndLineEnd(&pCur, end);
     return true;
 }
 
@@ -773,7 +777,7 @@ bool PLY::PropertyInstance::ParseValue(const char *&pCur,
     ai_assert(nullptr != pCur);
     ai_assert(nullptr != out);
 
-    //calc element size
+    // calc element size
     bool ret = true;
     switch (eType) {
     case EDT_UInt:
@@ -823,7 +827,7 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
         bool p_bBE) {
     ai_assert(nullptr != out);
 
-    //calc element size
+    // calc element size
     unsigned int lsize = 0;
     switch (eType) {
     case EDT_Char:
@@ -851,11 +855,11 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
         break;
     }
 
-    //read the next file block if needed
+    // read the next file block if needed
     if (bufferSize < lsize) {
         std::vector<char> nbuffer;
         if (streamBuffer.getNextBlock(nbuffer)) {
-            //concat buffer contents
+            // concat buffer contents
             buffer = std::vector<char>(buffer.end() - bufferSize, buffer.end());
             buffer.insert(buffer.end(), nbuffer.begin(), nbuffer.end());
             nbuffer.clear();
@@ -956,5 +960,7 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
 
     return ret;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_PLY_IMPORTER

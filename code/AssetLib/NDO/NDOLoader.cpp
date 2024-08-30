@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Implementation of the NDO importer class.
  */
 
-
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
+
 #include "NDOLoader.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Nendo Mesh Importer",
     "",
     "",
@@ -68,14 +68,6 @@ static const aiImporterDesc desc = {
     0,
     "ndo"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-NDOImporter::NDOImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-NDOImporter::~NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

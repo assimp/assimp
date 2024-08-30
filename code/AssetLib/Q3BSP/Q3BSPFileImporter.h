@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -81,6 +81,7 @@ protected:
     using FaceMapIt = std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>* >::iterator;
     using FaceMapConstIt = std::map<std::string, std::vector<Q3BSP::sQ3BSPFace*>*>::const_iterator;
 
+    void clear();
     const aiImporterDesc* GetInfo () const override;
     void InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
     void separateMapName( const std::string &rImportName, std::string &rArchiveName, std::string &rMapName );

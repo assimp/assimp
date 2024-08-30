@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -48,6 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class BlendImportAreaLight : public ::testing::Test {
 public:
+    BlendImportAreaLight() :
+            im(nullptr) {}
+    ~BlendImportAreaLight() override = default;
     void SetUp() override {
         im = new Assimp::Importer();
     }

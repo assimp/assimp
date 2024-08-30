@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -224,6 +224,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION    \
     "PP_PTV_ROOT_TRANSFORMATION"
+
+// ---------------------------------------------------------------------------
+/** @brief Set epsilon to check the identity of the matrix 4x4.
+ *
+ * This is used by aiMatrix4x4t<TReal>::IsIdentity(const TReal epsilon).
+ * @note The default value is 10e-3f for backward compatibility of legacy code.
+ * Property type: Float.
+ */
+#define AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON \
+    "CHECK_IDENTITY_MATRIX_EPSILON"
+
+// default value for AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON
+#if (!defined AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT)
+#   define AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT 10e-3f
+#endif
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_FindDegenerates step to
@@ -710,6 +725,12 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATION_EVENTS "IMPORT_MDL_HL1_READ_ANIMATION_EVENTS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether you want to convert the HS1 coordinate system in a special way.
+ * The default value is true (S1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_MDL_HL1_TRANSFORM_COORD_SYSTEM "TRANSFORM COORDSYSTEM FOR HS! MODELS"
+// ---------------------------------------------------------------------------
 /** @brief Set whether the MDL (HL1) importer will read blend controllers.
  * \note This property requires AI_CONFIG_IMPORT_MDL_HL1_READ_ANIMATIONS to be set to true.
  *
@@ -1097,6 +1118,16 @@ enum aiComponent
  */
 #define AI_CONFIG_EXPORT_GLTF_UNLIMITED_SKINNING_BONES_PER_VERTEX \
         "USE_UNLIMITED_BONES_PER VERTEX"
+
+/** @brief Specifies whether to write the value referenced to opacity in TransparencyFactor of each material. 
+ *
+ * When this flag is not defined, the TransparencyFactor value of each meterial is 1.0.
+ * By enabling this flag, the value is 1.0 - opacity;
+
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY \
+        "EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY"
 
 /**
  * @brief Specifies the blob name, assimp uses for exporting.

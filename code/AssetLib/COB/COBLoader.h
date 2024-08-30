@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -56,16 +56,16 @@ class LineSplitter;
 
 // TinyFormatter.h
 namespace Formatter {
-template <typename T, typename TR, typename A>
-class basic_formatter;
-typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>> format;
+    template <typename T, typename TR, typename A>
+    class basic_formatter;
+    typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>> format;
 } // namespace Formatter
 
 // COBScene.h
 namespace COB {
-struct ChunkInfo;
-struct Node;
-struct Scene;
+    struct ChunkInfo;
+    struct Node;
+    struct Scene;
 } // namespace COB
 
 // -------------------------------------------------------------------------------------------
@@ -75,8 +75,8 @@ struct Scene;
 // -------------------------------------------------------------------------------------------
 class COBImporter : public BaseImporter {
 public:
-    COBImporter();
-    ~COBImporter() override;
+    COBImporter() = default;
+    ~COBImporter() override = default;
 
     // --------------------
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
@@ -120,7 +120,7 @@ private:
     void ReadChunkInfo_Ascii(COB::ChunkInfo &out, const LineSplitter &splitter);
     void ReadBasicNodeInfo_Ascii(COB::Node &msh, LineSplitter &splitter, const COB::ChunkInfo &nfo);
     template <typename T>
-    void ReadFloat3Tuple_Ascii(T &fill, const char **in);
+    void ReadFloat3Tuple_Ascii(T &fill, const char **in, const char *end);
 
     void ReadPolH_Ascii(COB::Scene &out, LineSplitter &splitter, const COB::ChunkInfo &nfo);
     void ReadBitM_Ascii(COB::Scene &out, LineSplitter &splitter, const COB::ChunkInfo &nfo);

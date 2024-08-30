@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -68,7 +68,7 @@ namespace XFile {
  */
 class XFileImporter : public BaseImporter {
 public:
-    XFileImporter();
+    XFileImporter() = default;
     ~XFileImporter() override = default;
 
     // -------------------------------------------------------------------

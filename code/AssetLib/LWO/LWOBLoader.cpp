@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 
@@ -51,64 +51,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LWOLoader.h"
 using namespace Assimp;
 
-
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBFile()
-{
+void LWOImporter::LoadLWOBFile() {
     LE_NCONST uint8_t* const end = mFileBuffer + fileSize;
     bool running = true;
-    while (running)
-    {
-        if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
+    while (running) {
+        if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)
+            break;
         const IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
 
-        if (mFileBuffer + head.length > end)
-        {
+        if (mFileBuffer + head.length > end) {
             throw DeadlyImportError("LWOB: Invalid chunk length");
         }
         uint8_t* const next = mFileBuffer+head.length;
-        switch (head.type)
-        {
+        switch (head.type) {
             // vertex list
-        case AI_LWO_PNTS:
-            {
+            case AI_LWO_PNTS: {
                 if (!mCurLayer->mTempPoints.empty())
                     ASSIMP_LOG_WARN("LWO: PNTS chunk encountered twice");
-                else LoadLWOPoints(head.length);
-                break;
-            }
-            // face list
-        case AI_LWO_POLS:
-            {
+                else
+                    LoadLWOPoints(head.length);
+                } break;
+            case AI_LWO_POLS: {                 // face list
+                    if (!mCurLayer->mFaces.empty())
+                        ASSIMP_LOG_WARN("LWO: POLS chunk encountered twice");
+                    else
+                        LoadLWOBPolygons(head.length);
+                } break;
+                
+            case AI_LWO_SRFS: // list of tags
+                {
+                    if (!mTags->empty())
+                        ASSIMP_LOG_WARN("LWO: SRFS chunk encountered twice");
+                    else
+                        LoadLWOTags(head.length);
+                } break;
 
-                if (!mCurLayer->mFaces.empty())
-                    ASSIMP_LOG_WARN("LWO: POLS chunk encountered twice");
-                else LoadLWOBPolygons(head.length);
-                break;
-            }
-            // list of tags
-        case AI_LWO_SRFS:
-            {
-                if (!mTags->empty())
-                    ASSIMP_LOG_WARN("LWO: SRFS chunk encountered twice");
-                else LoadLWOTags(head.length);
-                break;
-            }
+            case AI_LWO_SURF: // surface chunk
+                {
+                    LoadLWOBSurface(head.length);
+                } break;
 
-            // surface chunk
-        case AI_LWO_SURF:
-            {
-                LoadLWOBSurface(head.length);
+            default:
                 break;
-            }
         }
         mFileBuffer = next;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBPolygons(unsigned int length)
-{
+void LWOImporter::LoadLWOBPolygons(unsigned int length) {
     // first find out how many faces and vertices we'll finally need
     LE_NCONST uint16_t* const end   = (LE_NCONST uint16_t*)(mFileBuffer+length);
     LE_NCONST uint16_t* cursor      = (LE_NCONST uint16_t*)mFileBuffer;
@@ -123,8 +115,7 @@ void LWOImporter::LoadLWOBPolygons(unsigned int length)
     CountVertsAndFacesLWOB(iNumVertices,iNumFaces,cursor,end);
 
     // allocate the output array and copy face indices
-    if (iNumFaces)
-    {
+    if (iNumFaces) {
         cursor = (LE_NCONST uint16_t*)mFileBuffer;
 
         mCurLayer->mFaces.resize(iNumFaces);
@@ -135,10 +126,8 @@ void LWOImporter::LoadLWOBPolygons(unsigned int length)
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& faces,
-    LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max)
-{
-    while (cursor < end && max--)
-    {
+    LE_NCONST uint16_t*& cursor, const uint16_t* const end, unsigned int max) {
+    while (cursor < end && max--) {
         uint16_t numIndices;
         // must have 2 shorts left for numIndices and surface
         if (end - cursor < 2) {
@@ -154,8 +143,7 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
         cursor += numIndices;
         int16_t surface;
         ::memcpy(&surface, cursor++, 2);
-        if (surface < 0)
-        {
+        if (surface < 0) {
             // there are detail polygons
             ::memcpy(&numIndices, cursor++, 2);
             CountVertsAndFacesLWOB(verts,faces,cursor,end,numIndices);
@@ -164,21 +152,17 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
+void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator &it,
     LE_NCONST uint16_t*& cursor,
     const uint16_t* const end,
-    unsigned int max)
-{
-    while (cursor < end && max--)
-    {
+    unsigned int max) {
+    while (cursor < end && max--) {
         LWO::Face& face = *it;++it;
         uint16_t numIndices;
         ::memcpy(&numIndices, cursor++, 2);
         face.mNumIndices = numIndices;
-        if(face.mNumIndices)
-        {
-            if (cursor + face.mNumIndices >= end)
-            {
+        if(face.mNumIndices) {
+            if (cursor + face.mNumIndices >= end) {
                 break;
             }
             face.mIndices = new unsigned int[face.mNumIndices];
@@ -187,8 +171,7 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
                 uint16_t index;
                 ::memcpy(&index, cursor++, 2);
                 mi = index;
-                if (mi > mCurLayer->mTempPoints.size())
-                {
+                if (mi > mCurLayer->mTempPoints.size()) {
                     ASSIMP_LOG_WARN("LWOB: face index is out of range");
                     mi = (unsigned int)mCurLayer->mTempPoints.size()-1;
                 }
@@ -198,15 +181,13 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
         }
         int16_t surface;
         ::memcpy(&surface, cursor++, 2);
-        if (surface < 0)
-        {
+        if (surface < 0) {
             surface = -surface;
 
             // there are detail polygons.
             uint16_t numPolygons;
             ::memcpy(&numPolygons, cursor++, 2);
-            if (cursor < end)
-            {
+            if (cursor < end) {
                 CopyFaceIndicesLWOB(it,cursor,end,numPolygons);
             }
         }
@@ -215,8 +196,7 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 }
 
 // ------------------------------------------------------------------------------------------------
-LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned int size)
-{
+LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned int size) {
     list.emplace_back();
     LWO::Texture* tex = &list.back();
 
@@ -224,8 +204,7 @@ LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned i
     GetS0(type,size);
     const char* s = type.c_str();
 
-    if(strstr(s, "Image Map"))
-    {
+    if(strstr(s, "Image Map")) {
         // Determine mapping type
         if(strstr(s, "Planar"))
             tex->mapMode = LWO::Texture::Planar;
@@ -237,9 +216,7 @@ LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned i
             tex->mapMode = LWO::Texture::Cubic;
         else if(strstr(s, "Front"))
             tex->mapMode = LWO::Texture::FrontProjection;
-    }
-    else
-    {
+    } else {
         // procedural or gradient, not supported
         ASSIMP_LOG_ERROR("LWOB: Unsupported legacy texture: ", type);
     }
@@ -248,8 +225,7 @@ LWO::Texture* LWOImporter::SetupNewTextureLWOB(LWO::TextureList& list,unsigned i
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::LoadLWOBSurface(unsigned int size)
-{
+void LWOImporter::LoadLWOBSurface(unsigned int size) {
     LE_NCONST uint8_t* const end = mFileBuffer + size;
 
     mSurfaces->push_back( LWO::Surface () );
@@ -277,148 +253,147 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
         }
 
         uint8_t* const next = mFileBuffer+head.length;
-        switch (head.type)
-        {
-        // diffuse color
-        case AI_LWO_COLR:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,COLR,3);
-                surf.mColor.r = GetU1() / 255.0f;
-                surf.mColor.g = GetU1() / 255.0f;
-                surf.mColor.b = GetU1() / 255.0f;
-                break;
-            }
-        // diffuse strength ...
-        case AI_LWO_DIFF:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,DIFF,2);
-                surf.mDiffuseValue = GetU2() / 255.0f;
-                break;
-            }
-        // specular strength ...
-        case AI_LWO_SPEC:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPEC,2);
-                surf.mSpecularValue = GetU2() / 255.0f;
-                break;
-            }
-        // luminosity ...
-        case AI_LWO_LUMI:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,LUMI,2);
-                surf.mLuminosity = GetU2() / 255.0f;
-                break;
-            }
-        // transparency
-        case AI_LWO_TRAN:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TRAN,2);
-                surf.mTransparency = GetU2() / 255.0f;
-                break;
-            }
-        // surface flags
-        case AI_LWO_FLAG:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,FLAG,2);
-                uint16_t flag = GetU2();
-                if (flag & 0x4 )   surf.mMaximumSmoothAngle = 1.56207f;
-                if (flag & 0x8 )   surf.mColorHighlights = 1.f;
-                if (flag & 0x100)  surf.bDoubleSided = true;
-                break;
-            }
-        // maximum smoothing angle
-        case AI_LWO_SMAN:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
-                surf.mMaximumSmoothAngle = std::fabs( GetF4() );
-                break;
-            }
-        // glossiness
-        case AI_LWO_GLOS:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,GLOS,2);
-                surf.mGlossiness = (float)GetU2();
-                break;
-            }
-        // color texture
-        case AI_LWO_CTEX:
-            {
-                pTex = SetupNewTextureLWOB(surf.mColorTextures,
-                    head.length);
-                break;
-            }
-        // diffuse texture
-        case AI_LWO_DTEX:
-            {
-                pTex = SetupNewTextureLWOB(surf.mDiffuseTextures,
-                    head.length);
-                break;
-            }
-        // specular texture
-        case AI_LWO_STEX:
-            {
-                pTex = SetupNewTextureLWOB(surf.mSpecularTextures,
-                    head.length);
-                break;
-            }
-        // bump texture
-        case AI_LWO_BTEX:
-            {
-                pTex = SetupNewTextureLWOB(surf.mBumpTextures,
-                    head.length);
-                break;
-            }
-        // transparency texture
-        case AI_LWO_TTEX:
-            {
-                pTex = SetupNewTextureLWOB(surf.mOpacityTextures,
-                    head.length);
-                break;
-            }
-        // texture path
-        case AI_LWO_TIMG:
-            {
-                if (pTex)   {
-                    GetS0(pTex->mFileName,head.length);
-                } else {
-                    ASSIMP_LOG_WARN("LWOB: Unexpected TIMG chunk");
+        switch (head.type) {
+            // diffuse color
+            case AI_LWO_COLR:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,COLR,3);
+                    surf.mColor.r = GetU1() / 255.0f;
+                    surf.mColor.g = GetU1() / 255.0f;
+                    surf.mColor.b = GetU1() / 255.0f;
+                    break;
                 }
-                break;
-            }
-        // texture strength
-        case AI_LWO_TVAL:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TVAL,1);
-                if (pTex)   {
-                    pTex->mStrength = (float)GetU1()/ 255.f;
-                } else {
-                    ASSIMP_LOG_ERROR("LWOB: Unexpected TVAL chunk");
+            // diffuse strength ...
+            case AI_LWO_DIFF:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,DIFF,2);
+                    surf.mDiffuseValue = GetU2() / 255.0f;
+                    break;
                 }
-                break;
-            }
-        // texture flags
-        case AI_LWO_TFLG:
-            {
-                AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TFLG,2);
-
-                if (nullptr != pTex) {
-                    const uint16_t s = GetU2();
-                    if (s & 1)
-                        pTex->majorAxis = LWO::Texture::AXIS_X;
-                    else if (s & 2)
-                        pTex->majorAxis = LWO::Texture::AXIS_Y;
-                    else if (s & 4)
-                        pTex->majorAxis = LWO::Texture::AXIS_Z;
-
-                    if (s & 16) {
-                        ASSIMP_LOG_WARN("LWOB: Ignoring \'negate\' flag on texture");
+            // specular strength ...
+            case AI_LWO_SPEC:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPEC,2);
+                    surf.mSpecularValue = GetU2() / 255.0f;
+                    break;
+                }
+            // luminosity ...
+            case AI_LWO_LUMI:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,LUMI,2);
+                    surf.mLuminosity = GetU2() / 255.0f;
+                    break;
+                }
+            // transparency
+            case AI_LWO_TRAN:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TRAN,2);
+                    surf.mTransparency = GetU2() / 255.0f;
+                    break;
+                }
+            // surface flags
+            case AI_LWO_FLAG:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,FLAG,2);
+                    uint16_t flag = GetU2();
+                    if (flag & 0x4 )   surf.mMaximumSmoothAngle = 1.56207f;
+                    if (flag & 0x8 )   surf.mColorHighlights = 1.f;
+                    if (flag & 0x100)  surf.bDoubleSided = true;
+                    break;
+                }
+            // maximum smoothing angle
+            case AI_LWO_SMAN:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
+                    surf.mMaximumSmoothAngle = std::fabs( GetF4() );
+                    break;
+                }
+            // glossiness
+            case AI_LWO_GLOS:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,GLOS,2);
+                    surf.mGlossiness = (float)GetU2();
+                    break;
+                }
+            // color texture
+            case AI_LWO_CTEX:
+                {
+                    pTex = SetupNewTextureLWOB(surf.mColorTextures,
+                        head.length);
+                    break;
+                }
+            // diffuse texture
+            case AI_LWO_DTEX:
+                {
+                    pTex = SetupNewTextureLWOB(surf.mDiffuseTextures,
+                        head.length);
+                    break;
+                }
+            // specular texture
+            case AI_LWO_STEX:
+                {
+                    pTex = SetupNewTextureLWOB(surf.mSpecularTextures,
+                        head.length);
+                    break;
+                }
+            // bump texture
+            case AI_LWO_BTEX:
+                {
+                    pTex = SetupNewTextureLWOB(surf.mBumpTextures,
+                        head.length);
+                    break;
+                }
+            // transparency texture
+            case AI_LWO_TTEX:
+                {
+                    pTex = SetupNewTextureLWOB(surf.mOpacityTextures,
+                        head.length);
+                    break;
+                }
+            // texture path
+            case AI_LWO_TIMG:
+                {
+                    if (pTex)   {
+                        GetS0(pTex->mFileName,head.length);
+                    } else {
+                        ASSIMP_LOG_WARN("LWOB: Unexpected TIMG chunk");
                     }
+                    break;
                 }
-                else {
-                    ASSIMP_LOG_WARN("LWOB: Unexpected TFLG chunk");
+            // texture strength
+            case AI_LWO_TVAL:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TVAL,1);
+                    if (pTex)   {
+                        pTex->mStrength = (float)GetU1()/ 255.f;
+                    } else {
+                        ASSIMP_LOG_ERROR("LWOB: Unexpected TVAL chunk");
+                    }
+                    break;
                 }
-                break;
-            }
+            // texture flags
+            case AI_LWO_TFLG:
+                {
+                    AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TFLG,2);
+
+                    if (nullptr != pTex) {
+                        const uint16_t s = GetU2();
+                        if (s & 1)
+                            pTex->majorAxis = LWO::Texture::AXIS_X;
+                        else if (s & 2)
+                            pTex->majorAxis = LWO::Texture::AXIS_Y;
+                        else if (s & 4)
+                            pTex->majorAxis = LWO::Texture::AXIS_Z;
+
+                        if (s & 16) {
+                            ASSIMP_LOG_WARN("LWOB: Ignoring \'negate\' flag on texture");
+                        }
+                    }
+                    else {
+                        ASSIMP_LOG_WARN("LWOB: Unexpected TFLG chunk");
+                    }
+                    break;
+                }
         }
         mFileBuffer = next;
     }

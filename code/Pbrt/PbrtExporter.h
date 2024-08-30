@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -70,15 +70,33 @@ class ExportProperties;
 // ---------------------------------------------------------------------
 /** Helper class to export a given scene to a Pbrt file. */
 // ---------------------------------------------------------------------
-class PbrtExporter
-{
+class PbrtExporter {
 public:
     /// Constructor for a specific scene to export
     PbrtExporter(const aiScene *pScene, IOSystem *pIOSystem,
             const std::string &path, const std::string &file);
 
     /// Destructor
-    virtual ~PbrtExporter();
+    virtual ~PbrtExporter() = default;
+
+private:
+    aiMatrix4x4 GetNodeTransform(const aiString &name) const;
+    static std::string TransformAsString(const aiMatrix4x4 &m);
+    static std::string RemoveSuffix(std::string filename);
+    std::string CleanTextureFilename(const aiString &f, bool rewriteExtension = true) const;
+    void WriteMetaData();
+    void WriteWorldDefinition();
+    void WriteCameras();
+    void WriteCamera(int i);
+    void WriteLights();
+    void WriteTextures();
+    static bool TextureHasAlphaMask(const std::string &filename);
+    void WriteMaterials();
+    void WriteMaterial(int i);
+    void WriteMesh(aiMesh *mesh);
+    void WriteInstanceDefinition(int i);
+    void WriteGeometricObjects(aiNode *node, aiMatrix4x4 parentTransform,
+            std::map<int, int> &meshUses);
 
 private:
     // the scene to export
@@ -96,39 +114,11 @@ private:
     /// Name of the file (without extension) where the scene will be exported
     const std::string mFile;
 
-private:
     //  A private set to keep track of which textures have been declared
     std::set<std::string> mTextureSet;
 
     // Transform to apply to the root node and all root objects such as cameras, lights, etc.
     aiMatrix4x4 mRootTransform;
-
-    aiMatrix4x4 GetNodeTransform(const aiString& name) const;
-    static std::string TransformAsString(const aiMatrix4x4& m);
-
-    static std::string RemoveSuffix(std::string filename);
-    std::string CleanTextureFilename(const aiString &f, bool rewriteExtension = true) const;
-
-    void WriteMetaData();
-
-    void WriteWorldDefinition();
-
-    void WriteCameras();
-    void WriteCamera(int i);
-
-    void WriteLights();
-
-    void WriteTextures();
-    static bool TextureHasAlphaMask(const std::string &filename);
-
-    void WriteMaterials();
-    void WriteMaterial(int i);
-
-    void WriteMesh(aiMesh* mesh);
-
-    void WriteInstanceDefinition(int i);
-    void WriteGeometricObjects(aiNode* node, aiMatrix4x4 parentTransform,
-                               std::map<int, int> &meshUses);
 };
 
 } // namespace Assimp

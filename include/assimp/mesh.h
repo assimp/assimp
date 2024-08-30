@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -59,6 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 #ifdef __cplusplus
+#include <unordered_set>
+
 extern "C" {
 #endif
 
@@ -727,8 +729,9 @@ struct aiMesh {
     /**
      * @brief Vertex texture coordinates, also known as UV channels.
      * 
-     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
-     * vertex. nullptr if not present. The array is mNumVertices in size.
+     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS channels per
+     * vertex. Used and unused (nullptr) channels may go in any order.
+     * The array is mNumVertices in size.
      */
     C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
@@ -872,10 +875,14 @@ struct aiMesh {
 
         // DO NOT REMOVE THIS ADDITIONAL CHECK
         if (mNumBones && mBones) {
+            std::unordered_set<const aiBone *> bones;
             for (unsigned int a = 0; a < mNumBones; a++) {
                 if (mBones[a]) {
-                    delete mBones[a];
+                    bones.insert(mBones[a]);
                 }
+            }
+            for (const aiBone *bone: bones) {
+                delete bone;
             }
             delete[] mBones;
         }
@@ -944,8 +951,10 @@ struct aiMesh {
     //! @return the number of stored uv-channels.
     unsigned int GetNumUVChannels() const {
         unsigned int n(0);
-        while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mTextureCoords[n]) {
-            ++n;
+        for (unsigned i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
+            if (mTextureCoords[i]) {
+                ++n;
+            }
         }
 
         return n;

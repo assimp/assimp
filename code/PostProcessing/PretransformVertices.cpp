@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -290,12 +290,6 @@ void PretransformVertices::ComputeAbsoluteTransform(aiNode *pcNode) {
 	}
 }
 
-static void normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors) {
-	for (size_t i=0; i<numVectors; ++i) {
-		vectorArrayOut[i] = vectorArrayIn[i].Normalize();
-	}
-}
-
 // ------------------------------------------------------------------------------------------------
 // Apply the node transformation to a mesh
 void PretransformVertices::ApplyTransform(aiMesh *mesh, const aiMatrix4x4 &mat) const {
@@ -322,8 +316,11 @@ void PretransformVertices::ApplyTransform(aiMesh *mesh, const aiMatrix4x4 &mat) 
 		const aiMatrix3x3 m = aiMatrix3x3(mat).Inverse().Transpose();
 
 		if (mesh->HasNormals()) {
-			normalizeVectorArray(mesh->mNormals, mesh->mNormals, mesh->mNumVertices);
+			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+                mesh->mNormals[i] = (m * mesh->mNormals[i]).Normalize();
+            }
 		}
+
 		if (mesh->HasTangentsAndBitangents()) {
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 				mesh->mTangents[i] = (m * mesh->mTangents[i]).Normalize();
@@ -638,7 +635,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 				aiNode *pcNode = new aiNode();
 				*nodes = pcNode;
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u", i);
+				pcNode->mName.length = ai_snprintf(pcNode->mName.data, AI_MAXLEN, "light_%u", i);
 				pScene->mLights[i]->mName = pcNode->mName;
 			}
 			// generate camera nodes
@@ -646,7 +643,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 				aiNode *pcNode = new aiNode();
 				*nodes = pcNode;
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ::ai_snprintf(pcNode->mName.data, MAXLEN, "cam_%u", i);
+				pcNode->mName.length = ::ai_snprintf(pcNode->mName.data, AI_MAXLEN, "cam_%u", i);
 				pScene->mCameras[i]->mName = pcNode->mName;
 			}
 		}

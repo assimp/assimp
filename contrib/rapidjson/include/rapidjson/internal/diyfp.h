@@ -25,7 +25,11 @@
 
 #if defined(_MSC_VER) && defined(_M_AMD64) && !defined(__INTEL_COMPILER)
 #include <intrin.h>
+#if !defined(_ARM64EC_)
 #pragma intrinsic(_umul128)
+#else
+#pragma comment(lib,"softintrin")
+#endif
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
@@ -75,7 +79,7 @@ struct DiyFp {
         if (l & (uint64_t(1) << 63)) // rounding
             h++;
         return DiyFp(h, e + rhs.e + 64);
-#elif (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) && defined(__x86_64__)
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) && defined(__x86_64__)
         __extension__ typedef unsigned __int128 uint128;
         uint128 p = static_cast<uint128>(f) * static_cast<uint128>(rhs.f);
         uint64_t h = static_cast<uint64_t>(p >> 64);

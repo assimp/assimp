@@ -203,3 +203,9 @@ TEST_F(utPLYImportExport, parseInvalid) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/crash-30d6d0f7c529b3b66b4131700b7a4580cd7082df.ply", 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utPLYImportExport, payload_JVN42386607) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/payload_JVN42386607", 0);
+   EXPECT_EQ(nullptr, scene);
+}

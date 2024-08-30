@@ -130,7 +130,7 @@ jobs:
           prerelease: true
       - run: |
           echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: create-release
           path: release_upload_url.txt
@@ -171,13 +171,13 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           name: create-release
       - id: upload-url
         run: |
           echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v4
         with:
           name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
       - uses: actions/upload-release-asset@v1

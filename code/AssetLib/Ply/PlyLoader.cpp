@@ -448,6 +448,9 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
             mGeneratedMesh->mNumVertices = pcElement->NumOccur;
             mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
         }
+        if (pos >= mGeneratedMesh->mNumVertices) {
+            throw DeadlyImportError("Invalid .ply file: Too many vertices");
+        }
 
         mGeneratedMesh->mVertices[pos] = vOut;
 

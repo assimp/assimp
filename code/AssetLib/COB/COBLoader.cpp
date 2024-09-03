@@ -372,9 +372,11 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
     }
 
     // add children recursively
-    nd->mChildren = new aiNode *[root.temp_children.size()]();
-    for (const Node *n : root.temp_children) {
-        (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+    if (!root.temp_children.empty()) {
+        nd->mChildren = new aiNode *[root.temp_children.size()]();
+        for (const Node *n : root.temp_children) {
+            (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+        }
     }
 
     return nd;

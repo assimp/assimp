@@ -1053,7 +1053,7 @@ ENDIF() # IF (ASSIMP_BUILD_USD_IMPORTER)
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
-ELSE()
+ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
@@ -1438,6 +1438,9 @@ ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
+  if(TARGET pugixml::pugixml)
+    target_link_libraries(assimp pugixml::pugixml)
   endif()
 ENDIF()
 

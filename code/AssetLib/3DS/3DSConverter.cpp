@@ -643,11 +643,17 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     }
 
     // Allocate storage for children
-    pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
+    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
+
+    pcOut->mNumChildren = size;
+    if (size == 0) {
+        return;
+    }
+
     pcOut->mChildren = new aiNode *[pcIn->mChildren.size()];
 
     // Recursively process all children
-    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
+    
     for (unsigned int i = 0; i < size; ++i) {
         pcOut->mChildren[i] = new aiNode();
         pcOut->mChildren[i]->mParent = pcOut;

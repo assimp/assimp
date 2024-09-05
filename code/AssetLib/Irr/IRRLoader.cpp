@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -168,7 +168,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<aiMater
         aiMaterial *out = (aiMaterial *)(*(materials.end() - (6 - i)));
 
         aiString s;
-        s.length = ::ai_snprintf(s.data, MAXLEN, "SkyboxSide_%u", i);
+        s.length = ::ai_snprintf(s.data, AI_MAXLEN, "SkyboxSide_%u", i);
         out->AddProperty(&s, AI_MATKEY_NAME);
 
         int shading = aiShadingMode_NoShading;
@@ -316,7 +316,7 @@ void IRRImporter::ComputeAnimations(Node *root, aiNode *real, std::vector<aiNode
         if (cur != total - 1) {
             // Build a new name - a prefix instead of a suffix because it is
             // easier to check against
-            anim->mNodeName.length = ::ai_snprintf(anim->mNodeName.data, MAXLEN,
+            anim->mNodeName.length = ::ai_snprintf(anim->mNodeName.data, AI_MAXLEN,
                     "$INST_DUMMY_%i_%s", total - 1,
                     (root->name.length() ? root->name.c_str() : ""));
 
@@ -1234,7 +1234,10 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Parse the XML
     // Find the scene root from document root.
     const pugi::xml_node &sceneRoot = documentRoot.child("irr_scene");
-    if (!sceneRoot) throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    if (!sceneRoot) {
+        delete root;
+        throw new DeadlyImportError("IRR: <irr_scene> not found in file");
+    }
     for (pugi::xml_node &child : sceneRoot.children()) {
         // XML elements are either nodes, animators, attributes, or materials
         if (!ASSIMP_stricmp(child.name(), "node")) {

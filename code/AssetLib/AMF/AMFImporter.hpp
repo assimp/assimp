@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -168,7 +168,6 @@ public:
     AI_WONT_RETURN void Throw_ID_NotFound(const std::string &pID) const AI_WONT_RETURN_SUFFIX;
     void XML_CheckNode_MustHaveChildren(pugi::xml_node &node);
     bool XML_SearchNode(const std::string &nodeName);
-    void ParseHelper_FixTruncatedFloatString(const char *pInStr, std::string &pOutString);
     AMFImporter(const AMFImporter &pScene) = delete;
     AMFImporter &operator=(const AMFImporter &pScene) = delete;
 

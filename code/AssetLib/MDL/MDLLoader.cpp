@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -99,7 +99,7 @@ MDLImporter::MDLImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MDLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_MDL_MAGIC_NUMBER_LE_HL2a,
         AI_MDL_MAGIC_NUMBER_LE_HL2b,
         AI_MDL_MAGIC_NUMBER_LE_GS7,
@@ -138,12 +138,27 @@ void MDLImporter::SetupProperties(const Importer *pImp) {
     mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
     mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
     mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
+    mHL1ImportSettings.transform_coord_system = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_TRANSFORM_COORD_SYSTEM);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported extensions
 const aiImporterDesc *MDLImporter::GetInfo() const {
     return &desc;
+}
+
+// ------------------------------------------------------------------------------------------------
+static void transformCoordinateSystem(const aiScene *pScene) {
+    if (pScene == nullptr) {
+        return;
+    }
+
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+        0.f, -1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        -1.f, 0.f, 0.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -246,18 +261,16 @@ void MDLImporter::InternReadFile(const std::string &pFile,
                                     ". Magic word (", ai_str_toprintable((const char *)&iMagicWord, sizeof(iMagicWord)), ") is not known");
         }
 
-        if (is_half_life){
+        if (is_half_life && mHL1ImportSettings.transform_coord_system) {
             // Now rotate the whole scene 90 degrees around the z and x axes to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(
-                    0.f, -1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    -1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 0.f, 1.f);
-        }
-        else {
+            transformCoordinateSystem(pScene);
+        } else {
             // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+            pScene->mRootNode->mTransformation = aiMatrix4x4(
+                1.f,  0.f, 0.f, 0.f,
+                0.f,  0.f, 1.f, 0.f, 
+                0.f, -1.f, 0.f, 0.f, 
+                0.f,  0.f, 0.f, 1.f);
         }
 
         DeleteBufferAndCleanup();
@@ -962,7 +975,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
 
                 if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size) {
                     // no real name for our poor bone is specified :-(
-                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, MAXLEN,
+                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, AI_MAXLEN,
                             "UnnamedBone_%i", iBone);
                 } else {
                     // Make sure we won't run over the buffer's end if there is no
@@ -1567,7 +1580,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
             } else {
                 pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
             }
-            ::strncpy(pcNode->mName.data, szBuffer, MAXLEN - 1);
+            ::strncpy(pcNode->mName.data, szBuffer, AI_MAXLEN - 1);
             ++p;
         }
     }

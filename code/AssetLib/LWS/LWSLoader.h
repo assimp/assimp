@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -76,7 +76,7 @@ public:
     std::list<Element> children;
 
     //! Recursive parsing function
-    void Parse(const char *&buffer);
+    void Parse(const char *&buffer, const char *end);
 };
 
 #define AI_LWS_MASK (0xffffffff >> 4u)

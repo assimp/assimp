@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -507,7 +507,7 @@ namespace glTF2 {
 
             WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
 
-            if (volume.attenuationDistance != INFINITY) {
+            if (volume.attenuationDistance != std::numeric_limits<float>::infinity()) {
                 WriteFloat(materialVolume, volume.attenuationDistance, "attenuationDistance", w.mAl);
             }
 
@@ -940,7 +940,7 @@ namespace glTF2 {
             if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
                 throw DeadlyExportError("Failed to write body data!");
             }
-            if (curPaddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            if (curPaddingLength && outfile->Write(&padding, 1, curPaddingLength) != curPaddingLength) {
                 throw DeadlyExportError("Failed to write body data padding!");
             }
         }

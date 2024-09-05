@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -49,6 +49,10 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 class ASSIMP_API GeometryUtils {
 public:
+    /// @brief Will calculate the area of a triangle.
+    /// @param a  The first vertex of the triangle.
+    /// @param b  The first vertex of the triangle.
+    /// @param c  The first vertex of the triangle.
     static ai_real heron( ai_real a, ai_real b, ai_real c );
     
     /// @brief Will compute the distance between 2 3D-vectors

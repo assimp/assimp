@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -78,14 +78,14 @@ static constexpr aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Recursive parsing of LWS files
-void LWS::Element::Parse(const char *&buffer) {
-    for (; SkipSpacesAndLineEnd(&buffer); SkipLine(&buffer)) {
+void LWS::Element::Parse(const char *&buffer, const char *end) {
+    for (; SkipSpacesAndLineEnd(&buffer, end); SkipLine(&buffer, end)) {
 
         // begin of a new element with children
         bool sub = false;
         if (*buffer == '{') {
             ++buffer;
-            SkipSpaces(&buffer);
+            SkipSpaces(&buffer, end);
             sub = true;
         } else if (*buffer == '}')
             return;
@@ -98,16 +98,15 @@ void LWS::Element::Parse(const char *&buffer) {
         while (!IsSpaceOrNewLine(*buffer))
             ++buffer;
         children.back().tokens[0] = std::string(cur, (size_t)(buffer - cur));
-        SkipSpaces(&buffer);
+        SkipSpaces(&buffer, end);
 
         if (children.back().tokens[0] == "Plugin") {
             ASSIMP_LOG_VERBOSE_DEBUG("LWS: Skipping over plugin-specific data");
 
             // strange stuff inside Plugin/Endplugin blocks. Needn't
             // follow LWS syntax, so we skip over it
-            for (; SkipSpacesAndLineEnd(&buffer); SkipLine(&buffer)) {
+            for (; SkipSpacesAndLineEnd(&buffer, end); SkipLine(&buffer, end)) {
                 if (!::strncmp(buffer, "EndPlugin", 9)) {
-                    //SkipLine(&buffer);
                     break;
                 }
             }
@@ -122,7 +121,7 @@ void LWS::Element::Parse(const char *&buffer) {
 
         // parse more elements recursively
         if (sub) {
-            children.back().Parse(buffer);
+            children.back().Parse(buffer, end);
         }
     }
 }
@@ -155,6 +154,8 @@ const aiImporterDesc *LWSImporter::GetInfo() const {
     return &desc;
 }
 
+static constexpr int MagicHackNo = 150392;
+
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties
 void LWSImporter::SetupProperties(const Importer *pImp) {
@@ -163,11 +164,11 @@ void LWSImporter::SetupProperties(const Importer *pImp) {
 
     // AI_CONFIG_IMPORT_LWS_ANIM_START
     first = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_START,
-            150392 /* magic hack */);
+            MagicHackNo /* magic hack */);
 
     // AI_CONFIG_IMPORT_LWS_ANIM_END
     last = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_LWS_ANIM_END,
-            150392 /* magic hack */);
+            MagicHackNo /* magic hack */);
 
     if (last < first) {
         std::swap(last, first);
@@ -191,15 +192,16 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
     for (++it; it != dad.children.end(); ++it) {
         const char *c = (*it).tokens[1].c_str();
+        const char *end = c + (*it).tokens[1].size();
 
         if ((*it).tokens[0] == "Key") {
             fill.keys.emplace_back();
             LWO::Key &key = fill.keys.back();
 
             float f;
-            SkipSpaces(&c);
+            SkipSpaces(&c, end);
             c = fast_atoreal_move<float>(c, key.value);
-            SkipSpaces(&c);
+            SkipSpaces(&c, end);
             c = fast_atoreal_move<float>(c, f);
 
             key.time = f;
@@ -231,13 +233,13 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
                     ASSIMP_LOG_ERROR("LWS: Unknown span type");
             }
             for (unsigned int i = 0; i < num; ++i) {
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 c = fast_atoreal_move<float>(c, key.params[i]);
             }
         } else if ((*it).tokens[0] == "Behaviors") {
-            SkipSpaces(&c);
+            SkipSpaces(&c, end);
             fill.pre = (LWO::PrePostBehaviour)strtoul10(c, &c);
-            SkipSpaces(&c);
+            SkipSpaces(&c, end);
             fill.post = (LWO::PrePostBehaviour)strtoul10(c, &c);
         }
     }
@@ -245,47 +247,45 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
 // ------------------------------------------------------------------------------------------------
 // Read animation channels in the old LightWave animation format
-void LWSImporter::ReadEnvelope_Old(
-        std::list<LWS::Element>::const_iterator &it,
-        const std::list<LWS::Element>::const_iterator &end,
-        LWS::NodeDesc &nodes,
-        unsigned int /*version*/) {
-    unsigned int num, sub_num;
-    if (++it == end) goto unexpected_end;
+void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt, 
+        LWS::NodeDesc &nodes, unsigned int) {
+    if (++it == endIt) {
+        ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
+        return;
+    }
 
-    num = strtoul10((*it).tokens[0].c_str());
+    const unsigned int num = strtoul10((*it).tokens[0].c_str());
     for (unsigned int i = 0; i < num; ++i) {
-
         nodes.channels.emplace_back();
         LWO::Envelope &envl = nodes.channels.back();
 
         envl.index = i;
         envl.type = (LWO::EnvelopeType)(i + 1);
 
-        if (++it == end) {
-            goto unexpected_end;
+        if (++it == endIt) {
+            ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
+            return;
         }
-        sub_num = strtoul10((*it).tokens[0].c_str());
-
+        
+        const unsigned int sub_num = strtoul10((*it).tokens[0].c_str());
         for (unsigned int n = 0; n < sub_num; ++n) {
-
-            if (++it == end) goto unexpected_end;
+            if (++it == endIt) {
+                ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
+                return;
+            }
 
             // parse value and time, skip the rest for the moment.
             LWO::Key key;
             const char *c = fast_atoreal_move<float>((*it).tokens[0].c_str(), key.value);
-            SkipSpaces(&c);
+            const char *end = c + (*it).tokens[0].size();
+            SkipSpaces(&c, end);
             float f;
             fast_atoreal_move<float>((*it).tokens[0].c_str(), f);
             key.time = f;
 
-            envl.keys.push_back(key);
+            envl.keys.emplace_back(key);
         }
     }
-    return;
-
-unexpected_end:
-    ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -296,7 +296,6 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
     // the name depends on the type. We break LWS's strange naming convention
     // and return human-readable, but still machine-parsable and unique, strings.
     if (src.type == LWS::NodeDesc::OBJECT) {
-
         if (src.path.length()) {
             std::string::size_type s = src.path.find_last_of("\\/");
             if (s == std::string::npos) {
@@ -306,14 +305,14 @@ void LWSImporter::SetupNodeName(aiNode *nd, LWS::NodeDesc &src) {
             }
             std::string::size_type t = src.path.substr(s).find_last_of('.');
 
-            nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
-            if (nd->mName.length > MAXLEN) {
-                nd->mName.length = MAXLEN;
+            nd->mName.length = ::ai_snprintf(nd->mName.data, AI_MAXLEN, "%s_(%08X)", src.path.substr(s).substr(0, t).c_str(), combined);
+            if (nd->mName.length > AI_MAXLEN) {
+                nd->mName.length = AI_MAXLEN;
             }
             return;
         }
     }
-    nd->mName.length = ::ai_snprintf(nd->mName.data, MAXLEN, "%s_(%08X)", src.name, combined);
+    nd->mName.length = ::ai_snprintf(nd->mName.data, AI_MAXLEN, "%s_(%08X)", src.name, combined);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -501,7 +500,8 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Parse the file structure
     LWS::Element root;
     const char *dummy = &mBuffer[0];
-    root.Parse(dummy);
+    const char *dummyEnd = dummy + mBuffer.size();
+    root.Parse(dummy, dummyEnd);
 
     // Construct a Batch-importer to read more files recursively
     BatchLoader batch(pIOHandler);
@@ -540,6 +540,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Now read all elements in a very straightforward manner
     for (; it != root.children.end(); ++it) {
         const char *c = (*it).tokens[1].c_str();
+        const char *end = c + (*it).tokens[1].size();
 
         // 'FirstFrame': begin of animation slice
         if ((*it).tokens[0] == "FirstFrame") {
@@ -567,14 +568,14 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             LWS::NodeDesc d;
             d.type = LWS::NodeDesc::OBJECT;
             if (version >= 4) { // handle LWSC 4 explicit ID
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
             } else {
                 d.number = cur_object++;
             }
 
             // and add the file to the import list
-            SkipSpaces(&c);
+            SkipSpaces(&c, end);
             std::string path = FindLWOFile(c);
             d.path = path;
             d.id = batch.AddLoadRequest(path, 0, &props);
@@ -588,7 +589,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
             } else {
                 d.number = cur_object++;
             }
@@ -604,7 +605,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             d.type = LWS::NodeDesc::OBJECT;
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
             } else {
                 d.number = cur_object++;
             }
@@ -668,26 +669,25 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     // two ints per envelope
                     LWO::Envelope &env = *envelopeIt;
                     env.pre = (LWO::PrePostBehaviour)strtoul10(c, &c);
-                    SkipSpaces(&c);
+                    SkipSpaces(&c, end);
                     env.post = (LWO::PrePostBehaviour)strtoul10(c, &c);
-                    SkipSpaces(&c);
+                    SkipSpaces(&c, end);
                 }
             }
         }
         // 'ParentItem': specifies the parent of the current element
         else if ((*it).tokens[0] == "ParentItem") {
-            if (nodes.empty())
+            if (nodes.empty()) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'ParentItem\'");
-
-            else
+            } else {
                 nodes.back().parent = strtoul16(c, &c);
+            }
         }
         // 'ParentObject': deprecated one for older formats
         else if (version < 3 && (*it).tokens[0] == "ParentObject") {
-            if (nodes.empty())
+            if (nodes.empty()) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'ParentObject\'");
-
-            else {
+            } else {
                 nodes.back().parent = strtoul10(c, &c) | (1u << 28u);
             }
         }
@@ -700,19 +700,20 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
-            } else
+            } else {
                 d.number = cur_camera++;
+            }
             nodes.push_back(d);
 
             num_camera++;
         }
         // 'CameraName': set name of currently active camera
         else if ((*it).tokens[0] == "CameraName") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::CAMERA)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::CAMERA) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'CameraName\'");
-
-            else
+            } else {
                 nodes.back().name = c;
+            }
         }
         // 'AddLight': add a light to the scenegraph
         else if ((*it).tokens[0] == "AddLight") {
@@ -723,19 +724,20 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
             if (version >= 4) { // handle LWSC 4 explicit ID
                 d.number = strtoul16(c, &c) & AI_LWS_MASK;
-            } else
+            } else {
                 d.number = cur_light++;
+            }
             nodes.push_back(d);
 
             num_light++;
         }
         // 'LightName': set name of currently active light
         else if ((*it).tokens[0] == "LightName") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightName\'");
-
-            else
+            } else {
                 nodes.back().name = c;
+            }
         }
         // 'LightIntensity': set intensity of currently active light
         else if ((*it).tokens[0] == "LightIntensity" || (*it).tokens[0] == "LgtIntensity") {
@@ -753,62 +755,58 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         }
         // 'LightType': set type of currently active light
         else if ((*it).tokens[0] == "LightType") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightType\'");
-
-            else
+            } else {
                 nodes.back().lightType = strtoul10(c);
-
+            }
         }
         // 'LightFalloffType': set falloff type of currently active light
         else if ((*it).tokens[0] == "LightFalloffType") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightFalloffType\'");
-            else
+            } else {
                 nodes.back().lightFalloffType = strtoul10(c);
-
+            }
         }
         // 'LightConeAngle': set cone angle of currently active light
         else if ((*it).tokens[0] == "LightConeAngle") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightConeAngle\'");
-
-            else
+            } else {
                 nodes.back().lightConeAngle = fast_atof(c);
-
+            }
         }
         // 'LightEdgeAngle': set area where we're smoothing from min to max intensity
         else if ((*it).tokens[0] == "LightEdgeAngle") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightEdgeAngle\'");
-
-            else
+            } else {
                 nodes.back().lightEdgeAngle = fast_atof(c);
-
+            }
         }
         // 'LightColor': set color of currently active light
         else if ((*it).tokens[0] == "LightColor") {
-            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT)
+            if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightColor\'");
-
-            else {
+            } else {
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.r);
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.g);
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.b);
             }
         }
 
         // 'PivotPosition': position of local transformation origin
         else if ((*it).tokens[0] == "PivotPosition" || (*it).tokens[0] == "PivotPoint") {
-            if (nodes.empty())
+            if (nodes.empty()) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'PivotPosition\'");
-            else {
+            } else {
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.x);
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.y);
-                SkipSpaces(&c);
+                SkipSpaces(&c, end);
                 c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.z);
                 // Mark pivotPos as set
                 nodes.back().isPivotSet = true;
@@ -818,7 +816,6 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // resolve parenting
     for (std::list<LWS::NodeDesc>::iterator ndIt = nodes.begin(); ndIt != nodes.end(); ++ndIt) {
-
         // check whether there is another node which calls us a parent
         for (std::list<LWS::NodeDesc>::iterator dit = nodes.begin(); dit != nodes.end(); ++dit) {
             if (dit != ndIt && *ndIt == (*dit).parent) {
@@ -854,7 +851,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     aiNode *nd = master->mRootNode = new aiNode();
 
     // allocate storage for cameras&lights
-    if (num_camera) {
+    if (num_camera > 0u) {
         master->mCameras = new aiCamera *[master->mNumCameras = num_camera];
     }
     aiCamera **cams = master->mCameras;

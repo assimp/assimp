@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -643,11 +643,17 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     }
 
     // Allocate storage for children
-    pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
+    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
+
+    pcOut->mNumChildren = size;
+    if (size == 0) {
+        return;
+    }
+
     pcOut->mChildren = new aiNode *[pcIn->mChildren.size()];
 
     // Recursively process all children
-    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
+    
     for (unsigned int i = 0; i < size; ++i) {
         pcOut->mChildren[i] = new aiNode();
         pcOut->mChildren[i]->mParent = pcOut;
@@ -709,7 +715,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
             pcNode->mNumMeshes = 1;
 
             // Build a name for the node
-            pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "3DSMesh_%u", i);
+            pcNode->mName.length = ai_snprintf(pcNode->mName.data, AI_MAXLEN, "3DSMesh_%u", i);
         }
 
         // Build dummy nodes for all cameras

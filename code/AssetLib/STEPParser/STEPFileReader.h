@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -60,8 +60,7 @@ void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const*
 
 /// @brief  Helper to read a file.
 template <size_t N, size_t N2>
-inline
-void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
+inline void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
     return ReadFile(db,scheme,arr,N,arr2,N2);
 }
 

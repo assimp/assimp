@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -644,10 +644,12 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
         return;
     }
 
-    // materials are handled separately. First of all, they are assigned per-face
-    // and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
-    // has a slightly different meaning for materials.
-    ParseVectorDataArray(materials_out,GetRequiredElement(source,"Materials"));
+    if (source["Materials"]) {
+        // materials are handled separately. First of all, they are assigned per-face
+        // and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
+        // has a slightly different meaning for materials.
+        ParseVectorDataArray(materials_out, GetRequiredElement(source, "Materials"));
+    }
 
     if (MappingInformationType == "AllSame") {
         // easy - same material for all faces

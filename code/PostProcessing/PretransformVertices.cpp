@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -635,7 +635,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 				aiNode *pcNode = new aiNode();
 				*nodes = pcNode;
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u", i);
+				pcNode->mName.length = ai_snprintf(pcNode->mName.data, AI_MAXLEN, "light_%u", i);
 				pScene->mLights[i]->mName = pcNode->mName;
 			}
 			// generate camera nodes
@@ -643,7 +643,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 				aiNode *pcNode = new aiNode();
 				*nodes = pcNode;
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ::ai_snprintf(pcNode->mName.data, MAXLEN, "cam_%u", i);
+				pcNode->mName.length = ::ai_snprintf(pcNode->mName.data, AI_MAXLEN, "cam_%u", i);
 				pScene->mCameras[i]->mName = pcNode->mName;
 			}
 		}

@@ -48,9 +48,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
+#include <unordered_set>
 #include <utility>
 
 namespace Assimp {
+
+std::string to_string(EElementSemantic e) {
+
+    switch (e) {
+    case EEST_Vertex:
+        return std::string{ "vertex" };
+    case EEST_TriStrip:
+        return std::string{ "tristrips" };
+    case EEST_Edge:
+        return std::string{ "edge" };
+    case EEST_Material:
+        return std::string{ "material" };
+    case EEST_TextureFile:
+        return std::string{ "TextureFile" };
+    default:
+        return std::string{ "invalid" };
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(std::vector<char> &buffer) {
@@ -281,6 +300,8 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
         // if the exact semantic can't be determined, just store
         // the original string identifier
         pOut->szName = std::string(&buffer[0], &buffer[0] + strlen(&buffer[0]));
+        auto pos = pOut->szName.find_last_of(' ');
+        pOut->szName.erase(pos, pOut->szName.size());
     }
 
     if (!PLY::DOM::SkipSpaces(buffer))
@@ -413,6 +434,7 @@ bool PLY::DOM::SkipComments(std::vector<char> buffer) {
 bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer, bool isBinary) {
     ASSIMP_LOG_VERBOSE_DEBUG("PLY::DOM::ParseHeader() begin");
 
+    std::unordered_set<std::string> definedAlElements;
     // parse all elements
     while (!buffer.empty()) {
         // skip all comments
@@ -421,6 +443,13 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
         PLY::Element out;
         if (PLY::Element::ParseElement(streamBuffer, buffer, &out)) {
             // add the element to the list of elements
+
+            const auto propertyName = (out.szName.empty()) ? to_string(out.eSemantic) : out.szName;
+            auto alreadyDefined = definedAlElements.find(propertyName);
+            if (alreadyDefined != definedAlElements.end()) {
+                throw DeadlyImportError("Property '" + propertyName + "' in header already defined ");
+            }
+            definedAlElements.insert(propertyName);
             alElements.push_back(out);
         } else if (TokenMatch(buffer, "end_header", 10)) {
             // we have reached the end of the header

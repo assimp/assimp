@@ -156,6 +156,9 @@ struct ImportSettings {
     /** Set to true to perform a conversion from cm to meter after the import
     */
     bool convertToMeters;
+
+    // Set to true to ignore the axis configuration in the file
+    bool ignoreUpDirection = false;
 };
 
 } // namespace FBX

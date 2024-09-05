@@ -677,6 +677,19 @@ enum aiComponent
     "AI_CONFIG_FBX_CONVERT_TO_M"
 
 // ---------------------------------------------------------------------------
+/** @brief  Set whether the FBX importer shall ignore the provided axis configuration
+ *
+ * If this property is set to true, the axis directions provided in the FBX file
+ * will be ignored and the file will be loaded as is.
+ *
+ * Set to true for Assimp 5.3.x and earlier behavior
+ * Equivalent to AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_FBX_IGNORE_UP_DIRECTION \
+    "AI_CONFIG_IMPORT_FBX_IGNORE_UP_DIRECTION"
+
+// ---------------------------------------------------------------------------
 /** @brief  Will enable the skeleton struct to store bone data.
  *
  *  This will decouple the bone coupling to the mesh. This feature is

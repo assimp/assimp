@@ -100,6 +100,7 @@ SET( COMMON
   unit/Common/utBase64.cpp
   unit/Common/utHash.cpp
   unit/Common/utBaseProcess.cpp
+  unit/Common/utLogger.cpp
 )
 
 SET(Geometry 

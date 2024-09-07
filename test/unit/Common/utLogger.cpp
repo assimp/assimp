@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include <assimp/IMporter.hpp>
+#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 class utLogger : public ::testing::Test {};

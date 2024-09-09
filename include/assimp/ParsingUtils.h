@@ -103,7 +103,7 @@ AI_FORCE_INLINE bool IsSpaceOrNewLine(char_t in) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out, const char_t *end) {
-    while ((*in == (char_t)' ' || *in == (char_t)'\t') && in != end) {
+    while (in != end && (*in == (char_t)' ' || *in == (char_t)'\t')) {
         ++in;
     }
     *out = in;

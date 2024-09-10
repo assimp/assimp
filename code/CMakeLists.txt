@@ -1397,6 +1397,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
         -Wno-deprecated-declarations
+	-Wdeprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)

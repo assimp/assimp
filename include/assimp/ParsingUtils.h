@@ -103,7 +103,7 @@ AI_FORCE_INLINE bool IsSpaceOrNewLine(char_t in) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out, const char_t *end) {
-    while (in >= end && (*in == (char_t)' ' || *in == (char_t)'\t')) {
+    while (in < end && (*in == (char_t)' ' || *in == (char_t)'\t')) {
         ++in;
     }
     *out = in;
@@ -119,12 +119,12 @@ AI_FORCE_INLINE bool SkipSpaces(const char_t **inout, const char_t *end) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t *end) {
-    while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && in != end) {
+    while (in < end && (*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0')) {
         ++in;
     }
 
     // files are opened in binary mode. Ergo there are both NL and CR
-    while ((*in == (char_t)'\r' || *in == (char_t)'\n') && in != end) {
+    while (in < end && (*in == (char_t)'\r' || *in == (char_t)'\n')) {
         ++in;
     }
     *out = in;
@@ -140,7 +140,7 @@ AI_FORCE_INLINE bool SkipLine(const char_t **inout, const char_t *end) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t *in, const char_t **out, const char_t  *end) {
-    while ((*in == (char_t)' ' || *in == (char_t)'\t' || *in == (char_t)'\r' || *in == (char_t)'\n') && in != end) {
+    while (in < end && (*in == (char_t)' ' || *in == (char_t)'\t' || *in == (char_t)'\r' || *in == (char_t)'\n')) {
         ++in;
     }
     *out = in;

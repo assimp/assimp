@@ -177,7 +177,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         // with the largest number of primitives
         unsigned int aiNumPerPType[4] = { 0, 0, 0, 0 };
         aiFace *pFirstFace = mesh->mFaces;
-        if (!pFirstFace) {
+        if (pFirstFace == nullptr) {
             continue;
         }
 

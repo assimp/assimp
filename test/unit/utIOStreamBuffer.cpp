@@ -84,10 +84,10 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fname[]={ "octest.XXXXXX" };
-    FILE *fsm = fopen(fname, "w+");
+    auto* fs = MakeTmpFile(fname);
     ASSERT_NE(nullptr, fs);
 
-    auto written = std::fwrite( data, sizeof(*data), dataCount, fs );
+    auto written = std::fwrite(data, sizeof(*data), dataCount, fs);
     EXPECT_NE( 0U, written );
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);

@@ -685,11 +685,14 @@ ShapeGeometry::ShapeGeometry(uint64_t id, const Element& element, const std::str
         DOMError("failed to read Geometry object (class: Shape), no data scope found");
     }
     const Element& Indexes = GetRequiredElement(*sc, "Indexes", &element);
-    const Element& Normals = GetRequiredElement(*sc, "Normals", &element);
     const Element& Vertices = GetRequiredElement(*sc, "Vertices", &element);
     ParseVectorDataArray(m_indices, Indexes);
     ParseVectorDataArray(m_vertices, Vertices);
-    ParseVectorDataArray(m_normals, Normals);
+
+    if ((*sc)["Normals"]) {
+        const Element& Normals = GetRequiredElement(*sc, "Normals", &element);
+        ParseVectorDataArray(m_normals, Normals);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

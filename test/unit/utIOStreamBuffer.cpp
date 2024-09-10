@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -86,7 +84,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fname[]={ "octest.XXXXXX" };
-    auto* fs = MakeTmpFile(fname);
+    FILE *fsm = fopen(fname, "w+");
     ASSERT_NE(nullptr, fs);
 
     auto written = std::fwrite( data, sizeof(*data), dataCount, fs );

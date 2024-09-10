@@ -66,36 +66,46 @@ void SortByPTypeProcess::SetupProperties(const Importer *pImp) {
 }
 
 // ------------------------------------------------------------------------------------------------
+static void clearMeshesInNode(aiNode *node) {
+    delete[] node->mMeshes;
+    node->mNumMeshes = 0;
+    node->mMeshes = nullptr;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node) {
+    ai_assert(node != nullptr);
+    
     if (node->mNumMeshes) {
         unsigned int newSize = 0;
         for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
             unsigned int add = node->mMeshes[m] << 2;
             for (unsigned int i = 0; i < 4; ++i) {
-                if (UINT_MAX != replaceMeshIndex[add + i]) ++newSize;
-            }
-        }
-        if (!newSize) {
-            delete[] node->mMeshes;
-            node->mNumMeshes = 0;
-            node->mMeshes = nullptr;
-        } else {
-            // Try to reuse the old array if possible
-            unsigned int *newMeshes = (newSize > node->mNumMeshes ? new unsigned int[newSize] : node->mMeshes);
-
-            for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
-                unsigned int add = node->mMeshes[m] << 2;
-                for (unsigned int i = 0; i < 4; ++i) {
-                    if (UINT_MAX != replaceMeshIndex[add + i])
-                        *newMeshes++ = replaceMeshIndex[add + i];
+                if (UINT_MAX != replaceMeshIndex[add + i]) {
+                    ++newSize;
                 }
             }
-            if (newSize > node->mNumMeshes)
-                delete[] node->mMeshes;
-
-            node->mMeshes = newMeshes - (node->mNumMeshes = newSize);
         }
+        if (newSize == 0) {
+            clearMeshesInNode(node);
+            return;
+        }
+        
+        // Try to reuse the old array if possible
+        unsigned int *newMeshes = (newSize > node->mNumMeshes ? new unsigned int[newSize] : node->mMeshes);
+        for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
+            unsigned int add = node->mMeshes[m] << 2;
+            for (unsigned int i = 0; i < 4; ++i) {
+                if (UINT_MAX != replaceMeshIndex[add + i]) {
+                    *newMeshes++ = replaceMeshIndex[add + i];
+                }
+            }
+        }
+        if (newSize > node->mNumMeshes) {
+            clearMeshesInNode(node);
+        }
+        node->mMeshes = newMeshes - (node->mNumMeshes = newSize);
     }
 
     // call all subnodes recursively
@@ -167,6 +177,10 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         // with the largest number of primitives
         unsigned int aiNumPerPType[4] = { 0, 0, 0, 0 };
         aiFace *pFirstFace = mesh->mFaces;
+        if (pFirstFace == nullptr) {
+            continue;
+        }
+
         aiFace *const pLastFace = pFirstFace + mesh->mNumFaces;
 
         unsigned int numPolyVerts = 0;

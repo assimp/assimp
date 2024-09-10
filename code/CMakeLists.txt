@@ -1053,7 +1053,7 @@ ENDIF() # IF (ASSIMP_BUILD_USD_IMPORTER)
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
-ELSE()
+ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
@@ -1396,6 +1396,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-unused-template
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
+        -Wno-deprecated-declarations
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
@@ -1417,9 +1418,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
@@ -1438,6 +1437,9 @@ ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
+  if(TARGET pugixml::pugixml)
+    target_link_libraries(assimp pugixml::pugixml)
   endif()
 ENDIF()
 

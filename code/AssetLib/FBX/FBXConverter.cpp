@@ -181,7 +181,9 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     if (out->mNumMeshes == 0) {
         out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     } else {
-        correctRootTransform(mSceneOut);
+        // Apply the FBX axis metadata unless requested not to
+        if (!doc.Settings().ignoreUpDirection)
+            correctRootTransform(mSceneOut);
     }
 }
 
@@ -357,12 +359,12 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
     if (nodes.empty()) {
         parent->mNumChildren = 0;
         parent->mChildren = nullptr;
-    }
-
-    parent->mChildren = new aiNode *[nodes.size()]();
-    parent->mNumChildren = static_cast<unsigned int>(nodes.size());
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        parent->mChildren[i] = nodes[i].mOwnership.release();
+    } else {
+        parent->mChildren = new aiNode *[nodes.size()]();
+        parent->mNumChildren = static_cast<unsigned int>(nodes.size());
+        for (unsigned int i = 0; i < nodes.size(); ++i) {
+            parent->mChildren[i] = nodes[i].mOwnership.release();
+        }
     }
 }
 

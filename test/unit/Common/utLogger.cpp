@@ -1,4 +1,5 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -35,43 +36,17 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
+---------------------------------------------------------------------------
+*/
+
 #include "UnitTestPCH.h"
-#include <assimp/version.h>
+#include <assimp/Importer.hpp>
 
-class utVersion : public ::testing::Test {
-    // empty
-};
+using namespace Assimp;
+class utLogger : public ::testing::Test {};
 
-TEST_F( utVersion, aiGetLegalStringTest ) {
-    const char *lv = aiGetLegalString();
-    EXPECT_NE( lv, nullptr );
-    std::string text( lv );
-
-    size_t pos = text.find(std::string("2024"));
-    EXPECT_NE(pos, std::string::npos);
-}
-
-TEST_F( utVersion, aiGetVersionMajorTest ) {
-    EXPECT_EQ( aiGetVersionMajor(), 5U );
-}
-
-TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ(aiGetVersionMinor(), 4U);
-}
-
-TEST_F( utVersion, aiGetVersionPatchTest ) {
-    EXPECT_EQ(aiGetVersionPatch(), 3U );
-}
-
-TEST_F( utVersion, aiGetCompileFlagsTest ) {
-    EXPECT_NE( aiGetCompileFlags(), 0U );
-}
-
-TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NO_THROW(aiGetVersionRevision());
-}
-
-TEST_F( utVersion, aiGetBranchNameTest ) {
-    EXPECT_NE( nullptr, aiGetBranchName() );
+TEST_F(utLogger, aiGetPredefinedLogStream_leak_test) {
+    aiLogStream stream1 = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, nullptr);
+    aiLogStream stream2 = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, nullptr);
+    ASSERT_EQ(stream1.callback, stream2.callback);
 }

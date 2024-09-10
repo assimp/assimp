@@ -359,20 +359,25 @@ void CallbackToLogRedirector(const char *msg, char *dt) {
     s->write(msg);
 }
 
+static LogStream *DefaultStream = nullptr;
+
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, const char *file) {
     aiLogStream sout;
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
-    LogStream *stream = LogStream::createDefaultStream(pStream, file);
-    if (!stream) {
+    if (DefaultStream == nullptr) {
+        DefaultStream = LogStream::createDefaultStream(pStream, file);
+    }
+    
+    if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;
     } else {
         sout.callback = &CallbackToLogRedirector;
-        sout.user = (char *)stream;
+        sout.user = (char *)DefaultStream;
     }
-    gPredefinedStreams.push_back(stream);
+    gPredefinedStreams.push_back(DefaultStream);
     ASSIMP_END_EXCEPTION_REGION(aiLogStream);
     return sout;
 }

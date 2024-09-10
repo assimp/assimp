@@ -89,7 +89,7 @@ TEST_F(utPLYImportExport, exportTest_Success) {
 
 #endif // ASSIMP_BUILD_NO_EXPORT
 
-//Test issue 1623, crash when loading two PLY files in a row
+// Test issue 1623, crash when loading two PLY files in a row
 TEST_F(utPLYImportExport, importerMultipleTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
@@ -109,7 +109,7 @@ TEST_F(utPLYImportExport, importPLYwithUV) {
 
     EXPECT_NE(nullptr, scene);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
-    //This test model is using n-gons, so 6 faces instead of 12 tris
+    // This test model is using n-gons, so 6 faces instead of 12 tris
     EXPECT_EQ(6u, scene->mMeshes[0]->mNumFaces);
     EXPECT_EQ(aiPrimitiveType_POLYGON, scene->mMeshes[0]->mPrimitiveTypes);
     EXPECT_EQ(true, scene->mMeshes[0]->HasTextureCoords(0));
@@ -121,7 +121,7 @@ TEST_F(utPLYImportExport, importBinaryPLY) {
 
     EXPECT_NE(nullptr, scene);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
-    //This test model is double sided, so 12 faces instead of 6
+    // This test model is double sided, so 12 faces instead of 6
     EXPECT_EQ(12u, scene->mMeshes[0]->mNumFaces);
 }
 
@@ -160,7 +160,7 @@ TEST_F(utPLYImportExport, vertexColorTest) {
 TEST_F(utPLYImportExport, pointcloudTest) {
     Assimp::Importer importer;
 
-    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    // Could not use aiProcess_ValidateDataStructure since it's missing faces.
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
     EXPECT_NE(nullptr, scene);
 
@@ -192,7 +192,7 @@ static const char *test_file =
 
 TEST_F(utPLYImportExport, parseErrorTest) {
     Assimp::Importer importer;
-    //Could not use aiProcess_ValidateDataStructure since it's missing faces.
+    // Could not use aiProcess_ValidateDataStructure since it's missing faces.
     const aiScene *scene = importer.ReadFileFromMemory(test_file, strlen(test_file), 0);
     EXPECT_NE(nullptr, scene);
 }
@@ -201,5 +201,63 @@ TEST_F(utPLYImportExport, parseErrorTest) {
 TEST_F(utPLYImportExport, parseInvalid) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/crash-30d6d0f7c529b3b66b4131700b7a4580cd7082df.ply", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utPLYImportExport, payload_JVN42386607) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/payload_JVN42386607", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+// Tests Issue #5729. Test, if properties defined multiple times. Unclear what to do, better to abort than to crash entirely
+TEST_F(utPLYImportExport, parseInvalidDoubleProperty) {
+    const char data[] = "ply\n"
+                        "format ascii 1.0\n"
+                        "element vertex 4\n"
+                        "property float x\n"
+                        "property float y\n"
+                        "property float z\n"
+                        "element vertex 8\n"
+                        "property float x\n"
+                        "property float y\n"
+                        "property float z\n"
+                        "end_header\n"
+                        "0.0 0.0 0.0 0.0 0.0 0.0\n"
+                        "0.0 0.0 1.0 0.0 0.0 1.0\n"
+                        "0.0 1.0 0.0 0.0 1.0 0.0\n"
+                        "0.0 0.0 1.0\n"
+                        "0.0 1.0 0.0 0.0 0.0 1.0\n"
+                        "0.0 1.0 1.0 0.0 1.0 1.0\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+// Tests Issue #5729. Test, if properties defined multiple times. Unclear what to do, better to abort than to crash entirely
+TEST_F(utPLYImportExport, parseInvalidDoubleCustomProperty) {
+    const char data[] = "ply\n"
+                        "format ascii 1.0\n"
+                        "element vertex 4\n"
+                        "property float x\n"
+                        "property float y\n"
+                        "property float z\n"
+                        "element name 8\n"
+                        "property float x\n"
+                        "element name 5\n"
+                        "property float x\n"
+                        "end_header\n"
+                        "0.0 0.0 0.0 100.0 10.0\n"
+                        "0.0 0.0 1.0 200.0 20.0\n"
+                        "0.0 1.0 0.0 300.0 30.0\n"
+                        "0.0 1.0 1.0 400.0 40.0\n"
+                        "0.0 0.0 0.0 500.0 50.0\n"
+                        "0.0 0.0 1.0 600.0 60.0\n"
+                        "0.0 1.0 0.0 700.0 70.0\n"
+                        "0.0 1.0 1.0 800.0 80.0\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
     EXPECT_EQ(nullptr, scene);
 }

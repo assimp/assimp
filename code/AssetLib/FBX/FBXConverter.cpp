@@ -312,6 +312,8 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                 child->mParent = last_parent;
                 last_parent = child.mNode;
+
+                new_abs_transform *= child->mTransformation;
             }
 
             // attach geometry
@@ -334,6 +336,8 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                     postnode->mParent = last_parent;
                     last_parent = postnode.mNode;
+
+                    new_abs_transform *= postnode->mTransformation;
                 }
             } else {
                 // free the nodes we allocated as we don't need them

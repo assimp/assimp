@@ -271,7 +271,6 @@ MACRO(ADD_ASSIMP_IMPORTER name)
 ENDMACRO()
 
 if (NOT ASSIMP_NO_EXPORT)
-
   # if this variable is set to TRUE, the user can manually disable exporters by setting
   # ASSIMP_BUILD_XXX_EXPORTER to FALSE for each exporter
   # if this variable is set to FALSE, the user can manually enable exporters by setting
@@ -1397,6 +1396,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
         -Wno-deprecated-declarations
+	-Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)

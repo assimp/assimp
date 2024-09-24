@@ -1254,9 +1254,9 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
             const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
             for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
-                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const auto &curVertices = shapeGeometry->GetVertices();
                 const auto &curNormals = shapeGeometry->GetNormals();
+                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh, true, !curNormals.empty());
+                const auto &curVertices = shapeGeometry->GetVertices();
                 const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
                 // if blendShapeChannel Name is empty or doesn't have a ".", add geoMetryName;
@@ -1272,7 +1272,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
-                    aiVector3D normal = curNormals.at(j);
+                    aiVector3D normal = curNormals.empty() ? aiVector3D() : curNormals.at(j);
                     unsigned int count = 0;
                     const unsigned int *outIndices = mesh.ToOutputVertexIndex(curIndex, count);
                     for (unsigned int k = 0; k < count; k++) {
@@ -1492,15 +1492,15 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
             const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
             for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
-                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const auto& curVertices = shapeGeometry->GetVertices();
                 const auto& curNormals = shapeGeometry->GetNormals();
+                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh, true, !curNormals.empty());
+                const auto& curVertices = shapeGeometry->GetVertices();
                 const auto& curIndices = shapeGeometry->GetIndices();
                 animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
-                    aiVector3D normal = curNormals.at(j);
+                    aiVector3D normal = curNormals.empty() ? aiVector3D() : curNormals.at(j);
                     unsigned int count = 0;
                     const unsigned int *outIndices = mesh.ToOutputVertexIndex(curIndex, count);
                     for (unsigned int k = 0; k < count; k++) {

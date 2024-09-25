@@ -155,11 +155,19 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char *pKey, unsigned int type,
             ::memcpy(&pOut, prop->mData, sizeof(bool));
         } break;
 
-        case aiPTI_Float:
+        case aiPTI_Float: {
+            // Read as float and cast to bool
+            float value = 0.0f;
+            if (AI_SUCCESS == ::aiGetMaterialFloat(this, pKey, type, idx, &value)) {
+                pOut = static_cast<bool>(value);
+                return AI_SUCCESS;
+            }
+            return AI_FAILURE;
+        }
         case aiPTI_Double: {
             // Read as float and cast to bool
-            ai_real value = 0.0f;
-            if (AI_SUCCESS == ::aiGetMaterialFloat(this, pKey, type, idx, &value)) {
+            double value = 0.0f;
+            if (AI_SUCCESS == ::aiGetMaterialDouble(this, pKey, type, idx, &value)) {
                 pOut = static_cast<bool>(value);
                 return AI_SUCCESS;
             }
@@ -179,7 +187,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char *pKey, unsigned int type,
 // ---------------------------------------------------------------------------
 AI_FORCE_INLINE
 aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-        unsigned int idx,ai_real* pOut,
+        unsigned int idx, ai_real* pOut,
         unsigned int* pMax) const {
     return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
 }

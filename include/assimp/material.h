@@ -829,7 +829,7 @@ public:
             C_STRUCT aiString *path,
             aiTextureMapping *mapping = NULL,
             unsigned int *uvindex = NULL,
-            ai_real *blend = NULL,
+            float *blend = NULL,
             aiTextureOp *op = NULL,
             aiTextureMapMode *mapmode = NULL) const;
 
@@ -1539,6 +1539,39 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         unsigned int *pMax);
 
 // ---------------------------------------------------------------------------
+/** @brief Retrieve an array of double values with a specific key
+ *  from the material
+ *
+ * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
+ * example reads the #AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
+ * @code
+ * aiUVTransform trafo;
+ * unsigned int max = sizeof(aiUVTransform);
+ * if (AI_SUCCESS != aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),
+ *    (float*)&trafo, &max) || sizeof(aiUVTransform) != max)
+ * {
+ *   // error handling
+ * }
+ * @endcode
+ *
+ * @param pMat Pointer to the input material. May not be NULL
+ * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+ * @param pOut Pointer to a buffer to receive the result.
+ * @param pMax Specifies the size of the given buffer, in float's.
+ *        Receives the number of values (not bytes!) read.
+ * @param type (see the code sample above)
+ * @param index (see the code sample above)
+ * @return Specifies whether the key has been found. If not, the output
+ *   arrays remains unmodified and pMax is set to 0.*/
+// ---------------------------------------------------------------------------
+ASSIMP_API C_ENUM aiReturn aiGetMaterialDoubleArray(const C_STRUCT aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        double *pOut,
+        unsigned int *pMax);
+
+// ---------------------------------------------------------------------------
 /** @brief Retrieve a single float property with a specific key from the material.
 *
 * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
@@ -1563,6 +1596,33 @@ inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         unsigned int index,
         float *pOut) {
     return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+}
+
+// ---------------------------------------------------------------------------
+/** @brief Retrieve a single double property with a specific key from the material.
+*
+* Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
+* example reads the #AI_MATKEY_SHININESS_STRENGTH property of the first diffuse texture)
+* @code
+* float specStrength = 1.f; // default value, remains unmodified if we fail.
+* aiGetMaterialFloat(mat, AI_MATKEY_SHININESS_STRENGTH,
+*    (float*)&specStrength);
+* @endcode
+*
+* @param pMat Pointer to the input material. May not be NULL
+* @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
+* @param pOut Receives the output float.
+* @param type (see the code sample above)
+* @param index (see the code sample above)
+* @return Specifies whether the key has been found. If not, the output
+*   float remains unmodified.*/
+// ---------------------------------------------------------------------------
+inline aiReturn aiGetMaterialDouble(const C_STRUCT aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        double *pOut) {
+    return aiGetMaterialDoubleArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1677,7 +1737,7 @@ ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial *mat,
         aiString *path,
         aiTextureMapping *mapping = NULL,
         unsigned int *uvindex = NULL,
-        ai_real *blend = NULL,
+        float *blend = NULL,
         aiTextureOp *op = NULL,
         aiTextureMapMode *mapmode = NULL,
         unsigned int *flags = NULL);

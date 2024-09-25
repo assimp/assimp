@@ -428,7 +428,7 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial *mat,
         C_STRUCT aiString *path,
         aiTextureMapping *_mapping /*= nullptr*/,
         unsigned int *uvindex /*= nullptr*/,
-        ai_real *blend /*= nullptr*/,
+        float *blend /*= nullptr*/,
         aiTextureOp *op /*= nullptr*/,
         aiTextureMapMode *mapmode /*= nullptr*/,
         unsigned int *flags /*= nullptr*/

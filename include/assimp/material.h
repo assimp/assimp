@@ -1625,6 +1625,18 @@ inline aiReturn aiGetMaterialDouble(const C_STRUCT aiMaterial *pMat,
     return aiGetMaterialDoubleArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
 }
 
+inline aiReturn aiGetMaterialReal(const C_STRUCT aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        ai_real *pOut) {
+#ifndef ASSIMP_DOUBLE_PRECISION
+    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+#else
+    return aiGetMaterialDoubleArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+#endif
+}
+
 // ---------------------------------------------------------------------------
 /** @brief Retrieve an array of integer values with a specific key
  *  from a material

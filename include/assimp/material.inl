@@ -189,7 +189,11 @@ AI_FORCE_INLINE
 aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx, ai_real* pOut,
         unsigned int* pMax) const {
-    return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
+#ifndef ASSIMP_DOUBLE_PRECISION
+    return ::aiGetMaterialFloatArray(this, pKey, type, idx, pOut, pMax);
+#else
+    return ::aiGetMaterialDoubleArray(this, pKey, type, idx, pOut, pMax);
+#endif
 }
 // ---------------------------------------------------------------------------
 AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,

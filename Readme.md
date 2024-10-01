@@ -7,7 +7,6 @@ Open Asset Import Library is a library to load various 3d file formats into a sh
 [![Financial Contributors on Open Collective](https://opencollective.com/assimp/all/badge.svg?label=financial+contributors)](https://opencollective.com/assimp) 
 ![C/C++ CI](https://github.com/assimp/assimp/workflows/C/C++%20CI/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
-[![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/assimp/assimp.svg)](http://isitmaintained.com/project/assimp/assimp "Percentage of issues still open")
 <br>

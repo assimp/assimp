@@ -2,19 +2,19 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v5.3.0)
+AppVerName=Open Asset Import Library - SDK (v5.4.3)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
 OutputDir=out
 AppCopyright=Assimp Development Team
 SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
-WizardImageFile=compiler:WizModernImage-IS.BMP
-WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
+WizardImageFile=..\..\tools\shared\assimp_tools_icon.bmp
+WizardSmallImageFile=..\..\tools\shared\assimp_tools_icon.bmp
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-5.2.6-setup
-VersionInfoVersion=5.3.0.
-VersionInfoTextVersion=5.3.0
+OutputBaseFileName=assimp-sdk-5.4.3-setup
+VersionInfoVersion=5.4.3.
+VersionInfoTextVersion=5.4.3
 VersionInfoCompany=Assimp Development Team
 ;ArchitecturesInstallIn64BitMode=x64
 
@@ -43,13 +43,13 @@ Source: "vc_redist.x86.exe"; DestDir: "{app}\stub\"; Check: not IsWin64
 ; Common stuff
 Source: "..\..\CREDITS"; DestDir: "{app}"
 Source: "..\..\LICENSE"; DestDir: "{app}"
-Source: "..\..\README"; DestDir: "{app}"
+Source: "..\..\Readme.md"; DestDir: "{app}"
 Source: "WEB"; DestDir: "{app}"
 
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-Source: "..\..\bin\release\assimp-vc141-mt.dll";      DestDir: "{app}\bin\x86"
+Source: "..\..\bin\release\assimp-vc143-mt.dll";      DestDir: "{app}\bin\x86"
 Source: "..\..\bin\release\assimp_viewer.exe";        DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DCompiler_42.dll";     DestDir: "{app}\bin\x86"; Components: tools
 Source: "C:\Windows\SysWOW64\D3DX9_42.dll";           DestDir: "{app}\bin\x86"; Components: tools
@@ -57,7 +57,7 @@ Source: "..\..\bin\release\assimp.exe";               DestDir: "{app}\bin\x86"; 
 
 
 ; Import libraries
-Source: "..\..\lib\release\assimp-vc141-mt.lib"; DestDir: "{app}\lib\x86"
+Source: "..\..\lib\release\assimp-vc143-mt.lib"; DestDir: "{app}\lib\x86"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples

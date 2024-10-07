@@ -891,6 +891,9 @@ void ValidateDSProcess::Validate(const aiNode *pNode) {
                 ReportError("aiNode \"%s\" child %i \"%s\" parent is someone else: \"%s\"", pNode->mName.C_Str(), i, pChild->mName.C_Str(), parentName);
             }
         }
+    } else if (pNode->mChildren) {
+        ReportError("aiNode::mChildren is not nullptr for empty node %s (aiNode::mNumChildren is %i)",
+                nodeName, pNode->mNumChildren);
     }
 }
 

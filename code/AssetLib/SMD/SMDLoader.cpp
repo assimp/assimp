@@ -400,8 +400,12 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent) {
         }
     }
 
+    // nothing to do
+    if (pcNode->mNumChildren == 0)
+        return;
+
     // now allocate the output array
-    pcNode->mChildren = new aiNode*[pcNode->mNumChildren];
+    pcNode->mChildren = new aiNode *[pcNode->mNumChildren];
 
     // and fill all subnodes
     unsigned int qq( 0 );

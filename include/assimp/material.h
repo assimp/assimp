@@ -701,7 +701,7 @@ struct aiMaterialProperty {
 *  Material data is stored using a key-value structure. A single key-value
 *  pair is called a 'material property'. C++ users should use the provided
 *  member functions of aiMaterial to process material properties, C users
-*  have to stick with the aiMaterialGetXXX family of unbound functions.
+*  have to stick with the aiGetMaterialXXX family of unbound functions.
 *  The library defines a set of standard keys (AI_MATKEY_XXX).
 */
 #ifdef __cplusplus

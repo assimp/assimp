@@ -85,6 +85,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOStream.h>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/ProgressTracker.h>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #   include "PostProcessing/ValidateDataStructure.h"
@@ -596,6 +597,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
     // ImportErrorException's are throw by ourselves and caught elsewhere.
     //-----------------------------------------------------------------------
 
+    Assimp::ProgressScope progScope("Read File");
+    progScope.AddStep(35);  // Importing File
+    progScope.AddStep();    // Post Processing Scene
+
+    progScope.StartStep("Importing File");
+
     WriteLogOpening(pFile);
 
 #ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
@@ -712,6 +719,8 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
         if (profiler) {
             profiler->EndRegion("import");
         }
+
+        progScope.StartStep("Post Processing Scene");
 
         SetPropertyString("sourceFilePath", pFile);
 

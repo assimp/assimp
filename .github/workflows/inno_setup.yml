@@ -27,7 +27,10 @@ jobs:
         run: |
           curl -s -o DXSDK_Jun10.exe --location https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
           cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
-
+      - name: Download DLL using curl
+        run: |
+          curl -L -o ${{ github.workspace }} https://aka.ms/vs/17/release/VC_redist.x64.exe
+          
       - name: Set Windows specific CMake arguments
         id: windows_extra_cmake_args
         run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1 -DASSIMP_BUILD_ZLIB=1"

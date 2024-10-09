@@ -107,8 +107,27 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     }
 
     // allocate an array to hold the output normals
-    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-    const float qnan = get_qnan();
+    std::vector<aiVector3D> normals;
+    normals.resize(pMesh->mNumVertices);
+
+    // mask to indicate if a vertex was already referenced and needs to be duplicated
+    std::vector<bool> alreadyReferenced;
+    alreadyReferenced.resize(pMesh->mNumVertices, false);
+    std::vector<aiVector3D> duplicatedVertices;
+
+    auto storeNormalSplitVertex = [&](unsigned int index, const aiVector3D& normal) {
+        if (!alreadyReferenced[index]) {
+            normals[index]           = normal;
+            alreadyReferenced[index] = true;
+        } else {
+            duplicatedVertices.push_back(pMesh->mVertices[index]);
+            normals.push_back(normal);
+            index = pMesh->mNumVertices + (unsigned int)duplicatedVertices.size() - 1;
+        }
+        return index;
+    };
+
+    const aiVector3D undefinedNormal = aiVector3D(get_qnan());
 
     // iterate through all faces and compute per-face normals but store them per-vertex.
     for (unsigned int a = 0; a < pMesh->mNumFaces; a++) {
@@ -116,7 +135,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         if (face.mNumIndices < 3) {
             // either a point or a line -> no well-defined normal vector
             for (unsigned int i = 0; i < face.mNumIndices; ++i) {
-                pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
+                face.mIndices[i] = storeNormalSplitVertex(face.mIndices[i], undefinedNormal);
             }
             continue;
         }
@@ -131,8 +150,22 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {
-            pMesh->mNormals[face.mIndices[i]] = vNor;
+            face.mIndices[i] = storeNormalSplitVertex(face.mIndices[i], vNor);
         }
     }
+
+    // store normals (and additional vertices) back into the mesh
+    if(duplicatedVertices.size() > 0) {
+        const aiVector3D * oldVertices = pMesh->mVertices;
+        auto oldNumVertices = pMesh->mNumVertices;
+        pMesh->mNumVertices += (unsigned int)duplicatedVertices.size();
+        pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+        memcpy(pMesh->mVertices, oldVertices, oldNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mVertices + oldNumVertices, duplicatedVertices.data(), duplicatedVertices.size() * sizeof(aiVector3D));
+        delete[] oldVertices;
+    }
+    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    memcpy(pMesh->mNormals, normals.data(), normals.size() * sizeof(aiVector3D));
+
     return true;
 }

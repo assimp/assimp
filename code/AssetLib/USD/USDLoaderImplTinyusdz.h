@@ -123,17 +123,20 @@ public:
     void setupNodes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
+            const tinyusdz::Stage &usdStage,
             std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
             const std::string &nameWExt
             );
 
     aiNode *nodes(
             const tinyusdz::tydra::RenderScene &render_scene,
+            const tinyusdz::Stage &usdStage,
             std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
             const std::string &nameWExt);
 
     aiNode *nodesRecursive(
             aiNode *pNodeParent,
+            const tinyusdz::Prim &prim,
             const tinyusdz::tydra::Node &node,
             std::map<size_t, tinyusdz::tydra::Node> &meshNodes);
 

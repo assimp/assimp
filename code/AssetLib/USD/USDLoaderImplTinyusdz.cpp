@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
+#include <assimp/metadata.h>
 
 #include "io-util.hh" // namespace tinyusdz::io
 #include "tydra/scene-access.hh"
@@ -198,7 +199,7 @@ void USDImporterImplTinyusdz::InternReadFile(
     buffers(render_scene, pScene, nameWExt);
 
     std::map<size_t, tinyusdz::tydra::Node> meshNodes;
-    setupNodes(render_scene, pScene, meshNodes, nameWExt);
+    setupNodes(render_scene, pScene, stage, meshNodes, nameWExt);
 
     setupBlendShapes(render_scene, pScene, nameWExt);
 }
@@ -598,11 +599,12 @@ void USDImporterImplTinyusdz::buffers(
 void USDImporterImplTinyusdz::setupNodes(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
+        const tinyusdz::Stage &usdStage,
         std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
         const std::string &nameWExt) {
     stringstream ss;
 
-    pScene->mRootNode = nodes(render_scene, meshNodes, nameWExt);
+    pScene->mRootNode = nodes(render_scene, usdStage, meshNodes, nameWExt);
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
     ss.str("");
@@ -620,6 +622,7 @@ void USDImporterImplTinyusdz::setupNodes(
 
 aiNode *USDImporterImplTinyusdz::nodes(
         const tinyusdz::tydra::RenderScene &render_scene,
+        const tinyusdz::Stage &usdStage,
         std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
         const std::string &nameWExt) {
     const size_t numNodes{render_scene.nodes.size()};
@@ -628,7 +631,7 @@ aiNode *USDImporterImplTinyusdz::nodes(
     ss.str("");
     ss << "nodes(): model" << nameWExt << ", numNodes: " << numNodes;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
-    return nodesRecursive(nullptr, render_scene.nodes[0], meshNodes);
+    return nodesRecursive(nullptr, usdStage.root_prims()[0], render_scene.nodes[0], meshNodes);
 }
 
 using Assimp::tinyusdzNodeTypeFor;
@@ -636,6 +639,7 @@ using Assimp::tinyUsdzMat4ToAiMat4;
 using tinyusdz::tydra::NodeType;
 aiNode *USDImporterImplTinyusdz::nodesRecursive(
         aiNode *pNodeParent,
+        const tinyusdz::Prim& prim,
         const tinyusdz::tydra::Node &node,
         std::map<size_t, tinyusdz::tydra::Node> &meshNodes) {
     stringstream ss;
@@ -661,9 +665,22 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         cNode->mChildren = new aiNode *[cNode->mNumChildren];
     }
 
+    // Composition: references
+    if (prim.metas().references.has_value())
+    {
+        const tinyusdz::ListEditQual referenceQual = prim.metas().references->first;
+        const std::vector<tinyusdz::Reference> references = prim.metas().references->second;
+
+        for (const auto &reference : references)
+        {
+            cNode->mMetaData = aiMetadata::Alloc(1);
+            cNode->mMetaData->Add("ref", aiString(reference.asset_path.GetAssetPath()));
+        }
+    }
+
     size_t i{0};
     for (const auto &childNode: node.children) {
-        cNode->mChildren[i] = nodesRecursive(cNode, childNode, meshNodes);
+        cNode->mChildren[i] = nodesRecursive(cNode, prim.children()[i], childNode, meshNodes);
         ++i;
     }
     return cNode;

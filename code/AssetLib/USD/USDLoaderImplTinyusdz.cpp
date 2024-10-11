@@ -272,6 +272,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
             #endif
 
             outputBone->mName = aiString(skeletonNode->joint_name);
+            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m);
             aiBones.push_back(outputBone);
 
             for (const auto &child : skeletonNodes[i]->children)
@@ -302,7 +303,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         }        
 
         pScene->mMeshes[meshIdx]->mNumBones = numBones;
-        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones]();
+        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
         std::swap_ranges(aiBones.begin(), aiBones.end(), pScene->mMeshes[meshIdx]->mBones);
 
         for (int boneIndex = 0; boneIndex < numBones; ++boneIndex)
@@ -313,13 +314,12 @@ void USDImporterImplTinyusdz::verticesForMesh(
 
             std::swap_ranges(aiBonesVertexWeights[boneIndex].begin(), aiBonesVertexWeights[boneIndex].end(), pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights);
         }
-    }
+    }  // Skinned mesh end
 
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
         pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
         pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
         pScene->mMeshes[meshIdx]->mVertices[j].z = render_scene.meshes[meshIdx].points[j][2];
-
     }
 }
 

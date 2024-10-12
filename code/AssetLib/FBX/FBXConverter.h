@@ -134,7 +134,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     // collect and assign child nodes
-    void ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node);
+    void ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node, const aiMatrix4x4& parent_transform = aiMatrix4x4());
 
     // ------------------------------------------------------------------------------------------------
     void ConvertLights(const Model& model, const std::string &orig_name );

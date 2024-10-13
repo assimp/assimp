@@ -104,7 +104,7 @@ void USDImporterImplTinyusdz::InternReadFile(
         }
         size_t file_size{ file_stream->FileSize() };
         in_mem_data.resize(file_size);
-        file_stream->Read(in_mem_data.data(), file_size, file_size);
+        file_stream->Read(in_mem_data.data(), 1, file_size);
     }
 
     bool ret{ false };

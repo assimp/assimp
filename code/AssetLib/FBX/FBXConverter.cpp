@@ -717,8 +717,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
 
-        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-            comp == TransformationComp_PreRotation || comp == TransformationComp_PostRotation) {
+        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation) {
             continue;
         }
 

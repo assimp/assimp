@@ -1770,23 +1770,25 @@ void FBXExporter::WriteObjects ()
         indent++;
         if (pAnimMesh->HasPositions()) {
           std::vector<int32_t>shape_indices;
-          std::vector<double>pPositionDiff;
-          std::vector<double>pNormalDiff;
+          std::vector<float>pPositionDiff;
+          std::vector<float>pNormalDiff;
 
           for (unsigned int vt = 0; vt < vertex_indices.size(); ++vt) {
               aiVector3D pDiff = (pAnimMesh->mVertices[vertex_indices[vt]] - m->mVertices[vertex_indices[vt]]);
-              if(pDiff.Length()>1e-8){
-                shape_indices.push_back(vertex_indices[vt]);
-                pPositionDiff.push_back(pDiff[0]);
-                pPositionDiff.push_back(pDiff[1]);
-                pPositionDiff.push_back(pDiff[2]);
+              shape_indices.push_back(vertex_indices[vt]);
+              pPositionDiff.push_back(pDiff[0]);
+              pPositionDiff.push_back(pDiff[1]);
+              pPositionDiff.push_back(pDiff[2]);
 
-                if (pAnimMesh->HasNormals()) {
-                    aiVector3D nDiff = (pAnimMesh->mNormals[vertex_indices[vt]] - m->mNormals[vertex_indices[vt]]);
-                    pNormalDiff.push_back(nDiff[0]);
-                    pNormalDiff.push_back(nDiff[1]);
-                    pNormalDiff.push_back(nDiff[2]);
-                }
+              if (pAnimMesh->HasNormals()) {
+                  aiVector3D nDiff = (pAnimMesh->mNormals[vertex_indices[vt]] - m->mNormals[vertex_indices[vt]]);
+                  pNormalDiff.push_back(nDiff[0]);
+                  pNormalDiff.push_back(nDiff[1]);
+                  pNormalDiff.push_back(nDiff[2]);
+              } else {
+                  pNormalDiff.push_back(0.0);
+                  pNormalDiff.push_back(0.0);
+                  pNormalDiff.push_back(0.0);
               }
           }
 

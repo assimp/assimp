@@ -527,6 +527,7 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                         continue;
                     vNormals += v;
                 }
+                mesh->mNormals[idx] = vNormals.Normalize();
             }
         }
     }
@@ -547,6 +548,7 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                     const aiVector3D &v = faceNormals[*a];
                     vNormals += v;
                 }
+                vNormals.Normalize();
                 for (std::vector<unsigned int>::const_iterator a = poResult.begin(); a != poResult.end(); ++a) {
                     mesh->mNormals[*a] = vNormals;
                     vertexDone[*a] = true;

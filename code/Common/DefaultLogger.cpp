@@ -221,13 +221,11 @@ void DefaultLogger::set(Logger *logger) {
 #endif
 
     if (nullptr == logger) {
-        logger = &s_pNullLogger;
+        m_pLogger = &s_pNullLogger;
     }
-    if (nullptr != m_pLogger && !isNullLogger()) {
-        delete m_pLogger;
+    else {
+        m_pLogger = logger;
     }
-
-    DefaultLogger::m_pLogger = logger;
 }
 
 // ----------------------------------------------------------------------------------

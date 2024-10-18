@@ -91,9 +91,13 @@ bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, boo
     }
 
     char s[32];
-    in->Read(s, sizeof(char), 32);
+    const size_t read = in->Read(s, sizeof(char), 32);
 
     pIOHandler->Close(in);
+    
+    if (read < 19) {
+      return false;
+    }
 
     return strncmp(s, "ASSIMP.binary-dump.", 19) == 0;
 }

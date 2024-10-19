@@ -631,8 +631,9 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
             numEmbeddedTexs += 1;
     }
 
-    if (numEmbeddedTexs == 0)
+    if (numEmbeddedTexs == 0) {
         return;
+    }
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
 
@@ -657,11 +658,13 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
         if (!img.mimeType.empty()) {
             const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
             if (ext) {
-                if (strcmp(ext, "jpeg") == 0) ext = "jpg";
+                if (strncmp(ext, "jpeg", 4) == 0) {
+                    ext = "jpg";
+                }
 
-                size_t len = strlen(ext);
+                const size_t len = strlen(ext);
                 if (len <= 3) {
-                    strcpy(tex->achFormatHint, ext);
+                    strncpy(tex->achFormatHint, ext, len);
                 }
             }
         }

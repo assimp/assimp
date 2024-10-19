@@ -1,4 +1,4 @@
-_# USD model files
+# USD model files
 
 ## MotionCaptureROM.usdc
 Converted bundled .wrl test model:

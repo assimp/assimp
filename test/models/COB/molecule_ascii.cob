@@ -1170,7 +1170,7 @@ Object Mode Off 0
 Mat1 V0.08 Id 497131204 Parent 58548212 Size 00000083
 mat# 0
 shader: phong  facet: auto40
-rgb 1,1,1
+rgb 1.0,1.0,1.0
 alpha 1  ka 0  ks 0.1  exp 0  ior 1
 ShBx V0.04 Id 497131205 Parent 497131204 Size 00000605
 Shader class: color
@@ -1758,7 +1758,7 @@ Object Mode Off 0
 Mat1 V0.08 Id 497168220 Parent 57850740 Size 00000083
 mat# 0
 shader: phong  facet: auto40
-rgb 1,1,1
+rgb 1.0,1.0,1.0
 alpha 1  ka 0  ks 0.1  exp 0  ior 1
 ShBx V0.04 Id 497168221 Parent 497168220 Size 00000605
 Shader class: color
@@ -2346,7 +2346,7 @@ Object Mode Off 0
 Mat1 V0.08 Id 497153380 Parent 497235148 Size 00000083
 mat# 0
 shader: phong  facet: auto40
-rgb 1,1,1
+rgb 1.0,1.0,1.0
 alpha 1  ka 0  ks 0.1  exp 0  ior 1
 ShBx V0.04 Id 497153381 Parent 497153380 Size 00000605
 Shader class: color

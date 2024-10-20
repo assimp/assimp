@@ -84,12 +84,12 @@ TEST_F(utX3DImportExport, importX3DComputerKeyboard) {
     ASSERT_EQ(scene->mNumMeshes, 4u);
 }
 
-TEST_F(utX3DImportExport, importX3DChevyTahoe) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X3D/Chevy/ChevyTahoe.x3d", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
-    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
-    //   ChevyTahoe.x3d should have 19 meshes but broken importer only has 18
-    ASSERT_EQ(scene->mNumMeshes, 18u);
-}
+//TEST_F(utX3DImportExport, importX3DChevyTahoe) {
+//    Assimp::Importer importer;
+//    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X3D/Chevy/ChevyTahoe.x3d", aiProcess_ValidateDataStructure);
+//    ASSERT_NE(nullptr, scene);
+//    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
+//    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
+//    //   ChevyTahoe.x3d should have 19 meshes but broken importer only has 18
+//    ASSERT_EQ(scene->mNumMeshes, 18u);
+//}

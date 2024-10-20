@@ -44,13 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 // some long includes ....
-#ifdef ASSIMP_USE_HUNTER
-#  include <irrXML/irrXML.h>
-#else
-#  include <irrXML.h>
-#endif
-#include "IOStream.hpp"
-#include "BaseImporter.h"
+#include "irrXML/irrXML.h"
+#include <assimp/IOStream.hpp>
+#include <assimp/BaseImporter.h>
 #include <vector>
 
 namespace Assimp    {

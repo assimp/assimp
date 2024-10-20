@@ -57,11 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 //#include <stdio.h>
 //#include <cstdint>
-#ifdef ASSIMP_USE_HUNTER
-#  include <irrXML/irrXML.h>
-#else
-#  include <irrXML.h>
-#endif
+#include "legacyXML/irrXML/irrXML.h"
 
 namespace Assimp {
 

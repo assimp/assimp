@@ -60,6 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <iterator>
 
+using namespace std;
+
 namespace Assimp {
 
 /// \var aiImporterDesc X3DImporter::Description

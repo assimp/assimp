@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter_Macro.hpp"
 #include <assimp/StringUtils.h>
 
+using namespace std;
+
 namespace Assimp {
 
 // <DirectionalLight

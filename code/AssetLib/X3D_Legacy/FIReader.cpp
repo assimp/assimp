@@ -72,6 +72,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 
+using namespace std;
+
 namespace Assimp {
 
 static const std::string parseErrorMessage = "Fast Infoset parse error";

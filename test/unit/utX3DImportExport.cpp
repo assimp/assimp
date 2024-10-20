@@ -80,9 +80,9 @@ TEST_F(utX3DImportExport, importX3DComputerKeyboard) {
     ASSERT_NE(nullptr, scene);
     // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
     //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
-    //   ComputerKeyboard.x3d should have 99 meshes but broken importer only has 4
+    //   ComputerKeyboard.x3d should have 100 meshes but broken importer only has 4
     ASSERT_EQ(4u, scene->mNumMeshes);  // Incorrect value from currently broken importer
-    ASSERT_NE(99u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
+    ASSERT_NE(100u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
 }
 
 TEST_F(utX3DImportExport, importX3DChevyTahoe) {

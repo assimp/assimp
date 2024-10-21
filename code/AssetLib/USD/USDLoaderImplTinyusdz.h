@@ -120,22 +120,27 @@ public:
             aiScene *pScene,
             const std::string &nameWExt);
 
+    void setupSkeletons(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
     void setupNodes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
-            const std::string &nameWExt
-            );
+            const std::string &nameWExt);
 
     aiNode *nodes(
             const tinyusdz::tydra::RenderScene &render_scene,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
             const std::string &nameWExt);
 
     aiNode *nodesRecursive(
             aiNode *pNodeParent,
             const tinyusdz::tydra::Node &node,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes);
+            const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons);
+
+    aiNode *skeletonNodesRecursive(
+            aiNode *pNodeParent,
+            const tinyusdz::tydra::SkelNode &joint);
 
     void sanityCheckNodesRecursive(
             aiNode *pNode);

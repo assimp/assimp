@@ -57,8 +57,15 @@ if(ASSIMP_BUILD_USE_CCACHE)
 endif()
 
 # Disabled importers: m3d for 5.1 or later
-ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
-ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
+option(ASSIMP_BUILD_M3D_IMPORTER "Enable M3D file import" off)
+option(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
+if (NOT ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
+endif () # if (not ASSIMP_BUILD_M3D_IMPORTER)
+if (NOT ASSIMP_BUILD_M3D_EXPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
+endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
+
 # Toggles the use of the hunter package manager
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 

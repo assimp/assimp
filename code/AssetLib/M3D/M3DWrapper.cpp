@@ -39,8 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#if !defined ASSIMP_BUILD_NO_M3D_IMPORTER || !(defined ASSIMP_BUILD_NO_EXPORT || defined ASSIMP_BUILD_NO_M3D_EXPORTER)
-
 #include "M3DWrapper.h"
 
 #include <assimp/DefaultIOSystem.h>
@@ -127,16 +125,9 @@ void M3DWrapper::reset() {
 }
 
 unsigned char *M3DWrapper::Save(int quality, int flags, unsigned int &size) {
-#if (!(ASSIMP_BUILD_NO_EXPORT || ASSIMP_BUILD_NO_M3D_EXPORTER))
     ClearSave();
     saved_output_ = m3d_save(m3d_, quality, flags, &size);
     return saved_output_;
-#else
-    (void)quality;
-    (void)flags;
-    (void)size;
-    return nullptr;
-#endif
 }
 
 void M3DWrapper::ClearSave() {
@@ -146,5 +137,3 @@ void M3DWrapper::ClearSave() {
     saved_output_ = nullptr;
 }
 } // namespace Assimp
-
-#endif

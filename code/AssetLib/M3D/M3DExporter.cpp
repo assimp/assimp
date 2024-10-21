@@ -39,13 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_M3D_EXPORTER
-
 #define M3D_IMPLEMENTATION
 #define M3D_NOIMPORTER
 #define M3D_EXPORTER
-#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
 #define M3D_NODUP
 
 
@@ -437,6 +433,3 @@ void M3DExporter::NodeWalk(const M3DWrapper &m3d, const aiNode *pNode, aiMatrix4
     }
 }
 } // namespace Assimp
-#endif
-#endif // ASSIMP_BUILD_NO_M3D_EXPORTER
-#endif // ASSIMP_BUILD_NO_EXPORT

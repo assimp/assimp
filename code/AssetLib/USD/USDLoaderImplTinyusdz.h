@@ -120,10 +120,6 @@ public:
             aiScene *pScene,
             const std::string &nameWExt);
 
-    void setupSkeletons(
-            const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene);
-
     void setupNodes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,

@@ -197,8 +197,6 @@ void USDImporterImplTinyusdz::InternReadFile(
     textureImages(render_scene, pScene, nameWExt);
     buffers(render_scene, pScene, nameWExt);
 
-    //setupSkeletons(render_scene, pScene);
-
     setupNodes(render_scene, pScene, nameWExt);
 
     setupBlendShapes(render_scene, pScene, nameWExt);
@@ -660,51 +658,6 @@ void USDImporterImplTinyusdz::buffers(
         ss << "    buffer[" << i << "]: count: " << buffer.data.size() << ", type: " << to_string(buffer.componentType);
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         ++i;
-    }
-}
-
-void USDImporterImplTinyusdz::setupSkeletons(
-    const tinyusdz::tydra::RenderScene& render_scene,
-    aiScene* pScene)
-{
-    std::vector<aiSkeleton *> aiSkeletons;
-
-    for (const tinyusdz::tydra::SkelHierarchy &skeleton : render_scene.skeletons)
-    {
-        aiSkeleton *outputSkeleton = new aiSkeleton();
-        outputSkeleton->mName = skeleton.display_name;
-
-        std::vector<aiSkeletonBone *> outputSkeletonBones;
-
-        //outputSkeleton->mNumBones
-        //outputSkeleton->mBones
-
-        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
-        skeletonNodes.push_back(&skeleton.root_node);
-
-        for (int i = 0; i < skeletonNodes.size(); ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
-
-            aiBone *outputBone = new aiBone();
-
-            // @todo: required?
-            #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
-                // used for skeleton conversion
-                // outputBone->mArmature
-                // outputBone->mNode;
-            #endif
-
-            outputBone->mName = aiString(skeletonNode->joint_name);
-            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m);
-            //aiBones.push_back(outputBone);
-
-            // recursively add bones
-            for (const auto &child : skeletonNodes[i]->children) {
-                skeletonNodes.push_back(&child);
-            }
-        }
-
-        aiSkeletons.push_back(outputSkeleton);
     }
 }
 

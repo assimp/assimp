@@ -56,9 +56,12 @@ if(ASSIMP_BUILD_USE_CCACHE)
   endif()
 endif()
 
-# Disabled importers: m3d for 5.1 or later
+# User may override these in their CMake script to provide M3D import/export support
+# (M3D importer/exporter was disabled for assimp release 5.1 or later)
 option(ASSIMP_BUILD_M3D_IMPORTER "Enable M3D file import" off)
 option(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
+
+# Internal/private M3D logic
 if (NOT ASSIMP_BUILD_M3D_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
 endif () # if (not ASSIMP_BUILD_M3D_IMPORTER)

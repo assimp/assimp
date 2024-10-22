@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
+
 #define M3D_IMPLEMENTATION
 #define M3D_NONORMALS /* leave the post-processing to Assimp */
 #define M3D_NOWEIGHTS
@@ -783,3 +785,5 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
 // ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
+
+#endif // !! ASSIMP_BUILD_NO_M3D_IMPORTER

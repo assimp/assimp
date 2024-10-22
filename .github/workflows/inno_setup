@@ -45,7 +45,7 @@ jobs:
           buildDirectory: '${{ github.workspace }}/build/'
 
       - name: Compile .ISS to .EXE Installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
         with:
           path: packaging/windows-innosetup/script_x64.iss
           options: /O+

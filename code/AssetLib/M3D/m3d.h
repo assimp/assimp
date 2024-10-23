@@ -631,44 +631,6 @@ static m3dcd_t m3d_commandtypes[] = {
    stb_image - v2.23 - public domain image loader - http://nothings.org/stb_image.h
 */
 
-enum
-{
-   STBI_default = 0,
-
-   STBI_grey       = 1,
-   STBI_grey_alpha = 2,
-   STBI_rgb        = 3,
-   STBI_rgb_alpha  = 4
-};
-
-enum
-{
-   STBI__SCAN_load=0,
-   STBI__SCAN_type,
-   STBI__SCAN_header
-};
-
-#define STBI_ASSERT(v)
-#define STBI_NOTUSED(v)  (void)sizeof(v)
-#define STBI__BYTECAST(x)  ((unsigned char) ((x) & 255))
-#define STBI_MALLOC(sz)           M3D_MALLOC(sz)
-#define STBI_REALLOC(p,newsz)     M3D_REALLOC(p,newsz)
-#define STBI_FREE(p)              M3D_FREE(p)
-#define STBI_REALLOC_SIZED(p,oldsz,newsz) STBI_REALLOC(p,newsz)
-
-constexpr int STBI__ZFAST_BITS = 9;
-#define STBI__ZFAST_MASK  ((1 << STBI__ZFAST_BITS) - 1)
-
-enum {
-   STBI__F_none=0,
-   STBI__F_sub=1,
-   STBI__F_up=2,
-   STBI__F_avg=3,
-   STBI__F_paeth=4,
-   STBI__F_avg_first,
-   STBI__F_paeth_first
-};
-
 #define STBI__PNG_TYPE(a,b,c,d)  (((unsigned) (a) << 24) + ((unsigned) (b) << 16) + ((unsigned) (c) << 8) + (unsigned) (d))
 
 #endif

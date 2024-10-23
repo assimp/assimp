@@ -212,6 +212,28 @@ void USDImporterImplTinyusdz::InternReadFile(
         return;
     }
 
+    pScene->mNumAnimations = render_scene.animations.size();
+    pScene->mAnimations = new aiAnimation*[pScene->mNumAnimations];
+
+    for (int animationIndex = 0; animationIndex < pScene->mNumAnimations; ++animationIndex) {
+
+        const auto &animation = render_scene.animations[animationIndex];
+
+        auto newAiAnimation = new aiAnimation();
+        newAiAnimation->mName = animation.abs_path;
+        // newAiAnimation->mChannels;
+        // newAiAnimation->mNumChannels
+        newAiAnimation->mDuration = animation.
+        // newAiAnimation->mMeshChannels
+        // newAiAnimation->mNumMeshChannels
+        // newAiAnimation->mTicksPerSecond
+        // newAiAnimation->mMorphMeshChannels
+        //newAiAnimation->mNumMorphMeshChannels
+
+
+        pScene->mAnimations[animationIndex] = newAiAnimation;
+    }
+
 //    sanityCheckNodesRecursive(pScene->mRootNode);
     meshes(render_scene, pScene, nameWExt);
     materials(render_scene, pScene, nameWExt);

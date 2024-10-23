@@ -416,14 +416,12 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+if (ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_ASSIMP_IMPORTER( M3D
+            AssetLib/M3D/M3DImporter.cpp
+            AssetLib/M3D/M3DWrapper.cpp
+    )
+endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
@@ -663,9 +661,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assxml/AssxmlFileWriter.h
     AssetLib/Assxml/AssxmlFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER(M3D
-    AssetLib/M3D/M3DExporter.h
-    AssetLib/M3D/M3DExporter.cpp)
+  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
+      ADD_ASSIMP_EXPORTER(M3D
+              AssetLib/M3D/M3DExporter.cpp)
+  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
 
   ADD_ASSIMP_EXPORTER(COLLADA
     AssetLib/Collada/ColladaExporter.h

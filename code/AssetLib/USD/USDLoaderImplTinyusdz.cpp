@@ -268,7 +268,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         size_t meshIdx,
         const std::string &nameWExt) {
     UNUSED(nameWExt);
-    const unsigned int numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
+    const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
     pScene->mMeshes[meshIdx]->mNumVertices = numVertices;
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
 
@@ -283,7 +283,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         {
             const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
 
-            aiBone* outputBone = new aiBone();
+            auto outputBone = new aiBone();
 
             outputBone->mName = aiString(skeletonNode->joint_name);
             outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();

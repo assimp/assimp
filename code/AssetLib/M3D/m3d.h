@@ -41,8 +41,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "../../contrib/stb/stb_image.h"
-
 /*** configuration ***/
 #ifndef M3D_MALLOC
 #define M3D_MALLOC(sz) malloc(sz)

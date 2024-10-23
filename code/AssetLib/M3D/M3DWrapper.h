@@ -75,10 +75,10 @@ public:
 	explicit M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer);
 
 	/// Theclasss destructor.
-	~M3DWrapper();
+    ~M3DWrapper();
 
 	/// Will reset the wrapper, all data will become nullptr.
-	void reset();
+    void reset();
 
 	// The Name access, empty string returned when no m3d instance.
 	std::string Name() const;

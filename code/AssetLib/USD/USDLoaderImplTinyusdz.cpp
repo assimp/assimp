@@ -263,13 +263,6 @@ void USDImporterImplTinyusdz::verticesForMesh(
 
             aiBone* outputBone = new aiBone();
 
-            // @todo: required?
-            #ifndef ASSIMP_BUILD_NO_ARMATUREPOPULATE_PROCESS
-                // used for skeleton conversion
-                // outputBone->mArmature
-                // outputBone->mNode;
-            #endif
-
             outputBone->mName = aiString(skeletonNode->joint_name);
             outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
             aiBones.push_back(outputBone);

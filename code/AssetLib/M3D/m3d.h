@@ -633,7 +633,7 @@ char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, 
 */
 static const char *_m3dstbi__g_failure_reason;
 
-enum class
+enum
 {
    STBI_default = 0,
 
@@ -643,7 +643,7 @@ enum class
    STBI_rgb_alpha  = 4
 };
 
-enum class
+enum
 {
    STBI__SCAN_load=0,
    STBI__SCAN_type,
@@ -871,7 +871,7 @@ static _m3dstbi__uint16 *_m3dstbi__convert_format16(_m3dstbi__uint16 *data, int 
     return good;
 }
 
-#define STBI__ZFAST_BITS  9
+constexpr int STBI__ZFAST_BITS = 9;
 #define STBI__ZFAST_MASK  ((1 << STBI__ZFAST_BITS) - 1)
 
 typedef struct

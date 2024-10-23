@@ -41,6 +41,8 @@ extern "C" {
 
 #include <stdint.h>
 
+#include "../../contrib/stb/stb_image.h"
+
 /*** configuration ***/
 #ifndef M3D_MALLOC
 #define M3D_MALLOC(sz) malloc(sz)
@@ -621,9 +623,6 @@ static m3dcd_t m3d_commandtypes[] = {
 
 #include <stdlib.h>
 #include <string.h>
-
-/* we'll need this with M3D_NOTEXTURE */
-char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header);
 
 #ifndef M3D_NOTEXTURE
 #if !defined(M3D_NOIMPORTER) && !defined(STBI_INCLUDE_STB_IMAGE_H)
@@ -1225,22 +1224,6 @@ static int _m3dstbi__do_zlib(_m3dstbi__zbuf *a, char *obuf, int olen, int exp, i
     return _m3dstbi__parse_zlib(a, parse_header);
 }
 
-char *_m3dstbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, int len, int initial_size, int *outlen, int parse_header)
-{
-    _m3dstbi__zbuf a;
-    char *p = (char *) _m3dstbi__malloc(initial_size);
-    if (p == nullptr) return nullptr;
-    a.zbuffer = (unsigned char *) buffer;
-    a.zbuffer_end = (unsigned char *) buffer + len;
-    if (_m3dstbi__do_zlib(&a, p, initial_size, 1, parse_header)) {
-        if (outlen) *outlen = (int) (a.zout - a.zout_start);
-        return a.zout_start;
-    } else {
-        STBI_FREE(a.zout_start);
-        return nullptr;
-    }
-}
-
 typedef struct
 {
    _m3dstbi__uint32 length;
@@ -1303,241 +1286,6 @@ static int _m3dstbi__paeth(int a, int b, int c)
 }
 
 static unsigned char _m3dstbi__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
-
-static int _m3dstbi__create_png_image_raw(_m3dstbi__png *a, unsigned char *raw, _m3dstbi__uint32 raw_len, int out_n, _m3dstbi__uint32 x, _m3dstbi__uint32 y, int depth, int color)
-{
-   int bytes = (depth == 16? 2 : 1);
-   _m3dstbi__context *s = a->s;
-   _m3dstbi__uint32 i;
-   _m3dstbi__uint32 j;
-   _m3dstbi__uint32 stride = x*out_n*bytes;
-   _m3dstbi__uint32 img_len;
-   _m3dstbi__uint32 img_width_bytes;
-   int k;
-   int img_n = s->img_n;
-
-   int output_bytes = out_n*bytes;
-   int filter_bytes = img_n*bytes;
-   int width = x;
-
-   STBI_ASSERT(out_n == s->img_n || out_n == s->img_n+1);
-   a->out = (unsigned char *) _m3dstbi__malloc_mad3(x, y, output_bytes, 0);
-   if (!a->out) return _m3dstbi__err("outofmem", "Out of memory");
-
-   if (!_m3dstbi__mad3sizes_valid(img_n, x, depth, 7)) return _m3dstbi__err("too large", "Corrupt PNG");
-   img_width_bytes = (((img_n * x * depth) + 7) >> 3);
-   img_len = (img_width_bytes + 1) * y;
-   if (s->img_x == x && s->img_y == y) {
-      if (raw_len != img_len) return _m3dstbi__err("not enough pixels","Corrupt PNG");
-   } else {
-      if (raw_len < img_len) return _m3dstbi__err("not enough pixels","Corrupt PNG");
-   }
-
-   for (j=0; j < y; ++j) {
-      unsigned char *cur = a->out + stride*j;
-      unsigned char *prior = cur - stride;
-      int filter = *raw++;
-
-      if (filter > 4)
-         return _m3dstbi__err("invalid filter","Corrupt PNG");
-
-      if (depth < 8) {
-         STBI_ASSERT(img_width_bytes <= x);
-         cur += x*out_n - img_width_bytes;
-         filter_bytes = 1;
-         width = img_width_bytes;
-      }
-      prior = cur - stride;
-
-      if (j == 0) filter = first_row_filter[filter];
-
-      for (k=0; k < filter_bytes; ++k) {
-         switch (filter) {
-            case STBI__F_none       : cur[k] = raw[k]; break;
-            case STBI__F_sub        : cur[k] = raw[k]; break;
-            case STBI__F_up         : cur[k] = STBI__BYTECAST(raw[k] + prior[k]); break;
-            case STBI__F_avg        : cur[k] = STBI__BYTECAST(raw[k] + (prior[k]>>1)); break;
-            case STBI__F_paeth      : cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(0,prior[k],0)); break;
-            case STBI__F_avg_first  : cur[k] = raw[k]; break;
-            case STBI__F_paeth_first: cur[k] = raw[k]; break;
-         }
-      }
-
-      if (depth == 8) {
-         if (img_n != out_n)
-            cur[img_n] = 255;
-         raw += img_n;
-         cur += out_n;
-         prior += out_n;
-      } else if (depth == 16) {
-         if (img_n != out_n) {
-            cur[filter_bytes]   = 255;
-            cur[filter_bytes+1] = 255;
-         }
-         raw += filter_bytes;
-         cur += output_bytes;
-         prior += output_bytes;
-      } else {
-         raw += 1;
-         cur += 1;
-         prior += 1;
-      }
-
-      if (depth < 8 || img_n == out_n) {
-         int nk = (width - 1)*filter_bytes;
-         #define STBI__CASE(f) \
-             case f:     \
-                for (k=0; k < nk; ++k)
-         switch (filter) {
-            case STBI__F_none:         memcpy(cur, raw, nk); break;
-            STBI__CASE(STBI__F_sub)          { cur[k] = STBI__BYTECAST(raw[k] + cur[k-filter_bytes]); } break;
-            STBI__CASE(STBI__F_up)           { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); } break;
-            STBI__CASE(STBI__F_avg)          { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k-filter_bytes])>>1)); } break;
-            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k-filter_bytes],prior[k],prior[k-filter_bytes])); } break;
-            STBI__CASE(STBI__F_avg_first)    { cur[k] = STBI__BYTECAST(raw[k] + (cur[k-filter_bytes] >> 1)); } break;
-            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k-filter_bytes],0,0)); } break;
-         }
-         #undef STBI__CASE
-         raw += nk;
-      } else {
-         STBI_ASSERT(img_n+1 == out_n);
-         #define STBI__CASE(f) \
-             case f:     \
-                for (i=x-1; i >= 1; --i, cur[filter_bytes]=255,raw+=filter_bytes,cur+=output_bytes,prior+=output_bytes) \
-                   for (k=0; k < filter_bytes; ++k)
-         switch (filter) {
-            STBI__CASE(STBI__F_none)         { cur[k] = raw[k]; } break;
-            STBI__CASE(STBI__F_sub)          { cur[k] = STBI__BYTECAST(raw[k] + cur[k- output_bytes]); } break;
-            STBI__CASE(STBI__F_up)           { cur[k] = STBI__BYTECAST(raw[k] + prior[k]); } break;
-            STBI__CASE(STBI__F_avg)          { cur[k] = STBI__BYTECAST(raw[k] + ((prior[k] + cur[k- output_bytes])>>1)); } break;
-            STBI__CASE(STBI__F_paeth)        { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k- output_bytes],prior[k],prior[k- output_bytes])); } break;
-            STBI__CASE(STBI__F_avg_first)    { cur[k] = STBI__BYTECAST(raw[k] + (cur[k- output_bytes] >> 1)); } break;
-            STBI__CASE(STBI__F_paeth_first)  { cur[k] = STBI__BYTECAST(raw[k] + _m3dstbi__paeth(cur[k- output_bytes],0,0)); } break;
-         }
-         #undef STBI__CASE
-
-         if (depth == 16) {
-            cur = a->out + stride*j;
-            for (i=0; i < x; ++i,cur+=output_bytes) {
-               cur[filter_bytes+1] = 255;
-            }
-         }
-      }
-   }
-
-   if (depth < 8) {
-      for (j=0; j < y; ++j) {
-         unsigned char *cur = a->out + stride*j;
-         unsigned char *in  = a->out + stride*j + x*out_n - img_width_bytes;
-         unsigned char scale = (color == 0) ? _m3dstbi__depth_scale_table[depth] : 1;
-
-         if (depth == 4) {
-            for (k=x*img_n; k >= 2; k-=2, ++in) {
-               *cur++ = scale * ((*in >> 4)       );
-               *cur++ = scale * ((*in     ) & 0x0f);
-            }
-            if (k > 0) *cur++ = scale * ((*in >> 4)       );
-         } else if (depth == 2) {
-            for (k=x*img_n; k >= 4; k-=4, ++in) {
-               *cur++ = scale * ((*in >> 6)       );
-               *cur++ = scale * ((*in >> 4) & 0x03);
-               *cur++ = scale * ((*in >> 2) & 0x03);
-               *cur++ = scale * ((*in     ) & 0x03);
-            }
-            if (k > 0) *cur++ = scale * ((*in >> 6)       );
-            if (k > 1) *cur++ = scale * ((*in >> 4) & 0x03);
-            if (k > 2) *cur++ = scale * ((*in >> 2) & 0x03);
-         } else if (depth == 1) {
-            for (k=x*img_n; k >= 8; k-=8, ++in) {
-               *cur++ = scale * ((*in >> 7)       );
-               *cur++ = scale * ((*in >> 6) & 0x01);
-               *cur++ = scale * ((*in >> 5) & 0x01);
-               *cur++ = scale * ((*in >> 4) & 0x01);
-               *cur++ = scale * ((*in >> 3) & 0x01);
-               *cur++ = scale * ((*in >> 2) & 0x01);
-               *cur++ = scale * ((*in >> 1) & 0x01);
-               *cur++ = scale * ((*in     ) & 0x01);
-            }
-            if (k > 0) *cur++ = scale * ((*in >> 7)       );
-            if (k > 1) *cur++ = scale * ((*in >> 6) & 0x01);
-            if (k > 2) *cur++ = scale * ((*in >> 5) & 0x01);
-            if (k > 3) *cur++ = scale * ((*in >> 4) & 0x01);
-            if (k > 4) *cur++ = scale * ((*in >> 3) & 0x01);
-            if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
-            if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
-         }
-         if (img_n != out_n) {
-            int q;
-            cur = a->out + stride*j;
-            if (img_n == 1) {
-               for (q=x-1; q >= 0; --q) {
-                  cur[q*2+1] = 255;
-                  cur[q*2+0] = cur[q];
-               }
-            } else {
-               STBI_ASSERT(img_n == 3);
-               for (q=x-1; q >= 0; --q) {
-                  cur[q*4+3] = 255;
-                  cur[q*4+2] = cur[q*3+2];
-                  cur[q*4+1] = cur[q*3+1];
-                  cur[q*4+0] = cur[q*3+0];
-               }
-            }
-         }
-      }
-   } else if (depth == 16) {
-      unsigned char *cur = a->out;
-      _m3dstbi__uint16 *cur16 = (_m3dstbi__uint16*)cur;
-
-      for(i=0; i < x*y*out_n; ++i,cur16++,cur+=2) {
-         *cur16 = (cur[0] << 8) | cur[1];
-      }
-   }
-
-   return 1;
-}
-
-static int _m3dstbi__create_png_image(_m3dstbi__png *a, unsigned char *image_data, _m3dstbi__uint32 image_data_len, int out_n, int depth, int color, int interlaced)
-{
-   int bytes = (depth == 16 ? 2 : 1);
-   int out_bytes = out_n * bytes;
-   unsigned char *final;
-   int p;
-   if (!interlaced)
-      return _m3dstbi__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, color);
-
-   final = (unsigned char *) _m3dstbi__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
-   for (p=0; p < 7; ++p) {
-      int xorig[] = { 0,4,0,2,0,1,0 };
-      int yorig[] = { 0,0,4,0,2,0,1 };
-      int xspc[]  = { 8,8,4,4,2,2,1 };
-      int yspc[]  = { 8,8,8,4,4,2,2 };
-      int i,j,x,y;
-      x = (a->s->img_x - xorig[p] + xspc[p]-1) / xspc[p];
-      y = (a->s->img_y - yorig[p] + yspc[p]-1) / yspc[p];
-      if (x && y) {
-         _m3dstbi__uint32 img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
-         if (!_m3dstbi__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color)) {
-            STBI_FREE(final);
-            return 0;
-         }
-         for (j=0; j < y; ++j) {
-            for (i=0; i < x; ++i) {
-               int out_y = j*yspc[p]+yorig[p];
-               int out_x = i*xspc[p]+xorig[p];
-               memcpy(final + out_y*a->s->img_x*out_bytes + out_x*out_bytes,
-                      a->out + (j*x+i)*out_bytes, out_bytes);
-            }
-         }
-         STBI_FREE(a->out);
-         image_data += img_len;
-         image_data_len -= img_len;
-      }
-   }
-   a->out = final;
-
-   return 1;
-}
 
 static int _m3dstbi__compute_transparency(_m3dstbi__png *z, unsigned char tc[3], int out_n)
 {
@@ -1736,7 +1484,7 @@ static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp)
             if (z->idata == nullptr) return _m3dstbi__err("no IDAT","Corrupt PNG");
             bpl = (s->img_x * z->depth + 7) / 8;
             raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
-            z->expanded = (unsigned char *) _m3dstbi_zlib_decode_malloc_guesssize_headerflag((char *) z->idata, ioff, raw_len, (int *) &raw_len, 1);
+            z->expanded = (unsigned char *) stbi_zlib_decode_malloc_guesssize_headerflag((char *) z->idata, ioff, raw_len, (int *) &raw_len, 1);
             if (z->expanded == nullptr) return 0;
             STBI_FREE(z->idata); z->idata = nullptr;
             if ((req_comp == s->img_n+1 && req_comp != 3 && !pal_img_n) || has_trans)
@@ -1815,7 +1563,6 @@ static void *_m3dstbi__png_load(_m3dstbi__context *s, int *x, int *y, int *comp,
 #define stbi__result_info _m3dstbi__result_info
 #define stbi__context _m3dstbi__context
 #define stbi__png_load _m3dstbi__png_load
-#define stbi_zlib_decode_malloc_guesssize_headerflag _m3dstbi_zlib_decode_malloc_guesssize_headerflag
 #endif
 #else
 #endif /* M3D_NOTEXTURE */

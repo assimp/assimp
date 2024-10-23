@@ -58,6 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
+// TODO: make sure there's no stb_image conflicts with other assimp sub-projects
+// Must define STB_IMAGE_IMPLEMENTATION in only a single source file
+#define STB_IMAGE_IMPLEMENTATION
 #include "M3DWrapper.h"
 
 // RESOURCES:

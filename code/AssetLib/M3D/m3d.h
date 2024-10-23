@@ -630,7 +630,6 @@ static m3dcd_t m3d_commandtypes[] = {
 
    stb_image - v2.23 - public domain image loader - http://nothings.org/stb_image.h
 */
-static const char *_m3dstbi__g_failure_reason;
 
 enum
 {
@@ -649,37 +648,6 @@ enum
    STBI__SCAN_header
 };
 
-typedef unsigned short _m3dstbi_us;
-
-typedef uint16_t _m3dstbi__uint16;
-typedef int16_t  _m3dstbi__int16;
-typedef uint32_t _m3dstbi__uint32;
-typedef int32_t  _m3dstbi__int32;
-
-typedef struct
-{
-    _m3dstbi__uint32 img_x, img_y;
-    int img_n, img_out_n;
-
-    void *io_user_data;
-
-    int read_from_callbacks;
-    int buflen;
-    unsigned char buffer_start[128];
-
-    unsigned char *img_buffer;
-    unsigned char *img_buffer_end;
-    unsigned char *img_buffer_original;
-    unsigned char *img_buffer_original_end;
-} _m3dstbi__context;
-
-typedef struct
-{
-    int bits_per_channel;
-    int num_channels;
-    int channel_order;
-} _m3dstbi__result_info;
-
 #define STBI_ASSERT(v)
 #define STBI_NOTUSED(v)  (void)sizeof(v)
 #define STBI__BYTECAST(x)  ((unsigned char) ((x) & 255))
@@ -688,61 +656,8 @@ typedef struct
 #define STBI_FREE(p)              M3D_FREE(p)
 #define STBI_REALLOC_SIZED(p,oldsz,newsz) STBI_REALLOC(p,newsz)
 
-_inline static unsigned char _m3dstbi__get8(_m3dstbi__context *s)
-{
-    if (s->img_buffer < s->img_buffer_end)
-        return *s->img_buffer++;
-    return 0;
-}
-
-static void _m3dstbi__skip(_m3dstbi__context *s, int n)
-{
-    if (n < 0) {
-        s->img_buffer = s->img_buffer_end;
-        return;
-    }
-    s->img_buffer += n;
-}
-
-static int _m3dstbi__getn(_m3dstbi__context *s, unsigned char *buffer, int n)
-{
-   if (s->img_buffer+n <= s->img_buffer_end) {
-      memcpy(buffer, s->img_buffer, n);
-      s->img_buffer += n;
-      return 1;
-   } else
-      return 0;
-}
-
-static int _m3dstbi__get16be(_m3dstbi__context *s)
-{
-    int z = _m3dstbi__get8(s);
-    return (z << 8) + _m3dstbi__get8(s);
-}
-
-static _m3dstbi__uint32 _m3dstbi__get32be(_m3dstbi__context *s)
-{
-    _m3dstbi__uint32 z = _m3dstbi__get16be(s);
-    return (z << 16) + _m3dstbi__get16be(s);
-}
-
-#define _m3dstbi__err(x,y)  _m3dstbi__errstr(y)
-static int _m3dstbi__errstr(const char *str)
-{
-    _m3dstbi__g_failure_reason = str;
-    return 0;
-}
-
 constexpr int STBI__ZFAST_BITS = 9;
 #define STBI__ZFAST_MASK  ((1 << STBI__ZFAST_BITS) - 1)
-
-typedef struct
-{
-   _m3dstbi__context *s;
-   unsigned char *idata, *expanded, *out;
-   int depth;
-} _m3dstbi__png;
-
 
 enum {
    STBI__F_none=0,
@@ -754,32 +669,8 @@ enum {
    STBI__F_paeth_first
 };
 
-static unsigned char first_row_filter[5] =
-{
-   STBI__F_none,
-   STBI__F_sub,
-   STBI__F_none,
-   STBI__F_avg_first,
-   STBI__F_paeth_first
-};
-
-static int _m3dstbi__paeth(int a, int b, int c)
-{
-   int p = a + b - c;
-   int pa = abs(p-a);
-   int pb = abs(p-b);
-   int pc = abs(p-c);
-   if (pa <= pb && pa <= pc) return a;
-   if (pb <= pc) return b;
-   return c;
-}
-
-static unsigned char _m3dstbi__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
-
 #define STBI__PNG_TYPE(a,b,c,d)  (((unsigned) (a) << 24) + ((unsigned) (b) << 16) + ((unsigned) (c) << 8) + (unsigned) (d))
 
-#define stbi__result_info _m3dstbi__result_info
-#define stbi__context _m3dstbi__context
 #endif
 #else
 #endif /* M3D_NOTEXTURE */

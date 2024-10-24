@@ -220,18 +220,56 @@ void USDImporterImplTinyusdz::InternReadFile(
         const auto &animation = render_scene.animations[animationIndex];
 
         auto newAiAnimation = new aiAnimation();
+        pScene->mAnimations[animationIndex] = newAiAnimation;
+
         newAiAnimation->mName = animation.abs_path;
         // newAiAnimation->mChannels;
         // newAiAnimation->mNumChannels
-        newAiAnimation->mDuration = animation.
+        // newAiAnimation->mDuration 
         // newAiAnimation->mMeshChannels
         // newAiAnimation->mNumMeshChannels
         // newAiAnimation->mTicksPerSecond
         // newAiAnimation->mMorphMeshChannels
         //newAiAnimation->mNumMorphMeshChannels
 
+        // each channel affects a node (joint)
+        newAiAnimation->mNumChannels = animation.channels_map.size();
+        newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
+        int channelIndex = 0;
+        for (const auto& [jointName, animationChannelMap] : animation.channels_map) {
+            auto newAiNodeAnim = new aiNodeAnim();
+            newAiNodeAnim->mNodeName = jointName;
 
-        pScene->mAnimations[animationIndex] = newAiAnimation;
+            std::vector<aiQuatKey *> rotationKeys;
+            newAiNodeAnim->mPositionKeys;
+            newAiNodeAnim->mRotationKeys;
+            newAiNodeAnim->mScalingKeys;
+            newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+
+            for (const auto& [channelType, animChannel] : animationChannelMap) {
+                switch (channelType) {
+                case tinyusdz::tydra::AnimationChannel::ChannelType::Rotation:
+                    const tinyusdz::tydra::AnimationSampler<tinyusdz::tydra::quat> &rotations = animChannel.rotations;
+                    if (rotations.static_value.has_value()) {
+                        rotationKeys.push_back(new aiQuatKey(0, rotations.static_value.value()))
+                    }
+                    break;
+                case tinyusdz::tydra::AnimationChannel::ChannelType::Scale:
+                    break;
+                case tinyusdz::tydra::AnimationChannel::ChannelType::Transform:
+                    break;
+                case tinyusdz::tydra::AnimationChannel::ChannelType::Translation:
+                    break;
+                case tinyusdz::tydra::AnimationChannel::ChannelType::Weight:
+                    break;
+                default:
+                    TINYUSDZLOGW(TAG, "Unknown animation channel type %i. Please update the USD importer to support this type of animation.", channelType);
+                }
+            }
+
+            ++channelIndex;
+        }
+
     }
 
 //    sanityCheckNodesRecursive(pScene->mRootNode);

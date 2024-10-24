@@ -55,6 +55,7 @@ std::string tinyusdzAnimChannelTypeFor(
         tinyusdz::tydra::AnimationChannel::ChannelType animChannel);
 std::string tinyusdzNodeTypeFor(tinyusdz::tydra::NodeType type);
 aiMatrix4x4 tinyUsdzMat4ToAiMat4(const double matIn[4][4]);
+aiMatrix4x4 tinyUsdzMat4ToAiMat4(const float matIn[4][4]);
 
 aiVector3D tinyUsdzScaleOrPosToAssimp(const std::array<float, 3> &scaleOrPosIn);
 

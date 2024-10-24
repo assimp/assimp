@@ -230,7 +230,7 @@ void USDImporterImplTinyusdz::InternReadFile(
         // newAiAnimation->mNumMeshChannels
         // newAiAnimation->mTicksPerSecond
         // newAiAnimation->mMorphMeshChannels
-        //newAiAnimation->mNumMorphMeshChannels
+        // newAiAnimation->mNumMorphMeshChannels
 
         // each channel affects a node (joint)
         newAiAnimation->mNumChannels = animation.channels_map.size();
@@ -238,34 +238,93 @@ void USDImporterImplTinyusdz::InternReadFile(
         int channelIndex = 0;
         for (const auto& [jointName, animationChannelMap] : animation.channels_map) {
             auto newAiNodeAnim = new aiNodeAnim();
+            newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
             newAiNodeAnim->mNodeName = jointName;
 
-            std::vector<aiQuatKey *> rotationKeys;
-            newAiNodeAnim->mPositionKeys;
-            newAiNodeAnim->mRotationKeys;
-            newAiNodeAnim->mScalingKeys;
-            newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+            std::vector<aiVectorKey> positionKeys;
+            std::vector<aiQuatKey> rotationKeys;
+            std::vector<aiVectorKey> scalingKeys;
 
             for (const auto& [channelType, animChannel] : animationChannelMap) {
                 switch (channelType) {
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Rotation:
-                    const tinyusdz::tydra::AnimationSampler<tinyusdz::tydra::quat> &rotations = animChannel.rotations;
-                    if (rotations.static_value.has_value()) {
-                        rotationKeys.push_back(new aiQuatKey(0, rotations.static_value.value()))
+                    if (animChannel.rotations.static_value.has_value()) {
+                        rotationKeys.push_back(aiQuatKey(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value())));
+                    }
+                    for (const auto &rotationAnimSampler : animChannel.rotations.samples) {
+                        if (rotationAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = rotationAnimSampler.t;
+                        }
+
+                        rotationKeys.push_back(aiQuatKey(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value)));
                     }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Scale:
+                    if (animChannel.scales.static_value.has_value()) {
+                        scalingKeys.push_back(aiVectorKey(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value())));
+                    }
+                    for (const auto &scaleAnimSampler : animChannel.scales.samples) {
+                        if (scaleAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = scaleAnimSampler.t;
+                        }
+                        scalingKeys.push_back(aiVectorKey(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value)));
+                    }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Transform:
+                    if (animChannel.transforms.static_value.has_value()) {
+                        aiVector3D position;
+                        aiVector3D scale;
+                        aiQuaternion rotation;
+                        tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
+                        
+                        positionKeys.push_back(aiVectorKey(0, position));
+                        scalingKeys.push_back(aiVectorKey(0, scale));
+                        rotationKeys.push_back(aiQuatKey(0, rotation));
+                    }
+                    for (const auto &transformAnimSampler : animChannel.transforms.samples) {
+                        if (transformAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = transformAnimSampler.t;
+                        }
+
+                        aiVector3D position;
+                        aiVector3D scale;
+                        aiQuaternion rotation;
+                        tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
+
+                        positionKeys.push_back(aiVectorKey(transformAnimSampler.t, position));
+                        scalingKeys.push_back(aiVectorKey(transformAnimSampler.t, scale));
+                        rotationKeys.push_back(aiQuatKey(transformAnimSampler.t, rotation));
+                    }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Translation:
-                    break;
-                case tinyusdz::tydra::AnimationChannel::ChannelType::Weight:
+                    if (animChannel.translations.static_value.has_value()) {
+                        positionKeys.push_back(aiVectorKey(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value())));
+                    }
+                    for (const auto &translationAnimSampler : animChannel.translations.samples) {
+                        if (translationAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = translationAnimSampler.t;
+                        }
+
+                        positionKeys.push_back(aiVectorKey(translationAnimSampler.t, tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value)));
+                    }
                     break;
                 default:
-                    TINYUSDZLOGW(TAG, "Unknown animation channel type %i. Please update the USD importer to support this type of animation.", channelType);
+                    TINYUSDZLOGW(TAG, "Unsupported animation channel type %i. Please update the USD importer to support this type of animation.", channelType);
                 }
             }
+
+            newAiNodeAnim->mNumPositionKeys = positionKeys.size();
+            newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];
+            std::move(positionKeys.begin(), positionKeys.end(), newAiNodeAnim->mPositionKeys);
+
+            newAiNodeAnim->mNumRotationKeys = rotationKeys.size();
+            newAiNodeAnim->mRotationKeys = new aiQuatKey[newAiNodeAnim->mNumRotationKeys];
+            std::move(rotationKeys.begin(), rotationKeys.end(), newAiNodeAnim->mRotationKeys);
+
+            newAiNodeAnim->mNumScalingKeys = scalingKeys.size();
+            newAiNodeAnim->mNumScalingKeys = scalingKeys.size();
+            newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
+            std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);
 
             ++channelIndex;
         }

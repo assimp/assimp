@@ -70,14 +70,14 @@ typedef double M3D_FLOAT;
 #endif
 #if !defined(M3D_SMALLINDEX)
 typedef uint32_t M3D_INDEX;
-constexpr int M3D_UNDEF = 0xffffffff;
-constexpr int M3D_INDEXMAX = 0xfffffffe;
+#define M3D_UNDEF 0xffffffff
+#define M3D_INDEXMAX 0xfffffffe
 #else
 typedef uint16_t M3D_INDEX;
-constexpr int M3D_UNDEF = 0xffff;
-constexpr int M3D_INDEXMAX = 0xfffe;
+#define M3D_UNDEF 0xffff
+#define M3D_INDEXMAX 0xfffe
 #endif
-constexpr int M3D_NOTDEFINED = 0xffffffff;
+#define M3D_NOTDEFINED 0xffffffff
 #ifndef M3D_NUMBONE
 #define M3D_NUMBONE 4
 #endif
@@ -398,8 +398,8 @@ typedef struct {
 
 /* label entry */
 typedef struct {
-    char *name; /* name of the annotation layer or nullptr */
-    char *lang; /* language code or nullptr */
+    char *name; /* name of the annotation layer or NULL */
+    char *lang; /* language code or NULL */
     char *text; /* the label text */
     uint32_t color; /* color */
     M3D_INDEX vertexid; /* the vertex the label refers to */
@@ -622,19 +622,6 @@ static m3dcd_t m3d_commandtypes[] = {
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef M3D_NOTEXTURE
-#if !defined(M3D_NOIMPORTER) && !defined(STBI_INCLUDE_STB_IMAGE_H)
-/* PNG decompressor from
-
-   stb_image - v2.23 - public domain image loader - http://nothings.org/stb_image.h
-*/
-
-#define STBI__PNG_TYPE(a,b,c,d)  (((unsigned) (a) << 24) + ((unsigned) (b) << 16) + ((unsigned) (c) << 8) + (unsigned) (d))
-
-#endif
-#else
-#endif /* M3D_NOTEXTURE */
-
 #if defined(M3D_EXPORTER) && !defined(INCLUDE_STB_IMAGE_WRITE_H)
 /* zlib_compressor from
 
@@ -735,10 +722,10 @@ unsigned char *_m3dstbi_zlib_compress(unsigned char *data, int data_len, int *ou
     static unsigned char disteb[] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
     unsigned int bitbuf = 0;
     int i, j, bitcount = 0;
-    unsigned char *out = nullptr;
+    unsigned char *out = NULL;
     unsigned char ***hash_table = (unsigned char ***)STBIW_MALLOC(_m3dstbiw___ZHASH * sizeof(char **));
-    if (hash_table == nullptr)
-        return nullptr;
+    if (hash_table == NULL)
+        return NULL;
     if (quality < 5) quality = 5;
 
     _m3dstbiw___sbpush(out, 0x78);
@@ -747,7 +734,7 @@ unsigned char *_m3dstbi_zlib_compress(unsigned char *data, int data_len, int *ou
     _m3dstbiw___zlib_add(1, 2);
 
     for (i = 0; i < _m3dstbiw___ZHASH; ++i)
-        hash_table[i] = nullptr;
+        hash_table[i] = NULL;
 
     i = 0;
     while (i < data_len - 3) {
@@ -775,7 +762,7 @@ unsigned char *_m3dstbi_zlib_compress(unsigned char *data, int data_len, int *ou
                 if (hlist[j] - data > i - 32767) {
                     int e = _m3dstbiw___zlib_countm(hlist[j], data + i + 1, data_len - i - 1);
                     if (e > best) {
-                        bestloc = nullptr;
+                        bestloc = NULL;
                         break;
                     }
                 }
@@ -889,7 +876,7 @@ static char *_m3d_getfloat(char *s, M3D_FLOAT *ret) {
     if (!s || !*s || *s == '\r' || *s == '\n') return s;
     for (; *e == '-' || *e == '+' || *e == '.' || (*e >= '0' && *e <= '9') || *e == 'e' || *e == 'E'; e++)
         ;
-    *ret = (M3D_FLOAT)strtod(s, nullptr);
+    *ret = (M3D_FLOAT)strtod(s, NULL);
     return _m3d_findarg(e);
 }
 #endif
@@ -900,13 +887,13 @@ char *_m3d_safestr(char *in, int morelines) {
     int l;
     if (!in || !*in) {
         out = (char *)M3D_MALLOC(1);
-        if (!out) return nullptr;
+        if (!out) return NULL;
         out[0] = 0;
     } else {
         for (o = in, l = 0; *o && ((morelines & 1) || (*o != '\r' && *o != '\n')) && l < 256; o++, l++)
             ;
         out = o = (char *)M3D_MALLOC(l + 1);
-        if (!out) return nullptr;
+        if (!out) return NULL;
         while (*i == ' ' || *i == '\t' || *i == '\r' || (morelines && *i == '\n'))
             i++;
         for (; *i && (morelines || (*i != '\r' && *i != '\n')) && o - out < l; i++) {
@@ -936,7 +923,7 @@ char *_m3d_safestr(char *in, int morelines) {
 /* helper function to load and decode/generate a texture */
 M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char *fn) {
     unsigned int i, len = 0;
-    unsigned char *buff = nullptr;
+    unsigned char *buff = NULL;
     char *fn2;
 #ifdef STBI__PNG_TYPE
     unsigned int w, h;
@@ -953,7 +940,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
             if (!strcmp(fn, model->inlined[i].name)) {
                 buff = model->inlined[i].data;
                 len = model->inlined[i].length;
-                freecb = nullptr;
+                freecb = NULL;
                 break;
             }
     }
@@ -986,7 +973,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     }
     model->texture[i].name = fn;
     model->texture[i].w = model->texture[i].h = 0;
-    model->texture[i].d = nullptr;
+    model->texture[i].d = NULL;
     if (buff) {
         if (buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
 #ifdef STBI__PNG_TYPE
@@ -1023,14 +1010,14 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
 void _m3d_getpr(m3d_t *model, _unused m3dread_t readfilecb, _unused m3dfree_t freecb, _unused char *fn) {
 #ifdef M3D_PR_INTERP
     unsigned int i, len = 0;
-    unsigned char *buff = readfilecb ? (*readfilecb)(fn, &len) : nullptr;
+    unsigned char *buff = readfilecb ? (*readfilecb)(fn, &len) : NULL;
 
     if (!buff && model->inlined) {
         for (i = 0; i < model->numinlined; i++)
             if (!strcmp(fn, model->inlined[i].name)) {
                 buff = model->inlined[i].data;
                 len = model->inlined[i].length;
-                freecb = nullptr;
+                freecb = NULL;
                 break;
             }
     }
@@ -1054,7 +1041,7 @@ void _m3d_getpr(m3d_t *model, _unused m3dread_t readfilecb, _unused m3dfree_t fr
     do {                                                    \
         offs = 0;                                           \
         data = _m3d_getidx(data, model->si_s, &offs);       \
-        x = offs ? ((char *)model->raw + 16 + offs) : nullptr; \
+        x = offs ? ((char *)model->raw + 16 + offs) : NULL; \
     } while (0)
 _inline static unsigned char *_m3d_getidx(unsigned char *data, char type, M3D_INDEX *idx) {
     switch (type) {
@@ -1190,7 +1177,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
     m3di_t *t;
 #ifndef M3D_NONORMALS
     char neednorm = 0;
-    m3dv_t *norm = nullptr, *v0, *v1, *v2, va, vb;
+    m3dv_t *norm = NULL, *v0, *v1, *v2, va, vb;
 #endif
 #ifndef M3D_NOANIMATION
     M3D_FLOAT r[16];
@@ -1207,17 +1194,17 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
     char *ptr, *pe, *fn;
 #ifdef M3D_PROFILING
     struct timeval tv0, tv1, tvd;
-    gettimeofday(&tv0, nullptr);
+    gettimeofday(&tv0, NULL);
 #endif
 
     if (!data || (!M3D_CHUNKMAGIC(data, '3', 'D', 'M', 'O')
                          && !M3D_CHUNKMAGIC(data, '3', 'd', 'm', 'o')
                                  ))
-        return nullptr;
+        return NULL;
     model = (m3d_t *)M3D_MALLOC(sizeof(m3d_t));
     if (!model) {
         M3D_LOG("Out of memory");
-        return nullptr;
+        return NULL;
     }
     memset(model, 0, sizeof(m3d_t));
 
@@ -1234,13 +1221,13 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         model->flags |= M3D_FLG_FREESTR;
         model->raw = (m3dhdr_t *)data;
         ptr = (char *)data;
-        ol = setlocale(LC_NUMERIC, nullptr);
+        ol = setlocale(LC_NUMERIC, NULL);
         setlocale(LC_NUMERIC, "C");
         /* parse header. Don't use sscanf, that's incredibly slow */
         ptr = _m3d_findarg(ptr);
         if (!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
         pe = _m3d_findnl(ptr);
-        model->scale = (float)strtod(ptr, nullptr);
+        model->scale = (float)strtod(ptr, NULL);
         ptr = pe;
         if (model->scale <= (M3D_FLOAT)0.0) model->scale = (M3D_FLOAT)1.0;
         model->name = _m3d_safestr(ptr, 2);
@@ -1377,7 +1364,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                     if (level > M3D_BONEMAXLEVEL || !*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
                     bi[level + 1] = i;
                     model->bone[i].numweight = 0;
-                    model->bone[i].weight = nullptr;
+                    model->bone[i].weight = NULL;
                     model->bone[i].parent = bi[level];
                     ptr = _m3d_getint(ptr, &k);
                     ptr = _m3d_findarg(ptr);
@@ -1405,7 +1392,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                         M3D_LOG("Multiple definitions for material");
                         M3D_LOG(pe);
                         M3D_FREE(pe);
-                        pe = nullptr;
+                        pe = NULL;
                         while (*ptr && *ptr != '\r' && *ptr != '\n')
                             ptr = _m3d_findnl(ptr);
                         break;
@@ -1431,7 +1418,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 m = &model->material[i];
                 m->name = pe;
                 m->numprop = 0;
-                m->prop = nullptr;
+                m->prop = NULL;
                 while (*ptr && *ptr != '\r' && *ptr != '\n') {
                     k = n = 256;
                     if (*ptr == 'm' && *(ptr + 1) == 'a' && *(ptr + 2) == 'p' && *(ptr + 3) == '_') {
@@ -1513,7 +1500,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                                 if (!model->material) goto memerr;
                                 model->material[mi].name = pe;
                                 model->material[mi].numprop = 1;
-                                model->material[mi].prop = nullptr;
+                                model->material[mi].prop = NULL;
                             } else
                                 M3D_FREE(pe);
                         }
@@ -1567,7 +1554,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 h->name = pe;
                 h->group = M3D_UNDEF;
                 h->numcmd = 0;
-                h->cmd = nullptr;
+                h->cmd = NULL;
                 while (*ptr && *ptr != '\r' && *ptr != '\n') {
                     if (!memcmp(ptr, "group", 5)) {
                         ptr = _m3d_findarg(ptr);
@@ -1581,7 +1568,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                         }
                         continue;
                     }
-                    for (cd = nullptr, k = 0; k < (unsigned int)(sizeof(m3d_commandtypes) / sizeof(m3d_commandtypes[0])); k++) {
+                    for (cd = NULL, k = 0; k < (unsigned int)(sizeof(m3d_commandtypes) / sizeof(m3d_commandtypes[0])); k++) {
                         j = (unsigned int)strlen(m3d_commandtypes[k].key);
                         if (!memcmp(ptr, m3d_commandtypes[k].key, j) && (ptr[j] == ' ' || ptr[j] == '\r' || ptr[j] == '\n')) {
                             cd = &m3d_commandtypes[k];
@@ -1622,7 +1609,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                                         if (!model->material) goto memerr;
                                         model->material[mi].name = pe;
                                         model->material[mi].numprop = 1;
-                                        model->material[mi].prop = nullptr;
+                                        model->material[mi].prop = NULL;
                                     } else
                                         M3D_FREE(pe);
                                 }
@@ -1663,11 +1650,11 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 pe = _m3d_findarg(pe);
                 if (!*pe) goto asciiend;
                 if (*pe == '\r' || *pe == '\n')
-                    pe = nullptr;
+                    pe = NULL;
                 else
                     pe = _m3d_safestr(pe, 0);
                 k = 0;
-                fn = nullptr;
+                fn = NULL;
                 while (*ptr && *ptr != '\r' && *ptr != '\n') {
                     if (*ptr == 'c') {
                         ptr = _m3d_findarg(ptr);
@@ -1714,7 +1701,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 if (!a->frame) goto memerr;
                 a->frame[0].msec = 0;
                 a->frame[0].numtransform = 0;
-                a->frame[0].transform = nullptr;
+                a->frame[0].transform = NULL;
                 i = 0;
                 if (*ptr == 'f')
                     ptr = _m3d_findnl(ptr);
@@ -1726,7 +1713,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                         ptr = _m3d_findarg(ptr);
                         ptr = _m3d_getint(ptr, &a->frame[i].msec);
                         a->frame[i].numtransform = 0;
-                        a->frame[i].transform = nullptr;
+                        a->frame[i].transform = NULL;
                     } else {
                         j = a->frame[i].numtransform++;
                         a->frame[i].transform = (m3dtr_t *)M3D_REALLOC(a->frame[i].transform,
@@ -1811,13 +1798,13 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         if (!buff || !len || !M3D_CHUNKMAGIC(buff, 'H', 'E', 'A', 'D')) {
             if (buff) M3D_FREE(buff);
             M3D_FREE(model);
-            return nullptr;
+            return NULL;
         }
         buff = (unsigned char *)M3D_REALLOC(buff, len);
         model->flags |= M3D_FLG_FREERAW; /* mark that we have to free the raw buffer */
         data = buff;
 #ifdef M3D_PROFILING
-        gettimeofday(&tv1, nullptr);
+        gettimeofday(&tv1, NULL);
         tvd.tv_sec = tv1.tv_sec - tv0.tv_sec;
         tvd.tv_usec = tv1.tv_usec - tv0.tv_usec;
         if (tvd.tv_usec < 0) {
@@ -1881,12 +1868,12 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                                           model->bi_s > 2 || model->sk_s > 2 || model->fc_s > 2 || model->hi_s > 2 || model->fi_s > 2)) {
         M3D_LOG("32 bit indices not supported, unable to load model");
         M3D_FREE(model);
-        return nullptr;
+        return NULL;
     }
     if (model->vi_s > 4 || model->si_s > 4) {
         M3D_LOG("Invalid index size, unable to load model");
         M3D_FREE(model);
-        return nullptr;
+        return NULL;
     }
     if (model->nb_s > M3D_NUMBONE) {
         M3D_LOG("Model has more bones per vertex than what importer was configured to support");
@@ -2094,7 +2081,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 data = _m3d_getidx(data, model->vi_s, &model->bone[i].pos);
                 data = _m3d_getidx(data, model->vi_s, &model->bone[i].ori);
                 model->bone[i].numweight = 0;
-                model->bone[i].weight = nullptr;
+                model->bone[i].weight = NULL;
             }
             /* read skin definitions */
             if (model->numskin) {
@@ -2143,7 +2130,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                     model->errcode = M3D_ERR_MTRL;
                     M3D_LOG("Multiple definitions for material");
                     M3D_LOG(name);
-                    name = nullptr;
+                    name = NULL;
                     break;
                 }
             if (name) {
@@ -2308,7 +2295,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
             if (!model->shape) goto memerr;
             h = &model->shape[i];
             h->numcmd = 0;
-            h->cmd = nullptr;
+            h->cmd = NULL;
             h->name = name;
             h->group = M3D_UNDEF;
             data = _m3d_getidx(data, model->bi_s, &h->group);
@@ -2447,7 +2434,7 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                     a->frame[i].msec = *((uint32_t *)data);
                     data += 4;
                     a->frame[i].numtransform = 0;
-                    a->frame[i].transform = nullptr;
+                    a->frame[i].transform = NULL;
                     data = _m3d_getidx(data, model->fc_s, &a->frame[i].numtransform);
                     if (a->frame[i].numtransform > 0) {
                         a->frame[i].transform = (m3dtr_t *)M3D_MALLOC(a->frame[i].numtransform * sizeof(m3dtr_t));
@@ -2471,7 +2458,7 @@ postprocess:
     if (model) {
         M3D_LOG("Post-process");
 #ifdef M3D_PROFILING
-        gettimeofday(&tv1, nullptr);
+        gettimeofday(&tv1, NULL);
         tvd.tv_sec = tv1.tv_sec - tv0.tv_sec;
         tvd.tv_usec = tv1.tv_usec - tv0.tv_usec;
         if (tvd.tv_usec < 0) {
@@ -2570,7 +2557,7 @@ postprocess:
 #endif
         }
 #ifdef M3D_PROFILING
-        gettimeofday(&tv0, nullptr);
+        gettimeofday(&tv0, NULL);
         tvd.tv_sec = tv0.tv_sec - tv1.tv_sec;
         tvd.tv_usec = tv0.tv_usec - tv1.tv_usec;
         if (tvd.tv_usec < 0) {
@@ -2600,7 +2587,7 @@ m3dtr_t *m3d_frame(m3d_t *model, M3D_INDEX actionid, M3D_INDEX frameid, m3dtr_t 
         skeleton = (m3dtr_t *)M3D_MALLOC(model->numbone * sizeof(m3dtr_t));
         if (!skeleton) {
             model->errcode = M3D_ERR_ALLOC;
-            return nullptr;
+            return NULL;
         }
         goto gen;
     }
@@ -2639,12 +2626,12 @@ m3db_t *m3d_pose(m3d_t *model, M3D_INDEX actionid, uint32_t msec) {
 
     if (!model || !model->numbone || !model->bone) {
         model->errcode = M3D_ERR_UNKFRAME;
-        return nullptr;
+        return NULL;
     }
     ret = (m3db_t *)M3D_MALLOC(model->numbone * sizeof(m3db_t));
     if (!ret) {
         model->errcode = M3D_ERR_ALLOC;
-        return nullptr;
+        return NULL;
     }
     memcpy(ret, model->bone, model->numbone * sizeof(m3db_t));
     for (i = 0; i < model->numbone; i++)
@@ -2669,7 +2656,7 @@ m3db_t *m3d_pose(m3d_t *model, M3D_INDEX actionid, uint32_t msec) {
         if (!model->vertex) {
             free(ret);
             model->errcode = M3D_ERR_ALLOC;
-            return nullptr;
+            return NULL;
         }
         tmp = (m3dtr_t *)M3D_MALLOC(model->numbone * sizeof(m3dtr_t));
         if (tmp) {
@@ -2798,13 +2785,13 @@ void m3d_free(m3d_t *model) {
                 if (model->label[i].name) {
                     for (j = i + 1; j < model->numlabel; j++)
                         if (model->label[j].name == model->label[i].name)
-                            model->label[j].name = nullptr;
+                            model->label[j].name = NULL;
                     M3D_FREE(model->label[i].name);
                 }
                 if (model->label[i].lang) {
                     for (j = i + 1; j < model->numlabel; j++)
                         if (model->label[j].lang == model->label[i].lang)
-                            model->label[j].lang = nullptr;
+                            model->label[j].lang = NULL;
                     M3D_FREE(model->label[i].lang);
                 }
                 if (model->label[i].text)
@@ -2916,7 +2903,7 @@ m3dhdr_t *_m3d_addhdr(m3dhdr_t *h, m3dstr_t *s) {
     h = (m3dhdr_t *)M3D_REALLOC(h, h->length + i + 1);
     if (!h) {
         M3D_FREE(safe);
-        return nullptr;
+        return NULL;
     }
     memcpy((uint8_t *)h + h->length, safe, i + 1);
     s->offs = h->length - 16;
@@ -2974,9 +2961,9 @@ static int _m3d_vrtxcmp(const void *a, const void *b) {
 }
 /* compare labels */
 static _inline int _m3d_strcmp(char *a, char *b) {
-    if (a == nullptr && b != nullptr) return -1;
-    if (a != nullptr && b == nullptr) return 1;
-    if (a == nullptr && b == nullptr) return 0;
+    if (a == NULL && b != NULL) return -1;
+    if (a != NULL && b == NULL) return 1;
+    if (a == NULL && b == NULL) return 0;
     return strcmp(a, b);
 }
 static int _m3d_lblcmp(const void *a, const void *b) {
@@ -3106,28 +3093,28 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     const char *ol;
     char *ptr;
     char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s;
-    char *sn = nullptr, *sl = nullptr, *sa = nullptr, *sd = nullptr;
-    unsigned char *out = nullptr, *z = nullptr, weights[M3D_NUMBONE], *norm = nullptr;
-    unsigned int i = 0, j = 0, k = 0, l = 0, n = 0, len = 0, chunklen = 0, *length = nullptr;
+    char *sn = NULL, *sl = NULL, *sa = NULL, *sd = NULL;
+    unsigned char *out = NULL, *z = NULL, weights[M3D_NUMBONE], *norm = NULL;
+    unsigned int i = 0, j = 0, k = 0, l = 0, n = 0, len = 0, chunklen = 0, *length = NULL;
     M3D_FLOAT scale = (M3D_FLOAT)0.0, min_x, max_x, min_y, max_y, min_z, max_z;
-    M3D_INDEX last, *vrtxidx = nullptr, *mtrlidx = nullptr, *tmapidx = nullptr, *skinidx = nullptr;
-    uint32_t idx, numcmap = 0, *cmap = nullptr, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
-    uint32_t numskin = 0, maxskin = 0, numstr = 0, maxt = 0, maxbone = 0, numgrp = 0, maxgrp = 0, *grpidx = nullptr;
+    M3D_INDEX last, *vrtxidx = NULL, *mtrlidx = NULL, *tmapidx = NULL, *skinidx = NULL;
+    uint32_t idx, numcmap = 0, *cmap = NULL, numvrtx = 0, maxvrtx = 0, numtmap = 0, maxtmap = 0, numproc = 0;
+    uint32_t numskin = 0, maxskin = 0, numstr = 0, maxt = 0, maxbone = 0, numgrp = 0, maxgrp = 0, *grpidx = NULL;
     uint8_t *opa = nullptr;
     m3dcd_t *cd;
     m3dc_t *cmd;
-    m3dstr_t *str = nullptr;
-    m3dvsave_t *vrtx = nullptr, vertex;
-    m3dtisave_t *tmap = nullptr, tcoord;
-    m3dssave_t *skin = nullptr, sk;
-    m3dfsave_t *face = nullptr;
-    m3dhdr_t *h = nullptr;
+    m3dstr_t *str = NULL;
+    m3dvsave_t *vrtx = NULL, vertex;
+    m3dtisave_t *tmap = NULL, tcoord;
+    m3dssave_t *skin = NULL, sk;
+    m3dfsave_t *face = NULL;
+    m3dhdr_t *h = NULL;
     m3dm_t *m;
     m3da_t *a;
 
     if (!model) {
         if (size) *size = 0;
-        return nullptr;
+        return NULL;
     }
     model->errcode = M3D_SUCCESS;
     if (flags & M3D_EXP_ASCII) quality = M3D_EXP_DOUBLE;
@@ -3277,7 +3264,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         }
         if (grpidx) {
             M3D_FREE(grpidx);
-            grpidx = nullptr;
+            grpidx = NULL;
         }
         if (model->numlabel && model->label) {
             M3D_LOG("Processing annotation labels");
@@ -3494,11 +3481,11 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
     }
     if (skinidx) {
         M3D_FREE(skinidx);
-        skinidx = nullptr;
+        skinidx = NULL;
     }
     if (norm) {
         M3D_FREE(norm);
-        norm = nullptr;
+        norm = NULL;
     }
 
     /* normalize to bounding cube */
@@ -3555,7 +3542,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         if (h) M3D_FREE(h);
         M3D_LOG("Out of memory");
         model->errcode = M3D_ERR_ALLOC;
-        return nullptr;
+        return NULL;
     }
 
     M3D_LOG("Serializing model");
@@ -3563,7 +3550,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         /* use CRLF to make model creators on Win happy... */
         sd = _m3d_safestr(model->desc, 1);
         if (!sd) goto memerr;
-        ol = setlocale(LC_NUMERIC, nullptr);
+        ol = setlocale(LC_NUMERIC, NULL);
         setlocale(LC_NUMERIC, "C");
         /* header */
         len = 64 + (unsigned int)(strlen(sn) + strlen(sl) + strlen(sa) + strlen(sd));
@@ -3578,7 +3565,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         M3D_FREE(sl);
         M3D_FREE(sa);
         M3D_FREE(sd);
-        sl = sa = sd = nullptr;
+        sl = sa = sd = NULL;
         /* preview chunk */
         if (model->preview.data && model->preview.length) {
             sl = _m3d_safestr(sn, 0);
@@ -3593,11 +3580,11 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 ptr += sprintf(ptr, "Preview\r\n%s.png\r\n\r\n", sl);
                 M3D_FREE(sl);
-                sl = nullptr;
+                sl = NULL;
             }
         }
         M3D_FREE(sn);
-        sn = nullptr;
+        sn = NULL;
         /* texture map */
         if (numtmap && tmap && !(flags & M3D_EXP_NOTXTCRD) && !(flags & M3D_EXP_NOFACE)) {
             ptr -= (uintptr_t)out;
@@ -3692,7 +3679,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 ptr += sprintf(ptr, "Material %s\r\n", sn);
                 M3D_FREE(sn);
-                sn = nullptr;
+                sn = NULL;
                 for (i = 0; i < m->numprop; i++) {
                     k = 256;
                     if (m->prop[i].type >= 128) {
@@ -3734,11 +3721,11 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                                 ptr += sprintf(ptr, "map_%s %s\r\n", sn, sl);
                             M3D_FREE(sn);
                             M3D_FREE(sl);
-                            sl = nullptr;
+                            sl = NULL;
                         }
                         break;
                     }
-                    sn = nullptr;
+                    sn = NULL;
                 }
                 ptr += sprintf(ptr, "\r\n");
             }
@@ -3772,7 +3759,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 ptr += sprintf(ptr, "Procedural\r\n%s\r\n\r\n", sn);
                 M3D_FREE(sn);
-                sn = nullptr;
+                sn = NULL;
             }
         }
         /* mesh face */
@@ -3810,7 +3797,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                         }
                         ptr += sprintf(ptr, "use %s\r\n", sn);
                         M3D_FREE(sn);
-                        sn = nullptr;
+                        sn = NULL;
                     } else
                         ptr += sprintf(ptr, "use\r\n");
                 }
@@ -3848,7 +3835,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 ptr += sprintf(ptr, "Shape %s\r\n", sn);
                 M3D_FREE(sn);
-                sn = nullptr;
+                sn = NULL;
                 if (model->shape[j].group != M3D_UNDEF && !(flags & M3D_EXP_NOBONE))
                     ptr += sprintf(ptr, "group %d\r\n", model->shape[j].group);
                 for (i = 0; i < model->shape[j].numcmd; i++) {
@@ -3889,7 +3876,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                                 }
                                 ptr += sprintf(ptr, " %s", sn);
                                 M3D_FREE(sn);
-                                sn = nullptr;
+                                sn = NULL;
                             }
                             break;
                         case m3dcp_vc_t: ptr += sprintf(ptr, " %g", *((float *)&cmd->arg[k])); break;
@@ -3908,7 +3895,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         }
         /* annotation labels */
         if (model->numlabel && model->label && !(flags & M3D_EXP_NOFACE)) {
-            for (i = 0, j = 3, length = nullptr; i < model->numlabel; i++) {
+            for (i = 0, j = 3, length = NULL; i < model->numlabel; i++) {
                 if (model->label[i].name) j += (unsigned int)strlen(model->label[i].name);
                 if (model->label[i].lang) j += (unsigned int)strlen(model->label[i].lang);
                 if (model->label[i].text) j += (unsigned int)strlen(model->label[i].text);
@@ -3929,39 +3916,39 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     sd = _m3d_safestr(sn, 0);
                     if (!sd) {
                         setlocale(LC_NUMERIC, ol);
-                        sn = sl = nullptr;
+                        sn = sl = NULL;
                         goto memerr;
                     }
                     if (i) ptr += sprintf(ptr, "\r\n");
                     ptr += sprintf(ptr, "Labels %s\r\n", sd);
                     M3D_FREE(sd);
-                    sd = nullptr;
+                    sd = NULL;
                     if (model->label[i].color)
                         ptr += sprintf(ptr, "color #0x%08x\r\n", model->label[i].color);
                     if (sl && *sl) {
                         sd = _m3d_safestr(sl, 0);
                         if (!sd) {
                             setlocale(LC_NUMERIC, ol);
-                            sn = sl = nullptr;
+                            sn = sl = NULL;
                             goto memerr;
                         }
                         ptr += sprintf(ptr, "lang %s\r\n", sd);
                         M3D_FREE(sd);
-                        sd = nullptr;
+                        sd = NULL;
                     }
                 }
                 sd = _m3d_safestr(model->label[i].text, 2);
                 if (!sd) {
                     setlocale(LC_NUMERIC, ol);
-                    sn = sl = nullptr;
+                    sn = sl = NULL;
                     goto memerr;
                 }
                 ptr += sprintf(ptr, "%d %s\r\n", model->label[i].vertexid, sd);
                 M3D_FREE(sd);
-                sd = nullptr;
+                sd = NULL;
             }
             ptr += sprintf(ptr, "\r\n");
-            sn = sl = nullptr;
+            sn = sl = NULL;
         }
         /* actions */
         if (model->numaction && model->action && !(flags & M3D_EXP_NOACTION)) {
@@ -3984,7 +3971,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 ptr += sprintf(ptr, "Action %d %s\r\n", a->durationmsec, sn);
                 M3D_FREE(sn);
-                sn = nullptr;
+                sn = NULL;
                 for (i = 0; i < a->numframe; i++) {
                     ptr += sprintf(ptr, "frame %d\r\n", a->frame[i].msec);
                     for (k = 0; k < a->frame[i].numtransform; k++) {
@@ -4071,7 +4058,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
         memcpy((uint8_t *)h + h->length, sd, i + 1);
         h->length += i + 1;
         M3D_FREE(sd);
-        sn = sl = sa = sd = nullptr;
+        sn = sl = sa = sd = NULL;
         if (model->inlined)
             for (i = 0; i < model->numinlined; i++) {
                 if (model->inlined[i].name && *model->inlined[i].name && model->inlined[i].length > 0) {
@@ -4166,7 +4153,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
             }
             *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            out = nullptr;
+            out = NULL;
             len += *length;
         }
         /* vertex */
@@ -4236,7 +4223,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
             memcpy(length, &v, sizeof(uint32_t));
             //*length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            out = nullptr;
+            out = NULL;
             len += v;
         }
         /* bones chunk */
@@ -4288,7 +4275,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
             }
             *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
-            out = nullptr;
+            out = NULL;
             len += *length;
         }
         /* materials */
@@ -4357,7 +4344,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 }
                 *length = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
                 len += *length;
-                out = nullptr;
+                out = NULL;
             }
         }
         /* procedural face */
@@ -4382,7 +4369,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 *((uint32_t *)((uint8_t *)h + len + 4)) = chunklen;
                 out = (uint8_t *)h + len + 8;
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->inlined[j].name));
-                out = nullptr;
+                out = NULL;
                 len += chunklen;
             }
         }
@@ -4424,7 +4411,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
             uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
             memcpy(length, &v, sizeof(uint32_t));
             len += v;
-            out = nullptr;
+            out = NULL;
         }
         /* mathematical shapes face */
         if (model->numshape && model->shape && !(flags & M3D_EXP_NOFACE)) {
@@ -4486,12 +4473,12 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
                 memcpy( length, &v, sizeof(uint32_t));
                 len += v;
-                out = nullptr;
+                out = NULL;
             }
         }
         /* annotation labels */
         if (model->numlabel && model->label) {
-            for (i = 0, length = nullptr; i < model->numlabel; i++) {
+            for (i = 0, length = NULL; i < model->numlabel; i++) {
                 if (!i || _m3d_strcmp(sl, model->label[i].lang) || _m3d_strcmp(sn, model->label[i].name)) {
                     sl = model->label[i].lang;
                     sn = model->label[i].name;
@@ -4502,8 +4489,8 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                     chunklen = 8 + 2 * si_s + ci_s + model->numlabel * (vi_s + si_s);
                     h = (m3dhdr_t *)M3D_REALLOC(h, len + chunklen);
                     if (!h) {
-                        sn = nullptr;
-                        sl = nullptr;
+                        sn = NULL;
+                        sl = NULL;
                         goto memerr;
                     }
                     memcpy((uint8_t *)h + len, "LBLS", 4);
@@ -4532,8 +4519,8 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 memcpy( length, &v, sizeof(uint32_t));
                 len += v;
             }
-            out = nullptr;
-            sn = sl = nullptr;
+            out = NULL;
+            sn = sl = NULL;
         }
         /* actions */
         if (model->numaction && model->action && model->numbone && model->bone && !(flags & M3D_EXP_NOACTION)) {
@@ -4563,7 +4550,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 uint32_t v = (uint32_t)((uintptr_t)out - (uintptr_t)((uint8_t *)h + len));
                 memcpy( length, &v, sizeof(uint32_t));
                 len += v;
-                out = nullptr;
+                out = NULL;
             }
         }
         /* inlined assets */
@@ -4590,7 +4577,7 @@ unsigned char *m3d_save(m3d_t *model, int quality, int flags, unsigned int *size
                 out = (uint8_t *)h + len + 8;
                 out = _m3d_addidx(out, si_s, _m3d_stridx(str, numstr, model->inlined[j].name));
                 memcpy(out, model->inlined[j].data, model->inlined[j].length);
-                out = nullptr;
+                out = NULL;
                 len += chunklen;
             }
         }

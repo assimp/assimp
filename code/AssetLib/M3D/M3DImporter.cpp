@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
+
 // TODO: make sure there's no stb_image conflicts with other assimp sub-projects
 // Must define STB_IMAGE_IMPLEMENTATION in only a single source file
 #define STB_IMAGE_IMPLEMENTATION
@@ -98,11 +99,7 @@ static constexpr aiImporterDesc desc = {
     0,
     0,
     0,
-#ifdef M3D_ASCII
     "m3d a3d"
-#else
-    "m3d"
-#endif
 };
 
 namespace Assimp {
@@ -118,38 +115,19 @@ M3DImporter::M3DImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is a binary or ASCII Model 3D file.
-bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const {
-	const std::string extension = GetExtension(pFile);
-
-	if (extension == "m3d"
+bool M3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    // don't use CheckMagicToken because that checks with swapped bytes too, leading to false
+    // positives. This magic is not uint32_t, but char[4], so memcmp is the best way
+    std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
+    unsigned char data[4];
+    if (4 != pStream->Read(data, 1, 4)) {
+        return false;
+    }
+    return !memcmp(data, "3DMO", 4) /* bin */
 #ifdef M3D_ASCII
-		|| extension == "a3d"
+        || !memcmp(data, "3dmo", 4) /* ASCII */
 #endif
-		)
-		return true;
-	else if (!extension.length() || checkSig) {
-		if (!pIOHandler) {
-			return true;
-		}
-		/*
-         * don't use CheckMagicToken because that checks with swapped bytes too, leading to false
-         * positives. This magic is not uint32_t, but char[4], so memcmp is the best way
-
-        const char* tokens[] = {"3DMO", "3dmo"};
-        return CheckMagicToken(pIOHandler,pFile,tokens,2,0,4);
-        */
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile, "rb"));
-        unsigned char data[4];
-        if (4 != pStream->Read(data, 1, 4)) {
-            return false;
-        }
-        return !memcmp(data, "3DMO", 4) /* bin */
-#ifdef M3D_ASCII
-			|| !memcmp(data, "3dmo", 4) /* ASCII */
-#endif
-		;
-	}
-	return false;
+            ;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -179,12 +157,10 @@ void M3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     if (!memcmp(buffer.data(), "3DMO", 4) && memcmp(buffer.data() + 4, &fileSize, 4)) {
         throw DeadlyImportError("Bad binary header in file ", file, ".");
     }
-#ifdef M3D_ASCII
     // make sure there's a terminator zero character, as input must be ASCIIZ
     if (!memcmp(buffer.data(), "3dmo", 4)) {
         buffer.push_back(0);
     }
-#endif
 
     // Get the path for external assets
     std::string folderName("./");

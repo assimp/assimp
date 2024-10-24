@@ -240,6 +240,7 @@ void USDImporterImplTinyusdz::InternReadFile(
             auto newAiNodeAnim = new aiNodeAnim();
             newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
             newAiNodeAnim->mNodeName = jointName;
+            newAiAnimation->mDuration = 0;
 
             std::vector<aiVectorKey> positionKeys;
             std::vector<aiQuatKey> rotationKeys;
@@ -309,7 +310,7 @@ void USDImporterImplTinyusdz::InternReadFile(
                     }
                     break;
                 default:
-                    TINYUSDZLOGW(TAG, "Unsupported animation channel type %i. Please update the USD importer to support this type of animation.", channelType);
+                    TINYUSDZLOGW(TAG, "Unsupported animation channel type (%s). Please update the USD importer to support this animation channel.", tinyusdzAnimChannelTypeFor(channelType).c_str());
                 }
             }
 
@@ -403,7 +404,6 @@ void USDImporterImplTinyusdz::verticesForMesh(
             const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
 
             auto outputBone = new aiBone();
-
             outputBone->mName = aiString(skeletonNode->joint_name);
             outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
             aiBones.push_back(outputBone);

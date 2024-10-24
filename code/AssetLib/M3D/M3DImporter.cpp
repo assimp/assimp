@@ -59,8 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
 
-// TODO: make sure there's no stb_image conflicts with other assimp sub-projects
-// Must define STB_IMAGE_IMPLEMENTATION in only a single source file
+// TODO: Common/Assimp.cpp handles defining STB_IMAGE_IMPLEMENTATION in a single, project-wide
+//   source file, but for some reason the stb_image implementation isn't being picked up by M3D
+//   importer.  As a workaround hack, defining it here for demonstration purposes; need to
+//   investigate and fix the problem with finding stb_image implementation provided by Assimp.cpp
 #define STB_IMAGE_IMPLEMENTATION
 #include "M3DWrapper.h"
 

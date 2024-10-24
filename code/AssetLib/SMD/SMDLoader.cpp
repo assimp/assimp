@@ -455,11 +455,10 @@ void SMDImporter::CreateOutputNodes() {
         delete pcOldRoot;
 
         pScene->mRootNode->mParent = nullptr;
-    }
-    else
-    {
-        ::strcpy(pScene->mRootNode->mName.data, "<SMD_root>");
+    } else {
+        static constexpr char rootName[11] = "<SMD_root>";
         pScene->mRootNode->mName.length = 10;
+        ::strncpy(pScene->mRootNode->mName.data, rootName, pScene->mRootNode->mName.length);
     }
 }
 

@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,7 +73,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial *pMat,
         aiMaterialProperty *prop = pMat->mProperties[i];
 
         if (prop /* just for safety ... */
-                && 0 == strcmp(prop->mKey.data, pKey) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
+                && 0 == strncmp(prop->mKey.data, pKey, strlen(pKey)) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
                 && (UINT_MAX == index || prop->mIndex == index)) {
             *pPropOut = pMat->mProperties[i];
             return AI_SUCCESS;

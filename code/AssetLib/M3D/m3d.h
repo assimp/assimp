@@ -3261,6 +3261,18 @@ void m3d_free(m3d_t *model) {
             for (i = 0; i < model->numshape; i++)
                 if (model->shape[i].name)
                     M3D_FREE(model->shape[i].name);
+        if(model->numvoxtype)
+            for(i = 0; i < model->numvoxtype; i++) {
+                if(model->voxtype[i].name)
+                    M3D_FREE(model->voxtype[i].name);
+                for(j = 0; j < model->voxtype[i].numitem; j++)
+                    if(model->voxtype[i].item[j].name)
+                        M3D_FREE(model->voxtype[i].item[j].name);
+            }
+        if(model->numvoxel)
+            for(i = 0; i < model->numvoxel; i++)
+                if(model->voxel[i].name)
+                    M3D_FREE(model->voxel[i].name);
         if (model->material)
             for (i = 0; i < model->nummaterial; i++)
                 if (model->material[i].name)
@@ -3316,6 +3328,18 @@ void m3d_free(m3d_t *model) {
     if (model->skin) M3D_FREE(model->skin);
     if (model->vertex) M3D_FREE(model->vertex);
     if (model->face) M3D_FREE(model->face);
+    if(model->voxtype) {
+        for(i = 0; i < model->numvoxtype; i++)
+            if(model->voxtype[i].item)
+                M3D_FREE(model->voxtype[i].item);
+        M3D_FREE(model->voxtype);
+    }
+    if(model->voxel) {
+        for(i = 0; i < model->numvoxel; i++)
+            if(model->voxel[i].data)
+                M3D_FREE(model->voxel[i].data);
+        M3D_FREE(model->voxel);
+    }
     if (model->shape) {
         for (i = 0; i < model->numshape; i++) {
             if (model->shape[i].cmd) {

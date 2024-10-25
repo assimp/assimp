@@ -431,7 +431,9 @@ void USDImporterImplTinyusdz::verticesForMesh(
                 const int jointIndex = jointIndices[index];
                 const float jointWeight = jointWeightIndices[index];
 
-                aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
+                if (jointWeight > 0) {
+                    aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
+                }
             }
         }        
 

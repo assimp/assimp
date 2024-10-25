@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 
 using namespace Assimp;
 
@@ -112,17 +113,11 @@ std::string EmbedTexturesProcess::tryToFindValidPath(const std::string &imagePat
         return testPath;
     }
 
-    const char alternativeSeparator = std::filesystem::path::preferred_separator == '/' ? '\\' : '/';
-    if (imagePath.find(alternativeSeparator) != std::string::npos) {
+    if (const char alternativeSeparator = std::filesystem::path::preferred_separator == '/' ? '\\' : '/';
+        imagePath.contains(alternativeSeparator)) {
         ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image '", imagePath, "' in root folder. Will try replacing directory separators.");
         testPath = imagePath;
-
-        for (std::string::iterator it = testPath.begin(); it != testPath.end(); ++it) {
-            if (*it == alternativeSeparator) {
-                *it = std::filesystem::path::preferred_separator;
-            }
-        }
-
+        std::replace(testPath.begin(), testPath.end(), alternativeSeparator, std::filesystem::path::preferred_separator);
         return tryToFindValidPath(testPath);
     }
     

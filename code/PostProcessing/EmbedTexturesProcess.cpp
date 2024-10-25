@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 
 #include <fstream>
+#include <filesystem>
 
 using namespace Assimp;
 
@@ -91,25 +92,52 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
     ASSIMP_LOG_INFO("EmbedTexturesProcess finished. Embedded ", embeddedTexturesCount, " textures." );
 }
 
-bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) const {
-    std::streampos imageSize = 0;
-    std::string    imagePath = path;
-
+std::string EmbedTexturesProcess::tryToFindValidPath(const std::string &imagePath) const
+{
     // Test path directly
-    if (!mIOHandler->Exists(imagePath)) {
-        ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
+    if (mIOHandler->Exists(imagePath)) {
+        return imagePath;
+    }
+    ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
 
-        // Test path in root path
-        imagePath = mRootPath + path;
-        if (!mIOHandler->Exists(imagePath)) {
-            // Test path basename in root path
-            imagePath = mRootPath + path.substr(path.find_last_of("\\/") + 1u);
-            if (!mIOHandler->Exists(imagePath)) {
-                ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");
-                return false;
+    // Test path in root path
+    std::string testPath = mRootPath + imagePath;
+    if (mIOHandler->Exists(testPath)) {
+        return testPath;
+    }
+
+    // Test path basename in root path
+    testPath = mRootPath + imagePath.substr(imagePath.find_last_of("\\/") + 1u);
+    if (mIOHandler->Exists(testPath)) {
+        return testPath;
+    }
+
+    const char alternativeSeparator = std::filesystem::path::preferred_separator == '/' ? '\\' : '/';
+    if (imagePath.find(alternativeSeparator) != std::string::npos) {
+        ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image '", imagePath, "' in root folder. Will try replacing directory separators.");
+        testPath = imagePath;
+
+        for (std::string::iterator it = testPath.begin(); it != testPath.end(); ++it) {
+            if (*it == alternativeSeparator) {
+                *it = std::filesystem::path::preferred_separator;
             }
         }
+
+        return tryToFindValidPath(testPath);
     }
+    
+    ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", imagePath, ".");
+    return {};
+}
+
+bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) const {
+    std::streampos imageSize = 0;
+    std::string    imagePath = tryToFindValidPath(path);
+
+    if (imagePath.empty()) {
+        return false;
+    }
+
     IOStream* pFile = mIOHandler->Open(imagePath);
     if (pFile == nullptr) {
         ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");

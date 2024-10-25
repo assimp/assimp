@@ -70,12 +70,18 @@ typedef double M3D_FLOAT;
 #endif
 #if !defined(M3D_SMALLINDEX)
 typedef uint32_t M3D_INDEX;
+typedef uint16_t M3D_VOXEL;
 #define M3D_UNDEF 0xffffffff
 #define M3D_INDEXMAX 0xfffffffe
+#define M3D_VOXUNDEF 0xffff
+#define M3D_VOXCLEAR 0xfffe
 #else
 typedef uint16_t M3D_INDEX;
+typedef uint8_t M3D_VOXEL;
 #define M3D_UNDEF 0xffff
 #define M3D_INDEXMAX 0xfffe
+#define M3D_VOXUNDEF 0xff
+#define M3D_VOXCLEAR 0xfe
 #endif
 #define M3D_NOTDEFINED 0xffffffff
 #ifndef M3D_NUMBONE
@@ -306,6 +312,37 @@ typedef struct {
 } m3df_t;
 #define m3d_face_t m3df_t
 
+typedef struct {
+    uint16_t count;
+    char *name;
+} m3dvi_t;
+#define m3d_voxelitem_t m3dvi_t
+#define m3d_parameter_t m3dvi_t
+
+/* voxel types (voxel palette) */
+typedef struct {
+    char *name;                 /* technical name of the voxel */
+    uint8_t rotation;           /* rotation info */
+    uint16_t voxshape;          /* voxel shape */
+    M3D_INDEX materialid;       /* material index */
+    uint32_t color;             /* default voxel color */
+    M3D_INDEX skinid;           /* skin index */
+    uint8_t numitem;            /* number of sub-voxels */
+    m3dvi_t *item;              /* list of sub-voxels */
+} m3dvt_t;
+#define m3d_voxeltype_t m3dvt_t
+
+/* voxel data blocks */
+typedef struct {
+    char *name;                 /* name of the block */
+    int32_t x, y, z;            /* position */
+    uint32_t w, h, d;           /* dimension */
+    uint8_t uncertain;          /* probability */
+    uint8_t groupid;            /* block group id */
+    M3D_VOXEL *data;            /* voxel data, indices to voxel type */
+} m3dvx_t;
+#define m3d_voxel_t m3dvx_t
+
 /* shape command types. must match the row in m3d_commandtypes */
 enum {
     /* special commands */
@@ -449,7 +486,7 @@ typedef struct {
     m3dhdr_t *raw; /* pointer to raw data */
     char flags; /* internal flags */
     signed char errcode; /* returned error code */
-    char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s; /* decoded sizes for types */
+    char vc_s, vi_s, si_s, ci_s, ti_s, bi_s, nb_s, sk_s, fc_s, hi_s, fi_s, vd_s, vp_s;  /* decoded sizes for types */
     char *name; /* name of the model, like "Utah teapot" */
     char *license; /* usage condition or license, like "MIT", "LGPL" or "BSD-3clause" */
     char *author; /* nickname, email, homepage or github URL etc. */
@@ -471,6 +508,10 @@ typedef struct {
     m3dm_t *material; /* material list */
     M3D_INDEX numface;
     m3df_t *face; /* model face, polygon (triangle) mesh */
+    M3D_INDEX numvoxtype;
+    m3dvt_t *voxtype;           /* model face, voxel types */
+    M3D_INDEX numvoxel;
+    m3dvx_t *voxel;             /* model face, cubes compressed into voxels */
     M3D_INDEX numshape;
     m3dh_t *shape; /* model face, shape commands */
     M3D_INDEX numlabel;
@@ -515,13 +556,15 @@ typedef struct {
 #define M3D_ERR_UNKIMG -68
 #define M3D_ERR_UNKFRAME -69
 #define M3D_ERR_UNKCMD -70
-#define M3D_ERR_TRUNC -71
-#define M3D_ERR_CMAP -72
-#define M3D_ERR_TMAP -73
-#define M3D_ERR_VRTS -74
-#define M3D_ERR_BONE -75
-#define M3D_ERR_MTRL -76
-#define M3D_ERR_SHPE -77
+#define M3D_ERR_UNKVOX      -71
+#define M3D_ERR_TRUNC       -72
+#define M3D_ERR_CMAP        -73
+#define M3D_ERR_TMAP        -74
+#define M3D_ERR_VRTS        -75
+#define M3D_ERR_BONE        -76
+#define M3D_ERR_MTRL        -77
+#define M3D_ERR_SHPE        -78
+#define M3D_ERR_VOXT        -79
 
 #define M3D_ERR_ISFATAL(x) ((x) < 0 && (x) > -65)
 
@@ -1164,6 +1207,10 @@ static M3D_FLOAT _m3d_rsq(M3D_FLOAT x) {
 m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d_t *mtllib) {
     unsigned char *end, *chunk, *buff, weights[8];
     unsigned int i, j, k, l, n, am, len = 0, reclen, offs;
+#ifndef M3D_NOVOXELS
+    int32_t min_x, min_y, min_z, max_x, max_y, max_z, sx, sy, sz, x, y, z;
+    M3D_INDEX edge[8], enorm;
+#endif
     char *name, *lang;
     float f;
     m3d_t *model;

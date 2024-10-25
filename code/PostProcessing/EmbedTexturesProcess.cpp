@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 
 #include <fstream>
-#include <filesystem>
 #include <algorithm>
 
 using namespace Assimp;
@@ -113,11 +112,12 @@ std::string EmbedTexturesProcess::tryToFindValidPath(const std::string &imagePat
         return testPath;
     }
 
-    if (const char alternativeSeparator = std::filesystem::path::preferred_separator == '/' ? '\\' : '/';
-        imagePath.contains(alternativeSeparator)) {
+    // In unix systems, '\' is a valid file name character, but some files may use \ as a directory separator.
+    // Try replacing '\' by '/'. 
+    if (mIOHandler->getOsSeparator() != '\\' && imagePath.contains('\\')) {
         ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image '", imagePath, "' in root folder. Will try replacing directory separators.");
         testPath = imagePath;
-        std::replace(testPath.begin(), testPath.end(), alternativeSeparator, std::filesystem::path::preferred_separator);
+        std::ranges::replace(testPath, '\\', mIOHandler->getOsSeparator());
         return tryToFindValidPath(testPath);
     }
     

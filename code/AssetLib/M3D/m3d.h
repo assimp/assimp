@@ -2801,6 +2801,176 @@ postprocess:
         }
         printf("  Parsing chunks  %ld.%06ld sec\n", tvd.tv_sec, tvd.tv_usec);
 #endif
+#ifndef M3D_NOVOXELS
+        if(model->numvoxel && model->voxel) {
+            M3D_LOG("Converting voxels into vertices and mesh");
+            /* add normals */
+            enorm = model->numvertex; model->numvertex += 6;
+            model->vertex = (m3dv_t*)M3D_REALLOC(model->vertex, model->numvertex * sizeof(m3dv_t));
+            if(!model->vertex) goto memerr;
+            memset(&model->vertex[enorm], 0, 6 * sizeof(m3dv_t));
+            for(l = 0; l < 6; l++)
+                model->vertex[enorm+l].skinid = M3D_UNDEF;
+            model->vertex[enorm+0].y = (M3D_FLOAT)-1.0;
+            model->vertex[enorm+1].z = (M3D_FLOAT)-1.0;
+            model->vertex[enorm+2].x = (M3D_FLOAT)-1.0;
+            model->vertex[enorm+3].y = (M3D_FLOAT)1.0;
+            model->vertex[enorm+4].z = (M3D_FLOAT)1.0;
+            model->vertex[enorm+5].x = (M3D_FLOAT)1.0;
+            /* this is a fast, not so memory efficient version, only basic face culling used */
+            min_x = min_y = min_z = 2147483647L;
+            max_x = max_y = max_z = -2147483647L;
+            for(i = 0; i < model->numvoxel; i++) {
+                if(model->voxel[i].x + (int32_t)model->voxel[i].w > max_x) max_x = model->voxel[i].x + (int32_t)model->voxel[i].w;
+                if(model->voxel[i].x < min_x) min_x = model->voxel[i].x;
+                if(model->voxel[i].y + (int32_t)model->voxel[i].h > max_y) max_y = model->voxel[i].y + (int32_t)model->voxel[i].h;
+                if(model->voxel[i].y < min_y) min_y = model->voxel[i].y;
+                if(model->voxel[i].z + (int32_t)model->voxel[i].d > max_z) max_z = model->voxel[i].z + (int32_t)model->voxel[i].d;
+                if(model->voxel[i].z < min_z) min_z = model->voxel[i].z;
+            }
+            i = (-min_x > max_x ? -min_x : max_x);
+            j = (-min_y > max_y ? -min_y : max_y);
+            k = (-min_z > max_z ? -min_z : max_z);
+            if(j > i) i = j;
+            if(k > i) i = k;
+            if(i <= 1) i = 1;
+            w = (M3D_FLOAT)1.0 / (M3D_FLOAT)i;
+            if(i >= 254) model->vc_s = 2;
+            if(i >= 65534) model->vc_s = 4;
+            for(i = 0; i < model->numvoxel; i++) {
+                sx = model->voxel[i].w; sz = model->voxel[i].d; sy = model->voxel[i].h;
+                for(y = 0, j = 0; y < sy; y++)
+                    for(z = 0; z < sz; z++)
+                        for(x = 0; x < sx; x++, j++)
+                            if(model->voxel[i].data[j] < model->numvoxtype) {
+                                k = 0;
+                                /*  16__32     ____
+                                 *  /|  /|    /|2 /|
+                                 *64_128 |   /_8_/ 32
+                                 * | 1_|_2   |4|_|_|
+                                 * |/  |/    |/ 1|/
+                                 * 4___8     |16_|    */
+                                k = n = am = 0;
+                                if(!y || model->voxel[i].data[j - sx*sz] >= model->numvoxtype) { n++; am |= 1; k |= 1|2|4|8; }
+                                if(!z || model->voxel[i].data[j - sx] >= model->numvoxtype) { n++; am |= 2; k |= 1|2|16|32; }
+                                if(!x || model->voxel[i].data[j - 1] >= model->numvoxtype) { n++; am |= 4; k |= 1|4|16|64; }
+                                if(y == sy-1 || model->voxel[i].data[j + sx*sz] >= model->numvoxtype) { n++; am |= 8; k |= 16|32|64|128; }
+                                if(z == sz-1 || model->voxel[i].data[j + sx] >= model->numvoxtype) { n++; am |= 16; k |= 4|8|64|128; }
+                                if(x == sx-1 || model->voxel[i].data[j + 1] >= model->numvoxtype) { n++; am |= 32; k |= 2|8|32|128; }
+                                if(k) {
+                                    memset(edge, 255, sizeof(edge));
+                                    for(l = 0, len = 1, reclen = model->numvertex; l < 8; l++, len <<= 1)
+                                        if(k & len) edge[l] = model->numvertex++;
+                                    model->vertex = (m3dv_t*)M3D_REALLOC(model->vertex, model->numvertex * sizeof(m3dv_t));
+                                    if(!model->vertex) goto memerr;
+                                    memset(&model->vertex[reclen], 0, (model->numvertex-reclen) * sizeof(m3dv_t));
+                                    for(l = reclen; l < model->numvertex; l++) {
+                                        model->vertex[l].skinid = model->voxtype[model->voxel[i].data[j]].skinid;
+                                        model->vertex[l].color = model->voxtype[model->voxel[i].data[j]].color;
+                                    }
+                                    l = reclen;
+                                    if(k & 1) {
+                                        model->vertex[l].x = (model->voxel[i].x + x) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z) * w;
+                                        l++;
+                                    }
+                                    if(k & 2) {
+                                        model->vertex[l].x = (model->voxel[i].x + x + 1) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z) * w;
+                                        l++;
+                                    }
+                                    if(k & 4) {
+                                        model->vertex[l].x = (model->voxel[i].x + x) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z + 1) * w;
+                                        l++;
+                                    }
+                                    if(k & 8) {
+                                        model->vertex[l].x = (model->voxel[i].x + x + 1) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z + 1) * w;
+                                        l++;
+                                    }
+                                    if(k & 16) {
+                                        model->vertex[l].x = (model->voxel[i].x + x) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y + 1) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z) * w;
+                                        l++;
+                                    }
+                                    if(k & 32) {
+                                        model->vertex[l].x = (model->voxel[i].x + x + 1) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y + 1) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z) * w;
+                                        l++;
+                                    }
+                                    if(k & 64) {
+                                        model->vertex[l].x = (model->voxel[i].x + x) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y + 1) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z + 1) * w;
+                                        l++;
+                                    }
+                                    if(k & 128) {
+                                        model->vertex[l].x = (model->voxel[i].x + x + 1) * w;
+                                        model->vertex[l].y = (model->voxel[i].y + y + 1) * w;
+                                        model->vertex[l].z = (model->voxel[i].z + z + 1) * w;
+                                        l++;
+                                    }
+                                    n <<= 1;
+                                    l = model->numface; model->numface += n;
+                                    model->face = (m3df_t*)M3D_REALLOC(model->face, model->numface * sizeof(m3df_t));
+                                    if(!model->face) goto memerr;
+                                    memset(&model->face[l], 255, n * sizeof(m3df_t));
+                                    for(reclen = l; reclen < model->numface; reclen++)
+                                        model->face[reclen].materialid = model->voxtype[model->voxel[i].data[j]].materialid;
+                                    if(am & 1) {            /* bottom */
+                                        model->face[l].vertex[0] = edge[0];   model->face[l].vertex[1] = edge[1];   model->face[l].vertex[2] = edge[2];
+                                        model->face[l+1].vertex[0] = edge[2]; model->face[l+1].vertex[1] = edge[1]; model->face[l+1].vertex[2] = edge[3];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm;
+                                        l += 2;
+                                    }
+                                    if(am & 2) {            /* north */
+                                        model->face[l].vertex[0] = edge[0];   model->face[l].vertex[1] = edge[4];   model->face[l].vertex[2] = edge[1];
+                                        model->face[l+1].vertex[0] = edge[1]; model->face[l+1].vertex[1] = edge[4]; model->face[l+1].vertex[2] = edge[5];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm+1;
+                                        l += 2;
+                                    }
+                                    if(am & 4) {            /* west */
+                                        model->face[l].vertex[0] = edge[0];   model->face[l].vertex[1] = edge[2];   model->face[l].vertex[2] = edge[4];
+                                        model->face[l+1].vertex[0] = edge[2]; model->face[l+1].vertex[1] = edge[6]; model->face[l+1].vertex[2] = edge[4];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm+2;
+                                        l += 2;
+                                    }
+                                    if(am & 8) {            /* top */
+                                        model->face[l].vertex[0] = edge[4];   model->face[l].vertex[1] = edge[6];   model->face[l].vertex[2] = edge[5];
+                                        model->face[l+1].vertex[0] = edge[5]; model->face[l+1].vertex[1] = edge[6]; model->face[l+1].vertex[2] = edge[7];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm+3;
+                                        l += 2;
+                                    }
+                                    if(am & 16) {           /* south */
+                                        model->face[l].vertex[0] = edge[2];   model->face[l].vertex[1] = edge[7];   model->face[l].vertex[2] = edge[6];
+                                        model->face[l+1].vertex[0] = edge[7]; model->face[l+1].vertex[1] = edge[2]; model->face[l+1].vertex[2] = edge[3];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm+4;
+                                        l += 2;
+                                    }
+                                    if(am & 32) {           /* east */
+                                        model->face[l].vertex[0] = edge[1];   model->face[l].vertex[1] = edge[5];   model->face[l].vertex[2] = edge[7];
+                                        model->face[l+1].vertex[0] = edge[1]; model->face[l+1].vertex[1] = edge[7]; model->face[l+1].vertex[2] = edge[3];
+                                        model->face[l].normal[0] = model->face[l].normal[1] = model->face[l].normal[2] =
+                                        model->face[l+1].normal[0] = model->face[l+1].normal[1] = model->face[l+1].normal[2] = enorm+5;
+                                        l += 2;
+                                    }
+                                }
+                            }
+            }
+        }
+#endif
 #ifndef M3D_NONORMALS
         if (model->numface && model->face && neednorm) {
             /* if they are missing, calculate triangle normals into a temporary buffer */

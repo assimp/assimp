@@ -1587,6 +1587,174 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                     }
                     ptr = _m3d_findnl(ptr);
                 }
+            } else if(!memcmp(pe, "VoxTypes", 8) || !memcmp(pe, "Voxtypes", 8)) {
+                /* voxel types chunk */
+                if(model->voxtype) { M3D_LOG("More voxel types chunks, should be unique"); goto asciiend; }
+                while(*ptr && *ptr != '\r' && *ptr != '\n') {
+                    i = model->numvoxtype++;
+                    model->voxtype = (m3dvt_t*)M3D_REALLOC(model->voxtype, model->numvoxtype * sizeof(m3dvt_t));
+                    if(!model->voxtype) goto memerr;
+                    memset(&model->voxtype[i], 0, sizeof(m3dvt_t));
+                    model->voxtype[i].materialid = M3D_UNDEF;
+                    model->voxtype[i].skinid = M3D_UNDEF;
+                    ptr = _m3d_gethex(ptr, &model->voxtype[i].color);
+                    if(!*ptr) goto asciiend;
+                    if(*ptr == '/') {
+                        ptr = _m3d_gethex(ptr, &k);
+                        model->voxtype[i].rotation = k;
+                        if(!*ptr) goto asciiend;
+                        if(*ptr == '/') {
+                            ptr = _m3d_gethex(ptr, &k);
+                            model->voxtype[i].voxshape = k;
+                            if(!*ptr) goto asciiend;
+                        }
+                    }
+                    while(*ptr == ' ' || *ptr == '\t') ptr++;
+                    if(*ptr == '\r' || *ptr == '\n') { ptr = _m3d_findnl(ptr); continue; }
+                    /* name */
+                    if(*ptr != '-') {
+                        pe = _m3d_safestr(ptr, 0);
+                        if(!pe || !*pe) goto asciiend;
+                        model->voxtype[i].name = pe;
+                        for(j = 0; j < model->nummaterial; j++)
+                            if(!strcmp(pe, model->material[j].name)) { model->voxtype[i].materialid = (M3D_INDEX)j; break; }
+                    }
+                    ptr = _m3d_findarg(ptr);
+                    /* parse skin */
+                    memset(&s, 0, sizeof(m3ds_t));
+                    for(j = 0, w = (M3D_FLOAT)0.0; j < M3D_NUMBONE && *ptr && *ptr != '{' && *ptr != '\r' && *ptr != '\n'; j++) {
+                        ptr = _m3d_getint(ptr, &k);
+                        s.boneid[j] = (M3D_INDEX)k;
+                        if(*ptr == ':') {
+                            ptr++;
+                            ptr = _m3d_getfloat(ptr, &s.weight[j]);
+                            w += s.weight[j];
+                        } else if(!j)
+                            s.weight[j] = (M3D_FLOAT)1.0;
+                        if(!*ptr) goto asciiend;
+                        ptr = _m3d_findarg(ptr);
+                    }
+                    if(s.boneid[0] != M3D_UNDEF && s.weight[0] > (M3D_FLOAT)0.0) {
+                        if(w != (M3D_FLOAT)1.0 && w != (M3D_FLOAT)0.0)
+                            for(j = 0; j < M3D_NUMBONE && s.weight[j] > (M3D_FLOAT)0.0; j++)
+                                s.weight[j] /= w;
+                        k = M3D_NOTDEFINED;
+                        if(model->skin) {
+                            for(j = 0; j < model->numskin; j++)
+                                if(!memcmp(&model->skin[j], &s, sizeof(m3ds_t))) { k = j; break; }
+                        }
+                        if(k == M3D_NOTDEFINED) {
+                            k = model->numskin++;
+                            model->skin = (m3ds_t*)M3D_REALLOC(model->skin, model->numskin * sizeof(m3ds_t));
+                            if(!model->skin) goto memerr;
+                            memcpy(&model->skin[k], &s, sizeof(m3ds_t));
+                        }
+                        model->voxtype[i].skinid = (M3D_INDEX)k;
+                    }
+                    /* parse item list */
+                    if(*ptr == '{') {
+                        while(*ptr == '{' || *ptr == ' ' || *ptr == '\t') ptr++;
+                        while(*ptr && *ptr != '}' && *ptr != '\r' && *ptr != '\n') {
+                            ptr = _m3d_getint(ptr, &k);
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '}' || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            pe = _m3d_safestr(ptr, 0);
+                            if(!pe || !*pe) goto asciiend;
+                            ptr = _m3d_findarg(ptr);
+                            j = model->voxtype[i].numitem++;
+                            model->voxtype[i].item = (m3dvi_t*)M3D_REALLOC(model->voxtype[i].item,
+                                model->voxtype[i].numitem * sizeof(m3dvi_t));
+                            if(!model->voxtype[i].item) goto memerr;
+                            model->voxtype[i].item[j].count = k;
+                            model->voxtype[i].item[j].name = pe;
+                        }
+                        if(*ptr != '}') goto asciiend;
+                    }
+                    ptr = _m3d_findnl(ptr);
+                }
+            } else
+            /* voxel data */
+            if(!memcmp(pe, "Voxel", 5)) {
+                if(!model->voxtype) { M3D_LOG("No voxel type chunk before voxel data"); goto asciiend; }
+                pe = _m3d_findarg(pe);
+                if(!*pe) goto asciiend;
+                if(*pe == '\r' || *pe == '\n') pe = NULL;
+                else pe = _m3d_safestr(pe, 0);
+                i = model->numvoxel++;
+                model->voxel = (m3dvx_t*)M3D_REALLOC(model->voxel, model->numvoxel * sizeof(m3dvx_t));
+                if(!model->voxel) goto memerr;
+                memset(&model->voxel[i], 0, sizeof(m3dvx_t));
+                model->voxel[i].name = pe;
+                k = l = 0;
+                while(*ptr && *ptr != '\r' && *ptr != '\n') {
+                    switch(*ptr) {
+                        case 'u':
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].uncertain = ((n > 0 && n < 256 ? n : 0) * 255) / 100;
+                            ptr = _m3d_findarg(ptr);
+                            if(*ptr && *ptr != '\r' && *ptr != '\n') {
+                                ptr = _m3d_getint(ptr, &n);
+                                model->voxel[i].groupid = n > 0 && n < 256 ? n : 0;
+                            }
+                        break;
+                        case 'p':
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].x = n;
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].y = n;
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].z = n;
+                        break;
+                        case 'd':
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].w = n;
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].h = n;
+                            ptr = _m3d_findarg(ptr);
+                            if(!*ptr || *ptr == '\r' || *ptr == '\n') goto asciiend;
+                            ptr = _m3d_getint(ptr, &n);
+                            model->voxel[i].d = n;
+                        break;
+                        case 'l':
+                            if(model->voxel[i].data) { l++; k = 0; }
+                            else {
+                                if(!model->voxel[i].w || !model->voxel[i].h || !model->voxel[i].d) {
+                                    M3D_LOG("No voxel dimension before layer data");
+                                    goto asciiend;
+                                }
+                                model->voxel[i].data = (M3D_VOXEL*)M3D_MALLOC(
+                                    model->voxel[i].w * model->voxel[i].h * model->voxel[i].d * sizeof(M3D_VOXEL));
+                                if(!model->voxel[i].data) goto memerr;
+                            }
+                        break;
+                        default:
+                            if(!model->voxel[i].data || l >= model->voxel[i].h || k >= model->voxel[i].d) {
+                                M3D_LOG("Missing voxel attributes or out of bound data");
+                                goto asciiend;
+                            }
+                            for(n = l * model->voxel[i].w * model->voxel[i].d + k * model->voxel[i].w;
+                                j < model->voxel[i].w && *ptr && *ptr != '\r' && *ptr != '\n'; j++) {
+                                ptr = _m3d_getint(ptr, &am);
+                                if(am >= model->numvoxtype) goto asciiend;
+                                model->voxel[i].data[n + j] = am;
+                            }
+                            k++;
+                        break;
+                    }
+                    ptr = _m3d_findnl(ptr);
+                }
             } else
                     /* mathematical shape */
                     if (!memcmp(pe, "Shape", 5)) {
@@ -1898,6 +2066,8 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
     model->fc_s = 1 << ((model->raw->types >> 16) & 3); /* frame counter size */
     model->hi_s = 1 << ((model->raw->types >> 18) & 3); /* shape index size */
     model->fi_s = 1 << ((model->raw->types >> 20) & 3); /* face index size */
+    model->vd_s = 1 << ((model->raw->types >>22) & 3);  /* voxel dimension size */
+    model->vp_s = 1 << ((model->raw->types >>24) & 3);  /* voxel pixel size */
     if (model->ci_s == 8) model->ci_s = 0; /* optional indices */
     if (model->ti_s == 8) model->ti_s = 0;
     if (model->bi_s == 8) model->bi_s = 0;
@@ -1911,14 +2081,20 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
         M3D_LOG("Double precision coordinates not supported, truncating to float...");
         model->errcode = M3D_ERR_TRUNC;
     }
-    if (sizeof(M3D_INDEX) == 2 && (model->vi_s > 2 || model->si_s > 2 || model->ci_s > 2 || model->ti_s > 2 ||
-                                          model->bi_s > 2 || model->sk_s > 2 || model->fc_s > 2 || model->hi_s > 2 || model->fi_s > 2)) {
+    if((sizeof(M3D_INDEX) == 2 && (model->vi_s > 2 || model->si_s > 2 || model->ci_s > 2 || model->ti_s > 2 ||
+        model->bi_s > 2 || model->sk_s > 2 || model->fc_s > 2 || model->hi_s > 2 || model->fi_s > 2)) ||
+       (sizeof(M3D_VOXEL) < (size_t)model->vp_s && model->vp_s != 8)) {
         M3D_LOG("32 bit indices not supported, unable to load model");
         M3D_FREE(model);
         return NULL;
     }
-    if (model->vi_s > 4 || model->si_s > 4) {
+    if(model->vi_s > 4 || model->si_s > 4 || model->vp_s == 4) {
         M3D_LOG("Invalid index size, unable to load model");
+        M3D_FREE(model);
+        return NULL;
+    }
+    if(!M3D_CHUNKMAGIC(end - 4, 'O','M','D','3')) {
+        M3D_LOG("Missing end chunk");
         M3D_FREE(model);
         return NULL;
     }
@@ -2331,6 +2507,117 @@ m3d_t *m3d_load(unsigned char *data, m3dread_t readfilecb, m3dfree_t freecb, m3d
                 }
             }
             model->face = (m3df_t *)M3D_REALLOC(model->face, model->numface * sizeof(m3df_t));
+        } else if(M3D_CHUNKMAGIC(data, 'V','O','X','T')) {
+            /* voxel types */
+            M3D_LOG("Voxel types list");
+            if(model->voxtype) { M3D_LOG("More voxel type chunks, should be unique"); model->errcode = M3D_ERR_VOXT; continue; }
+            if(model->ci_s && model->ci_s < 4 && !model->cmap) model->errcode = M3D_ERR_CMAP;
+            reclen = model->ci_s + model->si_s + 3 + model->sk_s;
+            k = len / reclen;
+            model->voxtype = (m3dvt_t*)M3D_MALLOC(k * sizeof(m3dvt_t));
+            if(!model->voxtype) goto memerr;
+            memset(model->voxtype, 0, k * sizeof(m3dvt_t));
+            model->numvoxtype = 0;
+            for(i = 0, data += sizeof(m3dchunk_t); data < chunk && i < k; i++) {
+                switch(model->ci_s) {
+                    case 1: model->voxtype[i].color = model->cmap ? model->cmap[data[0]] : 0; data++; break;
+                    case 2: model->voxtype[i].color = model->cmap ? model->cmap[*((uint16_t*)data)] : 0; data += 2; break;
+                    case 4: model->voxtype[i].color = *((uint32_t*)data); data += 4; break;
+                    /* case 8: break; */
+                }
+                M3D_GETSTR(name);
+                model->voxtype[i].materialid = M3D_UNDEF;
+                if(name) {
+                    model->voxtype[i].name = name;
+/*
+                    for(j = 0; j < model->nummaterial; j++)
+                        if(!strcmp(name, model->material[j].name)) {
+                            model->voxtype[i].materialid = (M3D_INDEX)j;
+                            break;
+                        }
+*/
+                }
+                j = *data++;
+                model->voxtype[i].rotation = j & 0xBF;
+                model->voxtype[i].voxshape = ((j & 0x40) << 2) | *data++;
+                model->voxtype[i].numitem = *data++;
+                model->voxtype[i].skinid = M3D_UNDEF;
+                data = _m3d_getidx(data, model->sk_s, &model->voxtype[i].skinid);
+                if(model->voxtype[i].numitem) {
+                    model->voxtype[i].item = (m3dvi_t*)M3D_MALLOC(model->voxtype[i].numitem * sizeof(m3dvi_t));
+                    if(!model->voxtype[i].item) goto memerr;
+                    memset(model->voxtype[i].item, 0, model->voxtype[i].numitem * sizeof(m3dvi_t));
+                    for(j = 0; j < model->voxtype[i].numitem; j++) {
+                        model->voxtype[i].item[j].count = *data++;
+                        model->voxtype[i].item[j].count |= (*data++) << 8;
+                        M3D_GETSTR(model->voxtype[i].item[j].name);
+                    }
+                }
+            }
+            model->numvoxtype = i;
+            if(k != model->numvoxtype) {
+                model->voxtype = (m3dvt_t*)M3D_REALLOC(model->voxtype, model->numvoxtype * sizeof(m3dvt_t));
+                if(!model->voxtype) goto memerr;
+            }
+        } else if(M3D_CHUNKMAGIC(data, 'V','O','X','D')) {
+            /* voxel data */
+            data += sizeof(m3dchunk_t);
+            M3D_GETSTR(name);
+            M3D_LOG("Voxel Data Layer");
+            M3D_LOG(name);
+            if(model->vd_s > 4 || model->vp_s > 2) { M3D_LOG("No voxel index size"); model->errcode = M3D_ERR_UNKVOX; continue; }
+            if(!model->voxtype) { M3D_LOG("No voxel type chunk before voxel data"); model->errcode = M3D_ERR_VOXT; }
+            i = model->numvoxel++;
+            model->voxel = (m3dvx_t*)M3D_REALLOC(model->voxel, model->numvoxel * sizeof(m3dvx_t));
+            if(!model->voxel) goto memerr;
+            memset(&model->voxel[i], 0, sizeof(m3dvx_t));
+            model->voxel[i].name = name;
+            switch(model->vd_s) {
+                case 1:
+                    model->voxel[i].x = (int32_t)((int8_t)data[0]);
+                    model->voxel[i].y = (int32_t)((int8_t)data[1]);
+                    model->voxel[i].z = (int32_t)((int8_t)data[2]);
+                    model->voxel[i].w = (uint32_t)(data[3]);
+                    model->voxel[i].h = (uint32_t)(data[4]);
+                    model->voxel[i].d = (uint32_t)(data[5]);
+                    data += 6;
+                break;
+                case 2:
+                    model->voxel[i].x = (int32_t)(*((int16_t*)(data+0)));
+                    model->voxel[i].y = (int32_t)(*((int16_t*)(data+2)));
+                    model->voxel[i].z = (int32_t)(*((int16_t*)(data+4)));
+                    model->voxel[i].w = (uint32_t)(*((uint16_t*)(data+6)));
+                    model->voxel[i].h = (uint32_t)(*((uint16_t*)(data+8)));
+                    model->voxel[i].d = (uint32_t)(*((uint16_t*)(data+10)));
+                    data += 12;
+                break;
+                case 4:
+                    model->voxel[i].x = *((int32_t*)(data+0));
+                    model->voxel[i].y = *((int32_t*)(data+4));
+                    model->voxel[i].z = *((int32_t*)(data+8));
+                    model->voxel[i].w = *((uint32_t*)(data+12));
+                    model->voxel[i].h = *((uint32_t*)(data+16));
+                    model->voxel[i].d = *((uint32_t*)(data+20));
+                    data += 24;
+                break;
+            }
+            model->voxel[i].uncertain = *data++;
+            model->voxel[i].groupid = *data++;
+            k = model->voxel[i].w * model->voxel[i].h * model->voxel[i].d;
+            model->voxel[i].data = (M3D_VOXEL*)M3D_MALLOC(k * sizeof(M3D_VOXEL));
+            if(!model->voxel[i].data) goto memerr;
+            memset(model->voxel[i].data, 0xff, k * sizeof(M3D_VOXEL));
+            for(j = 0; data < chunk && j < k;) {
+                l = ((*data++) & 0x7F) + 1;
+                if(data[-1] & 0x80) {
+                    data = _m3d_getidx(data, model->vp_s, &mi);
+                    while(l-- && j < k) model->voxel[i].data[j++] = (M3D_VOXEL)mi;
+                } else
+                    while(l-- && j < k) {
+                        data = _m3d_getidx(data, model->vp_s, &mi);
+                        model->voxel[i].data[j++] = (M3D_VOXEL)mi;
+                    }
+            }
         } else if (M3D_CHUNKMAGIC(data, 'S', 'H', 'P', 'E')) {
             /* mathematical shape */
             data += sizeof(m3dchunk_t);

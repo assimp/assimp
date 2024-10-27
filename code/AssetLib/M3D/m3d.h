@@ -977,7 +977,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
             unsigned char *img_buffer_end = buff + len;
             /* don't use model->texture[i].w directly, it's a uint16_t */
             w = h = len = 0;
-            model->texture[i].d = (uint8_t *)stbi__png_load_expose_for_m3d(img_buffer, img_buffer_end, &w, &h, &len);
+            model->texture[i].d = stbi__png_load_expose_for_m3d(img_buffer, img_buffer_end, &w, &h, &len);
             model->texture[i].w = (uint16_t)w;
             model->texture[i].h = (uint16_t)h;
             model->texture[i].f = (uint8_t)len;

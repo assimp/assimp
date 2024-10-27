@@ -370,7 +370,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, cons
     if (DefaultStream == nullptr) {
         DefaultStream = LogStream::createDefaultStream(pStream, file);
     }
-    
+
     if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;
@@ -1311,7 +1311,7 @@ ASSIMP_API void aiQuaternionInterpolate(
      *   file (instead it's dealt with in Common/Assimp.cpp)
      */
     #if ASSIMP_HAS_M3D
-    void *stbi__png_load_expose_for_m3d(
+    uint8_t *stbi__png_load_expose_for_m3d(
             unsigned char *img_buffer,
             unsigned char *img_buffer_end,
             unsigned int *pw, unsigned int *ph, unsigned int *plen) {
@@ -1325,7 +1325,7 @@ ASSIMP_API void aiQuaternionInterpolate(
         stbi__result_info rio;
         rio.bits_per_channel = 8;
 
-        return stbi__png_load(&c, (int *)pw, (int *)ph, (int *)plen, 0, &rio);
+        return (uint8_t *) stbi__png_load(&c, (int *)pw, (int *)ph, (int *)plen, 0, &rio);
     }
     #endif // ASSIMP_HAS_M3D
 #endif // #if ASSIMP_NEEDS_STB_IMAGE

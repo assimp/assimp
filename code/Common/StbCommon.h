@@ -123,7 +123,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   file (instead it's dealt with in Common/Assimp.cpp)
  */
 #if ASSIMP_HAS_M3D
-    void *stbi__png_load_expose_for_m3d(
+    uint8_t *stbi__png_load_expose_for_m3d(
             unsigned char *img_buffer,
             unsigned char *img_buffer_end,
             unsigned int *pw, unsigned int *ph, unsigned int *plen);

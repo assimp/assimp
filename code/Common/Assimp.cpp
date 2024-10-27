@@ -55,7 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CApi/CInterfaceIOWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
-#include "../AssetLib/M3D/M3DImpl.h"
 
 #include <list>
 
@@ -370,7 +369,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, cons
     if (DefaultStream == nullptr) {
         DefaultStream = LogStream::createDefaultStream(pStream, file);
     }
-
+    
     if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;
@@ -1286,6 +1285,7 @@ ASSIMP_API void aiQuaternionInterpolate(
 // Don't scatter this task over multiple importers/exporters. Maintain it in a central place (here!).
 
 #define ASSIMP_HAS_PBRT_EXPORT (!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_PBRT_EXPORTER)
+#define ASSIMP_HAS_M3D ((!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER)
 
 #ifndef STB_USE_HUNTER
 #if ASSIMP_HAS_PBRT_EXPORT
@@ -1293,8 +1293,8 @@ ASSIMP_API void aiQuaternionInterpolate(
 #elif ASSIMP_HAS_M3D
 #define ASSIMP_NEEDS_STB_IMAGE 1
 #define STBI_ONLY_PNG
-#endif // #if ASSIMP_HAS_PBRT_EXPORT
-#endif // #ifndef STB_USE_HUNTER
+#endif
+#endif
 
 // Ensure all symbols are linked correctly
 #if ASSIMP_NEEDS_STB_IMAGE
@@ -1302,30 +1302,7 @@ ASSIMP_API void aiQuaternionInterpolate(
 #define STBI_ONLY_PNG
 #ifdef ASSIMP_USE_STB_IMAGE_STATIC
 #define STB_IMAGE_STATIC
-#endif // #ifdef ASSIMP_USE_STB_IMAGE_STATIC
+#endif
 #define STB_IMAGE_IMPLEMENTATION
 #include "Common/StbCommon.h"
-    /*
-     * TODO: migrate M3D to only use public API of stb_image.h; currently it depends on private implementation
-     *   details which aren't available because STB_IMAGE_IMPLEMENTATION isn't defined in the wrapping source
-     *   file (instead it's dealt with in Common/Assimp.cpp)
-     */
-    #if ASSIMP_HAS_M3D
-    uint8_t *stbi__png_load_expose_for_m3d(
-            unsigned char *img_buffer,
-            unsigned char *img_buffer_end,
-            unsigned int *pw, unsigned int *ph, unsigned int *plen) {
-        stbi__context c;
-        c.read_from_callbacks = 0;
-        c.img_buffer = img_buffer;
-        c.img_buffer_end = img_buffer_end;
-        c.img_buffer_original = img_buffer;
-        c.img_buffer_original_end = img_buffer_end;
-
-        stbi__result_info rio;
-        rio.bits_per_channel = 8;
-
-        return (uint8_t *) stbi__png_load(&c, (int *)pw, (int *)ph, (int *)plen, 0, &rio);
-    }
-    #endif // ASSIMP_HAS_M3D
-#endif // #if ASSIMP_NEEDS_STB_IMAGE
+#endif

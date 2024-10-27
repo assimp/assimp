@@ -925,8 +925,10 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     unsigned int i, len = 0;
     unsigned char *buff = NULL;
     char *fn2;
-    unsigned int w;
-    unsigned int h;
+    // stb_image set via pointer; native type "int"
+    int w = 0;
+    int h = 0;
+    int img_components = 0;
 
     /* do we have loaded this texture already? */
     for (i = 0; i < model->numtexture; i++)
@@ -973,14 +975,11 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     model->texture[i].d = NULL;
     if (buff) {
         if (buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
-            unsigned char *img_buffer = buff;
-            unsigned char *img_buffer_end = buff + len;
             /* don't use model->texture[i].w directly, it's a uint16_t */
-            w = h = len = 0;
-            model->texture[i].d = stbi__png_load_expose_for_m3d(img_buffer, img_buffer_end, &w, &h, &len);
-            model->texture[i].w = (uint16_t)w;
-            model->texture[i].h = (uint16_t)h;
-            model->texture[i].f = (uint8_t)len;
+            model->texture[i].d = stbi_load_from_memory(buff, len, &w, &h, &img_components, 0);
+            model->texture[i].w = (uint16_t) w;
+            model->texture[i].h = (uint16_t) h;
+            model->texture[i].f = (uint8_t) img_components;
         } else {
 #ifdef M3D_TX_INTERP
             if ((model->errcode = M3D_TX_INTERP(fn, buff, len, &model->texture[i])) != M3D_SUCCESS) {

@@ -925,11 +925,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     unsigned int i, len = 0;
     unsigned char *buff = NULL;
     char *fn2;
-#ifdef STBI__PNG_TYPE
     unsigned int w, h;
-    stbi__context s;
-    stbi__result_info ri;
-#endif
 
     /* do we have loaded this texture already? */
     for (i = 0; i < model->numtexture; i++)
@@ -976,18 +972,21 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     model->texture[i].d = NULL;
     if (buff) {
         if (buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
-#ifdef STBI__PNG_TYPE
-            s.read_from_callbacks = 0;
-            s.img_buffer = s.img_buffer_original = (unsigned char *)buff;
-            s.img_buffer_end = s.img_buffer_original_end = (unsigned char *)buff + len;
+            const int read_from_callbacks = 0;
+            unsigned char *img_buffer = (unsigned char *)buff;
+            unsigned char *img_buffer_original = (unsigned char *)buff;
+            unsigned char *img_buffer_end = (unsigned char *)buff + len;
+            unsigned char *img_buffer_original_end = (unsigned char *)buff + len;
             /* don't use model->texture[i].w directly, it's a uint16_t */
             w = h = len = 0;
-            ri.bits_per_channel = 8;
-            model->texture[i].d = (uint8_t *)stbi__png_load(&s, (int *)&w, (int *)&h, (int *)&len, 0, &ri);
+            const int bits_per_channel = 8;
+            model->texture[i].d = (uint8_t *)stbi__png_load_expose_for_m3d(
+                    read_from_callbacks,
+                    img_buffer, img_buffer_original, img_buffer_end, img_buffer_original_end,
+                    &w, &h, &len, bits_per_channel);
             model->texture[i].w = (uint16_t)w;
             model->texture[i].h = (uint16_t)h;
             model->texture[i].f = (uint8_t)len;
-#endif
         } else {
 #ifdef M3D_TX_INTERP
             if ((model->errcode = M3D_TX_INTERP(fn, buff, len, &model->texture[i])) != M3D_SUCCESS) {

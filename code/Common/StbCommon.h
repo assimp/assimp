@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
+#include "../AssetLib/M3D/M3DImpl.h"
+
 #if _MSC_VER // "unreferenced function has been removed" (SSE2 detection routine in x64 builds)
 #pragma warning(push)
 #pragma warning(disable : 4505)
@@ -114,6 +116,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "stb/stb_image.h"
+
+/*
+ * TODO: migrate M3D to only use public API of stb_image.h; currently it depends on private implementation
+ *   details which aren't available because STB_IMAGE_IMPLEMENTATION isn't defined in the wrapping source
+ *   file (instead it's dealt with in Common/Assimp.cpp)
+ */
+#if ASSIMP_HAS_M3D
+    void *stbi__png_load_expose_for_m3d(
+            int read_from_callbacks,
+            unsigned char *img_buffer,
+            unsigned char *img_buffer_original,
+            unsigned char *img_buffer_end,
+            unsigned char *img_buffer_original_end,
+            unsigned int *pw, unsigned int *ph, unsigned int *plen,
+            int bits_per_channel);
+#endif // #if ASSIMP_HAS_M3D
 
 #if _MSC_VER
 #pragma warning(pop)

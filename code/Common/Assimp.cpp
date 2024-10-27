@@ -1305,4 +1305,31 @@ ASSIMP_API void aiQuaternionInterpolate(
 #endif // #ifdef ASSIMP_USE_STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "Common/StbCommon.h"
+    /*
+     * TODO: migrate M3D to only use public API of stb_image.h; currently it depends on private implementation
+     *   details which aren't available because STB_IMAGE_IMPLEMENTATION isn't defined in the wrapping source
+     *   file (instead it's dealt with in Common/Assimp.cpp)
+     */
+    #if ASSIMP_HAS_M3D
+    void *stbi__png_load_expose_for_m3d(
+            int read_from_callbacks,
+            unsigned char *img_buffer,
+            unsigned char *img_buffer_original,
+            unsigned char *img_buffer_end,
+            unsigned char *img_buffer_original_end,
+            unsigned int *pw, unsigned int *ph, unsigned int *plen,
+            int bits_per_channel) {
+        stbi__context c;
+        c.read_from_callbacks = read_from_callbacks;
+        c.img_buffer = img_buffer;
+        c.img_buffer_end = img_buffer_end;
+        c.img_buffer_original = img_buffer_original;
+        c.img_buffer_original_end = img_buffer_original_end;
+
+        stbi__result_info rio;
+        rio.bits_per_channel = bits_per_channel;
+
+        return stbi__png_load(&c, (int *)pw, (int *)ph, (int *)plen, 0, &rio);
+    }
+    #endif // ASSIMP_HAS_M3D
 #endif // #if ASSIMP_NEEDS_STB_IMAGE

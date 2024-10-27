@@ -982,7 +982,7 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
             const int bits_per_channel = 8;
             model->texture[i].d = (uint8_t *)stbi__png_load_expose_for_m3d(
                     read_from_callbacks,
-                    img_buffer, img_buffer_original, img_buffer_end, img_buffer_original_end,
+                    img_buffer, img_buffer_end,
                     &w, &h, &len, bits_per_channel);
             model->texture[i].w = (uint16_t)w;
             model->texture[i].h = (uint16_t)h;

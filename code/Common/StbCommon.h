@@ -126,9 +126,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     void *stbi__png_load_expose_for_m3d(
             int read_from_callbacks,
             unsigned char *img_buffer,
-            unsigned char *img_buffer_original,
             unsigned char *img_buffer_end,
-            unsigned char *img_buffer_original_end,
             unsigned int *pw, unsigned int *ph, unsigned int *plen,
             int bits_per_channel);
 #endif // #if ASSIMP_HAS_M3D

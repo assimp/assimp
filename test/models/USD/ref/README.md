@@ -1,4 +1,4 @@
 # USD 3D model reference images
 
 ## MotionCaptureROM.usdc
-![MotionCaptureROM.usdc](MotionCaptureROM_usdc.png)
+![MotionCaptureROM.usdc](screenshots/MotionCaptureROM_usdc.png)

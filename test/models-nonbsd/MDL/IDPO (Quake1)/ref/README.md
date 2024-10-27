@@ -1,4 +1,4 @@
 # IDPO 3D model reference images
 
 ## gijoe.mdl
-![gijoe.mdl](gijoe_mdl.png)
+![gijoe.mdl](screenshots/gijoe_mdl.png)

@@ -1,4 +1,4 @@
 # NFF 3D model reference images
 
 ## cone.nff
-![cone.nff](cone_nff.png)
+![cone.nff](screenshots/cone_nff.png)

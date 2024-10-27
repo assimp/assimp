@@ -1312,20 +1312,18 @@ ASSIMP_API void aiQuaternionInterpolate(
      */
     #if ASSIMP_HAS_M3D
     void *stbi__png_load_expose_for_m3d(
-            int read_from_callbacks,
             unsigned char *img_buffer,
             unsigned char *img_buffer_end,
-            unsigned int *pw, unsigned int *ph, unsigned int *plen,
-            int bits_per_channel) {
+            unsigned int *pw, unsigned int *ph, unsigned int *plen) {
         stbi__context c;
-        c.read_from_callbacks = read_from_callbacks;
+        c.read_from_callbacks = 0;
         c.img_buffer = img_buffer;
         c.img_buffer_end = img_buffer_end;
         c.img_buffer_original = img_buffer;
         c.img_buffer_original_end = img_buffer_end;
 
         stbi__result_info rio;
-        rio.bits_per_channel = bits_per_channel;
+        rio.bits_per_channel = 8;
 
         return stbi__png_load(&c, (int *)pw, (int *)ph, (int *)plen, 0, &rio);
     }

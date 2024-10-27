@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CApi/CInterfaceIOWrapper.h"
 #include "Importer.h"
 #include "ScenePrivate.h"
+#include "../AssetLib/M3D/M3DImpl.h"
 
 #include <list>
 
@@ -1285,7 +1286,6 @@ ASSIMP_API void aiQuaternionInterpolate(
 // Don't scatter this task over multiple importers/exporters. Maintain it in a central place (here!).
 
 #define ASSIMP_HAS_PBRT_EXPORT (!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_PBRT_EXPORTER)
-#define ASSIMP_HAS_M3D ((!ASSIMP_BUILD_NO_EXPORT && !ASSIMP_BUILD_NO_M3D_EXPORTER) || !ASSIMP_BUILD_NO_M3D_IMPORTER)
 
 #ifndef STB_USE_HUNTER
 #if ASSIMP_HAS_PBRT_EXPORT
@@ -1293,8 +1293,8 @@ ASSIMP_API void aiQuaternionInterpolate(
 #elif ASSIMP_HAS_M3D
 #define ASSIMP_NEEDS_STB_IMAGE 1
 #define STBI_ONLY_PNG
-#endif
-#endif
+#endif // #if ASSIMP_HAS_PBRT_EXPORT
+#endif // #ifndef STB_USE_HUNTER
 
 // Ensure all symbols are linked correctly
 #if ASSIMP_NEEDS_STB_IMAGE
@@ -1302,7 +1302,7 @@ ASSIMP_API void aiQuaternionInterpolate(
 #define STBI_ONLY_PNG
 #ifdef ASSIMP_USE_STB_IMAGE_STATIC
 #define STB_IMAGE_STATIC
-#endif
+#endif // #ifdef ASSIMP_USE_STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "Common/StbCommon.h"
-#endif
+#endif // #if ASSIMP_NEEDS_STB_IMAGE

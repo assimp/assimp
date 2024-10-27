@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#if !defined ASSIMP_BUILD_NO_M3D_IMPORTER || !(defined ASSIMP_BUILD_NO_EXPORT || defined ASSIMP_BUILD_NO_M3D_EXPORTER)
+#include "M3DImpl.h"
+
+#ifdef ASSIMP_HAS_M3D
 
 #include "M3DWrapper.h"
 
@@ -147,4 +149,4 @@ void M3DWrapper::ClearSave() {
 }
 } // namespace Assimp
 
-#endif
+#endif // #ifdef ASSIMP_HAS_M3D

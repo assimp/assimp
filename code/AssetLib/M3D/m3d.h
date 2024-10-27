@@ -925,10 +925,6 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     unsigned int i, len = 0;
     unsigned char *buff = NULL;
     char *fn2;
-    // stb_image set via pointer; native type "int"
-    int w = 0;
-    int h = 0;
-    int img_components = 0;
 
     /* do we have loaded this texture already? */
     for (i = 0; i < model->numtexture; i++)
@@ -976,6 +972,10 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     if (buff) {
         if (buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
             /* don't use model->texture[i].w directly, it's a uint16_t */
+            // stb_image in/out vars (set via pointer), native type "int"
+            int w = 0;
+            int h = 0;
+            int img_components = 0;
             model->texture[i].d = stbi_load_from_memory(buff, len, &w, &h, &img_components, 0);
             model->texture[i].w = (uint16_t) w;
             model->texture[i].h = (uint16_t) h;

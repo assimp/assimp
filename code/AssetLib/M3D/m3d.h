@@ -925,7 +925,8 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     unsigned int i, len = 0;
     unsigned char *buff = NULL;
     char *fn2;
-    unsigned int w, h;
+    unsigned int w;
+    unsigned int h;
 
     /* do we have loaded this texture already? */
     for (i = 0; i < model->numtexture; i++)
@@ -973,10 +974,8 @@ M3D_INDEX _m3d_gettx(m3d_t *model, m3dread_t readfilecb, m3dfree_t freecb, char 
     if (buff) {
         if (buff[0] == 0x89 && buff[1] == 'P' && buff[2] == 'N' && buff[3] == 'G') {
             const int read_from_callbacks = 0;
-            unsigned char *img_buffer = (unsigned char *)buff;
-            unsigned char *img_buffer_original = (unsigned char *)buff;
-            unsigned char *img_buffer_end = (unsigned char *)buff + len;
-            unsigned char *img_buffer_original_end = (unsigned char *)buff + len;
+            unsigned char *img_buffer = buff;
+            unsigned char *img_buffer_end = buff + len;
             /* don't use model->texture[i].w directly, it's a uint16_t */
             w = h = len = 0;
             const int bits_per_channel = 8;

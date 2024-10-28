@@ -794,14 +794,16 @@ void USDImporterImplTinyusdz::setupNodes(
     stringstream ss;
 
     pScene->mRootNode = nodes(render_scene, nameWExt);
+    if (pScene->mRootNode == nullptr) {
+        return;
+    }
+
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
 
     ss.str("");
     ss << "setupNodes(): pScene->mNumMeshes: " << pScene->mNumMeshes;
-    if (pScene->mRootNode != nullptr) {
-        ss << ", mRootNode->mNumMeshes: " << pScene->mRootNode->mNumMeshes;
-    }
+    ss << ", mRootNode->mNumMeshes: " << pScene->mRootNode->mNumMeshes;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
 
     for (unsigned int meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
@@ -843,7 +845,7 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         ss << " (parent " << cNode->mParent->mName.C_Str() << ")";
     }
     ss << " has " << node.children.size() << " children";
-    if (node.id > -1) {
+    if (node.id != -1) {
         ss << "\n    node mesh id: " << node.id << " (node type: " << tinyusdzNodeTypeFor(node.nodeType) << ")";
     }
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
@@ -862,12 +864,13 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         }
     }
 
+    cNode->mNumChildren = numChildren;
+
     // Done. No more children.
     if (numChildren == 0) {
         return cNode;
     }
 
-    cNode->mNumChildren = numChildren;
     cNode->mChildren = new aiNode *[cNode->mNumChildren];
 
     size_t i{ 0 };
@@ -877,7 +880,8 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
     }
     
     if (skelNode != nullptr) {
-        cNode->mChildren[i] = skeletonNodesRecursive(cNode, *skelNode);
+        // Convert USD skeleton into an Assimp node and make it the last child
+        cNode->mChildren[cNode->mNumChildren-1] = skeletonNodesRecursive(cNode, *skelNode);
     }
     
     return cNode;

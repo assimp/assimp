@@ -223,14 +223,6 @@ void USDImporterImplTinyusdz::InternReadFile(
         pScene->mAnimations[animationIndex] = newAiAnimation;
 
         newAiAnimation->mName = animation.abs_path;
-        // newAiAnimation->mChannels;
-        // newAiAnimation->mNumChannels
-        // newAiAnimation->mDuration 
-        // newAiAnimation->mMeshChannels
-        // newAiAnimation->mNumMeshChannels
-        // newAiAnimation->mTicksPerSecond
-        // newAiAnimation->mMorphMeshChannels
-        // newAiAnimation->mNumMorphMeshChannels
 
         // each channel affects a node (joint)
         newAiAnimation->mNumChannels = animation.channels_map.size();
@@ -329,10 +321,9 @@ void USDImporterImplTinyusdz::InternReadFile(
 
             ++channelIndex;
         }
-
     }
 
-//    sanityCheckNodesRecursive(pScene->mRootNode);
+    // sanityCheckNodesRecursive(pScene->mRootNode);
     meshes(render_scene, pScene, nameWExt);
     materials(render_scene, pScene, nameWExt);
     textures(render_scene, pScene, nameWExt);
@@ -393,28 +384,35 @@ void USDImporterImplTinyusdz::verticesForMesh(
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
 
     // Check if this is a skinned mesh
-    if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1)
-    {
-        // recursively iterate the joints in the hierarchy
-        std::vector<aiBone *> aiBones;
+    if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
+        // Recursively iterate to collect all the joints in the hierarchy into a flattened array
         std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
         skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
-        for (int i = 0; i < skeletonNodes.size(); ++i)
-        {
+        for (int i = 0; i < skeletonNodes.size(); ++i) {
             const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
 
-            auto outputBone = new aiBone();
-            outputBone->mName = aiString(skeletonNode->joint_name);
-            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
-            aiBones.push_back(outputBone);
-
-            for (const auto &child : skeletonNodes[i]->children)
-            {
+            for (const auto &child : skeletonNodes[i]->children) {
                 skeletonNodes.push_back(&child);
             }
         }
 
-        const unsigned int numBones = aiBones.size();
+        // Convert USD skeleton joints to Assimp bones
+        const unsigned int numBones = skeletonNodes.size();
+        pScene->mMeshes[meshIdx]->mNumBones = numBones;
+        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
+
+        for (unsigned int i = 0; i < numBones; ++i) {
+            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
+            const int boneIndex = skeletonNode->joint_id;
+
+            // Sorted so that Assimp bone ids align with USD joint id
+            auto outputBone = new aiBone();
+            outputBone->mName = aiString(skeletonNode->joint_name);
+            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
+            pScene->mMeshes[meshIdx]->mBones[boneIndex] = outputBone;
+        }
+
+        // Vertex weights
         std::vector<std::vector<aiVertexWeight>> aiBonesVertexWeights;
         aiBonesVertexWeights.resize(numBones);
 
@@ -422,27 +420,19 @@ void USDImporterImplTinyusdz::verticesForMesh(
         const std::vector<float> &jointWeightIndices = render_scene.meshes[meshIdx].joint_and_weights.jointWeights;
         const int numWeightsPerVertex = render_scene.meshes[meshIdx].joint_and_weights.elementSize;
 
-        const int numJointIndices = jointIndices.size();
-        for (unsigned int vertexIndex = 0; vertexIndex < numVertices; ++vertexIndex)
-        {
-            for (int weightIndex = 0; weightIndex < numWeightsPerVertex; ++weightIndex)
-            {
+        for (unsigned int vertexIndex = 0; vertexIndex < numVertices; ++vertexIndex) {
+            for (int weightIndex = 0; weightIndex < numWeightsPerVertex; ++weightIndex) {
                 const unsigned int index = vertexIndex * numWeightsPerVertex + weightIndex;
-                const int jointIndex = jointIndices[index];
                 const float jointWeight = jointWeightIndices[index];
 
                 if (jointWeight > 0) {
+                    const int jointIndex = jointIndices[index];
                     aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
                 }
             }
         }        
 
-        pScene->mMeshes[meshIdx]->mNumBones = numBones;
-        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
-        std::swap_ranges(aiBones.begin(), aiBones.end(), pScene->mMeshes[meshIdx]->mBones);
-
-        for (int boneIndex = 0; boneIndex < numBones; ++boneIndex)
-        {
+        for (int boneIndex = 0; boneIndex < numBones; ++boneIndex) {
             const unsigned int numWeightsForBone = aiBonesVertexWeights[boneIndex].size();
             pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights = new aiVertexWeight[numWeightsForBone];
             pScene->mMeshes[meshIdx]->mBones[boneIndex]->mNumWeights = numWeightsForBone;

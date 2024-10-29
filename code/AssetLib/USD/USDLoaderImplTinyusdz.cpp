@@ -212,8 +212,27 @@ void USDImporterImplTinyusdz::InternReadFile(
         return;
     }
 
+    // sanityCheckNodesRecursive(pScene->mRootNode);
+    animations(render_scene, pScene);
+    meshes(render_scene, pScene, nameWExt);
+    materials(render_scene, pScene, nameWExt);
+    textures(render_scene, pScene, nameWExt);
+    textureImages(render_scene, pScene, nameWExt);
+    buffers(render_scene, pScene, nameWExt);
+
+    setupNodes(render_scene, pScene, nameWExt);
+
+    setupBlendShapes(render_scene, pScene, nameWExt);
+}
+void USDImporterImplTinyusdz::animations(
+    const tinyusdz::tydra::RenderScene& render_scene,
+    aiScene* pScene) {
+    if (render_scene.animations.empty()) {
+        return;
+    }
+
     pScene->mNumAnimations = render_scene.animations.size();
-    pScene->mAnimations = new aiAnimation*[pScene->mNumAnimations];
+    pScene->mAnimations = new aiAnimation *[pScene->mNumAnimations];
 
     for (int animationIndex = 0; animationIndex < pScene->mNumAnimations; ++animationIndex) {
 
@@ -228,7 +247,7 @@ void USDImporterImplTinyusdz::InternReadFile(
         newAiAnimation->mNumChannels = animation.channels_map.size();
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
         int channelIndex = 0;
-        for (const auto& [jointName, animationChannelMap] : animation.channels_map) {
+        for (const auto &[jointName, animationChannelMap] : animation.channels_map) {
             auto newAiNodeAnim = new aiNodeAnim();
             newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
             newAiNodeAnim->mNodeName = jointName;
@@ -238,7 +257,7 @@ void USDImporterImplTinyusdz::InternReadFile(
             std::vector<aiQuatKey> rotationKeys;
             std::vector<aiVectorKey> scalingKeys;
 
-            for (const auto& [channelType, animChannel] : animationChannelMap) {
+            for (const auto &[channelType, animChannel] : animationChannelMap) {
                 switch (channelType) {
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Rotation:
                     if (animChannel.rotations.static_value.has_value()) {
@@ -269,7 +288,7 @@ void USDImporterImplTinyusdz::InternReadFile(
                         aiVector3D scale;
                         aiQuaternion rotation;
                         tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
-                        
+
                         positionKeys.push_back(aiVectorKey(0, position));
                         scalingKeys.push_back(aiVectorKey(0, scale));
                         rotationKeys.push_back(aiQuatKey(0, rotation));
@@ -322,17 +341,6 @@ void USDImporterImplTinyusdz::InternReadFile(
             ++channelIndex;
         }
     }
-
-    // sanityCheckNodesRecursive(pScene->mRootNode);
-    meshes(render_scene, pScene, nameWExt);
-    materials(render_scene, pScene, nameWExt);
-    textures(render_scene, pScene, nameWExt);
-    textureImages(render_scene, pScene, nameWExt);
-    buffers(render_scene, pScene, nameWExt);
-
-    setupNodes(render_scene, pScene, nameWExt);
-
-    setupBlendShapes(render_scene, pScene, nameWExt);
 }
 
 void USDImporterImplTinyusdz::meshes(

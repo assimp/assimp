@@ -54,6 +54,7 @@ class utUSDImport : public AbstractImportExportBase {
 TEST_F(utUSDImport, meshTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/../models-nonbsd/USD/usdc/suzanne.usdc", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
     EXPECT_EQ(1u, scene->mNumMeshes);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
     EXPECT_EQ(1968u, scene->mMeshes[0]->mNumVertices); // Note: suzanne is authored with only 507 vertices, but TinyUSDZ rebuilds the vertex array. see https://github.com/lighttransport/tinyusdz/blob/36f2aabb256b360365989c01a52f839a57dfe2a6/src/tydra/render-data.cc#L2673-L2690 
@@ -63,7 +64,7 @@ TEST_F(utUSDImport, meshTest) {
 TEST_F(utUSDImport, skinnedMeshTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/../models-nonbsd/USD/usda/simple-skin-test.usda", aiProcess_ValidateDataStructure);
-
+    EXPECT_NE(nullptr, scene);
     EXPECT_TRUE(scene->HasMeshes());
 
     const aiMesh *mesh = scene->mMeshes[0];

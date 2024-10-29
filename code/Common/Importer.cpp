@@ -771,6 +771,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
 #else
         pimpl->mErrorString = std::string("std::exception: ") + e.what();
 #endif
+        pimpl->mException = std::current_exception();
 
         ASSIMP_LOG_ERROR(pimpl->mErrorString);
         delete pimpl->mScene; pimpl->mScene = nullptr;

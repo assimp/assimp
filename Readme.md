@@ -14,6 +14,9 @@ Open Asset Import Library is a library that loads various 3D file formats into a
 APIs are provided for C and C++. Various bindings exist to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
 Additionally, assimp features various __mesh post-processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
+## Project activity ##
+![Alt](https://repobeats.axiom.co/api/embed/997f84e5f9fcf772da1e687f3a4f3a8afdbf4cf0.svg "Repobeats analytics image")
+
 ### Documentation ###
 Read [our latest documentation](https://assimp-docs.readthedocs.io/en/latest/).
 

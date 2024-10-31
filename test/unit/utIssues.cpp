@@ -74,6 +74,9 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
         EXPECT_FLOAT_EQ( opacity, newOpacity );
     }
     delete scene;
+
+    // Cleanup. Delete exported dae.dae file
+    EXPECT_EQ(0, std::remove(path.c_str()));
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

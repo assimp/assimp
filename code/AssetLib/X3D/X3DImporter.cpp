@@ -56,6 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "meshlab/vrml/Parser.h"
 
+namespace {
+    const char *TAG{"X3DImporter (C++)"};
+}
 using std::string;
 
 namespace Assimp {

@@ -915,7 +915,7 @@ aiNode *USDImporterImplTinyusdz::skeletonNodesRecursive(
         const tinyusdz::tydra::SkelNode &childJoint = joint.children[i];
         cNode->mChildren[i] = skeletonNodesRecursive(cNode, childJoint);
     }
-   
+
     return cNode;
 }
 

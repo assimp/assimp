@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <memory>
 
-#include "meshlab/vrml/Scanner.h"
+#include "meshlab/vrml/Parser.h"
 
 using std::string;
 
@@ -278,6 +278,9 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         VrmlTranslator::Scanner scanner(wide_string);
         delete [] wide_string;
+
+        VrmlTranslator::Parser parser(&scanner);
+        parser.Parse();
     }
 
     mpIOHandler = pIOHandler;

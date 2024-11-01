@@ -35,11 +35,14 @@
 #if !defined(VRML_PARSER_H__)
 #define VRML_PARSER_H__
 
-#include <QtXml>
+#include <map>
 #include <set>
-
+#include <string>
+#include "contrib/pugixml/src/pugixml.hpp"
 
 #include "Scanner.h"
+
+#define QDomElement pugi::xml_node
 
 namespace VrmlTranslator {
 
@@ -48,7 +51,7 @@ class Errors {
 public:
 	int count;			// number of errors detected
 	wchar_t* stringError;
-	
+
 	Errors();
 	~Errors();
 	void SynErr(int line, int col, int n);
@@ -90,14 +93,15 @@ public:
 	Token *t;			// last recognized token
 	Token *la;			// lookahead token
 
-QDomDocument *doc;
-	
-	std::map<QString, QString> defNode;
-	
-	std::set<QString> proto;
-	
-	std::set<QString> x3dNode;
-	
+    pugi::xml_document doc_;
+    pugi::xml_document *doc = &doc_; // IrrXMLReader* createIrrXMLReader(const char* filename);
+
+    std::map<std::string, std::string> defNode;
+
+	std::set<std::string> proto;
+
+	std::set<std::string> x3dNode;
+
 	void InitX3dNode()
 	{
 	  x3dNode.insert("Arc2D"); x3dNode.insert("ArcClose2D"); x3dNode.insert("BallJoint");
@@ -116,7 +120,7 @@ QDomDocument *doc;
 	  x3dNode.insert("EspduTransform"); x3dNode.insert("ExplosionEmitter");
 	  x3dNode.insert("FillProperties"); x3dNode.insert("FloatVertexAttribute");
 	  x3dNode.insert("FogCoordinate"); x3dNode.insert(" GeneratedCubeMapTexture");
-	  x3dNode.insert("GeoCoordinate"); x3dNode.insert("GeoElevationGrid"); x3dNode.insert("GeoLocation"); 
+	  x3dNode.insert("GeoCoordinate"); x3dNode.insert("GeoElevationGrid"); x3dNode.insert("GeoLocation");
 	  x3dNode.insert("GeoLOD"); x3dNode.insert("GeoMetadata"); x3dNode.insert("GeoOrigin");
 	  x3dNode.insert("GeoPositionInterpolator"); x3dNode.insert("GeoProximitySensor");
 	  x3dNode.insert("GeoTouchSensor"); x3dNode.insert("GeoViewpoint");	x3dNode.insert("GravityPhysicsModel");
@@ -128,7 +132,7 @@ QDomDocument *doc;
 	  x3dNode.insert("Layer"); x3dNode.insert("LayerSet"); x3dNode.insert("Layout");
 	  x3dNode.insert("LayoutGroup"); x3dNode.insert("LayoutLayer"); x3dNode.insert("LinePicker");
 	  x3dNode.insert("LineProperties"); x3dNode.insert("LineSet"); x3dNode.insert("LoadSensor");
-	  x3dNode.insert("LocalFog"); x3dNode.insert("Material"); x3dNode.insert("Matrix3VertexAttribute"); 
+	  x3dNode.insert("LocalFog"); x3dNode.insert("Material"); x3dNode.insert("Matrix3VertexAttribute");
 	  x3dNode.insert("Matrix4VertexAttribute"); x3dNode.insert("MetadataDouble");
 	  x3dNode.insert("MetadataFloat"); x3dNode.insert("MetadataInteger"); x3dNode.insert("MetadataSet");
 	  x3dNode.insert("MetadataString"); x3dNode.insert("MotorJoint"); x3dNode.insert("MultiTexture");
@@ -162,7 +166,7 @@ QDomDocument *doc;
 	  x3dNode.insert(" Viewpoint"); x3dNode.insert("ViewpointGroup"); x3dNode.insert("VolumeEmitter");
 	  x3dNode.insert("VolumePicker"); x3dNode.insert("WindPhysicsModel"); x3dNode.insert("Cylinder"); x3dNode.insert("Sphere");
 	}
-	
+
 
 
 	Parser(Scanner *scanner);
@@ -180,7 +184,7 @@ QDomDocument *doc;
 	void ComponentNameId();
 	void ComponentSupportLevel();
 	void ExportStatement();
-	void NodeNameId(QString& str);
+	void NodeNameId(std::string& str);
 	void ExportedNodeNameId();
 	void ImportStatement();
 	void InlineNodeNameId();
@@ -191,35 +195,35 @@ QDomDocument *doc;
 	void NodeStatement(QDomElement& parent);
 	void ProtoStatement(QDomElement& parent);
 	void RouteStatement();
-	void Node(QDomElement& parent, QString& tagName, const QString defValue);
+	void Node(QDomElement& parent, std::string& tagName, const std::string defValue);
 	void RootNodeStatement(QDomElement& parent);
 	void Proto(QDomElement& parent);
 	void Externproto(QDomElement& parent);
 	void ProtoStatements(QDomElement& parent);
-	void NodeTypeId(QString& str);
+	void NodeTypeId(std::string& str);
 	void InterfaceDeclarations(QDomElement& parent);
 	void ProtoBody(QDomElement& parent);
 	void InterfaceDeclaration(QDomElement& parent);
 	void RestrictedInterfaceDeclaration(QDomElement& parent);
-	void FieldType(QString& str);
-	void InputOnlyId(QString& str);
-	void OutputOnlyId(QString& str);
-	void InitializeOnlyId(QString& str);
-	void FieldValue(QDomElement& parent, QString fieldName, bool flag);
-	void FieldId(QString& str);
+	void FieldType(std::string& str);
+	void InputOnlyId(std::string& str);
+	void OutputOnlyId(std::string& str);
+	void InitializeOnlyId(std::string& str);
+	void FieldValue(QDomElement& parent, std::string fieldName, bool flag);
+	void FieldId(std::string& str);
 	void ExternInterfaceDeclarations(QDomElement& parent);
-	void URLList(QString& url);
+	void URLList(std::string& url);
 	void ExternInterfaceDeclaration(QDomElement& parent);
 	void NodeBody(QDomElement& parent, bool flag);
 	void ScriptBody();
 	void NodeBodyElement(QDomElement& parent, bool flag);
 	void ScriptBodyElement();
-	void InputOutputId(QString& str);
-	void SingleValue(QDomElement& parent, QString fieldName, bool flag);
-	void MultiValue(QDomElement& parent, QString fieldName, bool flag);
-	void MultiNumber(QString& value);
-	void MultiString(QString& value);
-	void MultiBool(QString& value);
+	void InputOutputId(std::string& str);
+	void SingleValue(QDomElement& parent, std::string fieldName, bool flag);
+	void MultiValue(QDomElement& parent, std::string fieldName, bool flag);
+	void MultiNumber(std::string& value);
+	void MultiString(std::string& value);
+	void MultiBool(std::string& value);
 
 	void Parse();
 

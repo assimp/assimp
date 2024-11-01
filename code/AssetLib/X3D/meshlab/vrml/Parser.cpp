@@ -350,27 +350,28 @@ void Parser::Proto(pugi::xml_node& parent) {
 }
 
 void Parser::Externproto(pugi::xml_node& parent) {
+//        QString name, url;
 		std::string name, url;
 //		QDomElement node = doc->createElement("ExternProtoDeclare");
-        pugi::xml_node node;
+        pugi::xml_node node = doc->append_child("ExternProtoDeclare");
 		Expect(34);
 		NodeTypeId(name);
 		Expect(22);
-        // TODO: can't do anything to unattached pugixml node here since nodes only exist within doc tree
 		ExternInterfaceDeclarations(node);
 		Expect(23);
 		URLList(url);
 		std::set<std::string>::const_iterator iter = x3dNode.find(name);
 		if (iter == x3dNode.end())
 		{
-          node = parent.append_child("ExternProtoDeclare");
 //		  node.setAttribute("name", name);
           node.append_attribute("name") = name.c_str();
 //		  node.setAttribute("url", url);
           node.append_attribute("url") = url.c_str();
 //		  parent.appendChild(node);
+          parent.append_copy(node);
 		  proto.insert(name);
 		}
+        doc->remove_child(node);
 }
 
 void Parser::ProtoStatements(pugi::xml_node& parent) {
@@ -398,7 +399,7 @@ void Parser::ProtoBody(pugi::xml_node& parent) {
 
 void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
 //        QString name, type, val; QDomElement node;
-		std::string name, type, val;
+		std::string name, type, val; pugi::xml_node node;
 		if (StartOf(4)) {
 			RestrictedInterfaceDeclaration(parent);
 		} else if (la->kind == 32 || la->kind == 33) {
@@ -409,7 +410,7 @@ void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
 			}
 			FieldType(type);
 			FieldId(name);
-            pugi::xml_node node = parent.append_child("field");
+            node = parent.append_child("field");
 			FieldValue(node, "value", false);
 //			node = doc->createElement("field");
 //			node.setAttribute("name", name);

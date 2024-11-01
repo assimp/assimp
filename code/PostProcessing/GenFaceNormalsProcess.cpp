@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to generate face
-* normals for all imported faces.
-*/
+/** 
+ * @file Implementation of the post-processing step to generate face
+ * normals for all imported faces.
+ */
 
 #include "GenFaceNormalsProcess.h"
 #include <assimp/Exceptional.h>
@@ -55,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the processing step is present in the given flag field.
+// Returns whether the processing step is in the given flag field.
 bool GenFaceNormalsProcess::IsActive(unsigned int pFlags) const {
     force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     flippedWindingOrder_ = (pFlags & aiProcess_FlipWindingOrder) != 0;
@@ -64,7 +63,7 @@ bool GenFaceNormalsProcess::IsActive(unsigned int pFlags) const {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
+// Executes the post-processing step on the given imported data.
 void GenFaceNormalsProcess::Execute(aiScene *pScene) {
     ASSIMP_LOG_DEBUG("GenFaceNormalsProcess begin");
 
@@ -88,7 +87,7 @@ void GenFaceNormalsProcess::Execute(aiScene *pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
+// Executes the post-processing step on the given imported data.
 bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     if (nullptr != pMesh->mNormals) {
         if (force_) {
@@ -122,7 +121,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         } else {
             duplicatedVertices.push_back(pMesh->mVertices[index]);
             normals.push_back(normal);
-            index = pMesh->mNumVertices + (unsigned int)duplicatedVertices.size() - 1;
+            index = pMesh->mNumVertices + static_cast<unsigned int>(duplicatedVertices.size() - 1);
         }
         return index;
     };
@@ -143,8 +142,8 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         const aiVector3D *pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D *pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
-        // Boolean XOR - if either but not both of these flags is set, then the winding order has
-        // changed and the cross product to calculate the normal needs to be reversed
+        // Boolean XOR - if either but not both of these flags are set, then the winding order has
+        // changed and the cross-product to calculate the normal needs to be reversed
         if (flippedWindingOrder_ != leftHanded_) 
             std::swap(pV2, pV3);
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
@@ -155,10 +154,10 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     }
 
     // store normals (and additional vertices) back into the mesh
-    if(duplicatedVertices.size() > 0) {
+    if (!duplicatedVertices.empty()) {
         const aiVector3D * oldVertices = pMesh->mVertices;
         auto oldNumVertices = pMesh->mNumVertices;
-        pMesh->mNumVertices += (unsigned int)duplicatedVertices.size();
+        pMesh->mNumVertices += static_cast<unsigned int>(duplicatedVertices.size());
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
         memcpy(pMesh->mVertices, oldVertices, oldNumVertices * sizeof(aiVector3D));
         memcpy(pMesh->mVertices + oldNumVertices, duplicatedVertices.data(), duplicatedVertices.size() * sizeof(aiVector3D));

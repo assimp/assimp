@@ -864,6 +864,7 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DGeoHelper.h
   AssetLib/X3D/X3DXmlHelper.cpp
   AssetLib/X3D/X3DXmlHelper.h
+  AssetLib/X3D/meshlab/vrml/Scanner.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF

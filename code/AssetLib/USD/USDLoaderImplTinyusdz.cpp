@@ -438,7 +438,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
                     aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
                 }
             }
-        }        
+        }
 
         for (int boneIndex = 0; boneIndex < numBones; ++boneIndex) {
             const unsigned int numWeightsForBone = aiBonesVertexWeights[boneIndex].size();
@@ -886,11 +886,12 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         cNode->mChildren[i] = nodesRecursive(cNode, childNode, skeletons);
         ++i;
     }
-    
+
     if (skelNode != nullptr) {
         // Convert USD skeleton into an Assimp node and make it the last child
         cNode->mChildren[cNode->mNumChildren-1] = skeletonNodesRecursive(cNode, *skelNode);
     }
+
     return cNode;
 }
 

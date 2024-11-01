@@ -226,6 +226,14 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
     ParseFile(theParser);
 }
 
+void X3DImporter::ParseFile(std::istream &myIstream) {
+    XmlParser theParser;
+    if (!theParser.parse(myIstream)) {
+        return;
+    }
+    ParseFile(theParser);
+}
+
 void X3DImporter::ParseFile(const std::string &pFileContents) {
     XmlParser theParser;
     if (!theParser.parse(pFileContents)) {
@@ -318,7 +326,7 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 
     if (readFromMem) {
-        ParseFile(ss.str());
+        ParseFile(ss);
     } else {
         pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
         ParseFile(pFile, pIOHandler);

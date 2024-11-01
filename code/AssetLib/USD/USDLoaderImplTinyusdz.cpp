@@ -891,7 +891,6 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         // Convert USD skeleton into an Assimp node and make it the last child
         cNode->mChildren[cNode->mNumChildren-1] = skeletonNodesRecursive(cNode, *skelNode);
     }
-    
     return cNode;
 }
 

@@ -325,7 +325,8 @@ void Parser::RootNodeStatement(pugi::xml_node& parent) {
 }
 
 void Parser::Proto(pugi::xml_node& parent) {
-		std::string name; pugi::xml_node node = parent.append_child(pugi::node_element);
+//        QString name; QDomElement node;
+		std::string name; pugi::xml_node node;
 		Expect(21);
 		NodeTypeId(name);
 //		node = doc->createElement("ProtoDeclare");
@@ -351,16 +352,18 @@ void Parser::Proto(pugi::xml_node& parent) {
 void Parser::Externproto(pugi::xml_node& parent) {
 		std::string name, url;
 //		QDomElement node = doc->createElement("ExternProtoDeclare");
-        pugi::xml_node node = parent.append_child("ExternProtoDeclare");
+        pugi::xml_node node;
 		Expect(34);
 		NodeTypeId(name);
 		Expect(22);
+        // TODO: can't do anything to unattached pugixml node here since nodes only exist within doc tree
 		ExternInterfaceDeclarations(node);
 		Expect(23);
 		URLList(url);
 		std::set<std::string>::const_iterator iter = x3dNode.find(name);
 		if (iter == x3dNode.end())
 		{
+          node = parent.append_child("ExternProtoDeclare");
 //		  node.setAttribute("name", name);
           node.append_attribute("name") = name.c_str();
 //		  node.setAttribute("url", url);
@@ -394,7 +397,8 @@ void Parser::ProtoBody(pugi::xml_node& parent) {
 }
 
 void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
-		std::string name, type, val; pugi::xml_node node = parent.append_child("field");
+//        QString name, type, val; QDomElement node;
+		std::string name, type, val;
 		if (StartOf(4)) {
 			RestrictedInterfaceDeclaration(parent);
 		} else if (la->kind == 32 || la->kind == 33) {
@@ -405,6 +409,7 @@ void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
 			}
 			FieldType(type);
 			FieldId(name);
+            pugi::xml_node node = parent.append_child("field");
 			FieldValue(node, "value", false);
 //			node = doc->createElement("field");
 //			node.setAttribute("name", name);
@@ -751,6 +756,7 @@ void Parser::ScriptBody() {
 }
 
 void Parser::NodeBodyElement(pugi::xml_node& parent, bool flag) {
+//        QString idName, idProto; QDomElement node;
 		std::string idName, idProto; pugi::xml_node node;
 		if (la->kind == 1) {
 			Get();
@@ -762,7 +768,7 @@ void Parser::NodeBodyElement(pugi::xml_node& parent, bool flag) {
 				Expect(1);
 				idProto = std::string(coco_string_create_char(t->val));
 //				node = doc->createElement("IS");
-                node = parent.append_child("IS");
+                pugi::xml_node node = parent.append_child("IS");
 //				QDomElement connect = doc->createElement("connect");
                 pugi::xml_node connect = node.append_child("connect");
 //				connect.setAttribute("nodeField", idName);
@@ -841,8 +847,8 @@ void Parser::InputOutputId(std::string& str) {
 }
 
 void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
-		std::string value; //QDomElement tmpParent = doc->createElement("tmp");
-        pugi::xml_node tmpParent;
+//        QString value; QDomElement tmpParent = doc->createElement("tmp");
+		std::string value; pugi::xml_node tmpParent = doc->append_child("tmpParent");
 		if (StartOf(9)) {
 			if (la->kind == 4) {
 				Get();
@@ -904,14 +910,15 @@ void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool fla
 			}
 			else {
 //              parent.appendChild(tmpParent.firstChildElement());
-                parent.insert_child_before(pugi::node_element, tmpParent.first_child());
+              parent.append_copy(tmpParent.first_child());
             }
 		} else SynErr(102);
+        doc->remove_child(tmpParent);
 }
 
 void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
-		std::string value; //QDomElement tmpParent = doc->createElement("tmp");
-        pugi::xml_node tmpParent;
+//        QString value; QDomElement tmpParent = doc->createElement("tmp");
+		std::string value; pugi::xml_node tmpParent = doc->append_child("tmpParent");
 		Expect(22);
 		if (StartOf(10)) {
 			if (la->kind == 2 || la->kind == 3) {
@@ -951,7 +958,7 @@ void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag
                 list.push_back(item);
             }
 //			QDomElement field = doc->createElement("field");
-            pugi::xml_node field;// = parent.append_child("field");
+            pugi::xml_node field = parent.append_child("field");
 //			field.setAttribute("name", fieldName);
             field.append_attribute("name") = fieldName.c_str();
 			int i = 0;
@@ -969,10 +976,12 @@ void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag
 			}
 			if (flag) {
 //              parent.appendChild(field);
-                parent.insert_child_before(pugi::node_element, field);
+            } else {
+                parent.remove_child(field);
             }
 		} else SynErr(103);
 		Expect(23);
+        doc->remove_child(tmpParent);
 }
 
 void Parser::MultiNumber(std::string& value) {

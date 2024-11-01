@@ -114,6 +114,9 @@ TEST_F(utColladaExport, testExportCamera) {
         EXPECT_FLOAT_EQ(pos[i].y, read->mPosition.y);
         EXPECT_FLOAT_EQ(pos[i].z, read->mPosition.z);
     }
+
+    // Cleanup, delete the exported file
+    EXPECT_EQ(0, std::remove(file));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -220,6 +223,9 @@ TEST_F(utColladaExport, testExportLight) {
         EXPECT_NEAR(orig->mAngleInnerCone, read->mAngleInnerCone, 0.001);
         EXPECT_NEAR(orig->mAngleOuterCone, read->mAngleOuterCone, 0.001);
     }
+
+    // Cleanup, delete the exported file
+    EXPECT_EQ(0, std::remove(file));
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

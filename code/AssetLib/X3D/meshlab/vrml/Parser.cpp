@@ -36,10 +36,6 @@
 #include "Parser.h"
 #include "Scanner.h"
 
-namespace {
-    const char *TAG{"VRML Parser (C++)"};
-}
-
 namespace VrmlTranslator {
 
 

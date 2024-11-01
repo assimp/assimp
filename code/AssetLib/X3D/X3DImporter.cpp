@@ -53,11 +53,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, stdlib.
 #include <iterator>
 #include <memory>
+#include <sstream>
 
 #include "meshlab/vrml/Parser.h"
 
 namespace {
-    const char *TAG{"X3DImporter (C++)"};
+//    const char *TAG{"X3DImporter (C++)"};
 }
 using std::string;
 
@@ -222,7 +223,18 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
     if (!theParser.parse(fileStream.get())) {
         return;
     }
+    ParseFile(theParser);
+}
 
+void X3DImporter::ParseFile(const std::string &pFileContents) {
+    XmlParser theParser;
+    if (!theParser.parse(pFileContents)) {
+        return;
+    }
+    ParseFile(theParser);
+}
+
+void X3DImporter::ParseFile(XmlParser &theParser) {
     XmlNode *node = theParser.findNode("X3D");
     if (nullptr == node) {
         return;
@@ -274,8 +286,10 @@ static bool isX3dv(const std::string &pFile) {
 }
 
 void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+    std::stringstream ss;
     const bool isWrlExt{isWrl(pFile)};
-    if (isWrlExt || isX3dv(pFile)) {
+    const bool readFromMem{ isWrlExt || isX3dv(pFile) };
+    if (readFromMem) {
         wchar_t* wide_string = new wchar_t[ pFile.length() + 1 ];
         std::copy( pFile.begin(), pFile.end(), wide_string );
         wide_string[ pFile.length() ] = 0;
@@ -285,6 +299,8 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
+        ss.str("");
+        parser.doc_.save(ss);
     }
 
     mpIOHandler = pIOHandler;
@@ -301,10 +317,13 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mRootNode->mParent = nullptr;
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 
-    pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
-    ParseFile(pFile, pIOHandler);
-    pIOHandler->PopDirectory();
-
+    if (readFromMem) {
+        ParseFile(ss.str());
+    } else {
+        pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
+        ParseFile(pFile, pIOHandler);
+        pIOHandler->PopDirectory();
+    }
     //search for root node element
 
     mNodeElementCur = NodeElement_List.front();

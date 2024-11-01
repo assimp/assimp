@@ -58,7 +58,7 @@ std::string tinyusdzNodeTypeFor(tinyusdz::tydra::NodeType type);
 
 template <typename T>
 aiMatrix4x4 tinyUsdzMat4ToAiMat4(const T matIn[4][4]) {
-    static_assert(std::is_floating_point<T>::value, "Only floating-point types are allowed.");
+    static_assert(std::is_floating_point_v<T>, "Only floating-point types are allowed.");
     aiMatrix4x4 matOut;
     matOut.a1 = matIn[0][0];
     matOut.a2 = matIn[1][0];

@@ -42,8 +42,6 @@
 
 #include "Scanner.h"
 
-#define QDomElement pugi::xml_node
-
 namespace VrmlTranslator {
 
 
@@ -178,7 +176,7 @@ public:
 	void ProfileStatement();
 	void ComponentStatements();
 	void MetaStatements();
-	void Statements(QDomElement& parent);
+	void Statements(pugi::xml_node& parent);
 	void ProfileNameId();
 	void ComponentStatement();
 	void ComponentNameId();
@@ -191,36 +189,36 @@ public:
 	void MetaStatement();
 	void Metakey();
 	void Metavalue();
-	void Statement(QDomElement& parent);
-	void NodeStatement(QDomElement& parent);
-	void ProtoStatement(QDomElement& parent);
+	void Statement(pugi::xml_node& parent);
+	void NodeStatement(pugi::xml_node& parent);
+	void ProtoStatement(pugi::xml_node& parent);
 	void RouteStatement();
-	void Node(QDomElement& parent, std::string& tagName, const std::string defValue);
-	void RootNodeStatement(QDomElement& parent);
-	void Proto(QDomElement& parent);
-	void Externproto(QDomElement& parent);
-	void ProtoStatements(QDomElement& parent);
+	void Node(pugi::xml_node& parent, std::string& tagName, const std::string defValue);
+	void RootNodeStatement(pugi::xml_node& parent);
+	void Proto(pugi::xml_node& parent);
+	void Externproto(pugi::xml_node& parent);
+	void ProtoStatements(pugi::xml_node& parent);
 	void NodeTypeId(std::string& str);
-	void InterfaceDeclarations(QDomElement& parent);
-	void ProtoBody(QDomElement& parent);
-	void InterfaceDeclaration(QDomElement& parent);
-	void RestrictedInterfaceDeclaration(QDomElement& parent);
+	void InterfaceDeclarations(pugi::xml_node& parent);
+	void ProtoBody(pugi::xml_node& parent);
+	void InterfaceDeclaration(pugi::xml_node& parent);
+	void RestrictedInterfaceDeclaration(pugi::xml_node& parent);
 	void FieldType(std::string& str);
 	void InputOnlyId(std::string& str);
 	void OutputOnlyId(std::string& str);
 	void InitializeOnlyId(std::string& str);
-	void FieldValue(QDomElement& parent, std::string fieldName, bool flag);
+	void FieldValue(pugi::xml_node& parent, std::string fieldName, bool flag);
 	void FieldId(std::string& str);
-	void ExternInterfaceDeclarations(QDomElement& parent);
+	void ExternInterfaceDeclarations(pugi::xml_node& parent);
 	void URLList(std::string& url);
-	void ExternInterfaceDeclaration(QDomElement& parent);
-	void NodeBody(QDomElement& parent, bool flag);
+	void ExternInterfaceDeclaration(pugi::xml_node& parent);
+	void NodeBody(pugi::xml_node& parent, bool flag);
 	void ScriptBody();
-	void NodeBodyElement(QDomElement& parent, bool flag);
+	void NodeBodyElement(pugi::xml_node& parent, bool flag);
 	void ScriptBodyElement();
 	void InputOutputId(std::string& str);
-	void SingleValue(QDomElement& parent, std::string fieldName, bool flag);
-	void MultiValue(QDomElement& parent, std::string fieldName, bool flag);
+	void SingleValue(pugi::xml_node& parent, std::string fieldName, bool flag);
+	void MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag);
 	void MultiNumber(std::string& value);
 	void MultiString(std::string& value);
 	void MultiBool(std::string& value);

@@ -234,14 +234,6 @@ void X3DImporter::ParseFile(std::istream &myIstream) {
     ParseFile(theParser);
 }
 
-void X3DImporter::ParseFile(const std::string &pFileContents) {
-    XmlParser theParser;
-    if (!theParser.parse(pFileContents)) {
-        return;
-    }
-    ParseFile(theParser);
-}
-
 void X3DImporter::ParseFile(XmlParser &theParser) {
     XmlNode *node = theParser.findNode("X3D");
     if (nullptr == node) {

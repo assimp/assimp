@@ -277,7 +277,6 @@ public:
     /// \param [in] pIOHandler - pointer to IO helper object.
     void ParseFile(const std::string &file, IOSystem *pIOHandler);
     void ParseFile(std::istream &myIstream);
-    void ParseFile(const std::string &pFileContents);
     void ParseFile(XmlParser &theParser);
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);

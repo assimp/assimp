@@ -248,7 +248,9 @@ void Parser::NodeStatement(pugi::xml_node& parent) {
 			if(iter != defNode.end())
 			{
 //			  QDomElement node = doc->createElement(iter->second);
+              pugi::xml_node node = parent.append_child((iter->second).c_str());
 //			  node.setAttribute("USE", attrValue);
+              node.append_attribute("USE") = attrValue.c_str();
 //			  parent.appendChild(node);
 			}
 		} else SynErr(88);
@@ -282,15 +284,19 @@ void Parser::Node(pugi::xml_node& parent, std::string& tagName, const std::strin
 			if (iter != proto.end())
 			{
 //			  node = doc->createElement("ProtoInstance");
+              node = parent.append_child("ProtoInstance");
 //			  node.setAttribute("name", tagName);
+              node.append_attribute("name") = tagName.c_str();
 			  flag = true;
 			}
 			else {
 //			  node = doc->createElement(tagName);
+              node = parent.append_child(tagName.c_str());
             }
 			if (defValue != "")
 			{
 //			  node.setAttribute("DEF", defValue);
+              node.append_attribute("DEF") = defValue.c_str();
 			  defNode[defValue] = tagName;
 			}
 			Expect(24);
@@ -302,6 +308,7 @@ void Parser::Node(pugi::xml_node& parent, std::string& tagName, const std::strin
 			ScriptBody();
 			Expect(25);
 //			node = doc->createElement("Script");
+            node = parent.append_child("Script");
 		} else SynErr(90);
 //		parent.appendChild(node);
 }
@@ -318,20 +325,24 @@ void Parser::RootNodeStatement(pugi::xml_node& parent) {
 }
 
 void Parser::Proto(pugi::xml_node& parent) {
-		std::string name; pugi::xml_node node;
+		std::string name; pugi::xml_node node = parent.append_child(pugi::node_element);
 		Expect(21);
 		NodeTypeId(name);
 //		node = doc->createElement("ProtoDeclare");
+        node = parent.append_child("ProtoDeclare");
 //		node.setAttribute("name", name);
+        node.append_attribute("name") = name.c_str();
 		proto.insert(name);
 		Expect(22);
 //		QDomElement interf = doc->createElement("ProtoInterface");
-//		InterfaceDeclarations(interf);
+        pugi::xml_node interf = node.append_child("ProtoInterface");
+		InterfaceDeclarations(interf);
 //		node.appendChild(interf);
 		Expect(23);
 		Expect(24);
 //		QDomElement body = doc->createElement("ProtoBody");
-//		ProtoBody(body);
+        pugi::xml_node body = node.append_child("ProtoBody");
+		ProtoBody(body);
 //		node.appendChild(body);
 		Expect(25);
 //		parent.appendChild(node);
@@ -340,17 +351,20 @@ void Parser::Proto(pugi::xml_node& parent) {
 void Parser::Externproto(pugi::xml_node& parent) {
 		std::string name, url;
 //		QDomElement node = doc->createElement("ExternProtoDeclare");
+        pugi::xml_node node = parent.append_child("ExternProtoDeclare");
 		Expect(34);
 		NodeTypeId(name);
 		Expect(22);
-//		ExternInterfaceDeclarations(node);
+		ExternInterfaceDeclarations(node);
 		Expect(23);
 		URLList(url);
 		std::set<std::string>::const_iterator iter = x3dNode.find(name);
 		if (iter == x3dNode.end())
 		{
 //		  node.setAttribute("name", name);
+          node.append_attribute("name") = name.c_str();
 //		  node.setAttribute("url", url);
+          node.append_attribute("url") = url.c_str();
 //		  parent.appendChild(node);
 		  proto.insert(name);
 		}
@@ -380,7 +394,7 @@ void Parser::ProtoBody(pugi::xml_node& parent) {
 }
 
 void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
-		std::string name, type, val; pugi::xml_node node;
+		std::string name, type, val; pugi::xml_node node = parent.append_child("field");
 		if (StartOf(4)) {
 			RestrictedInterfaceDeclaration(parent);
 		} else if (la->kind == 32 || la->kind == 33) {
@@ -394,8 +408,11 @@ void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
 			FieldValue(node, "value", false);
 //			node = doc->createElement("field");
 //			node.setAttribute("name", name);
+            node.append_attribute("name") = name.c_str();
 //			node.setAttribute("type", type);
+            node.append_attribute("type") = type.c_str();
 //			node.setAttribute("accessType", "inputOutput");
+            node.append_attribute("accessType") = "inputOutput";
 //			parent.appendChild(node);
 		} else SynErr(92);
 }
@@ -403,6 +420,7 @@ void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
 void Parser::RestrictedInterfaceDeclaration(pugi::xml_node& parent) {
 		std::string name; std::string type; std::string val;
 //		QDomElement node = doc->createElement("field");
+        pugi::xml_node node = parent.append_child("field");
 		if (la->kind == 26 || la->kind == 27) {
 			if (la->kind == 26) {
 				Get();
@@ -412,6 +430,7 @@ void Parser::RestrictedInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			InputOnlyId(name);
 //			node.setAttribute("accessType", "inputOnly");
+            node.append_attribute("accessType") = "inputOnly";
 		} else if (la->kind == 28 || la->kind == 29) {
 			if (la->kind == 28) {
 				Get();
@@ -421,6 +440,7 @@ void Parser::RestrictedInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			OutputOnlyId(name);
 //			node.setAttribute("accessType", "outputOnly");
+            node.append_attribute("accessType") = "outputOnly";
 		} else if (la->kind == 30 || la->kind == 31) {
 			if (la->kind == 30) {
 				Get();
@@ -429,11 +449,14 @@ void Parser::RestrictedInterfaceDeclaration(pugi::xml_node& parent) {
 			}
 			FieldType(type);
 			InitializeOnlyId(name);
-//			FieldValue(node, "value", false);
+			FieldValue(node, "value", false);
 //			node.setAttribute("accessType", "initializeOnly");
+            node.append_attribute("accessType") = "initializeOnly";
 		} else SynErr(93);
 //		node.setAttribute("name", name);
+        node.append_attribute("name") = name.c_str();
 //		node.setAttribute("type", type);
+        node.append_attribute("type") = type.c_str();
 //		parent.appendChild(node);
 }
 
@@ -666,6 +689,7 @@ void Parser::URLList(std::string& url) {
 void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
 		std::string type, name;
 //		QDomElement node = doc->createElement("field");
+        pugi::xml_node node = parent.append_child("field");
 		if (la->kind == 26 || la->kind == 27) {
 			if (la->kind == 26) {
 				Get();
@@ -675,6 +699,7 @@ void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			InputOnlyId(name);
 //			node.setAttribute("accessType", "inputOnly");
+            node.append_attribute("accessType") = "inputOnly";
 		} else if (la->kind == 28 || la->kind == 29) {
 			if (la->kind == 28) {
 				Get();
@@ -684,6 +709,7 @@ void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			OutputOnlyId(name);
 //			node.setAttribute("accessType", "outputOnly");
+            node.append_attribute("accessType") = "outputOnly";
 		} else if (la->kind == 30 || la->kind == 31) {
 			if (la->kind == 30) {
 				Get();
@@ -693,6 +719,7 @@ void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			InitializeOnlyId(name);
 //			node.setAttribute("accessType", "initializeOnly");
+            node.append_attribute("accessType") = "initializeOnly";
 		} else if (la->kind == 32 || la->kind == 33) {
 			if (la->kind == 32) {
 				Get();
@@ -702,9 +729,12 @@ void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
 			FieldType(type);
 			FieldId(name);
 //			node.setAttribute("accessType", "inputOutput");
+            node.append_attribute("accessType") = "inputOutput";
 		} else SynErr(97);
 //		node.setAttribute("name" , name);
+        node.append_attribute("name") = name.c_str();
 //		node.setAttribute("type", type);
+        node.append_attribute("type") = type.c_str();
 //		parent.appendChild(node);
 }
 
@@ -732,9 +762,13 @@ void Parser::NodeBodyElement(pugi::xml_node& parent, bool flag) {
 				Expect(1);
 				idProto = std::string(coco_string_create_char(t->val));
 //				node = doc->createElement("IS");
+                node = parent.append_child("IS");
 //				QDomElement connect = doc->createElement("connect");
+                pugi::xml_node connect = node.append_child("connect");
 //				connect.setAttribute("nodeField", idName);
+                connect.append_attribute("nodeField") = idName.c_str();
 //				connect.setAttribute("protoField", idProto);
+                connect.append_attribute("protoField") = idProto.c_str();
 //				node.appendChild(connect);
 //				parent.appendChild(node);
 
@@ -808,10 +842,12 @@ void Parser::InputOutputId(std::string& str) {
 
 void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
 		std::string value; //QDomElement tmpParent = doc->createElement("tmp");
+        pugi::xml_node tmpParent;
 		if (StartOf(9)) {
 			if (la->kind == 4) {
 				Get();
-//				value.append(coco_string_create_char(t->val)); value.remove("\"");
+				value.append(coco_string_create_char(t->val)); //value.remove("\"");
+                value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
 			} else if (la->kind == 2 || la->kind == 3) {
 				if (la->kind == 2) {
 					Get();
@@ -843,30 +879,39 @@ void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool fla
 			if (flag)
 			{
 //			  QDomElement node = doc->createElement("fieldValue");
+              pugi::xml_node node = parent.append_child("fieldValue");
 //			  node.setAttribute("name", fieldName);
+              node.append_attribute("name") = fieldName.c_str();
 //			  node.setAttribute("value", value);
+              node.append_attribute("value") = value.c_str();
 //			  parent.appendChild(node);
 			}
 			else {
 //			  parent.setAttribute(fieldName, value);
+              parent.append_attribute(fieldName.c_str()) = value.c_str();
             }
 		} else if (StartOf(2)) {
-//			NodeStatement(tmpParent);
+			NodeStatement(tmpParent);
 			if (flag)
 			{
 //			  QDomElement tmp = doc->createElement("fieldValue");
+              pugi::xml_node tmp = parent.append_child("fieldValue");
 //			  tmp.setAttribute("name", fieldName);
+              tmp.append_attribute("name") = fieldName.c_str();
 //			  tmp.appendChild(tmpParent.firstChildElement());
+              tmp.insert_child_before(pugi::node_element, tmpParent.first_child());
 //			  parent.appendChild(tmp);
 			}
 			else {
 //              parent.appendChild(tmpParent.firstChildElement());
+                parent.insert_child_before(pugi::node_element, tmpParent.first_child());
             }
 		} else SynErr(102);
 }
 
 void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
 		std::string value; //QDomElement tmpParent = doc->createElement("tmp");
+        pugi::xml_node tmpParent;
 		Expect(22);
 		if (StartOf(10)) {
 			if (la->kind == 2 || la->kind == 3) {
@@ -879,17 +924,21 @@ void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag
 			if (flag)
 			{
 //			  QDomElement tmp = doc->createElement("fieldValue");
+              pugi::xml_node tmp = parent.append_child("fieldValue");
 //			  tmp.setAttribute("name", fieldName);
+              tmp.append_attribute("name") = fieldName.c_str();
 //			  tmp.setAttribute("value", value);
+              tmp.append_attribute("value") = value.c_str();
 //			  parent.appendChild(tmp);
 			}
 			else {
 //              parent.setAttribute(fieldName, value);
+              parent.append_attribute(fieldName.c_str()) = value.c_str();
             }
 
 		} else if (StartOf(11)) {
 			while (StartOf(2)) {
-//				NodeStatement(tmpParent);
+				NodeStatement(tmpParent);
 				if (la->kind == 37) {
 					Get();
 				}
@@ -898,21 +947,29 @@ void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag
             pugi::xml_node child;
 //			QDomNodeList list = tmpParent.childNodes();
             std::vector<pugi::xml_node> list;
+            for (auto item : tmpParent.children()) {
+                list.push_back(item);
+            }
 //			QDomElement field = doc->createElement("field");
+            pugi::xml_node field;// = parent.append_child("field");
 //			field.setAttribute("name", fieldName);
+            field.append_attribute("name") = fieldName.c_str();
 			int i = 0;
 			while(i < list.size())
 			{
-//			  child = list.at(i).toElement();
+			  child = list.at(i);//.toElement();
 			  if (flag) {
 //                field.appendChild(child.cloneNode());
+                  field.append_copy(child);
               } else {
 //                parent.appendChild(child.cloneNode());
+                  parent.append_copy(child);
               }
 			  i++;
 			}
 			if (flag) {
 //              parent.appendChild(field);
+                parent.insert_child_before(pugi::node_element, field);
             }
 		} else SynErr(103);
 		Expect(23);

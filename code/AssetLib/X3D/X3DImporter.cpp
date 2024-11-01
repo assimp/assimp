@@ -271,7 +271,8 @@ static bool isX3dv(const std::string &pFile) {
 }
 
 void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    if (isWrl(pFile) || isX3dv(pFile)) {
+    const bool isWrlExt{isWrl(pFile)};
+    if (isWrlExt || isX3dv(pFile)) {
         wchar_t* wide_string = new wchar_t[ pFile.length() + 1 ];
         std::copy( pFile.begin(), pFile.end(), wide_string );
         wide_string[ pFile.length() ] = 0;

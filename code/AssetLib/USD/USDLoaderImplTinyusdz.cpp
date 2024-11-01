@@ -278,8 +278,6 @@ void USDImporterImplTinyusdz::verticesForMesh(
         std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
         skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
         for (int i = 0; i < skeletonNodes.size(); ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
-
             for (const auto &child : skeletonNodes[i]->children) {
                 skeletonNodes.push_back(&child);
             }
@@ -319,7 +317,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
                     aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
                 }
             }
-        }        
+        }
 
         for (int boneIndex = 0; boneIndex < numBones; ++boneIndex) {
             const unsigned int numWeightsForBone = aiBonesVertexWeights[boneIndex].size();
@@ -767,12 +765,12 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         cNode->mChildren[i] = nodesRecursive(cNode, childNode, skeletons);
         ++i;
     }
-    
+
     if (skelNode != nullptr) {
         // Convert USD skeleton into an Assimp node and make it the last child
         cNode->mChildren[cNode->mNumChildren-1] = skeletonNodesRecursive(cNode, *skelNode);
     }
-    
+
     return cNode;
 }
 
@@ -796,7 +794,7 @@ aiNode *USDImporterImplTinyusdz::skeletonNodesRecursive(
         const tinyusdz::tydra::SkelNode &childJoint = joint.children[i];
         cNode->mChildren[i] = skeletonNodesRecursive(cNode, childJoint);
     }
-   
+
     return cNode;
 }
 

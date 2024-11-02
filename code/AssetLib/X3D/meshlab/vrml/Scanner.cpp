@@ -637,18 +637,18 @@ void Scanner::CreateHeapBlock() {
 }
 
 Token* Scanner::CreateToken() {
-	Token *t;
+	Token *tkn;
 	if (((char*) heapTop + (int) sizeof(Token)) >= (char*) heapEnd) {
 		CreateHeapBlock();
 	}
-	t = (Token*) heapTop;
+	tkn = (Token*) heapTop;
 	heapTop = (void*) ((char*) heapTop + sizeof(Token));
-	t->val = NULL;
-	t->next = NULL;
-	return t;
+	tkn->val = NULL;
+	tkn->next = NULL;
+	return tkn;
 }
 
-void Scanner::AppendVal(Token *t) {
+void Scanner::AppendVal(Token *tkn) {
 	int reqMem = (tlen + 1) * sizeof(wchar_t);
 	if (((char*) heapTop + reqMem) >= (char*) heapEnd) {
 		if (reqMem > HEAP_BLOCK_SIZE) {
@@ -656,11 +656,11 @@ void Scanner::AppendVal(Token *t) {
 		}
 		CreateHeapBlock();
 	}
-	t->val = (wchar_t*) heapTop;
+	tkn->val = (wchar_t*) heapTop;
 	heapTop = (void*) ((char*) heapTop + reqMem);
 
-	wcsncpy(t->val, tval, tlen);
-	t->val[tlen] = L'\0';
+	wcsncpy(tkn->val, tval, tlen);
+	tkn->val[tlen] = L'\0';
 }
 
 Token* Scanner::NextToken() {

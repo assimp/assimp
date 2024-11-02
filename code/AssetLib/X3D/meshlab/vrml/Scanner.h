@@ -52,9 +52,9 @@
 //#define coco_swprintf _snwprintf
 //#elif defined __GNUC__
 //#define coco_swprintf swprintf
-//#else 
+//#else
 //#error unknown compiler!
-//#endif 
+//#endif
 
 #ifdef WIN32
   #ifndef __MINGW32__
@@ -62,7 +62,7 @@
       #define coco_swprintf swprintf_s
     #elif _MSC_VER >= 1300
        #define coco_swprintf _snwprintf
-    #else 
+    #else
        #error unknown compiler!
     #endif
    #else
@@ -106,7 +106,7 @@ void  coco_string_delete(char* &data);
 namespace VrmlTranslator {
 
 
-class Token  
+class Token
 {
 public:
 	int kind;     // token kind
@@ -135,10 +135,10 @@ private:
 	int bufPos;         // current position in buffer
 	FILE* stream;       // input stream (seekable)
 	bool isUserStream;  // was the stream opened by the user?
-	
+
 	int ReadNextStreamChunk();
 	bool CanSeek();     // true if stream can seek otherwise false
-	
+
 public:
 	static const int EoF = COCO_WCHAR_MAX + 1;
 
@@ -146,7 +146,7 @@ public:
 	Buffer(const unsigned char* buf, int len);
 	Buffer(Buffer *b);
 	virtual ~Buffer();
-	
+
 	virtual void Close();
 	virtual int Read();
 	virtual int Peek();
@@ -277,7 +277,7 @@ private:
 
 	void CreateHeapBlock();
 	Token* CreateToken();
-	void AppendVal(Token *t);
+	void AppendVal(Token *tkn);
 
 	void Init();
 	void NextCh();
@@ -288,7 +288,7 @@ private:
 
 public:
 	Buffer *buffer;   // scanner buffer
-	
+
 	Scanner(const unsigned char* buf, int len);
 	Scanner(const wchar_t* fileName);
 	Scanner(FILE* s);

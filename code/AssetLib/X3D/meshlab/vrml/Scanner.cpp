@@ -554,7 +554,7 @@ void Scanner::Init() {
 	heapEnd = (void**) (((char*) heap) + HEAP_BLOCK_SIZE);
 	*heapEnd = 0;
 	heapTop = heap;
-	if (sizeof(Token) > HEAP_BLOCK_SIZE) {
+	if constexpr (sizeof(Token) > HEAP_BLOCK_SIZE) {
 		throw "Too small HEAP_BLOCK_SIZE";
 	}
 

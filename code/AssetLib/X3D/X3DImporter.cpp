@@ -304,11 +304,13 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         parser.Parse();
         ss.str("");
         parser.doc_.save(ss);
+    } else {
+        std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
+        if (!stream) {
+            throw DeadlyImportError("Could not open file for reading");
+        }
     }
-    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
-    if (!stream) {
-        throw DeadlyImportError("Could not open file for reading");
-    }
+
     std::string::size_type slashPos = pFile.find_last_of("\\/");
 
     mScene = pScene;

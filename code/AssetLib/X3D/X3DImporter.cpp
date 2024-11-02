@@ -286,6 +286,10 @@ static bool isX3dv(const std::string &pFile) {
 }
 
 void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+    mpIOHandler = pIOHandler;
+
+    Clear();
+
     std::stringstream ss;
     const bool isReadFromMem{ isWrl(pFile) || isX3dv(pFile) };
     if (isReadFromMem) {
@@ -301,10 +305,6 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         ss.str("");
         parser.doc_.save(ss);
     }
-
-    mpIOHandler = pIOHandler;
-
-    Clear();
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
     if (!stream) {
         throw DeadlyImportError("Could not open file for reading");

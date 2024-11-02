@@ -338,7 +338,7 @@ void Buffer::SetPos(int value) {
 		bufPos = value - bufStart;
 	} else if (stream != NULL) { // must be swapped in
 		fseek(stream, value, SEEK_SET);
-		bufLen = fread(buf, sizeof(unsigned char), bufCapacity, stream);
+		bufLen = static_cast<int>(fread(buf, sizeof(unsigned char), bufCapacity, stream));
 		bufStart = value; bufPos = 0;
 	} else {
 		bufPos = fileLen - bufStart; // make Pos return fileLen

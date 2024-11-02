@@ -306,12 +306,12 @@ int Buffer::Peek() {
 
 wchar_t* Buffer::GetString(int beg, int end) {
 	int len = end - beg;
-	wchar_t *buf = new wchar_t[len];
+	wchar_t *retBuf = new wchar_t[len];
 	int oldPos = GetPos();
 	SetPos(beg);
-	for (int i = 0; i < len; ++i) buf[i] = (wchar_t) Read();
+	for (int i = 0; i < len; ++i) retBuf[i] = (wchar_t) Read();
 	SetPos(oldPos);
-	return buf;
+	return retBuf;
 }
 
 int Buffer::GetPos() {

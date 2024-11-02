@@ -62,8 +62,8 @@ wchar_t* coco_string_create(const wchar_t *value , int startIndex, int length) {
 wchar_t* coco_string_create_upper(const wchar_t* data) {
 	if (!data) { return NULL; }
 
-	size_t dataLen = 0;
-	if (data) { dataLen = wcslen(data); }
+	int dataLen = 0;
+	if (data) { dataLen = static_cast<int>(wcslen(data)); }
 
 	wchar_t *newData = new wchar_t[dataLen + 1];
 
@@ -186,8 +186,8 @@ int coco_string_hash(const wchar_t *data) {
 // string handling, ascii character
 
 wchar_t* coco_string_create(const char* value) {
-    size_t len = 0;
-	if (value) { len = strlen(value); }
+    int len = 0;
+	if (value) { len = static_cast<int>(strlen(value)); }
 	wchar_t* data = new wchar_t[len + 1];
 	for (int i = 0; i < len; ++i) { data[i] = (wchar_t) value[i]; }
 	data[len] = 0;

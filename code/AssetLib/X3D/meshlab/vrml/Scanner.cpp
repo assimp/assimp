@@ -80,7 +80,7 @@ wchar_t* coco_string_create_upper(const wchar_t* data) {
 
 wchar_t* coco_string_create_lower(const wchar_t* data) {
 	if (!data) { return NULL; }
-	size_t dataLen = wcslen(data);
+	int dataLen = static_cast<int>(wcslen(data));
 	return coco_string_create_lower(data, 0, dataLen);
 }
 
@@ -362,7 +362,7 @@ int Buffer::ReadNextStreamChunk() {
 		buf = newBuf;
 		free = bufLen;
 	}
-    size_t read = fread(buf + bufLen, sizeof(unsigned char), free, stream);
+    int read = static_cast<int>(fread(buf + bufLen, sizeof(unsigned char), free, stream));
 	if (read > 0) {
 		fileLen = bufLen = (bufLen + read);
 		return read;

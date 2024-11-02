@@ -964,7 +964,7 @@ void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag
             pugi::xml_node field = parent.append_child("field");
 //			field.setAttribute("name", fieldName);
             field.append_attribute("name") = fieldName.c_str();
-			int i = 0;
+			unsigned int i = 0;
 			while(i < list.size())
 			{
 			  child = list.at(i);//.toElement();

@@ -853,7 +853,9 @@ void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool fla
 			if (la->kind == 4) {
 				Get();
 				value.append(coco_string_create_char(t->val)); //value.remove("\"");
-                value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+                // TODO: modify quotation removal; below violates const-correctness:
+                //   error: cannot convert ‘std::__cxx11::basic_string<char>::iterator’ to ‘const char*’
+//                value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
 			} else if (la->kind == 2 || la->kind == 3) {
 				if (la->kind == 2) {
 					Get();

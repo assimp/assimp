@@ -287,9 +287,8 @@ static bool isX3dv(const std::string &pFile) {
 
 void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     std::stringstream ss;
-    const bool isWrlExt{isWrl(pFile)};
-    const bool readFromMem{ isWrlExt || isX3dv(pFile) };
-    if (readFromMem) {
+    const bool isReadFromMem{ isWrl(pFile) || isX3dv(pFile) };
+    if (isReadFromMem) {
         wchar_t* wide_string = new wchar_t[ pFile.length() + 1 ];
         std::copy( pFile.begin(), pFile.end(), wide_string );
         wide_string[ pFile.length() ] = 0;
@@ -317,7 +316,7 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mRootNode->mParent = nullptr;
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 
-    if (readFromMem) {
+    if (isReadFromMem) {
         ParseFile(ss);
     } else {
         pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));

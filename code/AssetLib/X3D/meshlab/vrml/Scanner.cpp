@@ -133,7 +133,7 @@ void coco_string_delete(wchar_t* &data) {
 }
 
 int coco_string_length(const wchar_t* data) {
-	if (data) { return wcslen(data); }
+	if (data) { return static_cast<int>(wcslen(data)); }
 	return 0;
 }
 

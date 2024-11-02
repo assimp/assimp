@@ -39,7 +39,7 @@
 
 wchar_t* coco_string_create(const wchar_t* value) {
 	wchar_t* data;
-	int len = 0;
+	size_t len = 0;
 	if (value) { len = wcslen(value); }
 	data = new wchar_t[len + 1];
 	wcsncpy(data, value, len);
@@ -62,7 +62,7 @@ wchar_t* coco_string_create(const wchar_t *value , int startIndex, int length) {
 wchar_t* coco_string_create_upper(const wchar_t* data) {
 	if (!data) { return NULL; }
 
-	int dataLen = 0;
+	size_t dataLen = 0;
 	if (data) { dataLen = wcslen(data); }
 
 	wchar_t *newData = new wchar_t[dataLen + 1];
@@ -80,7 +80,7 @@ wchar_t* coco_string_create_upper(const wchar_t* data) {
 
 wchar_t* coco_string_create_lower(const wchar_t* data) {
 	if (!data) { return NULL; }
-	int dataLen = wcslen(data);
+	size_t dataLen = wcslen(data);
 	return coco_string_create_lower(data, 0, dataLen);
 }
 
@@ -102,11 +102,11 @@ wchar_t* coco_string_create_lower(const wchar_t* data, int startIndex, int dataL
 
 wchar_t* coco_string_create_append(const wchar_t* data1, const wchar_t* data2) {
 	wchar_t* data;
-	int data1Len = 0;
-	int data2Len = 0;
+    size_t data1Len = 0;
+    size_t data2Len = 0;
 
 	if (data1) { data1Len = wcslen(data1); }
-	if (data2) {data2Len = wcslen(data2); }
+	if (data2) { data2Len = wcslen(data2); }
 
 	data = new wchar_t[data1Len + data2Len + 1];
 
@@ -138,8 +138,8 @@ int coco_string_length(const wchar_t* data) {
 }
 
 bool coco_string_endswith(const wchar_t* data, const wchar_t *end) {
-	int dataLen = wcslen(data);
-	int endLen = wcslen(end);
+	size_t dataLen = wcslen(data);
+    size_t endLen = wcslen(end);
 	return (endLen <= dataLen) && (wcscmp(data + dataLen - endLen, end) == 0);
 }
 
@@ -186,7 +186,7 @@ int coco_string_hash(const wchar_t *data) {
 // string handling, ascii character
 
 wchar_t* coco_string_create(const char* value) {
-	int len = 0;
+    size_t len = 0;
 	if (value) { len = strlen(value); }
 	wchar_t* data = new wchar_t[len + 1];
 	for (int i = 0; i < len; ++i) { data[i] = (wchar_t) value[i]; }
@@ -362,7 +362,7 @@ int Buffer::ReadNextStreamChunk() {
 		buf = newBuf;
 		free = bufLen;
 	}
-	int read = fread(buf + bufLen, sizeof(unsigned char), free, stream);
+    size_t read = fread(buf + bufLen, sizeof(unsigned char), free, stream);
 	if (read > 0) {
 		fileLen = bufLen = (bufLen + read);
 		return read;

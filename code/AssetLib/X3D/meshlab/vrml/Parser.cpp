@@ -769,7 +769,7 @@ void Parser::NodeBodyElement(pugi::xml_node& parent, bool flag) {
 				Expect(1);
 				idProto = std::string(coco_string_create_char(t->val));
 //				node = doc->createElement("IS");
-                pugi::xml_node node = parent.append_child("IS");
+                node = parent.append_child("IS");
 //				QDomElement connect = doc->createElement("connect");
                 pugi::xml_node connect = node.append_child("connect");
 //				connect.setAttribute("nodeField", idName);

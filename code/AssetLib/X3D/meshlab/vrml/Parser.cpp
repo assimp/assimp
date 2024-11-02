@@ -32,6 +32,7 @@
 
 *****************************************************************************/
 
+#include <vector>
 #include <wchar.h>
 #include "Parser.h"
 #include "Scanner.h"

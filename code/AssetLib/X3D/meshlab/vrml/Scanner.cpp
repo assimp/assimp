@@ -240,7 +240,7 @@ Buffer::Buffer(FILE* s, bool isUserStream) {
 		fileLen = bufLen = bufStart = 0;
 	}
 	bufCapacity = (bufLen>0) ? bufLen : MIN_BUFFER_LENGTH;
-	buf = new unsigned char[bufCapacity];	
+	buf = new unsigned char[bufCapacity];
 	if (fileLen > 0) SetPos(0);          // setup  buffer to position 0 (start)
 	else bufPos = 0; // index 0 is already after the file, thus Pos = 0 is invalid
 	if (bufLen == fileLen && CanSeek()) Close();
@@ -270,7 +270,7 @@ Buffer::Buffer(const unsigned char* buf, int len) {
 }
 
 Buffer::~Buffer() {
-	Close(); 
+	Close();
 	if (buf != NULL) {
 		delete [] buf;
 		buf = NULL;
@@ -329,9 +329,9 @@ void Buffer::SetPos(int value) {
 
 	if ((value < 0) || (value > fileLen)) {
 		char msg[50];
-		sprintf(msg, "Buffer out of bounds access, position: %d", value);
+		snprintf(msg, 50, "Buffer out of bounds access, position: %d", value);
 		throw msg;
-		
+
 	}
 
 	if ((value >= bufStart) && (value < (bufStart + bufLen))) { // already in buffer
@@ -416,7 +416,7 @@ Scanner::Scanner(const wchar_t* fileName) {
 	char *chFileName = coco_string_create_char(fileName);
 	if ((stream = fopen(chFileName, "rb")) == NULL) {
 		char msg[50];
-		sprintf(msg, "Can not open file: %s", chFileName);
+		snprintf(msg, 50, "Can not open file: %s", chFileName);
 		coco_string_delete(chFileName);
 		throw msg;
 	}

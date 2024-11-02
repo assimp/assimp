@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <sstream>
 
-#include "meshlab/vrml/Parser.h"
+#include "../WRL/meshlab/vrml/Parser.h"
 
 namespace {
 //    const char *TAG{"X3DImporter (C++)"};

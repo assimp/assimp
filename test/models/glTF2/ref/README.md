@@ -3,6 +3,9 @@
 ## AnimatedMorphCube
 ![AnimatedMorphCube](screenshots/AnimatedMorphCube.gif)
 
+## AnimatedMorphSphere
+![AnimatedMorphSphere](screenshots/AnimatedMorphSphere.gif)
+
 ## MorphPrimitivesTest
 ![MorphPrimitivesTest](screenshots/MorphPrimitivesTest.gif)
 

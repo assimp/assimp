@@ -104,7 +104,9 @@ bool DefaultIOSystem::Exists(const char *pFile) const {
     }
 #else
 	struct stat statbuf;
-    stat(pFile, &statbuf);
+    if (stat(pFile, &statbuf) != 0) {
+        return false;
+    }
     // test for a regular file
     if (!S_ISREG(statbuf.st_mode)) {
         return false;

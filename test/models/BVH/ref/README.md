@@ -8,7 +8,7 @@ Three hops forward, turn around, three hops back, turn around, three hops forwar
 ## 01_03.bvh
 Climb step ladder, hang on bar, climb step ladder, hang on bar
 
-<img alt="01_03.bvh" src="screenshots/01_03_bvh.gif" width=180 />
+<img alt="01_03.bvh" src="screenshots/01_03_bvh.gif" width=320 />
 
 ## Boxing_Toes.bvh
 Boxer warming up, throwing punches, getting hit, going to canvas

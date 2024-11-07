@@ -1,16 +1,16 @@
 # glTF 3D model reference images
 
 ## AnimatedMorphCube
-![AnimatedMorphCube](screenshots/AnimatedMorphCube.gif)
+<img alt="AnimatedMorphCube" src="screenshots/AnimatedMorphCube.gif" width=180 />
 
 ## AnimatedMorphSphere
-![AnimatedMorphSphere](screenshots/AnimatedMorphSphere.gif)
+<img alt="AnimatedMorphSphere" src="screenshots/AnimatedMorphSphere.gif" width=180 />
 
 ## MorphPrimitivesTest
-![MorphPrimitivesTest](screenshots/MorphPrimitivesTest.gif)
+<img alt="MorphPrimitivesTest" src="screenshots/MorphPrimitivesTest.gif" width=180 />
 
 ## MorphStressTest
-![MorphStressTest](screenshots/MorphStressTest_cycle_animations.gif)
+<img alt="MorphStressTest" src="screenshots/MorphStressTest_cycle_animations.gif" width=180 />
 
 ## SimpleMorph
-![SimpleMorph](screenshots/SimpleMorph.gif)
+<img alt="SimpleMorph" src="screenshots/SimpleMorph.gif" width=180 />

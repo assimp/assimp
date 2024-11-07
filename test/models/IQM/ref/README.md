@@ -1,4 +1,4 @@
 # IQM 3D model reference images
 
 ## mrfixit.iqm
-![mrfixit.iqm](screenshots/mrfixit_iqm.png)
+<img alt="mrfixit.iqm" src="screenshots/mrfixit_iqm.png" width=180 />

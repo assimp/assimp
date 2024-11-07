@@ -1,4 +1,4 @@
 # HMP 3D model reference images
 
 ## terrain.hmp
-![terrain.hmp](screenshots/terrain_hmp.png)
+<img alt="terrain.hmp" src="screenshots/terrain_hmp.png" width=180 />

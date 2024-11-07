@@ -1,7 +1,7 @@
 # MD2 3D model reference images
 
 ## faerie.md2
-![faerie.md2](screenshots/faerie_md2.png)
+<img alt="faerie.md2" src="screenshots/faerie_md2.png" width=180 />
 
 ## sydney.md2
-![sydney.md2](screenshots/sydney_md2.png)
+<img alt="sydney.md2" src="screenshots/sydney_md2.png" width=180 />

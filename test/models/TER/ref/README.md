@@ -1,7 +1,7 @@
 # TER 3D model reference images
 
 ## RealisticTerrain.ter
-![RealisticTerrain_ter.png](screenshots/RealisticTerrain_ter.png)
+<img alt="RealisticTerrain.ter" src="screenshots/RealisticTerrain_ter.png" width=180 />
 
 ## RealisticTerrain_Large.ter
-![RealisticTerrain_Large_ter.png](screenshots/RealisticTerrain_Large_ter.png)
+<img alt="RealisticTerrain_Large.ter" src="screenshots/RealisticTerrain_Large_ter.png" width=180 />

@@ -2,4 +2,5 @@
 
 ## human.zae
 Compressed Collada file (.zae)
-![human.zae](screenshots/human_zae.png)
+
+<img alt="human.zae" src="screenshots/human_zae.png" width=180 />

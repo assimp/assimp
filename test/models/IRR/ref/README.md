@@ -4,9 +4,11 @@
 
 ### Animation "AnimationSet0"
 Dwarf animated; primitive objects not animated
-![scenegraphAnimMod_UTF16LE.irr](screenshots/scenegraphAnimMod_UTF16LE_irr.gif)
-![scenegraphAnimMod_UTF16LE.irr](screenshots/scenegraphAnimMod_UTF16LE_irr_anim_AnimationSet0.gif)
+
+<img alt="scenegraphAnimMod_UTF16LE.irr" src="screenshots/scenegraphAnimMod_UTF16LE_irr.gif" width=320 />
+<img alt="scenegraphAnimMod_UTF16LE.irr" src="screenshots/scenegraphAnimMod_UTF16LE_irr_anim_AnimationSet0.gif" width=180 />
 
 ### Animation "Irr_GlobalAnimChannel"
 Primitive objects animate; dwarf not animated (Animation playback sped up significantly)
-![scenegraphAnimMod_UTF16LE.irr](screenshots/scenegraphAnimMod_UTF16LE_irr_anim_Irr_GlobalAnimChannel.gif)
+
+<img alt="scenegraphAnimMod_UTF16LE.irr" src="screenshots/scenegraphAnimMod_UTF16LE_irr_anim_Irr_GlobalAnimChannel.gif" width=180 />

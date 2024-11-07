@@ -1,8 +1,9 @@
 # OgreSDK 3D model reference images
 
 ## fish.mesh
-![fish.mesh](screenshots/fish_mesh.gif)
+<img alt="fish.mesh" src="screenshots/fish_mesh.gif" width=320 />
 
 ## ninja.mesh
 Simple rigged/skinned model with about 20 animations
-![ninja.mesh](screenshots/ninja_mesh.gif)
+
+<img alt="ninja.mesh" src="screenshots/ninja_mesh.gif" width=180 />

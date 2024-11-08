@@ -262,7 +262,6 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     mpIOHandler = pIOHandler;
 
     Clear();
-
     std::stringstream ss = ConvertVrmlFileToX3dXmlFile(pFile);
     const bool isReadFromMem{ ss.str().length() > 0 };
     if (!isReadFromMem) {

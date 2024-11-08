@@ -35,10 +35,10 @@
 #if !defined(VRML_PARSER_H__)
 #define VRML_PARSER_H__
 
+#include "../../pugixml/src/pugixml.hpp"
 #include <map>
 #include <set>
 #include <string>
-#include "contrib/pugixml/src/pugixml.hpp"
 
 #include "Scanner.h"
 

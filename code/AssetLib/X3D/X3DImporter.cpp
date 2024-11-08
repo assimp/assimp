@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "../VRML/VrmlConverter.hpp"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
@@ -54,8 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <memory>
 #include <sstream>
-
-#include "../WRL/meshlab/vrml/Parser.h"
 
 namespace {
 //    const char *TAG{"X3DImporter (C++)"};
@@ -261,50 +260,14 @@ bool X3DImporter::CanRead(const std::string &pFile, IOSystem * /*pIOHandler*/, b
     return false;
 }
 
-static bool isWrl(const std::string &pFile) {
-    size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
-        return false;
-    }
-    string ext = pFile.substr(pos + 1);
-    if (ext.size() != 3) {
-        return false;
-    }
-    return (ext[0] == 'w' || ext[0] == 'W') && (ext[1] == 'r' || ext[1] == 'R') && (ext[2] == 'l' || ext[2] == 'L');
-}
-
-static bool isX3dv(const std::string &pFile) {
-    size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
-        return false;
-    }
-    string ext = pFile.substr(pos + 1);
-    if (ext.size() != 4) {
-        return false;
-    }
-    return (ext[0] == 'x' || ext[0] == 'X') && (ext[1] == '3') && (ext[2] == 'd' || ext[2] == 'D') && (ext[3] == 'v' || ext[3] == 'V');
-}
-
 void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     mpIOHandler = pIOHandler;
 
     Clear();
 
-    std::stringstream ss;
-    const bool isReadFromMem{ isWrl(pFile) || isX3dv(pFile) };
-    if (isReadFromMem) {
-        wchar_t* wide_string = new wchar_t[ pFile.length() + 1 ];
-        std::copy( pFile.begin(), pFile.end(), wide_string );
-        wide_string[ pFile.length() ] = 0;
-
-        VrmlTranslator::Scanner scanner(wide_string);
-        delete [] wide_string;
-
-        VrmlTranslator::Parser parser(&scanner);
-        parser.Parse();
-        ss.str("");
-        parser.doc_.save(ss);
-    } else {
+    std::stringstream ss = ConvertVrmlFileToX3dXmlFile(pFile);
+    const bool isReadFromMem{ ss.str().length() > 0 };
+    if (!isReadFromMem) {
         std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
         if (!stream) {
             throw DeadlyImportError("Could not open file for reading");

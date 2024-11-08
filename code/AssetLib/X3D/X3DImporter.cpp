@@ -54,12 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, stdlib.
 #include <iterator>
 #include <memory>
-#include <sstream>
 
 namespace {
 //    const char *TAG{"X3DImporter (C++)"};
 }
-using std::string;
 
 namespace Assimp {
 

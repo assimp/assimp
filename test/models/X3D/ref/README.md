@@ -1,4 +1,4 @@
 # X3D 3D model reference images
 
 ## HelloWorld.x3d
-![HelloWorld_x3d.png](screenshots/HelloWorld_x3d.png)
+<img alt="HelloWorld.x3d" src="screenshots/HelloWorld_x3d.png" width=180 />

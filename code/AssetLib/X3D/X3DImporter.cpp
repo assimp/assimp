@@ -63,7 +63,7 @@ namespace Assimp {
 
 /// Constant which holds the importer description
 const aiImporterDesc X3DImporter::Description = {
-    "VRML(WRL) and Extensible 3D(X3D) Importer",
+    "VRML(WRL, X3DV) and Extensible 3D(X3D, X3DB) Importer",
     "smalcom",
     "",
     "See documentation in source code. Chapter: Limitations.",

@@ -271,7 +271,6 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             throw DeadlyImportError("Could not open file for reading");
         }
     }
-
     std::string::size_type slashPos = pFile.find_last_of("\\/");
 
     mScene = pScene;
@@ -286,6 +285,7 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         ParseFile(pFile, pIOHandler);
         pIOHandler->PopDirectory();
     }
+
     //search for root node element
 
     mNodeElementCur = NodeElement_List.front();

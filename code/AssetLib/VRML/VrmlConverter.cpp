@@ -48,9 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory> // std::unique_ptr
 #include "VrmlConverter.hpp"
 
-namespace {
-//    const char *TAG{"VrmlImporter (C++)"};
-}
 using std::string;
 
 namespace Assimp {
@@ -80,14 +77,10 @@ bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
 }
 
 static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
-    // TODO: switch to std::make_unique when supported e.g.
-//    std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
     std::unique_ptr<wchar_t[]> wide_stringPtr{ new wchar_t[ pFile.length() + 1 ] };
     std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
     wide_stringPtr[ pFile.length() ] = 0;
 
-//    VrmlTranslator::Scanner scanner(wide_stringPtr.get());
-//    return scanner;
     return VrmlTranslator::Scanner(wide_stringPtr.get());
 } // wide_stringPtr auto-deleted when leaving scope
 

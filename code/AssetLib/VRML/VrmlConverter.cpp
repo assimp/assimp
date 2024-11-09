@@ -78,20 +78,25 @@ bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
     return (ext[0] == 'x' || ext[0] == 'X') && (ext[1] == '3') && (ext[2] == 'd' || ext[2] == 'D') && (ext[3] == 'v' || ext[3] == 'V');
 }
 
+static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
+    std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
+    std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
+    wide_stringPtr[ pFile.length() ] = 0;
+
+//    VrmlTranslator::Scanner scanner(wide_stringPtr.get());
+//    return scanner;
+    return VrmlTranslator::Scanner(wide_stringPtr.get());
+} // wide_stringPtr auto-deleted when leaving scope
+
 std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
     std::stringstream ss;
     if (isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile)) {
-        std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
-        std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
-        wide_stringPtr[ pFile.length() ] = 0;
-
-        VrmlTranslator::Scanner scanner(wide_stringPtr.get());
-        // TODO: delete wide_stringPtr here, only needed to construct Scanner
+        VrmlTranslator::Scanner scanner = createScanner(pFile);
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
         ss.str("");
         parser.doc_.save(ss);
-    } // wide_stringPtr auto-deleted when leaving scope
+    }
     return ss;
 }
 

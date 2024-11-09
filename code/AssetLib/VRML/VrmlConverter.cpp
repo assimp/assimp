@@ -82,18 +82,17 @@ std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
     std::stringstream ss;
     const bool isReadFromMem{ isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile) };
     if (isReadFromMem) {
-        wchar_t* wide_string = new wchar_t[ pFile.length() + 1 ];
-        std::copy( pFile.begin(), pFile.end(), wide_string );
+        std::unique_ptr<wchar_t[]> wide_string{std::make_unique<wchar_t[]>(pFile.length() + 1)};
+        std::copy(pFile.begin(), pFile.end(), wide_string.get());
         wide_string[ pFile.length() ] = 0;
 
-        VrmlTranslator::Scanner scanner(wide_string);
-        delete [] wide_string;
+        VrmlTranslator::Scanner scanner(wide_string.get());
 
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
         ss.str("");
         parser.doc_.save(ss);
-    }
+    } // wide_string auto-deleted when leaving scope
     return ss;
 }
 

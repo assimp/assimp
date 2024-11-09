@@ -86,7 +86,7 @@ std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
         wide_stringPtr[ pFile.length() ] = 0;
 
         VrmlTranslator::Scanner scanner(wide_stringPtr.get());
-
+        // TODO: delete wide_stringPtr here, only needed to construct Scanner
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
         ss.str("");

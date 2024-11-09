@@ -79,7 +79,9 @@ bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
 }
 
 static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
-    std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
+    // TODO: switch to std::make_unique when supported e.g.
+//    std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
+    std::unique_ptr<wchar_t[]> wide_stringPtr{ new wchar_t[ pFile.length() + 1 ] };
     std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
     wide_stringPtr[ pFile.length() ] = 0;
 

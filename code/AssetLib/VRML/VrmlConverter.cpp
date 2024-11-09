@@ -80,19 +80,18 @@ bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
 
 std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
     std::stringstream ss;
-    const bool isReadFromMem{ isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile) };
-    if (isReadFromMem) {
-        std::unique_ptr<wchar_t[]> wide_string{std::make_unique<wchar_t[]>(pFile.length() + 1)};
-        std::copy(pFile.begin(), pFile.end(), wide_string.get());
-        wide_string[ pFile.length() ] = 0;
+    if (isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile)) {
+        std::unique_ptr<wchar_t[]> wide_stringPtr{std::make_unique<wchar_t[]>(pFile.length() + 1)};
+        std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
+        wide_stringPtr[ pFile.length() ] = 0;
 
-        VrmlTranslator::Scanner scanner(wide_string.get());
+        VrmlTranslator::Scanner scanner(wide_stringPtr.get());
 
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
         ss.str("");
         parser.doc_.save(ss);
-    } // wide_string auto-deleted when leaving scope
+    } // wide_stringPtr auto-deleted when leaving scope
     return ss;
 }
 

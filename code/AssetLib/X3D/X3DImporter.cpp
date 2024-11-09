@@ -55,10 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <memory>
 
-namespace {
-//    const char *TAG{"X3DImporter (C++)"};
-}
-
 namespace Assimp {
 
 /// Constant which holds the importer description

@@ -163,7 +163,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
 // ------------------------------------------------------------------------------------------------
 //  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene) {
-    if (nullptr == pModel) {
+    if (pModel == nullptr) {
         return;
     }
 
@@ -311,16 +311,13 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
 std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
-    // Checking preconditions
-    ai_assert(nullptr != pModel);
-
-    if (nullptr == pData) {
+    if (nullptr == pData || pModel == nullptr) {    
         return nullptr;
     }
 
     // Create faces
     ObjFile::Mesh *pObjMesh = pModel->mMeshes[meshIndex];
-    if (!pObjMesh) {
+    if (pObjMesh == nullptr) {
         return nullptr;
     }
 
@@ -352,14 +349,14 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
         }
     }
 
-    unsigned int uiIdxCount(0u);
+    unsigned int uiIdxCount = 0u;
     if (pMesh->mNumFaces > 0) {
         pMesh->mFaces = new aiFace[pMesh->mNumFaces];
         if (pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial) {
             pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
         }
 
-        unsigned int outIndex(0);
+        unsigned int outIndex = 0u;
 
         // Copy all data from all stored meshes
         for (auto &face : pObjMesh->m_Faces) {
@@ -403,11 +400,14 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
         aiMesh *pMesh,
         unsigned int numIndices) {
     // Checking preconditions
-    ai_assert(nullptr != pCurrentObject);
+    if (pCurrentObject == nullptr) {
+        return;
+    }     
 
     // Break, if no faces are stored in object
-    if (pCurrentObject->m_Meshes.empty())
+    if (pCurrentObject->m_Meshes.empty()) {
         return;
+    }
 
     // Get current mesh
     ObjFile::Mesh *pObjMesh = pModel->mMeshes[uiMeshIndex];
@@ -777,8 +777,11 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
 //  Appends this node to the parent node
 void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild) {
     // Checking preconditions
-    ai_assert(nullptr != pParent);
-    ai_assert(nullptr != pChild);
+    if (pParent == nullptr || pChild == nullptr) {
+        ai_assert(nullptr != pParent);
+        ai_assert(nullptr != pChild);
+        return;
+    }
 
     // Assign parent to child
     pChild->mParent = pParent;

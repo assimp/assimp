@@ -178,7 +178,6 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
     }
 
     if (!pModel->mObjects.empty()) {
-
         unsigned int meshCount = 0;
         unsigned int childCount = 0;
 
@@ -588,11 +587,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         it = pModel->mMaterialMap.find(pModel->mMaterialLib[matIndex]);
 
         // No material found, use the default material
-        if (pModel->mMaterialMap.end() == it)
+        if (pModel->mMaterialMap.end() == it) {
             continue;
+        }
 
         aiMaterial *mat = new aiMaterial;
-        ObjFile::Material *pCurrentMaterial = (*it).second;
+        ObjFile::Material *pCurrentMaterial = it->second;
         mat->AddProperty(&pCurrentMaterial->MaterialName, AI_MATKEY_NAME);
 
         // convert illumination model

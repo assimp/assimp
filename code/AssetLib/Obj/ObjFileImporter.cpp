@@ -67,7 +67,7 @@ static constexpr aiImporterDesc desc = {
     "obj"
 };
 
-static const unsigned int ObjMinSize = 16;
+static constexpr unsigned int ObjMinSize = 16u;
 
 namespace Assimp {
 
@@ -258,8 +258,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile::Object *pObject,
         aiNode *pParent, aiScene *pScene,
         std::vector<std::unique_ptr<aiMesh>> &MeshArray) {
-    ai_assert(nullptr != pModel);
-    if (nullptr == pObject) {
+    if (nullptr == pObject || pModel == nullptr) {
         return nullptr;
     }
 
@@ -332,7 +331,10 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
 
     for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
         const ObjFile::Face *inp = pObjMesh->m_Faces[index];
-
+        if (inp == nullptr) {
+            continue;
+        }
+        
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
             pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
             pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;

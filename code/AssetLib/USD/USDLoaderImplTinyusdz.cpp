@@ -212,15 +212,14 @@ void USDImporterImplTinyusdz::InternReadFile(
         return;
     }
 
-//    sanityCheckNodesRecursive(pScene->mRootNode);
+    // sanityCheckNodesRecursive(pScene->mRootNode);
     meshes(render_scene, pScene, nameWExt);
     materials(render_scene, pScene, nameWExt);
     textures(render_scene, pScene, nameWExt);
     textureImages(render_scene, pScene, nameWExt);
     buffers(render_scene, pScene, nameWExt);
 
-    std::map<size_t, tinyusdz::tydra::Node> meshNodes;
-    setupNodes(render_scene, pScene, meshNodes, nameWExt);
+    setupNodes(render_scene, pScene, nameWExt);
 
     setupBlendShapes(render_scene, pScene, nameWExt);
 }
@@ -269,8 +268,66 @@ void USDImporterImplTinyusdz::verticesForMesh(
         size_t meshIdx,
         const std::string &nameWExt) {
     UNUSED(nameWExt);
-    pScene->mMeshes[meshIdx]->mNumVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
+    const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
+    pScene->mMeshes[meshIdx]->mNumVertices = numVertices;
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+
+    // Check if this is a skinned mesh
+    if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
+        // Recursively iterate to collect all the joints in the hierarchy into a flattened array
+        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
+        skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
+        for (int i = 0; i < skeletonNodes.size(); ++i) {
+            for (const auto &child : skeletonNodes[i]->children) {
+                skeletonNodes.push_back(&child);
+            }
+        }
+
+        // Convert USD skeleton joints to Assimp bones
+        const unsigned int numBones = skeletonNodes.size();
+        pScene->mMeshes[meshIdx]->mNumBones = numBones;
+        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
+
+        for (unsigned int i = 0; i < numBones; ++i) {
+            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
+            const int boneIndex = skeletonNode->joint_id;
+
+            // Sorted so that Assimp bone ids align with USD joint id
+            auto outputBone = new aiBone();
+            outputBone->mName = aiString(skeletonNode->joint_name);
+            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
+            pScene->mMeshes[meshIdx]->mBones[boneIndex] = outputBone;
+        }
+
+        // Vertex weights
+        std::vector<std::vector<aiVertexWeight>> aiBonesVertexWeights;
+        aiBonesVertexWeights.resize(numBones);
+
+        const std::vector<int> &jointIndices = render_scene.meshes[meshIdx].joint_and_weights.jointIndices;
+        const std::vector<float> &jointWeightIndices = render_scene.meshes[meshIdx].joint_and_weights.jointWeights;
+        const int numWeightsPerVertex = render_scene.meshes[meshIdx].joint_and_weights.elementSize;
+
+        for (unsigned int vertexIndex = 0; vertexIndex < numVertices; ++vertexIndex) {
+            for (int weightIndex = 0; weightIndex < numWeightsPerVertex; ++weightIndex) {
+                const unsigned int index = vertexIndex * numWeightsPerVertex + weightIndex;
+                const float jointWeight = jointWeightIndices[index];
+
+                if (jointWeight > 0) {
+                    const int jointIndex = jointIndices[index];
+                    aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
+                }
+            }
+        }
+
+        for (int boneIndex = 0; boneIndex < numBones; ++boneIndex) {
+            const unsigned int numWeightsForBone = aiBonesVertexWeights[boneIndex].size();
+            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights = new aiVertexWeight[numWeightsForBone];
+            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mNumWeights = numWeightsForBone;
+
+            std::swap_ranges(aiBonesVertexWeights[boneIndex].begin(), aiBonesVertexWeights[boneIndex].end(), pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights);
+        }
+    }  // Skinned mesh end
+
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
         pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
         pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
@@ -620,29 +677,29 @@ void USDImporterImplTinyusdz::buffers(
 void USDImporterImplTinyusdz::setupNodes(
         const tinyusdz::tydra::RenderScene &render_scene,
         aiScene *pScene,
-        std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
         const std::string &nameWExt) {
     stringstream ss;
 
-    pScene->mRootNode = nodes(render_scene, meshNodes, nameWExt);
+    pScene->mRootNode = nodes(render_scene, nameWExt);
+    if (pScene->mRootNode == nullptr) {
+        return;
+    }
+
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
+
     ss.str("");
     ss << "setupNodes(): pScene->mNumMeshes: " << pScene->mNumMeshes;
-    if (pScene->mRootNode != nullptr) {
-        ss << ", mRootNode->mNumMeshes: " << pScene->mRootNode->mNumMeshes;
-    }
+    ss << ", mRootNode->mNumMeshes: " << pScene->mRootNode->mNumMeshes;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
 
     for (unsigned int meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
         pScene->mRootNode->mMeshes[meshIdx] = meshIdx;
     }
-
 }
 
 aiNode *USDImporterImplTinyusdz::nodes(
         const tinyusdz::tydra::RenderScene &render_scene,
-        std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
         const std::string &nameWExt) {
     const size_t numNodes{render_scene.nodes.size()};
     (void) numNodes; // Ignore unused variable when -Werror enabled
@@ -650,7 +707,9 @@ aiNode *USDImporterImplTinyusdz::nodes(
     ss.str("");
     ss << "nodes(): model" << nameWExt << ", numNodes: " << numNodes;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
-    return nodesRecursive(nullptr, render_scene.nodes[0], meshNodes);
+
+    aiNode *rootNode = nodesRecursive(nullptr, render_scene.nodes[0], render_scene.skeletons);
+    return rootNode;
 }
 
 using Assimp::tinyusdzNodeTypeFor;
@@ -659,7 +718,7 @@ using tinyusdz::tydra::NodeType;
 aiNode *USDImporterImplTinyusdz::nodesRecursive(
         aiNode *pNodeParent,
         const tinyusdz::tydra::Node &node,
-        std::map<size_t, tinyusdz::tydra::Node> &meshNodes) {
+        const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons) {
     stringstream ss;
     aiNode *cNode = new aiNode();
     cNode->mParent = pNodeParent;
@@ -673,21 +732,69 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         ss << " (parent " << cNode->mParent->mName.C_Str() << ")";
     }
     ss << " has " << node.children.size() << " children";
-    if (node.id > -1) {
+    if (node.id != -1) {
         ss << "\n    node mesh id: " << node.id << " (node type: " << tinyusdzNodeTypeFor(node.nodeType) << ")";
-        meshNodes[node.id] = node;
     }
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
-    if (!node.children.empty()) {
-        cNode->mNumChildren = static_cast<unsigned int>(node.children.size());
-        cNode->mChildren = new aiNode *[cNode->mNumChildren];
+
+    unsigned int numChildren = node.children.size();
+
+    // Find any tinyusdz skeletons which might begin at this node
+    // Add the skeleton bones as child nodes
+    const tinyusdz::tydra::SkelNode *skelNode = nullptr;
+    for (const auto &skeleton : skeletons) {
+        if (skeleton.abs_path == node.abs_path) {
+            // Add this skeleton's bones as child nodes
+            ++numChildren;
+            skelNode = &skeleton.root_node;
+            break;
+        }
     }
 
-    size_t i{0};
-    for (const auto &childNode: node.children) {
-        cNode->mChildren[i] = nodesRecursive(cNode, childNode, meshNodes);
+    cNode->mNumChildren = numChildren;
+
+    // Done. No more children.
+    if (numChildren == 0) {
+        return cNode;
+    }
+
+    cNode->mChildren = new aiNode *[cNode->mNumChildren];
+
+    size_t i{ 0 };
+    for (const auto &childNode : node.children) {
+        cNode->mChildren[i] = nodesRecursive(cNode, childNode, skeletons);
         ++i;
     }
+
+    if (skelNode != nullptr) {
+        // Convert USD skeleton into an Assimp node and make it the last child
+        cNode->mChildren[cNode->mNumChildren-1] = skeletonNodesRecursive(cNode, *skelNode);
+    }
+
+    return cNode;
+}
+
+aiNode *USDImporterImplTinyusdz::skeletonNodesRecursive(
+        aiNode* pNodeParent,
+        const tinyusdz::tydra::SkelNode& joint) {
+    auto *cNode = new aiNode(joint.joint_path);
+    cNode->mParent = pNodeParent;
+    cNode->mNumMeshes = 0; // not a mesh node
+    cNode->mTransformation = tinyUsdzMat4ToAiMat4(joint.rest_transform.m);
+
+    // Done. No more children.
+    if (joint.children.empty()) {
+        return cNode;
+    }
+
+    cNode->mNumChildren = static_cast<unsigned int>(joint.children.size());
+    cNode->mChildren = new aiNode *[cNode->mNumChildren];
+
+    for (int i = 0; i < cNode->mNumChildren; ++i) {
+        const tinyusdz::tydra::SkelNode &childJoint = joint.children[i];
+        cNode->mChildren[i] = skeletonNodesRecursive(cNode, childJoint);
+    }
+
     return cNode;
 }
 

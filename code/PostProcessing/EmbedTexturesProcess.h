@@ -77,6 +77,8 @@ public:
     virtual void Execute(aiScene* pScene) override;
 
 private:
+    // Try several ways to attempt to resolve the image path
+    std::string tryToFindValidPath(const std::string &imagePath) const;
     // Resolve the path and add the file content to the scene as a texture.
     bool addTexture(aiScene *pScene, const std::string &path) const;
 

@@ -243,6 +243,11 @@ void USDImporterImplTinyusdz::animations(
 
         newAiAnimation->mName = animation.abs_path;
 
+        if (animation.channels_map.empty()) {
+            newAiAnimation->mNumChannels = 0;
+            continue;
+        }
+
         // each channel affects a node (joint)
         newAiAnimation->mNumChannels = animation.channels_map.size();
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
@@ -261,25 +266,25 @@ void USDImporterImplTinyusdz::animations(
                 switch (channelType) {
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Rotation:
                     if (animChannel.rotations.static_value.has_value()) {
-                        rotationKeys.push_back(aiQuatKey(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value())));
+                        rotationKeys.emplace_back(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value()));
                     }
                     for (const auto &rotationAnimSampler : animChannel.rotations.samples) {
                         if (rotationAnimSampler.t > newAiAnimation->mDuration) {
                             newAiAnimation->mDuration = rotationAnimSampler.t;
                         }
 
-                        rotationKeys.push_back(aiQuatKey(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value)));
+                        rotationKeys.emplace_back(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value));
                     }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Scale:
                     if (animChannel.scales.static_value.has_value()) {
-                        scalingKeys.push_back(aiVectorKey(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value())));
+                        scalingKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value()));
                     }
                     for (const auto &scaleAnimSampler : animChannel.scales.samples) {
                         if (scaleAnimSampler.t > newAiAnimation->mDuration) {
                             newAiAnimation->mDuration = scaleAnimSampler.t;
                         }
-                        scalingKeys.push_back(aiVectorKey(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value)));
+                        scalingKeys.emplace_back(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value));
                     }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Transform:
@@ -289,9 +294,9 @@ void USDImporterImplTinyusdz::animations(
                         aiQuaternion rotation;
                         tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
 
-                        positionKeys.push_back(aiVectorKey(0, position));
-                        scalingKeys.push_back(aiVectorKey(0, scale));
-                        rotationKeys.push_back(aiQuatKey(0, rotation));
+                        positionKeys.emplace_back(0, position);
+                        scalingKeys.emplace_back(0, scale);
+                        rotationKeys.emplace_back(0, rotation);
                     }
                     for (const auto &transformAnimSampler : animChannel.transforms.samples) {
                         if (transformAnimSampler.t > newAiAnimation->mDuration) {
@@ -303,21 +308,21 @@ void USDImporterImplTinyusdz::animations(
                         aiQuaternion rotation;
                         tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
 
-                        positionKeys.push_back(aiVectorKey(transformAnimSampler.t, position));
-                        scalingKeys.push_back(aiVectorKey(transformAnimSampler.t, scale));
-                        rotationKeys.push_back(aiQuatKey(transformAnimSampler.t, rotation));
+                        positionKeys.emplace_back(transformAnimSampler.t, position);
+                        scalingKeys.emplace_back(transformAnimSampler.t, scale);
+                        rotationKeys.emplace_back(transformAnimSampler.t, rotation);
                     }
                     break;
                 case tinyusdz::tydra::AnimationChannel::ChannelType::Translation:
                     if (animChannel.translations.static_value.has_value()) {
-                        positionKeys.push_back(aiVectorKey(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value())));
+                        positionKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value()));
                     }
                     for (const auto &translationAnimSampler : animChannel.translations.samples) {
                         if (translationAnimSampler.t > newAiAnimation->mDuration) {
                             newAiAnimation->mDuration = translationAnimSampler.t;
                         }
 
-                        positionKeys.push_back(aiVectorKey(translationAnimSampler.t, tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value)));
+                        positionKeys.emplace_back(translationAnimSampler.t, tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value));
                     }
                     break;
                 default:
@@ -333,7 +338,6 @@ void USDImporterImplTinyusdz::animations(
             newAiNodeAnim->mRotationKeys = new aiQuatKey[newAiNodeAnim->mNumRotationKeys];
             std::move(rotationKeys.begin(), rotationKeys.end(), newAiNodeAnim->mRotationKeys);
 
-            newAiNodeAnim->mNumScalingKeys = scalingKeys.size();
             newAiNodeAnim->mNumScalingKeys = scalingKeys.size();
             newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
             std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);

@@ -546,9 +546,9 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
                         // We need to add a new mesh to the list. We assign
                         // an unique name to it to make sure the scene will
                         // pass the validation step for the moment.
-                        // TODO: fix naming of objects in the scenegraph later
+                        // TODO: fix naming of objects in the scene-graph later
                         if (objectName.length()) {
-                            ::strcpy(mesh->name, objectName.c_str());
+                            ::strncpy(mesh->name, objectName.c_str(), objectName.size());
                             ASSIMP_itoa10(&mesh->name[objectName.length()], 30, subMeshIdx++);
                         }
 

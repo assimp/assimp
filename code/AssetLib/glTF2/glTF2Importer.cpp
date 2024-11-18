@@ -1630,7 +1630,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         if (!img.mimeType.empty()) {
             const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
             if (ext) {
-                if (strcmp(ext, "jpeg") == 0) {
+                if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 } else if (strcmp(ext, "ktx2") == 0) { // basisu: ktx remains
                     ext = "kx2";
@@ -1638,9 +1638,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                     ext = "bu";
                 }
 
-                size_t len = strlen(ext);
+                const size_t len = strlen(ext);
                 if (len <= 3) {
-                    strcpy(tex->achFormatHint, ext);
+                    strncpy(tex->achFormatHint, ext, len);
                 }
             }
         }

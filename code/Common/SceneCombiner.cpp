@@ -316,15 +316,6 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
         boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);
 #endif
         for (unsigned int i = 1; i < src.size(); ++i) {
-            //if (i != duplicates[i])
-            //{
-            //  // duplicate scenes share the same UID
-            //  ::strcpy( src[i].id, src[duplicates[i]].id );
-            //  src[i].idlen = src[duplicates[i]].idlen;
-
-            //  continue;
-            //}
-
             src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_", i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {

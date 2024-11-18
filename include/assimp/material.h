@@ -1562,7 +1562,7 @@ static inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         unsigned int type,
         unsigned int index,
         float *pOut) {
-    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------
@@ -1587,7 +1587,7 @@ static inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
         unsigned int type,
         unsigned int index,
         int *pOut) {
-    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 diff -rupN -x .git autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h tinyusdz_repo_patch/src/external/stb_image_resize2.h
---- autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h	2024-07-09 21:29:48.556969900 -0700
-+++ tinyusdz_repo_patch/src/external/stb_image_resize2.h	2024-07-09 23:03:47.379316700 -0700
-@@ -2404,6 +2404,38 @@ static stbir__inline stbir_uint8 stbir__
+--- autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h	2024-10-27 03:26:45.457163600 -0700
++++ tinyusdz_repo_patch/src/external/stb_image_resize2.h	2024-10-27 03:31:09.255211100 -0700
+@@ -2500,6 +2500,38 @@ static stbir__inline stbir_uint8 stbir__
      }
    }
  
@@ -37,6 +37,6 @@ diff -rupN -x .git autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h 
 +    return 0;
 +  }
 +
- #elif defined(STBIR_NEON) && defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__) // 64-bit ARM on MSVC (not clang)
+ #endif
  
-   static stbir__inline void stbir__half_to_float_SIMD(float * output, stbir__FP16 const * input)
+ 

@@ -495,7 +495,7 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
                 std::shared_ptr<Material> p(new Material());
                 const size_t len = ::strlen(AI_DEFAULT_MATERIAL_NAME);
                 ai_assert(len < sizeof(p->id.name) - 2);
-                strncpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
+                memcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
                 // Thus all relevant fields should be explicitly initialized. We cannot add

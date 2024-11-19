@@ -401,8 +401,6 @@ void USDImporterImplTinyusdz::verticesForMesh(
         std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
         skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
         for (int i = 0; i < skeletonNodes.size(); ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
-
             for (const auto &child : skeletonNodes[i]->children) {
                 skeletonNodes.push_back(&child);
             }

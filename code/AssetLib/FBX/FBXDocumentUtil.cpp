@@ -118,8 +118,7 @@ std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
         }
         if(templateProps) {
             return templateProps;
-        }
-        else {
+        } else {
             return std::make_shared<const PropertyTable>();
         }
     }

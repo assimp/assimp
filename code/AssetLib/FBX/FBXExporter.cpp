@@ -1090,6 +1090,8 @@ void FBXExporter::WriteObjects ()
     // save vertex_indices as it is needed later
     std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
 
+    std::vector<uint32_t> uniq_v_before_mi;
+
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
     // geometry (aiMesh)
@@ -1188,6 +1190,8 @@ void FBXExporter::WriteObjects ()
               static_cast<int32_t>(-1 - (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
             );
           }
+
+          uniq_v_before_mi.push_back(static_cast<uint32_t>(uniq_v_before));
 
           if (m->HasNormals()) {
             normal_data.reserve(3 * polygon_data.size());
@@ -1945,22 +1949,15 @@ void FBXExporter::WriteObjects ()
                 // otherwise check if this is the root of the skeleton
                 bool end = false;
                 // is the mesh part of this node?
-                for (size_t i = 0; i < parent->mNumMeshes; ++i) {
-                    if (parent->mMeshes[i] == mi) {
-                        end = true;
-                        break;
-                    }
+                for (size_t i = 0; i < parent->mNumMeshes && !end; ++i) {
+                    end |= parent->mMeshes[i] == mi;
                 }
                 // is the mesh in one of the children of this node?
-                for (size_t j = 0; j < parent->mNumChildren; ++j) {
+                for (size_t j = 0; j < parent->mNumChildren && !end; ++j) {
                     aiNode* child = parent->mChildren[j];
-                    for (size_t i = 0; i < child->mNumMeshes; ++i) {
-                        if (child->mMeshes[i] == mi) {
-                            end = true;
-                            break;
-                        }
+                    for (size_t i = 0; i < child->mNumMeshes && !end; ++i) {
+                        end |= child->mMeshes[i] == mi;
                     }
-                    if (end) { break; }
                 }
 
                 // if it was the skeleton root we can finish here
@@ -1974,8 +1971,7 @@ void FBXExporter::WriteObjects ()
     for (size_t i = 0; i < mScene->mNumMeshes; ++i) {
         auto &s = skeleton_by_mesh[i];
         for (const aiNode* n : s) {
-            auto elem = node_uids.find(n);
-            if (elem == node_uids.end()) {
+            if (node_uids.find(n) == node_uids.end()) {
                 node_uids[n] = generate_uid();
             }
         }
@@ -1991,6 +1987,8 @@ void FBXExporter::WriteObjects ()
         if (!m->HasBones()) {
             continue;
         }
+
+        const aiNode *mesh_node = get_node_for_mesh((uint32_t)mi, mScene->mRootNode);
         // make a deformer for this mesh
         int64_t deformer_uid = generate_uid();
         FBX::Node dnode("Deformer");
@@ -2002,13 +2000,7 @@ void FBXExporter::WriteObjects ()
         dnode.Dump(outstream, binary, indent);
 
         // connect it
-        connections.emplace_back(
-          "C", "OO", deformer_uid,
-          mesh_uids[get_node_for_mesh((uint32_t)mi, mScene->mRootNode)]
-        );
-
-        //computed before
-        std::vector<int32_t>& vertex_indices = vVertexIndice[mi];
+        connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mesh_node]);
 
         // TODO, FIXME: this won't work if anything is not in the bind pose.
         // for now if such a situation is detected, we throw an exception.
@@ -2022,7 +2014,6 @@ void FBXExporter::WriteObjects ()
         // as it can be instanced to many nodes.
         // All we can do is assume no instancing,
         // and take the first node we find that contains the mesh.
-        aiNode* mesh_node = get_node_for_mesh((unsigned int)mi, mScene->mRootNode);
         aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
         // now make a subdeformer for each bone in the skeleton
@@ -2051,14 +2042,15 @@ void FBXExporter::WriteObjects ()
             sdnode.AddChild("Version", int32_t(100));
             sdnode.AddChild("UserData", "", "");
 
-            std::set<int32_t> setWeightedVertex;
             // add indices and weights, if any
             if (b) {
+                std::set<int32_t> setWeightedVertex;
                 std::vector<int32_t> subdef_indices;
                 std::vector<double> subdef_weights;
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                    int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId] \
+                      + uniq_v_before_mi[mi];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx

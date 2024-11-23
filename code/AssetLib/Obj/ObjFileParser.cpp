@@ -303,6 +303,9 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (!SkipSpaces(&tmp, mEnd)) {
             break;
         }
+        if (*tmp == '#') {
+            break;
+        }
         const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
         SkipToken(tmp, mEnd);
         if (isNum) {
@@ -311,8 +314,11 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (!SkipSpaces(&tmp, mEnd)) {
             break;
         }
+        if (*tmp == '#') {
+            break;
+        }
     }
-    
+
     return numComponents;
 }
 
@@ -452,6 +458,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         int iStep = 1;
 
         if (IsLineEnd(*m_DataIt)) {
+            break;
+        }
+        if (*m_DataIt == '#') {
             break;
         }
 

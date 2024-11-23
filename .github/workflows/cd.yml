@@ -1,0 +1,50 @@
+name: Build and Publish Prebuilt Binaries
+
+on:
+  release:
+    types: [created]
+    
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-latest
+            arch: x64
+          - name: windows-x86
+            os: windows-latest
+            arch: x86
+            cmake_args: -A Win32
+          - name: macos-x64
+            os: macos-latest
+          - name: linux-x64
+            os: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: lukka/get-cmake@latest
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+      
+      - name: Build
+        run: |
+          cmake -B build -S . ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF
+          cmake --build build --config Release
+
+      - uses: TheDoctor0/zip-release@0.7.6
+        with:
+          filename: ${{ matrix.name }}-${{ github.event.release.tag_name }}.zip
+          directory: build/bin/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: build/bin/${{ matrix.name }}-${{ github.event.release.tag_name }}.zip
+          append_body: true
+          fail_on_unmatched_files: true

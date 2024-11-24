@@ -20,6 +20,8 @@ jobs:
             arch: x86
             cmake_args: -A Win32
           - name: macos-x64
+            os: macos-13
+          - name: macos-arm64
             os: macos-latest
           - name: linux-x64
             os: ubuntu-latest

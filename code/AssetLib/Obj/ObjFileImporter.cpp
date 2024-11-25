@@ -401,7 +401,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
         aiMesh *pMesh,
         unsigned int numIndices) {
     // Checking preconditions
-    if (pCurrentObject == nullptr) {
+    if (pCurrentObject == nullptr || pModel == nullptr || pMesh == nullptr) {
         return;
     }     
 

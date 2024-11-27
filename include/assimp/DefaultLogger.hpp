@@ -56,6 +56,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NullLogger.hpp"
 #include <vector>
 
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#include <mutex>
+#include <thread>
+#endif
+
 namespace Assimp {
 // ------------------------------------------------------------------------------------
 class IOStream;
@@ -183,6 +188,10 @@ private:
 
     //! Attached streams
     StreamArray m_StreamArray;
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+    std::mutex m_arrayMutex;
+#endif
 
     bool noRepeatMsg;
     char lastMsg[MAX_LOG_MESSAGE_LENGTH * 2];

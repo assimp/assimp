@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -151,6 +151,8 @@ public:
 
 
 typedef aiVector3t<ai_real> aiVector3D;
+typedef aiVector3t<float> aiVector3f;
+typedef aiVector3t<double> aiVector3d;
 
 #else
 

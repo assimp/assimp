@@ -349,7 +349,7 @@ public enum AiPostProcessSteps {
      *   <li>Specify the #SortByPType flag. This moves line and point 
      *       primitives to separate meshes.
      *   <li>Set the <tt>AI_CONFIG_PP_SBP_REMOVE</tt> option to
-     *       <code>aiPrimitiveType_POINTS | aiPrimitiveType_LINES</code>
+     *       <code>aiPrimitiveType_POINT | aiPrimitiveType_LINE</code>
      *       to cause SortByPType to reject point and line meshes from the 
      *       scene.
      * </ul>

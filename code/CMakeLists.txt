@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2022, assimp team
+# Copyright (c) 2006-2024, assimp team
 #
 # All rights reserved.
 #
@@ -42,7 +42,7 @@
 # 3) Add libassimp using the file lists (eliminates duplication of file names between
 #    source groups and library command)
 #
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.22 )
 SET( HEADER_PATH ../include/assimp )
 
 if(NOT ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
@@ -271,7 +271,6 @@ MACRO(ADD_ASSIMP_IMPORTER name)
 ENDMACRO()
 
 if (NOT ASSIMP_NO_EXPORT)
-
   # if this variable is set to TRUE, the user can manually disable exporters by setting
   # ASSIMP_BUILD_XXX_EXPORTER to FALSE for each exporter
   # if this variable is set to FALSE, the user can manually enable exporters by setting
@@ -417,14 +416,12 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+if (ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_ASSIMP_IMPORTER( M3D
+            AssetLib/M3D/M3DImporter.cpp
+            AssetLib/M3D/M3DWrapper.cpp
+    )
+endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
@@ -471,6 +468,14 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/HalfLife/UniqueNameGenerator.h
 )
 
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for"
+      " AssetLib/MDL/MDLLoader.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/MDL/MDLLoader.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-array-bounds -Wno-stringop-overflow"
+  )
+endif()
+
 SET( MaterialSystem_SRCS
   Material/MaterialSystem.cpp
   Material/MaterialSystem.h
@@ -502,6 +507,14 @@ ADD_ASSIMP_IMPORTER( OBJ
   AssetLib/Obj/ObjFileParser.h
   AssetLib/Obj/ObjTools.h
 )
+
+IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION EQUAL 14)
+  message(STATUS "GCC14 detected disabling \"-Wmaybe-uninitialized\" for"
+      " AssetLib/Obj/ObjFileParser.cpp as it appears to be a false positive")
+  set_source_files_properties(AssetLib/Obj/ObjFileParser.cpp PROPERTIES
+      COMPILE_FLAGS "-Wno-maybe-uninitialized"
+  )
+endif()
 
 ADD_ASSIMP_IMPORTER( OGRE
   AssetLib/Ogre/OgreImporter.h
@@ -648,9 +661,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assxml/AssxmlFileWriter.h
     AssetLib/Assxml/AssxmlFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER(M3D
-    AssetLib/M3D/M3DExporter.h
-    AssetLib/M3D/M3DExporter.cpp)
+  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
+      ADD_ASSIMP_EXPORTER(M3D
+              AssetLib/M3D/M3DExporter.cpp)
+  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
 
   ADD_ASSIMP_EXPORTER(COLLADA
     AssetLib/Collada/ColladaExporter.h
@@ -812,6 +826,17 @@ ADD_ASSIMP_IMPORTER( 3D
   AssetLib/Unreal/UnrealLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( USD
+  AssetLib/USD/USDLoader.cpp
+  AssetLib/USD/USDLoader.h
+  AssetLib/USD/USDLoaderImplTinyusdz.cpp
+  AssetLib/USD/USDLoaderImplTinyusdz.h
+  AssetLib/USD/USDLoaderImplTinyusdzHelper.cpp
+  AssetLib/USD/USDLoaderImplTinyusdzHelper.h
+  AssetLib/USD/USDLoaderUtil.cpp
+  AssetLib/USD/USDLoaderUtil.h
+)
+
 ADD_ASSIMP_IMPORTER( X
   AssetLib/X/XFileHelper.h
   AssetLib/X/XFileImporter.cpp
@@ -905,11 +930,128 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
+# USD/USDA/USDC/USDZ support
+# tinyusdz
+IF (ASSIMP_BUILD_USD_IMPORTER)
+    if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
+        ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
+    endif ()
+    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
+    # relative to top-level/main project)
+    set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")
+    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/autoclone")
+
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
+    #       name can lead to non-deterministic (unpredictable) results since the code is potentially
+    #       in flux
+    # "dev" branch, 28 Oct 2024
+    set(TINYUSDZ_GIT_TAG "36f2aabb256b360365989c01a52f839a57dfe2a6")
+    message("****")
+    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+
+    # Patch required to build arm32 on android
+    set(TINYUSDZ_PATCH_CMD git apply ${Tinyusdz_BASE_ABSPATH}/patches/tinyusdz.patch)
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
+    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
+    set(FETCHCONTENT_BASE_DIR ${Tinyusdz_REPO_ABSPATH})
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
+    FetchContent_Declare(
+            tinyusdz_repo
+            GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
+            GIT_TAG        ${TINYUSDZ_GIT_TAG}
+            PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(tinyusdz_repo)
+    message("**** Finished cloning tinyusdz repo")
+    message("****")
+
+    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/tinyusdz_repo-src/src")
+    set(Tinyusdz_SRCS
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples-array.cc
+            ${Tinyusdz_SRC_ABSPATH}/asset-resolution.cc
+            ${Tinyusdz_SRC_ABSPATH}/composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-loader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/io-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/linear-algebra.cc
+            ${Tinyusdz_SRC_ABSPATH}/path-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/pprinter.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/primvar.cc
+            ${Tinyusdz_SRC_ABSPATH}/stage.cc
+            ${Tinyusdz_SRC_ABSPATH}/str-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/tiny-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/tinyusdz.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/facial.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/prim-apply.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/render-data.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/shader-network.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdGeom.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdLux.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdMtlx.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdShade.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdSkel.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/xform.cc
+    )
+
+    set(Tinyusdz_DEP_SOURCES
+            ${Tinyusdz_SRC_ABSPATH}/external/fpng.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/staticstruct.cc
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/database.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/error.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/string_id.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/tinyxml2/tinyxml2.cpp
+            ${Tinyusdz_SRC_ABSPATH}/integerCoding.cpp
+            ${Tinyusdz_SRC_ABSPATH}/lz4-compression.cc
+            ${Tinyusdz_SRC_ABSPATH}/lz4/lz4.c
+    )
+
+    set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")
+    INCLUDE_DIRECTORIES(${tinyusdz_INCLUDE_DIRS})
+    SOURCE_GROUP( Contrib\\Tinyusdz
+            FILES
+            ${Tinyusdz_SRCS}
+            ${Tinyusdz_DEP_SOURCES}
+    )
+    MESSAGE(STATUS "tinyusdz enabled")
+ELSE() # IF (ASSIMP_BUILD_USD_IMPORTER)
+    set(Tinyusdz_SRCS "")
+    set(Tinyusdz_DEP_SOURCES "")
+    MESSAGE(STATUS "tinyusdz disabled")
+ENDIF() # IF (ASSIMP_BUILD_USD_IMPORTER)
+
 # pugixml
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
-ELSE()
+ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
@@ -1155,6 +1297,8 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Tinyusdz_SRCS}
+  ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
   ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
@@ -1188,10 +1332,14 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
 IF (BUILD_SHARED_LIBS)
   TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
 ELSE ()
-  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY)
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY P2T_STATIC_EXPORTS)
 ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+
+add_compile_options(
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
 
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
@@ -1246,6 +1394,8 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-unused-template
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
+        -Wno-deprecated-declarations
+	-Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
@@ -1267,9 +1417,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
@@ -1282,12 +1430,15 @@ IF(ASSIMP_HUNTER_ENABLED)
   endif()
 
   if (ASSIMP_BUILD_DRACO)
-    target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+    target_link_libraries(assimp PRIVATE ${draco_LIBRARIES})
   endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
+  if(TARGET pugixml::pugixml)
+    target_link_libraries(assimp pugixml::pugixml)
   endif()
 ENDIF()
 
@@ -1396,19 +1547,20 @@ IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
   TARGET_LINK_LIBRARIES(assimp rt)
 ENDIF ()
 
+IF(ASSIMP_INSTALL)
+  INSTALL( TARGETS assimp
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP-DEV_COMPONENT}
+    RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
+    INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
+  )
+  INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
+  INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
+ENDIF()
 
-INSTALL( TARGETS assimp
-  EXPORT "${TARGETS_EXPORT_NAME}"
-  LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP-DEV_COMPONENT}
-  RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  FRAMEWORK DESTINATION ${ASSIMP_LIB_INSTALL_DIR} COMPONENT ${LIBASSIMP_COMPONENT}
-  INCLUDES DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
-)
-INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
-INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
-
-if (ASSIMP_ANDROID_JNIIOSYSTEM)
+if (ASSIMP_ANDROID_JNIIOSYSTEM AND ASSIMP_INSTALL)
   INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
     COMPONENT assimp-dev)
@@ -1424,7 +1576,7 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
       COMPILE_PDB_NAME_DEBUG assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}
     )
 
-    IF(GENERATOR_IS_MULTI_CONFIG)
+    IF(is_multi_config)
       install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
         DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
         CONFIGURATIONS Debug

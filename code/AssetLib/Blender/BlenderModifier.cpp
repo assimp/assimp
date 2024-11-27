@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -281,6 +281,11 @@ void BlenderModifier_Subdivision ::DoIt(aiNode &out, ConversionData &conv_data, 
     std::unique_ptr<Subdivider> subd(Subdivider::Create(algo));
     ai_assert(subd);
     if (conv_data.meshes->empty()) {
+        return;
+    }
+    const size_t meshIndex = conv_data.meshes->size() - out.mNumMeshes;
+    if (meshIndex >= conv_data.meshes->size()) {
+        ASSIMP_LOG_ERROR("Invalid index detected.");
         return;
     }
     aiMesh **const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];

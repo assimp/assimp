@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -65,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Assimp Binary Importer",
     "Gargaj / Conspiracy",
     "",
@@ -91,9 +91,13 @@ bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, boo
     }
 
     char s[32];
-    in->Read(s, sizeof(char), 32);
+    const size_t read = in->Read(s, sizeof(char), 32);
 
     pIOHandler->Close(in);
+    
+    if (read < 19) {
+      return false;
+    }
 
     return strncmp(s, "ASSIMP.binary-dump.", 19) == 0;
 }

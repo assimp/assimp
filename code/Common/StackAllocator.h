@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -61,9 +61,10 @@ namespace Assimp {
 class StackAllocator {
 public:
     /// @brief Constructs the allocator
-    inline StackAllocator();
+    StackAllocator();
+
     /// @brief Destructs the allocator and frees all memory
-    inline ~StackAllocator();
+    ~StackAllocator();
 
     // non copyable
     StackAllocator(const StackAllocator &) = delete;
@@ -86,6 +87,11 @@ private:
 };
 
 } // namespace Assimp
+
+/// @brief Fixes an undefined reference error when linking in certain build environments.
+//         May throw warnings about needing stdc++17, but should compile without issues on modern compilers.
+inline const size_t Assimp::StackAllocator::g_maxBytesPerBlock;
+inline const size_t Assimp::StackAllocator::g_startBytesPerBlock;
 
 #include "StackAllocator.inl"
 

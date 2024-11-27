@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -57,8 +57,8 @@ namespace Assimp {
 */
 class RAWImporter : public BaseImporter {
 public:
-    RAWImporter();
-    ~RAWImporter() override;
+    RAWImporter() = default;
+    ~RAWImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

@@ -2725,6 +2725,10 @@ template <> size_t GenericFill<IfcSpatialStructureElement>(const DB& db, const L
     do { // convert the 'CompositionType' argument
         std::shared_ptr<const DataType> arg = params[base++];
         if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::Schema_2x3::IfcSpatialStructureElement,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const UNSET *>(&*arg)) {
+            // Consider assigning the default value as in->CompositionType = "ELEMENT".
+            break;
+        }
         try { GenericConvert( in->CompositionType, arg, db ); break; }
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 8 to IfcSpatialStructureElement to be a `IfcElementCompositionEnum`")); }
     } while (false);

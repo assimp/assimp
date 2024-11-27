@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -56,64 +56,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 #include <utility>
-//#include <cctype>
-//#include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
+static constexpr uint32_t ErrorId = ~0u;
 
 template <>
 const char *LogFunctions<XGLImporter>::Prefix() {
 	return "XGL: ";
 }
 
-} // namespace Assimp
-
-static const aiImporterDesc desc = {
-	"XGL Importer",
-	"",
-	"",
-	"",
-	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
-	0,
-	0,
-	0,
-	0,
-	"xgl zgl"
-};
+static constexpr aiImporterDesc desc = {
+	"XGL Importer", "", "",  "",
+    aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
+	0,	0,	0,	0,	"xgl zgl"};
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-XGLImporter::XGLImporter() :
-        mXmlParser(nullptr),
-        m_scene(nullptr) {
+XGLImporter::XGLImporter() : mXmlParser(nullptr), m_scene(nullptr) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
 XGLImporter::~XGLImporter() {
-	delete mXmlParser;
+    clear();
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file.
 bool XGLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
 	static const char *tokens[] = { "<world>", "<World>", "<WORLD>" };
 	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get a list of all file extensions which are handled by this class
 const aiImporterDesc *XGLImporter::GetInfo() const {
 	return &desc;
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure.
 void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
- #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
+    clear();
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 	std::vector<char> uncompressed;
 #endif
 
@@ -159,7 +141,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
 	std::vector<aiMesh *> &meshes = scope.meshes_linear;
 	std::vector<aiMaterial *> &materials = scope.materials_linear;
-	if (!meshes.size() || !materials.size()) {
+	if (meshes.empty() || materials.empty()) {
 		ThrowException("failed to extract data from XGL file, no meshes loaded");
 	}
 
@@ -185,6 +167,13 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 }
 
 // ------------------------------------------------------------------------------------------------
+void XGLImporter::clear() {
+    delete mXmlParser;
+    mXmlParser = nullptr;
+}
+
+
+// ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &s = ai_stdStrToLower(currentNode.name());
@@ -199,9 +188,10 @@ void XGLImporter::ReadWorld(XmlNode &node, TempScope &scope) {
 	}
 
 	aiNode *const nd = ReadObject(node, scope);
-	if (!nd) {
+	if (nd == nullptr) {
 		ThrowException("failure reading <world>");
 	}
+
 	if (nd->mName.length == 0) {
 		nd->mName.Set("WORLD");
 	}
@@ -254,15 +244,17 @@ aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 			const std::string &s = ai_stdStrToLower(child.name());
 			if (s == "mesh") {
 				const size_t prev = scope.meshes_linear.size();
-                bool empty;
-				if (ReadMesh(child, scope, empty)) {
+				if (ReadMesh(child, scope)) {
 					const size_t newc = scope.meshes_linear.size();
 					for (size_t i = 0; i < newc - prev; ++i) {
 						meshes.push_back(static_cast<unsigned int>(i + prev));
 					}
-				}
+				} 
 			} else if (s == "mat") {
-				ReadMaterial(child, scope);
+				const uint32_t matId = ReadMaterial(child, scope);
+                if (matId == ErrorId) {
+                    ThrowException("Invalid material id detected.");
+                }
 			} else if (s == "object") {
 				children.push_back(ReadObject(child, scope));
 			} else if (s == "objectref") {
@@ -438,18 +430,25 @@ aiMesh *XGLImporter::ToOutputMesh(const TempMaterialMesh &m) {
     return mesh.release();
 }
 
-// ------------------------------------------------------------------------------------------------
-bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope, bool &empty) {
-	TempMesh t;
 
+// ------------------------------------------------------------------------------------------------
+inline static unsigned int generateMeshId(unsigned int meshId, bool nor, bool uv) {
+    unsigned int currentMeshId = meshId | ((nor ? 1 : 0) << 31) | ((uv ? 1 : 0) << 30);
+    return currentMeshId;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
+	TempMesh t;
+    uint32_t matId = 99999;
+    bool mesh_created = false;
 	std::map<unsigned int, TempMaterialMesh> bymat;
     const unsigned int mesh_id = ReadIDAttr(node);
-    bool empty_mesh = true;
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
 
 		if (s == "mat") {
-			ReadMaterial(child, scope);
+			matId = ReadMaterial(child, scope);
 		} else if (s == "p") {
 			pugi::xml_attribute attr = child.attribute("ID");
 			if (attr.empty()) {
@@ -477,66 +476,41 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope, bool &empty) {
 		} else if (s == "f" || s == "l" || s == "p") {
 			const unsigned int vcount = s == "f" ? 3 : (s == "l" ? 2 : 1);
 
-			unsigned int mid = ~0u;
-			TempFace tf[3];
+			unsigned int meshId = ErrorId;
+            TempFace tempFace[3] = {};
 			bool has[3] = { false };
-			for (XmlNode &sub_child : child.children()) {
-                const std::string &scn = ai_stdStrToLower(sub_child.name());
-                if (scn == "fv1" || scn == "lv1" || scn == "pv1") {
-					ReadFaceVertex(sub_child, t, tf[0]);
-					has[0] = true;
-                } else if (scn == "fv2" || scn == "lv2") {
-					ReadFaceVertex(sub_child, t, tf[1]);
-					has[1] = true;
-                } else if (scn == "fv3") {
-					ReadFaceVertex(sub_child, t, tf[2]);
-					has[2] = true;
-                } else if (scn == "mat") {
-					if (mid != ~0u) {
-						LogWarn("only one material tag allowed per <f>");
-					}
-					mid = ResolveMaterialRef(sub_child, scope);
-                } else if (scn == "matref") {
-					if (mid != ~0u) {
-						LogWarn("only one material tag allowed per <f>");
-					}
-					mid = ResolveMaterialRef(sub_child, scope);
-				}
-			}
-            if (has[0] || has[1] || has[2]) {
-                empty_mesh = false;
-            }
-
-			if (mid == ~0u) {
+            meshId = ReadVertices(child, t, tempFace, has, meshId, scope);
+            if (meshId == ErrorId) {
 				ThrowException("missing material index");
 			}
 
-			bool nor = false;
-			bool uv = false;
+			bool nor = false, uv = false;
 			for (unsigned int i = 0; i < vcount; ++i) {
 				if (!has[i]) {
 					ThrowException("missing face vertex data");
 				}
 
-				nor = nor || tf[i].has_normal;
-				uv = uv || tf[i].has_uv;
+				nor = nor || tempFace[i].has_normal;
+				uv = uv || tempFace[i].has_uv;
 			}
 
-			if (mid >= (1 << 30)) {
+			if (meshId >= (1 << 30)) {
 				LogWarn("material indices exhausted, this may cause errors in the output");
 			}
-			unsigned int meshId = mid | ((nor ? 1 : 0) << 31) | ((uv ? 1 : 0) << 30);
+            const unsigned int currentMeshId = generateMeshId(meshId, nor, uv);
 
-			TempMaterialMesh &mesh = bymat[meshId];
-			mesh.matid = mid;
+            // Generate the temp mesh
+			TempMaterialMesh &mesh = bymat[currentMeshId];
+            mesh.matid = meshId;
+            mesh_created = true;
 
 			for (unsigned int i = 0; i < vcount; ++i) {
-				mesh.positions.push_back(tf[i].pos);
+				mesh.positions.push_back(tempFace[i].pos);
 				if (nor) {
-					mesh.normals.push_back(tf[i].normal);
+					mesh.normals.push_back(tempFace[i].normal);
 				}
 				if (uv) {
-					mesh.uvs.push_back(tf[i].uv);
+					mesh.uvs.push_back(tempFace[i].uv);
 				}
 
 				mesh.pflags |= 1 << (vcount - 1);
@@ -546,25 +520,59 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope, bool &empty) {
 		}
 	}
 
-	// finally extract output meshes and add them to the scope
-	using pairt = std::pair<const unsigned int, TempMaterialMesh>;
-	for (const pairt &p : bymat) {
-		aiMesh *const m = ToOutputMesh(p.second);
-		scope.meshes_linear.push_back(m);
-
-		// if this is a definition, keep it on the stack
-		if (mesh_id != ~0u) {
-			scope.meshes.insert(std::pair<unsigned int, aiMesh *>(mesh_id, m));
-		}
-	}
-    if (empty_mesh) {
-        LogWarn("Mesh is empty, skipping.");
-        empty = empty_mesh;
-        return false;
+    if (!mesh_created) {
+        TempMaterialMesh &mesh = bymat[mesh_id];
+        mesh.matid = matId;
     }
 
+	// finally extract output meshes and add them to the scope
+    AppendOutputMeshes(bymat, scope, mesh_id);
+
 	// no id == not a reference, insert this mesh right *here*
-	return mesh_id == ~0u;
+    return mesh_id == ErrorId;
+}
+
+// ----------------------------------------------------------------------------------------------
+void XGLImporter::AppendOutputMeshes(std::map<unsigned int, TempMaterialMesh> bymat, TempScope &scope,
+        const unsigned int mesh_id) {
+    using pairt = std::pair<const unsigned int, TempMaterialMesh>;
+    for (const pairt &p : bymat) {
+        aiMesh *const m = ToOutputMesh(p.second);
+        scope.meshes_linear.push_back(m);
+
+        // if this is a definition, keep it on the stack
+        if (mesh_id != ErrorId) {
+            scope.meshes.insert(std::pair<unsigned int, aiMesh *>(mesh_id, m));
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------------------
+unsigned int XGLImporter::ReadVertices(XmlNode &child, TempMesh t, TempFace *tf, bool *has, unsigned int mid, TempScope &scope) {
+    for (XmlNode &sub_child : child.children()) {
+        const std::string &scn = ai_stdStrToLower(sub_child.name());
+        if (scn == "fv1" || scn == "lv1" || scn == "pv1") {
+            ReadFaceVertex(sub_child, t, tf[0]);
+            has[0] = true;
+        } else if (scn == "fv2" || scn == "lv2") {
+            ReadFaceVertex(sub_child, t, tf[1]);
+            has[1] = true;
+        } else if (scn == "fv3") {
+            ReadFaceVertex(sub_child, t, tf[2]);
+            has[2] = true;
+        } else if (scn == "mat") {
+            if (mid != ErrorId) {
+                LogWarn("only one material tag allowed per <f>");
+            }
+            mid = ResolveMaterialRef(sub_child, scope);
+        } else if (scn == "matref") {
+            if (mid != ErrorId) {
+                LogWarn("only one material tag allowed per <f>");
+            }
+            mid = ResolveMaterialRef(sub_child, scope);
+        }
+    }
+    return mid;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -598,10 +606,10 @@ unsigned int XGLImporter::ResolveMaterialRef(XmlNode &node, TempScope &scope) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
+unsigned int XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
     const unsigned int mat_id = ReadIDAttr(node);
 
-	auto *mat(new aiMaterial);
+	auto *mat = new aiMaterial;
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "amb") {
@@ -627,6 +635,8 @@ void XGLImporter::ReadMaterial(XmlNode &node, TempScope &scope) {
 
 	scope.materials[mat_id] = mat;
 	scope.materials_linear.push_back(mat);
+
+    return mat_id;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -683,20 +693,21 @@ unsigned int XGLImporter::ReadIDAttr(XmlNode &node) {
 		}
 	}
 
-	return ~0u;
+	return ErrorId;
 }
 
 // ------------------------------------------------------------------------------------------------
 float XGLImporter::ReadFloat(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
-    const char *s = v.c_str(), *se;
-	if (!SkipSpaces(&s)) {
+    const char *s = v.c_str();
+    const char *end = v.c_str() + v.size();
+	if (!SkipSpaces(&s, end)) {
 		LogError("unexpected EOL, failed to parse index element");
 		return 0.f;
 	}
-	float t;
-	se = fast_atoreal_move(s, t);
+    float t{ 0.0f };
+	const char *se = fast_atoreal_move(s, t);
 	if (se == s) {
 		LogError("failed to read float text");
 		return 0.f;
@@ -710,16 +721,17 @@ unsigned int XGLImporter::ReadIndexFromText(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
     const char *s = v.c_str();
-	if (!SkipSpaces(&s)) {
+    const char *end = v.c_str() + v.size();
+    if (!SkipSpaces(&s, end)) {
 		LogError("unexpected EOL, failed to parse index element");
-		return ~0u;
+        return ErrorId;
 	}
-	const char *se;
+	const char *se = nullptr;
 	const unsigned int t = strtoul10(s, &se);
 
 	if (se == s) {
 		LogError("failed to read index");
-		return ~0u;
+        return ErrorId;
 	}
 
 	return t;
@@ -731,16 +743,17 @@ aiVector2D XGLImporter::ReadVec2(XmlNode &node) {
     std::string val;
     XmlParser::getValueAsString(node, val);
     const char *s = val.c_str();
+    const char *end = val.c_str() + val.size();
     ai_real v[2] = {};
 	for (int i = 0; i < 2; ++i) {
-		if (!SkipSpaces(&s)) {
+		if (!SkipSpaces(&s, end)) {
 			LogError("unexpected EOL, failed to parse vec2");
 			return vec;
 		}
 
 		v[i] = fast_atof(&s);
 
-		SkipSpaces(&s);
+		SkipSpaces(&s, end);
 		if (i != 1 && *s != ',') {
 			LogError("expected comma, failed to parse vec2");
 			return vec;
@@ -759,14 +772,15 @@ aiVector3D XGLImporter::ReadVec3(XmlNode &node) {
     std::string v;
     XmlParser::getValueAsString(node, v);
 	const char *s = v.c_str();
+    const char *end = v.c_str() + v.size();
 	for (int i = 0; i < 3; ++i) {
-		if (!SkipSpaces(&s)) {
+		if (!SkipSpaces(&s, end)) {
 			LogError("unexpected EOL, failed to parse vec3");
 			return vec;
 		}
 		vec[i] = fast_atof(&s);
 
-		SkipSpaces(&s);
+		SkipSpaces(&s, end);
 		if (i != 2 && *s != ',') {
 			LogError("expected comma, failed to parse vec3");
 			return vec;
@@ -785,5 +799,7 @@ aiColor3D XGLImporter::ReadCol3(XmlNode &node) {
 	}
 	return aiColor3D(v.x, v.y, v.z);
 }
+
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_XGL_IMPORTER

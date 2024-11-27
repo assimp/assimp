@@ -188,6 +188,51 @@ mg_m_err:
     pFaces.clear();
 }
 
+void X3DGeoHelper::coordIdx_str2lines_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces) {
+    std::vector<int32_t> f_data(pCoordIdx);
+
+    if (f_data.back() != (-1)) {
+        f_data.push_back(-1);
+    }
+
+    // reserve average size.
+    pFaces.reserve(f_data.size() / 2);
+    for (std::vector<int32_t>::const_iterator startIt = f_data.cbegin(), endIt = f_data.cbegin(); endIt != f_data.cend(); ++endIt) {
+        // check for end of current polyline
+        if (*endIt != -1)
+            continue;
+
+        // found end of polyline, check if this is a valid polyline
+        std::size_t numIndices = std::distance(startIt, endIt);
+        if (numIndices <= 1)
+            goto mg_m_err;
+
+        // create line faces out of polyline indices
+        for (int32_t idx0 = *startIt++; startIt != endIt; ++startIt) {
+            int32_t idx1 = *startIt;
+
+            aiFace tface;
+            tface.mNumIndices = 2;
+            tface.mIndices = new unsigned int[2];
+            tface.mIndices[0] = idx0;
+            tface.mIndices[1] = idx1;
+            pFaces.push_back(tface);
+
+            idx0 = idx1;
+        }
+
+        ++startIt;
+    }
+
+    return;
+
+mg_m_err:
+    for (size_t i = 0, i_e = pFaces.size(); i < i_e; i++)
+        delete[] pFaces[i].mIndices;
+
+    pFaces.clear();
+}
+
 void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor3D> &pColors, const bool pColorPerVertex) {
     std::list<aiColor4D> tcol;
 
@@ -524,6 +569,42 @@ aiMesh *X3DGeoHelper::make_mesh(const std::vector<int32_t> &pCoordIdx, const std
 
     // set primitives type and return result.
     tmesh->mPrimitiveTypes = prim_type;
+
+    return tmesh;
+}
+
+aiMesh *X3DGeoHelper::make_line_mesh(const std::vector<int32_t> &pCoordIdx, const std::list<aiVector3D> &pVertices) {
+    std::vector<aiFace> faces;
+
+    // create faces array from input string with vertices indices.
+    X3DGeoHelper::coordIdx_str2lines_arr(pCoordIdx, faces);
+    if (!faces.size()) {
+        throw DeadlyImportError("Failed to create mesh, faces list is empty.");
+    }
+
+    //
+    // Create new mesh and copy geometry data.
+    //
+    aiMesh *tmesh = new aiMesh;
+    size_t ts = faces.size();
+    // faces
+    tmesh->mFaces = new aiFace[ts];
+    tmesh->mNumFaces = static_cast<unsigned int>(ts);
+    for (size_t i = 0; i < ts; i++)
+        tmesh->mFaces[i] = faces[i];
+
+    // vertices
+    std::list<aiVector3D>::const_iterator vit = pVertices.begin();
+
+    ts = pVertices.size();
+    tmesh->mVertices = new aiVector3D[ts];
+    tmesh->mNumVertices = static_cast<unsigned int>(ts);
+    for (size_t i = 0; i < ts; i++) {
+        tmesh->mVertices[i] = *vit++;
+    }
+
+    // set primitive type and return result.
+    tmesh->mPrimitiveTypes = aiPrimitiveType_LINE;
 
     return tmesh;
 }

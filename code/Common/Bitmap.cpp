@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -148,8 +148,10 @@ void Bitmap::WriteData(aiTexture *texture, IOStream *file) {
 
             file->Write(pixel, mBytesPerPixel, 1);
         }
-
-        file->Write(padding_data, padding, 1);
+        // When padding is 0, passing it as an argument will cause an assertion failure in DefaultIOStream::Write.
+        if (padding) {
+            file->Write(padding_data, padding, 1);
+        }
     }
 }
 

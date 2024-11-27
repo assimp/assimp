@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 
@@ -221,13 +221,11 @@ void DefaultLogger::set(Logger *logger) {
 #endif
 
     if (nullptr == logger) {
-        logger = &s_pNullLogger;
+        m_pLogger = &s_pNullLogger;
     }
-    if (nullptr != m_pLogger && !isNullLogger()) {
-        delete m_pLogger;
+    else {
+        m_pLogger = logger;
     }
-
-    DefaultLogger::m_pLogger = logger;
 }
 
 // ----------------------------------------------------------------------------------

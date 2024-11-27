@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -380,3 +380,4 @@ ai_real ImproveCacheLocalityProcess::ProcessMesh(aiMesh *pMesh, unsigned int mes
 }
 
 } // namespace Assimp
+

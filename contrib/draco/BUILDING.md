@@ -1,21 +1,23 @@
 _**Contents**_
 
-  * [CMake Basics](#cmake-basics)
-  * [Mac OS X](#mac-os-x)
-  * [Windows](#windows)
-  * [CMake Build Configuration](#cmake-build-configuration)
-    * [Transcoder](#transcoder)
-    * [Debugging and Optimization](#debugging-and-optimization)
-    * [Googletest Integration](#googletest-integration)
-    * [Third Party Libraries](#third-party-libraries)
-    * [Javascript Encoder/Decoder](#javascript-encoderdecoder)
-    * [WebAssembly Decoder](#webassembly-decoder)
-    * [WebAssembly Mesh Only Decoder](#webassembly-mesh-only-decoder)
-    * [WebAssembly Point Cloud Only Decoder](#webassembly-point-cloud-only-decoder)
-    * [iOS Builds](#ios-builds)
-  * [Android Studio Project Integration](#android-studio-project-integration)
-  * [Native Android Builds](#native-android-builds)
-  * [vcpkg](#vcpkg)
+- [Building](#building)
+  - [CMake Basics](#cmake-basics)
+  - [Mac OS X](#mac-os-x)
+  - [Windows](#windows)
+  - [CMake Build Configuration](#cmake-build-configuration)
+  - [Transcoder](#transcoder)
+  - [Debugging and Optimization](#debugging-and-optimization)
+  - [Googletest Integration](#googletest-integration)
+  - [Third Party Libraries](#third-party-libraries)
+  - [WebAssembly Decoder](#webassembly-decoder)
+  - [WebAssembly Mesh Only Decoder](#webassembly-mesh-only-decoder)
+  - [WebAssembly Point Cloud Only Decoder](#webassembly-point-cloud-only-decoder)
+  - [Javascript Encoder/Decoder](#javascript-encoderdecoder)
+  - [iOS Builds](#ios-builds)
+  - [Native Android Builds](#native-android-builds)
+  - [Android Studio Project Integration](#android-studio-project-integration)
+  - [Draco - Static Library](#draco---static-library)
+  - [vcpkg](#vcpkg)
 
 Building
 ========
@@ -325,7 +327,7 @@ Draco - Static Library
 
 To include Draco in an existing or new Android Studio project, reference it
 from the `cmake` file of an existing native project that has a minimum SDK
-version of 18 or higher. The project must support C++11.
+version of 18 or higher. The project must support C++11 at least.
 To add Draco to your project:
 
   1. Create a new "Native C++" project.

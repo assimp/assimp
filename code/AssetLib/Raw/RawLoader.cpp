@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Raw Importer",
     "",
     "",
@@ -69,14 +69,6 @@ static const aiImporterDesc desc = {
     0,
     "raw"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-RAWImporter::RAWImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-RAWImporter::~RAWImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -112,11 +104,12 @@ void RAWImporter::InternReadFile(const std::string &pFile,
 
     // now read all lines
     char line[4096];
+    const char *end = &line[4096];
     while (GetNextLine(buffer, line)) {
         // if the line starts with a non-numeric identifier, it marks
         // the beginning of a new group
         const char *sz = line;
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
         if (IsLineEnd(*sz)) continue;
         if (!IsNumeric(*sz)) {
             const char *sz2 = sz;
@@ -125,8 +118,8 @@ void RAWImporter::InternReadFile(const std::string &pFile,
             const unsigned int length = (unsigned int)(sz2 - sz);
 
             // find an existing group with this name
-            for (std::vector<GroupInformation>::iterator it = outGroups.begin(), end = outGroups.end();
-                    it != end; ++it) {
+            for (std::vector<GroupInformation>::iterator it = outGroups.begin(), endIt = outGroups.end();
+                    it != endIt; ++it) {
                 if (length == (*it).name.length() && !::strcmp(sz, (*it).name.c_str())) {
                     curGroup = it;
                     sz2 = nullptr;
@@ -142,7 +135,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
             float data[12];
             unsigned int num;
             for (num = 0; num < 12; ++num) {
-                if (!SkipSpaces(&sz) || !IsNumeric(*sz)) break;
+                if (!SkipSpaces(&sz, end) || !IsNumeric(*sz)) break;
                 sz = fast_atoreal_move<float>(sz, data[num]);
             }
             if (num != 12 && num != 9) {
@@ -294,5 +287,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
         }
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_RAW_IMPORTER

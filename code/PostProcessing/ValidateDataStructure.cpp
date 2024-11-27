@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -371,20 +371,7 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh) {
         ReportWarning("There are unreferenced vertices");
     }
 
-    // texture channel 2 may not be set if channel 1 is zero ...
-    {
-        unsigned int i = 0;
-        for (; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-            if (!pMesh->HasTextureCoords(i)) break;
-        }
-        for (; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i)
-            if (pMesh->HasTextureCoords(i)) {
-                ReportError("Texture coordinate channel %i exists "
-                            "although the previous channel was nullptr.",
-                        i);
-            }
-    }
-    // the same for the vertex colors
+    // vertex color channel 2 may not be set if channel 1 is zero ...
     {
         unsigned int i = 0;
         for (; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
@@ -904,14 +891,17 @@ void ValidateDSProcess::Validate(const aiNode *pNode) {
                 ReportError("aiNode \"%s\" child %i \"%s\" parent is someone else: \"%s\"", pNode->mName.C_Str(), i, pChild->mName.C_Str(), parentName);
             }
         }
+    } else if (pNode->mChildren) {
+        ReportError("aiNode::mChildren is not nullptr for empty node %s (aiNode::mNumChildren is %i)",
+                nodeName, pNode->mNumChildren);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate(const aiString *pString) {
-    if (pString->length > MAXLEN) {
+    if (pString->length > AI_MAXLEN) {
         ReportError("aiString::length is too large (%u, maximum is %lu)",
-                pString->length, MAXLEN);
+                pString->length, AI_MAXLEN);
     }
     const char *sz = pString->data;
     while (true) {
@@ -920,7 +910,7 @@ void ValidateDSProcess::Validate(const aiString *pString) {
                 ReportError("aiString::data is invalid: the terminal zero is at a wrong offset");
             }
             break;
-        } else if (sz >= &pString->data[MAXLEN]) {
+        } else if (sz >= &pString->data[AI_MAXLEN]) {
             ReportError("aiString::data is invalid. There is no terminal character");
         }
         ++sz;

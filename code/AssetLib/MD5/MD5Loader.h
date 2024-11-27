@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -65,7 +65,7 @@ using namespace Assimp::MD5;
 class MD5Importer : public BaseImporter {
 public:
     MD5Importer();
-    ~MD5Importer() override;
+    ~MD5Importer() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -118,7 +118,7 @@ protected:
      *  @param node_anims Generated node animations
     */
     void AttachChilds_Anim(int iParentID, aiNode *piParent,
-            AnimBoneList &bones, const aiNodeAnim **node_anims);
+            AnimBoneArray &bones, const aiNodeAnim **node_anims);
 
     // -------------------------------------------------------------------
     /** Construct node hierarchy from a given MD5MESH
@@ -126,7 +126,7 @@ protected:
      *  @param piParent Parent node to attach to
      *  @param bones Input bones
     */
-    void AttachChilds_Mesh(int iParentID, aiNode *piParent, BoneList &bones);
+    void AttachChilds_Mesh(int iParentID, aiNode *piParent, BoneArray &bones);
 
     // -------------------------------------------------------------------
     /** Build unique vertex buffers from a given MD5ANIM

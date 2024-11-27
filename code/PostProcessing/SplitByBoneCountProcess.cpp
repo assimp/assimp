@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -394,7 +394,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 // Recursively updates the node's mesh list to account for the changed mesh list
 void SplitByBoneCountProcess::UpdateNode( aiNode* pNode) const {
     // rebuild the node's mesh index list
-    if( pNode->mNumMeshes == 0 ) {
+    if( pNode->mNumMeshes != 0 ) {
         IndexArray newMeshList;
         for( unsigned int a = 0; a < pNode->mNumMeshes; ++a) {
             unsigned int srcIndex = pNode->mMeshes[a];

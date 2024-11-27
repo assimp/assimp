@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -52,8 +52,9 @@ namespace Assimp {
 // -------------------------------------------------------------------------------
 void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
     const char *s = in.c_str();
+    const char *end = in.c_str() + in.size();
     while (*s) {
-        SkipSpacesAndLineEnd(&s);
+        SkipSpacesAndLineEnd(&s, end);
         if (*s == '\'') {
             const char *base = ++s;
             while (*s != '\'') {
@@ -66,7 +67,7 @@ void ConvertListToStrings(const std::string &in, std::list<std::string> &out) {
             out.emplace_back(base, (size_t)(s - base));
             ++s;
         } else {
-            out.push_back(GetNextToken(s));
+            out.push_back(GetNextToken(s, end));
         }
     }
 }
@@ -176,8 +177,8 @@ unsigned int GetMeshVFormatUnique(const aiMesh *pcMesh) {
     if (pcMesh->HasTangentsAndBitangents()) iRet |= 0x4;
 
 
-    static_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS);
-    static_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS);
+    static_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS, "static_assert(8 >= AI_MAX_NUMBER_OF_COLOR_SETS)");
+    static_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS, "static_assert(8 >= AI_MAX_NUMBER_OF_TEXTURECOORDS)");
 
     // texture coordinates
     unsigned int p = 0;

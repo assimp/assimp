@@ -1,0 +1,42 @@
+diff -rupN -x .git autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h tinyusdz_repo_patch/src/external/stb_image_resize2.h
+--- autoclone/tinyusdz_repo-src/src/external/stb_image_resize2.h	2024-10-27 03:26:45.457163600 -0700
++++ tinyusdz_repo_patch/src/external/stb_image_resize2.h	2024-10-27 03:31:09.255211100 -0700
+@@ -2500,6 +2500,38 @@ static stbir__inline stbir_uint8 stbir__
+     }
+   }
+ 
++#elif defined(STBIR_NEON) && (defined(__ANDROID__) && defined(__arm__)) // 32-bit ARM on android NDK
++
++  // TODO  As of Apr 2024, tinyusdz doesn't support building on armeabi-v7a (32 bit arm) for android
++  //  (falls through to arm64 block and build fails)
++  //
++  //  For assimp integration, the image processing utilities aren't used at all, so it's safe to
++  //  essentially replace the functions with dummy no-ops.
++  //
++  //  This will need to be done manually whenever the tinyusdz source files are updated in assimp,
++  //  as it seems unlikely this will be fixed in the tinyusdz project
++  static stbir__inline void stbir__half_to_float_SIMD(float * output, stbir__FP16 const * input)
++  {
++    // TODO: this stub is just to allow build on armeabi-v7a via android NDK
++  }
++
++  static stbir__inline void stbir__float_to_half_SIMD(stbir__FP16 * output, float const * input)
++  {
++    // TODO: this stub is just to allow build on armeabi-v7a via android NDK
++  }
++
++  static stbir__inline float stbir__half_to_float( stbir__FP16 h )
++  {
++    // TODO: this stub is just to allow build on armeabi-v7a via android NDK
++    return 0;
++  }
++
++  static stbir__inline stbir__FP16 stbir__float_to_half( float f )
++  {
++    // TODO: this stub is just to allow build on armeabi-v7a via android NDK
++    return 0;
++  }
++
+ #endif
+ 
+ 

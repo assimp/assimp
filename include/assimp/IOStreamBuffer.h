@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -66,7 +66,7 @@ public:
     IOStreamBuffer(size_t cache = 4096 * 4096);
 
     /// @brief  The class destructor.
-    ~IOStreamBuffer();
+    ~IOStreamBuffer() = default;
 
     /// @brief  Will open the cached access for a given stream.
     /// @param  stream      The stream to cache.
@@ -139,9 +139,6 @@ AI_FORCE_INLINE IOStreamBuffer<T>::IOStreamBuffer(size_t cache) :
     m_cache.resize(cache);
     std::fill(m_cache.begin(), m_cache.end(), '\n');
 }
-
-template <class T>
-AI_FORCE_INLINE IOStreamBuffer<T>::~IOStreamBuffer() = default;
 
 template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::open(IOStream *stream) {
@@ -287,7 +284,7 @@ static AI_FORCE_INLINE bool isEndOfCache(size_t pos, size_t cacheSize) {
 template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
     buffer.resize(m_cacheSize);
-    if (isEndOfCache(m_cachePos, m_cacheSize) || 0 == m_filePos) {
+    if (m_cachePos >= m_cacheSize || 0 == m_filePos) {
         if (!readNextBlock()) {
             return false;
         }

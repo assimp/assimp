@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -103,6 +103,9 @@ public:
      *  your needs. If the provided message formatting is OK for you,
      *  it's much easier to use #create() and to attach your own custom
      *  output streams to it.
+     *  Since set is intended to be used for custom loggers, the user is
+     *  responsible for instantiation and destruction (new / delete).
+     *  Before deletion of the custom logger, set(nullptr); must be called.
      *  @param logger Pass NULL to setup a default NullLogger*/
     static void set(Logger *logger);
 
@@ -120,8 +123,8 @@ public:
     static bool isNullLogger();
 
     // ----------------------------------------------------------------------
-    /** @brief  Kills the current singleton logger and replaces it with a
-     *  #NullLogger instance. */
+    /** @brief  Kills and deletes the current singleton logger and replaces
+     *  it with a #NullLogger instance. */
     static void kill();
 
     // ----------------------------------------------------------------------

@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 
@@ -55,10 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
+
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "BVH Importer (MoCap)",
     "",
     "",
@@ -73,8 +74,8 @@ static const aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-template<typename... T>
-AI_WONT_RETURN void BVHLoader::ThrowException(T&&... args) {
+template <typename... T>
+AI_WONT_RETURN void BVHLoader::ThrowException(T &&...args) {
     throw DeadlyImportError(mFileName, ":", mLine, " - ", args...);
 }
 
@@ -426,7 +427,7 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
         nodeAnim->mNodeName.Set(nodeName);
         std::map<BVHLoader::ChannelType, int> channelMap;
 
-        //Build map of channels
+        // Build map of channels
         for (unsigned int channel = 0; channel < node.mChannels.size(); ++channel) {
             channelMap[node.mChannels[channel]] = channel;
         }
@@ -441,7 +442,7 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
 
                 // Now compute all translations
                 for (BVHLoader::ChannelType channel = Channel_PositionX; channel <= Channel_PositionZ; channel = (BVHLoader::ChannelType)(channel + 1)) {
-                    //Find channel in node
+                    // Find channel in node
                     std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
 
                     if (mapIter == channelMap.end())
@@ -485,30 +486,27 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
             for (unsigned int fr = 0; fr < mAnimNumFrames; ++fr) {
                 aiMatrix4x4 temp;
                 aiMatrix3x3 rotMatrix;
-				for (unsigned int channelIdx = 0; channelIdx < node.mChannels.size(); ++ channelIdx) {
-					switch (node.mChannels[channelIdx]) {
-                    case Channel_RotationX:
-                        {
+                for (unsigned int channelIdx = 0; channelIdx < node.mChannels.size(); ++channelIdx) {
+                    switch (node.mChannels[channelIdx]) {
+                    case Channel_RotationX: {
                         const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp);
-                        }
-                        break;
-                    case Channel_RotationY:
-                        {
+                        aiMatrix4x4::RotationX(angle, temp);
+                        rotMatrix *= aiMatrix3x3(temp);
+                    } break;
+                    case Channel_RotationY: {
                         const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);
-                        }
-                        break;
-                    case Channel_RotationZ:
-                        {
+                        aiMatrix4x4::RotationY(angle, temp);
+                        rotMatrix *= aiMatrix3x3(temp);
+                    } break;
+                    case Channel_RotationZ: {
                         const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationZ( angle, temp); rotMatrix *= aiMatrix3x3( temp);
-                        }
-                        break;
+                        aiMatrix4x4::RotationZ(angle, temp);
+                        rotMatrix *= aiMatrix3x3(temp);
+                    } break;
                     default:
                         break;
-					}
-				}
+                    }
+                }
                 rotkey->mTime = double(fr);
                 rotkey->mValue = aiQuaternion(rotMatrix);
                 ++rotkey;
@@ -524,5 +522,7 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
         }
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_BVH_IMPORTER

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -73,14 +73,14 @@ class ASSIMP_API IOStream
 {
 protected:
     /** Constructor protected, use IOSystem::Open() to create an instance. */
-    IOStream() AI_NO_EXCEPT;
+    IOStream() AI_NO_EXCEPT = default;
 
 public:
     // -------------------------------------------------------------------
     /** @brief Destructor. Deleting the object closes the underlying file,
      * alternatively you may use IOSystem::Close() to release the file.
      */
-    virtual ~IOStream();
+    virtual ~IOStream() = default;
 
     // -------------------------------------------------------------------
     /** @brief Read from the file
@@ -125,15 +125,6 @@ public:
      */
     virtual void Flush() = 0;
 }; //! class IOStream
-
-// ----------------------------------------------------------------------------------
-AI_FORCE_INLINE
-IOStream::IOStream() AI_NO_EXCEPT = default;
-
-// ----------------------------------------------------------------------------------
-AI_FORCE_INLINE
-IOStream::~IOStream() = default;
-// ----------------------------------------------------------------------------------
 
 } //!namespace Assimp
 

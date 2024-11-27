@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -123,9 +123,8 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture *pcTexture) {
 // Read a texture from a MDL3 file
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     const MDL::Header *pcHeader = (const MDL::Header *)mBuffer; //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
-
-    VALIDATE_FILE_SIZE(szData + pcHeader->skinwidth *
-                                        pcHeader->skinheight);
+    const size_t len = pcHeader->skinwidth * pcHeader->skinheight;
+    VALIDATE_FILE_SIZE(szData + len);
 
     // allocate a new texture object
     aiTexture *pcNew = new aiTexture();
@@ -495,7 +494,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
         aiString szFile;
         const size_t iLen = strlen((const char *)szCurrent);
-        size_t iLen2 = iLen > (MAXLEN - 1) ? (MAXLEN - 1) : iLen;
+        size_t iLen2 = iLen > (AI_MAXLEN - 1) ? (AI_MAXLEN - 1) : iLen;
         memcpy(szFile.data, (const char *)szCurrent, iLen2);
         szFile.data[iLen2] = '\0';
         szFile.length = static_cast<ai_uint32>(iLen2);
@@ -611,7 +610,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         if (is_not_qnan(clrTexture.r)) {
             clrTemp.r *= clrTexture.a;
         }
-        pcMatOut->AddProperty<ai_real>(&clrTemp.r, 1, AI_MATKEY_OPACITY);
+        pcMatOut->AddProperty<float>(&clrTemp.r, 1, AI_MATKEY_OPACITY);
 
         // read phong power
         int iShadingMode = (int)aiShadingMode_Gouraud;
@@ -731,9 +730,12 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     // if an ASCII effect description (HLSL?) is contained in the file,
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
-        int32_t iMe = *((int32_t *)szCurrent);
+        VALIDATE_FILE_SIZE(szCurrent + sizeof(int32_t));
+        int32_t iMe = 0;
+        ::memcpy(&iMe, szCurrent, sizeof(int32_t));
         AI_SWAP4(iMe);
         szCurrent += sizeof(char) * iMe + sizeof(int32_t);
+        VALIDATE_FILE_SIZE(szCurrent);
     }
     *szCurrentOut = szCurrent;
 }

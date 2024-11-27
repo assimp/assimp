@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -242,6 +242,22 @@ TEST_F( utMetadata, copy_test ) {
         EXPECT_EQ( i32v, v );
     }
 
+    // uint32_t test
+    {
+        uint32_t v = 0;
+        bool ok = copy.Get("uint32_t", v);
+        EXPECT_TRUE(ok);
+        EXPECT_EQ( ui32, v );
+    }
+
+    // int64_t test
+    {
+        int64_t v = -1;
+        bool ok = copy.Get("int64_t", v);
+        EXPECT_TRUE(ok);
+        EXPECT_EQ( i64, v );
+    }
+
     // uint64_t test
     {
         uint64_t v = 255;
@@ -264,14 +280,14 @@ TEST_F( utMetadata, copy_test ) {
         EXPECT_EQ( dv, v );
     }
 
-    // bool test
+    // string test
     {
         aiString v;
         EXPECT_TRUE( copy.Get( "aiString", v ) );
         EXPECT_EQ( strVal, v );
     }
 
-    // bool test
+    // vector test
     {
         aiVector3D v;
         EXPECT_TRUE( copy.Get( "aiVector3D", v ) );

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -63,6 +63,7 @@ struct aiImporterDesc;
 
 namespace Assimp {
 
+// Forward declarations
 class Importer;
 class IOSystem;
 class BaseProcess;
@@ -72,6 +73,9 @@ class IOStream;
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
                                           (string[1] << 16) + (string[2] << 8) + string[3]))
+
+using UByteBuffer = std::vector<uint8_t>;
+using ByteBuffer = std::vector<int8_t>;
 
 // ---------------------------------------------------------------------------
 /** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
@@ -91,7 +95,7 @@ public:
     BaseImporter() AI_NO_EXCEPT;
 
     /** Destructor, private as well */
-    virtual ~BaseImporter();
+    virtual ~BaseImporter() = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -273,7 +277,8 @@ public: // static utilities
             const std::string &pFile,
             const char *ext0,
             const char *ext1 = nullptr,
-            const char *ext2 = nullptr);
+            const char *ext2 = nullptr,
+            const char *ext3 = nullptr);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has one of the passed file extensions

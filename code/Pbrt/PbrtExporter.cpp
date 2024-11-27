@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -89,22 +89,27 @@ using namespace Assimp;
 
 namespace Assimp {
 
-void ExportScenePbrt (
-    const char* pFile,
-    IOSystem* pIOSystem,
-    const aiScene* pScene,
-    const ExportProperties* /*pProperties*/
-){
+void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pScene,
+        const ExportProperties *) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-
+    path = path + file + ".pbrt";
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file);
 }
 
 } // end of namespace Assimp
 
-// Constructor
+static void create_embedded_textures_folder(const aiScene *scene, IOSystem *pIOSystem) {
+    if (scene->mNumTextures > 0) {
+        if (!pIOSystem->Exists("textures")) {
+            if (!pIOSystem->CreateDirectory("textures")) {
+                throw DeadlyExportError("Could not create textures/ directory.");
+            }
+        }
+    }
+}
+
 PbrtExporter::PbrtExporter(
         const aiScene *pScene, IOSystem *pIOSystem,
         const std::string &path, const std::string &file) :
@@ -127,10 +132,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
+    
     // Export embedded textures.
-    if (mScene->mNumTextures > 0)
-        if (!mIOSystem->CreateDirectory("textures"))
-            throw DeadlyExportError("Could not create textures/ directory.");
+    create_embedded_textures_folder(mScene, mIOSystem);
+    
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);
@@ -175,9 +180,6 @@ PbrtExporter::PbrtExporter(
     }
     outfile->Write(mOutput.str().c_str(), mOutput.str().length(), 1);
 }
-
-// Destructor
-PbrtExporter::~PbrtExporter() = default;
 
 void PbrtExporter::WriteMetaData() {
     mOutput << "#############################\n";

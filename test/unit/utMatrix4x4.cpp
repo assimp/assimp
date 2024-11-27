@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -89,4 +89,18 @@ TEST_F(utMatrix4x4, indexOperatorTest) {
     EXPECT_FLOAT_EQ(0.0, *a14);
     ai_real *a15 = a12 + 3;
     EXPECT_FLOAT_EQ(1.0, *a15);
+}
+
+TEST_F(utMatrix4x4, identityMatrixTest) {
+    aiMatrix4x4 m1 = aiMatrix4x4(1.f,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0, 1);
+    EXPECT_TRUE(m1.IsIdentity());
+    aiMatrix4x4 m2 = aiMatrix4x4(1.02f,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0, 1);
+    EXPECT_FALSE(m2.IsIdentity());
+    aiMatrix4x4 m3 = aiMatrix4x4(1.009f,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0, 1);
+    EXPECT_TRUE(m3.IsIdentity());
+
+    EXPECT_TRUE(m1.IsIdentity(1e-3f));
+    EXPECT_FALSE(m2.IsIdentity(1e-3f));
+    EXPECT_TRUE(m2.IsIdentity(1e-1f));
+    EXPECT_FALSE(m3.IsIdentity(1e-3f));
 }

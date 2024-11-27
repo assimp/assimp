@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJ_FILEPARSER_H_INC
 #define OBJ_FILEPARSER_H_INC
 
+#include "ObjFileData.h"
+
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/material.h>
 #include <assimp/mesh.h>
@@ -52,14 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 namespace Assimp {
-
-namespace ObjFile {
-struct Model;
-struct Object;
-struct Material;
-struct Point3;
-struct Point2;
-} // namespace ObjFile
 
 class ObjFileImporter;
 class IOSystem;
@@ -79,7 +73,7 @@ public:
     /// @brief  Constructor with data array.
     ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem *io, ProgressHandler *progress, const std::string &originalObjFileName);
     /// @brief  Destructor
-    ~ObjFileParser();
+    ~ObjFileParser() = default;
     /// @brief  If you want to load in-core data.
     void setBuffer(std::vector<char> &buffer);
     /// @brief  Model getter.
@@ -149,6 +143,7 @@ private:
     unsigned int m_uiLine;
     //! Helper buffer
     char m_buffer[Buffersize];
+    const char *mEnd; 
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
     //! Pointer to progress handler

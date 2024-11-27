@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -61,7 +61,7 @@ namespace Assimp {
 class CSMImporter : public BaseImporter {
 public:
     CSMImporter();
-    ~CSMImporter() override;
+    ~CSMImporter() override = default;
 
     // -------------------------------------------------------------------
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
@@ -81,9 +81,8 @@ protected:
 private:
     bool noSkeletonMesh;
 
-}; // end of class CSMImporter
+};
 
-} // end of namespace Assimp
+} // namespace Assimp
 
 #endif // AI_AC3DIMPORTER_H_INC
-

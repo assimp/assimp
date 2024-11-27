@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -62,8 +62,11 @@ namespace Assimp {
  */
 class IRRMeshImporter : public BaseImporter, public IrrlichtBase {
 public:
-    IRRMeshImporter();
-    ~IRRMeshImporter() override;
+    /// @brief The class constructor.
+    IRRMeshImporter() = default;
+
+    /// @brief The class destructor.
+    ~IRRMeshImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -93,7 +96,7 @@ private:
         tangent = 2, // "tangents" - standard + tangents and bitangents
     };
 
-    void ParseBufferVertices(const char *sz, VertexFormat vertexFormat,
+    void ParseBufferVertices(const char *sz, const char *end, VertexFormat vertexFormat,
             std::vector<aiVector3D> &vertices, std::vector<aiVector3D> &normals,
             std::vector<aiVector3D> &tangents, std::vector<aiVector3D> &bitangents,
             std::vector<aiVector3D> &UVs, std::vector<aiVector3D> &UV2s,

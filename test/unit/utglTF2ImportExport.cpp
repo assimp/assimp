@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -988,3 +988,27 @@ TEST_F(utglTF2ImportExport, noSchemaFound) {
     EXPECT_NE(scene, nullptr);
     EXPECT_STREQ(importer.GetErrorString(), "");
 }
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(utglTF2ImportExport, testSetIdentityMatrixEpsilon) {
+//    Assimp::Exporter exporter;
+    Assimp::ExportProperties properties = Assimp::ExportProperties();
+    EXPECT_EQ(AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT,
+            properties.GetPropertyFloat("CHECK_IDENTITY_MATRIX_EPSILON",
+                    AI_CONFIG_CHECK_IDENTITY_MATRIX_EPSILON_DEFAULT));
+    aiMatrix4x4 m;
+    m = aiMatrix4x4(1.02f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    EXPECT_FALSE(m.IsIdentity());
+    m = aiMatrix4x4(1.001f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    EXPECT_TRUE(m.IsIdentity());
+
+    bool b = properties.SetPropertyFloat("CHECK_IDENTITY_MATRIX_EPSILON", 0.0001f);
+    EXPECT_TRUE(!b);
+    ai_real epsilon = properties.GetPropertyFloat("CHECK_IDENTITY_MATRIX_EPSILON", 0.01f);
+    EXPECT_EQ(0.0001f, epsilon);
+    m = aiMatrix4x4(1.0002f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    EXPECT_FALSE(m.IsIdentity(epsilon));
+    m = aiMatrix4x4(1.00009f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    EXPECT_TRUE(m.IsIdentity(epsilon));
+}
+

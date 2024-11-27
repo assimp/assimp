@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Irrlicht Mesh Reader",
     "",
     "",
@@ -68,14 +68,6 @@ static const aiImporterDesc desc = {
     0,
     "xml irrmesh"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-IRRMeshImporter::IRRMeshImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-IRRMeshImporter::~IRRMeshImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -116,8 +108,9 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file == nullptr)
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open IRRMESH file ", pFile);
+    }
 
     // Construct the irrXML parser
     XmlParser parser;
@@ -148,13 +141,11 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     // int vertexFormat = 0; // 0 = normal; 1 = 2 tcoords, 2 = tangents
     bool useColors = false;
 
-    /*
-    ** irrmesh files have a top level <mesh> owning multiple <buffer> nodes.
-    ** Each <buffer> contains <material>, <vertices>, and <indices>
-    ** <material> tags here directly owns the material data specs
-    ** <vertices> are a vertex per line, contains position, UV1 coords, maybe UV2, normal, tangent, bitangent
-    ** <boundingbox> is ignored, I think assimp recalculates those?
-    */
+    // irrmesh files have a top level <mesh> owning multiple <buffer> nodes.
+    // Each <buffer> contains <material>, <vertices>, and <indices>
+    // <material> tags here directly owns the material data specs
+    // <vertices> are a vertex per line, contains position, UV1 coords, maybe UV2, normal, tangent, bitangent
+    // <boundingbox> is ignored, I think assimp recalculates those?
 
     // Parse the XML file
     pugi::xml_node const &meshNode = root.child("mesh");
@@ -201,7 +192,6 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                 // This is possible ... remove the mesh from the list and skip further reading
                 ASSIMP_LOG_WARN("IRRMESH: Found mesh with zero vertices");
                 releaseMaterial(&curMat);
-                // releaseMesh(&curMesh);
                 continue; // Bail out early
             };
 
@@ -250,7 +240,9 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             };
 
             // We know what format buffer is, collect numbers
-            ParseBufferVertices(verticesNode.text().get(), vertexFormat,
+            std::string v = verticesNode.text().get();
+            const char *end = v.c_str() + v.size();
+            ParseBufferVertices(v.c_str(), end, vertexFormat,
                     curVertices, curNormals,
                     curTangents, curBitangents,
                     curUVs, curUV2s, curColors, useColors);
@@ -329,8 +321,10 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
             // NOTE this might explode for UTF-16 and wchars
             const char *sz = indicesNode.text().get();
+            const char *end = sz + std::strlen(sz);
+            
             // For each index loop over aiMesh faces
-            while (SkipSpacesAndLineEnd(&sz)) {
+            while (SkipSpacesAndLineEnd(&sz, end)) {
                 if (curFace >= faceEnd) {
                     ASSIMP_LOG_ERROR("IRRMESH: Too many indices");
                     break;
@@ -354,12 +348,18 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
                 // Copy over data to aiMesh
                 *pcV++ = curVertices[idx];
-                if (pcN) *pcN++ = curNormals[idx];
-                if (pcT) *pcT++ = curTangents[idx];
-                if (pcB) *pcB++ = curBitangents[idx];
-                if (pcC0) *pcC0++ = curColors[idx];
-                if (pcT0) *pcT0++ = curUVs[idx];
-                if (pcT1) *pcT1++ = curUV2s[idx];
+                if (pcN)
+                    *pcN++ = curNormals[idx];
+                if (pcT)
+                    *pcT++ = curTangents[idx];
+                if (pcB)
+                    *pcB++ = curBitangents[idx];
+                if (pcC0)
+                    *pcC0++ = curColors[idx];
+                if (pcT0)
+                    *pcT0++ = curUVs[idx];
+                if (pcT1)
+                    *pcT1++ = curUV2s[idx];
 
                 // start new face
                 if (++curIdx == 3) {
@@ -368,8 +368,9 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                 }
             }
             // We should be at the end of mFaces
-            if (curFace != faceEnd)
+            if (curFace != faceEnd) {
                 ASSIMP_LOG_ERROR("IRRMESH: Not enough indices");
+            }
         }
 
         // Finish processing the mesh - do some small material workarounds
@@ -379,8 +380,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             aiMaterial *mat = (aiMaterial *)curMat;
             mat->AddProperty(&curColors[0].a, 1, AI_MATKEY_OPACITY);
         }
-        // textMeaning = 2;
-
+        
         // end of previous buffer. A material and a mesh should be there
         if (!curMat || !curMesh) {
             ASSIMP_LOG_ERROR("IRRMESH: A buffer must contain a mesh and a material");
@@ -421,37 +421,37 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     };
 }
 
-void IRRMeshImporter::ParseBufferVertices(const char *sz, VertexFormat vertexFormat,
+void IRRMeshImporter::ParseBufferVertices(const char *sz, const char *end, VertexFormat vertexFormat,
         std::vector<aiVector3D> &vertices, std::vector<aiVector3D> &normals,
         std::vector<aiVector3D> &tangents, std::vector<aiVector3D> &bitangents,
         std::vector<aiVector3D> &UVs, std::vector<aiVector3D> &UV2s,
         std::vector<aiColor4D> &colors, bool &useColors) {
     // read vertices
     do {
-        SkipSpacesAndLineEnd(&sz);
+        SkipSpacesAndLineEnd(&sz, end);
         aiVector3D temp;
         aiColor4D c;
 
         // Read the vertex position
         sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         sz = fast_atoreal_move<float>(sz, (float &)temp.y);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         sz = fast_atoreal_move<float>(sz, (float &)temp.z);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
         vertices.push_back(temp);
 
         // Read the vertex normals
         sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         sz = fast_atoreal_move<float>(sz, (float &)temp.y);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         sz = fast_atoreal_move<float>(sz, (float &)temp.z);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
         normals.push_back(temp);
 
         // read the vertex colors
@@ -463,14 +463,14 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, VertexFormat vertexFor
             useColors = true;
 
         colors.push_back(c);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         // read the first UV coordinate set
         sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
 
         sz = fast_atoreal_move<float>(sz, (float &)temp.y);
-        SkipSpaces(&sz);
+        SkipSpaces(&sz, end);
         temp.z = 0.f;
         temp.y = 1.f - temp.y; // DX to OGL
         UVs.push_back(temp);
@@ -480,7 +480,7 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, VertexFormat vertexFor
         // read the (optional) second UV coordinate set
         if (vertexFormat == VertexFormat::t2coord) {
             sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
 
             sz = fast_atoreal_move<float>(sz, (float &)temp.y);
             temp.y = 1.f - temp.y; // DX to OGL
@@ -490,33 +490,32 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, VertexFormat vertexFor
         else if (vertexFormat == VertexFormat::tangent) {
             // tangents
             sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
 
             sz = fast_atoreal_move<float>(sz, (float &)temp.z);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
 
             sz = fast_atoreal_move<float>(sz, (float &)temp.y);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
             temp.y *= -1.0f;
             tangents.push_back(temp);
 
             // bitangents
             sz = fast_atoreal_move<float>(sz, (float &)temp.x);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
 
             sz = fast_atoreal_move<float>(sz, (float &)temp.z);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
 
             sz = fast_atoreal_move<float>(sz, (float &)temp.y);
-            SkipSpaces(&sz);
+            SkipSpaces(&sz, end);
             temp.y *= -1.0f;
             bitangents.push_back(temp);
         }
-    } while (SkipLine(&sz));
-    /* IMPORTANT: We assume that each vertex is specified in one
-    line. So we can skip the rest of the line - unknown vertex
-    elements are ignored.
-    */
+    } while (SkipLine(&sz, end));
+    // IMPORTANT: We assume that each vertex is specified in one
+    // line. So we can skip the rest of the line - unknown vertex
+    // elements are ignored.
 }
 
 #endif // !! ASSIMP_BUILD_NO_IRRMESH_IMPORTER

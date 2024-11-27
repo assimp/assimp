@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -56,11 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/StreamReader.h>
 #include <assimp/TinyFormatter.h>
-#ifdef ASSIMP_USE_HUNTER
-#include <utf8.h>
-#else
-#include "../contrib/utf8cpp/source/utf8.h"
-#endif
+#include "utf8.h"
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -69,9 +65,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Silo SIB Importer",
     "Richard Mitton (http://www.codersnotes.com/about)",
     "",
@@ -94,7 +90,7 @@ enum {
     N
 };
 
-typedef std::pair<uint32_t, uint32_t> SIBPair;
+using SIBPair = std::pair<uint32_t, uint32_t>;
 
 struct SIBEdge {
     uint32_t faceA, faceB;
@@ -199,15 +195,6 @@ static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
 
     return result;
 }
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-SIBImporter::SIBImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-SIBImporter::~SIBImporter() = default;
-
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool SIBImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
@@ -881,5 +868,7 @@ void SIBImporter::InternReadFile(const std::string &pFile,
         }
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_SIB_IMPORTER

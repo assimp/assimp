@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -547,7 +547,7 @@ struct BufferView : public Object {
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
     void Read(Value &obj, Asset &r);
-    uint8_t *GetPointer(size_t accOffset);
+    uint8_t *GetPointerAndTailSize(size_t accOffset, size_t& outTailSize);
 };
 
 //! A typed view into a BufferView. A BufferView contains raw binary data.
@@ -629,7 +629,7 @@ struct Accessor : public Object {
 
         std::vector<uint8_t> data; //!< Actual data, which may be defaulted to an array of zeros or the original data, with the sparse buffer view applied on top of it.
 
-        void PopulateData(size_t numBytes, uint8_t *bytes);
+        void PopulateData(size_t numBytes, const uint8_t *bytes);
         void PatchData(unsigned int elementSize);
     };
 };
@@ -720,7 +720,7 @@ const vec4 defaultBaseColor = { 1, 1, 1, 1 };
 const vec3 defaultEmissiveFactor = { 0, 0, 0 };
 const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
-const vec3 defaultSpecularColorFactor = { 0, 0, 0 };
+const vec3 defaultSpecularColorFactor = { 1, 1, 1 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
 const vec3 defaultAttenuationColor = { 1, 1, 1 };
 

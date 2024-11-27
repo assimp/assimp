@@ -297,7 +297,7 @@ void Structure ::Convert<Base>(
         const FileDatabase &db) const {
     // note: as per https://github.com/assimp/assimp/issues/128,
     // reading the Object linked list recursively is prone to stack overflow.
-    // This structure converter is therefore an hand-written exception that
+    // This structure converter is therefore a hand-written exception that
     // does it iteratively.
 
     const int initial_pos = db.reader->GetCurrentPos();

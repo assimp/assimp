@@ -39,7 +39,7 @@
 #include <vector>
 
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__GNUC__)
 #  pragma warning( disable: 4251)
 #endif
 namespace p2t {

@@ -77,3 +77,14 @@ TEST_F(utUSDImport, skinnedMeshTest) {
     EXPECT_NE(nullptr, scene->mRootNode->FindNode("Bone"));
     EXPECT_NE(nullptr, scene->mRootNode->FindNode("Bone/Bone_001"));
 }
+
+TEST_F(utUSDImport, singleAnimationTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/../models-nonbsd/USD/usda/simple-skin-animation-test.usda", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_TRUE(scene->HasAnimations());
+    EXPECT_EQ(2, scene->mAnimations[0]->mNumChannels);  // 2 bones. 1 channel for each bone
+}
+
+// Note: Add multi-animation test once supported by USD
+// See https://github.com/lighttransport/tinyusdz/issues/122 for details.

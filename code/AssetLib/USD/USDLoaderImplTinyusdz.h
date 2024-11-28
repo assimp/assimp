@@ -65,6 +65,10 @@ public:
             aiScene *pScene,
             IOSystem *pIOHandler);
 
+    void animations(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
     void meshes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,

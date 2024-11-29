@@ -67,7 +67,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::GetTexture( aiTextureType type,
        C_STRUCT aiString* path,
        aiTextureMapping* mapping    /*= NULL*/,
        unsigned int* uvindex        /*= NULL*/,
-       float* blend               /*= NULL*/,
+       ai_real* blend               /*= NULL*/,
        aiTextureOp* op              /*= NULL*/,
        aiTextureMapMode* mapmode    /*= NULL*/) const {
     return ::aiGetMaterialTexture(this,type,index,path,mapping,uvindex,blend,op,mapmode);
@@ -191,7 +191,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 }
 // ---------------------------------------------------------------------------
 AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-        unsigned int idx, float& pOut) const {
+        unsigned int idx, ai_real& pOut) const {
     return aiGetMaterialFloat(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------

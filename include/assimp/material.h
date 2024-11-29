@@ -1535,7 +1535,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut,
+        ai_real *pOut,
         unsigned int *pMax);
 
 // ---------------------------------------------------------------------------
@@ -1561,7 +1561,7 @@ static inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut) {
+        ai_real *pOut) {
     return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, NULL);
 }
 

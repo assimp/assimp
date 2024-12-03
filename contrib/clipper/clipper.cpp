@@ -1567,7 +1567,7 @@ bool Clipper::ExecuteInternal()
     m_SortedEdges = 0;
 
     succeeded = true;
-    cInt botY, topY;
+    cInt botY = 0, topY = 0;
     if (!PopScanbeam(botY)) return false;
     InsertLocalMinimaIntoAEL(botY);
     while (PopScanbeam(topY) || LocalMinimaPending())

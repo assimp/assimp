@@ -800,10 +800,20 @@ void PbrtExporter::WriteLights() {
 
 void PbrtExporter::WriteMesh(aiMesh* mesh) {
     mOutput << "# - Mesh: ";
+    const char* mName;
     if (mesh->mName == aiString(""))
-        mOutput << "<No Name>\n";
+        mName = "<No Name>";
     else
-        mOutput << mesh->mName.C_Str() << "\n";
+        mName = mesh->mName.C_Str();
+    mOutput << mName << "\n";
+
+    // Check if any types other than tri
+    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
+        std::cerr << "Error: ignoring point / line / polygon mesh " << mName << ".\n";
+        return;
+    }
 
     mOutput << "AttributeBegin\n";
     aiMaterial* material = mScene->mMaterials[mesh->mMaterialIndex];
@@ -815,14 +825,6 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         (emission.r > 0 || emission.g > 0 || emission.b > 0))
         mOutput << "    AreaLightSource \"diffuse\" \"rgb L\" [ " << emission.r <<
             " " << emission.g << " " << emission.b << " ]\n";
-
-    // Check if any types other than tri
-    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
-        std::cerr << "Error: ignoring point / line / polygon mesh " << mesh->mName.C_Str() << ".\n";
-        return;
-    }
 
     // Alpha mask
     std::string alpha;

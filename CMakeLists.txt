@@ -56,17 +56,27 @@ if(ASSIMP_BUILD_USE_CCACHE)
   endif()
 endif()
 
-# Disabled importers: m3d for 5.1 or later
-ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
-ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
+# User may override these in their CMake script to provide M3D import/export support
+# (M3D importer/exporter was disabled for assimp release 5.1 or later)
+option(ASSIMP_BUILD_M3D_IMPORTER "Enable M3D file import" off)
+option(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
+
+# Internal/private M3D logic
+if (NOT ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_IMPORTER)
+endif () # if (not ASSIMP_BUILD_M3D_IMPORTER)
+if (NOT ASSIMP_BUILD_M3D_EXPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
+endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
+
 # Toggles the use of the hunter package manager
 option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.5.tar.gz"
-    SHA1 "a20151e4c0740ee7d0f9994476856d813cdead29"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.8.tar.gz"
+    SHA1 "26c79d587883ec910bce168e25f6ac4595f97033"
   )
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
@@ -279,7 +289,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
 
-  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
     ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
   ENDIF()

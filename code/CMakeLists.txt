@@ -271,7 +271,6 @@ MACRO(ADD_ASSIMP_IMPORTER name)
 ENDMACRO()
 
 if (NOT ASSIMP_NO_EXPORT)
-
   # if this variable is set to TRUE, the user can manually disable exporters by setting
   # ASSIMP_BUILD_XXX_EXPORTER to FALSE for each exporter
   # if this variable is set to FALSE, the user can manually enable exporters by setting
@@ -417,14 +416,12 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+if (ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_ASSIMP_IMPORTER( M3D
+            AssetLib/M3D/M3DImporter.cpp
+            AssetLib/M3D/M3DWrapper.cpp
+    )
+endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
@@ -664,9 +661,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assxml/AssxmlFileWriter.h
     AssetLib/Assxml/AssxmlFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER(M3D
-    AssetLib/M3D/M3DExporter.h
-    AssetLib/M3D/M3DExporter.cpp)
+  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
+      ADD_ASSIMP_EXPORTER(M3D
+              AssetLib/M3D/M3DExporter.cpp)
+  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
 
   ADD_ASSIMP_EXPORTER(COLLADA
     AssetLib/Collada/ColladaExporter.h
@@ -946,8 +944,8 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
-    # "dev" branch, 9 Jul 2024
-    set(TINYUSDZ_GIT_TAG "bd2a1edbbf69f352a6c40730114db9918c384848")
+    # "dev" branch, 28 Oct 2024
+    set(TINYUSDZ_GIT_TAG "36f2aabb256b360365989c01a52f839a57dfe2a6")
     message("****")
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 
@@ -1053,7 +1051,7 @@ ENDIF() # IF (ASSIMP_BUILD_USD_IMPORTER)
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
-ELSE()
+ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
     ../contrib/pugixml/src/pugixml.hpp
@@ -1396,6 +1394,8 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-unused-template
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
+        -Wno-deprecated-declarations
+	-Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
@@ -1417,9 +1417,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
@@ -1438,6 +1436,9 @@ ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
+  if(TARGET pugixml::pugixml)
+    target_link_libraries(assimp pugixml::pugixml)
   endif()
 ENDIF()
 

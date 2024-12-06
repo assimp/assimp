@@ -608,6 +608,7 @@ namespace glTF2 {
                 {
                     WriteAttrs(w, attrs, p.attributes.position, "POSITION");
                     WriteAttrs(w, attrs, p.attributes.normal, "NORMAL");
+                    WriteAttrs(w, attrs, p.attributes.tangent, "TANGENT");
                     WriteAttrs(w, attrs, p.attributes.texcoord, "TEXCOORD", true);
                     WriteAttrs(w, attrs, p.attributes.color, "COLOR", true);
                     WriteAttrs(w, attrs, p.attributes.joint, "JOINTS", true);

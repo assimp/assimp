@@ -119,7 +119,7 @@ AI_FORCE_INLINE bool SkipSpaces(const char_t **inout, const char_t *end) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t *end) {
-    while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && in != end) {
+    while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && *in != (char_t)'#' && in != end) {
         ++in;
     }
 

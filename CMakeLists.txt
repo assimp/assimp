@@ -59,6 +59,11 @@ option(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
 # auto-cloned during build; so MUST disable the feature or the PR will be rejected
 option(ASSIMP_BUILD_USD_IMPORTER "Enable USD file import" off)
 option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" off)
+
+# VRML (.wrl/.x3dv) file import support by leveraging X3D importer and 3rd party file
+# format converter to convert .wrl/.x3dv files to X3D-compatible .xml
+# (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
+option(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
 #--------------------------------------------------------------------------------#
 #                  Internal impl for optional model formats
 #--------------------------------------------------------------------------------#
@@ -69,6 +74,11 @@ endif () # if (not ASSIMP_BUILD_M3D_IMPORTER)
 if (NOT ASSIMP_BUILD_M3D_EXPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_NO_M3D_EXPORTER)
 endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
+
+# Internal/private VRML logic
+if (NOT ASSIMP_BUILD_VRML_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_VRML_IMPORTER)
+endif () # if (not ASSIMP_BUILD_VRML_IMPORTER)
 #================================================================================#
 
 option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)

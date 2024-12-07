@@ -55,11 +55,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <memory>
 
+#if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+#define X3D_FORMATS_DESCR_STR "Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "x3d x3db"
+#else
+#define X3D_FORMATS_DESCR_STR "VRML(WRL, X3DV) and Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "wrl x3d x3db x3dv"
+#endif // #if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+
 namespace Assimp {
 
 /// Constant which holds the importer description
 const aiImporterDesc X3DImporter::Description = {
-    "VRML(WRL, X3DV) and Extensible 3D(X3D, X3DB) Importer",
+    X3D_FORMATS_DESCR_STR,
     "smalcom",
     "",
     "See documentation in source code. Chapter: Limitations.",
@@ -68,7 +76,7 @@ const aiImporterDesc X3DImporter::Description = {
     0,
     0,
     0,
-    "wrl x3d x3db x3dv"
+    X3D_FORMATS_EXTENSIONS_STR
 };
 
 bool X3DImporter::isNodeEmpty(XmlNode &node) {

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <string>
 
-#include "contrib/meshlab/src/meshlabplugins/io_x3d/vrml/Parser.h"
+#include "contrib/meshlab/autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h"
 
 namespace Assimp {
 

@@ -88,15 +88,15 @@ static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
 
 std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
     std::stringstream ss;
-#if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
     if (isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile)) {
+#if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
         VrmlTranslator::Scanner scanner = createScanner(pFile);
         VrmlTranslator::Parser parser(&scanner);
         parser.Parse();
         ss.str("");
         parser.doc_.save(ss);
-    }
 #endif // #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+    }
     return ss;
 }
 

@@ -1,5 +1,5 @@
-diff -rupN -x .git meshlab_repo_raw/CMakeLists.txt meshlab_repo_patch/CMakeLists.txt
---- meshlab_repo_raw/CMakeLists.txt	2024-12-06 18:01:10.831623800 -0800
+diff -rupN -x .git autoclone/meshlab_repo-src/CMakeLists.txt meshlab_repo_patch/CMakeLists.txt
+--- autoclone/meshlab_repo-src/CMakeLists.txt	2024-12-06 18:01:10.831623800 -0800
 +++ meshlab_repo_patch/CMakeLists.txt	2024-12-06 18:15:09.647799500 -0800
 @@ -16,4 +16,6 @@ option(MESHLAB_USE_DEFAULT_BUILD_AND_INS
  
@@ -10,8 +10,8 @@ diff -rupN -x .git meshlab_repo_raw/CMakeLists.txt meshlab_repo_patch/CMakeLists
 +# Disable meshlab project to avoid breaking assimp build (for converting VMRL (.wrl/.x3dv) files to
 +# .xml format, just need to compile two source files)
 +#add_subdirectory(src)
-diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.cpp
---- meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.cpp	2024-12-06 18:01:12.268963700 -0800
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.cpp
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.cpp	2024-12-06 18:01:12.268963700 -0800
 +++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.cpp	2024-12-06 14:19:26.138842300 -0800
 @@ -32,11 +32,11 @@
  
@@ -752,8 +752,8 @@ diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.cpp me
  	exit(1);
  }
  */
-diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.h
---- meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.h	2024-12-06 18:01:12.268963700 -0800
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.h
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h	2024-12-06 18:01:12.268963700 -0800
 +++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.h	2024-12-06 18:48:17.891284300 -0800
 @@ -35,9 +35,10 @@
  #if !defined(VRML_PARSER_H__)
@@ -913,8 +913,8 @@ diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Parser.h mesh
  
  	void Parse();
  
-diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Scanner.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.cpp
---- meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Scanner.cpp	2024-12-06 18:01:12.268963700 -0800
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.cpp
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.cpp	2024-12-06 18:01:12.268963700 -0800
 +++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.cpp	2024-12-06 14:21:47.920443100 -0800
 @@ -39,7 +39,7 @@
  
@@ -1107,8 +1107,8 @@ diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Scanner.cpp m
  }
  
  Token* Scanner::NextToken() {
-diff -rupN -x .git meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Scanner.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.h
---- meshlab_repo_raw/src/meshlabplugins/io_x3d/vrml/Scanner.h	2024-12-06 18:01:12.268963700 -0800
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.h
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.h	2024-12-06 18:01:12.268963700 -0800
 +++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.h	2024-12-06 14:21:59.453748300 -0800
 @@ -52,9 +52,9 @@
  //#define coco_swprintf _snwprintf

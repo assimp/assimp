@@ -862,6 +862,9 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DImporter_Node.hpp
   AssetLib/X3D/X3DGeoHelper.cpp
   AssetLib/X3D/X3DGeoHelper.h
+  AssetLib/X3D/X3DXmlHelper.cpp
+  AssetLib/X3D/X3DXmlHelper.h
+  AssetLib/VRML/VrmlConverter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -978,9 +981,6 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     message("****")
     set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_ABSPATH}/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml")
     set(Meshlab_SRCS
-            AssetLib/X3D/X3DXmlHelper.cpp
-            AssetLib/X3D/X3DXmlHelper.h
-            AssetLib/VRML/VrmlConverter.cpp
             ${Meshlab_SRC_ABSPATH}/Parser.cpp
             ${Meshlab_SRC_ABSPATH}/Scanner.cpp
     )

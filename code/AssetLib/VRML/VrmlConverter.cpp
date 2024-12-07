@@ -76,6 +76,7 @@ bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
     return (ext[0] == 'x' || ext[0] == 'X') && (ext[1] == '3') && (ext[2] == 'd' || ext[2] == 'D') && (ext[3] == 'v' || ext[3] == 'V');
 }
 
+#if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
 static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
     std::unique_ptr<wchar_t[]> wide_stringPtr{ new wchar_t[ pFile.length() + 1 ] };
     std::copy(pFile.begin(), pFile.end(), wide_stringPtr.get());
@@ -83,9 +84,11 @@ static VrmlTranslator::Scanner createScanner(const std::string &pFile) {
 
     return VrmlTranslator::Scanner(wide_stringPtr.get());
 } // wide_stringPtr auto-deleted when leaving scope
+#endif // #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
 
 std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
     std::stringstream ss;
+#if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
     if (isFileWrlVrml97Ext(pFile) || isFileX3dvClassicVrmlExt(pFile)) {
         VrmlTranslator::Scanner scanner = createScanner(pFile);
         VrmlTranslator::Parser parser(&scanner);
@@ -93,6 +96,7 @@ std::stringstream ConvertVrmlFileToX3dXmlFile(const std::string &pFile) {
         ss.str("");
         parser.doc_.save(ss);
     }
+#endif // #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
     return ss;
 }
 

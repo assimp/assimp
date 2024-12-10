@@ -74,12 +74,11 @@ const char *getTypeToken(Value::ValueType type) {
     return Grammar::PrimitiveTypeToken[(size_t)type];
 }
 
-static void logInvalidTokenError(const char *in, const std::string &exp, OpenDDLParser::logCallback callback) {
-    if (callback) {
-        std::string full(in);
-        std::string part(full.substr(0, 50));
+static void logInvalidTokenError(const std::string &in, const std::string &exp, OpenDDLParser::logCallback callback) {
+    if (callback) {\
+        std::string part(in.substr(0, 50));
         std::stringstream stream;
-        stream << "Invalid token \"" << *in << "\" "
+        stream << "Invalid token \"" << in << "\" "
                << "(expected \"" << exp << "\") "
                << "in: \"" << part << "\"";
         callback(ddl_error_msg, stream.str());
@@ -306,7 +305,7 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
                 }
 
                 if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
-                    logInvalidTokenError(in, Grammar::ClosePropertyToken, m_logCallback);
+                    logInvalidTokenError(std::string(in, end), Grammar::ClosePropertyToken, m_logCallback);
                     return nullptr;
                 }
 
@@ -355,8 +354,7 @@ char *OpenDDLParser::parseStructure(char *in, char *end) {
                 ++in;
             }
         } else {
-            ++in;
-            logInvalidTokenError(in, std::string(Grammar::OpenBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::OpenBracketToken), m_logCallback);
             error = true;
             return nullptr;
         }
@@ -427,7 +425,7 @@ char *OpenDDLParser::parseStructureBody(char *in, char *end, bool &error) {
 
         in = lookForNextToken(in, end);
         if (in == end || *in != '}') {
-            logInvalidTokenError(in == end ? "" : in, std::string(Grammar::CloseBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::CloseBracketToken), m_logCallback);
             return nullptr;
         } else {
             //in++;

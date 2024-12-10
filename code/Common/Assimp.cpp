@@ -416,6 +416,10 @@ ASSIMP_API aiReturn aiDetachLogStream(const aiLogStream *stream) {
     DefaultLogger::get()->detachStream(it->second);
     delete it->second;
 
+    if ((Assimp::LogStream *)stream->user == DefaultStream) {
+        DefaultStream = nullptr;
+    }
+
     gActiveLogStreams.erase(it);
 
     if (gActiveLogStreams.empty()) {

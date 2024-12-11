@@ -444,7 +444,7 @@ void USDImporterImplTinyusdz::verticesForMesh(
         }
 
         for (unsigned boneIndex = 0; boneIndex < numBones; ++boneIndex) {
-            const unsigned int numWeightsForBone = unsigned(aiBonesVertexWeights[boneIndex].size());
+            const auto numWeightsForBone = unsigned(aiBonesVertexWeights[boneIndex].size());
             pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights = new aiVertexWeight[numWeightsForBone];
             pScene->mMeshes[meshIdx]->mBones[boneIndex]->mNumWeights = numWeightsForBone;
 

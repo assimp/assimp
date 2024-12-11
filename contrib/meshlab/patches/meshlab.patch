@@ -1,0 +1,1191 @@
+diff -rupN -x .git autoclone/meshlab_repo-src/CMakeLists.txt meshlab_repo_patch/CMakeLists.txt
+--- autoclone/meshlab_repo-src/CMakeLists.txt	2024-12-06 18:01:10.831623800 -0800
++++ meshlab_repo_patch/CMakeLists.txt	2024-12-06 18:15:09.647799500 -0800
+@@ -16,4 +16,6 @@ option(MESHLAB_USE_DEFAULT_BUILD_AND_INS
+ 
+ option(MESHLAB_IS_NIGHTLY_VERSION "Nightly version of meshlab will be used instead of ML_VERSION" OFF)
+ 
+-add_subdirectory(src)
+\ No newline at end of file
++# Disable meshlab project to avoid breaking assimp build (for converting VMRL (.wrl/.x3dv) files to
++# .xml format, just need to compile two source files)
++#add_subdirectory(src)
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.cpp
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.cpp	2024-12-06 18:01:12.268963700 -0800
++++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.cpp	2024-12-06 14:19:26.138842300 -0800
+@@ -32,11 +32,11 @@
+ 
+ *****************************************************************************/
+ 
++#include <vector>
+ #include <wchar.h>
+ #include "Parser.h"
+ #include "Scanner.h"
+ 
+-
+ namespace VrmlTranslator {
+ 
+ 
+@@ -95,9 +95,11 @@ bool Parser::WeakSeparator(int n, int sy
+ }
+ 
+ void Parser::VrmlTranslator() {
+-		QDomElement root = doc->createElement("X3D");
+-		QDomElement scene = doc->createElement("Scene");
+-		root.appendChild(scene);
++//		QDomElement root = doc->createElement("X3D");
++        pugi::xml_node root = doc->append_child("X3D");
++//		QDomElement scene = doc->createElement("Scene");
++//		root.appendChild(scene);
++        pugi::xml_node scene = root.append_child("Scene");
+ 		InitX3dNode();
+ 		if (la->kind == 7) {
+ 			HeaderStatement();
+@@ -108,7 +110,7 @@ void Parser::VrmlTranslator() {
+ 		ComponentStatements();
+ 		MetaStatements();
+ 		Statements(scene);
+-		doc->appendChild(root);
++//		doc->appendChild(root);
+ }
+ 
+ void Parser::HeaderStatement() {
+@@ -147,7 +149,7 @@ void Parser::MetaStatements() {
+ 		}
+ }
+ 
+-void Parser::Statements(QDomElement& parent) {
++void Parser::Statements(pugi::xml_node& parent) {
+ 		while (StartOf(1)) {
+ 			Statement(parent);
+ 		}
+@@ -173,16 +175,16 @@ void Parser::ComponentSupportLevel() {
+ }
+ 
+ void Parser::ExportStatement() {
+-		QString str;
++		std::string str;
+ 		Expect(14);
+ 		NodeNameId(str);
+ 		Expect(15);
+ 		ExportedNodeNameId();
+ }
+ 
+-void Parser::NodeNameId(QString& str) {
++void Parser::NodeNameId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+ void Parser::ExportedNodeNameId() {
+@@ -190,7 +192,7 @@ void Parser::ExportedNodeNameId() {
+ }
+ 
+ void Parser::ImportStatement() {
+-		QString str;
++		std::string str;
+ 		Expect(16);
+ 		InlineNodeNameId();
+ 		Expect(17);
+@@ -217,7 +219,7 @@ void Parser::Metavalue() {
+ 		Expect(4);
+ }
+ 
+-void Parser::Statement(QDomElement& parent) {
++void Parser::Statement(pugi::xml_node& parent) {
+ 		if (StartOf(2)) {
+ 			NodeStatement(parent);
+ 		} else if (la->kind == 16) {
+@@ -231,8 +233,8 @@ void Parser::Statement(QDomElement& pare
+ 		} else SynErr(87);
+ }
+ 
+-void Parser::NodeStatement(QDomElement& parent) {
+-		QString tagName, attrValue;
++void Parser::NodeStatement(pugi::xml_node& parent) {
++		std::string tagName, attrValue;
+ 		if (la->kind == 1 || la->kind == 38) {
+ 			Node(parent, tagName, "");
+ 		} else if (la->kind == 19) {
+@@ -242,17 +244,19 @@ void Parser::NodeStatement(QDomElement&
+ 		} else if (la->kind == 20) {
+ 			Get();
+ 			NodeNameId(attrValue);
+-			std::map<QString, QString>::const_iterator iter = defNode.find(attrValue);
++			std::map<std::string, std::string>::const_iterator iter = defNode.find(attrValue);
+ 			if(iter != defNode.end())
+ 			{
+-			  QDomElement node = doc->createElement(iter->second);
+-			  node.setAttribute("USE", attrValue);
+-			  parent.appendChild(node);
++//			  QDomElement node = doc->createElement(iter->second);
++              pugi::xml_node node = parent.append_child((iter->second).c_str());
++//			  node.setAttribute("USE", attrValue);
++              node.append_attribute("USE") = attrValue.c_str();
++//			  parent.appendChild(node);
+ 			}
+ 		} else SynErr(88);
+ }
+ 
+-void Parser::ProtoStatement(QDomElement& parent) {
++void Parser::ProtoStatement(pugi::xml_node& parent) {
+ 		if (la->kind == 21) {
+ 			Proto(parent);
+ 		} else if (la->kind == 34) {
+@@ -261,7 +265,7 @@ void Parser::ProtoStatement(QDomElement&
+ }
+ 
+ void Parser::RouteStatement() {
+-		QString str;
++		std::string str;
+ 		Expect(35);
+ 		NodeNameId(str);
+ 		Expect(17);
+@@ -272,22 +276,27 @@ void Parser::RouteStatement() {
+ 		InputOnlyId(str);
+ }
+ 
+-void Parser::Node(QDomElement& parent, QString& tagName, const QString defValue) {
+-		bool flag = false; QDomElement node;
++void Parser::Node(pugi::xml_node& parent, std::string& tagName, const std::string defValue) {
++		bool flag = false; pugi::xml_node node;
+ 		if (la->kind == 1) {
+ 			NodeTypeId(tagName);
+-			std::set<QString>::const_iterator iter = proto.find(tagName);
++			std::set<std::string>::const_iterator iter = proto.find(tagName);
+ 			if (iter != proto.end())
+ 			{
+-			  node = doc->createElement("ProtoInstance");
+-			  node.setAttribute("name", tagName);
++//			  node = doc->createElement("ProtoInstance");
++              node = parent.append_child("ProtoInstance");
++//			  node.setAttribute("name", tagName);
++              node.append_attribute("name") = tagName.c_str();
+ 			  flag = true;
+ 			}
+-			else
+-			  node = doc->createElement(tagName);
++			else {
++//			  node = doc->createElement(tagName);
++              node = parent.append_child(tagName.c_str());
++            }
+ 			if (defValue != "")
+ 			{
+-			  node.setAttribute("DEF", defValue);
++//			  node.setAttribute("DEF", defValue);
++              node.append_attribute("DEF") = defValue.c_str();
+ 			  defNode[defValue] = tagName;
+ 			}
+ 			Expect(24);
+@@ -298,13 +307,14 @@ void Parser::Node(QDomElement& parent, Q
+ 			Expect(24);
+ 			ScriptBody();
+ 			Expect(25);
+-			node = doc->createElement("Script");
++//			node = doc->createElement("Script");
++            node = parent.append_child("Script");
+ 		} else SynErr(90);
+-		parent.appendChild(node);
++//		parent.appendChild(node);
+ }
+ 
+-void Parser::RootNodeStatement(QDomElement& parent) {
+-		QString tagName, attrValue;
++void Parser::RootNodeStatement(pugi::xml_node& parent) {
++		std::string tagName, attrValue;
+ 		if (la->kind == 1 || la->kind == 38) {
+ 			Node(parent, tagName, "");
+ 		} else if (la->kind == 19) {
+@@ -314,70 +324,82 @@ void Parser::RootNodeStatement(QDomEleme
+ 		} else SynErr(91);
+ }
+ 
+-void Parser::Proto(QDomElement& parent) {
+-		QString name; QDomElement node;
++void Parser::Proto(pugi::xml_node& parent) {
++//        QString name; QDomElement node;
++		std::string name; pugi::xml_node node;
+ 		Expect(21);
+ 		NodeTypeId(name);
+-		node = doc->createElement("ProtoDeclare");
+-		node.setAttribute("name", name);
++//		node = doc->createElement("ProtoDeclare");
++        node = parent.append_child("ProtoDeclare");
++//		node.setAttribute("name", name);
++        node.append_attribute("name") = name.c_str();
+ 		proto.insert(name);
+ 		Expect(22);
+-		QDomElement interf = doc->createElement("ProtoInterface");
++//		QDomElement interf = doc->createElement("ProtoInterface");
++        pugi::xml_node interf = node.append_child("ProtoInterface");
+ 		InterfaceDeclarations(interf);
+-		node.appendChild(interf);
++//		node.appendChild(interf);
+ 		Expect(23);
+ 		Expect(24);
+-		QDomElement body = doc->createElement("ProtoBody");
++//		QDomElement body = doc->createElement("ProtoBody");
++        pugi::xml_node body = node.append_child("ProtoBody");
+ 		ProtoBody(body);
+-		node.appendChild(body);
++//		node.appendChild(body);
+ 		Expect(25);
+-		parent.appendChild(node);
++//		parent.appendChild(node);
+ }
+ 
+-void Parser::Externproto(QDomElement& parent) {
+-		QString name, url;
+-		QDomElement node = doc->createElement("ExternProtoDeclare");
++void Parser::Externproto(pugi::xml_node& parent) {
++//        QString name, url;
++		std::string name, url;
++//		QDomElement node = doc->createElement("ExternProtoDeclare");
++        pugi::xml_node node = doc->append_child("ExternProtoDeclare");
+ 		Expect(34);
+ 		NodeTypeId(name);
+ 		Expect(22);
+ 		ExternInterfaceDeclarations(node);
+ 		Expect(23);
+ 		URLList(url);
+-		std::set<QString>::const_iterator iter = x3dNode.find(name);
++		std::set<std::string>::const_iterator iter = x3dNode.find(name);
+ 		if (iter == x3dNode.end())
+ 		{
+-		  node.setAttribute("name", name);
+-		  node.setAttribute("url", url);
+-		  parent.appendChild(node);
++//		  node.setAttribute("name", name);
++          node.append_attribute("name") = name.c_str();
++//		  node.setAttribute("url", url);
++          node.append_attribute("url") = url.c_str();
++//		  parent.appendChild(node);
++          parent.append_copy(node);
+ 		  proto.insert(name);
+ 		}
++        doc->remove_child(node);
+ }
+ 
+-void Parser::ProtoStatements(QDomElement& parent) {
++void Parser::ProtoStatements(pugi::xml_node& parent) {
+ 		while (la->kind == 21 || la->kind == 34) {
+ 			ProtoStatement(parent);
+ 		}
+ }
+ 
+-void Parser::NodeTypeId(QString& str) {
++void Parser::NodeTypeId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::InterfaceDeclarations(QDomElement& parent) {
++void Parser::InterfaceDeclarations(pugi::xml_node& parent) {
+ 		while (StartOf(3)) {
+ 			InterfaceDeclaration(parent);
+ 		}
+ }
+ 
+-void Parser::ProtoBody(QDomElement& parent) {
++void Parser::ProtoBody(pugi::xml_node& parent) {
+ 		ProtoStatements(parent);
+ 		RootNodeStatement(parent);
+ 		Statements(parent);
+ }
+ 
+-void Parser::InterfaceDeclaration(QDomElement& parent) {
+-		QString name, type, val; QDomElement node;
++void Parser::InterfaceDeclaration(pugi::xml_node& parent) {
++//        QString name, type, val; QDomElement node;
++		std::string name, type, val; pugi::xml_node node;
+ 		if (StartOf(4)) {
+ 			RestrictedInterfaceDeclaration(parent);
+ 		} else if (la->kind == 32 || la->kind == 33) {
+@@ -388,18 +410,23 @@ void Parser::InterfaceDeclaration(QDomEl
+ 			}
+ 			FieldType(type);
+ 			FieldId(name);
++            node = parent.append_child("field");
+ 			FieldValue(node, "value", false);
+-			node = doc->createElement("field");
+-			node.setAttribute("name", name);
+-			node.setAttribute("type", type);
+-			node.setAttribute("accessType", "inputOutput");
+-			parent.appendChild(node);
++//			node = doc->createElement("field");
++//			node.setAttribute("name", name);
++            node.append_attribute("name") = name.c_str();
++//			node.setAttribute("type", type);
++            node.append_attribute("type") = type.c_str();
++//			node.setAttribute("accessType", "inputOutput");
++            node.append_attribute("accessType") = "inputOutput";
++//			parent.appendChild(node);
+ 		} else SynErr(92);
+ }
+ 
+-void Parser::RestrictedInterfaceDeclaration(QDomElement& parent) {
+-		QString name; QString type; QString val;
+-		QDomElement node = doc->createElement("field");
++void Parser::RestrictedInterfaceDeclaration(pugi::xml_node& parent) {
++		std::string name; std::string type; std::string val;
++//		QDomElement node = doc->createElement("field");
++        pugi::xml_node node = parent.append_child("field");
+ 		if (la->kind == 26 || la->kind == 27) {
+ 			if (la->kind == 26) {
+ 				Get();
+@@ -408,7 +435,8 @@ void Parser::RestrictedInterfaceDeclarat
+ 			}
+ 			FieldType(type);
+ 			InputOnlyId(name);
+-			node.setAttribute("accessType", "inputOnly");
++//			node.setAttribute("accessType", "inputOnly");
++            node.append_attribute("accessType") = "inputOnly";
+ 		} else if (la->kind == 28 || la->kind == 29) {
+ 			if (la->kind == 28) {
+ 				Get();
+@@ -417,7 +445,8 @@ void Parser::RestrictedInterfaceDeclarat
+ 			}
+ 			FieldType(type);
+ 			OutputOnlyId(name);
+-			node.setAttribute("accessType", "outputOnly");
++//			node.setAttribute("accessType", "outputOnly");
++            node.append_attribute("accessType") = "outputOnly";
+ 		} else if (la->kind == 30 || la->kind == 31) {
+ 			if (la->kind == 30) {
+ 				Get();
+@@ -427,14 +456,17 @@ void Parser::RestrictedInterfaceDeclarat
+ 			FieldType(type);
+ 			InitializeOnlyId(name);
+ 			FieldValue(node, "value", false);
+-			node.setAttribute("accessType", "initializeOnly");
++//			node.setAttribute("accessType", "initializeOnly");
++            node.append_attribute("accessType") = "initializeOnly";
+ 		} else SynErr(93);
+-		node.setAttribute("name", name);
+-		node.setAttribute("type", type);
+-		parent.appendChild(node);
++//		node.setAttribute("name", name);
++        node.append_attribute("name") = name.c_str();
++//		node.setAttribute("type", type);
++        node.append_attribute("type") = type.c_str();
++//		parent.appendChild(node);
+ }
+ 
+-void Parser::FieldType(QString& str) {
++void Parser::FieldType(std::string& str) {
+ 		switch (la->kind) {
+ 		case 40: {
+ 			Get();
+@@ -606,25 +638,25 @@ void Parser::FieldType(QString& str) {
+ 		}
+ 		default: SynErr(94); break;
+ 		}
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::InputOnlyId(QString& str) {
++void Parser::InputOnlyId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::OutputOnlyId(QString& str) {
++void Parser::OutputOnlyId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::InitializeOnlyId(QString& str) {
++void Parser::InitializeOnlyId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::FieldValue(QDomElement& parent, QString fieldName, bool flag) {
++void Parser::FieldValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
+ 		if (StartOf(5)) {
+ 			SingleValue(parent, fieldName, flag);
+ 		} else if (la->kind == 22) {
+@@ -632,21 +664,21 @@ void Parser::FieldValue(QDomElement& par
+ 		} else SynErr(95);
+ }
+ 
+-void Parser::FieldId(QString& str) {
++void Parser::FieldId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::ExternInterfaceDeclarations(QDomElement& parent) {
++void Parser::ExternInterfaceDeclarations(pugi::xml_node& parent) {
+ 		while (StartOf(3)) {
+ 			ExternInterfaceDeclaration(parent);
+ 		}
+ }
+ 
+-void Parser::URLList(QString& url) {
++void Parser::URLList(std::string& url) {
+ 		if (la->kind == 4) {
+ 			Get();
+-			url = QString(coco_string_create_char(t->val));
++			url = std::string(coco_string_create_char(t->val));
+ 		} else if (la->kind == 22) {
+ 			Get();
+ 			while (la->kind == 4) {
+@@ -660,9 +692,10 @@ void Parser::URLList(QString& url) {
+ 		} else SynErr(96);
+ }
+ 
+-void Parser::ExternInterfaceDeclaration(QDomElement& parent) {
+-		QString type, name;
+-		QDomElement node = doc->createElement("field");
++void Parser::ExternInterfaceDeclaration(pugi::xml_node& parent) {
++		std::string type, name;
++//		QDomElement node = doc->createElement("field");
++        pugi::xml_node node = parent.append_child("field");
+ 		if (la->kind == 26 || la->kind == 27) {
+ 			if (la->kind == 26) {
+ 				Get();
+@@ -671,7 +704,8 @@ void Parser::ExternInterfaceDeclaration(
+ 			}
+ 			FieldType(type);
+ 			InputOnlyId(name);
+-			node.setAttribute("accessType", "inputOnly");
++//			node.setAttribute("accessType", "inputOnly");
++            node.append_attribute("accessType") = "inputOnly";
+ 		} else if (la->kind == 28 || la->kind == 29) {
+ 			if (la->kind == 28) {
+ 				Get();
+@@ -680,7 +714,8 @@ void Parser::ExternInterfaceDeclaration(
+ 			}
+ 			FieldType(type);
+ 			OutputOnlyId(name);
+-			node.setAttribute("accessType", "outputOnly");
++//			node.setAttribute("accessType", "outputOnly");
++            node.append_attribute("accessType") = "outputOnly";
+ 		} else if (la->kind == 30 || la->kind == 31) {
+ 			if (la->kind == 30) {
+ 				Get();
+@@ -689,7 +724,8 @@ void Parser::ExternInterfaceDeclaration(
+ 			}
+ 			FieldType(type);
+ 			InitializeOnlyId(name);
+-			node.setAttribute("accessType", "initializeOnly");
++//			node.setAttribute("accessType", "initializeOnly");
++            node.append_attribute("accessType") = "initializeOnly";
+ 		} else if (la->kind == 32 || la->kind == 33) {
+ 			if (la->kind == 32) {
+ 				Get();
+@@ -698,14 +734,17 @@ void Parser::ExternInterfaceDeclaration(
+ 			}
+ 			FieldType(type);
+ 			FieldId(name);
+-			node.setAttribute("accessType", "inputOutput");
++//			node.setAttribute("accessType", "inputOutput");
++            node.append_attribute("accessType") = "inputOutput";
+ 		} else SynErr(97);
+-		node.setAttribute("name" , name);
+-		node.setAttribute("type", type);
+-		parent.appendChild(node);
++//		node.setAttribute("name" , name);
++        node.append_attribute("name") = name.c_str();
++//		node.setAttribute("type", type);
++        node.append_attribute("type") = type.c_str();
++//		parent.appendChild(node);
+ }
+ 
+-void Parser::NodeBody(QDomElement& parent, bool flag) {
++void Parser::NodeBody(pugi::xml_node& parent, bool flag) {
+ 		while (StartOf(6)) {
+ 			NodeBodyElement(parent, flag);
+ 		}
+@@ -717,24 +756,29 @@ void Parser::ScriptBody() {
+ 		}
+ }
+ 
+-void Parser::NodeBodyElement(QDomElement& parent, bool flag) {
+-		QString idName, idProto; QDomElement node;
++void Parser::NodeBodyElement(pugi::xml_node& parent, bool flag) {
++//        QString idName, idProto; QDomElement node;
++		std::string idName, idProto; pugi::xml_node node;
+ 		if (la->kind == 1) {
+ 			Get();
+-			idName = QString(coco_string_create_char(t->val));
++			idName = std::string(coco_string_create_char(t->val));
+ 			if (StartOf(8)) {
+ 				FieldValue(parent, idName, flag);
+ 			} else if (la->kind == 39) {
+ 				Get();
+ 				Expect(1);
+-				idProto = QString(coco_string_create_char(t->val));
+-				node = doc->createElement("IS");
+-				QDomElement connect = doc->createElement("connect");
+-				connect.setAttribute("nodeField", idName);
+-				connect.setAttribute("protoField", idProto);
+-				node.appendChild(connect);
+-				parent.appendChild(node);
+-				
++				idProto = std::string(coco_string_create_char(t->val));
++//				node = doc->createElement("IS");
++                node = parent.append_child("IS");
++//				QDomElement connect = doc->createElement("connect");
++                pugi::xml_node connect = node.append_child("connect");
++//				connect.setAttribute("nodeField", idName);
++                connect.append_attribute("nodeField") = idName.c_str();
++//				connect.setAttribute("protoField", idProto);
++                connect.append_attribute("protoField") = idProto.c_str();
++//				node.appendChild(connect);
++//				parent.appendChild(node);
++
+ 			} else SynErr(98);
+ 		} else if (la->kind == 35) {
+ 			RouteStatement();
+@@ -744,7 +788,7 @@ void Parser::NodeBodyElement(QDomElement
+ }
+ 
+ void Parser::ScriptBodyElement() {
+-		QString str; QDomElement elem;
++		std::string str; pugi::xml_node elem;
+ 		if (StartOf(6)) {
+ 			NodeBodyElement(elem, false);
+ 		} else if (la->kind == 26 || la->kind == 27) {
+@@ -798,17 +842,21 @@ void Parser::ScriptBodyElement() {
+ 		} else SynErr(101);
+ }
+ 
+-void Parser::InputOutputId(QString& str) {
++void Parser::InputOutputId(std::string& str) {
+ 		Expect(1);
+-		str = QString(coco_string_create_char(t->val));
++		str = std::string(coco_string_create_char(t->val));
+ }
+ 
+-void Parser::SingleValue(QDomElement& parent, QString fieldName, bool flag) {
+-		QString value; QDomElement tmpParent = doc->createElement("tmp");
++void Parser::SingleValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
++//        QString value; QDomElement tmpParent = doc->createElement("tmp");
++		std::string value; pugi::xml_node tmpParent = doc->append_child("tmpParent");
+ 		if (StartOf(9)) {
+ 			if (la->kind == 4) {
+ 				Get();
+-				value.append(coco_string_create_char(t->val)); value.remove("\"");
++				value.append(coco_string_create_char(t->val)); //value.remove("\"");
++                // TODO: modify quotation removal; below violates const-correctness:
++                //   error: cannot convert ‘std::__cxx11::basic_string<char>::iterator’ to ‘const char*’
++//                value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+ 			} else if (la->kind == 2 || la->kind == 3) {
+ 				if (la->kind == 2) {
+ 					Get();
+@@ -839,29 +887,41 @@ void Parser::SingleValue(QDomElement& pa
+ 			}
+ 			if (flag)
+ 			{
+-			  QDomElement node = doc->createElement("fieldValue");
+-			  node.setAttribute("name", fieldName);
+-			  node.setAttribute("value", value);
+-			  parent.appendChild(node);
+-			}
+-			else
+-			  parent.setAttribute(fieldName, value);
++//			  QDomElement node = doc->createElement("fieldValue");
++              pugi::xml_node node = parent.append_child("fieldValue");
++//			  node.setAttribute("name", fieldName);
++              node.append_attribute("name") = fieldName.c_str();
++//			  node.setAttribute("value", value);
++              node.append_attribute("value") = value.c_str();
++//			  parent.appendChild(node);
++			}
++			else {
++//			  parent.setAttribute(fieldName, value);
++              parent.append_attribute(fieldName.c_str()) = value.c_str();
++            }
+ 		} else if (StartOf(2)) {
+ 			NodeStatement(tmpParent);
+ 			if (flag)
+ 			{
+-			  QDomElement tmp = doc->createElement("fieldValue");
+-			  tmp.setAttribute("name", fieldName);
+-			  tmp.appendChild(tmpParent.firstChildElement());
+-			  parent.appendChild(tmp);
+-			}
+-			else
+-			  parent.appendChild(tmpParent.firstChildElement());
++//			  QDomElement tmp = doc->createElement("fieldValue");
++              pugi::xml_node tmp = parent.append_child("fieldValue");
++//			  tmp.setAttribute("name", fieldName);
++              tmp.append_attribute("name") = fieldName.c_str();
++//			  tmp.appendChild(tmpParent.firstChildElement());
++              tmp.insert_child_before(pugi::node_element, tmpParent.first_child());
++//			  parent.appendChild(tmp);
++			}
++			else {
++//              parent.appendChild(tmpParent.firstChildElement());
++              parent.append_copy(tmpParent.first_child());
++            }
+ 		} else SynErr(102);
++        doc->remove_child(tmpParent);
+ }
+ 
+-void Parser::MultiValue(QDomElement& parent, QString fieldName, bool flag) {
+-		QString value; QDomElement tmpParent = doc->createElement("tmp");
++void Parser::MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag) {
++//        QString value; QDomElement tmpParent = doc->createElement("tmp");
++		std::string value; pugi::xml_node tmpParent = doc->append_child("tmpParent");
+ 		Expect(22);
+ 		if (StartOf(10)) {
+ 			if (la->kind == 2 || la->kind == 3) {
+@@ -873,14 +933,19 @@ void Parser::MultiValue(QDomElement& par
+ 			}
+ 			if (flag)
+ 			{
+-			  QDomElement tmp = doc->createElement("fieldValue");
+-			  tmp.setAttribute("name", fieldName);
+-			  tmp.setAttribute("value", value);
+-			  parent.appendChild(tmp);
+-			}
+-			else
+-			  parent.setAttribute(fieldName, value);
+-			
++//			  QDomElement tmp = doc->createElement("fieldValue");
++              pugi::xml_node tmp = parent.append_child("fieldValue");
++//			  tmp.setAttribute("name", fieldName);
++              tmp.append_attribute("name") = fieldName.c_str();
++//			  tmp.setAttribute("value", value);
++              tmp.append_attribute("value") = value.c_str();
++//			  parent.appendChild(tmp);
++			}
++			else {
++//              parent.setAttribute(fieldName, value);
++              parent.append_attribute(fieldName.c_str()) = value.c_str();
++            }
++
+ 		} else if (StartOf(11)) {
+ 			while (StartOf(2)) {
+ 				NodeStatement(tmpParent);
+@@ -888,28 +953,41 @@ void Parser::MultiValue(QDomElement& par
+ 					Get();
+ 				}
+ 			}
+-			QDomElement child;
+-			QDomNodeList list = tmpParent.childNodes();
+-			QDomElement field = doc->createElement("field");
+-			field.setAttribute("name", fieldName);
+-			int i = 0;
++//			QDomElement child;
++            pugi::xml_node child;
++//			QDomNodeList list = tmpParent.childNodes();
++            std::vector<pugi::xml_node> list;
++            for (auto item : tmpParent.children()) {
++                list.push_back(item);
++            }
++//			QDomElement field = doc->createElement("field");
++            pugi::xml_node field = parent.append_child("field");
++//			field.setAttribute("name", fieldName);
++            field.append_attribute("name") = fieldName.c_str();
++			unsigned int i = 0;
+ 			while(i < list.size())
+ 			{
+-			  child = list.at(i).toElement();
+-			  if (flag)
+-			    field.appendChild(child.cloneNode());
+-			  else
+-			    parent.appendChild(child.cloneNode());
++			  child = list.at(i);//.toElement();
++			  if (flag) {
++//                field.appendChild(child.cloneNode());
++                  field.append_copy(child);
++              } else {
++//                parent.appendChild(child.cloneNode());
++                  parent.append_copy(child);
++              }
+ 			  i++;
+ 			}
+-			if (flag)
+-			  parent.appendChild(field);
+-			
++			if (flag) {
++//              parent.appendChild(field);
++            } else {
++                parent.remove_child(field);
++            }
+ 		} else SynErr(103);
+ 		Expect(23);
++        doc->remove_child(tmpParent);
+ }
+ 
+-void Parser::MultiNumber(QString& value) {
++void Parser::MultiNumber(std::string& value) {
+ 		if (la->kind == 2) {
+ 			Get();
+ 		} else if (la->kind == 3) {
+@@ -932,7 +1010,7 @@ void Parser::MultiNumber(QString& value)
+ 		}
+ }
+ 
+-void Parser::MultiString(QString& value) {
++void Parser::MultiString(std::string& value) {
+ 		Expect(4);
+ 		value.append(coco_string_create_char(t->val));
+ 		if (la->kind == 37) {
+@@ -947,7 +1025,7 @@ void Parser::MultiString(QString& value)
+ 		}
+ }
+ 
+-void Parser::MultiBool(QString& value) {
++void Parser::MultiBool(std::string& value) {
+ 		if (la->kind == 82) {
+ 			Get();
+ 		} else if (la->kind == 84) {
+@@ -1173,7 +1251,7 @@ void Errors::Warning(const wchar_t *s) {
+ }
+ 
+ void Errors::Exception(const wchar_t* s) {
+-	wprintf(L"%ls", s); 
++	wprintf(L"%ls", s);
+ 	exit(1);
+ }
+ */
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.h
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h	2024-12-06 18:01:12.268963700 -0800
++++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Parser.h	2024-12-06 18:48:17.891284300 -0800
+@@ -35,9 +35,10 @@
+ #if !defined(VRML_PARSER_H__)
+ #define VRML_PARSER_H__
+ 
+-#include <QtXml>
++#include "contrib/pugixml/src/pugixml.hpp"
++#include <map>
+ #include <set>
+-
++#include <string>
+ 
+ #include "Scanner.h"
+ 
+@@ -48,7 +49,7 @@ class Errors {
+ public:
+ 	int count;			// number of errors detected
+ 	wchar_t* stringError;
+-	
++
+ 	Errors();
+ 	~Errors();
+ 	void SynErr(int line, int col, int n);
+@@ -90,14 +91,15 @@ public:
+ 	Token *t;			// last recognized token
+ 	Token *la;			// lookahead token
+ 
+-QDomDocument *doc;
+-	
+-	std::map<QString, QString> defNode;
+-	
+-	std::set<QString> proto;
+-	
+-	std::set<QString> x3dNode;
+-	
++    pugi::xml_document doc_;
++    pugi::xml_document *doc = &doc_; // IrrXMLReader* createIrrXMLReader(const char* filename);
++
++    std::map<std::string, std::string> defNode;
++
++	std::set<std::string> proto;
++
++	std::set<std::string> x3dNode;
++
+ 	void InitX3dNode()
+ 	{
+ 	  x3dNode.insert("Arc2D"); x3dNode.insert("ArcClose2D"); x3dNode.insert("BallJoint");
+@@ -116,7 +118,7 @@ QDomDocument *doc;
+ 	  x3dNode.insert("EspduTransform"); x3dNode.insert("ExplosionEmitter");
+ 	  x3dNode.insert("FillProperties"); x3dNode.insert("FloatVertexAttribute");
+ 	  x3dNode.insert("FogCoordinate"); x3dNode.insert(" GeneratedCubeMapTexture");
+-	  x3dNode.insert("GeoCoordinate"); x3dNode.insert("GeoElevationGrid"); x3dNode.insert("GeoLocation"); 
++	  x3dNode.insert("GeoCoordinate"); x3dNode.insert("GeoElevationGrid"); x3dNode.insert("GeoLocation");
+ 	  x3dNode.insert("GeoLOD"); x3dNode.insert("GeoMetadata"); x3dNode.insert("GeoOrigin");
+ 	  x3dNode.insert("GeoPositionInterpolator"); x3dNode.insert("GeoProximitySensor");
+ 	  x3dNode.insert("GeoTouchSensor"); x3dNode.insert("GeoViewpoint");	x3dNode.insert("GravityPhysicsModel");
+@@ -128,7 +130,7 @@ QDomDocument *doc;
+ 	  x3dNode.insert("Layer"); x3dNode.insert("LayerSet"); x3dNode.insert("Layout");
+ 	  x3dNode.insert("LayoutGroup"); x3dNode.insert("LayoutLayer"); x3dNode.insert("LinePicker");
+ 	  x3dNode.insert("LineProperties"); x3dNode.insert("LineSet"); x3dNode.insert("LoadSensor");
+-	  x3dNode.insert("LocalFog"); x3dNode.insert("Material"); x3dNode.insert("Matrix3VertexAttribute"); 
++	  x3dNode.insert("LocalFog"); x3dNode.insert("Material"); x3dNode.insert("Matrix3VertexAttribute");
+ 	  x3dNode.insert("Matrix4VertexAttribute"); x3dNode.insert("MetadataDouble");
+ 	  x3dNode.insert("MetadataFloat"); x3dNode.insert("MetadataInteger"); x3dNode.insert("MetadataSet");
+ 	  x3dNode.insert("MetadataString"); x3dNode.insert("MotorJoint"); x3dNode.insert("MultiTexture");
+@@ -162,7 +164,7 @@ QDomDocument *doc;
+ 	  x3dNode.insert(" Viewpoint"); x3dNode.insert("ViewpointGroup"); x3dNode.insert("VolumeEmitter");
+ 	  x3dNode.insert("VolumePicker"); x3dNode.insert("WindPhysicsModel"); x3dNode.insert("Cylinder"); x3dNode.insert("Sphere");
+ 	}
+-	
++
+ 
+ 
+ 	Parser(Scanner *scanner);
+@@ -174,52 +176,52 @@ QDomDocument *doc;
+ 	void ProfileStatement();
+ 	void ComponentStatements();
+ 	void MetaStatements();
+-	void Statements(QDomElement& parent);
++	void Statements(pugi::xml_node& parent);
+ 	void ProfileNameId();
+ 	void ComponentStatement();
+ 	void ComponentNameId();
+ 	void ComponentSupportLevel();
+ 	void ExportStatement();
+-	void NodeNameId(QString& str);
++	void NodeNameId(std::string& str);
+ 	void ExportedNodeNameId();
+ 	void ImportStatement();
+ 	void InlineNodeNameId();
+ 	void MetaStatement();
+ 	void Metakey();
+ 	void Metavalue();
+-	void Statement(QDomElement& parent);
+-	void NodeStatement(QDomElement& parent);
+-	void ProtoStatement(QDomElement& parent);
++	void Statement(pugi::xml_node& parent);
++	void NodeStatement(pugi::xml_node& parent);
++	void ProtoStatement(pugi::xml_node& parent);
+ 	void RouteStatement();
+-	void Node(QDomElement& parent, QString& tagName, const QString defValue);
+-	void RootNodeStatement(QDomElement& parent);
+-	void Proto(QDomElement& parent);
+-	void Externproto(QDomElement& parent);
+-	void ProtoStatements(QDomElement& parent);
+-	void NodeTypeId(QString& str);
+-	void InterfaceDeclarations(QDomElement& parent);
+-	void ProtoBody(QDomElement& parent);
+-	void InterfaceDeclaration(QDomElement& parent);
+-	void RestrictedInterfaceDeclaration(QDomElement& parent);
+-	void FieldType(QString& str);
+-	void InputOnlyId(QString& str);
+-	void OutputOnlyId(QString& str);
+-	void InitializeOnlyId(QString& str);
+-	void FieldValue(QDomElement& parent, QString fieldName, bool flag);
+-	void FieldId(QString& str);
+-	void ExternInterfaceDeclarations(QDomElement& parent);
+-	void URLList(QString& url);
+-	void ExternInterfaceDeclaration(QDomElement& parent);
+-	void NodeBody(QDomElement& parent, bool flag);
++	void Node(pugi::xml_node& parent, std::string& tagName, const std::string defValue);
++	void RootNodeStatement(pugi::xml_node& parent);
++	void Proto(pugi::xml_node& parent);
++	void Externproto(pugi::xml_node& parent);
++	void ProtoStatements(pugi::xml_node& parent);
++	void NodeTypeId(std::string& str);
++	void InterfaceDeclarations(pugi::xml_node& parent);
++	void ProtoBody(pugi::xml_node& parent);
++	void InterfaceDeclaration(pugi::xml_node& parent);
++	void RestrictedInterfaceDeclaration(pugi::xml_node& parent);
++	void FieldType(std::string& str);
++	void InputOnlyId(std::string& str);
++	void OutputOnlyId(std::string& str);
++	void InitializeOnlyId(std::string& str);
++	void FieldValue(pugi::xml_node& parent, std::string fieldName, bool flag);
++	void FieldId(std::string& str);
++	void ExternInterfaceDeclarations(pugi::xml_node& parent);
++	void URLList(std::string& url);
++	void ExternInterfaceDeclaration(pugi::xml_node& parent);
++	void NodeBody(pugi::xml_node& parent, bool flag);
+ 	void ScriptBody();
+-	void NodeBodyElement(QDomElement& parent, bool flag);
++	void NodeBodyElement(pugi::xml_node& parent, bool flag);
+ 	void ScriptBodyElement();
+-	void InputOutputId(QString& str);
+-	void SingleValue(QDomElement& parent, QString fieldName, bool flag);
+-	void MultiValue(QDomElement& parent, QString fieldName, bool flag);
+-	void MultiNumber(QString& value);
+-	void MultiString(QString& value);
+-	void MultiBool(QString& value);
++	void InputOutputId(std::string& str);
++	void SingleValue(pugi::xml_node& parent, std::string fieldName, bool flag);
++	void MultiValue(pugi::xml_node& parent, std::string fieldName, bool flag);
++	void MultiNumber(std::string& value);
++	void MultiString(std::string& value);
++	void MultiBool(std::string& value);
+ 
+ 	void Parse();
+ 
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.cpp meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.cpp
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.cpp	2024-12-06 18:01:12.268963700 -0800
++++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.cpp	2024-12-06 14:21:47.920443100 -0800
+@@ -39,7 +39,7 @@
+ 
+ wchar_t* coco_string_create(const wchar_t* value) {
+ 	wchar_t* data;
+-	int len = 0;
++	size_t len = 0;
+ 	if (value) { len = wcslen(value); }
+ 	data = new wchar_t[len + 1];
+ 	wcsncpy(data, value, len);
+@@ -63,7 +63,7 @@ wchar_t* coco_string_create_upper(const
+ 	if (!data) { return NULL; }
+ 
+ 	int dataLen = 0;
+-	if (data) { dataLen = wcslen(data); }
++	if (data) { dataLen = static_cast<int>(wcslen(data)); }
+ 
+ 	wchar_t *newData = new wchar_t[dataLen + 1];
+ 
+@@ -80,7 +80,7 @@ wchar_t* coco_string_create_upper(const
+ 
+ wchar_t* coco_string_create_lower(const wchar_t* data) {
+ 	if (!data) { return NULL; }
+-	int dataLen = wcslen(data);
++	int dataLen = static_cast<int>(wcslen(data));
+ 	return coco_string_create_lower(data, 0, dataLen);
+ }
+ 
+@@ -102,11 +102,11 @@ wchar_t* coco_string_create_lower(const
+ 
+ wchar_t* coco_string_create_append(const wchar_t* data1, const wchar_t* data2) {
+ 	wchar_t* data;
+-	int data1Len = 0;
+-	int data2Len = 0;
++    size_t data1Len = 0;
++    size_t data2Len = 0;
+ 
+ 	if (data1) { data1Len = wcslen(data1); }
+-	if (data2) {data2Len = wcslen(data2); }
++	if (data2) { data2Len = wcslen(data2); }
+ 
+ 	data = new wchar_t[data1Len + data2Len + 1];
+ 
+@@ -133,13 +133,13 @@ void coco_string_delete(wchar_t* &data)
+ }
+ 
+ int coco_string_length(const wchar_t* data) {
+-	if (data) { return wcslen(data); }
++	if (data) { return static_cast<int>(wcslen(data)); }
+ 	return 0;
+ }
+ 
+ bool coco_string_endswith(const wchar_t* data, const wchar_t *end) {
+-	int dataLen = wcslen(data);
+-	int endLen = wcslen(end);
++	size_t dataLen = wcslen(data);
++    size_t endLen = wcslen(end);
+ 	return (endLen <= dataLen) && (wcscmp(data + dataLen - endLen, end) == 0);
+ }
+ 
+@@ -186,8 +186,8 @@ int coco_string_hash(const wchar_t *data
+ // string handling, ascii character
+ 
+ wchar_t* coco_string_create(const char* value) {
+-	int len = 0;
+-	if (value) { len = strlen(value); }
++    int len = 0;
++	if (value) { len = static_cast<int>(strlen(value)); }
+ 	wchar_t* data = new wchar_t[len + 1];
+ 	for (int i = 0; i < len; ++i) { data[i] = (wchar_t) value[i]; }
+ 	data[len] = 0;
+@@ -240,7 +240,7 @@ Buffer::Buffer(FILE* s, bool isUserStrea
+ 		fileLen = bufLen = bufStart = 0;
+ 	}
+ 	bufCapacity = (bufLen>0) ? bufLen : MIN_BUFFER_LENGTH;
+-	buf = new unsigned char[bufCapacity];	
++	buf = new unsigned char[bufCapacity];
+ 	if (fileLen > 0) SetPos(0);          // setup  buffer to position 0 (start)
+ 	else bufPos = 0; // index 0 is already after the file, thus Pos = 0 is invalid
+ 	if (bufLen == fileLen && CanSeek()) Close();
+@@ -270,7 +270,7 @@ Buffer::Buffer(const unsigned char* buf,
+ }
+ 
+ Buffer::~Buffer() {
+-	Close(); 
++	Close();
+ 	if (buf != NULL) {
+ 		delete [] buf;
+ 		buf = NULL;
+@@ -306,12 +306,12 @@ int Buffer::Peek() {
+ 
+ wchar_t* Buffer::GetString(int beg, int end) {
+ 	int len = end - beg;
+-	wchar_t *buf = new wchar_t[len];
++	wchar_t *retBuf = new wchar_t[len];
+ 	int oldPos = GetPos();
+ 	SetPos(beg);
+-	for (int i = 0; i < len; ++i) buf[i] = (wchar_t) Read();
++	for (int i = 0; i < len; ++i) retBuf[i] = (wchar_t) Read();
+ 	SetPos(oldPos);
+-	return buf;
++	return retBuf;
+ }
+ 
+ int Buffer::GetPos() {
+@@ -329,16 +329,16 @@ void Buffer::SetPos(int value) {
+ 
+ 	if ((value < 0) || (value > fileLen)) {
+ 		char msg[50];
+-		sprintf(msg, "Buffer out of bounds access, position: %d", value);
++		snprintf(msg, 50, "Buffer out of bounds access, position: %d", value);
+ 		throw msg;
+-		
++
+ 	}
+ 
+ 	if ((value >= bufStart) && (value < (bufStart + bufLen))) { // already in buffer
+ 		bufPos = value - bufStart;
+ 	} else if (stream != NULL) { // must be swapped in
+ 		fseek(stream, value, SEEK_SET);
+-		bufLen = fread(buf, sizeof(unsigned char), bufCapacity, stream);
++		bufLen = static_cast<int>(fread(buf, sizeof(unsigned char), bufCapacity, stream));
+ 		bufStart = value; bufPos = 0;
+ 	} else {
+ 		bufPos = fileLen - bufStart; // make Pos return fileLen
+@@ -362,7 +362,7 @@ int Buffer::ReadNextStreamChunk() {
+ 		buf = newBuf;
+ 		free = bufLen;
+ 	}
+-	int read = fread(buf + bufLen, sizeof(unsigned char), free, stream);
++    int read = static_cast<int>(fread(buf + bufLen, sizeof(unsigned char), free, stream));
+ 	if (read > 0) {
+ 		fileLen = bufLen = (bufLen + read);
+ 		return read;
+@@ -416,7 +416,7 @@ Scanner::Scanner(const wchar_t* fileName
+ 	char *chFileName = coco_string_create_char(fileName);
+ 	if ((stream = fopen(chFileName, "rb")) == NULL) {
+ 		char msg[50];
+-		sprintf(msg, "Can not open file: %s", chFileName);
++		snprintf(msg, 50, "Can not open file: %s", chFileName);
+ 		coco_string_delete(chFileName);
+ 		throw msg;
+ 	}
+@@ -554,7 +554,7 @@ void Scanner::Init() {
+ 	heapEnd = (void**) (((char*) heap) + HEAP_BLOCK_SIZE);
+ 	*heapEnd = 0;
+ 	heapTop = heap;
+-	if (sizeof(Token) > HEAP_BLOCK_SIZE) {
++	if constexpr (sizeof(Token) > HEAP_BLOCK_SIZE) {
+ 		throw "Too small HEAP_BLOCK_SIZE";
+ 	}
+ 
+@@ -637,18 +637,18 @@ void Scanner::CreateHeapBlock() {
+ }
+ 
+ Token* Scanner::CreateToken() {
+-	Token *t;
++	Token *tkn;
+ 	if (((char*) heapTop + (int) sizeof(Token)) >= (char*) heapEnd) {
+ 		CreateHeapBlock();
+ 	}
+-	t = (Token*) heapTop;
++	tkn = (Token*) heapTop;
+ 	heapTop = (void*) ((char*) heapTop + sizeof(Token));
+-	t->val = NULL;
+-	t->next = NULL;
+-	return t;
++	tkn->val = NULL;
++	tkn->next = NULL;
++	return tkn;
+ }
+ 
+-void Scanner::AppendVal(Token *t) {
++void Scanner::AppendVal(Token *tkn) {
+ 	int reqMem = (tlen + 1) * sizeof(wchar_t);
+ 	if (((char*) heapTop + reqMem) >= (char*) heapEnd) {
+ 		if (reqMem > HEAP_BLOCK_SIZE) {
+@@ -656,11 +656,11 @@ void Scanner::AppendVal(Token *t) {
+ 		}
+ 		CreateHeapBlock();
+ 	}
+-	t->val = (wchar_t*) heapTop;
++	tkn->val = (wchar_t*) heapTop;
+ 	heapTop = (void*) ((char*) heapTop + reqMem);
+ 
+-	wcsncpy(t->val, tval, tlen);
+-	t->val[tlen] = L'\0';
++	wcsncpy(tkn->val, tval, tlen);
++	tkn->val[tlen] = L'\0';
+ }
+ 
+ Token* Scanner::NextToken() {
+diff -rupN -x .git autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.h meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.h
+--- autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Scanner.h	2024-12-06 18:01:12.268963700 -0800
++++ meshlab_repo_patch/src/meshlabplugins/io_x3d/vrml/Scanner.h	2024-12-06 14:21:59.453748300 -0800
+@@ -52,9 +52,9 @@
+ //#define coco_swprintf _snwprintf
+ //#elif defined __GNUC__
+ //#define coco_swprintf swprintf
+-//#else 
++//#else
+ //#error unknown compiler!
+-//#endif 
++//#endif
+ 
+ #ifdef WIN32
+   #ifndef __MINGW32__
+@@ -62,7 +62,7 @@
+       #define coco_swprintf swprintf_s
+     #elif _MSC_VER >= 1300
+        #define coco_swprintf _snwprintf
+-    #else 
++    #else
+        #error unknown compiler!
+     #endif
+    #else
+@@ -106,7 +106,7 @@ void  coco_string_delete(char* &data);
+ namespace VrmlTranslator {
+ 
+ 
+-class Token  
++class Token
+ {
+ public:
+ 	int kind;     // token kind
+@@ -135,10 +135,10 @@ private:
+ 	int bufPos;         // current position in buffer
+ 	FILE* stream;       // input stream (seekable)
+ 	bool isUserStream;  // was the stream opened by the user?
+-	
++
+ 	int ReadNextStreamChunk();
+ 	bool CanSeek();     // true if stream can seek otherwise false
+-	
++
+ public:
+ 	static const int EoF = COCO_WCHAR_MAX + 1;
+ 
+@@ -146,7 +146,7 @@ public:
+ 	Buffer(const unsigned char* buf, int len);
+ 	Buffer(Buffer *b);
+ 	virtual ~Buffer();
+-	
++
+ 	virtual void Close();
+ 	virtual int Read();
+ 	virtual int Peek();
+@@ -256,7 +256,7 @@ private:
+ 	int eofSym;
+ 	int noSym;
+ 	int maxT;
+-	int charSetSize;
++//	int charSetSize; // unused
+ 	StartStates start;
+ 	KeywordMap keywords;
+ 
+@@ -277,7 +277,7 @@ private:
+ 
+ 	void CreateHeapBlock();
+ 	Token* CreateToken();
+-	void AppendVal(Token *t);
++	void AppendVal(Token *tkn);
+ 
+ 	void Init();
+ 	void NextCh();
+@@ -288,7 +288,7 @@ private:
+ 
+ public:
+ 	Buffer *buffer;   // scanner buffer
+-	
++
+ 	Scanner(const unsigned char* buf, int len);
+ 	Scanner(const wchar_t* fileName);
+ 	Scanner(FILE* s);

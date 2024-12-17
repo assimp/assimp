@@ -264,7 +264,14 @@ class Int128
     Int128(const Int128 &val): lo(val.lo), hi(val.hi){}
 
     Int128(const long64& _hi, const ulong64& _lo): lo(_lo), hi(_hi){}
-    
+
+  Int128& operator = (const Int128 &val)
+    {
+      lo = val.lo;
+      hi = val.hi;
+      return *this;
+    }
+
     Int128& operator = (const long64 &val)
     {
       lo = (ulong64)val;

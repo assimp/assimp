@@ -298,13 +298,15 @@ void Importer::SetIOHandler( IOSystem* pIOHandler) {
     ai_assert(nullptr != pimpl);
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
+    if (pimpl->mIOHandler) {
+        delete pimpl->mIOHandler;
+    }
     // If the new handler is zero, allocate a default IO implementation.
     if (!pIOHandler) {
         // Release pointer in the possession of the caller
         pimpl->mIOHandler = new DefaultIOSystem();
         pimpl->mIsDefaultHandler = true;
     } else if (pimpl->mIOHandler != pIOHandler) { // Otherwise register the custom handler
-        delete pimpl->mIOHandler;
         pimpl->mIOHandler = pIOHandler;
         pimpl->mIsDefaultHandler = false;
     }

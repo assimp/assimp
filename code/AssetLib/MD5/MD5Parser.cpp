@@ -115,14 +115,18 @@ void MD5Parser::ParseHeader() {
         ReportError("MD5 version tag is unknown (10 is expected)");
     }
     SkipLine();
+
+    // print the command line options to the console
+    char *sz = buffer;
+    while (buffer < bufferEnd) {
+        if (IsLineEnd(*buffer++)) {
+            break;
+        }
+    }
+
     if (buffer == bufferEnd) {
         return;
     }
-
-    // print the command line options to the console
-    // FIX: can break the log length limit, so we need to be careful
-    char *sz = buffer;
-    while (!IsLineEnd(*buffer++));
     
     ASSIMP_LOG_INFO(std::string(sz, std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer - sz))));
     SkipSpacesAndLineEnd();

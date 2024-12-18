@@ -75,8 +75,8 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.7.tar.gz"
-    SHA1 "99f05ff154c682f7349546d66294d2f69f7193bc"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.8.tar.gz"
+    SHA1 "26c79d587883ec910bce168e25f6ac4595f97033"
   )
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
@@ -289,7 +289,7 @@ IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
 
-  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
+  IF(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     MESSAGE(STATUS "GCC13 detected disabling \"-Wdangling-reference\" in Cpp files as it appears to be a false positive")
     ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference>")
   ENDIF()

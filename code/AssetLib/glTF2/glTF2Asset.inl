@@ -294,6 +294,8 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
     // Usually uint32_t but shouldn't assume
     if (sizeof(dracoMesh.face(draco::FaceIndex(0))[0]) == componentBytes) {
         memcpy(decodedIndexBuffer->GetPointer(), &dracoMesh.face(draco::FaceIndex(0))[0], decodedIndexBuffer->byteLength);
+        // Assign this alternate data buffer to the accessor
+        prim.indices->decodedBuffer.swap(decodedIndexBuffer);
         return;
     }
 

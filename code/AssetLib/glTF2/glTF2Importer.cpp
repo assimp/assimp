@@ -1640,6 +1640,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
 
                 const size_t len = strlen(ext);
                 if (len <= 3) {
+                    static_assert(sizeof(tex->achFormatHint) > 3, "achFormatHint is expected to hold at least 4 bytes.");
                     strncpy(tex->achFormatHint, ext, len + 1);
                 }
             }

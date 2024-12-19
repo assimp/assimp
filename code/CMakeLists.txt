@@ -866,7 +866,7 @@ IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
             AssetLib/X3D_Legacy/X3DImporter_Texturing.cpp
 #            AssetLib/X3D_Legacy/FIReader.cpp
             AssetLib/X3D_Legacy/X3DVocabulary.cpp
-            AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
+#            AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
     )
 ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_ASSIMP_IMPORTER( X3D

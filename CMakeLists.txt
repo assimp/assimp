@@ -63,6 +63,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 #     * line 863: AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
 #     * line 864: AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
 #     * line 867: AssetLib/X3D_Legacy/FIReader.cpp
+#     * line 869: AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
 option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
 if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)

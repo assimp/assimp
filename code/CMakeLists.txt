@@ -687,10 +687,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/X/XFileExporter.cpp)
 
   IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
-      ADD_ASSIMP_EXPORTER(X3D
+      ADD_ASSIMP_EXPORTER( X3D
         AssetLib/X3D_Legacy/X3DExporter.cpp)
   ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
-      ADD_ASSIMP_EXPORTER(X3D
+      ADD_ASSIMP_EXPORTER( X3D
         AssetLib/X3D/X3DExporter.cpp
         AssetLib/X3D/X3DExporter.hpp)
   ENDIF() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)

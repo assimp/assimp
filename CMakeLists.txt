@@ -41,6 +41,9 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
 option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
+if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)
+endif() # ASSIMP_USE_LEGACY_X3D_IMPORTER
 
 # Experimental USD importer: disabled, need to opt-in
 # Note: assimp github PR automatic checks will fail the PR due to compiler warnings in

@@ -45,6 +45,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 # So, in order to use the X3D importer based on IRRXML, the following steps are required
 #  - override below cmake option "ASSIMP_USE_LEGACY_X3D_IMPORTER" to "on"
 #  - remove dummy ".txt" extension added to source files:
+#     * AssetLib/X3D_Legacy/FIReader.cpp
 #     * AssetLib/X3D_Legacy/X3DExporter.cpp
 #     * AssetLib/X3D_Legacy/X3DExporter.hpp
 #     * AssetLib/X3D_Legacy/X3DImporter.cpp
@@ -61,6 +62,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 #     * line 860: AssetLib/X3D_Legacy/X3DImporter_Light.cpp
 #     * line 863: AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
 #     * line 864: AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
+#     * line 867: AssetLib/X3D_Legacy/FIReader.cpp
 option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
 if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)

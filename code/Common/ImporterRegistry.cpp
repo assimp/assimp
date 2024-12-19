@@ -197,7 +197,11 @@ corresponding preprocessor flag to selectively disable formats.
 #include "AssetLib/3MF/D3MFImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
+#ifdef ASSIMP_BUILD_LEGACY_X3D_IMPORTER
+#include "AssetLib/X3D_Legacy/X3DImporter.hpp"
+#else
 #include "AssetLib/X3D/X3DImporter.hpp"
+#endif // #ifdef ASSIMP_BUILD_LEGACY_X3D_IMPORTER
 #endif
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
 #include "AssetLib/MMD/MMDImporter.h"

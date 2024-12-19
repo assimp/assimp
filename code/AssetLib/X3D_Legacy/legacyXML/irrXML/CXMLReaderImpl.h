@@ -646,7 +646,7 @@ private:
 	void convertTextData(src_char_type* source, char* pointerToStore, int sizeWithoutHeader)
 	{
 		// convert little to big endian if necessary
-		if constexpr (sizeof(src_char_type) > 1 &&
+		if (sizeof(src_char_type) > 1 &&
 			isLittleEndian(TargetFormat) != isLittleEndian(SourceFormat))
 			convertToLittleEndian(source);
 

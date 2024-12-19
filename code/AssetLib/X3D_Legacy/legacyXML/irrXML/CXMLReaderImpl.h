@@ -651,7 +651,7 @@ private:
 			convertToLittleEndian(source);
 
 		// check if conversion is necessary:
-		if (sizeof(src_char_type) == sizeof(char_type))
+		if constexpr (sizeof(src_char_type) == sizeof(char_type))
 		{
 			// no need to convert
 			TextBegin = (char_type*)source;

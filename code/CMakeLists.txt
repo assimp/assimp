@@ -691,8 +691,9 @@ if (NOT ASSIMP_NO_EXPORT)
         AssetLib/X3D_Legacy/X3DExporter.cpp)
   ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
       ADD_ASSIMP_EXPORTER( X3D
-        AssetLib/X3D/X3DExporter.cpp
-        AssetLib/X3D/X3DExporter.hpp)
+#        AssetLib/X3D/X3DExporter.cpp
+#        AssetLib/X3D/X3DExporter.hpp
+      )
   ENDIF() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
 
   ADD_ASSIMP_EXPORTER( GLTF
@@ -869,24 +870,24 @@ IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     )
 ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_ASSIMP_IMPORTER( X3D
-            AssetLib/X3D/X3DImporter.cpp
-            AssetLib/X3D/X3DImporter_Geometry2D.cpp
-            AssetLib/X3D/X3DImporter_Geometry3D.cpp
-            AssetLib/X3D/X3DImporter_Group.cpp
-            AssetLib/X3D/X3DImporter_Light.cpp
-            AssetLib/X3D/X3DImporter_Metadata.cpp
-            AssetLib/X3D/X3DImporter_Networking.cpp
-            AssetLib/X3D/X3DImporter_Postprocess.cpp
-            AssetLib/X3D/X3DImporter_Rendering.cpp
-            AssetLib/X3D/X3DImporter_Shape.cpp
-            AssetLib/X3D/X3DImporter_Texturing.cpp
-            AssetLib/X3D/X3DImporter.hpp
-            AssetLib/X3D/X3DImporter_Macro.hpp
-            AssetLib/X3D/X3DImporter_Node.hpp
-            AssetLib/X3D/X3DGeoHelper.cpp
-            AssetLib/X3D/X3DGeoHelper.h
-            AssetLib/X3D/X3DXmlHelper.cpp
-            AssetLib/X3D/X3DXmlHelper.h
+#            AssetLib/X3D/X3DImporter.cpp
+#            AssetLib/X3D/X3DImporter_Geometry2D.cpp
+#            AssetLib/X3D/X3DImporter_Geometry3D.cpp
+#            AssetLib/X3D/X3DImporter_Group.cpp
+#            AssetLib/X3D/X3DImporter_Light.cpp
+#            AssetLib/X3D/X3DImporter_Metadata.cpp
+#            AssetLib/X3D/X3DImporter_Networking.cpp
+#            AssetLib/X3D/X3DImporter_Postprocess.cpp
+#            AssetLib/X3D/X3DImporter_Rendering.cpp
+#            AssetLib/X3D/X3DImporter_Shape.cpp
+#            AssetLib/X3D/X3DImporter_Texturing.cpp
+#            AssetLib/X3D/X3DImporter.hpp
+#            AssetLib/X3D/X3DImporter_Macro.hpp
+#            AssetLib/X3D/X3DImporter_Node.hpp
+#            AssetLib/X3D/X3DGeoHelper.cpp
+#            AssetLib/X3D/X3DGeoHelper.h
+#            AssetLib/X3D/X3DXmlHelper.cpp
+#            AssetLib/X3D/X3DXmlHelper.h
     )
 ENDIF() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
 

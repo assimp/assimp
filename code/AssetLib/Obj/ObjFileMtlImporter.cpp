@@ -105,7 +105,15 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
         m_pModel->mDefaultMaterial = new ObjFile::Material;
         m_pModel->mDefaultMaterial->MaterialName.Set("default");
     }
-    std::size_t found = m_strAbsPath.find_last_of(DefaultIOSystem().getOsSeparator());
+    
+    // Try with OS folder separator first
+    char folderSeparator = DefaultIOSystem().getOsSeparator();
+    std::size_t found = m_strAbsPath.find_last_of(folderSeparator);
+    if (found == std::string::npos) {
+        // Not found, try alternative folder separator
+        folderSeparator = (folderSeparator == '/' ? '\\' : '/');
+        found = m_strAbsPath.find_last_of(folderSeparator);
+    }
     if (found != std::string::npos) {
         m_strAbsPath = m_strAbsPath.substr(0, found + 1);
     } else {

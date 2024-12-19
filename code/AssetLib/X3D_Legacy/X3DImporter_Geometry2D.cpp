@@ -297,17 +297,19 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 			for(std::list<aiVector3D>::iterator it_i = tlist_i.begin(), it_o = tlist_o.begin(); it_i != tlist_i.end();)
 			{
 				// do not forget - CCW direction
-				vlist.push_back(*it_i++);// 1st point
-				vlist.push_back(*it_o++);// 2nd point
-				vlist.push_back(*it_o);// 3rd point
-				vlist.push_back(*it_i);// 4th point
+                // Replace push_back() w/emplace_back() due to massive CI build failures
+				vlist.emplace_back(*it_i++);// 1st point
+				vlist.emplace_back(*it_o++);// 2nd point
+				vlist.emplace_back(*it_o);// 3rd point
+				vlist.emplace_back(*it_i);// 4th point
 			}
 
 			// add last quad
-			vlist.push_back(*tlist_i.end());// 1st point
-			vlist.push_back(*tlist_o.end());// 2nd point
-			vlist.push_back(*tlist_o.begin());// 3rd point
-			vlist.push_back(*tlist_o.begin());// 4th point
+            // Replace push_back() w/emplace_back() due to massive CI build failures
+			vlist.emplace_back(*tlist_i.end());// 1st point
+			vlist.emplace_back(*tlist_o.end());// 2nd point
+			vlist.emplace_back(*tlist_o.begin());// 3rd point
+			vlist.emplace_back(*tlist_o.begin());// 4th point
 
 			((CX3DImporter_NodeElement_Geometry2D*)ne)->NumIndices = 4;
 		}

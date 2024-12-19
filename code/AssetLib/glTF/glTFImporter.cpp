@@ -664,7 +664,7 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
 
                 const size_t len = strlen(ext);
                 if (len <= 3) {
-                    strncpy(tex->achFormatHint, ext, len);
+                    strncpy(tex->achFormatHint, ext, len + 1);
                 }
             }
         }

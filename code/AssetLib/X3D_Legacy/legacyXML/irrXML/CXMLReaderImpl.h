@@ -646,9 +646,13 @@ private:
 	void convertTextData(src_char_type* source, char* pointerToStore, int sizeWithoutHeader)
 	{
 		// convert little to big endian if necessary
-		if (sizeof(src_char_type) > 1 &&
-			isLittleEndian(TargetFormat) != isLittleEndian(SourceFormat))
-			convertToLittleEndian(source);
+        // assimp CI checks are insane, windows insists entire expression was constant, ubuntu the opposite;
+        // split into two "if"s to attempt workaround
+		if constexpr (sizeof(src_char_type) > 1) {
+			if (isLittleEndian(TargetFormat) != isLittleEndian(SourceFormat)) {
+                convertToLittleEndian(source);
+            }
+        }
 
 		// check if conversion is necessary:
 		if constexpr (sizeof(src_char_type) == sizeof(char_type))

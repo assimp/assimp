@@ -40,6 +40,29 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
+# To prevent PR from failing CI checks needed to hide some source files from being analyzed/built
+# (otherwise would trigger code duplication warnings or worse)
+# So, in order to use the X3D importer based on IRRXML, the following steps are required
+#  - override below cmake option "ASSIMP_USE_LEGACY_X3D_IMPORTER" to "on"
+#  - remove dummy ".txt" extension added to source files:
+#     * AssetLib/X3D_Legacy/X3DExporter.cpp
+#     * AssetLib/X3D_Legacy/X3DExporter.hpp
+#     * AssetLib/X3D_Legacy/X3DImporter.cpp
+#     * AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp
+#     * AssetLib/X3D_Legacy/X3DImporter_Group.cpp
+#     * AssetLib/X3D_Legacy/X3DImporter_Light.cpp
+#     * AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
+#     * AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
+#     * AssetLib/X3D_Legacy/legacyXML/irrXML/fast_atof.h
+#  - uncomment commented-out source files in code/CMakeLists.txt
+#     * line 691: "AssetLib/X3D_Legacy/X3DExporter.cpp"
+#     * line 856: "AssetLib/X3D_Legacy/X3DImporter.cpp"
+#     * line 858: "AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp"
+#     * line 859: "AssetLib/X3D_Legacy/X3DImporter_Group.cpp"
+#     * line 860: "AssetLib/X3D_Legacy/X3DImporter_Light.cpp"
+#     * line 863: "AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp"
+#     * line 864: "AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp"
+#     * line 869: "AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp"
 option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
 if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)

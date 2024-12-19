@@ -646,7 +646,7 @@ private:
 	void convertTextData(src_char_type* source, char* pointerToStore, int sizeWithoutHeader)
 	{
 		// convert little to big endian if necessary
-		if (sizeof(src_char_type) > 1 && 
+		if constexpr (sizeof(src_char_type) > 1 &&
 			isLittleEndian(TargetFormat) != isLittleEndian(SourceFormat))
 			convertToLittleEndian(source);
 
@@ -682,7 +682,7 @@ private:
 	template<class src_char_type>
 	void convertToLittleEndian(src_char_type* t)
 	{
-		if (sizeof(src_char_type) == 4) 
+		if constexpr (sizeof(src_char_type) == 4)
 		{
 			// 32 bit
 

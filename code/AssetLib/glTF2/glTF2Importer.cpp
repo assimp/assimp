@@ -1638,10 +1638,10 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                     ext = "bu";
                 }
 
-                const size_t len = strlen(ext);
-                if (len <= 3) {
-                    strncpy(tex->achFormatHint, ext, len);
-                }
+                size_t len = strlen(ext);
+                if (len > 3) len = 3;
+                tex->achFormatHint[3] = '\0';
+                memcpy(tex->achFormatHint, ext, len);
             }
         }
     }

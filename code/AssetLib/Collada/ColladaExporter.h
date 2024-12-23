@@ -72,7 +72,7 @@ public:
     ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, const std::string &path, const std::string &file);
 
     /// Destructor
-    virtual ~ColladaExporter();
+    virtual ~ColladaExporter() = default;
 
 protected:
     /// Starts writing the contents

@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cinttypes>
 #include <limits>
 #include <memory>
+#include <iostream>
 
 using namespace rapidjson;
 
@@ -1177,6 +1178,9 @@ void glTF2Exporter::ExportMeshes() {
 
     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
         const aiMesh *aim = mScene->mMeshes[idx_mesh];
+        if (aim->mNumFaces == 0) {
+            continue;
+        }
 
         std::string name = aim->mName.C_Str();
 

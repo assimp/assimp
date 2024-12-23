@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
-#include "AssetLib/glTF2/glTF2AssetWriter.h"
+#   include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif
 
 #include <assimp/CreateAnimMesh.h>
@@ -1055,7 +1055,8 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
         }
     }
-    //
+    
+    // No indices are an invalid usecase
     if (nullptr == indices8 && nullptr == indices16) {
         // Something went completely wrong!
         ai_assert(false);
@@ -1456,7 +1457,8 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         if (animsampler.input->count > animsampler.output->count) {
-            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count,
+                            " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
         }
 
@@ -1638,10 +1640,10 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                     ext = "bu";
                 }
 
-                const size_t len = strlen(ext);
-                if (len <= 3) {
-                    strncpy(tex->achFormatHint, ext, len);
-                }
+                size_t len = strlen(ext);
+                if (len > 3) len = 3;
+                tex->achFormatHint[3] = '\0';
+                memcpy(tex->achFormatHint, ext, len);
             }
         }
     }

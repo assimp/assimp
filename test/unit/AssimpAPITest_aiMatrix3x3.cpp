@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -161,7 +159,7 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3FromToTest) {
 
 TEST_F(AssimpAPITest_aiMatrix3x3, operatorTest) {
     ai_real value[] = { 1, 2, 3, 4, 5, 6, 7, 8,9};
-    aiMatrix3x3 result_cpp = aiMatrix3x3( value[0], value[1], value[2], value[3],
+    result_cpp = aiMatrix3x3( value[0], value[1], value[2], value[3],
                               value[4], value[5], value[6], value[7],
                               value[8]);
     size_t idx=0;

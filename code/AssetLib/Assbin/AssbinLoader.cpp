@@ -688,6 +688,7 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     unsigned int versionMajor = Read<unsigned int>(stream);
     unsigned int versionMinor = Read<unsigned int>(stream);
     if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
+        pIOHandler->Close(stream);
         throw DeadlyImportError("Invalid version, data format not compatible!");
     }
 
@@ -697,8 +698,10 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     shortened = Read<uint16_t>(stream) > 0;
     compressed = Read<uint16_t>(stream) > 0;
 
-    if (shortened)
+    if (shortened) {
+        pIOHandler->Close(stream);
         throw DeadlyImportError("Shortened binaries are not supported!");
+    }
 
     stream->Seek(256, aiOrigin_CUR); // original filename
     stream->Seek(128, aiOrigin_CUR); // options

@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
+#include <array>
 
 using namespace Assimp;
 
@@ -158,7 +159,7 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3FromToTest) {
 }
 
 TEST_F(AssimpAPITest_aiMatrix3x3, operatorTest) {
-    ai_real value[] = { 1, 2, 3, 4, 5, 6, 7, 8,9};
+    std::array<ai_real, 9> value = { 1, 2, 3, 4, 5, 6, 7, 8,9};
     result_cpp = aiMatrix3x3( value[0], value[1], value[2], value[3],
                               value[4], value[5], value[6], value[7],
                               value[8]);

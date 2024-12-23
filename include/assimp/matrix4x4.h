@@ -73,11 +73,14 @@ template<typename TReal> class aiQuaterniont;
 template<typename TReal>
 class aiMatrix4x4t {
 public:
-
-    /** set to identity */
+    /** 
+     * @brief Set to identity 
+     * */
     aiMatrix4x4t() AI_NO_EXCEPT;
 
-    /** construction from single values */
+    /** 
+     * @brief Construction from single values 
+     * */
     aiMatrix4x4t (  TReal _a1, TReal _a2, TReal _a3, TReal _a4,
                     TReal _b1, TReal _b2, TReal _b3, TReal _b4,
                     TReal _c1, TReal _c2, TReal _c3, TReal _c4,
@@ -93,18 +96,18 @@ public:
      * @param position The position for the x,y,z axes
      */
     aiMatrix4x4t(const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation,
-        const aiVector3t<TReal>& position);
+          const aiVector3t<TReal>& position);
 
     // array access operators
-	/** @fn TReal* operator[] (unsigned int p_iIndex)
-	 *  @param [in] p_iIndex - index of the row.
-	 *  @return pointer to pointed row.
-	 */
-    TReal* operator[]       (unsigned int p_iIndex);
+    /** @fn TReal* operator[] (unsigned int p_iIndex)
+     *  @param [in] p_iIndex - index of the row.
+     *  @return pointer to pointed row.
+     */
+      TReal* operator[] (unsigned int p_iIndex);
 
-	/** @fn const TReal* operator[] (unsigned int p_iIndex) const
-	 *  @overload TReal* operator[] (unsigned int p_iIndex)
-	 */
+    /** @fn const TReal* operator[] (unsigned int p_iIndex) const
+     *  @overload TReal* operator[] (unsigned int p_iIndex)
+     */
     const TReal* operator[] (unsigned int p_iIndex) const;
 
     // comparison operators
@@ -132,8 +135,12 @@ public:
      *  Beware, use (f != f) to check whether a TReal f is qnan.
      */
     aiMatrix4x4t& Inverse();
-    TReal Determinant() const;
 
+    // -------------------------------------------------------------------
+    /**
+     * @brief Inverts the matrix if it is invertible.
+     */
+    TReal Determinant() const;
 
     // -------------------------------------------------------------------
     /** @brief Returns true of the matrix is the identity matrix.
@@ -147,40 +154,38 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Decompose a trafo matrix into its original components
-     *  @param scaling Receives the output scaling for the x,y,z axes
-     *  @param rotation Receives the output rotation as a hamilton
-     *   quaternion
+     *  @param scaling  Receives the output scaling for the x,y,z axes
+     *  @param rotation Receives the output rotation as a hamilton quaternion
      *  @param position Receives the output position for the x,y,z axes
      */
     void Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
         aiVector3t<TReal>& position) const;
 
-	// -------------------------------------------------------------------
-	/** @fn void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const
+    // -------------------------------------------------------------------
+    /**
      *  @brief Decompose a trafo matrix into its original components.
-     * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
-     *  @param [out] pScaling - Receives the output scaling for the x,y,z axes.
+     *  Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
+     *  @param [out] pScaling  - Receives the output scaling for the x,y,z axes.
      *  @param [out] pRotation - Receives the output rotation as a Euler angles.
      *  @param [out] pPosition - Receives the output position for the x,y,z axes.
      */
     void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const;
 
-	// -------------------------------------------------------------------
-	/** @fn void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle, aiVector3t<TReal>& pPosition) const
+    // -------------------------------------------------------------------
+    /** 
      *  @brief Decompose a trafo matrix into its original components
-	 * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
-     *  @param [out] pScaling - Receives the output scaling for the x,y,z axes.
-     *  @param [out] pRotationAxis - Receives the output rotation axis.
-	 *  @param [out] pRotationAngle - Receives the output rotation angle for @ref pRotationAxis.
-     *  @param [out] pPosition - Receives the output position for the x,y,z axes.
+     * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
+     *  @param [out] pScaling       - Receives the output scaling for the x,y,z axes.
+     *  @param [out] pRotationAxis  - Receives the output rotation axis.
+     *  @param [out] pRotationAngle - Receives the output rotation angle for @ref pRotationAxis.
+     *  @param [out] pPosition      - Receives the output position for the x,y,z axes.
      */
     void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle, aiVector3t<TReal>& pPosition) const;
 
     // -------------------------------------------------------------------
     /** @brief Decompose a trafo matrix with no scaling into its
      *    original components
-     *  @param rotation Receives the output rotation as a hamilton
-     *    quaternion
+     *  @param rotation Receives the output rotation as a hamilton quaternion
      *  @param position Receives the output position for the x,y,z axes
      */
     void DecomposeNoScaling (aiQuaterniont<TReal>& rotation,
@@ -197,7 +202,7 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Returns a rotation matrix for a rotation around the x axis
-     *  @param a Rotation angle, in radians
+     *  @param a   Rotation angle, in radians
      *  @param out Receives the output matrix
      *  @return Reference to the output matrix
      */
@@ -205,7 +210,7 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Returns a rotation matrix for a rotation around the y axis
-     *  @param a Rotation angle, in radians
+     *  @param a   Rotation angle, in radians
      *  @param out Receives the output matrix
      *  @return Reference to the output matrix
      */

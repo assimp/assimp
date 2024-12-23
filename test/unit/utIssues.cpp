@@ -55,7 +55,7 @@ class utIssues : public ::testing::Test {};
 
 TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     float opacity;
-    aiScene *scene = TestModelFacttory::createDefaultTestModel(opacity);
+    aiScene *scene = TestModelFactory::createDefaultTestModel(opacity);
     Assimp::Importer importer;
     Assimp::Exporter exporter;
 
@@ -69,11 +69,12 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     const aiScene *newScene( importer.ReadFile( path, aiProcess_ValidateDataStructure ) );
     ASSERT_NE( nullptr, newScene );
     float newOpacity;
-    if ( newScene->mNumMaterials > 0 ) {
+    if (newScene->mNumMaterials > 0 ) {
         EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
         EXPECT_FLOAT_EQ( opacity, newOpacity );
     }
-    delete scene;
+    
+    TestModelFactory::releaseDefaultTestModel(&scene);
 
     // Cleanup. Delete exported dae.dae file
     EXPECT_EQ(0, std::remove(path.c_str()));

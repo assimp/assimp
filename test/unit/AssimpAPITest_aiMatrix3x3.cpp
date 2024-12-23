@@ -158,3 +158,18 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3FromToTest) {
     aiMatrix3FromTo(&result_c, &from, &to);
     EXPECT_EQ(result_cpp, result_c);
 }
+
+TEST_F(AssimpAPITest_aiMatrix3x3, operatorTest) {
+    ai_real value[] = { 1, 2, 3, 4, 5, 6, 7, 8,9};
+    aiMatrix3x3 result_cpp = aiMatrix3x3( value[0], value[1], value[2], value[3],
+                              value[4], value[5], value[6], value[7],
+                              value[8]);
+    size_t idx=0;
+    for (size_t i = 0; i < 3; ++i) {
+       for (size_t j = 0; j < 3; ++j) {
+            ai_real curValue = result_cpp[i][j];
+            EXPECT_EQ(curValue, value[idx]);
+            idx++;
+       }
+    }
+}

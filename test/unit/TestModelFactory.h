@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,7 +54,7 @@ public:
     ~TestModelFactory() = default;
 
     static aiScene *createDefaultTestModel( float &opacity ) {
-        aiScene *scene = new aiScene;
+        auto *scene = new aiScene;
         scene->mNumMaterials = 1;
         scene->mMaterials = new aiMaterial*[scene->mNumMaterials];
         scene->mMaterials[ 0 ] = new aiMaterial;

@@ -223,7 +223,8 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
     const unsigned int majorVersion(aiGetVersionMajor());
     const unsigned int minorVersion(aiGetVersionMinor());
     const unsigned int rev(aiGetVersionRevision());
-    const char *curtime(asctime(p));
+    char buf[256] = {0};
+    const char *curtime = asctime_r(p, buf);
     ioprintf(io, header.c_str(), majorVersion, minorVersion, rev, pFile, c.c_str(), curtime, scene->mFlags, 0u);
 
     // write the node graph

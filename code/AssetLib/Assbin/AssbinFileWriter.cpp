@@ -756,10 +756,11 @@ public:
             // header
             char s[64];
             memset(s, 0, 64);
+            char buf[256] = {0};
 #if _MSC_VER >= 1400
-            sprintf_s(s, "ASSIMP.binary-dump.%s", asctime(p));
+            sprintf_s(s, "ASSIMP.binary-dump.%s", asctime_r(p, buf));
 #else
-            ai_snprintf(s, 64, "ASSIMP.binary-dump.%s", asctime(p));
+            ai_snprintf(s, 64, "ASSIMP.binary-dump.%s", asctime_r(p, buf));
 #endif
             out->Write(s, 44, 1);
             // == 44 bytes

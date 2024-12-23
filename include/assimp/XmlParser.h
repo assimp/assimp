@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IOStream.hpp"
 
 #include <pugixml.hpp>
+#include <istream>
 #include <utility>
 #include <vector>
 
@@ -127,6 +128,11 @@ public:
     /// @param[in] stream      The input stream.
     /// @return true, if the parsing was successful, false if not.
     bool parse(IOStream *stream);
+
+    /// @brief  Will parse an xml-file from a stringstream.
+    /// @param[in] str      The input istream (note: not "const" to match pugixml param)
+    /// @return true, if the parsing was successful, false if not.
+    bool parse(std::istream &inStream);
 
     /// @brief  Will return true if a root node is there.
     /// @return true in case of an existing root.
@@ -311,7 +317,23 @@ bool TXmlParser<TNodeType>::parse(IOStream *stream) {
     mDoc = new pugi::xml_document();
     // load_string assumes native encoding (aka always utf-8 per build options)
     //pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
-     pugi::xml_parse_result parse_result = mDoc->load_buffer(&mData[0], mData.size(), pugi::parse_full);
+    pugi::xml_parse_result parse_result = mDoc->load_buffer(&mData[0], mData.size(), pugi::parse_full);
+    if (parse_result.status == pugi::status_ok) {
+        return true;
+    }
+
+    ASSIMP_LOG_DEBUG("Error while parse xml.", std::string(parse_result.description()), " @ ", parse_result.offset);
+
+    return false;
+}
+
+template <class TNodeType>
+bool TXmlParser<TNodeType>::parse(std::istream &inStream) {
+    if (hasRoot()) {
+        clear();
+    }
+    mDoc = new pugi::xml_document();
+    pugi::xml_parse_result parse_result = mDoc->load(inStream);
     if (parse_result.status == pugi::status_ok) {
         return true;
     }

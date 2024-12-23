@@ -164,7 +164,7 @@ TEST_F(AssimpAPITest_aiMatrix3x3, operatorTest) {
                               value[8]);
     size_t idx=0;
     for (unsigned int i = 0; i < 3; ++i) {
-       for (size_t j = 0; j < 3; ++j) {
+       for (unsigned int j = 0; j < 3; ++j) {
             ai_real curValue = result_cpp[i][j];
             EXPECT_EQ(curValue, value[idx]);
             idx++;

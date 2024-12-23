@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -36,7 +35,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
@@ -151,10 +149,6 @@ ColladaExporter::ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, con
     // start writing the file
     WriteFile();
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor
-ColladaExporter::~ColladaExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Starts writing the contents
@@ -558,7 +552,8 @@ void ColladaExporter::WriteAmbientLight(const aiLight *const light) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a single surface entry from the given material keys
-bool ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial &pSrcMat, aiTextureType pTexture, const char *pKey, size_t pType, size_t pIndex) {
+bool ColladaExporter::ReadMaterialSurface(Surface &poSurface, const aiMaterial &pSrcMat, aiTextureType pTexture,
+        const char *pKey, size_t pType, size_t pIndex) {
     if (pSrcMat.GetTextureCount(pTexture) > 0) {
         aiString texfile;
         unsigned int uvChannel = 0;

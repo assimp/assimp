@@ -47,8 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
+#ifdef _DEBUG
     aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, nullptr);
     aiAttachLogStream(&stream);
+#endif
 
     Importer importer;
     const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
@@ -61,7 +63,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
     Exporter exporter;
     exporter.ExportToBlob(sc, "fbx");
     
+#ifdef _DEBUG
     aiDetachLogStream(&stream);
+#endif
 
     return 0;
 }

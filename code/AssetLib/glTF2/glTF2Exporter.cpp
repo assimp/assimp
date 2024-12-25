@@ -1215,6 +1215,20 @@ void glTF2Exporter::ExportMeshes() {
             p.attributes.normal.push_back(n);
         }
 
+        /******************** Tangents ********************/
+        if (nullptr != aim->mTangents) {
+            for (uint32_t i = 0; i < aim->mNumVertices; ++i) {
+                aim->mTangents[i].NormalizeSafe();
+            }
+            Ref<Accessor> t = ExportData(
+                *mAsset, meshId, b, aim->mNumVertices, aim->mTangents, AttribType::VEC3,
+                AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER
+            );
+            if (t) {
+                p.attributes.tangent.push_back(t);
+            }
+        }
+
         /************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
             if (!aim->HasTextureCoords(i)) {

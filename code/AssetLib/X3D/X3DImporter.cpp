@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
-#include "../VRML/VrmlConverter.hpp"
+#include "AssetLib/VRML/VrmlConverter.hpp"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 

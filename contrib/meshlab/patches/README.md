@@ -1,4 +1,10 @@
 # meshlab patch
+
+## Notes
+Depending on user's OS, build environment etc it may be necessary to change line endings of
+`patches/meshlab.patch` file from `CRLF` to `LF` in order for patch operation to succeed
+
+## Overview
 "Parser" based on QtXml, need to change to use pugixml
 
 ## pugixml notes

@@ -944,6 +944,8 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     # relative to top-level/main project)
     set(Meshlab_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab")
 
+    # Note: Depending on user's OS, build environment etc it may be necessary to change line endings of
+    #       "patches/meshlab.patch" file from CRLF to LF in order for patch operation to succeed
     # Patch required to
     #  - replace QtXml w/pugixml
     #  - disable meshlab cmake scripts to prevent breaking assimp build

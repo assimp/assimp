@@ -48,16 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory> // std::unique_ptr
 #include "VrmlConverter.hpp"
 
-using std::string;
-
 namespace Assimp {
 
 bool isFileWrlVrml97Ext(const std::string &pFile) {
     size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
+    if (pos == std::string::npos) {
         return false;
     }
-    string ext = pFile.substr(pos + 1);
+    std::string ext = pFile.substr(pos + 1);
     if (ext.size() != 3) {
         return false;
     }
@@ -66,10 +64,10 @@ bool isFileWrlVrml97Ext(const std::string &pFile) {
 
 bool isFileX3dvClassicVrmlExt(const std::string &pFile) {
     size_t pos = pFile.find_last_of('.');
-    if (pos == string::npos) {
+    if (pos == std::string::npos) {
         return false;
     }
-    string ext = pFile.substr(pos + 1);
+    std::string ext = pFile.substr(pos + 1);
     if (ext.size() != 4) {
         return false;
     }

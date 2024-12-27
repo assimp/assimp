@@ -230,6 +230,7 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
 void X3DImporter::ParseFile(std::istream &myIstream) {
     XmlParser theParser;
     if (!theParser.parse(myIstream)) {
+        LogInfo("ParseFile(): ERROR: failed to convert VRML istream to xml");
         return;
     }
     ParseFile(theParser);

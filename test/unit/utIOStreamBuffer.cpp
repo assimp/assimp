@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -89,7 +87,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     auto* fs = MakeTmpFile(fname);
     ASSERT_NE(nullptr, fs);
 
-    auto written = std::fwrite( data, sizeof(*data), dataCount, fs );
+    auto written = std::fwrite(data, sizeof(*data), dataCount, fs);
     EXPECT_NE( 0U, written );
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);

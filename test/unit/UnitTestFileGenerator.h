@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -45,32 +45,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <gtest/gtest.h>
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-#define TMP_PATH "./"
+#   define TMP_PATH "./"
 #elif defined(__GNUC__) || defined(__clang__)
-#define TMP_PATH "/tmp/"
+#   define TMP_PATH "/tmp/"
 #endif
 
 #if defined(_MSC_VER)
+#   ifndef _CRT_SECURE_NO_WARNINGS
+#       define _CRT_SECURE_NO_WARNINGS
+#   endif
 #include <io.h>
-inline FILE* MakeTmpFile(char* tmplate)
-{
-    auto pathtemplate = _mktemp(tmplate);
+inline FILE* MakeTmpFile(char* tmplate) {
+    char *pathtemplate = tmplate;
+    int err = _mktemp_s(pathtemplate, std::strlen(pathtemplate));
+    EXPECT_EQ(err, 0);
     EXPECT_NE(pathtemplate, nullptr);
-    if(pathtemplate == nullptr)
-    {
+    if(pathtemplate == nullptr) {
         return nullptr;
     }
     auto* fs = std::fopen(pathtemplate, "w+");
-    EXPECT_NE(fs, nullptr);
+    EXPECT_NE(fs, nullptr);    return fs;
+
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)
-inline FILE* MakeTmpFile(char* tmplate)
-{
+inline FILE* MakeTmpFile(char* tmplate) {
     auto fd = mkstemp(tmplate);
     EXPECT_NE(-1, fd);
-    if(fd == -1)
-    {
+    if(fd == -1) {
         return nullptr;
     }
     auto fs = fdopen(fd, "w+");

@@ -585,6 +585,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             // and add the file to the import list
             SkipSpaces(&c, end);
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: self reference.");
+            }
+
             d.path = path;
             d.id = batch.AddLoadRequest(path, 0, &props);
 
@@ -602,6 +611,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 d.number = cur_object++;
             }
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: self reference.");
+            }
+
             d.id = batch.AddLoadRequest(path, 0, nullptr);
 
             d.path = path;

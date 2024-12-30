@@ -122,5 +122,7 @@ tools/assimp_qt_viewer/ui_mainwindow.h
 generated/*
 
 # 3rd party cloned repos/tarballs etc
+# meshlab repo, automatically cloned via CMake (to gain 2 source files for VRML file format conversion)
+contrib/meshlab/autoclone
 # tinyusdz repo, automatically cloned via CMake
 contrib/tinyusdz/autoclone

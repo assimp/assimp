@@ -163,8 +163,14 @@ void HMPImporter::ValidateHeader_HMP457() {
                                 "120 bytes, this file is smaller)");
     }
 
+    if (!std::isfinite(pcHeader->ftrisize_x) || !std::isfinite(pcHeader->ftrisize_y))
+        throw DeadlyImportError("Size of triangles in either x or y direction is not finite");
+
     if (!pcHeader->ftrisize_x || !pcHeader->ftrisize_y)
-        throw DeadlyImportError("Size of triangles in either  x or y direction is zero");
+        throw DeadlyImportError("Size of triangles in either x or y direction is zero");
+
+    if (!std::isfinite(pcHeader->fnumverts_x))
+        throw DeadlyImportError("Number of triangles in x direction is not finite");
 
     if (pcHeader->fnumverts_x < 1.0f || (pcHeader->numverts / pcHeader->fnumverts_x) < 1.0f)
         throw DeadlyImportError("Number of triangles in either x or y direction is zero");

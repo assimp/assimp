@@ -325,13 +325,13 @@ void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int 
 // Validate a quake file header
 void MDLImporter::ValidateHeader_Quake1(const MDL::Header *pcHeader) {
     // some values may not be nullptr
-    if (!pcHeader->num_frames)
+    if (pcHeader->num_frames <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no frames in the file");
 
-    if (!pcHeader->num_verts)
+    if (pcHeader->num_verts <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no vertices in the file");
 
-    if (!pcHeader->num_tris)
+    if (pcHeader->num_tris <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no triangles in the file");
 
     // check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only

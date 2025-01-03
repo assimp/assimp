@@ -301,13 +301,15 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
     OpenDDLParser myParser;
     myParser.setLogCallback(&logDDLParserMessage);
     myParser.setBuffer(&buffer[0], buffer.size());
-    bool success(myParser.parse());
-    if (success) {
-        m_ctx = myParser.getContext();
-        pScene->mRootNode = new aiNode;
-        pScene->mRootNode->mName.Set(filename);
-        handleNodes(m_ctx->m_root, pScene);
+
+    if (!myParser.parse()) {
+        throw DeadlyImportError("Failed to parse file ", filename);
     }
+
+    m_ctx = myParser.getContext();
+    pScene->mRootNode = new aiNode;
+    pScene->mRootNode->mName.Set(filename);
+    handleNodes(m_ctx->m_root, pScene);
 
     copyMeshes(pScene);
     copyCameras(pScene);

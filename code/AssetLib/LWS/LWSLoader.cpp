@@ -536,8 +536,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     ++it;
 
     if (it == root.children.end() || (*it).tokens[0].empty()) {
-        ASSIMP_LOG_ERROR("Invalid LWS file detectedm abort import.");
-        return;
+        throw DeadlyImportError("LWS: Invalid LWS file detected, abort import");
     }
     unsigned int version = strtoul10((*it).tokens[0].c_str());
     ASSIMP_LOG_INFO("LWS file format version is ", (*it).tokens[0]);

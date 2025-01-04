@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include "MathTest.h"
 #include <assimp/MathFunctions.h>
+#include <array>
 
 using namespace Assimp;
 
@@ -261,4 +262,21 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4FromToTest) {
     aiMatrix4x4::FromToMatrix(from, to, result_cpp);
     aiMatrix4FromTo(&result_c, &from, &to);
     EXPECT_EQ(result_cpp, result_c);
+}
+
+TEST_F(AssimpAPITest_aiMatrix4x4, operatorTest) {
+    std::array<ai_real, 16> value = { 1, 2, 3, 4, 5, 6, 7, 8,
+                        9, 10, 11, 12, 13, 14, 15, 16 };
+    result_cpp = aiMatrix4x4( value[0], value[1], value[2], value[3],
+                              value[4], value[5], value[6], value[7],
+                              value[8], value[9], value[10], value[11],
+                              value[12], value[13], value[14], value[15] );
+    size_t idx=0;
+    for (unsigned int i = 0; i < 4; ++i) {
+       for (unsigned int j = 0; j < 4; ++j) {
+            ai_real curValue = result_cpp[i][j];
+            EXPECT_EQ(curValue, value[idx]);
+            idx++;
+       }
+    }
 }

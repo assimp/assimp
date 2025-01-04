@@ -202,7 +202,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
 
     ((AMFVolume *)ne)->MaterialID = node.attribute("materialid").as_string();
 
-    ((AMFVolume *)ne)->Type = type;
+    ((AMFVolume *)ne)->VolumeType = type;
     // Check for child nodes
     bool col_read = false;
     if (!node.empty()) {

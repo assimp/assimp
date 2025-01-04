@@ -1535,7 +1535,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut,
+        ai_real *pOut,
         unsigned int *pMax);
 
 // ---------------------------------------------------------------------------
@@ -1557,12 +1557,12 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 * @return Specifies whether the key has been found. If not, the output
 *   float remains unmodified.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
+static inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut) {
-    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+        ai_real *pOut) {
+    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------
@@ -1582,12 +1582,12 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial *
  *
  * See the sample for aiGetMaterialFloat for more information.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
+static inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
         int *pOut) {
-    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------

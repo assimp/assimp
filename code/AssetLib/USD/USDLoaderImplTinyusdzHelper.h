@@ -48,14 +48,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include "tinyusdz.hh"
 #include "tydra/render-data.hh"
+#include <type_traits>
 
 namespace Assimp {
 
 std::string tinyusdzAnimChannelTypeFor(
         tinyusdz::tydra::AnimationChannel::ChannelType animChannel);
 std::string tinyusdzNodeTypeFor(tinyusdz::tydra::NodeType type);
-aiMatrix4x4 tinyUsdzMat4ToAiMat4(const double matIn[4][4]);
 
+template <typename T>
+aiMatrix4x4 tinyUsdzMat4ToAiMat4(const T matIn[4][4]) {
+    static_assert(std::is_floating_point_v<T>, "Only floating-point types are allowed.");
+    aiMatrix4x4 matOut;
+    matOut.a1 = ai_real(matIn[0][0]);
+    matOut.a2 = ai_real(matIn[1][0]);
+    matOut.a3 = ai_real(matIn[2][0]);
+    matOut.a4 = ai_real(matIn[3][0]);
+    matOut.b1 = ai_real(matIn[0][1]);
+    matOut.b2 = ai_real(matIn[1][1]);
+    matOut.b3 = ai_real(matIn[2][1]);
+    matOut.b4 = ai_real(matIn[3][1]);
+    matOut.c1 = ai_real(matIn[0][2]);
+    matOut.c2 = ai_real(matIn[1][2]);
+    matOut.c3 = ai_real(matIn[2][2]);
+    matOut.c4 = ai_real(matIn[3][2]);
+    matOut.d1 = ai_real(matIn[0][3]);
+    matOut.d2 = ai_real(matIn[1][3]);
+    matOut.d3 = ai_real(matIn[2][3]);
+    matOut.d4 = ai_real(matIn[3][3]);
+    return matOut;
+}
 aiVector3D tinyUsdzScaleOrPosToAssimp(const std::array<float, 3> &scaleOrPosIn);
 
 /**

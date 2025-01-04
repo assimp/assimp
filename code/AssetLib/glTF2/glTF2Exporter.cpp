@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cinttypes>
 #include <limits>
 #include <memory>
+#include <iostream>
 
 using namespace rapidjson;
 
@@ -1177,6 +1178,9 @@ void glTF2Exporter::ExportMeshes() {
 
     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
         const aiMesh *aim = mScene->mMeshes[idx_mesh];
+        if (aim->mNumFaces == 0) {
+            continue;
+        }
 
         std::string name = aim->mName.C_Str();
 
@@ -1209,6 +1213,20 @@ void glTF2Exporter::ExportMeshes() {
                 AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER);
         if (n) {
             p.attributes.normal.push_back(n);
+        }
+
+        /******************** Tangents ********************/
+        if (nullptr != aim->mTangents) {
+            for (uint32_t i = 0; i < aim->mNumVertices; ++i) {
+                aim->mTangents[i].NormalizeSafe();
+            }
+            Ref<Accessor> t = ExportData(
+                *mAsset, meshId, b, aim->mNumVertices, aim->mTangents, AttribType::VEC3,
+                AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER
+            );
+            if (t) {
+                p.attributes.tangent.push_back(t);
+            }
         }
 
         /************** Texture coordinates **************/

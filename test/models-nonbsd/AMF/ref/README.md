@@ -2,6 +2,7 @@
 
 ## 3_bananas.amf
 (Note: need to flip UVs when rendering)
+
 <img alt="3_bananas.amf" src="screenshots/3bananas_amf_uvs_flipped_01.png" width=180 />
 
 ## 3_bananas.amf embedded texture

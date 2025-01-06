@@ -3,7 +3,7 @@
 ## 3_bananas.amf
 (Note: need to flip UVs when rendering)
 
-<img alt="3_bananas.amf" src="screenshots/3bananas_amf_uvs_flipped_01.png" width=180 />
+<img alt="3_bananas.amf" src="screenshots/3bananas_amf_uvs_flipped_01.png" width=180 /><img alt="3_bananas.amf" src="screenshots/screenshot_3_bananas.jpeg" width=360 />
 
 ## 3_bananas.amf embedded texture
 3_bananas.amf embeds a strange-looking but valid texture, which when applied to the model renders correctly.

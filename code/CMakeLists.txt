@@ -864,6 +864,7 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DGeoHelper.h
   AssetLib/X3D/X3DXmlHelper.cpp
   AssetLib/X3D/X3DXmlHelper.h
+  AssetLib/VRML/VrmlConverter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( GLTF
@@ -929,6 +930,69 @@ SET( Extra_SRCS
   MD4FileData.h
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
+
+# VRML (.wrl/.x3dv) support
+IF (ASSIMP_BUILD_VRML_IMPORTER)
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch name
+    #       can lead to non-deterministic (unpredictable) results since the code is potentially in flux
+    # "main" branch, 18 Nov 2024
+    set(Meshlab_GIT_TAG "ad55b47a9b0700e7b427db6db287bb3a39aa31e7")
+    message("****")
+    message("\n\n**** Cloning meshlab repo, git tag ${Meshlab_GIT_TAG}\n\n")
+
+    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
+    # relative to top-level/main project)
+    set(Meshlab_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab")
+
+    # Note: Depending on user's OS, build environment etc it may be necessary to change line endings of
+    #       "patches/meshlab.patch" file from CRLF to LF in order for patch operation to succeed
+    # Patch required to
+    #  - replace QtXml w/pugixml
+    #  - disable meshlab cmake scripts to prevent breaking assimp build
+    #  - address compiler warnings to avoid breaking build for users who wisely treat warnings-as-errors
+    set(Meshlab_PATCH_CMD git apply ${Meshlab_BASE_ABSPATH}/patches/meshlab.patch)
+
+    # Note: cloning entire meshlab repo is wasteful since we require literally only two source files.
+    #       There is a technique using "git archive" e.g.
+    #           execute_process(
+    #              COMMAND git archive --remote=${Meshlab_GIT_REPO} ${Meshlab_GIT_TAG} <files> | \
+    #                  tar -x -C ${Meshlab_BASE_ABSPATH}
+    #              RESULT_VARIABLE result
+    #           )
+    #       But this doesn't work with git "https" protocol so not a viable solution
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
+    set(Meshlab_REPO_ABSPATH "${Meshlab_BASE_ABSPATH}/autoclone")
+    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
+    set(FETCHCONTENT_BASE_DIR ${Meshlab_REPO_ABSPATH})
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
+    set(Meshlab_GIT_REPO "https://github.com/cnr-isti-vclab/meshlab")
+    FetchContent_Declare(
+            meshlab_repo
+            GIT_REPOSITORY ${Meshlab_GIT_REPO}
+            GIT_TAG        ${Meshlab_GIT_TAG}
+            PATCH_COMMAND  ${Meshlab_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(meshlab_repo)
+    message("**** Finished cloning meshlab repo")
+    message("****")
+    set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_ABSPATH}/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml")
+    set(Meshlab_SRCS
+            ${Meshlab_SRC_ABSPATH}/Parser.cpp
+            ${Meshlab_SRC_ABSPATH}/Scanner.cpp
+    )
+    set(Meshlab_INCLUDE_DIRS "${Meshlab_SRC_ABSPATH}")
+    INCLUDE_DIRECTORIES(${Meshlab_INCLUDE_DIRS})
+    MESSAGE(STATUS "VRML enabled")
+ELSE() # IF (ASSIMP_BUILD_VRML_IMPORTER)
+    set(Meshlab_SRCS "")
+    MESSAGE(STATUS "VRML disabled")
+ENDIF() # IF (ASSIMP_BUILD_VRML_IMPORTER)
 
 # USD/USDA/USDC/USDZ support
 # tinyusdz
@@ -1297,6 +1361,7 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Meshlab_SRCS}
   ${Tinyusdz_SRCS}
   ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}

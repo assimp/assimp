@@ -661,7 +661,7 @@ class Material final : public Object {
 public:
     Material(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    ~Material() override;
+    ~Material() override = default;
 
     const std::string& GetShadingModel() const {
         return shading;

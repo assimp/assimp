@@ -663,6 +663,10 @@ LazyObject& Connection::LazyDestinationObject() const {
 const Object* Connection::SourceObject() const {
     LazyObject* const lazy = doc.GetObject(src);
     ai_assert(lazy);
+    if (lazy == nullptr) {
+        return nullptr;
+    }
+
     return lazy->Get();
 }
 
@@ -670,6 +674,10 @@ const Object* Connection::SourceObject() const {
 const Object* Connection::DestinationObject() const {
     LazyObject* const lazy = doc.GetObject(dest);
     ai_assert(lazy);
+    if (lazy == nullptr) {
+        return nullptr;
+    }
+
     return lazy->Get();
 }
 

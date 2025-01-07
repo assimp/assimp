@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2024, assimp team
 
 
 All rights reserved.
@@ -62,7 +62,7 @@ namespace Assimp {
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to an OBJ file. */
 // ------------------------------------------------------------------------------------------------
-class ObjExporter {
+class ObjExporter final {
 public:
     /// Constructor for a specific scene to export
     ObjExporter(const char* filename, const aiScene* pScene, bool noMtl=false, const ExportProperties* props = nullptr);

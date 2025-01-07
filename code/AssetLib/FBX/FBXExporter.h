@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXCommon.h" // FBX::TransformInheritance
 
 #include <assimp/types.h>
-//#include <assimp/material.h>
 #include <assimp/StreamWriter.h> // StreamWriterLE
 #include <assimp/Exceptional.h> // DeadlyExportError
 

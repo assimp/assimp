@@ -80,32 +80,27 @@ class BVHLoader : public BaseImporter {
         std::vector<ChannelType> mChannels;
         std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
 
-        Node() :
-                mNode(nullptr) {}
-
-        explicit Node(const aiNode *pNode) :
-                mNode(pNode) {}
+        Node() : mNode(nullptr) {}
+        explicit Node(const aiNode *pNode) :mNode(pNode) {}
     };
 
 public:
     BVHLoader();
-    ~BVHLoader();
+    ~BVHLoader() override = default;
 
-public:
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details. */
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const override;
 
-    void SetupProperties(const Importer *pImp);
-    const aiImporterDesc *GetInfo() const;
+    void SetupProperties(const Importer *pImp) override;
+    const aiImporterDesc *GetInfo() const override;
 
 protected:
     /** Imports the given file into the given scene structure.
      * See BaseImporter::InternReadFile() for details
      */
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
-protected:
     /** Reads the file */
     void ReadStructure(aiScene *pScene);
 

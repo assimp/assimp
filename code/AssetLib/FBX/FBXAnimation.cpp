@@ -143,31 +143,33 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element &element, cons
 
 // ------------------------------------------------------------------------------------------------
 const AnimationCurveMap &AnimationCurveNode::Curves() const {
-    if (curves.empty()) {
-        // resolve attached animation curves
-        const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationCurve");
+    if (!curves.empty()) {
+        return curves;
+    }
+        
+    // resolve attached animation curves
+    const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationCurve");
 
-        for (const Connection *con : conns) {
+    for (const Connection *con : conns) {
 
-            // link should go for a property
-            if (!con->PropertyName().length()) {
-                continue;
-            }
-
-            const Object *const ob = con->SourceObject();
-            if (nullptr == ob) {
-                DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring", &element);
-                continue;
-            }
-
-            const AnimationCurve *const anim = dynamic_cast<const AnimationCurve *>(ob);
-            if (nullptr == anim) {
-                DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve", &element);
-                continue;
-            }
-
-            curves[con->PropertyName()] = anim;
+        // link should go for a property
+        if (!con->PropertyName().length()) {
+            continue;
         }
+
+        const Object *const ob = con->SourceObject();
+        if (nullptr == ob) {
+            DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring", &element);
+            continue;
+        }
+
+        const AnimationCurve *const anim = dynamic_cast<const AnimationCurve *>(ob);
+        if (nullptr == anim) {
+            DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve", &element);
+            continue;
+        }
+
+        curves[con->PropertyName()] = anim;
     }
 
     return curves;

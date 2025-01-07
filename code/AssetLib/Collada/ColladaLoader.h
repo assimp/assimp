@@ -6,7 +6,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -77,8 +76,11 @@ struct ColladaMeshIndex {
     }
 };
 
-/** Loader class to read Collada scenes. Collada is over-engineered to death, with every new iteration bringing
- * more useless stuff, so I limited the data to what I think is useful for games.
+/** 
+ * @brief Loader class to read Collada scenes. 
+ *
+ * Collada is over-engineered to death, with every new iteration bringing  more useless stuff, 
+ * so I limited the data to what I think is useful for games.
 */
 class ColladaLoader : public BaseImporter {
 public:
@@ -102,50 +104,51 @@ protected:
     /// See #BaseImporter::InternReadFile for the details
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
-    /** Recursively constructs a scene node for the given parser node and returns it. */
+    /// Recursively constructs a scene node for the given parser node and returns it.
     aiNode *BuildHierarchy(const ColladaParser &pParser, const Collada::Node *pNode);
 
-    /** Resolve node instances */
+    /// Resolve node instances
     void ResolveNodeInstances(const ColladaParser &pParser, const Collada::Node *pNode,
             std::vector<const Collada::Node *> &resolved);
 
-    /** Builds meshes for the given node and references them */
+    /// Builds meshes for the given node and references them 
     void BuildMeshesForNode(const ColladaParser &pParser, const Collada::Node *pNode,
             aiNode *pTarget);
 
+    /// Lookup for meshes by their name
     aiMesh *findMesh(const std::string &meshid);
 
-    /** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
+    /// Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
     aiMesh *CreateMesh(const ColladaParser &pParser, const Collada::Mesh *pSrcMesh, const Collada::SubMesh &pSubMesh,
             const Collada::Controller *pSrcController, size_t pStartVertex, size_t pStartFace);
 
-    /** Builds cameras for the given node and references them */
+    /// Builds cameras for the given node and references them
     void BuildCamerasForNode(const ColladaParser &pParser, const Collada::Node *pNode,
             aiNode *pTarget);
 
-    /** Builds lights for the given node and references them */
+    /// Builds lights for the given node and references them
     void BuildLightsForNode(const ColladaParser &pParser, const Collada::Node *pNode,
             aiNode *pTarget);
 
-    /** Stores all meshes in the given scene */
+    /// Stores all meshes in the given scene
     void StoreSceneMeshes(aiScene *pScene);
 
-    /** Stores all materials in the given scene */
+    /// Stores all materials in the given scene
     void StoreSceneMaterials(aiScene *pScene);
 
-    /** Stores all lights in the given scene */
+    /// Stores all lights in the given scene
     void StoreSceneLights(aiScene *pScene);
 
-    /** Stores all cameras in the given scene */
+    /// Stores all cameras in the given scene
     void StoreSceneCameras(aiScene *pScene);
 
-    /** Stores all textures in the given scene */
+    /// Stores all textures in the given scene
     void StoreSceneTextures(aiScene *pScene);
 
-    /** Stores all animations
-     * @param pScene target scene to store the anims
-     */
-    void StoreAnimations(aiScene *pScene, const ColladaParser &pParser);
+    /// Stores all animations
+    /// @param pScene   Target scene to store the anims
+    /// @param parser   The collada parser
+    void StoreAnimations(aiScene *pScene, const ColladaParser &parser);
 
     /** Stores all animations for the given source anim and its nested child animations
      * @param pScene target scene to store the anims

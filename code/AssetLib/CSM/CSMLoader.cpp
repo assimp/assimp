@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -73,10 +71,9 @@ static constexpr aiImporterDesc desc = {
     "csm"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-CSMImporter::CSMImporter() : noSkeletonMesh(){
+CSMImporter::CSMImporter() : noSkeletonMesh() {
     // empty
 }
 
@@ -102,8 +99,7 @@ void CSMImporter::SetupProperties(const Importer* pImp) {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void CSMImporter::InternReadFile( const std::string& pFile,
-    aiScene* pScene, IOSystem* pIOHandler)
-{
+        aiScene* pScene, IOSystem* pIOHandler) {
     std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
@@ -127,11 +123,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
         if ('$'  == *buffer)    {
             ++buffer;
-            if (TokenMatchI(buffer,"firstframe",10))    {
+            if (TokenMatchI(buffer,"firstframe",10)) {
                 SkipSpaces(&buffer, end);
                 first = strtol10(buffer,&buffer);
             }
-            else if (TokenMatchI(buffer,"lastframe",9))     {
+            else if (TokenMatchI(buffer,"lastframe",9)) {
                 SkipSpaces(&buffer, end);
                 last = strtol10(buffer,&buffer);
             }

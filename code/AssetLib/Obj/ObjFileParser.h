@@ -55,18 +55,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+// Forward declarations
 class ObjFileImporter;
 class IOSystem;
 class ProgressHandler;
 
+// ------------------------------------------------------------------------------------------------
 /// \class  ObjFileParser
 /// \brief  Parser for a obj waveform file
+// ------------------------------------------------------------------------------------------------
 class ASSIMP_API ObjFileParser {
 public:
-    static const size_t Buffersize = 4096;
-    typedef std::vector<char> DataArray;
-    typedef std::vector<char>::iterator DataArrayIt;
-    typedef std::vector<char>::const_iterator ConstDataArrayIt;
+    static constexpr size_t Buffersize = 4096;
+    using DataArray = std::vector<char>;
+    using DataArrayIt = std::vector<char>::iterator;
+    using ConstDataArrayIt = std::vector<char>::const_iterator;
 
     /// @brief  The default constructor.
     ObjFileParser();

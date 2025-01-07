@@ -657,11 +657,11 @@ private:
 };
 
 /** DOM class for generic FBX materials */
-class Material : public Object {
+class Material final : public Object {
 public:
     Material(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Material();
+    ~Material() override = default;
 
     const std::string& GetShadingModel() const {
         return shading;
@@ -835,7 +835,7 @@ private:
 class Deformer : public Object {
 public:
     Deformer(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Deformer();
+    virtual ~Deformer() = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -855,7 +855,7 @@ class BlendShapeChannel : public Deformer {
 public:
     BlendShapeChannel(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~BlendShapeChannel();
+    virtual ~BlendShapeChannel() = default;
 
     float DeformPercent() const {
         return percent;
@@ -880,7 +880,7 @@ class BlendShape : public Deformer {
 public:
     BlendShape(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~BlendShape();
+    virtual ~BlendShape() = default;
 
     const std::unordered_set<const BlendShapeChannel*>& BlendShapeChannels() const {
         return blendShapeChannels;
@@ -895,7 +895,7 @@ class Cluster : public Deformer {
 public:
     Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Cluster();
+    virtual ~Cluster() = default;
 
     /** get the list of deformer weights associated with this cluster.
      *  Use #GetIndices() to get the associated vertices. Both arrays
@@ -939,7 +939,7 @@ class Skin : public Deformer {
 public:
     Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Skin();
+    virtual ~Skin() = default;
 
     float DeformAccuracy() const {
         return accuracy;

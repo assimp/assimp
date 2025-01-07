@@ -35,7 +35,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
@@ -70,7 +69,6 @@ public:
     // some nodes always pretend they have children...
     bool force_has_children = false;
 
-public: // constructors
     /// The default class constructor.
     Node() = default;
 
@@ -89,7 +87,6 @@ public: // constructors
         AddProperties(std::forward<More>(more)...);
     }
 
-public: // functions to add properties or children
     // add a single property to the node
     template <typename T>
     void AddProperty(T&& value) {
@@ -117,8 +114,6 @@ public: // functions to add properties or children
         c.AddProperties(std::forward<More>(more)...);
         children.push_back(std::move(c));
     }
-
-public: // support specifically for dealing with Properties70 nodes
 
     // it really is simpler to make these all separate functions.
     // the versions with 'A' suffixes are for animatable properties.
@@ -150,8 +145,6 @@ public: // support specifically for dealing with Properties70 nodes
         AddChild(n);
     }
 
-public: // member functions for writing data to a file or stream
-
     // write the full node to the given file or stream
     void Dump(
             const std::shared_ptr<Assimp::IOStream> &outfile,
@@ -175,31 +168,6 @@ public: // member functions for writing data to a file or stream
         bool has_children
     );
 
-private: // internal functions used for writing
-
-    void DumpBinary(Assimp::StreamWriterLE &s);
-    void DumpAscii(Assimp::StreamWriterLE &s, int indent);
-    void DumpAscii(std::ostream &s, int indent);
-
-    void BeginBinary(Assimp::StreamWriterLE &s);
-    void DumpPropertiesBinary(Assimp::StreamWriterLE& s);
-    void EndPropertiesBinary(Assimp::StreamWriterLE &s);
-    void EndPropertiesBinary(Assimp::StreamWriterLE &s, size_t num_properties);
-    void DumpChildrenBinary(Assimp::StreamWriterLE& s);
-    void EndBinary(Assimp::StreamWriterLE &s, bool has_children);
-
-    void BeginAscii(std::ostream &s, int indent);
-    void DumpPropertiesAscii(std::ostream &s, int indent);
-    void BeginChildrenAscii(std::ostream &s, int indent);
-    void DumpChildrenAscii(std::ostream &s, int indent);
-    void EndAscii(std::ostream &s, int indent, bool has_children);
-
-private: // data used for binary dumps
-    size_t start_pos; // starting position in stream
-    size_t end_pos; // ending position in stream
-    size_t property_start; // starting position of property section
-
-public: // static member functions
 
     // convenience function to create a node with a single property,
     // and write it to the stream.
@@ -235,7 +203,26 @@ public: // static member functions
         bool binary, int indent
     );
 
-private: // static helper functions
+private: // internal functions used for writing
+
+    void DumpBinary(Assimp::StreamWriterLE &s);
+    void DumpAscii(Assimp::StreamWriterLE &s, int indent);
+    void DumpAscii(std::ostream &s, int indent);
+
+    void BeginBinary(Assimp::StreamWriterLE &s);
+    void DumpPropertiesBinary(Assimp::StreamWriterLE& s);
+    void EndPropertiesBinary(Assimp::StreamWriterLE &s);
+    void EndPropertiesBinary(Assimp::StreamWriterLE &s, size_t num_properties);
+    void DumpChildrenBinary(Assimp::StreamWriterLE& s);
+    void EndBinary(Assimp::StreamWriterLE &s, bool has_children);
+
+    void BeginAscii(std::ostream &s, int indent);
+    void DumpPropertiesAscii(std::ostream &s, int indent);
+    void BeginChildrenAscii(std::ostream &s, int indent);
+    void DumpChildrenAscii(std::ostream &s, int indent);
+    void EndAscii(std::ostream &s, int indent, bool has_children);
+    
+    // static helper functions
     static void WritePropertyNodeAscii(
         const std::string& name,
         const std::vector<double>& v,
@@ -259,9 +246,13 @@ private: // static helper functions
         Assimp::StreamWriterLE& s
     );
 
+private: // data used for binary dumps
+    size_t start_pos; // starting position in stream
+    size_t end_pos; // ending position in stream
+    size_t property_start; // starting position of property section
 };
-}
+
+} // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
-
 #endif // AI_FBXEXPORTNODE_H_INC

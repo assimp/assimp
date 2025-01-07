@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2024, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -86,7 +86,7 @@ namespace Assimp {
     }
 }
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Cinema4D Importer",
     "",
     "",
@@ -98,13 +98,6 @@ static const aiImporterDesc desc = {
     0,
     "c4d"
 };
-
-
-// ------------------------------------------------------------------------------------------------
-C4DImporter::C4DImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-C4DImporter::~C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
@@ -195,7 +188,6 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials]();
     std::copy(materials.begin(), materials.end(), pScene->mMaterials);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::ReadShader(aiMaterial* out, BaseShader* shader) {

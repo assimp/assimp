@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,34 +55,33 @@ namespace FBX {
 // Forward declarations
 class Element;
 
-/** Represents a dynamic property. Type info added by deriving classes,
- *  see #TypedProperty.
- Example:
- @verbatim
-   P: "ShininessExponent", "double", "Number", "",0.5
- @endvebatim
-*/
+/**
+ * Represents a dynamic property. Type info added by deriving classes,
+ * see #TypedProperty.
+ * Example:
+ *
+ * @verbatim
+ *  P: "ShininessExponent", "double", "Number", "",0.5
+ * @endvebatim
+ */
 class Property {
-protected:
-    Property();
 
 public:
-    virtual ~Property();
+    virtual ~Property() = default;
 
-public:
     template <typename T>
     const T* As() const {
         return dynamic_cast<const T*>(this);
     }
+
+protected:
+    Property() = default;
 };
 
 template<typename T>
 class TypedProperty : public Property {
 public:
-    explicit TypedProperty(const T& value)
-    : value(value) {
-        // empty
-    }
+    explicit TypedProperty(const T& value) : value(value) {}
 
     const T& Value() const {
         return value;
@@ -93,10 +91,9 @@ private:
     T value;
 };
 
-
-typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPropertyMap;
-typedef std::fbx_unordered_map<std::string,const Property*>            PropertyMap;
-typedef std::fbx_unordered_map<std::string,const Element*>             LazyPropertyMap;
+using DirectPropertyMap = std::fbx_unordered_map<std::string,std::shared_ptr<Property> >;
+using PropertyMap = std::fbx_unordered_map<std::string,const Property*>;
+using LazyPropertyMap = std::fbx_unordered_map<std::string,const Element*>;
 
 /**
  *  Represents a property table as can be found in the newer FBX files (Properties60, Properties70)
@@ -104,7 +101,7 @@ typedef std::fbx_unordered_map<std::string,const Element*>             LazyPrope
 class PropertyTable {
 public:
     // in-memory property table with no source element
-    PropertyTable();
+    PropertyTable() : element() {}
     PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps);
     ~PropertyTable();
 
@@ -130,8 +127,7 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline
-T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
+inline T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
     const Property* const prop = in.Get(name);
     if( nullptr == prop) {
         return defaultValue;
@@ -148,8 +144,7 @@ T PropertyGet(const PropertyTable& in, const std::string& name, const T& default
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline
-T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bool useTemplate=false ) {
+inline T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bool useTemplate=false ) {
     const Property* prop = in.Get(name);
     if( nullptr == prop) {
         if ( ! useTemplate ) {

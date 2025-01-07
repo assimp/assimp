@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "AssetLib/VRML/VrmlConverter.hpp"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 #include <assimp/StringUtils.h>
@@ -59,6 +60,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <string>
 #include <iterator>
+
+#if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+#define X3D_FORMATS_DESCR_STR "Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "x3d x3db"
+#else
+#define X3D_FORMATS_DESCR_STR "VRML(WRL, X3DV) and Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "wrl x3d x3db x3dv"
+#endif // #if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
 
 using namespace std;
 

@@ -1518,28 +1518,26 @@ void X3DImporter::ParseNode_Head()
 
 void X3DImporter::ParseNode_Scene()
 {
-    auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
-    {
-	    pCounter++;
-	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: ", pGroupName, ".");
-};
+    auto GroupCounter_Increase = [](size_t &pCounter, const char *pGroupName) -> void {
+        pCounter++;
+        if (pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: ", pGroupName, ".");
+    };
 
-auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> void
-{
-	if(pCounter == 0) Throw_TagCountIncorrect(pGroupName);
+    auto GroupCounter_Decrease = [&](size_t &pCounter, const char *pGroupName) -> void {
+        if (pCounter == 0) Throw_TagCountIncorrect(pGroupName);
 
-	pCounter--;
-};
+        pCounter--;
+    };
 
-static const char* GroupName_Group = "Group";
-static const char* GroupName_StaticGroup = "StaticGroup";
-static const char* GroupName_Transform = "Transform";
-static const char* GroupName_Switch = "Switch";
+    static const char *GroupName_Group = "Group";
+    static const char *GroupName_StaticGroup = "StaticGroup";
+    static const char *GroupName_Transform = "Transform";
+    static const char *GroupName_Switch = "Switch";
 
-bool close_found = false;
-size_t counter_group = 0;
-size_t counter_transform = 0;
-size_t counter_switch = 0;
+    bool close_found = false;
+    size_t counter_group = 0;
+    size_t counter_transform = 0;
+    size_t counter_switch = 0;
 
 	// while create static node? Because objects name used deeper in "USE" attribute can be equal to some meta in <head> node.
 	ParseHelper_Group_Begin(true);

@@ -853,20 +853,20 @@ ADD_ASSIMP_IMPORTER( X
 
 IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_ASSIMP_IMPORTER( X3D
-#            AssetLib/X3D_Legacy/X3DImporter.cpp
+            AssetLib/X3D_Legacy/X3DImporter.cpp
             AssetLib/X3D_Legacy/X3DImporter_Geometry2D.cpp
-#            AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp
-#            AssetLib/X3D_Legacy/X3DImporter_Group.cpp
-#            AssetLib/X3D_Legacy/X3DImporter_Light.cpp
+            AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp
+            AssetLib/X3D_Legacy/X3DImporter_Group.cpp
+            AssetLib/X3D_Legacy/X3DImporter_Light.cpp
             AssetLib/X3D_Legacy/X3DImporter_Metadata.cpp
             AssetLib/X3D_Legacy/X3DImporter_Networking.cpp
-#            AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
-#            AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
+            AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
+            AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
             AssetLib/X3D_Legacy/X3DImporter_Shape.cpp
             AssetLib/X3D_Legacy/X3DImporter_Texturing.cpp
-#            AssetLib/X3D_Legacy/FIReader.cpp
+            AssetLib/X3D_Legacy/FIReader.cpp
             AssetLib/X3D_Legacy/X3DVocabulary.cpp
-#            AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
+            AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
             AssetLib/VRML/VrmlConverter.cpp
     )
 ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)

@@ -40,35 +40,6 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
-# To prevent PR from failing CI checks needed to hide some source files from being analyzed/built
-# (otherwise would trigger code duplication/security warnings and fail PR)
-# So, in order to use the X3D importer based on IRRXML, the following steps are required
-#  - override below cmake option "ASSIMP_USE_LEGACY_X3D_IMPORTER" to "on"
-#  - remove dummy ".txt" extension added to source files:
-#     * AssetLib/X3D_Legacy/FIReader.cpp
-#     * AssetLib/X3D_Legacy/X3DExporter.cpp
-#     * AssetLib/X3D_Legacy/X3DExporter.hpp
-#     * AssetLib/X3D_Legacy/X3DImporter.cpp
-#     * AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp
-#     * AssetLib/X3D_Legacy/X3DImporter_Group.cpp
-#     * AssetLib/X3D_Legacy/X3DImporter_Light.cpp
-#     * AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
-#     * AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
-#  - uncomment commented-out source files in code/CMakeLists.txt
-#     * line 691: AssetLib/X3D_Legacy/X3DExporter.cpp
-#     * line 856: AssetLib/X3D_Legacy/X3DImporter.cpp
-#     * line 858: AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp
-#     * line 859: AssetLib/X3D_Legacy/X3DImporter_Group.cpp
-#     * line 860: AssetLib/X3D_Legacy/X3DImporter_Light.cpp
-#     * line 863: AssetLib/X3D_Legacy/X3DImporter_Postprocess.cpp
-#     * line 864: AssetLib/X3D_Legacy/X3DImporter_Rendering.cpp
-#     * line 867: AssetLib/X3D_Legacy/FIReader.cpp
-#     * line 869: AssetLib/X3D_Legacy/legacyXML/irrXML/irrXML.cpp
-option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
-if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
-    ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)
-endif() # ASSIMP_USE_LEGACY_X3D_IMPORTER
-
 #================================================================================#
 #                    Model formats not enabled by default
 #
@@ -93,6 +64,10 @@ option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" o
 # format converter to convert .wrl/.x3dv files to X3D-compatible .xml
 # (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
 option(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
+
+# To use the X3D importer based on IRRXML, override below cmake option
+# (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
+option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
 #--------------------------------------------------------------------------------#
 #                  Internal impl for optional model formats
 #--------------------------------------------------------------------------------#
@@ -108,6 +83,11 @@ endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
 if (NOT ASSIMP_BUILD_VRML_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_NO_VRML_IMPORTER)
 endif () # if (not ASSIMP_BUILD_VRML_IMPORTER)
+
+# Internal/private legacy X3D IRRXML logic
+if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)
+endif() # ASSIMP_USE_LEGACY_X3D_IMPORTER
 #================================================================================#
 
 option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)

@@ -275,7 +275,9 @@ public:
     /// Also exception can be thrown if trouble will found.
     /// \param [in] pFile - name of file to be parsed.
     /// \param [in] pIOHandler - pointer to IO helper object.
-    void ParseFile(const std::string &pFile, IOSystem *pIOHandler);
+    void ParseFile(const std::string &file, IOSystem *pIOHandler);
+    void ParseFile(std::istream &myIstream);
+    void ParseFile(XmlParser &theParser);
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool pCheckSig) const;
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
     const aiImporterDesc *GetInfo() const;

@@ -897,6 +897,27 @@ TEST_F(utglTF2ImportExport, import_dracoEncoded) {
         ASSERT_EQ(strcmp(generator.C_Str(), "COLLADA2GLTF"), 0);
     }
 #endif
+    const aiScene *robotScene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/draco/robot.glb",
+        aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_ENABLE_DRACO
+    // No draco support, scene should not load
+    ASSERT_EQ(robotScene, nullptr);
+#else
+    ASSERT_NE(robotScene, nullptr);
+    ASSERT_NE(robotScene->mMetaData, nullptr);
+    {
+        ASSERT_TRUE(robotScene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT));
+        aiString format;
+        ASSERT_TRUE(robotScene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT, format));
+        ASSERT_EQ(strcmp(format.C_Str(), "glTF2 Importer"), 0);
+    }
+    {
+        ASSERT_TRUE(robotScene->mMetaData->HasKey(AI_METADATA_SOURCE_FORMAT_VERSION));
+        aiString version;
+        ASSERT_TRUE(robotScene->mMetaData->Get(AI_METADATA_SOURCE_FORMAT_VERSION, version));
+        ASSERT_EQ(strcmp(version.C_Str(), "2.0"), 0);
+    }
+#endif
 }
 
 TEST_F(utglTF2ImportExport, wrongTypes) {

@@ -174,9 +174,12 @@ void ObjExporter::WriteHeader(std::ostringstream& out) {
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialName(unsigned int index) {
+    static const std::string EmptyStr;
+    if ( nullptr == pScene->mMaterials ) {
+        return EmptyStr;
+    }
     const aiMaterial* const mat = pScene->mMaterials[index];
     if ( nullptr == mat ) {
-        static const std::string EmptyStr;
         return EmptyStr;
     }
 

@@ -370,12 +370,6 @@ void FBXExporter::WriteHeaderExtension ()
         "Creator", creator.str(), outstream, binary, indent
     );
 
-    //FBX::Node sceneinfo("SceneInfo");
-    //sceneinfo.AddProperty("GlobalInfo" + FBX::SEPARATOR + "SceneInfo");
-    // not sure if any of this is actually needed,
-    // so just write an empty node for now.
-    //sceneinfo.Dump(outstream, binary, indent);
-
     indent = 0;
 
     // finish node
@@ -459,11 +453,7 @@ void WritePropString(const aiScene* scene, FBX::Node& p, const std::string& key,
     }
 }
 
-void FBXExporter::WriteGlobalSettings ()
-{
-    if (!binary) {
-        // no title, follows directly from the header extension
-    }
+void FBXExporter::WriteGlobalSettings () {
     FBX::Node gs("GlobalSettings");
     gs.AddChild("Version", int32_t(1000));
 
@@ -493,8 +483,7 @@ void FBXExporter::WriteGlobalSettings ()
     gs.Dump(outfile, binary, 0);
 }
 
-void FBXExporter::WriteDocuments ()
-{
+void FBXExporter::WriteDocuments() {
     if (!binary) {
         WriteAsciiSectionHeader("Documents Description");
     }
@@ -523,8 +512,7 @@ void FBXExporter::WriteDocuments ()
     docs.Dump(outfile, binary, 0);
 }
 
-void FBXExporter::WriteReferences ()
-{
+void FBXExporter::WriteReferences() {
     if (!binary) {
         WriteAsciiSectionHeader("Document References");
     }
@@ -540,7 +528,6 @@ void FBXExporter::WriteReferences ()
 // some internal helper functions used for writing the definitions
 // (before any actual data is written)
 // ---------------------------------------------------------------
-
 size_t count_nodes(const aiNode* n, const aiNode* root) {
     size_t count;
     if (n == root) {
@@ -556,8 +543,7 @@ size_t count_nodes(const aiNode* n, const aiNode* root) {
     return count;
 }
 
-bool has_phong_mat(const aiScene* scene)
-{
+static bool has_phong_mat(const aiScene* scene) {
     // just search for any material with a shininess exponent
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial* mat = scene->mMaterials[i];
@@ -570,16 +556,12 @@ bool has_phong_mat(const aiScene* scene)
     return false;
 }
 
-size_t count_images(const aiScene* scene) {
+static size_t count_images(const aiScene* scene) {
     std::unordered_set<std::string> images;
     aiString texpath;
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
-        aiMaterial* mat = scene->mMaterials[i];
-        for (
-            size_t tt = aiTextureType_DIFFUSE;
-            tt < aiTextureType_UNKNOWN;
-            ++tt
-        ){
+        aiMaterial *mat = scene->mMaterials[i];
+        for (size_t tt = aiTextureType_DIFFUSE; tt < aiTextureType_UNKNOWN; ++tt) {
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
             for (unsigned int j = 0; j < texcount; ++j) {
@@ -588,10 +570,11 @@ size_t count_images(const aiScene* scene) {
             }
         }
     }
+
     return images.size();
 }
 
-size_t count_textures(const aiScene* scene) {
+static size_t count_textures(const aiScene* scene) {
     size_t count = 0;
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial* mat = scene->mMaterials[i];
@@ -609,7 +592,7 @@ size_t count_textures(const aiScene* scene) {
     return count;
 }
 
-size_t count_deformers(const aiScene* scene) {
+static size_t count_deformers(const aiScene* scene) {
     size_t count = 0;
     for (size_t i = 0; i < scene->mNumMeshes; ++i) {
         const size_t n = scene->mMeshes[i]->mNumBones;
@@ -621,8 +604,7 @@ size_t count_deformers(const aiScene* scene) {
     return count;
 }
 
-void FBXExporter::WriteDefinitions ()
-{
+void FBXExporter::WriteDefinitions () {
     // basically this is just bookkeeping:
     // determining how many of each type of object there are
     // and specifying the base properties to use when otherwise unspecified.
@@ -1033,9 +1015,7 @@ void FBXExporter::WriteDefinitions ()
 // some internal helper functions used for writing the objects section
 // (which holds the actual data)
 // -------------------------------------------------------------------
-
-aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
-{
+static aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node) {
     for (size_t i = 0; i < node->mNumMeshes; ++i) {
         if (node->mMeshes[i] == meshIndex) {
             return node;
@@ -1048,8 +1028,7 @@ aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
     return nullptr;
 }
 
-aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
-{
+aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
     std::vector<const aiNode*> node_chain;
     while (node != scene->mRootNode && node != nullptr) {
         node_chain.push_back(node);
@@ -1073,8 +1052,7 @@ inline int64_t to_ktime(double time) {
     return (static_cast<int64_t>(time * FBX::SECOND));
 }
 
-void FBXExporter::WriteObjects ()
-{
+void FBXExporter::WriteObjects () {
     if (!binary) {
         WriteAsciiSectionHeader("Object properties");
     }

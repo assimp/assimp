@@ -228,7 +228,7 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
         const Mesh &ndmesh = (const Mesh &)(root);
         if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
 
-            typedef std::pair<const unsigned int, Mesh::FaceRefList> Entry;
+            using Entry = std::pair<const unsigned int, Mesh::FaceRefList>;
             for (const Entry &reflist : ndmesh.temp_map) {
                 { // create mesh
                     size_t n = 0;

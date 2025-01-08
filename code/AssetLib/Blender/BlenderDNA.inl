@@ -841,5 +841,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
 #endif
 }
 
-}}
+}
+}
+
 #endif

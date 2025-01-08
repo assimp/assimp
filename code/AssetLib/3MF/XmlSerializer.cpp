@@ -199,11 +199,11 @@ void assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
 
 } // namespace
 
-XmlSerializer::XmlSerializer(XmlParser *xmlParser) :
+XmlSerializer::XmlSerializer(XmlParser &xmlParser) :
         mResourcesDictionnary(),
         mMeshCount(0),
         mXmlParser(xmlParser) {
-    ai_assert(nullptr != xmlParser);
+    // empty
 }
 
 XmlSerializer::~XmlSerializer() {
@@ -218,7 +218,7 @@ void XmlSerializer::ImportXml(aiScene *scene) {
     }
 
     scene->mRootNode = new aiNode(XmlTag::RootTag);
-    XmlNode node = mXmlParser->getRootNode().child(XmlTag::model);
+    XmlNode node = mXmlParser.getRootNode().child(XmlTag::model);
     if (node.empty()) {
         return;
     }

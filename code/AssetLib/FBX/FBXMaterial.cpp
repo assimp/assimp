@@ -134,10 +134,6 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
     }
 }
 
-
-// ------------------------------------------------------------------------------------------------
-Material::~Material() = default;
-
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :
         Object(id,element,name),

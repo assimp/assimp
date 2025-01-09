@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DXmlHelper.h"
 
 // Header files, Assimp.
 #include <assimp/DefaultIOSystem.h>
@@ -80,9 +81,8 @@ void X3DImporter::ParseNode_Networking_Inline()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
+    X3DNodeElementBase *ne = nullptr;
 	if (!use.empty()) {
-		X3DNodeElementBase* ne;
-
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
@@ -115,7 +115,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 		}
 
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement()) ParseNode_Metadata(mNodeElementCur, "Inline");
+		if(!isNodeEmpty()) ParseNode_Metadata(mNodeElementCur, "Inline");
 
 		// exit from node in that place
 		ParseHelper_Node_Exit();

@@ -74,8 +74,7 @@ void X3DImporter::startReadGroup() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		X3DNodeElementBase* ne;
-
+		X3DNodeElementBase *ne(nullptr);
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
@@ -84,7 +83,7 @@ void X3DImporter::startReadGroup() {
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+		if(isNodeEmpty()) ParseHelper_Node_Exit();
 	}// if(!use.empty()) else
 }
 
@@ -115,7 +114,7 @@ void X3DImporter::startReadStaticGroup() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		X3DNodeElementBase* ne;
+		X3DNodeElementBase *ne(nullptr);
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -125,7 +124,7 @@ void X3DImporter::startReadStaticGroup() {
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+		if(isNodeEmpty()) ParseHelper_Node_Exit();
 	}// if(!use.empty()) else
 }
 
@@ -160,7 +159,7 @@ void X3DImporter::startReadSwitch() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		X3DNodeElementBase* ne;
+		X3DNodeElementBase *ne(nullptr);
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -174,7 +173,7 @@ void X3DImporter::startReadSwitch() {
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+		if(isNodeEmpty()) ParseHelper_Node_Exit();
 	}// if(!use.empty()) else
 }
 
@@ -249,7 +248,7 @@ void X3DImporter::startReadTransform() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		X3DNodeElementBase* ne( nullptr );
+		X3DNodeElementBase *ne( nullptr );
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -281,8 +280,7 @@ void X3DImporter::startReadTransform() {
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-        if ( mReader->isEmptyElement() )
-        {
+        if ( isNodeEmpty() ) {
             ParseHelper_Node_Exit();
         }
 	}// if(!use.empty()) else

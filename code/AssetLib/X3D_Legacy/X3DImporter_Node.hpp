@@ -105,42 +105,13 @@ enum X3DElemType {
     ENET_Invalid                 ///< Element has invalid type and possible contain invalid data.
 };
 
-/// \class X3DNodeElementBase
-/// Base class for elements of nodes.
-class X3DNodeElementBase
-{
-	/***********************************************/
-	/******************** Types ********************/
-	/***********************************************/
+struct X3DNodeElementBase {
+    X3DNodeElementBase* Parent;
+    std::string ID;
+	std::list<X3DNodeElementBase*> Children;
+	X3DElemType Type;
 
-public:
-
-	/***********************************************/
-	/****************** Constants ******************/
-	/***********************************************/
-
-public:
-
-	const X3DElemType Type;
-
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
-	std::string ID;///< ID of the element. Can be empty. In X3D synonym for "ID" attribute.
-	X3DNodeElementBase* Parent;///< Parent element. If nullptr then this node is root.
-	std::list<X3DNodeElementBase*> Children;///< Child elements.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-    /// @brief  The destructor, virtual.
-    virtual ~X3DNodeElementBase() {
-        // empty
-    }
+    virtual ~X3DNodeElementBase() = default;
 
 private:
 	/// Disabled copy constructor.
@@ -153,296 +124,72 @@ private:
 	X3DNodeElementBase();
 
 protected:
-	/// In constructor inheritor must set element type.
-	/// \param [in] pType - element type.
-	/// \param [in] pParent - parent element.
-	X3DNodeElementBase(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: Type(pType), Parent(pParent)
-	{}
-};// class IX3DImporter_NodeElement
+	X3DNodeElementBase(X3DElemType type, X3DNodeElementBase* pParent) :
+            Parent(pParent), Type(type) {
+        // empty
+    }
+};
 
-/// \class X3DNodeElementGroup
-/// Class that define grouping node. Define transformation matrix for children.
-/// Also can select which child will be kept and others are removed.
-class X3DNodeElementGroup : public X3DNodeElementBase
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
-	aiMatrix4x4 Transformation;///< Transformation matrix.
-
-	/// \var bool Static
-	/// As you know node elements can use already defined node elements when attribute "USE" is defined.
-	/// Standard search when looking for an element in the whole scene graph, existing at this moment.
-	/// If a node is marked as static, the children(or lower) can not search for elements in the nodes upper then static.
-	bool Static;
-
-	bool UseChoice;///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
-	int32_t Choice;///< Number of the child which will be kept.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn X3DNodeElementGroup(const X3DNodeElementGroup& pNode)
-	/// Disabled copy constructor.
-	X3DNodeElementGroup(const X3DNodeElementGroup& pNode);
-
-	/// \fn X3DNodeElementGroup& operator=(const X3DNodeElementGroup& pNode)
-	/// Disabled assign operator.
-	X3DNodeElementGroup& operator=(const X3DNodeElementGroup& pNode);
-
-	/// \fn X3DNodeElementGroup()
-	/// Disabled default constructor.
-	X3DNodeElementGroup();
-
-public:
-
-	/// \fn X3DNodeElementGroup(X3DNodeElementGroup* pParent, const bool pStatic = false)
-	/// Constructor.
-	/// \param [in] pParent - pointer to parent node.
-	/// \param [in] pStatic - static node flag.
-	X3DNodeElementGroup(X3DNodeElementBase* pParent, const bool pStatic = false)
-		: X3DNodeElementBase(ENET_Group, pParent), Static(pStatic), UseChoice(false)
-	{}
-
-};// class X3DNodeElementGroup
-
-/// \class X3DNodeElementMeta
-/// This struct describe metavalue.
-class X3DNodeElementMeta : public X3DNodeElementBase
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
-	std::string Name;///< Name of metadata object.
-	/// \var std::string Reference
-	/// If provided, it identifies the metadata standard or other specification that defines the name field. If the reference field is not provided or is
-	/// empty, the meaning of the name field is considered implicit to the characters in the string.
-	std::string Reference;
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn X3DNodeElementMeta(const X3DNodeElementMeta& pNode)
-	/// Disabled copy constructor.
-	X3DNodeElementMeta(const X3DNodeElementMeta& pNode);
-
-	/// \fn X3DNodeElementMeta& operator=(const X3DNodeElementMeta& pNode)
-	/// Disabled assign operator.
-	X3DNodeElementMeta& operator=(const X3DNodeElementMeta& pNode);
-
-	/// \fn X3DNodeElementMeta()
-	/// Disabled default constructor.
-	X3DNodeElementMeta();
-
-public:
-
-	/// \fn X3DNodeElementMeta(const X3DElemType pType, X3DNodeElementBase* pParent)
-	/// In constructor inheritor must set element type.
-	/// \param [in] pType - element type.
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMeta(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(pType, pParent)
-	{}
-
-};// class X3DNodeElementMeta
-
-/// \struct X3DNodeElementMetaBoolean
-/// This struct describe metavalue of type boolean.
-struct X3DNodeElementMetaBoolean : public X3DNodeElementMeta
-{
-	std::vector<bool> Value;///< Stored value.
-
-	/// \fn X3DNodeElementMetaBoolean(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMetaBoolean(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaBoolean, pParent)
-	{}
-
-};// struct X3DNodeElementMetaBoolean
-
-/// \struct X3DNodeElementMetaDouble
-/// This struct describe metavalue of type double.
-struct X3DNodeElementMetaDouble : public X3DNodeElementMeta
-{
-	std::vector<double> Value;///< Stored value.
-
-	/// \fn X3DNodeElementMetaDouble(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMetaDouble(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaDouble, pParent)
-	{}
-
-};// struct X3DNodeElementMetaDouble
-
-/// \struct X3DNodeElementMetaFloat
-/// This struct describe metavalue of type float.
-struct X3DNodeElementMetaFloat : public X3DNodeElementMeta
-{
-	std::vector<float> Value;///< Stored value.
-
-	/// \fn X3DNodeElementMetaFloat(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMetaFloat(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaFloat, pParent)
-	{}
-
-};// struct X3DNodeElementMetaFloat
-
-/// \struct X3DNodeElementMetaInt
-/// This struct describe metavalue of type integer.
-struct X3DNodeElementMetaInt : public X3DNodeElementMeta
-{
-	std::vector<int32_t> Value;///< Stored value.
-
-	/// \fn X3DNodeElementMetaInt(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMetaInt(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaInteger, pParent)
-	{}
-
-};// struct X3DNodeElementMetaInt
-
-/// \struct CX3DImporter_NodeElement_MetaSet
-/// This struct describe container for metaobjects.
-struct CX3DImporter_NodeElement_MetaSet : public X3DNodeElementMeta
-{
-	std::list<X3DNodeElementMeta> Value;///< Stored value.
-
-	/// \fn CX3DImporter_NodeElement_MetaSet(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaSet(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaSet, pParent)
-	{}
-
-};// struct CX3DImporter_NodeElement_MetaSet
-
-/// \struct X3DNodeElementMetaString
-/// This struct describe metavalue of type string.
-struct X3DNodeElementMetaString : public X3DNodeElementMeta
-{
-	std::list<std::string> Value;///< Stored value.
-
-	/// \fn X3DNodeElementMetaString(X3DNodeElementBase* pParent)
-	/// Constructor
-	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementMetaString(X3DNodeElementBase* pParent)
-		: X3DNodeElementMeta(ENET_MetaString, pParent)
-	{}
-
-};// struct X3DNodeElementMetaString
-
-/// \struct X3DNodeElementColor
 /// This struct hold <Color> value.
-struct X3DNodeElementColor : public X3DNodeElementBase
-{
+struct X3DNodeElementColor : X3DNodeElementBase {
 	std::list<aiColor3D> Value;///< Stored value.
 
-	/// \fn X3DNodeElementColor(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementColor(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_Color, pParent)
-	{}
+	X3DNodeElementColor(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Color, pParent) {}
 
 };// struct X3DNodeElementColor
 
-/// \struct X3DNodeElementColorRGBA
 /// This struct hold <ColorRGBA> value.
-struct X3DNodeElementColorRGBA : public X3DNodeElementBase
-{
+struct X3DNodeElementColorRGBA : X3DNodeElementBase {
 	std::list<aiColor4D> Value;///< Stored value.
 
-	/// \fn X3DNodeElementColorRGBA(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementColorRGBA(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_ColorRGBA, pParent)
-	{}
+	X3DNodeElementColorRGBA(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_ColorRGBA, pParent) {}
 
 };// struct X3DNodeElementColorRGBA
 
-/// \struct X3DNodeElementCoordinate
 /// This struct hold <Coordinate> value.
-struct X3DNodeElementCoordinate : public X3DNodeElementBase
-{
+struct X3DNodeElementCoordinate : public X3DNodeElementBase {
 	std::list<aiVector3D> Value;///< Stored value.
 
-	/// \fn X3DNodeElementCoordinate(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementCoordinate(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_Coordinate, pParent)
-	{}
+	X3DNodeElementCoordinate(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Coordinate, pParent) {}
 
 };// struct X3DNodeElementCoordinate
 
-/// \struct X3DNodeElementNormal
 /// This struct hold <Normal> value.
-struct X3DNodeElementNormal : public X3DNodeElementBase
-{
+struct X3DNodeElementNormal : X3DNodeElementBase {
 	std::list<aiVector3D> Value;///< Stored value.
 
-	/// \fn X3DNodeElementNormal(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementNormal(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_Normal, pParent)
-	{}
+	X3DNodeElementNormal(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Normal, pParent) {}
 
 };// struct X3DNodeElementNormal
 
-/// \struct X3DNodeElementTextureCoordinate
 /// This struct hold <TextureCoordinate> value.
-struct X3DNodeElementTextureCoordinate : public X3DNodeElementBase
-{
+struct X3DNodeElementTextureCoordinate : X3DNodeElementBase {
 	std::list<aiVector2D> Value;///< Stored value.
 
-	/// \fn X3DNodeElementTextureCoordinate(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementTextureCoordinate(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_TextureCoordinate, pParent)
-	{}
+	X3DNodeElementTextureCoordinate(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_TextureCoordinate, pParent) {}
 
 };// struct X3DNodeElementTextureCoordinate
 
-/// \class X3DNodeElementGeometry2D
 /// Two-dimensional figure.
-class X3DNodeElementGeometry2D : public X3DNodeElementBase
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
+struct X3DNodeElementGeometry2D : X3DNodeElementBase {
 	std::list<aiVector3D> Vertices;///< Vertices list.
 	size_t NumIndices;///< Number of indices in one face.
 	bool Solid;///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
 
 	/// \fn X3DNodeElementGeometry2D(const X3DNodeElementGeometry2D& pNode)
 	/// Disabled copy constructor.
@@ -452,22 +199,16 @@ private:
 	/// Disabled assign operator.
 	X3DNodeElementGeometry2D& operator=(const X3DNodeElementGeometry2D& pNode);
 
-public:
-
-	/// \fn X3DNodeElementGeometry2D(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementGeometry2D(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(pType, pParent), Solid(true)
-	{}
+	X3DNodeElementGeometry2D(X3DElemType pType, X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(pType, pParent), Solid(true) {}
 
 };// class X3DNodeElementGeometry2D
 
-/// \class X3DNodeElementGeometry3D
 /// Three-dimensional body.
-class X3DNodeElementGeometry3D : public X3DNodeElementBase {
-public:
+struct X3DNodeElementGeometry3D : X3DNodeElementBase {
 	std::list<aiVector3D> Vertices;  ///< Vertices list.
 	size_t                NumIndices;///< Number of indices in one face.
 	bool                  Solid;     ///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
@@ -475,15 +216,11 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementGeometry3D(const X3DElemType pType, X3DNodeElementBase* pParent)
-	: X3DNodeElementBase(pType, pParent)
-	, Vertices()
-	, NumIndices( 0 )
-	, Solid(true) {
+	X3DNodeElementGeometry3D(X3DElemType pType, X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(pType, pParent), Vertices(), NumIndices( 0 ), Solid(true) {
         // empty		
 	}
 
-private:
 	/// Disabled copy constructor.
 	X3DNodeElementGeometry3D(const X3DNodeElementGeometry3D& pNode);
 
@@ -491,29 +228,14 @@ private:
 	X3DNodeElementGeometry3D& operator=(const X3DNodeElementGeometry3D& pNode);
 };// class X3DNodeElementGeometry3D
 
-/// \class X3DNodeElementElevationGrid
 /// Uniform rectangular grid of varying height.
-class X3DNodeElementElevationGrid : public X3DNodeElementGeometry3D
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
+struct X3DNodeElementElevationGrid : X3DNodeElementGeometry3D {
 	bool NormalPerVertex;///< If true then normals are defined for every vertex, else for every face(line).
 	bool ColorPerVertex;///< If true then colors are defined for every vertex, else for every face(line).
-	/// \var CreaseAngle
 	/// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
 	/// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
 	float CreaseAngle;
 	std::vector<int32_t> CoordIdx;///< Coordinates list by faces. In X3D format: "-1" - delimiter for faces.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
 
 	/// \fn X3DNodeElementElevationGrid(const X3DNodeElementElevationGrid& pNode)
 	/// Disabled copy constructor.
@@ -523,29 +245,15 @@ private:
 	/// Disabled assign operator.
 	X3DNodeElementElevationGrid& operator=(const X3DNodeElementElevationGrid& pNode);
 
-public:
-
-	/// \fn X3DNodeElementElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: X3DNodeElementGeometry3D(pType, pParent)
-	{}
-
+	X3DNodeElementElevationGrid(X3DElemType pType, X3DNodeElementBase* pParent) :
+            X3DNodeElementGeometry3D(pType, pParent) {}
 };// class X3DNodeElementIndexedSet
 
-/// \class X3DNodeElementIndexedSet
 /// Shape with indexed vertices.
-class X3DNodeElementIndexedSet : public X3DNodeElementGeometry3D
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
-	/// \var CCW
+struct X3DNodeElementIndexedSet : public X3DNodeElementGeometry3D {
 	/// The ccw field defines the ordering of the vertex coordinates of the geometry with respect to user-given or automatically generated normal vectors
 	/// used in the lighting model equations. If ccw is TRUE, the normals shall follow the right hand rule; the orientation of each normal with respect to
 	/// the vertices (taken in order) shall be such that the vertices appear to be oriented in a counterclockwise order when the vertices are viewed (in the
@@ -555,23 +263,17 @@ public:
 	bool CCW;
 	std::vector<int32_t> ColorIndex;///< Field to specify the polygonal faces by indexing into the <Color> or <ColorRGBA>.
 	bool ColorPerVertex;///< If true then colors are defined for every vertex, else for every face(line).
-	/// \var Convex
 	/// The convex field indicates whether all polygons in the shape are convex (TRUE). A polygon is convex if it is planar, does not intersect itself,
 	/// and all of the interior angles at its vertices are less than 180 degrees. Non planar and self intersecting polygons may produce undefined results
 	/// even if the convex field is FALSE.
 	bool Convex;
 	std::vector<int32_t> CoordIndex;///< Field to specify the polygonal faces by indexing into the <Coordinate>.
-	/// \var CreaseAngle
 	/// If the angle between the geometric normals of two adjacent faces is less than the crease angle, normals shall be calculated so that the faces are
 	/// shaded smoothly across the edge; otherwise, normals shall be calculated so that a lighting discontinuity across the edge is produced.
 	float CreaseAngle;
 	std::vector<int32_t> NormalIndex;///< Field to specify the polygonal faces by indexing into the <Normal>.
 	bool NormalPerVertex;///< If true then normals are defined for every vertex, else for every face(line).
 	std::vector<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
 
 private:
 
@@ -585,27 +287,15 @@ private:
 
 public:
 
-	/// \fn X3DNodeElementIndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementIndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: X3DNodeElementGeometry3D(pType, pParent)
-	{}
-
+	X3DNodeElementIndexedSet(X3DElemType pType, X3DNodeElementBase* pParent) :
+            X3DNodeElementGeometry3D(pType, pParent) {}
 };// class X3DNodeElementIndexedSet
 
-/// \class X3DNodeElementSet
 /// Shape with set of vertices.
-class X3DNodeElementSet : public X3DNodeElementGeometry3D
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
-public:
-
-	/// \var CCW
+struct X3DNodeElementSet : X3DNodeElementGeometry3D {
 	/// The ccw field defines the ordering of the vertex coordinates of the geometry with respect to user-given or automatically generated normal vectors
 	/// used in the lighting model equations. If ccw is TRUE, the normals shall follow the right hand rule; the orientation of each normal with respect to
 	/// the vertices (taken in order) shall be such that the vertices appear to be oriented in a counterclockwise order when the vertices are viewed (in the
@@ -620,12 +310,6 @@ public:
 	std::vector<int32_t> TexCoordIndex;///< Field to specify the polygonal faces by indexing into the <TextureCoordinate>.
 	std::vector<int32_t> VertexCount;///< Field describes how many vertices are to be used in each polyline(polygon) from the <Coordinate> field.
 
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
 	/// \fn X3DNodeElementSet(const X3DNodeElementSet& pNode)
 	/// Disabled copy constructor.
 	X3DNodeElementSet(const X3DNodeElementSet& pNode);
@@ -634,48 +318,34 @@ private:
 	/// Disabled assign operator.
 	X3DNodeElementSet& operator=(const X3DNodeElementSet& pNode);
 
-public:
-
-	/// \fn X3DNodeElementSet(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementSet(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: X3DNodeElementGeometry3D(pType, pParent)
-	{}
+	X3DNodeElementSet(X3DElemType type, X3DNodeElementBase* pParent) :
+            X3DNodeElementGeometry3D(type, pParent) {}
 
 };// class X3DNodeElementSet
 
-/// \struct X3DNodeElementShape
 /// This struct hold <Shape> value.
-struct X3DNodeElementShape : public X3DNodeElementBase
-{
-	/// \fn X3DNodeElementShape(X3DNodeElementShape* pParent)
+struct X3DNodeElementShape : X3DNodeElementBase {
+
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementShape(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_Shape, pParent)
-	{}
-
+	X3DNodeElementShape(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Shape, pParent) {}
 };// struct X3DNodeElementShape
 
-/// \struct CX3DImporter_NodeElement_Appearance
 /// This struct hold <Appearance> value.
-struct CX3DImporter_NodeElement_Appearance : public X3DNodeElementBase
-{
-	/// \fn CX3DImporter_NodeElement_Appearance(CX3DImporter_NodeElement_Appearance* pParent)
+struct X3DNodeElementAppearance : public X3DNodeElementBase {
+
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Appearance(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_Appearance, pParent)
-	{}
+	X3DNodeElementAppearance(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Appearance, pParent) {}
 
-};// struct CX3DImporter_NodeElement_Appearance
+};// struct X3DNodeElementAppearance
 
-/// \class X3DNodeElementMaterial
-/// Material.
-class X3DNodeElementMaterial : public X3DNodeElementBase {
-public:
+struct X3DNodeElementMaterial : public X3DNodeElementBase {
 	float     AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
 	aiColor3D DiffuseColor;    ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
 	aiColor3D EmissiveColor;   ///< Models "glowing" objects. This can be useful for displaying pre-lit models.
@@ -686,14 +356,14 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementMaterial(X3DNodeElementBase* pParent)
-	: X3DNodeElementBase(ENET_Material, pParent)
-	, AmbientIntensity( 0.0f )
-	, DiffuseColor()
-	, EmissiveColor()
-	, Shininess( 0.0f )
-	, SpecularColor()
-	, Transparency( 1.0f ) {
+	X3DNodeElementMaterial(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_Material, pParent),
+            AmbientIntensity( 0.0f ),
+            DiffuseColor(),
+            EmissiveColor(),
+            Shininess( 0.0f ),
+            SpecularColor(),
+            Transparency( 1.0f ) {
 		// empty
 	}
 
@@ -705,48 +375,149 @@ private:
 	X3DNodeElementMaterial& operator=(const X3DNodeElementMaterial& pNode);
 };// class X3DNodeElementMaterial
 
-/// \struct X3DNodeElementImageTexture
 /// This struct hold <ImageTexture> value.
-struct X3DNodeElementImageTexture : public X3DNodeElementBase
-{
-	/// \var RepeatS
+struct X3DNodeElementImageTexture : X3DNodeElementBase {
 	/// RepeatS and RepeatT, that specify how the texture wraps in the S and T directions. If repeatS is TRUE (the default), the texture map is repeated
 	/// outside the [0.0, 1.0] texture coordinate range in the S direction so that it fills the shape. If repeatS is FALSE, the texture coordinates are
 	/// clamped in the S direction to lie within the [0.0, 1.0] range. The repeatT field is analogous to the repeatS field.
 	bool RepeatS;
 	bool RepeatT;///< See \ref RepeatS.
 	std::string URL;///< URL of the texture.
-	/// \fn X3DNodeElementImageTexture(X3DNodeElementImageTexture* pParent)
+
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementImageTexture(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_ImageTexture, pParent)
-	{}
+	X3DNodeElementImageTexture(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_ImageTexture, pParent) {}
 
 };// struct X3DNodeElementImageTexture
 
-/// \struct X3DNodeElementTextureTransform
 /// This struct hold <TextureTransform> value.
-struct X3DNodeElementTextureTransform : public X3DNodeElementBase
-{
+struct X3DNodeElementTextureTransform : X3DNodeElementBase {
 	aiVector2D Center;///< Specifies a translation offset in texture coordinate space about which the rotation and scale fields are applied.
 	float Rotation;///< Specifies a rotation in angle base units of the texture coordinates about the center point after the scale has been applied.
 	aiVector2D Scale;///< Specifies a scaling factor in S and T of the texture coordinates about the center point.
 	aiVector2D Translation;///<  Specifies a translation of the texture coordinates.
 
-	/// \fn X3DNodeElementTextureTransform(X3DNodeElementTextureTransform* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	X3DNodeElementTextureTransform(X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(ENET_TextureTransform, pParent)
-	{}
+	X3DNodeElementTextureTransform(X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(X3DElemType::ENET_TextureTransform, pParent) {}
 
 };// struct X3DNodeElementTextureTransform
 
+struct X3DNodeElementGroup : X3DNodeElementBase {
+
+    aiMatrix4x4 Transformation;///< Transformation matrix.
+
+    /// As you know node elements can use already defined node elements when attribute "USE" is defined.
+    /// Standard search when looking for an element in the whole scene graph, existing at this moment.
+    /// If a node is marked as static, the children(or lower) can not search for elements in the nodes upper then static.
+    bool Static;
+
+    bool UseChoice;///< Flag: if true then use number from \ref Choice to choose what the child will be kept.
+    int32_t Choice;///< Number of the child which will be kept.
+
+    /// \fn X3DNodeElementGroup(const X3DNodeElementGroup& pNode)
+    /// Disabled copy constructor.
+    X3DNodeElementGroup(const X3DNodeElementGroup& pNode);
+
+    /// \fn X3DNodeElementGroup& operator=(const X3DNodeElementGroup& pNode)
+    /// Disabled assign operator.
+    X3DNodeElementGroup& operator=(const X3DNodeElementGroup& pNode);
+
+    /// \fn X3DNodeElementGroup()
+    /// Disabled default constructor.
+    X3DNodeElementGroup();
+
+    /// Constructor.
+    /// \param [in] pParent - pointer to parent node.
+    /// \param [in] pStatic - static node flag.
+    X3DNodeElementGroup(X3DNodeElementBase* pParent, const bool pStatic = false) :
+            X3DNodeElementBase(X3DElemType::ENET_Group, pParent), Static(pStatic), UseChoice(false) {}
+};
+
+struct X3DNodeElementMeta : X3DNodeElementBase {
+    std::string Name;///< Name of metadata object.
+    std::string Reference;
+
+    virtual ~X3DNodeElementMeta() = default;
+
+    /// \fn X3DNodeElementMeta(const X3DNodeElementMeta& pNode)
+    /// Disabled copy constructor.
+    X3DNodeElementMeta(const X3DNodeElementMeta& pNode);
+
+    /// \fn X3DNodeElementMeta& operator=(const X3DNodeElementMeta& pNode)
+    /// Disabled assign operator.
+    X3DNodeElementMeta& operator=(const X3DNodeElementMeta& pNode);
+
+    /// \fn X3DNodeElementMeta()
+    /// Disabled default constructor.
+    X3DNodeElementMeta();
+
+protected:
+    X3DNodeElementMeta(X3DElemType type, X3DNodeElementBase* parent) :
+            X3DNodeElementBase(type, parent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaBoolean : X3DNodeElementMeta {
+    std::vector<bool> Value;///< Stored value.
+
+    explicit X3DNodeElementMetaBoolean(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaBoolean, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaDouble : X3DNodeElementMeta {
+    std::vector<double> Value;///< Stored value.
+
+    explicit X3DNodeElementMetaDouble(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaDouble, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaFloat : public X3DNodeElementMeta {
+    std::vector<float> Value;///< Stored value.
+
+    explicit X3DNodeElementMetaFloat(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaFloat, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaInt : public X3DNodeElementMeta {
+    std::vector<int32_t> Value;///< Stored value.
+
+    explicit X3DNodeElementMetaInt(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaInteger, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaSet : public X3DNodeElementMeta {
+    std::list<X3DNodeElementMeta> Value;///< Stored value.
+
+    X3DNodeElementMetaSet(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaSet, pParent) {
+        // empty
+    }
+};
+
+struct X3DNodeElementMetaString : X3DNodeElementMeta {
+    std::list<std::string> Value;///< Stored value.
+
+    explicit X3DNodeElementMetaString(X3DNodeElementBase* pParent) :
+            X3DNodeElementMeta(X3DElemType::ENET_MetaString, pParent) {
+        // empty
+    }
+};
+
 /// \struct X3DNodeElementLight
 /// This struct hold <TextureTransform> value.
-struct X3DNodeElementLight : public X3DNodeElementBase
-{
+struct X3DNodeElementLight : X3DNodeElementBase {
 	float AmbientIntensity;///< Specifies the intensity of the ambient emission from the light.
 	aiColor3D Color;///< specifies the spectral colour properties of both the direct and ambient light emission as an RGB value.
 	aiVector3D Direction;///< Specifies the direction vector of the illumination emanating from the light source in the local coordinate system.
@@ -764,13 +535,11 @@ struct X3DNodeElementLight : public X3DNodeElementBase
 	float BeamWidth;///< Specifies an inner solid angle in which the light source emits light at uniform full intensity.
 	float CutOffAngle;///< The light source's emission intensity drops off from the inner solid angle (beamWidth) to the outer solid angle (cutOffAngle).
 
-	/// \fn X3DNodeElementLight(X3DElemType pLightType, X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pLightType - type of the light source.
-	X3DNodeElementLight(X3DElemType pLightType, X3DNodeElementBase* pParent)
-		: X3DNodeElementBase(pLightType, pParent)
-	{}
+	X3DNodeElementLight(X3DElemType pLightType, X3DNodeElementBase* pParent) :
+            X3DNodeElementBase(pLightType, pParent) {}
 
 };// struct X3DNodeElementLight
 

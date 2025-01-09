@@ -48,9 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DXmlHelper.h"
 #include <assimp/StringUtils.h>
-
-using namespace std;
 
 namespace Assimp {
 
@@ -94,7 +93,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 			if(!def.empty())
 				ne->ID = def;
 			else
-				ne->ID = "DirectionalLight_" + to_string((size_t)ne);// make random name
+				ne->ID = "DirectionalLight_" + ai_to_string((size_t)ne);// make random name
 
 			((X3DNodeElementLight*)ne)->AmbientIntensity = ambientIntensity;
 			((X3DNodeElementLight*)ne)->Color = color;
@@ -107,7 +106,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
-			if(!mReader->isEmptyElement())
+			if(!isNodeEmpty())
 				ParseNode_Metadata(ne, "DirectionalLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -172,12 +171,12 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
-			if(ne->ID.empty()) ne->ID = "PointLight_" + to_string((size_t)ne);
+			if(ne->ID.empty()) ne->ID = "PointLight_" + ai_to_string((size_t)ne);
 
 			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
-			if(!mReader->isEmptyElement())
+			if(!isNodeEmpty())
 				ParseNode_Metadata(ne, "PointLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -258,12 +257,12 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
-			if(ne->ID.empty()) ne->ID = "SpotLight_" + to_string((size_t)ne);
+			if(ne->ID.empty()) ne->ID = "SpotLight_" + ai_to_string((size_t)ne);
 
 			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
-			if(!mReader->isEmptyElement())
+			if(!isNodeEmpty())
 				ParseNode_Metadata(ne, "SpotLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element

@@ -48,9 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DXmlHelper.h"
 
-namespace Assimp
-{
+namespace Assimp {
 
 /// \def MACRO_METADATA_FINDCREATE(pDEF_Var, pUSE_Var, pReference, pValue, pNE, pMetaName)
 /// Find element by "USE" or create new one.
@@ -64,19 +64,16 @@ namespace Assimp
 /// \param [in] pType - type of element to find.
 #define MACRO_METADATA_FINDCREATE(pDEF_Var, pUSE_Var, pReference, pValue, pNE, pMetaClass, pMetaName, pType) \
 	/* if "USE" defined then find already defined element. */ \
-	if(!pUSE_Var.empty()) \
-	{ \
+	if(!pUSE_Var.empty()) { \
 		MACRO_USE_CHECKANDAPPLY(pDEF_Var, pUSE_Var, pType, pNE); \
-	} \
-	else \
-	{ \
+	} else { \
 		pNE = new pMetaClass(mNodeElementCur); \
 		if(!pDEF_Var.empty()) pNE->ID = pDEF_Var; \
 	 \
 		((pMetaClass*)pNE)->Reference = pReference; \
 		((pMetaClass*)pNE)->Value = pValue; \
 		/* also metadata node can contain childs */ \
-		if(!mReader->isEmptyElement()) \
+		if(!isNodeEmpty()) \
 			ParseNode_Metadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
 		else \
 			mNodeElementCur->Children.push_back(pNE);/* else - add element to child list manually */ \
@@ -84,7 +81,8 @@ namespace Assimp
 		NodeElement_List.push_back(pNE);/* add new element to elements list. */ \
 	}/* if(!pUSE_Var.empty()) else */ \
 	 \
-	do {} while(false)
+	do {                                                                                                        \
+    } while(false)
 
 bool X3DImporter::ParseHelper_CheckRead_X3DMetadataObject()
 {
@@ -120,8 +118,7 @@ void X3DImporter::ParseNode_Metadata(X3DNodeElementBase* pParentElement, const s
 // reference="" SFString [inputOutput]
 // value=""     MFBool   [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataBoolean()
-{
+void X3DImporter::ParseNode_MetadataBoolean() {
     std::string def, use;
     std::string name, reference;
     std::vector<bool> value;
@@ -144,8 +141,7 @@ void X3DImporter::ParseNode_MetadataBoolean()
 // reference="" SFString [inputOutput]
 // value=""     MFDouble [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataDouble()
-{
+void X3DImporter::ParseNode_MetadataDouble() {
     std::string def, use;
     std::string name, reference;
     std::vector<double> value;
@@ -168,8 +164,7 @@ void X3DImporter::ParseNode_MetadataDouble()
 // reference="" SFString [inputOutput]
 // value=""     MFFloat  [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataFloat()
-{
+void X3DImporter::ParseNode_MetadataFloat() {
     std::string def, use;
     std::string name, reference;
     std::vector<float> value;
@@ -192,8 +187,7 @@ void X3DImporter::ParseNode_MetadataFloat()
 // reference="" SFString  [inputOutput]
 // value=""     MFInteger [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataInteger()
-{
+void X3DImporter::ParseNode_MetadataInteger() {
     std::string def, use;
     std::string name, reference;
     std::vector<int32_t> value;
@@ -215,8 +209,7 @@ void X3DImporter::ParseNode_MetadataInteger()
 // name=""      SFString [inputOutput]
 // reference="" SFString [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataSet()
-{
+void X3DImporter::ParseNode_MetadataSet() {
     std::string def, use;
     std::string name, reference;
     X3DNodeElementBase* ne( nullptr );
@@ -231,12 +224,12 @@ void X3DImporter::ParseNode_MetadataSet()
 	if(!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_MetaSet, ne);
 	} else {
-		ne = new CX3DImporter_NodeElement_MetaSet(mNodeElementCur);
+		ne = new X3DNodeElementMetaSet(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_MetaSet*)ne)->Reference = reference;
-		// also metadata node can contain childs
-		if(!mReader->isEmptyElement())
+		((X3DNodeElementMetaSet*)ne)->Reference = reference;
+		// also metadata node can contain children
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "MetadataSet");
 		else
 			mNodeElementCur->Children.push_back(ne);// made object as child to current element

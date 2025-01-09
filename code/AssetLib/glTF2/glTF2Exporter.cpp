@@ -804,6 +804,22 @@ bool glTF2Exporter::GetMatEmissiveStrength(const aiMaterial &mat, glTF2::Materia
     return mat.Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength.emissiveStrength) == aiReturn_SUCCESS;
 }
 
+bool glTF2Exporter::GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAnisotropy &anisotropy) {
+    if (mat.Get(AI_MATKEY_ANISOTROPY_FACTOR, anisotropy.anisotropyStrength) != aiReturn_SUCCESS) {
+        return false;
+    }
+
+    // do not export anisotropy when strength is zero
+    if (anisotropy.anisotropyStrength == 0.0f) {
+        return false;
+    }
+
+    mat.Get(AI_MATKEY_ANISOTROPY_ROTATION, anisotropy.anisotropyRotation);
+    GetMatTex(mat, anisotropy.anisotropyTexture, AI_MATKEY_ANISOTROPY_TEXTURE);
+
+    return true;
+}
+
 void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -955,6 +971,12 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatEmissiveStrength(mat, emissiveStrength)) {
                     mAsset->extensionsUsed.KHR_materials_emissive_strength = true;
                     m->materialEmissiveStrength = Nullable<MaterialEmissiveStrength>(emissiveStrength);
+                }
+
+                MaterialAnisotropy anisotropy;
+                if (GetMatAnisotropy(mat, anisotropy)) {
+                    mAsset->extensionsUsed.KHR_materials_anisotropy = true;
+                    m->materialAnisotropy = Nullable<MaterialAnisotropy>(anisotropy);
                 }
             }
         }

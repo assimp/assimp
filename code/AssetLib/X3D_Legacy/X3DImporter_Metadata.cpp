@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -228,12 +228,9 @@ void X3DImporter::ParseNode_MetadataSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_MetaSet, ne);
-	}
-	else
-	{
+	} else {
 		ne = new CX3DImporter_NodeElement_MetaSet(NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 

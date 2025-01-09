@@ -160,7 +160,7 @@ void X3DImporter::Clear() {
 /************************************************************ Functions: find set ************************************************************/
 /*********************************************************************************************************************************************/
 
-bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
+bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement)
 {
 	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it)
 	{
@@ -176,7 +176,7 @@ bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImp
 }
 
 bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID,
-													const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
+													const X3DElemType pType, CX3DImporter_NodeElement** pElement)
 {
     bool found = false;// flag: true - if requested element is found.
 
@@ -207,7 +207,7 @@ fne_fn_end:
 	return found;
 }
 
-bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
+bool X3DImporter::FindNodeElement(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement)
 {
     CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
     bool static_search = false;// flag: true if searching in static node.
@@ -215,7 +215,7 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_Nod
     // At first check if we have deal with static node. Go up through parent nodes and check flag.
     while(tnd != nullptr)
     {
-		if(tnd->Type == CX3DImporter_NodeElement::ENET_Group)
+		if(tnd->Type == X3DElemType::ENET_Group)
 		{
 			if(((CX3DImporter_NodeElement_Group*)tnd)->Static)
 			{
@@ -1561,28 +1561,28 @@ void X3DImporter::ParseNode_Scene()
 			else if(XML_CheckNode_NameEqual(GroupName_Group))
 			{
 				GroupCounter_Increase(counter_group, GroupName_Group);
-				ParseNode_Grouping_Group();
+				startReadGroup();
 				// if node is empty then decrease group counter at this place.
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_group, GroupName_Group);
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_StaticGroup))
 			{
 				GroupCounter_Increase(counter_group, GroupName_StaticGroup);
-				ParseNode_Grouping_StaticGroup();
+				startReadStaticGroup();
 				// if node is empty then decrease group counter at this place.
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_group, GroupName_StaticGroup);
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_Transform))
 			{
 				GroupCounter_Increase(counter_transform, GroupName_Transform);
-				ParseNode_Grouping_Transform();
+				startReadTransform();
 				// if node is empty then decrease group counter at this place.
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_transform, GroupName_Transform);
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
 				GroupCounter_Increase(counter_switch, GroupName_Switch);
-				ParseNode_Grouping_Switch();
+				startReadSwitch();
 				// if node is empty then decrease group counter at this place.
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_switch, GroupName_Switch);
 			}
@@ -1618,22 +1618,22 @@ void X3DImporter::ParseNode_Scene()
 			else if(XML_CheckNode_NameEqual(GroupName_Group))
 			{
 				GroupCounter_Decrease(counter_group, GroupName_Group);
-				ParseNode_Grouping_GroupEnd();
+				endReadGroup();
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_StaticGroup))
 			{
 				GroupCounter_Decrease(counter_group, GroupName_StaticGroup);
-				ParseNode_Grouping_StaticGroupEnd();
+				endReadStaticGroup();
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_Transform))
 			{
 				GroupCounter_Decrease(counter_transform, GroupName_Transform);
-				ParseNode_Grouping_TransformEnd();
+				endReadTransform();
 			}
 			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
 				GroupCounter_Decrease(counter_switch, GroupName_Switch);
-				ParseNode_Grouping_SwitchEnd();
+				endReadSwitch();
 			}
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT) else
 	}// while(mReader->read())

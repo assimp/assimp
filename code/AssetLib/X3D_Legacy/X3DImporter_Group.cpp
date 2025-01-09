@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -41,16 +41,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /// \file   X3DImporter_Group.cpp
 /// \brief  Parsing data from nodes of "Grouping" set of X3D.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
+/// date   2015-2016
+/// author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <Group
 // DEF=""              ID
@@ -58,15 +57,14 @@ namespace Assimp
 // bboxCenter="0 0 0"  SFVec3f [initializeOnly]
 // bboxSize="-1 -1 -1" SFVec3f [initializeOnly]
 // >
-//    <!-- ChildContentModel -->
+//    <\!-- ChildContentModel -->
 // ChildContentModel is the child-node content model corresponding to X3DChildNode, combining all profiles. ChildContentModel can contain most nodes,
 // other Grouping nodes, Prototype declarations and ProtoInstances in any order and any combination. When the assigned profile is less than Full, the
 // precise palette of legal nodes that are available depends on assigned profile and components.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </Group>
 // A Group node contains children nodes without introducing a new transformation. It is equivalent to a Transform node containing an identity transform.
-void X3DImporter::ParseNode_Grouping_Group()
-{
+void X3DImporter::startReadGroup() {
     std::string def, use;
 
 	MACRO_ATTRREAD_LOOPBEG;
@@ -74,14 +72,11 @@ void X3DImporter::ParseNode_Grouping_Group()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		CX3DImporter_NodeElement* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
 		if(!def.empty()) NodeElement_Cur->ID = def;
@@ -92,8 +87,7 @@ void X3DImporter::ParseNode_Grouping_Group()
 	}// if(!use.empty()) else
 }
 
-void X3DImporter::ParseNode_Grouping_GroupEnd()
-{
+void X3DImporter::endReadGroup() {
 	ParseHelper_Node_Exit();// go up in scene graph
 }
 
@@ -103,7 +97,7 @@ void X3DImporter::ParseNode_Grouping_GroupEnd()
 // bboxCenter="0 0 0"  SFVec3f [initializeOnly]
 // bboxSize="-1 -1 -1" SFVec3f [initializeOnly]
 // >
-//    <!-- ChildContentModel -->
+//    <\!-- ChildContentModel -->
 // ChildContentModel is the child-node content model corresponding to X3DChildNode, combining all profiles. ChildContentModel can contain most nodes,
 // other Grouping nodes, Prototype declarations and ProtoInstances in any order and any combination. When the assigned profile is less than Full, the
 // precise palette of legal nodes that are available depends on assigned profile and components.
@@ -111,8 +105,7 @@ void X3DImporter::ParseNode_Grouping_GroupEnd()
 // </StaticGroup>
 // The StaticGroup node contains children nodes which cannot be modified. StaticGroup children are guaranteed to not change, send events, receive events or
 // contain any USE references outside the StaticGroup.
-void X3DImporter::ParseNode_Grouping_StaticGroup()
-{
+void X3DImporter::startReadStaticGroup() {
     std::string def, use;
 
 	MACRO_ATTRREAD_LOOPBEG;
@@ -120,14 +113,11 @@ void X3DImporter::ParseNode_Grouping_StaticGroup()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		CX3DImporter_NodeElement* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+	} else {
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
 		if(!def.empty()) NodeElement_Cur->ID = def;
@@ -138,8 +128,7 @@ void X3DImporter::ParseNode_Grouping_StaticGroup()
 	}// if(!use.empty()) else
 }
 
-void X3DImporter::ParseNode_Grouping_StaticGroupEnd()
-{
+void X3DImporter::endReadStaticGroup() {
 	ParseHelper_Node_Exit();// go up in scene graph
 }
 
@@ -150,7 +139,7 @@ void X3DImporter::ParseNode_Grouping_StaticGroupEnd()
 // bboxSize="-1 -1 -1" SFVec3f [initializeOnly]
 // whichChoice="-1"    SFInt32 [inputOutput]
 // >
-//    <!-- ChildContentModel -->
+//    <\!-- ChildContentModel -->
 // ChildContentModel is the child-node content model corresponding to X3DChildNode, combining all profiles. ChildContentModel can contain most nodes,
 // other Grouping nodes, Prototype declarations and ProtoInstances in any order and any combination. When the assigned profile is less than Full, the
 // precise palette of legal nodes that are available depends on assigned profile and components.
@@ -159,8 +148,7 @@ void X3DImporter::ParseNode_Grouping_StaticGroupEnd()
 // The Switch grouping node traverses zero or one of the nodes specified in the children field. The whichChoice field specifies the index of the child
 // to traverse, with the first child having index 0. If whichChoice is less than zero or greater than the number of nodes in the children field, nothing
 // is chosen.
-void X3DImporter::ParseNode_Grouping_Switch()
-{
+void X3DImporter::startReadSwitch() {
     std::string def, use;
     int32_t whichChoice = -1;
 
@@ -170,14 +158,11 @@ void X3DImporter::ParseNode_Grouping_Switch()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		CX3DImporter_NodeElement* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
 		if(!def.empty()) NodeElement_Cur->ID = def;
@@ -192,8 +177,7 @@ void X3DImporter::ParseNode_Grouping_Switch()
 	}// if(!use.empty()) else
 }
 
-void X3DImporter::ParseNode_Grouping_SwitchEnd()
-{
+void X3DImporter::endReadSwitch() {
 	// just exit from node. Defined choice will be accepted at postprocessing stage.
 	ParseHelper_Node_Exit();// go up in scene graph
 }
@@ -209,7 +193,7 @@ void X3DImporter::ParseNode_Grouping_SwitchEnd()
 // scaleOrientation="0 0 1 0" SFRotation [inputOutput]
 // translation="0 0 0"        SFVec3f    [inputOutput]
 // >
-//    <!-- ChildContentModel -->
+//    <\!-- ChildContentModel -->
 // ChildContentModel is the child-node content model corresponding to X3DChildNode, combining all profiles. ChildContentModel can contain most nodes,
 // other Grouping nodes, Prototype declarations and ProtoInstances in any order and any combination. When the assigned profile is less than Full, the
 // precise palette of legal nodes that are available depends on assigned profile and components.
@@ -220,8 +204,7 @@ void X3DImporter::ParseNode_Grouping_SwitchEnd()
 // transformations. In matrix transformation notation, where C (center), SR (scaleOrientation), T (translation), R (rotation), and S (scale) are the
 // equivalent transformation matrices,
 //   P' = T * C * R * SR * S * -SR * -C * P
-void X3DImporter::ParseNode_Grouping_Transform()
-{
+void X3DImporter::startReadTransform() {
     aiVector3D center(0, 0, 0);
     float rotation[4] = {0, 0, 1, 0};
     aiVector3D scale(1, 1, 1);// A value of zero indicates that any child geometry shall not be displayed
@@ -264,18 +247,14 @@ void X3DImporter::ParseNode_Grouping_Transform()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		CX3DImporter_NodeElement* ne( nullptr );
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-        if ( !def.empty() )
-        {
+        if ( !def.empty() ) {
             NodeElement_Cur->ID = def;
         }
 
@@ -308,8 +287,7 @@ void X3DImporter::ParseNode_Grouping_Transform()
 	}// if(!use.empty()) else
 }
 
-void X3DImporter::ParseNode_Grouping_TransformEnd()
-{
+void X3DImporter::endReadTransform() {
 	ParseHelper_Node_Exit();// go up in scene graph
 }
 

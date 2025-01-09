@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /// \file   X3DImporter_Light.cpp
 /// \brief  Parsing data from nodes of "Lighting" set of X3D.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
+/// date   2015-2016
+/// author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
@@ -64,8 +64,7 @@ namespace Assimp {
 // intensity="1"        SFFloat [inputOutput]
 // on="true"            SFBool  [inputOutput]
 // />
-void X3DImporter::ParseNode_Lighting_DirectionalLight()
-{
+void X3DImporter::ParseNode_Lighting_DirectionalLight() {
     std::string def, use;
     float ambientIntensity = 0;
     aiColor3D color(1, 1, 1);
@@ -86,16 +85,12 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_DirectionalLight, ne);
-	}
-	else
-	{
-		if(on)
-		{
+	} else {
+		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_DirectionalLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_DirectionalLight, NodeElement_Cur);
 			if(!def.empty())
 				ne->ID = def;
 			else
@@ -134,8 +129,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight()
 // on="true"            SFBool  [inputOutput]
 // radius="100"         SFFloat [inputOutput]
 // />
-void X3DImporter::ParseNode_Lighting_PointLight()
-{
+void X3DImporter::ParseNode_Lighting_PointLight() {
     std::string def, use;
     float ambientIntensity = 0;
     aiVector3D attenuation( 1, 0, 0 );
@@ -160,16 +154,12 @@ void X3DImporter::ParseNode_Lighting_PointLight()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if(!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_PointLight, ne);
-	}
-	else
-	{
-		if(on)
-		{
+	} else {
+		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_PointLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_PointLight, NodeElement_Cur);
 			if(!def.empty()) ne->ID = def;
 
 			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
@@ -244,16 +234,12 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_SpotLight, ne);
-	}
-	else
-	{
-		if(on)
-		{
+	} else {
+		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(CX3DImporter_NodeElement::ENET_SpotLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_SpotLight, NodeElement_Cur);
 			if(!def.empty()) ne->ID = def;
 
 			if(beamWidth > cutOffAngle) beamWidth = cutOffAngle;

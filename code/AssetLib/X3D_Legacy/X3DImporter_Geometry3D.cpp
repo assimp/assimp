@@ -85,7 +85,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(CX3DImporter_NodeElement::ENET_Box, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Box, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		GeometryHelper_MakeQL_RectParallelepiped(size, ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices);// get quad list
@@ -141,7 +141,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(CX3DImporter_NodeElement::ENET_Cone, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cone, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cone or parts according to flags.
@@ -215,7 +215,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(CX3DImporter_NodeElement::ENET_Cylinder, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cylinder, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cilynder or parts according to flags.
@@ -321,7 +321,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		if((size_t)(xDimension * zDimension) != height.size()) Throw_IncorrectAttrValue("Heights count must be equal to \"xDimension * zDimension\"");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ElevationGrid(CX3DImporter_NodeElement::ENET_ElevationGrid, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_ElevationGrid(X3DElemType::ENET_ElevationGrid, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_ElevationGrid& grid_alias = *((CX3DImporter_NodeElement_ElevationGrid*)ne);// create alias for conveience
@@ -667,7 +667,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		//
 		// create and if needed - define new geometry object.
 		//
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_Extrusion, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_Extrusion, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ext_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);// create alias for conveience
@@ -900,7 +900,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		if(coordIndex.size() == 0) throw DeadlyImportError("IndexedFaceSet must contain not empty \"coordIndex\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_IndexedFaceSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedFaceSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -972,7 +972,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 		std::vector<aiVector3D> tlist;
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(CX3DImporter_NodeElement::ENET_Sphere, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Sphere, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		StandardShapes::MakeSphere(tess, tlist);

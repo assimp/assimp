@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -56,6 +56,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 
+enum X3DElemType {
+    ENET_Group,                  ///< Element has type "Group".
+    ENET_MetaBoolean,            ///< Element has type "Metadata boolean".
+    ENET_MetaDouble,             ///< Element has type "Metadata double".
+    ENET_MetaFloat,              ///< Element has type "Metadata float".
+    ENET_MetaInteger,            ///< Element has type "Metadata integer".
+    ENET_MetaSet,                ///< Element has type "Metadata set".
+    ENET_MetaString,             ///< Element has type "Metadata string".
+    ENET_Arc2D,                  ///< Element has type "Arc2D".
+    ENET_ArcClose2D,             ///< Element has type "ArcClose2D".
+    ENET_Circle2D,               ///< Element has type "Circle2D".
+    ENET_Disk2D,                 ///< Element has type "Disk2D".
+    ENET_Polyline2D,             ///< Element has type "Polyline2D".
+    ENET_Polypoint2D,            ///< Element has type "Polypoint2D".
+    ENET_Rectangle2D,            ///< Element has type "Rectangle2D".
+    ENET_TriangleSet2D,          ///< Element has type "TriangleSet2D".
+    ENET_Box,                    ///< Element has type "Box".
+    ENET_Cone,                   ///< Element has type "Cone".
+    ENET_Cylinder,               ///< Element has type "Cylinder".
+    ENET_Sphere,                 ///< Element has type "Sphere".
+    ENET_ElevationGrid,          ///< Element has type "ElevationGrid".
+    ENET_Extrusion,              ///< Element has type "Extrusion".
+    ENET_Coordinate,             ///< Element has type "Coordinate".
+    ENET_Normal,                 ///< Element has type "Normal".
+    ENET_TextureCoordinate,      ///< Element has type "TextureCoordinate".
+    ENET_IndexedFaceSet,         ///< Element has type "IndexedFaceSet".
+    ENET_IndexedLineSet,         ///< Element has type "IndexedLineSet".
+    ENET_IndexedTriangleSet,     ///< Element has type "IndexedTriangleSet".
+    ENET_IndexedTriangleFanSet,  ///< Element has type "IndexedTriangleFanSet".
+    ENET_IndexedTriangleStripSet,///< Element has type "IndexedTriangleStripSet".
+    ENET_LineSet,                ///< Element has type "LineSet".
+    ENET_PointSet,               ///< Element has type "PointSet".
+    ENET_TriangleSet,            ///< Element has type "TriangleSet".
+    ENET_TriangleFanSet,         ///< Element has type "TriangleFanSet".
+    ENET_TriangleStripSet,       ///< Element has type "TriangleStripSet".
+    ENET_Color,                  ///< Element has type "Color".
+    ENET_ColorRGBA,              ///< Element has type "ColorRGBA".
+    ENET_Shape,                  ///< Element has type "Shape".
+    ENET_Appearance,             ///< Element has type "Appearance".
+    ENET_Material,               ///< Element has type "Material".
+    ENET_ImageTexture,           ///< Element has type "ImageTexture".
+    ENET_TextureTransform,       ///< Element has type "TextureTransform".
+    ENET_DirectionalLight,       ///< Element has type "DirectionalLight".
+    ENET_PointLight,             ///< Element has type "PointLight".
+    ENET_SpotLight,              ///< Element has type "SpotLight".
+
+    ENET_Invalid                 ///< Element has invalid type and possible contain invalid data.
+};
+
 /// \class CX3DImporter_NodeElement
 /// Base class for elements of nodes.
 class CX3DImporter_NodeElement
@@ -66,65 +115,13 @@ class CX3DImporter_NodeElement
 
 public:
 
-	/// \enum EType
-	/// Define what data type contain node element.
-	enum EType
-	{
-		ENET_Group,                  ///< Element has type "Group".
-		ENET_MetaBoolean,            ///< Element has type "Metadata boolean".
-		ENET_MetaDouble,             ///< Element has type "Metadata double".
-		ENET_MetaFloat,              ///< Element has type "Metadata float".
-		ENET_MetaInteger,            ///< Element has type "Metadata integer".
-		ENET_MetaSet,                ///< Element has type "Metadata set".
-		ENET_MetaString,             ///< Element has type "Metadata string".
-		ENET_Arc2D,                  ///< Element has type "Arc2D".
-		ENET_ArcClose2D,             ///< Element has type "ArcClose2D".
-		ENET_Circle2D,               ///< Element has type "Circle2D".
-		ENET_Disk2D,                 ///< Element has type "Disk2D".
-		ENET_Polyline2D,             ///< Element has type "Polyline2D".
-		ENET_Polypoint2D,            ///< Element has type "Polypoint2D".
-		ENET_Rectangle2D,            ///< Element has type "Rectangle2D".
-		ENET_TriangleSet2D,          ///< Element has type "TriangleSet2D".
-		ENET_Box,                    ///< Element has type "Box".
-		ENET_Cone,                   ///< Element has type "Cone".
-		ENET_Cylinder,               ///< Element has type "Cylinder".
-		ENET_Sphere,                 ///< Element has type "Sphere".
-		ENET_ElevationGrid,          ///< Element has type "ElevationGrid".
-		ENET_Extrusion,              ///< Element has type "Extrusion".
-		ENET_Coordinate,             ///< Element has type "Coordinate".
-		ENET_Normal,                 ///< Element has type "Normal".
-		ENET_TextureCoordinate,      ///< Element has type "TextureCoordinate".
-		ENET_IndexedFaceSet,         ///< Element has type "IndexedFaceSet".
-		ENET_IndexedLineSet,         ///< Element has type "IndexedLineSet".
-		ENET_IndexedTriangleSet,     ///< Element has type "IndexedTriangleSet".
-		ENET_IndexedTriangleFanSet,  ///< Element has type "IndexedTriangleFanSet".
-		ENET_IndexedTriangleStripSet,///< Element has type "IndexedTriangleStripSet".
-		ENET_LineSet,                ///< Element has type "LineSet".
-		ENET_PointSet,               ///< Element has type "PointSet".
-		ENET_TriangleSet,            ///< Element has type "TriangleSet".
-		ENET_TriangleFanSet,         ///< Element has type "TriangleFanSet".
-		ENET_TriangleStripSet,       ///< Element has type "TriangleStripSet".
-		ENET_Color,                  ///< Element has type "Color".
-		ENET_ColorRGBA,              ///< Element has type "ColorRGBA".
-		ENET_Shape,                  ///< Element has type "Shape".
-		ENET_Appearance,             ///< Element has type "Appearance".
-		ENET_Material,               ///< Element has type "Material".
-		ENET_ImageTexture,           ///< Element has type "ImageTexture".
-		ENET_TextureTransform,       ///< Element has type "TextureTransform".
-		ENET_DirectionalLight,       ///< Element has type "DirectionalLight".
-		ENET_PointLight,             ///< Element has type "PointLight".
-		ENET_SpotLight,              ///< Element has type "SpotLight".
-
-		ENET_Invalid                 ///< Element has invalid type and possible contain invalid data.
-	};
-
 	/***********************************************/
 	/****************** Constants ******************/
 	/***********************************************/
 
 public:
 
-	const EType Type;
+	const X3DElemType Type;
 
 	/***********************************************/
 	/****************** Variables ******************/
@@ -159,7 +156,7 @@ protected:
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - parent element.
-	CX3DImporter_NodeElement(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: Type(pType), Parent(pParent)
 	{}
 };// class IX3DImporter_NodeElement
@@ -252,11 +249,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Meta(const EType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Meta(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Meta(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Meta(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement(pType, pParent)
 	{}
 
@@ -457,11 +454,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Geometry2D(const EType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Geometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Geometry2D(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Geometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement(pType, pParent), Solid(true)
 	{}
 
@@ -478,7 +475,7 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Geometry3D(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Geometry3D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	: CX3DImporter_NodeElement(pType, pParent)
 	, Vertices()
 	, NumIndices( 0 )
@@ -528,11 +525,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_ElevationGrid(const EType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_ElevationGrid(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -588,11 +585,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_IndexedSet(const EType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_IndexedSet(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -639,11 +636,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Set(const EType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Set(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Set(const EType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Set(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -767,11 +764,11 @@ struct CX3DImporter_NodeElement_Light : public CX3DImporter_NodeElement
 	float BeamWidth;///< Specifies an inner solid angle in which the light source emits light at uniform full intensity.
 	float CutOffAngle;///< The light source's emission intensity drops off from the inner solid angle (beamWidth) to the outer solid angle (cutOffAngle).
 
-	/// \fn CX3DImporter_NodeElement_Light(EType pLightType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Light(X3DElemType pLightType, CX3DImporter_NodeElement* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pLightType - type of the light source.
-	CX3DImporter_NodeElement_Light(EType pLightType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Light(X3DElemType pLightType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement(pLightType, pParent)
 	{}
 

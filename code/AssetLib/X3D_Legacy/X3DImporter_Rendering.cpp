@@ -205,7 +205,7 @@ void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 			throw DeadlyImportError("IndexedLineSet must contain not empty \"coordIndex\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_IndexedLineSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedLineSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -282,7 +282,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleFanSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_IndexedTriangleFanSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleFanSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -400,7 +400,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_IndexedTriangleSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -506,7 +506,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleStripSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_IndexedTriangleStripSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleStripSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -607,7 +607,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		if(vertexCount.size() == 0) throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(CX3DImporter_NodeElement::ENET_LineSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_LineSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -676,7 +676,7 @@ void X3DImporter::ParseNode_Rendering_PointSet()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_PointSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_PointSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
@@ -748,7 +748,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 		if(fanCount.size() == 0) throw DeadlyImportError("TriangleFanSet must contain not empty \"fanCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(CX3DImporter_NodeElement::ENET_TriangleFanSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleFanSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -859,7 +859,7 @@ void X3DImporter::ParseNode_Rendering_TriangleSet()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(CX3DImporter_NodeElement::ENET_TriangleSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_TriangleSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -939,7 +939,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 		if(stripCount.size() == 0) throw DeadlyImportError("TriangleStripSet must contain not empty \"stripCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(CX3DImporter_NodeElement::ENET_TriangleStripSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleStripSet, NodeElement_Cur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);

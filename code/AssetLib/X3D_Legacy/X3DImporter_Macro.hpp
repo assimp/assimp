@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	do { \
 	XML_CheckNode_MustBeEmpty(); \
 	if(!pDEF.empty()) Throw_DEF_And_USE(); \
-	if(!FindNodeElement(pUSE, CX3DImporter_NodeElement::pType, &pNE)) Throw_USE_NotFound(pUSE); \
+	if(!FindNodeElement(pUSE, pType, &pNE)) Throw_USE_NotFound(pUSE); \
 	 \
 	NodeElement_Cur->Child.push_back(pNE);/* add found object as child to current element */ \
 	} while(false)
@@ -156,40 +156,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// Add points as quad. Means that pP1..pP4 set in CCW order.
 #define MACRO_FACE_ADD_QUAD_FA(pCCW, pOut, pIn, pP1, pP2, pP3, pP4) \
 	do { \
-	if(pCCW) \
-	{ \
-		pOut.push_back(pIn[pP1]); \
-		pOut.push_back(pIn[pP2]); \
-		pOut.push_back(pIn[pP3]); \
-		pOut.push_back(pIn[pP4]); \
-	} \
-	else \
-	{ \
-		pOut.push_back(pIn[pP4]); \
-		pOut.push_back(pIn[pP3]); \
-		pOut.push_back(pIn[pP2]); \
-		pOut.push_back(pIn[pP1]); \
-	} \
+        if(pCCW) { \
+            pOut.push_back(pIn[pP1]); \
+            pOut.push_back(pIn[pP2]); \
+            pOut.push_back(pIn[pP3]); \
+            pOut.push_back(pIn[pP4]); \
+        } else { \
+            pOut.push_back(pIn[pP4]); \
+            pOut.push_back(pIn[pP3]); \
+            pOut.push_back(pIn[pP2]); \
+            pOut.push_back(pIn[pP1]); \
+        } \
 	} while(false)
 
 /// \def MACRO_FACE_ADD_QUAD(pCCW, pOut, pP1, pP2, pP3, pP4)
 /// Add points as quad. Means that pP1..pP4 set in CCW order.
 #define MACRO_FACE_ADD_QUAD(pCCW, pOut, pP1, pP2, pP3, pP4) \
 	do { \
-	if(pCCW) \
-	{ \
-		pOut.push_back(pP1); \
-		pOut.push_back(pP2); \
-		pOut.push_back(pP3); \
-		pOut.push_back(pP4); \
-	} \
-	else \
-	{ \
-		pOut.push_back(pP4); \
-		pOut.push_back(pP3); \
-		pOut.push_back(pP2); \
-		pOut.push_back(pP1); \
-	} \
+        if(pCCW) { \
+            pOut.push_back(pP1); \
+            pOut.push_back(pP2); \
+            pOut.push_back(pP3); \
+            pOut.push_back(pP4); \
+        } else { \
+            pOut.push_back(pP4); \
+            pOut.push_back(pP3); \
+            pOut.push_back(pP2); \
+            pOut.push_back(pP1); \
+        } \
 	} while(false)
 
 #endif // X3DIMPORTER_MACRO_HPP_INCLUDED

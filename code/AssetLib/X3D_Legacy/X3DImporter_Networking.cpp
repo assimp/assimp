@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /// \file   X3DImporter_Networking.cpp
 /// \brief  Parsing data from nodes of "Networking" set of X3D.
-/// \date   2015-2016
-/// \author smal.root@gmail.com
+/// date   2015-2016
+/// author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
@@ -54,8 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //#include <regex>
 
-namespace Assimp
-{
+namespace Assimp {
 
 //static std::regex pattern_parentDir(R"((^|/)[^/]+/../)");
 static std::string parentDir("/../");
@@ -81,20 +80,16 @@ void X3DImporter::ParseNode_Networking_Inline()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		CX3DImporter_NodeElement* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
-	}
-	else
-	{
+	} else {
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if (!def.empty()) NodeElement_Cur->ID = def;
 
-		if(load && !url.empty())
-		{
+		if(load && !url.empty()) {
 			std::string full_path = mpIOHandler->CurrentDirectory() + url.front();
 
 			//full_path = std::regex_replace(full_path, pattern_parentDir, "$1");
@@ -104,13 +99,11 @@ void X3DImporter::ParseNode_Networking_Inline()
 					if (pos2 != std::string::npos) {
 						full_path.erase(pos2, pos - pos2 + 3);
 						pos = pos2;
-					}
-					else {
+					} else {
 						full_path.erase(0, pos + 4);
 						pos = 0;
 					}
-				}
-				else {
+				} else {
 					pos += 3;
 				}
 			}

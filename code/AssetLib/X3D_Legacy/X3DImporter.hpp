@@ -246,7 +246,7 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromRoot(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement);
 
 	/// Find requested node element. Search will be made from pointed node down to childs.
 	/// \param [in] pStartNode - pointer to start node.
@@ -254,7 +254,7 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID, const CX3DImporter_NodeElement::EType pType,
+	bool FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID, const X3DElemType pType,
 									CX3DImporter_NodeElement** pElement);
 
 	/// Find requested node element. For "Node"'s accounting flag "Static".
@@ -262,7 +262,7 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement(const std::string& pName, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement(const std::string& pName, const X3DElemType pType, CX3DImporter_NodeElement** pElement);
 
 	/***********************************************/
 	/********* Functions: postprocess set **********/
@@ -279,12 +279,12 @@ private:
 	/// Check if type of node element is metadata. E.g. <MetadataSet>, <MetadataString>.
 	/// \param [in] pType - checked type.
 	/// \return true - if the type corresponds to the metadata.
-	bool PostprocessHelper_ElementIsMetadata(const CX3DImporter_NodeElement::EType pType) const;
+	bool PostprocessHelper_ElementIsMetadata(const X3DElemType pType) const;
 
 	/// Check if type of node element is geometry object and can be used to build mesh. E.g. <Box>, <Arc2D>.
 	/// \param [in] pType - checked type.
 	/// \return true - if the type corresponds to the mesh.
-	bool PostprocessHelper_ElementIsMesh(const CX3DImporter_NodeElement::EType pType) const;
+	bool PostprocessHelper_ElementIsMesh(const X3DElemType pType) const;
 
 	/// Read CX3DImporter_NodeElement_Light, create aiLight and add it to list of the lights.
 	/// \param [in] pNodeElement - reference to lisght element(<DirectionalLight>, <PointLight>, <SpotLight>).
@@ -716,28 +716,28 @@ private:
 	void ParseNode_Geometry3D_Sphere();
 
 	/// Parse <Group> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Group();
+	void startReadGroup();
 
 	/// Doing actions at an exit from <Group>. Walk up in scene graph.
-	void ParseNode_Grouping_GroupEnd();
+	void endReadGroup();
 
 	/// Parse <StaticGroup> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_StaticGroup();
+	void startReadStaticGroup();
 
 	/// Doing actions at an exit from <StaticGroup>. Walk up in scene graph.
-	void ParseNode_Grouping_StaticGroupEnd();
+	void endReadStaticGroup();
 
 	/// Parse <Switch> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Switch();
+	void startReadSwitch();
 
 	/// Doing actions at an exit from <Switch>. Walk up in scene graph.
-	void ParseNode_Grouping_SwitchEnd();
+	void endReadSwitch();
 
 	/// Parse <Transform> node of the file. And create new node in scene graph.
-	void ParseNode_Grouping_Transform();
+	void startReadTransform();
 
 	/// Doing actions at an exit from <Transform>. Walk up in scene graph.
-	void ParseNode_Grouping_TransformEnd();
+	void endReadTransform();
 
 	/// Parse <Color> node of the file.
 	void ParseNode_Rendering_Color();

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -46,14 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "X3DGeoHelper.h"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
 // Header files, Assimp.
 #include <assimp/StandardShapes.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <Box
 // DEF=""       ID
@@ -64,8 +64,7 @@ namespace Assimp
 // The Box node specifies a rectangular parallelepiped box centred at (0, 0, 0) in the local coordinate system and aligned with the local coordinate axes.
 // By default, the box measures 2 units in each dimension, from -1 to +1. The size field specifies the extents of the box along the X-, Y-, and Z-axes
 // respectively and each component value shall be greater than zero.
-void X3DImporter::ParseNode_Geometry3D_Box()
-{
+void X3DImporter::ParseNode_Geometry3D_Box() {
     std::string def, use;
     bool solid = true;
     aiVector3D size(2, 2, 2);
@@ -78,19 +77,16 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Box, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Box, mNodeElementCur);
+		ne = new X3DNodeElementGeometry3D(X3DElemType::ENET_Box, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		GeometryHelper_MakeQL_RectParallelepiped(size, ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices);// get quad list
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 4;
+		GeometryHelper_MakeQL_RectParallelepiped(size, ((X3DNodeElementGeometry3D*)ne)->Vertices);// get quad list
+		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
+		((X3DNodeElementGeometry3D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Box");
@@ -110,8 +106,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 // side="true"      SFBool [initializeOnly]
 // solid="true"     SFBool [initializeOnly]
 // />
-void X3DImporter::ParseNode_Geometry3D_Cone()
-{
+void X3DImporter::ParseNode_Geometry3D_Cone() {
     std::string use, def;
     bool bottom = true;
     float bottomRadius = 1;
@@ -130,39 +125,35 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Cone, ne);
-	}
-	else
-	{
+	} else {
 		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cone, mNodeElementCur);
+		ne = new X3DNodeElementGeometry3D(X3DElemType::ENET_Cone, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cone or parts according to flags.
-		if(side)
-		{
+		if (side) {
 			StandardShapes::MakeCone(height, 0, bottomRadius, tess, tvec, !bottom);
-		}
-		else if(bottom)
-		{
+		} else if (bottom) {
 			StandardShapes::MakeCircle(bottomRadius, tess, tvec);
 			height = -(height / 2);
-			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) it->y = height;// y - because circle made in oXZ.
+			for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it)
+                it->y = height; // y - because circle made in oXZ.
 		}
 
 		// copy data from temp array
-		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it) ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tvec.begin(); it != tvec.end(); ++it)
+            ((X3DNodeElementGeometry3D*)ne)->Vertices.push_back(*it);
 
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 3;
+		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
+		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cone");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -181,8 +172,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 // solid="true"  SFBool [initializeOnly]
 // top="true"    SFBool [initializeOnly]
 // />
-void X3DImporter::ParseNode_Geometry3D_Cylinder()
-{
+void X3DImporter::ParseNode_Geometry3D_Cylinder() {
     std::string use, def;
     bool bottom = true;
     float height = 2;
@@ -203,19 +193,16 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Cylinder, ne);
-	}
-	else
-	{
+	} else {
 		const unsigned int tess = 30;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tside;// temp array for vertices of side.
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cylinder, mNodeElementCur);
+		ne = new X3DNodeElementGeometry3D(X3DElemType::ENET_Cylinder, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cilynder or parts according to flags.
@@ -224,30 +211,27 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		height /= 2;// height defined for whole cylinder, when creating top and bottom circle we are using just half of height.
 		if(top || bottom) StandardShapes::MakeCircle(radius, tess, tcir);
 		// copy data from temp arrays
-		std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices;// just short alias.
+		std::list<aiVector3D>& vlist = ((X3DNodeElementGeometry3D*)ne)->Vertices;// just short alias.
 
-		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); ++it) vlist.push_back(*it);
+		for(std::vector<aiVector3D>::iterator it = tside.begin(); it != tside.end(); ++it)
+            vlist.push_back(*it);
 
-		if(top)
-		{
-			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it)
-			{
+		if (top) {
+			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it) {
 				(*it).y = height;// y - because circle made in oXZ.
 				vlist.push_back(*it);
 			}
-		}// if(top)
+		} // if(top)
 
-		if(bottom)
-		{
-			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it)
-			{
+		if (bottom) {
+			for(std::vector<aiVector3D>::iterator it = tcir.begin(); it != tcir.end(); ++it) {
 				(*it).y = -height;// y - because circle made in oXZ.
 				vlist.push_back(*it);
 			}
 		}// if(top)
 
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 3;
+		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
+		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cylinder");
@@ -280,8 +264,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 // by a scalar array of height values that specify the height of a surface above each point of the grid. The xDimension and zDimension fields indicate
 // the number of elements of the grid height array in the X and Z directions. Both xDimension and zDimension shall be greater than or equal to zero.
 // If either the xDimension or the zDimension is less than two, the ElevationGrid contains no quadrilaterals.
-void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
-{
+void X3DImporter::ParseNode_Geometry3D_ElevationGrid() {
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
@@ -310,21 +293,18 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ElevationGrid, ne);
-	}
-	else
-	{
+	} else {
 		if((xSpacing == 0.0f) || (zSpacing == 0.0f)) throw DeadlyImportError("Spacing in <ElevationGrid> must be grater than zero.");
 		if((xDimension <= 0) || (zDimension <= 0)) throw DeadlyImportError("Dimension in <ElevationGrid> must be grater than zero.");
 		if((size_t)(xDimension * zDimension) != height.size()) Throw_IncorrectAttrValue("Heights count must be equal to \"xDimension * zDimension\"");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ElevationGrid(X3DElemType::ENET_ElevationGrid, mNodeElementCur);
+		ne = new X3DNodeElementElevationGrid(X3DElemType::ENET_ElevationGrid, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_ElevationGrid& grid_alias = *((CX3DImporter_NodeElement_ElevationGrid*)ne);// create alias for conveience
+		X3DNodeElementElevationGrid& grid_alias = *((X3DNodeElementElevationGrid*)ne);// create alias for conveience
 
 		{// create grid vertices list
 			std::vector<float>::const_iterator he_it = height.begin();
@@ -346,24 +326,21 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		// check if we have quads
 		if((xDimension < 2) || (zDimension < 2))// only one element in dimension is set, create line set.
 		{
-			((CX3DImporter_NodeElement_ElevationGrid*)ne)->NumIndices = 2;// will be holded as line set.
-			for(size_t i = 0, i_e = (grid_alias.Vertices.size() - 1); i < i_e; i++)
-			{
+			((X3DNodeElementElevationGrid*)ne)->NumIndices = 2;// will be holded as line set.
+			for(size_t i = 0, i_e = (grid_alias.Vertices.size() - 1); i < i_e; i++) {
 				grid_alias.CoordIdx.push_back(static_cast<int32_t>(i));
 				grid_alias.CoordIdx.push_back(static_cast<int32_t>(i + 1));
 				grid_alias.CoordIdx.push_back(-1);
 			}
-		}
-		else// two or more elements in every dimension is set. create quad set.
+		} else// two or more elements in every dimension is set. create quad set.
 		{
-			((CX3DImporter_NodeElement_ElevationGrid*)ne)->NumIndices = 4;
+			((X3DNodeElementElevationGrid*)ne)->NumIndices = 4;
 			for(int32_t fzi = 0, fzi_e = (zDimension - 1); fzi < fzi_e; fzi++)// rows
 			{
 				for(int32_t fxi = 0, fxi_e = (xDimension - 1); fxi < fxi_e; fxi++)// columns
 				{
 					// points direction in face.
-					if(ccw)
-					{
+					if (ccw) {
 						// CCW:
 						//	3 2
 						//	0 1
@@ -371,9 +348,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 						grid_alias.CoordIdx.push_back((fzi + 1) * xDimension + (fxi + 1));
 						grid_alias.CoordIdx.push_back(fzi * xDimension + (fxi + 1));
 						grid_alias.CoordIdx.push_back(fzi * xDimension + fxi);
-					}
-					else
-					{
+					} else {
 						// CW:
 						//	0 1
 						//	3 2
@@ -393,8 +368,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		grid_alias.CreaseAngle = creaseAngle;
 		grid_alias.Solid = solid;
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if(!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("ElevationGrid");
 				// check for X3DComposedGeometryNodes
@@ -408,8 +382,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 			MACRO_NODECHECK_LOOPEND("ElevationGrid");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
+		else {
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}// if(!mReader->isEmptyElement()) else
 
@@ -418,26 +391,21 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 }
 
 template<typename TVector>
-static void GeometryHelper_Extrusion_CurveIsClosed(std::vector<TVector>& pCurve, const bool pDropTail, const bool pRemoveLastPoint, bool& pCurveIsClosed)
-{
+static void GeometryHelper_Extrusion_CurveIsClosed(std::vector<TVector>& pCurve, const bool pDropTail, const bool pRemoveLastPoint, bool& pCurveIsClosed) {
     size_t cur_sz = pCurve.size();
 
 	pCurveIsClosed = false;
 	// for curve with less than four points checking is have no sense,
 	if(cur_sz < 4) return;
 
-	for(size_t s = 3, s_e = cur_sz; s < s_e; s++)
-	{
+	for(size_t s = 3, s_e = cur_sz; s < s_e; s++) {
 		// search for first point of duplicated part.
-		if(pCurve[0] == pCurve[s])
-		{
+		if (pCurve[0] == pCurve[s]) {
 			bool found = true;
 
 			// check if tail(indexed by b2) is duplicate of head(indexed by b1).
-			for(size_t b1 = 1, b2 = (s + 1); b2 < cur_sz; b1++, b2++)
-			{
-				if(pCurve[b1] != pCurve[b2])
-				{// points not match: clear flag and break loop.
+			for (size_t b1 = 1, b2 = (s + 1); b2 < cur_sz; b1++, b2++) {
+				if(pCurve[b1] != pCurve[b2]) { // points not match: clear flag and break loop.
 					found = false;
 
 					break;
@@ -445,11 +413,9 @@ static void GeometryHelper_Extrusion_CurveIsClosed(std::vector<TVector>& pCurve,
 			}// for(size_t b1 = 1, b2 = (s + 1); b2 < cur_sz; b1++, b2++)
 
 			// if duplicate tail is found then drop or not it depending on flags.
-			if(found)
-			{
+			if (found) {
 				pCurveIsClosed = true;
-				if(pDropTail)
-				{
+				if (pDropTail) {
 					if(!pRemoveLastPoint) s++;// prepare value for iterator's arithmetics.
 
 					pCurve.erase(pCurve.begin() + s, pCurve.end());// remove tail
@@ -461,32 +427,25 @@ static void GeometryHelper_Extrusion_CurveIsClosed(std::vector<TVector>& pCurve,
 	}// for(size_t s = 3, s_e = (cur_sz - 1); s < s_e; s++)
 }
 
-static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed)
-{
+static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed) {
     const size_t spine_idx_last = pSpine.size() - 1;
     aiVector3D tvec;
 
 	if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))// at first special cases
 	{
-		if(pSpine_Closed)
-		{// If the spine curve is closed: The SCP for the first and last points is the same and is found using (spine[1] - spine[n - 2]) to compute the Y-axis.
+		if(pSpine_Closed) { // If the spine curve is closed: The SCP for the first and last points is the same and is found using (spine[1] - spine[n - 2]) to compute the Y-axis.
 			// As we even for closed spine curve last and first point in pSpine are not the same: duplicates(spine[n - 1] which are equivalent to spine[0])
 			// in tail are removed.
 			// So, last point in pSpine is a spine[n - 2]
 			tvec = pSpine[1] - pSpine[spine_idx_last];
-		}
-		else if(pSpine_PointIdx == 0)
-		{// The Y-axis used for the first point is the vector from spine[0] to spine[1]
+		} else if(pSpine_PointIdx == 0) { // The Y-axis used for the first point is the vector from spine[0] to spine[1]
 			tvec = pSpine[1] - pSpine[0];
-		}
-		else
-		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about dropping tail) spine[n - 1] is
+		} else { // The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about dropping tail) spine[n - 1] is
 			// the spine[0].
 			tvec = pSpine[spine_idx_last] - pSpine[spine_idx_last - 1];
 		}
 	}// if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))
-	else
-	{// For all points other than the first or last: The Y-axis for spine[i] is found by normalizing the vector defined by (spine[i+1] - spine[i-1]).
+	else { // For all points other than the first or last: The Y-axis for spine[i] is found by normalizing the vector defined by (spine[i+1] - spine[i-1]).
 		tvec = pSpine[pSpine_PointIdx + 1] - pSpine[pSpine_PointIdx - 1];
 	}// if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last)) else
 
@@ -494,8 +453,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx
 }
 
 static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed,
-													const aiVector3D pVecZ_Prev)
-{
+	        const aiVector3D pVecZ_Prev) {
     const aiVector3D zero_vec(0);
     const size_t spine_idx_last = pSpine.size() - 1;
 
@@ -505,22 +463,19 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 	if(pSpine.size() < 3)// spine have not enough points for vector calculations.
 	{
 		tvec.Set(0, 0, 1);
-	}
-	else if(pSpine_PointIdx == 0)// special case: first point
+	} else if(pSpine_PointIdx == 0)// special case: first point
 	{
 		if(pSpine_Closed)// for calculating use previous point in curve s[n - 2]. In list it's a last point, because point s[n - 1] was removed as duplicate.
 		{
 			tvec = (pSpine[1] - pSpine[0]) ^ (pSpine[spine_idx_last] - pSpine[0]);
-		}
-		else // for not closed curve first and next point(s[0] and s[1]) has the same vector Z.
+		} else // for not closed curve first and next point(s[0] and s[1]) has the same vector Z.
 		{
 			bool found = false;
 
 			// As said: "If the Z-axis of the first point is undefined (because the spine is not closed and the first two spine segments are collinear)
 			// then the Z-axis for the first spine point with a defined Z-axis is used."
 			// Walk through spine and find Z.
-			for(size_t next_point = 2; (next_point <= spine_idx_last) && !found; next_point++)
-			{
+			for(size_t next_point = 2; (next_point <= spine_idx_last) && !found; next_point++) {
 				// (pSpine[2] - pSpine[1]) ^ (pSpine[0] - pSpine[1])
 				tvec = (pSpine[next_point] - pSpine[next_point - 1]) ^ (pSpine[next_point - 2] - pSpine[next_point - 1]);
 				found = !tvec.Equal(zero_vec);
@@ -532,18 +487,14 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 	}// else if(pSpine_PointIdx == 0)
 	else if(pSpine_PointIdx == spine_idx_last)// special case: last point
 	{
-		if(pSpine_Closed)
-		{// do not forget that real last point s[n - 1] is removed as duplicated. And in this case we are calculating vector Z for point s[n - 2].
+		if (pSpine_Closed) { // do not forget that real last point s[n - 1] is removed as duplicated. And in this case we are calculating vector Z for point s[n - 2].
 			tvec = (pSpine[0] - pSpine[pSpine_PointIdx]) ^ (pSpine[pSpine_PointIdx - 1] - pSpine[pSpine_PointIdx]);
 			// if taken spine vectors are collinear then use previous vector Z.
 			if(tvec.Equal(zero_vec)) tvec = pVecZ_Prev;
-		}
-		else
-		{// vector Z for last point of not closed curve is previous vector Z.
+		} else { // vector Z for last point of not closed curve is previous vector Z.
 			tvec = pVecZ_Prev;
 		}
-	}
-	else// regular point
+	} else // regular point
 	{
 		tvec = (pSpine[pSpine_PointIdx + 1] - pSpine[pSpine_PointIdx]) ^ (pSpine[pSpine_PointIdx - 1] - pSpine[pSpine_PointIdx]);
 		// if taken spine vectors are collinear then use previous vector Z.
@@ -571,8 +522,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 // solid="true"                           SFBool     [initializeOnly]
 // spine="0 0 0 0 1 0"                    MFVec3f    [initializeOnly]
 // />
-void X3DImporter::ParseNode_Geometry3D_Extrusion()
-{
+void X3DImporter::ParseNode_Geometry3D_Extrusion() {
     std::string use, def;
     bool beginCap = true;
     bool ccw = true;
@@ -601,27 +551,20 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Extrusion, ne);
-	}
-	else
-	{
+	} else {
 		//
 		// check if default values must be assigned
 		//
-		if(spine.size() == 0)
-		{
+		if (spine.size() == 0) {
 			spine.resize(2);
 			spine[0].Set(0, 0, 0), spine[1].Set(0, 1, 0);
-		}
-		else if(spine.size() == 1)
-		{
+		} else if(spine.size() == 1) {
 			throw DeadlyImportError("ParseNode_Geometry3D_Extrusion. Spine must have at least two points.");
 		}
 
-		if(crossSection.size() == 0)
-		{
+		if (crossSection.size() == 0) {
 			crossSection.resize(5);
 			crossSection[0].Set(1, 1), crossSection[1].Set(1, -1), crossSection[2].Set(-1, -1), crossSection[3].Set(-1, 1), crossSection[4].Set(1, 1);
 		}
@@ -629,15 +572,13 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		{// orientation
 			size_t ori_size = orientation.size() / 4;
 
-			if(ori_size < spine.size())
-			{
+			if (ori_size < spine.size()) {
 				float add_ori[4];// values that will be added
 
 				if(ori_size == 1)// if "orientation" has one element(means one MFRotation with four components) then use it value for all spine points.
 				{
 					add_ori[0] = orientation[0], add_ori[1] = orientation[1], add_ori[2] = orientation[2], add_ori[3] = orientation[3];
-				}
-				else// else - use default values
+				} else // else - use default values
 				{
 					add_ori[0] = 0, add_ori[1] = 0, add_ori[2] = 1, add_ori[3] = 0;
 				}
@@ -651,8 +592,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		}// END: orientation
 
 		{// scale
-			if(scale.size() < spine.size())
-			{
+			if (scale.size() < spine.size()) {
 				aiVector2D add_sc;
 
 				if(scale.size() == 1)// if "scale" has one element then use it value for all spine points.
@@ -661,16 +601,17 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 					add_sc.Set(1, 1);
 
 				scale.reserve(spine.size());
-				for(size_t i = 0, i_e = (spine.size() - scale.size()); i < i_e; i++) scale.push_back(add_sc);
+				for (size_t i = 0, i_e = (spine.size() - scale.size()); i < i_e; i++)
+                    scale.push_back(add_sc);
 			}
 		}// END: scale
 		//
 		// create and if needed - define new geometry object.
 		//
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_Extrusion, mNodeElementCur);
+		ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_Extrusion, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_IndexedSet& ext_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);// create alias for conveience
+		X3DNodeElementIndexedSet& ext_alias = *((X3DNodeElementIndexedSet*)ne);// create alias for conveience
 		// assign part of input data
 		ext_alias.CCW = ccw;
 		ext_alias.Convex = convex;
@@ -696,8 +637,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
         GeometryHelper_Extrusion_CurveIsClosed(crossSection, true, true, cross_closed);// true - drop tail, true - remove duplicate end.
         GeometryHelper_Extrusion_CurveIsClosed(spine, true, true, spine_closed);// true - drop tail, true - remove duplicate end.
         // If both cap are requested and spine curve is closed then we can make only one cap. Because second cap will be the same surface.
-        if(spine_closed)
-        {
+        if (spine_closed) {
 			beginCap |= endCap;
 			endCap = false;
 		}
@@ -707,8 +647,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 			aiVector3D vecX(0), vecY(0), vecZ(0);
 
 			basis_arr.resize(spine.size());
-			for(size_t i = 0, i_e = spine.size(); i < i_e; i++)
-			{
+			for(size_t i = 0, i_e = spine.size(); i < i_e; i++) {
 				aiVector3D tvec;
 
 				// get axises of basis.
@@ -728,14 +667,12 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 			std::vector<aiVector3D> tcross(crossSection.size());
 
 			pointset_arr.resize(spine.size());
-			for(size_t spi = 0, spi_e = spine.size(); spi < spi_e; spi++)
-			{
+			for(size_t spi = 0, spi_e = spine.size(); spi < spi_e; spi++) {
 				aiVector3D tc23vec;
 
 				tc23vec.Set(scale[spi].x, 0, scale[spi].y);
 				aiMatrix4x4::Scaling(tc23vec, scmat);
-				for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; cri++)
-				{
+				for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; cri++) {
 					aiVector3D tvecX, tvecY, tvecZ;
 
 					tc23vec.Set(crossSection[cri].x, 0, crossSection[cri].y);
@@ -757,29 +694,28 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 
 		{// 3. Create CoordIdx.
 			// add caps if needed
-			if(beginCap)
-			{
+			if (beginCap) {
 				// add cap as polygon. vertices of cap are places at begin, so just add numbers from zero.
-				for(size_t i = 0, i_e = crossSection.size(); i < i_e; i++) ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
+				for(size_t i = 0, i_e = crossSection.size(); i < i_e; i++)
+                    ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
 
 				// add delimiter
 				ext_alias.CoordIndex.push_back(-1);
 			}// if(beginCap)
 
-			if(endCap)
-			{
+			if (endCap) {
 				// add cap as polygon. vertices of cap are places at end, as for beginCap use just sequence of numbers but with offset.
 				size_t beg = (pointset_arr.size() - 1) * crossSection.size();
 
-				for(size_t i = beg, i_e = (beg + crossSection.size()); i < i_e; i++) ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
+				for(size_t i = beg, i_e = (beg + crossSection.size()); i < i_e; i++)
+                    ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
 
 				// add delimiter
 				ext_alias.CoordIndex.push_back(-1);
 			}// if(beginCap)
 
 			// add quads
-			for(size_t spi = 0, spi_e = (spine.size() - 1); spi <= spi_e; spi++)
-			{
+			for(size_t spi = 0, spi_e = (spine.size() - 1); spi <= spi_e; spi++) {
 				const size_t cr_sz = crossSection.size();
 				const size_t cr_last = crossSection.size() - 1;
 
@@ -792,10 +728,8 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 				else
 					break;// if spine curve is not closed then break the loop, because spi is out of range for that type of spine.
 
-				for(size_t cri = 0; cri < cr_sz; cri++)
-				{
-					if(cri != cr_last)
-					{
+				for (size_t cri = 0; cri < cr_sz; cri++) {
+					if (cri != cr_last) {
 						MACRO_FACE_ADD_QUAD(ccw, ext_alias.CoordIndex,
 											static_cast<int32_t>(spi * cr_sz + cri), 
                                             static_cast<int32_t>(right_col * cr_sz + cri), 
@@ -803,8 +737,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
                                             static_cast<int32_t>(spi * cr_sz + cri + 1));
 						// add delimiter
 						ext_alias.CoordIndex.push_back(-1);
-					}
-					else if(cross_closed)// if cross curve is closed then one more quad is needed: between first and last points of curve.
+					} else if(cross_closed) // if cross curve is closed then one more quad is needed: between first and last points of curve.
 					{
 						MACRO_FACE_ADD_QUAD(ccw, ext_alias.CoordIndex,
                                             static_cast<int32_t>(spi * cr_sz + cri), 
@@ -820,10 +753,8 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 
 		{// 4. Create vertices list.
 			// just copy all vertices
-			for(size_t spi = 0, spi_e = spine.size(); spi < spi_e; spi++)
-			{
-				for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; cri++)
-				{
+			for(size_t spi = 0, spi_e = spine.size(); spi < spi_e; spi++) {
+				for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; cri++) {
 					ext_alias.Vertices.push_back(pointset_arr[spi][cri]);
 				}
 			}
@@ -890,20 +821,17 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_IndexedFaceSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if(coordIndex.size() == 0) throw DeadlyImportError("IndexedFaceSet must contain not empty \"coordIndex\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedFaceSet, mNodeElementCur);
+		ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_IndexedFaceSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
+		X3DNodeElementIndexedSet& ne_alias = *((X3DNodeElementIndexedSet*)ne);
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorIndex = colorIndex;
@@ -916,8 +844,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		ne_alias.Solid = solid;
 		ne_alias.TexCoordIndex = texCoordIndex;
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedFaceSet");
 				// check for X3DComposedGeometryNodes
@@ -931,9 +858,8 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 
 			MACRO_NODECHECK_LOOPEND("IndexedFaceSet");
 			ParseHelper_Node_Exit();
-		}// if(!mReader->isEmptyElement())
-		else
-		{
+		} // if(!mReader->isEmptyElement())
+		else {
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
@@ -947,8 +873,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 // radius="1"   SFloat [initializeOnly]
 // solid="true" SFBool [initializeOnly]
 // />
-void X3DImporter::ParseNode_Geometry3D_Sphere()
-{
+void X3DImporter::ParseNode_Geometry3D_Sphere() {
     std::string use, def;
     ai_real radius = 1;
     bool solid = true;
@@ -961,29 +886,25 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Sphere, ne);
-	}
-	else
-	{
+	} else {
 		const unsigned int tess = 3;///TODO: IME tessellation factor through ai_property
 
 		std::vector<aiVector3D> tlist;
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Sphere, mNodeElementCur);
+		ne = new X3DNodeElementGeometry3D(X3DElemType::ENET_Sphere, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		StandardShapes::MakeSphere(tess, tlist);
 		// copy data from temp array and apply scale
-		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it)
-		{
-			((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices.push_back(*it * radius);
+		for(std::vector<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); ++it) {
+			((X3DNodeElementGeometry3D*)ne)->Vertices.push_back(*it * radius);
 		}
 
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->Solid = solid;
-		((CX3DImporter_NodeElement_Geometry3D*)ne)->NumIndices = 3;
+		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
+		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Sphere");

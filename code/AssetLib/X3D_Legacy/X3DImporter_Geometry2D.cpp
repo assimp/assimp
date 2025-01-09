@@ -89,7 +89,7 @@ void X3DImporter::readArc2D() {
 		std::list<aiVector3D> tlist;
 
         X3DGeoHelper::make_arc2D(startAngle, endAngle, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
-		GeometryHelper_Extend_PointToLine(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
+		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
@@ -120,8 +120,7 @@ void X3DImporter::readArc2D() {
 // the center to the start point. A closureType of "CHORD" connects the end point to the start point by defining a straight line segment from the end point
 // to the start point. Textures are applied individually to each face of the ArcClose2D. On the front (+Z) and back (-Z) faces of the ArcClose2D, when
 // viewed from the +Z-axis, the texture is mapped onto each face with the same orientation as if the image were displayed normally in 2D.
-void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
-{
+void X3DImporter::ParseNode_Geometry2D_ArcClose2D() {
     std::string def, use;
     std::string closureType("PIE");
     float endAngle = AI_MATH_HALF_PI_F;
@@ -178,8 +177,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 // USE=""     IDREF
 // radius="1" SFFloat  [initializeOnly]
 // />
-void X3DImporter::ParseNode_Geometry2D_Circle2D()
-{
+void X3DImporter::ParseNode_Geometry2D_Circle2D() {
     std::string def, use;
     float radius = 1;
     X3DNodeElementBase* ne( nullptr );
@@ -201,7 +199,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 		std::list<aiVector3D> tlist;
 
 		X3DGeoHelper::make_arc2D(0, 0, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
-		GeometryHelper_Extend_PointToLine(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
+		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
@@ -261,7 +259,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 			((X3DNodeElementGeometry2D*)ne)->NumIndices = tlist_o.size();
 		} else if(innerRadius == outerRadius) { // make circle
 			// in tlist_o we already have points of circle. convert it to line set.
-			GeometryHelper_Extend_PointToLine(tlist_o, ((X3DNodeElementGeometry2D*)ne)->Vertices);
+			X3DGeoHelper::extend_point_to_line(tlist_o, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 			((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		} else { // make disk
 			std::list<aiVector3D>& vlist = ((X3DNodeElementGeometry2D*)ne)->Vertices;// just short alias.
@@ -270,7 +268,10 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 			//
 			// create quad list from two point lists
 			//
-			if(tlist_i.size() < 2) throw DeadlyImportError("Disk2D. Not enough points for creating quad list.");// tlist_i and tlist_o has equal size.
+			if (tlist_i.size() < 2) {
+                // tlist_i and tlist_o has equal size.
+                throw DeadlyImportError("Disk2D. Not enough points for creating quad list.");
+            }
 
 			// add all quads except last
 			for(std::list<aiVector3D>::iterator it_i = tlist_i.begin(), it_o = tlist_o.begin(); it_i != tlist_i.end();) {
@@ -334,7 +335,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D() {
             tlist.push_back(aiVector3D(it2->x, it2->y, 0));
 
 		// convert point set to line set
-		GeometryHelper_Extend_PointToLine(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
+		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())

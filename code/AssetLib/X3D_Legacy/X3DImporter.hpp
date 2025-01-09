@@ -516,11 +516,6 @@ private:
 	/// \return made point coordinates.
 	aiVector3D GeometryHelper_Make_Point2D(const float pAngle, const float pRadius);
 
-	/// Create line set from point set.
-	/// \param [in] pPoint - input points list.
-	/// \param [out] pLine - made lines list.
-	void GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>& pPoint, std::list<aiVector3D>& pLine);
-
 	/// Create CoordIdx of line set from CoordIdx of polyline set.
 	/// \param [in] pPolylineCoordIdx - vertices indices divided by delimiter "-1". Must contain faces with two or more indices.
 	/// \param [out] pLineCoordIdx - made CoordIdx of line set.

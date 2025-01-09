@@ -248,7 +248,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	//
 	if((pNodeElement.Type == X3DElemType::ENET_Box) || (pNodeElement.Type == X3DElemType::ENET_Cone) ||
 		(pNodeElement.Type == X3DElemType::ENET_Cylinder) || (pNodeElement.Type == X3DElemType::ENET_Sphere)) {
-		CX3DImporter_NodeElement_Geometry3D& tnemesh = *((CX3DImporter_NodeElement_Geometry3D*)&pNodeElement);// create alias for convenience
+		X3DNodeElementGeometry3D& tnemesh = *((X3DNodeElementGeometry3D*)&pNodeElement);// create alias for convenience
 		std::vector<aiVector3D> tarr;
 
 		tarr.reserve(tnemesh.Vertices.size());
@@ -263,7 +263,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	// Parametric figures
 	//
 	if(pNodeElement.Type == X3DElemType::ENET_ElevationGrid) {
-		CX3DImporter_NodeElement_ElevationGrid& tnemesh = *((CX3DImporter_NodeElement_ElevationGrid*)&pNodeElement);// create alias for convenience
+		X3DNodeElementElevationGrid& tnemesh = *((X3DNodeElementElevationGrid*)&pNodeElement);// create alias for convenience
 
 		// at first create mesh from existing vertices.
 		*pMesh = GeometryHelper_MakeMesh(tnemesh.CoordIdx, tnemesh.Vertices);
@@ -287,7 +287,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	// Indexed primitives sets
 	//
 	if(pNodeElement.Type == X3DElemType::ENET_IndexedFaceSet) {
-		CX3DImporter_NodeElement_IndexedSet& tnemesh = *((CX3DImporter_NodeElement_IndexedSet*)&pNodeElement);// create alias for convenience
+		X3DNodeElementIndexedSet& tnemesh = *((X3DNodeElementIndexedSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
@@ -318,7 +318,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	}// if(pNodeElement.Type == X3DElemType::ENET_IndexedFaceSet)
 
 	if(pNodeElement.Type == X3DElemType::ENET_IndexedLineSet) {
-		CX3DImporter_NodeElement_IndexedSet& tnemesh = *((CX3DImporter_NodeElement_IndexedSet*)&pNodeElement);// create alias for convenience
+		X3DNodeElementIndexedSet& tnemesh = *((X3DNodeElementIndexedSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
@@ -347,7 +347,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	if((pNodeElement.Type == X3DElemType::ENET_IndexedTriangleSet) ||
 		(pNodeElement.Type == X3DElemType::ENET_IndexedTriangleFanSet) ||
 		(pNodeElement.Type == X3DElemType::ENET_IndexedTriangleStripSet)) {
-		CX3DImporter_NodeElement_IndexedSet& tnemesh = *((CX3DImporter_NodeElement_IndexedSet*)&pNodeElement);// create alias for convenience
+		X3DNodeElementIndexedSet& tnemesh = *((X3DNodeElementIndexedSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
@@ -380,7 +380,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	}// if((pNodeElement.Type == X3DElemType::ENET_IndexedTriangleFanSet) || (pNodeElement.Type == X3DElemType::ENET_IndexedTriangleStripSet))
 
 	if(pNodeElement.Type == X3DElemType::ENET_Extrusion) {
-		CX3DImporter_NodeElement_IndexedSet& tnemesh = *((CX3DImporter_NodeElement_IndexedSet*)&pNodeElement);// create alias for convenience
+		X3DNodeElementIndexedSet& tnemesh = *((X3DNodeElementIndexedSet*)&pNodeElement);// create alias for convenience
 
 		*pMesh = GeometryHelper_MakeMesh(tnemesh.CoordIndex, tnemesh.Vertices);
 

@@ -43,4 +43,26 @@ void X3DGeoHelper::make_arc2D(const float pStartAngle, const float pEndAngle, co
     if(angle_full == AI_MATH_TWO_PI_F) pVertices.push_back(*pVertices.begin());
 }
 
+void X3DGeoHelper::extend_point_to_line(const std::list<aiVector3D>& pPoint, std::list<aiVector3D>& pLine) {
+    std::list<aiVector3D>::const_iterator pit = pPoint.begin();
+    std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
+
+    --pit_last;
+
+    if ( pPoint.size() < 2 ) {
+        throw DeadlyImportError( "GeometryHelper_Extend_PointToLine.pPoint.size() can not be less than 2." );
+    }
+
+    // add first point of first line.
+    pLine.push_back(*pit++);
+    // add internal points
+    while(pit != pit_last) {
+        pLine.push_back(*pit);// second point of previous line
+        pLine.push_back(*pit);// first point of next line
+        ++pit;
+    }
+    // add last point of last line
+    pLine.push_back(*pit);
+}
+
 } // namespace Assimp

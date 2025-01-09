@@ -464,9 +464,9 @@ public:
 
 };// class X3DNodeElementGeometry2D
 
-/// \class CX3DImporter_NodeElement_Geometry3D
+/// \class X3DNodeElementGeometry3D
 /// Three-dimensional body.
-class CX3DImporter_NodeElement_Geometry3D : public X3DNodeElementBase {
+class X3DNodeElementGeometry3D : public X3DNodeElementBase {
 public:
 	std::list<aiVector3D> Vertices;  ///< Vertices list.
 	size_t                NumIndices;///< Number of indices in one face.
@@ -475,7 +475,7 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Geometry3D(const X3DElemType pType, X3DNodeElementBase* pParent)
+	X3DNodeElementGeometry3D(const X3DElemType pType, X3DNodeElementBase* pParent)
 	: X3DNodeElementBase(pType, pParent)
 	, Vertices()
 	, NumIndices( 0 )
@@ -485,15 +485,15 @@ public:
 
 private:
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode);
+	X3DNodeElementGeometry3D(const X3DNodeElementGeometry3D& pNode);
 
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode);
-};// class CX3DImporter_NodeElement_Geometry3D
+	X3DNodeElementGeometry3D& operator=(const X3DNodeElementGeometry3D& pNode);
+};// class X3DNodeElementGeometry3D
 
-/// \class CX3DImporter_NodeElement_ElevationGrid
+/// \class X3DNodeElementElevationGrid
 /// Uniform rectangular grid of varying height.
-class CX3DImporter_NodeElement_ElevationGrid : public CX3DImporter_NodeElement_Geometry3D
+class X3DNodeElementElevationGrid : public X3DNodeElementGeometry3D
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -515,29 +515,29 @@ public:
 
 private:
 
-	/// \fn CX3DImporter_NodeElement_ElevationGrid(const CX3DImporter_NodeElement_ElevationGrid& pNode)
+	/// \fn X3DNodeElementElevationGrid(const X3DNodeElementElevationGrid& pNode)
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_ElevationGrid(const CX3DImporter_NodeElement_ElevationGrid& pNode);
+	X3DNodeElementElevationGrid(const X3DNodeElementElevationGrid& pNode);
 
-	/// \fn CX3DImporter_NodeElement_ElevationGrid& operator=(const CX3DImporter_NodeElement_ElevationGrid& pNode)
+	/// \fn X3DNodeElementElevationGrid& operator=(const X3DNodeElementElevationGrid& pNode)
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement_ElevationGrid& operator=(const CX3DImporter_NodeElement_ElevationGrid& pNode);
+	X3DNodeElementElevationGrid& operator=(const X3DNodeElementElevationGrid& pNode);
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
+	X3DNodeElementElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
+		: X3DNodeElementGeometry3D(pType, pParent)
 	{}
 
-};// class CX3DImporter_NodeElement_IndexedSet
+};// class X3DNodeElementIndexedSet
 
-/// \class CX3DImporter_NodeElement_IndexedSet
+/// \class X3DNodeElementIndexedSet
 /// Shape with indexed vertices.
-class CX3DImporter_NodeElement_IndexedSet : public CX3DImporter_NodeElement_Geometry3D
+class X3DNodeElementIndexedSet : public X3DNodeElementGeometry3D
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -575,29 +575,29 @@ public:
 
 private:
 
-	/// \fn CX3DImporter_NodeElement_IndexedSet(const CX3DImporter_NodeElement_IndexedSet& pNode)
+	/// \fn X3DNodeElementIndexedSet(const X3DNodeElementIndexedSet& pNode)
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_IndexedSet(const CX3DImporter_NodeElement_IndexedSet& pNode);
+	X3DNodeElementIndexedSet(const X3DNodeElementIndexedSet& pNode);
 
-	/// \fn CX3DImporter_NodeElement_IndexedSet& operator=(const CX3DImporter_NodeElement_IndexedSet& pNode)
+	/// \fn X3DNodeElementIndexedSet& operator=(const X3DNodeElementIndexedSet& pNode)
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement_IndexedSet& operator=(const CX3DImporter_NodeElement_IndexedSet& pNode);
+	X3DNodeElementIndexedSet& operator=(const X3DNodeElementIndexedSet& pNode);
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementIndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
+	X3DNodeElementIndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
+		: X3DNodeElementGeometry3D(pType, pParent)
 	{}
 
-};// class CX3DImporter_NodeElement_IndexedSet
+};// class X3DNodeElementIndexedSet
 
 /// \class CX3DImporter_NodeElement_Set
 /// Shape with set of vertices.
-class CX3DImporter_NodeElement_Set : public CX3DImporter_NodeElement_Geometry3D
+class CX3DImporter_NodeElement_Set : public X3DNodeElementGeometry3D
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -641,7 +641,7 @@ public:
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
 	CX3DImporter_NodeElement_Set(const X3DElemType pType, X3DNodeElementBase* pParent)
-		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
+		: X3DNodeElementGeometry3D(pType, pParent)
 	{}
 
 };// class CX3DImporter_NodeElement_Set

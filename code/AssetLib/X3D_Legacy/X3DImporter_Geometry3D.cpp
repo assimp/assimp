@@ -69,7 +69,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
     std::string def, use;
     bool solid = true;
     aiVector3D size(2, 2, 2);
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -118,7 +118,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
     float height = 2;
     bool side = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -190,7 +190,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
     bool side = true;
     bool solid = true;
     bool top = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -293,7 +293,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
     float xSpacing = 1;
     int32_t zDimension = 0;
     float zSpacing = 1;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -584,7 +584,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
     std::vector<aiVector2D> scale;
     bool solid = true;
     std::vector<aiVector3D> spine;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -873,7 +873,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
     bool normalPerVertex = true;
     bool solid = true;
     std::vector<int32_t> texCoordIndex;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -952,7 +952,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
     std::string use, def;
     ai_real radius = 1;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

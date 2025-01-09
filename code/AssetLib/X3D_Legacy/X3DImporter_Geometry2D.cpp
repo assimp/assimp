@@ -46,8 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
-#include "X3DImporter_Node.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DImporter_Node.hpp"
+#include "X3DGeoHelper.h"
 
 namespace Assimp {
 
@@ -67,7 +68,7 @@ void X3DImporter::readArc2D() {
     float endAngle = AI_MATH_HALF_PI_F;
     float radius = 1;
     float startAngle = 0;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -87,7 +88,7 @@ void X3DImporter::readArc2D() {
 		// create point list of geometry object and convert it to line set.
 		std::list<aiVector3D> tlist;
 
-		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
+        X3DGeoHelper::make_arc2D(startAngle, endAngle, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
 		GeometryHelper_Extend_PointToLine(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
@@ -127,7 +128,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
     float radius = 1;
     bool solid = false;
     float startAngle = 0;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -148,7 +149,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 
 		((X3DNodeElementGeometry2D*)ne)->Solid = solid;
 		// create point list of geometry object.
-		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, ((X3DNodeElementGeometry2D*)ne)->Vertices);///TODO: IME - AI_CONFIG for NumSeg
+		X3DGeoHelper::make_arc2D(startAngle, endAngle, radius, 10, ((X3DNodeElementGeometry2D*)ne)->Vertices);///TODO: IME - AI_CONFIG for NumSeg
 		// add chord or two radiuses only if not a circle was defined
 		if(!((std::fabs(endAngle - startAngle) >= AI_MATH_TWO_PI_F) || (endAngle == startAngle))) {
 			std::list<aiVector3D>& vlist = ((X3DNodeElementGeometry2D*)ne)->Vertices;// just short alias.
@@ -181,7 +182,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 {
     std::string def, use;
     float radius = 1;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -199,7 +200,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 		// create point list of geometry object and convert it to line set.
 		std::list<aiVector3D> tlist;
 
-		GeometryHelper_Make_Arc2D(0, 0, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
+		X3DGeoHelper::make_arc2D(0, 0, radius, 10, tlist);///TODO: IME - AI_CONFIG for NumSeg
 		GeometryHelper_Extend_PointToLine(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
@@ -230,7 +231,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
     float innerRadius = 0;
     float outerRadius = 1;
     bool solid = false;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -253,7 +254,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 
 		// create point list of geometry object.
 		///TODO: IME - AI_CONFIG for NumSeg
-		GeometryHelper_Make_Arc2D(0, 0, outerRadius, 10, tlist_o);// outer circle
+		X3DGeoHelper::make_arc2D(0, 0, outerRadius, 10, tlist_o);// outer circle
 		if(innerRadius == 0.0f) { // make filled disk
 			// in tlist_o we already have points of circle. just copy it and sign as polygon.
 			((X3DNodeElementGeometry2D*)ne)->Vertices = tlist_o;
@@ -265,7 +266,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 		} else { // make disk
 			std::list<aiVector3D>& vlist = ((X3DNodeElementGeometry2D*)ne)->Vertices;// just short alias.
 
-			GeometryHelper_Make_Arc2D(0, 0, innerRadius, 10, tlist_i);// inner circle
+			X3DGeoHelper::make_arc2D(0, 0, innerRadius, 10, tlist_i);// inner circle
 			//
 			// create quad list from two point lists
 			//
@@ -308,7 +309,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 void X3DImporter::ParseNode_Geometry2D_Polyline2D() {
     std::string def, use;
     std::list<aiVector2D> lineSegments;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -353,7 +354,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D() {
 void X3DImporter::ParseNode_Geometry2D_Polypoint2D() {
     std::string def, use;
     std::list<aiVector2D> point;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -394,7 +395,7 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D() {
     std::string def, use;
     aiVector2D size(2, 2);
     bool solid = false;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -442,7 +443,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D() {
     std::string def, use;
     bool solid = false;
     std::list<aiVector2D> vertices;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

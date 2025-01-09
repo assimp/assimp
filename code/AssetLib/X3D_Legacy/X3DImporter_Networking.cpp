@@ -81,7 +81,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 
 	// if "USE" defined then find already defined element.
 	if (!use.empty()) {
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {

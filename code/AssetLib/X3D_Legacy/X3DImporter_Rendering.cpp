@@ -59,7 +59,7 @@ namespace Assimp {
 void X3DImporter::readColor() {
     std::string use, def;
     std::list<aiColor3D> color;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -93,7 +93,7 @@ void X3DImporter::readColor() {
 void X3DImporter::readColorRGBA() {
     std::string use, def;
     std::list<aiColor4D> color;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -127,7 +127,7 @@ void X3DImporter::readColorRGBA() {
 void X3DImporter::ParseNode_Rendering_Coordinate() {
     std::string use, def;
     std::list<aiVector3D> point;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -170,7 +170,7 @@ void X3DImporter::readIndexedLineSet() {
     std::vector<int32_t> colorIndex;
     bool colorPerVertex = true;
     std::vector<int32_t> coordIndex;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -240,7 +240,7 @@ void X3DImporter::readIndexedTriangleFanSet() {
     std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -342,7 +342,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet() {
     std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -441,7 +441,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
     std::vector<int32_t> index;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -532,7 +532,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 void X3DImporter::ParseNode_Rendering_LineSet() {
     std::string use, def;
     std::vector<int32_t> vertexCount;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -599,7 +599,7 @@ void X3DImporter::ParseNode_Rendering_LineSet() {
 // </PointSet>
 void X3DImporter::ParseNode_Rendering_PointSet() {
     std::string use, def;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -657,7 +657,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet() {
     std::vector<int32_t> fanCount;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -761,7 +761,7 @@ void X3DImporter::ParseNode_Rendering_TriangleSet() {
     bool colorPerVertex = true;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -832,7 +832,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
     std::vector<int32_t> stripCount;
     bool normalPerVertex = true;
     bool solid = true;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -938,7 +938,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 void X3DImporter::ParseNode_Rendering_Normal() {
 std::string use, def;
 std::list<aiVector3D> vector;
-CX3DImporter_NodeElement* ne;
+X3DNodeElementBase* ne;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

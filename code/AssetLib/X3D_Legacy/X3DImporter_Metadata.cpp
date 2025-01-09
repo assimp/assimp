@@ -106,7 +106,7 @@ bool X3DImporter::ParseHelper_CheckRead_X3DMetadataObject()
 	return true;
 }
 
-void X3DImporter::ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& /*pNodeName*/)
+void X3DImporter::ParseNode_Metadata(X3DNodeElementBase* pParentElement, const std::string& /*pNodeName*/)
 {
 	ParseHelper_Node_Enter(pParentElement);
 	MACRO_NODECHECK_METADATA(mReader->getNodeName());
@@ -125,7 +125,7 @@ void X3DImporter::ParseNode_MetadataBoolean()
     std::string def, use;
     std::string name, reference;
     std::vector<bool> value;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -149,7 +149,7 @@ void X3DImporter::ParseNode_MetadataDouble()
     std::string def, use;
     std::string name, reference;
     std::vector<double> value;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -173,7 +173,7 @@ void X3DImporter::ParseNode_MetadataFloat()
     std::string def, use;
     std::string name, reference;
     std::vector<float> value;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -197,7 +197,7 @@ void X3DImporter::ParseNode_MetadataInteger()
     std::string def, use;
     std::string name, reference;
     std::vector<int32_t> value;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -219,7 +219,7 @@ void X3DImporter::ParseNode_MetadataSet()
 {
     std::string def, use;
     std::string name, reference;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -257,7 +257,7 @@ void X3DImporter::ParseNode_MetadataString()
     std::string def, use;
     std::string name, reference;
     std::list<std::string> value;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

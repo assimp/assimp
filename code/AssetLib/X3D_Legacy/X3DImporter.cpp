@@ -148,7 +148,7 @@ void X3DImporter::Clear() {
 	mNodeElementCur = nullptr;
 	// Delete all elements
 	if(!NodeElement_List.empty()) {
-        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it ) {
+        for ( std::list<X3DNodeElementBase*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it ) {
             delete *it;
         }
 		NodeElement_List.clear();
@@ -160,9 +160,9 @@ void X3DImporter::Clear() {
 /************************************************************ Functions: find set ************************************************************/
 /*********************************************************************************************************************************************/
 
-bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement)
+bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, X3DNodeElementBase** pElement)
 {
-	for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it)
+	for(std::list<X3DNodeElementBase*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it)
 	{
 		if(((*it)->Type == pType) && ((*it)->ID == pID))
 		{
@@ -170,13 +170,13 @@ bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const X3DElem
 
 			return true;
 		}
-	}// for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++)
+	}// for(std::list<X3DNodeElementBase*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++)
 
 	return false;
 }
 
-bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID,
-													const X3DElemType pType, CX3DImporter_NodeElement** pElement)
+bool X3DImporter::FindNodeElement_FromNode(X3DNodeElementBase* pStartNode, const std::string& pID,
+													const X3DElemType pType, X3DNodeElementBase** pElement)
 {
     bool found = false;// flag: true - if requested element is found.
 
@@ -193,23 +193,23 @@ bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode,
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
 
 	// Check childs of pStartNode.
-	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Children.begin(); ch_it != pStartNode->Children.end(); ++ch_it)
+	for(std::list<X3DNodeElementBase*>::iterator ch_it = pStartNode->Children.begin(); ch_it != pStartNode->Children.end(); ++ch_it)
 	{
 		found = FindNodeElement_FromNode(*ch_it, pID, pType, pElement);
         if ( found )
         {
             break;
         }
-	}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = it->Child.begin(); ch_it != it->Child.end(); ch_it++)
+	}// for(std::list<X3DNodeElementBase*>::iterator ch_it = it->Child.begin(); ch_it != it->Child.end(); ch_it++)
 
 fne_fn_end:
 
 	return found;
 }
 
-bool X3DImporter::FindNodeElement(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement)
+bool X3DImporter::FindNodeElement(const std::string& pID, const X3DElemType pType, X3DNodeElementBase** pElement)
 {
-    CX3DImporter_NodeElement* tnd = mNodeElementCur;// temporary pointer to node.
+    X3DNodeElementBase* tnd = mNodeElementCur;// temporary pointer to node.
     bool static_search = false;// flag: true if searching in static node.
 
     // At first check if we have deal with static node. Go up through parent nodes and check flag.
@@ -787,48 +787,6 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListS(const int pAttrIdx, std::list<
 /****************************************************** Functions: geometry helper set  ******************************************************/
 /*********************************************************************************************************************************************/
 
-aiVector3D X3DImporter::GeometryHelper_Make_Point2D(const float pAngle, const float pRadius)
-{
-	return aiVector3D(pRadius * std::cos(pAngle), pRadius * std::sin(pAngle), 0);
-}
-
-void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments,
-												std::list<aiVector3D>& pVertices)
-{
-	// check argument values ranges.
-    if ( ( pStartAngle < -AI_MATH_TWO_PI_F ) || ( pStartAngle > AI_MATH_TWO_PI_F ) )
-    {
-        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pStartAngle" );
-    }
-    if ( ( pEndAngle < -AI_MATH_TWO_PI_F ) || ( pEndAngle > AI_MATH_TWO_PI_F ) )
-    {
-        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pEndAngle" );
-    }
-    if ( pRadius <= 0 )
-    {
-        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pRadius" );
-    }
-
-	// calculate arc angle and check type of arc
-	float angle_full = std::fabs(pEndAngle - pStartAngle);
-    if ( ( angle_full > AI_MATH_TWO_PI_F ) || ( angle_full == 0.0f ) )
-    {
-        angle_full = AI_MATH_TWO_PI_F;
-    }
-
-	// calculate angle for one step - angle to next point of line.
-	float angle_step = angle_full / (float)pNumSegments;
-	// make points
-	for(size_t pi = 0; pi <= pNumSegments; pi++)
-	{
-		float tangle = pStartAngle + pi * angle_step;
-		pVertices.push_back(GeometryHelper_Make_Point2D(tangle, pRadius));
-	}// for(size_t pi = 0; pi <= pNumSegments; pi++)
-
-	// if we making full circle then add last vertex equal to first vertex
-	if(angle_full == AI_MATH_TWO_PI_F) pVertices.push_back(*pVertices.begin());
-}
-
 void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>& pPoint, std::list<aiVector3D>& pLine)
 {
     std::list<aiVector3D>::const_iterator pit = pPoint.begin();
@@ -1373,7 +1331,7 @@ void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 	mNodeElementCur = new_group;// switch current element to new one.
 }
 
-void X3DImporter::ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode)
+void X3DImporter::ParseHelper_Node_Enter(X3DNodeElementBase* pNode)
 {
 	mNodeElementCur->Children.push_back(pNode);// add new element to current element child list.
 	mNodeElementCur = pNode;// switch current element to new one.

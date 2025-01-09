@@ -853,6 +853,7 @@ ADD_ASSIMP_IMPORTER( X
 
 IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     ADD_ASSIMP_IMPORTER( X3D
+            AssetLib/X3D_Legacy/X3DGeoHelper.cpp
             AssetLib/X3D_Legacy/X3DImporter.cpp
             AssetLib/X3D_Legacy/X3DImporter_Geometry2D.cpp
             AssetLib/X3D_Legacy/X3DImporter_Geometry3D.cpp

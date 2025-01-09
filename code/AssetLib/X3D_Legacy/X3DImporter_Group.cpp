@@ -73,7 +73,7 @@ void X3DImporter::startReadGroup() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -114,7 +114,7 @@ void X3DImporter::startReadStaticGroup() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -159,7 +159,7 @@ void X3DImporter::startReadSwitch() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		CX3DImporter_NodeElement* ne;
+		X3DNodeElementBase* ne;
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {
@@ -248,7 +248,7 @@ void X3DImporter::startReadTransform() {
 
 	// if "USE" defined then find already defined element.
 	if(!use.empty()) {
-		CX3DImporter_NodeElement* ne( nullptr );
+		X3DNodeElementBase* ne( nullptr );
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	} else {

@@ -105,9 +105,9 @@ enum X3DElemType {
     ENET_Invalid                 ///< Element has invalid type and possible contain invalid data.
 };
 
-/// \class CX3DImporter_NodeElement
+/// \class X3DNodeElementBase
 /// Base class for elements of nodes.
-class CX3DImporter_NodeElement
+class X3DNodeElementBase
 {
 	/***********************************************/
 	/******************** Types ********************/
@@ -130,33 +130,33 @@ public:
 public:
 
 	std::string ID;///< ID of the element. Can be empty. In X3D synonym for "ID" attribute.
-	CX3DImporter_NodeElement* Parent;///< Parent element. If nullptr then this node is root.
-	std::list<CX3DImporter_NodeElement*> Children;///< Child elements.
+	X3DNodeElementBase* Parent;///< Parent element. If nullptr then this node is root.
+	std::list<X3DNodeElementBase*> Children;///< Child elements.
 
 	/***********************************************/
 	/****************** Functions ******************/
 	/***********************************************/
 
     /// @brief  The destructor, virtual.
-    virtual ~CX3DImporter_NodeElement() {
+    virtual ~X3DNodeElementBase() {
         // empty
     }
 
 private:
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement(const CX3DImporter_NodeElement& pNodeElement);
+	X3DNodeElementBase(const X3DNodeElementBase& pNodeElement);
 
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement& operator=(const CX3DImporter_NodeElement& pNodeElement);
+	X3DNodeElementBase& operator=(const X3DNodeElementBase& pNodeElement);
 
 	/// Disabled default constructor.
-	CX3DImporter_NodeElement();
+	X3DNodeElementBase();
 
 protected:
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - parent element.
-	CX3DImporter_NodeElement(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	X3DNodeElementBase(const X3DElemType pType, X3DNodeElementBase* pParent)
 		: Type(pType), Parent(pParent)
 	{}
 };// class IX3DImporter_NodeElement
@@ -164,7 +164,7 @@ protected:
 /// \class CX3DImporter_NodeElement_Group
 /// Class that define grouping node. Define transformation matrix for children.
 /// Also can select which child will be kept and others are removed.
-class CX3DImporter_NodeElement_Group : public CX3DImporter_NodeElement
+class CX3DImporter_NodeElement_Group : public X3DNodeElementBase
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -207,15 +207,15 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pStatic - static node flag.
-	CX3DImporter_NodeElement_Group(CX3DImporter_NodeElement* pParent, const bool pStatic = false)
-		: CX3DImporter_NodeElement(ENET_Group, pParent), Static(pStatic), UseChoice(false)
+	CX3DImporter_NodeElement_Group(X3DNodeElementBase* pParent, const bool pStatic = false)
+		: X3DNodeElementBase(ENET_Group, pParent), Static(pStatic), UseChoice(false)
 	{}
 
 };// class CX3DImporter_NodeElement_Group
 
 /// \class CX3DImporter_NodeElement_Meta
 /// This struct describe metavalue.
-class CX3DImporter_NodeElement_Meta : public CX3DImporter_NodeElement
+class CX3DImporter_NodeElement_Meta : public X3DNodeElementBase
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -249,12 +249,12 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Meta(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Meta(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Meta(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(pType, pParent)
+	CX3DImporter_NodeElement_Meta(const X3DElemType pType, X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(pType, pParent)
 	{}
 
 };// class CX3DImporter_NodeElement_Meta
@@ -265,10 +265,10 @@ struct CX3DImporter_NodeElement_MetaBoolean : public CX3DImporter_NodeElement_Me
 {
 	std::vector<bool> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaBoolean(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaBoolean(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaBoolean(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaBoolean(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaBoolean, pParent)
 	{}
 
@@ -280,10 +280,10 @@ struct CX3DImporter_NodeElement_MetaDouble : public CX3DImporter_NodeElement_Met
 {
 	std::vector<double> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaDouble(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaDouble(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaDouble(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaDouble(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaDouble, pParent)
 	{}
 
@@ -295,10 +295,10 @@ struct CX3DImporter_NodeElement_MetaFloat : public CX3DImporter_NodeElement_Meta
 {
 	std::vector<float> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaFloat(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaFloat(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaFloat(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaFloat(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaFloat, pParent)
 	{}
 
@@ -310,10 +310,10 @@ struct CX3DImporter_NodeElement_MetaInteger : public CX3DImporter_NodeElement_Me
 {
 	std::vector<int32_t> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaInteger(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaInteger(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaInteger(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaInteger(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaInteger, pParent)
 	{}
 
@@ -325,10 +325,10 @@ struct CX3DImporter_NodeElement_MetaSet : public CX3DImporter_NodeElement_Meta
 {
 	std::list<CX3DImporter_NodeElement_Meta> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaSet(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaSet(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaSet(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaSet(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaSet, pParent)
 	{}
 
@@ -340,10 +340,10 @@ struct CX3DImporter_NodeElement_MetaString : public CX3DImporter_NodeElement_Met
 {
 	std::list<std::string> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_MetaString(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_MetaString(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_MetaString(CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_MetaString(X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Meta(ENET_MetaString, pParent)
 	{}
 
@@ -351,82 +351,82 @@ struct CX3DImporter_NodeElement_MetaString : public CX3DImporter_NodeElement_Met
 
 /// \struct CX3DImporter_NodeElement_Color
 /// This struct hold <Color> value.
-struct CX3DImporter_NodeElement_Color : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Color : public X3DNodeElementBase
 {
 	std::list<aiColor3D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_Color(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Color(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Color(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Color, pParent)
+	CX3DImporter_NodeElement_Color(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_Color, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Color
 
 /// \struct CX3DImporter_NodeElement_ColorRGBA
 /// This struct hold <ColorRGBA> value.
-struct CX3DImporter_NodeElement_ColorRGBA : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_ColorRGBA : public X3DNodeElementBase
 {
 	std::list<aiColor4D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_ColorRGBA(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_ColorRGBA(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_ColorRGBA(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_ColorRGBA, pParent)
+	CX3DImporter_NodeElement_ColorRGBA(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_ColorRGBA, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_ColorRGBA
 
 /// \struct CX3DImporter_NodeElement_Coordinate
 /// This struct hold <Coordinate> value.
-struct CX3DImporter_NodeElement_Coordinate : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Coordinate : public X3DNodeElementBase
 {
 	std::list<aiVector3D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_Coordinate(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Coordinate(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Coordinate(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Coordinate, pParent)
+	CX3DImporter_NodeElement_Coordinate(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_Coordinate, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Coordinate
 
 /// \struct CX3DImporter_NodeElement_Normal
 /// This struct hold <Normal> value.
-struct CX3DImporter_NodeElement_Normal : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Normal : public X3DNodeElementBase
 {
 	std::list<aiVector3D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_Normal(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Normal(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Normal(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Normal, pParent)
+	CX3DImporter_NodeElement_Normal(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_Normal, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Normal
 
 /// \struct CX3DImporter_NodeElement_TextureCoordinate
 /// This struct hold <TextureCoordinate> value.
-struct CX3DImporter_NodeElement_TextureCoordinate : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_TextureCoordinate : public X3DNodeElementBase
 {
 	std::list<aiVector2D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_TextureCoordinate(CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_TextureCoordinate(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_TextureCoordinate(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_TextureCoordinate, pParent)
+	CX3DImporter_NodeElement_TextureCoordinate(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_TextureCoordinate, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_TextureCoordinate
 
 /// \class X3DNodeElementGeometry2D
 /// Two-dimensional figure.
-class X3DNodeElementGeometry2D : public CX3DImporter_NodeElement
+class X3DNodeElementGeometry2D : public X3DNodeElementBase
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -454,19 +454,19 @@ private:
 
 public:
 
-	/// \fn X3DNodeElementGeometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn X3DNodeElementGeometry2D(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	X3DNodeElementGeometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(pType, pParent), Solid(true)
+	X3DNodeElementGeometry2D(const X3DElemType pType, X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(pType, pParent), Solid(true)
 	{}
 
 };// class X3DNodeElementGeometry2D
 
 /// \class CX3DImporter_NodeElement_Geometry3D
 /// Three-dimensional body.
-class CX3DImporter_NodeElement_Geometry3D : public CX3DImporter_NodeElement {
+class CX3DImporter_NodeElement_Geometry3D : public X3DNodeElementBase {
 public:
 	std::list<aiVector3D> Vertices;  ///< Vertices list.
 	size_t                NumIndices;///< Number of indices in one face.
@@ -475,8 +475,8 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Geometry3D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
-	: CX3DImporter_NodeElement(pType, pParent)
+	CX3DImporter_NodeElement_Geometry3D(const X3DElemType pType, X3DNodeElementBase* pParent)
+	: X3DNodeElementBase(pType, pParent)
 	, Vertices()
 	, NumIndices( 0 )
 	, Solid(true) {
@@ -525,11 +525,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_ElevationGrid(const X3DElemType pType, X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -585,11 +585,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_IndexedSet(const X3DElemType pType, X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -636,11 +636,11 @@ private:
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Set(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Set(const X3DElemType pType, X3DNodeElementBase* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Set(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	CX3DImporter_NodeElement_Set(const X3DElemType pType, X3DNodeElementBase* pParent)
 		: CX3DImporter_NodeElement_Geometry3D(pType, pParent)
 	{}
 
@@ -648,33 +648,33 @@ public:
 
 /// \struct CX3DImporter_NodeElement_Shape
 /// This struct hold <Shape> value.
-struct CX3DImporter_NodeElement_Shape : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Shape : public X3DNodeElementBase
 {
 	/// \fn CX3DImporter_NodeElement_Shape(CX3DImporter_NodeElement_Shape* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Shape(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Shape, pParent)
+	CX3DImporter_NodeElement_Shape(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_Shape, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Shape
 
 /// \struct CX3DImporter_NodeElement_Appearance
 /// This struct hold <Appearance> value.
-struct CX3DImporter_NodeElement_Appearance : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Appearance : public X3DNodeElementBase
 {
 	/// \fn CX3DImporter_NodeElement_Appearance(CX3DImporter_NodeElement_Appearance* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Appearance(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Appearance, pParent)
+	CX3DImporter_NodeElement_Appearance(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_Appearance, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Appearance
 
 /// \class CX3DImporter_NodeElement_Material
 /// Material.
-class CX3DImporter_NodeElement_Material : public CX3DImporter_NodeElement {
+class CX3DImporter_NodeElement_Material : public X3DNodeElementBase {
 public:
 	float     AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
 	aiColor3D DiffuseColor;    ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
@@ -686,8 +686,8 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Material(CX3DImporter_NodeElement* pParent)
-	: CX3DImporter_NodeElement(ENET_Material, pParent)
+	CX3DImporter_NodeElement_Material(X3DNodeElementBase* pParent)
+	: X3DNodeElementBase(ENET_Material, pParent)
 	, AmbientIntensity( 0.0f )
 	, DiffuseColor()
 	, EmissiveColor()
@@ -707,7 +707,7 @@ private:
 
 /// \struct CX3DImporter_NodeElement_ImageTexture
 /// This struct hold <ImageTexture> value.
-struct CX3DImporter_NodeElement_ImageTexture : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_ImageTexture : public X3DNodeElementBase
 {
 	/// \var RepeatS
 	/// RepeatS and RepeatT, that specify how the texture wraps in the S and T directions. If repeatS is TRUE (the default), the texture map is repeated
@@ -719,15 +719,15 @@ struct CX3DImporter_NodeElement_ImageTexture : public CX3DImporter_NodeElement
 	/// \fn CX3DImporter_NodeElement_ImageTexture(CX3DImporter_NodeElement_ImageTexture* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_ImageTexture(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_ImageTexture, pParent)
+	CX3DImporter_NodeElement_ImageTexture(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_ImageTexture, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_ImageTexture
 
 /// \struct CX3DImporter_NodeElement_TextureTransform
 /// This struct hold <TextureTransform> value.
-struct CX3DImporter_NodeElement_TextureTransform : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_TextureTransform : public X3DNodeElementBase
 {
 	aiVector2D Center;///< Specifies a translation offset in texture coordinate space about which the rotation and scale fields are applied.
 	float Rotation;///< Specifies a rotation in angle base units of the texture coordinates about the center point after the scale has been applied.
@@ -737,15 +737,15 @@ struct CX3DImporter_NodeElement_TextureTransform : public CX3DImporter_NodeEleme
 	/// \fn CX3DImporter_NodeElement_TextureTransform(CX3DImporter_NodeElement_TextureTransform* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_TextureTransform(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_TextureTransform, pParent)
+	CX3DImporter_NodeElement_TextureTransform(X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(ENET_TextureTransform, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_TextureTransform
 
 /// \struct CX3DImporter_NodeElement_Light
 /// This struct hold <TextureTransform> value.
-struct CX3DImporter_NodeElement_Light : public CX3DImporter_NodeElement
+struct CX3DImporter_NodeElement_Light : public X3DNodeElementBase
 {
 	float AmbientIntensity;///< Specifies the intensity of the ambient emission from the light.
 	aiColor3D Color;///< specifies the spectral colour properties of both the direct and ambient light emission as an RGB value.
@@ -764,12 +764,12 @@ struct CX3DImporter_NodeElement_Light : public CX3DImporter_NodeElement
 	float BeamWidth;///< Specifies an inner solid angle in which the light source emits light at uniform full intensity.
 	float CutOffAngle;///< The light source's emission intensity drops off from the inner solid angle (beamWidth) to the outer solid angle (cutOffAngle).
 
-	/// \fn CX3DImporter_NodeElement_Light(X3DElemType pLightType, CX3DImporter_NodeElement* pParent)
+	/// \fn CX3DImporter_NodeElement_Light(X3DElemType pLightType, X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pLightType - type of the light source.
-	CX3DImporter_NodeElement_Light(X3DElemType pLightType, CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(pLightType, pParent)
+	CX3DImporter_NodeElement_Light(X3DElemType pLightType, X3DNodeElementBase* pParent)
+		: X3DNodeElementBase(pLightType, pParent)
 	{}
 
 };// struct CX3DImporter_NodeElement_Light

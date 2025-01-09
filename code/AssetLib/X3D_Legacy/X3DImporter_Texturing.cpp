@@ -64,7 +64,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture() {
     bool repeatS = true;
     bool repeatT = true;
     std::list<std::string> url;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -107,7 +107,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture() {
 void X3DImporter::ParseNode_Texturing_TextureCoordinate() {
     std::string use, def;
     std::list<aiVector2D> point;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -147,7 +147,7 @@ void X3DImporter::ParseNode_Texturing_TextureTransform() {
     float rotation = 0;
     aiVector2D scale(1, 1);
     aiVector2D translation(0, 0);
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

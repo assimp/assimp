@@ -194,7 +194,7 @@ namespace Assimp {
 class X3DImporter : public BaseImporter
 {
 public:
-    std::list<CX3DImporter_NodeElement*> NodeElement_List;///< All elements of scene graph.
+    std::list<X3DNodeElementBase*> NodeElement_List;///< All elements of scene graph.
 
 public:
     /***********************************************/
@@ -246,7 +246,7 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement_FromRoot(const std::string& pID, const X3DElemType pType, X3DNodeElementBase** pElement);
 
 	/// Find requested node element. Search will be made from pointed node down to childs.
 	/// \param [in] pStartNode - pointer to start node.
@@ -254,15 +254,15 @@ private:
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID, const X3DElemType pType,
-									CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement_FromNode(X3DNodeElementBase* pStartNode, const std::string& pID, const X3DElemType pType,
+									X3DNodeElementBase** pElement);
 
 	/// Find requested node element. For "Node"'s accounting flag "Static".
 	/// \param [in] pName - name of requested element.
 	/// \param [in] pType - type of requested element.
 	/// \param [out] pElement - pointer to pointer to item found.
 	/// \return true - if the element is found, else - false.
-	bool FindNodeElement(const std::string& pName, const X3DElemType pType, CX3DImporter_NodeElement** pElement);
+	bool FindNodeElement(const std::string& pName, const X3DElemType pType, X3DNodeElementBase** pElement);
 
 	/***********************************************/
 	/********* Functions: postprocess set **********/
@@ -274,7 +274,7 @@ private:
 	/// Check if child elements of node element is metadata and add it to temporary list.
 	/// \param [in] pNodeElement - node element where metadata is searching.
 	/// \param [out] pList - temporary list for collected metadata.
-	void PostprocessHelper_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, std::list<CX3DImporter_NodeElement*>& pList) const;
+	void PostprocessHelper_CollectMetadata(const X3DNodeElementBase& pNodeElement, std::list<X3DNodeElementBase*>& pList) const;
 
 	/// Check if type of node element is metadata. E.g. <MetadataSet>, <MetadataString>.
 	/// \param [in] pType - checked type.
@@ -289,28 +289,28 @@ private:
 	/// Read CX3DImporter_NodeElement_Light, create aiLight and add it to list of the lights.
 	/// \param [in] pNodeElement - reference to lisght element(<DirectionalLight>, <PointLight>, <SpotLight>).
 	/// \param [out] pSceneLightList - reference to list of the lights.
-	void Postprocess_BuildLight(const CX3DImporter_NodeElement& pNodeElement, std::list<aiLight*>& pSceneLightList) const;
+	void Postprocess_BuildLight(const X3DNodeElementBase& pNodeElement, std::list<aiLight*>& pSceneLightList) const;
 
-	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
+	/// Create filled structure with type \ref aiMaterial from \ref X3DNodeElementBase. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to material element(<Appearance>).
 	/// \param [out] pMaterial - pointer to pointer to created material. *pMaterial must be nullptr.
-	void Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNodeElement, aiMaterial** pMaterial) const;
+	void Postprocess_BuildMaterial(const X3DNodeElementBase& pNodeElement, aiMaterial** pMaterial) const;
 
-	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
+	/// Create filled structure with type \ref aiMaterial from \ref X3DNodeElementBase. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to geometry object.
 	/// \param [out] pMesh - pointer to pointer to created mesh. *pMesh must be nullptr.
-	void Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeElement, aiMesh** pMesh) const;
+	void Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, aiMesh** pMesh) const;
 
-	/// Create aiNode from CX3DImporter_NodeElement. Also function check children and make recursive call.
+	/// Create aiNode from X3DNodeElementBase. Also function check children and make recursive call.
 	/// \param [out] pNode - pointer to pointer to created node. *pNode must be nullptr.
-	/// \param [in] pNodeElement - CX3DImporter_NodeElement which read.
+	/// \param [in] pNodeElement - X3DNodeElementBase which read.
 	/// \param [out] pSceneNode - aiNode for filling.
 	/// \param [out] pSceneMeshList - list with aiMesh which belong to scene.
 	/// \param [out] pSceneMaterialList - list with aiMaterial which belong to scene.
 	/// \param [out] pSceneLightList - list with aiLight which belong to scene.
-	void Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
+	void Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
 								std::list<aiMaterial*>& pSceneMaterialList, std::list<aiLight*>& pSceneLightList) const;
 
 	/// To create mesh and material kept in <Schape>.
@@ -324,7 +324,7 @@ private:
 	/// Check if child elements of node element is metadata and add it to scene node.
 	/// \param [in] pNodeElement - node element where metadata is searching.
 	/// \param [out] pSceneNode - scene node in which metadata will be added.
-	void Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode) const;
+	void Postprocess_CollectMetadata(const X3DNodeElementBase& pNodeElement, aiNode& pSceneNode) const;
 
 	/***********************************************/
 	/************* Functions: throw set ************/
@@ -516,16 +516,6 @@ private:
 	/// \return made point coordinates.
 	aiVector3D GeometryHelper_Make_Point2D(const float pAngle, const float pRadius);
 
-	/// Make 2D figure - linear circular arc with center in (0, 0). The z-coordinate is 0. The arc extends from the pStartAngle counterclockwise
-	/// to the pEndAngle. If pStartAngle and pEndAngle have the same value, a circle is specified. If the absolute difference between pStartAngle
-	/// and pEndAngle is greater than or equal to 2pi, a circle is specified.
-	/// \param [in] pStartAngle - angle in radians of start of the arc.
-	/// \param [in] pEndAngle - angle in radians of end of the arc.
-	/// \param [in] pRadius - radius of the arc.
-	/// \param [out] pNumSegments - number of segments in arc. In other words - tessellation factor.
-	/// \param [out] pVertices - generated vertices.
-	void GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments, std::list<aiVector3D>& pVertices);
-
 	/// Create line set from point set.
 	/// \param [in] pPoint - input points list.
 	/// \param [out] pLine - made lines list.
@@ -612,7 +602,7 @@ private:
 
 	/// Make pNode as current and enter deeper for parsing child nodes. At end \ref ParseHelper_Node_Exit must be called.
 	/// \param [in] pNode - new current node.
-	void ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode);
+	void ParseHelper_Node_Enter(X3DNodeElementBase* pNode);
 
 	/// This function must be called when exiting from X3D group node(e.g. </Group>). \ref ParseHelper_Group_Begin.
 	void ParseHelper_Node_Exit();
@@ -649,7 +639,7 @@ private:
 	/// \param [in] pNodeName - parsed node name. Must be set because that function is general and name needed for checking the end
 	/// and error reporing.
 	/// \param [in] pParentElement - parent metadata element.
-	void ParseNode_Metadata(CX3DImporter_NodeElement* pParentElement, const std::string& pNodeName);
+	void ParseNode_Metadata(X3DNodeElementBase* pParentElement, const std::string& pNodeName);
 
 	/// Parse <MetadataBoolean> node of the file.
 	void ParseNode_MetadataBoolean();
@@ -824,7 +814,7 @@ private:
     /***********************************************/
     /****************** Variables ******************/
     /***********************************************/
-    CX3DImporter_NodeElement* mNodeElementCur;///< Current element.
+    X3DNodeElementBase* mNodeElementCur;///< Current element.
     std::unique_ptr<FIReader> mReader;///< Pointer to XML-reader object
     IOSystem *mpIOHandler;
 };// class X3DImporter

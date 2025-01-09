@@ -68,7 +68,7 @@ namespace Assimp {
 // NOTE Geometry nodes that represent lines or points do not support lighting.
 void X3DImporter::ParseNode_Shape_Shape() {
     std::string use, def;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -139,7 +139,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 // </Appearance>
 void X3DImporter::ParseNode_Shape_Appearance() {
     std::string use, def;
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -192,7 +192,7 @@ void X3DImporter::ParseNode_Shape_Material() {
     aiColor3D diffuseColor(0.8f, 0.8f, 0.8f);
     aiColor3D emissiveColor(0, 0, 0);
     aiColor3D specularColor(0, 0, 0);
-    CX3DImporter_NodeElement* ne( nullptr );
+    X3DNodeElementBase* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

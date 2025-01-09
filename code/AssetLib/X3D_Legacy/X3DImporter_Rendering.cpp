@@ -139,10 +139,10 @@ void X3DImporter::ParseNode_Rendering_Coordinate() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Coordinate, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Coordinate(mNodeElementCur);
+		ne = new X3DNodeElementCoordinate(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Coordinate*)ne)->Value = point;
+		((X3DNodeElementCoordinate*)ne)->Value = point;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Coordinate");
@@ -547,10 +547,10 @@ void X3DImporter::ParseNode_Rendering_LineSet() {
 		if (vertexCount.size() == 0) throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_LineSet, mNodeElementCur);
+		ne = new X3DNodeElementSet(X3DElemType::ENET_LineSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
+		X3DNodeElementSet& ne_alias = *((X3DNodeElementSet*)ne);
 
 		ne_alias.VertexCount = vertexCount;
 		// create CoordIdx
@@ -676,10 +676,10 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet() {
 		if(fanCount.size() == 0) throw DeadlyImportError("TriangleFanSet must contain not empty \"fanCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleFanSet, mNodeElementCur);
+		ne = new X3DNodeElementSet(X3DElemType::ENET_TriangleFanSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
+		X3DNodeElementSet& ne_alias = *((X3DNodeElementSet*)ne);
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
@@ -779,7 +779,7 @@ void X3DImporter::ParseNode_Rendering_TriangleSet() {
 		ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_TriangleSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
+		X3DNodeElementSet& ne_alias = *((X3DNodeElementSet*)ne);
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
@@ -851,10 +851,10 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 		if(stripCount.size() == 0) throw DeadlyImportError("TriangleStripSet must contain not empty \"stripCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleStripSet, mNodeElementCur);
+		ne = new X3DNodeElementSet(X3DElemType::ENET_TriangleStripSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
+		X3DNodeElementSet& ne_alias = *((X3DNodeElementSet*)ne);
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;

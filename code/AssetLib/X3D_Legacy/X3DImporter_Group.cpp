@@ -169,8 +169,8 @@ void X3DImporter::startReadSwitch() {
 		if(!def.empty()) mNodeElementCur->ID = def;
 
 		// also set values specific to this type of group
-		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->UseChoice = true;
-		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->Choice = whichChoice;
+		((X3DNodeElementGroup*)mNodeElementCur)->UseChoice = true;
+		((X3DNodeElementGroup*)mNodeElementCur)->Choice = whichChoice;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -277,7 +277,7 @@ void X3DImporter::startReadTransform() {
 		aiMatrix4x4::Translation(-center, tmatr);// -C
 		matr *= tmatr;
 		// and assign it
-		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->Transformation = matr;
+		((X3DNodeElementGroup*)mNodeElementCur)->Transformation = matr;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place

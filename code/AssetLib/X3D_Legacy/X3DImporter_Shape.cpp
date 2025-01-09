@@ -79,7 +79,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Shape, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Shape(mNodeElementCur);
+		ne = new X3DNodeElementShape(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes

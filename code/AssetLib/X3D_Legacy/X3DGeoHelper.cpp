@@ -38,7 +38,7 @@ void X3DGeoHelper::make_arc2D(const float pStartAngle, const float pEndAngle, co
     for (size_t pi = 0; pi <= numSegments; pi++) {
         float tangle = pStartAngle + pi * angle_step;
         pVertices.push_back(make_point2D(tangle, pRadius));
-    }// for(size_t pi = 0; pi <= numSegments; pi++)
+    }// for(size_t pi = 0; pi <= pNumSegments; pi++)
 
     // if we making full circle then add last vertex equal to first vertex
     if(angle_full == AI_MATH_TWO_PI_F) pVertices.push_back(*pVertices.begin());
@@ -410,6 +410,72 @@ void X3DGeoHelper::add_normal(aiMesh& pMesh, const std::list<aiVector3D>& pNorma
             ++norm_it;
         }
     }// if(pNormalPerVertex) else
+}
+
+void X3DGeoHelper::add_tex_coord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
+        const std::list<aiVector2D>& pTexCoords) {
+    std::vector<aiVector3D> texcoord_arr_copy;
+    std::vector<aiFace> faces;
+    unsigned int prim_type;
+
+    // copy list to array because we are need indexed access to normals.
+    texcoord_arr_copy.reserve(pTexCoords.size());
+    for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it)
+    {
+        texcoord_arr_copy.push_back(aiVector3D((*it).x, (*it).y, 0));
+    }
+
+    if(pTexCoordIdx.size() > 0)
+    {
+        X3DGeoHelper::coordIdx_str2faces_arr(pTexCoordIdx, faces, prim_type);
+        if ( faces.empty() )
+        {
+            throw DeadlyImportError( "Failed to add texture coordinates to mesh, faces list is empty." );
+        }
+        if ( faces.size() != pMesh.mNumFaces )
+        {
+            throw DeadlyImportError( "Texture coordinates faces count must be equal to mesh faces count." );
+        }
+    }
+    else
+    {
+        X3DGeoHelper::coordIdx_str2faces_arr(pCoordIdx, faces, prim_type);
+    }
+
+    pMesh.mTextureCoords[0] = new aiVector3D[pMesh.mNumVertices];
+    pMesh.mNumUVComponents[0] = 2;
+    for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++) {
+        if(pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
+            throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + ai_to_string(fi) + ".");
+
+        for(size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++) {
+            size_t vert_idx = pMesh.mFaces[fi].mIndices[ii];
+            size_t tc_idx = faces.at(fi).mIndices[ii];
+
+            pMesh.mTextureCoords[0][vert_idx] = texcoord_arr_copy.at(tc_idx);
+        }
+    }// for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
+}
+
+void X3DGeoHelper::add_tex_coord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) {
+    std::vector<aiVector3D> tc_arr_copy;
+
+    if ( pTexCoords.size() != pMesh.mNumVertices ) {
+        throw DeadlyImportError( "MeshGeometry_AddTexCoord. Texture coordinates and vertices count must be equal." );
+    }
+
+    // copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
+    tc_arr_copy.reserve(pTexCoords.size());
+    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it ) {
+        tc_arr_copy.push_back( aiVector3D( ( *it ).x, ( *it ).y, static_cast<ai_real>(0) ) );
+    }
+
+    // copy texture coordinates to mesh
+    pMesh.mTextureCoords[0] = new aiVector3D[pMesh.mNumVertices];
+    pMesh.mNumUVComponents[0] = 2;
+    for ( size_t i = 0; i < pMesh.mNumVertices; i++ ) {
+        pMesh.mTextureCoords[ 0 ][ i ] = tc_arr_copy[ i ];
+    }
 }
 
 aiMesh* X3DGeoHelper::make_mesh(const std::vector<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) {

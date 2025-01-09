@@ -29,6 +29,9 @@ public:
     static void add_normal(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pNormalIdx,
             const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex);
     static void add_normal(aiMesh& pMesh, const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex);
+    static void add_tex_coord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
+            const std::list<aiVector2D>& pTexCoords);
+    static void add_tex_coord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords);
     static aiMesh* make_mesh(const std::vector<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices);
 };
 

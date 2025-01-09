@@ -218,7 +218,7 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const X3DElemType pTyp
     {
 		if(tnd->Type == X3DElemType::ENET_Group)
 		{
-			if(((CX3DImporter_NodeElement_Group*)tnd)->Static)
+			if(((X3DNodeElementGroup*)tnd)->Static)
 			{
 				static_search = true;// Flag found, stop walking up. Node with static flag will holded in tnd variable.
 				break;
@@ -812,86 +812,13 @@ void X3DImporter::GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int
 	}// while(plit != pPolylineCoordIdx.end())
 }
 
-void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
-								const std::list<aiVector2D>& pTexCoords) const
-{
-    std::vector<aiVector3D> texcoord_arr_copy;
-    std::vector<aiFace> faces;
-    unsigned int prim_type;
-
-	// copy list to array because we are need indexed access to normals.
-	texcoord_arr_copy.reserve(pTexCoords.size());
-	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it)
-	{
-		texcoord_arr_copy.push_back(aiVector3D((*it).x, (*it).y, 0));
-	}
-
-	if(pTexCoordIdx.size() > 0)
-	{
-		X3DGeoHelper::coordIdx_str2faces_arr(pTexCoordIdx, faces, prim_type);
-        if ( faces.empty() )
-        {
-            throw DeadlyImportError( "Failed to add texture coordinates to mesh, faces list is empty." );
-        }
-        if ( faces.size() != pMesh.mNumFaces )
-        {
-            throw DeadlyImportError( "Texture coordinates faces count must be equal to mesh faces count." );
-        }
-	}
-	else
-	{
-		X3DGeoHelper::coordIdx_str2faces_arr(pCoordIdx, faces, prim_type);
-	}
-
-	pMesh.mTextureCoords[0] = new aiVector3D[pMesh.mNumVertices];
-	pMesh.mNumUVComponents[0] = 2;
-	for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
-	{
-		if(pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
-			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: ", to_string(fi), ".");
-
-		for(size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++)
-		{
-			size_t vert_idx = pMesh.mFaces[fi].mIndices[ii];
-			size_t tc_idx = faces.at(fi).mIndices[ii];
-
-			pMesh.mTextureCoords[0][vert_idx] = texcoord_arr_copy.at(tc_idx);
-		}
-	}// for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
-}
-
-void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) const
-{
-    std::vector<aiVector3D> tc_arr_copy;
-
-    if ( pTexCoords.size() != pMesh.mNumVertices )
-    {
-        throw DeadlyImportError( "MeshGeometry_AddTexCoord. Texture coordinates and vertices count must be equal." );
-    }
-
-	// copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
-	tc_arr_copy.reserve(pTexCoords.size());
-    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); ++it )
-    {
-        tc_arr_copy.push_back( aiVector3D( ( *it ).x, ( *it ).y, 0 ) );
-    }
-
-	// copy texture coordinates to mesh
-	pMesh.mTextureCoords[0] = new aiVector3D[pMesh.mNumVertices];
-	pMesh.mNumUVComponents[0] = 2;
-    for ( size_t i = 0; i < pMesh.mNumVertices; i++ )
-    {
-        pMesh.mTextureCoords[ 0 ][ i ] = tc_arr_copy[ i ];
-    }
-}
-
 /*********************************************************************************************************************************************/
 /************************************************************ Functions: parse set ***********************************************************/
 /*********************************************************************************************************************************************/
 
 void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 {
-    CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(mNodeElementCur, pStatic);// create new node with current node as parent.
+    X3DNodeElementGroup* new_group = new X3DNodeElementGroup(mNodeElementCur, pStatic);// create new node with current node as parent.
 
 	// if we are adding not the root element then add new element to current element child list.
     if ( mNodeElementCur != nullptr )
@@ -1019,7 +946,7 @@ void X3DImporter::ParseNode_Head()
 
 				// adding metadata from <head> as MetaString from <Scene>
                 bool added( false );
-                CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(mNodeElementCur);
+                X3DNodeElementMetaString* ms = new X3DNodeElementMetaString(mNodeElementCur);
 
 				ms->Name = mReader->getAttributeValueSafe("name");
 				// name must not be empty

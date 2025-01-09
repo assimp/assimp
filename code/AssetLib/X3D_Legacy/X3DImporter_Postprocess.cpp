@@ -59,8 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <string>
 
-using namespace std;
-
 namespace Assimp {
 
 aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const {
@@ -73,7 +71,7 @@ aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const {
 	if(cur_node != nullptr) {
 		do {
 			// if cur_node is group then store group transformation matrix in list.
-			if(cur_node->Type == X3DElemType::ENET_Group) matr.push_back(((CX3DImporter_NodeElement_Group*)cur_node)->Transformation);
+			if(cur_node->Type == X3DElemType::ENET_Group) matr.push_back(((X3DNodeElementGroup*)cur_node)->Transformation);
 
 			cur_node = cur_node->Parent;
 		} while(cur_node != nullptr);
@@ -163,7 +161,7 @@ void X3DImporter::Postprocess_BuildLight(const X3DNodeElementBase& pNodeElement,
 
 			break;
 		default:
-			throw DeadlyImportError("Postprocess_BuildLight. Unknown type of light: ", to_string(pNodeElement.Type), ".");
+			throw DeadlyImportError("Postprocess_BuildLight. Unknown type of light: " + ai_to_string(pNodeElement.Type) + ".");
 	}
 
 	pSceneLightList.push_back(new_light);
@@ -179,8 +177,7 @@ void X3DImporter::Postprocess_BuildMaterial(const X3DNodeElementBase& pNodeEleme
 
 	// at this point pNodeElement point to <Appearance> node. Walk through childs and add all stored data.
 	for(std::list<X3DNodeElementBase*>::const_iterator el_it = pNodeElement.Children.begin(); el_it != pNodeElement.Children.end(); ++el_it) {
-		if((*el_it)->Type == X3DElemType::ENET_Material)
-		{
+		if((*el_it)->Type == X3DElemType::ENET_Material) {
 			aiColor3D tcol3;
 			float tvalf;
 			X3DNodeElementMaterial& tnemat = *((X3DNodeElementMaterial*)*el_it);
@@ -276,9 +273,9 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh,  ((X3DNodeElementNormal*)*ch_it)->Value, tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of ElevationGrid: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of ElevationGrid: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
@@ -292,7 +289,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -303,15 +300,15 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColorRGBA*)*ch_it)->Value,
 										tnemesh.ColorPerVertex);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedFaceSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedFaceSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
@@ -323,7 +320,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -338,7 +335,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate){
             } // skip because already read when mesh created.
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedLineSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedLineSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
@@ -352,7 +349,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -364,16 +361,17 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColorRGBA*)*ch_it)->Value,
 										tnemesh.ColorPerVertex);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedTriangleSet or IndexedTriangleFanSet, or \
-																	IndexedTriangleStripSet: " + to_string((*ch_it)->Type) + ".");
+																	IndexedTriangleStripSet: " +
+                                        ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
@@ -391,16 +389,16 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 	// Primitives sets
 	//
 	if(pNodeElement.Type == X3DElemType::ENET_PointSet) {
-		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
+		X3DNodeElementSet& tnemesh = *((X3DNodeElementSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
 				std::vector<aiVector3D> vec_copy;
 
-				vec_copy.reserve(((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.size());
-				for(std::list<aiVector3D>::const_iterator it = ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.begin();
-					    it != ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.end(); ++it) {
+				vec_copy.reserve(((X3DNodeElementCoordinate*)*ch_it)->Value.size());
+				for(std::list<aiVector3D>::const_iterator it = ((X3DNodeElementCoordinate*)*ch_it)->Value.begin();
+					    it != ((X3DNodeElementCoordinate*)*ch_it)->Value.end(); ++it) {
 					vec_copy.push_back(*it);
 				}
 
@@ -415,22 +413,22 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, true);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of PointSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of PointSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == X3DElemType::ENET_PointSet)
 
 	if(pNodeElement.Type == X3DElemType::ENET_LineSet) {
-		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
+		X3DNodeElementSet& tnemesh = *((X3DNodeElementSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -441,22 +439,22 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, true);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of LineSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of LineSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == X3DElemType::ENET_LineSet)
 
 	if(pNodeElement.Type == X3DElemType::ENET_TriangleFanSet) {
-		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
+		X3DNodeElementSet& tnemesh = *((X3DNodeElementSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -469,31 +467,31 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value,tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleFanSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeFanSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == X3DElemType::ENET_TriangleFanSet)
 
 	if(pNodeElement.Type == X3DElemType::ENET_TriangleSet) {
-		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
+		X3DNodeElementSet& tnemesh = *((X3DNodeElementSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
 				std::vector<aiVector3D> vec_copy;
 
-				vec_copy.reserve(((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.size());
-				for(std::list<aiVector3D>::const_iterator it = ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.begin();
-					it != ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value.end(); ++it) {
+				vec_copy.reserve(((X3DNodeElementCoordinate*)*ch_it)->Value.size());
+				for(std::list<aiVector3D>::const_iterator it = ((X3DNodeElementCoordinate*)*ch_it)->Value.begin();
+					it != ((X3DNodeElementCoordinate*)*ch_it)->Value.end(); ++it) {
 					vec_copy.push_back(*it);
 				}
 
@@ -508,27 +506,27 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == X3DElemType::ENET_TriangleSet)
 
 	if(pNodeElement.Type == X3DElemType::ENET_TriangleStripSet) {
-		CX3DImporter_NodeElement_Set& tnemesh = *((CX3DImporter_NodeElement_Set*)&pNodeElement);// create alias for convenience
+		X3DNodeElementSet& tnemesh = *((X3DNodeElementSet*)&pNodeElement);// create alias for convenience
 
 		// at first search for <Coordinate> node and create mesh.
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((CX3DImporter_NodeElement_Coordinate*)*ch_it)->Value);
+				*pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate*)*ch_it)->Value);
 			}
 		}
 
@@ -539,21 +537,21 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
 				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
-			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
-				{} // skip because already read when mesh created.
+			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
+            } // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
 				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
+				X3DGeoHelper::add_tex_coord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleStripSet: ", to_string((*ch_it)->Type), ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleStripSet: " + ai_to_string((*ch_it)->Type) + ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == X3DElemType::ENET_TriangleStripSet)
 
-	throw DeadlyImportError("Postprocess_BuildMesh. Unknown mesh type: ", to_string(pNodeElement.Type), ".");
+	throw DeadlyImportError("Postprocess_BuildMesh. Unknown mesh type: " + ai_to_string(pNodeElement.Type) + ".");
 }
 
 void X3DImporter::Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
@@ -567,7 +565,7 @@ void X3DImporter::Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, 
 	Postprocess_CollectMetadata(pNodeElement, pSceneNode);
 	// check if we have deal with grouping node. Which can contain transformation or switch
 	if(pNodeElement.Type == X3DElemType::ENET_Group) {
-		const CX3DImporter_NodeElement_Group& tne_group = *((CX3DImporter_NodeElement_Group*)&pNodeElement);// create alias for convenience
+		const X3DNodeElementGroup& tne_group = *((X3DNodeElementGroup*)&pNodeElement);// create alias for convenience
 
 		pSceneNode.mTransformation = tne_group.Transformation;
 		if(tne_group.UseChoice) {
@@ -597,13 +595,13 @@ void X3DImporter::Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, 
 			Postprocess_BuildNode(**it, *new_node, pSceneMeshList, pSceneMaterialList, pSceneLightList);
 		} else if((*it)->Type == X3DElemType::ENET_Shape) {
 			// shape can contain only one geometry and one appearance nodes.
-			Postprocess_BuildShape(*((CX3DImporter_NodeElement_Shape*)*it), SceneNode_Mesh, pSceneMeshList, pSceneMaterialList);
+			Postprocess_BuildShape(*((X3DNodeElementShape *)*it), SceneNode_Mesh, pSceneMeshList, pSceneMaterialList);
 		} else if(((*it)->Type == X3DElemType::ENET_DirectionalLight) || ((*it)->Type == X3DElemType::ENET_PointLight) ||
 				((*it)->Type == X3DElemType::ENET_SpotLight)) {
 			Postprocess_BuildLight(*((X3DNodeElementLight*)*it), pSceneLightList);
 		} else if(!PostprocessHelper_ElementIsMetadata((*it)->Type))// skip metadata
 		{
-			throw DeadlyImportError("Postprocess_BuildNode. Unknown type: ", to_string((*it)->Type), ".");
+			throw DeadlyImportError("Postprocess_BuildNode. Unknown type: " + ai_to_string((*it)->Type) + ".");
 		}
 	}// for(std::list<X3DNodeElementBase*>::const_iterator it = chit_begin; it != chit_end; it++)
 
@@ -629,7 +627,7 @@ void X3DImporter::Postprocess_BuildNode(const X3DNodeElementBase& pNodeElement, 
 	// that's all. return to previous deals
 }
 
-void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
+void X3DImporter::Postprocess_BuildShape(const X3DNodeElementShape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
 							std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList) const {
     aiMaterial* tmat = nullptr;
     aiMesh* tmesh = nullptr;
@@ -654,7 +652,7 @@ void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& p
 				pSceneMaterialList.push_back(tmat);
 			}
 		}
-	} // for(std::list<X3DNodeElementBase*>::const_iterator it = pShapeNodeElement.Child.begin(); it != pShapeNodeElement.Child.end(); it++)
+	} // for(std::list<X3DNodeElementBase*>::const_iterator it = pShapeNodeElement.Children.begin(); it != pShapeNodeElement.Children.end(); it++)
 
 	// associate read material with read mesh.
 	if((tmesh != nullptr) && (tmat != nullptr)) {
@@ -699,27 +697,25 @@ void X3DImporter::Postprocess_CollectMetadata(const X3DNodeElementBase& pNodeEle
         pSceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(meta_list.size()) );
 		meta_idx = 0;
 		for(std::list<X3DNodeElementBase*>::const_iterator it = meta_list.begin(); it != meta_list.end(); ++it, ++meta_idx) {
-			CX3DImporter_NodeElement_Meta* cur_meta = (CX3DImporter_NodeElement_Meta*)*it;
+			X3DNodeElementMeta* cur_meta = (X3DNodeElementMeta*)*it;
 
 			// due to limitations we can add only first element of value list.
 			// Add an element according to its type.
 			if((*it)->Type == X3DElemType::ENET_MetaBoolean) {
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0) {
-					const bool v = (bool) *( ( (CX3DImporter_NodeElement_MetaBoolean*) cur_meta )->Value.begin());
-                    pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, v);
-                }
+				if(((X3DNodeElementMetaBoolean*)cur_meta)->Value.size() > 0)
+                    pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((X3DNodeElementMetaBoolean*) cur_meta )->Value.begin()) == true);
 			} else if((*it)->Type == X3DElemType::ENET_MetaDouble) {
-				if(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, (float)*(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.begin()));
+				if(((X3DNodeElementMetaDouble*)cur_meta)->Value.size() > 0)
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, (float)*(((X3DNodeElementMetaDouble*)cur_meta)->Value.begin()));
 			} else if((*it)->Type == X3DElemType::ENET_MetaFloat) {
-				if(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.begin()));
+				if(((X3DNodeElementMetaFloat*)cur_meta)->Value.size() > 0)
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((X3DNodeElementMetaFloat*)cur_meta)->Value.begin()));
 			} else if((*it)->Type == X3DElemType::ENET_MetaInteger) {
-				if(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.begin()));
+				if(((X3DNodeElementMetaInt*)cur_meta)->Value.size() > 0)
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((X3DNodeElementMetaInt*)cur_meta)->Value.begin()));
 			} else if((*it)->Type == X3DElemType::ENET_MetaString) {
-				if(((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.size() > 0) {
-					aiString tstr(((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.begin()->data());
+				if(((X3DNodeElementMetaString*)cur_meta)->Value.size() > 0) {
+					aiString tstr(((X3DNodeElementMetaString*)cur_meta)->Value.begin()->data());
 
 					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, tstr);
 				}

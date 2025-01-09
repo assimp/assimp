@@ -134,7 +134,7 @@ void X3DImporter::ParseNode_MetadataBoolean()
 		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrB);
 	MACRO_ATTRREAD_LOOPEND;
 
-	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaBoolean, "MetadataBoolean", ENET_MetaBoolean);
+	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, X3DNodeElementMetaBoolean, "MetadataBoolean", ENET_MetaBoolean);
 }
 
 // <MetadataDouble
@@ -158,7 +158,7 @@ void X3DImporter::ParseNode_MetadataDouble()
 		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrD);
 	MACRO_ATTRREAD_LOOPEND;
 
-	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaDouble, "MetadataDouble", ENET_MetaDouble);
+	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, X3DNodeElementMetaDouble, "MetadataDouble", ENET_MetaDouble);
 }
 
 // <MetadataFloat
@@ -182,7 +182,7 @@ void X3DImporter::ParseNode_MetadataFloat()
 		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrF);
 	MACRO_ATTRREAD_LOOPEND;
 
-	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaFloat, "MetadataFloat", ENET_MetaFloat);
+	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, X3DNodeElementMetaFloat, "MetadataFloat", ENET_MetaFloat);
 }
 
 // <MetadataInteger
@@ -206,7 +206,7 @@ void X3DImporter::ParseNode_MetadataInteger()
 		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrI32);
 	MACRO_ATTRREAD_LOOPEND;
 
-	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaInteger, "MetadataInteger", ENET_MetaInteger);
+	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, X3DNodeElementMetaInt, "MetadataInteger", ENET_MetaInteger);
 }
 
 // <MetadataSet
@@ -266,7 +266,7 @@ void X3DImporter::ParseNode_MetadataString()
 		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsListS);
 	MACRO_ATTRREAD_LOOPEND;
 
-	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaString, "MetadataString", ENET_MetaString);
+	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, X3DNodeElementMetaString, "MetadataString", ENET_MetaString);
 }
 
 }// namespace Assimp

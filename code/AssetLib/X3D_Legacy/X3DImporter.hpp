@@ -318,7 +318,7 @@ private:
 	/// \param pNodeMeshInd - reference to list with mesh indices. When pShapeNodeElement will read new mesh index will be added to this list.
 	/// \param pSceneMeshList - reference to list with meshes. When pShapeNodeElement will read new mesh will be added to this list.
 	/// \param pSceneMaterialList - reference to list with materials. When pShapeNodeElement will read new material will be added to this list.
-	void Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
+	void Postprocess_BuildShape(const X3DNodeElementShape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
 								std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList) const;
 
 	/// Check if child elements of node element is metadata and add it to scene node.
@@ -514,13 +514,6 @@ private:
 	/// \param [in] pPolylineCoordIdx - vertices indices divided by delimiter "-1". Must contain faces with two or more indices.
 	/// \param [out] pLineCoordIdx - made CoordIdx of line set.
 	void GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int32_t>& pPolylineCoordIdx, std::list<int32_t>& pLineCoordIdx);
-
-    /// Add texture coordinates to mesh. Function work similar to \ref add_color;
-	void MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
-								const std::list<aiVector2D>& pTexCoords) const;
-
-    /// Add texture coordinates to mesh. Function work similar to \ref add_color;
-	void MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) const;
 
 	/***********************************************/
 	/******** Functions: parse set private *********/

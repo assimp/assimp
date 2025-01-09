@@ -286,7 +286,7 @@ private:
 	/// \return true - if the type corresponds to the mesh.
 	bool PostprocessHelper_ElementIsMesh(const X3DElemType pType) const;
 
-	/// Read CX3DImporter_NodeElement_Light, create aiLight and add it to list of the lights.
+	/// Read X3DNodeElementLight, create aiLight and add it to list of the lights.
 	/// \param [in] pNodeElement - reference to lisght element(<DirectionalLight>, <PointLight>, <SpotLight>).
 	/// \param [out] pSceneLightList - reference to list of the lights.
 	void Postprocess_BuildLight(const X3DNodeElementBase& pNodeElement, std::list<aiLight*>& pSceneLightList) const;
@@ -510,27 +510,10 @@ private:
 	/******* Functions: geometry helper set  *******/
 	/***********************************************/
 
-	/// Make point on surface oXY.
-	/// \param [in] pAngle - angle in radians between radius-vector of point and oX axis. Angle extends from the oX axis counterclockwise to the radius-vector.
-	/// \param [in] pRadius - length of radius-vector.
-	/// \return made point coordinates.
-	aiVector3D GeometryHelper_Make_Point2D(const float pAngle, const float pRadius);
-
 	/// Create CoordIdx of line set from CoordIdx of polyline set.
 	/// \param [in] pPolylineCoordIdx - vertices indices divided by delimiter "-1". Must contain faces with two or more indices.
 	/// \param [out] pLineCoordIdx - made CoordIdx of line set.
 	void GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int32_t>& pPolylineCoordIdx, std::list<int32_t>& pLineCoordIdx);
-
-	/// Make 3D body - rectangular parallelepiped with center in (0, 0). QL mean quadlist (\sa pVertices).
-	/// \param [in] pSize - scale factor for body for every axis. E.g. (1, 2, 1) mean: X-size and Z-size - 1, Y-size - 2.
-	/// \param [out] pVertices - generated vertices. The list of vertices is grouped in quads.
-	void GeometryHelper_MakeQL_RectParallelepiped(const aiVector3D& pSize, std::list<aiVector3D>& pVertices);
-
-	/// Create faces array from vertices indices array.
-	/// \param [in] pCoordIdx - vertices indices divided by delimiter "-1".
-	/// \param [in] pFaces - created faces array.
-	/// \param [in] pPrimitiveTypes - type of primitives in faces.
-	void GeometryHelper_CoordIdxStr2FacesArr(const std::vector<int32_t>& pCoordIdx, std::vector<aiFace>& pFaces, unsigned int& pPrimitiveTypes) const;
 
 	/// Add colors to mesh.
 	/// a. If colorPerVertex is FALSE, colours are applied to each face, as follows:
@@ -578,12 +561,6 @@ private:
 
     /// Add texture coordinates to mesh. Function work similar to \ref MeshGeometry_AddColor;
 	void MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) const;
-
-	/// Create mesh.
-	/// \param [in] pCoordIdx - vertices indices divided by delimiter "-1".
-	/// \param [in] pVertices - vertices of mesh.
-	/// \return created mesh.
-	aiMesh* GeometryHelper_MakeMesh(const std::vector<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) const;
 
 	/***********************************************/
 	/******** Functions: parse set private *********/

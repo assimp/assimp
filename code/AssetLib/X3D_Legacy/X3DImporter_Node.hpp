@@ -672,9 +672,9 @@ struct CX3DImporter_NodeElement_Appearance : public X3DNodeElementBase
 
 };// struct CX3DImporter_NodeElement_Appearance
 
-/// \class CX3DImporter_NodeElement_Material
+/// \class X3DNodeElementMaterial
 /// Material.
-class CX3DImporter_NodeElement_Material : public X3DNodeElementBase {
+class X3DNodeElementMaterial : public X3DNodeElementBase {
 public:
 	float     AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
 	aiColor3D DiffuseColor;    ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
@@ -686,7 +686,7 @@ public:
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Material(X3DNodeElementBase* pParent)
+	X3DNodeElementMaterial(X3DNodeElementBase* pParent)
 	: X3DNodeElementBase(ENET_Material, pParent)
 	, AmbientIntensity( 0.0f )
 	, DiffuseColor()
@@ -699,15 +699,15 @@ public:
 
 private:
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode);
+	X3DNodeElementMaterial(const X3DNodeElementMaterial& pNode);
 
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode);
-};// class CX3DImporter_NodeElement_Material
+	X3DNodeElementMaterial& operator=(const X3DNodeElementMaterial& pNode);
+};// class X3DNodeElementMaterial
 
-/// \struct CX3DImporter_NodeElement_ImageTexture
+/// \struct X3DNodeElementImageTexture
 /// This struct hold <ImageTexture> value.
-struct CX3DImporter_NodeElement_ImageTexture : public X3DNodeElementBase
+struct X3DNodeElementImageTexture : public X3DNodeElementBase
 {
 	/// \var RepeatS
 	/// RepeatS and RepeatT, that specify how the texture wraps in the S and T directions. If repeatS is TRUE (the default), the texture map is repeated
@@ -716,36 +716,36 @@ struct CX3DImporter_NodeElement_ImageTexture : public X3DNodeElementBase
 	bool RepeatS;
 	bool RepeatT;///< See \ref RepeatS.
 	std::string URL;///< URL of the texture.
-	/// \fn CX3DImporter_NodeElement_ImageTexture(CX3DImporter_NodeElement_ImageTexture* pParent)
+	/// \fn X3DNodeElementImageTexture(X3DNodeElementImageTexture* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_ImageTexture(X3DNodeElementBase* pParent)
+	X3DNodeElementImageTexture(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_ImageTexture, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_ImageTexture
+};// struct X3DNodeElementImageTexture
 
-/// \struct CX3DImporter_NodeElement_TextureTransform
+/// \struct X3DNodeElementTextureTransform
 /// This struct hold <TextureTransform> value.
-struct CX3DImporter_NodeElement_TextureTransform : public X3DNodeElementBase
+struct X3DNodeElementTextureTransform : public X3DNodeElementBase
 {
 	aiVector2D Center;///< Specifies a translation offset in texture coordinate space about which the rotation and scale fields are applied.
 	float Rotation;///< Specifies a rotation in angle base units of the texture coordinates about the center point after the scale has been applied.
 	aiVector2D Scale;///< Specifies a scaling factor in S and T of the texture coordinates about the center point.
 	aiVector2D Translation;///<  Specifies a translation of the texture coordinates.
 
-	/// \fn CX3DImporter_NodeElement_TextureTransform(CX3DImporter_NodeElement_TextureTransform* pParent)
+	/// \fn X3DNodeElementTextureTransform(X3DNodeElementTextureTransform* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_TextureTransform(X3DNodeElementBase* pParent)
+	X3DNodeElementTextureTransform(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_TextureTransform, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_TextureTransform
+};// struct X3DNodeElementTextureTransform
 
-/// \struct CX3DImporter_NodeElement_Light
+/// \struct X3DNodeElementLight
 /// This struct hold <TextureTransform> value.
-struct CX3DImporter_NodeElement_Light : public X3DNodeElementBase
+struct X3DNodeElementLight : public X3DNodeElementBase
 {
 	float AmbientIntensity;///< Specifies the intensity of the ambient emission from the light.
 	aiColor3D Color;///< specifies the spectral colour properties of both the direct and ambient light emission as an RGB value.
@@ -764,14 +764,14 @@ struct CX3DImporter_NodeElement_Light : public X3DNodeElementBase
 	float BeamWidth;///< Specifies an inner solid angle in which the light source emits light at uniform full intensity.
 	float CutOffAngle;///< The light source's emission intensity drops off from the inner solid angle (beamWidth) to the outer solid angle (cutOffAngle).
 
-	/// \fn CX3DImporter_NodeElement_Light(X3DElemType pLightType, X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementLight(X3DElemType pLightType, X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pLightType - type of the light source.
-	CX3DImporter_NodeElement_Light(X3DElemType pLightType, X3DNodeElementBase* pParent)
+	X3DNodeElementLight(X3DElemType pLightType, X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(pLightType, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_Light
+};// struct X3DNodeElementLight
 
 #endif // INCLUDED_AI_X3D_IMPORTER_NODE_H

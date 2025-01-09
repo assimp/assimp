@@ -209,15 +209,15 @@ void X3DImporter::ParseNode_Shape_Material() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Material, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Material(mNodeElementCur);
+		ne = new X3DNodeElementMaterial(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Material*)ne)->AmbientIntensity = ambientIntensity;
-		((CX3DImporter_NodeElement_Material*)ne)->Shininess = shininess;
-		((CX3DImporter_NodeElement_Material*)ne)->Transparency = transparency;
-		((CX3DImporter_NodeElement_Material*)ne)->DiffuseColor = diffuseColor;
-		((CX3DImporter_NodeElement_Material*)ne)->EmissiveColor = emissiveColor;
-		((CX3DImporter_NodeElement_Material*)ne)->SpecularColor = specularColor;
+		((X3DNodeElementMaterial*)ne)->AmbientIntensity = ambientIntensity;
+		((X3DNodeElementMaterial*)ne)->Shininess = shininess;
+		((X3DNodeElementMaterial*)ne)->Transparency = transparency;
+		((X3DNodeElementMaterial*)ne)->DiffuseColor = diffuseColor;
+		((X3DNodeElementMaterial*)ne)->EmissiveColor = emissiveColor;
+		((X3DNodeElementMaterial*)ne)->SpecularColor = specularColor;
         // check for child nodes
 		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Material");

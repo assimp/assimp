@@ -78,16 +78,16 @@ void X3DImporter::ParseNode_Texturing_ImageTexture() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ImageTexture, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ImageTexture(mNodeElementCur);
+		ne = new X3DNodeElementImageTexture(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_ImageTexture*)ne)->RepeatS = repeatS;
-		((CX3DImporter_NodeElement_ImageTexture*)ne)->RepeatT = repeatT;
+		((X3DNodeElementImageTexture*)ne)->RepeatS = repeatS;
+		((X3DNodeElementImageTexture*)ne)->RepeatT = repeatT;
 		// Attribute "url" can contain list of strings. But we need only one - first.
 		if(!url.empty())
-			((CX3DImporter_NodeElement_ImageTexture*)ne)->URL = url.front();
+			((X3DNodeElementImageTexture*)ne)->URL = url.front();
 		else
-			((CX3DImporter_NodeElement_ImageTexture*)ne)->URL = "";
+			((X3DNodeElementImageTexture*)ne)->URL = "";
 
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
@@ -162,13 +162,13 @@ void X3DImporter::ParseNode_Texturing_TextureTransform() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TextureTransform, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_TextureTransform(mNodeElementCur);
+		ne = new X3DNodeElementTextureTransform(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_TextureTransform*)ne)->Center = center;
-		((CX3DImporter_NodeElement_TextureTransform*)ne)->Rotation = rotation;
-		((CX3DImporter_NodeElement_TextureTransform*)ne)->Scale = scale;
-		((CX3DImporter_NodeElement_TextureTransform*)ne)->Translation = translation;
+		((X3DNodeElementTextureTransform*)ne)->Center = center;
+		((X3DNodeElementTextureTransform*)ne)->Rotation = rotation;
+		((X3DNodeElementTextureTransform*)ne)->Scale = scale;
+		((X3DNodeElementTextureTransform*)ne)->Translation = translation;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureTransform");

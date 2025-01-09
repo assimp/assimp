@@ -90,17 +90,17 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_DirectionalLight, mNodeElementCur);
+			ne = new X3DNodeElementLight(X3DElemType::ENET_DirectionalLight, mNodeElementCur);
 			if(!def.empty())
 				ne->ID = def;
 			else
 				ne->ID = "DirectionalLight_" + to_string((size_t)ne);// make random name
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->Direction = direction;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
+			((X3DNodeElementLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DNodeElementLight*)ne)->Color = color;
+			((X3DNodeElementLight*)ne)->Direction = direction;
+			((X3DNodeElementLight*)ne)->Global = global;
+			((X3DNodeElementLight*)ne)->Intensity = intensity;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 
@@ -159,16 +159,16 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_PointLight, mNodeElementCur);
+			ne = new X3DNodeElementLight(X3DElemType::ENET_PointLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Attenuation = attenuation;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Location = location;
-			((CX3DImporter_NodeElement_Light*)ne)->Radius = radius;
+			((X3DNodeElementLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DNodeElementLight*)ne)->Attenuation = attenuation;
+			((X3DNodeElementLight*)ne)->Color = color;
+			((X3DNodeElementLight*)ne)->Global = global;
+			((X3DNodeElementLight*)ne)->Intensity = intensity;
+			((X3DNodeElementLight*)ne)->Location = location;
+			((X3DNodeElementLight*)ne)->Radius = radius;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
@@ -239,21 +239,21 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_SpotLight, mNodeElementCur);
+			ne = new X3DNodeElementLight(X3DElemType::ENET_SpotLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
 			if(beamWidth > cutOffAngle) beamWidth = cutOffAngle;
 
-			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Attenuation = attenuation;
-			((CX3DImporter_NodeElement_Light*)ne)->BeamWidth = beamWidth;
-			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
-			((CX3DImporter_NodeElement_Light*)ne)->CutOffAngle = cutOffAngle;
-			((CX3DImporter_NodeElement_Light*)ne)->Direction = direction;
-			((CX3DImporter_NodeElement_Light*)ne)->Global = global;
-			((CX3DImporter_NodeElement_Light*)ne)->Intensity = intensity;
-			((CX3DImporter_NodeElement_Light*)ne)->Location = location;
-			((CX3DImporter_NodeElement_Light*)ne)->Radius = radius;
+			((X3DNodeElementLight*)ne)->AmbientIntensity = ambientIntensity;
+			((X3DNodeElementLight*)ne)->Attenuation = attenuation;
+			((X3DNodeElementLight*)ne)->BeamWidth = beamWidth;
+			((X3DNodeElementLight*)ne)->Color = color;
+			((X3DNodeElementLight*)ne)->CutOffAngle = cutOffAngle;
+			((X3DNodeElementLight*)ne)->Direction = direction;
+			((X3DNodeElementLight*)ne)->Global = global;
+			((X3DNodeElementLight*)ne)->Intensity = intensity;
+			((X3DNodeElementLight*)ne)->Location = location;
+			((X3DNodeElementLight*)ne)->Radius = radius;
 
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);

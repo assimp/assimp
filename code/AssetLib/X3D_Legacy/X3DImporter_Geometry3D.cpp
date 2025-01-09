@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DGeoHelper.h"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DXmlHelper.h"
 
 // Header files, Assimp.
 #include <assimp/StandardShapes.h>
@@ -84,7 +85,7 @@ void X3DImporter::ParseNode_Geometry3D_Box() {
 		ne = new X3DNodeElementGeometry3D(X3DElemType::ENET_Box, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		GeometryHelper_MakeQL_RectParallelepiped(size, ((X3DNodeElementGeometry3D*)ne)->Vertices);// get quad list
+        X3DGeoHelper::rect_parallel_epiped(size, ((X3DNodeElementGeometry3D*)ne)->Vertices);// get quad list
 		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
@@ -296,9 +297,9 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid() {
 	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ElevationGrid, ne);
 	} else {
-		if((xSpacing == 0.0f) || (zSpacing == 0.0f)) throw DeadlyImportError("Spacing in <ElevationGrid> must be grater than zero.");
-		if((xDimension <= 0) || (zDimension <= 0)) throw DeadlyImportError("Dimension in <ElevationGrid> must be grater than zero.");
-		if((size_t)(xDimension * zDimension) != height.size()) Throw_IncorrectAttrValue("Heights count must be equal to \"xDimension * zDimension\"");
+		if ((xSpacing == 0.0f) || (zSpacing == 0.0f)) throw DeadlyImportError("Spacing in <ElevationGrid> must be grater than zero.");
+		if ((xDimension <= 0) || (zDimension <= 0)) throw DeadlyImportError("Dimension in <ElevationGrid> must be grater than zero.");
+		if ((size_t)(xDimension * zDimension) != height.size()) DeadlyImportError("Heights count must be equal to \"xDimension * zDimension\" in <ElevationGrid>");
 
 		// create and if needed - define new geometry object.
 		ne = new X3DNodeElementElevationGrid(X3DElemType::ENET_ElevationGrid, mNodeElementCur);

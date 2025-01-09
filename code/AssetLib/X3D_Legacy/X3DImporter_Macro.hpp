@@ -152,23 +152,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			if(!ParseHelper_CheckRead_X3DMetadataObject()) XML_CheckNode_SkipUnsupported(pNodeName); \
 	 MACRO_NODECHECK_LOOPEND(pNodeName)
 
-/// \def MACRO_FACE_ADD_QUAD_FA(pCCW, pOut, pIn, pP1, pP2, pP3, pP4)
-/// Add points as quad. Means that pP1..pP4 set in CCW order.
-#define MACRO_FACE_ADD_QUAD_FA(pCCW, pOut, pIn, pP1, pP2, pP3, pP4) \
-	do { \
-        if(pCCW) { \
-            pOut.push_back(pIn[pP1]); \
-            pOut.push_back(pIn[pP2]); \
-            pOut.push_back(pIn[pP3]); \
-            pOut.push_back(pIn[pP4]); \
-        } else { \
-            pOut.push_back(pIn[pP4]); \
-            pOut.push_back(pIn[pP3]); \
-            pOut.push_back(pIn[pP2]); \
-            pOut.push_back(pIn[pP1]); \
-        } \
-	} while(false)
-
 /// \def MACRO_FACE_ADD_QUAD(pCCW, pOut, pP1, pP2, pP3, pP4)
 /// Add points as quad. Means that pP1..pP4 set in CCW order.
 #define MACRO_FACE_ADD_QUAD(pCCW, pOut, pP1, pP2, pP3, pP4) \

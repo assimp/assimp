@@ -134,7 +134,7 @@ struct WordIterator {
 const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter()
-: NodeElement_Cur( nullptr )
+: mNodeElementCur( nullptr )
 , mReader( nullptr ) {
     // empty
 }
@@ -145,7 +145,7 @@ X3DImporter::~X3DImporter() {
 }
 
 void X3DImporter::Clear() {
-	NodeElement_Cur = nullptr;
+	mNodeElementCur = nullptr;
 	// Delete all elements
 	if(!NodeElement_List.empty()) {
         for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); ++it ) {
@@ -209,7 +209,7 @@ fne_fn_end:
 
 bool X3DImporter::FindNodeElement(const std::string& pID, const X3DElemType pType, CX3DImporter_NodeElement** pElement)
 {
-    CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
+    CX3DImporter_NodeElement* tnd = mNodeElementCur;// temporary pointer to node.
     bool static_search = false;// flag: true if searching in static node.
 
     // At first check if we have deal with static node. Go up through parent nodes and check flag.
@@ -1361,30 +1361,30 @@ aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::vector<int32_t>& pCoordI
 
 void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 {
-    CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(NodeElement_Cur, pStatic);// create new node with current node as parent.
+    CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(mNodeElementCur, pStatic);// create new node with current node as parent.
 
 	// if we are adding not the root element then add new element to current element child list.
-    if ( NodeElement_Cur != nullptr )
+    if ( mNodeElementCur != nullptr )
     {
-        NodeElement_Cur->Child.push_back( new_group );
+        mNodeElementCur->Child.push_back( new_group );
     }
 
 	NodeElement_List.push_back(new_group);// it's a new element - add it to list.
-	NodeElement_Cur = new_group;// switch current element to new one.
+	mNodeElementCur = new_group;// switch current element to new one.
 }
 
 void X3DImporter::ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode)
 {
-	NodeElement_Cur->Child.push_back(pNode);// add new element to current element child list.
-	NodeElement_Cur = pNode;// switch current element to new one.
+	mNodeElementCur->Child.push_back(pNode);// add new element to current element child list.
+	mNodeElementCur = pNode;// switch current element to new one.
 }
 
 void X3DImporter::ParseHelper_Node_Exit()
 {
 	// check if we can walk up.
-    if ( NodeElement_Cur != nullptr )
+    if ( mNodeElementCur != nullptr )
     {
-        NodeElement_Cur = NodeElement_Cur->Parent;
+        mNodeElementCur = mNodeElementCur->Parent;
     }
 }
 
@@ -1489,7 +1489,7 @@ void X3DImporter::ParseNode_Head()
 
 				// adding metadata from <head> as MetaString from <Scene>
                 bool added( false );
-                CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(NodeElement_Cur);
+                CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(mNodeElementCur);
 
 				ms->Name = mReader->getAttributeValueSafe("name");
 				// name must not be empty
@@ -1497,9 +1497,9 @@ void X3DImporter::ParseNode_Head()
 				{
 					ms->Value.push_back(mReader->getAttributeValueSafe("content"));
 					NodeElement_List.push_back(ms);
-                    if ( NodeElement_Cur != nullptr )
+                    if ( mNodeElementCur != nullptr )
                     {
-                        NodeElement_Cur->Child.push_back( ms );
+                        mNodeElementCur->Child.push_back( ms );
                         added = true;
                     }
 				}
@@ -1697,8 +1697,8 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 	pScene->mRootNode->mParent = nullptr;
 	pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 	//search for root node element
-	NodeElement_Cur = NodeElement_List.front();
-	while(NodeElement_Cur->Parent != nullptr) NodeElement_Cur = NodeElement_Cur->Parent;
+	mNodeElementCur = NodeElement_List.front();
+	while(mNodeElementCur->Parent != nullptr) mNodeElementCur = mNodeElementCur->Parent;
 
 	{// fill aiScene with objects.
 		std::list<aiMesh*> mesh_list;
@@ -1706,7 +1706,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		std::list<aiLight*> light_list;
 
 		// create nodes tree
-		Postprocess_BuildNode(*NodeElement_Cur, *pScene->mRootNode, mesh_list, mat_list, light_list);
+		Postprocess_BuildNode(*mNodeElementCur, *pScene->mRootNode, mesh_list, mat_list, light_list);
 		// copy needed data to scene
 		if(!mesh_list.empty())
 		{

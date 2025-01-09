@@ -70,7 +70,7 @@ namespace Assimp
 	} \
 	else \
 	{ \
-		pNE = new pMetaClass(NodeElement_Cur); \
+		pNE = new pMetaClass(mNodeElementCur); \
 		if(!pDEF_Var.empty()) pNE->ID = pDEF_Var; \
 	 \
 		((pMetaClass*)pNE)->Reference = pReference; \
@@ -79,7 +79,7 @@ namespace Assimp
 		if(!mReader->isEmptyElement()) \
 			ParseNode_Metadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
 		else \
-			NodeElement_Cur->Child.push_back(pNE);/* else - add element to child list manually */ \
+			mNodeElementCur->Child.push_back(pNE);/* else - add element to child list manually */ \
 	 \
 		NodeElement_List.push_back(pNE);/* add new element to elements list. */ \
 	}/* if(!pUSE_Var.empty()) else */ \
@@ -231,7 +231,7 @@ void X3DImporter::ParseNode_MetadataSet()
 	if(!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_MetaSet, ne);
 	} else {
-		ne = new CX3DImporter_NodeElement_MetaSet(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_MetaSet(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_MetaSet*)ne)->Reference = reference;
@@ -239,7 +239,7 @@ void X3DImporter::ParseNode_MetadataSet()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "MetadataSet");
 		else
-			NodeElement_Cur->Child.push_back(ne);// made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// made object as child to current element
 
 		NodeElement_List.push_back(ne);// add new element to elements list.
 	}// if(!use.empty()) else

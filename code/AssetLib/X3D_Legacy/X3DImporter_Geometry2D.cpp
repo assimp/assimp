@@ -87,7 +87,7 @@ void X3DImporter::ParseNode_Geometry2D_Arc2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Arc2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Arc2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object and convert it to line set.
@@ -100,7 +100,7 @@ void X3DImporter::ParseNode_Geometry2D_Arc2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Arc2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -152,7 +152,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_ArcClose2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_ArcClose2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_Geometry2D*)ne)->Solid = solid;
@@ -176,7 +176,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ArcClose2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -206,7 +206,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Circle2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Circle2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object and convert it to line set.
@@ -219,7 +219,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Circle2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -265,7 +265,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 		if(innerRadius > outerRadius) Throw_IncorrectAttrValue("innerRadius");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Disk2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Disk2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// create point list of geometry object.
@@ -317,7 +317,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Disk2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -347,7 +347,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Polyline2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Polyline2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		//
@@ -365,7 +365,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Polyline2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -395,7 +395,7 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Polypoint2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Polypoint2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// convert vec2 to vec3
@@ -409,7 +409,7 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Polypoint2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -442,7 +442,7 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Rectangle2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_Rectangle2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		float x1 = -size.x / 2.0f;
@@ -461,7 +461,7 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Rectangle2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -496,7 +496,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
 		if(vertices.size() % 3) throw DeadlyImportError("TriangleSet2D. Not enough points for defining triangle.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_TriangleSet2D, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry2D(X3DElemType::ENET_TriangleSet2D, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// convert vec2 to vec3
@@ -511,7 +511,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TriangleSet2D");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

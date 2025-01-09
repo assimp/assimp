@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -49,8 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <Shape
 // DEF=""              ID
@@ -67,8 +66,7 @@ namespace Assimp
 //     The shape's appearance field is nullptr (default).
 //     The material field in the Appearance node is nullptr (default).
 // NOTE Geometry nodes that represent lines or points do not support lighting.
-void X3DImporter::ParseNode_Shape_Shape()
-{
+void X3DImporter::ParseNode_Shape_Shape() {
     std::string use, def;
     CX3DImporter_NodeElement* ne( nullptr );
 
@@ -77,19 +75,15 @@ void X3DImporter::ParseNode_Shape_Shape()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Shape, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Shape(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Shape(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("Shape");
 				// check for appearance node
@@ -110,10 +104,10 @@ void X3DImporter::ParseNode_Shape_Shape()
 				if(XML_CheckNode_NameEqual("Extrusion")) { ParseNode_Geometry3D_Extrusion(); continue; }
 				if(XML_CheckNode_NameEqual("IndexedFaceSet")) { ParseNode_Geometry3D_IndexedFaceSet(); continue; }
 				if(XML_CheckNode_NameEqual("Sphere")) { ParseNode_Geometry3D_Sphere(); continue; }
-				if(XML_CheckNode_NameEqual("IndexedLineSet")) { ParseNode_Rendering_IndexedLineSet(); continue; }
+				if(XML_CheckNode_NameEqual("IndexedLineSet")) { readIndexedLineSet(); continue; }
 				if(XML_CheckNode_NameEqual("LineSet")) { ParseNode_Rendering_LineSet(); continue; }
 				if(XML_CheckNode_NameEqual("PointSet")) { ParseNode_Rendering_PointSet(); continue; }
-				if(XML_CheckNode_NameEqual("IndexedTriangleFanSet")) { ParseNode_Rendering_IndexedTriangleFanSet(); continue; }
+				if(XML_CheckNode_NameEqual("IndexedTriangleFanSet")) { readIndexedTriangleFanSet(); continue; }
 				if(XML_CheckNode_NameEqual("IndexedTriangleSet")) { ParseNode_Rendering_IndexedTriangleSet(); continue; }
 				if(XML_CheckNode_NameEqual("IndexedTriangleStripSet")) { ParseNode_Rendering_IndexedTriangleStripSet(); continue; }
 				if(XML_CheckNode_NameEqual("TriangleFanSet")) { ParseNode_Rendering_TriangleFanSet(); continue; }
@@ -125,9 +119,8 @@ void X3DImporter::ParseNode_Shape_Shape()
 			MACRO_NODECHECK_LOOPEND("Shape");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -144,8 +137,7 @@ void X3DImporter::ParseNode_Shape_Shape()
 // PackagedShader, ProgramShader).
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model."
 // </Appearance>
-void X3DImporter::ParseNode_Shape_Appearance()
-{
+void X3DImporter::ParseNode_Shape_Appearance() {
     std::string use, def;
     CX3DImporter_NodeElement* ne( nullptr );
 
@@ -154,19 +146,15 @@ void X3DImporter::ParseNode_Shape_Appearance()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Appearance, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Appearance(NodeElement_Cur);
-		if(!def.empty()) ne->ID = def;
+		ne = new CX3DImporter_NodeElement_Appearance(mNodeElementCur);
+		if (!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("Appearance");
 				if(XML_CheckNode_NameEqual("Material")) { ParseNode_Shape_Material(); continue; }
@@ -178,9 +166,8 @@ void X3DImporter::ParseNode_Shape_Appearance()
 			MACRO_NODECHECK_LOOPEND("Appearance");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -197,8 +184,7 @@ void X3DImporter::ParseNode_Shape_Appearance()
 // specularColor="0 0 0"      SFColor [inputOutput]
 // transparency="0"           SFFloat [inputOutput]
 // />
-void X3DImporter::ParseNode_Shape_Material()
-{
+void X3DImporter::ParseNode_Shape_Material() {
     std::string use, def;
     float ambientIntensity = 0.2f;
     float shininess = 0.2f;
@@ -219,14 +205,11 @@ void X3DImporter::ParseNode_Shape_Material()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Material, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Material(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Material(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_Material*)ne)->AmbientIntensity = ambientIntensity;
@@ -236,10 +219,10 @@ void X3DImporter::ParseNode_Shape_Material()
 		((CX3DImporter_NodeElement_Material*)ne)->EmissiveColor = emissiveColor;
 		((CX3DImporter_NodeElement_Material*)ne)->SpecularColor = specularColor;
         // check for child nodes
-		if(!mReader->isEmptyElement())
+		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Material");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

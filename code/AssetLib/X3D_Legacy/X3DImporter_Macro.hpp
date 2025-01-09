@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	if(!pDEF.empty()) Throw_DEF_And_USE(); \
 	if(!FindNodeElement(pUSE, pType, &pNE)) Throw_USE_NotFound(pUSE); \
 	 \
-	NodeElement_Cur->Child.push_back(pNE);/* add found object as child to current element */ \
+	mNodeElementCur->Child.push_back(pNE);/* add found object as child to current element */ \
 	} while(false)
 
 /// \def MACRO_ATTRREAD_LOOPBEG

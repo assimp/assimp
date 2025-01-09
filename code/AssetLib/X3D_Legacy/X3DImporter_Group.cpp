@@ -79,7 +79,7 @@ void X3DImporter::startReadGroup() {
 	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -120,7 +120,7 @@ void X3DImporter::startReadStaticGroup() {
 	} else {
 		ParseHelper_Group_Begin(true);// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -165,11 +165,11 @@ void X3DImporter::startReadSwitch() {
 	} else {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+		if(!def.empty()) mNodeElementCur->ID = def;
 
 		// also set values specific to this type of group
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->UseChoice = true;
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->Choice = whichChoice;
+		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->UseChoice = true;
+		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->Choice = whichChoice;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
@@ -255,7 +255,7 @@ void X3DImporter::startReadTransform() {
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
         if ( !def.empty() ) {
-            NodeElement_Cur->ID = def;
+            mNodeElementCur->ID = def;
         }
 
 		//
@@ -276,7 +276,7 @@ void X3DImporter::startReadTransform() {
 		aiMatrix4x4::Translation(-center, tmatr);// -C
 		matr *= tmatr;
 		// and assign it
-		((CX3DImporter_NodeElement_Group*)NodeElement_Cur)->Transformation = matr;
+		((CX3DImporter_NodeElement_Group*)mNodeElementCur)->Transformation = matr;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place

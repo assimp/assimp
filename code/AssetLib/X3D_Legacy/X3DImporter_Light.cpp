@@ -90,7 +90,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_DirectionalLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_DirectionalLight, mNodeElementCur);
 			if(!def.empty())
 				ne->ID = def;
 			else
@@ -104,13 +104,13 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "DirectionalLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -159,7 +159,7 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_PointLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_PointLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
 			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
@@ -174,13 +174,13 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 			// make random name
 			if(ne->ID.empty()) ne->ID = "PointLight_" + to_string((size_t)ne);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "PointLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -239,7 +239,7 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 	} else {
 		if (on) {
 			// create and if needed - define new geometry object.
-			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_SpotLight, NodeElement_Cur);
+			ne = new CX3DImporter_NodeElement_Light(X3DElemType::ENET_SpotLight, mNodeElementCur);
 			if(!def.empty()) ne->ID = def;
 
 			if(beamWidth > cutOffAngle) beamWidth = cutOffAngle;
@@ -260,13 +260,13 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 			// make random name
 			if(ne->ID.empty()) ne->ID = "SpotLight_" + to_string((size_t)ne);
 
-			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
+			mNodeElementCur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "SpotLight");
 			else
-				NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)

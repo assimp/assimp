@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -49,16 +49,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <Color
 // DEF=""           ID
 // USE=""           IDREF
 // color="" MFColor [inputOutput]
 // />
-void X3DImporter::ParseNode_Rendering_Color()
-{
+void X3DImporter::readColor() {
     std::string use, def;
     std::list<aiColor3D> color;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -69,14 +67,11 @@ void X3DImporter::ParseNode_Rendering_Color()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Color, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Color(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Color(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_Color*)ne)->Value = color;
@@ -84,7 +79,7 @@ void X3DImporter::ParseNode_Rendering_Color()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Color");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -95,8 +90,7 @@ void X3DImporter::ParseNode_Rendering_Color()
 // USE=""               IDREF
 // color="" MFColorRGBA [inputOutput]
 // />
-void X3DImporter::ParseNode_Rendering_ColorRGBA()
-{
+void X3DImporter::readColorRGBA() {
     std::string use, def;
     std::list<aiColor4D> color;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -107,14 +101,11 @@ void X3DImporter::ParseNode_Rendering_ColorRGBA()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ColorRGBA, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ColorRGBA(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_ColorRGBA(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_ColorRGBA*)ne)->Value = color;
@@ -122,7 +113,7 @@ void X3DImporter::ParseNode_Rendering_ColorRGBA()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ColorRGBA");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -133,8 +124,7 @@ void X3DImporter::ParseNode_Rendering_ColorRGBA()
 // USE=""      IDREF
 // point=""    MFVec3f [inputOutput]
 // />
-void X3DImporter::ParseNode_Rendering_Coordinate()
-{
+void X3DImporter::ParseNode_Rendering_Coordinate() {
     std::string use, def;
     std::list<aiVector3D> point;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -145,14 +135,11 @@ void X3DImporter::ParseNode_Rendering_Coordinate()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Coordinate, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Coordinate(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Coordinate(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_Coordinate*)ne)->Value = point;
@@ -160,7 +147,7 @@ void X3DImporter::ParseNode_Rendering_Coordinate()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Coordinate");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -178,8 +165,7 @@ void X3DImporter::ParseNode_Rendering_Coordinate()
 // contain any-order Coordinate node with Color (or ColorRGBA) node. No more than one instance of any single node type is allowed.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </IndexedLineSet>
-void X3DImporter::ParseNode_Rendering_IndexedLineSet()
-{
+void X3DImporter::readIndexedLineSet() {
     std::string use, def;
     std::vector<int32_t> colorIndex;
     bool colorPerVertex = true;
@@ -194,18 +180,15 @@ void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_IndexedLineSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if((coordIndex.size() < 2) || ((coordIndex.back() == (-1)) && (coordIndex.size() < 3)))
 			throw DeadlyImportError("IndexedLineSet must contain not empty \"coordIndex\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedLineSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedLineSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -214,13 +197,12 @@ void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 		ne_alias.ColorPerVertex = colorPerVertex;
 		ne_alias.CoordIndex = coordIndex;
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedLineSet");
 				// check for Color and Coordinate nodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				// check for X3DMetadataObject
 				if(!ParseHelper_CheckRead_X3DMetadataObject()) XML_CheckNode_SkipUnsupported("IndexedLineSet");
@@ -228,9 +210,8 @@ void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 			MACRO_NODECHECK_LOOPEND("IndexedLineSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -252,8 +233,7 @@ void X3DImporter::ParseNode_Rendering_IndexedLineSet()
 // Matrix3VertexAttribute, Matrix4VertexAttribute) nodes can also be contained.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </IndexedTriangleFanSet>
-void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
-{
+void X3DImporter::readIndexedTriangleFanSet() {
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
@@ -272,17 +252,14 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_IndexedTriangleFanSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleFanSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleFanSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleFanSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -295,34 +272,24 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
-		{
+		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it) {
 			idx[2] = *idx_it;
-			if (idx[2] < 0)
-			{
+			if (idx[2] < 0) {
 				counter = 0;
-			}
-			else
-			{
-				if (counter >= 2)
-				{
-					if(ccw)
-					{
+			} else {
+				if (counter >= 2) {
+					if (ccw) {
 						ne_alias.CoordIndex.push_back(idx[0]);
 						ne_alias.CoordIndex.push_back(idx[1]);
 						ne_alias.CoordIndex.push_back(idx[2]);
-					}
-					else
-					{
+					} else {
 						ne_alias.CoordIndex.push_back(idx[0]);
 						ne_alias.CoordIndex.push_back(idx[2]);
 						ne_alias.CoordIndex.push_back(idx[1]);
 					}
 					ne_alias.CoordIndex.push_back(-1);
 					idx[1] = idx[2];
-				}
-				else
-				{
+				} else {
 					idx[counter] = idx[2];
 				}
 				++counter;
@@ -330,13 +297,12 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedTriangleFanSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -346,9 +312,8 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 			MACRO_NODECHECK_LOOPEND("IndexedTriangleFanSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -370,8 +335,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 // Matrix3VertexAttribute, Matrix4VertexAttribute) nodes can also be contained.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </IndexedTriangleSet>
-void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
-{
+void X3DImporter::ParseNode_Rendering_IndexedTriangleSet() {
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
@@ -400,7 +364,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -413,20 +377,15 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
-		{
+		for (std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it) {
 			idx[counter++] = *idx_it;
-			if (counter > 2)
-			{
+			if (counter > 2) {
 				counter = 0;
-				if(ccw)
-				{
+				if (ccw) {
 					ne_alias.CoordIndex.push_back(idx[0]);
 					ne_alias.CoordIndex.push_back(idx[1]);
 					ne_alias.CoordIndex.push_back(idx[2]);
-				}
-				else
-				{
+				} else {
 					ne_alias.CoordIndex.push_back(idx[0]);
 					ne_alias.CoordIndex.push_back(idx[2]);
 					ne_alias.CoordIndex.push_back(idx[1]);
@@ -436,13 +395,12 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedTriangleSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -452,9 +410,8 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 			MACRO_NODECHECK_LOOPEND("IndexedTriangleSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -496,18 +453,15 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_IndexedTriangleStripSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if(index.size() == 0) throw DeadlyImportError("IndexedTriangleStripSet must contain not empty \"index\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleStripSet, NodeElement_Cur);
-		if(!def.empty()) ne->ID = def;
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedTriangleStripSet, mNodeElementCur);
+		if (!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
 
@@ -519,25 +473,17 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		ne_alias.CoordIndex.clear();
 		int counter = 0;
 		int32_t idx[3];
-		for(std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it)
-		{
+		for (std::vector<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); ++idx_it) {
 			idx[2] = *idx_it;
-			if (idx[2] < 0)
-			{
+			if (idx[2] < 0) {
 				counter = 0;
-			}
-			else
-			{
-				if (counter >= 2)
-				{
-					if(ccw)
-					{
+			} else {
+				if (counter >= 2) {
+					if (ccw) {
 						ne_alias.CoordIndex.push_back(idx[0]);
 						ne_alias.CoordIndex.push_back(idx[1]);
 						ne_alias.CoordIndex.push_back(idx[2]);
-					}
-					else
-					{
+					} else {
 						ne_alias.CoordIndex.push_back(idx[0]);
 						ne_alias.CoordIndex.push_back(idx[2]);
 						ne_alias.CoordIndex.push_back(idx[1]);
@@ -550,13 +496,12 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedTriangleStripSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -566,9 +511,8 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 			MACRO_NODECHECK_LOOPEND("IndexedTriangleStripSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -585,8 +529,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 // contain any-order Coordinate node with Color (or ColorRGBA) node. No more than one instance of any single node type is allowed.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </LineSet>
-void X3DImporter::ParseNode_Rendering_LineSet()
-{
+void X3DImporter::ParseNode_Rendering_LineSet() {
     std::string use, def;
     std::vector<int32_t> vertexCount;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -597,17 +540,14 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_LineSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
-		if(vertexCount.size() == 0) throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
+		if (vertexCount.size() == 0) throw DeadlyImportError("LineSet must contain not empty \"vertexCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_LineSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_LineSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -617,23 +557,22 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		size_t coord_num = 0;
 
 		ne_alias.CoordIndex.clear();
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
-		{
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it) {
 			if(*vc_it < 2) throw DeadlyImportError("LineSet. vertexCount shall be greater than or equal to two.");
 
-			for(int32_t i = 0; i < *vc_it; i++) ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num++));// add vertices indices
+			for(int32_t i = 0; i < *vc_it; i++)
+                ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num++));// add vertices indices
 
 			 ne_alias.CoordIndex.push_back(-1);// add face delimiter.
 		}
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("LineSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				// check for X3DMetadataObject
 				if(!ParseHelper_CheckRead_X3DMetadataObject()) XML_CheckNode_SkipUnsupported("LineSet");
@@ -641,9 +580,8 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 			MACRO_NODECHECK_LOOPEND("LineSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -659,8 +597,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 // contain any-order Coordinate node with Color (or ColorRGBA) node. No more than one instance of any single node type is allowed.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </PointSet>
-void X3DImporter::ParseNode_Rendering_PointSet()
-{
+void X3DImporter::ParseNode_Rendering_PointSet() {
     std::string use, def;
     CX3DImporter_NodeElement* ne( nullptr );
 
@@ -669,24 +606,20 @@ void X3DImporter::ParseNode_Rendering_PointSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_PointSet, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_PointSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_PointSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("PointSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				// check for X3DMetadataObject
 				if(!ParseHelper_CheckRead_X3DMetadataObject()) XML_CheckNode_SkipUnsupported("PointSet");
@@ -694,9 +627,8 @@ void X3DImporter::ParseNode_Rendering_PointSet()
 			MACRO_NODECHECK_LOOPEND("PointSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -718,8 +650,7 @@ void X3DImporter::ParseNode_Rendering_PointSet()
 // Matrix3VertexAttribute, Matrix4VertexAttribute) nodes can also be contained.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </TriangleFanSet>
-void X3DImporter::ParseNode_Rendering_TriangleFanSet()
-{
+void X3DImporter::ParseNode_Rendering_TriangleFanSet() {
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
@@ -738,17 +669,14 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TriangleFanSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if(fanCount.size() == 0) throw DeadlyImportError("TriangleFanSet must contain not empty \"fanCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleFanSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleFanSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -765,22 +693,17 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 		// assign indices for first triangle
 		coord_num_first = 0;
 		coord_num_prev = 1;
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
-		{
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it) {
 			if(*vc_it < 3) throw DeadlyImportError("TriangleFanSet. fanCount shall be greater than or equal to three.");
 
-			for(int32_t vc = 2; vc < *vc_it; vc++)
-			{
-				if(ccw)
-				{
+			for (int32_t vc = 2; vc < *vc_it; vc++) {
+				if (ccw) {
 					// 2 1
 					//  0
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_first));// first vertex is a center and always is [0].
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev++));
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev));
-				}
-				else
-				{
+				} else {
 					// 1 2
 					//  0
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_first));// first vertex is a center and always is [0].
@@ -795,13 +718,12 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 			coord_num_first = coord_num_prev++;// forward to next point - second point of fan
 		}// for(std::list<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("TriangleFanSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -811,9 +733,8 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 			MACRO_NODECHECK_LOOPEND("TriangleFanSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -834,8 +755,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 // Matrix3VertexAttribute, Matrix4VertexAttribute) nodes can also be contained.
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </TriangleSet>
-void X3DImporter::ParseNode_Rendering_TriangleSet()
-{
+void X3DImporter::ParseNode_Rendering_TriangleSet() {
     std::string use, def;
     bool ccw = true;
     bool colorPerVertex = true;
@@ -852,14 +772,11 @@ void X3DImporter::ParseNode_Rendering_TriangleSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TriangleSet, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_TriangleSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_TriangleSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -869,13 +786,12 @@ void X3DImporter::ParseNode_Rendering_TriangleSet()
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("TriangleSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -885,9 +801,8 @@ void X3DImporter::ParseNode_Rendering_TriangleSet()
 			MACRO_NODECHECK_LOOPEND("TriangleSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -929,17 +844,14 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TriangleStripSet, ne);
-	}
-	else
-	{
+	} else {
 		// check data
 		if(stripCount.size() == 0) throw DeadlyImportError("TriangleStripSet must contain not empty \"stripCount\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleStripSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Set(X3DElemType::ENET_TriangleStripSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_Set& ne_alias = *((CX3DImporter_NodeElement_Set*)ne);
@@ -956,8 +868,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 
 		ne_alias.CoordIndex.clear();
 		coord_num_sb = 0;
-		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it)
-		{
+		for(std::vector<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); ++vc_it) {
 			if(*vc_it < 3) throw DeadlyImportError("TriangleStripSet. stripCount shall be greater than or equal to three.");
 
 			// set initial values for first triangle
@@ -966,18 +877,14 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 			coord_num2 = coord_num_sb + 2;
 			odd_tri = true;
 
-			for(int32_t vc = 2; vc < *vc_it; vc++)
-			{
-				if(ccw)
-				{
+			for (int32_t vc = 2; vc < *vc_it; vc++) {
+				if(ccw) {
 					// 0 2
 					//  1
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num0));
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num1));
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num2));
-				}
-				else
-				{
+				} else {
 					// 0 1
 					//  2
 					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num0));
@@ -987,13 +894,10 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 
 				ne_alias.CoordIndex.push_back(-1);// add face delimiter.
 				// prepare values for next triangle
-				if(odd_tri)
-				{
+				if (odd_tri) {
 					coord_num0 = coord_num2;
 					coord_num2++;
-				}
-				else
-				{
+				} else {
 					coord_num1 = coord_num2;
 					coord_num2 = coord_num1 + 1;
 				}
@@ -1003,13 +907,12 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 			}// for(int32_t vc = 2; vc < *vc_it; vc++)
 		}// for(std::list<int32_t>::const_iterator vc_it = ne_alias.VertexCount.begin(); vc_it != ne_alias.VertexCount.end(); vc_it++)
         // check for child nodes
-        if(!mReader->isEmptyElement())
-        {
+        if (!mReader->isEmptyElement()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("TriangleStripSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -1019,9 +922,8 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 			MACRO_NODECHECK_LOOPEND("TriangleStripSet");
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
-		else
-		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+		else {
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -1033,8 +935,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 // USE=""      IDREF
 // vector=""   MFVec3f [inputOutput]
 // />
-void X3DImporter::ParseNode_Rendering_Normal()
-{
+void X3DImporter::ParseNode_Rendering_Normal() {
 std::string use, def;
 std::list<aiVector3D> vector;
 CX3DImporter_NodeElement* ne;
@@ -1045,14 +946,11 @@ CX3DImporter_NodeElement* ne;
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Normal, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Normal(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Normal(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_Normal*)ne)->Value = vector;
@@ -1060,7 +958,7 @@ CX3DImporter_NodeElement* ne;
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Normal");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

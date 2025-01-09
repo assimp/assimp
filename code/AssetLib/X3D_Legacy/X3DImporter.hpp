@@ -740,10 +740,10 @@ private:
 	void endReadTransform();
 
 	/// Parse <Color> node of the file.
-	void ParseNode_Rendering_Color();
+	void readColor();
 
 	/// Parse <ColorRGBA> node of the file.
-	void ParseNode_Rendering_ColorRGBA();
+	void readColorRGBA();
 
 	/// Parse <Coordinate> node of the file.
 	void ParseNode_Rendering_Coordinate();
@@ -752,10 +752,10 @@ private:
 	void ParseNode_Rendering_Normal();
 
 	/// Parse <IndexedLineSet> node of the file.
-	void ParseNode_Rendering_IndexedLineSet();
+	void readIndexedLineSet();
 
 	/// Parse <IndexedTriangleFanSet> node of the file.
-	void ParseNode_Rendering_IndexedTriangleFanSet();
+	void readIndexedTriangleFanSet();
 
 	/// Parse <IndexedTriangleSet> node of the file.
 	void ParseNode_Rendering_IndexedTriangleSet();
@@ -824,7 +824,7 @@ private:
     /***********************************************/
     /****************** Variables ******************/
     /***********************************************/
-    CX3DImporter_NodeElement* NodeElement_Cur;///< Current element.
+    CX3DImporter_NodeElement* mNodeElementCur;///< Current element.
     std::unique_ptr<FIReader> mReader;///< Pointer to XML-reader object
     IOSystem *mpIOHandler;
 };// class X3DImporter

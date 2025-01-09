@@ -85,7 +85,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 	else
 	{
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Box, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Box, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		GeometryHelper_MakeQL_RectParallelepiped(size, ((CX3DImporter_NodeElement_Geometry3D*)ne)->Vertices);// get quad list
@@ -95,7 +95,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Box");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -141,7 +141,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cone, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cone, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cone or parts according to flags.
@@ -165,7 +165,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cone");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -215,7 +215,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cylinder, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Cylinder, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		// make cilynder or parts according to flags.
@@ -252,7 +252,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cylinder");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -321,7 +321,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		if((size_t)(xDimension * zDimension) != height.size()) Throw_IncorrectAttrValue("Heights count must be equal to \"xDimension * zDimension\"");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ElevationGrid(X3DElemType::ENET_ElevationGrid, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_ElevationGrid(X3DElemType::ENET_ElevationGrid, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_ElevationGrid& grid_alias = *((CX3DImporter_NodeElement_ElevationGrid*)ne);// create alias for conveience
@@ -398,8 +398,8 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("ElevationGrid");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
 				// check for X3DMetadataObject
@@ -410,7 +410,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}// if(!mReader->isEmptyElement()) else
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -667,7 +667,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		//
 		// create and if needed - define new geometry object.
 		//
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_Extrusion, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_Extrusion, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ext_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);// create alias for conveience
@@ -834,7 +834,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Extrusion");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -900,7 +900,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		if(coordIndex.size() == 0) throw DeadlyImportError("IndexedFaceSet must contain not empty \"coordIndex\" attribute.");
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedFaceSet, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_IndexedSet(X3DElemType::ENET_IndexedFaceSet, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		CX3DImporter_NodeElement_IndexedSet& ne_alias = *((CX3DImporter_NodeElement_IndexedSet*)ne);
@@ -921,8 +921,8 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedFaceSet");
 				// check for X3DComposedGeometryNodes
-				if(XML_CheckNode_NameEqual("Color")) { ParseNode_Rendering_Color(); continue; }
-				if(XML_CheckNode_NameEqual("ColorRGBA")) { ParseNode_Rendering_ColorRGBA(); continue; }
+				if(XML_CheckNode_NameEqual("Color")) { readColor(); continue; }
+				if(XML_CheckNode_NameEqual("ColorRGBA")) { readColorRGBA(); continue; }
 				if(XML_CheckNode_NameEqual("Coordinate")) { ParseNode_Rendering_Coordinate(); continue; }
 				if(XML_CheckNode_NameEqual("Normal")) { ParseNode_Rendering_Normal(); continue; }
 				if(XML_CheckNode_NameEqual("TextureCoordinate")) { ParseNode_Texturing_TextureCoordinate(); continue; }
@@ -934,7 +934,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -972,7 +972,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 		std::vector<aiVector3D> tlist;
 
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Sphere, NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_Geometry3D(X3DElemType::ENET_Sphere, mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		StandardShapes::MakeSphere(tess, tlist);
@@ -988,7 +988,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Sphere");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

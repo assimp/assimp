@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2019, assimp team
 
 
 All rights reserved.
@@ -49,8 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
-namespace Assimp
-{
+namespace Assimp {
 
 // <ImageTexture
 // DEF=""         ID
@@ -60,8 +59,7 @@ namespace Assimp
 // url=""         MFString
 // />
 // When the url field contains no values ([]), texturing is disabled.
-void X3DImporter::ParseNode_Texturing_ImageTexture()
-{
+void X3DImporter::ParseNode_Texturing_ImageTexture() {
     std::string use, def;
     bool repeatS = true;
     bool repeatT = true;
@@ -76,14 +74,11 @@ void X3DImporter::ParseNode_Texturing_ImageTexture()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ImageTexture, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ImageTexture(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_ImageTexture(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_ImageTexture*)ne)->RepeatS = repeatS;
@@ -98,7 +93,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ImageTexture");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -109,8 +104,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture()
 // USE=""      IDREF
 // point=""    MFVec3f [inputOutput]
 // />
-void X3DImporter::ParseNode_Texturing_TextureCoordinate()
-{
+void X3DImporter::ParseNode_Texturing_TextureCoordinate() {
     std::string use, def;
     std::list<aiVector2D> point;
     CX3DImporter_NodeElement* ne( nullptr );
@@ -121,22 +115,19 @@ void X3DImporter::ParseNode_Texturing_TextureCoordinate()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TextureCoordinate, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_TextureCoordinate(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_TextureCoordinate(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_TextureCoordinate*)ne)->Value = point;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureCoordinate");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -150,8 +141,7 @@ void X3DImporter::ParseNode_Texturing_TextureCoordinate()
 // scale="1 1"       SFVec2f [inputOutput]
 // translation="0 0" SFVec2f [inputOutput]
 // />
-void X3DImporter::ParseNode_Texturing_TextureTransform()
-{
+void X3DImporter::ParseNode_Texturing_TextureTransform() {
     std::string use, def;
     aiVector2D center(0, 0);
     float rotation = 0;
@@ -168,14 +158,11 @@ void X3DImporter::ParseNode_Texturing_TextureTransform()
 	MACRO_ATTRREAD_LOOPEND;
 
 	// if "USE" defined then find already defined element.
-	if(!use.empty())
-	{
+	if (!use.empty()) {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TextureTransform, ne);
-	}
-	else
-	{
+	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_TextureTransform(NodeElement_Cur);
+		ne = new CX3DImporter_NodeElement_TextureTransform(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
 		((CX3DImporter_NodeElement_TextureTransform*)ne)->Center = center;
@@ -186,7 +173,7 @@ void X3DImporter::ParseNode_Texturing_TextureTransform()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureTransform");
 		else
-			NodeElement_Cur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

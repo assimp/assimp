@@ -193,7 +193,7 @@ bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode,
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
 
 	// Check childs of pStartNode.
-	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ++ch_it)
+	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Children.begin(); ch_it != pStartNode->Children.end(); ++ch_it)
 	{
 		found = FindNodeElement_FromNode(*ch_it, pID, pType, pElement);
         if ( found )
@@ -1366,7 +1366,7 @@ void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 	// if we are adding not the root element then add new element to current element child list.
     if ( mNodeElementCur != nullptr )
     {
-        mNodeElementCur->Child.push_back( new_group );
+        mNodeElementCur->Children.push_back( new_group );
     }
 
 	NodeElement_List.push_back(new_group);// it's a new element - add it to list.
@@ -1375,7 +1375,7 @@ void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 
 void X3DImporter::ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode)
 {
-	mNodeElementCur->Child.push_back(pNode);// add new element to current element child list.
+	mNodeElementCur->Children.push_back(pNode);// add new element to current element child list.
 	mNodeElementCur = pNode;// switch current element to new one.
 }
 
@@ -1499,7 +1499,7 @@ void X3DImporter::ParseNode_Head()
 					NodeElement_List.push_back(ms);
                     if ( mNodeElementCur != nullptr )
                     {
-                        mNodeElementCur->Child.push_back( ms );
+                        mNodeElementCur->Children.push_back( ms );
                         added = true;
                     }
 				}

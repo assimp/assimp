@@ -110,7 +110,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "DirectionalLight");
 			else
-				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -180,7 +180,7 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "PointLight");
 			else
-				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)
@@ -266,7 +266,7 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 			if(!mReader->isEmptyElement())
 				ParseNode_Metadata(ne, "SpotLight");
 			else
-				mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 			NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 		}// if(on)

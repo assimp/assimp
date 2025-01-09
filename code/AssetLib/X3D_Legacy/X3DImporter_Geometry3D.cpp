@@ -95,7 +95,7 @@ void X3DImporter::ParseNode_Geometry3D_Box()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Box");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -165,7 +165,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cone");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -252,7 +252,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Cylinder");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -410,7 +410,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}// if(!mReader->isEmptyElement()) else
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -834,7 +834,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Extrusion");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -934,7 +934,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		}// if(!mReader->isEmptyElement())
 		else
 		{
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -988,7 +988,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Sphere");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

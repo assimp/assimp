@@ -131,7 +131,7 @@ public:
 
 	std::string ID;///< ID of the element. Can be empty. In X3D synonym for "ID" attribute.
 	CX3DImporter_NodeElement* Parent;///< Parent element. If nullptr then this node is root.
-	std::list<CX3DImporter_NodeElement*> Child;///< Child elements.
+	std::list<CX3DImporter_NodeElement*> Children;///< Child elements.
 
 	/***********************************************/
 	/****************** Functions ******************/
@@ -424,9 +424,9 @@ struct CX3DImporter_NodeElement_TextureCoordinate : public CX3DImporter_NodeElem
 
 };// struct CX3DImporter_NodeElement_TextureCoordinate
 
-/// \class CX3DImporter_NodeElement_Geometry2D
+/// \class X3DNodeElementGeometry2D
 /// Two-dimensional figure.
-class CX3DImporter_NodeElement_Geometry2D : public CX3DImporter_NodeElement
+class X3DNodeElementGeometry2D : public CX3DImporter_NodeElement
 {
 	/***********************************************/
 	/****************** Variables ******************/
@@ -444,25 +444,25 @@ public:
 
 private:
 
-	/// \fn CX3DImporter_NodeElement_Geometry2D(const CX3DImporter_NodeElement_Geometry2D& pNode)
+	/// \fn X3DNodeElementGeometry2D(const X3DNodeElementGeometry2D& pNode)
 	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Geometry2D(const CX3DImporter_NodeElement_Geometry2D& pNode);
+	X3DNodeElementGeometry2D(const X3DNodeElementGeometry2D& pNode);
 
-	/// \fn CX3DImporter_NodeElement_Geometry2D& operator=(const CX3DImporter_NodeElement_Geometry2D& pNode)
+	/// \fn X3DNodeElementGeometry2D& operator=(const X3DNodeElementGeometry2D& pNode)
 	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Geometry2D& operator=(const CX3DImporter_NodeElement_Geometry2D& pNode);
+	X3DNodeElementGeometry2D& operator=(const X3DNodeElementGeometry2D& pNode);
 
 public:
 
-	/// \fn CX3DImporter_NodeElement_Geometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	/// \fn X3DNodeElementGeometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
-	CX3DImporter_NodeElement_Geometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
+	X3DNodeElementGeometry2D(const X3DElemType pType, CX3DImporter_NodeElement* pParent)
 		: CX3DImporter_NodeElement(pType, pParent), Solid(true)
 	{}
 
-};// class CX3DImporter_NodeElement_Geometry2D
+};// class X3DNodeElementGeometry2D
 
 /// \class CX3DImporter_NodeElement_Geometry3D
 /// Three-dimensional body.

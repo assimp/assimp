@@ -671,7 +671,7 @@ private:
 	void ParseNode_MetadataString();
 
 	/// Parse <Arc2D> node of the file.
-	void ParseNode_Geometry2D_Arc2D();
+	void readArc2D();
 
 	/// Parse <ArcClose2D> node of the file.
 	void ParseNode_Geometry2D_ArcClose2D();

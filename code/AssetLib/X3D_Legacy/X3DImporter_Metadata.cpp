@@ -79,7 +79,7 @@ namespace Assimp
 		if(!mReader->isEmptyElement()) \
 			ParseNode_Metadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
 		else \
-			mNodeElementCur->Child.push_back(pNE);/* else - add element to child list manually */ \
+			mNodeElementCur->Children.push_back(pNE);/* else - add element to child list manually */ \
 	 \
 		NodeElement_List.push_back(pNE);/* add new element to elements list. */ \
 	}/* if(!pUSE_Var.empty()) else */ \
@@ -239,7 +239,7 @@ void X3DImporter::ParseNode_MetadataSet()
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "MetadataSet");
 		else
-			mNodeElementCur->Child.push_back(ne);// made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// made object as child to current element
 
 		NodeElement_List.push_back(ne);// add new element to elements list.
 	}// if(!use.empty()) else

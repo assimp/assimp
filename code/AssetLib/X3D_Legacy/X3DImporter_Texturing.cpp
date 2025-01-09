@@ -93,7 +93,7 @@ void X3DImporter::ParseNode_Texturing_ImageTexture() {
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ImageTexture");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -127,7 +127,7 @@ void X3DImporter::ParseNode_Texturing_TextureCoordinate() {
 		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureCoordinate");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -173,7 +173,7 @@ void X3DImporter::ParseNode_Texturing_TextureTransform() {
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureTransform");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

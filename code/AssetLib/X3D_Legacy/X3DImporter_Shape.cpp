@@ -89,7 +89,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 				// check for appearance node
 				if(XML_CheckNode_NameEqual("Appearance")) { ParseNode_Shape_Appearance(); continue; }
 				// check for X3DGeometryNodes
-				if(XML_CheckNode_NameEqual("Arc2D")) { ParseNode_Geometry2D_Arc2D(); continue; }
+				if(XML_CheckNode_NameEqual("Arc2D")) { readArc2D(); continue; }
 				if(XML_CheckNode_NameEqual("ArcClose2D")) { ParseNode_Geometry2D_ArcClose2D(); continue; }
 				if(XML_CheckNode_NameEqual("Circle2D")) { ParseNode_Geometry2D_Circle2D(); continue; }
 				if(XML_CheckNode_NameEqual("Disk2D")) { ParseNode_Geometry2D_Disk2D(); continue; }
@@ -120,7 +120,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -167,7 +167,7 @@ void X3DImporter::ParseNode_Shape_Appearance() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -222,7 +222,7 @@ void X3DImporter::ParseNode_Shape_Material() {
 		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Material");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

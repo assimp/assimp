@@ -79,7 +79,7 @@ void X3DImporter::readColor() {
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Color");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -113,7 +113,7 @@ void X3DImporter::readColorRGBA() {
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ColorRGBA");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -147,7 +147,7 @@ void X3DImporter::ParseNode_Rendering_Coordinate() {
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Coordinate");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
@@ -211,7 +211,7 @@ void X3DImporter::readIndexedLineSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -313,7 +313,7 @@ void X3DImporter::readIndexedTriangleFanSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -411,7 +411,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -512,7 +512,7 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -581,7 +581,7 @@ void X3DImporter::ParseNode_Rendering_LineSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -628,7 +628,7 @@ void X3DImporter::ParseNode_Rendering_PointSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -734,7 +734,7 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -802,7 +802,7 @@ void X3DImporter::ParseNode_Rendering_TriangleSet() {
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -923,7 +923,7 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 			ParseHelper_Node_Exit();
 		}// if(!mReader->isEmptyElement())
 		else {
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
@@ -958,7 +958,7 @@ CX3DImporter_NodeElement* ne;
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Normal");
 		else
-			mNodeElementCur->Child.push_back(ne);// add made object as child to current element
+			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else

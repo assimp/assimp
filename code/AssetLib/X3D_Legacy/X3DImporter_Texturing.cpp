@@ -119,10 +119,10 @@ void X3DImporter::ParseNode_Texturing_TextureCoordinate() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_TextureCoordinate, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_TextureCoordinate(mNodeElementCur);
+		ne = new X3DNodeElementTextureCoordinate(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_TextureCoordinate*)ne)->Value = point;
+		((X3DNodeElementTextureCoordinate*)ne)->Value = point;
 		// check for X3DMetadataObject childs.
 		if (!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "TextureCoordinate");

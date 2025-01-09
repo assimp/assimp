@@ -515,51 +515,11 @@ private:
 	/// \param [out] pLineCoordIdx - made CoordIdx of line set.
 	void GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int32_t>& pPolylineCoordIdx, std::list<int32_t>& pLineCoordIdx);
 
-	/// Add colors to mesh.
-	/// a. If colorPerVertex is FALSE, colours are applied to each face, as follows:
-	///		If the colorIndex field is not empty, one colour is used for each face of the mesh. There shall be at least as many indices in the
-	///			colorIndex field as there are faces in the mesh. The colorIndex field shall not contain any negative entries.
-	///		If the colorIndex field is empty, the colours in the X3DColorNode node are applied to each face of the mesh in order.
-	///			There shall be at least as many colours in the X3DColorNode node as there are faces.
-	/// b. If colorPerVertex is TRUE, colours are applied to each vertex, as follows:
-	///		If the colorIndex field is not empty, colours are applied to each vertex of the mesh in exactly the same manner that the coordIndex
-	///			field is used to choose coordinates for each vertex from the <Coordinate> node. The colorIndex field shall contain end-of-face markers (-1)
-	///			in exactly the same places as the coordIndex field.
-	///		If the colorIndex field is empty, the coordIndex field is used to choose colours from the X3DColorNode node.
-	/// \param [in] pMesh - mesh for adding data.
-	/// \param [in] pCoordIdx - vertices indices divided by delimiter "-1".
-	/// \param [in] pColorIdx - color indices for every vertex divided by delimiter "-1" if \ref pColorPerVertex is true. if \ref pColorPerVertex is false
-	/// then pColorIdx contain color indices for every faces and must not contain delimiter "-1".
-	/// \param [in] pColors - defined colors.
-	/// \param [in] pColorPerVertex - if \ref pColorPerVertex is true then color in \ref pColors defined for every vertex, if false - for every face.
-	void MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pColorIdx,
-								const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const;
-
-	/// \overload void MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pColorIdx, const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const;
-	void MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pColorIdx,
-								const std::list<aiColor3D>& pColors, const bool pColorPerVertex) const;
-
-	/// Add colors to mesh.
-	/// \param [in] pMesh - mesh for adding data.
-	/// \param [in] pColors - defined colors.
-	/// \param [in] pColorPerVertex - if \ref pColorPerVertex is true then color in \ref pColors defined for every vertex, if false - for every face.
-	void MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const;
-
-	/// \overload void MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const
-	void MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor3D>& pColors, const bool pColorPerVertex) const;
-
-	/// Add normals to mesh. Function work similar to \ref MeshGeometry_AddColor;
-	void MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pNormalIdx,
-								const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex) const;
-
-	/// Add normals to mesh. Function work similar to \ref MeshGeometry_AddColor;
-	void MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex) const;
-
-    /// Add texture coordinates to mesh. Function work similar to \ref MeshGeometry_AddColor;
+    /// Add texture coordinates to mesh. Function work similar to \ref add_color;
 	void MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
 								const std::list<aiVector2D>& pTexCoords) const;
 
-    /// Add texture coordinates to mesh. Function work similar to \ref MeshGeometry_AddColor;
+    /// Add texture coordinates to mesh. Function work similar to \ref add_color;
 	void MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) const;
 
 	/***********************************************/

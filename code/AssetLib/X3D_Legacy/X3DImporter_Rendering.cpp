@@ -71,10 +71,10 @@ void X3DImporter::readColor() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Color, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Color(mNodeElementCur);
+		ne = new X3DNodeElementColor(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Color*)ne)->Value = color;
+		((X3DNodeElementColor*)ne)->Value = color;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Color");
@@ -105,10 +105,10 @@ void X3DImporter::readColorRGBA() {
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_ColorRGBA, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_ColorRGBA(mNodeElementCur);
+		ne = new X3DNodeElementColorRGBA(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_ColorRGBA*)ne)->Value = color;
+		((X3DNodeElementColorRGBA*)ne)->Value = color;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "ColorRGBA");
@@ -950,10 +950,10 @@ X3DNodeElementBase* ne;
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Normal, ne);
 	} else {
 		// create and if needed - define new geometry object.
-		ne = new CX3DImporter_NodeElement_Normal(mNodeElementCur);
+		ne = new X3DNodeElementNormal(mNodeElementCur);
 		if(!def.empty()) ne->ID = def;
 
-		((CX3DImporter_NodeElement_Normal*)ne)->Value = vector;
+		((X3DNodeElementNormal*)ne)->Value = vector;
 		// check for X3DMetadataObject childs.
 		if(!mReader->isEmptyElement())
 			ParseNode_Metadata(ne, "Normal");

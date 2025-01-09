@@ -349,35 +349,35 @@ struct CX3DImporter_NodeElement_MetaString : public CX3DImporter_NodeElement_Met
 
 };// struct CX3DImporter_NodeElement_MetaString
 
-/// \struct CX3DImporter_NodeElement_Color
+/// \struct X3DNodeElementColor
 /// This struct hold <Color> value.
-struct CX3DImporter_NodeElement_Color : public X3DNodeElementBase
+struct X3DNodeElementColor : public X3DNodeElementBase
 {
 	std::list<aiColor3D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_Color(X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementColor(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Color(X3DNodeElementBase* pParent)
+	X3DNodeElementColor(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_Color, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_Color
+};// struct X3DNodeElementColor
 
-/// \struct CX3DImporter_NodeElement_ColorRGBA
+/// \struct X3DNodeElementColorRGBA
 /// This struct hold <ColorRGBA> value.
-struct CX3DImporter_NodeElement_ColorRGBA : public X3DNodeElementBase
+struct X3DNodeElementColorRGBA : public X3DNodeElementBase
 {
 	std::list<aiColor4D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_ColorRGBA(X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementColorRGBA(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_ColorRGBA(X3DNodeElementBase* pParent)
+	X3DNodeElementColorRGBA(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_ColorRGBA, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_ColorRGBA
+};// struct X3DNodeElementColorRGBA
 
 /// \struct CX3DImporter_NodeElement_Coordinate
 /// This struct hold <Coordinate> value.
@@ -394,35 +394,35 @@ struct CX3DImporter_NodeElement_Coordinate : public X3DNodeElementBase
 
 };// struct CX3DImporter_NodeElement_Coordinate
 
-/// \struct CX3DImporter_NodeElement_Normal
+/// \struct X3DNodeElementNormal
 /// This struct hold <Normal> value.
-struct CX3DImporter_NodeElement_Normal : public X3DNodeElementBase
+struct X3DNodeElementNormal : public X3DNodeElementBase
 {
 	std::list<aiVector3D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_Normal(X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementNormal(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_Normal(X3DNodeElementBase* pParent)
+	X3DNodeElementNormal(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_Normal, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_Normal
+};// struct X3DNodeElementNormal
 
-/// \struct CX3DImporter_NodeElement_TextureCoordinate
+/// \struct X3DNodeElementTextureCoordinate
 /// This struct hold <TextureCoordinate> value.
-struct CX3DImporter_NodeElement_TextureCoordinate : public X3DNodeElementBase
+struct X3DNodeElementTextureCoordinate : public X3DNodeElementBase
 {
 	std::list<aiVector2D> Value;///< Stored value.
 
-	/// \fn CX3DImporter_NodeElement_TextureCoordinate(X3DNodeElementBase* pParent)
+	/// \fn X3DNodeElementTextureCoordinate(X3DNodeElementBase* pParent)
 	/// Constructor
 	/// \param [in] pParent - pointer to parent node.
-	CX3DImporter_NodeElement_TextureCoordinate(X3DNodeElementBase* pParent)
+	X3DNodeElementTextureCoordinate(X3DNodeElementBase* pParent)
 		: X3DNodeElementBase(ENET_TextureCoordinate, pParent)
 	{}
 
-};// struct CX3DImporter_NodeElement_TextureCoordinate
+};// struct X3DNodeElementTextureCoordinate
 
 /// \class X3DNodeElementGeometry2D
 /// Two-dimensional figure.

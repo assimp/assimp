@@ -270,13 +270,13 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		// copy additional information from children
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh,  ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value, tnemesh.NormalPerVertex);
+				X3DGeoHelper::add_normal(**pMesh,  ((X3DNodeElementNormal*)*ch_it)->Value, tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of ElevationGrid: ", to_string((*ch_it)->Type), ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
@@ -299,17 +299,17 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		// copy additional information from children
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value,
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColorRGBA*)*ch_it)->Value,
 										tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value,
+				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedFaceSet: ", to_string((*ch_it)->Type), ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
@@ -331,9 +331,9 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value,
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColorRGBA*)*ch_it)->Value,
 										tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate){
             } // skip because already read when mesh created.
@@ -360,17 +360,17 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value,
+				X3DGeoHelper::add_color(**pMesh, tnemesh.CoordIndex, tnemesh.ColorIndex, ((X3DNodeElementColorRGBA*)*ch_it)->Value,
 										tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value,
+				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedTriangleSet or IndexedTriangleFanSet, or \
 																	IndexedTriangleStripSet: " + to_string((*ch_it)->Type) + ".");
@@ -412,9 +412,9 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, true);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, true);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
@@ -438,9 +438,9 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, true);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, true);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, true);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
@@ -466,16 +466,16 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 				break;
 			}
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value,tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value,tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value,
+				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleFanSet: ", to_string((*ch_it)->Type), ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
@@ -505,16 +505,16 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value,
+				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeSet: ", to_string((*ch_it)->Type), ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)
@@ -536,16 +536,16 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase& pNodeElement, 
 		for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
 			ai_assert(*pMesh);
 			if((*ch_it)->Type == X3DElemType::ENET_Color)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColor*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_ColorRGBA)
-				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_ColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
+				X3DGeoHelper::add_color(**pMesh, ((X3DNodeElementColorRGBA*)*ch_it)->Value, tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else if((*ch_it)->Type == X3DElemType::ENET_Normal)
-				MeshGeometry_AddNormal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((CX3DImporter_NodeElement_Normal*)*ch_it)->Value,
+				X3DGeoHelper::add_normal(**pMesh, tnemesh.CoordIndex, tnemesh.NormalIndex, ((X3DNodeElementNormal*)*ch_it)->Value,
 										tnemesh.NormalPerVertex);
 			else if((*ch_it)->Type == X3DElemType::ENET_TextureCoordinate)
-				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
+				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((X3DNodeElementTextureCoordinate*)*ch_it)->Value);
 			else
 				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleStripSet: ", to_string((*ch_it)->Type), ".");
 		}// for(std::list<X3DNodeElementBase*>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it)

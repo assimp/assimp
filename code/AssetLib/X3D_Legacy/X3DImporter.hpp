@@ -237,6 +237,8 @@ private:
 	/// Clear all temporary data.
 	void Clear();
 
+    bool isNodeEmpty();
+
 	/***********************************************/
 	/************* Functions: find set *************/
 	/***********************************************/
@@ -363,6 +365,8 @@ private:
 	/// \param [in] pAttrName - attribute name.
 	/// \throw DeadlyImportError.
 	void Throw_IncorrectAttrValue(const std::string& pAttrName);
+
+    void Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName);
 
 	/// Call that function when some type of nodes are defined twice or more when must be used only once and exception must be raised.
 	/// E.g.:

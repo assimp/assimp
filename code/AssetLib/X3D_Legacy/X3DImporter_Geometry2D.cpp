@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 #include "X3DImporter_Node.hpp"
+#include "X3DXmlHelper.h"
 #include "X3DGeoHelper.h"
 
 namespace Assimp {
@@ -92,7 +93,7 @@ void X3DImporter::readArc2D() {
 		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Arc2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -156,14 +157,14 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D() {
 			if((closureType == "PIE") || (closureType == "\"PIE\""))
 				vlist.push_back(aiVector3D(0, 0, 0));// center point - first radial line
 			else if((closureType != "CHORD") && (closureType != "\"CHORD\""))
-				Throw_IncorrectAttrValue("closureType");
+				Throw_IncorrectAttrValue("ArcClose2D", "closureType");
 
 			vlist.push_back(*vlist.begin());// arc first point - chord from first to last point of arc(if CHORD) or second radial line(if PIE).
 		}
 
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = ((X3DNodeElementGeometry2D*)ne)->Vertices.size();
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "ArcClose2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -202,7 +203,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D() {
 		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Circle2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -244,7 +245,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 	} else {
 		std::list<aiVector3D> tlist_o, tlist_i;
 
-		if(innerRadius > outerRadius) Throw_IncorrectAttrValue("innerRadius");
+		if(innerRadius > outerRadius) Throw_IncorrectAttrValue("Disk2D", "innerRadius");
 
 		// create and if needed - define new geometry object.
 		ne = new X3DNodeElementGeometry2D(X3DElemType::ENET_Disk2D, mNodeElementCur);
@@ -276,10 +277,10 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 			// add all quads except last
 			for(std::list<aiVector3D>::iterator it_i = tlist_i.begin(), it_o = tlist_o.begin(); it_i != tlist_i.end();) {
 				// do not forget - CCW direction
-				vlist.push_back(*it_i++);// 1st point
-				vlist.push_back(*it_o++);// 2nd point
-				vlist.push_back(*it_o);// 3rd point
-				vlist.push_back(*it_i);// 4th point
+				vlist.emplace_back(*it_i++);// 1st point
+				vlist.emplace_back(*it_o++);// 2nd point
+				vlist.emplace_back(*it_o);// 3rd point
+				vlist.emplace_back(*it_i);// 4th point
 			}
 
 			// add last quad
@@ -293,7 +294,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 
 		((X3DNodeElementGeometry2D*)ne)->Solid = solid;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Disk2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -332,13 +333,13 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D() {
 
 		// convert vec2 to vec3
 		for (std::list<aiVector2D>::iterator it2 = lineSegments.begin(); it2 != lineSegments.end(); ++it2)
-            tlist.push_back(aiVector3D(it2->x, it2->y, 0));
+            tlist.emplace_back(it2->x, it2->y,static_cast<ai_real>(0));
 
 		// convert point set to line set
 		X3DGeoHelper::extend_point_to_line(tlist, ((X3DNodeElementGeometry2D*)ne)->Vertices);
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Polyline2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -377,7 +378,7 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D() {
 
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 1;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Polypoint2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -418,14 +419,14 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D() {
 		float y2 = size.y / 2.0f;
 		std::list<aiVector3D>& vlist = ((X3DNodeElementGeometry2D*)ne)->Vertices;// just short alias.
 
-		vlist.push_back(aiVector3D(x2, y1, 0));// 1st point
-		vlist.push_back(aiVector3D(x2, y2, 0));// 2nd point
-		vlist.push_back(aiVector3D(x1, y2, 0));// 3rd point
-		vlist.push_back(aiVector3D(x1, y1, 0));// 4th point
+		vlist.emplace_back(x2, y1, static_cast<ai_real>(0));// 1st point
+		vlist.emplace_back(x2, y2, static_cast<ai_real>(0));// 2nd point
+		vlist.emplace_back(x1, y2, static_cast<ai_real>(0));// 3rd point
+		vlist.emplace_back(x1, y1, static_cast<ai_real>(0));// 4th point
 		((X3DNodeElementGeometry2D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Rectangle2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -464,13 +465,13 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D() {
 
 		// convert vec2 to vec3
 		for(std::list<aiVector2D>::iterator it2 = vertices.begin(); it2 != vertices.end(); ++it2) {
-			((X3DNodeElementGeometry2D*)ne)->Vertices.push_back(aiVector3D(it2->x, it2->y, 0));
+			((X3DNodeElementGeometry2D*)ne)->Vertices.emplace_back(it2->x, it2->y, static_cast<ai_real>(0));
 		}
 
 		((X3DNodeElementGeometry2D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "TriangleSet2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element

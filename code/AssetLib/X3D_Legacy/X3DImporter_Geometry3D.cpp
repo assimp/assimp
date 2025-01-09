@@ -89,7 +89,7 @@ void X3DImporter::ParseNode_Geometry3D_Box() {
 		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Box");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -154,7 +154,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone() {
 		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
-		if (!mReader->isEmptyElement())
+		if (!isNodeEmpty())
 			ParseNode_Metadata(ne, "Cone");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -234,7 +234,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder() {
 		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Cylinder");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -369,7 +369,7 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid() {
 		grid_alias.CreaseAngle = creaseAngle;
 		grid_alias.Solid = solid;
         // check for child nodes
-        if(!mReader->isEmptyElement()) {
+        if(!isNodeEmpty()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("ElevationGrid");
 				// check for X3DComposedGeometryNodes
@@ -763,7 +763,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion() {
 //PrintVectorSet("Ext. CoordIdx", ext_alias.CoordIndex);
 //PrintVectorSet("Ext. Vertices", ext_alias.Vertices);
 		// check for child nodes
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Extrusion");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
@@ -845,7 +845,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 		ne_alias.Solid = solid;
 		ne_alias.TexCoordIndex = texCoordIndex;
         // check for child nodes
-        if (!mReader->isEmptyElement()) {
+        if (!isNodeEmpty()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("IndexedFaceSet");
 				// check for X3DComposedGeometryNodes
@@ -859,7 +859,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 
 			MACRO_NODECHECK_LOOPEND("IndexedFaceSet");
 			ParseHelper_Node_Exit();
-		} // if(!mReader->isEmptyElement())
+		} // if(!isNodeEmpty())
 		else {
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
@@ -907,7 +907,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere() {
 		((X3DNodeElementGeometry3D*)ne)->Solid = solid;
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
+		if(!isNodeEmpty())
 			ParseNode_Metadata(ne, "Sphere");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element

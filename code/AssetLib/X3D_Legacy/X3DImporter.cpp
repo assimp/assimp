@@ -89,6 +89,10 @@ const aiImporterDesc X3DImporter::Description = {
 	"x3d x3db"
 };
 
+bool X3DImporter::isNodeEmpty() {
+    return mReader->isEmptyElement();
+}
+
 //const std::regex X3DImporter::pattern_nws(R"([^, \t\r\n]+)");
 //const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
 
@@ -272,6 +276,10 @@ void X3DImporter::Throw_IncorrectAttr(const std::string& pAttrName)
 void X3DImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
 {
 	throw DeadlyImportError("Attribute \"", pAttrName, "\" in node <", mReader->getNodeName(), "> has incorrect value.");
+}
+
+void X3DImporter::Throw_IncorrectAttrValue(const std::string &nodeName, const std::string &pAttrName) {
+    throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + nodeName + "> has incorrect value.");
 }
 
 void X3DImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)

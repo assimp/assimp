@@ -53,8 +53,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
 #endif
 
     Importer importer;
-    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
-        aiProcessPreset_TargetRealtime_Quality, nullptr );
+    unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, nullptr);
 
     if (sc == nullptr) {
         return 0;

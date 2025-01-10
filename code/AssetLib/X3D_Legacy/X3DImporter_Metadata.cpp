@@ -74,7 +74,7 @@ namespace Assimp {
 		((pMetaClass*)pNE)->Value = pValue; \
 		/* also metadata node can contain childs */ \
 		if(!isNodeEmpty()) \
-			ParseNode_Metadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
+			childrenReadMetadata(pNE, pMetaName);/* in that case node element will be added to child elements list of current node. */ \
 		else \
 			mNodeElementCur->Children.push_back(pNE);/* else - add element to child list manually */ \
 	 \
@@ -87,24 +87,24 @@ namespace Assimp {
 bool X3DImporter::ParseHelper_CheckRead_X3DMetadataObject()
 {
 	if(XML_CheckNode_NameEqual("MetadataBoolean"))
-		ParseNode_MetadataBoolean();
+		childrenReadMetadataBoolean();
 	else if(XML_CheckNode_NameEqual("MetadataDouble"))
-		ParseNode_MetadataDouble();
+		childrenReadMetadataDouble();
 	else if(XML_CheckNode_NameEqual("MetadataFloat"))
-		ParseNode_MetadataFloat();
+		childrenReadMetadataFloat();
 	else if(XML_CheckNode_NameEqual("MetadataInteger"))
-		ParseNode_MetadataInteger();
+		childrenReadMetadataInteger();
 	else if(XML_CheckNode_NameEqual("MetadataSet"))
-		ParseNode_MetadataSet();
+		childrenReadMetadataSet();
 	else if(XML_CheckNode_NameEqual("MetadataString"))
-		ParseNode_MetadataString();
+		childrenReadMetadataString();
 	else
 		return false;
 
 	return true;
 }
 
-void X3DImporter::ParseNode_Metadata(X3DNodeElementBase* pParentElement, const std::string& /*pNodeName*/)
+void X3DImporter::childrenReadMetadata(X3DNodeElementBase* pParentElement, const std::string& /*pNodeName*/)
 {
 	ParseHelper_Node_Enter(pParentElement);
 	MACRO_NODECHECK_METADATA(mReader->getNodeName());
@@ -118,7 +118,7 @@ void X3DImporter::ParseNode_Metadata(X3DNodeElementBase* pParentElement, const s
 // reference="" SFString [inputOutput]
 // value=""     MFBool   [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataBoolean() {
+void X3DImporter::childrenReadMetadataBoolean() {
     std::string def, use;
     std::string name, reference;
     std::vector<bool> value;
@@ -141,7 +141,7 @@ void X3DImporter::ParseNode_MetadataBoolean() {
 // reference="" SFString [inputOutput]
 // value=""     MFDouble [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataDouble() {
+void X3DImporter::childrenReadMetadataDouble() {
     std::string def, use;
     std::string name, reference;
     std::vector<double> value;
@@ -164,7 +164,7 @@ void X3DImporter::ParseNode_MetadataDouble() {
 // reference="" SFString [inputOutput]
 // value=""     MFFloat  [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataFloat() {
+void X3DImporter::childrenReadMetadataFloat() {
     std::string def, use;
     std::string name, reference;
     std::vector<float> value;
@@ -187,7 +187,7 @@ void X3DImporter::ParseNode_MetadataFloat() {
 // reference="" SFString  [inputOutput]
 // value=""     MFInteger [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataInteger() {
+void X3DImporter::childrenReadMetadataInteger() {
     std::string def, use;
     std::string name, reference;
     std::vector<int32_t> value;
@@ -209,7 +209,7 @@ void X3DImporter::ParseNode_MetadataInteger() {
 // name=""      SFString [inputOutput]
 // reference="" SFString [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataSet() {
+void X3DImporter::childrenReadMetadataSet() {
     std::string def, use;
     std::string name, reference;
     X3DNodeElementBase* ne( nullptr );
@@ -230,7 +230,7 @@ void X3DImporter::ParseNode_MetadataSet() {
 		((X3DNodeElementMetaSet*)ne)->Reference = reference;
 		// also metadata node can contain children
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "MetadataSet");
+			childrenReadMetadata(ne, "MetadataSet");
 		else
 			mNodeElementCur->Children.push_back(ne);// made object as child to current element
 
@@ -245,7 +245,7 @@ void X3DImporter::ParseNode_MetadataSet() {
 // reference="" SFString [inputOutput]
 // value=""     MFString [inputOutput]
 // />
-void X3DImporter::ParseNode_MetadataString()
+void X3DImporter::childrenReadMetadataString()
 {
     std::string def, use;
     std::string name, reference;

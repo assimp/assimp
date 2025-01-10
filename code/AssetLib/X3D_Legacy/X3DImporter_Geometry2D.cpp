@@ -94,7 +94,7 @@ void X3DImporter::readArc2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Arc2D");
+			childrenReadMetadata(ne, "Arc2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -165,7 +165,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = ((X3DNodeElementGeometry2D*)ne)->Vertices.size();
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "ArcClose2D");
+			childrenReadMetadata(ne, "ArcClose2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -204,7 +204,7 @@ void X3DImporter::ParseNode_Geometry2D_Circle2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Circle2D");
+			childrenReadMetadata(ne, "Circle2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -295,7 +295,7 @@ void X3DImporter::ParseNode_Geometry2D_Disk2D() {
 		((X3DNodeElementGeometry2D*)ne)->Solid = solid;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Disk2D");
+			childrenReadMetadata(ne, "Disk2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -340,7 +340,7 @@ void X3DImporter::ParseNode_Geometry2D_Polyline2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 2;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Polyline2D");
+			childrenReadMetadata(ne, "Polyline2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -379,7 +379,7 @@ void X3DImporter::ParseNode_Geometry2D_Polypoint2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 1;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Polypoint2D");
+			childrenReadMetadata(ne, "Polypoint2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -427,7 +427,7 @@ void X3DImporter::ParseNode_Geometry2D_Rectangle2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Rectangle2D");
+			childrenReadMetadata(ne, "Rectangle2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -472,7 +472,7 @@ void X3DImporter::ParseNode_Geometry2D_TriangleSet2D() {
 		((X3DNodeElementGeometry2D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "TriangleSet2D");
+			childrenReadMetadata(ne, "TriangleSet2D");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 

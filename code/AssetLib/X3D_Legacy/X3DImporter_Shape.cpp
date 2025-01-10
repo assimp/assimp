@@ -51,21 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-// <Shape
-// DEF=""              ID
-// USE=""              IDREF
-// bboxCenter="0 0 0"  SFVec3f [initializeOnly]
-// bboxSize="-1 -1 -1" SFVec3f [initializeOnly]
-// >
-//    <!-- ShapeChildContentModel -->
-// "ShapeChildContentModel is the child-node content model corresponding to X3DShapeNode. ShapeChildContentModel can contain a single Appearance node and a
-// single geometry node, in any order.
-// A ProtoInstance node (with the proper node type) can be substituted for any node in this content model."
-// </Shape>
-// A Shape node is unlit if either of the following is true:
-//     The shape's appearance field is nullptr (default).
-//     The material field in the Appearance node is nullptr (default).
-// NOTE Geometry nodes that represent lines or points do not support lighting.
 void X3DImporter::ParseNode_Shape_Shape() {
     std::string use, def;
     X3DNodeElementBase* ne( nullptr );
@@ -83,7 +68,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 		if(!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if (!mReader->isEmptyElement()) {
+        if (!isNodeEmpty()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("Shape");
 				// check for appearance node
@@ -118,7 +103,7 @@ void X3DImporter::ParseNode_Shape_Shape() {
 
 			MACRO_NODECHECK_LOOPEND("Shape");
 			ParseHelper_Node_Exit();
-		}// if(!mReader->isEmptyElement())
+		}// if(!isNodeEmpty())
 		else {
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
@@ -154,7 +139,7 @@ void X3DImporter::ParseNode_Shape_Appearance() {
 		if (!def.empty()) ne->ID = def;
 
         // check for child nodes
-        if (!mReader->isEmptyElement()) {
+        if (!isNodeEmpty()) {
 			ParseHelper_Node_Enter(ne);
 			MACRO_NODECHECK_LOOPBEGIN("Appearance");
 				if(XML_CheckNode_NameEqual("Material")) { ParseNode_Shape_Material(); continue; }
@@ -165,7 +150,7 @@ void X3DImporter::ParseNode_Shape_Appearance() {
 
 			MACRO_NODECHECK_LOOPEND("Appearance");
 			ParseHelper_Node_Exit();
-		}// if(!mReader->isEmptyElement())
+		}// if(!isNodeEmpty())
 		else {
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 		}
@@ -219,8 +204,8 @@ void X3DImporter::ParseNode_Shape_Material() {
 		((X3DNodeElementMaterial*)ne)->EmissiveColor = emissiveColor;
 		((X3DNodeElementMaterial*)ne)->SpecularColor = specularColor;
         // check for child nodes
-		if (!mReader->isEmptyElement())
-			ParseNode_Metadata(ne, "Material");
+		if (!isNodeEmpty())
+			childrenReadMetadata(ne, "Material");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 

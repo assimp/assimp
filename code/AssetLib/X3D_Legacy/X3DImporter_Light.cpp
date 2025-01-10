@@ -107,7 +107,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight() {
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!isNodeEmpty())
-				ParseNode_Metadata(ne, "DirectionalLight");
+				childrenReadMetadata(ne, "DirectionalLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -177,7 +177,7 @@ void X3DImporter::ParseNode_Lighting_PointLight() {
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!isNodeEmpty())
-				ParseNode_Metadata(ne, "PointLight");
+				childrenReadMetadata(ne, "PointLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -263,7 +263,7 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 			ParseHelper_Node_Exit();
 			// check for child nodes
 			if(!isNodeEmpty())
-				ParseNode_Metadata(ne, "SpotLight");
+				childrenReadMetadata(ne, "SpotLight");
 			else
 				mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 

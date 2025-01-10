@@ -90,7 +90,7 @@ void X3DImporter::ParseNode_Geometry3D_Box() {
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 4;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Box");
+			childrenReadMetadata(ne, "Box");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -155,7 +155,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone() {
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if (!isNodeEmpty())
-			ParseNode_Metadata(ne, "Cone");
+			childrenReadMetadata(ne, "Cone");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -235,7 +235,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder() {
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Cylinder");
+			childrenReadMetadata(ne, "Cylinder");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -764,7 +764,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion() {
 //PrintVectorSet("Ext. Vertices", ext_alias.Vertices);
 		// check for child nodes
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Extrusion");
+			childrenReadMetadata(ne, "Extrusion");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -908,7 +908,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere() {
 		((X3DNodeElementGeometry3D*)ne)->NumIndices = 3;
 		// check for X3DMetadataObject childs.
 		if(!isNodeEmpty())
-			ParseNode_Metadata(ne, "Sphere");
+			childrenReadMetadata(ne, "Sphere");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 

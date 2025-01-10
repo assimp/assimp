@@ -224,9 +224,7 @@ void X3DImporter::startReadTransform() {
 
 			XML_ReadNode_GetAttrVal_AsArrF(idx, tvec);
 			if(tvec.size() != 4) throw DeadlyImportError("<Transform>: rotation vector must have 4 elements.");
-
 			memcpy(rotation, tvec.data(), sizeof(rotation));
-
 			continue;
 		}
 

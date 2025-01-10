@@ -568,26 +568,26 @@ private:
 	/// \param [in] pNodeName - parsed node name. Must be set because that function is general and name needed for checking the end
 	/// and error reporing.
 	/// \param [in] pParentElement - parent metadata element.
-	void ParseNode_Metadata(X3DNodeElementBase* pParentElement, const std::string& pNodeName);
+	void childrenReadMetadata(X3DNodeElementBase* pParentElement, const std::string& pNodeName);
 
 	/// Parse <MetadataBoolean> node of the file.
-	void ParseNode_MetadataBoolean();
+	void childrenReadMetadataBoolean();
 
 	/// Parse <MetadataDouble> node of the file.
-	void ParseNode_MetadataDouble();
+	void childrenReadMetadataDouble();
 
 	/// Parse <MetadataFloat> node of the file.
-	void ParseNode_MetadataFloat();
+	void childrenReadMetadataFloat();
 
 	/// Parse <MetadataInteger> node of the file.
-	void ParseNode_MetadataInteger();
+	void childrenReadMetadataInteger();
 
 	/// Parse <MetadataSet> node of the file.
-	void ParseNode_MetadataSet();
+	void childrenReadMetadataSet();
 
-	/// \fn void ParseNode_MetadataString()
+	/// \fn void childrenReadMetadataString()
 	/// Parse <MetadataString> node of the file.
-	void ParseNode_MetadataString();
+	void childrenReadMetadataString();
 
 	/// Parse <Arc2D> node of the file.
 	void readArc2D();

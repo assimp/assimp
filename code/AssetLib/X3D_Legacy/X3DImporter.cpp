@@ -389,10 +389,8 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
     bool found = false;
     bool close_found = false;
 
-	for(size_t i = 0; i < Uns_Skip_Len; i++)
-	{
-		if(nn == Uns_Skip[i])
-		{
+	for(size_t i = 0; i < Uns_Skip_Len; i++) {
+		if(nn == Uns_Skip[i]) {
 			found = true;
 			if(mReader->isEmptyElement())
 			{
@@ -415,7 +413,7 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
 
 casu_cres:
 
-	if(!found) throw DeadlyImportError("Unknown node \"", nn, "\" in ", pParentNodeName, ".");
+	if(!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
 
 	if(close_found)
 		LogInfo("Skipping node \"" + nn + "\" in " + pParentNodeName + ".");
@@ -1116,8 +1114,7 @@ void X3DImporter::ParseNode_Scene()
 /******************************************************** Functions: BaseImporter set ********************************************************/
 /*********************************************************************************************************************************************/
 
-bool X3DImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const
-{
+bool X3DImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const {
     const std::string extension = GetExtension(pFile);
 
 	if((extension == "x3d") || (extension == "x3db")) return true;
@@ -1143,11 +1140,10 @@ const aiImporterDesc* X3DImporter::GetInfo () const
 	return &Description;
 }
 
-void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
+void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
 	mpIOHandler = pIOHandler;
 
-	Clear();// delete old graph.
+	Clear();
 	std::string::size_type slashPos = pFile.find_last_of("\\/");
 	pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
 	ParseFile(pFile, pIOHandler);
@@ -1162,8 +1158,14 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 	pScene->mRootNode->mParent = nullptr;
 	pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 	//search for root node element
+
 	mNodeElementCur = NodeElement_List.front();
-	while(mNodeElementCur->Parent != nullptr) mNodeElementCur = mNodeElementCur->Parent;
+    if (mNodeElementCur == nullptr) {
+        return;
+    }
+	while(mNodeElementCur->Parent != nullptr) {
+        mNodeElementCur = mNodeElementCur->Parent;
+    }
 
 	{// fill aiScene with objects.
 		std::list<aiMesh*> mesh_list;
@@ -1173,35 +1175,33 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		// create nodes tree
 		Postprocess_BuildNode(*mNodeElementCur, *pScene->mRootNode, mesh_list, mat_list, light_list);
 		// copy needed data to scene
-		if(!mesh_list.empty())
-		{
+		if(!mesh_list.empty()) {
 			std::list<aiMesh*>::const_iterator it = mesh_list.begin();
 
 			pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
 			pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-			for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *it++;
+			for(size_t i = 0; i < pScene->mNumMeshes; i++)
+                pScene->mMeshes[i] = *it++;
 		}
 
-		if(!mat_list.empty())
-		{
+		if(!mat_list.empty()) {
 			std::list<aiMaterial*>::const_iterator it = mat_list.begin();
 
 			pScene->mNumMaterials = static_cast<unsigned int>(mat_list.size());
 			pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-			for(size_t i = 0; i < pScene->mNumMaterials; i++) pScene->mMaterials[i] = *it++;
+			for(size_t i = 0; i < pScene->mNumMaterials; i++)
+                pScene->mMaterials[i] = *it++;
 		}
 
-		if(!light_list.empty())
-		{
+		if(!light_list.empty()) {
 			std::list<aiLight*>::const_iterator it = light_list.begin();
 
 			pScene->mNumLights = static_cast<unsigned int>(light_list.size());
 			pScene->mLights = new aiLight*[pScene->mNumLights];
-			for(size_t i = 0; i < pScene->mNumLights; i++) pScene->mLights[i] = *it++;
+			for(size_t i = 0; i < pScene->mNumLights; i++)
+                pScene->mLights[i] = *it++;
 		}
-	}// END: fill aiScene with objects.
-
-	///TODO: IME optimize tree
+	}
 }
 
 }// namespace Assimp

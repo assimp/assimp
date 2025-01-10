@@ -115,7 +115,7 @@ void X3DImporter::ParseNode_Networking_Inline()
 		}
 
 		// check for X3DMetadataObject childs.
-		if(!isNodeEmpty()) ParseNode_Metadata(mNodeElementCur, "Inline");
+		if(!isNodeEmpty()) childrenReadMetadata(mNodeElementCur, "Inline");
 
 		// exit from node in that place
 		ParseHelper_Node_Exit();

@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+#include "X3DXmlHelper.h"
 
 namespace Assimp {
 
@@ -90,8 +91,8 @@ void X3DImporter::ParseNode_Texturing_ImageTexture() {
 			((X3DNodeElementImageTexture*)ne)->URL = "";
 
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
-			ParseNode_Metadata(ne, "ImageTexture");
+		if(!isNodeEmpty())
+			childrenReadMetadata(ne, "ImageTexture");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -124,8 +125,8 @@ void X3DImporter::ParseNode_Texturing_TextureCoordinate() {
 
 		((X3DNodeElementTextureCoordinate*)ne)->Value = point;
 		// check for X3DMetadataObject childs.
-		if (!mReader->isEmptyElement())
-			ParseNode_Metadata(ne, "TextureCoordinate");
+		if (!isNodeEmpty())
+			childrenReadMetadata(ne, "TextureCoordinate");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 
@@ -170,8 +171,8 @@ void X3DImporter::ParseNode_Texturing_TextureTransform() {
 		((X3DNodeElementTextureTransform*)ne)->Scale = scale;
 		((X3DNodeElementTextureTransform*)ne)->Translation = translation;
 		// check for X3DMetadataObject childs.
-		if(!mReader->isEmptyElement())
-			ParseNode_Metadata(ne, "TextureTransform");
+		if(!isNodeEmpty())
+			childrenReadMetadata(ne, "TextureTransform");
 		else
 			mNodeElementCur->Children.push_back(ne);// add made object as child to current element
 

@@ -1233,17 +1233,16 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
                     ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
                 }
                 break;
-        // OKINO extensions
-        // -------------------------------------------------------
+            // OKINO extensions
+            // -------------------------------------------------------
             case "weighting":
                 XmlParser::getValueAsReal(currentNode, out.mWeighting);
                 break;
             case "mix_with_previous_layer":
                 XmlParser::getValueAsReal(currentNode, out.mMixWithPrevious);
                 break;
-        }
-        // MAX3D extensions
-        // -------------------------------------------------------
+            // MAX3D extensions
+            // -------------------------------------------------------
             case "amount":
                 XmlParser::getValueAsReal(currentNode, out.mWeighting);
                 break;

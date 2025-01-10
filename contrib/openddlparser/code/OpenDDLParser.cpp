@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2020 Kim Kulling
+Copyright (c) 2014-2025 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -289,8 +289,8 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
         if (nullptr != name && nullptr != node && nullptr != name->m_id->m_buffer) {
             const std::string nodeName(name->m_id->m_buffer);
             node->setName(nodeName);
-            delete name;
         }
+        delete name;
 
         Property *first(nullptr);
         in = lookForNextToken(in, end);

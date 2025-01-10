@@ -1189,51 +1189,64 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         const std::string &currentName = currentNode.name();
         // MAYA extensions
         // -------------------------------------------------------
-        if (currentName == "wrapU") {
-            XmlParser::getValueAsBool(currentNode, out.mWrapU);
-        } else if (currentName == "wrapV") {
-            XmlParser::getValueAsBool(currentNode, out.mWrapV);
-        } else if (currentName == "mirrorU") {
-            XmlParser::getValueAsBool(currentNode, out.mMirrorU);
-        } else if (currentName == "mirrorV") {
-            XmlParser::getValueAsBool(currentNode, out.mMirrorV);
-        } else if (currentName == "repeatU") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.x);
-        } else if (currentName == "repeatV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.y);
-        } else if (currentName == "offsetU") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.x);
-        } else if (currentName == "offsetV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.y);
-        } else if (currentName == "rotateUV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mRotation);
-        } else if (currentName == "blend_mode") {
-            std::string v;
-            XmlParser::getValueAsString(currentNode, v);
-            const char *sz = v.c_str();
-            // http://www.feelingsoftware.com/content/view/55/72/lang,en/
-            // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
-            if (0 == ASSIMP_strincmp(sz, "ADD", 3))
-                out.mOp = aiTextureOp_Add;
-            else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
-                out.mOp = aiTextureOp_Subtract;
-            else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
-                out.mOp = aiTextureOp_Multiply;
-            else {
-                ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
-            }
-        }
+        switch (currentName){
+            case "wrapU":
+                XmlParser::getValueAsBool(currentNode, out.mWrapU);
+                break;
+            case "wrapV":
+                XmlParser::getValueAsBool(currentNode, out.mWrapV);
+                break;
+            case "mirrorU":
+                XmlParser::getValueAsBool(currentNode, out.mMirrorU);
+                break;
+            case "mirrorV":
+                XmlParser::getValueAsBool(currentNode, out.mMirrorV);
+                break;
+            case "repeatU":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.x);
+                break;
+            case "repeatV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.y);
+                break;
+            case "offsetU":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.x);
+                break;
+            case "offsetV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.y);
+                break;
+            case "rotateUV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mRotation);
+                break;
+            case "blend_mode":
+                std::string v;
+                XmlParser::getValueAsString(currentNode, v);
+                const char *sz = v.c_str();
+                // http://www.feelingsoftware.com/content/view/55/72/lang,en/
+                // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
+                if (0 == ASSIMP_strincmp(sz, "ADD", 3))
+                    out.mOp = aiTextureOp_Add;
+                else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
+                    out.mOp = aiTextureOp_Subtract;
+                else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
+                    out.mOp = aiTextureOp_Multiply;
+                else {
+                    ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
+                }
+                break;
         // OKINO extensions
         // -------------------------------------------------------
-        else if (currentName == "weighting") {
-            XmlParser::getValueAsReal(currentNode, out.mWeighting);
-        } else if (currentName == "mix_with_previous_layer") {
-            XmlParser::getValueAsReal(currentNode, out.mMixWithPrevious);
+            case "weighting":
+                XmlParser::getValueAsReal(currentNode, out.mWeighting);
+                break;
+            case "mix_with_previous_layer":
+                XmlParser::getValueAsReal(currentNode, out.mMixWithPrevious);
+                break;
         }
         // MAX3D extensions
         // -------------------------------------------------------
-        else if (currentName == "amount") {
-            XmlParser::getValueAsReal(currentNode, out.mWeighting);
+            case "amount":
+                XmlParser::getValueAsReal(currentNode, out.mWeighting);
+                break;
         }
     }
 }

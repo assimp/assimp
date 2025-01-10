@@ -288,32 +288,46 @@ void ColladaParser::ReadContents(XmlNode &node) {
 void ColladaParser::ReadStructure(XmlNode &node) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "asset") {
-            ReadAssetInfo(currentNode);
-        } else if (currentName == "library_animations") {
-            ReadAnimationLibrary(currentNode);
-        } else if (currentName == "library_animation_clips") {
-            ReadAnimationClipLibrary(currentNode);
-        } else if (currentName == "library_controllers") {
-            ReadControllerLibrary(currentNode);
-        } else if (currentName == "library_images") {
-            ReadImageLibrary(currentNode);
-        } else if (currentName == "library_materials") {
-            ReadMaterialLibrary(currentNode);
-        } else if (currentName == "library_effects") {
-            ReadEffectLibrary(currentNode);
-        } else if (currentName == "library_geometries") {
-            ReadGeometryLibrary(currentNode);
-        } else if (currentName == "library_visual_scenes") {
-            ReadSceneLibrary(currentNode);
-        } else if (currentName == "library_lights") {
-            ReadLightLibrary(currentNode);
-        } else if (currentName == "library_cameras") {
-            ReadCameraLibrary(currentNode);
-        } else if (currentName == "library_nodes") {
-            ReadSceneNode(currentNode, nullptr); /* some hacking to reuse this piece of code */
-        } else if (currentName == "scene") {
-            ReadScene(currentNode);
+        switch(currentName){
+            case "asset":
+                ReadAssetInfo(currentNode);
+                break;
+            case "library_animations":
+                ReadAnimationLibrary(currentNode);
+                break;
+            case "library_animation_clips":
+                ReadAnimationClipLibrary(currentNode);
+                break;
+            case "library_controllers":
+                ReadControllerLibrary(currentNode);
+                break;
+            case "library_images":
+                ReadImageLibrary(currentNode);
+                break;
+            case "library_materials":
+                ReadMaterialLibrary(currentNode);
+                break;
+            case "library_effects":
+                ReadEffectLibrary(currentNode);
+                break;
+            case "library_geometries":
+                ReadGeometryLibrary(currentNode);
+                break;
+            case "library_visual_scenes":
+                ReadSceneLibrary(currentNode);
+                break;
+            case "library_lights":
+                ReadLightLibrary(currentNode);
+                break;
+            case "library_cameras":
+                ReadCameraLibrary(currentNode);
+                break;
+            case "library_nodes":
+                ReadSceneNode(currentNode, nullptr); /* some hacking to reuse this piece of code */
+                break;
+            case "scene":
+                ReadScene(currentNode);
+                break;
         }
     }
 

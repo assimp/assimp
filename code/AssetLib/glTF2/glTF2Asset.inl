@@ -2045,6 +2045,12 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
         mDicts[i]->AttachToDocument(doc);
     }
 
+    // Read the "extensions" property, then add it to each scene's metadata.
+    CustomExtension customExtensions;
+    if (Value *extensionsObject = FindObject(doc, "extensions")) {
+        customExtensions = glTF2::ReadExtensions("extensions", *extensionsObject);
+    }
+
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
     unsigned int sceneIndex = 0;
@@ -2056,6 +2062,8 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     if (Value *scenesArray = FindArray(doc, "scenes")) {
         if (sceneIndex < scenesArray->Size()) {
             this->scene = scenes.Retrieve(sceneIndex);
+
+            this->scene->customExtensions = customExtensions;
         }
     }
 

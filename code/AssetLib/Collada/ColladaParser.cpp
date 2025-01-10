@@ -958,58 +958,72 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
 
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "spot") {
-            pLight.mType = aiLightSource_SPOT;
-        } else if (currentName == "ambient") {
-            pLight.mType = aiLightSource_AMBIENT;
-        } else if (currentName == "directional") {
-            pLight.mType = aiLightSource_DIRECTIONAL;
-        } else if (currentName == "point") {
-            pLight.mType = aiLightSource_POINT;
-        } else if (currentName == "color") {
-            // text content contains 3 floats
-            std::string v;
-            XmlParser::getValueAsString(currentNode, v);
-            const char *content = v.c_str();
-            const char *end = content + v.size();
+        switch (currentName){
+            case "spot":
+                pLight.mType = aiLightSource_SPOT;
+                break;
+            case "ambient":
+                pLight.mType = aiLightSource_AMBIENT;
+                break;
+            case "directional":
+                pLight.mType = aiLightSource_DIRECTIONAL;
+                break;
+            case "point":
+                pLight.mType = aiLightSource_POINT;
+                break;
+            case "color":
+                // text content contains 3 floats
+                std::string v;
+                XmlParser::getValueAsString(currentNode, v);
+                const char *content = v.c_str();
+                const char *end = content + v.size();
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
-            SkipSpacesAndLineEnd(&content, end);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
+                SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
-            SkipSpacesAndLineEnd(&content, end);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
+                SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
-            SkipSpacesAndLineEnd(&content, end);
-        } else if (currentName == "constant_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);
-        } else if (currentName == "linear_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttLinear);
-        } else if (currentName == "quadratic_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttQuadratic);
-        } else if (currentName == "falloff_angle") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
-        } else if (currentName == "falloff_exponent") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffExponent);
-        }
-        // FCOLLADA extensions
-        // -------------------------------------------------------
-        else if (currentName == "outer_cone") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
-        } else if (currentName == "penumbra_angle") { // this one is deprecated, now calculated using outer_cone
-            XmlParser::getValueAsReal(currentNode, pLight.mPenumbraAngle);
-        } else if (currentName == "intensity") {
-            XmlParser::getValueAsReal(currentNode, pLight.mIntensity);
-        }
-        else if (currentName == "falloff") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
-        } else if (currentName == "hotspot_beam") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
-        }
-        // OpenCOLLADA extensions
-        // -------------------------------------------------------
-        else if (currentName == "decay_falloff") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
+                SkipSpacesAndLineEnd(&content, end);
+                break;
+            case "constant_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);
+                break;
+            case "linear_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttLinear);
+                break;
+            case "quadratic_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttQuadratic);
+                break;
+            case "falloff_angle":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
+                break;
+            case "falloff_exponent":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffExponent);
+                break;
+            // FCOLLADA extensions
+            // -------------------------------------------------------
+            case "outer_cone":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
+            case "penumbra_angle": // this one is deprecated, now calculated using outer_cone
+                XmlParser::getValueAsReal(currentNode, pLight.mPenumbraAngle);
+                break;
+            case "intensity":
+                XmlParser::getValueAsReal(currentNode, pLight.mIntensity);
+                break;
+            case "falloff":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
+            case "hotspot_beam":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
+                break;
+            // OpenCOLLADA extensions
+            // -------------------------------------------------------
+            case "decay_falloff":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
         }
     }
 }

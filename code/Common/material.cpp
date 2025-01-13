@@ -90,6 +90,14 @@ const char *aiTextureTypeToString(aiTextureType in) {
         return "Clearcoat";
     case aiTextureType_TRANSMISSION:
         return "Transmission";
+    case aiTextureType_MAYA_BASE:
+        return "MayaBase";
+    case aiTextureType_MAYA_SPECULAR:
+        return "MayaSpecular";
+    case aiTextureType_MAYA_SPECULAR_COLOR: 
+        return "MayaSpecularColor";
+    case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
+        return "MayaSpecularRoughness";
     case aiTextureType_UNKNOWN:
         return "Unknown";
     default:

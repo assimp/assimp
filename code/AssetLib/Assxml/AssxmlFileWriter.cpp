@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -36,7 +35,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
@@ -223,7 +221,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
     const unsigned int majorVersion(aiGetVersionMajor());
     const unsigned int minorVersion(aiGetVersionMinor());
     const unsigned int rev(aiGetVersionRevision());
-    const char *curtime(asctime(p));
+    const char *curtime = asctime(p);
     ioprintf(io, header.c_str(), majorVersion, minorVersion, rev, pFile, c.c_str(), curtime, scene->mFlags, 0u);
 
     // write the node graph

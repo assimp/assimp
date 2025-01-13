@@ -1077,6 +1077,7 @@ static float getWeightAtKey(const std::vector<MorphTimeValues> &values, int key,
             return mKey.mWeight;
         }
     }
+    
     // no value at key found, try to interpolate if present at other keys. if not, return zero
     // TODO: interpolation
     return 0.0f;

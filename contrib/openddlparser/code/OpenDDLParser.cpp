@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2020 Kim Kulling
+Copyright (c) 2014-2025 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -149,7 +149,7 @@ void OpenDDLParser::logToStream(FILE *f, LogSeverity severity, const std::string
 
 OpenDDLParser::logCallback OpenDDLParser::StdLogCallback (FILE *destination) {
     using namespace std::placeholders;
-    return std::bind(logToStream, destination ? destination : stderr, _1, _2);
+    return [capture0 = destination ? destination : stderr](auto && PH1, auto && PH2) { logToStream(capture0, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
 }
 
 void OpenDDLParser::setLogCallback(logCallback callback) {
@@ -289,8 +289,8 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
         if (nullptr != name && nullptr != node && nullptr != name->m_id->m_buffer) {
             const std::string nodeName(name->m_id->m_buffer);
             node->setName(nodeName);
-            delete name;
         }
+        delete name;
 
         Property *first(nullptr);
         in = lookForNextToken(in, end);

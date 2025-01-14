@@ -659,10 +659,10 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
                     ext = "jpg";
                 }
 
-                const size_t len = strlen(ext);
-                if (len <= 3) {
-                    strncpy(tex->achFormatHint, ext, len+1);//+1 because we need to copy terminator
-                }
+                tex->achFormatHint[3] = '\0';
+                size_t len = strlen(ext);
+                if (len > 3) len = 3;
+                memcpy(tex->achFormatHint, ext, len);
             }
         }
     }

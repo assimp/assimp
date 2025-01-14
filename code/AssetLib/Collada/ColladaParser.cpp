@@ -288,32 +288,46 @@ void ColladaParser::ReadContents(XmlNode &node) {
 void ColladaParser::ReadStructure(XmlNode &node) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "asset") {
-            ReadAssetInfo(currentNode);
-        } else if (currentName == "library_animations") {
-            ReadAnimationLibrary(currentNode);
-        } else if (currentName == "library_animation_clips") {
-            ReadAnimationClipLibrary(currentNode);
-        } else if (currentName == "library_controllers") {
-            ReadControllerLibrary(currentNode);
-        } else if (currentName == "library_images") {
-            ReadImageLibrary(currentNode);
-        } else if (currentName == "library_materials") {
-            ReadMaterialLibrary(currentNode);
-        } else if (currentName == "library_effects") {
-            ReadEffectLibrary(currentNode);
-        } else if (currentName == "library_geometries") {
-            ReadGeometryLibrary(currentNode);
-        } else if (currentName == "library_visual_scenes") {
-            ReadSceneLibrary(currentNode);
-        } else if (currentName == "library_lights") {
-            ReadLightLibrary(currentNode);
-        } else if (currentName == "library_cameras") {
-            ReadCameraLibrary(currentNode);
-        } else if (currentName == "library_nodes") {
-            ReadSceneNode(currentNode, nullptr); /* some hacking to reuse this piece of code */
-        } else if (currentName == "scene") {
-            ReadScene(currentNode);
+        switch(currentName){
+            case "asset":
+                ReadAssetInfo(currentNode);
+                break;
+            case "library_animations":
+                ReadAnimationLibrary(currentNode);
+                break;
+            case "library_animation_clips":
+                ReadAnimationClipLibrary(currentNode);
+                break;
+            case "library_controllers":
+                ReadControllerLibrary(currentNode);
+                break;
+            case "library_images":
+                ReadImageLibrary(currentNode);
+                break;
+            case "library_materials":
+                ReadMaterialLibrary(currentNode);
+                break;
+            case "library_effects":
+                ReadEffectLibrary(currentNode);
+                break;
+            case "library_geometries":
+                ReadGeometryLibrary(currentNode);
+                break;
+            case "library_visual_scenes":
+                ReadSceneLibrary(currentNode);
+                break;
+            case "library_lights":
+                ReadLightLibrary(currentNode);
+                break;
+            case "library_cameras":
+                ReadCameraLibrary(currentNode);
+                break;
+            case "library_nodes":
+                ReadSceneNode(currentNode, nullptr); /* some hacking to reuse this piece of code */
+                break;
+            case "scene":
+                ReadScene(currentNode);
+                break;
         }
     }
 
@@ -944,58 +958,72 @@ void ColladaParser::ReadLight(XmlNode &node, Collada::Light &pLight) {
 
     while (xmlIt.getNext(currentNode)) {
         const std::string &currentName = currentNode.name();
-        if (currentName == "spot") {
-            pLight.mType = aiLightSource_SPOT;
-        } else if (currentName == "ambient") {
-            pLight.mType = aiLightSource_AMBIENT;
-        } else if (currentName == "directional") {
-            pLight.mType = aiLightSource_DIRECTIONAL;
-        } else if (currentName == "point") {
-            pLight.mType = aiLightSource_POINT;
-        } else if (currentName == "color") {
-            // text content contains 3 floats
-            std::string v;
-            XmlParser::getValueAsString(currentNode, v);
-            const char *content = v.c_str();
-            const char *end = content + v.size();
+        switch (currentName){
+            case "spot":
+                pLight.mType = aiLightSource_SPOT;
+                break;
+            case "ambient":
+                pLight.mType = aiLightSource_AMBIENT;
+                break;
+            case "directional":
+                pLight.mType = aiLightSource_DIRECTIONAL;
+                break;
+            case "point":
+                pLight.mType = aiLightSource_POINT;
+                break;
+            case "color":
+                // text content contains 3 floats
+                std::string v;
+                XmlParser::getValueAsString(currentNode, v);
+                const char *content = v.c_str();
+                const char *end = content + v.size();
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
-            SkipSpacesAndLineEnd(&content, end);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
+                SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
-            SkipSpacesAndLineEnd(&content, end);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
+                SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
-            SkipSpacesAndLineEnd(&content, end);
-        } else if (currentName == "constant_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);
-        } else if (currentName == "linear_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttLinear);
-        } else if (currentName == "quadratic_attenuation") {
-            XmlParser::getValueAsReal(currentNode, pLight.mAttQuadratic);
-        } else if (currentName == "falloff_angle") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
-        } else if (currentName == "falloff_exponent") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffExponent);
-        }
-        // FCOLLADA extensions
-        // -------------------------------------------------------
-        else if (currentName == "outer_cone") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
-        } else if (currentName == "penumbra_angle") { // this one is deprecated, now calculated using outer_cone
-            XmlParser::getValueAsReal(currentNode, pLight.mPenumbraAngle);
-        } else if (currentName == "intensity") {
-            XmlParser::getValueAsReal(currentNode, pLight.mIntensity);
-        }
-        else if (currentName == "falloff") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
-        } else if (currentName == "hotspot_beam") {
-            XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
-        }
-        // OpenCOLLADA extensions
-        // -------------------------------------------------------
-        else if (currentName == "decay_falloff") {
-            XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
+                SkipSpacesAndLineEnd(&content, end);
+                break;
+            case "constant_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);
+                break;
+            case "linear_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttLinear);
+                break;
+            case "quadratic_attenuation":
+                XmlParser::getValueAsReal(currentNode, pLight.mAttQuadratic);
+                break;
+            case "falloff_angle":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
+                break;
+            case "falloff_exponent":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffExponent);
+                break;
+            // FCOLLADA extensions
+            // -------------------------------------------------------
+            case "outer_cone":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
+            case "penumbra_angle": // this one is deprecated, now calculated using outer_cone
+                XmlParser::getValueAsReal(currentNode, pLight.mPenumbraAngle);
+                break;
+            case "intensity":
+                XmlParser::getValueAsReal(currentNode, pLight.mIntensity);
+                break;
+            case "falloff":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
+            case "hotspot_beam":
+                XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
+                break;
+            // OpenCOLLADA extensions
+            // -------------------------------------------------------
+            case "decay_falloff":
+                XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
+                break;
         }
     }
 }
@@ -1161,51 +1189,63 @@ void ColladaParser::ReadSamplerProperties(XmlNode &node, Sampler &out) {
         const std::string &currentName = currentNode.name();
         // MAYA extensions
         // -------------------------------------------------------
-        if (currentName == "wrapU") {
-            XmlParser::getValueAsBool(currentNode, out.mWrapU);
-        } else if (currentName == "wrapV") {
-            XmlParser::getValueAsBool(currentNode, out.mWrapV);
-        } else if (currentName == "mirrorU") {
-            XmlParser::getValueAsBool(currentNode, out.mMirrorU);
-        } else if (currentName == "mirrorV") {
-            XmlParser::getValueAsBool(currentNode, out.mMirrorV);
-        } else if (currentName == "repeatU") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.x);
-        } else if (currentName == "repeatV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.y);
-        } else if (currentName == "offsetU") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.x);
-        } else if (currentName == "offsetV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.y);
-        } else if (currentName == "rotateUV") {
-            XmlParser::getValueAsReal(currentNode, out.mTransform.mRotation);
-        } else if (currentName == "blend_mode") {
-            std::string v;
-            XmlParser::getValueAsString(currentNode, v);
-            const char *sz = v.c_str();
-            // http://www.feelingsoftware.com/content/view/55/72/lang,en/
-            // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
-            if (0 == ASSIMP_strincmp(sz, "ADD", 3))
-                out.mOp = aiTextureOp_Add;
-            else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
-                out.mOp = aiTextureOp_Subtract;
-            else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
-                out.mOp = aiTextureOp_Multiply;
-            else {
-                ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
-            }
-        }
-        // OKINO extensions
-        // -------------------------------------------------------
-        else if (currentName == "weighting") {
-            XmlParser::getValueAsReal(currentNode, out.mWeighting);
-        } else if (currentName == "mix_with_previous_layer") {
-            XmlParser::getValueAsReal(currentNode, out.mMixWithPrevious);
-        }
-        // MAX3D extensions
-        // -------------------------------------------------------
-        else if (currentName == "amount") {
-            XmlParser::getValueAsReal(currentNode, out.mWeighting);
+        switch (currentName){
+            case "wrapU":
+                XmlParser::getValueAsBool(currentNode, out.mWrapU);
+                break;
+            case "wrapV":
+                XmlParser::getValueAsBool(currentNode, out.mWrapV);
+                break;
+            case "mirrorU":
+                XmlParser::getValueAsBool(currentNode, out.mMirrorU);
+                break;
+            case "mirrorV":
+                XmlParser::getValueAsBool(currentNode, out.mMirrorV);
+                break;
+            case "repeatU":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.x);
+                break;
+            case "repeatV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mScaling.y);
+                break;
+            case "offsetU":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.x);
+                break;
+            case "offsetV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mTranslation.y);
+                break;
+            case "rotateUV":
+                XmlParser::getValueAsReal(currentNode, out.mTransform.mRotation);
+                break;
+            case "blend_mode":
+                std::string v;
+                XmlParser::getValueAsString(currentNode, v);
+                const char *sz = v.c_str();
+                // http://www.feelingsoftware.com/content/view/55/72/lang,en/
+                // NONE, OVER, IN, OUT, ADD, SUBTRACT, MULTIPLY, DIFFERENCE, LIGHTEN, DARKEN, SATURATE, DESATURATE and ILLUMINATE
+                if (0 == ASSIMP_strincmp(sz, "ADD", 3))
+                    out.mOp = aiTextureOp_Add;
+                else if (0 == ASSIMP_strincmp(sz, "SUBTRACT", 8))
+                    out.mOp = aiTextureOp_Subtract;
+                else if (0 == ASSIMP_strincmp(sz, "MULTIPLY", 8))
+                    out.mOp = aiTextureOp_Multiply;
+                else {
+                    ASSIMP_LOG_WARN("Collada: Unsupported MAYA texture blend mode");
+                }
+                break;
+            // OKINO extensions
+            // -------------------------------------------------------
+            case "weighting":
+                XmlParser::getValueAsReal(currentNode, out.mWeighting);
+                break;
+            case "mix_with_previous_layer":
+                XmlParser::getValueAsReal(currentNode, out.mMixWithPrevious);
+                break;
+            // MAX3D extensions
+            // -------------------------------------------------------
+            case "amount":
+                XmlParser::getValueAsReal(currentNode, out.mWeighting);
+                break;
         }
     }
 }

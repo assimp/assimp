@@ -1172,38 +1172,55 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 subElement.clear();
                 subElement = srcChannel.mTarget.substr(bracketPos);
 
-                if (subElement == "(0)(0)")
-                    entry.mSubElement = 0;
-                else if (subElement == "(1)(0)")
-                    entry.mSubElement = 1;
-                else if (subElement == "(2)(0)")
-                    entry.mSubElement = 2;
-                else if (subElement == "(3)(0)")
-                    entry.mSubElement = 3;
-                else if (subElement == "(0)(1)")
-                    entry.mSubElement = 4;
-                else if (subElement == "(1)(1)")
-                    entry.mSubElement = 5;
-                else if (subElement == "(2)(1)")
-                    entry.mSubElement = 6;
-                else if (subElement == "(3)(1)")
-                    entry.mSubElement = 7;
-                else if (subElement == "(0)(2)")
-                    entry.mSubElement = 8;
-                else if (subElement == "(1)(2)")
-                    entry.mSubElement = 9;
-                else if (subElement == "(2)(2)")
-                    entry.mSubElement = 10;
-                else if (subElement == "(3)(2)")
-                    entry.mSubElement = 11;
-                else if (subElement == "(0)(3)")
-                    entry.mSubElement = 12;
-                else if (subElement == "(1)(3)")
-                    entry.mSubElement = 13;
-                else if (subElement == "(2)(3)")
-                    entry.mSubElement = 14;
-                else if (subElement == "(3)(3)")
-                    entry.mSubElement = 15;
+                switch (subElement){
+                    case "(0)(0)":
+                        entry.mSubElement = 0;
+                        break;
+                    case "(1)(0)":
+                        entry.mSubElement = 1;
+                        break;
+                    case "(2)(0)":
+                        entry.mSubElement = 2;
+                        break;
+                    case "(3)(0)":
+                        entry.mSubElement = 3;
+                        break;
+                    case "(0)(1)":
+                        entry.mSubElement = 4;
+                        break;
+                    case "(1)(1)":
+                        entry.mSubElement = 5;
+                        break;
+                    case "(2)(1)":
+                        entry.mSubElement = 6;
+                        break;
+                    case "(3)(1)":
+                        entry.mSubElement = 7;
+                        break;
+                    case "(0)(2)":
+                        entry.mSubElement = 8;
+                        break;
+                    case "(1)(2)":
+                        entry.mSubElement = 9;
+                        break;
+                    case "(2)(2)":
+                        entry.mSubElement = 10;
+                        break;
+                    case "(3)(2)":
+                        entry.mSubElement = 11;
+                        break;
+                    case "(0)(3)":
+                        entry.mSubElement = 12;
+                        break;
+                    case "(1)(3)":
+                        entry.mSubElement = 13;
+                        break;
+                    case "(2)(3)":
+                        entry.mSubElement = 14;
+                        break;
+                    case "(3)(3)":
+                        entry.mSubElement = 15;
+                        break;
             }
 
             // determine which transform step is affected by this channel

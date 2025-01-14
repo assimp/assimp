@@ -658,6 +658,7 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 }
+
                 tex->achFormatHint[3] = '\0';
                 size_t len = strlen(ext);
                 if (len > 3) len = 3;

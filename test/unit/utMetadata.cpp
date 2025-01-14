@@ -229,7 +229,7 @@ TEST_F( utMetadata, copy_test ) {
 
     // bool test
     {
-        bool v;
+        bool v = true;
         EXPECT_TRUE( copy.Get( "bool", v ) );
         EXPECT_EQ( bv, v );
     }

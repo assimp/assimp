@@ -370,12 +370,6 @@ void FBXExporter::WriteHeaderExtension ()
         "Creator", creator.str(), outstream, binary, indent
     );
 
-    //FBX::Node sceneinfo("SceneInfo");
-    //sceneinfo.AddProperty("GlobalInfo" + FBX::SEPARATOR + "SceneInfo");
-    // not sure if any of this is actually needed,
-    // so just write an empty node for now.
-    //sceneinfo.Dump(outstream, binary, indent);
-
     indent = 0;
 
     // finish node
@@ -459,11 +453,7 @@ void WritePropString(const aiScene* scene, FBX::Node& p, const std::string& key,
     }
 }
 
-void FBXExporter::WriteGlobalSettings ()
-{
-    if (!binary) {
-        // no title, follows directly from the header extension
-    }
+void FBXExporter::WriteGlobalSettings () {
     FBX::Node gs("GlobalSettings");
     gs.AddChild("Version", int32_t(1000));
 
@@ -493,8 +483,7 @@ void FBXExporter::WriteGlobalSettings ()
     gs.Dump(outfile, binary, 0);
 }
 
-void FBXExporter::WriteDocuments ()
-{
+void FBXExporter::WriteDocuments() {
     if (!binary) {
         WriteAsciiSectionHeader("Documents Description");
     }
@@ -523,8 +512,7 @@ void FBXExporter::WriteDocuments ()
     docs.Dump(outfile, binary, 0);
 }
 
-void FBXExporter::WriteReferences ()
-{
+void FBXExporter::WriteReferences() {
     if (!binary) {
         WriteAsciiSectionHeader("Document References");
     }
@@ -540,7 +528,6 @@ void FBXExporter::WriteReferences ()
 // some internal helper functions used for writing the definitions
 // (before any actual data is written)
 // ---------------------------------------------------------------
-
 size_t count_nodes(const aiNode* n, const aiNode* root) {
     size_t count;
     if (n == root) {
@@ -556,8 +543,7 @@ size_t count_nodes(const aiNode* n, const aiNode* root) {
     return count;
 }
 
-bool has_phong_mat(const aiScene* scene)
-{
+static bool has_phong_mat(const aiScene* scene) {
     // just search for any material with a shininess exponent
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial* mat = scene->mMaterials[i];
@@ -570,16 +556,12 @@ bool has_phong_mat(const aiScene* scene)
     return false;
 }
 
-size_t count_images(const aiScene* scene) {
+static size_t count_images(const aiScene* scene) {
     std::unordered_set<std::string> images;
     aiString texpath;
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
-        aiMaterial* mat = scene->mMaterials[i];
-        for (
-            size_t tt = aiTextureType_DIFFUSE;
-            tt < aiTextureType_UNKNOWN;
-            ++tt
-        ){
+        aiMaterial *mat = scene->mMaterials[i];
+        for (size_t tt = aiTextureType_DIFFUSE; tt < aiTextureType_UNKNOWN; ++tt) {
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
             for (unsigned int j = 0; j < texcount; ++j) {
@@ -588,10 +570,11 @@ size_t count_images(const aiScene* scene) {
             }
         }
     }
+
     return images.size();
 }
 
-size_t count_textures(const aiScene* scene) {
+static size_t count_textures(const aiScene* scene) {
     size_t count = 0;
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial* mat = scene->mMaterials[i];
@@ -609,7 +592,7 @@ size_t count_textures(const aiScene* scene) {
     return count;
 }
 
-size_t count_deformers(const aiScene* scene) {
+static size_t count_deformers(const aiScene* scene) {
     size_t count = 0;
     for (size_t i = 0; i < scene->mNumMeshes; ++i) {
         const size_t n = scene->mMeshes[i]->mNumBones;
@@ -621,8 +604,7 @@ size_t count_deformers(const aiScene* scene) {
     return count;
 }
 
-void FBXExporter::WriteDefinitions ()
-{
+void FBXExporter::WriteDefinitions () {
     // basically this is just bookkeeping:
     // determining how many of each type of object there are
     // and specifying the base properties to use when otherwise unspecified.
@@ -1033,9 +1015,7 @@ void FBXExporter::WriteDefinitions ()
 // some internal helper functions used for writing the objects section
 // (which holds the actual data)
 // -------------------------------------------------------------------
-
-aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
-{
+static aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node) {
     for (size_t i = 0; i < node->mNumMeshes; ++i) {
         if (node->mMeshes[i] == meshIndex) {
             return node;
@@ -1048,8 +1028,7 @@ aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
     return nullptr;
 }
 
-aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
-{
+aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
     std::vector<const aiNode*> node_chain;
     while (node != scene->mRootNode && node != nullptr) {
         node_chain.push_back(node);
@@ -1073,8 +1052,7 @@ inline int64_t to_ktime(double time) {
     return (static_cast<int64_t>(time * FBX::SECOND));
 }
 
-void FBXExporter::WriteObjects ()
-{
+void FBXExporter::WriteObjects () {
     if (!binary) {
         WriteAsciiSectionHeader("Object properties");
     }
@@ -1087,21 +1065,28 @@ void FBXExporter::WriteObjects ()
     object_node.BeginChildren(outstream, binary, indent);
 
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
-    std::vector<std::vector<int32_t>> vVertexIndice;//save vertex_indices as it is needed later
+    // save vertex_indices as it is needed later
+    std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
+
+    std::vector<uint32_t> uniq_v_before_mi;
 
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
     // geometry (aiMesh)
     mesh_uids.clear();
     indent = 1;
-    for (size_t mi = 0; mi < mScene->mNumMeshes; ++mi) {
-        // it's all about this mesh
-        aiMesh* m = mScene->mMeshes[mi];
+    std::function<void(const aiNode*)> visit_node_geo = [&](const aiNode *node) {
+        if (node->mNumMeshes == 0) {
+          for (uint32_t ni = 0; ni < node->mNumChildren; ni++) {
+            visit_node_geo(node->mChildren[ni]);
+          }
+          return;
+        }
 
         // start the node record
         FBX::Node n("Geometry");
         int64_t uid = generate_uid();
-        mesh_uids.push_back(uid);
+        mesh_uids[node] = uid;
         n.AddProperty(uid);
         n.AddProperty(FBX::SEPARATOR + "Geometry");
         n.AddProperty("Mesh");
@@ -1109,158 +1094,112 @@ void FBXExporter::WriteObjects ()
         n.DumpProperties(outstream, binary, indent);
         n.EndProperties(outstream, binary, indent);
         n.BeginChildren(outstream, binary, indent);
-        indent = 2;
 
         // output vertex data - each vertex should be unique (probably)
         std::vector<double> flattened_vertices;
         // index of original vertex in vertex data vector
         std::vector<int32_t> vertex_indices;
-        // map of vertex value to its index in the data vector
-        std::map<aiVector3D,size_t> index_by_vertex_value;
-        if(bJoinIdenticalVertices){
-            int32_t index = 0;
-            for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
-                aiVector3D vtx = m->mVertices[vi];
-                auto elem = index_by_vertex_value.find(vtx);
-                if (elem == index_by_vertex_value.end()) {
-                    vertex_indices.push_back(index);
-                    index_by_vertex_value[vtx] = index;
-                    flattened_vertices.push_back(vtx[0]);
-                    flattened_vertices.push_back(vtx[1]);
-                    flattened_vertices.push_back(vtx[2]);
-                    ++index;
-                } else {
-                    vertex_indices.push_back(int32_t(elem->second));
-                }
-            }
-        }
-        else { // do not join vertex, respect the export flag
-            vertex_indices.resize(m->mNumVertices);
-            std::iota(vertex_indices.begin(), vertex_indices.end(), 0);
-            for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
-                aiVector3D vtx = m->mVertices[v];
-                flattened_vertices.push_back(vtx.x);
-                flattened_vertices.push_back(vtx.y);
-                flattened_vertices.push_back(vtx.z);
-            }
-        }
-        vVertexIndice.push_back(vertex_indices);
 
-        FBX::Node::WritePropertyNode(
-            "Vertices", flattened_vertices, outstream, binary, indent
-        );
+        std::vector<double> normal_data;
+        std::vector<double> color_data;
+
+        std::vector<int32_t> polygon_data;
+
+        std::vector<std::vector<double>> uv_data;
+        std::vector<std::vector<int32_t>> uv_indices;
+        std::map<aiVector3D, int32_t> index_by_uv;
+
+        std::vector<int32_t> offsets = { 0 };
+
+        indent = 2;
+
+        for (uint32_t n_mi = 0; n_mi < node->mNumMeshes; n_mi++) {
+          const auto mi = node->mMeshes[n_mi];
+          const aiMesh *m = mScene->mMeshes[mi];
+
+          size_t v_offset = vertex_indices.size();
+          size_t uniq_v_before = flattened_vertices.size() / 3;
+
+          // map of vertex value to its index in the data vector
+          std::map<aiVector3D,size_t> index_by_vertex_value;
+          if(bJoinIdenticalVertices){
+              int32_t index = 0;
+              for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
+                  aiVector3D vtx = m->mVertices[vi];
+                  auto elem = index_by_vertex_value.find(vtx);
+                  if (elem == index_by_vertex_value.end()) {
+                      vertex_indices.push_back(index);
+                      index_by_vertex_value[vtx] = index;
+                      flattened_vertices.insert(flattened_vertices.end(), { vtx.x, vtx.y, vtx.z });
+                      ++index;
+                  } else {
+                      vertex_indices.push_back(int32_t(elem->second));
+                  }
+              }
+          } else { // do not join vertex, respect the export flag
+              vertex_indices.resize(v_offset + m->mNumVertices);
+              std::iota(vertex_indices.begin() + v_offset, vertex_indices.end(), (int)v_offset);
+              for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
+                  aiVector3D vtx = m->mVertices[v];
+                  flattened_vertices.insert(flattened_vertices.end(), {vtx.x, vtx.y, vtx.z});
+              }
+          }
+          vVertexIndice[mi].insert(
+            // TODO test whether this can be end or not
+            vVertexIndice[mi].begin(),
+            vertex_indices.begin(),
+            vertex_indices.end()
+          );
+
+          // here could be edges but they're insane.
+          // it's optional anyway, so let's ignore it.
 
         // output polygon data as a flattened array of vertex indices.
         // the last vertex index of each polygon is negated and - 1
-        std::vector<int32_t> polygon_data;
-        for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
+          for (size_t fi = 0; fi < m->mNumFaces; fi++) {
             const aiFace &f = m->mFaces[fi];
-            for (size_t pvi = 0; pvi < f.mNumIndices - 1; ++pvi) {
-                polygon_data.push_back(vertex_indices[f.mIndices[pvi]]);
+            size_t pvi = 0;
+            for (; pvi < f.mNumIndices - 1; pvi++) {
+              polygon_data.push_back(
+                static_cast<int32_t>(uniq_v_before + vertex_indices[v_offset + f.mIndices[pvi]])
+              );
             }
             polygon_data.push_back(
-                -1 - vertex_indices[f.mIndices[f.mNumIndices-1]]
+              static_cast<int32_t>(-1 - (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
             );
-        }
-        FBX::Node::WritePropertyNode(
-            "PolygonVertexIndex", polygon_data, outstream, binary, indent
-        );
+          }
 
-        // here could be edges but they're insane.
-        // it's optional anyway, so let's ignore it.
+          uniq_v_before_mi.push_back(static_cast<uint32_t>(uniq_v_before));
 
-        FBX::Node::WritePropertyNode(
-            "GeometryVersion", int32_t(124), outstream, binary, indent
-        );
-
-        // normals, if any
-        if (m->HasNormals()) {
-            FBX::Node normals("LayerElementNormal", int32_t(0));
-            normals.Begin(outstream, binary, indent);
-            normals.DumpProperties(outstream, binary, indent);
-            normals.EndProperties(outstream, binary, indent);
-            normals.BeginChildren(outstream, binary, indent);
-            indent = 3;
-            FBX::Node::WritePropertyNode(
-                "Version", int32_t(101), outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "Name", "", outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "MappingInformationType", "ByPolygonVertex",
-                outstream, binary, indent
-            );
-            // TODO: vertex-normals or indexed normals when appropriate
-            FBX::Node::WritePropertyNode(
-                "ReferenceInformationType", "Direct",
-                outstream, binary, indent
-            );
-            std::vector<double> normal_data;
+          if (m->HasNormals()) {
             normal_data.reserve(3 * polygon_data.size());
-            for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
-                const aiFace &f = m->mFaces[fi];
-                for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiVector3D &curN = m->mNormals[f.mIndices[pvi]];
-                    normal_data.push_back(curN.x);
-                    normal_data.push_back(curN.y);
-                    normal_data.push_back(curN.z);
-                }
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              const aiFace & f = m->mFaces[fi];
+              for (size_t pvi = 0; pvi < f.mNumIndices; pvi++) {
+                const aiVector3D &curN = m->mNormals[f.mIndices[pvi]];
+                normal_data.insert(normal_data.end(), { curN.x, curN.y, curN.z });
+              }
             }
-            FBX::Node::WritePropertyNode(
-                "Normals", normal_data, outstream, binary, indent
-            );
-            // note: version 102 has a NormalsW also... not sure what it is,
-            // so we can stick with version 101 for now.
-            indent = 2;
-            normals.End(outstream, binary, indent, true);
-        }
+          }
 
-        // colors, if any
-        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
-            FBX::Node vertexcolors("LayerElementColor", int32_t(ci));
-            vertexcolors.Begin(outstream, binary, indent);
-            vertexcolors.DumpProperties(outstream, binary, indent);
-            vertexcolors.EndProperties(outstream, binary, indent);
-            vertexcolors.BeginChildren(outstream, binary, indent);
-            indent = 3;
-            FBX::Node::WritePropertyNode(
-                "Version", int32_t(101), outstream, binary, indent
-            );
-            char layerName[8];
-            snprintf(layerName, sizeof(layerName), "COLOR_%d", int32_t(ci));
-            FBX::Node::WritePropertyNode(
-                "Name", (const char*)layerName, outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "MappingInformationType", "ByPolygonVertex",
-                outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "ReferenceInformationType", "Direct",
-                outstream, binary, indent
-            );
-            std::vector<double> color_data;
+          const int32_t colorChannelIndex = 0;
+          if (m->HasVertexColors(colorChannelIndex)) {
             color_data.reserve(4 * polygon_data.size());
-            for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
-                const aiFace &f = m->mFaces[fi];
-                for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiColor4D &c = m->mColors[ci][f.mIndices[pvi]];
-                    color_data.push_back(c.r);
-                    color_data.push_back(c.g);
-                    color_data.push_back(c.b);
-                    color_data.push_back(c.a);
-                }
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              const aiFace &f = m->mFaces[fi];
+              for (size_t pvi = 0; pvi < f.mNumIndices; pvi++) {
+                const aiColor4D &c = m->mColors[colorChannelIndex][f.mIndices[pvi]];
+                color_data.insert(color_data.end(), { c.r, c.g, c.b, c.a });
+              }
             }
-            FBX::Node::WritePropertyNode(
-                "Colors", color_data, outstream, binary, indent
-            );
-            indent = 2;
-            vertexcolors.End(outstream, binary, indent, true);
-        }
+          }
 
-        // uvs, if any
-        for (size_t uvi = 0; uvi < m->GetNumUVChannels(); ++uvi) {
+          const auto num_uv = static_cast<size_t>(m->GetNumUVChannels());
+          uv_indices.resize(std::max(num_uv, uv_indices.size()));
+          uv_data.resize(std::max(num_uv, uv_data.size()));
+
+          // uvs, if any
+          for (size_t uvi = 0; uvi < m->GetNumUVChannels(); uvi++) {
             if (m->mNumUVComponents[uvi] > 2) {
                 // FBX only supports 2-channel UV maps...
                 // or at least i'm not sure how to indicate a different number
@@ -1276,71 +1215,111 @@ void FBXExporter::WriteObjects ()
                 err << " but may be incorrectly interpreted on load.";
                 ASSIMP_LOG_WARN(err.str());
             }
-            FBX::Node uv("LayerElementUV", int32_t(uvi));
-            uv.Begin(outstream, binary, indent);
-            uv.DumpProperties(outstream, binary, indent);
-            uv.EndProperties(outstream, binary, indent);
-            uv.BeginChildren(outstream, binary, indent);
-            indent = 3;
-            FBX::Node::WritePropertyNode(
-                "Version", int32_t(101), outstream, binary, indent
-            );
-            // it doesn't seem like assimp keeps the uv map name,
-            // so just leave it blank.
-            FBX::Node::WritePropertyNode(
-                "Name", "", outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "MappingInformationType", "ByPolygonVertex",
-                outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "ReferenceInformationType", "IndexToDirect",
-                outstream, binary, indent
-            );
 
-            std::vector<double> uv_data;
-            std::vector<int32_t> uv_indices;
-            std::map<aiVector3D,int32_t> index_by_uv;
             int32_t index = 0;
-            for (size_t fi = 0; fi < m->mNumFaces; ++fi) {
-                const aiFace &f = m->mFaces[fi];
-                for (size_t pvi = 0; pvi < f.mNumIndices; ++pvi) {
-                    const aiVector3D &curUv =
-                        m->mTextureCoords[uvi][f.mIndices[pvi]];
-                    auto elem = index_by_uv.find(curUv);
-                    if (elem == index_by_uv.end()) {
-                        index_by_uv[curUv] = index;
-                        uv_indices.push_back(index);
-                        for (unsigned int x = 0; x < m->mNumUVComponents[uvi]; ++x) {
-                            uv_data.push_back(curUv[x]);
-                        }
-                        ++index;
-                    } else {
-                        uv_indices.push_back(elem->second);
-                    }
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              const aiFace &f = m->mFaces[fi];
+              for (size_t pvi = 0; pvi < f.mNumIndices; pvi++) {
+                const aiVector3D &curUv = m->mTextureCoords[uvi][f.mIndices[pvi]];
+                auto elem = index_by_uv.find(curUv);
+                if (elem == index_by_uv.end()) {
+                  index_by_uv[curUv] = index;
+                  uv_indices[uvi].push_back(index);
+                  for (uint32_t x = 0; x < m->mNumUVComponents[uvi]; ++x) {
+                    uv_data[uvi].push_back(curUv[x]);
+                  }
+                  ++index;
+                } else {
+                  uv_indices[uvi].push_back(elem->second);
                 }
+              }
             }
-            FBX::Node::WritePropertyNode(
-                "UV", uv_data, outstream, binary, indent
-            );
-            FBX::Node::WritePropertyNode(
-                "UVIndex", uv_indices, outstream, binary, indent
-            );
-            indent = 2;
-            uv.End(outstream, binary, indent, true);
+          }
+
+          offsets.push_back((int32_t)polygon_data.size());
         }
 
-        // i'm not really sure why this material section exists,
-        // as the material is linked via "Connections".
-        // it seems to always have the same "0" value.
+
+        FBX::Node::WritePropertyNode("Vertices", flattened_vertices, outstream, binary, indent);
+        FBX::Node::WritePropertyNode("PolygonVertexIndex", polygon_data, outstream, binary, indent);
+        FBX::Node::WritePropertyNode("GeometryVersion", int32_t(124), outstream, binary, indent);
+
+        FBX::Node normals("LayerElementNormal", int32_t(0));
+        normals.Begin(outstream, binary, indent);
+        normals.DumpProperties(outstream, binary, indent);
+        normals.EndProperties(outstream, binary, indent);
+        normals.BeginChildren(outstream, binary, indent);
+        indent = 3;
+        FBX::Node::WritePropertyNode("Version", int32_t(101),outstream,binary,indent);
+        FBX::Node::WritePropertyNode("Name", "",outstream,binary,indent);
+        FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex",outstream,binary,indent);
+        FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct",outstream,binary,indent);
+        FBX::Node::WritePropertyNode("Normals", normal_data,outstream,binary,indent);
+        // note: version 102 has a NormalsW also... not sure what it is,
+        // so stick with version 101 for now.
+        indent = 2;
+        normals.End(outstream,binary,indent,true);
+
+        const auto colorChannelIndex = 0;
+        FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+        vertexcolors.Begin(outstream, binary, indent);
+        vertexcolors.DumpProperties(outstream, binary, indent);
+        vertexcolors.EndProperties(outstream, binary, indent);
+        vertexcolors.BeginChildren(outstream, binary, indent);
+        indent = 3;
+        FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
+        char layerName[8];
+        snprintf(layerName, sizeof(layerName), "COLOR_%d", colorChannelIndex);
+        FBX::Node::WritePropertyNode("Name", (const char *)layerName, outstream, binary, indent);
+        FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
+        FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct", outstream, binary, indent);
+        FBX::Node::WritePropertyNode("Colors", color_data, outstream, binary, indent);
+        indent = 2;
+        vertexcolors.End(outstream, binary, indent, true);
+
+        for (uint32_t uvi = 0; uvi < uv_data.size(); uvi++) {
+          FBX::Node uv("LayerElementUV", int32_t(uvi));
+          uv.Begin(outstream, binary, indent);
+          uv.DumpProperties(outstream, binary, indent);
+          uv.EndProperties(outstream, binary, indent);
+          uv.BeginChildren(outstream, binary, indent);
+          indent = 3;
+          FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
+          FBX::Node::WritePropertyNode("Name", "", outstream, binary, indent);
+          FBX::Node::WritePropertyNode("MappingInformationType", "ByPolgonVertex", outstream, binary, indent);
+          FBX::Node::WritePropertyNode("ReferenceInformationType", "IndexToDirect", outstream, binary, indent);
+          FBX::Node::WritePropertyNode("UV", uv_data[uvi], outstream, binary, indent);
+          FBX::Node::WritePropertyNode("UVIndex", uv_indices[uvi], outstream, binary, indent);
+          indent = 2;
+          uv.End(outstream, binary, indent, true);
+        }
+
+
+        // When merging multiple meshes, we instead use by polygon so the correct material is
+        // assigned to each face. Previously, this LayerElementMaterial always had 0 since it
+        // assumed there was 1 material for each node for all meshes.
         FBX::Node mat("LayerElementMaterial", int32_t(0));
         mat.AddChild("Version", int32_t(101));
         mat.AddChild("Name", "");
-        mat.AddChild("MappingInformationType", "AllSame");
-        mat.AddChild("ReferenceInformationType", "IndexToDirect");
-        std::vector<int32_t> mat_indices = {0};
-        mat.AddChild("Materials", mat_indices);
+        if (node->mNumMeshes == 1) {
+          mat.AddChild("MappingInformationType", "AllSame");
+          mat.AddChild("ReferenceInformationType", "IndexToDirect");
+          std::vector<int32_t> mat_indices = {0};
+          mat.AddChild("Materials", mat_indices);
+        } else {
+          mat.AddChild("MappingInformationType", "ByPolygon");
+          mat.AddChild("ReferenceInformationType", "IndexToDirect");
+          std::vector<int32_t> mat_indices(polygon_data.size());
+          uint32_t curr_offset = 0;
+          for (uint32_t mi = 0; mi < node->mNumMeshes; mi++) {
+            uint32_t num_faces = mScene->mMeshes[node->mMeshes[mi]]->mNumFaces;
+            for (uint32_t fi = 0; fi < num_faces; fi++) {
+              mat_indices[curr_offset + fi] = mi;
+            }
+            curr_offset += num_faces;
+          }
+          mat.AddChild("Materials", mat_indices);
+        }
         mat.Dump(outstream, binary, indent);
 
         // finally we have the layer specifications,
@@ -1353,12 +1332,10 @@ void FBXExporter::WriteObjects ()
         le.AddChild("TypedIndex", int32_t(0));
         layer.AddChild(le);
 
-        for (size_t ci = 0; ci < m->GetNumColorChannels(); ++ci) {
-            le = FBX::Node("LayerElement");
-            le.AddChild("Type", "LayerElementColor");
-            le.AddChild("TypedIndex", int32_t(ci));
-            layer.AddChild(le);
-        }
+        le = FBX::Node("LayerElement");
+        le.AddChild("Type", "LayerElementColor");
+        le.AddChild("TypedIndex", int32_t(0));
+        layer.AddChild(le);
 
         le = FBX::Node("LayerElement");
         le.AddChild("Type", "LayerElementMaterial");
@@ -1370,8 +1347,7 @@ void FBXExporter::WriteObjects ()
         layer.AddChild(le);
         layer.Dump(outstream, binary, indent);
 
-        for(unsigned int lr = 1; lr < m->GetNumUVChannels(); ++ lr)
-        {
+        for(unsigned int lr = 1; lr < uv_data.size(); ++ lr) {
             FBX::Node layerExtra("Layer", int32_t(lr));
             layerExtra.AddChild("Version", int32_t(100));
             FBX::Node leExtra("LayerElement");
@@ -1383,7 +1359,14 @@ void FBXExporter::WriteObjects ()
         // finish the node record
         indent = 1;
         n.End(outstream, binary, indent, true);
-    }
+
+        for (uint32_t ni = 0; ni < node->mNumChildren; ni++) {
+          visit_node_geo(node->mChildren[ni]);
+        }
+        return;
+    };
+
+    visit_node_geo(mScene->mRootNode);
 
 
     // aiMaterial
@@ -1748,7 +1731,8 @@ void FBXExporter::WriteObjects ()
       dnode.AddChild("Version", int32_t(101));
       dnode.Dump(outstream, binary, indent);
       // connect it
-      connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mi]);
+      const auto node = get_node_for_mesh((unsigned int)mi, mScene->mRootNode);
+      connections.emplace_back("C", "OO", deformer_uid, mesh_uids[node]);
       std::vector<int32_t> vertex_indices = vVertexIndice[mi];
 
       for (unsigned int am = 0; am < m->mNumAnimMeshes; ++am) {
@@ -1758,7 +1742,7 @@ void FBXExporter::WriteObjects ()
         // start the node record
         FBX::Node bsnode("Geometry");
         int64_t blendshape_uid = generate_uid();
-        mesh_uids.push_back(blendshape_uid);
+        blendshape_uids.push_back(blendshape_uid);
         bsnode.AddProperty(blendshape_uid);
         bsnode.AddProperty(blendshape_name + FBX::SEPARATOR + "Geometry");
         bsnode.AddProperty("Shape");
@@ -1770,23 +1754,25 @@ void FBXExporter::WriteObjects ()
         indent++;
         if (pAnimMesh->HasPositions()) {
           std::vector<int32_t>shape_indices;
-          std::vector<double>pPositionDiff;
-          std::vector<double>pNormalDiff;
+          std::vector<float>pPositionDiff;
+          std::vector<float>pNormalDiff;
 
           for (unsigned int vt = 0; vt < vertex_indices.size(); ++vt) {
               aiVector3D pDiff = (pAnimMesh->mVertices[vertex_indices[vt]] - m->mVertices[vertex_indices[vt]]);
-              if(pDiff.Length()>1e-8){
-                shape_indices.push_back(vertex_indices[vt]);
-                pPositionDiff.push_back(pDiff[0]);
-                pPositionDiff.push_back(pDiff[1]);
-                pPositionDiff.push_back(pDiff[2]);
+              shape_indices.push_back(vertex_indices[vt]);
+              pPositionDiff.push_back(pDiff[0]);
+              pPositionDiff.push_back(pDiff[1]);
+              pPositionDiff.push_back(pDiff[2]);
 
-                if (pAnimMesh->HasNormals()) {
-                    aiVector3D nDiff = (pAnimMesh->mNormals[vertex_indices[vt]] - m->mNormals[vertex_indices[vt]]);
-                    pNormalDiff.push_back(nDiff[0]);
-                    pNormalDiff.push_back(nDiff[1]);
-                    pNormalDiff.push_back(nDiff[2]);
-                }
+              if (pAnimMesh->HasNormals()) {
+                  aiVector3D nDiff = (pAnimMesh->mNormals[vertex_indices[vt]] - m->mNormals[vertex_indices[vt]]);
+                  pNormalDiff.push_back(nDiff[0]);
+                  pNormalDiff.push_back(nDiff[1]);
+                  pNormalDiff.push_back(nDiff[2]);
+              } else {
+                  pNormalDiff.push_back(0.0);
+                  pNormalDiff.push_back(0.0);
+                  pNormalDiff.push_back(0.0);
               }
           }
 
@@ -1943,22 +1929,15 @@ void FBXExporter::WriteObjects ()
                 // otherwise check if this is the root of the skeleton
                 bool end = false;
                 // is the mesh part of this node?
-                for (size_t i = 0; i < parent->mNumMeshes; ++i) {
-                    if (parent->mMeshes[i] == mi) {
-                        end = true;
-                        break;
-                    }
+                for (size_t i = 0; i < parent->mNumMeshes && !end; ++i) {
+                    end |= parent->mMeshes[i] == mi;
                 }
                 // is the mesh in one of the children of this node?
-                for (size_t j = 0; j < parent->mNumChildren; ++j) {
+                for (size_t j = 0; j < parent->mNumChildren && !end; ++j) {
                     aiNode* child = parent->mChildren[j];
-                    for (size_t i = 0; i < child->mNumMeshes; ++i) {
-                        if (child->mMeshes[i] == mi) {
-                            end = true;
-                            break;
-                        }
+                    for (size_t i = 0; i < child->mNumMeshes && !end; ++i) {
+                        end |= child->mMeshes[i] == mi;
                     }
-                    if (end) { break; }
                 }
 
                 // if it was the skeleton root we can finish here
@@ -1972,8 +1951,7 @@ void FBXExporter::WriteObjects ()
     for (size_t i = 0; i < mScene->mNumMeshes; ++i) {
         auto &s = skeleton_by_mesh[i];
         for (const aiNode* n : s) {
-            auto elem = node_uids.find(n);
-            if (elem == node_uids.end()) {
+            if (node_uids.find(n) == node_uids.end()) {
                 node_uids[n] = generate_uid();
             }
         }
@@ -1989,6 +1967,8 @@ void FBXExporter::WriteObjects ()
         if (!m->HasBones()) {
             continue;
         }
+
+        const aiNode *mesh_node = get_node_for_mesh((uint32_t)mi, mScene->mRootNode);
         // make a deformer for this mesh
         int64_t deformer_uid = generate_uid();
         FBX::Node dnode("Deformer");
@@ -2000,10 +1980,7 @@ void FBXExporter::WriteObjects ()
         dnode.Dump(outstream, binary, indent);
 
         // connect it
-        connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mi]);
-
-        //computed before
-        std::vector<int32_t>& vertex_indices = vVertexIndice[mi];
+        connections.emplace_back("C", "OO", deformer_uid, mesh_uids[mesh_node]);
 
         // TODO, FIXME: this won't work if anything is not in the bind pose.
         // for now if such a situation is detected, we throw an exception.
@@ -2017,7 +1994,6 @@ void FBXExporter::WriteObjects ()
         // as it can be instanced to many nodes.
         // All we can do is assume no instancing,
         // and take the first node we find that contains the mesh.
-        aiNode* mesh_node = get_node_for_mesh((unsigned int)mi, mScene->mRootNode);
         aiMatrix4x4 mesh_xform = get_world_transform(mesh_node, mScene);
 
         // now make a subdeformer for each bone in the skeleton
@@ -2046,14 +2022,15 @@ void FBXExporter::WriteObjects ()
             sdnode.AddChild("Version", int32_t(100));
             sdnode.AddChild("UserData", "", "");
 
-            std::set<int32_t> setWeightedVertex;
             // add indices and weights, if any
             if (b) {
+                std::set<int32_t> setWeightedVertex;
                 std::vector<int32_t> subdef_indices;
                 std::vector<double> subdef_weights;
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                    int32_t vi = vertex_indices[b->mWeights[wi].mVertexId];
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId] \
+                      + uniq_v_before_mi[mi];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx
@@ -2700,9 +2677,8 @@ void FBXExporter::WriteModelNodes(
         // handled later
     } else if (node->mNumMeshes == 1) {
         // connect to child mesh, which should have been written previously
-        connections.emplace_back(
-            "C", "OO", mesh_uids[node->mMeshes[0]], node_uid
-        );
+        // TODO double check this line
+        connections.emplace_back("C", "OO", mesh_uids[node], node_uid);
         // also connect to the material for the child mesh
         connections.emplace_back(
             "C", "OO",
@@ -2727,6 +2703,16 @@ void FBXExporter::WriteModelNodes(
         na.Dump(outstream, binary, 1);
         // and connect them
         connections.emplace_back("C", "OO", node_attribute_uid, node_uid);
+    } else if (node->mNumMeshes >= 1) {
+      connections.emplace_back("C", "OO", mesh_uids[node], node_uid);
+      for (size_t i = 0; i < node->mNumMeshes; i++) {
+        connections.emplace_back(
+          "C", "OO",
+          material_uids[mScene->mMeshes[node->mMeshes[i]]->mMaterialIndex],
+          node_uid
+        );
+      }
+      WriteModelNode(outstream, binary, node, node_uid, "Mesh", transform_chain);
     } else {
         const auto& lightIt = lights_uids.find(node->mName.C_Str());
         if(lightIt != lights_uids.end()) {
@@ -2743,34 +2729,20 @@ void FBXExporter::WriteModelNodes(
         }
     }
 
-    // if more than one child mesh, make nodes for each mesh
-    if (node->mNumMeshes > 1 || node == mScene->mRootNode) {
-        for (size_t i = 0; i < node->mNumMeshes; ++i) {
-            // make a new model node
-            int64_t new_node_uid = generate_uid();
-            // connect to parent node
-            connections.emplace_back("C", "OO", new_node_uid, node_uid);
-            // connect to child mesh, which should have been written previously
-            connections.emplace_back(
-                "C", "OO", mesh_uids[node->mMeshes[i]], new_node_uid
-            );
-            // also connect to the material for the child mesh
-            connections.emplace_back(
-                "C", "OO",
-                material_uids[
-                    mScene->mMeshes[node->mMeshes[i]]->mMaterialIndex
-                ],
-                new_node_uid
-            );
-
-            aiNode new_node;
-            // take name from mesh name, if it exists
-            new_node.mName = mScene->mMeshes[node->mMeshes[i]]->mName;
-            // write model node
-            WriteModelNode(
-                outstream, binary, &new_node, new_node_uid, "Mesh", std::vector<std::pair<std::string,aiVector3D>>()
-            );
-        }
+    if (node == mScene->mRootNode && node->mNumMeshes > 0) {
+      int64_t new_node_uid = generate_uid();
+      connections.emplace_back("C", "OO", new_node_uid, node_uid);
+      connections.emplace_back("C", "OO", mesh_uids[node], new_node_uid);
+      for (size_t i = 0; i < node->mNumMeshes; ++i) {
+        connections.emplace_back(
+          "C", "OO",
+          material_uids[mScene->mMeshes[node->mMeshes[i]]->mMaterialIndex],
+          new_node_uid
+        );
+      }
+      aiNode new_node;
+      new_node.mName = mScene->mMeshes[0]->mName;
+      WriteModelNode(outstream, binary, &new_node, new_node_uid, "Mesh", {});
     }
 
     // now recurse into children

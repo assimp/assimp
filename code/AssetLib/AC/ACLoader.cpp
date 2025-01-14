@@ -145,10 +145,6 @@ AC3DImporter::AC3DImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-AC3DImporter::~AC3DImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool AC3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const uint32_t tokens[] = { AI_MAKE_MAGIC("AC3D") };
@@ -171,8 +167,9 @@ bool AC3DImporter::GetNextLine() {
 // ------------------------------------------------------------------------------------------------
 // Parse an object section in an AC file
 bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
-    if (!TokenMatch(mBuffer.data, "OBJECT", 6))
+    if (!TokenMatch(mBuffer.data, "OBJECT", 6)) {
         return false;
+    }
 
     SkipSpaces(&mBuffer.data, mBuffer.end);
 
@@ -192,7 +189,6 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         light->mAttenuationConstant = 1.f;
 
         // Generate a default name for both the light source and the node
-        // FIXME - what's the right way to print a size_t? Is 'zu' universally available? stick with the safe version.
         light->mName.length = ::ai_snprintf(light->mName.data, AI_MAXLEN, "ACLight_%i", static_cast<unsigned int>(mLights->size()) - 1);
         obj.name = std::string(light->mName.data);
 
@@ -202,8 +198,10 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         obj.type = Object::Group;
     } else if (!ASSIMP_strincmp(mBuffer.data, "world", 5)) {
         obj.type = Object::World;
-    } else
+    } else {
         obj.type = Object::Poly;
+    }
+
     while (GetNextLine()) {
         if (TokenMatch(mBuffer.data, "kids", 4)) {
             SkipSpaces(&mBuffer.data, mBuffer.end);
@@ -344,6 +342,7 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         }
     }
     ASSIMP_LOG_ERROR("AC3D: Unexpected EOF: \'kids\' line was expected");
+
     return false;
 }
 

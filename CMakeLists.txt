@@ -64,6 +64,10 @@ option(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" o
 # format converter to convert .wrl/.x3dv files to X3D-compatible .xml
 # (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
 option(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
+
+# To use the X3D importer based on IRRXML, override below cmake option
+# (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
+option(ASSIMP_USE_LEGACY_X3D_IMPORTER "Use legacy (pre-pugixml) X3D code" off)
 #--------------------------------------------------------------------------------#
 #                  Internal impl for optional model formats
 #--------------------------------------------------------------------------------#
@@ -79,6 +83,11 @@ endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
 if (NOT ASSIMP_BUILD_VRML_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_NO_VRML_IMPORTER)
 endif () # if (not ASSIMP_BUILD_VRML_IMPORTER)
+
+# Internal/private legacy X3D IRRXML logic
+if(ASSIMP_USE_LEGACY_X3D_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_LEGACY_X3D_IMPORTER)
+endif() # ASSIMP_USE_LEGACY_X3D_IMPORTER
 #================================================================================#
 
 option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)

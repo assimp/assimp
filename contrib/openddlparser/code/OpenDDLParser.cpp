@@ -149,7 +149,7 @@ void OpenDDLParser::logToStream(FILE *f, LogSeverity severity, const std::string
 
 OpenDDLParser::logCallback OpenDDLParser::StdLogCallback (FILE *destination) {
     using namespace std::placeholders;
-    return std::bind(logToStream, destination ? destination : stderr, _1, _2);
+    return [capture0 = destination ? destination : stderr](auto && PH1, auto && PH2) { logToStream(capture0, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
 }
 
 void OpenDDLParser::setLogCallback(logCallback callback) {

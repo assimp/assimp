@@ -339,7 +339,7 @@ enum aiTextureType {
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_MAYA_SPECULAR_ROUGHNESS
+#define AI_TEXTURE_TYPE_MAX aiTextureType_UNKNOWN
 
 // -------------------------------------------------------------------------------
 /**

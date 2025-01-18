@@ -336,11 +336,13 @@ enum aiTextureType {
 
     /**
      * gltf material declarations
-     * Ref: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
-     *     "textures for metalness and roughness properties are packed together in a single
-     *     texture called metallicRoughnessTexture. Its green channel contains roughness
-     *     values and its blue channel contains metalness values. This texture MUST be encoded
-     *     with linear transfer function and MAY use more than 8 bits per channel."
+     * Refs: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+     *           "textures for metalness and roughness properties are packed together in a single
+     *           texture called metallicRoughnessTexture. Its green channel contains roughness
+     *           values and its blue channel contains metalness values..."
+     *       https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_pbrmetallicroughness_metallicroughnesstexture
+     *           "The metalness values are sampled from the B channel. The roughness values are
+     *           sampled from the G channel..."
      */
     aiTextureType_GLTF_METALLIC_ROUGHNESS = 26,
 

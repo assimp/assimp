@@ -292,14 +292,6 @@ enum aiTextureType {
     aiTextureType_DIFFUSE_ROUGHNESS = 16,
     aiTextureType_AMBIENT_OCCLUSION = 17,
 
-    /** Unknown texture
-     *
-     *  A texture reference that does not match any of the definitions
-     *  above is considered to be 'unknown'. It is still imported,
-     *  but is excluded from any further post-processing.
-    */
-    aiTextureType_UNKNOWN = 18,
-
     /** PBR Material Modifiers
     * Some modern renderers have further PBR modifiers that may be overlaid
     * on top of the 'base' PBR materials for additional realism.
@@ -311,28 +303,36 @@ enum aiTextureType {
     * eg velvet
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_sheen
     */
-    aiTextureType_SHEEN = 19,
+    aiTextureType_SHEEN = 18,
 
     /** Clearcoat
     * Simulates a layer of 'polish' or 'lacquer' layered on top of a PBR substrate
     * https://autodesk.github.io/standard-surface/#closures/coating
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
     */
-    aiTextureType_CLEARCOAT = 20,
+    aiTextureType_CLEARCOAT = 19,
 
     /** Transmission
     * Simulates transmission through the surface
     * May include further information such as wall thickness
     */
-    aiTextureType_TRANSMISSION = 21,
+    aiTextureType_TRANSMISSION = 20,
 
     /**
      * Maya material declarations
      */
-    aiTextureType_MAYA_BASE = 22,
-    aiTextureType_MAYA_SPECULAR = 23,
-    aiTextureType_MAYA_SPECULAR_COLOR = 24,
-    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
+    aiTextureType_MAYA_BASE = 21,
+    aiTextureType_MAYA_SPECULAR = 22,
+    aiTextureType_MAYA_SPECULAR_COLOR = 23,
+    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 24,
+
+    /** Unknown texture
+     *  MUST BE LAST ITEM IN aiTextureType ENUM
+     *  A texture reference that does not match any of the definitions
+     *  above is considered to be 'unknown'. It is still imported,
+     *  but is excluded from any further post-processing.
+     */
+    aiTextureType_UNKNOWN = 25,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
@@ -438,7 +438,7 @@ enum aiShadingMode {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines some mixed flags for a particular texture.
  *
  *  Usually you'll instruct your cg artists how textures have to look like ...
@@ -478,7 +478,7 @@ enum aiTextureFlags {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines alpha-blend flags.
  *
  *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
@@ -523,7 +523,7 @@ enum aiBlendMode {
 #include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines how an UV channel is transformed.
  *
  *  This is just a helper structure for the #AI_MATKEY_UVTRANSFORM key.
@@ -568,7 +568,7 @@ struct aiUVTransform {
 
 //! @cond AI_DOX_INCLUDE_INTERNAL
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief A very primitive RTTI system for the contents of material properties.
  */
 enum aiPropertyTypeInfo {
@@ -714,7 +714,7 @@ struct aiMaterial
 #ifdef __cplusplus
 
 public:
-    /** 
+    /**
      * @brief  The class constructor.
      */
     aiMaterial();

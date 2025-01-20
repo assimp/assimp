@@ -334,12 +334,17 @@ enum aiTextureType {
     aiTextureType_MAYA_SPECULAR_COLOR = 24,
     aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
 
+    /** Anisotropy
+    * Simulates a surface with directional properties
+    */
+    aiTextureType_ANISOTROPY = 26,
+
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_MAYA_SPECULAR_ROUGHNESS
+#define AI_TEXTURE_TYPE_MAX aiTextureType_ANISOTROPY
 
 // -------------------------------------------------------------------------------
 /**
@@ -1072,6 +1077,11 @@ extern "C" {
 #define AI_MATKEY_USE_EMISSIVE_MAP   "$mat.useEmissiveMap", 0, 0
 #define AI_MATKEY_EMISSIVE_INTENSITY "$mat.emissiveIntensity", 0, 0
 #define AI_MATKEY_USE_AO_MAP         "$mat.useAOMap", 0, 0
+
+// Anisotropy
+// ----------
+#define AI_MATKEY_ANISOTROPY_ROTATION "$mat.anisotropyRotation", 0, 0
+#define AI_MATKEY_ANISOTROPY_TEXTURE aiTextureType_ANISOTROPY, 0
 
 // ---------------------------------------------------------------------------
 // Pure key names for all texture-related properties

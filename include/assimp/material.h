@@ -97,6 +97,11 @@ enum aiTextureOp {
     /** T = T1 + (T2-0.5) */
     aiTextureOp_SignedAdd = 0x5,
 
+    /**
+     * Unexpected texture operation
+     */
+    aiTextureOp_UNKNOWN = 0x6,
+
 #ifndef SWIG
     _aiTextureOp_Force32Bit = INT_MAX
 #endif
@@ -117,15 +122,20 @@ enum aiTextureMapMode {
      */
     aiTextureMapMode_Clamp = 0x1,
 
+    /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
+     *  1-(u%1)|1-(v%1) otherwise
+     */
+    aiTextureMapMode_Mirror = 0x2,
+
     /** If the texture coordinates for a pixel are outside [0...1]
      *  the texture is not applied to that pixel
      */
     aiTextureMapMode_Decal = 0x3,
 
-    /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
-     *  1-(u%1)|1-(v%1) otherwise
+    /**
+     * Unexpected texture mapping mode
      */
-    aiTextureMapMode_Mirror = 0x2,
+    aiTextureMapMode_UNKNOWN = 0x4,
 
 #ifndef SWIG
     _aiTextureMapMode_Force32Bit = INT_MAX
@@ -164,6 +174,11 @@ enum aiTextureMapping {
 
     /** Undefined mapping. Have fun. */
     aiTextureMapping_OTHER = 0x5,
+
+    /**
+     * Unexpected mapping
+     */
+    aiTextureMapping_UNKNOWN = 0x6,
 
 #ifndef SWIG
     _aiTextureMapping_Force32Bit = INT_MAX
@@ -432,6 +447,11 @@ enum aiShadingMode {
     */
     aiShadingMode_PBR_BRDF = 0xb,
 
+    /**
+     * Unexpected shading mode
+     */
+    aiShadingMode_UNKNOWN = 0xc,
+
 #ifndef SWIG
     _aiShadingMode_Force32Bit = INT_MAX
 #endif
@@ -511,6 +531,11 @@ enum aiBlendMode {
      *  @endcode
      */
     aiBlendMode_Additive = 0x1,
+
+    /**
+     * Unexpected blend mode
+     */
+    aiBlendMode_UNKNOWN = 0x2,
 
 // we don't need more for the moment, but we might need them
 // in future versions ...

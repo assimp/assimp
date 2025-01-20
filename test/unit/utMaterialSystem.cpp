@@ -239,7 +239,7 @@ TEST_F(MaterialSystemTest, testMaterialTextureOpEnum) {
         switch (texOp) {
         default: break;
 #ifndef SWIG
-        case _aiTextureType_Force32Bit: break;
+        case _aiTextureOp_Force32Bit: break;
 #endif
             // All the real values
         case aiTextureOp_Multiply:
@@ -271,7 +271,7 @@ TEST_F(MaterialSystemTest, testMaterialTextureMapModeEnum) {
         switch (texMapMode) {
         default: break;
 #ifndef SWIG
-        case _aiTextureType_Force32Bit: break;
+        case _aiTextureMapMode_Force32Bit: break;
 #endif
             // All the real values
         case aiTextureMapMode_Wrap:

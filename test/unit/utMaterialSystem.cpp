@@ -237,21 +237,23 @@ TEST_F(MaterialSystemTest, testMaterialTextureOpEnum) {
     for (int32_t i = 0; i < bigNumber; ++i) {
         aiTextureOp texOp = static_cast<aiTextureOp>(i);
         switch (texOp) {
-        default: break;
 #ifndef SWIG
-        case _aiTextureOp_Force32Bit: break;
+            case _aiTextureOp_Force32Bit: break;
 #endif
             // All the real values
-        case aiTextureOp_Multiply:
-        case aiTextureOp_Add:
-        case aiTextureOp_Subtract:
-        case aiTextureOp_Divide:
-        case aiTextureOp_SmoothAdd:
-        case aiTextureOp_SignedAdd:
-        case aiTextureOp_UNKNOWN:
-            if (i > maxTextureOp)
-                maxTextureOp = i;
-            break;
+            case aiTextureOp_Multiply:
+            case aiTextureOp_Add:
+            case aiTextureOp_Subtract:
+            case aiTextureOp_Divide:
+            case aiTextureOp_SmoothAdd:
+            case aiTextureOp_SignedAdd:
+            case aiTextureOp_UNKNOWN: {
+                if (i > maxTextureOp) {
+                    maxTextureOp = i;
+                }
+                break;
+            }
+            default: break;
         }
     }
 
@@ -269,23 +271,59 @@ TEST_F(MaterialSystemTest, testMaterialTextureMapModeEnum) {
     for (int32_t i = 0; i < bigNumber; ++i) {
         aiTextureMapMode texMapMode = static_cast<aiTextureMapMode>(i);
         switch (texMapMode) {
-        default: break;
 #ifndef SWIG
-        case _aiTextureMapMode_Force32Bit: break;
+            case _aiTextureMapMode_Force32Bit: break;
 #endif
             // All the real values
-        case aiTextureMapMode_Wrap:
-        case aiTextureMapMode_Clamp:
-        case aiTextureMapMode_Mirror:
-        case aiTextureMapMode_Decal:
-        case aiTextureMapMode_UNKNOWN:
-            if (i > maxTextureMapMode)
-                maxTextureMapMode = i;
-            break;
+            case aiTextureMapMode_Wrap:
+            case aiTextureMapMode_Clamp:
+            case aiTextureMapMode_Mirror:
+            case aiTextureMapMode_Decal:
+            case aiTextureMapMode_UNKNOWN: {
+                if (i > maxTextureMapMode) {
+                    maxTextureMapMode = i;
+                }
+                break;
+            }
+            default: break;
         }
     }
 
     EXPECT_EQ(maxTextureMapMode, AI_TEXTURE_MAP_MODE_MAX) << "AI_TEXTURE_MAP_MODE_MAX macro must be equal to the largest valid aiTextureMapMode_XXX";
+}
+
+TEST_F(MaterialSystemTest, testMaterialTextureMappingEnum) {
+    // Verify that AI_TEXTURE_MAPPING_MAX equals the largest 'real' value in the enum
+
+    int32_t maxTextureMapping = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_MAPPING_MAX) << "AI_TEXTURE_MAPPING_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiTextureMapping texMapping = static_cast<aiTextureMapping>(i);
+        switch (texMapping) {
+#ifndef SWIG
+            case _aiTextureMapping_Force32Bit: break;
+#endif
+            // All the real values
+            case aiTextureMapping_UV:
+            case aiTextureMapping_SPHERE:
+            case aiTextureMapping_CYLINDER:
+            case aiTextureMapping_BOX:
+            case aiTextureMapping_PLANE:
+            case aiTextureMapping_OTHER:
+            case aiTextureMapping_UNKNOWN: {
+                if (i > maxTextureMapping) {
+                    maxTextureMapping = i;
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+
+    EXPECT_EQ(maxTextureMapping, AI_TEXTURE_MAPPING_MAX) << "AI_TEXTURE_MAPPING_MAX macro must be equal to the largest valid aiTextureMapping_XXX";
 }
 
 TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
@@ -299,44 +337,116 @@ TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
     for (int32_t i = 0; i < bigNumber; ++i) {
         aiTextureType texType = static_cast<aiTextureType>(i);
         switch (texType) {
-        default: break;
+            default: break;
 #ifndef SWIG
-        case _aiTextureType_Force32Bit: break;
+            case _aiTextureType_Force32Bit: break;
 #endif
             // All the real values
-        case aiTextureType_NONE:
-        case aiTextureType_DIFFUSE:
-        case aiTextureType_SPECULAR:
-        case aiTextureType_AMBIENT:
-        case aiTextureType_EMISSIVE:
-        case aiTextureType_HEIGHT:
-        case aiTextureType_NORMALS:
-        case aiTextureType_SHININESS:
-        case aiTextureType_OPACITY:
-        case aiTextureType_DISPLACEMENT:
-        case aiTextureType_LIGHTMAP:
-        case aiTextureType_REFLECTION:
-        case aiTextureType_BASE_COLOR:
-        case aiTextureType_NORMAL_CAMERA:
-        case aiTextureType_EMISSION_COLOR:
-        case aiTextureType_METALNESS:
-        case aiTextureType_DIFFUSE_ROUGHNESS:
-        case aiTextureType_AMBIENT_OCCLUSION:
-        case aiTextureType_SHEEN:
-        case aiTextureType_CLEARCOAT:
-        case aiTextureType_TRANSMISSION:
-        case aiTextureType_MAYA_BASE:
-        case aiTextureType_MAYA_SPECULAR:
-        case aiTextureType_MAYA_SPECULAR_COLOR:
-        case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
-        case aiTextureType_UNKNOWN:
-            if (i > maxTextureType)
-                maxTextureType = i;
-            break;
+            case aiTextureType_NONE:
+            case aiTextureType_DIFFUSE:
+            case aiTextureType_SPECULAR:
+            case aiTextureType_AMBIENT:
+            case aiTextureType_EMISSIVE:
+            case aiTextureType_HEIGHT:
+            case aiTextureType_NORMALS:
+            case aiTextureType_SHININESS:
+            case aiTextureType_OPACITY:
+            case aiTextureType_DISPLACEMENT:
+            case aiTextureType_LIGHTMAP:
+            case aiTextureType_REFLECTION:
+            case aiTextureType_BASE_COLOR:
+            case aiTextureType_NORMAL_CAMERA:
+            case aiTextureType_EMISSION_COLOR:
+            case aiTextureType_METALNESS:
+            case aiTextureType_DIFFUSE_ROUGHNESS:
+            case aiTextureType_AMBIENT_OCCLUSION:
+            case aiTextureType_SHEEN:
+            case aiTextureType_CLEARCOAT:
+            case aiTextureType_TRANSMISSION:
+            case aiTextureType_MAYA_BASE:
+            case aiTextureType_MAYA_SPECULAR:
+            case aiTextureType_MAYA_SPECULAR_COLOR:
+            case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
+            case aiTextureType_UNKNOWN: {
+                if (i > maxTextureType) {
+                    maxTextureType = i;
+                }
+                break;
+            }
         }
     }
 
     EXPECT_EQ(maxTextureType, AI_TEXTURE_TYPE_MAX) << "AI_TEXTURE_TYPE_MAX macro must be equal to the largest valid aiTextureType_XXX";
+}
+
+TEST_F(MaterialSystemTest, testMaterialShadingModeEnum) {
+    // Verify that AI_TEXTURE_SHADING_MODE_MAX equals the largest 'real' value in the enum
+
+    int32_t maxShadingMode = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_SHADING_MODE_MAX) << "AI_TEXTURE_SHADING_MODE_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiShadingMode shadingMode = static_cast<aiShadingMode>(i);
+        switch (shadingMode) {
+#ifndef SWIG
+            case _aiShadingMode_Force32Bit: break;
+#endif
+                // All the real values
+            case aiShadingMode_Flat:
+            case aiShadingMode_Gouraud:
+            case aiShadingMode_Phong:
+            case aiShadingMode_Blinn:
+            case aiShadingMode_Toon:
+            case aiShadingMode_OrenNayar:
+            case aiShadingMode_Minnaert:
+            case aiShadingMode_CookTorrance:
+            case aiShadingMode_NoShading:
+            case aiShadingMode_Unlit:
+            case aiShadingMode_Fresnel:
+            case aiShadingMode_PBR_BRDF:
+            case aiShadingMode_UNKNOWN: {
+                if (i > maxShadingMode) {
+                    maxShadingMode = i;
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+
+    EXPECT_EQ(maxShadingMode, AI_TEXTURE_SHADING_MODE_MAX) << "AI_TEXTURE_SHADING_MODE_MAX macro must be equal to the largest valid aiShadingMode_XXX";
+}
+
+TEST_F(MaterialSystemTest, testMaterialTextureMappingEnum) {
+    // Verify that AI_TEXTURE_BLEND_MODE_MAX equals the largest 'real' value in the enum
+
+    int32_t maxBlendMode = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_BLEND_MODE_MAX) << "AI_TEXTURE_BLEND_MODE_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiBlendMode blendMode = static_cast<aiBlendMode>(i);
+        switch (blendMode) {
+#ifndef SWIG
+            case _aiBlendMode_Force32Bit: break;
+#endif
+            // All the real values
+            case aiBlendMode_Default:
+            case aiBlendMode_Additive:
+            case aiBlendMode_UNKNOWN: {
+                if (i > maxBlendMode) {
+                    maxBlendMode = i;
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+
+    EXPECT_EQ(maxBlendMode, AI_TEXTURE_BLEND_MODE_MAX) << "AI_TEXTURE_BLEND_MODE_MAX macro must be equal to the largest valid aiBlendMode_XXX";
 }
 
 #if defined(_MSC_VER)

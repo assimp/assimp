@@ -107,6 +107,8 @@ enum aiTextureOp {
 #endif
 };
 
+#define AI_TEXTURE_OP_MAX aiTextureOp_UNKNOWN
+
 // ---------------------------------------------------------------------------
 /** @brief Defines how UV coordinates outside the [0...1] range are handled.
  *
@@ -141,6 +143,8 @@ enum aiTextureMapMode {
     _aiTextureMapMode_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_MAP_MODE_MAX aiTextureMapMode_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines how the mapping coords for a texture are generated.
@@ -184,6 +188,8 @@ enum aiTextureMapping {
     _aiTextureMapping_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_MAPPING_MAX aiTextureMapping_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the purpose of a texture
@@ -457,6 +463,8 @@ enum aiShadingMode {
 #endif
 };
 
+#define AI_TEXTURE_SHADING_MODE_MAX aiShadingMode_UNKNOWN
+
 // ---------------------------------------------------------------------------
 /**
  *  @brief Defines some mixed flags for a particular texture.
@@ -544,6 +552,8 @@ enum aiBlendMode {
     _aiBlendMode_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_BLEND_MODE_MAX aiBlendMode_UNKNOWN
 
 #include "./Compiler/pushpack1.h"
 

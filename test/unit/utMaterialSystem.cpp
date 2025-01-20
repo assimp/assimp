@@ -226,6 +226,68 @@ __pragma(warning(error : 4061)); // enumerator 'identifier' in switch of enum 'e
 __pragma(warning(error : 4062)); // enumerator 'identifier' in switch of enum 'enumeration' is not handled
 #endif
 
+TEST_F(MaterialSystemTest, testMaterialTextureOpEnum) {
+    // Verify that AI_TEXTURE_OP_MAX equals the largest 'real' value in the enum
+
+    int32_t maxTextureOp = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_OP_MAX) << "AI_TEXTURE_OP_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiTextureOp texOp = static_cast<aiTextureOp>(i);
+        switch (texOp) {
+        default: break;
+#ifndef SWIG
+        case _aiTextureType_Force32Bit: break;
+#endif
+            // All the real values
+        case aiTextureOp_Multiply:
+        case aiTextureOp_Add:
+        case aiTextureOp_Subtract:
+        case aiTextureOp_Divide:
+        case aiTextureOp_SmoothAdd:
+        case aiTextureOp_SignedAdd:
+        case aiTextureOp_UNKNOWN:
+            if (i > maxTextureOp)
+                maxTextureOp = i;
+            break;
+        }
+    }
+
+    EXPECT_EQ(maxTextureOp, AI_TEXTURE_OP_MAX) << "AI_TEXTURE_OP_MAX macro must be equal to the largest valid aiTextureOp_XXX";
+}
+
+TEST_F(MaterialSystemTest, testMaterialTextureMapModeEnum) {
+    // Verify that AI_TEXTURE_MAP_MODE_MAX equals the largest 'real' value in the enum
+
+    int32_t maxTextureMapMode = 0;
+    static constexpr int32_t bigNumber = 255;
+    EXPECT_GT(bigNumber, AI_TEXTURE_MAP_MODE_MAX) << "AI_TEXTURE_MAP_MODE_MAX too large for valid enum test, increase bigNumber";
+
+    // Loop until a value larger than any enum
+    for (int32_t i = 0; i < bigNumber; ++i) {
+        aiTextureMapMode texMapMode = static_cast<aiTextureMapMode>(i);
+        switch (texMapMode) {
+        default: break;
+#ifndef SWIG
+        case _aiTextureType_Force32Bit: break;
+#endif
+            // All the real values
+        case aiTextureMapMode_Wrap:
+        case aiTextureMapMode_Clamp:
+        case aiTextureMapMode_Mirror:
+        case aiTextureMapMode_Decal:
+        case aiTextureMapMode_UNKNOWN:
+            if (i > maxTextureMapMode)
+                maxTextureMapMode = i;
+            break;
+        }
+    }
+
+    EXPECT_EQ(maxTextureMapMode, AI_TEXTURE_MAP_MODE_MAX) << "AI_TEXTURE_MAP_MODE_MAX macro must be equal to the largest valid aiTextureMapMode_XXX";
+}
+
 TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
     // Verify that AI_TEXTURE_TYPE_MAX equals the largest 'real' value in the enum
 

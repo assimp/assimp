@@ -419,7 +419,7 @@ TEST_F(MaterialSystemTest, testMaterialShadingModeEnum) {
     EXPECT_EQ(maxShadingMode, AI_TEXTURE_SHADING_MODE_MAX) << "AI_TEXTURE_SHADING_MODE_MAX macro must be equal to the largest valid aiShadingMode_XXX";
 }
 
-TEST_F(MaterialSystemTest, testMaterialTextureMappingEnum) {
+TEST_F(MaterialSystemTest, testMaterialTextureBlendModeEnum) {
     // Verify that AI_TEXTURE_BLEND_MODE_MAX equals the largest 'real' value in the enum
 
     int32_t maxBlendMode = 0;

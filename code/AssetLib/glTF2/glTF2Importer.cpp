@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -71,6 +71,7 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
+
 // generate bi-tangents from normals and tangents according to spec
 struct Tangent {
     aiVector3D xyz;
@@ -369,14 +370,14 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
         // KHR_materials_emissive_strength
         if (mat.materialEmissiveStrength.isPresent) {
-            MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
+            const MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
 
             aimat->AddProperty(&emissiveStrength.emissiveStrength, 1, AI_MATKEY_EMISSIVE_INTENSITY);
         }
 
         // KHR_materials_anisotropy
         if (mat.materialAnisotropy.isPresent) {
-            MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
+            const MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
 
             aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_FACTOR);
             aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);

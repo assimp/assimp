@@ -403,7 +403,7 @@ TEST_F(MaterialSystemTest, testMaterialShadingModeEnum) {
             case aiShadingMode_Minnaert:
             case aiShadingMode_CookTorrance:
             case aiShadingMode_NoShading:
-            case aiShadingMode_Unlit:
+//            case aiShadingMode_Unlit: // alias value disabled (if included fails w/"error: duplicate case value")
             case aiShadingMode_Fresnel:
             case aiShadingMode_PBR_BRDF:
             case aiShadingMode_UNKNOWN: {

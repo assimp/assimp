@@ -1027,6 +1027,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
     FetchContent_Declare(
             tinyusdz_repo
+            EXCLUDE_FROM_ALL TRUE
             GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
             GIT_TAG        ${TINYUSDZ_GIT_TAG}
             PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}

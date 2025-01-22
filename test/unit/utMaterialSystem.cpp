@@ -267,6 +267,7 @@ TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
         case aiTextureType_MAYA_SPECULAR:
         case aiTextureType_MAYA_SPECULAR_COLOR:
         case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
+        case aiTextureType_ANISOTROPY:
         case aiTextureType_GLTF_METALLIC_ROUGHNESS:
         case aiTextureType_UNKNOWN:
             if (i > maxTextureType)

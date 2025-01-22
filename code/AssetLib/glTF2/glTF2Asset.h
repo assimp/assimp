@@ -1267,7 +1267,7 @@ private:
     size_t mBodyOffset;
     size_t mBodyLength;
     IdMap mUsedIds;
-    std::map<std::string, int> mUsedNamesMap;
+    std::map<std::string, int, std::less<>> mUsedNamesMap;
     Ref<Buffer> mBodyBuffer;
 };
 

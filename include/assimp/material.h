@@ -97,10 +97,17 @@ enum aiTextureOp {
     /** T = T1 + (T2-0.5) */
     aiTextureOp_SignedAdd = 0x5,
 
+    /**
+     * Unexpected texture operation
+     */
+    aiTextureOp_UNKNOWN = 0x6,
+
 #ifndef SWIG
     _aiTextureOp_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_OP_MAX aiTextureOp_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines how UV coordinates outside the [0...1] range are handled.
@@ -117,20 +124,27 @@ enum aiTextureMapMode {
      */
     aiTextureMapMode_Clamp = 0x1,
 
-    /** If the texture coordinates for a pixel are outside [0...1]
-     *  the texture is not applied to that pixel
-     */
-    aiTextureMapMode_Decal = 0x3,
-
     /** A texture coordinate u|v becomes u%1|v%1 if (u-(u%1))%2 is zero and
      *  1-(u%1)|1-(v%1) otherwise
      */
     aiTextureMapMode_Mirror = 0x2,
 
+    /** If the texture coordinates for a pixel are outside [0...1]
+     *  the texture is not applied to that pixel
+     */
+    aiTextureMapMode_Decal = 0x3,
+
+    /**
+     * Unexpected texture mapping mode
+     */
+    aiTextureMapMode_UNKNOWN = 0x4,
+
 #ifndef SWIG
     _aiTextureMapMode_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_MAP_MODE_MAX aiTextureMapMode_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines how the mapping coords for a texture are generated.
@@ -165,10 +179,17 @@ enum aiTextureMapping {
     /** Undefined mapping. Have fun. */
     aiTextureMapping_OTHER = 0x5,
 
+    /**
+     * Unexpected mapping
+     */
+    aiTextureMapping_UNKNOWN = 0x6,
+
 #ifndef SWIG
     _aiTextureMapping_Force32Bit = INT_MAX
 #endif
 };
+
+#define AI_TEXTURE_MAPPING_MAX aiTextureMapping_UNKNOWN
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the purpose of a texture
@@ -292,14 +313,6 @@ enum aiTextureType {
     aiTextureType_DIFFUSE_ROUGHNESS = 16,
     aiTextureType_AMBIENT_OCCLUSION = 17,
 
-    /** Unknown texture
-     *
-     *  A texture reference that does not match any of the definitions
-     *  above is considered to be 'unknown'. It is still imported,
-     *  but is excluded from any further post-processing.
-    */
-    aiTextureType_UNKNOWN = 18,
-
     /** PBR Material Modifiers
     * Some modern renderers have further PBR modifiers that may be overlaid
     * on top of the 'base' PBR materials for additional realism.
@@ -311,40 +324,48 @@ enum aiTextureType {
     * eg velvet
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_sheen
     */
-    aiTextureType_SHEEN = 19,
+    aiTextureType_SHEEN = 18,
 
     /** Clearcoat
     * Simulates a layer of 'polish' or 'lacquer' layered on top of a PBR substrate
     * https://autodesk.github.io/standard-surface/#closures/coating
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
     */
-    aiTextureType_CLEARCOAT = 20,
+    aiTextureType_CLEARCOAT = 19,
 
     /** Transmission
     * Simulates transmission through the surface
     * May include further information such as wall thickness
     */
-    aiTextureType_TRANSMISSION = 21,
+    aiTextureType_TRANSMISSION = 20,
 
     /**
      * Maya material declarations
      */
-    aiTextureType_MAYA_BASE = 22,
-    aiTextureType_MAYA_SPECULAR = 23,
-    aiTextureType_MAYA_SPECULAR_COLOR = 24,
-    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
+    aiTextureType_MAYA_BASE = 21,
+    aiTextureType_MAYA_SPECULAR = 22,
+    aiTextureType_MAYA_SPECULAR_COLOR = 23,
+    aiTextureType_MAYA_SPECULAR_ROUGHNESS = 24,
 
     /** Anisotropy
     * Simulates a surface with directional properties
-    */
-    aiTextureType_ANISOTROPY = 26,
+     */
+    aiTextureType_ANISOTROPY = 25,
+
+    /** Unknown texture
+     *  MUST BE LAST ITEM IN aiTextureType ENUM
+     *  A texture reference that does not match any of the definitions
+     *  above is considered to be 'unknown'. It is still imported,
+     *  but is excluded from any further post-processing.
+     */
+    aiTextureType_UNKNOWN = 26,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_ANISOTROPY
+#define AI_TEXTURE_TYPE_MAX aiTextureType_UNKNOWN
 
 // -------------------------------------------------------------------------------
 /**
@@ -437,13 +458,20 @@ enum aiShadingMode {
     */
     aiShadingMode_PBR_BRDF = 0xb,
 
+    /**
+     * Unexpected shading mode
+     */
+    aiShadingMode_UNKNOWN = 0xc,
+
 #ifndef SWIG
     _aiShadingMode_Force32Bit = INT_MAX
 #endif
 };
 
+#define AI_TEXTURE_SHADING_MODE_MAX aiShadingMode_UNKNOWN
+
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines some mixed flags for a particular texture.
  *
  *  Usually you'll instruct your cg artists how textures have to look like ...
@@ -483,7 +511,7 @@ enum aiTextureFlags {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines alpha-blend flags.
  *
  *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
@@ -517,6 +545,11 @@ enum aiBlendMode {
      */
     aiBlendMode_Additive = 0x1,
 
+    /**
+     * Unexpected blend mode
+     */
+    aiBlendMode_UNKNOWN = 0x2,
+
 // we don't need more for the moment, but we might need them
 // in future versions ...
 
@@ -525,10 +558,12 @@ enum aiBlendMode {
 #endif
 };
 
+#define AI_TEXTURE_BLEND_MODE_MAX aiBlendMode_UNKNOWN
+
 #include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines how an UV channel is transformed.
  *
  *  This is just a helper structure for the #AI_MATKEY_UVTRANSFORM key.
@@ -573,7 +608,7 @@ struct aiUVTransform {
 
 //! @cond AI_DOX_INCLUDE_INTERNAL
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief A very primitive RTTI system for the contents of material properties.
  */
 enum aiPropertyTypeInfo {
@@ -719,7 +754,7 @@ struct aiMaterial
 #ifdef __cplusplus
 
 public:
-    /** 
+    /**
      * @brief  The class constructor.
      */
     aiMaterial();

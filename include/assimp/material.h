@@ -336,15 +336,27 @@ enum aiTextureType {
 
     /** Anisotropy
     * Simulates a surface with directional properties
-    */
+     */
     aiTextureType_ANISOTROPY = 26,
+
+    /**
+     * gltf material declarations
+     * Refs: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+     *           "textures for metalness and roughness properties are packed together in a single
+     *           texture called metallicRoughnessTexture. Its green channel contains roughness
+     *           values and its blue channel contains metalness values..."
+     *       https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_pbrmetallicroughness_metallicroughnesstexture
+     *           "The metalness values are sampled from the B channel. The roughness values are
+     *           sampled from the G channel..."
+     */
+    aiTextureType_GLTF_METALLIC_ROUGHNESS = 27,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_ANISOTROPY
+#define AI_TEXTURE_TYPE_MAX aiTextureType_GLTF_METALLIC_ROUGHNESS
 
 // -------------------------------------------------------------------------------
 /**
@@ -443,7 +455,7 @@ enum aiShadingMode {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines some mixed flags for a particular texture.
  *
  *  Usually you'll instruct your cg artists how textures have to look like ...
@@ -483,7 +495,7 @@ enum aiTextureFlags {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines alpha-blend flags.
  *
  *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
@@ -528,7 +540,7 @@ enum aiBlendMode {
 #include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines how an UV channel is transformed.
  *
  *  This is just a helper structure for the #AI_MATKEY_UVTRANSFORM key.
@@ -573,7 +585,7 @@ struct aiUVTransform {
 
 //! @cond AI_DOX_INCLUDE_INTERNAL
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief A very primitive RTTI system for the contents of material properties.
  */
 enum aiPropertyTypeInfo {
@@ -719,7 +731,7 @@ struct aiMaterial
 #ifdef __cplusplus
 
 public:
-    /** 
+    /**
      * @brief  The class constructor.
      */
     aiMaterial();

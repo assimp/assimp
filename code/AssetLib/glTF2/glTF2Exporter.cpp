@@ -1499,6 +1499,10 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode *n) {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
     node->name = n->mName.C_Str();
+    if(n->mNumChildren > 0)
+        node->children.reserve(n->mNumChildren);
+    if(n->mNumMeshes > 0)
+        node->meshes.reserve(n->mNumMeshes);
 
     if (!n->mTransformation.IsIdentity(configEpsilon)) {
         node->matrix.isPresent = true;
@@ -1527,6 +1531,10 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
 
     node->parent = parent;
     node->name = name;
+    if(n->mNumChildren > 0)
+        node->children.reserve(n->mNumChildren);
+    if(n->mNumMeshes > 0)
+        node->meshes.reserve(n->mNumMeshes);
 
     ExportNodeExtras(n->mMetaData, node->extras);
 

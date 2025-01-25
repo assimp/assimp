@@ -262,7 +262,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
 
     aiFace* out = new aiFace[numOut](), *curOut = out;
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
-    std::vector<std::vector<aiVector2D>> temp_poly(1); /* temporary storage for earcut.hhp */
+    std::vector<std::vector<aiVector2D>> temp_poly(1); /* temporary storage for earcut.hpp */
     std::vector<aiVector2D>& temp_verts = temp_poly[0];
     temp_verts.reserve(max_out + 2);
 

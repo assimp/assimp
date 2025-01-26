@@ -385,7 +385,7 @@ aiProcess_OptimizeGraph  = 0x400000
 #
 # <b>Output UV coordinate system:<b>
 # @code
-# 0y|0y ---------- 1x|0y 
+# 0x|0y ---------- 1x|0y 
 # |                 |
 # |                 |
 # |                 |

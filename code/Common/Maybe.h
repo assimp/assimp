@@ -83,6 +83,7 @@ struct Maybe {
 
     Maybe &operator&() = delete;
     Maybe(const Maybe &) = delete;
+    Maybe &operator=(const Maybe &) = default;
 
 private:
     T _val;

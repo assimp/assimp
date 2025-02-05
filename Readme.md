@@ -55,7 +55,7 @@ Start by reading [our build instructions](https://github.com/assimp/assimp/blob/
 * [Rust](https://github.com/jkvargas/russimp)
 
 ### Other tools ###
-[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
+[Qt5-ModelViewer](https://github.com/sharjith/ModelViewer-Qt5) is a powerful viewer based on Qt5 and Assimp's import and export abilities.
 [Assimp-Viewer](https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
 #### Repository structure ####

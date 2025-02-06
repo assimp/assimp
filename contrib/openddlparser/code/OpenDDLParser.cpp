@@ -899,6 +899,8 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
                     (*prop) = new Property(id);
                     (*prop)->m_ref = ref;
                 }
+            } else {
+                delete id;
             }
         } else {
             delete id;

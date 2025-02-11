@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
-#include "AssetLib/glTF2/glTF2AssetWriter.h"
+#   include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif
 
 #include <assimp/CreateAnimMesh.h>
@@ -71,6 +71,7 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
+
 // generate bi-tangents from normals and tangents according to spec
 struct Tangent {
     aiVector3D xyz;
@@ -369,9 +370,19 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
         // KHR_materials_emissive_strength
         if (mat.materialEmissiveStrength.isPresent) {
-            MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
+            const MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
 
             aimat->AddProperty(&emissiveStrength.emissiveStrength, 1, AI_MATKEY_EMISSIVE_INTENSITY);
+        }
+
+        // KHR_materials_anisotropy
+        if (mat.materialAnisotropy.isPresent) {
+            const MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
+
+            aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+            aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
+
+            SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, AI_MATKEY_ANISOTROPY_TEXTURE);
         }
 
         return aimat;
@@ -1055,7 +1066,8 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
         }
     }
-    //
+    
+    // No indices are an invalid usecase
     if (nullptr == indices8 && nullptr == indices16) {
         // Something went completely wrong!
         ai_assert(false);
@@ -1468,7 +1480,8 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
         }
 
         if (animsampler.input->count > animsampler.output->count) {
-            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count, " exceeds number of keyframes in sampler output ", animsampler.output->count);
+            ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count,
+                            " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;
         }
 
@@ -1642,7 +1655,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         if (!img.mimeType.empty()) {
             const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
             if (ext) {
-                if (strcmp(ext, "jpeg") == 0) {
+                if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 } else if (strcmp(ext, "ktx2") == 0) { // basisu: ktx remains
                     ext = "kx2";
@@ -1651,9 +1664,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                 }
 
                 size_t len = strlen(ext);
-                if (len <= 3) {
-                    strcpy(tex->achFormatHint, ext);
-                }
+                if (len > 3) len = 3;
+                tex->achFormatHint[3] = '\0';
+                memcpy(tex->achFormatHint, ext, len);
             }
         }
     }

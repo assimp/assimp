@@ -470,7 +470,7 @@ extern ( C ) {
        * material settings and bitangents accordingly.
        *
        * Output UV coordinate system:
-       * <pre> 0y|0y ---------- 1x|0y
+       * <pre> 0x|0y ---------- 1x|0y
        * |                 |
        * |                 |
        * |                 |

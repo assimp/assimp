@@ -7,10 +7,10 @@ on:
     branches: [ master ]
 
 permissions:
-  contents: read # to fetch code (actions/checkout)
+  contents: write # to fetch code (actions/checkout),and release
 
 jobs:
-  job:
+  build:
     name: ${{ matrix.name }}-build-and-test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,6 +37,9 @@ jobs:
             cc: gcc
 
     steps:
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      
     - uses: actions/checkout@v4
       with:
           submodules: true
@@ -70,12 +73,12 @@ jobs:
     - name: Set Windows specific CMake arguments
       if: contains(matrix.name, 'windows')
       id: windows_extra_cmake_args
-      run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1 -DASSIMP_BUILD_ZLIB=1"
+      run: echo ":set-output name=args::=-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1" >> $GITHUB_OUTPUT
     
     - name: Set Hunter specific CMake arguments
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_cmake_args
-      run: echo "::set-output name=args::-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake"
+      run: echo "args=-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake" >> $GITHUB_OUTPUT
 
     - name: configure and build
       uses: lukka/run-cmake@v3
@@ -92,7 +95,7 @@ jobs:
     - name: Exclude certain tests in Hunter specific builds
       if: contains(matrix.name, 'hunter')
       id: hunter_extra_test_args
-      run: echo "::set-output name=args::--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest"
+      run: echo "args=--gtest_filter=-utOpenGEXImportExport.Importissue1340_EmptyCameraObject:utColladaZaeImportExport.importBlenFromFileTest" >> $GITHUB_OUTPUT
 
     - name: test
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
@@ -101,5 +104,89 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: matrix.name == 'windows-msvc'
       with:
-        name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
-        path: build/bin
+        name: 'assimp-bins-${{ matrix.name }}'
+        path: build/bin/assimp*.exe
+        
+    - uses: marvinpinto/action-automatic-releases@latest
+      if: contains(matrix.name, 'windows-msvc-hunter')
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "master"
+        prerelease: true
+        title: "AutoRelease"
+        files: |
+          build/bin/assimp*.exe
+
+  create-release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+        with:
+          tag_name: '${{github.ref}}'
+          release_name: 'Release ${{github.ref}}'
+          draft: false
+          prerelease: true
+      - run: |
+          echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: create-release
+          path: release_upload_url.txt
+
+  upload-release:
+    strategy:
+      matrix:
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++, ubuntu-gcc-hunter, macos-clang-hunter, windows-msvc-hunter]
+        # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
+        include:
+          - name: windows-latest-cl.exe
+            os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
+          - name: ubuntu-latest-clang++
+            os: ubuntu-latest
+            cxx: clang++
+            cc: clang
+          - name: macos-latest-clang++
+            os: macos-latest
+            cxx: clang++
+            cc: clang
+          - name: ubuntu-latest-g++
+            os: ubuntu-latest
+            cxx: g++
+            cc: gcc
+          - name: ubuntu-gcc-hunter
+            os: ubuntu-latest
+            toolchain: ninja-gcc-cxx17-fpic
+          - name: macos-clang-hunter
+            os: macos-latest
+            toolchain: ninja-clang-cxx17-fpic
+          - name: windows-msvc-hunter
+            os: windows-latest
+            toolchain: ninja-vs-win64-cxx17
+            
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: create-release
+      - id: upload-url
+        run: |
+          echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v4
+        with:
+          name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+        with:
+          files: |
+            *.zip
+ 

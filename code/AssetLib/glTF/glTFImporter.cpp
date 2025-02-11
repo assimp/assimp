@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssetLib/glTF/glTFImporter.h"
 #include "AssetLib/glTF/glTFAsset.h"
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
-#include "AssetLib/glTF/glTFAssetWriter.h"
+#   include "AssetLib/glTF/glTFAssetWriter.h"
 #endif
 #include "PostProcessing/MakeVerboseFormat.h"
 
@@ -67,7 +67,11 @@ static constexpr aiImporterDesc desc = {
     "",
     "",
     "",
-    aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportCompressedFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
+    aiImporterFlags_SupportTextFlavour | 
+        aiImporterFlags_SupportBinaryFlavour | 
+        aiImporterFlags_SupportCompressedFlavour | 
+        aiImporterFlags_LimitedSupport | 
+        aiImporterFlags_Experimental,
     0,
     0,
     0,
@@ -129,11 +133,8 @@ void glTFImporter::ImportMaterials(glTF::Asset &r) {
         aiMaterial *aimat = mScene->mMaterials[i] = new aiMaterial();
 
         Material &mat = r.materials[i];
-
-        /*if (!mat.name.empty())*/ {
-            aiString str(mat.id /*mat.name*/);
-            aimat->AddProperty(&str, AI_MATKEY_NAME);
-        }
+        aiString str(mat.id);
+        aimat->AddProperty(&str, AI_MATKEY_NAME);
 
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient, aimat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse, aimat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
@@ -616,10 +617,6 @@ void glTFImporter::ImportNodes(glTF::Asset &r) {
         }
         mScene->mRootNode = root;
     }
-
-    //if (!mScene->mRootNode) {
-    //  mScene->mRootNode = new aiNode("EMPTY");
-    //}
 }
 
 void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
@@ -631,8 +628,9 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
             numEmbeddedTexs += 1;
     }
 
-    if (numEmbeddedTexs == 0)
+    if (numEmbeddedTexs == 0) {
         return;
+    }
 
     mScene->mTextures = new aiTexture *[numEmbeddedTexs];
 
@@ -657,12 +655,14 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset &r) {
         if (!img.mimeType.empty()) {
             const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
             if (ext) {
-                if (strcmp(ext, "jpeg") == 0) ext = "jpg";
-
-                size_t len = strlen(ext);
-                if (len <= 3) {
-                    strcpy(tex->achFormatHint, ext);
+                if (strncmp(ext, "jpeg", 4) == 0) {
+                    ext = "jpg";
                 }
+
+                tex->achFormatHint[3] = '\0';
+                size_t len = strlen(ext);
+                if (len > 3) len = 3;
+                memcpy(tex->achFormatHint, ext, len);
             }
         }
     }

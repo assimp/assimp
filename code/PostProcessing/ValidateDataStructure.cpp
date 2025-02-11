@@ -447,7 +447,7 @@ void ValidateDSProcess::Validate(const aiMesh *pMesh, const aiBone *pBone, float
         if (pBone->mWeights[i].mVertexId >= pMesh->mNumVertices) {
             ReportError("aiBone::mWeights[%i].mVertexId is out of range", i);
         } else if (!pBone->mWeights[i].mWeight || pBone->mWeights[i].mWeight > 1.0f) {
-            ReportWarning("aiBone::mWeights[%i].mWeight has an invalid value", i);
+                ReportWarning("aiBone::mWeights[%i].mWeight has an invalid value %i. Value must be greater than zero and less than 1.", i, pBone->mWeights[i].mWeight);
         }
         afSum[pBone->mWeights[i].mVertexId] += pBone->mWeights[i].mWeight;
     }
@@ -891,6 +891,9 @@ void ValidateDSProcess::Validate(const aiNode *pNode) {
                 ReportError("aiNode \"%s\" child %i \"%s\" parent is someone else: \"%s\"", pNode->mName.C_Str(), i, pChild->mName.C_Str(), parentName);
             }
         }
+    } else if (pNode->mChildren) {
+        ReportError("aiNode::mChildren is not nullptr for empty node %s (aiNode::mNumChildren is %i)",
+                nodeName, pNode->mNumChildren);
     }
 }
 

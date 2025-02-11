@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -62,10 +61,7 @@ namespace DXF {
 // do NOT skip empty lines. In DXF files, they count as valid data.
 class LineReader {
 public:
-    LineReader(StreamReaderLE& reader)
-    : splitter(reader,false,true)
-    , groupcode( 0 )
-    , end() {
+    LineReader(StreamReaderLE& reader) : splitter(reader,false,true), groupcode( 0 ), end() {
         // empty
     }
 
@@ -165,8 +161,7 @@ private:
 
 // represents a POLYLINE or a LWPOLYLINE. or even a 3DFACE The data is converted as needed.
 struct PolyLine {
-    PolyLine()
-    : flags() {
+    PolyLine() : flags() {
         // empty
     }
 
@@ -182,10 +177,7 @@ struct PolyLine {
 
 // reference to a BLOCK. Specifies its own coordinate system.
 struct InsertBlock {
-    InsertBlock()
-    : pos()
-    , scale(1.f,1.f,1.f)
-    , angle() {
+    InsertBlock() : pos(0.f, 0.f, 0.f), scale(1.f,1.f,1.f), angle(0.0f) {
         // empty
     }
 
@@ -198,8 +190,7 @@ struct InsertBlock {
 
 
 // keeps track of all geometry in a single BLOCK.
-struct Block
-{
+struct Block {
     std::vector< std::shared_ptr<PolyLine> > lines;
     std::vector<InsertBlock> insertions;
 
@@ -207,14 +198,12 @@ struct Block
     aiVector3D base;
 };
 
-
-struct FileData
-{
+struct FileData {
     // note: the LAST block always contains the stuff from ENTITIES.
     std::vector<Block> blocks;
 };
 
-}
-} // Namespace Assimp
+} // namespace DXF
+} // namespace Assimp
 
-#endif
+#endif // INCLUDED_DXFHELPER_H

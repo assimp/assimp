@@ -93,6 +93,10 @@ static std::string WideToUtf8(const wchar_t *in) {
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists(const char *pFile) const {
+    if (pFile == nullptr) {
+        return false;
+    }
+        
 #ifdef _WIN32
     struct __stat64 filestat;
     if (_wstat64(Utf8ToWide(pFile).c_str(), &filestat) != 0) {
@@ -100,7 +104,9 @@ bool DefaultIOSystem::Exists(const char *pFile) const {
     }
 #else
 	struct stat statbuf;
-    stat(pFile, &statbuf);
+    if (stat(pFile, &statbuf) != 0) {
+        return false;
+    }
     // test for a regular file
     if (!S_ISREG(statbuf.st_mode)) {
         return false;

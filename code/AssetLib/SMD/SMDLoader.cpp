@@ -400,8 +400,12 @@ void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent) {
         }
     }
 
+    // nothing to do
+    if (pcNode->mNumChildren == 0)
+        return;
+
     // now allocate the output array
-    pcNode->mChildren = new aiNode*[pcNode->mNumChildren];
+    pcNode->mChildren = new aiNode *[pcNode->mNumChildren];
 
     // and fill all subnodes
     unsigned int qq( 0 );
@@ -451,11 +455,10 @@ void SMDImporter::CreateOutputNodes() {
         delete pcOldRoot;
 
         pScene->mRootNode->mParent = nullptr;
-    }
-    else
-    {
-        ::strcpy(pScene->mRootNode->mName.data, "<SMD_root>");
+    } else {
+        static constexpr char rootName[11] = "<SMD_root>";
         pScene->mRootNode->mName.length = 10;
+        ::strncpy(pScene->mRootNode->mName.data, rootName, pScene->mRootNode->mName.length);
     }
 }
 

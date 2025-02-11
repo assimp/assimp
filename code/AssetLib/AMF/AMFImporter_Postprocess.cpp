@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -333,7 +333,7 @@ void AMFImporter::Postprocess_AddMetadata(const AMFMetaDataArray &metadataList, 
     size_t meta_idx(0);
 
     for (const AMFMetadata *metadata : metadataList) {
-        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->Type, aiString(metadata->Value));
+        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->MetaType, aiString(metadata->Value));
     }
 }
 

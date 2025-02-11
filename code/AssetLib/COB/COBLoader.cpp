@@ -228,7 +228,7 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
         const Mesh &ndmesh = (const Mesh &)(root);
         if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
 
-            typedef std::pair<const unsigned int, Mesh::FaceRefList> Entry;
+            using Entry = std::pair<const unsigned int, Mesh::FaceRefList>;
             for (const Entry &reflist : ndmesh.temp_map) {
                 { // create mesh
                     size_t n = 0;
@@ -372,9 +372,11 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
     }
 
     // add children recursively
-    nd->mChildren = new aiNode *[root.temp_children.size()]();
-    for (const Node *n : root.temp_children) {
-        (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+    if (!root.temp_children.empty()) {
+        nd->mChildren = new aiNode *[root.temp_children.size()]();
+        for (const Node *n : root.temp_children) {
+            (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+        }
     }
 
     return nd;

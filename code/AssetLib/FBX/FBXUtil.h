@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2024, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,9 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-
 namespace Util {
-
 
 /** helper for std::for_each to delete all heap-allocated items in a container */
 template<typename T>
@@ -88,14 +85,12 @@ const char* TokenTypeString(TokenType t);
  *  @return A string of the following format: " (offset 0x{offset}) "*/
 std::string GetOffsetText(size_t offset);
 
-
 /** Format log/error messages using a given line location in the source file.
  *
  *  @param line Line index, 1-based
  *  @param column Column index, 1-based
  *  @return A string of the following format: " (line {line}, col {column}) "*/
 std::string GetLineAndColumnText(unsigned int line, unsigned int column);
-
 
 /** Format log/error messages using a given cursor token.
  *

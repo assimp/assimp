@@ -78,7 +78,15 @@ static constexpr aiImporterDesc desc = {
 
 // ------------------------------------------------------------------------------------------------
 // Recursive parsing of LWS files
-void LWS::Element::Parse(const char *&buffer, const char *end) {
+namespace {
+    constexpr int MAX_DEPTH = 1000; // Define the maximum depth allowed
+}
+
+void LWS::Element::Parse(const char *&buffer, const char *end, int depth) {
+    if (depth > MAX_DEPTH) {
+        throw std::runtime_error("Maximum recursion depth exceeded in LWS::Element::Parse");
+    }
+
     for (; SkipSpacesAndLineEnd(&buffer, end); SkipLine(&buffer, end)) {
 
         // begin of a new element with children
@@ -121,7 +129,7 @@ void LWS::Element::Parse(const char *&buffer, const char *end) {
 
         // parse more elements recursively
         if (sub) {
-            children.back().Parse(buffer, end);
+            children.back().Parse(buffer, end, depth + 1);
         }
     }
 }
@@ -577,6 +585,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             // and add the file to the import list
             SkipSpaces(&c, end);
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: self reference.");
+            }
+
             d.path = path;
             d.id = batch.AddLoadRequest(path, 0, &props);
 
@@ -594,6 +611,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 d.number = cur_object++;
             }
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: self reference.");
+            }
+
             d.id = batch.AddLoadRequest(path, 0, nullptr);
 
             d.path = path;

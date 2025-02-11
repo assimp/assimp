@@ -249,10 +249,10 @@ void D3MFExporter::writeBaseMaterials() {
             if (color.r <= 1 && color.g <= 1 && color.b <= 1 && color.a <= 1) {
 
                 hexDiffuseColor = ai_rgba2hex(
-                        (int)((ai_real)color.r) * 255,
-                        (int)((ai_real)color.g) * 255,
-                        (int)((ai_real)color.b) * 255,
-                        (int)((ai_real)color.a) * 255,
+                        (int)(((ai_real)color.r) * 255),
+                        (int)(((ai_real)color.g) * 255),
+                        (int)(((ai_real)color.b) * 255),
+                        (int)(((ai_real)color.a) * 255),
                         true);
 
             } else {

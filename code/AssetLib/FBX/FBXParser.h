@@ -84,8 +84,7 @@ using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const
  *  As can be seen in this sample, elements can contain nested #Scope
  *  as their trailing member.  
 **/
-class Element
-{
+class Element {
 public:
     Element(const Token& key_token, Parser& parser);
     ~Element();

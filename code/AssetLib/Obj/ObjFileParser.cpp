@@ -111,8 +111,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = bytesToProcess;
-    unsigned int processed = 0;
-    size_t lastFilePos(0);
+    unsigned int processed = 0u;
+    size_t lastFilePos = 0u;
 
     bool insideCstype = false;
     std::vector<char> buffer;
@@ -300,7 +300,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         } else if (IsLineEnd(*tmp)) {
             end_of_definition = true;
         }
-        if (!SkipSpaces(&tmp, mEnd)) {
+        if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
         const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
@@ -308,11 +308,11 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (isNum) {
             ++numComponents;
         }
-        if (!SkipSpaces(&tmp, mEnd)) {
+        if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
     }
-    
+
     return numComponents;
 }
 
@@ -451,7 +451,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     while (m_DataIt < m_DataItEnd) {
         int iStep = 1;
 
-        if (IsLineEnd(*m_DataIt)) {
+        if (IsLineEnd(*m_DataIt) || *m_DataIt == '#') {
             break;
         }
 

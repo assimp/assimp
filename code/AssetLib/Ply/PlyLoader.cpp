@@ -81,6 +81,27 @@ namespace {
 
         return props[idx];
     }
+
+    // ------------------------------------------------------------------------------------------------
+    static bool isBigEndian(const char *szMe) {
+        ai_assert(nullptr != szMe);
+
+        // binary_little_endian
+        // binary_big_endian
+        bool isBigEndian{ false };
+#if (defined AI_BUILD_BIG_ENDIAN)
+        if ('l' == *szMe || 'L' == *szMe) {
+            isBigEndian = true;
+        }
+#else
+        if ('b' == *szMe || 'B' == *szMe) {
+            isBigEndian = true;
+        }
+#endif // ! AI_BUILD_BIG_ENDIAN
+
+        return isBigEndian;
+    }
+
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
@@ -90,6 +111,11 @@ PLYImporter::PLYImporter() :
         pcDOM(nullptr),
         mGeneratedMesh(nullptr) {
     // empty
+}
+
+// ------------------------------------------------------------------------------------------------
+PLYImporter::~PLYImporter() {
+    delete mGeneratedMesh;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -105,26 +131,6 @@ const aiImporterDesc *PLYImporter::GetInfo() const {
 }
 
 // ------------------------------------------------------------------------------------------------
-static bool isBigEndian(const char *szMe) {
-    ai_assert(nullptr != szMe);
-
-    // binary_little_endian
-    // binary_big_endian
-    bool isBigEndian(false);
-#if (defined AI_BUILD_BIG_ENDIAN)
-    if ('l' == *szMe || 'L' == *szMe) {
-        isBigEndian = true;
-    }
-#else
-    if ('b' == *szMe || 'B' == *szMe) {
-        isBigEndian = true;
-    }
-#endif // ! AI_BUILD_BIG_ENDIAN
-
-    return isBigEndian;
-}
-
-// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     const std::string mode = "rb";
@@ -134,7 +140,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
 
     // Get the file-size
-    const size_t fileSize(fileStream->FileSize());
+    const size_t fileSize = fileStream->FileSize();
     if (0 == fileSize) {
         throw DeadlyImportError("File ", pFile, " is empty.");
     }
@@ -180,7 +186,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             }
         } else if (!::strncmp(szMe, "binary_", 7)) {
             szMe += 7;
-            const bool bIsBE(isBigEndian(szMe));
+            const bool bIsBE = isBigEndian(szMe);
 
             // skip the line, parse the rest of the header and build the DOM
             if (!PLY::DOM::ParseInstanceBinary(streamedBuffer, &sPlyDom, this, bIsBE)) {
@@ -241,7 +247,9 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // fill the mesh list
     pScene->mNumMeshes = 1;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-    pScene->mMeshes[0] = mGeneratedMesh;
+    pScene->mMeshes[0] = mGeneratedMesh;    
+
+    // Move the mesh ownership into the scene instance
     mGeneratedMesh = nullptr;
 
     // generate a simple node structure
@@ -254,20 +262,22 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
 }
 
+static constexpr ai_uint NotSet = 0xFFFFFFFF;
+
 void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementInstance *instElement, unsigned int pos) {
     ai_assert(nullptr != pcElement);
     ai_assert(nullptr != instElement);
 
-    ai_uint aiPositions[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    ai_uint aiPositions[3] = { NotSet, NotSet, NotSet };
     PLY::EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-    ai_uint aiNormal[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    ai_uint aiNormal[3] = { NotSet, NotSet, NotSet };
     PLY::EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-    unsigned int aiColors[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    unsigned int aiColors[4] = { NotSet, NotSet, NotSet, NotSet };
     PLY::EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
 
-    unsigned int aiTexcoord[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
+    unsigned int aiTexcoord[2] = { NotSet, NotSet };
     PLY::EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
 
     // now check whether which normal components are available
@@ -337,17 +347,17 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
     if (0 != cnt) {
         // Position
         aiVector3D vOut;
-        if (0xFFFFFFFF != aiPositions[0]) {
+        if (NotSet != aiPositions[0]) {
             vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiPositions[0]).avList.front(), aiTypes[0]);
         }
 
-        if (0xFFFFFFFF != aiPositions[1]) {
+        if (NotSet != aiPositions[1]) {
             vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiPositions[1]).avList.front(), aiTypes[1]);
         }
 
-        if (0xFFFFFFFF != aiPositions[2]) {
+        if (NotSet != aiPositions[2]) {
             vOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiPositions[2]).avList.front(), aiTypes[2]);
         }
@@ -355,19 +365,19 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         // Normals
         aiVector3D nOut;
         bool haveNormal = false;
-        if (0xFFFFFFFF != aiNormal[0]) {
+        if (NotSet != aiNormal[0]) {
             nOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiNormal[0]).avList.front(), aiNormalTypes[0]);
             haveNormal = true;
         }
 
-        if (0xFFFFFFFF != aiNormal[1]) {
+        if (NotSet != aiNormal[1]) {
             nOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiNormal[1]).avList.front(), aiNormalTypes[1]);
             haveNormal = true;
         }
 
-        if (0xFFFFFFFF != aiNormal[2]) {
+        if (NotSet != aiNormal[2]) {
             nOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiNormal[2]).avList.front(), aiNormalTypes[2]);
             haveNormal = true;
@@ -376,7 +386,7 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         // Colors
         aiColor4D cOut;
         bool haveColor = false;
-        if (0xFFFFFFFF != aiColors[0]) {
+        if (NotSet != aiColors[0]) {
             cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties,
                                                  aiColors[0])
                                                  .avList.front(),
@@ -384,7 +394,7 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
             haveColor = true;
         }
 
-        if (0xFFFFFFFF != aiColors[1]) {
+        if (NotSet != aiColors[1]) {
             cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties,
                                                  aiColors[1])
                                                  .avList.front(),
@@ -392,7 +402,7 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
             haveColor = true;
         }
 
-        if (0xFFFFFFFF != aiColors[2]) {
+        if (NotSet != aiColors[2]) {
             cOut.b = NormalizeColorValue(GetProperty(instElement->alProperties,
                                                  aiColors[2])
                                                  .avList.front(),
@@ -401,7 +411,7 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         }
 
         // assume 1.0 for the alpha channel if it is not set
-        if (0xFFFFFFFF == aiColors[3]) {
+        if (NotSet == aiColors[3]) {
             cOut.a = 1.0;
         } else {
             cOut.a = NormalizeColorValue(GetProperty(instElement->alProperties,
@@ -416,13 +426,13 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         aiVector3D tOut;
         tOut.z = 0;
         bool haveTextureCoords = false;
-        if (0xFFFFFFFF != aiTexcoord[0]) {
+        if (NotSet != aiTexcoord[0]) {
             tOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiTexcoord[0]).avList.front(), aiTexcoordTypes[0]);
             haveTextureCoords = true;
         }
 
-        if (0xFFFFFFFF != aiTexcoord[1]) {
+        if (NotSet != aiTexcoord[1]) {
             tOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty(instElement->alProperties, aiTexcoord[1]).avList.front(), aiTexcoordTypes[1]);
             haveTextureCoords = true;
@@ -437,6 +447,9 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         if (nullptr == mGeneratedMesh->mVertices) {
             mGeneratedMesh->mNumVertices = pcElement->NumOccur;
             mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
+        }
+        if (pos >= mGeneratedMesh->mNumVertices) {
+            throw DeadlyImportError("Invalid .ply file: Too many vertices");
         }
 
         mGeneratedMesh->mVertices[pos] = vOut;
@@ -504,16 +517,12 @@ void PLYImporter::LoadFace(const PLY::Element *pcElement, const PLY::ElementInst
     bool bOne = false;
 
     // index of the vertex index list
-    unsigned int iProperty = 0xFFFFFFFF;
+    unsigned int iProperty = NotSet;
     PLY::EDataType eType = EDT_Char;
     bool bIsTriStrip = false;
 
-    // index of the material index property
-    // unsigned int iMaterialIndex = 0xFFFFFFFF;
-    // PLY::EDataType eType2 = EDT_Char;
-
     // texture coordinates
-    unsigned int iTextureCoord = 0xFFFFFFFF;
+    unsigned int iTextureCoord = NotSet;
     PLY::EDataType eType3 = EDT_Char;
 
     // face = unique number of vertex indices
@@ -572,7 +581,7 @@ void PLYImporter::LoadFace(const PLY::Element *pcElement, const PLY::ElementInst
 
         if (!bIsTriStrip) {
             // parse the list of vertex indices
-            if (0xFFFFFFFF != iProperty) {
+            if (NotSet != iProperty) {
                 const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iProperty).avList.size();
                 mGeneratedMesh->mFaces[pos].mNumIndices = iNum;
                 mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[iNum];
@@ -585,15 +594,7 @@ void PLYImporter::LoadFace(const PLY::Element *pcElement, const PLY::ElementInst
                 }
             }
 
-            // parse the material index
-            // cannot be handled without processing the whole file first
-            /*if (0xFFFFFFFF != iMaterialIndex)
-        {
-            mGeneratedMesh->mFaces[pos]. = PLY::PropertyInstance::ConvertTo<unsigned int>(
-            GetProperty(instElement->alProperties, iMaterialIndex).avList.front(), eType2);
-        }*/
-
-            if (0xFFFFFFFF != iTextureCoord) {
+            if (NotSet != iTextureCoord) {
                 const unsigned int iNum = (unsigned int)GetProperty(instElement->alProperties, iTextureCoord).avList.size();
 
                 // should be 6 coords
@@ -679,41 +680,29 @@ void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance> &avL
         aiColor4D *clrOut) {
     ai_assert(nullptr != clrOut);
 
-    if (0xFFFFFFFF == aiPositions[0])
+    if (NotSet == aiPositions[0]) {
         clrOut->r = 0.0f;
-    else {
-        clrOut->r = NormalizeColorValue(GetProperty(avList,
-                                                aiPositions[0])
-                                                .avList.front(),
-                aiTypes[0]);
+    } else {
+        clrOut->r = NormalizeColorValue(GetProperty(avList, aiPositions[0]).avList.front(), aiTypes[0]);
     }
 
-    if (0xFFFFFFFF == aiPositions[1])
+    if (NotSet == aiPositions[1]) {
         clrOut->g = 0.0f;
-    else {
-        clrOut->g = NormalizeColorValue(GetProperty(avList,
-                                                aiPositions[1])
-                                                .avList.front(),
-                aiTypes[1]);
+    } else {
+        clrOut->g = NormalizeColorValue(GetProperty(avList, aiPositions[1]).avList.front(), aiTypes[1]);
     }
 
-    if (0xFFFFFFFF == aiPositions[2])
+    if (NotSet == aiPositions[2])
         clrOut->b = 0.0f;
     else {
-        clrOut->b = NormalizeColorValue(GetProperty(avList,
-                                                aiPositions[2])
-                                                .avList.front(),
-                aiTypes[2]);
+        clrOut->b = NormalizeColorValue(GetProperty(avList, aiPositions[2]).avList.front(), aiTypes[2]);
     }
 
     // assume 1.0 for the alpha channel ifit is not set
-    if (0xFFFFFFFF == aiPositions[3])
+    if (NotSet == aiPositions[3])
         clrOut->a = 1.0f;
     else {
-        clrOut->a = NormalizeColorValue(GetProperty(avList,
-                                                aiPositions[3])
-                                                .avList.front(),
-                aiTypes[3]);
+        clrOut->a = NormalizeColorValue(GetProperty(avList, aiPositions[3]).avList.front(), aiTypes[3]);
     }
 }
 

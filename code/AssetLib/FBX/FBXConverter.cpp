@@ -181,7 +181,9 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     if (out->mNumMeshes == 0) {
         out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     } else {
-        correctRootTransform(mSceneOut);
+        // Apply the FBX axis metadata unless requested not to
+        if (!doc.Settings().ignoreUpDirection)
+            correctRootTransform(mSceneOut);
     }
 }
 
@@ -245,7 +247,7 @@ struct FBXConverter::PotentialNode {
 /// todo: get bone from stack
 /// todo: make map of aiBone* to aiNode*
 /// then update convert clusters to the new format
-void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) {
+void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node, const aiMatrix4x4& parent_transform) {
     const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
     std::vector<PotentialNode> nodes;
@@ -276,7 +278,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
         if (nullptr != model) {
             nodes_chain.clear();
             post_nodes_chain.clear();
-            aiMatrix4x4 new_abs_transform = parent->mTransformation;
+            aiMatrix4x4 new_abs_transform = parent_transform;
             std::string node_name = FixNodeName(model->Name());
             // even though there is only a single input node, the design of
             // assimp (or rather: the complicated transformation chain that
@@ -310,6 +312,8 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                 child->mParent = last_parent;
                 last_parent = child.mNode;
+
+                new_abs_transform *= child->mTransformation;
             }
 
             // attach geometry
@@ -332,6 +336,8 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
 
                     postnode->mParent = last_parent;
                     last_parent = postnode.mNode;
+
+                    new_abs_transform *= postnode->mTransformation;
                 }
             } else {
                 // free the nodes we allocated as we don't need them
@@ -339,7 +345,7 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
             }
 
             // recursion call - child nodes
-            ConvertNodes(model->ID(), last_parent, root_node);
+            ConvertNodes(model->ID(), last_parent, root_node, new_abs_transform);
 
             if (doc.Settings().readLights) {
                 ConvertLights(*model, node_name);
@@ -357,12 +363,12 @@ void FBXConverter::ConvertNodes(uint64_t id, aiNode *parent, aiNode *root_node) 
     if (nodes.empty()) {
         parent->mNumChildren = 0;
         parent->mChildren = nullptr;
-    }
-
-    parent->mChildren = new aiNode *[nodes.size()]();
-    parent->mNumChildren = static_cast<unsigned int>(nodes.size());
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        parent->mChildren[i] = nodes[i].mOwnership.release();
+    } else {
+        parent->mChildren = new aiNode *[nodes.size()]();
+        parent->mNumChildren = static_cast<unsigned int>(nodes.size());
+        for (unsigned int i = 0; i < nodes.size(); ++i) {
+            parent->mChildren[i] = nodes[i].mOwnership.release();
+        }
     }
 }
 
@@ -432,7 +438,8 @@ void FBXConverter::ConvertLight(const Light &light, const std::string &orig_name
             out_light->mType = aiLightSource_UNDEFINED;
             break;
         default:
-            ai_assert(false);
+            FBXImporter::LogError("Not handled light type: ", light.LightType());
+            break;
     }
 
     float decay = light.DecayStart();
@@ -457,7 +464,7 @@ void FBXConverter::ConvertLight(const Light &light, const std::string &orig_name
             out_light->mAttenuationQuadratic = 1.0f;
             break;
         default:
-            ai_assert(false);
+            FBXImporter::LogError("Not handled light decay type: ", light.DecayType());
             break;
     }
 }
@@ -595,7 +602,7 @@ const char *FBXConverter::NameTransformationCompProperty(TransformationComp comp
             return "GeometricRotationInverse";
         case TransformationComp_GeometricTranslationInverse:
             return "GeometricTranslationInverse";
-        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+        case TransformationComp_MAXIMUM:
             break;
     }
 
@@ -711,8 +718,7 @@ bool FBXConverter::NeedsComplexTransformationChain(const Model &model) {
     for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
         const TransformationComp comp = static_cast<TransformationComp>(i);
 
-        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
-            comp == TransformationComp_PreRotation || comp == TransformationComp_PostRotation) {
+        if (comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation) {
             continue;
         }
 
@@ -1248,9 +1254,9 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
             const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
             for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
-                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const auto &curVertices = shapeGeometry->GetVertices();
                 const auto &curNormals = shapeGeometry->GetNormals();
+                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh, true, !curNormals.empty());
+                const auto &curVertices = shapeGeometry->GetVertices();
                 const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
                 // if blendShapeChannel Name is empty or doesn't have a ".", add geoMetryName;
@@ -1266,7 +1272,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     const unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
-                    aiVector3D normal = curNormals.at(j);
+                    aiVector3D normal = curNormals.empty() ? aiVector3D() : curNormals.at(j);
                     unsigned int count = 0;
                     const unsigned int *outIndices = mesh.ToOutputVertexIndex(curIndex, count);
                     for (unsigned int k = 0; k < count; k++) {
@@ -1486,15 +1492,15 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
         for (const BlendShapeChannel *blendShapeChannel : blendShape->BlendShapeChannels()) {
             const auto& shapeGeometries = blendShapeChannel->GetShapeGeometries();
             for (const ShapeGeometry *shapeGeometry : shapeGeometries) {
-                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh);
-                const auto& curVertices = shapeGeometry->GetVertices();
                 const auto& curNormals = shapeGeometry->GetNormals();
+                aiAnimMesh *animMesh = aiCreateAnimMesh(out_mesh, true, !curNormals.empty());
+                const auto& curVertices = shapeGeometry->GetVertices();
                 const auto& curIndices = shapeGeometry->GetIndices();
                 animMesh->mName.Set(FixAnimMeshName(shapeGeometry->Name()));
                 for (size_t j = 0; j < curIndices.size(); j++) {
                     unsigned int curIndex = curIndices.at(j);
                     aiVector3D vertex = curVertices.at(j);
-                    aiVector3D normal = curNormals.at(j);
+                    aiVector3D normal = curNormals.empty() ? aiVector3D() : curNormals.at(j);
                     unsigned int count = 0;
                     const unsigned int *outIndices = mesh.ToOutputVertexIndex(curIndex, count);
                     for (unsigned int k = 0; k < count; k++) {
@@ -1670,14 +1676,14 @@ void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const 
 
         //bone->mOffsetMatrix = cluster->Transform();
         // store local transform link for post processing
-        
+
         bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
         const aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
 
         bone->mOffsetMatrix = bone->mOffsetMatrix * matrix; // * mesh_offset
-        
+
         //
         // Now calculate the aiVertexWeights
         //
@@ -2128,6 +2134,10 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor", aiTextureType_EMISSION_COLOR, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|metalness", aiTextureType_METALNESS, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|base", aiTextureType_MAYA_BASE, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specular", aiTextureType_MAYA_SPECULAR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specularColor", aiTextureType_MAYA_SPECULAR_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specularRoughness", aiTextureType_MAYA_SPECULAR_ROUGHNESS, mesh);
 
     // Maya stingray
     TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map", aiTextureType_BASE_COLOR, mesh);
@@ -3406,7 +3416,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
     KeyFrameListList inputs;
     inputs.reserve(nodes.size() * 3);
 
-    //give some breathing room for rounding errors
+    // give some breathing room for rounding errors
     const int64_t adj_start = start - 10000;
     const int64_t adj_stop = stop + 10000;
 
@@ -3432,7 +3442,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
             ai_assert(curve->GetKeys().size() == curve->GetValues().size());
             ai_assert(curve->GetKeys().size());
 
-            //get values within the start/stop time window
+            // get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
             std::shared_ptr<KeyValueList> Values(new KeyValueList());
             const size_t count = curve->GetKeys().size();
@@ -3452,8 +3462,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                         if (tnew >= adj_start && tnew <= adj_stop) {
                             Keys->push_back(tnew);
                             Values->push_back(vnew);
-                        }
-                        else {
+                        } else {
                             // Something broke
                             break;
                         }

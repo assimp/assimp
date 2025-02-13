@@ -556,8 +556,12 @@ class Bone(Structure):
             #AI_MAX_BONE_WEIGHTS.
             ("mNumWeights", c_uint),
             
+            # The bone armature node - used for skeleton conversion
+            # you must enable aiProcess_PopulateArmatureData to populate this
             ("mArmature", POINTER(Node)),
-
+            
+            # The bone node in the scene - used for skeleton conversion
+            # you must enable aiProcess_PopulateArmatureData to populate this
             ("mNode", POINTER(Node)),
 
             #  The vertices affected by this bone

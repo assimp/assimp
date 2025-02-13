@@ -555,6 +555,10 @@ class Bone(Structure):
             #  The maximum value for this member is
             #AI_MAX_BONE_WEIGHTS.
             ("mNumWeights", c_uint),
+            
+            ("mArmature", POINTER(Node)),
+
+            ("mNode", POINTER(Node)),
 
             #  The vertices affected by this bone
             ("mWeights", POINTER(VertexWeight)),
@@ -857,6 +861,9 @@ class QuatKey(Structure):
 
             # The value of this key
             ("mValue", Quaternion),
+
+            # The interpolation setting of this key
+            ("mInterpolation", c_uint32)
         ]
 
 class MeshMorphKey(Structure):

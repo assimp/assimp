@@ -876,7 +876,7 @@ struct IntSharedData_MDL7 {
         : apcOutBones(),
         iNum()
     {
-        abNeedMaterials.reserve(10);
+        abNeedMaterials.reserve(12);
     }
 
     //! Destruction: properly delete all allocated resources

@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 // ----------------------------------------------------------------------------
 #include "ScenePrivate.h"
-#include "time.h"
 #include <assimp/Hash.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -61,9 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/metadata.h>
 #include <assimp/scene.h>
-#include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
+
 #include <unordered_set>
+#include <ctime>
+#include <cstdio>
 
 namespace Assimp {
 

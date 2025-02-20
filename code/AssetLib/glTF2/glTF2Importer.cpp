@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -71,6 +71,7 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
+
 // generate bi-tangents from normals and tangents according to spec
 struct Tangent {
     aiVector3D xyz;
@@ -369,9 +370,19 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
         // KHR_materials_emissive_strength
         if (mat.materialEmissiveStrength.isPresent) {
-            MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
+            const MaterialEmissiveStrength &emissiveStrength = mat.materialEmissiveStrength.value;
 
             aimat->AddProperty(&emissiveStrength.emissiveStrength, 1, AI_MATKEY_EMISSIVE_INTENSITY);
+        }
+
+        // KHR_materials_anisotropy
+        if (mat.materialAnisotropy.isPresent) {
+            const MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
+
+            aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+            aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
+
+            SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, AI_MATKEY_ANISOTROPY_TEXTURE);
         }
 
         return aimat;
@@ -1300,6 +1311,9 @@ struct AnimationSamplers {
     Animation::Sampler *weight;
 };
 
+struct vec4f {
+    float x, y, z, w;
+};
 aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &samplers) {
     aiNodeAnim *anim = new aiNodeAnim();
 
@@ -1311,9 +1325,18 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
         if (samplers.translation && samplers.translation->input && samplers.translation->output) {
             float *times = nullptr;
             samplers.translation->input->ExtractData(times);
-            aiVector3D *values = nullptr;
-            samplers.translation->output->ExtractData(values);
-            anim->mNumPositionKeys = static_cast<uint32_t>(samplers.translation->input->count);
+            //aiVector3D *values = nullptr;
+            vec4f *tmp_values = nullptr;
+            size_t numItems = samplers.translation->output->ExtractData(tmp_values);
+            aiVector3D *values = new aiVector3D[numItems];
+            for (size_t i = 0; i < numItems; ++i) {
+                values[i].x = tmp_values[i].x;
+                values[i].y = tmp_values[i].y;
+                values[i].z = tmp_values[i].z;
+            }
+            delete[] tmp_values;
+
+            anim->mNumPositionKeys = static_cast<unsigned int>(samplers.translation->input->count);
             anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
             unsigned int ii = (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
@@ -1337,7 +1360,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
             samplers.rotation->output->ExtractData(values);
-            anim->mNumRotationKeys = static_cast<uint32_t>(samplers.rotation->input->count);
+            anim->mNumRotationKeys = static_cast<unsigned int>(samplers.rotation->input->count);
             anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
             unsigned int ii = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
@@ -1365,7 +1388,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             samplers.scale->input->ExtractData(times);
             aiVector3D *values = nullptr;
             samplers.scale->output->ExtractData(values);
-            anim->mNumScalingKeys = static_cast<uint32_t>(samplers.scale->input->count);
+            anim->mNumScalingKeys = static_cast<unsigned int>(samplers.scale->input->count);
             anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
             unsigned int ii = (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {

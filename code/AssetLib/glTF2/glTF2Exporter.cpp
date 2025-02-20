@@ -804,6 +804,22 @@ bool glTF2Exporter::GetMatEmissiveStrength(const aiMaterial &mat, glTF2::Materia
     return mat.Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength.emissiveStrength) == aiReturn_SUCCESS;
 }
 
+bool glTF2Exporter::GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAnisotropy &anisotropy) {
+    if (mat.Get(AI_MATKEY_ANISOTROPY_FACTOR, anisotropy.anisotropyStrength) != aiReturn_SUCCESS) {
+        return false;
+    }
+
+    // do not export anisotropy when strength is zero
+    if (anisotropy.anisotropyStrength == 0.0f) {
+        return false;
+    }
+
+    mat.Get(AI_MATKEY_ANISOTROPY_ROTATION, anisotropy.anisotropyRotation);
+    GetMatTex(mat, anisotropy.anisotropyTexture, AI_MATKEY_ANISOTROPY_TEXTURE);
+
+    return true;
+}
+
 void glTF2Exporter::ExportMaterials() {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -955,6 +971,12 @@ void glTF2Exporter::ExportMaterials() {
                 if (GetMatEmissiveStrength(mat, emissiveStrength)) {
                     mAsset->extensionsUsed.KHR_materials_emissive_strength = true;
                     m->materialEmissiveStrength = Nullable<MaterialEmissiveStrength>(emissiveStrength);
+                }
+
+                MaterialAnisotropy anisotropy;
+                if (GetMatAnisotropy(mat, anisotropy)) {
+                    mAsset->extensionsUsed.KHR_materials_anisotropy = true;
+                    m->materialAnisotropy = Nullable<MaterialAnisotropy>(anisotropy);
                 }
             }
         }
@@ -1477,6 +1499,10 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode *n) {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
     node->name = n->mName.C_Str();
+    if(n->mNumChildren > 0)
+        node->children.reserve(n->mNumChildren);
+    if(n->mNumMeshes > 0)
+        node->meshes.reserve(n->mNumMeshes);
 
     if (!n->mTransformation.IsIdentity(configEpsilon)) {
         node->matrix.isPresent = true;
@@ -1505,6 +1531,10 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
 
     node->parent = parent;
     node->name = name;
+    if(n->mNumChildren > 0)
+        node->children.reserve(n->mNumChildren);
+    if(n->mNumMeshes > 0)
+        node->meshes.reserve(n->mNumMeshes);
 
     ExportNodeExtras(n->mMetaData, node->extras);
 

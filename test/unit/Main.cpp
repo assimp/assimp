@@ -1,7 +1,6 @@
 #include "../../include/assimp/DefaultLogger.hpp"
 #include "UnitTestPCH.h"
-#include <math.h>
-#include <time.h>
+#include <ctime>
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

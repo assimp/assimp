@@ -36,7 +36,7 @@ namespace o3dgc
         //! Constructor.
                                          IndexedFaceSet(void)
                                          {
-                                             memset(this, 0, sizeof(IndexedFaceSet));
+                                             memset((void*)this, 0, sizeof(IndexedFaceSet));
                                              m_ccw              = true;
                                              m_solid            = true;
                                              m_convex           = true;

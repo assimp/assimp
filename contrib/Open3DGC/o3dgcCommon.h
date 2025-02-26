@@ -164,7 +164,7 @@ namespace o3dgc
     public: 
                                     SC3DMCStats(void)
                                     {
-                                        memset(this, 0, sizeof(SC3DMCStats));
+                                        memset((void*)this, 0, sizeof(SC3DMCStats));
                                     };
                                     ~SC3DMCStats(void){};
         

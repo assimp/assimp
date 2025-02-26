@@ -111,7 +111,7 @@ namespace o3dgc
     public: 
         Timer(void)
         {
-            memset(this, 0, sizeof(Timer));
+            memset((void*)this, 0, sizeof(Timer));
         };
         ~Timer(void){};
         void Tic() 

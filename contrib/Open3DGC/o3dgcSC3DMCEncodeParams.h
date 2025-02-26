@@ -35,7 +35,7 @@ namespace o3dgc
         //! Constructor.
                                     SC3DMCEncodeParams(void)
                                     {
-                                        memset(this, 0, sizeof(SC3DMCEncodeParams));
+                                        memset((void*)this, 0, sizeof(SC3DMCEncodeParams));
                                         m_encodeMode        = O3DGC_SC3DMC_ENCODE_MODE_TFAN;
                                         m_streamTypeMode    = O3DGC_STREAM_TYPE_ASCII;
                                         m_coordQuantBits    = 14;

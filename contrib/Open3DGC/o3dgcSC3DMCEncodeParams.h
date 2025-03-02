@@ -35,7 +35,7 @@ namespace o3dgc
         //! Constructor.
                                     SC3DMCEncodeParams(void)
                                     {
-                                        memset((void*)this, 0, sizeof(SC3DMCEncodeParams));
+                                        memset(this, 0, sizeof(SC3DMCEncodeParams));
                                         m_encodeMode        = O3DGC_SC3DMC_ENCODE_MODE_TFAN;
                                         m_streamTypeMode    = O3DGC_STREAM_TYPE_ASCII;
                                         m_coordQuantBits    = 14;
@@ -51,8 +51,6 @@ namespace o3dgc
                                             m_intAttributePredMode[a] = O3DGC_SC3DMC_NO_PREDICTION;
                                         }
                                     };
-        //! Destructor.
-                                    ~SC3DMCEncodeParams(void) {};
 
         O3DGCStreamType             GetStreamType()    const { return m_streamTypeMode;}
         O3DGCSC3DMCEncodingMode     GetEncodeMode()    const { return m_encodeMode;}
@@ -137,4 +135,3 @@ namespace o3dgc
     };
 }
 #endif // O3DGC_SC3DMC_ENCODE_PARAMS_H
-

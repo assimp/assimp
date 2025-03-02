@@ -111,9 +111,8 @@ namespace o3dgc
     public: 
         Timer(void)
         {
-            memset((void*)this, 0, sizeof(Timer));
+            memset(this, 0, sizeof(Timer));
         };
-        ~Timer(void){};
         void Tic() 
         {
             clock_gettime(CLOCK_REALTIME, &m_start);

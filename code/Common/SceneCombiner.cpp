@@ -1095,10 +1095,6 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces, dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces; ++i) {
-        aiFace &f = dest->mFaces[i];
-        GetArrayCopy(f.mIndices, f.mNumIndices);
-    }
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);

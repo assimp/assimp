@@ -43,8 +43,6 @@ namespace o3dgc
                                              m_isTriangularMesh = true;
                                              m_creaseAngle      = 30;
                                          };
-        //! Destructor.
-                                         ~IndexedFaceSet(void) {};
         
         unsigned long                    GetNCoordIndex() const { return m_nCoordIndex     ;}
         // only coordIndex is supported
@@ -260,4 +258,3 @@ namespace o3dgc
 }
 #include "o3dgcIndexedFaceSet.inl"    // template implementation
 #endif // O3DGC_INDEXED_FACE_SET_H
-

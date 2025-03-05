@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssetLib/glTF/glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
@@ -87,6 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace glTF2 {
+
 using glTFCommon::FindStringInContext;
 using glTFCommon::FindNumberInContext;
 using glTFCommon::FindUIntInContext;

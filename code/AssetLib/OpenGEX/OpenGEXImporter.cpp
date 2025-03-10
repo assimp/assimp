@@ -289,14 +289,13 @@ bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, boo
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
     // open source file
-    IOStream *file = pIOHandler->Open(filename, "rb");
+    std::unique_ptr<IOStream> file(pIOHandler->Open(filename, "rb"));
     if (!file) {
         throw DeadlyImportError("Failed to open file ", filename);
     }
 
     std::vector<char> buffer;
-    TextFileToBuffer(file, buffer);
-    pIOHandler->Close(file);
+    TextFileToBuffer(file.get(), buffer);
 
     OpenDDLParser myParser;
     myParser.setLogCallback(&logDDLParserMessage);

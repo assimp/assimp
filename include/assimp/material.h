@@ -350,7 +350,7 @@ enum aiTextureType {
     /** Anisotropy
     * Simulates a surface with directional properties
      */
-    aiTextureType_ANISOTROPY = 26,
+    aiTextureType_ANISOTROPY = 25,
 
     /**
      * gltf material declarations
@@ -362,7 +362,7 @@ enum aiTextureType {
      *           "The metalness values are sampled from the B channel. The roughness values are
      *           sampled from the G channel..."
      */
-    aiTextureType_GLTF_METALLIC_ROUGHNESS = 27,
+    aiTextureType_GLTF_METALLIC_ROUGHNESS = 26,
 
     /** Unknown texture
      *  MUST BE LAST ITEM IN aiTextureType ENUM
@@ -370,7 +370,7 @@ enum aiTextureType {
      *  above is considered to be 'unknown'. It is still imported,
      *  but is excluded from any further post-processing.
      */
-    aiTextureType_UNKNOWN = 28,
+    aiTextureType_UNKNOWN = 27,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX

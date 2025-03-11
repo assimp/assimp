@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssetLib/glTF/glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
@@ -87,6 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace glTF2 {
+
 using glTFCommon::FindStringInContext;
 using glTFCommon::FindNumberInContext;
 using glTFCommon::FindUIntInContext;
@@ -2195,8 +2196,10 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     std::string id = str;
 
     if (!id.empty()) {
-        if (mUsedIds.find(id) == mUsedIds.end())
+        if (mUsedIds.find(id) == mUsedIds.end()){
+            mUsedNamesMap[id] = 0;
             return id;
+        }
 
         id += "_";
     }
@@ -2205,17 +2208,13 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 
     Asset::IdMap::iterator it = mUsedIds.find(id);
     if (it == mUsedIds.end()) {
+        mUsedNamesMap[id] = 0;
         return id;
     }
 
-    std::vector<char> buffer;
-    buffer.resize(id.size() + 16);
-    int offset = ai_snprintf(buffer.data(), buffer.size(), "%s_", id.c_str());
-    for (int i = 0; it != mUsedIds.end(); ++i) {
-        ai_snprintf(buffer.data() + offset, buffer.size() - offset, "%d", i);
-        id = buffer.data();
-        it = mUsedIds.find(id);
-    }
+    auto key = id;
+    id += "_" + std::to_string(mUsedNamesMap[key]);
+    mUsedNamesMap[key] = mUsedNamesMap[key] + 1;
 
     return id;
 }

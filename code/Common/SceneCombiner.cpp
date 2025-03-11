@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 // ----------------------------------------------------------------------------
 #include "ScenePrivate.h"
-#include "time.h"
 #include <assimp/Hash.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -61,9 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/metadata.h>
 #include <assimp/scene.h>
-#include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
+
 #include <unordered_set>
+#include <ctime>
+#include <cstdio>
 
 namespace Assimp {
 
@@ -985,7 +985,7 @@ inline void GetArrayCopy(Type *&dest, ai_uint num) {
     Type *old = dest;
 
     dest = new Type[num];
-    ::memcpy(dest, old, sizeof(Type) * num);
+    std::copy(old, old+num, dest);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1095,10 +1095,6 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces, dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces; ++i) {
-        aiFace &f = dest->mFaces[i];
-        GetArrayCopy(f.mIndices, f.mNumIndices);
-    }
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);

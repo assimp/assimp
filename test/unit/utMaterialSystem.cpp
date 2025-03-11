@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -368,6 +368,7 @@ TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
             case aiTextureType_MAYA_SPECULAR_COLOR:
             case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
             case aiTextureType_ANISOTROPY:
+            case aiTextureType_GLTF_METALLIC_ROUGHNESS:
             case aiTextureType_UNKNOWN: {
                 if (i > maxTextureType) {
                     maxTextureType = i;

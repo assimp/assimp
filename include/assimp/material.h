@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -350,7 +350,19 @@ enum aiTextureType {
     /** Anisotropy
     * Simulates a surface with directional properties
      */
-    aiTextureType_ANISOTROPY = 25,
+    aiTextureType_ANISOTROPY = 26,
+
+    /**
+     * gltf material declarations
+     * Refs: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+     *           "textures for metalness and roughness properties are packed together in a single
+     *           texture called metallicRoughnessTexture. Its green channel contains roughness
+     *           values and its blue channel contains metalness values..."
+     *       https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_pbrmetallicroughness_metallicroughnesstexture
+     *           "The metalness values are sampled from the B channel. The roughness values are
+     *           sampled from the G channel..."
+     */
+    aiTextureType_GLTF_METALLIC_ROUGHNESS = 27,
 
     /** Unknown texture
      *  MUST BE LAST ITEM IN aiTextureType ENUM
@@ -358,7 +370,7 @@ enum aiTextureType {
      *  above is considered to be 'unknown'. It is still imported,
      *  but is excluded from any further post-processing.
      */
-    aiTextureType_UNKNOWN = 26,
+    aiTextureType_UNKNOWN = 28,
 
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX

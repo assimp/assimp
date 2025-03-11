@@ -614,6 +614,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
 
                     // The asset has its own buffer, see Image::SetData
                     // basisu: "image/ktx2", "image/basis" as is
+                    const size_t length = curTex->mWidth * curTex->mHeight;
+                    //texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), length, *mAsset);
                     texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                 } else {
                     texture->source->uri = path;

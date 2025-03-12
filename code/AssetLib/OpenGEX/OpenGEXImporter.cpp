@@ -783,10 +783,10 @@ static void fillColor4(aiColor4D *col4, Value *vals) {
     col4->b = next->getFloat();
     next = next->m_next;
     if (!next) {
-        throw DeadlyImportError("OpenGEX: Not enough values to fill 4-element color, only 3");
+        col4->a = 1.0f;
+    } else {
+        col4->a = next->getFloat();
     }
-
-    col4->a = next->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -731,6 +731,10 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
     unsigned int iCurrent = 0, fi = 0;
     for (std::vector<ASE::Face>::iterator i = mesh.mFaces.begin(); i != mesh.mFaces.end(); ++i, ++fi) {
         for (unsigned int n = 0; n < 3; ++n, ++iCurrent) {
+            const uint32_t curIndex = (*i).mIndices[n];
+            if (curIndex >= mesh.mPositions.size()) {
+                throw DeadlyImportError("ASE: Invalid vertex index in face ", fi, ".");
+            }
             mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
 
             // add texture coordinates

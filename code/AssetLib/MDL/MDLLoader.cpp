@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -420,7 +420,7 @@ void MDLImporter::InternReadFile_Quake1() {
                 }
                 // go to the end of the skin section / the beginning of the next skin
                 bool overflow = false;
-                if (pcHeader->skinwidth != 0 || pcHeader->skinheight != 0) {
+                if (pcHeader->skinwidth != 0 && pcHeader->skinheight != 0) {
                     if ((pcHeader->skinheight > INT_MAX / pcHeader->skinwidth) || (pcHeader->skinwidth > INT_MAX / pcHeader->skinheight)){
                         overflow = true;
                     }

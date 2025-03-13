@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -894,9 +894,13 @@ ELSE() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
     )
 ENDIF() # IF (ASSIMP_USE_LEGACY_X3D_IMPORTER)
 
+SET(glTFCommon_src
+  AssetLib/glTFCommon/glTFCommon.h
+  AssetLib/glTFCommon/glTFCommon.cpp
+)
+SOURCE_GROUP( glTFCommon FILES ${glTFCommon_src})
+
 ADD_ASSIMP_IMPORTER( GLTF
-  AssetLib/glTF/glTFCommon.h
-  AssetLib/glTF/glTFCommon.cpp
   AssetLib/glTF/glTFAsset.h
   AssetLib/glTF/glTFAsset.inl
   AssetLib/glTF/glTFAssetWriter.h
@@ -1376,6 +1380,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
+  ${glTFCommon_src}
 #  ${Step_SRCS} check if we need a different approach
 
   # Model Support

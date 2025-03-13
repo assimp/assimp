@@ -96,6 +96,11 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
 // ------------------------------------------------------------------------------------------------
 // Add node identifiers to a hashing set
 void SceneCombiner::AddNodeHashes(aiNode *node, std::set<unsigned int> &hashes) {
+    if (node == nullptr) {
+        ASSIMP_LOG_ERROR("Pointer to aiNode is nullptr.");
+        return;
+    }
+  
     // Add node name to hashing set if it is non-empty - empty nodes are allowed
     // and they can't have any anims assigned so its absolutely safe to duplicate them.
     if (node->mName.length) {

@@ -167,7 +167,7 @@ AI_FORCE_INLINE bool GetNextLine(const char_t *&buffer, char_t out[BufferSize]) 
     }
     *_out = (char_t)'\0';
 
-    while (IsLineEnd(*buffer) && '\0' != *buffer) {
+    while (IsLineEnd(*buffer) && '\0' != *buffer && buffer != end) {
         ++buffer;
     }
 

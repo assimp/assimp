@@ -1406,8 +1406,8 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices, ASE::Mesh &mes
             if (TokenMatch(mFilePtr, "MESH_BONE_VERTEX", 16)) {
                 // read the vertex index
                 unsigned int iIndex = strtoul10(mFilePtr, &mFilePtr);
-                if (iIndex >= mesh.mPositions.size()) {
-                    iIndex = (unsigned int)mesh.mPositions.size() - 1;
+                if (iIndex >= mesh.mBoneVertices.size()) {
+                    iIndex = (unsigned int)mesh.mBoneVertices.size() - 1;
                     LogWarning("Bone vertex index is out of bounds. Using the largest valid "
                                "bone vertex index instead");
                 }

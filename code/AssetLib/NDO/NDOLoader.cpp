@@ -275,7 +275,12 @@ void NDOImporter::InternReadFile( const std::string& pFile,
                     next_vert = obj.edges[cur_edge].edge[0];
                 }
                 indices.push_back( static_cast<unsigned int>(vertices.size()) );
-                vertices.push_back(obj.vertices[ next_vert ].val);
+                if (next_vert < obj.vertices.size()) {
+                    vertices.push_back(obj.vertices[ next_vert ].val);
+                } else {
+                    ASSIMP_LOG_WARN("NDOImporter: next_vert is out of bounds, skipping invalid access.");
+                    break;
+                }
 
                 cur_edge = next_edge;
                 if (cur_edge == v.second) {

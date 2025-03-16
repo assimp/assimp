@@ -310,7 +310,8 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
 
     copyMeshes(pScene);
     copyCameras(pScene);
-    copyLights(pScene);
+    // TODO: lights only partially implemented and breaking model import
+//    copyLights(pScene);
     copyMaterials(pScene);
     resolveReferences();
     createNodeTree(pScene);
@@ -366,7 +367,8 @@ void OpenGEXImporter::handleNodes(DDLNode *node, aiScene *pScene) {
             break;
 
         case Grammar::LightNodeToken:
-            handleLightNode(*it, pScene);
+            // TODO: lights only partially implemented and breaking model import
+//            handleLightNode(*it, pScene);
             break;
 
         case Grammar::GeometryObjectToken:
@@ -378,7 +380,8 @@ void OpenGEXImporter::handleNodes(DDLNode *node, aiScene *pScene) {
             break;
 
         case Grammar::LightObjectToken:
-            handleLightObject(*it, pScene);
+            // TODO: lights only partially implemented and breaking model import
+//            handleLightObject(*it, pScene);
             break;
 
         case Grammar::TransformToken:
@@ -468,7 +471,10 @@ void OpenGEXImporter::handleNameNode(DDLNode *node, aiScene * /*pScene*/) {
         }
 
         const std::string name(val->getString());
-        if (m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken || m_tokenType == Grammar::CameraNodeToken) {
+        if (m_tokenType == Grammar::GeometryNodeToken ||
+                // TODO: lights only partially implemented and breaking model import
+//                m_tokenType == Grammar::LightNodeToken ||
+                m_tokenType == Grammar::CameraNodeToken) {
             m_currentNode->mName.Set(name.c_str());
         } else if (m_tokenType == Grammar::MaterialToken) {
             aiString aiName;

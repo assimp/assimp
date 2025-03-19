@@ -403,7 +403,7 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a c-like string fron an aiString
-const char *aiGetStringC_Str(aiString *str) {
+const char *aiGetStringC_Str(const aiString *str) {
 	return str->data;
 }
 

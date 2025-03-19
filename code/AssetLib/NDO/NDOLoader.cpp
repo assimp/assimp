@@ -98,7 +98,7 @@ void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
     std::vector<aiVector3D>& vertices, std::vector<unsigned int>& indices)
 {
     unsigned int cur_edge = start_edge;
-    while (true) {
+    do {
         unsigned int next_edge, next_vert;
         if (key == obj.edges[cur_edge].edge[3]) {
             next_edge = obj.edges[cur_edge].edge[5];
@@ -118,10 +118,7 @@ void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
         }
 
         cur_edge = next_edge;
-        if (cur_edge == start_edge) {
-            break;
-        }
-    }
+    } while (cur_edge != start_edge);
 }
 
 // ------------------------------------------------------------------------------------------------

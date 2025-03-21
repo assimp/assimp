@@ -23,6 +23,10 @@ jobs:
             os: windows-latest
             cxx: cl.exe
             cc: cl.exe
+          - name: windows-hunter-latest-cl.exe
+            os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
           - name: ubuntu-latest-clang++
             os: ubuntu-latest
             cxx: clang++

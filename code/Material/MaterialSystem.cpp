@@ -402,6 +402,12 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a c-like string fron an aiString
+const char *aiGetStringC_Str(const aiString *str) {
+	return str->data;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get the number of textures on a particular texture stack
 unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial *pMat, C_ENUM aiTextureType type) {
     ai_assert(pMat != nullptr);

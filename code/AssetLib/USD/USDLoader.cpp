@@ -88,7 +88,7 @@ USDImporter::USDImporter() :
 
 bool USDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool) const {
     // Based on token
-    static const uint32_t usdcTokens[] = { AI_MAKE_MAGIC("PXR-USDC") };
+    static constexpr uint32_t usdcTokens[] = { AI_MAKE_MAGIC("PXR-USDC") };
     bool canRead = CheckMagicToken(pIOHandler, pFile, usdcTokens, AI_COUNT_OF(usdcTokens));
     if (canRead) {
         return canRead;

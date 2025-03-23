@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 
-#include "AssetLib/DXF/DXFLoader.h"
-#include "AssetLib/DXF/DXFHelper.h"
+#include "DXFLoader.h"
+#include "DXFHelper.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/ParsingUtils.h>

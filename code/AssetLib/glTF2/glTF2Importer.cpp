@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
-#include "AssetLib/glTF2/glTF2Importer.h"
-#include "AssetLib/glTF2/glTF2Asset.h"
+#include "glTF2Importer.h"
+#include "glTF2Asset.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)

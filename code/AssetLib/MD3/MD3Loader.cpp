@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
-#include "AssetLib/MD3/MD3Loader.h"
+#include "MD3Loader.h"
 #include "Common/Importer.h"
 
 #include <assimp/GenericProperty.h>

@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
-#include "AssetLib/X/XFileImporter.h"
-#include "AssetLib/X/XFileParser.h"
+#include "XFileImporter.h"
+#include "XFileParser.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/TinyFormatter.h>

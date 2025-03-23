@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
 
-#include "glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 #include <assimp/Exceptional.h>
 #include <list>
 #include <string>
@@ -100,7 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // clang-format on
 
-#include "glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 namespace glTF {
 

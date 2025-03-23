@@ -63,8 +63,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
-namespace MDL   {
+namespace Assimp {
+namespace MDL {
 
 // -------------------------------------------------------------------------------------
 // to make it easier for us, we test the magic word against both "endiannesses"

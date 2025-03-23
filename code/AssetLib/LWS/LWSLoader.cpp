@@ -255,7 +255,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
 // ------------------------------------------------------------------------------------------------
 // Read animation channels in the old LightWave animation format
-void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt, 
+void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt,
         LWS::NodeDesc &nodes, unsigned int) {
     if (++it == endIt) {
         ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
@@ -274,7 +274,7 @@ void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,c
             ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
             return;
         }
-        
+
         const unsigned int sub_num = strtoul10((*it).tokens[0].c_str());
         for (unsigned int n = 0; n < sub_num; ++n) {
             if (++it == endIt) {

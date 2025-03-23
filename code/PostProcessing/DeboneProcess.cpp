@@ -187,7 +187,7 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh) {
                     }
                 } else {
                     vertexBones[vid] = i;
-                } 
+                }
             }
 
             if(!isBoneNecessary[i]) {

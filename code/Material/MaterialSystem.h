@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
+namespace Assimp {
 
 // ------------------------------------------------------------------------------
 /** Computes a hash (hopefully unique) from all material properties

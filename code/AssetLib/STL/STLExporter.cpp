@@ -203,7 +203,7 @@ void STLExporter::WriteMeshBinary(const aiMesh* m) {
         if (f.mNumIndices < 3) {
             continue;
         }
-        
+
         // we need per-face normals. We specified aiProcess_GenNormals as pre-requisite for this exporter,
         // but nonetheless we have to expect per-vertex normals.
         aiVector3D nor;

@@ -13,7 +13,7 @@ the `.wrl`/`.x3dv` files can be converted to an X3D-compatible `.xml` file, then
 will be able to load the resulting model file.
 
 ## How this code is used
-The sole purpose of `Parser`/`Scanner` (adopted from the `meshlab` project) is to take a 
+The sole purpose of `Parser`/`Scanner` (adopted from the `meshlab` project) is to take a
 `VRML97` (`.wrl`) or "Classic VRML" (`.x3dv`) file as input, and convert to an X3D `.xml` file.
 That's it.
 

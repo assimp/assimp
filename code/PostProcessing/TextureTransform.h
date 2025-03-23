@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 struct aiMaterial;
 
-namespace Assimp    {
+namespace Assimp {
 
 #define AI_TT_UV_IDX_LOCK_TBD   0xffffffff
 #define AI_TT_UV_IDX_LOCK_NONE  0xeeeeeeee
@@ -220,7 +219,7 @@ protected:
 private:
     unsigned int configFlags;
 };
- 
+
 } // namespace Assimp
 
 #endif //! AI_TEXTURE_TRANSFORM_H_INCLUDED

@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Compiler/pushpack1.h>
 
-namespace Assimp    {
-namespace MDL   {
+namespace Assimp {
+namespace MDL {
 
 // magic bytes used in Half Life 2 MDL models
 #define AI_MDL_MAGIC_NUMBER_BE_HL2a AI_MAKE_MAGIC("IDST")

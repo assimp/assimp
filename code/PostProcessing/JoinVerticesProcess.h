@@ -65,7 +65,7 @@ class ASSIMP_API JoinVerticesProcess : public BaseProcess {
 public:
     // -------------------------------------------------------------------
     /// The default class constructor / destructor.
-    JoinVerticesProcess() = default;    
+    JoinVerticesProcess() = default;
     ~JoinVerticesProcess() override = default;
 
     // -------------------------------------------------------------------

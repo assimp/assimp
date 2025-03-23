@@ -82,7 +82,7 @@ using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const
  *  @endverbatim
  *
  *  As can be seen in this sample, elements can contain nested #Scope
- *  as their trailing member.  
+ *  as their trailing member.
 **/
 class Element {
 public:

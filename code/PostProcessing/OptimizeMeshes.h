@@ -56,7 +56,7 @@ struct aiMesh;
 struct aiNode;
 class OptimizeMeshesProcessTest;
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** @brief Postprocessing step to optimize mesh usage

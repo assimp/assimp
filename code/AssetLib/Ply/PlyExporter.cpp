@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //using namespace Assimp;
-namespace Assimp    {
+namespace Assimp {
 
 // make sure type_of returns consistent output across different platforms
 // also consider using: typeid(VAR).name()
@@ -358,7 +358,7 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
                 unsigned char rgba[4] = {
                     static_cast<unsigned char>(defaultColor.r * 255),
                     static_cast<unsigned char>(defaultColor.g * 255),
-                    static_cast<unsigned char>(defaultColor.b * 255), 
+                    static_cast<unsigned char>(defaultColor.b * 255),
                     static_cast<unsigned char>(defaultColor.a * 255)
                 };
                 mOutput.write(reinterpret_cast<const char*>(&rgba), 4);

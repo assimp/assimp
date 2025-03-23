@@ -1,4 +1,3 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
@@ -56,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp    {
+namespace Assimp {
 
 using namespace D3DS;
 
@@ -124,7 +123,6 @@ protected:
     */
     void ParseColorChunk(aiColor3D* p_pcOut,
         bool p_bAcceptPercent = true);
-
 
     // -------------------------------------------------------------------
     /** Skip a chunk in the file

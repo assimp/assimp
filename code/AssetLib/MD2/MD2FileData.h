@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Compiler/pushpack1.h>
 
-namespace Assimp    {
-namespace MD2   {
+namespace Assimp {
+namespace MD2 {
 
 // to make it easier for us, we test the magic word against both "endiannesses"
 #define AI_MD2_MAGIC_NUMBER_BE  AI_MAKE_MAGIC("IDP2")

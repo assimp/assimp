@@ -65,7 +65,7 @@ class Importer;
 */
 class NDOImporter : public BaseImporter {
 public:
-    NDOImporter() = default; 
+    NDOImporter() = default;
     ~NDOImporter() override = default;
 
     //! Represents a single edge

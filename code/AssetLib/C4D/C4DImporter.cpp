@@ -64,7 +64,7 @@ namespace {
 
 aiString aiStringFrom(cineware::String const & cinestring) {
     aiString result;
-    cinestring.GetCString(result.data, MAXLEN-1);
+    cinestring.GetCString(result.data, AI_MAXLEN - 1);
     result.length = static_cast<ai_uint32>(cinestring.GetLength());
     return result;
 }

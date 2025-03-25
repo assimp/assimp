@@ -375,7 +375,7 @@ void TempMesh::RemoveAdjacentDuplicates() {
         ArrayBounds(&*base, cnt ,vmin,vmax);
 
         const IfcFloat epsilon = (vmax-vmin).SquareLength() / static_cast<IfcFloat>(1e9);
-        
+
         // drop any identical, adjacent vertices. this pass will collect the dropouts
         // of the previous pass as a side-effect.
         FuzzyVectorCompare fz(epsilon);
@@ -461,7 +461,7 @@ void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourRgb& in) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, 
+void ConvertColor(aiColor4D& out,
         const Schema_2x3::IfcColourOrFactor& in,
         ConversionData& conv,
         const aiColor4D* base) {

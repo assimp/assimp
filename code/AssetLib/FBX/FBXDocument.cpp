@@ -269,7 +269,7 @@ Document::~Document()
 {
 	// The document does not own the memory for the following objects, but we need to call their d'tor
 	// so they can properly free memory like string members:
-	
+
     for (ObjectMap::value_type &v : objects) {
         delete_LazyObject(v.second);
     }

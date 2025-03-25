@@ -94,7 +94,7 @@ const char *aiTextureTypeToString(aiTextureType in) {
         return "MayaBase";
     case aiTextureType_MAYA_SPECULAR:
         return "MayaSpecular";
-    case aiTextureType_MAYA_SPECULAR_COLOR: 
+    case aiTextureType_MAYA_SPECULAR_COLOR:
         return "MayaSpecularColor";
     case aiTextureType_MAYA_SPECULAR_ROUGHNESS:
         return "MayaSpecularRoughness";

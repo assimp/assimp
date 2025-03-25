@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #endif
 
-namespace Assimp    {
+namespace Assimp {
 // --------------------------------------------------------------------------------------
 /** Defines some useful byte order swap routines.
  *

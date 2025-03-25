@@ -60,7 +60,7 @@ struct aiNode;
 struct aiMaterial;
 struct aiCamera;
 
-namespace Assimp    {
+namespace Assimp {
 
 // -----------------------------------------------------------------------------------
 /** @brief The MakeLeftHandedProcess converts all imported data to a left-handed

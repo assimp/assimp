@@ -1116,9 +1116,9 @@ void ColladaExporter::WriteGeometry(size_t pIndex) {
         }
         for (size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a) {
             if (mesh->HasTextureCoords(static_cast<unsigned int>(a))) {
-                mOutput << startstr 
-                        << "<input semantic=\"TEXCOORD\" source=\"#" 
-                        << geometryId 
+                mOutput << startstr
+                        << "<input semantic=\"TEXCOORD\" source=\"#"
+                        << geometryId
                         << "-tex" << a << "\" "
                         << "set=\"" << a << "\""
                         << " />" << endstr;
@@ -1199,26 +1199,26 @@ void ColladaExporter::WriteGeometry(size_t pIndex) {
 void ColladaExporter::WriteFloatArray(const std::string &pIdString, FloatDataType pType, const ai_real *pData, size_t pElementCount) {
     size_t floatsPerElement = 0;
     switch (pType) {
-    case FloatType_Vector: 
-        floatsPerElement = 3; 
+    case FloatType_Vector:
+        floatsPerElement = 3;
         break;
-    case FloatType_TexCoord2: 
-        floatsPerElement = 2; 
+    case FloatType_TexCoord2:
+        floatsPerElement = 2;
         break;
-    case FloatType_TexCoord3: 
-        floatsPerElement = 3; 
+    case FloatType_TexCoord3:
+        floatsPerElement = 3;
         break;
-    case FloatType_Color: 
-        floatsPerElement = 3; 
+    case FloatType_Color:
+        floatsPerElement = 3;
         break;
-    case FloatType_Mat4x4: 
-        floatsPerElement = 16; 
+    case FloatType_Mat4x4:
+        floatsPerElement = 16;
         break;
-    case FloatType_Weight: 
-        floatsPerElement = 1; 
+    case FloatType_Weight:
+        floatsPerElement = 1;
         break;
-    case FloatType_Time: 
-        floatsPerElement = 1; 
+    case FloatType_Time:
+        floatsPerElement = 1;
         break;
     default:
         return;
@@ -1342,7 +1342,7 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex) {
     if (anim == nullptr) {
         return;
     }
-    
+
     if (anim->mNumChannels == 0 && anim->mNumMeshChannels == 0 && anim->mNumMorphMeshChannels == 0) {
         return;
     }
@@ -1486,12 +1486,12 @@ void ColladaExporter::WriteAnimationLibrary(size_t pIndex) {
 
         {
             // channels
-            mOutput << startstr 
-                    << "<channel source=\"#" 
-                    << XMLIDEncode(nodeAnim->mNodeName.data + std::string("_matrix-sampler")) 
-                    << "\" target=\"" 
-                    << XMLIDEncode(nodeAnim->mNodeName.data) 
-                    << "/matrix\"/>" 
+            mOutput << startstr
+                    << "<channel source=\"#"
+                    << XMLIDEncode(nodeAnim->mNodeName.data + std::string("_matrix-sampler"))
+                    << "\" target=\""
+                    << XMLIDEncode(nodeAnim->mNodeName.data)
+                    << "/matrix\"/>"
                     << endstr;
         }
     }
@@ -1505,7 +1505,7 @@ void ColladaExporter::WriteAnimationsLibrary() {
     if (mScene->mNumAnimations == 0) {
         return;
     }
-    
+
     mOutput << startstr << "<library_animations>" << endstr;
     PushTag();
 
@@ -1688,7 +1688,7 @@ std::string ColladaExporter::GetNodeUniqueId(const aiNode *node) {
     idStr = MakeUniqueId(mUniqueIds, idStr, std::string());
     mUniqueIds.insert(idStr);
     mNodeIdMap.insert(std::make_pair(node, idStr));
-    
+
     return idStr;
 }
 
@@ -1744,14 +1744,14 @@ ColladaExporter::NameIdPair ColladaExporter::AddObjectIndexToMaps(AiObjectType t
 
     // Get the name and id postfix
     switch (type) {
-    case AiObjectType::Mesh: 
-        name = mScene->mMeshes[index]->mName.C_Str(); 
+    case AiObjectType::Mesh:
+        name = mScene->mMeshes[index]->mName.C_Str();
         break;
-    case AiObjectType::Material: 
-        name = mScene->mMaterials[index]->GetName().C_Str(); 
+    case AiObjectType::Material:
+        name = mScene->mMaterials[index]->GetName().C_Str();
         break;
-    case AiObjectType::Animation: 
-        name = mScene->mAnimations[index]->mName.C_Str(); 
+    case AiObjectType::Animation:
+        name = mScene->mAnimations[index]->mName.C_Str();
         break;
     case AiObjectType::Light:
         name = mScene->mLights[index]->mName.C_Str();
@@ -1761,7 +1761,7 @@ ColladaExporter::NameIdPair ColladaExporter::AddObjectIndexToMaps(AiObjectType t
         name = mScene->mCameras[index]->mName.C_Str();
         idPostfix = "-camera";
         break;
-    case AiObjectType::Count: 
+    case AiObjectType::Count:
         throw std::logic_error("ColladaExporter::AiObjectType::Count is not an object type");
     }
 

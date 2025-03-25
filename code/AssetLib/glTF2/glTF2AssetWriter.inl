@@ -710,7 +710,7 @@ namespace glTF2 {
         for (auto const &value : extras.mValues) {
             WriteExtrasValue(extrasNode, value, w);
         }
-        
+
         obj.AddMember("extras", extrasNode, w.mAl);
     }
 

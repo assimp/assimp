@@ -86,7 +86,7 @@ public:
 	AMFNodeElementBase *Parent; ///< Parent element. If nullptr then this node is root.
 	std::list<AMFNodeElementBase *> Child; ///< Child elements.
 
-public: 
+public:
 	/// Destructor, virtual..
 	virtual ~AMFNodeElementBase() = default;
 

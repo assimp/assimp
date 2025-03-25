@@ -369,7 +369,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, cons
     if (DefaultStream == nullptr) {
         DefaultStream = LogStream::createDefaultStream(pStream, file);
     }
-    
+
     if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;

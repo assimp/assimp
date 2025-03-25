@@ -76,10 +76,10 @@ struct ColladaMeshIndex {
     }
 };
 
-/** 
- * @brief Loader class to read Collada scenes. 
+/**
+ * @brief Loader class to read Collada scenes.
  *
- * Collada is over-engineered to death, with every new iteration bringing  more useless stuff, 
+ * Collada is over-engineered to death, with every new iteration bringing  more useless stuff,
  * so I limited the data to what I think is useful for games.
 */
 class ColladaLoader : public BaseImporter {
@@ -111,7 +111,7 @@ protected:
     void ResolveNodeInstances(const ColladaParser &pParser, const Collada::Node *pNode,
             std::vector<const Collada::Node *> &resolved);
 
-    /// Builds meshes for the given node and references them 
+    /// Builds meshes for the given node and references them
     void BuildMeshesForNode(const ColladaParser &pParser, const Collada::Node *pNode,
             aiNode *pTarget);
 

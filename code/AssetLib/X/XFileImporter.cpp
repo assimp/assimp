@@ -366,7 +366,7 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                     // TODO  In cases like this unit tests are less useful, since the model still has
                     // TODO  meshes, textures, animations etc. and asserts against these values may pass;
                     // TODO  when touching importer code, it is crucial that developers also run manual, visual
-                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch 
+                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch
                     //const unsigned int boneIdx = obone.mWeights[d].mVertex;
                     //if (boneIdx < obone.mWeights.size()) {
                         oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;

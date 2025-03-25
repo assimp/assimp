@@ -1042,7 +1042,7 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
-    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {    
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
         return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
     return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
@@ -2510,9 +2510,9 @@ void add_meta(FBX::Node& fbx_node, const aiNode* node){
         default:
             break;
         }
-        
+
     }
-    
+
 }
 
 // write a single model node to the stream

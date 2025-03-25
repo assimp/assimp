@@ -225,7 +225,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
         if (pcNew->mWidth > MaxTextureSize || pcNew->mHeight > MaxTextureSize) {
             throw DeadlyImportError("Invalid MDL file. A texture is too big.");
         }
-      
+
         if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
             throw DeadlyImportError("Invalid MDL file. A texture is too big.");
         }

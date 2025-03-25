@@ -26,7 +26,7 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
   getenv_path(DIRECTX_BASE)
 
   # construct search paths
-  set(DirectX_PREFIX_PATH 
+  set(DirectX_PREFIX_PATH
     "${DXSDK_DIR}" "${ENV_DXSDK_DIR}"
     "${DIRECTX_HOME}" "${ENV_DIRECTX_HOME}"
     "${DIRECTX_ROOT}" "${ENV_DIRECTX_ROOT}"
@@ -66,7 +66,7 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
   find_library(DirectX_D3DCOMPILER_LIBRARY NAMES d3dcompiler HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
 
   findpkg_finish(DirectX)
-  set(DirectX_LIBRARIES ${DirectX_LIBRARIES} 
+  set(DirectX_LIBRARIES ${DirectX_LIBRARIES}
     ${DirectX_D3DX9_LIBRARY}
     ${DirectX_DXERR_LIBRARY}
     ${DirectX_DXGUID_LIBRARY}
@@ -82,7 +82,7 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
       get_filename_component(DirectX_LIBRARY_DIR "${DirectX_LIBRARY}" PATH)
       message(STATUS "DX lib dir: ${DirectX_LIBRARY_DIR}")
     find_library(DirectX_D3D11_LIBRARY NAMES d3d11 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
-    find_library(DirectX_D3DX11_LIBRARY NAMES d3dx11 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})	
+    find_library(DirectX_D3DX11_LIBRARY NAMES d3dx11 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
     if (DirectX_D3D11_INCLUDE_DIR AND DirectX_D3D11_LIBRARY)
       set(DirectX_D3D11_FOUND TRUE)
       set(DirectX_D3D11_INCLUDE_DIR ${DirectX_D3D11_INCLUDE_DIR})
@@ -92,8 +92,8 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
 	${DirectX_DXGI_LIBRARY}
 	${DirectX_DXERR_LIBRARY}
 	${DirectX_DXGUID_LIBRARY}
-	${DirectX_D3DCOMPILER_LIBRARY}        	  
-      )	
+	${DirectX_D3DCOMPILER_LIBRARY}
+      )
     endif ()
     mark_as_advanced(DirectX_D3D11_INCLUDE_DIR DirectX_D3D11_LIBRARY DirectX_D3DX11_LIBRARY)
   endif ()

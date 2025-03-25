@@ -422,7 +422,7 @@ inline bool MD5Parser::SkipSpacesAndLineEnd( const char* in, const char** out) {
         *out = in;
         return false;
     }
-    
+
     bool bHad = false, running = true;
     while (running) {
         if( *in == '\r' || *in == '\n') {

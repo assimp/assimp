@@ -73,13 +73,13 @@ template<typename TReal> class aiQuaterniont;
 template<typename TReal>
 class aiMatrix4x4t {
 public:
-    /** 
-     * @brief Set to identity 
+    /**
+     * @brief Set to identity
      * */
     aiMatrix4x4t() AI_NO_EXCEPT;
 
-    /** 
-     * @brief Construction from single values 
+    /**
+     * @brief Construction from single values
      * */
     aiMatrix4x4t (  TReal _a1, TReal _a2, TReal _a3, TReal _a4,
                     TReal _b1, TReal _b2, TReal _b3, TReal _b4,
@@ -172,7 +172,7 @@ public:
     void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const;
 
     // -------------------------------------------------------------------
-    /** 
+    /**
      *  @brief Decompose a trafo matrix into its original components
      * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
      *  @param [out] pScaling       - Receives the output scaling for the x,y,z axes.

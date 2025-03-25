@@ -63,7 +63,7 @@ namespace cineware {
     class BaseShader;
 }
 
-namespace Assimp  {
+namespace Assimp {
     // TinyFormatter.h
     namespace Formatter {
         template <typename T,typename TR, typename A> class basic_formatter;

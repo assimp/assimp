@@ -11,6 +11,6 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-If you have found any security vulnerability you can contact us via 
+If you have found any security vulnerability you can contact us via
 kim.kulling@googlemail.com
 

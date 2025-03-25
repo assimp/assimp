@@ -49,7 +49,6 @@ namespace Assimp {
 CIOStreamWrapper::~CIOStreamWrapper() {
     // Various places depend on this destructor to close the file
     if (mFile != nullptr) {
-        
         mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
     }
 }

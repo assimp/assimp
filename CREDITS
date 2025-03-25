@@ -60,7 +60,7 @@ The GUY who performed some of the CSM mocaps.
 Contributed fixes for the documentation and the doxygen markup
 
 - Zhao Lei
-Contributed several bugfixes fixing memory leaks and improving float parsing 
+Contributed several bugfixes fixing memory leaks and improving float parsing
 
 - sueastside
 Updated PyAssimp to the latest Assimp data structures and provided a script to keep the Python binding up-to-date.
@@ -129,7 +129,7 @@ Contributed a patch to fix the VertexTriangleAdjacency postprocessing step.
 Contributed the Debian build fixes ( architecture macro ).
 
 - gellule
-Several LWO and LWS fixes (pivoting). 
+Several LWO and LWS fixes (pivoting).
 
 - Marcel Metz
 GCC/Linux fixes for the SimpleOpenGL sample.

@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiScene;
 
-namespace Assimp    {
+namespace Assimp {
     class ProgressHandler;
     class IOSystem;
     class BaseImporter;

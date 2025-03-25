@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <map>
 
-namespace Assimp    {
+namespace Assimp {
 
 // Forward declarations
 namespace DXF {

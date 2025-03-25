@@ -100,7 +100,7 @@ void SceneCombiner::AddNodeHashes(aiNode *node, std::set<unsigned int> &hashes) 
         ASSIMP_LOG_ERROR("Pointer to aiNode is nullptr.");
         return;
     }
-  
+
     // Add node name to hashing set if it is non-empty - empty nodes are allowed
     // and they can't have any anims assigned so its absolutely safe to duplicate them.
     if (node->mName.length) {

@@ -146,7 +146,7 @@ private:
     unsigned int m_uiLine;
     //! Helper buffer
     char m_buffer[Buffersize];
-    const char *mEnd; 
+    const char *mEnd;
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
     //! Pointer to progress handler

@@ -66,10 +66,10 @@ static constexpr aiImporterDesc desc = {
     "",
     "",
     "",
-    aiImporterFlags_SupportTextFlavour | 
-        aiImporterFlags_SupportBinaryFlavour | 
-        aiImporterFlags_SupportCompressedFlavour | 
-        aiImporterFlags_LimitedSupport | 
+    aiImporterFlags_SupportTextFlavour |
+        aiImporterFlags_SupportBinaryFlavour |
+        aiImporterFlags_SupportCompressedFlavour |
+        aiImporterFlags_LimitedSupport |
         aiImporterFlags_Experimental,
     0,
     0,

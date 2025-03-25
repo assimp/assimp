@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <cstdint>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the Quick3D Object and Scene formats.

@@ -7,8 +7,8 @@
 
 #include <assimp/ByteSwapper.h>
 
-namespace Assimp    {
-namespace IFF       {
+namespace Assimp {
+namespace IFF {
 
 /////////////////////////////////////////////////////////////////////////////////
 //! Describes an IFF chunk header

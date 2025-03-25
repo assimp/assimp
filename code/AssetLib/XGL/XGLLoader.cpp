@@ -249,7 +249,7 @@ aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 					for (size_t i = 0; i < newc - prev; ++i) {
 						meshes.push_back(static_cast<unsigned int>(i + prev));
 					}
-				} 
+				}
 			} else if (s == "mat") {
 				const uint32_t matId = ReadMaterial(child, scope);
                 if (matId == ErrorId) {

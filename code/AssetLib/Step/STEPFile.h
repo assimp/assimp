@@ -529,7 +529,6 @@ public:
 
     template <typename T>
     const T &To() const {
-
         return dynamic_cast<const T &>(**this);
     }
 

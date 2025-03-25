@@ -78,7 +78,7 @@ void LWOImporter::LoadLWOBFile() {
                     else
                         LoadLWOBPolygons(head.length);
                 } break;
-                
+
             case AI_LWO_SRFS: // list of tags
                 {
                     if (!mTags->empty())

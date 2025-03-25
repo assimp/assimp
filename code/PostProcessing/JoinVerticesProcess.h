@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -65,7 +64,7 @@ class ASSIMP_API JoinVerticesProcess : public BaseProcess {
 public:
     // -------------------------------------------------------------------
     /// The default class constructor / destructor.
-    JoinVerticesProcess() = default;    
+    JoinVerticesProcess() = default;
     ~JoinVerticesProcess() override = default;
 
     // -------------------------------------------------------------------

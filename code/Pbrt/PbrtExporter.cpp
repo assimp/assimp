@@ -132,10 +132,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
-    
+
     // Export embedded textures.
     create_embedded_textures_folder(mScene, mIOSystem);
-    
+
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);

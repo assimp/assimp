@@ -102,10 +102,10 @@ protected:
     void InternReadFile( const std::string &file, aiScene *pScene, IOSystem *pIOHandler ) override;
 
     /// BaseImporter override.
-    virtual const aiImporterDesc *GetInfo() const override;
+    const aiImporterDesc *GetInfo() const override;
 
     /// BaseImporter override.
-    virtual void SetupProperties( const Importer *pImp ) override;
+    void SetupProperties( const Importer *pImp ) override;
 
     void handleNodes( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );

@@ -299,7 +299,7 @@ aiImporterDesc s_failingImporterDescription = {
 class FailingImporter : public Assimp::BaseImporter {
 public:
     virtual ~FailingImporter() = default;
-    virtual bool CanRead(const std::string &, Assimp::IOSystem *, bool) const override {
+    bool CanRead(const std::string &, Assimp::IOSystem *, bool) const override {
         return true;
     }
 

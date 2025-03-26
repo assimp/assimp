@@ -243,7 +243,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
         ASSIMP_LOG_ERROR( "Invalidation detected in the number of indices: does not fit to the primitive type." );
         return false;
     }
-    
+
     aiVector3D *nor_out = nullptr;
 
     // if we don't have normals yet, but expect them to be a cheap side

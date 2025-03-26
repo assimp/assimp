@@ -81,7 +81,7 @@ void ArmaturePopulate::Execute(aiScene *out) {
         aiBone *bone = kvp.first;
         aiNode *bone_node = kvp.second;
         ASSIMP_LOG_VERBOSE_DEBUG("active node lookup: ", bone->mName.C_Str());
-        
+
         // lcl transform grab - done in generate_nodes :)
         aiNode *armature = GetArmatureRoot(bone_node, bones);
 

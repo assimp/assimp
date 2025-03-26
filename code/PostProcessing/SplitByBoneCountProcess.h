@@ -74,7 +74,7 @@ public:
     /// @brief Called prior to ExecuteOnScene().
     /// The function is a request to the process to update its configuration
     /// basing on the Importer's configuration property list.
-    virtual void SetupProperties(const Importer* pImp) override;
+    void SetupProperties(const Importer* pImp) override;
 
     /// @brief Will return the maximal number of bones.
     /// @return The maximal number of bones.

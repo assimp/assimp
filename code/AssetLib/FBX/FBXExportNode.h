@@ -221,7 +221,7 @@ private: // internal functions used for writing
     void BeginChildrenAscii(std::ostream &s, int indent);
     void DumpChildrenAscii(std::ostream &s, int indent);
     void EndAscii(std::ostream &s, int indent, bool has_children);
-    
+
     // static helper functions
     static void WritePropertyNodeAscii(
         const std::string& name,

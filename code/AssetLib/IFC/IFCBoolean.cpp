@@ -669,7 +669,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as, 
+void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as,
         TempMesh &result,
         const TempMesh &first_operand,
         ConversionData &conv) {

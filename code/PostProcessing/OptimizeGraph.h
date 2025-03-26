@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -58,7 +57,7 @@ struct aiMesh;
 
 class OptimizeGraphProcessTest;
 
-namespace Assimp    {
+namespace Assimp {
 
 // -----------------------------------------------------------------------------
 /** @brief Postprocessing step to optimize the scenegraph

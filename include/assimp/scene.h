@@ -469,9 +469,9 @@ struct ASSIMP_API aiScene {
         return std::make_pair(nullptr, -1);
     }
 
-        /**
+    /**
      * @brief Will try to locate a bone described by its name.
-     * 
+     *
      * @param name  The name to look for.
      * @return The bone as a pointer.
      */

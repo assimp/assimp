@@ -105,7 +105,7 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
         m_pModel->mDefaultMaterial = new ObjFile::Material;
         m_pModel->mDefaultMaterial->MaterialName.Set("default");
     }
-    
+
     // Try with OS folder separator first
     char folderSeparator = DefaultIOSystem().getOsSeparator();
     std::size_t found = m_strAbsPath.find_last_of(folderSeparator);

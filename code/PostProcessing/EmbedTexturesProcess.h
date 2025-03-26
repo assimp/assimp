@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,7 +73,7 @@ public:
     void SetupProperties(const Importer* pImp) override;
 
     /// Overwritten, @see BaseProcess
-    virtual void Execute(aiScene* pScene) override;
+    void Execute(aiScene* pScene) override;
 
 private:
     // Try several ways to attempt to resolve the image path

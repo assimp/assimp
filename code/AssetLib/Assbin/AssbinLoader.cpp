@@ -94,7 +94,7 @@ bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, boo
     const size_t read = in->Read(s, sizeof(char), 32);
 
     pIOHandler->Close(in);
-    
+
     if (read < 19) {
       return false;
     }

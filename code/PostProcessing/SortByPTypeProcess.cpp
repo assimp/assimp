@@ -76,7 +76,7 @@ static void clearMeshesInNode(aiNode *node) {
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node) {
     ai_assert(node != nullptr);
-    
+
     if (node->mNumMeshes) {
         unsigned int newSize = 0;
         for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
@@ -91,7 +91,7 @@ void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node
             clearMeshesInNode(node);
             return;
         }
-        
+
         // Try to reuse the old array if possible
         unsigned int *newMeshes = (newSize > node->mNumMeshes ? new unsigned int[newSize] : node->mMeshes);
         for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
@@ -322,7 +322,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                     if (vert) {
                         *vert++ = mesh->mVertices[idx];
                     }
-                    if (nor) 
+                    if (nor)
                         *nor++ = mesh->mNormals[idx];
                     if (tan) {
                         *tan++ = mesh->mTangents[idx];
@@ -330,13 +330,13 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++pp) {
-                        if (!uv[pp]) 
+                        if (!uv[pp])
                             break;
                         *uv[pp]++ = mesh->mTextureCoords[pp][idx];
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_COLOR_SETS; ++pp) {
-                        if (!cols[pp]) 
+                        if (!cols[pp])
                             break;
                         *cols[pp]++ = mesh->mColors[pp][idx];
                     }

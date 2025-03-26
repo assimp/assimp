@@ -146,7 +146,7 @@ const AnimationCurveMap &AnimationCurveNode::Curves() const {
     if (!curves.empty()) {
         return curves;
     }
-        
+
     // resolve attached animation curves
     const std::vector<const Connection *> &conns = doc.GetConnectionsByDestinationSequenced(ID(), "AnimationCurve");
 

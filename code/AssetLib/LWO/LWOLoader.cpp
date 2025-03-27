@@ -104,7 +104,7 @@ LWOImporter::~LWOImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_LWO_FOURCC_LWOB,
         AI_LWO_FOURCC_LWO2,
         AI_LWO_FOURCC_LXOB

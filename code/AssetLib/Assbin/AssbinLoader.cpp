@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
 // internal headers
-#include "AssetLib/Assbin/AssbinLoader.h"
+#include "AssbinLoader.h"
 #include "Common/assbin_chunks.h"
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/anim.h>

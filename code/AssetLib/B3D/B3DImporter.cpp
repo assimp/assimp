@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 
 // internal headers
-#include "AssetLib/B3D/B3DImporter.h"
+#include "B3DImporter.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 #include "PostProcessing/TextureTransform.h"
 

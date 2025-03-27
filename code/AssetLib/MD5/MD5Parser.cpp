@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 // internal headers
-#include "AssetLib/MD5/MD5Loader.h"
+#include "MD5Loader.h"
 #include "Material/MaterialSystem.h"
 
 #include <assimp/ParsingUtils.h>

@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
 
 // internal headers
-#include "AssetLib/MDC/MDCLoader.h"
+#include "MDCLoader.h"
 #include "AssetLib/MD3/MD3FileData.h"
-#include "AssetLib/MDC/MDCNormalTable.h" // shouldn't be included by other units
+#include "MDCNormalTable.h" // shouldn't be included by other units
 
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>

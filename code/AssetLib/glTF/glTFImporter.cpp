@@ -41,10 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
 
-#include "AssetLib/glTF/glTFImporter.h"
-#include "AssetLib/glTF/glTFAsset.h"
+#include "glTFImporter.h"
+#include "glTFAsset.h"
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
-#   include "AssetLib/glTF/glTFAssetWriter.h"
+#   include "glTFAssetWriter.h"
 #endif
 #include "PostProcessing/MakeVerboseFormat.h"
 

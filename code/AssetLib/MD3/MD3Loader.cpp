@@ -352,7 +352,7 @@ MD3Importer::~MD3Importer() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MD3Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 

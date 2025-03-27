@@ -108,7 +108,7 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char Token[] = "BLENDER";
+static constexpr char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

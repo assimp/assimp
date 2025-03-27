@@ -81,7 +81,7 @@ HMPImporter::~HMPImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_HMP_MAGIC_NUMBER_LE_4,
         AI_HMP_MAGIC_NUMBER_LE_5,
         AI_HMP_MAGIC_NUMBER_LE_7

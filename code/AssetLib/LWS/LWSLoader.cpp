@@ -149,7 +149,7 @@ LWSImporter::LWSImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_MAKE_MAGIC("LWSC"),
         AI_MAKE_MAGIC("LWMO")
     };

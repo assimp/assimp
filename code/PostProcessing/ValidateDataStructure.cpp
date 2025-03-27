@@ -134,7 +134,7 @@ inline void ValidateDSProcess::DoValidationEx(T **parray, unsigned int size,
     if (size == 0) {
         return;
     }
-        
+
     if (!parray) {
         ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
                 firstName, secondName, size);

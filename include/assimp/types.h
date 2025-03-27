@@ -243,7 +243,7 @@ struct aiColor3D {
 }; // !struct aiColor3D
 
 // ----------------------------------------------------------------------------------
-/** 
+/**
  * @brief Represents an UTF-8 string, zero byte terminated.
  *
  *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
@@ -267,7 +267,7 @@ struct aiColor3D {
 struct aiString {
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
-    aiString() AI_NO_EXCEPT : 
+    aiString() AI_NO_EXCEPT :
             length(0), data{'\0'} {
 #ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
@@ -283,7 +283,7 @@ struct aiString {
         memcpy(data, rOther.data, length);
         data[length] = '\0';
     }
-    
+
     /** Constructor from std::string */
     explicit aiString(const std::string &pString) :
             length((ai_uint32)pString.length()), data{'\0'} {

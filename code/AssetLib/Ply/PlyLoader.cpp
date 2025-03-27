@@ -247,7 +247,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // fill the mesh list
     pScene->mNumMeshes = 1;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-    pScene->mMeshes[0] = mGeneratedMesh;    
+    pScene->mMeshes[0] = mGeneratedMesh;
 
     // Move the mesh ownership into the scene instance
     mGeneratedMesh = nullptr;

@@ -1226,7 +1226,7 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
             std::string v;
             XmlParser::getValueAsString(currentNode, v);
             const char *content = v.c_str();
-            const char *end = v.c_str() + v.size() + 1; 
+            const char *end = v.c_str() + v.size() + 1;
 
             content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.r);
             SkipSpacesAndLineEnd(&content, end);
@@ -1352,7 +1352,7 @@ void ColladaParser::ReadGeometry(XmlNode &node, Collada::Mesh &pMesh) {
     if (node.empty()) {
         return;
     }
-    
+
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "mesh") {

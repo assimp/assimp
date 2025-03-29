@@ -502,6 +502,11 @@ inline aiReturn Exporter ::Export(const aiScene *pScene, const std::string &pFor
         const ExportProperties *pProperties) {
     return Export(pScene, pFormatId.c_str(), pPath.c_str(), pPreprocessing, pProperties);
 }
+inline aiReturn Exporter ::Export(const aiScene *pScene, const std::string &pFormatId,
+        std::string_view pPath, unsigned int pPreprocessing,
+        const ExportProperties *pProperties) {
+    return Export(pScene, pFormatId.c_str(), pPath.data(), pPreprocessing, pProperties);
+}
 
 } // namespace Assimp
 

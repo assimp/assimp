@@ -76,6 +76,7 @@ typedef uint32_t ai_uint32;
 #include <cstring>
 #include <new>    // for std::nothrow_t
 #include <string> // for aiString::Set(const std::string&)
+#include <string_view>
 
 namespace Assimp {
 //! @cond never

@@ -421,7 +421,8 @@ struct ASSIMP_API aiScene {
         return mAnimations != nullptr && mNumAnimations > 0;
     }
 
-    bool hasSkeletons() const {
+    //! Check whether the scene contains skeletons
+    inline bool HasSkeletons() const {
         return mSkeletons != nullptr && mNumSkeletons > 0;
     }
 

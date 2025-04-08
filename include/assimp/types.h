@@ -317,7 +317,7 @@ struct aiString {
         if (len > AI_MAXLEN - 1) {
             len = AI_MAXLEN - 1;
         }
-        length = len;
+        length = static_cast<uint32_t>(len);
         memcpy(data, sz, len);
         data[len] = 0;
     }

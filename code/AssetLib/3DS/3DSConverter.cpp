@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -653,7 +653,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     pcOut->mChildren = new aiNode *[pcIn->mChildren.size()];
 
     // Recursively process all children
-    
+
     for (unsigned int i = 0; i < size; ++i) {
         pcOut->mChildren[i] = new aiNode();
         pcOut->mChildren[i]->mParent = pcOut;

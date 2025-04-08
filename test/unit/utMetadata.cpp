@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -229,7 +229,7 @@ TEST_F( utMetadata, copy_test ) {
 
     // bool test
     {
-        bool v;
+        bool v = true;
         EXPECT_TRUE( copy.Get( "bool", v ) );
         EXPECT_EQ( bv, v );
     }

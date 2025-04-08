@@ -3,7 +3,7 @@ Open Asset Import Library (assimp)
 
 Open Asset Import Library is a library that loads various 3D file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
-### Current project status ### 
+### Current project status ###
 ![C/C++ CI](https://github.com/assimp/assimp/workflows/C/C++%20CI/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=assimp_assimp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=assimp_assimp)
@@ -32,7 +32,7 @@ Clone [our model database](https://github.com/assimp/assimp-mdb).
 - Ask questions at [the Assimp Discussion Board](https://github.com/assimp/assimp/discussions).
 - Find us on [https://discord.gg/s9KJfaem](https://discord.gg/kKazXMXDy2)
 - Ask [the Assimp community on Reddit](https://www.reddit.com/r/Assimp/).
-- Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest). 
+- Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest).
 - Nothing has worked? File a question or an issue report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
 
 #### Supported file formats ####
@@ -55,7 +55,7 @@ Start by reading [our build instructions](https://github.com/assimp/assimp/blob/
 * [Rust](https://github.com/jkvargas/russimp)
 
 ### Other tools ###
-[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.
+[Qt5-ModelViewer](https://github.com/sharjith/ModelViewer-Qt5) is a powerful viewer based on Qt5 and Assimp's import and export abilities.<br>
 [Assimp-Viewer](https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
 #### Repository structure ####

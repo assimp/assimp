@@ -4,9 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -85,11 +83,9 @@ BVHLoader::BVHLoader() :
         mLine(),
         mAnimTickDuration(),
         mAnimNumFrames(),
-        noSkeletonMesh() {}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BVHLoader::~BVHLoader() = default;
+        noSkeletonMesh() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

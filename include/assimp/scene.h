@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -164,6 +164,33 @@ struct ASSIMP_API aiNode {
      */
     const aiNode* FindNode(const char* name) const;
     aiNode* FindNode(const char* name);
+
+    // ------------------------------------------------------------------------------------------------
+    // Helper to find the node associated with a bone in the scene
+    const aiNode *findBoneNode(const aiBone *bone) const {
+        if (bone == nullptr) {
+            return nullptr;
+        }
+
+        if (mName == bone->mName) {
+            return this;
+        }
+
+        for (unsigned int i = 0; i < mNumChildren; ++i) {
+            aiNode *aChild = mChildren[i];
+            if (aChild == nullptr) {
+                continue;
+            }
+
+            const aiNode *foundFromChild = nullptr;
+            foundFromChild = aChild->findBoneNode(bone);
+            if (foundFromChild) {
+                return foundFromChild;
+            }
+        }
+
+        return nullptr;
+    }
 
     /**
      * @brief   Will add new children.
@@ -394,7 +421,8 @@ struct ASSIMP_API aiScene {
         return mAnimations != nullptr && mNumAnimations > 0;
     }
 
-    bool hasSkeletons() const {
+    //! Check whether the scene contains skeletons
+    inline bool HasSkeletons() const {
         return mSkeletons != nullptr && mNumSkeletons > 0;
     }
 
@@ -441,6 +469,33 @@ struct ASSIMP_API aiScene {
         }
         return std::make_pair(nullptr, -1);
     }
+
+    /**
+     * @brief Will try to locate a bone described by its name.
+     *
+     * @param name  The name to look for.
+     * @return The bone as a pointer.
+     */
+    inline aiBone *findBone(const aiString &name) const {
+        for (size_t m = 0; m < mNumMeshes; m++) {
+            aiMesh *mesh = mMeshes[m];
+            if (mesh == nullptr) {
+                continue;
+            }
+
+            for (size_t b = 0; b < mesh->mNumBones; b++) {
+                aiBone *bone = mesh->mBones[b];
+                if (bone == nullptr) {
+                    continue;
+                }
+                if (name == bone->mName) {
+                    return bone;
+                }
+            }
+        }
+        return nullptr;
+    }
+
 #endif // __cplusplus
 
     /**  Internal data, do not touch */

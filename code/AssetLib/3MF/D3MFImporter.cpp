@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -85,7 +85,7 @@ bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bo
     if (!ZipArchiveIOSystem::isZipArchive(pIOHandler, filename)) {
         return false;
     }
-    static const char *const ModelRef = "3D/3dmodel.model";
+    static constexpr char ModelRef[] = "3D/3dmodel.model";
     ZipArchiveIOSystem archive(pIOHandler, filename);
     if (!archive.Exists(ModelRef)) {
         return false;
@@ -107,7 +107,7 @@ void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, 
 
     XmlParser xmlParser;
     if (xmlParser.parse(opcPackage.RootStream())) {
-        XmlSerializer xmlSerializer(&xmlParser);
+        XmlSerializer xmlSerializer(xmlParser);
         xmlSerializer.ImportXml(pScene);
 
         const std::vector<aiTexture*> &tex =  opcPackage.GetEmbeddedTextures();

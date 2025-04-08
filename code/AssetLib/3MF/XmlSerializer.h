@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -59,9 +59,9 @@ class Texture2DGroup;
 class EmbeddedTexture;
 class ColorGroup;
 
-class XmlSerializer {
+class XmlSerializer final {
 public:
-    XmlSerializer(XmlParser *xmlParser);
+    XmlSerializer(XmlParser &xmlParser);
     ~XmlSerializer();
     void ImportXml(aiScene *scene);
 
@@ -92,7 +92,7 @@ private:
     std::vector<aiMaterial *> mMaterials;
     std::map<unsigned int, Resource *> mResourcesDictionnary;
     unsigned int mMeshCount;
-    XmlParser *mXmlParser;
+    XmlParser &mXmlParser;
 };
 
 } // namespace D3MF

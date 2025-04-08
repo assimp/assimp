@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 
 
@@ -200,7 +200,7 @@ bool CalcTangentsProcess::ProcessMesh(aiMesh *pMesh, unsigned int meshIndex) {
             localBitangent.NormalizeSafe();
 
             // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z) 
+            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z)
                 || (-0.5f < localTangent.x && localTangent.x < 0.5f && -0.5f < localTangent.y && localTangent.y < 0.5f && -0.5f < localTangent.z && localTangent.z < 0.5f);
             bool invalid_bitangent = is_special_float(localBitangent.x) || is_special_float(localBitangent.y) || is_special_float(localBitangent.z)
                 || (-0.5f < localBitangent.x && localBitangent.x < 0.5f && -0.5f < localBitangent.y && localBitangent.y < 0.5f && -0.5f < localBitangent.z && localBitangent.z < 0.5f);

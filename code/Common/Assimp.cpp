@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -369,7 +369,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, cons
     if (DefaultStream == nullptr) {
         DefaultStream = LogStream::createDefaultStream(pStream, file);
     }
-    
+
     if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;

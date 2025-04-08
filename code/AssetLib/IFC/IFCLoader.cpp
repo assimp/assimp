@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -245,11 +245,11 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // tell the reader for which types we need to simulate STEPs reverse indices
     static const char *const inverse_indices_to_track[] = {
-        "ifcrelcontainedinspatialstructure", 
-        "ifcrelaggregates", 
-        "ifcrelvoidselement", 
-        "ifcreldefinesbyproperties", 
-        "ifcpropertyset", 
+        "ifcrelcontainedinspatialstructure",
+        "ifcrelaggregates",
+        "ifcrelvoidselement",
+        "ifcreldefinesbyproperties",
+        "ifcpropertyset",
         "ifcstyleditem"
     };
 
@@ -259,8 +259,6 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (!proj) {
         ThrowException("missing IfcProject entity");
     }
-
-    
 
     ConversionData conv(*db, proj->To<Schema_2x3::IfcProject>(), pScene, settings);
     SetUnits(conv);

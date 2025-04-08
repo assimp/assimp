@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** 
+/**
  * @file Implementation of the post-processing step to generate face
  * normals for all imported faces.
  */
@@ -144,7 +144,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
         // Boolean XOR - if either but not both of these flags are set, then the winding order has
         // changed and the cross-product to calculate the normal needs to be reversed
-        if (flippedWindingOrder_ != leftHanded_) 
+        if (flippedWindingOrder_ != leftHanded_)
             std::swap(pV2, pV3);
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 

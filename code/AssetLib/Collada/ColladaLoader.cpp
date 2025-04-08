@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -176,7 +176,7 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
                 0, 0, parser.mUnitSize, 0,
                 0, 0, 0, 1);
     }
-    
+
     if (!ignoreUpDirection) {
         // Convert to Y_UP, if different orientation
         if (parser.mUpDirection == ColladaParser::UP_X) {
@@ -1077,6 +1077,7 @@ static float getWeightAtKey(const std::vector<MorphTimeValues> &values, int key,
             return mKey.mWeight;
         }
     }
+
     // no value at key found, try to interpolate if present at other keys. if not, return zero
     // TODO: interpolation
     return 0.0f;

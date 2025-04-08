@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
-#include "AssetLib/OpenGEX/OpenGEXImporter.h"
+#include "OpenGEXImporter.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #include <assimp/DefaultIOSystem.h>
@@ -289,14 +289,13 @@ bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, boo
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
     // open source file
-    IOStream *file = pIOHandler->Open(filename, "rb");
+    std::unique_ptr<IOStream> file(pIOHandler->Open(filename, "rb"));
     if (!file) {
         throw DeadlyImportError("Failed to open file ", filename);
     }
 
     std::vector<char> buffer;
-    TextFileToBuffer(file, buffer);
-    pIOHandler->Close(file);
+    TextFileToBuffer(file.get(), buffer);
 
     OpenDDLParser myParser;
     myParser.setLogCallback(&logDDLParserMessage);
@@ -311,7 +310,8 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
 
     copyMeshes(pScene);
     copyCameras(pScene);
-    copyLights(pScene);
+    // TODO: lights only partially implemented and breaking model import
+//    copyLights(pScene);
     copyMaterials(pScene);
     resolveReferences();
     createNodeTree(pScene);
@@ -367,7 +367,8 @@ void OpenGEXImporter::handleNodes(DDLNode *node, aiScene *pScene) {
             break;
 
         case Grammar::LightNodeToken:
-            handleLightNode(*it, pScene);
+            // TODO: lights only partially implemented and breaking model import
+//            handleLightNode(*it, pScene);
             break;
 
         case Grammar::GeometryObjectToken:
@@ -379,7 +380,8 @@ void OpenGEXImporter::handleNodes(DDLNode *node, aiScene *pScene) {
             break;
 
         case Grammar::LightObjectToken:
-            handleLightObject(*it, pScene);
+            // TODO: lights only partially implemented and breaking model import
+//            handleLightObject(*it, pScene);
             break;
 
         case Grammar::TransformToken:
@@ -469,7 +471,10 @@ void OpenGEXImporter::handleNameNode(DDLNode *node, aiScene * /*pScene*/) {
         }
 
         const std::string name(val->getString());
-        if (m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken || m_tokenType == Grammar::CameraNodeToken) {
+        if (m_tokenType == Grammar::GeometryNodeToken ||
+                // TODO: lights only partially implemented and breaking model import
+//                m_tokenType == Grammar::LightNodeToken ||
+                m_tokenType == Grammar::CameraNodeToken) {
             m_currentNode->mName.Set(name.c_str());
         } else if (m_tokenType == Grammar::MaterialToken) {
             aiString aiName;
@@ -784,10 +789,10 @@ static void fillColor4(aiColor4D *col4, Value *vals) {
     col4->b = next->getFloat();
     next = next->m_next;
     if (!next) {
-        throw DeadlyImportError("OpenGEX: Not enough values to fill 4-element color, only 3");
+        col4->a = 1.0f;
+    } else {
+        col4->a = next->getFloat();
     }
-
-    col4->a = next->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------

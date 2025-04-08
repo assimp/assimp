@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -299,7 +299,7 @@ aiImporterDesc s_failingImporterDescription = {
 class FailingImporter : public Assimp::BaseImporter {
 public:
     virtual ~FailingImporter() = default;
-    virtual bool CanRead(const std::string &, Assimp::IOSystem *, bool) const override {
+    bool CanRead(const std::string &, Assimp::IOSystem *, bool) const override {
         return true;
     }
 

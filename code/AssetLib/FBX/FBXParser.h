@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -82,10 +82,9 @@ using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const
  *  @endverbatim
  *
  *  As can be seen in this sample, elements can contain nested #Scope
- *  as their trailing member.  
+ *  as their trailing member.
 **/
-class Element
-{
+class Element {
 public:
     Element(const Token& key_token, Parser& parser);
     ~Element();

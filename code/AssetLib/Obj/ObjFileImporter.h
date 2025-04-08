@@ -61,7 +61,7 @@ struct Model;
 /// \class  ObjFileImporter
 /// \brief  Imports a waveform obj file
 // ------------------------------------------------------------------------------------------------
-class ObjFileImporter : public BaseImporter {
+class ObjFileImporter final : public BaseImporter {
 public:
     /// \brief  Default constructor
     ObjFileImporter();

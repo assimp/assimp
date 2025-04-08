@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -322,7 +322,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             // NOTE this might explode for UTF-16 and wchars
             const char *sz = indicesNode.text().get();
             const char *end = sz + std::strlen(sz);
-            
+
             // For each index loop over aiMesh faces
             while (SkipSpacesAndLineEnd(&sz, end)) {
                 if (curFace >= faceEnd) {
@@ -380,7 +380,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             aiMaterial *mat = (aiMaterial *)curMat;
             mat->AddProperty(&curColors[0].a, 1, AI_MATKEY_OPACITY);
         }
-        
+
         // end of previous buffer. A material and a mesh should be there
         if (!curMat || !curMesh) {
             ASSIMP_LOG_ERROR("IRRMESH: A buffer must contain a mesh and a material");

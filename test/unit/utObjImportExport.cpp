@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -524,4 +524,18 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].x, -0.5f, threshold);
     EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
+}
+
+TEST_F(utObjImportExport, issue2355_mtl_texture_prefix) {
+    ::Assimp::Importer importer;
+    const aiScene *const scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/mtl_different_folder.obj", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMaterials, 2U);
+    const aiMaterial *const material = scene->mMaterials[1];
+
+    aiString texturePath;
+    material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+    // The MTL file is in `folder`, the image path should have been prefixed with the folder
+    EXPECT_STREQ("folder/image.jpg", texturePath.C_Str());
 }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,8 +53,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
 #endif
 
     Importer importer;
-    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize,
-        aiProcessPreset_TargetRealtime_Quality, nullptr );
+    unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, nullptr);
 
     if (sc == nullptr) {
         return 0;
@@ -62,7 +62,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
 
     Exporter exporter;
     exporter.ExportToBlob(sc, "fbx");
-    
+
 #ifdef _DEBUG
     aiDetachLogStream(&stream);
 #endif

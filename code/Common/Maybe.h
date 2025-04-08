@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -83,6 +83,7 @@ struct Maybe {
 
     Maybe &operator&() = delete;
     Maybe(const Maybe &) = delete;
+    Maybe &operator=(const Maybe &) = default;
 
 private:
     T _val;

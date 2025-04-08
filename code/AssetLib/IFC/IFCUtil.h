@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -47,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_IFCUTIL_H
 #define INCLUDED_IFCUTIL_H
 
-#include "AssetLib/IFC/IFCReaderGen_2x3.h"
-#include "AssetLib/IFC/IFCLoader.h"
+#include "IFCReaderGen_2x3.h"
+#include "IFCLoader.h"
 #include "AssetLib/Step/STEPFile.h"
 
 #include <assimp/mesh.h>

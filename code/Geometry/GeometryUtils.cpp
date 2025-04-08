@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -81,7 +81,7 @@ ai_real GeometryUtils::calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh
 
 // ------------------------------------------------------------------------------------------------
 // Check whether a ray intersects a plane and find the intersection point
-bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, 
+bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos,
         const aiVector3D& planeNormal, aiVector3D& pos) {
     const ai_real b = planeNormal * (planePos - ray.pos);
     ai_real h = ray.dir * planeNormal;
@@ -93,7 +93,7 @@ bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos,
 }
 
 // ------------------------------------------------------------------------------------------------
-void GeometryUtils::normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, 
+void GeometryUtils::normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut,
         size_t numVectors) {
     for (size_t i=0; i<numVectors; ++i) {
 		    vectorArrayOut[i] = vectorArrayIn[i].Normalize();

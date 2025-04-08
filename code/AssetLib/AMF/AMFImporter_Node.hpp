@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -86,7 +86,8 @@ public:
 	AMFNodeElementBase *Parent; ///< Parent element. If nullptr then this node is root.
 	std::list<AMFNodeElementBase *> Child; ///< Child elements.
 
-public: /// Destructor, virtual..
+public:
+	/// Destructor, virtual..
 	virtual ~AMFNodeElementBase() = default;
 
 	/// Disabled copy constructor and co.
@@ -97,10 +98,10 @@ public: /// Destructor, virtual..
 
 protected:
 	/// In constructor inheritor must set element type.
-	/// \param [in] pType - element type.
+	/// \param [in] type - element type.
 	/// \param [in] pParent - parent element.
-	AMFNodeElementBase(const EType pType, AMFNodeElementBase *pParent) :
-			Type(pType), Parent(pParent) {
+	AMFNodeElementBase(EType type, AMFNodeElementBase *pParent) :
+			Type(type), Parent(pParent) {
 		// empty
 	}
 }; // class IAMFImporter_NodeElement
@@ -135,8 +136,8 @@ struct AMFInstance : public AMFNodeElementBase {
 /// Structure that define metadata node.
 struct AMFMetadata : public AMFNodeElementBase {
 
-	std::string Type; ///< Type of "Value".
-	std::string Value; ///< Value.
+	std::string MetaType; ///< Type of "Value".
+	std::string Value;    ///< Value.
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.

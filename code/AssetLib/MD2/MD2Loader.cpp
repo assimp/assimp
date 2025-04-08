@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -101,7 +101,7 @@ MD2Importer::MD2Importer()
 // Returns whether the class can handle the format of the given file.
 bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    static const uint32_t tokens[] = { AI_MD2_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MD2_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 

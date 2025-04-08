@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** 
+/**
  * @file  STEPFileReader.cpp
  *  @brief Implementation of the STEP file parser, which fills a
  *         STEP::DB with data read from a file.
@@ -499,21 +499,13 @@ STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* 
     int64_t skip_depth( 0 );
     while ( *a ) {
         handleSkippedDepthFromToken(a, skip_depth);
-        /*if (*a == '(') {
-            ++skip_depth;
-        } else if (*a == ')') {
-            --skip_depth;
-        }*/
 
-		if (skip_depth >= 1 && *a=='#') {
-			if (*(a + 1) != '#') {
-				/*const char *tmp;
-				const int64_t num = static_cast<int64_t>(strtoul10_64(a + 1, &tmp));
-				db.MarkRef(num, id);*/
-                db.MarkRef(getIdFromToken(a), id);
-			} else {
-				++a;
-			}
+	if (skip_depth >= 1 && *a=='#') {
+		if (*(a + 1) != '#') {
+			db.MarkRef(getIdFromToken(a), id);
+		} else {
+			++a;
+		}
         }
         ++a;
     }

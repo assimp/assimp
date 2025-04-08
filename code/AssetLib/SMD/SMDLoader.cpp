@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -85,8 +85,8 @@ SMDImporter::SMDImporter() :
         configFrameID(),
         mBuffer(),
         mEnd(nullptr),
-        pScene(nullptr), 
-        iFileSize( 0 ), 
+        pScene(nullptr),
+        iFileSize( 0 ),
         iSmallestFrame( INT_MAX ),
         dLengthOfAnim( 0.0 ),
         bHasUVs(false ),

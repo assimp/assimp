@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -41,10 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
 
-#include "AssetLib/MMD/MMDImporter.h"
-#include "AssetLib/MMD/MMDPmdParser.h"
-#include "AssetLib/MMD/MMDPmxParser.h"
-#include "AssetLib/MMD/MMDVmdParser.h"
+#include "MMDImporter.h"
+#include "MMDPmdParser.h"
+#include "MMDPmxParser.h"
+#include "MMDVmdParser.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/DefaultIOSystem.h>

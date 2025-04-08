@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/IOSystem.hpp>
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** Default implementation of IOSystem using the standard C file functions */

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,7 +63,7 @@ namespace Assimp {
 class AC3DImporter : public BaseImporter {
 public:
     AC3DImporter();
-    ~AC3DImporter() override;
+    ~AC3DImporter() override = default;
 
     // Represents an AC3D material
     struct Material {
@@ -103,7 +103,7 @@ public:
 
         unsigned int mat, flags;
 
-        typedef std::pair<unsigned int, aiVector2D> SurfaceEntry;
+        using SurfaceEntry = std::pair<unsigned int, aiVector2D>;
         std::vector<SurfaceEntry> entries;
 
         // Type is low nibble of flags

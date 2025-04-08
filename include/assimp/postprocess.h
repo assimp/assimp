@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -506,7 +505,7 @@ enum aiPostProcessSteps
      *
      * <b>Output UV coordinate system:</b>
      * @code
-     * 0y|0y ---------- 1x|0y
+     * 0x|0y ---------- 1x|0y
      * |                 |
      * |                 |
      * |                 |

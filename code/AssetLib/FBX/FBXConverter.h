@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -70,7 +69,7 @@ struct morphKeyData {
     std::vector<unsigned int> values;
     std::vector<float> weights;
 };
-typedef std::map<int64_t, morphKeyData*> morphAnimData;
+using morphAnimData = std::map<int64_t, morphKeyData*> ;
 
 namespace Assimp {
 namespace FBX {

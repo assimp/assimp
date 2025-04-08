@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,8 +62,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
-namespace MDL   {
+namespace Assimp {
+namespace MDL {
 
 // -------------------------------------------------------------------------------------
 // to make it easier for us, we test the magic word against both "endiannesses"
@@ -876,7 +875,7 @@ struct IntSharedData_MDL7 {
         : apcOutBones(),
         iNum()
     {
-        abNeedMaterials.reserve(10);
+        abNeedMaterials.reserve(12);
     }
 
     //! Destruction: properly delete all allocated resources

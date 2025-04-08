@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -134,7 +134,7 @@ inline void ValidateDSProcess::DoValidationEx(T **parray, unsigned int size,
     if (size == 0) {
         return;
     }
-        
+
     if (!parray) {
         ReportError("aiScene::%s is nullptr (aiScene::%s is %i)",
                 firstName, secondName, size);

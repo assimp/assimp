@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
 // internal headers
-#include "AssetLib/Assbin/AssbinLoader.h"
+#include "AssbinLoader.h"
 #include "Common/assbin_chunks.h"
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/anim.h>
@@ -94,7 +94,7 @@ bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, boo
     const size_t read = in->Read(s, sizeof(char), 32);
 
     pIOHandler->Close(in);
-    
+
     if (read < 19) {
       return false;
     }

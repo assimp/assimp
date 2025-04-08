@@ -119,9 +119,9 @@ bool Import3DFromFile( const std::string &filename) {
         logInfo(importer.GetErrorString());
         return false;
 	}
-    
+
 	fin.close();
-	
+
 	g_scene = importer.ReadFile(filename, aiProcessPreset_TargetRealtime_Quality);
 
 	// If the import failed, report it
@@ -176,7 +176,7 @@ void freeTextureIds() {
 int LoadGLTextures(const aiScene* scene) {
 	freeTextureIds();
 
-    if (scene->HasTextures()) 
+    if (scene->HasTextures())
 		return 1;
 
 	/* getTexture Filenames and Numb of Textures */

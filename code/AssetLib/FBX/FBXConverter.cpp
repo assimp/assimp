@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -438,7 +438,8 @@ void FBXConverter::ConvertLight(const Light &light, const std::string &orig_name
             out_light->mType = aiLightSource_UNDEFINED;
             break;
         default:
-            ai_assert(false);
+            FBXImporter::LogError("Not handled light type: ", light.LightType());
+            break;
     }
 
     float decay = light.DecayStart();
@@ -463,7 +464,7 @@ void FBXConverter::ConvertLight(const Light &light, const std::string &orig_name
             out_light->mAttenuationQuadratic = 1.0f;
             break;
         default:
-            ai_assert(false);
+            FBXImporter::LogError("Not handled light decay type: ", light.DecayType());
             break;
     }
 }
@@ -601,7 +602,7 @@ const char *FBXConverter::NameTransformationCompProperty(TransformationComp comp
             return "GeometricRotationInverse";
         case TransformationComp_GeometricTranslationInverse:
             return "GeometricTranslationInverse";
-        case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+        case TransformationComp_MAXIMUM:
             break;
     }
 
@@ -3415,7 +3416,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
     KeyFrameListList inputs;
     inputs.reserve(nodes.size() * 3);
 
-    //give some breathing room for rounding errors
+    // give some breathing room for rounding errors
     const int64_t adj_start = start - 10000;
     const int64_t adj_stop = stop + 10000;
 
@@ -3441,7 +3442,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
             ai_assert(curve->GetKeys().size() == curve->GetValues().size());
             ai_assert(curve->GetKeys().size());
 
-            //get values within the start/stop time window
+            // get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
             std::shared_ptr<KeyValueList> Values(new KeyValueList());
             const size_t count = curve->GetKeys().size();
@@ -3461,8 +3462,7 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                         if (tnew >= adj_start && tnew <= adj_stop) {
                             Keys->push_back(tnew);
                             Values->push_back(vnew);
-                        }
-                        else {
+                        } else {
                             // Something broke
                             break;
                         }

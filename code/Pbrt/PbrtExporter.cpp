@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -132,10 +132,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
-    
+
     // Export embedded textures.
     create_embedded_textures_folder(mScene, mIOSystem);
-    
+
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);

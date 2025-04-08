@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -111,8 +111,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = bytesToProcess;
-    unsigned int processed = 0;
-    size_t lastFilePos(0);
+    unsigned int processed = 0u;
+    size_t lastFilePos = 0u;
 
     bool insideCstype = false;
     std::vector<char> buffer;

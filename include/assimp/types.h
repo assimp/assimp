@@ -303,12 +303,21 @@ struct aiString {
     }
 
     /** Copy a const char* to the aiString */
-    void Set(const char *sz) {
-        ai_int32 len = (ai_uint32)::strlen(sz);
-        if (len > static_cast<ai_int32>(AI_MAXLEN - 1)) {
-            len = static_cast<ai_int32>(AI_MAXLEN - 1);
+    void Set(const char *sz, size_t maxlen) {
+        if (sz == nullptr) {
+            return;
         }
-        length = len;
+        size_t len = 0;
+        for (size_t i=0; i<maxlen; ++i) {
+            if (sz[i] == '\0') {
+                break;
+            }
+            ++len;
+        }
+        if (len > AI_MAXLEN - 1) {
+            len = AI_MAXLEN - 1;
+        }
+        length = static_cast<uint32_t>(len);
         memcpy(data, sz, len);
         data[len] = 0;
     }

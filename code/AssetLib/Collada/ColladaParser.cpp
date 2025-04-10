@@ -224,6 +224,72 @@ static void ReadControllerJoints(const XmlNode &node, Controller &pController) {
 }
 
 // ------------------------------------------------------------------------------------------------
+static void ReadControllerWeightsInput(const XmlNode &currentNode, Controller &pController) {
+    InputChannel channel;
+
+    const char *attrSemantic = currentNode.attribute("semantic").as_string();
+    const char *attrSource = currentNode.attribute("source").as_string();
+    channel.mOffset = currentNode.attribute("offset").as_int();
+
+    // local URLS always start with a '#'. We don't support global URLs
+    if (attrSource[0] != '#') {
+        throw DeadlyImportError("Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
+    }
+    channel.mAccessor = attrSource + 1;
+
+    // parse source URL to corresponding source
+    if (strcmp(attrSemantic, "JOINT") == 0) {
+        pController.mWeightInputJoints = channel;
+    } else if (strcmp(attrSemantic, "WEIGHT") == 0) {
+        pController.mWeightInputWeights = channel;
+    } else {
+        throw DeadlyImportError("Unknown semantic \"", attrSemantic, "\" in <vertex_weights> data <input> element");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+static void ReadControllerWeightsVCount(const XmlNode &currentNode, Controller &pController) {
+    const std::string stdText = currentNode.text().as_string();
+    const char *text = stdText.c_str();
+    const char *end = text + stdText.size();
+    size_t numWeights = 0;
+    for (auto it = pController.mWeightCounts.begin(); it != pController.mWeightCounts.end(); ++it) {
+        if (*text == 0) {
+            throw DeadlyImportError("Out of data while reading <vcount>");
+        }
+
+        *it = strtoul10(text, &text);
+        numWeights += *it;
+        SkipSpacesAndLineEnd(&text, end);
+    }
+    // reserve weight count
+    pController.mWeights.resize(numWeights);
+}
+
+// ------------------------------------------------------------------------------------------------
+static void ReadControllerWeightsJoint2verts(XmlNode &currentNode, Controller &pController) {
+    // read JointIndex - WeightIndex pairs
+    std::string stdText;
+    XmlParser::getValueAsString(currentNode, stdText);
+    const char *text = stdText.c_str();
+    const char *end = text + stdText.size();
+    for (auto it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it) {
+        if (text == nullptr) {
+            throw DeadlyImportError("Out of data while reading <vertex_weights>");
+        }
+        SkipSpacesAndLineEnd(&text, end);
+        it->first = strtoul10(text, &text);
+        SkipSpacesAndLineEnd(&text, end);
+        if (*text == 0) {
+            throw DeadlyImportError("Out of data while reading <vertex_weights>");
+        }
+        it->second = strtoul10(text, &text);
+        SkipSpacesAndLineEnd(&text, end);
+    }
+
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the joint weights for the given controller
 static void ReadControllerWeights(XmlNode &node, Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
@@ -234,61 +300,11 @@ static void ReadControllerWeights(XmlNode &node, Controller &pController) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "input") {
-            InputChannel channel;
-
-            const char *attrSemantic = currentNode.attribute("semantic").as_string();
-            const char *attrSource = currentNode.attribute("source").as_string();
-            channel.mOffset = currentNode.attribute("offset").as_int();
-
-            // local URLS always start with a '#'. We don't support global URLs
-            if (attrSource[0] != '#') {
-                throw DeadlyImportError("Unsupported URL format in \"", attrSource, "\" in source attribute of <vertex_weights> data <input> element");
-            }
-            channel.mAccessor = attrSource + 1;
-
-            // parse source URL to corresponding source
-            if (strcmp(attrSemantic, "JOINT") == 0) {
-                pController.mWeightInputJoints = channel;
-            } else if (strcmp(attrSemantic, "WEIGHT") == 0) {
-                pController.mWeightInputWeights = channel;
-            } else {
-                throw DeadlyImportError("Unknown semantic \"", attrSemantic, "\" in <vertex_weights> data <input> element");
-            }
+            ReadControllerWeightsInput(currentNode, pController);
         } else if (currentName == "vcount" && vertexCount > 0) {
-            const std::string stdText = currentNode.text().as_string();
-            const char *text = stdText.c_str();
-            const char *end = text + stdText.size();
-            size_t numWeights = 0;
-            for (auto it = pController.mWeightCounts.begin(); it != pController.mWeightCounts.end(); ++it) {
-                if (*text == 0) {
-                    throw DeadlyImportError("Out of data while reading <vcount>");
-                }
-
-                *it = strtoul10(text, &text);
-                numWeights += *it;
-                SkipSpacesAndLineEnd(&text, end);
-            }
-            // reserve weight count
-            pController.mWeights.resize(numWeights);
+            ReadControllerWeightsVCount(currentNode, pController);
         } else if (currentName == "v" && vertexCount > 0) {
-            // read JointIndex - WeightIndex pairs
-            std::string stdText;
-            XmlParser::getValueAsString(currentNode, stdText);
-            const char *text = stdText.c_str();
-            const char *end = text + stdText.size();
-            for (auto it = pController.mWeights.begin(); it != pController.mWeights.end(); ++it) {
-                if (text == nullptr) {
-                    throw DeadlyImportError("Out of data while reading <vertex_weights>");
-                }
-                SkipSpacesAndLineEnd(&text, end);
-                it->first = strtoul10(text, &text);
-                SkipSpacesAndLineEnd(&text, end);
-                if (*text == 0) {
-                    throw DeadlyImportError("Out of data while reading <vertex_weights>");
-                }
-                it->second = strtoul10(text, &text);
-                SkipSpacesAndLineEnd(&text, end);
-            }
+            ReadControllerWeightsJoint2verts(currentNode, pController);
         }
     }
 }
@@ -980,7 +996,7 @@ void ColladaParser::ReadImage(const XmlNode &node, Collada::Image &pImage) const
 // Reads the material library
 void ColladaParser::ReadMaterialLibrary(XmlNode &node) {
     std::map<std::string, int> names;
-    for (XmlNode &currentNode : node.children()) {
+    for (const XmlNode &currentNode : node.children()) {
         std::string id = currentNode.attribute("id").as_string();
         std::string name = currentNode.attribute("name").as_string();
         mMaterialLibrary[id] = Material();

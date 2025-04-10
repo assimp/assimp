@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
+#include <array>
 
 using namespace Assimp;
 

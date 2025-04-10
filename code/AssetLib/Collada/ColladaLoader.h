@@ -109,7 +109,7 @@ protected:
 
     /// Resolve node instances
     void ResolveNodeInstances(const ColladaParser &pParser, const Collada::Node *pNode,
-            std::vector<const Collada::Node *> &resolved);
+            std::vector<const Collada::Node *> &resolved) const;
 
     /// Builds meshes for the given node and references them
     void BuildMeshesForNode(const ColladaParser &pParser, const Collada::Node *pNode,
@@ -166,10 +166,6 @@ protected:
     /** Fill materials from the collada material definitions */
     void FillMaterials(const ColladaParser &pParser, aiScene *pScene);
 
-    /** Resolve UV channel mappings*/
-    void ApplyVertexToEffectSemanticMapping(Collada::Sampler &sampler,
-            const Collada::SemanticMappingTable &table);
-
     /** Add a texture and all of its sampling properties to a material*/
     void AddTexture(aiMaterial &mat, const ColladaParser &pParser,
             const Collada::Effect &effect,
@@ -180,22 +176,13 @@ protected:
     aiString FindFilenameForEffectTexture(const ColladaParser &pParser,
             const Collada::Effect &pEffect, const std::string &pName);
 
-    /** Reads a float value from an accessor and its data array.
-     * @param pAccessor The accessor to use for reading
-     * @param pData The data array to read from
-     * @param pIndex The index of the element to retrieve
-     * @param pOffset Offset into the element, for multipart elements such as vectors or matrices
-     * @return the specified value
-     */
-    ai_real ReadFloat(const Collada::Accessor &pAccessor, const Collada::Data &pData, size_t pIndex, size_t pOffset) const;
-
     /** Reads a string value from an accessor and its data array.
      * @param pAccessor The accessor to use for reading
      * @param pData The data array to read from
      * @param pIndex The index of the element to retrieve
      * @return the specified value
      */
-    const std::string &ReadString(const Collada::Accessor &pAccessor, const Collada::Data &pData, size_t pIndex) const;
+    [[nodiscard]] const std::string &ReadString(const Collada::Accessor &pAccessor, const Collada::Data &pData, size_t pIndex) const;
 
     /** Recursively collects all nodes into the given array */
     void CollectNodes(const aiNode *pNode, std::vector<const aiNode *> &poNodes) const;
@@ -208,7 +195,7 @@ protected:
     /** Finds a proper name for a node derived from the collada-node's properties */
     std::string FindNameForNode(const Collada::Node *pNode);
 
-protected:
+private:
     /** Filename, for a verbose error message */
     std::string mFileName;
 

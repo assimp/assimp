@@ -119,7 +119,7 @@ protected:
     void ReadController(XmlNode &node, Collada::Controller &pController);
 
     /** Reads the image library contents */
-    void ReadImageLibrary(XmlNode &node);
+    void ReadImageLibrary(const XmlNode &node);
 
     /** Reads an image entry into the given image */
     void ReadImage(XmlNode &node, Collada::Image &pImage) const;

@@ -901,7 +901,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
 
 // ------------------------------------------------------------------------------------------------
 // Reads the image library contents
-void ColladaParser::ReadImageLibrary(XmlNode &node) {
+void ColladaParser::ReadImageLibrary(const XmlNode &node) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "image") {

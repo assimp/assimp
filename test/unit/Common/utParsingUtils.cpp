@@ -1,6 +1,7 @@
 /*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2025, assimp team
 
@@ -37,38 +38,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 
-#include <assimp/types.h>
+#include "UnitTestPCH.h"
+#include <assimp/ParsingUtils.h>
+#include <assimp/fast_atof.h>
 
 using namespace Assimp;
 
-class utTypes : public ::testing::Test {
-    // empty
-};
+class utParsingUtils : public ::testing::Test {};
 
-TEST_F( utTypes, Color3dCpmpareOpTest ) {
-    aiColor3D col1( 1, 2, 3 );
-    aiColor3D col2( 4, 5, 6 );
-    const aiColor3D &col3(col1);
-
-    EXPECT_FALSE( col1 == col2 );
-    EXPECT_FALSE( col2 == col3 );
-    EXPECT_TRUE( col1 == col3 );
-
-    EXPECT_TRUE( col1 != col2 );
-    EXPECT_TRUE( col2 != col3 );
-    EXPECT_FALSE( col1 != col3 );
-}
-
-TEST_F( utTypes, Color3dIndexOpTest ) {
-    aiColor3D col( 1, 2, 3 );
-    const ai_real r = col[ 0 ];
-    EXPECT_FLOAT_EQ( 1, r );
-
-    const ai_real g = col[ 1 ];
-    EXPECT_FLOAT_EQ( 2, g );
-
-    const ai_real b = col[ 2 ];
-    EXPECT_FLOAT_EQ( 3, b );
+TEST_F(utParsingUtils, parseFloatsStringTest) {
+    constexpr float floatArray[] = {1, 0, 0, 0, 0, 7.54979e-8, -1, 0, 0, 1, 7.54979e-8, 0, 0, 0, 0, 1};
+    const std::string floatArrayAsStr = "1 0 0 0 0 7.54979e-8 -1 0 0 1 7.54979e-8 0 0 0 0 1";
+    const char *content = floatArrayAsStr.c_str();
+    const char *end = content + floatArrayAsStr.size();
+    for (float i : floatArray) {
+        float value = 0.0f;
+        SkipSpacesAndLineEnd(&content, end);
+        content = fast_atoreal_move<ai_real>(content, value);
+        EXPECT_FLOAT_EQ(value, i);
+    }
 }

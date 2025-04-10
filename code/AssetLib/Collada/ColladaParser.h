@@ -48,7 +48,6 @@
 #define AI_COLLADAPARSER_H_INC
 
 #include "ColladaHelper.h"
-#include <assimp/TinyFormatter.h>
 #include <assimp/ai_assert.h>
 #include <assimp/XmlParser.h>
 
@@ -71,11 +70,6 @@ public:
     /** Map for generic metadata as aiString */
     using StringMetaData = std::map<std::string, aiString>;
 
-private:
-    /** Converts a path read from a collada file to the usual representation */
-    static void UriDecodePath(aiString &ss);
-
-protected:
     /** Constructor from XML file */
     ColladaParser(IOSystem *pIOHandler, const std::string &pFile);
 
@@ -164,18 +158,18 @@ protected:
     void ReadMesh(XmlNode &node, Collada::Mesh &pMesh);
 
     /** Reads a source element - a combination of raw data and an accessor defining
-         * things that should not be redefinable. Yes, that's another rant.
-         */
+     * things that should not be redefinable. Yes, that's another rant.
+     */
     void ReadSource(XmlNode &node);
 
     /** Reads a data array holding a number of elements, and stores it in the global library.
-         * Currently supported are array of floats and arrays of strings.
-         */
+     * Currently supported are array of floats and arrays of strings.
+     */
     void ReadDataArray(XmlNode &node);
 
     /** Reads an accessor and stores it in the global library under the given ID -
-         * accessors use the ID of the parent <source> element
-         */
+     * accessors use the ID of the parent <source> element
+     */
     void ReadAccessor(XmlNode &node, const std::string &pID);
 
     /** Reads input declarations of per-vertex mesh data into the given mesh */
@@ -225,6 +219,9 @@ protected:
     void ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive);
 
 protected:
+    /** Converts a path read from a collada file to the usual representation */
+    static void UriDecodePath(aiString &ss);
+
     /** Calculates the resulting transformation from all the given transform steps */
     aiMatrix4x4 CalculateResultTransform(const std::vector<Collada::Transform> &pTransforms) const;
 
@@ -235,7 +232,7 @@ protected:
     template <typename Type>
     const Type &ResolveLibraryReference(const std::map<std::string, Type> &pLibrary, const std::string &pURL) const;
 
-protected:
+private:
     // Filename, for a verbose error message
     std::string mFileName;
 

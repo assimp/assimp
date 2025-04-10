@@ -199,10 +199,7 @@ public:
 
     /// Reads a scene node's contents including children and stores it in the given node
     void ReadSceneNode(XmlNode &node, Collada::Node *pNode);
-
-    /// Reads a node transformation entry of the given type and adds it to the given node's transformation list.
-    //void ReadNodeTransformation(XmlNode &node, Collada::Node *pNode, Collada::TransformType pType);
-
+    
     /// Reads a mesh reference in a node and adds it to the node's mesh list
     void ReadNodeGeometry(XmlNode &node, Collada::Node *pNode);
 

@@ -48,7 +48,11 @@ using namespace Assimp;
 class utParsingUtils : public ::testing::Test {};
 
 TEST_F(utParsingUtils, parseFloatsStringTest) {
-    constexpr float floatArray[] = {1, 0, 0, 0, 0, 7.54979e-8, -1, 0, 0, 1, 7.54979e-8, 0, 0, 0, 0, 1};
+    constexpr float floatArray[] = {
+        1.0f, 0.0f,         0.0f,        0.0f,
+        0.0f, 7.54979e-8f, -1.0f,        0.0f,
+        0.0f, 1.0f,         7.54979e-8f, 0.0f,
+        0.0f, 0.0f,         0.0f,        1.0f};
     const std::string floatArrayAsStr = "1 0 0 0 0 7.54979e-8 -1 0 0 1 7.54979e-8 0 0 0 0 1";
     const char *content = floatArrayAsStr.c_str();
     const char *end = content + floatArrayAsStr.size();

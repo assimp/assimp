@@ -61,6 +61,7 @@ using namespace Assimp;
 using namespace Assimp::Collada;
 using namespace Assimp::Formatter;
 
+// ------------------------------------------------------------------------------------------------
 static void ReportWarning(const char *msg, ...) {
     ai_assert(nullptr != msg);
 
@@ -75,6 +76,7 @@ static void ReportWarning(const char *msg, ...) {
     ASSIMP_LOG_WARN("Validation warning: ", std::string(szBuffer, iLen));
 }
 
+// ------------------------------------------------------------------------------------------------
 static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVector &key_renaming, size_t &found_index) {
     for (size_t i = 0; i < key_renaming.size(); ++i) {
         if (key_renaming[i].first == collada_key) {
@@ -87,6 +89,7 @@ static bool FindCommonKey(const std::string &collada_key, const MetaKeyPairVecto
     return false;
 }
 
+// ------------------------------------------------------------------------------------------------
 static void readUrlAttribute(XmlNode &node, std::string &url) {
     url.clear();
     if (!XmlParser::getStdStrAttribute(node, "url", url)) {
@@ -136,7 +139,7 @@ static void ReadNodeTransformation(XmlNode &node, Node *pNode, TransformType pTy
 // ------------------------------------------------------------------------------------------------
 // Reads a single string metadata item
 static void ReadMetaDataItem(XmlNode &node, ColladaParser::StringMetaData &metadata) {
-    const Collada::MetaKeyPairVector &key_renaming = GetColladaAssimpMetaKeysCamelCase();
+    const MetaKeyPairVector &key_renaming = GetColladaAssimpMetaKeysCamelCase();
     const std::string name = node.name();
     if (name.empty()) {
         return;
@@ -198,7 +201,7 @@ static void ReadAnimationSampler(const XmlNode &node, AnimationChannel &pChannel
 
 // ------------------------------------------------------------------------------------------------
 // Reads the joint definitions for the given controller
-static void ReadControllerJoints(const XmlNode &node, Collada::Controller &pController) {
+static void ReadControllerJoints(const XmlNode &node, Controller &pController) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "input") {
@@ -222,7 +225,7 @@ static void ReadControllerJoints(const XmlNode &node, Collada::Controller &pCont
 
 // ------------------------------------------------------------------------------------------------
 // Reads the joint weights for the given controller
-static void ReadControllerWeights(XmlNode &node, Collada::Controller &pController) {
+static void ReadControllerWeights(XmlNode &node, Controller &pController) {
     // Read vertex count from attributes and resize the array accordingly
     int vertexCount = 0;
     XmlParser::getIntAttribute(node, "count", vertexCount);
@@ -292,7 +295,7 @@ static void ReadControllerWeights(XmlNode &node, Collada::Controller &pControlle
 
 // ------------------------------------------------------------------------------------------------
 // Reads a material entry into the given material
-static void ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
+static void ReadMaterial(const XmlNode &node, Material &pMaterial) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "instance_effect") {
@@ -305,7 +308,7 @@ static void ReadMaterial(XmlNode &node, Collada::Material &pMaterial) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a light entry into the given light
-static void ReadLight(XmlNode &node, Collada::Light &pLight) {
+static void ReadLight(XmlNode &node, Light &pLight) {
     XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     // TODO: Check the current technique and skip over unsupported extra techniques
@@ -354,8 +357,7 @@ static void ReadLight(XmlNode &node, Collada::Light &pLight) {
             XmlParser::getValueAsReal(currentNode, pLight.mPenumbraAngle);
         } else if (currentName == "intensity") {
             XmlParser::getValueAsReal(currentNode, pLight.mIntensity);
-        }
-        else if (currentName == "falloff") {
+        } else if (currentName == "falloff") {
             XmlParser::getValueAsReal(currentNode, pLight.mOuterAngle);
         } else if (currentName == "hotspot_beam") {
             XmlParser::getValueAsReal(currentNode, pLight.mFalloffAngle);
@@ -370,7 +372,7 @@ static void ReadLight(XmlNode &node, Collada::Light &pLight) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads a camera entry into the given light
-static void ReadCamera(XmlNode &node, Collada::Camera &camera) {
+static void ReadCamera(XmlNode &node, Camera &camera) {
     XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
@@ -391,7 +393,6 @@ static void ReadCamera(XmlNode &node, Collada::Camera &camera) {
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
@@ -404,7 +405,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
         throw DeadlyImportError("IOSystem is nullptr.");
     }
 
-    std::unique_ptr<IOStream> daefile;
+    std::unique_ptr<IOStream> daeFile;
     std::unique_ptr<ZipArchiveIOSystem> zip_archive;
 
     // Determine type
@@ -420,20 +421,20 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
             throw DeadlyImportError("Invalid ZAE");
         }
 
-        daefile.reset(zip_archive->Open(dae_filename.c_str()));
-        if (daefile == nullptr) {
+        daeFile.reset(zip_archive->Open(dae_filename.c_str()));
+        if (daeFile == nullptr) {
             throw DeadlyImportError("Invalid ZAE manifest: '", dae_filename, "' is missing");
         }
     } else {
         // attempt to open the file directly
-        daefile.reset(pIOHandler->Open(pFile));
-        if (daefile == nullptr) {
+        daeFile.reset(pIOHandler->Open(pFile));
+        if (daeFile == nullptr) {
             throw DeadlyImportError("Failed to open file '", pFile, "'.");
         }
     }
 
     // generate a XML reader for it
-    if (!mXmlParser.parse(daefile.get())) {
+    if (!mXmlParser.parse(daeFile.get())) {
         throw DeadlyImportError("Unable to read file, malformed XML");
     }
     // start reading
@@ -916,7 +917,7 @@ void ColladaParser::ReadImageLibrary(const XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads an image entry into the given image
-void ColladaParser::ReadImage(XmlNode &node, Collada::Image &pImage) const {
+void ColladaParser::ReadImage(const XmlNode &node, Collada::Image &pImage) const {
     for (XmlNode &currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == "image") {

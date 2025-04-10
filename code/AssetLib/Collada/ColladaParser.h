@@ -67,13 +67,15 @@ class ZipArchiveIOSystem;
 class ColladaParser {
     friend class ColladaLoader;
 
+public:
+    /** Map for generic metadata as aiString */
+    using StringMetaData = std::map<std::string, aiString>;
+
+private:
     /** Converts a path read from a collada file to the usual representation */
     static void UriDecodePath(aiString &ss);
 
 protected:
-    /** Map for generic metadata as aiString */
-    typedef std::map<std::string, aiString> StringMetaData;
-
     /** Constructor from XML file */
     ColladaParser(IOSystem *pIOHandler, const std::string &pFile);
 
@@ -95,9 +97,6 @@ protected:
     /** Reads contributor information such as author and legal blah */
     void ReadContributorInfo(XmlNode &node);
 
-    /** Reads generic metadata into provided map and renames keys for Assimp */
-    void ReadMetaDataItem(XmlNode &node, StringMetaData &metadata);
-
     /** Reads the animation library */
     void ReadAnimationLibrary(XmlNode &node);
 
@@ -113,44 +112,26 @@ protected:
     /** Reads an animation into the given parent structure */
     void ReadAnimation(XmlNode &node, Collada::Animation *pParent);
 
-    /** Reads an animation sampler into the given anim channel */
-    void ReadAnimationSampler(XmlNode &node, Collada::AnimationChannel &pChannel);
-
     /** Reads the skeleton controller library */
     void ReadControllerLibrary(XmlNode &node);
 
     /** Reads a controller into the given mesh structure */
     void ReadController(XmlNode &node, Collada::Controller &pController);
 
-    /** Reads the joint definitions for the given controller */
-    void ReadControllerJoints(XmlNode &node, Collada::Controller &pController);
-
-    /** Reads the joint weights for the given controller */
-    void ReadControllerWeights(XmlNode &node, Collada::Controller &pController);
-
     /** Reads the image library contents */
     void ReadImageLibrary(XmlNode &node);
 
     /** Reads an image entry into the given image */
-    void ReadImage(XmlNode &node, Collada::Image &pImage);
+    void ReadImage(XmlNode &node, Collada::Image &pImage) const;
 
     /** Reads the material library */
     void ReadMaterialLibrary(XmlNode &node);
 
-    /** Reads a material entry into the given material */
-    void ReadMaterial(XmlNode &node, Collada::Material &pMaterial);
-
     /** Reads the camera library */
     void ReadCameraLibrary(XmlNode &node);
 
-    /** Reads a camera entry into the given camera */
-    void ReadCamera(XmlNode &node, Collada::Camera &pCamera);
-
     /** Reads the light library */
     void ReadLightLibrary(XmlNode &node);
-
-    /** Reads a light entry into the given light */
-    void ReadLight(XmlNode &node, Collada::Light &pLight);
 
     /** Reads the effect library */
     void ReadEffectLibrary(XmlNode &node);
@@ -229,7 +210,7 @@ protected:
     void ReadSceneNode(XmlNode &node, Collada::Node *pNode);
 
     /** Reads a node transformation entry of the given type and adds it to the given node's transformation list. */
-    void ReadNodeTransformation(XmlNode &node, Collada::Node *pNode, Collada::TransformType pType);
+    //void ReadNodeTransformation(XmlNode &node, Collada::Node *pNode, Collada::TransformType pType);
 
     /** Reads a mesh reference in a node and adds it to the node's mesh list */
     void ReadNodeGeometry(XmlNode &node, Collada::Node *pNode);

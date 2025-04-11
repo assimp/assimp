@@ -15,14 +15,21 @@
 #include "draco/mesh/mesh_splitter.h"
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
+#include <cstdint>
 #include <memory>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
+#include "draco/attributes/geometry_attribute.h"
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
+#include "draco/core/draco_types.h"
 #include "draco/core/vector_d.h"
 #include "draco/io/mesh_io.h"
+#include "draco/material/material.h"
 #include "draco/mesh/mesh_misc_functions.h"
+#include "draco/point_cloud/point_cloud_builder.h"
 
 namespace {}  // namespace
 #endif        // DRACO_TRANSCODER_SUPPORTED

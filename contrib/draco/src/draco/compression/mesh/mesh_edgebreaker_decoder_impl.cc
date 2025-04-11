@@ -15,6 +15,7 @@
 #include "draco/compression/mesh/mesh_edgebreaker_decoder_impl.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "draco/compression/attributes/sequential_attribute_decoders_controller.h"
 #include "draco/compression/mesh/mesh_edgebreaker_decoder.h"
@@ -299,6 +300,22 @@ bool MeshEdgebreakerDecoderImpl<TraversalDecoder>::DecodeConnectivity() {
   if (static_cast<uint32_t>(num_encoded_vertices_) > num_faces * 3) {
     return false;  // There cannot be more vertices than 3 * num_faces.
   }
+
+  // Minimum number of edges of the mesh assuming each edge is shared between
+  // two faces.
+  const uint32_t min_num_face_edges = 3 * num_faces / 2;
+
+  // Maximum number of edges that can exist between |num_encoded_vertices_|.
+  // This is based on graph theory assuming simple connected graph.
+  const uint64_t num_encoded_vertices_64 =
+      static_cast<uint64_t>(num_encoded_vertices_);
+  const uint64_t max_num_vertex_edges =
+      num_encoded_vertices_64 * (num_encoded_vertices_64 - 1) / 2;
+  if (max_num_vertex_edges < min_num_face_edges) {
+    // It is impossible to construct a manifold mesh with these properties.
+    return false;
+  }
+
   uint8_t num_attribute_data;
   if (!decoder_->buffer()->Decode(&num_attribute_data)) {
     return false;

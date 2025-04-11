@@ -22,6 +22,8 @@
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
 #include "draco/io/texture_io.h"
+#include "draco/metadata/property_table.h"
+#include "draco/metadata/structural_metadata.h"
 #include "draco/scene/scene_indices.h"
 
 namespace {
@@ -118,6 +120,47 @@ TEST(SceneUtilsTest, TestComputeAllInstances) {
 
   AssertMatrixNear(instances[MeshInstanceIndex(4)].transform,
                    expected_transform, 1e-6f);
+}
+
+TEST(SceneUtilsTest, TestComputeInstanceFromRootNode) {
+  // Tests that we can compute all instances from a root node of a scene.
+  // This should result in the same instances all the ComputeAllInstances().
+
+  auto scene =
+      draco::ReadSceneFromTestFile("CesiumMilkTruck/glTF/CesiumMilkTruck.gltf");
+  const auto node_instances = draco::SceneUtils::ComputeAllInstancesFromNode(
+      *scene, scene->GetRootNodeIndex(0));
+  const auto scene_instances = draco::SceneUtils::ComputeAllInstances(*scene);
+  ASSERT_EQ(node_instances.size(), scene_instances.size());
+  for (draco::MeshInstanceIndex i(0); i < node_instances.size(); ++i) {
+    ASSERT_EQ(node_instances[i].scene_node_index,
+              scene_instances[i].scene_node_index);
+    ASSERT_EQ(node_instances[i].mesh_index, scene_instances[i].mesh_index);
+    ASSERT_EQ(node_instances[i].mesh_group_mesh_index,
+              scene_instances[i].mesh_group_mesh_index);
+    ASSERT_EQ(node_instances[i].transform, scene_instances[i].transform);
+  }
+}
+
+TEST(SceneUtilsTest, TestComputeInstanceFromChildNode) {
+  // Tests that we can compute all instances from a child node of a scene.
+  auto scene =
+      draco::ReadSceneFromTestFile("CesiumMilkTruck/glTF/CesiumMilkTruck.gltf");
+  const auto node_instances = draco::SceneUtils::ComputeAllInstancesFromNode(
+      *scene, draco::SceneNodeIndex(1));
+
+  // There should be only one instance in this node chain.
+  ASSERT_EQ(node_instances.size(), 1);
+
+  // clang-format off
+  AssertMatrixNear(node_instances[draco::MeshInstanceIndex(0)].transform,
+            Eigen::Matrix4d{
+              { 0.98434,  0.176278, 0, 1.43267},
+              {-0.176278, 0.98434,  0, 0.427722},
+              {0,         0,        1, -2.98e-8},
+              {0,         0,        0, 1}
+            }, 1e-6);
+  // clang-format on
 }
 
 TEST(SceneUtilsTest, TestComputeAllInstancesWithShiftedGeometryRoot) {
@@ -334,8 +377,17 @@ TEST(SceneUtilsTest, TestMeshToSceneMultipleMeshFeatures) {
       const auto &scene_mf = scene->GetMesh(mi).GetMeshFeatures(mfi);
       const auto &scene_from_mesh_mf =
           scene_from_mesh->GetMesh(mi).GetMeshFeatures(mfi);
-      ASSERT_EQ(scene_mf.GetAttributeIndex(),
-                scene_from_mesh_mf.GetAttributeIndex());
+      const int att_index_0 = scene_mf.GetAttributeIndex();
+      const int att_index_1 = scene_from_mesh_mf.GetAttributeIndex();
+      if (att_index_0 == -1) {
+        ASSERT_EQ(att_index_0, att_index_1);
+      } else {
+        ASSERT_EQ(scene->GetMesh(mi).attribute(att_index_0)->name(),
+                  scene_from_mesh->GetMesh(mi).attribute(att_index_1)->name());
+        ASSERT_EQ(scene->GetMesh(mi).attribute(att_index_0)->size(),
+                  scene_from_mesh->GetMesh(mi).attribute(att_index_1)->size());
+      }
+
       ASSERT_EQ(scene_mf.GetPropertyTableIndex(),
                 scene_from_mesh_mf.GetPropertyTableIndex());
       ASSERT_EQ(scene_mf.GetLabel(), scene_from_mesh_mf.GetLabel());
@@ -349,6 +401,63 @@ TEST(SceneUtilsTest, TestMeshToSceneMultipleMeshFeatures) {
                 scene_from_mesh_mf.GetTextureMap().texture() != nullptr);
     }
   }
+}
+
+TEST(SceneUtilsTest, TestMeshToSceneMeshFeaturesWithAttributes) {
+  // Tests that converting a mesh into scene properly updates mesh features
+  // attribute indices.
+  auto mesh =
+      draco::ReadMeshFromTestFile("CesiumMilkTruck/glTF/CesiumMilkTruck.gltf");
+  ASSERT_NE(mesh, nullptr);
+
+  // Add a new dummy mesh features and mesh features attribute to the mesh.
+  std::unique_ptr<draco::PointAttribute> mf_att(new draco::PointAttribute());
+  mf_att->Init(draco::GeometryAttribute::GENERIC, 1, draco::DT_FLOAT32, false,
+               mesh->num_points());
+  const int mf_att_id = mesh->AddAttribute(std::move(mf_att));
+  std::unique_ptr<draco::MeshFeatures> mf(new draco::MeshFeatures());
+  mf->SetAttributeIndex(mf_att_id);
+  mesh->AddMeshFeatures(std::move(mf));
+
+  // Convert the mesh into a scene.
+  DRACO_ASSIGN_OR_ASSERT(const std::unique_ptr<draco::Scene> scene_from_mesh,
+                         draco::SceneUtils::MeshToScene(std::move(mesh)));
+  ASSERT_NE(scene_from_mesh, nullptr);
+
+  // Ensure the attribute indices on the meshes from scene are decremented by
+  // one because the material attribute was removed.
+  ASSERT_EQ(scene_from_mesh->NumMeshes(), 4);
+  for (draco::MeshIndex mi(0); mi < scene_from_mesh->NumMeshes(); ++mi) {
+    for (draco::MeshFeaturesIndex mfi(0);
+         mfi < scene_from_mesh->GetMesh(mi).NumMeshFeatures(); ++mfi) {
+      const auto &mf = scene_from_mesh->GetMesh(mi).GetMeshFeatures(mfi);
+      ASSERT_EQ(mf.GetAttributeIndex(), mf_att_id - 1);
+    }
+  }
+}
+
+TEST(SceneUtilsTest, TestMeshToSceneStructuralMetadata) {
+  const std::string filename = "cube_att.obj";
+  std::unique_ptr<draco::Mesh> mesh = draco::ReadMeshFromTestFile(filename);
+  ASSERT_NE(mesh, nullptr);
+
+  // Setting a sample schema to:
+  // {
+  //   "classes": []
+  // }
+  draco::StructuralMetadataSchema sample_schema;
+  auto &classes_json = sample_schema.json.SetObjects().emplace_back("classes");
+  classes_json.SetArray();
+
+  mesh->GetStructuralMetadata().SetSchema(sample_schema);
+  draco::StructuralMetadata mesh_structural_metadata;
+  mesh_structural_metadata.Copy(mesh->GetStructuralMetadata());
+  ASSERT_FALSE(mesh_structural_metadata.GetSchema().Empty());
+
+  DRACO_ASSIGN_OR_ASSERT(const std::unique_ptr<draco::Scene> scene_from_mesh,
+                         draco::SceneUtils::MeshToScene(std::move(mesh)));
+  ASSERT_NE(scene_from_mesh, nullptr);
+  ASSERT_EQ(scene_from_mesh->GetStructuralMetadata(), mesh_structural_metadata);
 }
 
 TEST(SceneUtilsTest, TestInstantiateMeshWithIdentityTransformation) {

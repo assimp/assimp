@@ -26,11 +26,7 @@ namespace draco {
 template <bool B, class T, class F>
 using conditional_t = typename std::conditional<B, T, F>::type;
 
-#ifdef DRACO_TRANSCODER_SUPPORTED
-Mesh::Mesh() : compression_enabled_(false) {}
-#else
 Mesh::Mesh() {}
-#endif
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
 void Mesh::Copy(const Mesh &src) {
@@ -39,8 +35,6 @@ void Mesh::Copy(const Mesh &src) {
   faces_ = src.faces_;
   attribute_data_ = src.attribute_data_;
   material_library_.Copy(src.material_library_);
-  compression_enabled_ = src.compression_enabled_;
-  compression_options_ = src.compression_options_;
 
   // Copy mesh feature ID sets.
   mesh_features_.clear();
@@ -67,6 +61,8 @@ void Mesh::Copy(const Mesh &src) {
 
   // Copy structural metadata.
   structural_metadata_.Copy(src.structural_metadata_);
+  property_attributes_ = src.property_attributes_;
+  property_attributes_material_mask_ = src.property_attributes_material_mask_;
 }
 
 namespace {
@@ -338,6 +334,22 @@ void Mesh::RemoveUnusedMaterials(bool remove_unused_material_indices) {
     }
   }
 
+  // Check if any of the (unused) materials is used by property attributes
+  // indices. If so, user should remove unused property attributes indices
+  // first.
+  for (int i = 0; i < NumPropertyAttributesIndices(); ++i) {
+    for (int mask_index = 0;
+         mask_index < NumPropertyAttributesIndexMaterialMasks(i);
+         ++mask_index) {
+      const int mat_index =
+          GetPropertyAttributesIndexMaterialMask(i, mask_index);
+      if (mat_index < num_materials && !is_material_used[mat_index]) {
+        is_material_used[mat_index] = true;
+        num_used_materials++;
+      }
+    }
+  }
+
   if (num_used_materials == num_materials) {
     return;  // All materials are used, don't do anything.
   }
@@ -408,6 +420,30 @@ void Mesh::RemoveUnusedMaterials(bool remove_unused_material_indices) {
       }
     }
   }
+
+  // Update material indices on property attributes incices.
+  for (int i = 0; i < NumPropertyAttributesIndices(); ++i) {
+    for (int mask_index = 0;
+         mask_index < NumPropertyAttributesIndexMaterialMasks(i);
+         ++mask_index) {
+      const int old_mat_index =
+          GetPropertyAttributesIndexMaterialMask(i, mask_index);
+      if (old_mat_index < num_materials && is_material_used[old_mat_index]) {
+        property_attributes_material_mask_[i][mask_index] =
+            old_to_new_material_index_map[old_mat_index];
+      }
+    }
+  }
+}
+
+bool Mesh::IsAttributeUsedByMeshFeatures(int att_id) const {
+  for (MeshFeaturesIndex mfi(0); mfi < NumMeshFeatures(); ++mfi) {
+    const auto &mf = GetMeshFeatures(mfi);
+    if (mf.GetAttributeIndex() == att_id) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Mesh::UpdateMeshFeaturesTexturePointer(
@@ -444,6 +480,43 @@ void Mesh::CopyMeshFeaturesForMaterial(const Mesh &source_mesh,
       std::unique_ptr<MeshFeatures> new_mf(new MeshFeatures());
       new_mf->Copy(source_mesh.GetMeshFeatures(mfi));
       target_mesh->AddMeshFeatures(std::move(new_mf));
+    }
+  }
+}
+
+void Mesh::CopyPropertyAttributesIndicesForMaterial(const Mesh &source_mesh,
+                                                    Mesh *target_mesh,
+                                                    int material_index) {
+  for (int i = 0; i < source_mesh.NumPropertyAttributesIndices(); ++i) {
+    // Property attributes index is used if it doesn't have any material mask or
+    // if one of the material masks matches |material_index|.
+    bool is_used = source_mesh.NumPropertyAttributesIndexMaterialMasks(i) == 0;
+    for (int mask_index = 0;
+         !is_used &&
+         mask_index < source_mesh.NumPropertyAttributesIndexMaterialMasks(i);
+         ++mask_index) {
+      if (source_mesh.GetPropertyAttributesIndexMaterialMask(i, mask_index) ==
+          material_index) {
+        is_used = true;
+      }
+    }
+    if (is_used) {
+      // Copy over the property attributes index to the target mesh.
+      target_mesh->AddPropertyAttributesIndex(
+          source_mesh.GetPropertyAttributesIndex(i));
+    }
+  }
+}
+
+void Mesh::UpdateMeshFeaturesAfterDeletedAttribute(int att_id) {
+  for (MeshFeaturesIndex mfi(0); mfi < NumMeshFeatures(); ++mfi) {
+    auto &mf = GetMeshFeatures(mfi);
+    if (mf.GetAttributeIndex() == att_id) {
+      // Mesh features is no longer associated with a vertex attribute.
+      mf.SetAttributeIndex(-1);
+    } else if (mf.GetAttributeIndex() > att_id) {
+      // Attribute index decremented by one.
+      mf.SetAttributeIndex(mf.GetAttributeIndex() - 1);
     }
   }
 }

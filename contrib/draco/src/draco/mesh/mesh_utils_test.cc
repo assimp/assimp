@@ -386,6 +386,47 @@ TEST(MeshUtilsTest, RemoveUnusedMeshFeatures) {
   }
 }
 
+TEST(MeshUtilsTest, RemoveUnusedPropertyAttributesIndices) {
+  // Test verifies that MeshUtils::RemoveUnusedPropertyAttributesIndices works
+  // as intended.
+  std::unique_ptr<draco::Mesh> mesh =
+      draco::ReadMeshFromTestFile("BoxesMeta/glTF/BoxesMeta.gltf");
+  ASSERT_NE(mesh, nullptr);
+
+  // The input mesh should have two property attributes indices.
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 2);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndex(0), 0);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndex(1), 1);
+  ASSERT_EQ(mesh->NumPropertyAttributesIndexMaterialMasks(0), 1);
+  ASSERT_EQ(mesh->NumPropertyAttributesIndexMaterialMasks(1), 1);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(0, 0), 0);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(1, 0), 1);
+
+  // Both indices should be used so calling the method below shouldn't do
+  // anything.
+  draco::MeshUtils::RemoveUnusedPropertyAttributesIndices(mesh.get());
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 2);
+
+  // Now remove material 1 that is mapped to second property attributes index.
+  draco::PointAttribute *mat_att = mesh->attribute(
+      mesh->GetNamedAttributeId(draco::GeometryAttribute::MATERIAL));
+
+  // This basically remaps all faces from material 1 to material 0.
+  uint32_t mat_index = 0;
+  mat_att->SetAttributeValue(draco::AttributeValueIndex(1), &mat_index);
+
+  // Try to remove the property attributes indices again.
+  draco::MeshUtils::RemoveUnusedPropertyAttributesIndices(mesh.get());
+
+  // One of the property attributes indices should have been removed.
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 1);
+
+  // Ensure the remaining property attributes index is mapped to the correct
+  // material.
+  ASSERT_EQ(mesh->NumPropertyAttributesIndexMaterialMasks(0), 1);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(0, 0), 0);
+}
+
 }  // namespace
 
 #endif  // DRACO_TRANSCODER_SUPPORTED

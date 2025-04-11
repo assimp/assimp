@@ -23,6 +23,13 @@
 #include <unordered_set>
 #include <vector>
 
+#include "draco/core/status.h"
+#include "draco/core/status_or.h"
+#include "draco/io/file_utils.h"
+#include "draco/io/image_compression_options.h"
+#include "draco/texture/texture.h"
+#include "draco/texture/texture_map.h"
+
 namespace draco {
 
 std::string TextureUtils::GetTargetStem(const Texture &texture) {
@@ -59,6 +66,42 @@ ImageFormat TextureUtils::GetTargetFormat(const Texture &texture) {
 
 std::string TextureUtils::GetTargetExtension(const Texture &texture) {
   return GetExtension(GetTargetFormat(texture));
+}
+
+std::string TextureUtils::GetTargetMimeType(const Texture &texture) {
+  const ImageFormat format = GetTargetFormat(texture);
+  if (format == ImageFormat::NONE) {
+    // Unknown format, try to re-use mime type stored in the source_image.
+    // This is mostly useful if users need to handle image formats not directly
+    // supported by the Draco library.
+    if (!texture.source_image().mime_type().empty()) {
+      return texture.source_image().mime_type();
+    } else if (!texture.source_image().filename().empty()) {
+      // Try to set mime type based on the extension of the filename.
+      const std::string extension =
+          LowercaseFileExtension(texture.source_image().filename());
+      if (!extension.empty()) {
+        return "image/" + extension;
+      }
+    }
+  }
+  return GetMimeType(format);
+}
+
+std::string TextureUtils::GetMimeType(ImageFormat image_format) {
+  switch (image_format) {
+    case ImageFormat::PNG:
+      return "image/png";
+    case ImageFormat::JPEG:
+      return "image/jpeg";
+    case ImageFormat::BASIS:
+      return "image/ktx2";
+    case ImageFormat::WEBP:
+      return "image/webp";
+    case ImageFormat::NONE:
+    default:
+      return "";
+  }
 }
 
 ImageFormat TextureUtils::GetSourceFormat(const Texture &texture) {

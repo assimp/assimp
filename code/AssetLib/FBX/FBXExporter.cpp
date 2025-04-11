@@ -1107,9 +1107,6 @@ void FBXExporter::WriteObjects () {
 
         std::vector<std::vector<double>> uv_data;
         std::vector<std::vector<int32_t>> uv_indices;
-        std::map<aiVector3D, int32_t> index_by_uv;
-
-        std::vector<int32_t> offsets = { 0 };
 
         indent = 2;
 
@@ -1122,7 +1119,7 @@ void FBXExporter::WriteObjects () {
 
           // map of vertex value to its index in the data vector
           std::map<aiVector3D,size_t> index_by_vertex_value;
-          if(bJoinIdenticalVertices){
+          if (bJoinIdenticalVertices) {
               int32_t index = 0;
               for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
                   aiVector3D vtx = m->mVertices[vi];
@@ -1138,7 +1135,7 @@ void FBXExporter::WriteObjects () {
               }
           } else { // do not join vertex, respect the export flag
               vertex_indices.resize(v_offset + m->mNumVertices);
-              std::iota(vertex_indices.begin() + v_offset, vertex_indices.end(), (int)v_offset);
+              std::iota(vertex_indices.begin() + v_offset, vertex_indices.end(), 0);
               for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
                   aiVector3D vtx = m->mVertices[v];
                   flattened_vertices.insert(flattened_vertices.end(), {vtx.x, vtx.y, vtx.z});
@@ -1146,8 +1143,8 @@ void FBXExporter::WriteObjects () {
           }
           vVertexIndice[mi].insert(
             // TODO test whether this can be end or not
-            vVertexIndice[mi].begin(),
-            vertex_indices.begin(),
+            vVertexIndice[mi].end(),
+            vertex_indices.begin() + v_offset,
             vertex_indices.end()
           );
 
@@ -1158,6 +1155,7 @@ void FBXExporter::WriteObjects () {
         // the last vertex index of each polygon is negated and - 1
           for (size_t fi = 0; fi < m->mNumFaces; fi++) {
             const aiFace &f = m->mFaces[fi];
+            if (f.mNumIndices == 0) continue;
             size_t pvi = 0;
             for (; pvi < f.mNumIndices - 1; pvi++) {
               polygon_data.push_back(
@@ -1165,7 +1163,7 @@ void FBXExporter::WriteObjects () {
               );
             }
             polygon_data.push_back(
-              static_cast<int32_t>(-1 - (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
+              static_cast<int32_t>(-1 ^ (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
             );
           }
 
@@ -1197,10 +1195,12 @@ void FBXExporter::WriteObjects () {
           const auto num_uv = static_cast<size_t>(m->GetNumUVChannels());
           uv_indices.resize(std::max(num_uv, uv_indices.size()));
           uv_data.resize(std::max(num_uv, uv_data.size()));
+          std::map<aiVector3D, int32_t> index_by_uv;
 
           // uvs, if any
           for (size_t uvi = 0; uvi < m->GetNumUVChannels(); uvi++) {
-            if (m->mNumUVComponents[uvi] > 2) {
+            const auto nc = m->mNumUVComponents[uvi];
+            if (nc > 2) {
                 // FBX only supports 2-channel UV maps...
                 // or at least i'm not sure how to indicate a different number
                 std::stringstream err;
@@ -1216,7 +1216,7 @@ void FBXExporter::WriteObjects () {
                 ASSIMP_LOG_WARN(err.str());
             }
 
-            int32_t index = 0;
+            int32_t index = static_cast<int32_t>(uv_data[uvi].size()) / nc;
             for (size_t fi = 0; fi < m->mNumFaces; fi++) {
               const aiFace &f = m->mFaces[fi];
               for (size_t pvi = 0; pvi < f.mNumIndices; pvi++) {
@@ -1225,7 +1225,7 @@ void FBXExporter::WriteObjects () {
                 if (elem == index_by_uv.end()) {
                   index_by_uv[curUv] = index;
                   uv_indices[uvi].push_back(index);
-                  for (uint32_t x = 0; x < m->mNumUVComponents[uvi]; ++x) {
+                  for (uint32_t x = 0; x < nc; ++x) {
                     uv_data[uvi].push_back(curUv[x]);
                   }
                   ++index;
@@ -1235,8 +1235,6 @@ void FBXExporter::WriteObjects () {
               }
             }
           }
-
-          offsets.push_back((int32_t)polygon_data.size());
         }
 
 
@@ -1286,7 +1284,7 @@ void FBXExporter::WriteObjects () {
           indent = 3;
           FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
           FBX::Node::WritePropertyNode("Name", "", outstream, binary, indent);
-          FBX::Node::WritePropertyNode("MappingInformationType", "ByPolgonVertex", outstream, binary, indent);
+          FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
           FBX::Node::WritePropertyNode("ReferenceInformationType", "IndexToDirect", outstream, binary, indent);
           FBX::Node::WritePropertyNode("UV", uv_data[uvi], outstream, binary, indent);
           FBX::Node::WritePropertyNode("UVIndex", uv_indices[uvi], outstream, binary, indent);

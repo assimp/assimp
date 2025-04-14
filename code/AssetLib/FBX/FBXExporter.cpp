@@ -1244,38 +1244,42 @@ void FBXExporter::WriteObjects () {
         FBX::Node::WritePropertyNode("PolygonVertexIndex", polygon_data, outstream, binary, indent);
         FBX::Node::WritePropertyNode("GeometryVersion", int32_t(124), outstream, binary, indent);
 
-        FBX::Node normals("LayerElementNormal", int32_t(0));
-        normals.Begin(outstream, binary, indent);
-        normals.DumpProperties(outstream, binary, indent);
-        normals.EndProperties(outstream, binary, indent);
-        normals.BeginChildren(outstream, binary, indent);
-        indent = 3;
-        FBX::Node::WritePropertyNode("Version", int32_t(101),outstream,binary,indent);
-        FBX::Node::WritePropertyNode("Name", "",outstream,binary,indent);
-        FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex",outstream,binary,indent);
-        FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct",outstream,binary,indent);
-        FBX::Node::WritePropertyNode("Normals", normal_data,outstream,binary,indent);
-        // note: version 102 has a NormalsW also... not sure what it is,
-        // so stick with version 101 for now.
-        indent = 2;
-        normals.End(outstream,binary,indent,true);
+	if (!normal_data.empty()) {
+	    FBX::Node normals("LayerElementNormal", int32_t(0));
+	    normals.Begin(outstream, binary, indent);
+	    normals.DumpProperties(outstream, binary, indent);
+	    normals.EndProperties(outstream, binary, indent);
+	    normals.BeginChildren(outstream, binary, indent);
+	    indent = 3;
+	    FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("Name", "", outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct", outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("Normals", normal_data, outstream, binary, indent);
+	    // note: version 102 has a NormalsW also... not sure what it is,
+	    // so stick with version 101 for now.
+	    indent = 2;
+	    normals.End(outstream, binary, indent, true);
+        }
 
-        const auto colorChannelIndex = 0;
-        FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
-        vertexcolors.Begin(outstream, binary, indent);
-        vertexcolors.DumpProperties(outstream, binary, indent);
-        vertexcolors.EndProperties(outstream, binary, indent);
-        vertexcolors.BeginChildren(outstream, binary, indent);
-        indent = 3;
-        FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
-        char layerName[8];
-        snprintf(layerName, sizeof(layerName), "COLOR_%d", colorChannelIndex);
-        FBX::Node::WritePropertyNode("Name", (const char *)layerName, outstream, binary, indent);
-        FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
-        FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct", outstream, binary, indent);
-        FBX::Node::WritePropertyNode("Colors", color_data, outstream, binary, indent);
-        indent = 2;
-        vertexcolors.End(outstream, binary, indent, true);
+	if (!color_data.empty()) {
+	    const auto colorChannelIndex = 0;
+	    FBX::Node vertexcolors("LayerElementColor", int32_t(colorChannelIndex));
+	    vertexcolors.Begin(outstream, binary, indent);
+	    vertexcolors.DumpProperties(outstream, binary, indent);
+	    vertexcolors.EndProperties(outstream, binary, indent);
+	    vertexcolors.BeginChildren(outstream, binary, indent);
+	    indent = 3;
+	    FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
+	    char layerName[8];
+	    snprintf(layerName, sizeof(layerName), "COLOR_%d", colorChannelIndex);
+	    FBX::Node::WritePropertyNode("Name", (const char *)layerName, outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("ReferenceInformationType", "Direct", outstream, binary, indent);
+	    FBX::Node::WritePropertyNode("Colors", color_data, outstream, binary, indent);
+	    indent = 2;
+	    vertexcolors.End(outstream, binary, indent, true);
+        }
 
         for (uint32_t uvi = 0; uvi < uv_data.size(); uvi++) {
           FBX::Node uv("LayerElementUV", int32_t(uvi));
@@ -1327,15 +1331,21 @@ void FBXExporter::WriteObjects () {
         // TODO: handle multiple uv sets correctly?
         FBX::Node layer("Layer", int32_t(0));
         layer.AddChild("Version", int32_t(100));
-        FBX::Node le("LayerElement");
-        le.AddChild("Type", "LayerElementNormal");
-        le.AddChild("TypedIndex", int32_t(0));
-        layer.AddChild(le);
+        FBX::Node le;
 
-        le = FBX::Node("LayerElement");
-        le.AddChild("Type", "LayerElementColor");
-        le.AddChild("TypedIndex", int32_t(0));
-        layer.AddChild(le);
+		if (normal_data.size()) {
+		  le = FBX::Node("LayerElement");
+		  le.AddChild("Type", "LayerElementNormal");
+		  le.AddChild("TypedIndex", int32_t(0));
+		  layer.AddChild(le);
+        }
+
+		if (color_data.size()) {
+		  le = FBX::Node("LayerElement");
+		  le.AddChild("Type", "LayerElementColor");
+		  le.AddChild("TypedIndex", int32_t(0));
+		  layer.AddChild(le);
+        }
 
         le = FBX::Node("LayerElement");
         le.AddChild("Type", "LayerElementMaterial");

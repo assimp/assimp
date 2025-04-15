@@ -1157,13 +1157,9 @@ void FBXExporter::WriteObjects () {
             const aiFace &f = m->mFaces[fi];
             size_t pvi = 0;
             for (; pvi < f.mNumIndices - 1; pvi++) {
-              polygon_data.push_back(
-                static_cast<int32_t>(vertex_indices[v_offset + f.mIndices[pvi]])
-              );
+              polygon_data.push_back(vertex_indices[v_offset + f.mIndices[pvi]]);
             }
-            polygon_data.push_back(
-              static_cast<int32_t>(-1 - vertex_indices[v_offset+f.mIndices[pvi]])
-            );
+            polygon_data.push_back(-1 - vertex_indices[v_offset+f.mIndices[pvi]]);
           }
 
           if (m->HasNormals()) {

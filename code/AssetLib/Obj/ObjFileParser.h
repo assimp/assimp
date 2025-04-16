@@ -90,8 +90,6 @@ protected:
     void parseFile(IOStreamBuffer<char> &streamBuffer);
     /// Method to copy the new delimited word in the current line.
     void copyNextWord(char *pBuffer, size_t length);
-    /// Method to copy the new line.
-    //    void copyNextLine(char *pBuffer, size_t length);
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();
     /// Stores the vector
@@ -146,6 +144,7 @@ private:
     unsigned int m_uiLine;
     //! Helper buffer
     char m_buffer[Buffersize];
+	/// End of buffer
     const char *mEnd;
     /// Pointer to IO system instance.
     IOSystem *m_pIO;

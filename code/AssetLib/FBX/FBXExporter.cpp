@@ -1333,14 +1333,14 @@ void FBXExporter::WriteObjects () {
         layer.AddChild("Version", int32_t(100));
         FBX::Node le;
 
-		if (normal_data.size()) {
+		if (!normal_data.empty()) {
 		  le = FBX::Node("LayerElement");
 		  le.AddChild("Type", "LayerElementNormal");
 		  le.AddChild("TypedIndex", int32_t(0));
 		  layer.AddChild(le);
         }
 
-		if (color_data.size()) {
+		if (!color_data.empty()) {
 		  le = FBX::Node("LayerElement");
 		  le.AddChild("Type", "LayerElementColor");
 		  le.AddChild("TypedIndex", int32_t(0));

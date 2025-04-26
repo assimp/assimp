@@ -660,13 +660,13 @@ void ObjFileParser::getMaterialLib() {
     } else {
         absName = strMatName;
     }
-
-    IOStream *pFile = m_pIO->Open(absName);
+	
+	std::unique_ptr<IOStream> pFile(m_pIO->Open(absName));
     if (nullptr == pFile) {
         ASSIMP_LOG_ERROR("OBJ: Unable to locate material file ", strMatName);
         std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
         ASSIMP_LOG_INFO("OBJ: Opening fallback material file ", strMatFallbackName);
-        pFile = m_pIO->Open(strMatFallbackName);
+        pFile.reset(m_pIO->Open(strMatFallbackName));
         if (!pFile) {
             ASSIMP_LOG_ERROR("OBJ: Unable to locate fallback material file ", strMatFallbackName);
             m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -679,8 +679,8 @@ void ObjFileParser::getMaterialLib() {
     // material files if the model doesn't use any materials, so we
     // allow that.
     std::vector<char> buffer;
-    BaseImporter::TextFileToBuffer(pFile, buffer, BaseImporter::ALLOW_EMPTY);
-    m_pIO->Close(pFile);
+    BaseImporter::TextFileToBuffer(pFile.get(), buffer, BaseImporter::ALLOW_EMPTY);
+    //m_pIO->Close(pFile);
 
     // Importing the material library
     ObjFileMtlImporter mtlImporter(buffer, strMatName, m_pModel.get());

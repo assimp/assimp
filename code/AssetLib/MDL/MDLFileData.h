@@ -602,7 +602,7 @@ struct Vertex_MDL7
     union {
         uint8_t norm162index;
         float norm[3];
-    };
+    } PACK_STRUCT;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------

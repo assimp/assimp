@@ -168,16 +168,6 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     // and texture coordinates).
     for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
         if (!c) {
-            mOutput << "property " << typeName << " s" << endl;
-            mOutput << "property " << typeName << " t" << endl;
-        } else {
-            mOutput << "property " << typeName << " s" << c << endl;
-            mOutput << "property " << typeName << " t" << c << endl;
-        }
-    }
-
-    for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
-        if (!c) {
             mOutput << "property " << "uchar" << " red" << endl;
             mOutput << "property " << "uchar" << " green" << endl;
             mOutput << "property " << "uchar" << " blue" << endl;
@@ -259,7 +249,7 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components) {
                         " " << m->mTextureCoords[c][i].x <<
                         " " << m->mTextureCoords[c][i].y;
                 } else {
-                    throw DeadlyExportError("Invalid number of texture coordinates detected: << m->mNumUVComponents[c]);
+                    throw DeadlyExportError("Invalid number of texture coordinates detected: " + std::to_string(m->mNumUVComponents[c]));
                 }
             } else {
                 mOutput << " -1.0 -1.0";

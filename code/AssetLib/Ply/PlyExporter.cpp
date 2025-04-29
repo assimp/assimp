@@ -252,7 +252,7 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components) {
                 if (m->mNumUVComponents[c] == 3) {
                     mOutput <<
                         " " << m->mTextureCoords[c][i].x <<
-                        " " << m->mTextureCoords[c][i].y <<;
+                        " " << m->mTextureCoords[c][i].y <<
                         " " << m->mTextureCoords[c][i].z;
                 } else if (m->mNumUVComponents[c] == 2) {
                     mOutput <<

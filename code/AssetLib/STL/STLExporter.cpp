@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -203,7 +202,7 @@ void STLExporter::WriteMeshBinary(const aiMesh* m) {
         if (f.mNumIndices < 3) {
             continue;
         }
-        
+
         // we need per-face normals. We specified aiProcess_GenNormals as pre-requisite for this exporter,
         // but nonetheless we have to expect per-vertex normals.
         aiVector3D nor;

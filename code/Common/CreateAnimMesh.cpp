@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/CreateAnimMesh.h>
 
-namespace Assimp    {
+namespace Assimp {
 
 aiAnimMesh *aiCreateAnimMesh(const aiMesh *mesh, bool needPositions, bool needNormals, bool needTangents, bool needColors, bool needTexCoords)
 {

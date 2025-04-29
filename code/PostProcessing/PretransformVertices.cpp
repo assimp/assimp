@@ -348,7 +348,7 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh *> &out, aiMesh **i
 			mesh->mBones = reinterpret_cast<aiBone **>(&node->mTransformation);
 			mesh->mNumBones = UINT_MAX;
 			continue;
-		} 
+		}
 
 		// try to find us in the list of newly created meshes
 		for (unsigned int n = 0; n < out.size(); ++n) {

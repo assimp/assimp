@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -63,8 +62,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
-namespace MDL   {
+namespace Assimp {
+namespace MDL {
 
 // -------------------------------------------------------------------------------------
 // to make it easier for us, we test the magic word against both "endiannesses"
@@ -603,7 +602,7 @@ struct Vertex_MDL7
     union {
         uint8_t norm162index;
         float norm[3];
-    };
+    } PACK_STRUCT;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------

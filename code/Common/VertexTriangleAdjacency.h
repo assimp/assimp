@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -51,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiMesh;
 struct aiFace;
 
-namespace Assimp    {
+namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
 /** @brief The VertexTriangleAdjacency class computes a vertex-triangle

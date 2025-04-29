@@ -421,7 +421,8 @@ struct ASSIMP_API aiScene {
         return mAnimations != nullptr && mNumAnimations > 0;
     }
 
-    bool hasSkeletons() const {
+    //! Check whether the scene contains skeletons
+    inline bool HasSkeletons() const {
         return mSkeletons != nullptr && mNumSkeletons > 0;
     }
 
@@ -469,9 +470,9 @@ struct ASSIMP_API aiScene {
         return std::make_pair(nullptr, -1);
     }
 
-        /**
+    /**
      * @brief Will try to locate a bone described by its name.
-     * 
+     *
      * @param name  The name to look for.
      * @return The bone as a pointer.
      */

@@ -85,7 +85,7 @@ bool D3MFImporter::CanRead(const std::string &filename, IOSystem *pIOHandler, bo
     if (!ZipArchiveIOSystem::isZipArchive(pIOHandler, filename)) {
         return false;
     }
-    static const char *const ModelRef = "3D/3dmodel.model";
+    static constexpr char ModelRef[] = "3D/3dmodel.model";
     ZipArchiveIOSystem archive(pIOHandler, filename);
     if (!archive.Exists(ModelRef)) {
         return false;

@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include "MDLFileData.h"
 #include "AssetLib/HMP/HalfLifeFileData.h"
-#include "AssetLib/MDL/HalfLife/HL1ImportSettings.h"
+#include "HalfLife/HL1ImportSettings.h"
 
 struct aiNode;
 struct aiTexture;

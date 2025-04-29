@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
-#include "AssetLib/glTF2/glTF2Importer.h"
-#include "AssetLib/glTF2/glTF2Asset.h"
+#include "glTF2Importer.h"
+#include "glTF2Asset.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
@@ -510,7 +510,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             // Extract used vertices:
             bool useIndexBuffer = prim.indices;
             std::vector<unsigned int> *vertexRemappingTable = nullptr;
-            
+
             if (useIndexBuffer) {
                 size_t count = prim.indices->count;
                 indexBuffer.resize(count);
@@ -530,7 +530,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     if (index >= numAllVertices) {
                         // Out-of-range indices will be filtered out when adding the faces and then lead to a warning. At this stage, we just keep them.
                         indexBuffer[i] = index;
-                        continue; 
+                        continue;
                     }
                     if (index >= reverseMappingIndices.size()) {
                         reverseMappingIndices.resize(index + 1, unusedIndex);
@@ -1067,7 +1067,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
         }
     }
-    
+
     // No indices are an invalid usecase
     if (nullptr == indices8 && nullptr == indices16) {
         // Something went completely wrong!

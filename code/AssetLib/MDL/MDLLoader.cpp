@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-#include "AssetLib/MDL/MDLLoader.h"
+#include "MDLLoader.h"
 #include "AssetLib/MD2/MD2FileData.h"
-#include "AssetLib/MDL/HalfLife/HL1MDLLoader.h"
-#include "AssetLib/MDL/MDLDefaultColorMap.h"
+#include "HalfLife/HL1MDLLoader.h"
+#include "MDLDefaultColorMap.h"
 
 #include <assimp/StringUtils.h>
 #include <assimp/importerdesc.h>
@@ -268,8 +268,8 @@ void MDLImporter::InternReadFile(const std::string &pFile,
             // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
             pScene->mRootNode->mTransformation = aiMatrix4x4(
                 1.f,  0.f, 0.f, 0.f,
-                0.f,  0.f, 1.f, 0.f, 
-                0.f, -1.f, 0.f, 0.f, 
+                0.f,  0.f, 1.f, 0.f,
+                0.f, -1.f, 0.f, 0.f,
                 0.f,  0.f, 0.f, 1.f);
         }
 

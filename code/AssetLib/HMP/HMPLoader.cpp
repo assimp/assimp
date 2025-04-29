@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
 
 // internal headers
-#include "AssetLib/HMP/HMPLoader.h"
+#include "HMPLoader.h"
 #include "AssetLib/MD2/MD2FileData.h"
 
 #include <assimp/StringUtils.h>
@@ -81,7 +81,7 @@ HMPImporter::~HMPImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool HMPImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_HMP_MAGIC_NUMBER_LE_4,
         AI_HMP_MAGIC_NUMBER_LE_5,
         AI_HMP_MAGIC_NUMBER_LE_7

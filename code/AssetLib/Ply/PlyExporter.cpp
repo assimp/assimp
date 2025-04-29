@@ -249,17 +249,17 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components) {
 
         for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
             if (m->HasTextureCoords(c)) {
-                if (m->mNumUVComponents[a] == 3) {
+                if (m->mNumUVComponents[c] == 3) {
                     mOutput <<
                         " " << m->mTextureCoords[c][i].x <<
                         " " << m->mTextureCoords[c][i].y <<;
                         " " << m->mTextureCoords[c][i].z;
-                } else if (m->mNumUVComponents[a] == 2) {
+                } else if (m->mNumUVComponents[c] == 2) {
                     mOutput <<
                         " " << m->mTextureCoords[c][i].x <<
                         " " << m->mTextureCoords[c][i].y;
                 } else {
-                    throw DeadlyExportError("Invalid number of texture coordinates detected: << m->mNumUVComponents[a]);
+                    throw DeadlyExportError("Invalid number of texture coordinates detected: << m->mNumUVComponents[c]);
                 }
             } else {
                 mOutput << " -1.0 -1.0";

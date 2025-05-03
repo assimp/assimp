@@ -118,10 +118,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
     // now process the file and look out for '$' sections
     while (true) {
         SkipSpaces(&buffer, end);
-        if ('\0' == *buffer)
+        if ('\0' == *buffer) {
             break;
+        }
 
-        if ('$'  == *buffer)    {
+        if ('$'  == *buffer) {
             ++buffer;
             if (TokenMatchI(buffer,"firstframe",10)) {
                 SkipSpaces(&buffer, end);

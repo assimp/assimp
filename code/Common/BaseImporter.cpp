@@ -393,7 +393,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
         ASSIMP_LOG_DEBUG("Found UTF-32 BOM ...");
 
         std::vector<char> output;
-        uint32_t *ptr = (uint32_t *)&data[0];
+        auto *ptr = (uint32_t *)&data[0];
         uint32_t *end = ptr + (data.size() / sizeof(uint32_t)) + 1;
         utf8::utf32to8(ptr, end, back_inserter(output));
         return;

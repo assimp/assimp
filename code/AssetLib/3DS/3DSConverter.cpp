@@ -196,7 +196,7 @@ void CopyTexture(aiMaterial &mat, Texture &texture, aiTextureType type) {
 void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
     // NOTE: Pass the background image to the viewer by bypassing the
     // material system. This is an evil hack, never do it again!
-    if (mBackgroundImage.Empty() && bHasBG) {
+    if (mBackgroundImage.empty() && bHasBG) {
         aiString tex(mBackgroundImage);
         mat.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 

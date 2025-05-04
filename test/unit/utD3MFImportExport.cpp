@@ -78,16 +78,21 @@ public:
 #endif // ASSIMP_BUILD_NO_EXPORT
 };
 
+#if !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+#endif // !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
+#if !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 TEST_F(utD3MFImporterExporter, export3MFtoMemTest) {
     //EXPECT_TRUE(exporterTest());
 }
+#endif // !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 
+#if !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 TEST_F(utD3MFImporterExporter, roundtrip3MFtoMemTest) {
     /*EXPECT_TRUE(exporterTest());
 
@@ -95,5 +100,6 @@ TEST_F(utD3MFImporterExporter, roundtrip3MFtoMemTest) {
     const aiScene *scene = importer.ReadFile("test.3mf", 0);
     EXPECT_NE(nullptr, scene));*/
 }
+#endif // !defined(ASSIMP_BUILD_NO_3MF_IMPORTER)
 
 #endif // ASSIMP_BUILD_NO_EXPORT

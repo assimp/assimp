@@ -339,7 +339,7 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
     out.push_back(new OpenGEX::OpenGEXImporter());
-#endif
+#endif // !ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 #if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
     out.push_back(new MS3DImporter());
 #endif

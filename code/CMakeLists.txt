@@ -529,11 +529,13 @@ ADD_ASSIMP_IMPORTER( OGRE
   AssetLib/Ogre/OgreMaterial.cpp
 )
 
-ADD_ASSIMP_IMPORTER( OPENGEX
-  AssetLib/OpenGEX/OpenGEXImporter.cpp
-  AssetLib/OpenGEX/OpenGEXImporter.h
-  AssetLib/OpenGEX/OpenGEXStructs.h
-)
+if (ASSIMP_BUILD_OPENGEX_IMPORTER_CMAKEOPT)
+    ADD_ASSIMP_IMPORTER( OPENGEX
+            AssetLib/OpenGEX/OpenGEXImporter.cpp
+            AssetLib/OpenGEX/OpenGEXImporter.h
+            AssetLib/OpenGEX/OpenGEXStructs.h
+    )
+endif () # if (ASSIMP_BUILD_OPENGEX_IMPORTER_CMAKEOPT)
 
 ADD_ASSIMP_IMPORTER( PLY
   AssetLib/Ply/PlyLoader.cpp
@@ -637,9 +639,11 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Obj/ObjExporter.h
     AssetLib/Obj/ObjExporter.cpp)
 
+if (ASSIMP_BUILD_OPENGEX_EXPORTER_CMAKEOPT)
   ADD_ASSIMP_EXPORTER( OPENGEX
     AssetLib/OpenGEX/OpenGEXExporter.cpp
     AssetLib/OpenGEX/OpenGEXExporter.h)
+endif () # if (ASSIMP_BUILD_OPENGEX_EXPORTER_CMAKEOPT)
 
   ADD_ASSIMP_EXPORTER( PLY
     AssetLib/Ply/PlyExporter.cpp
@@ -696,9 +700,11 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/glTF2/glTF2Exporter.h
     AssetLib/glTF2/glTF2Exporter.cpp)
 
+if (ASSIMP_BUILD_3MF_EXPORTER_CMAKEOPT)
   ADD_ASSIMP_EXPORTER( 3MF
     AssetLib/3MF/D3MFExporter.h
     AssetLib/3MF/D3MFExporter.cpp)
+endif () # if (ASSIMP_BUILD_3MF_EXPORTER_CMAKEOPT)
 
   ADD_ASSIMP_EXPORTER( PBRT
     Pbrt/PbrtExporter.h
@@ -887,16 +893,18 @@ ADD_ASSIMP_IMPORTER( GLTF
   AssetLib/glTF2/glTF2Importer.h
 )
 
-ADD_ASSIMP_IMPORTER(3MF
-  AssetLib/3MF/3MFTypes.h
-  AssetLib/3MF/XmlSerializer.h
-  AssetLib/3MF/XmlSerializer.cpp
-  AssetLib/3MF/D3MFImporter.h
-  AssetLib/3MF/D3MFImporter.cpp
-  AssetLib/3MF/D3MFOpcPackage.h
-  AssetLib/3MF/D3MFOpcPackage.cpp
-  AssetLib/3MF/3MFXmlTags.h
-)
+if (ASSIMP_BUILD_3MF_IMPORTER_CMAKEOPT)
+    ADD_ASSIMP_IMPORTER(3MF
+            AssetLib/3MF/3MFTypes.h
+            AssetLib/3MF/XmlSerializer.h
+            AssetLib/3MF/XmlSerializer.cpp
+            AssetLib/3MF/D3MFImporter.h
+            AssetLib/3MF/D3MFImporter.cpp
+            AssetLib/3MF/D3MFOpcPackage.h
+            AssetLib/3MF/D3MFOpcPackage.cpp
+            AssetLib/3MF/3MFXmlTags.h
+    )
+endif () # if (ASSIMP_BUILD_3MF_IMPORTER_CMAKEOPT)
 
 ADD_ASSIMP_IMPORTER( MMD
   AssetLib/MMD/MMDCpp14.h
@@ -1205,8 +1213,8 @@ IF(3MF IN_LIST ASSIMP_EXPORTERS_LIST)
     endif()
 
     SOURCE_GROUP( ziplib FILES ${ziplib_SRCS} )
-  ENDIF()
-ENDIF()
+  ENDIF() # IF(ASSIMP_HUNTER_ENABLED)
+ENDIF() # IF(3MF IN_LIST ASSIMP_EXPORTERS_LIST)
 
 # openddlparser
 IF(ASSIMP_HUNTER_ENABLED)

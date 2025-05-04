@@ -42,7 +42,38 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
 #================================================================================#
 #                    Model formats not enabled by default
-#
+#================================================================================#
+
+#================================================================================#
+#    Broken formats which should be opt-in only
+#================================================================================#
+# 3MF format import broken since 2024 due to regression
+option(ASSIMP_BUILD_3MF_IMPORTER_CMAKEOPT "Enable 3MF file import" off)
+option(ASSIMP_BUILD_3MF_EXPORTER_CMAKEOPT "Enable 3MF file export" on)
+
+# OpenGEX format import broken, difficult to tell when since there were masking issues
+# i.e. importer refused to load models for extraneous reasons so crashes weren't
+# apparent
+option(ASSIMP_BUILD_OPENGEX_IMPORTER_CMAKEOPT "Enable OpenGEX file import" off)
+option(ASSIMP_BUILD_OPENGEX_EXPORTER_CMAKEOPT "Enable OpenGEX file export" on)
+
+#--------------------------------------------------------------------------------#
+#                  Internal impl for broken formats
+#--------------------------------------------------------------------------------#
+if (NOT ASSIMP_BUILD_3MF_IMPORTER_CMAKEOPT)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_3MF_IMPORTER)
+endif () # if (not ASSIMP_BUILD_3MF_IMPORTER_CMAKEOPT)
+if (NOT ASSIMP_BUILD_3MF_EXPORTER_CMAKEOPT)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_3MF_EXPORTER)
+endif () # if (not ASSIMP_BUILD_3MF_EXPORTER_CMAKEOPT)
+
+if (NOT ASSIMP_BUILD_OPENGEX_IMPORTER_CMAKEOPT)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_OPENGEX_IMPORTER)
+endif () # if (not ASSIMP_BUILD_OPENGEX_IMPORTER_CMAKEOPT)
+if (NOT ASSIMP_BUILD_OPENGEX_EXPORTER_CMAKEOPT)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_OPENGEX_EXPORTER)
+endif () # if (not ASSIMP_BUILD_OPENGEX_EXPORTER_CMAKEOPT)
+#================================================================================#
 #    3rd party projects may not adhere to strict standards enforced by assimp,
 #    in which case those formats must be opt-in; otherwise the 3rd party code
 #    would fail assimp CI checks

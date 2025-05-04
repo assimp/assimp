@@ -2,9 +2,9 @@
 
 __Importers__:
 
+## Working
 - 3D
 - [3DS](https://en.wikipedia.org/wiki/.3ds)
-- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format)
 - AC
 - [AC3D](https://en.wikipedia.org/wiki/AC3D)
 - ACC
@@ -46,7 +46,6 @@ __Importers__:
 - NFF
 - [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 - [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
-- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange)
 - [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
 - PMX
 - PRJ
@@ -63,30 +62,37 @@ __Importers__:
 - [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description)
 - VTA
 - X
-- [X3D](https://en.wikipedia.org/wiki/X3D)
 - XGL
 - ZGL
-
-Note: support for [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) is deprecated.
-It is too time-consuming to maintain an undocumented format which contains so much more than we need.
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
 - [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) IMporting geometry + node hierarchy are currently supported
 
+## Deprecated (support frozen)
+- [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) It is too time-consuming to maintain an undocumented format which contains so much more than we need.
+
+## Partially broken (working but with known problems)
+- [X3D](https://en.wikipedia.org/wiki/X3D) Broke when migrating IRRXml to pugixml in 2020
+
+## Broken (not currently working)
+- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) Broke in Feb 2024
+- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) No clear working/broken demarcation
+
 __Exporters__:
 
-- DAE (Collada)
-- STL
-- OBJ
-- PLY
-- X
 - 3DS
-- JSON (for WebGl, via https://github.com/acgessler/assimp2json)
+- 3MF ( experimental )
 - ASSBIN
-- STEP
-- [PBRTv4](https://github.com/mmp/pbrt-v4)
+- DAE (Collada)
+- FBX ( experimental )
 - glTF 1.0 (partial)
 - glTF 2.0 (partial)
-- 3MF ( experimental )
-- FBX ( experimental )
+- JSON (for WebGl, via https://github.com/acgessler/assimp2json)
+- OBJ
+- OGEX ( experimental )
+- [PBRTv4](https://github.com/mmp/pbrt-v4)
+- PLY
+- STEP
+- STL
+- X

@@ -11,6 +11,7 @@
 - AMJ
 - ASE
 - ASK
+- ASSBIN (`Assimp Binary Importer`)
 - B3D
 - [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
 - CSM
@@ -47,22 +48,23 @@
 - [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 - [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
 - [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
-- PMX
+- [PMX](https://en.wikipedia.org/wiki/MikuMikuDance)
 - PRJ
 - Q3O
 - Q3S
 - RAW
-- SCN (Note: this extension used by multiple disparate 3D formats)
+- [SCN](https://en.wikipedia.org/wiki/TrueSpace) (Note: assimp supports TrueSpace `.scn` files, but this extension used by other unsupported 3D formats as well)
 - SIB
-- SMD
+- [SMD](https://developer.valvesoftware.com/wiki/SMD) (`StudioModel Data`)
+- [STEP](https://en.wikipedia.org/wiki/ISO_10303-21)
 - [STP](https://en.wikipedia.org/wiki/ISO_10303-21)
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - TER
 - UC
-- [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description) ( experimental; to build need to opt-in in `CMakeLists.txt`)
-- WRL ("classic" VRML) to build need to opt-in in `CMakeLists.txt`
-- VTA
-- X
+- [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description) (`.usd`, `.usda`, `.usdc`, `.usdz`) ( experimental ) To build need to opt-in in `CMakeLists.txt`
+- WRL ("classic" VRML, loaded via on-the-fly conversion to X3D `.xml`) To build need to opt-in in `CMakeLists.txt`
+- VTA (SMD loader)
+- [X](https://learn.microsoft.com/en-us/windows/win32/direct3d9/x-files--legacy-) (Legacy format introduced with DirectX 2.0)
 - XGL
 - ZGL
 
@@ -85,18 +87,18 @@ Additionally, some formats are supported by dependency on non-free code or exter
 
 ### Exporters
 
-- 3DS
-- 3MF ( experimental ) Note: importer broken
-- ASSBIN
-- DAE (Collada)
-- FBX ( experimental )
-- glTF 1.0 (partial)
-- glTF 2.0 (partial)
+- [3DS](https://en.wikipedia.org/wiki/.3ds)
+- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) ( experimental ) Note: importer broken
+- ASSBIN (`Assimp Binary Importer`)
+- [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
+- [FBX](https://en.wikipedia.org/wiki/FBX) ( experimental )
+- [glTF 1.0](https://en.wikipedia.org/wiki/GlTF#glTF_1.0) (partial)
+- [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0) (partial)
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
-- OBJ
-- OGEX ( experimental ) Note: importer broken
+- [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) ( experimental ) Note: importer broken
 - [PBRTv4](https://github.com/mmp/pbrt-v4)
-- PLY
-- STEP
-- STL
-- X
+- [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
+- [STEP](https://en.wikipedia.org/wiki/ISO_10303-21)
+- [STL](https://en.wikipedia.org/wiki/STL_(file_format))
+- [X](https://learn.microsoft.com/en-us/windows/win32/direct3d9/x-files--legacy-)

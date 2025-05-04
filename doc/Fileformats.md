@@ -68,7 +68,9 @@
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) Importing geometry + node hierarchy are currently supported
+- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) Importing geometry + node hierarchy are currently supported;
+    Note that this proprietary format depends on prebuilt libraries and is only supported on windows and MacOS
+    (i.e. not on Android/Linux/iOS)
 
 #### Deprecated (support frozen)
 - [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) It is too time-consuming to maintain an undocumented format which contains so much more than we need.

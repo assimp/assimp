@@ -58,18 +58,24 @@ public:
     }
 };
 
+#if !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 TEST_F(utOpenGEXImportExport, importOpenGexFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+#endif // !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 
+#if !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 TEST_F(utOpenGEXImportExport, Importissue1262_NoCrash) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0);
     EXPECT_NE(nullptr, scene);
 }
+#endif // !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 
+#if !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 TEST_F(utOpenGEXImportExport, Importissue1340_EmptyCameraObject) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/empty_camera.ogex", 0);
     EXPECT_NE(nullptr, scene);
 }
+#endif // !defined(ASSIMP_BUILD_NO_OPENGEX_IMPORTER)

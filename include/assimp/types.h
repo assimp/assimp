@@ -393,6 +393,14 @@ struct aiString {
         return data;
     }
 
+    /**
+     * @brief  Will return true, if the string is empty.
+     * @return true if the string is empty, false if not
+     */
+    bool Empty() const {
+        return length == 0;
+    }
+
 #endif // !__cplusplus
 
     /** Binary length of the string excluding the terminal 0. This is NOT the

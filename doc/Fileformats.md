@@ -1,8 +1,8 @@
 #### Supported file formats ####
 
-__Importers__:
+### Importers
 
-## Working
+#### Working
 - 3D
 - [3DS](https://en.wikipedia.org/wiki/.3ds)
 - AC
@@ -69,20 +69,20 @@ Additionally, some formats are supported by dependency on non-free code or exter
 
 - [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) IMporting geometry + node hierarchy are currently supported
 
-## Deprecated (support frozen)
+#### Deprecated (support frozen)
 - [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) It is too time-consuming to maintain an undocumented format which contains so much more than we need.
 
-## Partially broken (working but with known problems)
+#### Partially broken (working but with known problems)
 - [X3D](https://en.wikipedia.org/wiki/X3D) Broke when migrating IRRXml to pugixml in 2020
 
-## Broken (not currently working)
+#### Broken (not currently working)
 - [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) Broke in Feb 2024
 - [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) No clear working/broken demarcation
 
-__Exporters__:
+### Exporters
 
 - 3DS
-- 3MF ( experimental )
+- 3MF ( experimental ) Note: importer broken
 - ASSBIN
 - DAE (Collada)
 - FBX ( experimental )
@@ -90,7 +90,7 @@ __Exporters__:
 - glTF 2.0 (partial)
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - OBJ
-- OGEX ( experimental )
+- OGEX ( experimental ) Note: importer broken
 - [PBRTv4](https://github.com/mmp/pbrt-v4)
 - PLY
 - STEP

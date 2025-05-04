@@ -76,8 +76,8 @@ Additionally, some formats are supported by dependency on non-free code or exter
 - [X3D](https://en.wikipedia.org/wiki/X3D) Broke when migrating IRRXml to pugixml in 2020
 
 #### Broken (not currently working)
-- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) Broke in Feb 2024
-- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) No clear working/broken demarcation
+- [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) Broke in Feb 2024 (to build need to opt-in in `CMakeLists.txt`)
+- [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) No clear working/broken demarcation (to build need to opt-in in `CMakeLists.txt`)
 
 ### Exporters
 

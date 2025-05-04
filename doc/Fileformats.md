@@ -59,7 +59,8 @@
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - TER
 - UC
-- [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description)
+- [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description) ( experimental; to build need to opt-in in `CMakeLists.txt`)
+- WRL ("classic" VRML) to build need to opt-in in `CMakeLists.txt`
 - VTA
 - X
 - XGL
@@ -67,12 +68,13 @@
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) IMporting geometry + node hierarchy are currently supported
+- [C4D](https://en.wikipedia.org/wiki/Cinema_4D) (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange) Importing geometry + node hierarchy are currently supported
 
 #### Deprecated (support frozen)
 - [BLEND](https://en.wikipedia.org/wiki/.blend_(file_format)) It is too time-consuming to maintain an undocumented format which contains so much more than we need.
 
 #### Partially broken (working but with known problems)
+- [M3D](https://bztsrc.gitlab.io/model3d/) Assimp support abandoned by author (to build need to opt-in in `CMakeLists.txt`)
 - [X3D](https://en.wikipedia.org/wiki/X3D) Broke when migrating IRRXml to pugixml in 2020
 
 #### Broken (not currently working)

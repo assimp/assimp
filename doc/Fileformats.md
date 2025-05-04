@@ -13,7 +13,6 @@
 - ASK
 - B3D
 - [BVH](https://en.wikipedia.org/wiki/Biovision_Hierarchy)
-
 - CSM
 - COB
 - [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
@@ -29,7 +28,6 @@
   + KHR_texture_transform ( 5.1 under test )
 - HMB
 - IFC-STEP
-
 - IQM
 - IRR / IRRMESH
 - [LWO](https://en.wikipedia.org/wiki/LightWave_3D)
@@ -40,7 +38,6 @@
 - MD3
 - MD5
 - MDC
-
 - MDL
 - MESH / MESH.XML
 - MOT
@@ -51,7 +48,6 @@
 - [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
 - [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
 - PMX
-
 - PRJ
 - Q3O
 - Q3S
@@ -62,7 +58,6 @@
 - [STP](https://en.wikipedia.org/wiki/ISO_10303-21)
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - TER
-
 - UC
 - [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description) ( experimental; to build need to opt-in in `CMakeLists.txt`)
 - WRL ("classic" VRML) to build need to opt-in in `CMakeLists.txt`

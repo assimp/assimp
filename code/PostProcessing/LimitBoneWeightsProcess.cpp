@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -68,7 +68,7 @@ bool LimitBoneWeightsProcess::IsActive( unsigned int pFlags) const {
 // Executes the post processing step on the given imported data.
 void LimitBoneWeightsProcess::Execute( aiScene* pScene) {
     ai_assert(pScene != nullptr);
-              
+
     ASSIMP_LOG_DEBUG("LimitBoneWeightsProcess begin");
 
     for (unsigned int m = 0; m < pScene->mNumMeshes; ++m) {
@@ -88,7 +88,7 @@ void LimitBoneWeightsProcess::SetupProperties(const Importer* pImp) {
 // ------------------------------------------------------------------------------------------------
 static unsigned int removeEmptyBones(aiMesh *pMesh) {
     ai_assert(pMesh != nullptr);
-    
+
     unsigned int writeBone = 0;
     for (unsigned int readBone = 0; readBone< pMesh->mNumBones; ++readBone) {
         aiBone* bone = pMesh->mBones[readBone];
@@ -98,7 +98,7 @@ static unsigned int removeEmptyBones(aiMesh *pMesh) {
             delete bone;
         }
     }
-    
+
     return writeBone;
 }
 

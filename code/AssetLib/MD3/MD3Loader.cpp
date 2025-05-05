@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -52,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
-#include "AssetLib/MD3/MD3Loader.h"
+#include "MD3Loader.h"
 #include "Common/Importer.h"
 
 #include <assimp/GenericProperty.h>
@@ -352,7 +350,7 @@ MD3Importer::~MD3Importer() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MD3Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 

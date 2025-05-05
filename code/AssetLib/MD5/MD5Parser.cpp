@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 // internal headers
-#include "AssetLib/MD5/MD5Loader.h"
+#include "MD5Loader.h"
 #include "Material/MaterialSystem.h"
 
 #include <assimp/ParsingUtils.h>
@@ -127,7 +127,7 @@ void MD5Parser::ParseHeader() {
     if (buffer == bufferEnd) {
         return;
     }
-    
+
     ASSIMP_LOG_INFO(std::string(sz, std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer - sz))));
     SkipSpacesAndLineEnd();
 }
@@ -291,7 +291,7 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
     }
     if ('\0' != **sz) {
         const char *szStart = ++(*sz);
-        
+
         while (('\"' != **sz && '\0' != **sz) && *sz != bufferEnd) {
             ++*sz;
         }
@@ -324,7 +324,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
 
                 const char *sz = elem.szStart;
                 AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, elem.end, desc.mName);
-                
+
                 AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
 
                 // negative values, at least -1, is allowed here

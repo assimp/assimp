@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -64,7 +64,7 @@ namespace {
 
 aiString aiStringFrom(cineware::String const & cinestring) {
     aiString result;
-    cinestring.GetCString(result.data, MAXLEN-1);
+    cinestring.GetCString(result.data, AI_MAXLEN - 1);
     result.length = static_cast<ai_uint32>(cinestring.GetLength());
     return result;
 }

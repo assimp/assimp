@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssetLib/glTF/glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
@@ -87,6 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace glTF2 {
+
 using glTFCommon::FindStringInContext;
 using glTFCommon::FindNumberInContext;
 using glTFCommon::FindUIntInContext;
@@ -813,7 +814,7 @@ inline uint8_t *BufferView::GetPointerAndTailSize(size_t accOffset, size_t& outT
         outTailSize = 0;
         return nullptr;
     }
-    
+
     outTailSize = buffer->byteLength - offset;
     return basePtr + offset;
 }
@@ -918,7 +919,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
             if (!indiceViewID) {
                 throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
-            }			
+            }
             sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
             //indices byteOffset
             sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
@@ -956,8 +957,8 @@ inline void Accessor::Read(Value &obj, Asset &r) {
         }
         else {
             sparse->PopulateData(dataSize, nullptr);
-        }        
-		sparse->PatchData(elementSize);
+        }
+        sparse->PatchData(elementSize);
     }
 }
 
@@ -1316,7 +1317,7 @@ inline void Material::Read(Value &material, Asset &r) {
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
-        
+
         if (r.extensionsUsed.KHR_materials_specular) {
             if (Value *curMatSpecular = FindObject(*extensions, "KHR_materials_specular")) {
                 MaterialSpecular specular;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -529,7 +529,6 @@ public:
 
     template <typename T>
     const T &To() const {
-
         return dynamic_cast<const T &>(**this);
     }
 

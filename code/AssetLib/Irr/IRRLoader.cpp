@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/StringComparison.h"
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
-#include "AssetLib/Irr/IRRLoader.h"
+#include "IRRLoader.h"
 #include "Common/Importer.h"
 
 #include <assimp/GenericProperty.h>

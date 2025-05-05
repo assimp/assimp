@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -108,7 +108,7 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char Token[] = "BLENDER";
+static constexpr char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -243,7 +243,7 @@ struct aiColor3D {
 }; // !struct aiColor3D
 
 // ----------------------------------------------------------------------------------
-/** 
+/**
  * @brief Represents an UTF-8 string, zero byte terminated.
  *
  *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
@@ -267,7 +267,7 @@ struct aiColor3D {
 struct aiString {
 #ifdef __cplusplus
     /** Default constructor, the string is set to have zero length */
-    aiString() AI_NO_EXCEPT : 
+    aiString() AI_NO_EXCEPT :
             length(0), data{'\0'} {
 #ifdef ASSIMP_BUILD_DEBUG
         // Debug build: overwrite the string on its full length with ESC (27)
@@ -283,7 +283,7 @@ struct aiString {
         memcpy(data, rOther.data, length);
         data[length] = '\0';
     }
-    
+
     /** Constructor from std::string */
     explicit aiString(const std::string &pString) :
             length((ai_uint32)pString.length()), data{'\0'} {
@@ -303,12 +303,21 @@ struct aiString {
     }
 
     /** Copy a const char* to the aiString */
-    void Set(const char *sz) {
-        ai_int32 len = (ai_uint32)::strlen(sz);
-        if (len > static_cast<ai_int32>(AI_MAXLEN - 1)) {
-            len = static_cast<ai_int32>(AI_MAXLEN - 1);
+    void Set(const char *sz, size_t maxlen) {
+        if (sz == nullptr) {
+            return;
         }
-        length = len;
+        size_t len = 0;
+        for (size_t i=0; i<maxlen; ++i) {
+            if (sz[i] == '\0') {
+                break;
+            }
+            ++len;
+        }
+        if (len > AI_MAXLEN - 1) {
+            len = AI_MAXLEN - 1;
+        }
+        length = static_cast<uint32_t>(len);
         memcpy(data, sz, len);
         data[len] = 0;
     }
@@ -382,6 +391,14 @@ struct aiString {
     /** Returns a pointer to the underlying zero-terminated array of characters */
     const char *C_Str() const {
         return data;
+    }
+
+    /**
+     * @brief  Will return true, if the string is empty.
+     * @return true if the string is empty, false if not
+     */
+    bool Empty() const {
+        return length == 0;
     }
 
 #endif // !__cplusplus

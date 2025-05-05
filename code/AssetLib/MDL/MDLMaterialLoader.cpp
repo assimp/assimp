@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -209,6 +209,8 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char *szData,
     return;
 }
 
+static const uint32_t MaxTextureSize = 4096;
+
 // ------------------------------------------------------------------------------------------------
 // Load color data of a texture and convert it to our output format
 void MDLImporter::ParseTextureColorData(const unsigned char *szData,
@@ -219,6 +221,11 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 
     // allocate storage for the texture image
     if (do_read) {
+        // check for max texture sizes
+        if (pcNew->mWidth > MaxTextureSize || pcNew->mHeight > MaxTextureSize) {
+            throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+        }
+
         if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
             throw DeadlyImportError("Invalid MDL file. A texture is too big.");
         }

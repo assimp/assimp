@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -86,7 +86,7 @@ public:
 	AMFNodeElementBase *Parent; ///< Parent element. If nullptr then this node is root.
 	std::list<AMFNodeElementBase *> Child; ///< Child elements.
 
-public: 
+public:
 	/// Destructor, virtual..
 	virtual ~AMFNodeElementBase() = default;
 

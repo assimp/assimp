@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -399,6 +399,12 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
         return AI_FAILURE;
     }
     return AI_SUCCESS;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a c-like string fron an aiString
+const char *aiGetStringC_Str(const aiString *str) {
+	return str->data;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -113,14 +113,14 @@ std::string EmbedTexturesProcess::tryToFindValidPath(const std::string &imagePat
     }
 
     // In unix systems, '\' is a valid file name character, but some files may use \ as a directory separator.
-    // Try replacing '\' by '/'. 
+    // Try replacing '\' by '/'.
     if (mIOHandler->getOsSeparator() != '\\' && imagePath.find('\\') != std::string::npos) {
         ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image '", imagePath, "' in root folder. Will try replacing directory separators.");
         testPath = imagePath;
         std::replace(testPath.begin(), testPath.end(), '\\', mIOHandler->getOsSeparator());
         return tryToFindValidPath(testPath);
     }
-    
+
     ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", imagePath, ".");
     return {};
 }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -118,10 +118,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
     // now process the file and look out for '$' sections
     while (true) {
         SkipSpaces(&buffer, end);
-        if ('\0' == *buffer)
+        if ('\0' == *buffer) {
             break;
+        }
 
-        if ('$'  == *buffer)    {
+        if ('$'  == *buffer) {
             ++buffer;
             if (TokenMatchI(buffer,"firstframe",10)) {
                 SkipSpaces(&buffer, end);
@@ -150,7 +151,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     aiNodeAnim* nda = anims_temp.back();
 
                     char* ot = nda->mNodeName.data;
-                    while (!IsSpaceOrNewLine(*buffer)) {
+                    while (!IsSpaceOrNewLine(*buffer) && buffer != end) {
                         *ot++ = *buffer++;
                     }
 

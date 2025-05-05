@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,7 @@ struct aiNode;
 struct aiMaterial;
 struct aiCamera;
 
-namespace Assimp    {
+namespace Assimp {
 
 // -----------------------------------------------------------------------------------
 /** @brief The MakeLeftHandedProcess converts all imported data to a left-handed

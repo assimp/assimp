@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -195,6 +195,7 @@ static aiString ReadString(StreamReaderLE *stream, uint32_t numWChars) {
 
     return result;
 }
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool SIBImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {

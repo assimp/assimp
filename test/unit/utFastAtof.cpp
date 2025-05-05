@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -122,6 +120,7 @@ protected:
         TEST_CASE(0e-19);
         TEST_CASE(400012);
         TEST_CASE(5.9e-76);
+        TEST_CASE(7.54979e-8);
         TEST_CASE_INF(inf);
         TEST_CASE_INF(inf);
         TEST_CASE_INF(infinity);

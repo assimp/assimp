@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -91,15 +91,12 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     // now iterate through all meshes and through all faces and
     // find all faces that are using the default material
     unsigned int cnt = 0;
-    for (std::vector<D3DS::Mesh>::iterator
-                    i = mScene->mMeshes.begin();
-            i != mScene->mMeshes.end(); ++i) {
-        for (std::vector<unsigned int>::iterator
-                        a = (*i).mFaceMaterials.begin();
-                a != (*i).mFaceMaterials.end(); ++a) {
+    for (auto i = mScene->mMeshes.begin(); i != mScene->mMeshes.end(); ++i) {
+        for (auto a = (*i).mFaceMaterials.begin(); a != (*i).mFaceMaterials.end(); ++a) {
             // NOTE: The additional check seems to be necessary,
             // some exporters seem to generate invalid data here
-            if (0xcdcdcdcd == (*a)) {
+
+            if (NotSet == (*a)) {
                 (*a) = idx;
                 ++cnt;
             } else if ((*a) >= mScene->mMaterials.size()) {
@@ -111,7 +108,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     }
     if (cnt && idx == mScene->mMaterials.size()) {
         // We need to create our own default material
-        D3DS::Material sMat("%%%DEFAULT");
+        Material sMat("%%%DEFAULT");
         sMat.mDiffuse = aiColor3D(0.3f, 0.3f, 0.3f);
         mScene->mMaterials.push_back(sMat);
 
@@ -121,17 +118,17 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
 
 // ------------------------------------------------------------------------------------------------
 // Check whether all indices are valid. Otherwise we'd crash before the validation step is reached
-void Discreet3DSImporter::CheckIndices(D3DS::Mesh &sMesh) {
-    for (std::vector<D3DS::Face>::iterator i = sMesh.mFaces.begin(); i != sMesh.mFaces.end(); ++i) {
+void Discreet3DSImporter::CheckIndices(Mesh &sMesh) {
+    for (auto i = sMesh.mFaces.begin(); i != sMesh.mFaces.end(); ++i) {
         // check whether all indices are in range
         for (unsigned int a = 0; a < 3; ++a) {
             if ((*i).mIndices[a] >= sMesh.mPositions.size()) {
                 ASSIMP_LOG_WARN("3DS: Vertex index overflow)");
-                (*i).mIndices[a] = (uint32_t)sMesh.mPositions.size() - 1;
+                (*i).mIndices[a] = static_cast<uint32_t>(sMesh.mPositions.size() - 1);
             }
             if (!sMesh.mTexCoords.empty() && (*i).mIndices[a] >= sMesh.mTexCoords.size()) {
                 ASSIMP_LOG_WARN("3DS: Texture coordinate index overflow)");
-                (*i).mIndices[a] = (uint32_t)sMesh.mTexCoords.size() - 1;
+                (*i).mIndices[a] = static_cast<uint32_t>(sMesh.mTexCoords.size() - 1);
             }
         }
     }
@@ -139,7 +136,7 @@ void Discreet3DSImporter::CheckIndices(D3DS::Mesh &sMesh) {
 
 // ------------------------------------------------------------------------------------------------
 // Generate out unique verbose format representation
-void Discreet3DSImporter::MakeUnique(D3DS::Mesh &sMesh) {
+void Discreet3DSImporter::MakeUnique(Mesh &sMesh) {
     // TODO: really necessary? I don't think. Just a waste of memory and time
     // to do it now in a separate buffer.
 
@@ -150,7 +147,7 @@ void Discreet3DSImporter::MakeUnique(D3DS::Mesh &sMesh) {
         vNew2.resize(sMesh.mFaces.size() * 3);
 
     for (unsigned int i = 0, base = 0; i < sMesh.mFaces.size(); ++i) {
-        D3DS::Face &face = sMesh.mFaces[i];
+        Face &face = sMesh.mFaces[i];
 
         // Positions
         for (unsigned int a = 0; a < 3; ++a, ++base) {
@@ -167,10 +164,9 @@ void Discreet3DSImporter::MakeUnique(D3DS::Mesh &sMesh) {
 
 // ------------------------------------------------------------------------------------------------
 // Convert a 3DS texture to texture keys in an aiMaterial
-void CopyTexture(aiMaterial &mat, D3DS::Texture &texture, aiTextureType type) {
+void CopyTexture(aiMaterial &mat, Texture &texture, aiTextureType type) {
     // Setup the texture name
-    aiString tex;
-    tex.Set(texture.mMapName);
+    aiString tex(texture.mMapName);
     mat.AddProperty(&tex, AI_MATKEY_TEXTURE(type, 0));
 
     // Setup the texture blend factor
@@ -197,13 +193,11 @@ void CopyTexture(aiMaterial &mat, D3DS::Texture &texture, aiTextureType type) {
 
 // ------------------------------------------------------------------------------------------------
 // Convert a 3DS material to an aiMaterial
-void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
-        aiMaterial &mat) {
+void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
     // NOTE: Pass the background image to the viewer by bypassing the
     // material system. This is an evil hack, never do it again!
-    if (0 != mBackgroundImage.length() && bHasBG) {
-        aiString tex;
-        tex.Set(mBackgroundImage);
+    if (mBackgroundImage.empty() && bHasBG) {
+        aiString tex(mBackgroundImage);
         mat.AddProperty(&tex, AI_MATKEY_GLOBAL_BACKGROUND_IMAGE);
 
         // Be sure this is only done for the first material
@@ -215,8 +209,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
     oldMat.mAmbient.g += mClrAmbient.g;
     oldMat.mAmbient.b += mClrAmbient.b;
 
-    aiString name;
-    name.Set(oldMat.mName);
+    aiString name(oldMat.mName);
     mat.AddProperty(&name, AI_MATKEY_NAME);
 
     // Material colors
@@ -226,10 +219,9 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
     mat.AddProperty(&oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
     // Phong shininess and shininess strength
-    if (D3DS::Discreet3DS::Phong == oldMat.mShading ||
-            D3DS::Discreet3DS::Metal == oldMat.mShading) {
+    if (Discreet3DS::Phong == oldMat.mShading || Discreet3DS::Metal == oldMat.mShading) {
         if (!oldMat.mSpecularExponent || !oldMat.mShininessStrength) {
-            oldMat.mShading = D3DS::Discreet3DS::Gouraud;
+            oldMat.mShading = Discreet3DS::Gouraud;
         } else {
             mat.AddProperty(&oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);
             mat.AddProperty(&oldMat.mShininessStrength, 1, AI_MATKEY_SHININESS_STRENGTH);
@@ -251,40 +243,41 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material &oldMat,
     // Shading mode
     aiShadingMode eShading = aiShadingMode_NoShading;
     switch (oldMat.mShading) {
-    case D3DS::Discreet3DS::Flat:
+    case Discreet3DS::Flat:
         eShading = aiShadingMode_Flat;
         break;
 
     // I don't know what "Wire" shading should be,
     // assume it is simple lambertian diffuse shading
-    case D3DS::Discreet3DS::Wire: {
+    case Discreet3DS::Wire: {
         // Set the wireframe flag
         unsigned int iWire = 1;
         mat.AddProperty<int>((int *)&iWire, 1, AI_MATKEY_ENABLE_WIREFRAME);
     }
         [[fallthrough]];
 
-    case D3DS::Discreet3DS::Gouraud:
+    case Discreet3DS::Gouraud:
         eShading = aiShadingMode_Gouraud;
         break;
 
     // assume cook-torrance shading for metals.
-    case D3DS::Discreet3DS::Phong:
+    case Discreet3DS::Phong:
         eShading = aiShadingMode_Phong;
         break;
 
-    case D3DS::Discreet3DS::Metal:
+    case Discreet3DS::Metal:
         eShading = aiShadingMode_CookTorrance;
         break;
 
         // FIX to workaround a warning with GCC 4 who complained
         // about a missing case Blinn: here - Blinn isn't a valid
         // value in the 3DS Loader, it is just needed for ASE
-    case D3DS::Discreet3DS::Blinn:
+    case Discreet3DS::Blinn:
         eShading = aiShadingMode_Blinn;
         break;
     }
-    int eShading_ = static_cast<int>(eShading);
+
+    const int eShading_ = eShading;
     mat.AddProperty<int>(&eShading_, 1, AI_MATKEY_SHADING_MODEL);
 
     // DIFFUSE texture
@@ -653,7 +646,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     pcOut->mChildren = new aiNode *[pcIn->mChildren.size()];
 
     // Recursively process all children
-    
+
     for (unsigned int i = 0; i < size; ++i) {
         pcOut->mChildren[i] = new aiNode();
         pcOut->mChildren[i]->mParent = pcOut;
@@ -783,7 +776,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
 // Convert all meshes in the scene and generate the final output scene.
 void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
     // Allocate enough storage for all output materials
-    pcOut->mNumMaterials = (unsigned int)mScene->mMaterials.size();
+    pcOut->mNumMaterials = static_cast<unsigned int>(mScene->mMaterials.size());
     pcOut->mMaterials = new aiMaterial *[pcOut->mNumMaterials];
 
     //  ... and convert the 3DS materials to aiMaterial's
@@ -797,17 +790,17 @@ void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
     ConvertMeshes(pcOut);
 
     // Now copy all light sources to the output scene
-    pcOut->mNumLights = (unsigned int)mScene->mLights.size();
+    pcOut->mNumLights = static_cast<unsigned int>(mScene->mLights.size());
     if (pcOut->mNumLights) {
         pcOut->mLights = new aiLight *[pcOut->mNumLights];
-        ::memcpy(pcOut->mLights, &mScene->mLights[0], sizeof(void *) * pcOut->mNumLights);
+        memcpy(pcOut->mLights, &mScene->mLights[0], sizeof(void *) * pcOut->mNumLights);
     }
 
     // Now copy all cameras to the output scene
-    pcOut->mNumCameras = (unsigned int)mScene->mCameras.size();
+    pcOut->mNumCameras = static_cast<unsigned int>(mScene->mCameras.size());
     if (pcOut->mNumCameras) {
         pcOut->mCameras = new aiCamera *[pcOut->mNumCameras];
-        ::memcpy(pcOut->mCameras, &mScene->mCameras[0], sizeof(void *) * pcOut->mNumCameras);
+        memcpy(pcOut->mCameras, &mScene->mCameras[0], sizeof(void *) * pcOut->mNumCameras);
     }
 }
 

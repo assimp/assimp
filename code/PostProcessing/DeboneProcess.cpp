@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -187,7 +187,7 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh) {
                     }
                 } else {
                     vertexBones[vid] = i;
-                } 
+                }
             }
 
             if(!isBoneNecessary[i]) {

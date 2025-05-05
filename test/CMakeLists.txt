@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -86,6 +86,7 @@ SET( COMMON
   unit/TestModelFactory.h
   unit/utTypes.cpp
   unit/utVersion.cpp
+  unit/Common/utParsingUtils.cpp
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp

@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -866,10 +866,13 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DXmlHelper.h
   AssetLib/VRML/VrmlConverter.cpp
 )
+SET(glTFCommon_src
+  AssetLib/glTFCommon/glTFCommon.h
+  AssetLib/glTFCommon/glTFCommon.cpp
+)
+SOURCE_GROUP( glTFCommon FILES ${glTFCommon_src})
 
 ADD_ASSIMP_IMPORTER( GLTF
-  AssetLib/glTF/glTFCommon.h
-  AssetLib/glTF/glTFCommon.cpp
   AssetLib/glTF/glTFAsset.h
   AssetLib/glTF/glTFAsset.inl
   AssetLib/glTF/glTFAssetWriter.h
@@ -1008,8 +1011,8 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
-    # "dev" branch, 28 Oct 2024
-    set(TINYUSDZ_GIT_TAG "36f2aabb256b360365989c01a52f839a57dfe2a6")
+    # "dev" branch, 14 Mar 2025
+    set(TINYUSDZ_GIT_TAG "6050eef932f7d2788656d63297aa488fb0961ed1")
     message("****")
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 
@@ -1349,6 +1352,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
+  ${glTFCommon_src}
 #  ${Step_SRCS} check if we need a different approach
 
   # Model Support

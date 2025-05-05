@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
-#include "AssetLib/LWO/LWOLoader.h"
+#include "LWOLoader.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 #include "PostProcessing/ProcessHelper.h"
 #include "Geometry/GeometryUtils.h"
@@ -104,7 +104,7 @@ LWOImporter::~LWOImporter() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool LWOImporter::CanRead(const std::string &file, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_LWO_FOURCC_LWOB,
         AI_LWO_FOURCC_LWO2,
         AI_LWO_FOURCC_LXOB

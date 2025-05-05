@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -309,7 +309,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
 std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
-    if (nullptr == pData || pModel == nullptr) {    
+    if (nullptr == pData || pModel == nullptr) {
         return nullptr;
     }
 
@@ -333,7 +333,7 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
         if (inp == nullptr) {
             continue;
         }
-        
+
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
             pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
             pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
@@ -403,7 +403,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
     // Checking preconditions
     if (pCurrentObject == nullptr || pModel == nullptr || pMesh == nullptr) {
         return;
-    }     
+    }
 
     // Break, if no faces are stored in object
     if (pCurrentObject->m_Meshes.empty()) {

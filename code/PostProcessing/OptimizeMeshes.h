@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -56,7 +55,7 @@ struct aiMesh;
 struct aiNode;
 class OptimizeMeshesProcessTest;
 
-namespace Assimp    {
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** @brief Postprocessing step to optimize mesh usage

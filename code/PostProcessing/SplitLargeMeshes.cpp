@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -102,9 +102,9 @@ void SplitLargeMeshesProcess_Triangle::SetupProperties( const Importer* pImp) {
 void SplitLargeMeshesProcess_Triangle::UpdateNode(aiNode* pcNode, const std::vector<std::pair<aiMesh*, unsigned int> >& avList) {
     if (pcNode == nullptr) {
         ASSIMP_LOG_WARN("UpdateNode skipped, nullptr detected.");
-        return; 
+        return;
     }
-    
+
     // for every index in out list build a new entry
     std::vector<unsigned int> aiEntries;
     aiEntries.reserve(pcNode->mNumMeshes + 1);

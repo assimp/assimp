@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -106,7 +106,7 @@ Discreet3DSImporter::Discreet3DSImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };
+    static constexpr uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };
     return CheckMagicToken(pIOHandler, pFile, token, AI_COUNT_OF(token), 0, sizeof token[0]);
 }
 

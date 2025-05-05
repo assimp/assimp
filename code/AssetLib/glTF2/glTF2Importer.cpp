@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
-#include "AssetLib/glTF2/glTF2Importer.h"
-#include "AssetLib/glTF2/glTF2Asset.h"
+#include "glTF2Importer.h"
+#include "glTF2Asset.h"
 #include "PostProcessing/MakeVerboseFormat.h"
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT)
@@ -112,7 +112,7 @@ bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, b
     }
 
     if (pIOHandler) {
-        glTF2::Asset asset(pIOHandler);
+        Asset asset(pIOHandler);
         return asset.CanRead(
             filename,
             CheckMagicToken(
@@ -123,22 +123,23 @@ bool glTF2Importer::CanRead(const std::string &filename, IOSystem *pIOHandler, b
     return false;
 }
 
-static inline aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
+static aiTextureMapMode ConvertWrappingMode(SamplerWrap gltfWrapMode) {
     switch (gltfWrapMode) {
-    case SamplerWrap::Mirrored_Repeat:
-        return aiTextureMapMode_Mirror;
+        case SamplerWrap::Mirrored_Repeat:
+            return aiTextureMapMode_Mirror;
 
-    case SamplerWrap::Clamp_To_Edge:
-        return aiTextureMapMode_Clamp;
+        case SamplerWrap::Clamp_To_Edge:
+            return aiTextureMapMode_Clamp;
 
-    case SamplerWrap::UNSET:
-    case SamplerWrap::Repeat:
-    default:
-        return aiTextureMapMode_Wrap;
+        case SamplerWrap::UNSET:
+        case SamplerWrap::Repeat:
+        default:
+            break;
     }
+    return aiTextureMapMode_Wrap;
 }
 
-static inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat,
+static void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMaterial *mat,
         const char *pKey, unsigned int type, unsigned int idx) {
     aiColor4D col;
     CopyValue(prop, col);
@@ -148,12 +149,12 @@ static inline void SetMaterialColorProperty(Asset & /*r*/, vec4 &prop, aiMateria
 static inline void SetMaterialColorProperty(Asset & /*r*/, vec3 &prop, aiMaterial *mat,
         const char *pKey, unsigned int type, unsigned int idx) {
     aiColor4D col;
-    glTFCommon::CopyValue(prop, col);
+    CopyValue(prop, col);
     mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
 static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset & /*r*/,
-        glTF2::TextureInfo prop, aiMaterial *mat, aiTextureType texType,
+        TextureInfo prop, aiMaterial *mat, aiTextureType texType,
         unsigned int texSlot = 0) {
     if (prop.texture && prop.texture->source) {
         aiString uri(prop.texture->source->uri);
@@ -219,20 +220,20 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     }
 }
 
-inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
+static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
         NormalTextureInfo &prop, aiMaterial *mat, aiTextureType texType,
         unsigned int texSlot = 0) {
-    SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
+    SetMaterialTextureProperty(embeddedTexIdxs, r, static_cast<TextureInfo>(prop), mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
         mat->AddProperty(&prop.scale, 1, AI_MATKEY_GLTF_TEXTURE_SCALE(texType, texSlot));
     }
 }
 
-inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
+static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset &r,
         OcclusionTextureInfo &prop, aiMaterial *mat, aiTextureType texType,
         unsigned int texSlot = 0) {
-    SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
+    SetMaterialTextureProperty(embeddedTexIdxs, r, static_cast<TextureInfo>(prop), mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
         std::string textureStrengthKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + "strength";
@@ -286,7 +287,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialSpecular.isPresent) {
             MaterialSpecular &specular = mat.materialSpecular.value;
             // Default values of zero disables Specular
-            if (std::memcmp(specular.specularColorFactor, defaultSpecularColorFactor, sizeof(glTFCommon::vec3)) != 0 || specular.specularFactor != 0.0f) {
+            if (std::memcmp(specular.specularColorFactor, defaultSpecularColorFactor, sizeof(vec3)) != 0 || specular.specularFactor != 0.0f) {
                 SetMaterialColorProperty(r, specular.specularColorFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
                 aimat->AddProperty(&specular.specularFactor, 1, AI_MATKEY_SPECULAR_FACTOR);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularTexture, aimat, aiTextureType_SPECULAR, 0);
@@ -509,7 +510,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             // Extract used vertices:
             bool useIndexBuffer = prim.indices;
             std::vector<unsigned int> *vertexRemappingTable = nullptr;
-            
+
             if (useIndexBuffer) {
                 size_t count = prim.indices->count;
                 indexBuffer.resize(count);
@@ -529,7 +530,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     if (index >= numAllVertices) {
                         // Out-of-range indices will be filtered out when adding the faces and then lead to a warning. At this stage, we just keep them.
                         indexBuffer[i] = index;
-                        continue; 
+                        continue;
                     }
                     if (index >= reverseMappingIndices.size()) {
                         reverseMappingIndices.resize(index + 1, unusedIndex);
@@ -1066,7 +1067,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
         }
     }
-    
+
     // No indices are an invalid usecase
     if (nullptr == indices8 && nullptr == indices16) {
         // Something went completely wrong!

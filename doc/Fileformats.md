@@ -90,11 +90,13 @@ Additionally, some formats are supported by dependency on non-free code or exter
 - [3DS](https://en.wikipedia.org/wiki/.3ds)
 - [3MF](https://en.wikipedia.org/wiki/3D_Manufacturing_Format) ( experimental ) Note: importer broken
 - ASSBIN (`Assimp Binary Importer`)
+- ASSXML
 - [DAE/Collada](https://en.wikipedia.org/wiki/COLLADA)
 - [FBX](https://en.wikipedia.org/wiki/FBX) ( experimental )
 - [glTF 1.0](https://en.wikipedia.org/wiki/GlTF#glTF_1.0) (partial)
 - [glTF 2.0](https://en.wikipedia.org/wiki/GlTF#glTF_2.0) (partial)
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
+- [M3D](https://bztsrc.gitlab.io/model3d/) Assimp support abandoned by author (to build need to opt-in in `CMakeLists.txt`)
 - [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 - [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange) ( experimental ) Note: importer broken
 - [PBRTv4](https://github.com/mmp/pbrt-v4)
@@ -102,3 +104,4 @@ Additionally, some formats are supported by dependency on non-free code or exter
 - [STEP](https://en.wikipedia.org/wiki/ISO_10303-21)
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))
 - [X](https://learn.microsoft.com/en-us/windows/win32/direct3d9/x-files--legacy-)
+- [X3D](https://en.wikipedia.org/wiki/X3D)

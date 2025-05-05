@@ -185,7 +185,7 @@ void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
 
     // Allocate and initialize with large values.
     for (unsigned int i = 0; i < numCompsOut; i++) {
-        acc->min.push_back(std::numeric_limits<double>::max());
+        acc->min.push_back(std::numeric_limits<double>::min());
         acc->max.push_back(-std::numeric_limits<double>::max());
     }
 

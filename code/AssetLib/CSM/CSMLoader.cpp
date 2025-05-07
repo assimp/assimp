@@ -150,8 +150,9 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     anims_temp.push_back(new aiNodeAnim());
                     aiNodeAnim* nda = anims_temp.back();
 
-                    char* ot = nda->mNodeName.data;
-                    while (!IsSpaceOrNewLine(*buffer) && buffer != end) {
+                    char *ot = nda->mNodeName.data;
+                    const char *ot_end = nda->mNodeName.data + AI_MAXLEN;
+                    while (!IsSpaceOrNewLine(*buffer) && buffer != end && ot != ot_end) {
                         *ot++ = *buffer++;
                     }
 

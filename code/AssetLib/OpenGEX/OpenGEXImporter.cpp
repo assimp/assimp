@@ -913,7 +913,13 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
         current.mIndices = new unsigned int[current.mNumIndices];
         Value *next(vaList->m_dataList);
         for (size_t indices = 0; indices < current.mNumIndices; indices++) {
-            const int idx(next->getUnsignedInt32());
+            int idx = -1;
+            if (next->m_type == Value::ValueType::ddl_unsigned_int16) {
+                idx = next->getUnsignedInt16();
+            } else if (next->m_type == Value::ValueType::ddl_unsigned_int32) {
+                idx = next->getUnsignedInt32();
+            }
+            
             ai_assert(static_cast<size_t>(idx) <= m_currentVertices.m_vertices.size());
             ai_assert(index < m_currentMesh->mNumVertices);
             aiVector3D &pos = (m_currentVertices.m_vertices[idx]);

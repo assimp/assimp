@@ -50,6 +50,8 @@ class PointCloudBuilder {
 
   int AddAttribute(GeometryAttribute::Type attribute_type,
                    int8_t num_components, DataType data_type);
+  int AddAttribute(GeometryAttribute::Type attribute_type,
+                   int8_t num_components, DataType data_type, bool normalized);
 
   // Sets attribute value for a specific point.
   // |attribute_value| must contain data in the format specified by the
@@ -64,6 +66,14 @@ class PointCloudBuilder {
   // attribute.
   void SetAttributeValuesForAllPoints(int att_id, const void *attribute_values,
                                       int stride);
+
+  // Sets the unique ID for an attribute created with AddAttribute().
+  void SetAttributeUniqueId(int att_id, uint32_t unique_id);
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  // Sets attribute name.
+  void SetAttributeName(int att_id, const std::string &name);
+#endif  // DRACO_TRANSCODER_SUPPORTED
 
   // Finalizes the PointCloud or returns nullptr on error.
   // If |deduplicate_points| is set to true, the following happens:

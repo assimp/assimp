@@ -216,6 +216,13 @@ TEST_F(GltfUtilsTest, TestArrays) {
   json_writer.EndArray();
   json_writer.EndArray();
   CompareGolden(&json_writer, "\"array1\": [\n  \"array2\": [\n  ]\n]");
+
+  json_writer.Reset();
+  json_writer.BeginArray("array1");
+  json_writer.BeginArray();
+  json_writer.EndArray();
+  json_writer.EndArray();
+  CompareGolden(&json_writer, "\"array1\": [\n  [\n  ]\n]");
 }
 
 TEST_F(GltfUtilsTest, TestGltfValues) {
@@ -359,6 +366,13 @@ TEST_F(GltfUtilsTest, TestArraysCompact) {
   json_writer.EndArray();
   json_writer.EndArray();
   CompareGolden(&json_writer, "\"array1\":[\"array2\":[]]");
+
+  json_writer.Reset();
+  json_writer.BeginArray("array1");
+  json_writer.BeginArray();
+  json_writer.EndArray();
+  json_writer.EndArray();
+  CompareGolden(&json_writer, "\"array1\":[[]]");
 }
 
 }  // namespace draco

@@ -15,6 +15,7 @@
 #include "draco/io/texture_io.h"
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -48,6 +49,29 @@ TEST(TextureIoTest, TestLoadFromBuffer) {
   for (int i = 0; i < encoded_buffer.size(); ++i) {
     ASSERT_EQ(image_data[i], encoded_buffer[i]);
   }
+}
+
+// Tests that we can set mime type correctly even when the source file had
+// an incorrect extension.
+TEST(TextureIoTest, TestWrongExtension) {
+  const std::string file_name = draco::GetTestFileFullPath("this_is_png.jpg");
+
+  DRACO_ASSIGN_OR_ASSERT(std::unique_ptr<draco::Texture> texture,
+                         draco::ReadTextureFromFile(file_name));
+  ASSERT_NE(texture, nullptr);
+
+  // Ensure the mime type was set to png even though the file extension was jpg.
+  ASSERT_EQ(texture->source_image().mime_type(), "image/png");
+}
+
+// Tests that we can load jpeg files that have some trailing bytes after the
+// jpeg end marker.
+TEST(TextureIoTest, TestTrailingJpegBytes) {
+  const std::string file_name = draco::GetTestFileFullPath("trailing_zero.jpg");
+
+  DRACO_ASSIGN_OR_ASSERT(std::unique_ptr<draco::Texture> texture,
+                         draco::ReadTextureFromFile(file_name));
+  ASSERT_NE(texture, nullptr);
 }
 
 }  // namespace

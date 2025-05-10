@@ -1043,13 +1043,9 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
-        return static_cast<int64_t>(ticks) * FBX::SECOND;
+        return static_cast<int64_t>(ticks * FBX::SECOND);
     }
-    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
-}
-
-inline int64_t to_ktime(double time) {
-    return (static_cast<int64_t>(time * FBX::SECOND));
+    return static_cast<int64_t>((ticks / anim->mTicksPerSecond) * FBX::SECOND);
 }
 
 void FBXExporter::WriteObjects () {

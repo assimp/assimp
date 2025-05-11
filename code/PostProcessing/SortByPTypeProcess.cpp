@@ -126,7 +126,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
 
     unsigned int aiNumMeshesPerPType[4] = { 0, 0, 0, 0 };
 
-    std::vector<aiMesh *> outMeshes;
+    std::vector<std::unique_ptr<aiMesh>> outMeshes;
     outMeshes.reserve(static_cast<size_t>(pScene->mNumMeshes) << 1u);
 
     bool bAnyChanges = false;
@@ -161,6 +161,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         if (1 == num) {
             if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>(outMeshes.size());
+                // Take ownership of the mesh using unique_ptr
                 outMeshes.emplace_back(mesh);
             } else {
                 delete mesh;
@@ -200,8 +201,8 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             }
 
             *meshIdx = (unsigned int)outMeshes.size();
-            outMeshes.push_back(new aiMesh());
-            aiMesh *out = outMeshes.back();
+            outMeshes.push_back(std::unique_ptr<aiMesh>(new aiMesh()));
+            aiMesh *out = outMeshes.back().get();
 
             // the name carries the adjacency information between the meshes
             out->mName = mesh->mName;
@@ -430,7 +431,10 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         pScene->mNumMeshes = (unsigned int)outMeshes.size();
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
     }
-    ::memcpy(pScene->mMeshes, &outMeshes[0], pScene->mNumMeshes * sizeof(void *));
+    // Transfer ownership of meshes to the scene
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+        pScene->mMeshes[i] = outMeshes[i].release();
+    }
 
     if (!DefaultLogger::isNullLogger()) {
         char buffer[1024];

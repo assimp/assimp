@@ -201,7 +201,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             }
 
             *meshIdx = (unsigned int)outMeshes.size();
-            outMeshes.push_back(std::unique_ptr<aiMesh>(new aiMesh()));
+            outMeshes.push_back(std::make_unique<aiMesh>(new aiMesh()));
             aiMesh *out = outMeshes.back().get();
 
             // the name carries the adjacency information between the meshes

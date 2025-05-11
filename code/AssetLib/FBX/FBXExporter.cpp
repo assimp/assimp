@@ -2039,7 +2039,11 @@ void FBXExporter::WriteObjects () {
                 std::vector<double> subdef_weights;
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId] \
+                    if (b->mWeights[wi].mVertexId >= vVertexIndice[mi].size()) {
+                        // Skip out-of-bounds vertex indices to prevent buffer overflow
+                        continue;
+                    }
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId]
                       + uniq_v_before_mi[mi];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {

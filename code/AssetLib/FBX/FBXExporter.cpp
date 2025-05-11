@@ -1042,14 +1042,40 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
-    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
-        return static_cast<int64_t>(ticks) * FBX::SECOND;
+    // Defensive: handle zero or near-zero mTicksPerSecond
+    double tps = anim->mTicksPerSecond;
+    double timeVal;
+    if (FP_ZERO == std::fpclassify(tps)) {
+        timeVal = ticks;
+    } else {
+        timeVal = ticks / tps;
     }
-    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
+
+    // Clamp to prevent overflow
+    const double kMax = static_cast<double>(INT64_MAX) / static_cast<double>(FBX::SECOND);
+    const double kMin = static_cast<double>(INT64_MIN) / static_cast<double>(FBX::SECOND);
+
+    if (timeVal > kMax) {
+        return INT64_MAX;
+    }
+    if (timeVal < kMin) {
+        return INT64_MIN;
+    }
+    return static_cast<int64_t>(timeVal * FBX::SECOND);
 }
 
 inline int64_t to_ktime(double time) {
-    return (static_cast<int64_t>(time * FBX::SECOND));
+    // Clamp to prevent overflow
+    const double kMax = static_cast<double>(INT64_MAX) / static_cast<double>(FBX::SECOND);
+    const double kMin = static_cast<double>(INT64_MIN) / static_cast<double>(FBX::SECOND);
+
+    if (time > kMax) {
+        return INT64_MAX;
+    }
+    if (time < kMin) {
+        return INT64_MIN;
+    }
+    return static_cast<int64_t>(time * FBX::SECOND);
 }
 
 void FBXExporter::WriteObjects () {

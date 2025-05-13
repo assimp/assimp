@@ -90,7 +90,7 @@ namespace {
 // Returns whether the class can handle the format of the given file.
 bool FBXImporter::CanRead(const std::string & pFile, IOSystem * pIOHandler, bool /*checkSig*/) const {
 	// at least ASCII-FBX files usually have a 'FBX' somewhere in their head
-	static const char *tokens[] = { " \n\r\n " };
+	static const char *tokens[] = { "fbx" };
 	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 

@@ -438,7 +438,7 @@ unsigned int LazyDict<T>::Remove(const char *id) {
 
     const unsigned int index = objIt->second;
 
-    mAsset.mUsedIds[id] = false;
+    // mAsset.mUsedIds[id] = false;
     mObjsById.erase(id);
     mObjsByOIndex.erase(index);
     delete mObjs[index];
@@ -540,16 +540,16 @@ Ref<T> LazyDict<T>::Add(T *obj) {
     mObjs.push_back(obj);
     mObjsByOIndex[obj->oIndex] = idx;
     mObjsById[obj->id] = idx;
-    mAsset.mUsedIds[obj->id] = true;
+    // mAsset.mUsedIds[obj->id] = true;
     return Ref<T>(mObjs, idx);
 }
 
 template <class T>
 Ref<T> LazyDict<T>::Create(const char *id) {
-    Asset::IdMap::iterator it = mAsset.mUsedIds.find(id);
+    /*Asset::IdMap::iterator it = mAsset.mUsedIds.find(id);
     if (it != mAsset.mUsedIds.end()) {
         throw DeadlyImportError("GLTF: two objects with the same ID exist");
-    }
+    }*/
     T *inst = new T();
     unsigned int idx = unsigned(mObjs.size());
     inst->id = id;
@@ -2206,29 +2206,31 @@ inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool
 
 inline std::string Asset::FindUniqueID(const std::string &str, const char *suffix) {
     std::string id = str;
-
-    if (!id.empty()) {
-        if (mUsedIds.find(id) == mUsedIds.end()){
-            mUsedNamesMap[id] = 0;
-            return id;
-        }
-
-        id += "_";
+    int n = 1;
+    if(!id.empty())
+    {
+      n = lastUsedID[id];
+      if(!n)
+      {
+         lastUsedID[id] = n+1;
+         return id;
+      }
+      id += "_";
     }
 
-    id += suffix;
-
-    Asset::IdMap::iterator it = mUsedIds.find(id);
-    if (it == mUsedIds.end()) {
-        mUsedNamesMap[id] = 0;
-        return id;
+    if(suffix)
+    {
+      id += suffix;
+      n = lastUsedID[id];
+      if(!n)
+      {
+         lastUsedID[id] = n+1;
+         return id;
+      }
     }
 
-    auto key = id;
-    id += "_" + std::to_string(mUsedNamesMap[key]);
-    mUsedNamesMap[key] = mUsedNamesMap[key] + 1;
-
-    return id;
+    lastUsedID[id] = n+1;
+    return id + "_" + std::to_string(n-1);
 }
 
 #if _MSC_VER

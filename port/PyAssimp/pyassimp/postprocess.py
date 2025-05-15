@@ -40,17 +40,7 @@ aiProcess_MakeLeftHanded = 0x4
 #
 # By default the imported mesh data might contain faces with more than 3
 # indices. For rendering you'll usually want all faces to be triangles. 
-# This post processing step splits up faces with more than 3 indices into 
-# triangles. Line and point primitives are #not# modified! If you want
-# 'triangles only' with no other kinds of primitives, try the following
-# solution:
-# <ul>
-# <li>Specify both #aiProcess_Triangulate and #aiProcess_SortByPType <li>
-# <li>Ignore all point and line meshes when you process assimp's output<li>
-# <ul>
-#
-aiProcess_Triangulate = 0x8
-
+# This post processing stepaiProcess_ForceGenNormals
 ## <hr>Removes some parts of the data structure (animations, materials, 
 #  light sources, cameras, textures, vertex components).
 #
@@ -440,6 +430,46 @@ aiProcess_SplitByBoneCount  = 0x2000000
 #  only if all bones within the scene qualify for removal.
 #
 aiProcess_Debone  = 0x4000000
+
+## <hr>This step will perform a global scale of the model.
+#
+#  Some importers are providing a mechanism to define a scaling unit for the
+#  model. This post processing step can be used to do so. You need to get the
+#  global scaling from your importer settings like in FBX. Use the flag
+#  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
+#
+#  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaling factor.
+#
+aiProcess_GlobalScale = 0x8000000
+
+## <hr>A postprocessing step to embed of textures.
+#
+#  This will remove external data dependencies for textures.
+#  If a texture's file does not exist at the specified path
+#  (due, for instance, to an absolute path generated on another system),
+#  it will check if a file with the same name exists at the root folder
+#  of the imported model. And if so, it uses that.
+#
+aiProcess_EmbedTextures  = 0x10000000
+
+##
+#
+aiProcess_ForceGenNormals = 0x20000000
+
+## <hr>Drops normals for all faces of all meshes.
+#
+#  This is ignored if no normals are present.
+#  Face normals are shared between all points of a single face,
+#  so a single point can have multiple normals, which
+#  forces the library to duplicate vertices in some cases.
+#  #aiProcess_JoinIdenticalVertices is *senseless* then.
+#  This process gives sense back to aiProcess_JoinIdenticalVertices
+#
+aiProcess_DropNormals = 0x40000000,
+
+##
+#
+aiProcess_GenBoundingBoxes = 0x80000000
 
 aiProcess_GenEntityMeshes = 0x100000
 aiProcess_OptimizeAnimations = 0x200000

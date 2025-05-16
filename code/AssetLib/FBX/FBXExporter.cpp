@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/Logger.hpp>
 #include <assimp/StreamWriter.h> // StreamWriterLE
 #include <assimp/Exceptional.h> // DeadlyExportError
 #include <assimp/material.h> // aiTextureType
@@ -2037,7 +2038,11 @@ void FBXExporter::WriteObjects () {
                 std::vector<double> subdef_weights;
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId] \
+                    if (b->mWeights[wi].mVertexId >= vVertexIndice[mi].size()) {
+			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
+                        continue;
+                    }
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId]
                       + uniq_v_before_mi[mi];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {

@@ -4,7 +4,9 @@
 ### Install prerequisites
 You need to install
 * cmake
-* Your compiler
+* Your compiler (must support C++17 and C99 at least)
+* For Windows
+  *  DX-SDK 9 if you want to use our 3D-Viewer
 
 ### Get the source
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:

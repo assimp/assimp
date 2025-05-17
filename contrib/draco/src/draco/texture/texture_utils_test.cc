@@ -89,6 +89,39 @@ TEST(TextureUtilsTest, TestGetFormat) {
   ASSERT_EQ(draco::TextureUtils::GetFormat("bmp"), ImageFormat::NONE);
 }
 
+TEST(TextureUtilsTest, TestGetTargetMimeType) {
+  draco::Texture texture;
+  texture.source_image().set_mime_type("image/jpeg");
+  ASSERT_EQ(draco::TextureUtils::GetTargetMimeType(texture), "image/jpeg");
+
+  // Set compression settings to a different format.
+  draco::ImageCompressionOptions options;
+  options.target_image_format = draco::ImageFormat::BASIS;
+  texture.SetCompressionOptions(options);
+  ASSERT_EQ(draco::TextureUtils::GetTargetMimeType(texture), "image/ktx2");
+
+  // Test custom mime type in source image.
+  draco::Texture unknown_format;
+  unknown_format.source_image().set_mime_type("image/custom");
+  ASSERT_EQ(draco::TextureUtils::GetTargetMimeType(unknown_format),
+            "image/custom");
+
+  // Test custom mime type from file name.
+  draco::Texture unknown_format_file_name;
+  unknown_format_file_name.source_image().set_filename("test.extension");
+  ASSERT_EQ(draco::TextureUtils::GetTargetMimeType(unknown_format_file_name),
+            "image/extension");
+}
+
+TEST(TextureUtilsTest, TestGetMimeType) {
+  typedef draco::ImageFormat ImageFormat;
+  ASSERT_EQ(draco::TextureUtils::GetMimeType(ImageFormat::PNG), "image/png");
+  ASSERT_EQ(draco::TextureUtils::GetMimeType(ImageFormat::JPEG), "image/jpeg");
+  ASSERT_EQ(draco::TextureUtils::GetMimeType(ImageFormat::BASIS), "image/ktx2");
+  ASSERT_EQ(draco::TextureUtils::GetMimeType(ImageFormat::WEBP), "image/webp");
+  ASSERT_EQ(draco::TextureUtils::GetMimeType(ImageFormat::NONE), "");
+}
+
 TEST(TextureUtilsTest, TestGetExtension) {
   typedef draco::ImageFormat ImageFormat;
   ASSERT_EQ(draco::TextureUtils::GetExtension(ImageFormat::PNG), "png");

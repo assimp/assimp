@@ -48,6 +48,13 @@ class TextureUtils {
   // source image mime type or the source image filename.
   static std::string GetTargetExtension(const Texture &texture);
 
+  // Returns mime type string based on |texture| compression settings, source
+  // image mime type or the source image filename.
+  static std::string GetTargetMimeType(const Texture &texture);
+
+  // Returns mime type string for a given |image_format|.
+  static std::string GetMimeType(ImageFormat image_format);
+
   // Returns |texture| format based on source image mime type or the source
   // image filename.
   static ImageFormat GetSourceFormat(const Texture &texture);

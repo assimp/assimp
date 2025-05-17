@@ -53,8 +53,8 @@ class MeshFeatures {
   void SetNullFeatureId(int null_feature_id);
   int GetNullFeatureId() const;
 
-  // Index of the feature ID vertex attribute, e.g., 5 for an attribute named
-  // _FEATURE_ID_5, or -1 if the feature ID is not associated with vertices.
+  // Index of the feature ID vertex attribute in draco::Mesh or -1 if the
+  // feature ID is not associated with vertices.
   void SetAttributeIndex(int attribute_index);
   int GetAttributeIndex() const;
 

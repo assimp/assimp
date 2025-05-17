@@ -80,6 +80,14 @@ class TriangleSoupMeshBuilder {
     mesh_->AddMetadata(std::move(metadata));
   }
 
+  // Sets the unique ID for an attribute created with AddAttribute().
+  void SetAttributeUniqueId(int att_id, uint32_t unique_id);
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  // Sets attribute name.
+  void SetAttributeName(int att_id, const std::string &name);
+#endif  // DRACO_TRANSCODER_SUPPORTED
+
   // Add metadata for an attribute.
   void AddAttributeMetadata(int32_t att_id,
                             std::unique_ptr<AttributeMetadata> metadata) {

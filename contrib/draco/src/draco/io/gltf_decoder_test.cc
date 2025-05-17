@@ -14,9 +14,12 @@
 //
 #include "draco/io/gltf_decoder.h"
 
+#include <array>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -738,17 +741,14 @@ TEST(GltfDecoderTest, TextureTransformTest) {
       "KhronosSampleModels/TextureTransformTest/glTF/TextureTransformTest.gltf";
   const std::unique_ptr<Mesh> mesh(DecodeGltfFile(filename));
   EXPECT_EQ(mesh->GetMaterialLibrary().NumMaterials(), 9);
-  for (int i = 0; i < 6; ++i) {
-    EXPECT_FALSE(TextureTransform::IsDefault(mesh->GetMaterialLibrary()
-                                                 .GetMaterial(i)
-                                                 ->GetTextureMapByIndex(0)
-                                                 ->texture_transform()));
-  }
-  for (int i = 6; i < 9; ++i) {
-    EXPECT_TRUE(TextureTransform::IsDefault(mesh->GetMaterialLibrary()
-                                                .GetMaterial(i)
-                                                ->GetTextureMapByIndex(0)
-                                                ->texture_transform()));
+  std::set<int> expected_default_transforms = {4, 5, 6};
+  for (int i = 0; i < 9; ++i) {
+    const bool expected_default = (expected_default_transforms.count(i) != 0);
+    EXPECT_EQ(TextureTransform::IsDefault(mesh->GetMaterialLibrary()
+                                              .GetMaterial(i)
+                                              ->GetTextureMapByIndex(0)
+                                              ->texture_transform()),
+              expected_default);
   }
 
   const std::unique_ptr<Scene> scene(DecodeGltfFileToScene(filename));
@@ -1139,7 +1139,7 @@ TEST(GltfDecoderTest, CorrectVolumeThicknessFactor) {
   ASSERT_NE(scene, nullptr);
   auto instances = draco::SceneUtils::ComputeAllInstances(*scene);
   ASSERT_EQ(instances.size(), 2);
-  ASSERT_EQ(instances[MeshInstanceIndex(0)].transform.col(0).norm(),
+  ASSERT_EQ(instances[MeshInstanceIndex(1)].transform.col(0).norm(),
             kDragonScale);
   ASSERT_EQ(scene->GetMaterialLibrary().GetMaterial(1)->GetThicknessFactor(),
             kDragonVolumeThickness);
@@ -1256,47 +1256,84 @@ TEST(GltfDecoderTest, MaterialsVariants) {
 TEST(GltfDecoderTest, DecodeMeshWithMeshFeaturesWithStructuralMetadata) {
   // Checks decoding of a simple glTF with mesh features and structural metadata
   // property table as draco::Mesh.
-  constexpr bool kDracoCompressionEnabled = false;
   const auto path = GetTestFileFullPath("BoxMeta/glTF/BoxMeta.gltf");
+  GltfTestHelper::UseCase use_case;
+  use_case.has_mesh_features = true;
+  use_case.has_structural_metadata = true;
+
   draco::GltfDecoder decoder;
   DRACO_ASSIGN_OR_ASSERT(auto mesh, decoder.DecodeFromFile(path));
   ASSERT_NE(mesh, nullptr);
-  GltfTestHelper::CheckBoxMetaMeshFeatures(*mesh, kDracoCompressionEnabled);
-  GltfTestHelper::CheckBoxMetaStructuralMetadata(*mesh);
+  GltfTestHelper::CheckBoxMetaMeshFeatures(*mesh, use_case);
+  GltfTestHelper::CheckBoxMetaStructuralMetadata(*mesh, use_case);
+}
+
+TEST(GltfDecoderTest, DecodeMeshWithStructuralMetadataWithEmptyStringBuffer) {
+  // Checks that the decoder correctly handles 0-length buffers. An example case
+  // where this could happen is an EXT_structural_metadata extension with a
+  // buffer containing an empty string.
+  const auto path =
+      GetTestFileFullPath("ZeroLengthBufferView/ZeroLengthBufferView.gltf");
+  GltfTestHelper::UseCase use_case;
+  use_case.has_mesh_features = true;
+  use_case.has_structural_metadata = true;
+
+  draco::GltfDecoder decoder;
+  DRACO_ASSIGN_OR_ASSERT(auto mesh, decoder.DecodeFromFile(path));
+  ASSERT_NE(mesh, nullptr);
+  ASSERT_EQ(mesh->GetStructuralMetadata().NumPropertyTables(), 1);
+  ASSERT_EQ(mesh->GetStructuralMetadata().GetPropertyTable(0).GetCount(), 1);
+  ASSERT_EQ(mesh->GetStructuralMetadata().GetPropertyTable(0).NumProperties(),
+            1);
+  ASSERT_EQ(mesh->GetStructuralMetadata()
+                .GetPropertyTable(0)
+                .GetProperty(0)
+                .GetData()
+                .data.size(),
+            0);
 }
 
 TEST(GltfDecoderTest, DecodeMeshWithMeshFeaturesWithDracoCompression) {
   // Checks decoding of a simple glTF with mesh features compressed with Draco
   // as draco::Mesh.
-  constexpr bool kDracoCompressionEnabled = true;
   const auto path = GetTestFileFullPath("BoxMetaDraco/glTF/BoxMetaDraco.gltf");
+  GltfTestHelper::UseCase use_case;
+  use_case.has_draco_compression = true;
+  use_case.has_mesh_features = true;
+
   draco::GltfDecoder decoder;
   DRACO_ASSIGN_OR_ASSERT(auto mesh, decoder.DecodeFromFile(path));
   ASSERT_NE(mesh, nullptr);
-  GltfTestHelper::CheckBoxMetaMeshFeatures(*mesh, kDracoCompressionEnabled);
+  GltfTestHelper::CheckBoxMetaMeshFeatures(*mesh, use_case);
 }
 
 TEST(GltfDecoderTest, DecodeSceneWithMeshFeaturesWithStructuralMetadata) {
   // Checks decoding of a simple glTF with mesh features and structural metadata
   // property table as draco::Scene.
-  constexpr bool kHasDracoCompression = false;
   const auto path = GetTestFileFullPath("BoxMeta/glTF/BoxMeta.gltf");
+  GltfTestHelper::UseCase use_case;
+  use_case.has_mesh_features = true;
+  use_case.has_structural_metadata = true;
+
   draco::GltfDecoder decoder;
   DRACO_ASSIGN_OR_ASSERT(auto scene, decoder.DecodeFromFileToScene(path));
   ASSERT_NE(scene, nullptr);
-  GltfTestHelper::CheckBoxMetaMeshFeatures(*scene, kHasDracoCompression);
-  GltfTestHelper::CheckBoxMetaStructuralMetadata(*scene);
+  GltfTestHelper::CheckBoxMetaMeshFeatures(*scene, use_case);
+  GltfTestHelper::CheckBoxMetaStructuralMetadata(*scene, use_case);
 }
 
 TEST(GltfDecoderTest, DecodeSceneWithMeshFeaturesWithDracoCompression) {
   // Checks decoding of a simple glTF with mesh features compressed with Draco
   // as draco::Scene.
-  constexpr bool kHasDracoCompression = true;
   const auto path = GetTestFileFullPath("BoxMetaDraco/glTF/BoxMetaDraco.gltf");
+  GltfTestHelper::UseCase use_case;
+  use_case.has_draco_compression = true;
+  use_case.has_mesh_features = true;
+
   draco::GltfDecoder decoder;
   DRACO_ASSIGN_OR_ASSERT(auto scene, decoder.DecodeFromFileToScene(path));
   ASSERT_NE(scene, nullptr);
-  GltfTestHelper::CheckBoxMetaMeshFeatures(*scene, kHasDracoCompression);
+  GltfTestHelper::CheckBoxMetaMeshFeatures(*scene, use_case);
 }
 
 TEST(GltfDecoderTest, DecodePointCloudToMesh) {
@@ -1315,6 +1352,10 @@ TEST(GltfDecoderTest, DecodePointCloudToMesh) {
   ASSERT_EQ(mesh->NumNamedAttributes(draco::GeometryAttribute::TEX_COORD), 1);
   ASSERT_EQ(mesh->NumNamedAttributes(draco::GeometryAttribute::TANGENT), 1);
   ASSERT_EQ(mesh->NumNamedAttributes(draco::GeometryAttribute::MATERIAL), 1);
+
+  // Verify that vertex deduplication was performed
+  ASSERT_LT(mesh->GetNamedAttribute(draco::GeometryAttribute::NORMAL)->size(),
+            462);
 
   // Check the point cloud has two materials.
   ASSERT_EQ(mesh->GetNamedAttribute(draco::GeometryAttribute::MATERIAL)->size(),
@@ -1396,6 +1437,53 @@ TEST(GltfDecoderTest, TestLoadUnsupportedTexCoordAttributes) {
   ASSERT_EQ(scene->GetMesh(draco::MeshIndex(0))
                 .NumNamedAttributes(draco::GeometryAttribute::TEX_COORD),
             2);
+}
+
+TEST(GltfDecoderTest, TestInvertedMaterials) {
+  // Checks that GltfDecoder assigns materials properly to sub-meshes when the
+  // material indices are in reverse order in the input glTF.
+  auto mesh = draco::ReadMeshFromTestFile("two_objects_inverse_materials.gltf");
+  ASSERT_NE(mesh, nullptr);
+  ASSERT_EQ(mesh->GetMaterialLibrary().NumMaterials(), 2);
+
+  // There are two sub-meshes. A cube with 12 faces and a sphere. The cube
+  // should be mapped to a "Red" material and the sphere to a "Green" material.
+  ASSERT_EQ(mesh->GetMaterialLibrary().GetMaterial(0)->GetName(), "Red");
+  ASSERT_EQ(mesh->GetMaterialLibrary().GetMaterial(1)->GetName(), "Green");
+
+  // Count the number of faces for each material index in the mesh.
+  std::array<int, 2> num_material_faces = {0, 0};
+  const draco::PointAttribute *const mat_att =
+      mesh->GetNamedAttribute(draco::GeometryAttribute::MATERIAL);
+  for (draco::FaceIndex i(0); i < mesh->num_faces(); ++i) {
+    const auto f = mesh->face(i);
+    uint32_t mat_index = 0;
+    mat_att->GetMappedValue(f[0], &mat_index);
+    ASSERT_TRUE(mat_index == 0 || mat_index == 1);
+    num_material_faces[mat_index]++;
+  }
+
+  // There should be 12 faces mapped to the red material (index 0), rest should
+  // be mapped to the green one.
+  ASSERT_EQ(num_material_faces[0], 12);
+}
+
+TEST(GltfDecoderTest, DecodePointCloudToMeshWithDeduplicationDisabled) {
+  // Checks that no deduplication is performed when it is explicitly disabled.
+  const auto path = GetTestFileFullPath(
+      "SphereTwoMaterials/sphere_two_materials_point_cloud.gltf");
+  draco::GltfDecoder decoder;
+  decoder.SetDeduplicateVertices(false);
+  DRACO_ASSIGN_OR_ASSERT(auto mesh, decoder.DecodeFromFile(path));
+  ASSERT_NE(mesh, nullptr);
+
+  // Check the point cloud has expected number of points and attributes.
+  ASSERT_EQ(mesh->num_faces(), 0);
+  ASSERT_EQ(mesh->num_points(), 462);
+
+  // Verify that no deduplication was performed.
+  ASSERT_EQ(mesh->GetNamedAttribute(draco::GeometryAttribute::NORMAL)->size(),
+            462);
 }
 
 }  // namespace draco

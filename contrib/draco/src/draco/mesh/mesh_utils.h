@@ -42,6 +42,9 @@ class MeshUtils {
   // error is returned.
   static Status RemoveUnusedMeshFeatures(Mesh *mesh);
 
+  // Removes unused property attributes indices from |mesh|.
+  static Status RemoveUnusedPropertyAttributesIndices(Mesh *mesh);
+
   // Flips the UV values of |att|.
   static bool FlipTextureUvValues(bool flip_u, bool flip_v,
                                   PointAttribute *att);

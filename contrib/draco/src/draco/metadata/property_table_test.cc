@@ -14,11 +14,12 @@
 //
 #include "draco/metadata/property_table.h"
 
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
-#include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
 
 namespace {
@@ -58,266 +59,6 @@ TEST(PropertyTableTest, TestPropertyTableDefaults) {
   ASSERT_TRUE(table.GetClass().empty());
   ASSERT_EQ(table.GetCount(), 0);
   ASSERT_EQ(table.NumProperties(), 0);
-}
-
-TEST(PropertyTableTest, TestSchemaDefaults) {
-  // Test construction of an empty property table schema.
-  draco::PropertyTable::Schema schema;
-  ASSERT_TRUE(schema.Empty());
-  ASSERT_EQ(schema.json.GetName(), "schema");
-  ASSERT_EQ(schema.json.GetType(),
-            draco::PropertyTable::Schema::Object::OBJECT);
-  ASSERT_TRUE(schema.json.GetObjects().empty());
-  ASSERT_TRUE(schema.json.GetArray().empty());
-  ASSERT_TRUE(schema.json.GetString().empty());
-  ASSERT_EQ(schema.json.GetInteger(), 0);
-  ASSERT_FALSE(schema.json.GetBoolean());
-}
-
-TEST(PropertyTableTest, TestSchemaObjectDefaultConstructor) {
-  // Test construction of an empty property table schema object.
-  draco::PropertyTable::Schema::Object object;
-  ASSERT_TRUE(object.GetName().empty());
-  ASSERT_EQ(object.GetType(), draco::PropertyTable::Schema::Object::OBJECT);
-  ASSERT_TRUE(object.GetObjects().empty());
-  ASSERT_TRUE(object.GetArray().empty());
-  ASSERT_TRUE(object.GetString().empty());
-  ASSERT_EQ(object.GetInteger(), 0);
-  ASSERT_FALSE(object.GetBoolean());
-}
-
-TEST(PropertyTableTest, TestSchemaObjectNamedConstructor) {
-  // Test construction of a named property table schema object.
-  draco::PropertyTable::Schema::Object object("Flexible Demeanour");
-  ASSERT_EQ(object.GetName(), "Flexible Demeanour");
-  ASSERT_EQ(object.GetType(), draco::PropertyTable::Schema::Object::OBJECT);
-  ASSERT_TRUE(object.GetObjects().empty());
-}
-
-TEST(PropertyTableTest, TestSchemaObjectStringConstructor) {
-  // Test construction of property table schema object storing a string.
-  draco::PropertyTable::Schema::Object object("Flexible Demeanour", "GCU");
-  ASSERT_EQ(object.GetName(), "Flexible Demeanour");
-  ASSERT_EQ(object.GetType(), draco::PropertyTable::Schema::Object::STRING);
-  ASSERT_EQ(object.GetString(), "GCU");
-}
-
-TEST(PropertyTableTest, TestSchemaObjectIntegerConstructor) {
-  // Test construction of property table schema object storing an integer.
-  draco::PropertyTable::Schema::Object object("Flexible Demeanour", 12);
-  ASSERT_EQ(object.GetName(), "Flexible Demeanour");
-  ASSERT_EQ(object.GetType(), draco::PropertyTable::Schema::Object::INTEGER);
-  ASSERT_EQ(object.GetInteger(), 12);
-}
-
-TEST(PropertyTableTest, TestSchemaObjectBooleanConstructor) {
-  // Test construction of property table schema object storing a boolean.
-  draco::PropertyTable::Schema::Object object("Flexible Demeanour", true);
-  ASSERT_EQ(object.GetName(), "Flexible Demeanour");
-  ASSERT_EQ(object.GetType(), draco::PropertyTable::Schema::Object::BOOLEAN);
-  ASSERT_TRUE(object.GetBoolean());
-}
-
-TEST(PropertyTableTest, TestSchemaObjectSettersAndGetters) {
-  // Test value setters and getters of property table schema object.
-  typedef draco::PropertyTable::Schema::Object Object;
-  Object object;
-  ASSERT_EQ(object.GetType(), Object::OBJECT);
-
-  object.SetArray().push_back(Object("entry", 12));
-  ASSERT_EQ(object.GetType(), Object::ARRAY);
-  ASSERT_EQ(object.GetArray().size(), 1);
-  ASSERT_EQ(object.GetArray()[0].GetName(), "entry");
-  ASSERT_EQ(object.GetArray()[0].GetInteger(), 12);
-
-  object.SetObjects().push_back(Object("object", 9));
-  ASSERT_EQ(object.GetType(), Object::OBJECT);
-  ASSERT_EQ(object.GetObjects().size(), 1);
-  ASSERT_EQ(object.GetObjects()[0].GetName(), "object");
-  ASSERT_EQ(object.GetObjects()[0].GetInteger(), 9);
-
-  object.SetString("matter");
-  ASSERT_EQ(object.GetType(), Object::STRING);
-  ASSERT_EQ(object.GetString(), "matter");
-
-  object.SetInteger(5);
-  ASSERT_EQ(object.GetType(), Object::INTEGER);
-  ASSERT_EQ(object.GetInteger(), 5);
-
-  object.SetBoolean(true);
-  ASSERT_EQ(object.GetType(), Object::BOOLEAN);
-  ASSERT_EQ(object.GetBoolean(), true);
-}
-
-TEST(PropertyTableTest, TestSchemaCompare) {
-  typedef draco::PropertyTable::Schema Schema;
-  // Test comparison of two schema objects.
-  {
-    // Compare the same empty schema object.
-    Schema a;
-    ASSERT_TRUE(a == a);
-    ASSERT_FALSE(a != a);
-  }
-  {
-    // Compare two empty schema objects.
-    Schema a;
-    Schema b;
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two schema objects with different JSON objects.
-    Schema a;
-    Schema b;
-    a.json.SetBoolean(true);
-    b.json.SetBoolean(false);
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-}
-
-TEST(PropertyTableTest, TestSchemaObjectCompare) {
-  // Test comparison of two schema JSON objects.
-  typedef draco::PropertyTable::Schema::Object Object;
-  {
-    // Compare the same object.
-    Object a;
-    ASSERT_TRUE(a == a);
-    ASSERT_FALSE(a != a);
-  }
-  {
-    // Compare two default objects.
-    Object a;
-    Object b;
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two objects with different names.
-    Object a("one");
-    Object b("two");
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two objects with different types.
-    Object a;
-    Object b;
-    a.SetInteger(1);
-    b.SetString("one");
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two identical string-type objects.
-    Object a;
-    Object b;
-    a.SetString("one");
-    b.SetString("one");
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two different string-type objects.
-    Object a;
-    Object b;
-    a.SetString("one");
-    b.SetString("two");
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two identical integer-type objects.
-    Object a;
-    Object b;
-    a.SetInteger(1);
-    b.SetInteger(1);
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two different integer-type objects.
-    Object a;
-    Object b;
-    a.SetInteger(1);
-    b.SetInteger(2);
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two identical boolean-type objects.
-    Object a;
-    Object b;
-    a.SetBoolean(true);
-    b.SetBoolean(true);
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two different boolean-type objects.
-    Object a;
-    Object b;
-    a.SetBoolean(true);
-    b.SetBoolean(false);
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two identical object-type objects.
-    Object a;
-    Object b;
-    a.SetObjects().emplace_back("one");
-    b.SetObjects().emplace_back("one");
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two different object-type objects.
-    Object a;
-    Object b;
-    a.SetObjects().emplace_back("one");
-    b.SetObjects().emplace_back("two");
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two object-type objects with different counts.
-    Object a;
-    Object b;
-    a.SetObjects().emplace_back("one");
-    b.SetObjects().emplace_back("one");
-    b.SetObjects().emplace_back("two");
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two identical array-type objects.
-    Object a;
-    Object b;
-    a.SetArray().emplace_back("", 1);
-    b.SetArray().emplace_back("", 1);
-    ASSERT_TRUE(a == b);
-    ASSERT_FALSE(a != b);
-  }
-  {
-    // Compare two different array-type objects.
-    Object a;
-    Object b;
-    a.SetArray().emplace_back("", 1);
-    b.SetArray().emplace_back("", 2);
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
-  {
-    // Compare two array-type objects with different counts.
-    Object a;
-    Object b;
-    a.SetArray().emplace_back("", 1);
-    b.SetArray().emplace_back("", 1);
-    b.SetArray().emplace_back("", 2);
-    ASSERT_FALSE(a == b);
-    ASSERT_TRUE(a != b);
-  }
 }
 
 TEST(PropertyTableTest, TestPropertySettersAndGetters) {
@@ -616,6 +357,78 @@ TEST(PropertyTableTest, TestPropertyTableCompare) {
     b.AddProperty(std::move(p2));
     ASSERT_FALSE(a == b);
     ASSERT_TRUE(a != b);
+  }
+}
+
+TEST(PropertyTableTest, EnodesAndDecodesOffsetBuffers) {
+  {
+    // Encoding an offset buffer from small integers that should fit in an 8 bit
+    // integer.
+    std::vector<uint64_t> sample_offsets = {0x5u, 0x21u, 0x7u, 0x32u, 0xffu};
+    auto encoded_offsets =
+        draco::PropertyTable::Property::Offsets::MakeFromInts(sample_offsets);
+    ASSERT_EQ(encoded_offsets.data.data,
+              std::vector<uint8_t>({0x5u, 0x21u, 0x7u, 0x32u, 0xffu}));
+    ASSERT_EQ(encoded_offsets.type, "UINT8");
+
+    DRACO_ASSIGN_OR_ASSERT(std::vector<uint64_t> decoded_offsets,
+                           encoded_offsets.ParseToInts());
+    ASSERT_EQ(decoded_offsets, sample_offsets);
+  }
+  {
+    // Encoding an offset buffer from medium sized integers that should fit in a
+    // 16 bit integer.
+    std::vector<uint64_t> sample_offsets = {0x5u, 0x21u, 0xffffu};
+    auto encoded_offsets =
+        draco::PropertyTable::Property::Offsets::MakeFromInts(sample_offsets);
+    ASSERT_EQ(encoded_offsets.data.data,
+              std::vector<uint8_t>({0x5u, 0u, 0x21u, 0u, 0xffu, 0xffu}));
+    ASSERT_EQ(encoded_offsets.type, "UINT16");
+
+    DRACO_ASSIGN_OR_ASSERT(std::vector<uint64_t> decoded_offsets,
+                           encoded_offsets.ParseToInts());
+    ASSERT_EQ(decoded_offsets, sample_offsets);
+  }
+  {
+    // Encoding an offset buffer from medium sized integers that should fit in a
+    // 32 bit integer.
+    std::vector<uint64_t> sample_offsets = {0x5u, 0x21u, 0xffffffffu};
+    auto encoded_offsets =
+        draco::PropertyTable::Property::Offsets::MakeFromInts(sample_offsets);
+    ASSERT_EQ(encoded_offsets.data.data,
+              std::vector<uint8_t>({0x5u, 0u, 0u, 0u, 0x21u, 0u, 0u, 0u, 0xffu,
+                                    0xffu, 0xffu, 0xffu}));
+    ASSERT_EQ(encoded_offsets.type, "UINT32");
+
+    DRACO_ASSIGN_OR_ASSERT(std::vector<uint64_t> decoded_offsets,
+                           encoded_offsets.ParseToInts());
+    ASSERT_EQ(decoded_offsets, sample_offsets);
+  }
+  {
+    // Encoding an offset buffer from large integers that won't fit in a 32 bit
+    // integer.
+    std::vector<uint64_t> sample_offsets = {0x5u, 0x21u, 0x100000000u};
+    auto encoded_offsets =
+        draco::PropertyTable::Property::Offsets::MakeFromInts(sample_offsets);
+    ASSERT_EQ(encoded_offsets.data.data,
+              std::vector<uint8_t>({0x5u,  0u, 0u, 0u, 0u, 0u, 0u, 0u,
+                                    0x21u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+                                    0u,    0u, 0u, 0u, 1u, 0u, 0u, 0u}));
+    ASSERT_EQ(encoded_offsets.type, "UINT64");
+
+    DRACO_ASSIGN_OR_ASSERT(std::vector<uint64_t> decoded_offsets,
+                           encoded_offsets.ParseToInts());
+    ASSERT_EQ(decoded_offsets, sample_offsets);
+  }
+  {
+    // Decoding a malformed buffer should return an error.
+    draco::PropertyTable::Property::Offsets broken_offsets;
+    broken_offsets.data.data = std::vector<uint8_t>({0, 0, 0, 0});
+    broken_offsets.type = "BROKEN_TYPE";
+
+    draco::StatusOr<std::vector<uint64_t>> decoded_offsets =
+        broken_offsets.ParseToInts();
+    ASSERT_FALSE(decoded_offsets.ok());
   }
 }
 

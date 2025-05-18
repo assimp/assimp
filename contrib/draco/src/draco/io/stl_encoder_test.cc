@@ -32,8 +32,15 @@ class StlEncoderTest : public ::testing::Test {
     ASSERT_EQ(mesh0->num_faces(), mesh1->num_faces());
     ASSERT_EQ(mesh0->num_attributes(), mesh1->num_attributes());
     for (size_t att_id = 0; att_id < mesh0->num_attributes(); ++att_id) {
-      ASSERT_EQ(mesh0->attribute(att_id)->size(),
-                mesh1->attribute(att_id)->size());
+      ASSERT_EQ(mesh0->attribute(att_id)->attribute_type(),
+                mesh1->attribute(att_id)->attribute_type());
+      // Normals are recomputed during STL encoding and they may not
+      // correspond to the source ones.
+      if (mesh0->attribute(att_id)->attribute_type() !=
+          GeometryAttribute::NORMAL) {
+        ASSERT_EQ(mesh0->attribute(att_id)->size(),
+                  mesh1->attribute(att_id)->size());
+      }
     }
   }
 

@@ -29,7 +29,7 @@ namespace draco {
 // Texture class storing the source image data.
 class Texture {
  public:
-  void Copy(Texture &other) { source_image_.Copy(other.source_image_); }
+  void Copy(const Texture &other) { source_image_.Copy(other.source_image_); }
 
   void set_source_image(const SourceImage &image) { source_image_.Copy(image); }
   const SourceImage &source_image() const { return source_image_; }

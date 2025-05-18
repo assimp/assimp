@@ -16,7 +16,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
@@ -30,9 +29,9 @@ TEST(StructuralMetadataTest, TestCopy) {
   draco::StructuralMetadata structural_metadata;
 
   // Add property table schema to structural metadata.
-  draco::PropertyTable::Schema schema;
+  draco::StructuralMetadataSchema schema;
   schema.json.SetString("Culture");
-  structural_metadata.SetPropertyTableSchema(schema);
+  structural_metadata.SetSchema(schema);
 
   // Add property table to structural metadata.
   std::unique_ptr<draco::PropertyTable> table(new draco::PropertyTable());
@@ -58,7 +57,7 @@ TEST(StructuralMetadataTest, TestCopy) {
   copy.Copy(structural_metadata);
 
   // Check that the structural metadata property table schema has been copied.
-  ASSERT_EQ(copy.GetPropertyTableSchema().json.GetString(), "Culture");
+  ASSERT_EQ(copy.GetSchema().json.GetString(), "Culture");
 
   // Check that the structural metadata property table has been copied.
   ASSERT_EQ(copy.NumPropertyTables(), 1);
@@ -114,6 +113,7 @@ TEST(StructuralMetadataTest, TestPropertyTables) {
 TEST(StructuralMetadataTest, TestCompare) {
   // Test comparison of two structural metadata objects.
   typedef draco::PropertyTable PropertyTable;
+  typedef draco::PropertyAttribute PropertyAttribute;
   {
     // Compare the same structural metadata object.
     draco::StructuralMetadata a;
@@ -131,17 +131,17 @@ TEST(StructuralMetadataTest, TestCompare) {
     // Compare two structural metadata objects with different schemas.
     draco::StructuralMetadata a;
     draco::StructuralMetadata b;
-    PropertyTable::Schema s1;
-    PropertyTable::Schema s2;
+    draco::StructuralMetadataSchema s1;
+    draco::StructuralMetadataSchema s2;
     s1.json.SetString("one");
     s2.json.SetString("two");
-    a.SetPropertyTableSchema(s1);
-    b.SetPropertyTableSchema(s2);
+    a.SetSchema(s1);
+    b.SetSchema(s2);
     ASSERT_FALSE(a == b);
     ASSERT_TRUE(a != b);
   }
   {
-    // Compare two objects with different number of proeprty tables.
+    // Compare two objects with different number of property tables.
     draco::StructuralMetadata a;
     draco::StructuralMetadata b;
     a.AddPropertyTable(std::unique_ptr<PropertyTable>(new PropertyTable()));
@@ -151,7 +151,20 @@ TEST(StructuralMetadataTest, TestCompare) {
     ASSERT_TRUE(a != b);
   }
   {
-    // Compare two objects with different proeprty tables.
+    // Compare two objects with identical property tables.
+    draco::StructuralMetadata a;
+    draco::StructuralMetadata b;
+    auto p1 = std::unique_ptr<PropertyTable>(new PropertyTable());
+    auto p2 = std::unique_ptr<PropertyTable>(new PropertyTable());
+    p1->SetName("one");
+    p2->SetName("one");
+    a.AddPropertyTable(std::move(p1));
+    b.AddPropertyTable(std::move(p2));
+    ASSERT_TRUE(a == b);
+    ASSERT_FALSE(a != b);
+  }
+  {
+    // Compare two objects with different property tables.
     draco::StructuralMetadata a;
     draco::StructuralMetadata b;
     auto p1 = std::unique_ptr<PropertyTable>(new PropertyTable());
@@ -160,6 +173,32 @@ TEST(StructuralMetadataTest, TestCompare) {
     p2->SetName("two");
     a.AddPropertyTable(std::move(p1));
     b.AddPropertyTable(std::move(p2));
+    ASSERT_FALSE(a == b);
+    ASSERT_TRUE(a != b);
+  }
+  {
+    // Compare two objects with identical property attributes.
+    draco::StructuralMetadata a;
+    draco::StructuralMetadata b;
+    auto p1 = std::unique_ptr<PropertyAttribute>(new PropertyAttribute());
+    auto p2 = std::unique_ptr<PropertyAttribute>(new PropertyAttribute());
+    p1->SetName("one");
+    p2->SetName("one");
+    a.AddPropertyAttribute(std::move(p1));
+    b.AddPropertyAttribute(std::move(p2));
+    ASSERT_TRUE(a == b);
+    ASSERT_FALSE(a != b);
+  }
+  {
+    // Compare two objects with identical property attributes.
+    draco::StructuralMetadata a;
+    draco::StructuralMetadata b;
+    auto p1 = std::unique_ptr<PropertyAttribute>(new PropertyAttribute());
+    auto p2 = std::unique_ptr<PropertyAttribute>(new PropertyAttribute());
+    p1->SetName("one");
+    p2->SetName("two");
+    a.AddPropertyAttribute(std::move(p1));
+    b.AddPropertyAttribute(std::move(p2));
     ASSERT_FALSE(a == b);
     ASSERT_TRUE(a != b);
   }

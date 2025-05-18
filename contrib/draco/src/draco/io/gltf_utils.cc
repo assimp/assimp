@@ -79,6 +79,12 @@ void JsonWriter::EndObject() {
   o_ << indent_ << "}";
 }
 
+void JsonWriter::BeginArray() {
+  FinishPreviousLine(BEGIN);
+  o_ << indent_ << "[";
+  indent_writer_.Increase();
+}
+
 void JsonWriter::BeginArray(const std::string &name) {
   FinishPreviousLine(BEGIN);
   o_ << indent_ << "\"" << name << "\":" << separator_ << "[";

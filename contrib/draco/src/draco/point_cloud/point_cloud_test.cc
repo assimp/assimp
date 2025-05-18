@@ -77,6 +77,71 @@ TEST_F(PointCloudTest, PointCloudCopy) {
   ASSERT_TRUE(att_metadata_copy->GetEntryInt("attribute_test", &att_test));
   ASSERT_EQ(att_test, 3);
 }
+
+TEST_F(PointCloudTest, TestCompressionSettings) {
+  // Tests compression settings of a point cloud.
+  draco::PointCloud pc;
+
+  // Check that compression is disabled and compression settings are default.
+  ASSERT_FALSE(pc.IsCompressionEnabled());
+  const draco::DracoCompressionOptions default_compression_options;
+  ASSERT_EQ(pc.GetCompressionOptions(), default_compression_options);
+
+  // Check that compression options can be set without enabling compression.
+  draco::DracoCompressionOptions compression_options;
+  compression_options.quantization_bits_normal = 12;
+  pc.SetCompressionOptions(compression_options);
+  ASSERT_EQ(pc.GetCompressionOptions(), compression_options);
+  ASSERT_FALSE(pc.IsCompressionEnabled());
+
+  // Check that compression can be enabled.
+  pc.SetCompressionEnabled(true);
+  ASSERT_TRUE(pc.IsCompressionEnabled());
+
+  // Check that individual compression options can be updated.
+  pc.GetCompressionOptions().compression_level++;
+  pc.GetCompressionOptions().compression_level--;
+
+  // Check that compression settings can be copied.
+  draco::PointCloud pc_copy;
+  pc_copy.Copy(pc);
+  ASSERT_TRUE(pc_copy.IsCompressionEnabled());
+  ASSERT_EQ(pc_copy.GetCompressionOptions(), compression_options);
+}
+
+TEST_F(PointCloudTest, TestGetNamedAttributeByName) {
+  draco::PointCloud pc;
+  // Test whether we can get named attributes by name.
+  constexpr auto kPosition = draco::GeometryAttribute::POSITION;
+  constexpr auto kGeneric = draco::GeometryAttribute::GENERIC;
+  draco::GeometryAttribute pos_att;
+  draco::GeometryAttribute gen_att0;
+  draco::GeometryAttribute gen_att1;
+  pos_att.Init(kPosition, nullptr, 3, draco::DT_FLOAT32, false, 12, 0);
+  gen_att0.Init(kGeneric, nullptr, 3, draco::DT_FLOAT32, false, 12, 0);
+  gen_att1.Init(kGeneric, nullptr, 3, draco::DT_FLOAT32, false, 12, 0);
+  pos_att.set_name("Zero");
+  gen_att0.set_name("Zero");
+  gen_att1.set_name("One");
+
+  // Add one position, and two generic attributes.
+  pc.AddAttribute(pos_att, false, 0);
+  pc.AddAttribute(gen_att0, false, 0);
+  pc.AddAttribute(gen_att1, false, 0);
+
+  // Check added attributes.
+  ASSERT_EQ(pc.attribute(0)->attribute_type(), kPosition);
+  ASSERT_EQ(pc.attribute(1)->attribute_type(), kGeneric);
+  ASSERT_EQ(pc.attribute(2)->attribute_type(), kGeneric);
+  ASSERT_EQ(pc.attribute(0)->name(), "Zero");
+  ASSERT_EQ(pc.attribute(1)->name(), "Zero");
+  ASSERT_EQ(pc.attribute(2)->name(), "One");
+
+  // Check that we can get correct attributes by name.
+  ASSERT_EQ(pc.GetNamedAttributeByName(kPosition, "Zero"), pc.attribute(0));
+  ASSERT_EQ(pc.GetNamedAttributeByName(kGeneric, "Zero"), pc.attribute(1));
+  ASSERT_EQ(pc.GetNamedAttributeByName(kGeneric, "One"), pc.attribute(2));
+}
 #endif
 
 TEST_F(PointCloudTest, TestAttributeDeletion) {

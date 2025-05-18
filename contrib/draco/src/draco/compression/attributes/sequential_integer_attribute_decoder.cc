@@ -48,6 +48,11 @@ bool SequentialIntegerAttributeDecoder::DecodeValues(
   if (!in_buffer->Decode(&prediction_scheme_method)) {
     return false;
   }
+  // Check that decoded prediction scheme method type is valid.
+  if (prediction_scheme_method < PREDICTION_NONE ||
+      prediction_scheme_method >= NUM_PREDICTION_SCHEMES) {
+    return false;
+  }
   if (prediction_scheme_method != PREDICTION_NONE) {
     int8_t prediction_transform_type;
     if (!in_buffer->Decode(&prediction_transform_type)) {

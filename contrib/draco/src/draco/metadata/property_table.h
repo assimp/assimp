@@ -19,116 +19,29 @@
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
 
+#include <cstdint>
+#include <cstring>
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "draco/core/status_or.h"
+
 namespace draco {
 
-// Describes a property table as defined in the EXT_structural_metadata glTF
-// extension, including property table schema and table properties (columns).
+// Describes a property table (properties are table columns) as defined in the
+// EXT_structural_metadata glTF extension.
 class PropertyTable {
  public:
-  // Describes property table schema in the form of a JSON object.
-  struct Schema {
-    // JSON object of the schema.
-    // TODO(vytyaz): Consider using a third_party/json library. Currently there
-    // is a conflict between Filament's assert_invariant() macro and JSON
-    // library's assert_invariant() method that causes compile errors in Draco
-    // visualization library.
-    class Object {
-     public:
-      enum Type { OBJECT, ARRAY, STRING, INTEGER, BOOLEAN };
-
-      // Constructors.
-      Object() : Object("") {}
-      explicit Object(const std::string& name)
-          : name_(name), type_(OBJECT), integer_(0), boolean_(false) {}
-      Object(const std::string& name, const std::string& value) : Object(name) {
-        SetString(value);
-      }
-      Object(const std::string& name, const char* value) : Object(name) {
-        SetString(value);
-      }
-      Object(const std::string& name, int value) : Object(name) {
-        SetInteger(value);
-      }
-      Object(const std::string& name, bool value) : Object(name) {
-        SetBoolean(value);
-      }
-
-      // Methods for comparing two objects.
-      bool operator==(const Object& other) const;
-      bool operator!=(const Object& other) const { return !(*this == other); }
-
-      // Method for copying the object.
-      void Copy(const Object& src);
-
-      // Methods for getting object name and type.
-      const std::string& GetName() const { return name_; }
-      Type GetType() const { return type_; }
-
-      // Methods for getting object value.
-      const std::vector<Object>& GetObjects() const { return objects_; }
-      const std::vector<Object>& GetArray() const { return array_; }
-      const std::string& GetString() const { return string_; }
-      int GetInteger() const { return integer_; }
-      bool GetBoolean() const { return boolean_; }
-
-      // Methods for setting object value.
-      std::vector<Object>& SetObjects() {
-        type_ = OBJECT;
-        return objects_;
-      }
-      std::vector<Object>& SetArray() {
-        type_ = ARRAY;
-        return array_;
-      }
-      void SetString(const std::string& value) {
-        type_ = STRING;
-        string_ = value;
-      }
-      void SetInteger(int value) {
-        type_ = INTEGER;
-        integer_ = value;
-      }
-      void SetBoolean(bool value) {
-        type_ = BOOLEAN;
-        boolean_ = value;
-      }
-
-     private:
-      std::string name_;
-      Type type_;
-      std::vector<Object> objects_;
-      std::vector<Object> array_;
-      std::string string_;
-      int integer_;
-      bool boolean_;
-    };
-
-    // Valid schema top-level JSON object name is "schema".
-    Schema() : json("schema") {}
-
-    // Methods for comparing two schemas.
-    bool operator==(const Schema& other) const { return json == other.json; }
-    bool operator!=(const Schema& other) const { return !(*this == other); }
-
-    // Valid schema top-level JSON object is required to have child objects.
-    bool Empty() const { return json.GetObjects().empty(); }
-
-    // Top-level JSON object of the schema.
-    Object json;
-  };
-
   // Describes a property (column) of a property table.
   class Property {
    public:
     // Describes glTF buffer view data.
     struct Data {
       // Methods for comparing two data objects.
-      bool operator==(const Data& other) const;
-      bool operator!=(const Data& other) const { return !(*this == other); }
+      bool operator==(const Data &other) const;
+      bool operator!=(const Data &other) const { return !(*this == other); }
 
       // Buffer view data.
       std::vector<uint8_t> data;
@@ -143,36 +56,102 @@ class PropertyTable {
     // arrays.
     struct Offsets {
       // Methods for comparing two offsets.
-      bool operator==(const Offsets& other) const;
-      bool operator!=(const Offsets& other) const { return !(*this == other); }
+      bool operator==(const Offsets &other) const;
+      bool operator!=(const Offsets &other) const { return !(*this == other); }
 
       // Data containing the offset entries.
       Data data;
 
       // Data type of the offset entries.
       std::string type;
+
+      // Builds a new Offsets object given the offsets in |ints|. The resultant
+      // offsets will choose the smallest possible result.type that can contain
+      // all of the input |ints|.
+      static Offsets MakeFromInts(const std::vector<uint64_t> &ints) {
+        uint64_t max_value = 0;
+        for (uint64_t i = 0; i < ints.size(); ++i) {
+          if (ints[i] > max_value) {
+            max_value = ints[i];
+          }
+        }
+
+        Offsets result;
+        int bytes_per_int = 0;
+        if (max_value <= std::numeric_limits<uint8_t>::max()) {
+          result.type = "UINT8";
+          bytes_per_int = 1;
+        } else if (max_value <= std::numeric_limits<uint16_t>::max()) {
+          result.type = "UINT16";
+          bytes_per_int = 2;
+        } else if (max_value <= std::numeric_limits<uint32_t>::max()) {
+          result.type = "UINT32";
+          bytes_per_int = 4;
+        } else {
+          result.type = "UINT64";
+          bytes_per_int = 8;
+        }
+
+        result.data.data.resize(ints.size() * bytes_per_int);
+        for (uint64_t i = 0; i < ints.size(); ++i) {
+          // This assumes execution on a little endian platform.
+          memcpy(&result.data.data[i * bytes_per_int], &ints[i], bytes_per_int);
+        }
+
+        return result;
+      }
+
+      // Decodes the binary data in Offsets::data into offset integers as
+      // defined by the EXT_structural_metadata extension. Returns an error if
+      // Offsets::type is not one of the types allowed by the spec.
+      StatusOr<std::vector<uint64_t>> ParseToInts() const {
+        if (data.data.empty()) {
+          return std::vector<uint64_t>();
+        }
+
+        int bytes_per_int = 0;
+        if (type == "UINT8") {
+          bytes_per_int = 1;
+        } else if (type == "UINT16") {
+          bytes_per_int = 2;
+        } else if (type == "UINT32") {
+          bytes_per_int = 4;
+        } else if (type == "UINT64") {
+          bytes_per_int = 8;
+        } else {
+          return Status(Status::DRACO_ERROR, "Offsets data type invalid");
+        }
+
+        const int count = data.data.size() / bytes_per_int;
+        std::vector<uint64_t> result(count);
+        for (int i = 0; i < count; ++i) {
+          // This assumes execution on a little endian platform.
+          memcpy(&result[i], &data.data[i * bytes_per_int], bytes_per_int);
+        }
+        return result;
+      }
     };
 
     // Creates an empty property.
-    Property();
+    Property() = default;
 
     // Methods for comparing two properties.
-    bool operator==(const Property& other) const;
-    bool operator!=(const Property& other) const { return !(*this == other); }
+    bool operator==(const Property &other) const;
+    bool operator!=(const Property &other) const { return !(*this == other); }
 
     // Copies all data from |src| property.
-    void Copy(const Property& src);
+    void Copy(const Property &src);
 
     // Name of this property.
-    void SetName(const std::string& name);
-    const std::string& GetName() const;
+    void SetName(const std::string &name);
+    const std::string &GetName() const;
 
     // Property data stores one table column worth of data. For example, when
     // the data of type UINT8 is [11, 22] then the property values are 11 and 22
     // for the first and second table rows. See EXT_structural_metadata glTF
     // extension documentation for more details.
-    Data& GetData();
-    const Data& GetData() const;
+    Data &GetData();
+    const Data &GetData() const;
 
     // Array offsets are used when property data contains a variable-length
     // number arrays. For example, when the data is [0, 1, 2, 3, 4] and the
@@ -180,16 +159,16 @@ class PropertyTable {
     // arrays are [0, 1] and [2, 3, 4] for the first and second table rows,
     // respectively. See EXT_structural_metadata glTF extension documentation
     // for more details.
-    const Offsets& GetArrayOffsets() const;
-    Offsets& GetArrayOffsets();
+    const Offsets &GetArrayOffsets() const;
+    Offsets &GetArrayOffsets();
 
     // String offsets are used when property data contains strings. For example,
     // when the data is "SeaLand" and the array offsets are [0, 3, 7] for a
     // two-row table, then the property strings are "Sea"  and "Land" for the
     // first and second table rows, respectively. See EXT_structural_metadata
     // glTF extension documentation for more details.
-    const Offsets& GetStringOffsets() const;
-    Offsets& GetStringOffsets();
+    const Offsets &GetStringOffsets() const;
+    Offsets &GetStringOffsets();
 
    private:
     std::string name_;
@@ -203,21 +182,21 @@ class PropertyTable {
   PropertyTable();
 
   // Methods for comparing two property tables.
-  bool operator==(const PropertyTable& other) const;
-  bool operator!=(const PropertyTable& other) const {
+  bool operator==(const PropertyTable &other) const;
+  bool operator!=(const PropertyTable &other) const {
     return !(*this == other);
   }
 
   // Copies all data from |src| property table.
-  void Copy(const PropertyTable& src);
+  void Copy(const PropertyTable &src);
 
   // Name of this property table.
-  void SetName(const std::string& value);
-  const std::string& GetName() const;
+  void SetName(const std::string &value);
+  const std::string &GetName() const;
 
   // Class of this property table.
-  void SetClass(const std::string& value);
-  const std::string& GetClass() const;
+  void SetClass(const std::string &value);
+  const std::string &GetClass() const;
 
   // Number of rows in this property table.
   void SetCount(int count);
@@ -226,8 +205,8 @@ class PropertyTable {
   // Table properties (columns).
   int AddProperty(std::unique_ptr<Property> property);
   int NumProperties() const;
-  const Property& GetProperty(int index) const;
-  Property& GetProperty(int index);
+  const Property &GetProperty(int index) const;
+  Property &GetProperty(int index);
   void RemoveProperty(int index);
 
  private:

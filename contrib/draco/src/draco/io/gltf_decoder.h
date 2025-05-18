@@ -71,6 +71,18 @@ class GltfDecoder {
     gltf_scene_graph_mode_ = mode;
   }
 
+  // By default, the decoder will attempt to deduplicate vertices after decoding
+  // the mesh. This means lower memory usage and smaller output glTFs after
+  // reencoding. However, for very large meshes, this may become an expensive
+  // operation. If that becomes an issue, you might want to consider disabling
+  // deduplication with |SetDeduplicateVertices(false)|.
+  //
+  // Note that at this moment, disabling deduplication works ONLY for point
+  // clouds.
+  void SetDeduplicateVertices(bool deduplicate_vertices) {
+    deduplicate_vertices_ = deduplicate_vertices;
+  }
+
  private:
   // Loads |file_name| into |gltf_model_|. Fills |input_files| with paths to all
   // input files when non-null.
@@ -192,6 +204,18 @@ class GltfDecoder {
                                const std::string &attribute_name,
                                BuilderT *builder);
 
+  // Copies the property attribute data from |accessor| and adds it to a
+  // Draco mesh. |indices_data| is the indices data from the glTF file. |att_id|
+  // is the attribute ID of the mesh feature ID attribute in the Draco mesh.
+  // |number_of_elements| is the number of faces or points this function will
+  // process. |reverse_winding| if set will change the orientation of the data.
+  template <typename BuilderT>
+  Status AddPropertyAttributeToBuilder(
+      const tinygltf::Accessor &accessor,
+      const std::vector<uint32_t> &indices_data, int att_id,
+      int number_of_elements, bool reverse_winding,
+      const std::string &attribute_name, BuilderT *builder);
+
   // Copies the attribute data from |accessor| and adds it to a Draco mesh.
   // This function will transform all of the data by |transform_matrix| before
   // adding the data to the Draco mesh. |indices_data| is the indices data
@@ -219,6 +243,16 @@ class GltfDecoder {
                            int att_id, int number_of_elements,
                            const std::vector<T> &data, bool reverse_winding,
                            PointCloudBuilder *builder);
+
+  // Sets colors of for all vertices to white.
+  template <typename BuilderT>
+  void SetWhiteVertexColor(int color_att_id, draco::DataType type,
+                           BuilderT *builder);
+  template <typename ComponentT>
+  void SetWhiteVertexColorOfType(int color_att_id,
+                                 TriangleSoupMeshBuilder *builder);
+  template <typename ComponentT>
+  void SetWhiteVertexColorOfType(int color_att_id, PointCloudBuilder *builder);
 
   // Sets values in |data| into the mesh builder |mb| for |att_id|.
   // |reverse_winding| if set will change the orientation of the data.
@@ -306,27 +340,54 @@ class GltfDecoder {
       const tinygltf::Value::Object &extension,
       std::vector<MeshGroup::MaterialsVariantsMapping> *mappings);
 
-  // Decodes glTF mesh feature ID sets from all glTF primitives and adds them to
-  // |mesh|.
-  Status AddMeshFeaturesToDracoMesh(Mesh *mesh);
-
-  // Decodes glTF mesh feature ID sets from glTF primitive in glTF node at
-  // |node_index| and adds them to |mesh|.
-  Status AddMeshFeaturesToDracoMesh(int node_index, Mesh *mesh);
+  // Decode extensions on all primitives of all scenes, such as mesh features
+  // and structural metadata extensions, and add their contents to |mesh|.
+  Status AddPrimitiveExtensionsToDracoMesh(Mesh *mesh);
+  Status AddPrimitiveExtensionsToDracoMesh(int node_index, Mesh *mesh);
+  Status AddPrimitiveExtensionsToDracoMesh(const tinygltf::Primitive &primitive,
+                                           TextureLibrary *texture_library,
+                                           Mesh *mesh);
 
   // Decodes glTF structural metadata from glTF model and adds it to |geometry|.
   template <typename GeometryT>
   Status AddStructuralMetadataToGeometry(GeometryT *geometry);
 
+  // Decodes glTF structural metadata schema from |extension| and adds it to
+  // |geometry|.
+  template <typename GeometryT>
+  Status AddStructuralMetadataSchemaToGeometry(
+      const tinygltf::Value::Object &extension, GeometryT *geometry);
+
+  // Decodes glTF structural metadata property tables from |extension| and adds
+  // them to |geometry|.
+  template <typename GeometryT>
+  Status AddPropertyTablesToGeometry(const tinygltf::Value::Object &extension,
+                                     GeometryT *geometry);
+
+  // Decodes glTF structural metadata property attributes from |extension| and
+  // adds them to |geometry|.
+  template <typename GeometryT>
+  Status AddPropertyAttributesToGeometry(
+      const tinygltf::Value::Object &extension, GeometryT *geometry);
+
   // Decodes glTF mesh feature ID sets from |primitive| and adds them to |mesh|.
   Status DecodeMeshFeatures(const tinygltf::Primitive &primitive,
                             TextureLibrary *texture_library, Mesh *mesh);
+
+  // Decodes glTF structural metadata from |primitive| and adds it to |mesh|.
+  Status DecodeStructuralMetadata(const tinygltf::Primitive &primitive,
+                                  Mesh *mesh);
 
   // Decodes glTF mesh feature ID sets from |extension| and adds them to the
   // |mesh_features| vector.
   Status DecodeMeshFeatures(
       const tinygltf::Value::Object &extension, TextureLibrary *texture_library,
       std::vector<std::unique_ptr<MeshFeatures>> *mesh_features);
+
+  // Decodes glTF structural metadata from |extension| of a glTF primitive and
+  // adds its property attribute indices to the |property_attributes| vector.
+  Status DecodeStructuralMetadata(const tinygltf::Value::Object &extension,
+                                  std::vector<int> *property_attributes);
 
   // Adds an attribute of type |attribute_name| to |builder|. Returns the
   // attribute id.
@@ -427,6 +488,11 @@ class GltfDecoder {
   // Adds the skins to the scene.
   Status AddSkinsToScene();
 
+  // Adds various asset metadata to the scene or mesh.
+  Status AddAssetMetadata(Scene *scene);
+  Status AddAssetMetadata(Mesh *mesh);
+  Status AddAssetMetadata(Metadata *metadata);
+
   // All material and non-material textures (e.g., from EXT_mesh_features) are
   // initially loaded into a texture library inside the the material library.
   // These methods move |non_material_textures| from material texture library
@@ -441,8 +507,8 @@ class GltfDecoder {
   // point cloud builder |pb|. Mesh builder is used if |use_mesh_builder| is set
   // to true.
   static StatusOr<std::unique_ptr<Mesh>> BuildMeshFromBuilder(
-      bool use_mesh_builder, TriangleSoupMeshBuilder *mb,
-      PointCloudBuilder *pb);
+      bool use_mesh_builder, TriangleSoupMeshBuilder *mb, PointCloudBuilder *pb,
+      bool deduplicate_vertices);
 
   // Map of glTF Mesh to Draco scene mesh group.
   std::map<int, MeshGroupIndex> gltf_mesh_to_scene_mesh_group_;
@@ -456,6 +522,10 @@ class GltfDecoder {
   // Class used to build the Draco mesh.
   TriangleSoupMeshBuilder mb_;
   PointCloudBuilder pb_;
+
+  // Map from the index in a feature ID vertex attribute name like _FEATURE_ID_5
+  // to the corresponding attribute index in the current geometry builder.
+  std::unordered_map<int, int> feature_id_attribute_indices_;
 
   // Next face index used when adding attribute data to the Draco mesh.
   int next_face_id_;
@@ -503,6 +573,9 @@ class GltfDecoder {
 
   // Selected mode of the decoded scene graph.
   GltfSceneGraphMode gltf_scene_graph_mode_ = GltfSceneGraphMode::TREE;
+
+  // Whether vertices should be deduplicated after loading.
+  bool deduplicate_vertices_ = true;
 
   // Functionality for deduping primitives on decode.
   struct PrimitiveSignature {

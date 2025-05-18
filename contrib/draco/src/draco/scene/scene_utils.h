@@ -43,6 +43,12 @@ class SceneUtils {
   static IndexTypeVector<MeshInstanceIndex, MeshInstance> ComputeAllInstances(
       const Scene &scene);
 
+  // Computes all mesh instances in the node hierarchy originating from
+  // |node_index|. All instance transformations will be relative to the source
+  // node. That is transformation of parent nodes will not be included.
+  static IndexTypeVector<MeshInstanceIndex, MeshInstance>
+  ComputeAllInstancesFromNode(const Scene &scene, SceneNodeIndex node_index);
+
   // Computes global transform matrix of a |scene| node given by its |index|.
   static Eigen::Matrix4d ComputeGlobalNodeTransform(const Scene &scene,
                                                     SceneNodeIndex index);
@@ -97,8 +103,15 @@ class SceneUtils {
   // multiple materials, the returned scene will contain multiple meshes, one
   // for each of the source mesh's materials; if `mesh` has no material, one
   // will be created for it.
+  //
+  // By default, |MeshToScene| will attempt to deduplicate vertices if the mesh
+  // has multiple materials. This means lower memory usage and smaller output
+  // glTFs after encoding. However, for very large meshes, this may become an
+  // expensive operation. If that becomes an issue, you might want to consider
+  // disabling deduplication by setting |deduplicate_vertices| to false. Note
+  // that at this moment, disabling deduplication works ONLY for point clouds.
   static StatusOr<std::unique_ptr<Scene>> MeshToScene(
-      std::unique_ptr<Mesh> mesh);
+      std::unique_ptr<Mesh> mesh, bool deduplicate_vertices = true);
 
   // Creates a mesh according to mesh |instance| in |scene|. Error is returned
   // if there is no corresponding base mesh in the |scene| or the base mesh has

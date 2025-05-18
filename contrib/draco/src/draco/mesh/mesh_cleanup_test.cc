@@ -141,38 +141,62 @@ TEST_F(MeshCleanupTest, TestAttributes) {
 }
 
 TEST_F(MeshCleanupTest, TestDuplicateFaces) {
+  // This test verifies that the mesh cleanup tool removes duplicate faces.
   TriangleSoupMeshBuilder mb;
   mb.Start(5);
   const int pos_att_id =
       mb.AddAttribute(GeometryAttribute::POSITION, 3, DT_FLOAT32);
+  const int norm_att_id =
+      mb.AddAttribute(GeometryAttribute::NORMAL, 3, DT_FLOAT32);
 
-  // Five faces where only two are unique.
+  // Five faces where only two are unique in spatial domain and three are unique
+  // when we take into account the normal attribute.
 
   // clang-format off
   mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(0),
                                Vector3f(0.f, 0.f, 0.f).data(),
                                Vector3f(1.f, 0.f, 0.f).data(),
                                Vector3f(0.f, 1.f, 0.f).data());
+  mb.SetAttributeValuesForFace(norm_att_id, FaceIndex(0),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data());
 
   mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(1),
                                Vector3f(0.f, 0.f, 0.f).data(),
                                Vector3f(1.f, 0.f, 0.f).data(),
+                               Vector3f(0.f, 1.f, 0.f).data());
+  mb.SetAttributeValuesForFace(norm_att_id, FaceIndex(1),
+                               Vector3f(0.f, 1.f, 0.f).data(),
+                               Vector3f(0.f, 1.f, 0.f).data(),
                                Vector3f(0.f, 1.f, 0.f).data());
 
   mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(2),
                                Vector3f(0.f, 0.f, 0.f).data(),
                                Vector3f(1.f, 0.f, 0.f).data(),
                                Vector3f(0.f, 1.f, 1.f).data());
+  mb.SetAttributeValuesForFace(norm_att_id, FaceIndex(2),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data());
 
   mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(3),
                                Vector3f(1.f, 0.f, 0.f).data(),
                                Vector3f(0.f, 1.f, 0.f).data(),
                               Vector3f(0.f, 0.f, 0.f).data());
+  mb.SetAttributeValuesForFace(norm_att_id, FaceIndex(3),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data());
 
   mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(4),
                                Vector3f(0.f, 0.f, 0.f).data(),
                                Vector3f(1.f, 0.f, 0.f).data(),
                                Vector3f(0.f, 1.f, 1.f).data());
+  mb.SetAttributeValuesForFace(norm_att_id, FaceIndex(4),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data(),
+                               Vector3f(0.f, 0.f, 1.f).data());
   // clang-format on
 
   std::unique_ptr<Mesh> mesh = mb.Finalize();
@@ -180,7 +204,7 @@ TEST_F(MeshCleanupTest, TestDuplicateFaces) {
   ASSERT_EQ(mesh->num_faces(), 5);
   const MeshCleanupOptions cleanup_options;
   DRACO_ASSERT_OK(MeshCleanup::Cleanup(mesh.get(), cleanup_options));
-  ASSERT_EQ(mesh->num_faces(), 2);
+  ASSERT_EQ(mesh->num_faces(), 3);
 }
 
 }  // namespace draco

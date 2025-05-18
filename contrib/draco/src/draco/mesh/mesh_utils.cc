@@ -167,15 +167,10 @@ void MeshUtils::MergeMetadata(const Mesh &src_mesh, Mesh *dst_mesh) {
   }
 }
 
-Status MeshUtils::RemoveUnusedMeshFeatures(Mesh *mesh) {
-  // Unused mesh features are features that are not used by any face / vertex
-  // of the |mesh|. Currently, each mesh feature can be "masked" for specific
-  // materials, in which case we need to check whether the mask materials
-  // are present in the |mesh|. If not, we can remove the mesh features from the
-  // mesh.
+// Returns indices of all used materials on the |mesh|.
+std::unordered_set<int> FindUsedMaterials(const Mesh &mesh) {
   const PointAttribute *const mat_att =
-      mesh->GetNamedAttribute(GeometryAttribute::MATERIAL);
-  // Find which materials are used.
+      mesh.GetNamedAttribute(GeometryAttribute::MATERIAL);
   std::unordered_set<int> used_materials;
   if (mat_att == nullptr) {
     // Only material with index 0 is assumed to be used.
@@ -187,7 +182,16 @@ Status MeshUtils::RemoveUnusedMeshFeatures(Mesh *mesh) {
       used_materials.insert(mat_index);
     }
   }
+  return used_materials;
+}
 
+Status MeshUtils::RemoveUnusedMeshFeatures(Mesh *mesh) {
+  // Unused mesh features are features that are not used by any face / vertex
+  // of the |mesh|. Currently, each mesh feature can be "masked" for specific
+  // materials, in which case we need to check whether the mask materials
+  // are present in the |mesh|. If not, we can remove the mesh features from the
+  // mesh.
+  const std::unordered_set<int> used_materials = FindUsedMaterials(*mesh);
   std::vector<MeshFeaturesIndex> unused_mesh_features;
   for (MeshFeaturesIndex mfi(0); mfi < mesh->NumMeshFeatures(); ++mfi) {
     bool is_used = false;
@@ -243,6 +247,44 @@ Status MeshUtils::RemoveUnusedMeshFeatures(Mesh *mesh) {
     if (used_textures.count(texture) == 0) {
       mesh->GetNonMaterialTextureLibrary().RemoveTexture(ti);
     }
+  }
+  return OkStatus();
+}
+
+Status MeshUtils::RemoveUnusedPropertyAttributesIndices(Mesh *mesh) {
+  // Unused property attributes indices are indices that are not used by any
+  // face / vertex of the |mesh|. Currently, each property attributes index can
+  // be "masked" for specific materials, in which case we need to check whether
+  // the mask materials are present in the |mesh|. If not, we can remove the
+  // property attributes from the mesh.
+  const std::unordered_set<int> used_materials = FindUsedMaterials(*mesh);
+  std::vector<int> unused_property_attributes_indices;
+  for (int i = 0; i < mesh->NumPropertyAttributesIndices(); ++i) {
+    bool is_used = false;
+    if (mesh->NumPropertyAttributesIndexMaterialMasks(i) == 0) {
+      is_used = true;
+    } else {
+      for (int mask_i = 0;
+           mask_i < mesh->NumPropertyAttributesIndexMaterialMasks(i);
+           ++mask_i) {
+        const int material_index =
+            mesh->GetPropertyAttributesIndexMaterialMask(i, mask_i);
+        if (used_materials.count(material_index)) {
+          is_used = true;
+          break;
+        }
+      }
+    }
+    if (!is_used) {
+      unused_property_attributes_indices.push_back(i);
+    }
+  }
+
+  // Remove the unused property attributes indices (from back).
+  for (auto it = unused_property_attributes_indices.rbegin();
+       it != unused_property_attributes_indices.rend(); ++it) {
+    const int i = *it;
+    mesh->RemovePropertyAttributesIndex(i);
   }
   return OkStatus();
 }

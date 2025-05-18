@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
@@ -539,6 +540,57 @@ TEST(MeshTest, MeshCopyWithMeshFeatures) {
             library_copy.GetTexture(1));
 }
 
+// Tests that mesh features are updated properly after a mesh attribute is
+// deleted.
+TEST(MeshTest, TestMeshFeaturesAttributeDeletion) {
+  const std::unique_ptr<draco::Mesh> mesh =
+      draco::ReadMeshFromTestFile("cube_att.obj");
+  ASSERT_NE(mesh, nullptr);
+
+  // Add feature ID set referring to an attribute.
+  const draco::MeshFeaturesIndex index_0 = mesh->AddMeshFeatures(
+      std::unique_ptr<draco::MeshFeatures>(new draco::MeshFeatures()));
+  mesh->GetMeshFeatures(index_0).SetLabel("planet");
+  mesh->GetMeshFeatures(index_0).SetFeatureCount(2);
+  mesh->GetMeshFeatures(index_0).SetAttributeIndex(1);
+
+  // Delete mesh attribute 0. This should update attribute index associated with
+  // mesh features |index_0| by one (to 0).
+  ASSERT_EQ(mesh->GetMeshFeatures(index_0).GetAttributeIndex(), 1);
+  mesh->DeleteAttribute(0);
+  ASSERT_EQ(mesh->GetMeshFeatures(index_0).GetAttributeIndex(), 0);
+
+  // Delete the new mesh attribute 0 and the mesh features |index_0| should not
+  // be associated with any attribute anymore.
+  mesh->DeleteAttribute(0);
+  ASSERT_EQ(mesh->GetMeshFeatures(index_0).GetAttributeIndex(), -1);
+}
+
+// Tests that we can identify which attributes are used by mesh features.
+TEST(MeshTest, TestAttributeUsedByMeshFeatures) {
+  const std::unique_ptr<draco::Mesh> mesh =
+      draco::ReadMeshFromTestFile("cube_att.obj");
+  ASSERT_NE(mesh, nullptr);
+
+  // Add feature ID set referring to an attribute.
+  const draco::MeshFeaturesIndex index_0 = mesh->AddMeshFeatures(
+      std::unique_ptr<draco::MeshFeatures>(new draco::MeshFeatures()));
+  mesh->GetMeshFeatures(index_0).SetLabel("planet");
+  mesh->GetMeshFeatures(index_0).SetFeatureCount(2);
+  mesh->GetMeshFeatures(index_0).SetAttributeIndex(1);
+
+  // Ensure we can tell that attribute 1 is used by mesh features.
+  ASSERT_TRUE(mesh->IsAttributeUsedByMeshFeatures(1));
+
+  // Attribute 0 should not be used by mesh features.
+  ASSERT_FALSE(mesh->IsAttributeUsedByMeshFeatures(0));
+
+  // If the mesh features is deleted, attribute 1 should not be used by mesh
+  // features any more.
+  mesh->DeleteAttribute(1);
+  ASSERT_FALSE(mesh->IsAttributeUsedByMeshFeatures(1));
+}
+
 // Tests copying of a mesh with structural metadata.
 TEST(MeshTest, TestCopyWithStructuralMetadata) {
   const std::unique_ptr<draco::Mesh> mesh =
@@ -546,22 +598,32 @@ TEST(MeshTest, TestCopyWithStructuralMetadata) {
   ASSERT_NE(mesh, nullptr);
 
   // Add structural metadata to the mesh.
-  draco::PropertyTable::Schema schema;
+  draco::StructuralMetadataSchema schema;
   schema.json.SetString("Data");
-  mesh->GetStructuralMetadata().SetPropertyTableSchema(schema);
+  mesh->GetStructuralMetadata().SetSchema(schema);
+  mesh->AddPropertyAttributesIndex(0);
+  mesh->AddPropertyAttributesIndex(1);
 
   // Copy the mesh.
   draco::Mesh copy;
   copy.Copy(*mesh);
 
   // Check that the structural metadata has been copied.
-  ASSERT_EQ(
-      copy.GetStructuralMetadata().GetPropertyTableSchema().json.GetString(),
-      "Data");
+  ASSERT_EQ(copy.GetStructuralMetadata().GetSchema().json.GetString(), "Data");
+  ASSERT_EQ(copy.NumPropertyAttributesIndices(), 2);
+  ASSERT_EQ(copy.GetPropertyAttributesIndex(0), 0);
+  ASSERT_EQ(copy.GetPropertyAttributesIndex(1), 1);
+
+  // Check that property attributes index can be removed.
+  copy.RemovePropertyAttributesIndex(0);
+  ASSERT_EQ(copy.NumPropertyAttributesIndices(), 1);
+  ASSERT_EQ(copy.GetPropertyAttributesIndex(0), 1);
 }
 
-// Tests removing of unused materials for a mesh with mesh features.
-TEST(MeshTest, RemoveUnusedMaterialsWithMeshFeatures) {
+// Tests removing of unused materials for a mesh with mesh features and property
+// attributes indices.
+TEST(MeshTest,
+     RemoveUnusedMaterialsWithMeshFeaturesAndPropertyAttributesIndices) {
   const std::unique_ptr<draco::Mesh> mesh =
       draco::ReadMeshFromTestFile("BoxesMeta/glTF/BoxesMeta.gltf");
   ASSERT_NE(mesh, nullptr);
@@ -580,6 +642,12 @@ TEST(MeshTest, RemoveUnusedMaterialsWithMeshFeatures) {
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(4), 0),
             1);
 
+  // Input has two property attributes, one associated with each of the two
+  // materials.
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 2);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(0, 0), 0);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(1, 0), 1);
+
   // Remove material 0.
   draco::PointAttribute *mat_att = mesh->attribute(
       mesh->GetNamedAttributeId(draco::GeometryAttribute::MATERIAL));
@@ -588,36 +656,72 @@ TEST(MeshTest, RemoveUnusedMaterialsWithMeshFeatures) {
   mat_att->SetAttributeValue(draco::AttributeValueIndex(0), &new_mat_index);
 
   // This should not do anything because we still have the material 0 referenced
-  // by mesh features 0 and 1.
+  // by mesh features 0 and 1, as well as by property attributes at index 0.
   mesh->RemoveUnusedMaterials();
 
   ASSERT_EQ(mesh->GetMaterialLibrary().NumMaterials(), 2);
   ASSERT_EQ(mesh->NumMeshFeatures(), 5);
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 2);
 
-  // Now remove unused mesh features (should be 0 and 1).
+  // Now remove unused mesh features (should be 0 and 1) and property attributes
+  // indices (should be 0).
   DRACO_ASSERT_OK(draco::MeshUtils::RemoveUnusedMeshFeatures(mesh.get()));
+  DRACO_ASSERT_OK(
+      draco::MeshUtils::RemoveUnusedPropertyAttributesIndices(mesh.get()));
 
-  ASSERT_EQ(mesh->NumMeshFeatures(), 3);
   // All remaining mesh features should be still mapped to material 1.
+  ASSERT_EQ(mesh->NumMeshFeatures(), 3);
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(0), 0),
             1);
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(1), 0),
             1);
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(2), 0),
             1);
+
+  // Remaining property attributes index should be still mapped to material 1.
+  ASSERT_EQ(mesh->NumPropertyAttributesIndices(), 1);
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(0, 0), 1);
 
   // Now remove the unused materials (0).
   mesh->RemoveUnusedMaterials();
 
-  // Only one material should be remaining and all the mesh features should now
-  // be mapped to material 0.
+  // Only one material should be remaining.
   ASSERT_EQ(mesh->GetMaterialLibrary().NumMaterials(), 1);
+
+  // All the mesh features should now be mapped to material 0.
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(0), 0),
             0);
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(1), 0),
             0);
   ASSERT_EQ(mesh->GetMeshFeaturesMaterialMask(draco::MeshFeaturesIndex(2), 0),
             0);
+
+  // Property attributes index should now be mapped to material 0.
+  ASSERT_EQ(mesh->GetPropertyAttributesIndexMaterialMask(0, 0), 0);
+}
+
+// Tests that when we remove mesh features from a mesh, the associated vertex
+// attributes and textures are not removed.
+TEST(MeshTest, TestDeleteMeshFeatures) {
+  // The loaded mesh has several vertex attributes and textures used by the
+  // mesh features.
+  const std::unique_ptr<draco::Mesh> mesh =
+      draco::ReadMeshFromTestFile("BoxesMeta/glTF/BoxesMeta.gltf");
+  ASSERT_NE(mesh, nullptr);
+  ASSERT_GT(mesh->NumMeshFeatures(), 0);
+
+  draco::Mesh mesh_copy;
+  mesh_copy.Copy(*mesh);
+
+  // Delete all mesh features from the copy and ensure all vertex attributes
+  // and textures stay the same.
+  while (mesh_copy.NumMeshFeatures() > 0) {
+    mesh_copy.RemoveMeshFeatures(draco::MeshFeaturesIndex(0));
+  }
+  ASSERT_EQ(mesh_copy.NumMeshFeatures(), 0);
+  ASSERT_EQ(mesh_copy.num_attributes(), mesh->num_attributes());
+  ASSERT_EQ(mesh_copy.GetNonMaterialTextureLibrary().NumTextures(),
+            mesh->GetNonMaterialTextureLibrary().NumTextures());
 }
 #endif  // DRACO_TRANSCODER_SUPPORTED
 

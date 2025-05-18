@@ -75,35 +75,28 @@ void MeshCleanup::RemoveDegeneratedFaces(Mesh *mesh) {
 }
 
 void MeshCleanup::RemoveDuplicateFaces(Mesh *mesh) {
-  const PointAttribute *const pos_att =
-      mesh->GetNamedAttribute(GeometryAttribute::POSITION);
-
-  typedef std::array<AttributeValueIndex::ValueType, 3> PosTriplet;
-  PosTriplet pos_indices;
-  std::unordered_set<PosTriplet, HashArray<PosTriplet>> is_face_used;
+  std::unordered_set<Mesh::Face, HashArray<Mesh::Face>> is_face_used;
 
   uint32_t num_duplicate_faces = 0;
   for (FaceIndex fi(0); fi < mesh->num_faces(); ++fi) {
-    const auto f = mesh->face(fi);
-    for (int c = 0; c < 3; ++c) {
-      pos_indices[c] = pos_att->mapped_index(f[c]).value();
-    }
-    // Shift the position indices until the smallest index is the first one.
-    while (pos_indices[0] > pos_indices[1] || pos_indices[0] > pos_indices[2]) {
+    auto face = mesh->face(fi);
+
+    // Shift the face indices until the smallest index is the first one.
+    while (face[0] > face[1] || face[0] > face[2]) {
       // Shift to the left.
-      std::swap(pos_indices[0], pos_indices[1]);
-      std::swap(pos_indices[1], pos_indices[2]);
+      std::swap(face[0], face[1]);
+      std::swap(face[1], face[2]);
     }
-    // Check if have encountered the same position triplet on a different face.
-    if (is_face_used.find(pos_indices) != is_face_used.end()) {
+    // Check if have encountered the same face before.
+    if (is_face_used.find(face) != is_face_used.end()) {
       // Duplicate face. Ignore it.
       num_duplicate_faces++;
     } else {
       // Insert new face to the set.
-      is_face_used.insert(pos_indices);
+      is_face_used.insert(face);
       if (num_duplicate_faces > 0) {
         // Copy the face to its new location.
-        mesh->SetFace(fi - num_duplicate_faces, f);
+        mesh->SetFace(fi - num_duplicate_faces, face);
       }
     }
   }

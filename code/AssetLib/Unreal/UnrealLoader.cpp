@@ -67,32 +67,26 @@ namespace Assimp {
 
 namespace Unreal {
 
-/*
-    0 = Normal one-sided
-    1 = Normal two-sided
-    2 = Translucent two-sided
-    3 = Masked two-sided
-    4 = Modulation blended two-sided
-    8 = Placeholder triangle for weapon positioning (invisible)
-*/
+// Mesh-specific fags.
 enum MeshFlags {
-    MF_NORMAL_OS = 0,
-    MF_NORMAL_TS = 1,
-    MF_NORMAL_TRANS_TS = 2,
-    MF_NORMAL_MASKED_TS = 3,
-    MF_NORMAL_MOD_TS = 4,
-    MF_WEAPON_PLACEHOLDER = 8
+    MF_INVALID = -1,            // Not set
+    MF_NORMAL_OS = 0,           // Normal one-sided
+    MF_NORMAL_TS = 1,           // Normal two-sided
+    MF_NORMAL_TRANS_TS = 2,     // Translucent two-sided
+    MF_NORMAL_MASKED_TS = 3,    // Masked two-sided
+    MF_NORMAL_MOD_TS = 4,       // Modulation blended two-sided
+    MF_WEAPON_PLACEHOLDER = 8   // Placeholder triangle for weapon positioning (invisible)
 };
 
 // a single triangle
 struct Triangle {
-    uint16_t mVertex[3]; // Vertex indices
-    char mType; // James' Mesh Type
-    char mColor; // Color for flat and Gourand Shaded
-    unsigned char mTex[3][2]; // Texture UV coordinates
-    unsigned char mTextureNum; // Source texture offset
-    char mFlags; // Unreal Mesh Flags (unused)
-    unsigned int matIndex;
+    uint16_t mVertex[3];        // Vertex indices
+    char mType;                 // James' Mesh Type
+    char mColor;                // Color for flat and Gourand Shaded
+    unsigned char mTex[3][2];   // Texture UV coordinates
+    unsigned char mTextureNum;  // Source texture offset
+    char mFlags;                // Unreal Mesh Flags (unused)
+    unsigned int matIndex;      // Material index
 };
 
 // temporary representation for a material
@@ -118,6 +112,7 @@ struct TempMat {
     }
 };
 
+// A single vertex in an unsigned int 32 bit
 struct Vertex {
     int32_t X : 11;
     int32_t Y : 11;
@@ -171,10 +166,6 @@ UnrealImporter::UnrealImporter() :
         mConfigFrameID(0), mConfigHandleFlags(true) {
     // empty
 }
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-UnrealImporter::~UnrealImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -243,8 +234,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     const uint16_t numTris = d_reader.GetI2();
     const uint16_t numVert = d_reader.GetI2();
     d_reader.IncPtr(44);
-    if (!numTris || numVert < 3)
+    if (!numTris || numVert < 3) {
         throw DeadlyImportError("UNREAL: Invalid number of vertices/triangles");
+    }
 
     // maximum texture index
     unsigned int maxTexIdx = 0;
@@ -253,7 +245,6 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     std::vector<Unreal::Triangle> triangles(numTris);
     for (auto &tri : triangles) {
         for (unsigned int i = 0; i < 3; ++i) {
-
             tri.mVertex[i] = d_reader.GetI2();
             if (tri.mVertex[i] >= numTris) {
                 ASSIMP_LOG_WARN("UNREAL: vertex index out of range");
@@ -263,18 +254,20 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         tri.mType = d_reader.GetI1();
 
         // handle mesh flagss?
-        if (mConfigHandleFlags)
+        if (mConfigHandleFlags) {
             tri.mType = Unreal::MF_NORMAL_OS;
-        else {
+        } else {
             // ignore MOD and MASKED for the moment, treat them as two-sided
             if (tri.mType == Unreal::MF_NORMAL_MOD_TS || tri.mType == Unreal::MF_NORMAL_MASKED_TS)
                 tri.mType = Unreal::MF_NORMAL_TS;
         }
         d_reader.IncPtr(1);
 
-        for (unsigned int i = 0; i < 3; ++i)
-            for (unsigned int i2 = 0; i2 < 2; ++i2)
+        for (unsigned int i = 0; i < 3; ++i) {
+            for (unsigned int i2 = 0; i2 < 2; ++i2) {
                 tri.mTex[i][i2] = d_reader.GetI1();
+            }
+        }
 
         tri.mTextureNum = d_reader.GetI1();
         maxTexIdx = std::max(maxTexIdx, (unsigned int)tri.mTextureNum);
@@ -282,8 +275,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     }
 
     p.reset(pIOHandler->Open(a_path));
-    if (!p)
+    if (!p) {
         throw DeadlyImportError("UNREAL: Unable to open _a file");
+    }
     StreamReaderLE a_reader(pIOHandler->Open(a_path));
 
     // read number of frames
@@ -292,9 +286,10 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         throw DeadlyImportError("UNREAL: The requested frame does not exist");
     }
 
-    uint32_t st = a_reader.GetI2();
-    if (st != numVert * 4u)
+    // read aniv file length
+    if (uint32_t st = a_reader.GetI2(); st != numVert * 4u) {
         throw DeadlyImportError("UNREAL: Unexpected aniv file length");
+    }
 
     // skip to our frame
     a_reader.IncPtr(mConfigFrameID * numVert * 4);
@@ -407,7 +402,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     materials.reserve(textures.size() * 2 + 5);
 
     // find out how many output meshes and materials we'll have and build material indices
-    for (Unreal::Triangle &tri : triangles) {
+    for (auto &tri : triangles) {
         Unreal::TempMat mat(tri);
         auto nt = std::find(materials.begin(), materials.end(), mat);
         if (nt == materials.end()) {
@@ -483,7 +478,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
         // set texture, if any
         const unsigned int tex = materials[i].tex;
-        for (std::vector<std::pair<unsigned int, std::string>>::const_iterator it = textures.begin(); it != textures.end(); ++it) {
+        for (auto it = textures.begin(); it != textures.end(); ++it) {
             if ((*it).first == tex) {
                 s.Set((*it).second);
                 mat->AddProperty(&s, AI_MATKEY_TEXTURE_DIFFUSE(0));
@@ -495,7 +490,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     // fill them.
     for (const Unreal::Triangle &tri : triangles) {
         Unreal::TempMat mat(tri);
-        std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(), materials.end(), mat);
+        auto nt = std::find(materials.begin(), materials.end(), mat);
 
         aiMesh *mesh = pScene->mMeshes[nt - materials.begin()];
         aiFace &f = mesh->mFaces[mesh->mNumFaces++];

@@ -131,6 +131,10 @@ macro(draco_set_default_options)
     NAME DRACO_DEBUG_COMPILER_WARNINGS
     HELPSTRING "Turn on more warnings."
     VALUE OFF)
+  draco_option(
+    NAME DRACO_INSTALL
+    HELPSTRING "Enable installation."
+    VALUE ON)
   draco_check_deprecated_options()
 endmacro()
 

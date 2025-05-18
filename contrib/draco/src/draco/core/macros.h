@@ -34,12 +34,6 @@
 #include <iostream>
 namespace draco {
 
-#ifndef DISALLOW_COPY_AND_ASSIGN
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName &) = delete;     \
-  void operator=(const TypeName &) = delete;
-#endif  // DISALLOW_COPY_AND_ASSIGN
-
 #ifndef FALLTHROUGH_INTENDED
 #if defined(__clang__) && defined(__has_warning)
 #if __has_feature(cxx_attributes) && __has_warning("-Wimplicit-fallthrough")
@@ -66,6 +60,12 @@ namespace draco {
 #endif
 
 }  // namespace draco
+
+#ifndef DISALLOW_COPY_AND_ASSIGN
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName &) = delete;     \
+  void operator=(const TypeName &) = delete;
+#endif  // DISALLOW_COPY_AND_ASSIGN
 
 #ifdef DRACO_DEBUG
 #define DRACO_DCHECK(x) (assert(x));

@@ -541,7 +541,7 @@ bool ObjDecoder::ParseMaterial(Status * /* status */) {
   parser::SkipWhitespace(&line_buffer);
   std::string mat_name;
   parser::ParseLine(&line_buffer, &mat_name);
-  if (mat_name.length() == 0) {
+  if (mat_name.empty()) {
     return false;
   }
   auto it = material_name_to_id_.find(mat_name);
@@ -572,7 +572,7 @@ bool ObjDecoder::ParseObject(Status *status) {
   if (!parser::ParseString(&line_buffer, &obj_name)) {
     return false;
   }
-  if (obj_name.length() == 0) {
+  if (obj_name.empty()) {
     return true;  // Ignore empty name entries.
   }
   auto it = obj_name_to_id_.find(obj_name);

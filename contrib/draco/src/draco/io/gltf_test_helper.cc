@@ -20,8 +20,10 @@
 #include <utility>
 #include <vector>
 
+#include "draco/attributes/geometry_attribute.h"
 #include "draco/core/draco_test_base.h"
 #include "draco/core/draco_test_utils.h"
+#include "draco/metadata/property_attribute.h"
 #include "draco/metadata/property_table.h"
 #include "draco/texture/texture_library.h"
 
@@ -59,9 +61,6 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
       pa->SetAttributeValue(avi, &val);
     }
     const int att_id = mesh.AddPerFaceAttribute(std::move(pa));
-    std::unique_ptr<AttributeMetadata> metadata(new AttributeMetadata());
-    metadata->AddEntryString("attribute_name", "_FEATURE_ID_0");
-    mesh.AddAttributeMetadata(att_id, std::move(metadata));
 
     // Add feature ID set to the mesh.
     std::unique_ptr<MeshFeatures> features(new MeshFeatures());
@@ -69,7 +68,7 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
     features->SetFeatureCount(num_faces);
     features->SetNullFeatureId(100);
     features->SetPropertyTableIndex(0);
-    features->SetAttributeIndex(0);
+    features->SetAttributeIndex(att_id);
     mesh.AddMeshFeatures(std::move(features));
   }
 
@@ -84,9 +83,6 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
       pa->SetAttributeValue(avi, &val);
     }
     const int att_id = mesh.AddPerVertexAttribute(std::move(pa));
-    std::unique_ptr<AttributeMetadata> metadata(new AttributeMetadata());
-    metadata->AddEntryString("attribute_name", "_FEATURE_ID_1");
-    mesh.AddAttributeMetadata(att_id, std::move(metadata));
 
     // Add feature ID set to the mesh.
     std::unique_ptr<MeshFeatures> features(new MeshFeatures());
@@ -94,7 +90,7 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
     features->SetFeatureCount(num_vertices);
     features->SetNullFeatureId(101);
     features->SetPropertyTableIndex(1);
-    features->SetAttributeIndex(1);
+    features->SetAttributeIndex(att_id);
     mesh.AddMeshFeatures(std::move(features));
   }
 
@@ -113,14 +109,11 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
     }
     const int att_id =
         mesh.AddAttributeWithConnectivity(std::move(pa), corner_to_value);
-    std::unique_ptr<AttributeMetadata> metadata(new AttributeMetadata());
-    metadata->AddEntryString("attribute_name", "_FEATURE_ID_2");
-    mesh.AddAttributeMetadata(att_id, std::move(metadata));
 
     // Add feature ID set to the mesh.
     std::unique_ptr<MeshFeatures> features(new MeshFeatures());
     features->SetFeatureCount(num_corners);
-    features->SetAttributeIndex(2);
+    features->SetAttributeIndex(att_id);
     mesh.AddMeshFeatures(std::move(features));
   }
 
@@ -163,7 +156,7 @@ void GltfTestHelper::AddBoxMetaMeshFeatures(Scene *scene) {
 }
 
 void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
-  // Add structural metadata property table schema in the following JSON:
+  // Add structural metadata schema in the following JSON:
   // "schema": {
   //   "id": "galaxy",
   //   "classes": {
@@ -181,9 +174,28 @@ void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
   //           "type": "STRING"
   //         }
   //         "sequence": {
+  //           "componentType": "FLOAT32",
   //           "description": "The number sequence.",
   //           "required": false,
   //           "type": "SCALAR"
+  //         }
+  //       }
+  //     },
+  //     "movement": {
+  //       "name": "The movement.",
+  //       "description": "Vertex movement.",
+  //       "properties": {
+  //         "direction": {
+  //           "description": "Movement direction.",
+  //           "type": "VEC3",
+  //           "componentType": "FLOAT32",
+  //           "required": true
+  //         },
+  //         "magnitude": {
+  //           "description": "Movement magnitude.",
+  //           "type": "SCALAR",
+  //           "componentType": "FLOAT32",
+  //           "required": true
   //         }
   //       }
   //     }
@@ -201,35 +213,76 @@ void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
   //       ]
   //     }
   //   }
-  // }
-  typedef PropertyTable::Schema::Object Object;
-  PropertyTable::Schema schema;
+  // },
+  // "propertyAttributes": [{
+  //   "name": "The movement.",
+  //   "class": "movement",
+  //   "properties": {
+  //     "direction": {
+  //       "attribute": "_DIRECTION",
+  //     },
+  //     "magnitude": {
+  //       "attribute": "_MAGNITUDE",
+  //     }
+  //   }
+  // }]
+  typedef StructuralMetadataSchema::Object Object;
+  StructuralMetadataSchema schema;
   Object &json = schema.json;
   json.SetObjects().emplace_back("id", "galaxy");
   json.SetObjects().emplace_back("classes");
-  json.SetObjects().back().SetObjects().emplace_back("planet");
-  Object &planet = json.SetObjects().back().SetObjects().back();
-  planet.SetObjects().emplace_back("properties");
-  Object &properties = planet.SetObjects().back();
 
-  properties.SetObjects().emplace_back("color");
-  Object &color = properties.SetObjects().back();
-  color.SetObjects().emplace_back("componentType", "UINT8");
-  color.SetObjects().emplace_back("description", "The RGB color.");
-  color.SetObjects().emplace_back("required", true);
-  color.SetObjects().emplace_back("type", "VEC3");
+  // Add class "planet" to schema.
+  {
+    json.SetObjects().back().SetObjects().emplace_back("planet");
+    Object &planet = json.SetObjects().back().SetObjects().back();
+    planet.SetObjects().emplace_back("properties");
+    Object &properties = planet.SetObjects().back();
 
-  properties.SetObjects().emplace_back("name");
-  Object &name = properties.SetObjects().back();
-  name.SetObjects().emplace_back("description", "The name.");
-  name.SetObjects().emplace_back("required", true);
-  name.SetObjects().emplace_back("type", "STRING");
+    properties.SetObjects().emplace_back("color");
+    Object &color = properties.SetObjects().back();
+    color.SetObjects().emplace_back("componentType", "UINT8");
+    color.SetObjects().emplace_back("description", "The RGB color.");
+    color.SetObjects().emplace_back("required", true);
+    color.SetObjects().emplace_back("type", "VEC3");
 
-  properties.SetObjects().emplace_back("sequence");
-  Object &sequence = properties.SetObjects().back();
-  sequence.SetObjects().emplace_back("description", "The number sequence.");
-  sequence.SetObjects().emplace_back("required", false);
-  sequence.SetObjects().emplace_back("type", "SCALAR");
+    properties.SetObjects().emplace_back("name");
+    Object &name = properties.SetObjects().back();
+    name.SetObjects().emplace_back("description", "The name.");
+    name.SetObjects().emplace_back("required", true);
+    name.SetObjects().emplace_back("type", "STRING");
+
+    properties.SetObjects().emplace_back("sequence");
+    Object &sequence = properties.SetObjects().back();
+    sequence.SetObjects().emplace_back("componentType", "FLOAT32");
+    sequence.SetObjects().emplace_back("description", "The number sequence.");
+    sequence.SetObjects().emplace_back("required", false);
+    sequence.SetObjects().emplace_back("type", "SCALAR");
+  }
+
+  // Add class "movement" to schema.
+  {
+    json.SetObjects().back().SetObjects().emplace_back("movement");
+    Object &movement = json.SetObjects().back().SetObjects().back();
+    movement.SetObjects().emplace_back("name", "The movement.");
+    movement.SetObjects().emplace_back("description", "Vertex movement.");
+    movement.SetObjects().emplace_back("properties");
+    Object &properties = movement.SetObjects().back();
+
+    properties.SetObjects().emplace_back("direction");
+    Object &direction = properties.SetObjects().back();
+    direction.SetObjects().emplace_back("componentType", "FLOAT32");
+    direction.SetObjects().emplace_back("description", "Movement direction.");
+    direction.SetObjects().emplace_back("required", true);
+    direction.SetObjects().emplace_back("type", "VEC3");
+
+    properties.SetObjects().emplace_back("magnitude");
+    Object &mag = properties.SetObjects().back();
+    mag.SetObjects().emplace_back("componentType", "FLOAT32");
+    mag.SetObjects().emplace_back("description", "Movement magnitude.");
+    mag.SetObjects().emplace_back("required", true);
+    mag.SetObjects().emplace_back("type", "SCALAR");
+  }
 
   json.SetObjects().emplace_back("enums");
   json.SetObjects().back().SetObjects().emplace_back("classifications");
@@ -260,8 +313,8 @@ void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
   values.SetArray().back().SetObjects().emplace_back("name", "Ordnance");
   values.SetArray().back().SetObjects().emplace_back("value", 4);
 
-  // Add property table schema to the scene.
-  scene->GetStructuralMetadata().SetPropertyTableSchema(schema);
+  // Add structural metadata schema to the scene.
+  scene->GetStructuralMetadata().SetSchema(schema);
 
   // Add structural metadata property table.
   std::unique_ptr<PropertyTable> table(new PropertyTable());
@@ -334,9 +387,9 @@ void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
                                               212, 0, 0, 0,  // Mustafar
                                               232, 0, 0, 0,  // Bespin
                                               250, 0, 0, 0,  // Yavin
-                                              12,  1, 0, 0,  // Geonosis
-                                              32,  1, 0, 0,  // UNLABELED
-                                              41,  1, 0, 0};
+                                              11,  1, 0, 0,  // Geonosis
+                                              31,  1, 0, 0,  // UNLABELED
+                                              40,  1, 0, 0};
     table->AddProperty(std::move(property));
   }
 
@@ -391,36 +444,95 @@ void GltfTestHelper::AddBoxMetaStructuralMetadata(Scene *scene) {
 
   // Add property table to the scene.
   scene->GetStructuralMetadata().AddPropertyTable(std::move(table));
+
+  // Add structural metadata property attribute.
+  std::unique_ptr<PropertyAttribute> attribute(new PropertyAttribute());
+  attribute->SetName("The movement.");
+  attribute->SetClass("movement");
+  {
+    std::unique_ptr<PropertyAttribute::Property> property(
+        new PropertyAttribute::Property());
+    property->SetName("direction");
+    property->SetAttributeName("_DIRECTION");
+    attribute->AddProperty(std::move(property));
+  }
+  {
+    std::unique_ptr<PropertyAttribute::Property> property(
+        new PropertyAttribute::Property());
+    property->SetName("magnitude");
+    property->SetAttributeName("_MAGNITUDE");
+    attribute->AddProperty(std::move(property));
+  }
+  scene->GetStructuralMetadata().AddPropertyAttribute(std::move(attribute));
+
+  // Get mesh element counts.
+  Mesh &mesh = scene->GetMesh(MeshIndex(0));
+  ASSERT_EQ(mesh.num_faces(), 12);
+  ASSERT_EQ(mesh.num_points(), 36);
+  const int num_vertices =
+      mesh.GetNamedAttribute(GeometryAttribute::POSITION)->size();
+
+  // Add per-vertex Float32 3D vector property attribute named _DIRECTION.
+  {
+    // Create property attribute.
+    constexpr DataType kType = DataType::DT_FLOAT32;
+    std::unique_ptr<PointAttribute> pa(new PointAttribute());
+    pa->Init(GeometryAttribute::GENERIC, 3, kType, false, num_vertices);
+    for (AttributeValueIndex avi(0); avi < num_vertices; ++avi) {
+      const std::array<float, 3> val = {
+          avi.value() + 0.10f, avi.value() + 0.20f, avi.value() + 0.30f};
+      pa->SetAttributeValue(avi, &val);
+    }
+    const int att_id = mesh.AddPerVertexAttribute(std::move(pa));
+    mesh.attribute(att_id)->set_name("_DIRECTION");
+  }
+
+  // Add per-vertex Float32 scalar property attribute named _MAGNITUDE.
+  {
+    // Create property attribute.
+    constexpr DataType kType = DataType::DT_FLOAT32;
+    std::unique_ptr<PointAttribute> pa(new PointAttribute());
+    pa->Init(GeometryAttribute::GENERIC, 1, kType, false, num_vertices);
+    for (AttributeValueIndex avi(0); avi < num_vertices; ++avi) {
+      const float val = avi.value();
+      pa->SetAttributeValue(avi, &val);
+    }
+    const int att_id = mesh.AddPerVertexAttribute(std::move(pa));
+    mesh.attribute(att_id)->set_name("_MAGNITUDE");
+  }
+
+  // Add property attribute to the mesh.
+  mesh.AddPropertyAttributesIndex(0);
 }
 
 template <>
 void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &geometry,
-                                              bool has_draco_compression) {
+                                              const UseCase &use_case) {
   CheckBoxMetaMeshFeatures(geometry, geometry.GetNonMaterialTextureLibrary(),
-                           has_draco_compression);
+                           use_case);
 }
 
 template <>
 void GltfTestHelper::CheckBoxMetaMeshFeatures(const Scene &geometry,
-                                              bool has_draco_compression) {
+                                              const UseCase &use_case) {
   ASSERT_EQ(geometry.NumMeshes(), 1);
   CheckBoxMetaMeshFeatures(geometry.GetMesh(MeshIndex(0)),
-                           geometry.GetNonMaterialTextureLibrary(),
-                           has_draco_compression);
+                           geometry.GetNonMaterialTextureLibrary(), use_case);
 }
 
 void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
                                               const TextureLibrary &texture_lib,
-                                              bool has_draco_compression) {
+                                              const UseCase &use_case) {
   // Check texture library.
   ASSERT_EQ(texture_lib.NumTextures(), 2);
 
   // Check basic mesh properties.
   ASSERT_EQ(mesh.NumMeshFeatures(), 5);
   ASSERT_EQ(mesh.num_faces(), 12);
-  ASSERT_EQ(mesh.num_attributes(), 7);
+  ASSERT_EQ(mesh.num_attributes(), use_case.has_structural_metadata ? 9 : 7);
   ASSERT_EQ(mesh.num_points(), 36);
-  ASSERT_EQ(mesh.NumNamedAttributes(GeometryAttribute::GENERIC), 3);
+  ASSERT_EQ(mesh.NumNamedAttributes(GeometryAttribute::GENERIC),
+            use_case.has_structural_metadata ? 5 : 3);
   ASSERT_EQ(mesh.NumNamedAttributes(GeometryAttribute::TEX_COORD), 2);
 
   // Get mesh element counts.
@@ -437,15 +549,15 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
     ASSERT_EQ(features.GetFeatureCount(), num_faces);
     ASSERT_EQ(features.GetNullFeatureId(), 100);
     ASSERT_EQ(features.GetPropertyTableIndex(), 0);
-    ASSERT_EQ(features.GetAttributeIndex(), 0);
+    ASSERT_EQ(features.GetAttributeIndex(),
+              use_case.has_structural_metadata ? 5 : 4);
     ASSERT_TRUE(features.GetTextureChannels().empty());
     ASSERT_EQ(features.GetTextureMap().texture(), nullptr);
     ASSERT_EQ(features.GetTextureMap().tex_coord_index(), -1);
 
     // Check per-face Uint8 attribute named _FEATURE_ID_0.
-    const int att_id =
-        mesh.GetAttributeIdByMetadataEntry("attribute_name", "_FEATURE_ID_0");
-    auto att = mesh.GetAttributeByUniqueId(att_id);
+    const int att_id = features.GetAttributeIndex();
+    const auto att = mesh.attribute(att_id);
     ASSERT_NE(att, nullptr);
     ASSERT_EQ(att->attribute_type(), GeometryAttribute::GENERIC);
     ASSERT_EQ(att->data_type(), DataType::DT_UINT8);
@@ -455,7 +567,7 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
 
     // Check that the values are all the numbers from 0 to 12.
     const std::vector<uint8_t> expected_values =
-        has_draco_compression
+        use_case.has_draco_compression
             ? std::vector<uint8_t>{7, 11, 10, 3, 2, 5, 4, 1, 6, 9, 8, 0}
             : std::vector<uint8_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     for (int i = 0; i < num_faces; i++) {
@@ -482,15 +594,15 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
     ASSERT_EQ(features.GetFeatureCount(), num_vertices);
     ASSERT_EQ(features.GetNullFeatureId(), 101);
     ASSERT_EQ(features.GetPropertyTableIndex(), 1);
-    ASSERT_EQ(features.GetAttributeIndex(), 1);
+    ASSERT_EQ(features.GetAttributeIndex(),
+              use_case.has_structural_metadata ? 6 : 5);
     ASSERT_TRUE(features.GetTextureChannels().empty());
     ASSERT_EQ(features.GetTextureMap().texture(), nullptr);
     ASSERT_EQ(features.GetTextureMap().tex_coord_index(), -1);
 
     // Check per-vertex Uint16 attribute named _FEATURE_ID_1.
-    const int att_id =
-        mesh.GetAttributeIdByMetadataEntry("attribute_name", "_FEATURE_ID_1");
-    auto att = mesh.GetAttributeByUniqueId(att_id);
+    const int att_id = features.GetAttributeIndex();
+    const auto att = mesh.attribute(att_id);
     ASSERT_NE(att, nullptr);
     ASSERT_EQ(att->attribute_type(), GeometryAttribute::GENERIC);
     ASSERT_EQ(att->data_type(), DataType::DT_UINT16);
@@ -500,8 +612,9 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
 
     // Check that the values are all the numbers from 0 to 7.
     const std::vector<uint16_t> expected_values =
-        has_draco_compression ? std::vector<uint16_t>{3, 6, 7, 4, 5, 0, 1, 2}
-                              : std::vector<uint16_t>{0, 1, 2, 3, 4, 5, 6, 7};
+        use_case.has_draco_compression
+            ? std::vector<uint16_t>{3, 6, 7, 4, 5, 0, 1, 2}
+            : std::vector<uint16_t>{0, 1, 2, 3, 4, 5, 6, 7};
     for (int i = 0; i < num_vertices; i++) {
       uint16_t val;
       att->GetValue(AttributeValueIndex(i), &val);
@@ -528,15 +641,15 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
     ASSERT_EQ(features.GetFeatureCount(), num_corners);
     ASSERT_EQ(features.GetNullFeatureId(), -1);
     ASSERT_EQ(features.GetPropertyTableIndex(), -1);
-    ASSERT_EQ(features.GetAttributeIndex(), 2);
+    ASSERT_EQ(features.GetAttributeIndex(),
+              use_case.has_structural_metadata ? 7 : 6);
     ASSERT_TRUE(features.GetTextureChannels().empty());
     ASSERT_EQ(features.GetTextureMap().texture(), nullptr);
     ASSERT_EQ(features.GetTextureMap().tex_coord_index(), -1);
 
     // Check per-corner Float attribute named _FEATURE_ID_2.
-    const int att_id =
-        mesh.GetAttributeIdByMetadataEntry("attribute_name", "_FEATURE_ID_2");
-    auto att = mesh.GetAttributeByUniqueId(att_id);
+    const int att_id = features.GetAttributeIndex();
+    const auto att = mesh.attribute(att_id);
     ASSERT_NE(att, nullptr);
     ASSERT_EQ(att->attribute_type(), GeometryAttribute::GENERIC);
     ASSERT_EQ(att->data_type(), DataType::DT_FLOAT32);
@@ -547,7 +660,7 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
 
     // Check that the values are from 0 to 35.
     const std::vector<float> expected_values =
-        has_draco_compression
+        use_case.has_draco_compression
             ? std::vector<float>{23, 21, 22, 33, 34, 35, 31, 32, 30, 9, 10, 11,
                                  7,  8,  6,  15, 16, 17, 14, 12, 13, 5, 3,  4,
                                  19, 20, 18, 27, 28, 29, 26, 24, 25, 1, 2,  0}
@@ -598,55 +711,104 @@ void GltfTestHelper::CheckBoxMetaMeshFeatures(const Mesh &mesh,
 }
 
 void GltfTestHelper::CheckBoxMetaStructuralMetadata(
-    const StructuralMetadata &structural_metadata) {
-  // Check property table schema.
+    const Mesh &mesh, const StructuralMetadata &structural_metadata,
+    const UseCase &use_case) {
+  // Check structural metadata schema.
   {
-    const PropertyTable::Schema &schema =
-        structural_metadata.GetPropertyTableSchema();
+    const StructuralMetadataSchema &schema = structural_metadata.GetSchema();
     ASSERT_FALSE(schema.Empty());
-    const PropertyTable::Schema::Object &json = schema.json;
+    const StructuralMetadataSchema::Object &json = schema.json;
     ASSERT_EQ(json.GetObjects().size(), 3);
     ASSERT_EQ(json.GetObjects()[0].GetName(), "classes");
-    ASSERT_EQ(json.GetObjects()[0].GetObjects().size(), 1);
-    ASSERT_EQ(json.GetObjects()[0].GetObjects()[0].GetName(), "planet");
-    ASSERT_EQ(json.GetObjects()[0].GetObjects()[0].GetObjects().size(), 1);
+    ASSERT_EQ(json.GetObjects()[0].GetObjects().size(), 2);
 
-    const auto &properties =
-        json.GetObjects()[0].GetObjects()[0].GetObjects()[0];
-    ASSERT_EQ(properties.GetName(), "properties");
-    ASSERT_EQ(properties.GetObjects().size(), 3);
+    // Check class "movement".
+    {
+      const auto item = json.GetObjects()[0].GetObjects()[0];
+      ASSERT_EQ(item.GetName(), "movement");
+      ASSERT_EQ(item.GetObjects().size(), 3);
 
-    const auto &color = properties.GetObjects()[0];
-    ASSERT_EQ(color.GetName(), "color");
-    ASSERT_EQ(color.GetObjects().size(), 4);
-    ASSERT_EQ(color.GetObjects()[0].GetName(), "componentType");
-    ASSERT_EQ(color.GetObjects()[1].GetName(), "description");
-    ASSERT_EQ(color.GetObjects()[2].GetName(), "required");
-    ASSERT_EQ(color.GetObjects()[3].GetName(), "type");
-    ASSERT_EQ(color.GetObjects()[0].GetString(), "UINT8");
-    ASSERT_EQ(color.GetObjects()[1].GetString(), "The RGB color.");
-    ASSERT_TRUE(color.GetObjects()[2].GetBoolean());
-    ASSERT_EQ(color.GetObjects()[3].GetString(), "VEC3");
+      const auto &description = item.GetObjects()[0];
+      ASSERT_EQ(description.GetName(), "description");
+      ASSERT_EQ(description.GetString(), "Vertex movement.");
 
-    const auto &name = properties.GetObjects()[1];
-    ASSERT_EQ(name.GetName(), "name");
-    ASSERT_EQ(name.GetObjects().size(), 3);
-    ASSERT_EQ(name.GetObjects()[0].GetName(), "description");
-    ASSERT_EQ(name.GetObjects()[1].GetName(), "required");
-    ASSERT_EQ(name.GetObjects()[2].GetName(), "type");
-    ASSERT_EQ(name.GetObjects()[0].GetString(), "The name.");
-    ASSERT_TRUE(name.GetObjects()[1].GetBoolean());
-    ASSERT_EQ(name.GetObjects()[2].GetString(), "STRING");
+      const auto &name = item.GetObjects()[1];
+      ASSERT_EQ(name.GetName(), "name");
+      ASSERT_EQ(name.GetString(), "The movement.");
 
-    const auto &sequence = properties.GetObjects()[2];
-    ASSERT_EQ(sequence.GetName(), "sequence");
-    ASSERT_EQ(sequence.GetObjects().size(), 3);
-    ASSERT_EQ(sequence.GetObjects()[0].GetName(), "description");
-    ASSERT_EQ(sequence.GetObjects()[1].GetName(), "required");
-    ASSERT_EQ(sequence.GetObjects()[2].GetName(), "type");
-    ASSERT_EQ(sequence.GetObjects()[0].GetString(), "The number sequence.");
-    ASSERT_FALSE(sequence.GetObjects()[1].GetBoolean());
-    ASSERT_EQ(sequence.GetObjects()[2].GetString(), "SCALAR");
+      const auto &properties = item.GetObjects()[2];
+      ASSERT_EQ(properties.GetName(), "properties");
+      ASSERT_EQ(properties.GetObjects().size(), 2);
+
+      const auto &direction = properties.GetObjects()[0];
+      ASSERT_EQ(direction.GetName(), "direction");
+      ASSERT_EQ(direction.GetObjects().size(), 4);
+      ASSERT_EQ(direction.GetObjects()[0].GetName(), "componentType");
+      ASSERT_EQ(direction.GetObjects()[1].GetName(), "description");
+      ASSERT_EQ(direction.GetObjects()[2].GetName(), "required");
+      ASSERT_EQ(direction.GetObjects()[3].GetName(), "type");
+      ASSERT_EQ(direction.GetObjects()[0].GetString(), "FLOAT32");
+      ASSERT_EQ(direction.GetObjects()[1].GetString(), "Movement direction.");
+      ASSERT_EQ(direction.GetObjects()[2].GetBoolean(), true);
+      ASSERT_EQ(direction.GetObjects()[3].GetString(), "VEC3");
+
+      const auto &mag = properties.GetObjects()[1];
+      ASSERT_EQ(mag.GetName(), "magnitude");
+      ASSERT_EQ(mag.GetObjects().size(), 4);
+      ASSERT_EQ(mag.GetObjects()[0].GetName(), "componentType");
+      ASSERT_EQ(mag.GetObjects()[1].GetName(), "description");
+      ASSERT_EQ(mag.GetObjects()[2].GetName(), "required");
+      ASSERT_EQ(mag.GetObjects()[3].GetName(), "type");
+      ASSERT_EQ(mag.GetObjects()[0].GetString(), "FLOAT32");
+      ASSERT_EQ(mag.GetObjects()[1].GetString(), "Movement magnitude.");
+      ASSERT_EQ(mag.GetObjects()[2].GetBoolean(), true);
+      ASSERT_EQ(mag.GetObjects()[3].GetString(), "SCALAR");
+    }
+
+    // Check class "planet".
+    {
+      const auto item = json.GetObjects()[0].GetObjects()[1];
+      ASSERT_EQ(item.GetName(), "planet");
+      ASSERT_EQ(item.GetObjects().size(), 1);
+
+      const auto &properties = item.GetObjects()[0];
+      ASSERT_EQ(properties.GetName(), "properties");
+      ASSERT_EQ(properties.GetObjects().size(), 3);
+
+      const auto &color = properties.GetObjects()[0];
+      ASSERT_EQ(color.GetName(), "color");
+      ASSERT_EQ(color.GetObjects().size(), 4);
+      ASSERT_EQ(color.GetObjects()[0].GetName(), "componentType");
+      ASSERT_EQ(color.GetObjects()[1].GetName(), "description");
+      ASSERT_EQ(color.GetObjects()[2].GetName(), "required");
+      ASSERT_EQ(color.GetObjects()[3].GetName(), "type");
+      ASSERT_EQ(color.GetObjects()[0].GetString(), "UINT8");
+      ASSERT_EQ(color.GetObjects()[1].GetString(), "The RGB color.");
+      ASSERT_TRUE(color.GetObjects()[2].GetBoolean());
+      ASSERT_EQ(color.GetObjects()[3].GetString(), "VEC3");
+
+      const auto &name = properties.GetObjects()[1];
+      ASSERT_EQ(name.GetName(), "name");
+      ASSERT_EQ(name.GetObjects().size(), 3);
+      ASSERT_EQ(name.GetObjects()[0].GetName(), "description");
+      ASSERT_EQ(name.GetObjects()[1].GetName(), "required");
+      ASSERT_EQ(name.GetObjects()[2].GetName(), "type");
+      ASSERT_EQ(name.GetObjects()[0].GetString(), "The name.");
+      ASSERT_TRUE(name.GetObjects()[1].GetBoolean());
+      ASSERT_EQ(name.GetObjects()[2].GetString(), "STRING");
+
+      const auto &sequence = properties.GetObjects()[2];
+      ASSERT_EQ(sequence.GetName(), "sequence");
+      ASSERT_EQ(sequence.GetObjects().size(), 4);
+      ASSERT_EQ(sequence.GetObjects()[0].GetName(), "componentType");
+      ASSERT_EQ(sequence.GetObjects()[1].GetName(), "description");
+      ASSERT_EQ(sequence.GetObjects()[2].GetName(), "required");
+      ASSERT_EQ(sequence.GetObjects()[3].GetName(), "type");
+      ASSERT_EQ(sequence.GetObjects()[0].GetString(), "FLOAT32");
+      ASSERT_EQ(sequence.GetObjects()[1].GetString(), "The number sequence.");
+      ASSERT_FALSE(sequence.GetObjects()[2].GetBoolean());
+      ASSERT_EQ(sequence.GetObjects()[3].GetString(), "SCALAR");
+    }
 
     ASSERT_EQ(json.GetObjects()[1].GetName(), "enums");
     const auto &classifications = json.GetObjects()[1].GetObjects()[0];
@@ -736,11 +898,11 @@ void GltfTestHelper::CheckBoxMetaStructuralMetadata(
     ASSERT_EQ(offsets[1], 0);
     ASSERT_EQ(offsets[2], 0);
     ASSERT_EQ(offsets[3], 0);
-    ASSERT_EQ(offsets[60], 32);  // UNLABELED 287.
+    ASSERT_EQ(offsets[60], 31);  // UNLABELED 287.
     ASSERT_EQ(offsets[61], 1);
     ASSERT_EQ(offsets[62], 0);
     ASSERT_EQ(offsets[63], 0);
-    ASSERT_EQ(offsets[64], 41);  // Beyond UNLABELED 296.
+    ASSERT_EQ(offsets[64], 40);  // Beyond UNLABELED 296.
     ASSERT_EQ(offsets[65], 1);
     ASSERT_EQ(offsets[66], 0);
     ASSERT_EQ(offsets[67], 0);
@@ -748,8 +910,8 @@ void GltfTestHelper::CheckBoxMetaStructuralMetadata(
     struct Name {
       static std::string Extract(const std::vector<uint8_t> &data,
                                  const std::vector<uint8_t> &offsets, int row) {
-        const int b = offsets[4 * (row + 0)] + 255 * offsets[4 * (row + 0) + 1];
-        const int e = offsets[4 * (row + 1)] + 255 * offsets[4 * (row + 1) + 1];
+        const int b = offsets[4 * (row + 0)] + 256 * offsets[4 * (row + 0) + 1];
+        const int e = offsets[4 * (row + 1)] + 256 * offsets[4 * (row + 1) + 1];
         return std::string(data.begin() + b, data.begin() + e);
       }
     };
@@ -757,6 +919,9 @@ void GltfTestHelper::CheckBoxMetaStructuralMetadata(
     // Check that the names can be extracted from the data.
     ASSERT_EQ(Name::Extract(data, offsets, 0), "named_class:Tatooine");
     ASSERT_EQ(Name::Extract(data, offsets, 6), "named_class:Corellia");
+    ASSERT_EQ(Name::Extract(data, offsets, 12), "named_class:Bespin");
+    ASSERT_EQ(Name::Extract(data, offsets, 13), "named_class:Yavin");
+    ASSERT_EQ(Name::Extract(data, offsets, 14), "named_class:Geonosis");
     ASSERT_EQ(Name::Extract(data, offsets, 15), "UNLABELED");
 
     ASSERT_TRUE(property.GetArrayOffsets().type.empty());
@@ -815,6 +980,101 @@ void GltfTestHelper::CheckBoxMetaStructuralMetadata(
     ASSERT_TRUE(property.GetStringOffsets().type.empty());
     ASSERT_TRUE(property.GetStringOffsets().data.data.empty());
     ASSERT_EQ(property.GetStringOffsets().data.target, 0);
+  }
+
+  // Check property attributes in structural metadata.
+  ASSERT_EQ(structural_metadata.NumPropertyAttributes(), 1);
+  {
+    const PropertyAttribute &attribute =
+        structural_metadata.GetPropertyAttribute(0);
+    ASSERT_EQ(attribute.GetName(), "The movement.");
+    ASSERT_EQ(attribute.GetClass(), "movement");
+    ASSERT_EQ(attribute.NumProperties(), 2);
+
+    const PropertyAttribute::Property &direction = attribute.GetProperty(0);
+    ASSERT_EQ(direction.GetName(), "direction");
+    ASSERT_EQ(direction.GetAttributeName(), "_DIRECTION");
+
+    const PropertyAttribute::Property &magnitude = attribute.GetProperty(1);
+    ASSERT_EQ(magnitude.GetName(), "magnitude");
+    ASSERT_EQ(magnitude.GetAttributeName(), "_MAGNITUDE");
+  }
+
+  // Check property attributes in the |mesh|.
+  ASSERT_EQ(mesh.NumPropertyAttributesIndices(), 1);
+  ASSERT_EQ(mesh.GetPropertyAttributesIndex(0), 0);
+  ASSERT_EQ(mesh.num_faces(), 12);
+  ASSERT_EQ(mesh.num_attributes(), 9);
+  ASSERT_EQ(mesh.num_points(), 36);
+  ASSERT_EQ(mesh.NumNamedAttributes(GeometryAttribute::GENERIC), 5);
+
+  // Get mesh element counts.
+  const int num_corners = 3 * mesh.num_faces();
+  const int num_vertices =
+      mesh.GetNamedAttribute(GeometryAttribute::POSITION)->size();
+
+  // Check property attribute named _DIRECTION.
+  {
+    const auto att =
+        mesh.GetNamedAttributeByName(GeometryAttribute::GENERIC, "_DIRECTION");
+    ASSERT_NE(att, nullptr);
+    ASSERT_EQ(att->attribute_type(), GeometryAttribute::GENERIC);
+    ASSERT_EQ(att->data_type(), DataType::DT_FLOAT32);
+    ASSERT_EQ(att->num_components(), 3);
+    ASSERT_EQ(att->size(), num_vertices);
+    ASSERT_EQ(att->indices_map_size(), num_corners);
+
+    // Check attribute values.
+    // clang-format off
+    const std::vector<float> expected_values =
+        use_case.has_draco_compression
+            ? std::vector<float>{3.1f, 3.2f, 3.3f,
+                                 6.1f, 6.2f, 6.3f,
+                                 7.1f, 7.2f, 7.3f,
+                                 4.1f, 4.2f, 4.3f,
+                                 5.1f, 5.2f, 5.3f,
+                                 0.1f, 0.2f, 0.3f,
+                                 1.1f, 1.2f, 1.3f,
+                                 2.1f, 2.2f, 2.3f}
+            : std::vector<float>{0.1f, 0.2f, 0.3f,
+                                 1.1f, 1.2f, 1.3f,
+                                 2.1f, 2.2f, 2.3f,
+                                 3.1f, 3.2f, 3.3f,
+                                 4.1f, 4.2f, 4.3f,
+                                 5.1f, 5.2f, 5.3f,
+                                 6.1f, 6.2f, 6.3f,
+                                 7.1f, 7.2f, 7.3f};
+    // clang-format on
+    for (int i = 0; i < num_vertices; i++) {
+      std::array<float, 3> val;
+      att->GetValue(AttributeValueIndex(i), &val);
+      ASSERT_EQ(val[0], expected_values[3 * i + 0]);
+      ASSERT_EQ(val[1], expected_values[3 * i + 1]);
+      ASSERT_EQ(val[2], expected_values[3 * i + 2]);
+    }
+  }
+
+  // Check property attribute named _MAGNITUDE.
+  {
+    const auto att =
+        mesh.GetNamedAttributeByName(GeometryAttribute::GENERIC, "_MAGNITUDE");
+    ASSERT_NE(att, nullptr);
+    ASSERT_EQ(att->attribute_type(), GeometryAttribute::GENERIC);
+    ASSERT_EQ(att->data_type(), DataType::DT_FLOAT32);
+    ASSERT_EQ(att->num_components(), 1);
+    ASSERT_EQ(att->size(), num_vertices);
+    ASSERT_EQ(att->indices_map_size(), num_corners);
+
+    // Check attribute values.
+    const std::vector<float> expected_values =
+        use_case.has_draco_compression
+            ? std::vector<float>{3.f, 6.f, 7.f, 4.f, 5.f, 0.f, 1.f, 2.f}
+            : std::vector<float>{0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f};
+    for (int i = 0; i < num_vertices; i++) {
+      float val;
+      att->GetValue(AttributeValueIndex(i), &val);
+      ASSERT_EQ(val, expected_values[i]);
+    }
   }
 }
 

@@ -136,6 +136,9 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         aiMesh *const mesh = pScene->mMeshes[i];
         if (mesh->mPrimitiveTypes == 0) {
+            for (size_t idx = 0; idx < outMeshes.size(); ++idx) {
+                delete outMeshes[idx];
+            }
             throw DeadlyImportError("Mesh with invalid primitive type: ", mesh->mName.C_Str());
         }
 

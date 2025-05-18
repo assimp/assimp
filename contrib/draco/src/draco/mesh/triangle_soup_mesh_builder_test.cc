@@ -96,11 +96,15 @@ TEST_F(TriangleSoupMeshBuilderTest, CubeTest) {
                                Vector3f(0.f, 0.f, 1.f).data(),
                                Vector3f(0.f, 1.f, 0.f).data());
   // clang-format on
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  mb.SetAttributeName(pos_att_id, "Bob");
+#endif
 
   std::unique_ptr<Mesh> mesh = mb.Finalize();
   ASSERT_NE(mesh, nullptr) << "Failed to build the cube mesh.";
 #ifdef DRACO_TRANSCODER_SUPPORTED
   EXPECT_EQ(mesh->GetName(), "Cube");
+  EXPECT_EQ(mesh->attribute(pos_att_id)->name(), "Bob");
 #endif
   EXPECT_EQ(mesh->num_points(), 8) << "Unexpected number of vertices.";
   EXPECT_EQ(mesh->num_faces(), 12) << "Unexpected number of faces.";
@@ -205,6 +209,22 @@ TEST_F(TriangleSoupMeshBuilderTest, TestPerFaceAttribs) {
   EXPECT_EQ(mesh->num_faces(), 12) << "Unexpected number of faces.";
   EXPECT_EQ(mesh->GetAttributeElementType(gen_att_id), MESH_FACE_ATTRIBUTE)
       << "Unexpected attribute element type.";
+}
+
+TEST_F(TriangleSoupMeshBuilderTest, PropagatesAttributeUniqueIds) {
+  // This test verifies that TriangleSoupMeshBuilder correctly applies
+  // unique IDs to attributes.
+  TriangleSoupMeshBuilder mb;
+  mb.Start(1);
+  const int pos_att_id =
+      mb.AddAttribute(GeometryAttribute::POSITION, 3, DT_FLOAT32);
+  mb.SetAttributeValuesForFace(
+      pos_att_id, FaceIndex(0), Vector3f(0.f, 0.f, 0.f).data(),
+      Vector3f(1.f, 0.f, 0.f).data(), Vector3f(0.f, 1.f, 0.f).data());
+  mb.SetAttributeUniqueId(pos_att_id, 1234);
+  std::unique_ptr<Mesh> mesh = mb.Finalize();
+  ASSERT_NE(mesh, nullptr);
+  ASSERT_EQ(mesh->GetAttributeByUniqueId(1234), mesh->attribute(pos_att_id));
 }
 
 #ifdef DRACO_TRANSCODER_SUPPORTED

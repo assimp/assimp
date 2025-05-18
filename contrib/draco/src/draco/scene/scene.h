@@ -23,6 +23,7 @@
 #include "draco/animation/animation.h"
 #include "draco/animation/skin.h"
 #include "draco/mesh/mesh.h"
+#include "draco/metadata/metadata.h"
 #include "draco/metadata/structural_metadata.h"
 #include "draco/scene/instance_array.h"
 #include "draco/scene/light.h"
@@ -41,7 +42,7 @@ namespace draco {
 // meshes in this scene.
 class Scene {
  public:
-  Scene() {}
+  Scene();
 
   void Copy(const Scene &s);
 
@@ -221,6 +222,9 @@ class Scene {
     return instance_arrays_[index].get();
   }
 
+  const Metadata &GetMetadata() const { return *metadata_; }
+  Metadata &GetMetadata() { return *metadata_; }
+
  private:
   IndexTypeVector<MeshIndex, std::unique_ptr<Mesh>> meshes_;
   IndexTypeVector<MeshGroupIndex, std::unique_ptr<MeshGroup>> mesh_groups_;
@@ -250,6 +254,10 @@ class Scene {
 
   // Structural metadata defined by the EXT_structural_metadata glTF extension.
   StructuralMetadata structural_metadata_;
+
+  // General metadata associated with the scene (not related to the
+  // EXT_structural_metadata extension).
+  std::unique_ptr<Metadata> metadata_;
 };
 
 }  // namespace draco

@@ -14,6 +14,7 @@
 //
 #include "draco/scene/scene.h"
 
+#include <memory>
 #include <utility>
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
@@ -21,6 +22,8 @@
 #include "draco/scene/scene_indices.h"
 
 namespace draco {
+
+Scene::Scene() { metadata_.reset(new Metadata()); }
 
 void Scene::Copy(const Scene &s) {
   meshes_.resize(s.meshes_.size());
@@ -90,6 +93,9 @@ void Scene::Copy(const Scene &s) {
 
   // Copy structural metadata.
   structural_metadata_.Copy(s.structural_metadata_);
+
+  // Copy general metadata.
+  metadata_.reset(new Metadata(*s.metadata_));
 }
 
 Status Scene::RemoveMesh(MeshIndex index) {

@@ -20,17 +20,18 @@
 #ifdef DRACO_TRANSCODER_SUPPORTED
 
 #include <memory>
-#include <string>
 #include <vector>
 
+#include "draco/metadata/property_attribute.h"
 #include "draco/metadata/property_table.h"
+#include "draco/metadata/structural_metadata_schema.h"
 
 namespace draco {
 
 // Holds data associated with EXT_structural_metadata glTF extension.
 class StructuralMetadata {
  public:
-  StructuralMetadata();
+  StructuralMetadata() = default;
 
   // Methods for comparing two structural metadata objects.
   bool operator==(const StructuralMetadata &other) const;
@@ -41,9 +42,9 @@ class StructuralMetadata {
   // Copies |src| structural metadata into this object.
   void Copy(const StructuralMetadata &src);
 
-  // Property table schema.
-  void SetPropertyTableSchema(const PropertyTable::Schema &schema);
-  const PropertyTable::Schema &GetPropertyTableSchema() const;
+  // Schema of the structural metadata.
+  void SetSchema(const StructuralMetadataSchema &schema);
+  const StructuralMetadataSchema &GetSchema() const;
 
   // Property tables.
   int AddPropertyTable(std::unique_ptr<PropertyTable> property_table);
@@ -52,10 +53,23 @@ class StructuralMetadata {
   PropertyTable &GetPropertyTable(int index);
   void RemovePropertyTable(int index);
 
+  // Property attributes.
+  int AddPropertyAttribute(
+      std::unique_ptr<PropertyAttribute> property_attribute);
+  int NumPropertyAttributes() const;
+  const PropertyAttribute &GetPropertyAttribute(int index) const;
+  PropertyAttribute &GetPropertyAttribute(int index);
+  void RemovePropertyAttribute(int index);
+
  private:
-  // Property table schema and property tables.
-  PropertyTable::Schema property_table_schema_;
+  // Schema of the structural metadata.
+  StructuralMetadataSchema schema_;
+
+  // Property tables.
   std::vector<std::unique_ptr<PropertyTable>> property_tables_;
+
+  // Property attributes.
+  std::vector<std::unique_ptr<PropertyAttribute>> property_attributes_;
 };
 
 }  // namespace draco

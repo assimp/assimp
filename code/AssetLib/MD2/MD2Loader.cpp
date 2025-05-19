@@ -319,8 +319,8 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         clr.b = clr.g = clr.r = 0.05f;
         pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
-        const size_t MaxNameLength = MAXLEN - 1; // one byte reserved for \0
-        size_t iLen = ::strlen(pcSkins->name);
+        const ai_uint32 MaxNameLength = AI_MAXLEN - 1; // one byte reserved for \0
+        ai_uint32 iLen = ::strlen(pcSkins->name);
         bool nameTooLong = iLen > MaxNameLength;
 
         if (pcSkins->name[0] && !nameTooLong)

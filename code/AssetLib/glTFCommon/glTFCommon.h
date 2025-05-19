@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include <assimp/Exceptional.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include <algorithm>
 #include <list>
@@ -444,7 +445,7 @@ inline Value *FindArrayInContext(Value &val, const char *memberId, const char *c
     return &it->value;
 }
 
-inline Value *FindObjectInContext(Value &val, const char *memberId, const char *context, const char *extraContext = nullptr) {
+inline Value *FindObjectInContext(Value &val, const char * memberId, const char *context, const char *extraContext = nullptr) {
     if (!val.IsObject()) {
         return nullptr;
     }
@@ -453,8 +454,9 @@ inline Value *FindObjectInContext(Value &val, const char *memberId, const char *
         return nullptr;
     }
     if (!it->value.IsObject()) {
-        throwUnexpectedTypeError("object", memberId, context, extraContext);
-    }
+        ASSIMP_LOG_ERROR("Member \"", memberId, "\" was not of type \"", context, "\" when reading ", extraContext);
+        return nullptr;
+   }
     return &it->value;
 }
 

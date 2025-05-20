@@ -24,7 +24,6 @@
 #include "draco/core/status.h"
 #include "draco/draco_features.h"
 #ifdef DRACO_TRANSCODER_SUPPORTED
-#include "draco/compression/draco_compression_options.h"
 #include "draco/material/material_library.h"
 #include "draco/mesh/mesh_features.h"
 #include "draco/mesh/mesh_indices.h"
@@ -94,6 +93,9 @@ class Mesh : public PointCloud {
     if (att_id >= 0 && att_id < static_cast<int>(attribute_data_.size())) {
       attribute_data_.erase(attribute_data_.begin() + att_id);
     }
+#ifdef DRACO_TRANSCODER_SUPPORTED
+    UpdateMeshFeaturesAfterDeletedAttribute(att_id);
+#endif
   }
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
@@ -170,22 +172,6 @@ class Mesh : public PointCloud {
   void RemoveUnusedMaterials();
   void RemoveUnusedMaterials(bool remove_unused_material_indices);
 
-  // Enables or disables Draco geometry compression for this mesh.
-  void SetCompressionEnabled(bool enabled) { compression_enabled_ = enabled; }
-  bool IsCompressionEnabled() const { return compression_enabled_; }
-
-  // Sets |options| that configure Draco geometry compression. This does not
-  // enable or disable compression.
-  void SetCompressionOptions(const DracoCompressionOptions &options) {
-    compression_options_ = options;
-  }
-  const DracoCompressionOptions &GetCompressionOptions() const {
-    return compression_options_;
-  }
-  DracoCompressionOptions &GetCompressionOptions() {
-    return compression_options_;
-  }
-
   // Library that contains non-material textures.
   const TextureLibrary &GetNonMaterialTextureLibrary() const {
     return non_material_texture_library_;
@@ -208,11 +194,19 @@ class Mesh : public PointCloud {
   MeshFeatures &GetMeshFeatures(MeshFeaturesIndex index) {
     return *mesh_features_[index];
   }
+
+  // Removes mesh features from the mesh. Note that removing a mesh feature does
+  // not delete any associated data such as vertex attributes or feature
+  // textures.
   void RemoveMeshFeatures(MeshFeaturesIndex index) {
     mesh_features_.erase(mesh_features_.begin() + index.value());
     mesh_features_material_mask_.erase(mesh_features_material_mask_.begin() +
                                        index.value());
   }
+
+  // Returns true if an attribute with |att_id| is being used by any mesh
+  // features attached to the mesh.
+  bool IsAttributeUsedByMeshFeatures(int att_id) const;
 
   // Restricts given mesh features to faces mapped to a material with
   // |material_index|. Note that single mesh features can be restricted to
@@ -249,6 +243,49 @@ class Mesh : public PointCloud {
     return structural_metadata_;
   }
   StructuralMetadata &GetStructuralMetadata() { return structural_metadata_; }
+
+  // Property attributes indices as defined by EXT_structural_metadata glTF
+  // extension.
+  int AddPropertyAttributesIndex(int property_attribute_index) {
+    property_attributes_.push_back(property_attribute_index);
+    property_attributes_material_mask_.push_back({});
+    return property_attributes_.size() - 1;
+  }
+  int NumPropertyAttributesIndices() const {
+    return property_attributes_.size();
+  }
+  const int &GetPropertyAttributesIndex(int index) const {
+    return property_attributes_[index];
+  }
+  int &GetPropertyAttributesIndex(int index) {
+    return property_attributes_[index];
+  }
+  void RemovePropertyAttributesIndex(int index) {
+    property_attributes_.erase(property_attributes_.begin() + index);
+    property_attributes_material_mask_.erase(
+        property_attributes_material_mask_.begin() + index);
+  }
+
+  // Restricts given property attributes indices to faces mapped to a material
+  // with |material_index|. Note that single property attribute can be
+  // restricted to multiple materials.
+  void AddPropertyAttributesIndexMaterialMask(int index, int material_index) {
+    property_attributes_material_mask_[index].push_back(material_index);
+  }
+
+  size_t NumPropertyAttributesIndexMaterialMasks(int index) const {
+    return property_attributes_material_mask_[index].size();
+  }
+  int GetPropertyAttributesIndexMaterialMask(int index, int mask_index) const {
+    return property_attributes_material_mask_[index][mask_index];
+  }
+
+  // Copies over property attributes indices from |source_mesh| and stores them
+  // in |target_mesh| as long as the property attributes indices material mask
+  // is valid for given |material_index|.
+  static void CopyPropertyAttributesIndicesForMaterial(const Mesh &source_mesh,
+                                                       Mesh *target_mesh,
+                                                       int material_index);
 #endif  // DRACO_TRANSCODER_SUPPORTED
 
  protected:
@@ -266,6 +303,11 @@ class Mesh : public PointCloud {
   IndexTypeVector<FaceIndex, Face> &faces() { return faces_; }
 
  private:
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  // Updates attribute indices associated to all mesh features after a mesh
+  // attribute is deleted.
+  void UpdateMeshFeaturesAfterDeletedAttribute(int att_id);
+#endif
   // Mesh specific per-attribute data.
   std::vector<AttributeData> attribute_data_;
 
@@ -280,11 +322,6 @@ class Mesh : public PointCloud {
   // Materials applied to to this mesh.
   MaterialLibrary material_library_;
 
-  // Compression options for this mesh.
-  // TODO(vytyaz): Store encoded bitstream that this mesh compresses into.
-  bool compression_enabled_;
-  DracoCompressionOptions compression_options_;
-
   // Sets of feature IDs as defined by EXT_mesh_features glTF extension.
   IndexTypeVector<MeshFeaturesIndex, std::unique_ptr<MeshFeatures>>
       mesh_features_;
@@ -295,6 +332,15 @@ class Mesh : public PointCloud {
   // the corresponding mesh features are applied to the entire mesh.
   IndexTypeVector<MeshFeaturesIndex, std::vector<int>>
       mesh_features_material_mask_;
+
+  // Indices pointing to property attributes in draco::StructuralMetadata.
+  std::vector<int> property_attributes_;
+
+  // When the Mesh contains multiple materials, this mask can be used to limit
+  // specific index into |property_attributes_| to a vector of material indices.
+  // If for a given property attributes index, the material indices are empty,
+  // the corresponding property attributes are applied to the entire mesh.
+  std::vector<std::vector<int>> property_attributes_material_mask_;
 
   // Texture library for storing non-material textures used by this mesh, e.g.,
   // textures containing mesh feature IDs of EXT_mesh_features glTF extension.

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+#include <algorithm>
 #include <functional>
 
 #include "FBXMeshGeometry.h"
@@ -69,8 +70,10 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
         }
         const BlendShape* const bsp = ProcessSimpleConnection<BlendShape>(*con, false, "BlendShape -> Geometry", element);
         if (bsp) {
-            auto pr = blendShapes.insert(bsp);
-            if (!pr.second) {
+            // Only add a blendshape if it doesn't exist already
+            if (std::find(blendShapes.begin(), blendShapes.end(), bsp) == blendShapes.end()) {
+                blendShapes.push_back(bsp);
+            } else {
                 FBXImporter::LogWarn("there is the same blendShape id ", bsp->ID());
             }
         }
@@ -78,7 +81,7 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
 }
 
 // ------------------------------------------------------------------------------------------------
-const std::unordered_set<const BlendShape*>& Geometry::GetBlendShapes() const {
+const std::vector<const BlendShape*>& Geometry::GetBlendShapes() const {
     return blendShapes;
 }
 

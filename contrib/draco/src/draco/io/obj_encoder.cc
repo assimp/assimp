@@ -407,7 +407,8 @@ bool ObjEncoder::EncodeFaceCorner(PointIndex vert_index) {
 }
 
 void ObjEncoder::EncodeFloat(float val) {
-  snprintf(num_buffer_, sizeof(num_buffer_), "%f", val);
+  // Use %F instead of %f to make the floating point non-locale aware.
+  snprintf(num_buffer_, sizeof(num_buffer_), "%F", val);
   buffer()->Encode(num_buffer_, strlen(num_buffer_));
 }
 

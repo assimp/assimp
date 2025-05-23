@@ -19,6 +19,8 @@
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "draco/core/draco_types.h"
 #include "draco/core/status_or.h"
@@ -32,10 +34,10 @@ StatusOr<std::unique_ptr<Texture>> ReadTextureFromFile(
     const std::string &file_name);
 
 // Same as ReadTextureFromFile() but the texture data is parsed from a |buffer|.
-// |mime_type| should be set to a type of the texture encoded in |buffer|.
-// Supported mime types are "image/jpeg", "image/png" and "image/webp".
-// TODO(ostava): We should be able to get the mime type directly from the
-// |buffer| but our image decoding library doesn't support this at this time.
+StatusOr<std::unique_ptr<Texture>> ReadTextureFromBuffer(const uint8_t *buffer,
+                                                         size_t buffer_size);
+// Deprecated: |mime_type| is currently ignored and it is deducted automatically
+// from the content of the |buffer|.
 StatusOr<std::unique_ptr<Texture>> ReadTextureFromBuffer(
     const uint8_t *buffer, size_t buffer_size, const std::string &mime_type);
 
@@ -49,6 +51,10 @@ Status WriteTextureToFile(const std::string &file_name, const Texture &texture);
 // Writes a |texture| into |buffer|.
 Status WriteTextureToBuffer(const Texture &texture,
                             std::vector<uint8_t> *buffer);
+
+// Returns the image format of an encoded texture stored in |buffer|.
+// ImageFormat::NONE is returned for unknown image formats.
+ImageFormat ImageFormatFromBuffer(const uint8_t *buffer, size_t buffer_size);
 
 }  // namespace draco
 

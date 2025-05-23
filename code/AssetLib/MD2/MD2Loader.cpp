@@ -319,15 +319,21 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         clr.b = clr.g = clr.r = 0.05f;
         pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
-        if (pcSkins->name[0])
+        const ai_uint32 MaxNameLength = AI_MAXLEN - 1; // one byte reserved for \0
+        ai_uint32 iLen = static_cast<ai_uint32>(::strlen(pcSkins->name));
+        bool nameTooLong = iLen > MaxNameLength;
+
+        if (pcSkins->name[0] && !nameTooLong)
         {
             aiString szString;
-            const ai_uint32 iLen = (ai_uint32) ::strlen(pcSkins->name);
-            ::memcpy(szString.data,pcSkins->name,iLen);
+            ::memcpy(szString.data, pcSkins->name, iLen);
             szString.data[iLen] = '\0';
             szString.length = iLen;
 
             pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+        }
+        else if (nameTooLong) {
+            ASSIMP_LOG_WARN("Texture file name is too long. It will be skipped.");
         }
         else{
             ASSIMP_LOG_WARN("Texture file name has zero length. It will be skipped.");

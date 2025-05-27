@@ -2199,26 +2199,22 @@ inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool
 inline std::string Asset::FindUniqueID(const std::string &str, const char *suffix) {
     std::string id = str;
     int n = 1;
-    if(!id.empty())
-    {
-      n = lastUsedID[id];
-      if(!n)
-      {
-         lastUsedID[id] = n+1;
-         return id;
-      }
-      id += "_";
+    if(!id.empty()) {
+        n = lastUsedID[id];
+        if(!n) {
+            lastUsedID[id] = n+1;
+            return id;
+        }
+        id += "_";
     }
 
-    if(suffix)
-    {
-      id += suffix;
-      n = lastUsedID[id];
-      if(!n)
-      {
-         lastUsedID[id] = n+1;
-         return id;
-      }
+    if(suffix) {
+        id += suffix;
+        n = lastUsedID[id];
+        if(!n) {
+            lastUsedID[id] = n+1;
+            return id;
+        }
     }
 
     lastUsedID[id] = n+1;

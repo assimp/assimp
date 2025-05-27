@@ -31,7 +31,7 @@ option(HUNTER_STATUS_PRINT "Print working status" ON)
 option(HUNTER_STATUS_DEBUG "Print a lot info" OFF)
 option(HUNTER_TLS_VERIFY "Enable/disable TLS certificate checking on downloads" ON)
 
-set(HUNTER_ERROR_PAGE "https://docs.hunter.sh/en/latest/reference/errors")
+set(HUNTER_ERROR_PAGE "https://hunter.readthedocs.io/en/latest/reference/errors")
 
 function(hunter_gate_status_print)
   if(HUNTER_STATUS_PRINT OR HUNTER_STATUS_DEBUG)

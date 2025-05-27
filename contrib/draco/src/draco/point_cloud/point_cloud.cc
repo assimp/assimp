@@ -37,6 +37,8 @@ void PointCloud::Copy(const PointCloud &src) {
     attributes_[i] = std::unique_ptr<PointAttribute>(new PointAttribute());
     attributes_[i]->CopyFrom(*src.attributes_[i]);
   }
+  compression_enabled_ = src.compression_enabled_;
+  compression_options_ = src.compression_options_;
   CopyMetadata(src);
 }
 
@@ -105,6 +107,20 @@ const PointAttribute *PointCloud::GetAttributeByUniqueId(
   }
   return attributes_[att_id].get();
 }
+
+#ifdef DRACO_TRANSCODER_SUPPORTED
+const PointAttribute *PointCloud::GetNamedAttributeByName(
+    GeometryAttribute::Type type, const std::string &name) const {
+  const auto &index = named_attribute_index_;
+  for (size_t i = 0; i < index[type].size(); ++i) {
+    const PointAttribute *const att = attributes_[index[type][i]].get();
+    if (att->name() == name) {
+      return att;
+    }
+  }
+  return nullptr;
+}
+#endif  // DRACO_TRANSCODER_SUPPORTED
 
 int32_t PointCloud::GetAttributeIdByUniqueId(uint32_t unique_id) const {
   for (size_t att_id = 0; att_id < attributes_.size(); ++att_id) {

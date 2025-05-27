@@ -1220,6 +1220,17 @@ inline void Texture::Read(Value &obj, Asset &r) {
     if (Value *samplerVal = FindUInt(obj, "sampler")) {
         sampler = r.samplers.Retrieve(samplerVal->GetUint());
     }
+
+    if (Value *extensions = FindObject(obj, "extensions")) {
+        if (r.extensionsUsed.KHR_texture_basisu) {
+            if (Value *curBasisU = FindObject(*extensions, "KHR_texture_basisu")) {
+
+                if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
+                    source = r.images.Retrieve(sourceVal->GetUint());
+                }
+            }
+        }
+    }
 }
 
 void Material::SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
@@ -2145,6 +2156,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
     }
 
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
+    CHECK_REQUIRED_EXT(KHR_texture_basisu);
 
 #undef CHECK_REQUIRED_EXT
 }

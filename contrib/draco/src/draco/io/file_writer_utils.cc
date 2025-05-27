@@ -38,11 +38,10 @@ bool DirectoryExists(const std::string &path_arg) {
   struct stat path_stat;
   std::string path = path_arg;
 
-#if defined(_WIN32) && not defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__)
   // Avoid a silly windows issue: stat() will fail on a drive letter missing the
-  // trailing slash.
-  if (path.size() > 0 && path[path.size()] != '\\' &&
-      path[path.size()] != '/') {
+  // trailing slash. To keep it simple, append a path separator to all paths.
+  if (!path.empty() && path.back() != '\\' && path.back() != '/') {
     path.append("\\");
   }
 #endif
@@ -68,9 +67,7 @@ bool CheckAndCreatePathForFile(const std::string &filename) {
   const ghc::filesystem::path ghc_path(path);
   ghc::filesystem::create_directories(ghc_path);
 #endif  // DRACO_TRANSCODER_SUPPORTED
-  const bool directory_exists = DirectoryExists(path);
-
-  return directory_exists;
+  return DirectoryExists(path);
 }
 
 }  // namespace draco

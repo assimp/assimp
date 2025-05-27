@@ -354,9 +354,10 @@ ASSIMP_API const aiScene *aiApplyCustomizedPostProcessing(const aiScene *scene,
 void CallbackToLogRedirector(const char *msg, char *dt) {
     ai_assert(nullptr != msg);
     ai_assert(nullptr != dt);
-    LogStream *s = (LogStream *)dt;
-
-    s->write(msg);
+    LogStream *stream = (LogStream *)dt;
+    if (stream != nullptr) {
+        stream->write(msg);
+    }
 }
 
 static LogStream *DefaultStream = nullptr;

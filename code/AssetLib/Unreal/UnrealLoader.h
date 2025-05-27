@@ -55,8 +55,15 @@ namespace Assimp {
  */
 class UnrealImporter : public BaseImporter {
 public:
+    /**
+     *  @brief The class constructor.
+     */
     UnrealImporter();
-    ~UnrealImporter() override;
+
+    /**
+     *  @brief The class destructor.
+     */
+    ~UnrealImporter() override = default;
 
     // -------------------------------------------------------------------
     /** @brief Returns whether we can handle the format of the given file

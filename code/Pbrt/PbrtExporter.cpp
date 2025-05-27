@@ -93,7 +93,6 @@ void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pSce
         const ExportProperties *) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-
     std::string texturesPath = path;
     if (!texturesPath.empty()) {
         texturesPath+=pIOSystem->getOsSeparator(); 
@@ -183,7 +182,13 @@ PbrtExporter::PbrtExporter(
     WriteWorldDefinition();
 
     // And write the file to disk...
-    std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath,"wt"));
+    std::string outputFilePath = mPath;
+    if (!outputFilePath.empty()) {
+        outputFilePath = outputFilePath + mIOSystem->getOsSeparator();
+    }
+    outputFilePath = outputFilePath + mFile +".pbrt";
+
+    std::unique_ptr<IOStream> outfile(mIOSystem->Open(outputFilePath,"wt"));
     if (!outfile) {
         throw DeadlyExportError("could not open output .pbrt file: " + std::string(mFile));
     }

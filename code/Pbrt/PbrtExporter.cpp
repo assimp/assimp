@@ -98,9 +98,7 @@ void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pSce
         texturesPath+=pIOSystem->getOsSeparator(); 
     }
     texturesPath+="textures";
-
-    path = path + file + ".pbrt";
-
+    
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file, texturesPath);
 }

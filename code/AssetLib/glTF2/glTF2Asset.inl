@@ -438,7 +438,6 @@ unsigned int LazyDict<T>::Remove(const char *id) {
 
     const unsigned int index = objIt->second;
 
-    // mAsset.mUsedIds[id] = false;
     mObjsById.erase(id);
     mObjsByOIndex.erase(index);
     delete mObjs[index];
@@ -472,7 +471,6 @@ unsigned int LazyDict<T>::Remove(const char *id) {
 
 template <class T>
 Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
-
     typename Dict::iterator it = mObjsByOIndex.find(i);
     if (it != mObjsByOIndex.end()) { // already created?
         return Ref<T>(mObjs, it->second);
@@ -560,11 +558,12 @@ inline Buffer::Buffer() :
         byteLength(0),
         type(Type_arraybuffer),
         EncodedRegion_Current(nullptr),
-        mIsSpecial(false) {}
+        mIsSpecial(false) {
+    // empty
+}
 
 inline Buffer::~Buffer() {
-    for (SEncodedRegion *reg : EncodedRegion_List)
-        delete reg;
+    for (SEncodedRegion *reg : EncodedRegion_List) delete reg;
 }
 
 inline const char *Buffer::TranslateId(Asset & /*r*/, const char *id) {

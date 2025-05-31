@@ -1095,8 +1095,6 @@ void FBXExporter::WriteObjects () {
     // save vertex_indices as it is needed later
     std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
 
-    std::vector<uint32_t> uniq_v_before_mi;
-
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
     // geometry (aiMesh)
@@ -1142,7 +1140,6 @@ void FBXExporter::WriteObjects () {
           const aiMesh *m = mScene->mMeshes[mi];
 
           size_t v_offset = vertex_indices.size();
-          size_t uniq_v_before = flattened_vertices.size() / 3;
 
           // map of vertex value to its index in the data vector
           std::map<aiVector3D,size_t> index_by_vertex_value;
@@ -1185,16 +1182,10 @@ void FBXExporter::WriteObjects () {
             if (f.mNumIndices == 0) continue;
             size_t pvi = 0;
             for (; pvi < f.mNumIndices - 1; pvi++) {
-              polygon_data.push_back(
-                static_cast<int32_t>(uniq_v_before + vertex_indices[v_offset + f.mIndices[pvi]])
-              );
+              polygon_data.push_back(vertex_indices[v_offset + f.mIndices[pvi]]);
             }
-            polygon_data.push_back(
-              static_cast<int32_t>(-1 ^ (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
-            );
+            polygon_data.push_back(-1 - vertex_indices[v_offset+f.mIndices[pvi]]);
           }
-
-          uniq_v_before_mi.push_back(static_cast<uint32_t>(uniq_v_before));
 
           if (m->HasNormals()) {
             normal_data.reserve(3 * polygon_data.size());
@@ -2065,11 +2056,10 @@ void FBXExporter::WriteObjects () {
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
                     if (b->mWeights[wi].mVertexId >= vVertexIndice[mi].size()) {
-			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
+                  			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
                         continue;
                     }
-                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId]
-                      + uniq_v_before_mi[mi];
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx

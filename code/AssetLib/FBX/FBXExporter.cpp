@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/Logger.hpp>
 #include <assimp/StreamWriter.h> // StreamWriterLE
 #include <assimp/Exceptional.h> // DeadlyExportError
 #include <assimp/material.h> // aiTextureType
@@ -1042,14 +1043,40 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
-    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
-        return static_cast<int64_t>(ticks) * FBX::SECOND;
+    // Defensive: handle zero or near-zero mTicksPerSecond
+    double tps = anim->mTicksPerSecond;
+    double timeVal;
+    if (FP_ZERO == std::fpclassify(tps)) {
+        timeVal = ticks;
+    } else {
+        timeVal = ticks / tps;
     }
-    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
+
+    // Clamp to prevent overflow
+    const double kMax = static_cast<double>(INT64_MAX) / static_cast<double>(FBX::SECOND);
+    const double kMin = static_cast<double>(INT64_MIN) / static_cast<double>(FBX::SECOND);
+
+    if (timeVal > kMax) {
+        return INT64_MAX;
+    }
+    if (timeVal < kMin) {
+        return INT64_MIN;
+    }
+    return static_cast<int64_t>(timeVal * FBX::SECOND);
 }
 
 inline int64_t to_ktime(double time) {
-    return (static_cast<int64_t>(time * FBX::SECOND));
+    // Clamp to prevent overflow
+    const double kMax = static_cast<double>(INT64_MAX) / static_cast<double>(FBX::SECOND);
+    const double kMin = static_cast<double>(INT64_MIN) / static_cast<double>(FBX::SECOND);
+
+    if (time > kMax) {
+        return INT64_MAX;
+    }
+    if (time < kMin) {
+        return INT64_MIN;
+    }
+    return static_cast<int64_t>(time * FBX::SECOND);
 }
 
 void FBXExporter::WriteObjects () {
@@ -1067,8 +1094,6 @@ void FBXExporter::WriteObjects () {
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
     // save vertex_indices as it is needed later
     std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
-
-    std::vector<uint32_t> uniq_v_before_mi;
 
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
@@ -1107,9 +1132,6 @@ void FBXExporter::WriteObjects () {
 
         std::vector<std::vector<double>> uv_data;
         std::vector<std::vector<int32_t>> uv_indices;
-        std::map<aiVector3D, int32_t> index_by_uv;
-
-        std::vector<int32_t> offsets = { 0 };
 
         indent = 2;
 
@@ -1118,11 +1140,10 @@ void FBXExporter::WriteObjects () {
           const aiMesh *m = mScene->mMeshes[mi];
 
           size_t v_offset = vertex_indices.size();
-          size_t uniq_v_before = flattened_vertices.size() / 3;
 
           // map of vertex value to its index in the data vector
           std::map<aiVector3D,size_t> index_by_vertex_value;
-          if(bJoinIdenticalVertices){
+          if (bJoinIdenticalVertices) {
               int32_t index = 0;
               for (size_t vi = 0; vi < m->mNumVertices; ++vi) {
                   aiVector3D vtx = m->mVertices[vi];
@@ -1138,7 +1159,7 @@ void FBXExporter::WriteObjects () {
               }
           } else { // do not join vertex, respect the export flag
               vertex_indices.resize(v_offset + m->mNumVertices);
-              std::iota(vertex_indices.begin() + v_offset, vertex_indices.end(), (int)v_offset);
+              std::iota(vertex_indices.begin() + v_offset, vertex_indices.end(), 0);
               for(unsigned int v = 0; v < m->mNumVertices; ++ v) {
                   aiVector3D vtx = m->mVertices[v];
                   flattened_vertices.insert(flattened_vertices.end(), {vtx.x, vtx.y, vtx.z});
@@ -1146,8 +1167,8 @@ void FBXExporter::WriteObjects () {
           }
           vVertexIndice[mi].insert(
             // TODO test whether this can be end or not
-            vVertexIndice[mi].begin(),
-            vertex_indices.begin(),
+            vVertexIndice[mi].end(),
+            vertex_indices.begin() + v_offset,
             vertex_indices.end()
           );
 
@@ -1158,18 +1179,13 @@ void FBXExporter::WriteObjects () {
         // the last vertex index of each polygon is negated and - 1
           for (size_t fi = 0; fi < m->mNumFaces; fi++) {
             const aiFace &f = m->mFaces[fi];
+            if (f.mNumIndices == 0) continue;
             size_t pvi = 0;
             for (; pvi < f.mNumIndices - 1; pvi++) {
-              polygon_data.push_back(
-                static_cast<int32_t>(uniq_v_before + vertex_indices[v_offset + f.mIndices[pvi]])
-              );
+              polygon_data.push_back(vertex_indices[v_offset + f.mIndices[pvi]]);
             }
-            polygon_data.push_back(
-              static_cast<int32_t>(-1 - (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
-            );
+            polygon_data.push_back(-1 - vertex_indices[v_offset+f.mIndices[pvi]]);
           }
-
-          uniq_v_before_mi.push_back(static_cast<uint32_t>(uniq_v_before));
 
           if (m->HasNormals()) {
             normal_data.reserve(3 * polygon_data.size());
@@ -1197,10 +1213,12 @@ void FBXExporter::WriteObjects () {
           const auto num_uv = static_cast<size_t>(m->GetNumUVChannels());
           uv_indices.resize(std::max(num_uv, uv_indices.size()));
           uv_data.resize(std::max(num_uv, uv_data.size()));
+          std::map<aiVector3D, int32_t> index_by_uv;
 
           // uvs, if any
           for (size_t uvi = 0; uvi < m->GetNumUVChannels(); uvi++) {
-            if (m->mNumUVComponents[uvi] > 2) {
+            const auto nc = m->mNumUVComponents[uvi];
+            if (nc > 2) {
                 // FBX only supports 2-channel UV maps...
                 // or at least i'm not sure how to indicate a different number
                 std::stringstream err;
@@ -1216,7 +1234,7 @@ void FBXExporter::WriteObjects () {
                 ASSIMP_LOG_WARN(err.str());
             }
 
-            int32_t index = 0;
+            int32_t index = static_cast<int32_t>(uv_data[uvi].size()) / nc;
             for (size_t fi = 0; fi < m->mNumFaces; fi++) {
               const aiFace &f = m->mFaces[fi];
               for (size_t pvi = 0; pvi < f.mNumIndices; pvi++) {
@@ -1225,7 +1243,7 @@ void FBXExporter::WriteObjects () {
                 if (elem == index_by_uv.end()) {
                   index_by_uv[curUv] = index;
                   uv_indices[uvi].push_back(index);
-                  for (uint32_t x = 0; x < m->mNumUVComponents[uvi]; ++x) {
+                  for (uint32_t x = 0; x < nc; ++x) {
                     uv_data[uvi].push_back(curUv[x]);
                   }
                   ++index;
@@ -1235,8 +1253,6 @@ void FBXExporter::WriteObjects () {
               }
             }
           }
-
-          offsets.push_back((int32_t)polygon_data.size());
         }
 
 
@@ -1290,7 +1306,7 @@ void FBXExporter::WriteObjects () {
           indent = 3;
           FBX::Node::WritePropertyNode("Version", int32_t(101), outstream, binary, indent);
           FBX::Node::WritePropertyNode("Name", "", outstream, binary, indent);
-          FBX::Node::WritePropertyNode("MappingInformationType", "ByPolgonVertex", outstream, binary, indent);
+          FBX::Node::WritePropertyNode("MappingInformationType", "ByPolygonVertex", outstream, binary, indent);
           FBX::Node::WritePropertyNode("ReferenceInformationType", "IndexToDirect", outstream, binary, indent);
           FBX::Node::WritePropertyNode("UV", uv_data[uvi], outstream, binary, indent);
           FBX::Node::WritePropertyNode("UVIndex", uv_indices[uvi], outstream, binary, indent);
@@ -2039,8 +2055,11 @@ void FBXExporter::WriteObjects () {
                 std::vector<double> subdef_weights;
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
-                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId] \
-                      + uniq_v_before_mi[mi];
+                    if (b->mWeights[wi].mVertexId >= vVertexIndice[mi].size()) {
+                  			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
+                        continue;
+                    }
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx

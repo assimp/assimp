@@ -2958,7 +2958,7 @@ void FBXConverter::GenerateNodeAnimations(std::vector<aiNodeAnim *> &node_anims,
     // be invoked _later_ (animations come first). If this node has only rotation,
     // scaling and translation _and_ there are no animated other components either,
     // we can use a single node and also a single node animation channel.
-    if( !has_complex && !NeedsComplexTransformationChain(target)) {
+    if (!doc.Settings().preservePivots || (!has_complex && !NeedsComplexTransformationChain(target))) {
         aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain,
                 node_property_map.end(),
                 start, stop,

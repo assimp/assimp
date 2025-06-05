@@ -515,7 +515,7 @@ void glTFImporter::ImportLights(Asset &r) {
         CopyValue(l.color, ail->mColorSpecular);
 
         ail->mAngleOuterCone = l.falloffAngle;
-        ail->mAngleInnerCone = l.falloffExponent; // TODO fix this, it does not look right at all
+        ail->mAngleInnerCone = l.falloffAngle * (1.0f - 1.0f / (1.0f + l.falloffExponent)); 
 
         ail->mAttenuationConstant = l.constantAttenuation;
         ail->mAttenuationLinear = l.linearAttenuation;

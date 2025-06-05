@@ -86,6 +86,7 @@ SET( COMMON
   unit/TestModelFactory.h
   unit/utTypes.cpp
   unit/utVersion.cpp
+  unit/Common/utParsingUtils.cpp
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp

@@ -886,7 +886,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
             XmlParser::getValueAsString(currentNode, v);
             const char *content = v.c_str();
             const char *end = content + v.size();
-            for (float & a : controller.mBindShapeMatrix) {
+            for (auto & a : controller.mBindShapeMatrix) {
                 SkipSpacesAndLineEnd(&content, end);
                 // read a number
                 content = fast_atoreal_move<ai_real>(content, a);

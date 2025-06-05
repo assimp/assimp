@@ -60,7 +60,7 @@ TEST_F(utParsingUtils, parseFloatsStringTest) {
     for (float i : floatArray) {
         float value = 0.0f;
         SkipSpacesAndLineEnd(&content, end);
-        content = fast_atoreal_move<ai_real>(content, value);
+        content = fast_atoreal_move(content, value);
         EXPECT_FLOAT_EQ(value, i);
     }
 }

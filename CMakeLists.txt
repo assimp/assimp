@@ -103,7 +103,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   add_definitions(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 5.4.3)
+PROJECT(Assimp VERSION 6.0.1)
 
 # All supported options ###############################################
 
@@ -347,8 +347,11 @@ ELSEIF(MSVC)
   elseif((GENERATOR_IS_MULTI_CONFIG) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("-- MSVC PDB generation disabled. Release binary will not be debuggable.")
   endif()
-  # Source code is encoded in UTF-8
-  ADD_COMPILE_OPTIONS(/source-charset:utf-8)
+  if(NOT /utf-8 IN_LIST CMAKE_CXX_FLAGS)
+    # Source code is encoded in UTF-8
+    ADD_COMPILE_OPTIONS(/source-charset:utf-8)
+  endif ()
+
 ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)

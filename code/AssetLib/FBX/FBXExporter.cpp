@@ -1329,14 +1329,13 @@ void FBXExporter::WriteObjects () {
         } else {
           mat.AddChild("MappingInformationType", "ByPolygon");
           mat.AddChild("ReferenceInformationType", "IndexToDirect");
-          std::vector<int32_t> mat_indices(polygon_data.size());
-          uint32_t curr_offset = 0;
-          for (uint32_t mi = 0; mi < node->mNumMeshes; mi++) {
-            uint32_t num_faces = mScene->mMeshes[node->mMeshes[mi]]->mNumFaces;
-            for (uint32_t fi = 0; fi < num_faces; fi++) {
-              mat_indices[curr_offset + fi] = mi;
+          std::vector<int32_t> mat_indices;
+          for (uint32_t n_mi = 0; n_mi < node->mNumMeshes; n_mi++) {
+            const auto mi = node->mMeshes[n_mi];
+            const auto *const m = mScene->mMeshes[mi];
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              mat_indices.push_back(n_mi);
             }
-            curr_offset += num_faces;
           }
           mat.AddChild("Materials", mat_indices);
         }

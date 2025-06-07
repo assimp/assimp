@@ -1,87 +1,297 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10...3.30)
 
-project(pugixml)
-
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
-option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_PKGCONFIG "Build in PKGCONFIG mode" OFF)
-
-set(BUILD_DEFINES "" CACHE STRING "Build defines")
-
-if(MSVC)
-	option(STATIC_CRT "Use static CRT libraries" OFF)
-
-	# Rewrite command line flags to use /MT if necessary
-	if(STATIC_CRT)
-		foreach(flag_var
-				CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-				CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-			if(${flag_var} MATCHES "/MD")
-				string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-			endif(${flag_var} MATCHES "/MD")
-		endforeach(flag_var)
-	endif()
+# Policy configuration; this *MUST* be specified before project is defined
+if(POLICY CMP0091)
+    cmake_policy(SET CMP0091 NEW) # Enables use of MSVC_RUNTIME_LIBRARY
 endif()
 
-# Pre-defines standard install locations on *nix systems.
+project(pugixml VERSION 1.15 LANGUAGES CXX)
+
+include(CMakePackageConfigHelpers)
+include(CMakeDependentOption)
 include(GNUInstallDirs)
-mark_as_advanced(CLEAR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
 
-set(HEADERS src/pugixml.hpp src/pugiconfig.hpp)
-set(SOURCES src/pugixml.cpp)
+cmake_dependent_option(PUGIXML_USE_VERSIONED_LIBDIR
+  "Use a private subdirectory to install the headers and libraries" OFF
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
-if(DEFINED BUILD_DEFINES)
-	foreach(DEFINE ${BUILD_DEFINES})
-		add_definitions("-D" ${DEFINE})
-	endforeach()
-endif()
-#message(pugixml"   "${BUILD_SHARED_LIBS})
-#if(BUILD_SHARED_LIBS)
-#	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
-#else()
-	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
-#endif()
+cmake_dependent_option(PUGIXML_USE_POSTFIX
+  "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
-# Export symbols for shared library builds
-if(BUILD_SHARED_LIBS AND MSVC)
-	target_compile_definitions(pugixml PRIVATE "PUGIXML_API=__declspec(dllexport)")
-endif()
+cmake_dependent_option(PUGIXML_STATIC_CRT
+  "Use static MSVC RT libraries" OFF
+  "MSVC" OFF)
 
-# Enable C++11 long long for compilers that are capable of it
-if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_long_long_type;")
-	target_compile_features(pugixml PUBLIC cxx_long_long_type)
-endif()
+cmake_dependent_option(PUGIXML_BUILD_TESTS
+  "Build pugixml tests" OFF
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
-set_target_properties(pugixml PROPERTIES VERSION 1.9 SOVERSION 1)
-get_target_property(PUGIXML_VERSION_STRING pugixml VERSION)
+# Custom build defines
+set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
+separate_arguments(PUGIXML_BUILD_DEFINES)
 
-if(BUILD_PKGCONFIG)
-	# Install library into its own directory under LIBDIR
-	set(INSTALL_SUFFIX /pugixml-${PUGIXML_VERSION_STRING})
-endif()
+# Technically not needed for this file. This is builtin CMAKE global variable.
+option(BUILD_SHARED_LIBS "Build shared instead of static library")
 
-target_include_directories(pugixml PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
-	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
+# Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
+cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
+  "Build both shared and static libraries" OFF
+  "BUILD_SHARED_LIBS" OFF)
 
-install(TARGETS pugixml EXPORT pugixml-config
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX})
-install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
+# Expose options from the pugiconfig.hpp
+option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
+option(PUGIXML_COMPACT "Enable compact mode" OFF)
+option(PUGIXML_INSTALL "Enable installation rules" ON)
 
-if(BUILD_PKGCONFIG)
-	configure_file(scripts/pugixml.pc.in ${PROJECT_BINARY_DIR}/pugixml.pc @ONLY)
-	install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+# Advanced options from pugiconfig.hpp
+option(PUGIXML_NO_XPATH "Disable XPath" OFF)
+option(PUGIXML_NO_STL "Disable STL" OFF)
+option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
+mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
+
+if (APPLE)
+  option(PUGIXML_BUILD_APPLE_FRAMEWORK "Build as Apple Frameworks" OFF)
 endif()
 
-if(BUILD_TESTS)
-	file(GLOB TEST_SOURCES tests/*.cpp)
-	file(GLOB FUZZ_SOURCES tests/fuzz_*.cpp)
-	list(REMOVE_ITEM TEST_SOURCES ${FUZZ_SOURCES})
+set(PUGIXML_PUBLIC_DEFINITIONS
+  $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
+  $<$<BOOL:${PUGIXML_COMPACT}>:PUGIXML_COMPACT>
+  $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
+  $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>
+  $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>
+)
 
-	add_executable(check ${TEST_SOURCES})
-	target_link_libraries(check pugixml)
-	add_custom_command(TARGET check POST_BUILD COMMAND check WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+# This is used to backport a CMake 3.15 feature, but is also forwards compatible
+if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY
+    MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${PUGIXML_STATIC_CRT}>>:DLL>)
+endif()
+
+# Set the default C++ standard to C++17 if not set; CMake will automatically downgrade this if the compiler does not support it
+# When CMAKE_CXX_STANDARD_REQUIRED is set, we fall back to C++11 to avoid breaking older compilers
+if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED AND NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMAKE_VERSION VERSION_LESS 3.8)
+
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+elseif (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
+if (PUGIXML_USE_POSTFIX)
+  set(CMAKE_RELWITHDEBINFO_POSTFIX _r)
+  set(CMAKE_MINSIZEREL_POSTFIX _m)
+  set(CMAKE_DEBUG_POSTFIX _d)
+endif()
+
+if (CMAKE_VERSION VERSION_LESS 3.15)
+  set(msvc-rt $<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>)
+
+  set(msvc-rt-mtd-shared $<STREQUAL:${msvc-rt},MultiThreadedDebugDLL>)
+  set(msvc-rt-mtd-static $<STREQUAL:${msvc-rt},MultiThreadedDebug>)
+  set(msvc-rt-mt-shared $<STREQUAL:${msvc-rt},MultiThreadedDLL>)
+  set(msvc-rt-mt-static $<STREQUAL:${msvc-rt},MultiThreaded>)
+  unset(msvc-rt)
+
+  set(msvc-rt-mtd-shared $<${msvc-rt-mtd-shared}:-MDd>)
+  set(msvc-rt-mtd-static $<${msvc-rt-mtd-static}:-MTd>)
+  set(msvc-rt-mt-shared $<${msvc-rt-mt-shared}:-MD>)
+  set(msvc-rt-mt-static $<${msvc-rt-mt-static}:-MT>)
+endif()
+
+set(versioned-dir $<$<BOOL:${PUGIXML_USE_VERSIONED_LIBDIR}>:/pugixml-${PROJECT_VERSION}>)
+
+set(libs)
+
+if (BUILD_SHARED_LIBS)
+  add_library(pugixml-shared SHARED
+    ${PROJECT_SOURCE_DIR}/scripts/pugixml_dll.rc
+    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
+  add_library(pugixml::shared ALIAS pugixml-shared)
+  list(APPEND libs pugixml-shared)
+  string(CONCAT pugixml.msvc $<OR:
+    $<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,
+    $<CXX_COMPILER_ID:MSVC>
+  >)
+
+  set_property(TARGET pugixml-shared PROPERTY EXPORT_NAME shared)
+  target_include_directories(pugixml-shared
+    PUBLIC
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+  target_compile_definitions(pugixml-shared
+    PUBLIC
+      ${PUGIXML_BUILD_DEFINES}
+      ${PUGIXML_PUBLIC_DEFINITIONS}
+    PRIVATE
+      PUGIXML_API=$<IF:${pugixml.msvc},__declspec\(dllexport\),__attribute__\(\(visibility\("default"\)\)\)>
+    )
+  target_compile_options(pugixml-shared
+    PRIVATE
+      ${msvc-rt-mtd-shared}
+      ${msvc-rt-mtd-static}
+      ${msvc-rt-mt-shared}
+      ${msvc-rt-mt-static})
+endif()
+
+if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
+  add_library(pugixml-static STATIC
+    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
+  add_library(pugixml::static ALIAS pugixml-static)
+  list(APPEND libs pugixml-static)
+
+  set_property(TARGET pugixml-static PROPERTY EXPORT_NAME static)
+  target_include_directories(pugixml-static
+    PUBLIC
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+  target_compile_definitions(pugixml-static
+    PUBLIC
+      ${PUGIXML_BUILD_DEFINES}
+      ${PUGIXML_PUBLIC_DEFINITIONS})
+  target_compile_options(pugixml-static
+    PRIVATE
+      ${msvc-rt-mtd-shared}
+      ${msvc-rt-mtd-static}
+      ${msvc-rt-mt-shared}
+      ${msvc-rt-mt-static})
+endif()
+
+if (BUILD_SHARED_LIBS)
+  set(pugixml-alias pugixml-shared)
+else()
+  set(pugixml-alias pugixml-static)
+endif()
+add_library(pugixml INTERFACE)
+target_link_libraries(pugixml INTERFACE ${pugixml-alias})
+add_library(pugixml::pugixml ALIAS pugixml)
+
+set_target_properties(${libs}
+  PROPERTIES
+    MSVC_RUNTIME_LIBRARY ${CMAKE_MSVC_RUNTIME_LIBRARY}
+    EXCLUDE_FROM_ALL ON
+    POSITION_INDEPENDENT_CODE ON
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    VERSION ${PROJECT_VERSION}
+    OUTPUT_NAME pugixml)
+
+set_target_properties(${libs}
+  PROPERTIES
+    EXCLUDE_FROM_ALL OFF)
+set(install-targets pugixml ${libs})
+
+if (PUGIXML_BUILD_APPLE_FRAMEWORK)
+  set_target_properties(${libs} PROPERTIES
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION ${PROJECT_VERSION}
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER com.zeux.pugixml
+    MACOSX_FRAMEWORK_IDENTIFIER com.zeux.pugixml
+    MACOSX_FRAMEWORK_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR})
+endif()
+
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
+  "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+  NO_SET_AND_CHECK_MACRO)
+
+write_basic_package_version_file(
+  "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
+  COMPATIBILITY SameMajorVersion)
+
+if (PUGIXML_USE_POSTFIX)
+  if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    set(LIB_POSTFIX ${CMAKE_RELWITHDEBINFO_POSTFIX})
+  elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    set(LIB_POSTFIX ${CMAKE_MINSIZEREL_POSTFIX})
+  elseif(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+  endif()
+endif()
+
+# Handle both relative and absolute paths (e.g. NixOS) for a relocatable package
+if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+  set(PUGIXML_PC_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+else()
+  set(PUGIXML_PC_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+endif()
+if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+  set(PUGIXML_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+else()
+  set(PUGIXML_PC_LIBDIR "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+endif()
+configure_file(scripts/pugixml.pc.in pugixml.pc @ONLY)
+
+export(TARGETS ${install-targets}
+  NAMESPACE pugixml::
+  FILE pugixml-targets.cmake)
+
+if(PUGIXML_INSTALL)
+  if (NOT DEFINED PUGIXML_RUNTIME_COMPONENT)
+    set(PUGIXML_RUNTIME_COMPONENT Runtime)
+  endif()
+
+  if (NOT DEFINED PUGIXML_LIBRARY_COMPONENT)
+    set(PUGIXML_LIBRARY_COMPONENT Library)
+  endif()
+
+  if (NOT DEFINED PUGIXML_DEVELOPMENT_COMPONENT)
+    set(PUGIXML_DEVELOPMENT_COMPONENT Development)
+  endif()
+
+  set(namelink-component)
+  if (NOT CMAKE_VERSION VERSION_LESS 3.12)
+    set(namelink-component NAMELINK_COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  endif()
+  install(TARGETS ${install-targets}
+    EXPORT pugixml-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${PUGIXML_RUNTIME_COMPONENT}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_LIBRARY_COMPONENT} ${namelink-component}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime OPTIONAL)
+
+  install(EXPORT pugixml-targets
+    NAMESPACE pugixml::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(FILES
+    "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
+    "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(
+    FILES
+      "${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp"
+      "${PROJECT_SOURCE_DIR}/src/pugixml.hpp"
+    DESTINATION
+      ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+endif()
+
+if (PUGIXML_BUILD_TESTS)
+  include(CTest)
+  set(fuzz-pattern "tests/fuzz_*.cpp")
+  set(test-pattern "tests/*.cpp")
+  if (CMAKE_VERSION VERSION_GREATER 3.11)
+    list(INSERT fuzz-pattern 0 CONFIGURE_DEPENDS)
+    list(INSERT test-pattern 0 CONFIGURE_DEPENDS)
+  endif()
+  file(GLOB test-sources ${test-pattern})
+  file(GLOB fuzz-sources ${fuzz-pattern})
+  list(REMOVE_ITEM test-sources ${fuzz-sources})
+
+  add_custom_target(check
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+
+  add_executable(pugixml-check ${test-sources})
+  add_test(NAME pugixml::test
+    COMMAND pugixml-check
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  add_dependencies(check pugixml-check)
+  target_link_libraries(pugixml-check
+    PRIVATE
+      pugixml::pugixml)
 endif()

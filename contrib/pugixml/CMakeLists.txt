@@ -32,7 +32,7 @@ set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
 # Technically not needed for this file. This is builtin CMAKE global variable.
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
+option(BUILD_SHARED_LIBS "Build shared instead of static library")
 
 # Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS

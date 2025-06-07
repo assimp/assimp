@@ -1122,6 +1122,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.cpp
     ../contrib/pugixml/src/pugixml.hpp
   )
   INCLUDE_DIRECTORIES("../contrib/pugixml/src")

@@ -83,13 +83,17 @@ aiReturn aiGetMaterialProperty(const aiMaterial *pMat,
     return AI_FAILURE;
 }
 
+namespace
+{
+
 // ------------------------------------------------------------------------------------------------
-// Get an array of floating-point values from the material.
-aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
+// Implementation of functions "aiGetMaterialFloatArray" and "aiGetMaterialFloatFloatArray".
+template <class TReal>
+aiReturn GetMaterialFloatArray(const aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        ai_real *pOut,
+        TReal *pOut,
         unsigned int *pMax) {
     ai_assert(pOut != nullptr);
     ai_assert(pMat != nullptr);
@@ -100,7 +104,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         return AI_FAILURE;
     }
 
-    // data is given in floats, convert to ai_real
+    // data is given in floats, convert to TReal
     unsigned int iWrite = 0;
     if (aiPTI_Float == prop->mType || aiPTI_Buffer == prop->mType) {
         iWrite = prop->mDataLength / sizeof(float);
@@ -110,14 +114,14 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         }
 
         for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<float *>(prop->mData)[a]);
+            pOut[a] = static_cast<TReal>(reinterpret_cast<float *>(prop->mData)[a]);
         }
 
         if (pMax) {
             *pMax = iWrite;
         }
     }
-    // data is given in doubles, convert to float
+    // data is given in doubles, convert to TReal
     else if (aiPTI_Double == prop->mType) {
         iWrite = prop->mDataLength / sizeof(double);
         if (pMax) {
@@ -125,13 +129,13 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
             ;
         }
         for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<double *>(prop->mData)[a]);
+            pOut[a] = static_cast<TReal>(reinterpret_cast<double *>(prop->mData)[a]);
         }
         if (pMax) {
             *pMax = iWrite;
         }
     }
-    // data is given in ints, convert to float
+    // data is given in ints, convert to TReal
     else if (aiPTI_Integer == prop->mType) {
         iWrite = prop->mDataLength / sizeof(int32_t);
         if (pMax) {
@@ -139,7 +143,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
             ;
         }
         for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<int32_t *>(prop->mData)[a]);
+            pOut[a] = static_cast<TReal>(reinterpret_cast<int32_t *>(prop->mData)[a]);
         }
         if (pMax) {
             *pMax = iWrite;
@@ -155,7 +159,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
         ai_assert(prop->mDataLength >= 5);
         ai_assert(!prop->mData[prop->mDataLength - 1]);
         for (unsigned int a = 0;; ++a) {
-            cur = fast_atoreal_move<ai_real>(cur, pOut[a]);
+            cur = fast_atoreal_move<TReal>(cur, pOut[a]);
             if (a == iWrite - 1) {
                 break;
             }
@@ -174,92 +178,27 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Get an array of floating-point values from the material.
-aiReturn aiGetMaterialDoubleArray(const aiMaterial *pMat,
+// Get an array of float typed float values from the material.
+aiReturn aiGetMaterialFloatFloatArray(const aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        double *pOut,
+        float *pOut,
         unsigned int *pMax) {
-    ai_assert(pOut != nullptr);
-    ai_assert(pMat != nullptr);
+    return ::GetMaterialFloatArray(pMat, pKey, type, index, pOut, pMax);
+}
 
-    const aiMaterialProperty *prop;
-    aiGetMaterialProperty(pMat, pKey, type, index, (const aiMaterialProperty **)&prop);
-    if (nullptr == prop) {
-        return AI_FAILURE;
-    }
+} // namespace
 
-    // data is given in floats, convert to ai_real
-    unsigned int iWrite = 0;
-    if (aiPTI_Float == prop->mType || aiPTI_Buffer == prop->mType) {
-        iWrite = prop->mDataLength / sizeof(float);
-        if (pMax) {
-            iWrite = std::min(*pMax, iWrite);
-            ;
-        }
-
-        for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<float *>(prop->mData)[a]);
-        }
-
-        if (pMax) {
-            *pMax = iWrite;
-        }
-    }
-    // data is given in doubles, convert to float
-    else if (aiPTI_Double == prop->mType) {
-        iWrite = prop->mDataLength / sizeof(double);
-        if (pMax) {
-            iWrite = std::min(*pMax, iWrite);
-            ;
-        }
-        for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<double *>(prop->mData)[a]);
-        }
-        if (pMax) {
-            *pMax = iWrite;
-        }
-    }
-    // data is given in ints, convert to float
-    else if (aiPTI_Integer == prop->mType) {
-        iWrite = prop->mDataLength / sizeof(int32_t);
-        if (pMax) {
-            iWrite = std::min(*pMax, iWrite);
-        }
-        for (unsigned int a = 0; a < iWrite; ++a) {
-            pOut[a] = static_cast<ai_real>(reinterpret_cast<int32_t *>(prop->mData)[a]);
-        }
-        if (pMax) {
-            *pMax = iWrite;
-        }
-    }
-    // a string ... read floats separated by spaces
-    else {
-        if (pMax) {
-            iWrite = *pMax;
-        }
-        // strings are zero-terminated with a 32 bit length prefix, so this is safe
-        const char *cur = prop->mData + 4;
-        ai_assert(prop->mDataLength >= 5);
-        ai_assert(!prop->mData[prop->mDataLength - 1]);
-        for (unsigned int a = 0;; ++a) {
-            cur = fast_atoreal_move<double>(cur, pOut[a]);
-            if (a == iWrite - 1) {
-                break;
-            }
-            if (!IsSpace(*cur)) {
-                ASSIMP_LOG_ERROR("Material property", pKey,
-                        " is a string; failed to parse a float array out of it.");
-                return AI_FAILURE;
-            }
-        }
-
-        if (pMax) {
-            *pMax = iWrite;
-        }
-    }
-    return AI_SUCCESS;
+// ------------------------------------------------------------------------------------------------
+// Get an array of floating-point values from the material.
+aiReturn aiGetMaterialFloatArray(const aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        ai_real *pOut,
+        unsigned int *pMax) {
+    return ::GetMaterialFloatArray(pMat, pKey, type, index, pOut, pMax);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -348,7 +287,7 @@ aiReturn aiGetMaterialColor(const aiMaterial *pMat,
         unsigned int index,
         aiColor4D *pOut) {
     unsigned int iMax = 4;
-    const aiReturn eRet = aiGetMaterialFloatArray(pMat, pKey, type, index, (ai_real *)pOut, &iMax);
+    const aiReturn eRet = aiGetMaterialFloatFloatArray(pMat, pKey, type, index, (float *)pOut, &iMax);
 
     // if no alpha channel is defined: set it to 1.0
     if (3 == iMax) {

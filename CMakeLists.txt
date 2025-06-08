@@ -104,7 +104,10 @@ IF(ASSIMP_HUNTER_ENABLED)
   ADD_DEFINITIONS(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 6.0.1)
+PROJECT(Assimp VERSION 6.0.2
+  LANGUAGES C CXX
+  DESCRIPTION "Open Asset Import Library (Assimp) is a library to import various well-known 3D model formats in a uniform manner."
+)
 
 # All supported options ###############################################
 
@@ -246,7 +249,7 @@ SET (ASSIMP_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 SET (ASSIMP_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 SET (ASSIMP_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 SET (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
-SET (ASSIMP_SOVERSION 5)
+SET (ASSIMP_SOVERSION 6)
 
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 set(CMAKE_CXX_STANDARD 17)

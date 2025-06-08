@@ -176,9 +176,17 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                 // If we know how many frames we'll read, we can preallocate some storage
                 unsigned int alloc = 100;
                 if (last != 0x00ffffff) {
+                    // re-init if the file has last frame data
                     alloc = last-first;
                     alloc += alloc>>2u; // + 25%
                     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+                        if (anim->mChannels[i]->mPositionKeys != nullptr) delete[] anim->mChannels[i]->mPositionKeys;
+                        anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
+                    }
+                } else {
+                    // default init
+                    for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+                        if (anim->mChannels[i]->mPositionKeys != nullptr) continue;
                         anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
                     }
                 }
@@ -202,7 +210,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                         if (s->mNumPositionKeys == alloc)   {
                             // need to reallocate?
                             aiVectorKey* old = s->mPositionKeys;
-                            s->mPositionKeys = new aiVectorKey[s->mNumPositionKeys = alloc*2];
+                            s->mPositionKeys = new aiVectorKey[alloc*2];
                             ::memcpy(s->mPositionKeys,old,sizeof(aiVectorKey)*alloc);
                             delete[] old;
                         }

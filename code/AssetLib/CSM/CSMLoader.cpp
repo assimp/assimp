@@ -279,7 +279,13 @@ void CSMImporter::InternReadFile( const std::string& pFile,
         nd->mName   = anim->mChannels[i]->mNodeName;
         nd->mParent = pScene->mRootNode;
 
-        aiMatrix4x4::Translation(na->mPositionKeys[0].mValue, nd->mTransformation);
+        if (na->mPositionKeys != nullptr && na->mNumPositionKeys > 0) {
+            aiMatrix4x4::Translation(na->mPositionKeys[0].mValue, nd->mTransformation);
+        } else {
+            // Use identity matrix if no valid position data is available
+            nd->mTransformation = aiMatrix4x4();
+            DefaultLogger::get()->warn("CSM: No position keys available for node - using identity transformation");
+        }
     }
 
     // Store the one and only animation in the scene

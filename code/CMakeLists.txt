@@ -1122,6 +1122,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.cpp
     ../contrib/pugixml/src/pugixml.hpp
   )
   INCLUDE_DIRECTORIES("../contrib/pugixml/src")
@@ -1465,7 +1466,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
         -Wno-deprecated-declarations
-	-Wno-deprecated-non-prototype
+	      -Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)

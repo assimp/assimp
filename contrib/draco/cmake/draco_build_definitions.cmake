@@ -56,7 +56,7 @@ macro(draco_set_build_definitions)
   # passed to libtool.
   #
   # We set DRACO_SOVERSION = [c-a].a.r
-  set(LT_CURRENT 8)
+  set(LT_CURRENT 9)
   set(LT_REVISION 0)
   set(LT_AGE 0)
   math(EXPR DRACO_SOVERSION_MAJOR "${LT_CURRENT} - ${LT_AGE}")

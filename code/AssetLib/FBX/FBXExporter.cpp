@@ -1043,6 +1043,10 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
+        return static_cast<int64_t>(ticks * FBX::SECOND);
+    }
+    
     // Defensive: handle zero or near-zero mTicksPerSecond
     double tps = anim->mTicksPerSecond;
     double timeVal;
@@ -1062,7 +1066,7 @@ inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (timeVal < kMin) {
         return INT64_MIN;
     }
-    return static_cast<int64_t>(timeVal * FBX::SECOND);
+    return static_cast<int64_t>((ticks / anim->mTicksPerSecond) * FBX::SECOND);
 }
 
 inline int64_t to_ktime(double time) {

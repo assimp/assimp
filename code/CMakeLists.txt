@@ -943,17 +943,14 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     message("****")
     message("\n\n**** Cloning meshlab repo, git tag ${Meshlab_GIT_TAG}\n\n")
 
-    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
-    # relative to top-level/main project)
-    set(Meshlab_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab")
-
     # Note: Depending on user's OS, build environment etc it may be necessary to change line endings of
     #       "patches/meshlab.patch" file from CRLF to LF in order for patch operation to succeed
     # Patch required to
     #  - replace QtXml w/pugixml
     #  - disable meshlab cmake scripts to prevent breaking assimp build
     #  - address compiler warnings to avoid breaking build for users who wisely treat warnings-as-errors
-    set(Meshlab_PATCH_CMD git apply ${Meshlab_BASE_ABSPATH}/patches/meshlab.patch)
+    set(Meshlab_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab/patches/meshlab.patch")
+    set(Meshlab_PATCH_CMD git apply ${Meshlab_PATCHFILE_PATH})
 
     # Note: cloning entire meshlab repo is wasteful since we require literally only two source files.
     #       There is a technique using "git archive" e.g.
@@ -969,9 +966,6 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     #       block (wait) as long as necessary until cloning is complete, so we immediately have full
     #       access to the cloned source files
     include(FetchContent)
-    set(Meshlab_REPO_ABSPATH "${Meshlab_BASE_ABSPATH}/autoclone")
-    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
-    set(FETCHCONTENT_BASE_DIR ${Meshlab_REPO_ABSPATH})
     set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
     set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
     set(Meshlab_GIT_REPO "https://github.com/cnr-isti-vclab/meshlab")
@@ -984,7 +978,7 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     FetchContent_MakeAvailable(meshlab_repo)
     message("**** Finished cloning meshlab repo")
     message("****")
-    set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_ABSPATH}/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml")
+    set(Meshlab_SRC_ABSPATH "${CMAKE_BINARY_DIR}/_deps/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml")
     set(Meshlab_SRCS
             ${Meshlab_SRC_ABSPATH}/Parser.cpp
             ${Meshlab_SRC_ABSPATH}/Scanner.cpp
@@ -1003,10 +997,6 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
         ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
     endif ()
-    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
-    # relative to top-level/main project)
-    set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")
-    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/autoclone")
 
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
@@ -1017,15 +1007,14 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
 
     # Patch required to build arm32 on android
-    set(TINYUSDZ_PATCH_CMD git apply ${Tinyusdz_BASE_ABSPATH}/patches/tinyusdz.patch)
+    set(TINYUSDZ_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz/patches/tinyusdz.patch")
+    set(TINYUSDZ_PATCH_CMD git apply ${TINYUSDZ_PATCHFILE_PATH})
 
     # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
     #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
     #       block (wait) as long as necessary until cloning is complete, so we immediately have full
     #       access to the cloned source files
     include(FetchContent)
-    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
-    set(FETCHCONTENT_BASE_DIR ${Tinyusdz_REPO_ABSPATH})
     set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
     set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
     FetchContent_Declare(
@@ -1039,7 +1028,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     message("**** Finished cloning tinyusdz repo")
     message("****")
 
-    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/tinyusdz_repo-src/src")
+    set(Tinyusdz_SRC_ABSPATH "${CMAKE_BINARY_DIR}/_deps/tinyusdz_repo-src/src")
     set(Tinyusdz_SRCS
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc

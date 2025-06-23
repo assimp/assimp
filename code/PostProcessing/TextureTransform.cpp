@@ -479,6 +479,9 @@ void TextureTransformStep::Execute( aiScene* pScene) {
                     }
                 }
                 if (it2 == trafo.begin()){
+                    {
+                        std::unique_ptr<aiVector3D[]> oldTextureCoords(mesh->mTextureCoords[n]);
+                    }
                     mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
                 }
             }

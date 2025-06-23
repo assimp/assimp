@@ -978,13 +978,17 @@ IF (ASSIMP_BUILD_VRML_IMPORTER)
     FetchContent_MakeAvailable(meshlab_repo)
     message("**** Finished cloning meshlab repo")
     message("****")
-    set(Meshlab_SRC_ABSPATH "${CMAKE_BINARY_DIR}/_deps/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml")
+    set(Meshlab_REPO_BASEPATH "${CMAKE_BINARY_DIR}/_deps/meshlab_repo-src/src")
+    set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_BASEPATH}/meshlabplugins/io_x3d/vrml")
     set(Meshlab_SRCS
             ${Meshlab_SRC_ABSPATH}/Parser.cpp
             ${Meshlab_SRC_ABSPATH}/Scanner.cpp
     )
-    set(Meshlab_INCLUDE_DIRS "${Meshlab_SRC_ABSPATH}")
-    INCLUDE_DIRECTORIES(${Meshlab_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(
+            ${Meshlab_SRC_ABSPATH}
+            # Add this to avoid include of generic-looking "Parser.h" (for sonarCloud)
+            ${Meshlab_REPO_BASEPATH}
+    )
     MESSAGE(STATUS "VRML enabled")
 ELSE() # IF (ASSIMP_BUILD_VRML_IMPORTER)
     set(Meshlab_SRCS "")

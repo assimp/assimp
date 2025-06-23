@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
-#include "Parser.h"
+#include "meshlabplugins/io_x3d/vrml/Parser.h"
 #endif // #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
 
 namespace Assimp {

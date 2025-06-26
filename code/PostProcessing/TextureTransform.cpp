@@ -1,7 +1,6 @@
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
-
 Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
@@ -35,27 +34,20 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
 /** @file A helper class that processes texture transformations */
 
+#include "TextureTransform.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
-
-#include "TextureTransform.h"
 #include <assimp/StringUtils.h>
 
-using namespace Assimp;
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-TextureTransformStep::TextureTransformStep() : configFlags()  {
-    // nothing to do here
-}
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -539,13 +531,12 @@ void TextureTransformStep::Execute( aiScene* pScene) {
 
     // Print some detailed statistics into the log
     if (!DefaultLogger::isNullLogger()) {
-
         if (transformedChannels)    {
             ASSIMP_LOG_INFO("TransformUVCoordsProcess end: ", outChannels, " output channels (in: ", inChannels, ", modified: ", transformedChannels,")");
         } else {
-            ASSIMP_LOG_DEBUG("TransformUVCoordsProcess finished");
+            ASSIMP_LOG_INFO("TransformUVCoordsProcess finished");
         }
     }
 }
 
-
+} // namespace Assimp

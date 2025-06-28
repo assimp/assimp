@@ -1,10 +1,9 @@
 FROM gcc:1.5.1.0
 
 RUN apt-get update \
-    apt-get install -y ninja-build cmake
+    apt-get install --no-install-recommends -y ninja-build cmake zlib1g-dev
 
 WORKDIR /app
-RUN apt install zlib1g-dev
 
 COPY . .
 

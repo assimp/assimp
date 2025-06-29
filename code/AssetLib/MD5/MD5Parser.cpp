@@ -277,6 +277,8 @@ inline bool AI_MD5_PARSE_STRING(const char **sz, const char *bufferEnd, aiString
         }
     }
     out.length = (ai_uint32)(szEnd - szStart);
+    if (out.length >= AI_MAXLEN)
+        out.length = AI_MAXLEN - 1;
     ::memcpy(out.data, szStart, out.length);
     out.data[out.length] = '\0';
 
@@ -299,6 +301,8 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
             const char *szEnd = *sz;
             ++*sz;
             out.length = (ai_uint32)(szEnd - szStart);
+            if (out.length >= AI_MAXLEN)
+                out.length = AI_MAXLEN - 1;
             ::memcpy(out.data, szStart, out.length);
         }
     }

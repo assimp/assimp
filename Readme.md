@@ -20,7 +20,7 @@ Additionally, assimp features various __mesh post-processing tools__: normals an
 ![Alt](https://repobeats.axiom.co/api/embed/997f84e5f9fcf772da1e687f3a4f3a8afdbf4cf0.svg "Repobeats analytics image")
 
 ### Documentation ###
-Read [our latest documentation](https://assimp-docs.readthedocs.io/en/latest/).
+Read [our latest documentation](https://the-asset-importer-lib-documentation.readthedocs.io/en/latest/).
 
 ### Pre-built binaries ###
 Download binaries from [our Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib).

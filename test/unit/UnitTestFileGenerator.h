@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
 #   define TMP_PATH "./"
 #elif defined(__GNUC__) || defined(__clang__)
-#   define TMP_PATH "/tmp/"
+#   define TMP_PATH "/var/tmp/"
 #endif
 
 #if defined(_MSC_VER)

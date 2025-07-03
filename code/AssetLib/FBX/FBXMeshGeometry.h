@@ -72,11 +72,11 @@ public:
 
     /// @brief Get the BlendShape attached to this geometry or nullptr
     /// @return The blendshape arrays.
-    const std::unordered_set<const BlendShape*>& GetBlendShapes() const;
+    const std::vector<const BlendShape*>& GetBlendShapes() const;
 
 private:
     const Skin* skin;
-    std::unordered_set<const BlendShape*> blendShapes;
+    std::vector<const BlendShape*> blendShapes;
 
 };
 

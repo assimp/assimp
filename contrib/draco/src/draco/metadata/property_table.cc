@@ -23,111 +23,56 @@
 
 namespace draco {
 
-bool PropertyTable::Schema::Object::operator==(const Object& other) const {
-  if (type_ != other.type_ || name_ != other.name_) {
-    return false;
-  }
-  switch (type_) {
-    case OBJECT:
-      if (objects_.size() != other.objects_.size()) {
-        return false;
-      }
-      for (int i = 0; i < objects_.size(); ++i) {
-        if (objects_[i] != other.objects_[i]) {
-          return false;
-        }
-      }
-      break;
-    case ARRAY:
-      if (array_.size() != other.array_.size()) {
-        return false;
-      }
-      for (int i = 0; i < array_.size(); ++i) {
-        if (array_[i] != other.array_[i]) {
-          return false;
-        }
-      }
-      break;
-    case STRING:
-      return string_ == other.string_;
-    case INTEGER:
-      return integer_ == other.integer_;
-    case BOOLEAN:
-      return boolean_ == other.boolean_;
-  }
-  return true;
-}
-
-void PropertyTable::Schema::Object::Copy(const Object& src) {
-  name_ = src.name_;
-  type_ = src.type_;
-  objects_.reserve(src.objects_.size());
-  for (const Object& obj : src.objects_) {
-    objects_.emplace_back();
-    objects_.back().Copy(obj);
-  }
-  array_.reserve(src.array_.size());
-  for (const Object& obj : src.array_) {
-    array_.emplace_back();
-    array_.back().Copy(obj);
-  }
-  string_ = src.string_;
-  integer_ = src.integer_;
-  boolean_ = src.boolean_;
-}
-
-PropertyTable::Property::Property() {}
-
-bool PropertyTable::Property::Data::operator==(const Data& other) const {
+bool PropertyTable::Property::Data::operator==(const Data &other) const {
   return data == other.data && target == other.target;
 }
 
-bool PropertyTable::Property::Offsets::operator==(const Offsets& other) const {
+bool PropertyTable::Property::Offsets::operator==(const Offsets &other) const {
   return data == other.data && type == other.type;
 }
 
-bool PropertyTable::Property::operator==(const Property& other) const {
+bool PropertyTable::Property::operator==(const Property &other) const {
   return name_ == other.name_ && data_ == other.data_ &&
          array_offsets_ == other.array_offsets_ &&
          string_offsets_ == other.string_offsets_;
 }
 
-void PropertyTable::Property::Copy(const Property& src) {
+void PropertyTable::Property::Copy(const Property &src) {
   name_ = src.name_;
   data_ = src.data_;
   array_offsets_ = src.array_offsets_;
   string_offsets_ = src.string_offsets_;
 }
 
-void PropertyTable::Property::SetName(const std::string& name) { name_ = name; }
-const std::string& PropertyTable::Property::GetName() const { return name_; }
+void PropertyTable::Property::SetName(const std::string &name) { name_ = name; }
+const std::string &PropertyTable::Property::GetName() const { return name_; }
 
-PropertyTable::Property::Data& PropertyTable::Property::GetData() {
+PropertyTable::Property::Data &PropertyTable::Property::GetData() {
   return data_;
 }
-const PropertyTable::Property::Data& PropertyTable::Property::GetData() const {
+const PropertyTable::Property::Data &PropertyTable::Property::GetData() const {
   return data_;
 }
 
-const PropertyTable::Property::Offsets&
+const PropertyTable::Property::Offsets &
 PropertyTable::Property::GetArrayOffsets() const {
   return array_offsets_;
 }
-PropertyTable::Property::Offsets& PropertyTable::Property::GetArrayOffsets() {
+PropertyTable::Property::Offsets &PropertyTable::Property::GetArrayOffsets() {
   return array_offsets_;
 }
 
-const PropertyTable::Property::Offsets&
+const PropertyTable::Property::Offsets &
 PropertyTable::Property::GetStringOffsets() const {
   return string_offsets_;
 }
-PropertyTable::Property::Offsets& PropertyTable::Property::GetStringOffsets() {
+PropertyTable::Property::Offsets &PropertyTable::Property::GetStringOffsets() {
   return string_offsets_;
 }
 
 PropertyTable::PropertyTable() : count_(0) {}
 
-bool PropertyTable::operator==(const PropertyTable& other) const {
+bool PropertyTable::operator==(const PropertyTable &other) const {
   if (name_ != other.name_ || class_ != other.class_ ||
       count_ != other.count_ ||
       properties_.size() != other.properties_.size()) {
@@ -141,7 +86,7 @@ bool PropertyTable::operator==(const PropertyTable& other) const {
   return true;
 }
 
-void PropertyTable::Copy(const PropertyTable& src) {
+void PropertyTable::Copy(const PropertyTable &src) {
   name_ = src.name_;
   class_ = src.class_;
   count_ = src.count_;
@@ -154,11 +99,11 @@ void PropertyTable::Copy(const PropertyTable& src) {
   }
 }
 
-void PropertyTable::SetName(const std::string& value) { name_ = value; }
-const std::string& PropertyTable::GetName() const { return name_; }
+void PropertyTable::SetName(const std::string &value) { name_ = value; }
+const std::string &PropertyTable::GetName() const { return name_; }
 
-void PropertyTable::SetClass(const std::string& value) { class_ = value; }
-const std::string& PropertyTable::GetClass() const { return class_; }
+void PropertyTable::SetClass(const std::string &value) { class_ = value; }
+const std::string &PropertyTable::GetClass() const { return class_; }
 
 void PropertyTable::SetCount(int count) { count_ = count; }
 int PropertyTable::GetCount() const { return count_; }
@@ -168,10 +113,10 @@ int PropertyTable::AddProperty(std::unique_ptr<Property> property) {
   return properties_.size() - 1;
 }
 int PropertyTable::NumProperties() const { return properties_.size(); }
-const PropertyTable::Property& PropertyTable::GetProperty(int index) const {
+const PropertyTable::Property &PropertyTable::GetProperty(int index) const {
   return *properties_[index];
 }
-PropertyTable::Property& PropertyTable::GetProperty(int index) {
+PropertyTable::Property &PropertyTable::GetProperty(int index) {
   return *properties_[index];
 }
 void PropertyTable::RemoveProperty(int index) {

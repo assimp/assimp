@@ -120,10 +120,10 @@ static std::mutex gLogStreamMutex;
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API
-class LogToCallbackRedirector : public LogStream {
+class LogToCallbackRedirector final : public LogStream {
 public:
     explicit LogToCallbackRedirector(const aiLogStream &s) :
-            stream(s) {
+            mStream(s) {
         ai_assert(nullptr != s.callback);
     }
 
@@ -137,7 +137,7 @@ public:
         // might cause strange problems, but the chance is quite low.
 
         PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(),
-                gPredefinedStreams.end(), (Assimp::LogStream *)stream.user);
+                gPredefinedStreams.end(), (Assimp::LogStream *)mStream.user);
 
         if (it != gPredefinedStreams.end()) {
             delete *it;
@@ -147,11 +147,11 @@ public:
 
     /** @copydoc LogStream::write */
     void write(const char *message) {
-        stream.callback(message, stream.user);
+        mStream.callback(message, mStream.user);
     }
 
 private:
-    aiLogStream stream;
+    const aiLogStream &mStream;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -354,9 +354,10 @@ ASSIMP_API const aiScene *aiApplyCustomizedPostProcessing(const aiScene *scene,
 void CallbackToLogRedirector(const char *msg, char *dt) {
     ai_assert(nullptr != msg);
     ai_assert(nullptr != dt);
-    LogStream *s = (LogStream *)dt;
-
-    s->write(msg);
+    LogStream *stream = (LogStream *)dt;
+    if (stream != nullptr) {
+        stream->write(msg);
+    }
 }
 
 static LogStream *DefaultStream = nullptr;

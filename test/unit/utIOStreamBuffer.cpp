@@ -84,7 +84,8 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fname[]={ "octest.XXXXXX" };
-    auto* fs = MakeTmpFile(fname);
+    std::string tmpName;
+    auto* fs = MakeTmpFile(fname, std::strlen(fname), tmpName);
     ASSERT_NE(nullptr, fs);
 
     auto written = std::fwrite(data, sizeof(*data), dataCount, fs);
@@ -92,7 +93,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);
 	std::fclose( fs );
-	fs = std::fopen(fname, "r");
+    fs = std::fopen(tmpName.c_str(), "r");
 	ASSERT_NE(nullptr, fs);
     {
         TestDefaultIOStream myStream( fs, fname );
@@ -109,8 +110,9 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
     const auto dataSize = sizeof(data);
     const auto dataCount = dataSize / sizeof(*data);
 
-    char fname[]={ "readlinetest.XXXXXX" };
-    auto* fs = MakeTmpFile(fname);
+    char fname[]={ "readlinetest.XXXXXX\0" };
+    std::string tmpName;
+    auto* fs = MakeTmpFile(fname, std::strlen(fname), tmpName);
     ASSERT_NE(nullptr, fs);
 
     auto written = std::fwrite( data, sizeof(*data), dataCount, fs );
@@ -119,7 +121,7 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	auto flushResult = std::fflush(fs);
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
-	fs = std::fopen(fname, "r");
+    fs = std::fopen(tmpName.c_str(), "r");
 	ASSERT_NE(nullptr, fs);
 
     const auto tCacheSize = 26u;

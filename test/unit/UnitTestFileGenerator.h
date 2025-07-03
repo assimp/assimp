@@ -58,21 +58,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #       define _CRT_SECURE_NO_WARNINGS
 #   endif
 #include <io.h>
-inline FILE* MakeTmpFile(char* tmplate) {
-    char *pathtemplate = tmplate;
-    int err = _mktemp_s(pathtemplate, std::strlen(pathtemplate));
+inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
+    char *pathtemplate = new char[len + 1];
+    strncpy(pathtemplate, tmplate, len);
+    pathtemplate[len] = '\0';
+    int err = _mktemp_s(pathtemplate, len+1);
     EXPECT_EQ(err, 0);
     EXPECT_NE(pathtemplate, nullptr);
     if(pathtemplate == nullptr) {
+        delete[] pathtemplate;
         return nullptr;
     }
     auto* fs = std::fopen(pathtemplate, "w+");
-    EXPECT_NE(fs, nullptr);    return fs;
+    tmpName = pathtemplate;
+    EXPECT_NE(fs, nullptr);
+    delete[] pathtemplate;
 
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)
-inline FILE* MakeTmpFile(char* tmplate) {
+inline FILE *MakeTmpFile(char *tmplate, size_t len, std::string &tmpName) {
     auto fd = mkstemp(tmplate);
     EXPECT_NE(-1, fd);
     if(fd == -1) {
@@ -80,6 +85,9 @@ inline FILE* MakeTmpFile(char* tmplate) {
     }
     auto fs = fdopen(fd, "w+");
     EXPECT_NE(nullptr, fs);
+    tmpName += TMP_PATH;
+    tmpName += tmplate
+    
     return fs;
 }
 #endif

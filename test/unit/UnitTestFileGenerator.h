@@ -86,7 +86,7 @@ inline FILE *MakeTmpFile(char *tmplate, size_t len, std::string &tmpName) {
     auto fs = fdopen(fd, "w+");
     EXPECT_NE(nullptr, fs);
     tmpName += TMP_PATH;
-    tmpName += tmplate
+    tmpName += tmplate;
     
     return fs;
 }

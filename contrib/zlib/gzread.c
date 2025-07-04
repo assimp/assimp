@@ -3,6 +3,10 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
+#ifdef _WIN32
+#   define _CRT_NONSTDC_NO_DEPRECATE
+#endif 
+
 #include "gzguts.h"
 
 /* Local functions */

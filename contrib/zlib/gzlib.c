@@ -6,6 +6,9 @@
 #include "gzguts.h"
 
 #if defined(_WIN32) && !defined(__BORLANDC__)
+#  ifndef _CRT_SECURE_NO_WARNINGS
+#    define _CRT_SECURE_NO_WARNINGS
+#  endif
 #  define LSEEK _lseeki64
 #else
 #if defined(_LARGEFILE64_SOURCE) && _LFS64_LARGEFILE-0

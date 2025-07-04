@@ -4,8 +4,13 @@
  */
 
 #ifdef _WIN32
-#   define _CRT_NONSTDC_NO_DEPRECATE
-#endif 
+#  ifndef _CRT_SECURE_NO_WARNINGS
+#    define _CRT_SECURE_NO_WARNINGS
+#  endif // _CRT_SECURE_NO_WARNINGS
+#  ifndef _CRT_NONSTDC_NO_DEPRECATE
+#    define _CRT_NONSTDC_NO_DEPRECATE
+#  endif // _CRT_NONSTDC_NO_DEPRECATE
+#endif // _WIN32
 
 #include "gzguts.h"
 

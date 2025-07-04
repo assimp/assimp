@@ -59,13 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if defined(_MSC_VER)
-#   ifndef _CRT_SECURE_NO_WARNINGS
-#       define _CRT_SECURE_NO_WARNINGS
-#   endif
+
 #include <io.h>
 inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
     char *pathtemplate = new char[len + 1];
-    strncpy(pathtemplate, tmplate, len);
+    strncpy_s(pathtemplate, len, tmplate, len);
     pathtemplate[len] = '\0';
     int err = _mktemp_s(pathtemplate, len+1);
     EXPECT_EQ(err, 0);

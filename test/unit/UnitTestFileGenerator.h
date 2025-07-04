@@ -72,7 +72,10 @@ inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
         delete[] pathtemplate;
         return nullptr;
     }
-    auto* fs = std::fopen(pathtemplate, "w+");
+    errno_t err;
+    FILE *fs{nullptr};
+    err = std::fopen(&fs, pathtemplate, "w+");
+    EXPECT_EQ(0, err);
     tmpName = pathtemplate;
     EXPECT_NE(fs, nullptr);
     delete[] pathtemplate;

@@ -2,12 +2,6 @@
  * Copyright (C) 2004-2019 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
-#ifdef _WIN32
-#   define _CRT_NONSTDC_NO_DEPRECATE
-#endif 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#   define _CRT_SECURE_NO_WARNINGS
-#endif // _CRT_SECURE_NO_WARNINGS
 #include "gzguts.h"
 
 /* Local functions */

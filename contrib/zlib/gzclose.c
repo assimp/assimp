@@ -5,9 +5,6 @@
 
 #include "gzguts.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
-
 /* gzclose() is in a separate file so that it is linked in only if it is used.
    That way the other gzclose functions can be used instead to avoid linking in
    unneeded compression or decompression routines. */
@@ -26,6 +23,3 @@ int ZEXPORT gzclose(file)
     return gzclose_r(file);
 #endif
 }
-
-#pragma clang diagnostic pop
-

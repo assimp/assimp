@@ -23,9 +23,6 @@ z_const char * const z_errmsg[10] = {
     (z_const char *)""
 };
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
-
 const char * ZEXPORT zlibVersion()
 {
     return ZLIB_VERSION;
@@ -323,7 +320,6 @@ void ZLIB_INTERNAL zcfree(opaque, ptr)
     (void)opaque;
     free(ptr);
 }
-#pragma clang diagnostic pop
 
 #endif /* MY_ZCALLOC */
 

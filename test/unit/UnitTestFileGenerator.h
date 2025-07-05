@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -39,42 +39,60 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #pragma once
+#ifdef _WIN32
+#  ifndef _CRT_NONSTDC_NO_DEPRECATE
+#    define _CRT_NONSTDC_NO_DEPRECATE
+#  endif // _CRT_NONSTDC_NO_DEPRECATE
+#  ifndef _CRT_SECURE_NO_WARNINGS
+#     define _CRT_SECURE_NO_WARNINGS
+#  endif
+#endif
 
 #include <cstdio>
 #include <cstdlib>
 #include <gtest/gtest.h>
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-#define TMP_PATH "./"
+#   define TMP_PATH "./"
 #elif defined(__GNUC__) || defined(__clang__)
-#define TMP_PATH "/tmp/"
+#   define TMP_PATH "/var/tmp/"
 #endif
 
 #if defined(_MSC_VER)
+
 #include <io.h>
-inline FILE* MakeTmpFile(char* tmplate)
-{
-    auto pathtemplate = _mktemp(tmplate);
+inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
+    char *pathtemplate = new char[len + 1];
+    strncpy_s(pathtemplate, len, tmplate, len);
+    pathtemplate[len] = '\0';
+    int err = _mktemp_s(pathtemplate, len+1);
+    EXPECT_EQ(err, 0);
     EXPECT_NE(pathtemplate, nullptr);
-    if(pathtemplate == nullptr)
-    {
+    if(pathtemplate == nullptr) {
+        delete[] pathtemplate;
         return nullptr;
     }
-    auto* fs = std::fopen(pathtemplate, "w+");
+    errno_t err;
+    FILE *fs{nullptr};
+    err = std::fopen(&fs, pathtemplate, "w+");
+    EXPECT_EQ(0, err);
+    tmpName = pathtemplate;
     EXPECT_NE(fs, nullptr);
+    delete[] pathtemplate;
+
     return fs;
 }
 #elif defined(__GNUC__) || defined(__clang__)
-inline FILE* MakeTmpFile(char* tmplate)
-{
+inline FILE *MakeTmpFile(char *tmplate, size_t len, std::string &tmpName) {
     auto fd = mkstemp(tmplate);
     EXPECT_NE(-1, fd);
-    if(fd == -1)
-    {
+    if(fd == -1) {
         return nullptr;
     }
     auto fs = fdopen(fd, "w+");
     EXPECT_NE(nullptr, fs);
+    tmpName += tmplate;
+    
     return fs;
 }
 #endif

@@ -123,7 +123,7 @@ inline const char *TAcCheckedLoadFloatArray(const char *buffer, const char *end,
     }
     for (unsigned int _i = 0; _i < num; ++_i) {
         buffer = AcSkipToNextToken(buffer, end);
-        buffer = fast_atoreal_move<float>(buffer, ((float *)out)[_i]);
+        buffer = fast_atoreal_move(buffer, ((float *)out)[_i]);
     }
 
     return buffer;

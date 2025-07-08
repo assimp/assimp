@@ -129,7 +129,7 @@ static void ReadNodeTransformation(XmlNode &node, Node *pNode, TransformType pTy
         // skip whitespace before the number
         SkipSpacesAndLineEnd(&content, end);
         // read a number
-        content = fast_atoreal_move<ai_real>(content, tf.f[a]);
+        content = fast_atoreal_move(content, tf.f[a]);
     }
 
     // place the transformation at the queue of the node
@@ -346,13 +346,13 @@ static void ReadLight(XmlNode &node, Light &pLight) {
             const char *content = v.c_str();
             const char *end = content + v.size();
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
+            content = fast_atoreal_move(content, pLight.mColor.r);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
+            content = fast_atoreal_move(content, pLight.mColor.g);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
+            content = fast_atoreal_move(content, pLight.mColor.b);
             SkipSpacesAndLineEnd(&content, end);
         } else if (currentName == "constant_attenuation") {
             XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);
@@ -631,7 +631,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             std::string tUnitSizeString;
             if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
                 try {
-                    fast_atoreal_move<ai_real>(tUnitSizeString.data(), mUnitSize);
+                    fast_atoreal_move(tUnitSizeString.data(), mUnitSize);
                 } catch (const DeadlyImportError& die) {
                     std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
                     warning.append(die.what());
@@ -889,7 +889,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
             for (auto & a : controller.mBindShapeMatrix) {
                 SkipSpacesAndLineEnd(&content, end);
                 // read a number
-                content = fast_atoreal_move<ai_real>(content, a);
+                content = fast_atoreal_move(content, a);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd(&content, end);
             }
@@ -1262,16 +1262,16 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
             const char *content = v.c_str();
             const char *end = v.c_str() + v.size() + 1;
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.r);
+            content = fast_atoreal_move(content, pColor.r);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.g);
+            content = fast_atoreal_move(content, pColor.g);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.b);
+            content = fast_atoreal_move(content, pColor.b);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.a);
+            content = fast_atoreal_move(content, pColor.a);
             SkipSpacesAndLineEnd(&content, end);
         } else if (currentName == "texture") {
             // get name of source texture/sampler
@@ -1494,7 +1494,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
 
                 // read a number
                 ai_real value;
-                content = fast_atoreal_move<ai_real>(content, value);
+                content = fast_atoreal_move(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd(&content, end);

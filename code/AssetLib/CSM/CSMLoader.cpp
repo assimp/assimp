@@ -135,7 +135,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
             else if (TokenMatchI(buffer,"rate",4))  {
                 SkipSpaces(&buffer, end);
                 float d = { 0.0f };
-                buffer = fast_atoreal_move<float>(buffer,d);
+                buffer = fast_atoreal_move(buffer,d);
                 anim->mTicksPerSecond = d;
             }
             else if (TokenMatchI(buffer,"order",5)) {
@@ -226,17 +226,17 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                         } else {
                             aiVectorKey* sub = s->mPositionKeys + s->mNumPositionKeys;
                             sub->mTime = (double)frame;
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.x);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.x);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample y coord");
                             }
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.y);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.y);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample z coord");
                             }
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.z);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.z);
 
                             ++s->mNumPositionKeys;
                         }

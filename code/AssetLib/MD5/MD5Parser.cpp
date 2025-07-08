@@ -246,11 +246,11 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
         return;
     ++*sz;
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.x);
+    *sz = fast_atoreal_move(*sz, vec.x);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.y);
+    *sz = fast_atoreal_move(*sz, vec.y);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.z);
+    *sz = fast_atoreal_move(*sz, vec.z);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     if (')' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ) was expected", linenumber);
@@ -377,9 +377,9 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     if ('(' != *sz++)
                         MD5Parser::ReportWarning("Unexpected token: ( was expected", elem.iLineNumber);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, (float &)vert.mUV.x);
+                    sz = fast_atoreal_move(sz, vert.mUV.x);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, (float &)vert.mUV.y);
+                    sz = fast_atoreal_move(sz, vert.mUV.y);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     if (')' != *sz++)
                         MD5Parser::ReportWarning("Unexpected token: ) was expected", elem.iLineNumber);
@@ -415,7 +415,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     WeightDesc &weight = desc.mWeights[idx];
                     weight.mBone = strtoul10(sz, &sz);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, weight.mWeight);
+                    sz = fast_atoreal_move(sz, weight.mWeight);
                     AI_MD5_READ_TRIPLE(weight.vOffsetPosition, &sz, elem.end, elem.iLineNumber);
                 }
             }
@@ -486,7 +486,7 @@ MD5AnimParser::MD5AnimParser(SectionArray &mSections) {
                 const char *sz = elem.szStart;
                 while (SkipSpacesAndLineEnd(&sz, elem.end)) {
                     float f;
-                    sz = fast_atoreal_move<float>(sz, f);
+                    sz = fast_atoreal_move(sz, f);
                     desc.mValues.push_back(f);
                 }
             }
@@ -503,7 +503,7 @@ MD5AnimParser::MD5AnimParser(SectionArray &mSections) {
         } else if ((*iter).mName == "numAnimatedComponents") {
             mAnimatedBones.reserve(strtoul10((*iter).mGlobalValue.c_str()));
         } else if ((*iter).mName == "frameRate") {
-            fast_atoreal_move<float>((*iter).mGlobalValue.c_str(), fFrameRate);
+            fast_atoreal_move((*iter).mGlobalValue.c_str(), fFrameRate);
         }
     }
     ASSIMP_LOG_DEBUG("MD5AnimParser end");

@@ -212,14 +212,14 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         // stop at dimensions: this allows loading 1D or 2D coordinate vertices
         for (unsigned int dim = 0; dim < dimensions; ++dim) {
             SkipSpaces(&sz, lineEnd);
-            sz = fast_atoreal_move<ai_real>(sz, *vec[dim]);
+            sz = fast_atoreal_move(sz, *vec[dim]);
         }
 
         // if has homogeneous coordinate, divide others by this one
         if (hasHomogenous) {
             SkipSpaces(&sz, lineEnd);
             ai_real w = 1.;
-            sz = fast_atoreal_move<ai_real>(sz, w);
+            sz = fast_atoreal_move(sz, w);
             for (unsigned int dim = 0; dim < dimensions; ++dim) {
                 *(vec[dim]) /= w;
             }
@@ -229,11 +229,11 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         if (hasNormals) {
             aiVector3D &n = mesh->mNormals[i];
             SkipSpaces(&sz, lineEnd);
-            sz = fast_atoreal_move<ai_real>(sz, (ai_real &)n.x);
+            sz = fast_atoreal_move(sz, n.x);
             SkipSpaces(&sz, lineEnd);
-            sz = fast_atoreal_move<ai_real>(sz, (ai_real &)n.y);
+            sz = fast_atoreal_move(sz, n.y);
             SkipSpaces(&sz, lineEnd);
-            fast_atoreal_move<ai_real>(sz, (ai_real &)n.z);
+            fast_atoreal_move(sz, n.z);
         }
 
         // reading colors is a pain because the specification says it can be
@@ -243,22 +243,22 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         if (hasColors) {
             aiColor4D &c = mesh->mColors[0][i];
             SkipSpaces(&sz, lineEnd);
-            sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.r);
+            sz = fast_atoreal_move(sz, c.r);
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
                 SkipSpaces(&sz, lineEnd);
-                sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.g);
+                sz = fast_atoreal_move(sz, c.g);
             } else {
                 c.g = 0.;
             }
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
                 SkipSpaces(&sz, lineEnd);
-                sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.b);
+                sz = fast_atoreal_move(sz, c.b);
             } else {
                 c.b = 0.;
             }
             if (*sz != '#' && *sz != '\n' && *sz != '\r') {
                 SkipSpaces(&sz, lineEnd);
-                sz = fast_atoreal_move<ai_real>(sz, (ai_real &)c.a);
+                sz = fast_atoreal_move(sz, c.a);
             } else {
                 c.a = 1.;
             }
@@ -266,9 +266,9 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         if (hasTexCoord) {
             aiVector3D &t = mesh->mTextureCoords[0][i];
             SkipSpaces(&sz, lineEnd);
-            sz = fast_atoreal_move<ai_real>(sz, (ai_real &)t.x);
+            sz = fast_atoreal_move(sz, t.x);
             SkipSpaces(&sz, lineEnd);
-            fast_atoreal_move<ai_real>(sz, (ai_real &)t.y);
+            fast_atoreal_move(sz, t.y);
         }
     }
 

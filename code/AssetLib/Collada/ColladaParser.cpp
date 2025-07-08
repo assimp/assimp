@@ -1262,16 +1262,16 @@ void ColladaParser::ReadEffectColor(XmlNode &node, aiColor4D &pColor, Sampler &p
             const char *content = v.c_str();
             const char *end = v.c_str() + v.size() + 1;
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.r);
+            content = fast_atoreal_move(content, pColor.r);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.g);
+            content = fast_atoreal_move(content, pColor.g);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.b);
+            content = fast_atoreal_move(content, pColor.b);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pColor.a);
+            content = fast_atoreal_move(content, pColor.a);
             SkipSpacesAndLineEnd(&content, end);
         } else if (currentName == "texture") {
             // get name of source texture/sampler

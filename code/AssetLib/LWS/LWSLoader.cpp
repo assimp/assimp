@@ -816,11 +816,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightColor\'");
             } else {
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.r);
+                c = fast_atoreal_move(c, nodes.back().lightColor.r);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.g);
+                c = fast_atoreal_move(c, nodes.back().lightColor.g);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.b);
+                c = fast_atoreal_move(c, nodes.back().lightColor.b);
             }
         }
 

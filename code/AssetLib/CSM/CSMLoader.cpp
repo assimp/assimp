@@ -226,17 +226,17 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                         } else {
                             aiVectorKey* sub = s->mPositionKeys + s->mNumPositionKeys;
                             sub->mTime = (double)frame;
-                            buffer = fast_atoreal_move(buffer, (float&)sub->mValue.x);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.x);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample y coord");
                             }
-                            buffer = fast_atoreal_move(buffer, (float&)sub->mValue.y);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.y);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample z coord");
                             }
-                            buffer = fast_atoreal_move(buffer, (float&)sub->mValue.z);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.z);
 
                             ++s->mNumPositionKeys;
                         }

@@ -775,7 +775,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     ASSIMP_LOG_ERROR("LWS: envelopes for  LightIntensity not supported, set to 1.0");
                     nodes.back().lightIntensity = (ai_real)1.0;
                 } else {
-                    fast_atoreal_move<float>(c, nodes.back().lightIntensity);
+                    fast_atoreal_move(c, nodes.back().lightIntensity);
                 }
             }
         }

@@ -346,13 +346,13 @@ static void ReadLight(XmlNode &node, Light &pLight) {
             const char *content = v.c_str();
             const char *end = content + v.size();
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.r);
+            content = fast_atoreal_move(content, pLight.mColor.r);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.g);
+            content = fast_atoreal_move(content, pLight.mColor.g);
             SkipSpacesAndLineEnd(&content, end);
 
-            content = fast_atoreal_move<ai_real>(content, (ai_real &)pLight.mColor.b);
+            content = fast_atoreal_move(content, pLight.mColor.b);
             SkipSpacesAndLineEnd(&content, end);
         } else if (currentName == "constant_attenuation") {
             XmlParser::getValueAsReal(currentNode, pLight.mAttConstant);

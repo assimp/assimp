@@ -129,7 +129,7 @@ static void ReadNodeTransformation(XmlNode &node, Node *pNode, TransformType pTy
         // skip whitespace before the number
         SkipSpacesAndLineEnd(&content, end);
         // read a number
-        content = fast_atoreal_move<ai_real>(content, tf.f[a]);
+        content = fast_atoreal_move(content, tf.f[a]);
     }
 
     // place the transformation at the queue of the node
@@ -631,7 +631,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
             std::string tUnitSizeString;
             if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
                 try {
-                    fast_atoreal_move<ai_real>(tUnitSizeString.data(), mUnitSize);
+                    fast_atoreal_move(tUnitSizeString.data(), mUnitSize);
                 } catch (const DeadlyImportError& die) {
                     std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
                     warning.append(die.what());
@@ -889,7 +889,7 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
             for (auto & a : controller.mBindShapeMatrix) {
                 SkipSpacesAndLineEnd(&content, end);
                 // read a number
-                content = fast_atoreal_move<ai_real>(content, a);
+                content = fast_atoreal_move(content, a);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd(&content, end);
             }
@@ -1494,7 +1494,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
 
                 // read a number
                 ai_real value;
-                content = fast_atoreal_move<ai_real>(content, value);
+                content = fast_atoreal_move(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd(&content, end);

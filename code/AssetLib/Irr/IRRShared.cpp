@@ -139,21 +139,21 @@ void IrrlichtBase::ReadVectorProperty(VectorProperty &out, pugi::xml_node& vecto
             const char *end = ptr + len;
 
             SkipSpaces(&ptr, end);
-            ptr = fast_atoreal_move<float>(ptr, (float &)out.value.x);
+            ptr = fast_atoreal_move(ptr, out.value.x);
             SkipSpaces(&ptr, end);
             if (',' != *ptr) {
                 ASSIMP_LOG_ERROR("IRR(MESH): Expected comma in vector definition");
             } else {
                 SkipSpaces(ptr + 1, &ptr, end);
             }
-            ptr = fast_atoreal_move<float>(ptr, (float &)out.value.y);
+            ptr = fast_atoreal_move(ptr, out.value.y);
             SkipSpaces(&ptr, end);
             if (',' != *ptr) {
                 ASSIMP_LOG_ERROR("IRR(MESH): Expected comma in vector definition");
             } else {
                 SkipSpaces(ptr + 1, &ptr, end);
             }
-            ptr = fast_atoreal_move<float>(ptr, (float &)out.value.z);
+            ptr = fast_atoreal_move(ptr, out.value.z);
         }
     }
 }

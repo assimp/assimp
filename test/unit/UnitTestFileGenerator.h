@@ -65,8 +65,8 @@ inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
     char *pathtemplate = new char[len + 1];
     strncpy_s(pathtemplate, len, tmplate, len);
     pathtemplate[len] = '\0';
-    int err = _mktemp_s(pathtemplate, len+1);
-    EXPECT_EQ(err, 0);
+    int err_code = _mktemp_s(pathtemplate, len+1);
+    EXPECT_EQ(err_code, 0);
     EXPECT_NE(pathtemplate, nullptr);
     if(pathtemplate == nullptr) {
         delete[] pathtemplate;
@@ -74,7 +74,7 @@ inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
     }
     errno_t err;
     FILE *fs{nullptr};
-    err = std::fopen(&fs, pathtemplate, "w+");
+    err = fopen_s(&fs, pathtemplate, "w+");
     EXPECT_EQ(0, err);
     tmpName = pathtemplate;
     EXPECT_NE(fs, nullptr);
@@ -92,7 +92,7 @@ inline FILE *MakeTmpFile(char *tmplate, size_t len, std::string &tmpName) {
     auto fs = fdopen(fd, "w+");
     EXPECT_NE(nullptr, fs);
     tmpName += tmplate;
-    
+
     return fs;
 }
 #endif

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <assimp/IOStreamBuffer.h>
 #include "TestIOStream.h"
+#include "Tools/TestTools.h"
 #include "UnitTestFileGenerator.h"
 
 class IOStreamBufferTest : public ::testing::Test {
@@ -93,14 +94,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);
 	fclose( fs );
-
-#if defined(_WIN32)
-    errno_t err{ 0 };
-    err = fopen_s(&fs, tmpName.c_str(), "r");
-    EXPECT_EQ(err, 0);
-#else
-    fs = fopen(tmpName.c_str(), "r");
-#endif
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
     ASSERT_NE(nullptr, fs);
     {
         TestDefaultIOStream myStream( fs, fname );
@@ -129,14 +123,7 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
 
-#if defined(_WIN32)
-    errno_t err{ 0 };
-    err = fopen_s(&fs, tmpName.c_str(), "r");
-    EXPECT_EQ(err, 0);
-#else
-    fs = fopen(tmpName.c_str(), "r");
-#endif
-
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
 	ASSERT_NE(nullptr, fs);
 
     const auto tCacheSize = 26u;

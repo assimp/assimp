@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <gtest/gtest.h>
 #include "TestIOStream.h"
 #include "UnitTestFileGenerator.h"
+#include "Tools/TestTools.h"
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -72,9 +73,9 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
         ASSERT_EQ(vflush, 0);
 
 		std::fclose(fs);
-        fs = std::fopen(tmpName.c_str(), "r");
 
-		ASSERT_NE(nullptr, fs);
+        EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
+        ASSERT_NE(nullptr, fs);
 
         TestDefaultIOStream myStream( fs, fpath);
         size_t size = myStream.FileSize();

@@ -97,10 +97,10 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
 #if defined(_MSC_VER)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
+    EXPECT_EQ(err, 0);
 #else
     fs = fopen(tmpName.c_str(), "r");
 #endif
-    EXPECT_EQ(err, 0);
     ASSERT_NE(nullptr, fs);
     {
         TestDefaultIOStream myStream( fs, fname );
@@ -132,11 +132,11 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 #if defined(_MSC_VER)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
+    EXPECT_EQ(err, 0);
 #else
     fs = fopen(tmpName.c_str(), "r");
 #endif
 
-    EXPECT_EQ(err, 0);
 	ASSERT_NE(nullptr, fs);
 
     const auto tCacheSize = 26u;

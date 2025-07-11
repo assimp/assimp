@@ -93,11 +93,13 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     EXPECT_NE( 0U, written );
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);
-	fclose( fs );
-    EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
-    ASSERT_NE(nullptr, fs);
+	fclose(fs);
+
+    FILE *new_fs{ nullptr };
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(new_fs, tmpName.c_str(), "r"));
+    ASSERT_NE(nullptr, new_fs);
     {
-        TestDefaultIOStream myStream( fs, fname );
+        TestDefaultIOStream myStream(new_fs, fname);
 
         EXPECT_TRUE( myBuffer.open( &myStream ) );
         EXPECT_FALSE( myBuffer.open( &myStream ) );
@@ -123,23 +125,24 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
 
-    EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
-	ASSERT_NE(nullptr, fs);
+    FILE *new_fs{ nullptr };
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(new_fs, tmpName.c_str(), "r"));
+    ASSERT_NE(nullptr, new_fs);
 
     const auto tCacheSize = 26u;
 
-    IOStreamBuffer<char> myBuffer( tCacheSize );
-    EXPECT_EQ(tCacheSize, myBuffer.cacheSize() );
+    IOStreamBuffer<char> myBuffer(tCacheSize);
+    EXPECT_EQ(tCacheSize, myBuffer.cacheSize());
 
-    TestDefaultIOStream myStream( fs, fname );
+    TestDefaultIOStream myStream(new_fs, fname);
     auto size = myStream.FileSize();
     auto numBlocks = size / myBuffer.cacheSize();
     if ( size % myBuffer.cacheSize() > 0 ) {
         numBlocks++;
     }
-    EXPECT_TRUE( myBuffer.open( &myStream ) );
-    EXPECT_EQ( numBlocks, myBuffer.getNumBlocks() );
-    EXPECT_TRUE( myBuffer.close() );
+    EXPECT_TRUE(myBuffer.open(&myStream));
+    EXPECT_EQ(numBlocks, myBuffer.getNumBlocks() );
+    EXPECT_TRUE(myBuffer.close() );
 }
 
 TEST_F( IOStreamBufferTest, accessBlockIndexTest ) {

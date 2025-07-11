@@ -94,8 +94,12 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
 	ASSERT_EQ(0, flushResult);
 	fclose( fs );
 
+#if defined(_MSC_VER)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
+#else
+    fs = fopen(tmpName.c_str(), "r");
+#endif
     EXPECT_EQ(err, 0);
     ASSERT_NE(nullptr, fs);
     {
@@ -124,8 +128,14 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	auto flushResult = std::fflush(fs);
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
+
+#if defined(_MSC_VER)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
+#else
+    fs = fopen(tmpName.c_str(), "r");
+#endif
+
     EXPECT_EQ(err, 0);
 	ASSERT_NE(nullptr, fs);
 

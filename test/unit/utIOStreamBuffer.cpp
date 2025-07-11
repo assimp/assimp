@@ -94,7 +94,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
 	ASSERT_EQ(0, flushResult);
 	fclose( fs );
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
     EXPECT_EQ(err, 0);
@@ -129,7 +129,7 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     errno_t err{ 0 };
     err = fopen_s(&fs, tmpName.c_str(), "r");
     EXPECT_EQ(err, 0);

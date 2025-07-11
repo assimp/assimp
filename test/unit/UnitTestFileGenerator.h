@@ -62,10 +62,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <io.h>
 inline FILE* MakeTmpFile(char* tmplate, size_t len, std::string &tmpName) {
-    char *pathtemplate = new char[len + 1];
-    strncpy_s(pathtemplate, len, tmplate, len);
-    pathtemplate[len] = '\0';
-    int err_code = _mktemp_s(pathtemplate, len+1);
+    size_t tmpLen = len + 1;
+    char *pathtemplate = new char[tmpLen];
+    strcpy_s(pathtemplate, tmpLen, tmplate);
+    int err_code = _mktemp_s(pathtemplate, tmpLen);
     EXPECT_EQ(err_code, 0);
     EXPECT_NE(pathtemplate, nullptr);
     if(pathtemplate == nullptr) {

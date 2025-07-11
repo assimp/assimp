@@ -92,9 +92,12 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     EXPECT_NE( 0U, written );
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);
-	std::fclose( fs );
-    fs = std::fopen(tmpName.c_str(), "r");
-	ASSERT_NE(nullptr, fs);
+	fclose( fs );
+
+    errno_t err{ 0 };
+    err = fopen_s(&fs, tmpName.c_str(), "r");
+    EXPECT_EQ(err, 0);
+    ASSERT_NE(nullptr, fs);
     {
         TestDefaultIOStream myStream( fs, fname );
 
@@ -121,7 +124,9 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	auto flushResult = std::fflush(fs);
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
-    fs = std::fopen(tmpName.c_str(), "r");
+    errno_t err{ 0 };
+    err = fopen_s(&fs, tmpName.c_str(), "r");
+    EXPECT_EQ(err, 0);
 	ASSERT_NE(nullptr, fs);
 
     const auto tCacheSize = 26u;

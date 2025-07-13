@@ -180,6 +180,8 @@ struct Material {
     ai_real ior;
     //! Transparency color
     aiColor3D transparent;
+    //! Ambient occlusion
+    Maybe<ai_real> ambient_occlusion;
 
     //! PBR Roughness
     Maybe<ai_real> roughness;
@@ -193,6 +195,8 @@ struct Material {
     Maybe<ai_real> clearcoat_roughness;
     //! PBR Anisotropy
     ai_real anisotropy;
+    // Anisotropy Rotation
+    Maybe<ai_real> anisotropy_rotation;
 
     //! bump map multipler (normal map scalar)(-bm)
     ai_real bump_multiplier;
@@ -205,12 +209,14 @@ struct Material {
             illumination_model(1),
             ior(ai_real(1.0)),
             transparent(1.0f, 1.0, 1.0),
+            ambient_occlusion(),
             roughness(),
             metallic(),
             sheen(),
             clearcoat_thickness(),
             clearcoat_roughness(),
             anisotropy(ai_real(0.0)),
+            anisotropy_rotation(),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }

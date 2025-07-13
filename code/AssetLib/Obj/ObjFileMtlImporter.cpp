@@ -245,11 +245,63 @@ void ObjFileMtlImporter::load() {
                 }
                 break;
 
-            case 'm': // Texture
+            /*case 'm': // Texture
             case 'b': // quick'n'dirty - for 'bump' sections
             case 'r': // quick'n'dirty - for 'refl' sections
             {
                 getTexture();
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;*/
+            
+            case 'm': // Texture or metallic
+            {
+                // Save start of token (after 'm')
+                auto tokenStart = m_DataIt;  // points to 'm'
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd); // move iterator to end of token
+
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd; // advance iterator
+
+                if (keyword.compare(0, 3, "map") == 0) {
+                    // starts with "map", treat as texture map
+                    m_DataIt = tokenStart;
+                    getTexture();
+                } else if (keyword == "metallic" || keyword == "metal") {
+                    // parse metallic float value instead of texture
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->metallic);
+                } else {
+                    // fallback to texture parse for anything else starting with 'm'
+                    m_DataIt = tokenStart;
+                    getTexture();
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+            case 'b': // quick'n'dirty - for 'bump' sections
+            {
+                getTexture();
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+            case 'r': // refl (map) or roughness (float)
+            {
+                auto tokenStart = m_DataIt;  // points to 'r'
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "roughness" || keyword == "rough") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->roughness);
+                } else if (keyword == "refl" || keyword == "reflection") {
+                    m_DataIt = tokenStart;
+                    getTexture();
+                } else {
+                    // fallback to texture for any unknown "r*" keyword
+                    m_DataIt = tokenStart;
+                    getTexture();
+                }
+
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -261,11 +313,63 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
-            case 'a': // Anisotropy
-            {
-                ++m_DataIt;
-                if (m_pModel->mCurrentMaterial != nullptr)
-                    getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+            case 'a': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "aniso" || keyword == "anisotropy") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+                } else if (keyword == "ao") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->ambient_occlusion);
+                } else if (keyword == "anisotropicRotation") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 's': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "subsurface") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else if (keyword == "specularTint") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else if (keyword == "sheen") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else if (keyword == "sheenTint") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 'c': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "clearCoat") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else if (keyword == "clearCoatGloss") {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 

@@ -319,7 +319,7 @@ void ObjFileMtlImporter::load() {
                 } else if (keyword == "ao") {
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->ambient_occlusion);
-                } else if (keyword == "anisotropicRotation") {
+                } else if (keyword == "anisor" || keyword == "anisotropicRotation") {
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
                 } else {

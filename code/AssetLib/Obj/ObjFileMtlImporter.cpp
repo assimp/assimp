@@ -244,14 +244,6 @@ void ObjFileMtlImporter::load() {
                     m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
                 }
                 break;
-
-            /*case 'm': // Texture
-            case 'b': // quick'n'dirty - for 'bump' sections
-            case 'r': // quick'n'dirty - for 'refl' sections
-            {
-                getTexture();
-                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
-            } break;*/
             
             case 'm': // Texture or metallic
             {
@@ -278,11 +270,13 @@ void ObjFileMtlImporter::load() {
 
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
+
             case 'b': // quick'n'dirty - for 'bump' sections
             {
                 getTexture();
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
+
             case 'r': // refl (map) or roughness (float)
             {
                 auto tokenStart = m_DataIt;  // points to 'r'

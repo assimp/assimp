@@ -235,9 +235,13 @@ void ObjFileMtlImporter::load() {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_roughness);
-                        } else {
+                        } else if (*m_DataIt == 't') {
+                            ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_thickness);
+                        } else {
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->clearcoat);
                         }
                         break;
                     }
@@ -258,7 +262,7 @@ void ObjFileMtlImporter::load() {
                     // starts with "map", treat as texture map
                     m_DataIt = tokenStart;
                     getTexture();
-                } else if (keyword == "metallic" || keyword == "metal") {
+                } else if (keyword == "metallic" || keyword == "metal" || keyword == "metalness") {
                     // parse metallic float value instead of texture
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->metallic);
@@ -319,7 +323,7 @@ void ObjFileMtlImporter::load() {
                 } else if (keyword == "ao") {
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->ambient_occlusion);
-                } else if (keyword == "anisor" || keyword == "anisotropicRotation") {
+                } else if (keyword == "anisor" || ai_stdStrToLower(keyword) == "anisotropicrotation") {
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
                 } else {
@@ -335,14 +339,18 @@ void ObjFileMtlImporter::load() {
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = tokenEnd;
 
-                if (keyword == "subsurface") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
-                } else if (keyword == "specularTint") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                if (keyword == "subsurface" || keyword == "scattering") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->subsurface_scattering);
+                } else if (ai_stdStrToLower(keyword) == "speculartint") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->specular_tint);
                 } else if (keyword == "sheen") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
-                } else if (keyword == "sheenTint") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->sheen_grazing);
+                } else if (ai_stdStrToLower(keyword) == "sheentint") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->sheen_tint);
                 } else {
                     ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
                 }
@@ -356,10 +364,12 @@ void ObjFileMtlImporter::load() {
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = tokenEnd;
 
-                if (keyword == "clearCoat") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
-                } else if (keyword == "clearCoatGloss") {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                if (ai_stdStrToLower(keyword) == "clearcoat") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->clearcoat);
+                } else if (ai_stdStrToLower(keyword) == "clearcoatgloss") {
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->clearcoat_gloss);
                 } else {
                     ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
                 }

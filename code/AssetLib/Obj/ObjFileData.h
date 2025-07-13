@@ -189,14 +189,27 @@ struct Material {
     Maybe<ai_real> metallic;
     //! PBR Metallic
     Maybe<aiColor3D> sheen;
+    //! PBR Sheen: an additional grazing component, primarily intended for cloth.
+    Maybe<ai_real> sheen_grazing;
+    //! PBR Sheen Tint: amount to tint sheen towards base color.
+    Maybe<ai_real> sheen_tint;
+    //! PBR Clearcoat
+    Maybe<ai_real> clearcoat;
     //! PBR Clearcoat Thickness
     Maybe<ai_real> clearcoat_thickness;
     //! PBR Clearcoat Rougness
     Maybe<ai_real> clearcoat_roughness;
+    //! PBR clearcoatGloss: controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance).
+    Maybe<ai_real> clearcoat_gloss;
     //! PBR Anisotropy
     ai_real anisotropy;
-    // Anisotropy Rotation
+    //! PBR Anisotropy Rotation
     Maybe<ai_real> anisotropy_rotation;
+    //! PBR Subsurface Scattering
+    Maybe<ai_real> subsurface_scattering;
+    //! PBR Specular Tint: a concession for artistic control that tints incident specular towards the base color.
+    Maybe<ai_real> specular_tint;
+    // See: https://disneyanimation.com/publications/physically-based-shading-at-disney/
 
     //! bump map multipler (normal map scalar)(-bm)
     ai_real bump_multiplier;
@@ -213,10 +226,16 @@ struct Material {
             roughness(),
             metallic(),
             sheen(),
+            sheen_grazing(),
+            sheen_tint(),
+            clearcoat(),
             clearcoat_thickness(),
             clearcoat_roughness(),
+            clearcoat_gloss(),
             anisotropy(ai_real(0.0)),
             anisotropy_rotation(),
+            subsurface_scattering(),
+            specular_tint(),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }

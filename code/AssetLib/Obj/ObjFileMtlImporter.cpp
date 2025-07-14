@@ -264,12 +264,7 @@ void ObjFileMtlImporter::load() {
                     getTexture();
                 } else if (keyword == "metallic" || keyword == "metal" || keyword == "metalness") {
                     // parse metallic float value instead of texture
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->metallic);
-                } else {
-                    // fallback to texture parse for anything else starting with 'm'
-                    m_DataIt = tokenStart;
-                    getTexture();
+                    getFloatIfMaterialValid(&ObjFile::Material::metallic);
                 }
 
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -289,13 +284,8 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = tokenEnd;
 
                 if (keyword == "roughness" || keyword == "rough") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->roughness);
+                    getFloatIfMaterialValid(&ObjFile::Material::roughness);
                 } else if (keyword == "refl" || keyword == "reflection") {
-                    m_DataIt = tokenStart;
-                    getTexture();
-                } else {
-                    // fallback to texture for any unknown "r*" keyword
                     m_DataIt = tokenStart;
                     getTexture();
                 }
@@ -318,14 +308,11 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = tokenEnd;
 
                 if (keyword == "aniso" || keyword == "anisotropy") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+                    getFloatIfMaterialValid(&ObjFile::Material::anisotropy);
                 } else if (keyword == "ao") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->ambient_occlusion);
+                    getFloatIfMaterialValid(&ObjFile::Material::ambient_occlusion);
                 } else if (keyword == "anisor" || ai_stdStrToLower(keyword) == "anisotropicrotation") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
+                    getFloatIfMaterialValid(&ObjFile::Material::anisotropy_rotation);
                 } else {
                     ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
                 }
@@ -340,17 +327,15 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = tokenEnd;
 
                 if (keyword == "subsurface" || keyword == "scattering") {
+                    getFloatIfMaterialValid(&ObjFile::Material::subsurface_scattering);
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->subsurface_scattering);
                 } else if (ai_stdStrToLower(keyword) == "speculartint") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->specular_tint);
+                    getFloatIfMaterialValid(&ObjFile::Material::specular_tint);
                 } else if (keyword == "sheen") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->sheen_grazing);
+                    getFloatIfMaterialValid(&ObjFile::Material::sheen_grazing);
                 } else if (ai_stdStrToLower(keyword) == "sheentint") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->sheen_tint);
+                    getFloatIfMaterialValid(&ObjFile::Material::sheen_tint);
                 } else {
                     ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
                 }
@@ -365,11 +350,9 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = tokenEnd;
 
                 if (ai_stdStrToLower(keyword) == "clearcoat") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->clearcoat);
+                    getFloatIfMaterialValid(&ObjFile::Material::clearcoat);
                 } else if (ai_stdStrToLower(keyword) == "clearcoatgloss") {
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->clearcoat_gloss);
+                    getFloatIfMaterialValid(&ObjFile::Material::clearcoat_gloss);
                 } else {
                     ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
                 }
@@ -438,6 +421,23 @@ void ObjFileMtlImporter::getFloatValue(Maybe<ai_real> &value) {
         value = Maybe<ai_real>(fast_atof(&m_buffer[0]));
     else
         value = Maybe<ai_real>();
+}
+
+// -------------------------------------------------------------------
+//  Writes a loaded single float value if material not null
+void ObjFileMtlImporter::getFloatIfMaterialValid(ai_real ObjFile::Material::*member) {
+    if (m_pModel != nullptr && m_pModel->mCurrentMaterial != nullptr) {
+        // This will call getFloatValue(ai_real&)
+        getFloatValue(m_pModel->mCurrentMaterial->*member);
+    }
+}
+
+// -------------------------------------------------------------------
+void ObjFileMtlImporter::getFloatIfMaterialValid(Maybe<ai_real> ObjFile::Material::*member) {
+    // It can directly access `m_pModel` because it's part of the class
+    if (m_pModel != nullptr && m_pModel->mCurrentMaterial != nullptr) {
+        getFloatValue(m_pModel->mCurrentMaterial->*member);
+    }
 }
 
 // -------------------------------------------------------------------

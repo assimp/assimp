@@ -165,21 +165,21 @@ struct Material {
     //! Ambient color
     aiColor3D ambient;
     //! Diffuse color
-    aiColor3D diffuse;
+    aiColor3D diffuse = aiColor3D(0.6f, 0.6f, 0.6f);
     //! Specular color
     aiColor3D specular;
     //! Emissive color
     aiColor3D emissive;
     //! Alpha value
-    ai_real alpha;
+    ai_real alpha = ai_real(1.0);
     //! Shineness factor
-    ai_real shineness;
+    ai_real shineness = ai_real(0.0);
     //! Illumination model
-    int illumination_model;
+    int illumination_model = 1;
     //! Index of refraction
-    ai_real ior;
+    ai_real ior = ai_real(1.0);
     //! Transparency color
-    aiColor3D transparent;
+    aiColor3D transparent = aiColor3D(1.0f, 1.0f, 1.0f);
     //! Ambient occlusion
     Maybe<ai_real> ambient_occlusion;
 
@@ -202,7 +202,7 @@ struct Material {
     //! PBR clearcoatGloss: controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance).
     Maybe<ai_real> clearcoat_gloss;
     //! PBR Anisotropy
-    ai_real anisotropy;
+    ai_real anisotropy = ai_real(0.0);
     //! PBR Anisotropy Rotation
     Maybe<ai_real> anisotropy_rotation;
     //! PBR Subsurface Scattering
@@ -211,32 +211,11 @@ struct Material {
     Maybe<ai_real> specular_tint;
     // See: https://disneyanimation.com/publications/physically-based-shading-at-disney/
 
-    //! bump map multipler (normal map scalar)(-bm)
-    ai_real bump_multiplier;
+    //! bump map multiplier (normal map scalar)(-bm)
+    ai_real bump_multiplier = ai_real(1.0);
 
     //! Constructor
-    Material() :
-            diffuse(0.6f, 0.6f, 0.6f),
-            alpha(ai_real(1.0)),
-            shineness(ai_real(0.0)),
-            illumination_model(1),
-            ior(ai_real(1.0)),
-            transparent(1.0f, 1.0, 1.0),
-            ambient_occlusion(),
-            roughness(),
-            metallic(),
-            sheen(),
-            sheen_grazing(),
-            sheen_tint(),
-            clearcoat(),
-            clearcoat_thickness(),
-            clearcoat_roughness(),
-            clearcoat_gloss(),
-            anisotropy(ai_real(0.0)),
-            anisotropy_rotation(),
-            subsurface_scattering(),
-            specular_tint(),
-            bump_multiplier(ai_real(1.0)) {
+    Material() {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }
 

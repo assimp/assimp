@@ -121,14 +121,11 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         m_DataItEnd = buffer.end();
         mEnd = &buffer[buffer.size() - 1] + 1;
 
-        if (processed == 0 && std::distance(m_DataIt, m_DataItEnd) >= 1) {
-            // Check for UTF-8 BOM
-            if (static_cast<unsigned char>(*m_DataIt) == 0xEF &&
-                std::distance(m_DataIt, m_DataItEnd) >= 3 &&
-                static_cast<unsigned char>(*(m_DataIt + 1)) == 0xBB &&
-                static_cast<unsigned char>(*(m_DataIt + 2)) == 0xBF) {
-                m_DataIt += 3; // skip BOM
-            }
+        if (processed == 0 && std::distance(m_DataIt, m_DataItEnd) >= 3 &&
+            static_cast<unsigned char>(*m_DataIt) == 0xEF &&
+            static_cast<unsigned char>(*(m_DataIt + 1)) == 0xBB &&
+            static_cast<unsigned char>(*(m_DataIt + 2)) == 0xBF) {
+            m_DataIt += 3; // skip BOM
         }
 
         // Handle progress reporting

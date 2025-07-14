@@ -328,8 +328,6 @@ void ObjFileMtlImporter::load() {
 
                 if (keyword == "subsurface" || keyword == "scattering") {
                     getFloatIfMaterialValid(&ObjFile::Material::subsurface_scattering);
-                    if (m_pModel->mCurrentMaterial != nullptr)
-                        getFloatValue(m_pModel->mCurrentMaterial->subsurface_scattering);
                 } else if (ai_stdStrToLower(keyword) == "speculartint") {
                     getFloatIfMaterialValid(&ObjFile::Material::specular_tint);
                 } else if (keyword == "sheen") {

@@ -309,6 +309,17 @@ IF( UNIX )
   ENDIF()
 ENDIF()
 
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND WIN32)
+  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+ENDIF()
+
+IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
+  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+endif ()
+
+
 # Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU)
   IF(NOT ASSIMP_HUNTER_ENABLED)
@@ -354,14 +365,13 @@ ELSEIF(MSVC)
   if(NOT /utf-8 IN_LIST CMAKE_CXX_FLAGS)
     # Source code is encoded in UTF-8
     ADD_COMPILE_OPTIONS(/source-charset:utf-8)
-  endif ()
-
+  endif()
 ELSEIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
   ENDIF()
-  SET(CMAKE_CXX_FLAGS "-fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
-  SET(CMAKE_C_FLAGS "-fno-strict-aliasing ${CMAKE_C_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-Wno-deprecated-non-prototype -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long ${CMAKE_CXX_FLAGS}" )
+  SET(CMAKE_C_FLAGS "-Wno-deprecated-non-prototype -fno-strict-aliasing ${CMAKE_C_FLAGS}")
 ELSEIF( MINGW )
   IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     message(FATAL_ERROR "MinGW is too old to be supported. Please update MinGW and try again.")

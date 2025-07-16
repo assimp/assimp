@@ -118,7 +118,7 @@ extern "C" {
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated. */
 #ifdef __cplusplus
-static const size_t AI_MAXLEN = 1024;
+static constexpr size_t AI_MAXLEN = 1024;
 #else
 #define AI_MAXLEN 1024
 #endif

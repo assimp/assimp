@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
-
+#include "Tools/TestTools.h"
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/config.h>
@@ -472,7 +472,8 @@ TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTrianglesFan) {
 std::vector<char> ReadFile(const char *name) {
     std::vector<char> ret;
 
-    FILE *p = ::fopen(name, "r");
+    FILE *p{ nullptr };
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(&p, name, "r"));
     if (nullptr == p) {
         return ret;
     }

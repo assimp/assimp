@@ -74,7 +74,7 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
 
 		std::fclose(fs);
 
-        EXPECT_TRUE(Unittest::TestTools::openFilestream(fs, tmpName.c_str(), "r"));
+        EXPECT_TRUE(Unittest::TestTools::openFilestream(&fs, tmpName.c_str(), "r"));
         ASSERT_NE(nullptr, fs);
 
         TestDefaultIOStream myStream( fs, fpath);

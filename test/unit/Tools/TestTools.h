@@ -10,13 +10,13 @@ namespace Assimp::Unittest {
     public:
         TestTools() = default;
         ~TestTools() = default;
-        static bool openFilestream(FILE *pFile, const char *filename, const char *mode);
+        static bool openFilestream(FILE **pFile, const char *filename, const char *mode);
     };
 
-    inline bool TestTools::openFilestream(FILE *fs, const char *filename, const char *mode) {
+    inline bool TestTools::openFilestream(FILE **fs, const char *filename, const char *mode) {
 #if defined(_WIN32)
         errno_t err{ 0 };
-        err = fopen_s(&fs, filename, mode);
+        err = fopen_s(fs, filename, mode);
         EXPECT_EQ(err, 0);
 #else
         fs = fopen(filename, mode);

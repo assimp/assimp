@@ -96,7 +96,7 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
 	fclose(fs);
 
     FILE *new_fs{ nullptr };
-    EXPECT_TRUE(Unittest::TestTools::openFilestream(new_fs, tmpName.c_str(), "r"));
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(&new_fs, tmpName.c_str(), "r"));
     ASSERT_NE(nullptr, new_fs);
     {
         TestDefaultIOStream myStream(new_fs, fname);
@@ -126,7 +126,7 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	std::fclose(fs);
 
     FILE *new_fs{ nullptr };
-    EXPECT_TRUE(Unittest::TestTools::openFilestream(new_fs, tmpName.c_str(), "r"));
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(&new_fs, tmpName.c_str(), "r"));
     ASSERT_NE(nullptr, new_fs);
 
     const auto tCacheSize = 26u;

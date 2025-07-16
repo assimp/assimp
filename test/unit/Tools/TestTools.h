@@ -19,7 +19,7 @@ namespace Assimp::Unittest {
         err = fopen_s(fs, filename, mode);
         EXPECT_EQ(err, 0);
 #else
-        fs = fopen(filename, mode);
+        fs = fopen(*filename, mode);
 #endif
         return fs != nullptr;
     }

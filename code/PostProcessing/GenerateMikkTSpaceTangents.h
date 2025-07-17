@@ -11,9 +11,11 @@ public:
     ~GenerateMikkTSpaceTangents() override = default;
     bool IsActive(unsigned int pFlags) const override;
     void Execute(aiScene* pScene) override;
+    void SetupProperties(const Importer *pImp) override;
     void ExecutePerMesh(aiMesh *mesh);
 
 private:
+    bool mActive = false;
     SMikkTSpaceInterface mIface;
     SMikkTSpaceContext mContext;
 };

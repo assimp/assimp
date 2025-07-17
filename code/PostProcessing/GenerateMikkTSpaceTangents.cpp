@@ -50,7 +50,7 @@ static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int
     } else if (currentMesh->mNumUVComponents[iVert] == 3){
         outuv[0] = t.x;
         outuv[1] = t.y;
-        outuv[2] = t.z;
+        outuv[2] = 0.0;
     }
 }
 

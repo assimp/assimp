@@ -1171,4 +1171,3 @@ struct aiSkeleton {
 #endif //! extern "C"
 
 #endif // AI_MESH_H_INC
-

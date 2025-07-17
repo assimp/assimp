@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,13 +61,19 @@ CalcTangentsProcess::CalcTangentsProcess() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool CalcTangentsProcess::IsActive(unsigned int pFlags) const {
-    return (pFlags & aiProcess_CalcTangentSpace) != 0;
+    const bool active = ((pFlags & aiProcess_CalcTangentSpace) != 0);
+    if (mActive) {
+        return active;
+    }
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void CalcTangentsProcess::SetupProperties(const Importer *pImp) {
     ai_assert(nullptr != pImp);
+
+    mActive = pImp->GetPropertyBool(AI_CONFIG_POSTPROCESS_USE_MIKKTSPACE_TANGENTS, false);
 
     // get the current value of the property
     configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE, 45.f);

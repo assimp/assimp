@@ -1131,6 +1131,9 @@ enum aiComponent
 #endif // AI_CONFIG_APP_SCALE_KEY
 
 
+#define AI_CONFIG_POSTPROCESS_USE_MIKKTSPACE_TANGENTS \
+        "POSTPROCESS_USE_MIKKTSPACE_TANGENTS"
+
 // ---------- All the Build/Compile-time defines ------------
 
 /** @brief Specifies if double precision is supported inside assimp
@@ -1138,6 +1141,6 @@ enum aiComponent
  * Property type: Bool. Default value: undefined.
  */
 
-#cmakedefine ASSIMP_DOUBLE_PRECISION 1
+#define ASSIMP_DOUBLE_PRECISION 1
 
 #endif // !! AI_CONFIG_H_INC

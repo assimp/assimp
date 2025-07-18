@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -61,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
-namespace Assimp    {
+namespace Assimp {
 
     ///////////////////////////////////////////////////////////////////////////
     // std::plus-family operates on operands with identical types - we need to
@@ -112,6 +111,7 @@ struct Vertex {
     aiColor4D colors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
     Vertex() = default;
+    ~Vertex() = default;
 
     // ----------------------------------------------------------------------------
     /** Extract a particular vertex from a mesh and interleave all components */
@@ -183,6 +183,29 @@ struct Vertex {
         return *this;
     }
 
+    bool operator < (const Vertex & o) const {
+        if (position < o.position) return true;
+        if (position != o.position) return false;
+
+        if (normal < o.normal) return true;
+        if (normal != o.normal) return false;
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i ++) {
+          if (texcoords[i] < o.texcoords[i]) return true;
+          if (texcoords[i] != o.texcoords[i]) return false;
+        }
+
+        // note that tangent/bitangent are not checked since they are optional
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; i ++) {
+          if (colors[i] < o.colors[i]) return true;
+          if (colors[i] != o.colors[i]) return false;
+        }
+
+        // if reached this point, they are equal
+        return false;
+    }
+
     // ----------------------------------------------------------------------------
     /// Convert back to non-interleaved storage
     void SortBack(aiMesh* out, unsigned int idx) const {
@@ -231,7 +254,8 @@ private:
 
     // ----------------------------------------------------------------------------
     /// This time binary arithmetic of v0 with a floating-point number
-    template <template <typename, typename, typename> class op> static Vertex BinaryOp(const Vertex& v0, ai_real f) {
+    template <template <typename, typename, typename> class op>
+    static Vertex BinaryOp(const Vertex& v0, ai_real f) {
         // this is a heavy task for the compiler to optimize ... *pray*
 
         Vertex res;
@@ -244,14 +268,15 @@ private:
             res.texcoords[i] = op<aiVector3D,ai_real,aiVector3D>()(v0.texcoords[i],f);
         }
         for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
-            res.colors[i] = op<aiColor4D,ai_real,aiColor4D>()(v0.colors[i],f);
+            res.colors[i] = op<aiColor4D,float, aiColor4D>()(v0.colors[i],f);
         }
         return res;
     }
 
     // ----------------------------------------------------------------------------
     /** This time binary arithmetic of v0 with a floating-point number */
-    template <template <typename, typename, typename> class op> static Vertex BinaryOp(ai_real f, const Vertex& v0) {
+    template <template <typename, typename, typename> class op>
+    static Vertex BinaryOp(ai_real f, const Vertex& v0) {
         // this is a heavy task for the compiler to optimize ... *pray*
 
         Vertex res;
@@ -264,7 +289,7 @@ private:
             res.texcoords[i] = op<ai_real,aiVector3D,aiVector3D>()(f,v0.texcoords[i]);
         }
         for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
-            res.colors[i] = op<ai_real,aiColor4D,aiColor4D>()(f,v0.colors[i]);
+            res.colors[i] = op<float, aiColor4D,aiColor4D>()(f,v0.colors[i]);
         }
         return res;
     }

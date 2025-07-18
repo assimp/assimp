@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,11 +62,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMaterial;
 
-namespace Assimp    {
-namespace MDL   {
+namespace Assimp {
+namespace MDL {
 
 // -------------------------------------------------------------------------------------
-// to make it easier for us, we test the magic word against both "endianesses"
+// to make it easier for us, we test the magic word against both "endiannesses"
 
 // magic bytes used in Quake 1 MDL meshes
 #define AI_MDL_MAGIC_NUMBER_BE  AI_MAKE_MAGIC("IDPO")
@@ -603,7 +602,7 @@ struct Vertex_MDL7
     union {
         uint8_t norm162index;
         float norm[3];
-    };
+    } PACK_STRUCT;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -876,7 +875,7 @@ struct IntSharedData_MDL7 {
         : apcOutBones(),
         iNum()
     {
-        abNeedMaterials.reserve(10);
+        abNeedMaterials.reserve(12);
     }
 
     //! Destruction: properly delete all allocated resources

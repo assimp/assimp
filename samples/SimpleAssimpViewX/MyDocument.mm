@@ -257,7 +257,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
 {
     CVReturn rv = kCVReturnError;
     NSAutoreleasePool *pool;
-	
+
     pool = [[NSAutoreleasePool alloc] init];
     {
         [self render];
@@ -345,7 +345,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
             NSNumber* textureNumber = (NSNumber*)[textureDictionary valueForKey:textureKey];
             
             //NSLog(@"applyMaterialInContext: have texture %i", [textureNumber unsignedIntValue]); 
-            meshHelper.textureID = [textureNumber unsignedIntValue];		
+            meshHelper.textureID = [textureNumber unsignedIntValue];
         }
         else
             meshHelper.textureID = 0;
@@ -657,7 +657,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
     
     /* getTexture Filenames and Numb of Textures */
 	for (unsigned int m = 0; m < _scene->mNumMaterials; m++)
-	{		
+	{
 		int texIndex = 0;
 		aiReturn texFound = AI_SUCCESS;
         
@@ -674,7 +674,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
             [textureDictionary setValue:[NSNumber numberWithUnsignedInt:texIndex] forKey:texturePath];
             
 			texIndex++;
-		}		
+		}
 	}
     
     textureIds = (GLuint*) malloc(sizeof(GLuint) * [textureDictionary count]); //new GLuint[ [textureDictionary count] ];

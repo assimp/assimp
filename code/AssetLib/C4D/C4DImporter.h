@@ -63,7 +63,7 @@ namespace cineware {
     class BaseShader;
 }
 
-namespace Assimp  {
+namespace Assimp {
     // TinyFormatter.h
     namespace Formatter {
         template <typename T,typename TR, typename A> class basic_formatter;
@@ -78,6 +78,8 @@ namespace Assimp  {
 // -------------------------------------------------------------------------------------------
 class C4DImporter : public BaseImporter, public LogFunctions<C4DImporter> {
 public:
+    C4DImporter() = default;
+    ~C4DImporter() override = default;
     bool CanRead( const std::string& pFile, IOSystem*, bool checkSig) const override;
 
 protected:

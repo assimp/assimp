@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -426,12 +426,13 @@ namespace glTF2 {
 
             if (specular.specularFactor != 0.0f) {
                 WriteFloat(materialSpecular, specular.specularFactor, "specularFactor", w.mAl);
-                WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
             }
             if (specular.specularColorFactor[0] != defaultSpecularColorFactor[0] && specular.specularColorFactor[1] != defaultSpecularColorFactor[1] && specular.specularColorFactor[2] != defaultSpecularColorFactor[2]) {
                 WriteVec(materialSpecular, specular.specularColorFactor, "specularColorFactor", w.mAl);
-                WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
             }
+
+            WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
+            WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
 
             if (!materialSpecular.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_specular", materialSpecular, w.mAl);
@@ -506,7 +507,7 @@ namespace glTF2 {
 
             WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
 
-            if (volume.attenuationDistance != INFINITY) {
+            if (volume.attenuationDistance != std::numeric_limits<float>::infinity()) {
                 WriteFloat(materialVolume, volume.attenuationDistance, "attenuationDistance", w.mAl);
             }
 
@@ -542,6 +543,26 @@ namespace glTF2 {
 
             if (!materialEmissiveStrength.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_emissive_strength", materialEmissiveStrength, w.mAl);
+            }
+        }
+
+        if (m.materialAnisotropy.isPresent) {
+            Value materialAnisotropy(rapidjson::Type::kObjectType);
+
+            MaterialAnisotropy &anisotropy = m.materialAnisotropy.value;
+
+            if (anisotropy.anisotropyStrength != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyStrength, "anisotropyStrength", w.mAl);
+            }
+
+            if (anisotropy.anisotropyRotation != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyRotation, "anisotropyRotation", w.mAl);
+            }
+
+            WriteTex(materialAnisotropy, anisotropy.anisotropyTexture, "anisotropyTexture", w.mAl);
+
+            if (!materialAnisotropy.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_anisotropy", materialAnisotropy, w.mAl);
             }
         }
 
@@ -607,6 +628,7 @@ namespace glTF2 {
                 {
                     WriteAttrs(w, attrs, p.attributes.position, "POSITION");
                     WriteAttrs(w, attrs, p.attributes.normal, "NORMAL");
+                    WriteAttrs(w, attrs, p.attributes.tangent, "TANGENT");
                     WriteAttrs(w, attrs, p.attributes.texcoord, "TEXCOORD", true);
                     WriteAttrs(w, attrs, p.attributes.color, "COLOR", true);
                     WriteAttrs(w, attrs, p.attributes.joint, "JOINTS", true);
@@ -688,7 +710,7 @@ namespace glTF2 {
         for (auto const &value : extras.mValues) {
             WriteExtrasValue(extrasNode, value, w);
         }
-        
+
         obj.AddMember("extras", extrasNode, w.mAl);
     }
 
@@ -939,7 +961,7 @@ namespace glTF2 {
             if (outfile->Write(bodyBuffer->GetPointer(), 1, bodyBuffer->byteLength) != bodyBuffer->byteLength) {
                 throw DeadlyExportError("Failed to write body data!");
             }
-            if (curPaddingLength && outfile->Write(&padding, 1, paddingLength) != paddingLength) {
+            if (curPaddingLength && outfile->Write(&padding, 1, curPaddingLength) != curPaddingLength) {
                 throw DeadlyExportError("Failed to write body data padding!");
             }
         }
@@ -1014,6 +1036,10 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_emissive_strength) {
                 exts.PushBack(StringRef("KHR_materials_emissive_strength"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_anisotropy) {
+                exts.PushBack(StringRef("KHR_materials_anisotropy"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.FB_ngon_encoding) {

@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -79,7 +78,7 @@ public:
             unsigned int pElementOffset);
 
     /** Destructor */
-    ~SpatialSort();
+    ~SpatialSort() = default;
 
     // ------------------------------------------------------------------------------------
     /** Sets the input data for the SpatialSort. This replaces existing data, if any.

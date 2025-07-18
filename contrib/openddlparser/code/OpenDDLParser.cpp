@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2020 Kim Kulling
+Copyright (c) 2014-2025 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -74,12 +74,11 @@ const char *getTypeToken(Value::ValueType type) {
     return Grammar::PrimitiveTypeToken[(size_t)type];
 }
 
-static void logInvalidTokenError(const char *in, const std::string &exp, OpenDDLParser::logCallback callback) {
-    if (callback) {
-        std::string full(in);
-        std::string part(full.substr(0, 50));
+static void logInvalidTokenError(const std::string &in, const std::string &exp, OpenDDLParser::logCallback callback) {
+    if (callback) {\
+        std::string part(in.substr(0, 50));
         std::stringstream stream;
-        stream << "Invalid token \"" << *in << "\" "
+        stream << "Invalid token \"" << in << "\" "
                << "(expected \"" << exp << "\") "
                << "in: \"" << part << "\"";
         callback(ddl_error_msg, stream.str());
@@ -150,7 +149,7 @@ void OpenDDLParser::logToStream(FILE *f, LogSeverity severity, const std::string
 
 OpenDDLParser::logCallback OpenDDLParser::StdLogCallback (FILE *destination) {
     using namespace std::placeholders;
-    return std::bind(logToStream, destination ? destination : stderr, _1, _2);
+    return [capture0 = destination ? destination : stderr](auto && PH1, auto && PH2) { logToStream(capture0, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
 }
 
 void OpenDDLParser::setLogCallback(logCallback callback) {
@@ -290,8 +289,8 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
         if (nullptr != name && nullptr != node && nullptr != name->m_id->m_buffer) {
             const std::string nodeName(name->m_id->m_buffer);
             node->setName(nodeName);
-            delete name;
         }
+        delete name;
 
         Property *first(nullptr);
         in = lookForNextToken(in, end);
@@ -306,7 +305,7 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
                 }
 
                 if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
-                    logInvalidTokenError(in, Grammar::ClosePropertyToken, m_logCallback);
+                    logInvalidTokenError(std::string(in, end), Grammar::ClosePropertyToken, m_logCallback);
                     return nullptr;
                 }
 
@@ -355,8 +354,7 @@ char *OpenDDLParser::parseStructure(char *in, char *end) {
                 ++in;
             }
         } else {
-            ++in;
-            logInvalidTokenError(in, std::string(Grammar::OpenBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::OpenBracketToken), m_logCallback);
             error = true;
             return nullptr;
         }
@@ -427,7 +425,7 @@ char *OpenDDLParser::parseStructureBody(char *in, char *end, bool &error) {
 
         in = lookForNextToken(in, end);
         if (in == end || *in != '}') {
-            logInvalidTokenError(in == end ? "" : in, std::string(Grammar::CloseBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::CloseBracketToken), m_logCallback);
             return nullptr;
         } else {
             //in++;

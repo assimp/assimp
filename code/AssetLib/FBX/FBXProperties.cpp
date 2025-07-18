@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,15 +56,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-    Property::Property() = default;
 
-    // ------------------------------------------------------------------------------------------------
-    Property::~Property() = default;
-
-    namespace {
+namespace {
 
     void checkTokenCount(const TokenList &tok, unsigned int expectedCount) {
         ai_assert(expectedCount >= 2);
@@ -146,9 +141,9 @@ Property* ReadTypedProperty(const Element& element)
 
 // ------------------------------------------------------------------------------------------------
 // peek into an element and check if it contains a FBX property, if so return its name.
-std::string PeekPropertyName(const Element& element)
-{
+std::string PeekPropertyName(const Element& element) {
     ai_assert(element.KeyToken().StringContents() == "P");
+
     const TokenList& tok = element.Tokens();
     if(tok.size() < 4) {
         return std::string();
@@ -159,13 +154,6 @@ std::string PeekPropertyName(const Element& element)
 
 } //! anon
 
-
-// ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable()
-: templateProps()
-, element()
-{
-}
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::PropertyTable(const Element &element, std::shared_ptr<const PropertyTable> templateProps) :
@@ -243,7 +231,6 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
 
         // Read the element's value.
         // Wrap the naked pointer (since the call site is required to acquire ownership)
-        // std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
         std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*currentElement.second));
 
         // Element could not be read. Skip it.

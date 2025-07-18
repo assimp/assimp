@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 
 
@@ -78,7 +78,7 @@ void LWOImporter::LoadLWOBFile() {
                     else
                         LoadLWOBPolygons(head.length);
                 } break;
-                
+
             case AI_LWO_SRFS: // list of tags
                 {
                     if (!mTags->empty())
@@ -152,7 +152,7 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
+void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator &it,
     LE_NCONST uint16_t*& cursor,
     const uint16_t* const end,
     unsigned int max) {

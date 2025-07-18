@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -395,7 +394,10 @@ void Q3BSPFileImporter::createTriangleTopology(const Q3BSP::Q3BSPModel *pModel, 
                 m_pCurrentFace->mIndices = new unsigned int[3];
                 m_pCurrentFace->mIndices[idx] = vertIdx;
             }
-        }
+		} else {
+			m_pCurrentFace->mIndices[idx] = vertIdx;
+		}
+
 
         pMesh->mVertices[vertIdx].Set(pVertex->vPosition.x, pVertex->vPosition.y, pVertex->vPosition.z);
         pMesh->mNormals[vertIdx].Set(pVertex->vNormal.x, pVertex->vNormal.y, pVertex->vNormal.z);
@@ -585,7 +587,7 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
 
             aiString name;
             name.data[0] = '*';
-            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
             archive->Close(pTextureStream);
 
@@ -638,7 +640,7 @@ bool Q3BSPFileImporter::importLightmap(const Q3BSP::Q3BSPModel *pModel, aiScene 
 
     aiString name;
     name.data[0] = '*';
-    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
     pMatHelper->AddProperty(&name, AI_MATKEY_TEXTURE_LIGHTMAP(1));
     mTextures.push_back(pTexture);

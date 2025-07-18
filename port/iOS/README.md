@@ -1,7 +1,13 @@
 # assimp for iOS
 (deployment target 6.0+, 32/64bit)
 
-Builds assimp libraries for several iOS CPU architectures at once, and outputs a fat binary from the result.
+### Requirements 
+- cmake
+- pkg-config
+
+Note: all these packages can be installed with [brew](https://brew.sh)
+
+Builds assimp libraries for several iOS CPU architectures at once, and outputs a fat binary / XCFramework from the result.
 
 Run the **build.sh** script from the ```./port/iOS/``` directory. See **./build.sh --help** for information about command line options. 
 
@@ -15,11 +21,11 @@ shadeds-Mac:iOS arul$ ./build.sh --help
 Example:
 ```bash
 cd ./port/iOS/
-./build.sh --stdlib=libc++ --archs="armv7 arm64 i386"
+./build.sh --stdlib=libc++ --archs="arm64 x86_64" --no-fat --min-version="16.0"
 ```
 Supported architectures/devices:
 
-### Simulator
+### Simulator [CPU Architectures](https://docs.elementscompiler.com/Platforms/Cocoa/CpuArchitectures/)
 - i386
 - x86_64
  

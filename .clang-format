@@ -70,7 +70,7 @@ IncludeCategories:
   - Regex:           '^<.*'
     Priority:        3
 # IncludeIsMainRegex: '(Test)?$'
-IndentCaseLabels: false 
+IndentCaseLabels: false
 #IndentPPDirectives: AfterHash
 IndentWidth:     4
 # IndentWrappedFunctionNames: false

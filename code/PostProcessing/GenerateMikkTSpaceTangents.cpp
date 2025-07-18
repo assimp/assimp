@@ -25,7 +25,7 @@ static int get_num_vertices_of_face(const SMikkTSpaceContext *context, int iFace
     return face.mNumIndices;
 }
 
-static void get_position(const SMikkTSpaceContext *context, float outpos[], int iFace, int iVert) {
+static void get_position(const SMikkTSpaceContext *context, float outpos[], int /*iFace*/, int iVert) {
     aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiVector3D &v = currentMesh->mVertices[static_cast<size_t>(iVert)];
     outpos[0] = v.x;
@@ -33,7 +33,7 @@ static void get_position(const SMikkTSpaceContext *context, float outpos[], int 
     outpos[2] = v.z;
 }
 
-static void get_normal(const SMikkTSpaceContext *context, float outnormal[], int iFace, int iVert) {
+static void get_normal(const SMikkTSpaceContext *context, float outnormal[], int /*iFace*/, int iVert) {
     aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiVector3D &n = currentMesh->mNormals[static_cast<size_t>(iVert)];
     outnormal[0] = n.x;
@@ -41,7 +41,7 @@ static void get_normal(const SMikkTSpaceContext *context, float outnormal[], int
     outnormal[0] = n.z;
 }
 
-static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int iFace, int iVert) {
+static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int /*iFace*/, int iVert) {
     aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     aiVector3D &t = currentMesh->mTextureCoords[static_cast<size_t>(iVert)][0];
     if (currentMesh->mNumUVComponents[iVert] == 2) {
@@ -54,7 +54,7 @@ static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int
     }
 }
 
-static void set_tspace_basic(const SMikkTSpaceContext *context, const float tangentu[], float fSign, int iFace, int iVert) {
+static void set_tspace_basic(const SMikkTSpaceContext *context, const float tangentu[], float /*fSign*/, int /*iFace*/, int iVert) {
     aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     currentMesh->mTangents[iVert].x = tangentu[0];
     currentMesh->mTangents[iVert].y = tangentu[1];

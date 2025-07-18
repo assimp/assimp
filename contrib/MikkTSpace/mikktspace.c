@@ -556,8 +556,8 @@ static void GenerateSharedVerticesIndexList(int piTriList_in_and_out[], const SM
 		{
 			for (e=0; e<iEntries; e++)
 			{
-				int i = pTable[e];
-				const SVec3 vP = GetPosition(pContext, piTriList_in_and_out[i]);
+				const int index = pTable[e];
+				const SVec3 vP = GetPosition(pContext, piTriList_in_and_out[index]);
 				pTmpVert[e].vert[0] = vP.x; pTmpVert[e].vert[1] = vP.y;
 				pTmpVert[e].vert[2] = vP.z; pTmpVert[e].index = i;
 			}
@@ -814,10 +814,10 @@ static int GenerateInitialVerticesIndexList(STriInfo pTriInfos[], int piTriList_
 					const SVec3 P1 = GetPosition(pContext, i1);
 					const SVec3 P2 = GetPosition(pContext, i2);
 					const SVec3 P3 = GetPosition(pContext, i3);
-					const float distSQ_02 = LengthSquared(vsub(P2,P0));
-					const float distSQ_13 = LengthSquared(vsub(P3,P1));
+					const float distSQ_02_1 = LengthSquared(vsub(P2,P0));
+					const float distSQ_13_1 = LengthSquared(vsub(P3,P1));
 
-					bQuadDiagIs_02 = distSQ_13<distSQ_02 ? TFALSE : TTRUE;
+					bQuadDiagIs_02 = distSQ_13_1<distSQ_02_1 ? TFALSE : TTRUE;
 				}
 
 				if (bQuadDiagIs_02)
@@ -904,7 +904,8 @@ static SVec3 GetTexCoord(const SMikkTSpaceContext * pContext, const int index)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#pragma warning(push)
+#pragma warning(disable : 4201)
 typedef union {
 	struct
 	{
@@ -912,6 +913,8 @@ typedef union {
 	};
 	int array[3];
 } SEdge;
+
+#pragma warning(pop)
 
 static void BuildNeighborsFast(STriInfo pTriInfos[], SEdge * pEdges, const int piTriListIn[], const int iNrTrianglesIn);
 static void BuildNeighborsSlow(STriInfo pTriInfos[], const int piTriListIn[], const int iNrTrianglesIn);
@@ -1303,9 +1306,9 @@ static tbool GenerateTSpaces(STSpace psTspace[], const STriInfo pTriInfos[], con
 				if (pIndices==NULL)
 				{
 					// clean up and return false
-					int s=0;
-					for (s=0; s<iUniqueSubGroups; s++)
-						free(pUniSubGroups[s].pTriMembers);
+					int s1=0;
+					for (s1=0; s<iUniqueSubGroups; s1++)
+						free(pUniSubGroups[s1].pTriMembers);
 					free(pUniSubGroups);
 					free(pTmpMembers);
 					free(pSubGroupTspace);
@@ -1546,12 +1549,12 @@ static void BuildNeighborsFast(STriInfo pTriInfos[], SEdge * pEdges, const int p
 	{
 		const int i0=pEdges[i].i0;
 		const int i1=pEdges[i].i1;
-		const int f = pEdges[i].f;
+		const int ff = pEdges[i].f;
 		tbool bUnassigned_A;
 
 		int i0_A, i1_A;
 		int edgenum_A, edgenum_B=0;	// 0,1 or 2
-		GetEdge(&i0_A, &i1_A, &edgenum_A, &piTriListIn[f*3], i0, i1);	// resolve index ordering and edge_num
+		GetEdge(&i0_A, &i1_A, &edgenum_A, &piTriListIn[ff*3], i0, i1);	// resolve index ordering and edge_num
 		bUnassigned_A = pTriInfos[f].FaceNeighbors[edgenum_A] == -1 ? TTRUE : TFALSE;
 
 		if (bUnassigned_A)
@@ -1576,10 +1579,10 @@ static void BuildNeighborsFast(STriInfo pTriInfos[], SEdge * pEdges, const int p
 
 			if (!bNotFound)
 			{
-				int t = pEdges[j].f;
-				pTriInfos[f].FaceNeighbors[edgenum_A] = t;
+				int tt = pEdges[j].f;
+				pTriInfos[f].FaceNeighbors[edgenum_A] = tt;
 				//assert(pTriInfos[t].FaceNeighbors[edgenum_B]==-1);
-				pTriInfos[t].FaceNeighbors[edgenum_B] = f;
+				pTriInfos[tt].FaceNeighbors[edgenum_B] = ff;
 			}
 		}
 	}
@@ -1771,8 +1774,8 @@ static void DegenPrologue(STriInfo pTriInfos[], int piTriList_out[], const int i
 			tbool bJustADegenerate = TTRUE;
 			while (bJustADegenerate && iNextGoodTriangleSearchIndex<iTotTris)
 			{
-				const tbool bIsGood = (pTriInfos[iNextGoodTriangleSearchIndex].iFlag&MARK_DEGENERATE)==0 ? TTRUE : TFALSE;
-				if (bIsGood) bJustADegenerate=TFALSE;
+				const tbool bIsGood1 = (pTriInfos[iNextGoodTriangleSearchIndex].iFlag&MARK_DEGENERATE)==0 ? TTRUE : TFALSE;
+				if (bIsGood1) bJustADegenerate=TFALSE;
 				else ++iNextGoodTriangleSearchIndex;
 			}
 
@@ -1858,7 +1861,7 @@ static void DegenEpilogue(STSpace psTspace[], STriInfo pTriInfos[], int piTriLis
 		if ( (pTriInfos[t].iFlag&QUAD_ONE_DEGEN_TRI)!=0 )
 		{
 			SVec3 vDstP;
-			int iOrgF=-1, i=0;
+			int iOrgF=-1, ii=0;
 			tbool bNotFound;
 			unsigned char * pV = pTriInfos[t].vert_num;
 			int iFlag = (1<<pV[0]) | (1<<pV[1]) | (1<<pV[2]);
@@ -1870,8 +1873,8 @@ static void DegenEpilogue(STSpace psTspace[], STriInfo pTriInfos[], int piTriLis
 			iOrgF = pTriInfos[t].iOrgFaceNumber;
 			vDstP = GetPosition(pContext, MakeIndex(iOrgF, iMissingIndex));
 			bNotFound = TTRUE;
-			i=0;
-			while (bNotFound && i<3)
+			ii=0;
+			while (bNotFound && ii<3)
 			{
 				const int iVert = pV[i];
 				const SVec3 vSrcP = GetPosition(pContext, MakeIndex(iOrgF, iVert));
@@ -1882,7 +1885,7 @@ static void DegenEpilogue(STSpace psTspace[], STriInfo pTriInfos[], int piTriLis
 					bNotFound=TFALSE;
 				}
 				else
-					++i;
+					++ii;
 			}
 			assert(!bNotFound);
 		}

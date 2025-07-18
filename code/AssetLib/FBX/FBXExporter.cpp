@@ -1582,6 +1582,7 @@ void FBXExporter::WriteObjects () {
         }
     }
 
+    std::map<std::string, std::string> tpath_by_image;
     // FbxVideo - stores images used by textures.
     for (const auto &it : uid_by_image) {
         FBX::Node n("Video");
@@ -1601,9 +1602,20 @@ void FBXExporter::WriteObjects () {
             std::stringstream newPath;
             if (embedded_texture->mFilename.length > 0) {
                 newPath << embedded_texture->mFilename.C_Str();
+                // If newPath doesn't end in an extension, add extension from embedded_texture->achFormatHint
+                std::string np = newPath.str();
+                size_t dot_pos = np.find_last_of('.');
+                if (dot_pos == std::string::npos || dot_pos < np.find_last_of("/\\")) {
+                    // No extension found, add one
+                    newPath << "." << embedded_texture->achFormatHint;
+                }
             } else if (embedded_texture->achFormatHint[0]) {
                 int texture_index = std::stoi(path.substr(1, path.size() - 1));
                 newPath << texture_index << "." << embedded_texture->achFormatHint;
+            }
+            auto elem = tpath_by_image.find(path);
+            if (elem == tpath_by_image.end()) {
+                tpath_by_image[path] = newPath.str();
             }
             path = newPath.str();
             // embed the texture
@@ -1723,6 +1735,17 @@ void FBXExporter::WriteObjects () {
             unsigned int max = sizeof(aiUVTransform);
             aiGetMaterialFloatArray(mat, AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), (ai_real *)&trafo, &max);
 
+            auto tp_elem = tpath_by_image.find(texture_path);
+            std::string tfile_path = texture_path;
+            if (tp_elem != tpath_by_image.end()) {
+                tfile_path = tp_elem->second;
+            } else {
+                std::stringstream err;
+                err << "Texture path not found for texure " << texture_path;
+                err << " on material " << i;
+                ASSIMP_LOG_WARN(err.str());
+            }
+
             // now write the actual texture node
             FBX::Node tnode("Texture");
             // TODO: some way to determine texture name?
@@ -1743,8 +1766,8 @@ void FBXExporter::WriteObjects () {
             // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
             // these being incorrect is a common problem with FBX anyway.
-            tnode.AddChild("FileName", texture_path);
-            tnode.AddChild("RelativeFilename", texture_path);
+            tnode.AddChild("FileName", tp_elem->second);
+            tnode.AddChild("RelativeFilename", tp_elem->second);
             tnode.AddChild("ModelUVTranslation", double(0.0), double(0.0));
             tnode.AddChild("ModelUVScaling", double(1.0), double(1.0));
             tnode.AddChild("Texture_Alpha_Source", "None");

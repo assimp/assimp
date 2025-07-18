@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -42,12 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
+#include <array>
 
 using namespace Assimp;
 
 class AssimpAPITest_aiMatrix3x3 : public AssimpMathTest {
 protected:
-    virtual void SetUp() {
+    void SetUp() override {
         result_c = result_cpp = aiMatrix3x3();
     }
 
@@ -114,10 +113,19 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3InverseTest) {
     EXPECT_EQ(result_cpp, result_c);
 }
 
+inline void AI_EXPECT_REAL_EQ(ai_real val1, ai_real val2) {
+#ifdef ASSIMP_DOUBLE_PRECISION
+    EXPECT_DOUBLE_EQ((val1), (val2));
+#else
+    EXPECT_FLOAT_EQ((val1), (val2));
+#endif
+}
+
 TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3DeterminantTest) {
     result_c = result_cpp = random_mat3();
-    EXPECT_EQ(result_cpp.Determinant(),
-        aiMatrix3Determinant(&result_c));
+    const ai_real det_1 = result_cpp.Determinant();
+    const ai_real det_2 = aiMatrix3Determinant(&result_c);
+    AI_EXPECT_REAL_EQ(det_1, det_2);
 }
 
 TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3RotationZTest) {
@@ -148,4 +156,19 @@ TEST_F(AssimpAPITest_aiMatrix3x3, aiMatrix3FromToTest) {
     aiMatrix3x3::FromToMatrix(from, to, result_cpp);
     aiMatrix3FromTo(&result_c, &from, &to);
     EXPECT_EQ(result_cpp, result_c);
+}
+
+TEST_F(AssimpAPITest_aiMatrix3x3, operatorTest) {
+    std::array<ai_real, 9> value = { 1, 2, 3, 4, 5, 6, 7, 8,9};
+    result_cpp = aiMatrix3x3( value[0], value[1], value[2], value[3],
+                              value[4], value[5], value[6], value[7],
+                              value[8]);
+    size_t idx=0;
+    for (unsigned int i = 0; i < 3; ++i) {
+       for (unsigned int j = 0; j < 3; ++j) {
+            ai_real curValue = result_cpp[i][j];
+            EXPECT_EQ(curValue, value[idx]);
+            idx++;
+       }
+    }
 }

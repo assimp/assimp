@@ -114,4 +114,4 @@ inline const T* ProcessSimpleConnection(const Connection& con,
 } //!FBX
 } //!Assimp
 
-#endif
+#endif // ASSIMP_BUILD_NO_FBX_IMPORTER

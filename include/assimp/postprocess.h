@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -379,7 +378,7 @@ enum aiPostProcessSteps
      *     point primitives to separate meshes.
      *   </li>
      *   <li>Set the <tt>#AI_CONFIG_PP_SBP_REMOVE</tt> importer property to
-     *       @code aiPrimitiveType_POINTS | aiPrimitiveType_LINES
+     *       @code aiPrimitiveType_POINT | aiPrimitiveType_LINE
      *       @endcode to cause SortByPType to reject point
      *       and line meshes from the scene.
      *   </li>
@@ -506,7 +505,7 @@ enum aiPostProcessSteps
      *
      * <b>Output UV coordinate system:</b>
      * @code
-     * 0y|0y ---------- 1x|0y
+     * 0x|0y ---------- 1x|0y
      * |                 |
      * |                 |
      * |                 |

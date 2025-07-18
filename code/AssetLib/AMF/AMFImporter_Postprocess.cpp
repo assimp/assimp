@@ -1,9 +1,9 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -224,7 +224,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     }
 
     // Create format hint.
-    strcpy(converted_texture.FormatHint, "rgba0000"); // copy initial string.
+    constexpr char templateColor[] = "rgba0000";
+    memcpy(converted_texture.FormatHint, templateColor, 8);
     if (!r.empty()) converted_texture.FormatHint[4] = '8';
     if (!g.empty()) converted_texture.FormatHint[5] = '8';
     if (!b.empty()) converted_texture.FormatHint[6] = '8';
@@ -332,7 +333,7 @@ void AMFImporter::Postprocess_AddMetadata(const AMFMetaDataArray &metadataList, 
     size_t meta_idx(0);
 
     for (const AMFMetadata *metadata : metadataList) {
-        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->Type, aiString(metadata->Value));
+        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->MetaType, aiString(metadata->Value));
     }
 }
 
@@ -867,7 +868,7 @@ nl_clean_loop:
             pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
             pScene->mTextures[idx]->pcData = (aiTexel *)tex_convd.Data;
             // texture format description.
-            strcpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint);
+            strncpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint, HINTMAXTEXTURELEN);
             idx++;
         } // for(const SPP_Texture& tex_convd: mTexture_Converted)
 

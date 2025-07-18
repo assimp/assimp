@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 
-#include "AssetLib/COB/COBLoader.h"
-#include "AssetLib/COB/COBScene.h"
+#include "COBLoader.h"
+#include "COBScene.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/LineSplitter.h>
@@ -228,7 +228,7 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
         const Mesh &ndmesh = (const Mesh &)(root);
         if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
 
-            typedef std::pair<const unsigned int, Mesh::FaceRefList> Entry;
+            using Entry = std::pair<const unsigned int, Mesh::FaceRefList>;
             for (const Entry &reflist : ndmesh.temp_map) {
                 { // create mesh
                     size_t n = 0;
@@ -372,9 +372,11 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
     }
 
     // add children recursively
-    nd->mChildren = new aiNode *[root.temp_children.size()]();
-    for (const Node *n : root.temp_children) {
-        (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+    if (!root.temp_children.empty()) {
+        nd->mChildren = new aiNode *[root.temp_children.size()]();
+        for (const Node *n : root.temp_children) {
+            (nd->mChildren[nd->mNumChildren++] = BuildNodes(*n, scin, fill))->mParent = nd;
+        }
     }
 
     return nd;
@@ -473,8 +475,9 @@ void COBImporter::ReadBasicNodeInfo_Ascii(Node &msh, LineSplitter &splitter, con
         } else if (splitter.match_start("Transform")) {
             for (unsigned int y = 0; y < 4 && ++splitter; ++y) {
                 const char *s = splitter->c_str();
+                const char *end = s + splitter->size();
                 for (unsigned int x = 0; x < 4; ++x) {
-                    SkipSpaces(&s);
+                    SkipSpaces(&s, end);
                     msh.transform[y][x] = fast_atof(&s);
                 }
             }
@@ -486,12 +489,12 @@ void COBImporter::ReadBasicNodeInfo_Ascii(Node &msh, LineSplitter &splitter, con
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-void COBImporter::ReadFloat3Tuple_Ascii(T &fill, const char **in) {
+void COBImporter::ReadFloat3Tuple_Ascii(T &fill, const char **in, const char *end) {
     const char *rgb = *in;
     for (unsigned int i = 0; i < 3; ++i) {
-        SkipSpaces(&rgb);
+        SkipSpaces(&rgb, end);
         if (*rgb == ',') ++rgb;
-        SkipSpaces(&rgb);
+        SkipSpaces(&rgb, end);
 
         fill[i] = fast_atof(&rgb);
     }
@@ -538,7 +541,7 @@ void COBImporter::ReadMat1_Ascii(Scene &out, LineSplitter &splitter, const Chunk
     }
 
     const char *rgb = splitter[1];
-    ReadFloat3Tuple_Ascii(mat.rgb, &rgb);
+    ReadFloat3Tuple_Ascii(mat.rgb, &rgb, splitter.getEnd());
 
     ++splitter;
     if (!splitter.match_start("alpha ")) {
@@ -617,20 +620,21 @@ void COBImporter::ReadLght_Ascii(Scene &out, LineSplitter &splitter, const Chunk
     }
 
     const char *rgb = splitter[1];
-    ReadFloat3Tuple_Ascii(msh.color, &rgb);
+    const char *end = splitter.getEnd();
+    ReadFloat3Tuple_Ascii(msh.color, &rgb, end);
 
-    SkipSpaces(&rgb);
+    SkipSpaces(&rgb, end);
     if (strncmp(rgb, "cone angle", 10) != 0) {
         ASSIMP_LOG_WARN("Expected `cone angle` entity in `color` line in `Lght` chunk ", nfo.id);
     }
-    SkipSpaces(rgb + 10, &rgb);
+    SkipSpaces(rgb + 10, &rgb, end);
     msh.angle = fast_atof(&rgb);
 
-    SkipSpaces(&rgb);
+    SkipSpaces(&rgb, end);
     if (strncmp(rgb, "inner angle", 11) != 0) {
         ASSIMP_LOG_WARN("Expected `inner angle` entity in `color` line in `Lght` chunk ", nfo.id);
     }
-    SkipSpaces(rgb + 11, &rgb);
+    SkipSpaces(rgb + 11, &rgb, end);
     msh.inner_angle = fast_atof(&rgb);
 
     // skip the rest for we can't handle this kind of physically-based lighting information.
@@ -703,14 +707,14 @@ void COBImporter::ReadPolH_Ascii(Scene &out, LineSplitter &splitter, const Chunk
 
             for (unsigned int cur = 0; cur < cnt && ++splitter; ++cur) {
                 const char *s = splitter->c_str();
-
+                const char *end = splitter.getEnd();
                 aiVector3D &v = msh.vertex_positions[cur];
 
-                SkipSpaces(&s);
+                SkipSpaces(&s, end);
                 v.x = fast_atof(&s);
-                SkipSpaces(&s);
+                SkipSpaces(&s, end);
                 v.y = fast_atof(&s);
-                SkipSpaces(&s);
+                SkipSpaces(&s, end);
                 v.z = fast_atof(&s);
             }
         } else if (splitter.match_start("Texture Vertices")) {
@@ -719,12 +723,13 @@ void COBImporter::ReadPolH_Ascii(Scene &out, LineSplitter &splitter, const Chunk
 
             for (unsigned int cur = 0; cur < cnt && ++splitter; ++cur) {
                 const char *s = splitter->c_str();
+                const char *end = splitter.getEnd();
 
                 aiVector2D &v = msh.texture_coords[cur];
 
-                SkipSpaces(&s);
+                SkipSpaces(&s, end);
                 v.x = fast_atof(&s);
-                SkipSpaces(&s);
+                SkipSpaces(&s, end);
                 v.y = fast_atof(&s);
             }
         } else if (splitter.match_start("Faces")) {
@@ -749,8 +754,9 @@ void COBImporter::ReadPolH_Ascii(Scene &out, LineSplitter &splitter, const Chunk
                 face.material = strtoul10(splitter[6]);
 
                 const char *s = (++splitter)->c_str();
+                const char *end = splitter.getEnd();
                 for (size_t i = 0; i < face.indices.size(); ++i) {
-                    if (!SkipSpaces(&s)) {
+                    if (!SkipSpaces(&s, end)) {
                         ThrowException("Expected EOL token in Face entry");
                     }
                     if ('<' != *s++) {

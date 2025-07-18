@@ -13,7 +13,7 @@
 			<float name="Shininess" value="0.100000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="" />
+			<texture name="Texture1" value="assets/UVTransformTestImg.png" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -96,7 +96,7 @@
 			<float name="Shininess" value="0.100000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="" />
+			<texture name="Texture1" value="assets/UVTransform_OffsetUV0.5-mirrorUV.png" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -179,7 +179,7 @@
 			<float name="Shininess" value="0.100000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="" />
+			<texture name="Texture1" value="assets/UVTransform_ScaleUV1-2_OffsetUV0-0.9_Rotate-72.png" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -262,7 +262,7 @@
 			<float name="Shininess" value="0.100000" />
 			<float name="Param1" value="0.000000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="" />
+			<texture name="Texture1" value="assets/UVTransform_ScaleUV1-2_OffsetUV0-0.9_Rotate-72_mirrorU.png" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />
@@ -345,7 +345,7 @@
 			<float name="Shininess" value="0.100000" />
 			<float name="Param1" value="0.170000" />
 			<float name="Param2" value="0.000000" />
-			<texture name="Texture1" value="" />
+			<texture name="Texture1" value="assets/UVTransform_ScaleUV2x_Rotate45.png" />
 			<texture name="Texture2" value="" />
 			<texture name="Texture3" value="" />
 			<texture name="Texture4" value="" />

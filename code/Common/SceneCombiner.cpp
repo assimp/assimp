@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 // ----------------------------------------------------------------------------
 #include "ScenePrivate.h"
-#include "time.h"
 #include <assimp/Hash.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -61,8 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/metadata.h>
 #include <assimp/scene.h>
-#include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
+
+#include <unordered_set>
+#include <ctime>
+#include <cstdio>
 
 namespace Assimp {
 
@@ -78,7 +79,7 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
     if (string.length >= 1 && string.data[0] == '$')
         return;
 
-    if (len + string.length >= MAXLEN - 1) {
+    if (len + string.length >= AI_MAXLEN - 1) {
         ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
         ai_assert(false);
         return;
@@ -95,6 +96,11 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
 // ------------------------------------------------------------------------------------------------
 // Add node identifiers to a hashing set
 void SceneCombiner::AddNodeHashes(aiNode *node, std::set<unsigned int> &hashes) {
+    if (node == nullptr) {
+        ASSIMP_LOG_ERROR("Pointer to aiNode is nullptr.");
+        return;
+    }
+
     // Add node name to hashing set if it is non-empty - empty nodes are allowed
     // and they can't have any anims assigned so its absolutely safe to duplicate them.
     if (node->mName.length) {
@@ -252,6 +258,14 @@ void SceneCombiner::AttachToGraph(aiScene *master, std::vector<NodeAttachmentInf
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
     if (nullptr == _dest) {
+        std::unordered_set<aiScene *> uniqueScenes;
+        uniqueScenes.insert(master);
+        for (const auto &item : srcList) {
+            uniqueScenes.insert(item.scene);
+        }
+        for (const auto &item : uniqueScenes) {
+            delete item;
+        }
         return;
     }
 
@@ -259,6 +273,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
     if (srcList.empty()) {
         if (*_dest) {
             SceneCombiner::CopySceneFlat(_dest, master);
+            delete master;
         } else
             *_dest = master;
         return;
@@ -306,15 +321,6 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
         boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);
 #endif
         for (unsigned int i = 1; i < src.size(); ++i) {
-            //if (i != duplicates[i])
-            //{
-            //  // duplicate scenes share the same UID
-            //  ::strcpy( src[i].id, src[duplicates[i]].id );
-            //  src[i].idlen = src[duplicates[i]].idlen;
-
-            //  continue;
-            //}
-
             src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_", i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
@@ -408,7 +414,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                             // where n is the index of the texture.
                             // Copy here because we overwrite the string data in-place and the buffer inside of aiString
                             // will be a lie if we just reinterpret from prop->mData. The size of mData is not guaranteed to be
-                            // MAXLEN in size.
+                            // AI_MAXLEN in size.
                             aiString s(*(aiString *)prop->mData);
                             if ('*' == s.data[0]) {
                                 // Offset the index and write it back ..
@@ -984,7 +990,7 @@ inline void GetArrayCopy(Type *&dest, ai_uint num) {
     Type *old = dest;
 
     dest = new Type[num];
-    ::memcpy(dest, old, sizeof(Type) * num);
+    std::copy(old, old+num, dest);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1057,7 +1063,7 @@ void SceneCombiner::CopyScene(aiScene **_dest, const aiScene *src, bool allocate
     dest->mFlags = src->mFlags;
 
     // source private data might be nullptr if the scene is user-allocated (i.e. for use with the export API)
-    if (dest->mPrivate != nullptr) {
+    if (src->mPrivate != nullptr) {
         ScenePriv(dest)->mPPStepsApplied = ScenePriv(src) ? ScenePriv(src)->mPPStepsApplied : 0;
     }
 }
@@ -1094,10 +1100,6 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces, dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces; ++i) {
-        aiFace &f = dest->mFaces[i];
-        GetArrayCopy(f.mIndices, f.mNumIndices);
-    }
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);

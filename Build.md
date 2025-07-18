@@ -1,36 +1,12 @@
 # Build / Install Instructions
 
-## Install on all platforms using vcpkg
-You can download and install assimp using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
-```bash
-    git clone https://github.com/Microsoft/vcpkg.git
-    cd vcpkg
-    ./bootstrap-vcpkg.sh
-    ./vcpkg integrate install
-    ./vcpkg install assimp
-```
-The assimp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
-
-## Install on Ubuntu
-You can install the Asset-Importer-Lib via apt:
-```
-sudo apt-get update
-sudo apt-get install libassimp-dev
-```
-
-## Install pyassimp
-You need to have pip installed:
-```
-pip install pyassimp
-```
-
 ## Manual build instructions
-
-### Install CMake
-Asset-Importer-Lib can be built for a lot of different platforms. We are using cmake to generate the build environment for these via cmake. So you have to make sure that you have a working cmake-installation on your system. You can download it at https://cmake.org/ or for linux install it via
-```bash
-sudo apt-get install cmake
-```
+### Install prerequisites
+You need to install
+* cmake
+* Your compiler (must support C++17 and C99 at least)
+* For Windows
+  *  DX-SDK 9 if you want to use our 3D-Viewer
 
 ### Get the source
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:
@@ -38,15 +14,22 @@ Make sure you have a working git-installation. Open a command prompt and clone t
 git clone https://github.com/assimp/assimp.git
 ```
 ### Build from source:
+* For *assimp.lib* without any tools:
 ```bash
 cd assimp
-cmake CMakeLists.txt 
+cmake CMakeLists.txt
+cmake --build .
+```
+
+* For assimp with the common tools like *assimp-cmd*
+```bash
+cd assimp
+cmake CMakeLists.txt -DASSIMP_BUILD_ASSIMP_TOOLS=ON
 cmake --build .
 ```
 Note that by default this builds a shared library into the `bin` directory. If you want to build it as a static library see the build options at the bottom of this file.
 
 ### Build instructions for Windows with Visual-Studio
-
 First, you have to install Visual-Studio on your windows-system. You can get the Community-Version for free here: https://visualstudio.microsoft.com/de/downloads/
 To generate the build environment for your IDE open a command prompt, navigate to your repo and type:
 ```bash
@@ -57,19 +40,8 @@ This will generate the project files for the visual studio. All dependencies use
 ### Build instructions for Windows with UWP
 See <https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app>
 
-### Build instructions for Linux / Unix
-Open a terminal and got to your repository. You can generate the makefiles and build the library via:
-
-```bash
-cmake CMakeLists.txt
-make -j4
-```
-The option -j describes the number of parallel processes for the build. In this case make will try to use 4 cores for the build.
-
-If you want to use an IDE for linux you can try QTCreator for instance. 
-
 ### Build instructions for MinGW
- Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag 
+ Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag
 required to compile some of assimp's files, especially for debug builds.
 Version 7.3.0 of g++-mingw-w64 & gcc-mingw-w64 appears to work.
 
@@ -111,3 +83,31 @@ The cmake-build-environment provides options to configure the build. The followi
 - **USE_STATIC_CRT (default OFF)**: Link against the static MSVC runtime libraries.
 - **ASSIMP_BUILD_DRACO (default OFF)**: Build Draco libraries. Primarily for glTF.
 - **ASSIMP_BUILD_ASSIMP_VIEW (default ON, if DirectX found, OFF otherwise)**: Build Assimp view tool (requires DirectX).
+
+### Install prebuild binaries
+## Install on all platforms using vcpkg
+You can download and install assimp using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+```bash
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    ./vcpkg install assimp
+```
+The assimp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
+### Install on Ubuntu
+You can install the Asset-Importer-Lib via apt:
+```
+sudo apt-get update
+sudo apt-get install libassimp-dev
+```
+
+### Install pyassimp
+You need to have pip installed:
+```
+pip install pyassimp
+```
+
+### Get the SDK from itchi.io
+Just check [itchi.io](https://kimkulling.itch.io/the-asset-importer-lib)

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -167,11 +167,11 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
             AMFCoordinates &als = *((AMFCoordinates *)ne); // alias for convenience
             const std::string &currentName = ai_tolower(currentNode.name());
             if (currentName == "x") {
-                XmlParser::getValueAsFloat(currentNode, als.Coordinate.x);
+                XmlParser::getValueAsReal(currentNode, als.Coordinate.x);
             } else if (currentName == "y") {
-                XmlParser::getValueAsFloat(currentNode, als.Coordinate.y);
+                XmlParser::getValueAsReal(currentNode, als.Coordinate.y);
             } else if (currentName == "z") {
-                XmlParser::getValueAsFloat(currentNode, als.Coordinate.z);
+                XmlParser::getValueAsReal(currentNode, als.Coordinate.z);
             }
         }
         ParseHelper_Node_Exit();
@@ -202,7 +202,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
 
     ((AMFVolume *)ne)->MaterialID = node.attribute("materialid").as_string();
 
-    ((AMFVolume *)ne)->Type = type;
+    ((AMFVolume *)ne)->VolumeType = type;
     // Check for child nodes
     bool col_read = false;
     if (!node.empty()) {

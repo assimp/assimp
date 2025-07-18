@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -220,7 +220,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(std::move(stream)));
     const STEP::HeaderInfo &head = static_cast<const STEP::DB &>(*db).GetHeader();
 
-    if (!head.fileSchema.size() || head.fileSchema.substr(0, 3) != "IFC") {
+    if (!head.fileSchema.size() || head.fileSchema.substr(0, 4) != "IFC2") {
         ThrowException("Unrecognized file schema: " + head.fileSchema);
     }
 
@@ -245,11 +245,11 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // tell the reader for which types we need to simulate STEPs reverse indices
     static const char *const inverse_indices_to_track[] = {
-        "ifcrelcontainedinspatialstructure", 
-        "ifcrelaggregates", 
-        "ifcrelvoidselement", 
-        "ifcreldefinesbyproperties", 
-        "ifcpropertyset", 
+        "ifcrelcontainedinspatialstructure",
+        "ifcrelaggregates",
+        "ifcrelvoidselement",
+        "ifcreldefinesbyproperties",
+        "ifcpropertyset",
         "ifcstyleditem"
     };
 
@@ -352,6 +352,11 @@ void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType &dt, ConversionData &co
 
 // ------------------------------------------------------------------------------------------------
 void SetUnits(ConversionData &conv) {
+    if (conv.proj.UnitsInContext == nullptr) {
+        IFCImporter::LogError("Skipping conversion data, nullptr.");
+        return;
+    }
+
     // see if we can determine the coordinate space used to express.
     for (size_t i = 0; i < conv.proj.UnitsInContext->Units.size(); ++i) {
         ConvertUnit(*conv.proj.UnitsInContext->Units[i], conv);

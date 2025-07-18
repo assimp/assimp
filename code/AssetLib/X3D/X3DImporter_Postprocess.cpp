@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2019, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -320,7 +319,7 @@ void X3DImporter::Postprocess_BuildMesh(const X3DNodeElementBase &pNodeElement, 
         // at first search for <Coordinate> node and create mesh.
         for (std::list<X3DNodeElementBase *>::iterator ch_it = tnemesh.Children.begin(); ch_it != tnemesh.Children.end(); ++ch_it) {
             if ((*ch_it)->Type == X3DElemType::ENET_Coordinate) {
-                *pMesh = X3DGeoHelper::make_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate *)*ch_it)->Value);
+                *pMesh = X3DGeoHelper::make_line_mesh(tnemesh.CoordIndex, ((X3DNodeElementCoordinate *)*ch_it)->Value);
             }
         }
 

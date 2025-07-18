@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,10 +57,11 @@ class D3MFOpcPackage;
 class Object;
 class Texture2DGroup;
 class EmbeddedTexture;
+class ColorGroup;
 
-class XmlSerializer {
+class XmlSerializer final {
 public:
-    XmlSerializer(XmlParser *xmlParser);
+    XmlSerializer(XmlParser &xmlParser);
     ~XmlSerializer();
     void ImportXml(aiScene *scene);
 
@@ -78,6 +79,8 @@ private:
     void ReadTextureGroup(XmlNode &node);
     aiMaterial *readMaterialDef(XmlNode &node, unsigned int basematerialsId);
     void StoreMaterialsInScene(aiScene *scene);
+    void ReadColorGroup(XmlNode &node);
+    void ReadColor(XmlNode &node, ColorGroup *colorGroup);
 
 private:
     struct MetaEntry {
@@ -89,7 +92,7 @@ private:
     std::vector<aiMaterial *> mMaterials;
     std::map<unsigned int, Resource *> mResourcesDictionnary;
     unsigned int mMeshCount;
-    XmlParser *mXmlParser;
+    XmlParser &mXmlParser;
 };
 
 } // namespace D3MF

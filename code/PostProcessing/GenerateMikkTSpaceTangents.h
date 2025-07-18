@@ -3,6 +3,8 @@
 #include "Common/BaseProcess.h"
 #include "contrib/MikkTSpace/mikktspace.h"
 
+struct aiMesh;
+
 namespace Assimp {
 
 class GenerateMikkTSpaceTangents final : public BaseProcess {

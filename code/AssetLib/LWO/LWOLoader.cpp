@@ -239,7 +239,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     ResolveClips();
 
     // now process all layers and build meshes and nodes
-    std::vector<aiMesh *> apcMeshes;
+    MeshArray apcMeshes;
     std::map<uint16_t, aiNode *> apcNodes;
 
     apcMeshes.reserve(mLayers->size() * std::min(((unsigned int)mSurfaces->size() / 2u), 1u));

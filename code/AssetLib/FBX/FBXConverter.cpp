@@ -72,7 +72,7 @@ namespace FBX {
 
 using namespace Util;
 
-#define MAGIC_NODE_TAG "_$AssimpFbx$"
+static constexpr char MAGIC_NODE_TAG[] = "_$AssimpFbx$";
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000LL
 
@@ -125,21 +125,10 @@ static void correctRootTransform(const aiScene *scene) {
 
 FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBones) :
         defaultMaterialIndex(),
-        mMeshes(),
-        lights(),
-        cameras(),
-        textures(),
-        materials_converted(),
-        textures_converted(),
-        meshes_converted(),
-        node_anim_chain_bits(),
-        mNodeNames(),
         anim_fps(),
         mSceneOut(out),
         doc(doc),
         mRemoveEmptyBones(removeEmptyBones) {
-
-
     // animations need to be converted first since this will
     // populate the node_anim_chain_bits map, which is needed
     // to determine which nodes need to be generated.
@@ -162,7 +151,7 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
                 continue;
             }
 
-            const Material *mat = dynamic_cast<const Material *>(ob);
+            auto mat = dynamic_cast<const Material *>(ob);
             if (mat) {
 
                 if (materials_converted.find(mat) == materials_converted.end()) {
@@ -222,7 +211,6 @@ static std::string getAncestorBaseName(const aiNode *node) {
     return std::string(nodeName, length);
 }
 
-// Make unique name
 std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiNode &parent) {
     std::string original_name = FixNodeName(model->Name());
     if (original_name.empty()) {
@@ -236,9 +224,16 @@ std::string FBXConverter::MakeUniqueNodeName(const Model *const model, const aiN
 /// This struct manages nodes which may or may not end up in the node hierarchy.
 /// When a node becomes a child of another node, that node becomes its owner and mOwnership should be released.
 struct FBXConverter::PotentialNode {
-    PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {}
-    PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {}
-    aiNode* operator->() { return mNode; }
+    PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {
+        // empty
+    }
+    PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {
+        // empty
+    }
+    aiNode* operator->() {
+        return mNode;
+    }
+
     std::unique_ptr<aiNode> mOwnership;
     aiNode* mNode;
 };

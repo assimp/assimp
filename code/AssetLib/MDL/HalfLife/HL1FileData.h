@@ -139,7 +139,7 @@ struct Header_HL1 : HalfLifeMDLBaseHeader {
     //! The number of attachments.
     int32_t numattachments;
 
-    //! Offset the the first attachment chunk.
+    //! Offset of the first attachment chunk.
     int32_t attachmentindex;
 
     //! Was "soundtable".

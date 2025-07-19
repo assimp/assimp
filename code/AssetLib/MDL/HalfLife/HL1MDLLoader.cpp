@@ -50,17 +50,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/BaseImporter.h>
 #include <assimp/StringUtils.h>
-#include <assimp/ai_assert.h>
 #include <assimp/qnan.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/Importer.hpp>
 
 #include <iomanip>
 #include <sstream>
 #include <map>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
-#undef MDL_HALFLIFE_LOG_WARN_HEADER
+#  undef MDL_HALFLIFE_LOG_WARN_HEADER
 #endif
 #define MDL_HALFLIFE_LOG_HEADER "[Half-Life 1 MDL] "
 #include "LogFunctions.h"
@@ -74,30 +72,22 @@ namespace HalfLife {
 #endif // _MSC_VER
 
 // ------------------------------------------------------------------------------------------------
-HL1MDLLoader::HL1MDLLoader(
-    aiScene *scene,
-    IOSystem *io,
-    const unsigned char *buffer,
-    const std::string &file_path,
-    const HL1ImportSettings &import_settings) :
-    scene_(scene),
-    io_(io),
-    buffer_(buffer),
-    file_path_(file_path),
-    import_settings_(import_settings),
-    header_(nullptr),
-    texture_header_(nullptr),
-    anim_headers_(nullptr),
-    texture_buffer_(nullptr),
-    anim_buffers_(nullptr),
-    num_sequence_groups_(0),
-    rootnode_children_(),
-    unique_name_generator_(),
-    unique_sequence_names_(),
-    unique_sequence_groups_names_(),
-    temp_bones_(),
-    num_blend_controllers_(0),
-    total_models_(0) {
+HL1MDLLoader::HL1MDLLoader(aiScene *scene, IOSystem *io, const unsigned char *buffer, size_t buffersize,
+            const std::string &file_path, const HL1ImportSettings &import_settings) :
+        scene_(scene),
+        io_(io),
+        buffer_(buffer),
+        mBuffersize(buffersize),
+        file_path_(file_path),
+        import_settings_(import_settings),
+        header_(nullptr),
+        texture_header_(nullptr),
+        anim_headers_(nullptr),
+        texture_buffer_(nullptr),
+        anim_buffers_(nullptr),
+        num_sequence_groups_(0),
+        num_blend_controllers_(0),
+        total_models_(0) {
     load_file();
 }
 
@@ -457,8 +447,11 @@ void HL1MDLLoader::read_bones() {
         return;
     }
 
-    const Bone_HL1 *pbone = (const Bone_HL1 *)((uint8_t *)header_ + header_->boneindex);
+    if (header_->boneindex > mBuffersize) {
+        return;
+    }
 
+    const Bone_HL1 *pbone = (const Bone_HL1 *)((uint8_t *)header_ + header_->boneindex);
     std::vector<std::string> unique_bones_names(header_->numbones);
     for (int i = 0; i < header_->numbones; ++i) {
         unique_bones_names[i] = pbone[i].name;
@@ -605,6 +598,9 @@ void HL1MDLLoader::read_meshes() {
 
     for (int i = 0; i < header_->numbodyparts; ++i, ++pbodypart) {
         unique_bodyparts_names[i] = pbodypart->name;
+        if (header_->bodypartindex > mBuffersize) {
+            return;
+        }
 
         pmodel = (Model_HL1 *)((uint8_t *)header_ + pbodypart->modelindex);
         for (int j = 0; j < pbodypart->nummodels; ++j, ++pmodel) {
@@ -633,6 +629,9 @@ void HL1MDLLoader::read_meshes() {
     unique_name_generator_.make_unique(unique_bodyparts_names);
 
     // Now do the same for each model.
+    if (header_->bodypartindex > mBuffersize) {
+        return;
+    }
     pbodypart = (const Bodypart_HL1 *)((uint8_t *)header_ + header_->bodypartindex);
 
     // Prepare template name for bodypart models.
@@ -642,6 +641,10 @@ void HL1MDLLoader::read_meshes() {
     unsigned int model_index = 0;
 
     for (int i = 0; i < header_->numbodyparts; ++i, ++pbodypart) {
+        if (pbodypart->modelindex > mBuffersize) {
+            continue;
+        }
+
         pmodel = (Model_HL1 *)((uint8_t *)header_ + pbodypart->modelindex);
         for (int j = 0; j < pbodypart->nummodels; ++j, ++pmodel, ++model_index)
             unique_models_names[model_index] = pmodel->name;
@@ -653,7 +656,9 @@ void HL1MDLLoader::read_meshes() {
     unsigned int mesh_index = 0;
 
     scene_->mMeshes = new aiMesh *[scene_->mNumMeshes];
-
+    if (header_->bodypartindex > mBuffersize) {
+        return;
+    }
     pbodypart = (const Bodypart_HL1 *)((uint8_t *)header_ + header_->bodypartindex);
 
     /* Create a node that will represent the mesh hierarchy.

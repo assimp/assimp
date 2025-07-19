@@ -162,7 +162,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
 
         // process all meshes
         bool tookNormals = false;
-        std::vector<aiMesh *> avOutMeshes;
+        MeshArray avOutMeshes;
         avOutMeshes.reserve(mParser->m_vMeshes.size() * 2);
         for (std::vector<ASE::Mesh>::iterator i = mParser->m_vMeshes.begin(); i != mParser->m_vMeshes.end(); ++i) {
             if ((*i).bSkip) {
@@ -187,7 +187,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         // Now build the output mesh list. Remove dummies
         pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-        for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
+        for (MeshArray::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
                 continue;
             }
@@ -902,7 +902,7 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
 
 // ------------------------------------------------------------------------------------------------
 // Build output meshes
-void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMeshes) {
+void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, MeshArray &avOutMeshes) {
     // validate the material index of the mesh
     if (mesh.iMaterialIndex >= mParser->m_vMaterials.size()) {
         mesh.iMaterialIndex = (unsigned int)mParser->m_vMaterials.size() - 1;

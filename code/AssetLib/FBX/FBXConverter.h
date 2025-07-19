@@ -80,8 +80,8 @@ using SkeletonBoneArray = std::vector<aiSkeletonBone *>;
 using SkeletonBoneToMesh = std::map<aiMesh*, SkeletonBoneArray*>;
 
 struct SkeletonBoneContainer {
-    std::vector<aiMesh *> MeshArray;
-    SkeletonBoneToMesh SkeletonBoneToMeshLookup;
+    MeshArray meshArray;
+    SkeletonBoneToMesh skeletonBoneToMeshLookup;
 };
 
 class Document;

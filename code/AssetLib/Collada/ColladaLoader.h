@@ -206,10 +206,10 @@ private:
     std::map<std::string, size_t> mMaterialIndexByName;
 
     /** Accumulated meshes for the target scene */
-    std::vector<aiMesh *> mMeshes;
+    MeshArray mMeshes;
 
     /** Accumulated morph target meshes */
-    std::vector<aiMesh *> mTargetMeshes;
+    MeshArray mTargetMeshes;
 
     /** Temporary material list */
     std::vector<std::pair<Collada::Effect *, aiMaterial *>> newMats;

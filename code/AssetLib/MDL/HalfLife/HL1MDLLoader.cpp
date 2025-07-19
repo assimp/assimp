@@ -447,7 +447,7 @@ void HL1MDLLoader::read_bones() {
         return;
     }
 
-    if (header_->boneindex > mBuffersize) {
+    if (static_cast<size_t>(header_->boneindex) > mBuffersize) {
         return;
     }
 
@@ -499,16 +499,14 @@ void HL1MDLLoader::read_bones() {
     bones_node->mChildren = new aiNode *[bones_node->mNumChildren];
 
     // Build all bones children hierarchy starting from each MDL root bone.
-    for (size_t i = 0; i < roots.size(); ++i)
-    {
+    for (size_t i = 0; i < roots.size(); ++i) {
         const TempBone &root_bone = temp_bones_[roots[i]];
         bones_node->mChildren[i] = root_bone.node;
         build_bone_children_hierarchy(root_bone);
     }
 }
 
-void HL1MDLLoader::build_bone_children_hierarchy(const TempBone &bone)
-{
+void HL1MDLLoader::build_bone_children_hierarchy(const TempBone &bone) {
     if (bone.children.empty())
         return;
 
@@ -517,8 +515,7 @@ void HL1MDLLoader::build_bone_children_hierarchy(const TempBone &bone)
     bone_node->mChildren = new aiNode *[bone_node->mNumChildren];
 
     // Build each child bone's hierarchy recursively.
-    for (size_t i = 0; i < bone.children.size(); ++i)
-    {
+    for (size_t i = 0; i < bone.children.size(); ++i) {
         const TempBone &child_bone = temp_bones_[bone.children[i]];
         bone_node->mChildren[i] = child_bone.node;
         build_bone_children_hierarchy(child_bone);
@@ -598,7 +595,7 @@ void HL1MDLLoader::read_meshes() {
 
     for (int i = 0; i < header_->numbodyparts; ++i, ++pbodypart) {
         unique_bodyparts_names[i] = pbodypart->name;
-        if (header_->bodypartindex > mBuffersize) {
+        if (static_cast<size_t>(header_->bodypartindex) > mBuffersize) {
             return;
         }
 
@@ -629,7 +626,7 @@ void HL1MDLLoader::read_meshes() {
     unique_name_generator_.make_unique(unique_bodyparts_names);
 
     // Now do the same for each model.
-    if (header_->bodypartindex > mBuffersize) {
+    if (static_cast<size_t>(header_->bodypartindex) > mBuffersize) {
         return;
     }
     pbodypart = (const Bodypart_HL1 *)((uint8_t *)header_ + header_->bodypartindex);
@@ -641,7 +638,7 @@ void HL1MDLLoader::read_meshes() {
     unsigned int model_index = 0;
 
     for (int i = 0; i < header_->numbodyparts; ++i, ++pbodypart) {
-        if (pbodypart->modelindex > mBuffersize) {
+        if (static_cast<size_t>(pbodypart->modelindex) > mBuffersize) {
             continue;
         }
 
@@ -656,7 +653,7 @@ void HL1MDLLoader::read_meshes() {
     unsigned int mesh_index = 0;
 
     scene_->mMeshes = new aiMesh *[scene_->mNumMeshes];
-    if (header_->bodypartindex > mBuffersize) {
+    if (static_cast<size_t>(header_->bodypartindex) > mBuffersize) {
         return;
     }
     pbodypart = (const Bodypart_HL1 *)((uint8_t *)header_ + header_->bodypartindex);
@@ -743,6 +740,9 @@ void HL1MDLLoader::read_meshes() {
     model_index = 0;
 
     for (int i = 0; i < header_->numbodyparts; ++i, ++pbodypart, ++bodyparts_node_ptr) {
+        if (static_cast<size_t>(pbodypart->modelindex) > mBuffersize) {
+            continue;
+        }
         pmodel = (const Model_HL1 *)((uint8_t *)header_ + pbodypart->modelindex);
 
         // Create bodypart node for the mesh tree hierarchy.
@@ -755,8 +755,10 @@ void HL1MDLLoader::read_meshes() {
         bodypart_node->mChildren = new aiNode *[bodypart_node->mNumChildren];
         aiNode **bodypart_models_ptr = bodypart_node->mChildren;
 
-        for (int j = 0; j < pbodypart->nummodels;
-                ++j, ++pmodel, ++bodypart_models_ptr, ++model_index) {
+        for (int j = 0; j < pbodypart->nummodels; ++j, ++pmodel, ++bodypart_models_ptr, ++model_index) {
+            if (static_cast<size_t>(pmodel->meshindex) > mBuffersize) {
+                continue;
+            }
 
             pmesh = (const Mesh_HL1 *)((uint8_t *)header_ + pmodel->meshindex);
 

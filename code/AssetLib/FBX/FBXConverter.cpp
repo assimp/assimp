@@ -1092,14 +1092,14 @@ aiMesh *FBXConverter::SetupEmptyMesh(const Geometry &mesh, aiNode *parent) {
 }
 
 static aiSkeleton *createAiSkeleton(SkeletonBoneContainer &sbc) {
-    if (sbc.MeshArray.empty() || sbc.SkeletonBoneToMeshLookup.empty()) {
+    if (sbc.meshArray.empty() || sbc.skeletonBoneToMeshLookup.empty()) {
         return nullptr;
     }
 
     aiSkeleton *skeleton = new aiSkeleton;
-    for (auto *mesh : sbc.MeshArray) {
-        auto it = sbc.SkeletonBoneToMeshLookup.find(mesh);
-        if (it == sbc.SkeletonBoneToMeshLookup.end()) {
+    for (auto *mesh : sbc.meshArray) {
+        auto it = sbc.skeletonBoneToMeshLookup.find(mesh);
+        if (it == sbc.skeletonBoneToMeshLookup.end()) {
             continue;
         }
         SkeletonBoneArray *ba = it->second;
@@ -1547,12 +1547,12 @@ static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *s
 void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
         std::vector<unsigned int> *outputVertStartIndices, SkeletonBoneContainer &skeletonContainer) {
 
-    if (skeletonContainer.SkeletonBoneToMeshLookup.find(out) != skeletonContainer.SkeletonBoneToMeshLookup.end()) {
+    if (skeletonContainer.skeletonBoneToMeshLookup.find(out) != skeletonContainer.skeletonBoneToMeshLookup.end()) {
         return;
     }
 
     ConvertWeights(out, geo, absolute_transform, parent, materialIndex, outputVertStartIndices);
-    skeletonContainer.MeshArray.emplace_back(out);
+    skeletonContainer.meshArray.emplace_back(out);
     SkeletonBoneArray *ba = new SkeletonBoneArray;
     for (size_t i = 0; i < out->mNumBones; ++i) {
         aiBone *bone = out->mBones[i];
@@ -1563,15 +1563,13 @@ void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo
         copyBoneToSkeletonBone(out, bone, skeletonBone);
         ba->emplace_back(skeletonBone);
     }
-    skeletonContainer.SkeletonBoneToMeshLookup[out] = ba;
+    skeletonContainer.skeletonBoneToMeshLookup[out] = ba;
 }
 
 void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform,
         aiNode *parent, unsigned int materialIndex,
         std::vector<unsigned int> *outputVertStartIndices) {
     ai_assert(geo.DeformerSkin());
-
-    std::vector<size_t> out_indices, index_out_indices, count_out_indices;
 
     const Skin &sk = *geo.DeformerSkin();
 
@@ -1580,6 +1578,10 @@ void FBXConverter::ConvertWeights(aiMesh *out, const MeshGeometry &geo, const ai
     ai_assert(no_mat_check || outputVertStartIndices);
 
     try {
+        std::vector<size_t> count_out_indices;
+        std::vector<size_t> index_out_indices;
+        std::vector<size_t> out_indices;
+
         // iterate over the sub deformers
         for (const Cluster *cluster : sk.Clusters()) {
             ai_assert(cluster);
@@ -1751,10 +1753,10 @@ unsigned int FBXConverter::GetDefaultMaterial() {
         return defaultMaterialIndex - 1;
     }
 
-    aiMaterial *out_mat = new aiMaterial();
+    auto out_mat = new aiMaterial();
     materials.push_back(out_mat);
 
-    const aiColor3D diffuse = aiColor3D(0.8f, 0.8f, 0.8f);
+    const auto diffuse = aiColor3D(0.8f, 0.8f, 0.8f);
     out_mat->AddProperty(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 
     aiString s;
@@ -1770,7 +1772,7 @@ unsigned int FBXConverter::ConvertMaterial(const Material &material, const MeshG
     const PropertyTable &props = material.Props();
 
     // generate empty output material
-    aiMaterial *out_mat = new aiMaterial();
+    auto out_mat = new aiMaterial();
     materials_converted[&material] = static_cast<unsigned int>(materials.size());
 
     materials.push_back(out_mat);
@@ -1809,7 +1811,7 @@ unsigned int FBXConverter::ConvertMaterial(const Material &material, const MeshG
 
 unsigned int FBXConverter::ConvertVideo(const Video &video) {
     // generate empty output texture
-    aiTexture *out_tex = new aiTexture();
+    auto out_tex = new aiTexture();
     textures.push_back(out_tex);
 
     // assuming the texture is compressed

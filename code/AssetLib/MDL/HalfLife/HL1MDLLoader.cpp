@@ -371,6 +371,10 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_textures() {
+    if (texture_header_->textureindex > mBuffersize) {
+        return;
+    }
+
     const Texture_HL1 *ptexture = (const Texture_HL1 *)((uint8_t *)texture_header_ + texture_header_->textureindex);
     unsigned char *pin = texture_buffer_;
 
@@ -400,17 +404,17 @@ void HL1MDLLoader::read_textures() {
 
         if (ptexture[i].flags & AI_MDL_HL1_STUDIO_NF_FLATSHADE) {
             // Flat shading.
-            const aiShadingMode shading_mode = aiShadingMode_Flat;
+            constexpr aiShadingMode shading_mode = aiShadingMode_Flat;
             scene_material->AddProperty(&shading_mode, 1, AI_MATKEY_SHADING_MODEL);
         }
 
         if (ptexture[i].flags & AI_MDL_HL1_STUDIO_NF_ADDITIVE) {
             // Additive texture.
-            const aiBlendMode blend_mode = aiBlendMode_Additive;
+            constexpr aiBlendMode blend_mode = aiBlendMode_Additive;
             scene_material->AddProperty(&blend_mode, 1, AI_MATKEY_BLEND_FUNC);
         } else if (ptexture[i].flags & AI_MDL_HL1_STUDIO_NF_MASKED) {
             // Texture with 1 bit alpha test.
-            const aiTextureFlags use_alpha = aiTextureFlags_UseAlpha;
+            constexpr aiTextureFlags use_alpha = aiTextureFlags_UseAlpha;
             scene_material->AddProperty(&use_alpha, 1, AI_MATKEY_TEXFLAGS(texture_type, 0));
             scene_material->AddProperty(&last_palette_color, 1, AI_MATKEY_COLOR_TRANSPARENT);
         }

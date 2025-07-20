@@ -371,7 +371,7 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
 
 // ------------------------------------------------------------------------------------------------
 void HL1MDLLoader::read_textures() {
-    if (texture_header_->textureindex > mBuffersize) {
+    if (static_cast<size_t>(texture_header_->textureindex) > mBuffersize) {
         return;
     }
 

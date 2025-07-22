@@ -67,7 +67,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **ASSIMP_NO_EXPORT (default OFF)**: Disable Assimp's export functionality.
 - **ASSIMP_BUILD_ZLIB (default OFF)**: Build our own zlib.
 - **ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all exporters enabled.
-- **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all importers enabled.
+- **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with (most) importers enabled. Currently, USD importer is not included. See ASSIMP_BUILD_USD_IMPORTER.
 - **ASSIMP_BUILD_ASSIMP_TOOLS (default OFF)**: If the supplementary tools for Assimp are built in addition to the library.
 - **ASSIMP_BUILD_SAMPLES (default OFF)**: If the official samples are built as well (needs Glut).
 - **ASSIMP_BUILD_TESTS (default ON)**: If the test suite for Assimp is built in addition to the library.
@@ -83,6 +83,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **USE_STATIC_CRT (default OFF)**: Link against the static MSVC runtime libraries.
 - **ASSIMP_BUILD_DRACO (default OFF)**: Build Draco libraries. Primarily for glTF.
 - **ASSIMP_BUILD_ASSIMP_VIEW (default ON, if DirectX found, OFF otherwise)**: Build Assimp view tool (requires DirectX).
+- **ASSIMP_BUILD_USD_IMPORTER (default OFF, requires ASSIMP_WARNINGS_AS_ERRORS to be OFF)**: Build USD importer, defaults to off for CI purposes
 
 ### Install prebuild binaries
 ## Install on all platforms using vcpkg

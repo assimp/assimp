@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v5.4.3)
+AppVerName=Open Asset Import Library - SDK (v6.0.2)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x64\assimp.exe
@@ -12,9 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=..\..\tools\shared\assimp_tools_icon.bmp
 WizardSmallImageFile=..\..\tools\shared\assimp_tools_icon.bmp
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-5.4.3-setup
-VersionInfoVersion=5.4.3.0
-VersionInfoTextVersion=5.4.3
+OutputBaseFileName=assimp-sdk-6.0.2-setup
+VersionInfoVersion=6.0.2.0
+VersionInfoTextVersion=6.0.2
 VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 
@@ -43,7 +43,7 @@ Source: "vc_redist.x64.exe"; DestDir: "{app}\stub\"; Check: IsWin64
 ; Common stuff
 Source: "..\..\CREDITS"; DestDir: "{app}"
 Source: "..\..\LICENSE"; DestDir: "{app}"
-Source: "..\..\README"; DestDir: "{app}"
+Source: "..\..\README.md"; DestDir: "{app}"
 Source: "WEB"; DestDir: "{app}"
 
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs

@@ -332,7 +332,7 @@ void PretransformVertices::ApplyTransform(aiMesh *mesh, const aiMatrix4x4 &mat) 
 
 // ------------------------------------------------------------------------------------------------
 // Simple routine to build meshes in worldspace, no further optimization
-void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh *> &out, aiMesh **in,
+void PretransformVertices::BuildWCSMeshes(MeshArray &out, aiMesh **in,
 		unsigned int numIn, aiNode *node) const {
 	// NOTE:
 	//  aiMesh::mNumBones store original source mesh, or UINT_MAX if not a copy
@@ -459,7 +459,7 @@ void PretransformVertices::Execute(aiScene *pScene) {
 	}
 
 	// now build a list of output meshes
-	std::vector<aiMesh *> apcOutMeshes;
+	MeshArray apcOutMeshes;
 
 	// Keep scene hierarchy? It's an easy job in this case ...
 	// we go on and transform all meshes, if one is referenced by nodes

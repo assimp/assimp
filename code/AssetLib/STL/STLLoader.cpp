@@ -222,7 +222,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file
 void STLImporter::LoadASCIIFile(aiNode *root) {
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
     std::vector<aiNode *> nodes;
     const char *sz = mBuffer;
     const char *bufferEnd = mBuffer + mFileSize;

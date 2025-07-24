@@ -50,7 +50,7 @@ class utSceneCombiner : public ::testing::Test {
 };
 
 TEST_F(utSceneCombiner, MergeMeshes_ValidNames_Test) {
-    std::vector<aiMesh *> merge_list;
+    MeshArray merge_list;
     aiMesh *mesh1 = new aiMesh;
     mesh1->mName.Set("mesh_1");
     merge_list.push_back(mesh1);

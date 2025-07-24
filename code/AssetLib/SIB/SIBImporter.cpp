@@ -116,7 +116,7 @@ struct SIBObject {
 
 struct SIB {
     std::vector<aiMaterial *> mtls;
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
     std::vector<aiLight *> lights;
     std::vector<SIBObject> objs, insts;
 };

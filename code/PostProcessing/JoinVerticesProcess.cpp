@@ -100,6 +100,48 @@ void JoinVerticesProcess::Execute( aiScene* pScene) {
 
 namespace {
 
+struct CompareVerticesAlmostEqual {
+    bool operator () (const Vertex & a, const Vertex & b) const {
+        static const float epsilon = 1e-5f;
+        static const float squareEpsilon = epsilon * epsilon;
+
+        if ((a.position - b.position).SquareLength() > squareEpsilon) {
+            return (a.position < b.position);
+        }
+
+        if ((a.normal - b.normal).SquareLength() > squareEpsilon) {
+            return (a.normal < b.normal);
+        }
+
+        // We just test the other attributes even if they're not present in the mesh.
+        // In this case they're initialized to 0 so the comparison succeeds.
+        // By this method the non-present attributes are effectively ignored in the comparison.
+
+        if ((a.tangent - b.tangent).SquareLength() > squareEpsilon) {
+            return (a.tangent < b.tangent);
+        }
+
+        if ((a.bitangent - b.bitangent).SquareLength() > squareEpsilon) {
+            return (a.bitangent < b.bitangent);
+        }
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i ++) {
+            if ((a.texcoords[i] - b.texcoords[i]).SquareLength() > squareEpsilon) {
+                return (a.texcoords[i] < b.texcoords[i]);
+            }
+        }
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; i ++) {
+            if (GetColorDifference(a.colors[i], b.colors[i]) > squareEpsilon) {
+                return (a.colors[i] < b.colors[i]);
+            }
+        }
+
+        // if reached this point, they are ~equal
+        return false;
+    }
+};
+
 template<class XMesh>
 void updateXMeshVertices(XMesh *pMesh, std::vector<int> &uniqueVertices) {
     // replace vertex data with the unique data sets
@@ -208,7 +250,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
         }
     }
     // a map that maps a vertex to its new index
-    std::map<Vertex, int> vertex2Index = {};
+    std::map<Vertex, int, CompareVerticesAlmostEqual> vertex2Index = {};
     // we can not end up with more vertices than we started with
     // Now check each vertex if it brings something new to the table
     int newIndex = 0;

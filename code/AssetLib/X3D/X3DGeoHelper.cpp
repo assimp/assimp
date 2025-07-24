@@ -136,7 +136,7 @@ void X3DGeoHelper::coordIdx_str2faces_arr(const std::vector<int32_t> &pCoordIdx,
     unsigned int prim_type = 0;
 
     if (!f_data.empty()) {
-        if (f_data.back() != (InvalidIndex)) {
+        if (f_data.back() != InvalidIndex) {
             f_data.push_back(InvalidIndex);
         }
     }
@@ -196,7 +196,7 @@ void X3DGeoHelper::coordIdx_str2lines_arr(const std::vector<int32_t> &pCoordIdx,
     std::vector<int32_t> f_data(pCoordIdx);
 
     if (!f_data.empty()) {
-        if (f_data.back() != InvalidIndex)) {
+        if (f_data.back() != InvalidIndex) {
             f_data.push_back(InvalidIndex);
         }
     }

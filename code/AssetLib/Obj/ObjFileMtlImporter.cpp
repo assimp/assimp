@@ -264,8 +264,11 @@ void ObjFileMtlImporter::load() {
             case 'a': // Anisotropy
             {
                 ++m_DataIt;
-                if (m_pModel->mCurrentMaterial != nullptr)
-                    getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+                if (*m_DataIt == 'n') { // avoid possible conflicts with adobe_xxx parameters
+                    ++m_DataIt;
+                    if (m_pModel->mCurrentMaterial != nullptr)
+                        getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+                }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 

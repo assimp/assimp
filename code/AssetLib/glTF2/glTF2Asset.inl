@@ -641,7 +641,7 @@ inline bool Buffer::LoadFromStream(IOStream &stream, size_t length, size_t baseO
 
     mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
 
-    if (stream.Read(mData.get(), byteLength, 1) != 1) {
+    if (stream.Read(mData.get(), byteLength, 1) != byteLength) {
         return false;
     }
     return true;
@@ -1911,7 +1911,7 @@ inline void AssetMetadata::Read(Document &doc) {
 inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneData) {
     ASSIMP_LOG_DEBUG("Reading GLTF2 binary");
     GLB_Header header;
-    if (stream.Read(&header, sizeof(header), 1) != 1) {
+    if (stream.Read(&header, sizeof(header), 1) != sizeof(header)) {
         throw DeadlyImportError("GLTF: Unable to read the file header");
     }
 
@@ -1926,7 +1926,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     }
 
     GLB_Chunk chunk;
-    if (stream.Read(&chunk, sizeof(chunk), 1) != 1) {
+    if (stream.Read(&chunk, sizeof(chunk), 1) != sizeof(chunk)) {
         throw DeadlyImportError("GLTF: Unable to read JSON chunk");
     }
 
@@ -1955,7 +1955,7 @@ inline void Asset::ReadBinaryHeader(IOStream &stream, std::vector<char> &sceneDa
     AI_SWAP4(header.length);
     mBodyOffset = 12 + 8 + chunk.chunkLength + padding + 8;
     if (header.length >= mBodyOffset) {
-        if (stream.Read(&chunk, sizeof(chunk), 1) != 1) {
+        if (stream.Read(&chunk, sizeof(chunk), 1) != sizeof(chunk)) {
             throw DeadlyImportError("GLTF: Unable to read BIN chunk");
         }
 

@@ -641,7 +641,9 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, d += 3) {
-                BE_NCONST double val1 = d[0], val2 = d[1], val3 = d[2];
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
+                BE_NCONST double val3 = d[2];
                 AI_SWAP8(val1);
                 AI_SWAP8(val2);
                 AI_SWAP8(val3);
@@ -660,7 +662,9 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, f += 3) {
-                BE_NCONST float val1 = f[0], val2 = f[1], val3 = f[2];
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
+                BE_NCONST float val3 = f[2];
                 AI_SWAP4(val1);
                 AI_SWAP4(val2);
                 AI_SWAP4(val3);
@@ -738,7 +742,10 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, d += 4) {
-                BE_NCONST double val1 = d[0], val2 = d[1], val3 = d[2], val4 = d[3];
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
+                BE_NCONST double val3 = d[2];
+                BE_NCONST double val4 = d[3];
                 AI_SWAP8(val1);
                 AI_SWAP8(val2);
                 AI_SWAP8(val3);
@@ -752,7 +759,10 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, f += 4) {
-                BE_NCONST float val1 = f[0], val2 = f[1], val3 = f[2], val4 = f[3];
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
+                BE_NCONST float val3 = f[2];
+                BE_NCONST float val4 = f[3];
                 AI_SWAP4(val1);
                 AI_SWAP4(val2);
                 AI_SWAP4(val3);
@@ -829,7 +839,8 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el) {
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, d += 2) {
-                BE_NCONST double val1 = d[0], val2 = d[1];
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
                 AI_SWAP8(val1);
                 AI_SWAP8(val2);
                 out.emplace_back(static_cast<float>(val1),
@@ -838,7 +849,8 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el) {
         } else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, f += 2) {
-                BE_NCONST float val1 = f[0], val2 = f[1];
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
                 AI_SWAP4(val1);
                 AI_SWAP4(val2);
                 out.emplace_back(val1,val2);

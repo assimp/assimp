@@ -176,8 +176,8 @@ void MDLImporter::InternReadFile(const std::string &pFile,
 
     // This should work for all other types of MDL files, too ...
     // the HL1 sequence group header is one of the smallest, afaik
-    iFileSize = (unsigned int)file->FileSize();
-    if (iFileSize < sizeof(MDL::HalfLife::SequenceHeader_HL1)) {
+    mBuffersize = (unsigned int)file->FileSize();
+    if (mBuffersize < sizeof(HalfLife::SequenceHeader_HL1)) {
         throw DeadlyImportError("MDL File is too small.");
     }
 
@@ -193,13 +193,13 @@ void MDLImporter::InternReadFile(const std::string &pFile,
 
     try {
         // Allocate storage and copy the contents of the file to a memory buffer
-        mBuffer = new unsigned char[iFileSize + 1];
-        file->Read((void *)mBuffer, 1, iFileSize);
+        mBuffer = new unsigned char[mBuffersize + 1];
+        file->Read((void *)mBuffer, 1, mBuffersize);
 
         // Append a binary zero to the end of the buffer.
         // this is just for safety that string parsing routines
         // find the end of the buffer ...
-        mBuffer[iFileSize] = '\0';
+        mBuffer[mBuffersize] = '\0';
         const uint32_t iMagicWord = *((uint32_t *)mBuffer);
 
         // Determine the file subtype and call the appropriate member function
@@ -1985,6 +1985,7 @@ void MDLImporter::InternReadFile_HL1(const std::string &pFile, const uint32_t iM
             pScene,
             mIOHandler,
             mBuffer,
+            mBuffersize,
             pFile,
             mHL1ImportSettings);
 }

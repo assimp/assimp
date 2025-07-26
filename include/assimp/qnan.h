@@ -70,9 +70,15 @@ union _IEEESingle {
     float Float;
     struct
     {
+#if (defined AI_BUILD_BIG_ENDIAN)
+        uint32_t Sign : 1;
+        uint32_t Exp  : 8;
+        uint32_t Frac : 23;
+#else
         uint32_t Frac : 23;
         uint32_t Exp  : 8;
         uint32_t Sign : 1;
+#endif
     } IEEE;
 };
 
@@ -83,9 +89,15 @@ union _IEEEDouble {
     double Double;
     struct
     {
+#if (defined AI_BUILD_BIG_ENDIAN)
+        uint64_t Sign : 1;
+        uint64_t Exp  : 11;
+        uint64_t Frac : 52;
+#else
         uint64_t Frac : 52;
         uint64_t Exp  : 11;
         uint64_t Sign : 1;
+#endif
     } IEEE;
 };
 

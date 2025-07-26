@@ -394,7 +394,7 @@ void HL1MDLLoader::read_textures() {
 
         aiMaterial *scene_material = scene_->mMaterials[i] = new aiMaterial();
 
-        const aiTextureType texture_type = aiTextureType_DIFFUSE;
+        constexpr aiTextureType texture_type = aiTextureType_DIFFUSE;
         aiString texture_name(ptexture[i].name);
         scene_material->AddProperty(&texture_name, AI_MATKEY_TEXTURE(texture_type, 0));
 

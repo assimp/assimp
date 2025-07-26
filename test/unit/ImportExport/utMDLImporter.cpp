@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    void importerTest_HL1(Assimp::Importer *const importer) {
+    void importerTest_HL1(Importer *const importer) {
         const aiScene *scene = importer->ReadFile(MDL_HL1_FILE_MAN, 0);
         EXPECT_NE(nullptr, scene);
 

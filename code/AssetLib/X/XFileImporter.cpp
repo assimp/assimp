@@ -219,7 +219,7 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
     }
 
     // create a mesh for each mesh-material combination in the source node
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
     for (unsigned int a = 0; a < pMeshes.size(); ++a) {
         XFile::Mesh *sourceMesh = pMeshes[a];
         if (nullptr == sourceMesh) {

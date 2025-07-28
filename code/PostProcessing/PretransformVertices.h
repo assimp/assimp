@@ -139,7 +139,7 @@ private:
 
 	// -------------------------------------------------------------------
 	// Simple routine to build meshes in worldspace, no further optimization
-	void BuildWCSMeshes(std::vector<aiMesh *> &out, aiMesh **in,
+	void BuildWCSMeshes(MeshArray &out, aiMesh **in,
 			unsigned int numIn, aiNode *node) const;
 
 	// -------------------------------------------------------------------

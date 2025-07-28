@@ -961,7 +961,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>(mesh->mtface.size())) {
             ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
             const auto itMatTexUvMapping = matTexUvMappings.find((*it)->mMaterialIndex);
@@ -1030,7 +1030,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>(mesh->tface.size())) {
             ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
 
@@ -1057,7 +1057,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>((mesh->mcol.size() / 4))) {
             ThrowException("Number of faces is larger than the corresponding color face array");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
 

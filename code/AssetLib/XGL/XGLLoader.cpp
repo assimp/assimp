@@ -139,7 +139,7 @@ void XGLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 		ReadWorld(*worldNode, scope);
 	}
 
-	std::vector<aiMesh *> &meshes = scope.meshes_linear;
+	MeshArray &meshes = scope.meshes_linear;
 	std::vector<aiMaterial *> &materials = scope.materials_linear;
 	if (meshes.empty() || materials.empty()) {
 		ThrowException("failed to extract data from XGL file, no meshes loaded");

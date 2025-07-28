@@ -162,7 +162,7 @@ aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<aiMaterial *> materials) {
+void IRRImporter::BuildSkybox(MeshArray &meshes, std::vector<aiMaterial *> materials) {
     // Update the material of the skybox - replace the name and disable shading for skyboxes.
     for (unsigned int i = 0; i < 6; ++i) {
         aiMaterial *out = (aiMaterial *)(*(materials.end() - (6 - i)));
@@ -602,7 +602,7 @@ void SetupMapping(aiMaterial *mat, aiTextureMapping mode, const aiVector3D &axis
 // ------------------------------------------------------------------------------------------------
 void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         BatchLoader &batch,
-        std::vector<aiMesh *> &meshes,
+        MeshArray &meshes,
         std::vector<aiNodeAnim *> &anims,
         std::vector<AttachmentInfo> &attach,
         std::vector<aiMaterial *> &materials,
@@ -1283,7 +1283,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::vector<aiNodeAnim *> anims;
     std::vector<aiMaterial *> materials;
     std::vector<AttachmentInfo> attach;
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
 
     // try to guess how much storage we'll need
     anims.reserve(guessedAnimCnt + (guessedAnimCnt >> 2));

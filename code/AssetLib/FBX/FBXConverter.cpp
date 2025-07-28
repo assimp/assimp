@@ -227,9 +227,11 @@ struct FBXConverter::PotentialNode {
     PotentialNode() : mOwnership(new aiNode), mNode(mOwnership.get()) {
         // empty
     }
-    PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {
+    
+    explicit PotentialNode(const std::string& name) : mOwnership(new aiNode(name)), mNode(mOwnership.get()) {
         // empty
     }
+    
     aiNode* operator->() {
         return mNode;
     }

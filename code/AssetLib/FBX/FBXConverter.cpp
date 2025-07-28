@@ -1544,7 +1544,7 @@ static void copyBoneToSkeletonBone(aiMesh *mesh, aiBone *bone, aiSkeletonBone *s
 void FBXConverter::ConvertWeightsToSkeleton(aiMesh *out, const MeshGeometry &geo, const aiMatrix4x4 &absolute_transform, aiNode *parent, unsigned int materialIndex,
         std::vector<unsigned int> *outputVertStartIndices, SkeletonBoneContainer &skeletonContainer) {
 
-    if (skeletonContainer.contains(out)) {
+    if (skeletonContainer.skeletonBoneToMeshLookup.find(out) != skeletonContainer.skeletonBoneToMeshLookup.end()) {
         return;
     }
 

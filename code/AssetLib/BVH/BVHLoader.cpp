@@ -385,7 +385,7 @@ float BVHLoader::GetNextTokenAsFloat() {
     // check if the float is valid by testing if the atof() function consumed every char of the token
     const char *ctoken = token.c_str();
     float result = 0.0f;
-    ctoken = fast_atoreal_move<float>(ctoken, result);
+    ctoken = fast_atoreal_move(ctoken, result);
 
     if (ctoken != token.c_str() + token.length())
         ThrowException("Expected a floating point number, but found \"", token, "\".");

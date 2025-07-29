@@ -1277,7 +1277,7 @@ ai_real XFileParser::ReadFloat() {
     }
 
     ai_real result = 0.0;
-    mP = fast_atoreal_move<ai_real>(mP, result);
+    mP = fast_atoreal_move(mP, result);
 
     CheckForSeparator();
 

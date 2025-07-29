@@ -86,7 +86,7 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
     SkipSpaces(&sz, lineEnd);          \
-    if (!IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
+    if (!IsLineEnd(*sz)) sz = fast_atoreal_move(sz, (ai_real &)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \

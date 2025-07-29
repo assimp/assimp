@@ -404,7 +404,7 @@ std::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& i
     for(;*cur  && *cur != ',' && *cur != ')' && !IsSpace(*cur);++cur) {
         if (*cur == '.') {
             double f;
-            inout = fast_atoreal_move<double>(start,f);
+            inout = fast_atoreal_move(start,f);
             return std::make_shared<EXPRESS::REAL>(f);
         }
     }

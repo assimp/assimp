@@ -678,8 +678,8 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
 // ------------------------------------------------------------------------------------------------
 // Build a list of unique bones
 void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
-        std::vector<aiMesh *>::const_iterator it,
-        std::vector<aiMesh *>::const_iterator end) {
+        MeshArray::const_iterator it,
+        MeshArray::const_iterator end) {
     unsigned int iOffset = 0;
     for (; it != end; ++it) {
         for (unsigned int l = 0; l < (*it)->mNumBones; ++l) {
@@ -712,8 +712,7 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
 
 // ------------------------------------------------------------------------------------------------
 // Merge a list of bones
-void SceneCombiner::MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterator it,
-        std::vector<aiMesh *>::const_iterator end) {
+void SceneCombiner::MergeBones(aiMesh *out, MeshArray::const_iterator it, MeshArray::const_iterator end) {
     if (nullptr == out || out->mNumBones == 0) {
         return;
     }
@@ -771,8 +770,8 @@ void SceneCombiner::MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterato
 // ------------------------------------------------------------------------------------------------
 // Merge a list of meshes
 void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
-        std::vector<aiMesh *>::const_iterator begin,
-        std::vector<aiMesh *>::const_iterator end) {
+        MeshArray::const_iterator begin,
+        MeshArray::const_iterator end) {
     if (nullptr == _out) {
         return;
     }
@@ -788,7 +787,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
 
     std::string name;
     // Find out how much output storage we'll need
-    for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+    for (MeshArray::const_iterator it = begin; it != end; ++it) {
         const char *meshName((*it)->mName.C_Str());
         name += std::string(meshName);
         if (it != end - 1) {
@@ -810,7 +809,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         if ((**begin).HasPositions()) {
 
             pv2 = out->mVertices = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mVertices) {
                     ::memcpy(pv2, (*it)->mVertices, (*it)->mNumVertices * sizeof(aiVector3D));
                 } else
@@ -822,7 +821,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         if ((**begin).HasNormals()) {
 
             pv2 = out->mNormals = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mNormals) {
                     ::memcpy(pv2, (*it)->mNormals, (*it)->mNumVertices * sizeof(aiVector3D));
                 } else {
@@ -837,7 +836,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
             pv2 = out->mTangents = new aiVector3D[out->mNumVertices];
             aiVector3D *pv2b = out->mBitangents = new aiVector3D[out->mNumVertices];
 
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mTangents) {
                     ::memcpy(pv2, (*it)->mTangents, (*it)->mNumVertices * sizeof(aiVector3D));
                     ::memcpy(pv2b, (*it)->mBitangents, (*it)->mNumVertices * sizeof(aiVector3D));
@@ -854,7 +853,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
             out->mNumUVComponents[n] = (*begin)->mNumUVComponents[n];
 
             pv2 = out->mTextureCoords[n] = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mTextureCoords[n]) {
                     ::memcpy(pv2, (*it)->mTextureCoords[n], (*it)->mNumVertices * sizeof(aiVector3D));
                 } else {
@@ -868,7 +867,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         n = 0;
         while ((**begin).HasVertexColors(n)) {
             aiColor4D *pVec2 = out->mColors[n] = new aiColor4D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mColors[n]) {
                     ::memcpy(pVec2, (*it)->mColors[n], (*it)->mNumVertices * sizeof(aiColor4D));
                 } else {
@@ -887,7 +886,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         aiFace *pf2 = out->mFaces;
 
         unsigned int ofs = 0;
-        for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+        for (MeshArray::const_iterator it = begin; it != end; ++it) {
             for (unsigned int m = 0; m < (*it)->mNumFaces; ++m, ++pf2) {
                 aiFace &face = (*it)->mFaces[m];
                 pf2->mNumIndices = face.mNumIndices;
@@ -910,7 +909,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         MergeBones(out, begin, end);
 
     // delete all source meshes
-    for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it)
+    for (MeshArray::const_iterator it = begin; it != end; ++it)
         delete *it;
 }
 

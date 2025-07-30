@@ -1043,6 +1043,10 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
+        return static_cast<int64_t>(ticks * FBX::SECOND);
+    }
+    
     // Defensive: handle zero or near-zero mTicksPerSecond
     double tps = anim->mTicksPerSecond;
     double timeVal;
@@ -1062,7 +1066,7 @@ inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (timeVal < kMin) {
         return INT64_MIN;
     }
-    return static_cast<int64_t>(timeVal * FBX::SECOND);
+    return static_cast<int64_t>((ticks / anim->mTicksPerSecond) * FBX::SECOND);
 }
 
 inline int64_t to_ktime(double time) {
@@ -1094,7 +1098,6 @@ void FBXExporter::WriteObjects () {
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
     // save vertex_indices as it is needed later
     std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
-
     std::vector<uint32_t> uniq_v_before_mi;
 
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
@@ -1338,14 +1341,13 @@ void FBXExporter::WriteObjects () {
         } else {
           mat.AddChild("MappingInformationType", "ByPolygon");
           mat.AddChild("ReferenceInformationType", "IndexToDirect");
-          std::vector<int32_t> mat_indices(polygon_data.size());
-          uint32_t curr_offset = 0;
-          for (uint32_t mi = 0; mi < node->mNumMeshes; mi++) {
-            uint32_t num_faces = mScene->mMeshes[node->mMeshes[mi]]->mNumFaces;
-            for (uint32_t fi = 0; fi < num_faces; fi++) {
-              mat_indices[curr_offset + fi] = mi;
+          std::vector<int32_t> mat_indices;
+          for (uint32_t n_mi = 0; n_mi < node->mNumMeshes; n_mi++) {
+            const auto mi = node->mMeshes[n_mi];
+            const auto *const m = mScene->mMeshes[mi];
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              mat_indices.push_back(n_mi);
             }
-            curr_offset += num_faces;
           }
           mat.AddChild("Materials", mat_indices);
         }
@@ -2065,7 +2067,7 @@ void FBXExporter::WriteObjects () {
                 int32_t last_index = -1;
                 for (size_t wi = 0; wi < b->mNumWeights; ++wi) {
                     if (b->mWeights[wi].mVertexId >= vVertexIndice[mi].size()) {
-			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
+                  			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
                         continue;
                     }
                     int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId]

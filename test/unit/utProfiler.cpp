@@ -70,6 +70,7 @@ TEST_F( utProfiler, addRegion_success ) {
     for ( int i=0; i<10; i++ ) {
         volatile int j=0;
         j++;
+        (void)j; /* avoid gcc-16 warnings about unused variable */
     }
     myProfiler.EndRegion( "t1" );
     //UTLogStream *stream( (UTLogStream*) m_stream );

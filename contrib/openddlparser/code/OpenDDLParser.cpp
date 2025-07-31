@@ -688,7 +688,7 @@ char *OpenDDLParser::parseIntegerLiteral(char *in, char *end, Value **integer, V
 
     in = lookForNextToken(in, end);
     char *start(in);
-    while (in != end && !isSeparator(P0+r\P0+r\P0+r\P0+r\P0+r\*in)) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
     }
 

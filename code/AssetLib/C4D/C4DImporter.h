@@ -97,11 +97,12 @@ private:
 
     bool ReadShader(aiMaterial* out, cineware::BaseShader* shader);
 
-    std::vector<aiMesh*> meshes;
-    std::vector<aiMaterial*> materials;
+  private:
+    MeshArray mMeshes;
+    MaterialArray materials;
 
-    typedef std::map<cineware::BaseMaterial*, unsigned int> MaterialMap;
-    MaterialMap material_mapping;
+    using MaterialMap = std::map<cineware::BaseMaterial*, unsigned int> ;
+    MaterialMap mMaterialMapping;
 
 }; // !class C4DImporter
 

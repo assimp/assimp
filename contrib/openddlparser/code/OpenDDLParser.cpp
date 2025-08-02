@@ -655,7 +655,7 @@ char *OpenDDLParser::parseBooleanLiteral(char *in, char *end, Value **boolean) {
     char *start(in);
 
     size_t len(0);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
         ++len;
     }
@@ -688,7 +688,7 @@ char *OpenDDLParser::parseIntegerLiteral(char *in, char *end, Value **integer, V
 
     in = lookForNextToken(in, end);
     char *start(in);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
     }
 
@@ -831,7 +831,7 @@ char *OpenDDLParser::parseHexaLiteral(char *in, char *end, Value **data) {
     bool ok(true);
     char *start(in);
     int pos(0);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         if ((*in < '0' && *in > '9') || (*in < 'a' && *in > 'f') || (*in < 'A' && *in > 'F')) {
             ok = false;
             break;

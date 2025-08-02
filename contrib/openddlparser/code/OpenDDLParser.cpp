@@ -790,9 +790,12 @@ char *OpenDDLParser::parseStringLiteral(char *in, char *end, Value **stringData)
     if (*start == '\"') {
         ++start;
         ++in;
-        while (*in != '\"' && in != end) {
+        while (in != end && *in != '\"') {
             ++in;
             ++len;
+        }
+        if (in == end) {
+            return in;
         }
 
         *stringData = ValueAllocator::allocPrimData(Value::ValueType::ddl_string, len);

@@ -583,6 +583,9 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
     size_t prim_len(0);
     for (size_t i = 0; i < (size_t) Value::ValueType::ddl_types_max; i++) {
         prim_len = strlen(Grammar::PrimitiveTypeToken[i]);
+        if (static_cast<size_t>(end - in) < prim_len) {
+            continue;
+        }
         if (0 == strncmp(in, Grammar::PrimitiveTypeToken[i], prim_len)) {
             type = static_cast<Value::ValueType>(i);
             break;

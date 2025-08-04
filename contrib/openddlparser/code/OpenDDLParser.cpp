@@ -636,9 +636,9 @@ char *OpenDDLParser::parseReference(char *in, char *end, std::vector<Name *> &na
     if (nextName) {
         names.push_back(nextName);
     }
-    while (Grammar::CommaSeparator[0] == *in) {
+    while (in != end && Grammar::CommaSeparator[0] == *in) {
         in = getNextSeparator(in, end);
-        if (Grammar::CommaSeparator[0] == *in) {
+        if (in != end && Grammar::CommaSeparator[0] == *in) {
             in = parseName(in, end, &nextName);
             if (nextName) {
                 names.push_back(nextName);

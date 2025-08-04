@@ -193,9 +193,9 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             else {
                 ++aiNumPerPType[3];
                 numPolyVerts += pFirstFace->mNumIndices;
-                if (pFirstFace->mNumIndices == 0) {
-                    ASSIMP_LOG_WARN("Face with 0 indices treated as polygon");
-                }
+            }
+            if (pFirstFace->mNumIndices == 0) {
+                ASSIMP_LOG_WARN("Face with 0 indices treated as polygon");
             }
         }
 

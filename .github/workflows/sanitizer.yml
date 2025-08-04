@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
-    - uses: lukka/set-shell-env@v1
+    - uses: lukka/set-shell-env@v1.1
       with:
         CXX: clang++
         CC: clang
@@ -40,7 +40,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: lukka/get-cmake@latest    
-    - uses: lukka/set-shell-env@v1
+    - uses: lukka/set-shell-env@v1.1
       with:
         CXX: clang++
         CC: clang

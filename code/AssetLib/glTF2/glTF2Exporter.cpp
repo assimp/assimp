@@ -1239,7 +1239,7 @@ void glTF2Exporter::ExportMeshes() {
         }
 
         /******************** Tangents ********************/
-        if (nullptr != aim->mTangents) {
+        if (nullptr != aim->mTangents && nullptr != aim->mBitangents) {
           // Find the handedness by calculating the bitangent without the handedness factor,
           // the use a dot product to find out if the original bitangent was inverted (multiplied
           // by a factor of -1.0) or not (multiplied by 1.0)

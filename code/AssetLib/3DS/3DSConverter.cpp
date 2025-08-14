@@ -319,7 +319,7 @@ void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
 // ------------------------------------------------------------------------------------------------
 // Split meshes by their materials and generate output aiMesh'es
 void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
-    MeshArray avOutMeshes;
+    std::vector<aiMesh *> avOutMeshes;
     avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
     unsigned int iFaceCnt = 0, num = 0;

@@ -1404,10 +1404,10 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     sharedData.apcOutBones = this->LoadBones_3DGS_MDL7();
 
     // vector to held all created meshes
-    MeshArray *avOutList;
+    std::vector<aiMesh *> *avOutList;
 
     // 3 meshes per group - that should be OK for most models
-    avOutList = new MeshArray[pcHeader->groups_num];
+    avOutList = new std::vector<aiMesh *>[pcHeader->groups_num];
     for (uint32_t i = 0; i < pcHeader->groups_num; ++i)
         avOutList[i].reserve(3);
 

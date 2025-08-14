@@ -126,7 +126,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
 
     unsigned int aiNumMeshesPerPType[4] = { 0, 0, 0, 0 };
 
-    MeshArray outMeshes;
+    std::vector<aiMesh *> outMeshes;
     outMeshes.reserve(static_cast<size_t>(pScene->mNumMeshes) << 1u);
 
     bool bAnyChanges = false;

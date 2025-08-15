@@ -165,6 +165,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>(outMeshes.size());
                 outMeshes.emplace_back(mesh);
+                pScene->mMeshes[i] = nullptr; // Indicate ownership transfer
             } else {
                 delete mesh;
                 pScene->mMeshes[i] = nullptr;

@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLLoader.h"
 #include "AssetLib/MD2/MD2FileData.h"
 #include "HalfLife/HL1MDLLoader.h"
+#include "HalfLife/HL1FileData.h"
 #include "MDLDefaultColorMap.h"
 
 #include <assimp/StringUtils.h>
@@ -1404,10 +1405,10 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     sharedData.apcOutBones = this->LoadBones_3DGS_MDL7();
 
     // vector to held all created meshes
-    std::vector<aiMesh *> *avOutList;
+    MeshArray *avOutList;
 
     // 3 meshes per group - that should be OK for most models
-    avOutList = new std::vector<aiMesh *>[pcHeader->groups_num];
+    avOutList = new MeshArray[pcHeader->groups_num];
     for (uint32_t i = 0; i < pcHeader->groups_num; ++i)
         avOutList[i].reserve(3);
 
@@ -1979,6 +1980,11 @@ void MDLImporter::InternReadFile_HL1(const std::string &pFile, const uint32_t iM
     // We can't correctly load an MDL from a MDL "sequence" file.
     if (iMagicWord == AI_MDL_MAGIC_NUMBER_BE_HL2b || iMagicWord == AI_MDL_MAGIC_NUMBER_LE_HL2b)
         throw DeadlyImportError("Impossible to properly load a model from an MDL sequence file.");
+
+    // Check if the buffer is large enough to hold the header
+    if (iFileSize < sizeof(HalfLife::Header_HL1)) {
+        throw DeadlyImportError("HL1 MDL file is too small to contain header.");
+    }
 
     // Read the MDL file.
     HalfLife::HL1MDLLoader loader(

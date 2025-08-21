@@ -645,7 +645,11 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
         const size_t length = img.GetDataLength();
         void *data = img.StealData();
 
-        tex->mFilename = !img.name.empty() ? img.name : img.bufferView->name;
+        tex->mFilename = img.name;
+        if (img.name.empty() && img.bufferView->name != nullptr) {
+            tex->mFilename = img.bufferView->name;
+        }
+
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel *>(data);

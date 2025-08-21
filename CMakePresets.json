@@ -1,0 +1,17 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "assimp_with_tools",
+            "binaryDir": "${sourceDir}",
+            "cacheVariables": {
+                "ASSIMP_BUILD_ASSIMP_TOOLS" : "ON"
+            }
+        }
+    ]
+}

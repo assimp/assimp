@@ -136,7 +136,7 @@ void RAWImporter::InternReadFile(const std::string &pFile,
             unsigned int num;
             for (num = 0; num < 12; ++num) {
                 if (!SkipSpaces(&sz, end) || !IsNumeric(*sz)) break;
-                sz = fast_atoreal_move<float>(sz, data[num]);
+                sz = fast_atoreal_move(sz, data[num]);
             }
             if (num != 12 && num != 9) {
                 ASSIMP_LOG_ERROR("A line may have either 9 or 12 floats and an optional texture");

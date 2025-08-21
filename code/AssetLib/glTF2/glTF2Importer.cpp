@@ -1326,7 +1326,6 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
         if (samplers.translation && samplers.translation->input && samplers.translation->output) {
             float *times = nullptr;
             samplers.translation->input->ExtractData(times);
-            //aiVector3D *values = nullptr;
             vec4f *tmp_values = nullptr;
             size_t numItems = samplers.translation->output->ExtractData(tmp_values);
             aiVector3D *values = new aiVector3D[numItems];
@@ -1648,7 +1647,10 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         size_t length = img.GetDataLength();
         void *data = img.StealData();
 
-        tex->mFilename = !img.name.empty() ? img.name : img.bufferView->name;
+        tex->mFilename = img.name;
+        if (img.name.empty() && img.bufferView->name != nullptr) {
+            tex->mFilename = img.bufferView->name;
+        }
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel *>(data);

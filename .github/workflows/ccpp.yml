@@ -48,7 +48,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
           submodules: true
           

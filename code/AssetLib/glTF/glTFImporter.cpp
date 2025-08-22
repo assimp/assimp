@@ -655,7 +655,7 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
         void *data = img.StealData();
 
         tex->mFilename = img.name;
-        if (img.name.empty() && img.bufferView->name != nullptr) {
+        if (img.name.empty() && img.bufferView != nullptr) {
             tex->mFilename = img.bufferView->name;
         }
 

@@ -982,7 +982,7 @@ bool SMDImporter::ParseFloat(const char *szCurrent, const char **szCurrentOut, c
         return false;
     }
 
-    *szCurrentOut = fast_atoreal_move<float>(szCurrent,out);
+    *szCurrentOut = fast_atoreal_move(szCurrent,out);
     return true;
 }
 

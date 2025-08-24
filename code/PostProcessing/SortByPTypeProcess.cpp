@@ -165,6 +165,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>(outMeshes.size());
                 outMeshes.emplace_back(mesh);
+                pScene->mMeshes[i] = nullptr; // Indicate ownership transfer
             } else {
                 delete mesh;
                 pScene->mMeshes[i] = nullptr;
@@ -188,11 +189,14 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
 
         unsigned int numPolyVerts = 0;
         for (; pFirstFace != pLastFace; ++pFirstFace) {
-            if (pFirstFace->mNumIndices <= 3)
+            if (pFirstFace->mNumIndices >= 1 && pFirstFace->mNumIndices <= 3)
                 ++aiNumPerPType[pFirstFace->mNumIndices - 1];
             else {
                 ++aiNumPerPType[3];
                 numPolyVerts += pFirstFace->mNumIndices;
+            }
+            if (pFirstFace->mNumIndices == 0) {
+                ASSIMP_LOG_WARN("Face with 0 indices treated as polygon");
             }
         }
 

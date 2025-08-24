@@ -598,6 +598,9 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
     } else {
         in += prim_len;
     }
+    if (in >= end) {
+        return in;
+    }
 
     bool ok(true);
     if (*in == Grammar::OpenArrayToken[0]) {
@@ -605,13 +608,13 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
         ++in;
         char *start(in);
         while (in != end) {
-            ++in;
             if (*in == Grammar::CloseArrayToken[0]) {
                 len = ::atoi(start);
                 ok = true;
                 ++in;
                 break;
             }
+            ++in;
         }
     } else {
         len = 1;
@@ -633,9 +636,9 @@ char *OpenDDLParser::parseReference(char *in, char *end, std::vector<Name *> &na
     if (nextName) {
         names.push_back(nextName);
     }
-    while (Grammar::CommaSeparator[0] == *in) {
+    while (in != end && Grammar::CommaSeparator[0] == *in) {
         in = getNextSeparator(in, end);
-        if (Grammar::CommaSeparator[0] == *in) {
+        if (in != end && Grammar::CommaSeparator[0] == *in) {
             in = parseName(in, end, &nextName);
             if (nextName) {
                 names.push_back(nextName);

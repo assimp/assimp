@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,18 +48,7 @@ using namespace ::Assimp::Profiling;
 
 class utProfiler : public ::testing::Test {
 public:
-    LogStream *m_stream;
-
-    /*virtual void SetUp() {
-        m_stream = new UTLogStream;
-        DefaultLogger::create();
-        DefaultLogger::get()->attachStream( m_stream );
-    }
-
-    virtual void TearDown() {
-        DefaultLogger::get()->detatchStream( m_stream );
-        m_stream = nullptr;
-    }*/
+    LogStream *mStream = nullptr;
 };
 
 TEST_F( utProfiler, addRegion_success ) {
@@ -70,8 +57,7 @@ TEST_F( utProfiler, addRegion_success ) {
     for ( int i=0; i<10; i++ ) {
         volatile int j=0;
         j++;
+        (void)j; /* avoid gcc-16 warnings about unused variable */
     }
     myProfiler.EndRegion( "t1" );
-    //UTLogStream *stream( (UTLogStream*) m_stream );
-    //EXPECT_FALSE( stream->m_messages.empty() );
 }

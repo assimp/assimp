@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The current version of Assimp that's being supported with security updates are:
+The current version of Assimp that's being supported with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |

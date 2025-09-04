@@ -138,16 +138,7 @@ inline ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT :
         mIsDefaultHandler( false ),
         mProgressHandler( nullptr ),
         mIsDefaultProgressHandler( false ),
-        mImporter(),
-        mPostProcessingSteps(),
         mScene( nullptr ),
-        mErrorString(),
-        mException(),
-        mIntProperties(),
-        mFloatProperties(),
-        mStringProperties(),
-        mMatrixProperties(),
-        mPointerProperties(),
         bExtraVerbose( false ),
         mPPShared( nullptr ) {
     // empty

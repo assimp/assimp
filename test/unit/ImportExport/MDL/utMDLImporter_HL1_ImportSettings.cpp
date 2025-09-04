@@ -187,14 +187,14 @@ private:
             const char *setting_key,
             bool setting_value,
             std::function<void(const aiScene *)> &&func) {
-        Assimp::Importer importer;
+        Importer importer;
         importer.SetPropertyBool(setting_key, setting_value);
         const aiScene *scene = importer.ReadFile(file_path, aiProcess_ValidateDataStructure);
         ASSERT_NE(nullptr, scene);
         func(scene);
     }
 
-    inline static aiNode *get_global_info(const aiScene *scene) {
+    static aiNode *get_global_info(const aiScene *scene) {
         return scene->mRootNode->FindNode(AI_MDL_HL1_NODE_GLOBAL_INFO);
     }
 

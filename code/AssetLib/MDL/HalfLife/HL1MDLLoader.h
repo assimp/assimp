@@ -74,6 +74,7 @@ public:
         aiScene *scene,
         IOSystem *io,
         const unsigned char *buffer,
+        size_t buffersize,
         const std::string &file_path,
         const HL1ImportSettings &import_settings);
 
@@ -159,6 +160,8 @@ private:
 
     /** Buffer from MDLLoader class. */
     const unsigned char *buffer_;
+
+    size_t mBuffersize = 0l;
 
     /** The full file path to the MDL file we are trying to load.
      * Used to locate other MDL files since MDL may store resources

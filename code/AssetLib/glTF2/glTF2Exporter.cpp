@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Header files, standard library.
 #include <cinttypes>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <iostream>
@@ -1238,13 +1239,25 @@ void glTF2Exporter::ExportMeshes() {
         }
 
         /******************** Tangents ********************/
-        if (nullptr != aim->mTangents) {
+        if (nullptr != aim->mTangents && nullptr != aim->mBitangents) {
+          // Find the handedness by calculating the bitangent without the handedness factor,
+          // the use a dot product to find out if the original bitangent was inverted (multiplied
+          // by a factor of -1.0) or not (multiplied by 1.0)
+          std::vector<ai_real> tangentsWithHandedness(aim->mNumVertices * 4);
             for (uint32_t i = 0; i < aim->mNumVertices; ++i) {
+                aiVector3D calculatedBitangent = aim->mNormals[i] ^ aim->mTangents[i];
+                ai_real bitangentDotProduct = calculatedBitangent * aim->mBitangents[i];
+                ai_real handedness = std::copysign(1.0, bitangentDotProduct);
                 aim->mTangents[i].NormalizeSafe();
+                tangentsWithHandedness[i * 4] = aim->mTangents[i][0];
+                tangentsWithHandedness[i * 4 + 1] = aim->mTangents[i][1];
+                tangentsWithHandedness[i * 4 + 2] = aim->mTangents[i][2];
+                tangentsWithHandedness[i * 4 + 3] = handedness;
             }
+
             Ref<Accessor> t = ExportData(
-                *mAsset, meshId, b, aim->mNumVertices, aim->mTangents, AttribType::VEC3,
-                AttribType::VEC3, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER
+                *mAsset, meshId, b, aim->mNumVertices, &tangentsWithHandedness[0], AttribType::VEC4,
+                AttribType::VEC4, ComponentType_FLOAT, BufferViewTarget_ARRAY_BUFFER
             );
             if (t) {
                 p.attributes.tangent.push_back(t);

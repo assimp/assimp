@@ -36,13 +36,21 @@ aiProcess_JoinIdenticalVertices = 0x2
 #
 aiProcess_MakeLeftHanded = 0x4
 
-## <hr>Triangulates all faces of all meshes. 
+## <hr>Triangulates all faces of all meshes.
 #
 # By default the imported mesh data might contain faces with more than 3
-# indices. For rendering you'll usually want all faces to be triangles. 
-# This post processing stepaiProcess_ForceGenNormals
-## <hr>Removes some parts of the data structure (animations, materials, 
-#  light sources, cameras, textures, vertex components).
+# indices. For rendering you'll usually want all faces to be triangles.
+# This post processing step splits up faces with more than 3 indices into
+# triangles. Line and point primitives are *not* modified! If you want
+# 'triangles only' with no other kinds of primitives, try the following
+# solution:
+# - Specify both #aiProcess_Triangulate and #aiProcess_SortByPType
+# - Ignore all point and line meshes when you process assimp's output
+#
+aiProcess_Triangulate = 0x8
+
+# <hr>Removes some parts of the data structure (animations, materials,
+#     light sources, cameras, textures, vertex components).
 #
 # The  components to be removed are specified in a separate
 # configuration option, <tt>#AI_CONFIG_PP_RVC_FLAGS<tt>. This is quite useful

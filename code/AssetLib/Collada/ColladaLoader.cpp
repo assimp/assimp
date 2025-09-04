@@ -1,4 +1,4 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -285,7 +285,8 @@ void ColladaLoader::ResolveNodeInstances(const ColladaParser &pParser, const Nod
     resolved.reserve(pNode->mNodeInstances.size());
 
     // ... and iterate through all nodes to be instanced as children of pNode
-    for (const auto &[mNode] : pNode->mNodeInstances) {
+    for (const auto &mNodeInstance : pNode->mNodeInstances) {
+        const auto &mNode = mNodeInstance.mNode;
         // find the corresponding node in the library
         const auto itt = pParser.mNodeLibrary.find(mNode);
         const Node *nd = itt == pParser.mNodeLibrary.end() ? nullptr : (*itt).second;

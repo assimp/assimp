@@ -105,8 +105,8 @@ inline void SetMaterialColorProperty(const std::vector<int> &embeddedTexIdxs, As
     if (prop.texture) {
         if (prop.texture->source) {
             aiString uri(prop.texture->source->uri);
-
-            if (const int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()]; texIdx != -1) { // embedded
+            const int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()];
+            if (texIdx != -1) { // embedded
                 // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
                 uri.data[0] = '*';
                 uri.length = 1 + ASSIMP_itoa10(uri.data + 1, AI_MAXLEN - 1, texIdx);
@@ -232,7 +232,11 @@ void glTFImporter::ImportMeshes(Asset &r) {
         k += static_cast<unsigned>(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
-            auto &[mode, attributes, indices, material] = mesh.primitives[p];
+            auto &primitive = mesh.primitives[p];
+            auto &mode = primitive.mode;
+            auto &attributes = primitive.attributes;
+            auto &indices = primitive.indices;
+            auto &material = primitive.material;
 
             aiMesh *aim = new aiMesh();
             meshes.push_back(aim);

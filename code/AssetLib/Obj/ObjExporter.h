@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -109,6 +109,15 @@ private:
     const aiScene* const pScene;
 
     struct vertexData {
+        vertexData()
+        {}
+
+        vertexData(const aiVector3D &_vp, const aiColor3D &_vc, uint32_t _index)
+            : vp(_vp)
+            , vc(_vc)
+            , index(_index)
+        {}
+
         aiVector3D vp;
         aiColor3D vc; // OBJ does not support 4D color
         uint32_t index = 0;

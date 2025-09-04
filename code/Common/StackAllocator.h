@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -72,11 +72,11 @@ public:
 
     /// @brief Returns a pointer to byteSize bytes of heap memory that persists
     ///        for the lifetime of the allocator (or until FreeAll is called).
-    inline void *Allocate(size_t byteSize);
+    void *Allocate(size_t byteSize);
 
     /// @brief Releases all the memory owned by this allocator.
     //         Memory provided through function Allocate is not valid anymore after this function has been called.
-    inline void FreeAll();
+    void FreeAll();
 
 private:
     constexpr const static size_t g_maxBytesPerBlock = 64 * 1024 * 1024; // The maximum size (in bytes) of a block
@@ -87,12 +87,5 @@ private:
 };
 
 } // namespace Assimp
-
-/// @brief Fixes an undefined reference error when linking in certain build environments.
-//         May throw warnings about needing stdc++17, but should compile without issues on modern compilers.
-inline const size_t Assimp::StackAllocator::g_maxBytesPerBlock;
-inline const size_t Assimp::StackAllocator::g_startBytesPerBlock;
-
-#include "StackAllocator.inl"
 
 #endif // include guard

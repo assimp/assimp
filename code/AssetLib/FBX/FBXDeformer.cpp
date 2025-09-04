@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -66,9 +66,6 @@ Deformer::Deformer(uint64_t id, const Element& element, const Document& doc, con
 }
 
 // ------------------------------------------------------------------------------------------------
-Deformer::~Deformer() = default;
-
-// ------------------------------------------------------------------------------------------------
 Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : Deformer(id,element,doc,name)
 , node()
@@ -113,10 +110,6 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
     }
 }
 
-
-// ------------------------------------------------------------------------------------------------
-Cluster::~Cluster() = default;
-
 // ------------------------------------------------------------------------------------------------
 Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : Deformer(id,element,doc,name)
@@ -142,9 +135,6 @@ Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::
     }
 }
 
-
-// ------------------------------------------------------------------------------------------------
-Skin::~Skin() = default;
 // ------------------------------------------------------------------------------------------------
 BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc, const std::string& name)
     : Deformer(id, element, doc, name)
@@ -161,8 +151,7 @@ BlendShape::BlendShape(uint64_t id, const Element& element, const Document& doc,
         }
     }
 }
-// ------------------------------------------------------------------------------------------------
-BlendShape::~BlendShape() = default;
+
 // ------------------------------------------------------------------------------------------------
 BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const Document& doc, const std::string& name)
     : Deformer(id, element, doc, name)
@@ -188,10 +177,8 @@ BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const 
         }
     }
 }
-// ------------------------------------------------------------------------------------------------
-BlendShapeChannel::~BlendShapeChannel() = default;
-// ------------------------------------------------------------------------------------------------
-}
-}
-#endif
 
+} // namespace FBX
+} // Namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_FBX_IMPORTER

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -286,6 +286,8 @@ void FBXExportProperty::DumpAscii(std::ostream& s, int indent) {
                 break;
             }
         }
+        // assimp issue #6112; fallthrough confirmed by @mesilliac
+        [[fallthrough]];
     case 'R':
         s << '"';
         // we might as well check this now,

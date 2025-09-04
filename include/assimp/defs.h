@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -49,14 +49,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_DEFINES_H_INC
 
 #ifdef __GNUC__
-#pragma GCC system_header
+#  pragma GCC system_header
 #endif
 
 #include <assimp/config.h>
 
 //////////////////////////////////////////////////////////////////////////
-/* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
- * file format loader. The loader is be excluded from the
+/**
+ * @brief Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific file format loader.
+ *
+ * The loader is be excluded from the
  * build in this case. 'XX' stands for the most common file
  * extension of the file format. E.g.:
  * ASSIMP_BUILD_NO_X_IMPORTER disables the X loader.
@@ -76,34 +78,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
-#define ASSIMP_BUILD_NEED_Z_INFLATE
+#  define ASSIMP_BUILD_NEED_Z_INFLATE
 #endif
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
-#define ASSIMP_BUILD_NEED_Z_INFLATE
+#  define ASSIMP_BUILD_NEED_Z_INFLATE
 #endif
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
-#define ASSIMP_BUILD_NEED_Z_INFLATE
-#define ASSIMP_BUILD_NEED_UNZIP
+#  define ASSIMP_BUILD_NEED_Z_INFLATE
+#  define ASSIMP_BUILD_NEED_UNZIP
 #endif
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#define ASSIMP_BUILD_NEED_Z_INFLATE
-#define ASSIMP_BUILD_NEED_UNZIP
+#  define ASSIMP_BUILD_NEED_Z_INFLATE
+#  define ASSIMP_BUILD_NEED_UNZIP
 #endif
 
-// We need those constants, workaround for any platforms where nobody defined them yet
+/**
+ * @brief We need those constants, workaround for any platforms where nobody defined them yet.
+ */
 #if (!defined SIZE_MAX)
-#define SIZE_MAX (~((size_t)0))
+#  define SIZE_MAX (~((size_t)0))
 #endif
-
-/*#if (!defined UINT_MAX)
-#define UINT_MAX (~((unsigned int)0))
-#endif*/
 
 //////////////////////////////////////////////////////////////////////////
-/* Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
+/** @brief Define ASSIMP_BUILD_NO_XX_PROCESS to disable a specific
+ *
  * post processing step. This is the current list of process names ('XX'):
  * CALCTANGENTS
  * JOINVERTICES
@@ -134,46 +135,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * OPTIMIZEGRAPH
  * GENENTITYMESHES
  * FIXTEXTUREPATHS
- * GENBOUNDINGBOXES */
-//////////////////////////////////////////////////////////////////////////
+ * GENBOUNDINGBOXES
+ */
 
+//////////////////////////////////////////////////////////////////////////
+/** @brief Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library
+ *
+ * Define 'ASSIMP_DLL' before including Assimp to link to ASSIMP in
+ * an external DLL under Windows. Default is static linkage.
+ */
+//////////////////////////////////////////////////////////////////////////
 #ifdef _WIN32
-#undef ASSIMP_API
-//////////////////////////////////////////////////////////////////////////
-/* Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library */
-//////////////////////////////////////////////////////////////////////////
-#ifdef ASSIMP_BUILD_DLL_EXPORT
-#define ASSIMP_API __declspec(dllexport)
-#define ASSIMP_API_WINONLY __declspec(dllexport)
-
-//////////////////////////////////////////////////////////////////////////
-/* Define 'ASSIMP_DLL' before including Assimp to link to ASSIMP in
-     * an external DLL under Windows. Default is static linkage. */
-//////////////////////////////////////////////////////////////////////////
-#elif (defined ASSIMP_DLL)
-#define ASSIMP_API __declspec(dllimport)
-#define ASSIMP_API_WINONLY __declspec(dllimport)
+#  undef ASSIMP_API
+#  ifdef ASSIMP_BUILD_DLL_EXPORT
+#    define ASSIMP_API __declspec(dllexport)
+#    define ASSIMP_API_WINONLY __declspec(dllexport)
+#  elif (defined ASSIMP_DLL)
+#    define ASSIMP_API __declspec(dllimport)
+#    define ASSIMP_API_WINONLY __declspec(dllimport)
+#  else
+#    define ASSIMP_API
+#    define ASSIMP_API_WINONLY
+#  endif
 #else
-#define ASSIMP_API
-#define ASSIMP_API_WINONLY
-#endif
-#elif defined(SWIG)
-/* Do nothing, the relevant defines are all in AssimpSwigPort.i */
-#else
-#define ASSIMP_API __attribute__((visibility("default")))
-#define ASSIMP_API_WINONLY
+#  define ASSIMP_API __attribute__((visibility("default")))
+#  define ASSIMP_API_WINONLY
 #endif // _WIN32
 
+/**
+ * @brief Helper macros
+ *
+ * @def   AI_FORCE_INLINE
+ * @brief Force the compiler to inline a function, if possible
+ *
+ * @def   AI_WONT_RETURN
+ * @brief Tells the compiler that a function never returns.
+ *
+ * Used in code analysis to skip dead paths (e.g. after an assertion evaluated to false).
+ */
 #ifdef _MSC_VER
-    #pragma warning(disable : 4521 4512 4714 4127 4351 4510)
+    #pragma warning(disable : 4521 4512 4714 4127 4510)
+    #if _MSC_VER < 1900
+        #pragma warning(disable : 4351)
+    #endif
     #ifdef ASSIMP_BUILD_DLL_EXPORT
         #pragma warning(disable : 4251)
     #endif
-    /* Force the compiler to inline a function, if possible */
     #define AI_FORCE_INLINE inline
-
-    /* Tells the compiler that a function never returns. Used in code analysis
-    * to skip dead paths (e.g. after an assertion evaluated to false). */
     #define AI_WONT_RETURN __declspec(noreturn)
 #elif defined(SWIG)
   /* Do nothing, the relevant defines are all in AssimpSwigPort.i */
@@ -223,29 +231,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      * to typedef all structs/enums. */
 //////////////////////////////////////////////////////////////////////////
 #if (defined ASSIMP_DOXYGEN_BUILD)
-#define C_STRUCT
-#define C_ENUM
+#  define C_STRUCT
+#  define C_ENUM
 #else
-#define C_STRUCT struct
-#define C_ENUM enum
+#  define C_STRUCT struct
+#  define C_ENUM enum
 #endif
 #endif
 
 #if (defined(__BORLANDC__) || defined(__BCPLUSPLUS__))
-#error Currently, Borland is unsupported. Feel free to port Assimp.
+#  error Currently, Borland is unsupported. Feel free to port Assimp.
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-/* Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
-     * without threading support. The library doesn't utilize
-     * threads then and is itself not threadsafe. */
+/**
+ * Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
+ * without threading support. The library doesn't utilize
+ * threads then and is itself not threadsafe.
+ */
 //////////////////////////////////////////////////////////////////////////
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-#define ASSIMP_BUILD_SINGLETHREADED
+#  define ASSIMP_BUILD_SINGLETHREADED
 #endif
 
 #if defined(_DEBUG) || !defined(NDEBUG)
-#define ASSIMP_BUILD_DEBUG
+#  define ASSIMP_BUILD_DEBUG
 #endif
 
 //////////////////////////////////////////////////////////////////////////
@@ -291,55 +301,74 @@ typedef unsigned int ai_uint;
 #ifdef __cplusplus
 constexpr ai_real ai_epsilon = (ai_real) 1e-6;
 #else
-#define ai_epsilon ((ai_real)1e-6)
-#endif
-
-/* Support for big-endian builds */
-#if defined(__BYTE_ORDER__)
-#if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-#if !defined(__BIG_ENDIAN__)
-#define __BIG_ENDIAN__
-#endif
-#else /* little endian */
-#if defined(__BIG_ENDIAN__)
-#undef __BIG_ENDIAN__
-#endif
-#endif
-#endif
-#if defined(__BIG_ENDIAN__)
-#define AI_BUILD_BIG_ENDIAN
+#  define ai_epsilon ((ai_real)1e-6)
 #endif
 
 /**
- *  To avoid running out of memory
+ * @brief Support for big-endian builds
+ *
+ * This will check which byte ordering is used on the target architecture.
+ */
+#if defined(__BYTE_ORDER__)
+#  if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#    if !defined(__BIG_ENDIAN__)
+#      define __BIG_ENDIAN__
+#    endif
+#  else /* little endian */
+#    if defined(__BIG_ENDIAN__)
+#      undef __BIG_ENDIAN__
+#    endif
+#  endif
+#endif
+#if defined(__BIG_ENDIAN__)
+#  define AI_BUILD_BIG_ENDIAN
+#endif
+
+/**
+ *  @brief To avoid running out of memory
+ *
  *  This can be adjusted for specific use cases
  *  It's NOT a total limit, just a limit for individual allocations
  */
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
 #ifndef _MSC_VER
-#if __cplusplus >= 201103L // C++11
-#define AI_NO_EXCEPT noexcept
+#  if __cplusplus >= 201103L // C++11
+#    define AI_NO_EXCEPT noexcept
+#  else
+#    define AI_NO_EXCEPT
+#  endif
 #else
-#define AI_NO_EXCEPT
-#endif
-#else
-#if (_MSC_VER >= 1915)
-#define AI_NO_EXCEPT noexcept
-#else
-#define AI_NO_EXCEPT
-#endif
+#  if (_MSC_VER >= 1915)
+#    define AI_NO_EXCEPT noexcept
+#  else
+#    define AI_NO_EXCEPT
+#  endif
 #endif // _MSC_VER
 
 /**
- *  Helper macro to set a pointer to NULL in debug builds
+ *  @brief Helper macro to set a pointer to NULL in debug builds
  */
 #if (defined ASSIMP_BUILD_DEBUG)
-#define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
+#  define AI_DEBUG_INVALIDATE_PTR(x) x = NULL;
 #else
-#define AI_DEBUG_INVALIDATE_PTR(x)
+#  define AI_DEBUG_INVALIDATE_PTR(x)
 #endif
 
 #define AI_COUNT_OF(X) (sizeof(X) / sizeof((X)[0]))
+
+/**
+ * @brief Will mark functions or classes as deprecated.
+ *
+ * Deprecation means that we will remove this function, class or methods in the next m
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#  define AI_DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#  define AI_DEPRECATED __declspec(deprecated)
+#else
+#  pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#  define AI_DEPRECATED
+#endif
 
 #endif // !! AI_DEFINES_H_INC

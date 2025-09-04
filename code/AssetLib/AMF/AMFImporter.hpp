@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -99,8 +99,6 @@ namespace Assimp {
 ///
 class AMFImporter : public BaseImporter {
     using AMFMetaDataArray = std::vector<AMFMetadata *>;
-    using MeshArray = std::vector<aiMesh *>;
-    using NodeArray = std::vector<aiNode *>;
 
 public:
     struct SPP_Material;

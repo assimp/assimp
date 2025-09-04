@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
 // internal headers
-#include "AssetLib/Assbin/AssbinLoader.h"
+#include "AssbinLoader.h"
 #include "Common/assbin_chunks.h"
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/anim.h>
@@ -91,9 +91,13 @@ bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, boo
     }
 
     char s[32];
-    in->Read(s, sizeof(char), 32);
+    const size_t read = in->Read(s, sizeof(char), 32);
 
     pIOHandler->Close(in);
+
+    if (read < 19) {
+      return false;
+    }
 
     return strncmp(s, "ASSIMP.binary-dump.", 19) == 0;
 }
@@ -684,6 +688,7 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     unsigned int versionMajor = Read<unsigned int>(stream);
     unsigned int versionMinor = Read<unsigned int>(stream);
     if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
+        pIOHandler->Close(stream);
         throw DeadlyImportError("Invalid version, data format not compatible!");
     }
 
@@ -693,8 +698,10 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     shortened = Read<uint16_t>(stream) > 0;
     compressed = Read<uint16_t>(stream) > 0;
 
-    if (shortened)
+    if (shortened) {
+        pIOHandler->Close(stream);
         throw DeadlyImportError("Shortened binaries are not supported!");
+    }
 
     stream->Seek(256, aiOrigin_CUR); // original filename
     stream->Seek(128, aiOrigin_CUR); // options

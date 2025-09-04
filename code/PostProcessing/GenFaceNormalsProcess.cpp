@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -41,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to generate face
-* normals for all imported faces.
-*/
+/**
+ * @file Implementation of the post-processing step to generate face
+ * normals for all imported faces.
+ */
 
 #include "GenFaceNormalsProcess.h"
 #include <assimp/Exceptional.h>
@@ -55,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the processing step is present in the given flag field.
+// Returns whether the processing step is in the given flag field.
 bool GenFaceNormalsProcess::IsActive(unsigned int pFlags) const {
     force_ = (pFlags & aiProcess_ForceGenNormals) != 0;
     flippedWindingOrder_ = (pFlags & aiProcess_FlipWindingOrder) != 0;
@@ -64,7 +63,7 @@ bool GenFaceNormalsProcess::IsActive(unsigned int pFlags) const {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
+// Executes the post-processing step on the given imported data.
 void GenFaceNormalsProcess::Execute(aiScene *pScene) {
     ASSIMP_LOG_DEBUG("GenFaceNormalsProcess begin");
 
@@ -88,7 +87,7 @@ void GenFaceNormalsProcess::Execute(aiScene *pScene) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Executes the post processing step on the given imported data.
+// Executes the post-processing step on the given imported data.
 bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     if (nullptr != pMesh->mNormals) {
         if (force_) {
@@ -107,8 +106,27 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     }
 
     // allocate an array to hold the output normals
-    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-    const float qnan = get_qnan();
+    std::vector<aiVector3D> normals;
+    normals.resize(pMesh->mNumVertices);
+
+    // mask to indicate if a vertex was already referenced and needs to be duplicated
+    std::vector<bool> alreadyReferenced;
+    alreadyReferenced.resize(pMesh->mNumVertices, false);
+    std::vector<aiVector3D> duplicatedVertices;
+
+    auto storeNormalSplitVertex = [&](unsigned int index, const aiVector3D& normal) {
+        if (!alreadyReferenced[index]) {
+            normals[index]           = normal;
+            alreadyReferenced[index] = true;
+        } else {
+            duplicatedVertices.push_back(pMesh->mVertices[index]);
+            normals.push_back(normal);
+            index = pMesh->mNumVertices + static_cast<unsigned int>(duplicatedVertices.size() - 1);
+        }
+        return index;
+    };
+
+    const aiVector3D undefinedNormal = aiVector3D(get_qnan());
 
     // iterate through all faces and compute per-face normals but store them per-vertex.
     for (unsigned int a = 0; a < pMesh->mNumFaces; a++) {
@@ -116,7 +134,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         if (face.mNumIndices < 3) {
             // either a point or a line -> no well-defined normal vector
             for (unsigned int i = 0; i < face.mNumIndices; ++i) {
-                pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
+                face.mIndices[i] = storeNormalSplitVertex(face.mIndices[i], undefinedNormal);
             }
             continue;
         }
@@ -124,15 +142,29 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
         const aiVector3D *pV1 = &pMesh->mVertices[face.mIndices[0]];
         const aiVector3D *pV2 = &pMesh->mVertices[face.mIndices[1]];
         const aiVector3D *pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices - 1]];
-        // Boolean XOR - if either but not both of these flags is set, then the winding order has
-        // changed and the cross product to calculate the normal needs to be reversed
-        if (flippedWindingOrder_ != leftHanded_) 
+        // Boolean XOR - if either but not both of these flags are set, then the winding order has
+        // changed and the cross-product to calculate the normal needs to be reversed
+        if (flippedWindingOrder_ != leftHanded_)
             std::swap(pV2, pV3);
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).NormalizeSafe();
 
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {
-            pMesh->mNormals[face.mIndices[i]] = vNor;
+            face.mIndices[i] = storeNormalSplitVertex(face.mIndices[i], vNor);
         }
     }
+
+    // store normals (and additional vertices) back into the mesh
+    if (!duplicatedVertices.empty()) {
+        const aiVector3D * oldVertices = pMesh->mVertices;
+        auto oldNumVertices = pMesh->mNumVertices;
+        pMesh->mNumVertices += static_cast<unsigned int>(duplicatedVertices.size());
+        pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+        memcpy(pMesh->mVertices, oldVertices, oldNumVertices * sizeof(aiVector3D));
+        memcpy(pMesh->mVertices + oldNumVertices, duplicatedVertices.data(), duplicatedVertices.size() * sizeof(aiVector3D));
+        delete[] oldVertices;
+    }
+    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    memcpy(pMesh->mNormals, normals.data(), normals.size() * sizeof(aiVector3D));
+
     return true;
 }

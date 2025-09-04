@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_volume full
  *   KHR_materials_ior full
  *   KHR_materials_emissive_strength full
+ *   KHR_materials_anisotropy full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -118,7 +119,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
 
-#include "AssetLib/glTF/glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 namespace glTF2 {
 
@@ -821,6 +822,15 @@ struct MaterialEmissiveStrength {
     void SetDefaults();
 };
 
+struct MaterialAnisotropy {
+    float anisotropyStrength = 0.f;
+    float anisotropyRotation = 0.f;
+    TextureInfo anisotropyTexture;
+
+    MaterialAnisotropy() { SetDefaults(); }
+    void SetDefaults();
+};
+
 //! The material appearance of a primitive.
 struct Material : public Object {
     //PBR metallic roughness properties
@@ -858,6 +868,9 @@ struct Material : public Object {
 
     //extension: KHR_materials_emissive_strength
     Nullable<MaterialEmissiveStrength> materialEmissiveStrength;
+
+    //extension: KHR_materials_anisotropy
+    Nullable<MaterialAnisotropy> materialAnisotropy;
 
     //extension: KHR_materials_unlit
     bool unlit;
@@ -1133,22 +1146,24 @@ public:
         bool KHR_materials_volume;
         bool KHR_materials_ior;
         bool KHR_materials_emissive_strength;
+        bool KHR_materials_anisotropy;
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;
 
         Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false), 
-                KHR_materials_specular(false), 
-                KHR_materials_unlit(false), 
-                KHR_lights_punctual(false), 
-                KHR_texture_transform(false), 
-                KHR_materials_sheen(false), 
-                KHR_materials_clearcoat(false), 
-                KHR_materials_transmission(false), 
+                KHR_materials_pbrSpecularGlossiness(false),
+                KHR_materials_specular(false),
+                KHR_materials_unlit(false),
+                KHR_lights_punctual(false),
+                KHR_texture_transform(false),
+                KHR_materials_sheen(false),
+                KHR_materials_clearcoat(false),
+                KHR_materials_transmission(false),
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),
                 KHR_materials_emissive_strength(false),
+                KHR_materials_anisotropy(false),
                 KHR_draco_mesh_compression(false),
                 FB_ngon_encoding(false),
                 KHR_texture_basisu(false) {
@@ -1252,6 +1267,7 @@ private:
     size_t mBodyOffset;
     size_t mBodyLength;
     IdMap mUsedIds;
+    std::map<std::string, int, std::less<>> mUsedNamesMap;
     Ref<Buffer> mBodyBuffer;
 };
 

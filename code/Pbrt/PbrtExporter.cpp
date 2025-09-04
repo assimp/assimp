@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -93,7 +93,7 @@ void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pSce
         const ExportProperties *) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-    path = path + file + ".pbrt";
+    
     // initialize the exporter
     PbrtExporter exporter(pScene, pIOSystem, path, file);
 }
@@ -132,10 +132,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
-    
+
     // Export embedded textures.
     create_embedded_textures_folder(mScene, mIOSystem);
-    
+
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);
@@ -174,7 +174,13 @@ PbrtExporter::PbrtExporter(
     WriteWorldDefinition();
 
     // And write the file to disk...
-    std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath,"wt"));
+    std::string outputFilePath = mPath;
+    if (!outputFilePath.empty()) {
+        outputFilePath = outputFilePath + mIOSystem->getOsSeparator();
+    }
+    outputFilePath = outputFilePath + mFile +".pbrt";
+
+    std::unique_ptr<IOStream> outfile(mIOSystem->Open(outputFilePath,"wt"));
     if (!outfile) {
         throw DeadlyExportError("could not open output .pbrt file: " + std::string(mFile));
     }
@@ -800,10 +806,20 @@ void PbrtExporter::WriteLights() {
 
 void PbrtExporter::WriteMesh(aiMesh* mesh) {
     mOutput << "# - Mesh: ";
+    const char* mName;
     if (mesh->mName == aiString(""))
-        mOutput << "<No Name>\n";
+        mName = "<No Name>";
     else
-        mOutput << mesh->mName.C_Str() << "\n";
+        mName = mesh->mName.C_Str();
+    mOutput << mName << "\n";
+
+    // Check if any types other than tri
+    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
+        std::cerr << "Error: ignoring point / line / polygon mesh " << mName << ".\n";
+        return;
+    }
 
     mOutput << "AttributeBegin\n";
     aiMaterial* material = mScene->mMaterials[mesh->mMaterialIndex];
@@ -815,14 +831,6 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         (emission.r > 0 || emission.g > 0 || emission.b > 0))
         mOutput << "    AreaLightSource \"diffuse\" \"rgb L\" [ " << emission.r <<
             " " << emission.g << " " << emission.b << " ]\n";
-
-    // Check if any types other than tri
-    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
-        std::cerr << "Error: ignoring point / line / polygon mesh " << mesh->mName.C_Str() << ".\n";
-        return;
-    }
 
     // Alpha mask
     std::string alpha;

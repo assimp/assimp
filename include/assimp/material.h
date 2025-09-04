@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -334,12 +334,29 @@ enum aiTextureType {
     aiTextureType_MAYA_SPECULAR_COLOR = 24,
     aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25,
 
+    /** Anisotropy
+    * Simulates a surface with directional properties
+     */
+    aiTextureType_ANISOTROPY = 26,
+
+    /**
+     * gltf material declarations
+     * Refs: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+     *           "textures for metalness and roughness properties are packed together in a single
+     *           texture called metallicRoughnessTexture. Its green channel contains roughness
+     *           values and its blue channel contains metalness values..."
+     *       https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_pbrmetallicroughness_metallicroughnesstexture
+     *           "The metalness values are sampled from the B channel. The roughness values are
+     *           sampled from the G channel..."
+     */
+    aiTextureType_GLTF_METALLIC_ROUGHNESS = 27,
+
 #ifndef SWIG
     _aiTextureType_Force32Bit = INT_MAX
 #endif
 };
 
-#define AI_TEXTURE_TYPE_MAX aiTextureType_MAYA_SPECULAR_ROUGHNESS
+#define AI_TEXTURE_TYPE_MAX aiTextureType_GLTF_METALLIC_ROUGHNESS
 
 // -------------------------------------------------------------------------------
 /**
@@ -438,7 +455,7 @@ enum aiShadingMode {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines some mixed flags for a particular texture.
  *
  *  Usually you'll instruct your cg artists how textures have to look like ...
@@ -478,7 +495,7 @@ enum aiTextureFlags {
 };
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines alpha-blend flags.
  *
  *  If you're familiar with OpenGL or D3D, these flags aren't new to you.
@@ -523,7 +540,7 @@ enum aiBlendMode {
 #include "./Compiler/pushpack1.h"
 
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief Defines how an UV channel is transformed.
  *
  *  This is just a helper structure for the #AI_MATKEY_UVTRANSFORM key.
@@ -568,7 +585,7 @@ struct aiUVTransform {
 
 //! @cond AI_DOX_INCLUDE_INTERNAL
 // ---------------------------------------------------------------------------
-/** 
+/**
  *  @brief A very primitive RTTI system for the contents of material properties.
  */
 enum aiPropertyTypeInfo {
@@ -701,7 +718,7 @@ struct aiMaterialProperty {
 *  Material data is stored using a key-value structure. A single key-value
 *  pair is called a 'material property'. C++ users should use the provided
 *  member functions of aiMaterial to process material properties, C users
-*  have to stick with the aiMaterialGetXXX family of unbound functions.
+*  have to stick with the aiGetMaterialXXX family of unbound functions.
 *  The library defines a set of standard keys (AI_MATKEY_XXX).
 */
 #ifdef __cplusplus
@@ -714,7 +731,7 @@ struct aiMaterial
 #ifdef __cplusplus
 
 public:
-    /** 
+    /**
      * @brief  The class constructor.
      */
     aiMaterial();
@@ -1072,6 +1089,11 @@ extern "C" {
 #define AI_MATKEY_USE_EMISSIVE_MAP   "$mat.useEmissiveMap", 0, 0
 #define AI_MATKEY_EMISSIVE_INTENSITY "$mat.emissiveIntensity", 0, 0
 #define AI_MATKEY_USE_AO_MAP         "$mat.useAOMap", 0, 0
+
+// Anisotropy
+// ----------
+#define AI_MATKEY_ANISOTROPY_ROTATION "$mat.anisotropyRotation", 0, 0
+#define AI_MATKEY_ANISOTROPY_TEXTURE aiTextureType_ANISOTROPY, 0
 
 // ---------------------------------------------------------------------------
 // Pure key names for all texture-related properties
@@ -1535,7 +1557,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut,
+        ai_real *pOut,
         unsigned int *pMax);
 
 // ---------------------------------------------------------------------------
@@ -1557,12 +1579,12 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 * @return Specifies whether the key has been found. If not, the output
 *   float remains unmodified.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
+static inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
-        float *pOut) {
-    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+        ai_real *pOut) {
+    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------
@@ -1582,12 +1604,12 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial *
  *
  * See the sample for aiGetMaterialFloat for more information.*/
 // ---------------------------------------------------------------------------
-inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
+static inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
         unsigned int index,
         int *pOut) {
-    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, (unsigned int *)0x0);
+    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, NULL);
 }
 
 // ---------------------------------------------------------------------------

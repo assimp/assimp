@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -49,7 +49,6 @@ namespace Assimp {
 CIOStreamWrapper::~CIOStreamWrapper() {
     // Various places depend on this destructor to close the file
     if (mFile != nullptr) {
-        
         mIO->mFileSystem->CloseProc(mIO->mFileSystem, mFile);
     }
 }

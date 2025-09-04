@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -111,6 +111,7 @@ struct Vertex {
     aiColor4D colors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
     Vertex() = default;
+    ~Vertex() = default;
 
     // ----------------------------------------------------------------------------
     /** Extract a particular vertex from a mesh and interleave all components */
@@ -180,6 +181,29 @@ struct Vertex {
     Vertex& operator /= (ai_real v) {
         *this = *this/v;
         return *this;
+    }
+
+    bool operator < (const Vertex & o) const {
+        if (position < o.position) return true;
+        if (position != o.position) return false;
+
+        if (normal < o.normal) return true;
+        if (normal != o.normal) return false;
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i ++) {
+          if (texcoords[i] < o.texcoords[i]) return true;
+          if (texcoords[i] != o.texcoords[i]) return false;
+        }
+
+        // note that tangent/bitangent are not checked since they are optional
+
+        for (uint32_t i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; i ++) {
+          if (colors[i] < o.colors[i]) return true;
+          if (colors[i] != o.colors[i]) return false;
+        }
+
+        // if reached this point, they are equal
+        return false;
     }
 
     // ----------------------------------------------------------------------------

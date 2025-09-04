@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+#include "AssetLib/VRML/VrmlConverter.hpp"
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
@@ -54,11 +55,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <memory>
 
+#if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+#define X3D_FORMATS_DESCR_STR "Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "x3d x3db"
+#else
+#define X3D_FORMATS_DESCR_STR "VRML(WRL, X3DV) and Extensible 3D(X3D, X3DB) Importer"
+#define X3D_FORMATS_EXTENSIONS_STR "wrl x3d x3db x3dv"
+#endif // #if defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
+
 namespace Assimp {
 
 /// Constant which holds the importer description
 const aiImporterDesc X3DImporter::Description = {
-    "Extensible 3D(X3D) Importer",
+    X3D_FORMATS_DESCR_STR,
     "smalcom",
     "",
     "See documentation in source code. Chapter: Limitations.",
@@ -67,7 +76,7 @@ const aiImporterDesc X3DImporter::Description = {
     0,
     0,
     0,
-    "x3d x3db"
+    X3D_FORMATS_EXTENSIONS_STR
 };
 
 bool X3DImporter::isNodeEmpty(XmlNode &node) {
@@ -80,7 +89,7 @@ void X3DImporter::checkNodeMustBeEmpty(XmlNode &node) {
 
 void X3DImporter::skipUnsupportedNode(const std::string &pParentNodeName, XmlNode &node) {
     static const size_t Uns_Skip_Len = 192;
-    static const char *Uns_Skip[Uns_Skip_Len] = {
+    static constexpr char const * Uns_Skip[Uns_Skip_Len] = {
         // CAD geometry component
         "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
         // Core
@@ -215,7 +224,19 @@ void X3DImporter::ParseFile(const std::string &file, IOSystem *pIOHandler) {
     if (!theParser.parse(fileStream.get())) {
         return;
     }
+    ParseFile(theParser);
+}
 
+void X3DImporter::ParseFile(std::istream &myIstream) {
+    XmlParser theParser;
+    if (!theParser.parse(myIstream)) {
+        LogInfo("ParseFile(): ERROR: failed to convert VRML istream to xml");
+        return;
+    }
+    ParseFile(theParser);
+}
+
+void X3DImporter::ParseFile(XmlParser &theParser) {
     XmlNode *node = theParser.findNode("X3D");
     if (nullptr == node) {
         return;
@@ -246,9 +267,13 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     mpIOHandler = pIOHandler;
 
     Clear();
-    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
-    if (!stream) {
-        throw DeadlyImportError("Could not open file for reading");
+    std::stringstream ss = ConvertVrmlFileToX3dXmlFile(pFile);
+    const bool isReadFromMem{ ss.str().length() > 0 };
+    if (!isReadFromMem) {
+        std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile, "rb"));
+        if (!stream) {
+            throw DeadlyImportError("Could not open file for reading");
+        }
     }
     std::string::size_type slashPos = pFile.find_last_of("\\/");
 
@@ -257,9 +282,13 @@ void X3DImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pScene->mRootNode->mParent = nullptr;
     pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 
-    pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
-    ParseFile(pFile, pIOHandler);
-    pIOHandler->PopDirectory();
+    if (isReadFromMem) {
+        ParseFile(ss);
+    } else {
+        pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
+        ParseFile(pFile, pIOHandler);
+        pIOHandler->PopDirectory();
+    }
 
     //search for root node element
 

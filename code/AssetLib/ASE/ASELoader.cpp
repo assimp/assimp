@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -162,7 +162,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
 
         // process all meshes
         bool tookNormals = false;
-        std::vector<aiMesh *> avOutMeshes;
+        MeshArray avOutMeshes;
         avOutMeshes.reserve(mParser->m_vMeshes.size() * 2);
         for (std::vector<ASE::Mesh>::iterator i = mParser->m_vMeshes.begin(); i != mParser->m_vMeshes.end(); ++i) {
             if ((*i).bSkip) {
@@ -187,7 +187,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         // Now build the output mesh list. Remove dummies
         pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-        for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
+        for (MeshArray::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
                 continue;
             }
@@ -731,6 +731,10 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
     unsigned int iCurrent = 0, fi = 0;
     for (std::vector<ASE::Face>::iterator i = mesh.mFaces.begin(); i != mesh.mFaces.end(); ++i, ++fi) {
         for (unsigned int n = 0; n < 3; ++n, ++iCurrent) {
+            const uint32_t curIndex = (*i).mIndices[n];
+            if (curIndex >= mesh.mPositions.size()) {
+                throw DeadlyImportError("ASE: Invalid vertex index in face ", fi, ".");
+            }
             mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
 
             // add texture coordinates
@@ -898,7 +902,7 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
 
 // ------------------------------------------------------------------------------------------------
 // Build output meshes
-void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMeshes) {
+void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, MeshArray &avOutMeshes) {
     // validate the material index of the mesh
     if (mesh.iMaterialIndex >= mParser->m_vMaterials.size()) {
         mesh.iMaterialIndex = (unsigned int)mParser->m_vMaterials.size() - 1;

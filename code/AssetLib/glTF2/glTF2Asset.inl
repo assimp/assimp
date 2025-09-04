@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssetLib/glTF/glTFCommon.h"
+#include "AssetLib/glTFCommon/glTFCommon.h"
 
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StringUtils.h>
@@ -87,6 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace glTF2 {
+
 using glTFCommon::FindStringInContext;
 using glTFCommon::FindNumberInContext;
 using glTFCommon::FindUIntInContext;
@@ -294,6 +295,8 @@ inline void SetDecodedIndexBuffer_Draco(const draco::Mesh &dracoMesh, Mesh::Prim
     // Usually uint32_t but shouldn't assume
     if (sizeof(dracoMesh.face(draco::FaceIndex(0))[0]) == componentBytes) {
         memcpy(decodedIndexBuffer->GetPointer(), &dracoMesh.face(draco::FaceIndex(0))[0], decodedIndexBuffer->byteLength);
+        // Assign this alternate data buffer to the accessor
+        prim.indices->decodedBuffer.swap(decodedIndexBuffer);
         return;
     }
 
@@ -811,7 +814,7 @@ inline uint8_t *BufferView::GetPointerAndTailSize(size_t accOffset, size_t& outT
         outTailSize = 0;
         return nullptr;
     }
-    
+
     outTailSize = buffer->byteLength - offset;
     return basePtr + offset;
 }
@@ -916,7 +919,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
             Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
             if (!indiceViewID) {
                 throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
-            }			
+            }
             sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
             //indices byteOffset
             sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
@@ -954,8 +957,8 @@ inline void Accessor::Read(Value &obj, Asset &r) {
         }
         else {
             sparse->PopulateData(dataSize, nullptr);
-        }        
-		sparse->PatchData(elementSize);
+        }
+        sparse->PatchData(elementSize);
     }
 }
 
@@ -1217,6 +1220,17 @@ inline void Texture::Read(Value &obj, Asset &r) {
     if (Value *samplerVal = FindUInt(obj, "sampler")) {
         sampler = r.samplers.Retrieve(samplerVal->GetUint());
     }
+
+    if (Value *extensions = FindObject(obj, "extensions")) {
+        if (r.extensionsUsed.KHR_texture_basisu) {
+            if (Value *curBasisU = FindObject(*extensions, "KHR_texture_basisu")) {
+
+                if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
+                    source = r.images.Retrieve(sourceVal->GetUint());
+                }
+            }
+        }
+    }
 }
 
 void Material::SetTextureProperties(Asset &r, Value *prop, TextureInfo &out) {
@@ -1314,7 +1328,7 @@ inline void Material::Read(Value &material, Asset &r) {
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
-        
+
         if (r.extensionsUsed.KHR_materials_specular) {
             if (Value *curMatSpecular = FindObject(*extensions, "KHR_materials_specular")) {
                 MaterialSpecular specular;
@@ -1401,6 +1415,18 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_anisotropy) {
+            if (Value *curMaterialAnisotropy = FindObject(*extensions, "KHR_materials_anisotropy")) {
+                MaterialAnisotropy anisotropy;
+
+                ReadMember(*curMaterialAnisotropy, "anisotropyStrength", anisotropy.anisotropyStrength);
+                ReadMember(*curMaterialAnisotropy, "anisotropyRotation", anisotropy.anisotropyRotation);
+                ReadTextureProperty(r, *curMaterialAnisotropy, "anisotropyTexture", anisotropy.anisotropyTexture);
+
+                this->materialAnisotropy = Nullable<MaterialAnisotropy>(anisotropy);
+            }
+        }
+
         unlit = nullptr != FindObject(*extensions, "KHR_materials_unlit");
     }
 }
@@ -1452,6 +1478,12 @@ inline void MaterialIOR::SetDefaults() {
 inline void MaterialEmissiveStrength::SetDefaults() {
     //KHR_materials_emissive_strength properties
     emissiveStrength = 0.f;
+}
+
+inline void MaterialAnisotropy::SetDefaults() {
+    //KHR_materials_anisotropy properties
+    anisotropyStrength = 0.f;
+    anisotropyRotation = 0.f;
 }
 
 inline void Mesh::Read(Value &pJSON_Object, Asset &pAsset_Root) {
@@ -2043,6 +2075,12 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
         mDicts[i]->AttachToDocument(doc);
     }
 
+    // Read the "extensions" property, then add it to each scene's metadata.
+    CustomExtension customExtensions;
+    if (Value *extensionsObject = FindObject(doc, "extensions")) {
+        customExtensions = glTF2::ReadExtensions("extensions", *extensionsObject);
+    }
+
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
     unsigned int sceneIndex = 0;
@@ -2054,6 +2092,8 @@ inline void Asset::Load(const std::string &pFile, bool isBinary)
     if (Value *scenesArray = FindArray(doc, "scenes")) {
         if (sceneIndex < scenesArray->Size()) {
             this->scene = scenes.Retrieve(sceneIndex);
+
+            this->scene->customExtensions = customExtensions;
         }
     }
 
@@ -2116,6 +2156,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
     }
 
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
+    CHECK_REQUIRED_EXT(KHR_texture_basisu);
 
 #undef CHECK_REQUIRED_EXT
 }
@@ -2143,6 +2184,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_volume);
     CHECK_EXT(KHR_materials_ior);
     CHECK_EXT(KHR_materials_emissive_strength);
+    CHECK_EXT(KHR_materials_anisotropy);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
 
@@ -2166,8 +2208,10 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
     std::string id = str;
 
     if (!id.empty()) {
-        if (mUsedIds.find(id) == mUsedIds.end())
+        if (mUsedIds.find(id) == mUsedIds.end()){
+            mUsedNamesMap[id] = 0;
             return id;
+        }
 
         id += "_";
     }
@@ -2176,17 +2220,13 @@ inline std::string Asset::FindUniqueID(const std::string &str, const char *suffi
 
     Asset::IdMap::iterator it = mUsedIds.find(id);
     if (it == mUsedIds.end()) {
+        mUsedNamesMap[id] = 0;
         return id;
     }
 
-    std::vector<char> buffer;
-    buffer.resize(id.size() + 16);
-    int offset = ai_snprintf(buffer.data(), buffer.size(), "%s_", id.c_str());
-    for (int i = 0; it != mUsedIds.end(); ++i) {
-        ai_snprintf(buffer.data() + offset, buffer.size() - offset, "%d", i);
-        id = buffer.data();
-        it = mUsedIds.find(id);
-    }
+    auto key = id;
+    id += "_" + std::to_string(mUsedNamesMap[key]);
+    mUsedNamesMap[key] = mUsedNamesMap[key] + 1;
 
     return id;
 }

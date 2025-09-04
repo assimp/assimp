@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -103,7 +102,7 @@ private:
 // preserves the mesh's given name if it has one. |index| is the index
 // of the mesh in |aiScene::mMeshes|.
 std::string GetMeshName(const aiMesh &mesh, unsigned int index, const aiNode &node) {
-    static const char underscore = '_';
+    static constexpr char underscore = '_';
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
@@ -208,9 +207,6 @@ Discreet3DSExporter::Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, con
         WriteHierarchy(*scene->mRootNode, -1, -1);
     }
 }
-
-// ------------------------------------------------------------------------------------------------
-Discreet3DSExporter::~Discreet3DSExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 int Discreet3DSExporter::WriteHierarchy(const aiNode &node, int seq, int sibling_level) {

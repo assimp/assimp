@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjFileData.h"
 #include "ObjTools.h"
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/material.h>
@@ -89,8 +90,9 @@ static constexpr char TypeOption[] = "-type";
 // -------------------------------------------------------------------
 //  Constructor
 ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
-        const std::string &,
+        const std::string &strAbsPath,
         ObjFile::Model *pModel) :
+        m_strAbsPath(strAbsPath),
         m_DataIt(buffer.begin()),
         m_DataItEnd(buffer.end()),
         m_pModel(pModel),
@@ -103,12 +105,22 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
         m_pModel->mDefaultMaterial = new ObjFile::Material;
         m_pModel->mDefaultMaterial->MaterialName.Set("default");
     }
+
+    // Try with OS folder separator first
+    char folderSeparator = DefaultIOSystem().getOsSeparator();
+    std::size_t found = m_strAbsPath.find_last_of(folderSeparator);
+    if (found == std::string::npos) {
+        // Not found, try alternative folder separator
+        folderSeparator = (folderSeparator == '/' ? '\\' : '/');
+        found = m_strAbsPath.find_last_of(folderSeparator);
+    }
+    if (found != std::string::npos) {
+        m_strAbsPath = m_strAbsPath.substr(0, found + 1);
+    } else {
+        m_strAbsPath = "";
+    }
     load();
 }
-
-// -------------------------------------------------------------------
-//  Destructor
-ObjFileMtlImporter::~ObjFileMtlImporter() = default;
 
 // -------------------------------------------------------------------
 //  Loads the material description
@@ -446,7 +458,7 @@ void ObjFileMtlImporter::getTexture() {
     std::string texture;
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, texture);
     if (nullptr != out) {
-        out->Set(texture);
+        out->Set(m_strAbsPath + texture);
     }
 }
 

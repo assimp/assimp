@@ -63,7 +63,7 @@ namespace cineware {
     class BaseShader;
 }
 
-namespace Assimp  {
+namespace Assimp {
     // TinyFormatter.h
     namespace Formatter {
         template <typename T,typename TR, typename A> class basic_formatter;
@@ -78,8 +78,8 @@ namespace Assimp  {
 // -------------------------------------------------------------------------------------------
 class C4DImporter : public BaseImporter, public LogFunctions<C4DImporter> {
 public:
-    C4DImporter();
-    ~C4DImporter() override;
+    C4DImporter() = default;
+    ~C4DImporter() override = default;
     bool CanRead( const std::string& pFile, IOSystem*, bool checkSig) const override;
 
 protected:
@@ -97,11 +97,12 @@ private:
 
     bool ReadShader(aiMaterial* out, cineware::BaseShader* shader);
 
-    std::vector<aiMesh*> meshes;
-    std::vector<aiMaterial*> materials;
+  private:
+    MeshArray mMeshes;
+    MaterialArray materials;
 
-    typedef std::map<cineware::BaseMaterial*, unsigned int> MaterialMap;
-    MaterialMap material_mapping;
+    using MaterialMap = std::map<cineware::BaseMaterial*, unsigned int> ;
+    MaterialMap mMaterialMapping;
 
 }; // !class C4DImporter
 

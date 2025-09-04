@@ -1,10 +1,8 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,14 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp    {
+namespace Assimp {
 
 using namespace D3DS;
 
 // ---------------------------------------------------------------------------------
 /** Importer class for 3D Studio r3 and r4 3DS files
  */
-class Discreet3DSImporter : public BaseImporter {
+class Discreet3DSImporter final : public BaseImporter {
 public:
     Discreet3DSImporter();
     ~Discreet3DSImporter() override = default;
@@ -125,7 +123,6 @@ protected:
     */
     void ParseColorChunk(aiColor3D* p_pcOut,
         bool p_bAcceptPercent = true);
-
 
     // -------------------------------------------------------------------
     /** Skip a chunk in the file

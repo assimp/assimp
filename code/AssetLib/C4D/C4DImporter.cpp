@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2021, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -64,7 +64,7 @@ namespace {
 
 aiString aiStringFrom(cineware::String const & cinestring) {
     aiString result;
-    cinestring.GetCString(result.data, MAXLEN-1);
+    cinestring.GetCString(result.data, AI_MAXLEN - 1);
     result.length = static_cast<ai_uint32>(cinestring.GetLength());
     return result;
 }
@@ -86,7 +86,7 @@ namespace Assimp {
     }
 }
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Cinema4D Importer",
     "",
     "",
@@ -98,13 +98,6 @@ static const aiImporterDesc desc = {
     0,
     "c4d"
 };
-
-
-// ------------------------------------------------------------------------------------------------
-C4DImporter::C4DImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-C4DImporter::~C4DImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const {
@@ -173,10 +166,10 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // copy meshes over
     pScene->mNumMeshes = static_cast<unsigned int>(meshes.size());
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes]();
-    std::copy(meshes.begin(), meshes.end(), pScene->mMeshes);
+    std::copy(mMeshes.begin(), mMeshes.end(), pScene->mMeshes);
 
     // copy materials over, adding a default material if necessary
-    unsigned int mat_count = static_cast<unsigned int>(materials.size());
+    unsigned int mat_count = static_cast<unsigned int>(mMaterials.size());
     for(aiMesh* mesh : meshes) {
         ai_assert(mesh->mMaterialIndex <= mat_count);
         if(mesh->mMaterialIndex >= mat_count) {
@@ -186,16 +179,15 @@ void C4DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
             const aiString name(AI_DEFAULT_MATERIAL_NAME);
             def_material->AddProperty(&name, AI_MATKEY_NAME);
 
-            materials.push_back(def_material.release());
+            mMaterials.push_back(def_material.release());
             break;
         }
     }
 
     pScene->mNumMaterials = static_cast<unsigned int>(materials.size());
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials]();
-    std::copy(materials.begin(), materials.end(), pScene->mMaterials);
+    std::copy(mMaterials.begin(), mMaterials.end(), pScene->mMaterials);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 bool C4DImporter::ReadShader(aiMaterial* out, BaseShader* shader) {
@@ -259,8 +251,8 @@ void C4DImporter::ReadMaterials(BaseMaterial* mat) {
     while (mat) {
         if (mat->GetType() == Mmaterial) {
             aiMaterial* out = new aiMaterial();
-            material_mapping[mat] = static_cast<unsigned int>(materials.size());
-            materials.push_back(out);
+            mMaterialMapping[mat] = static_cast<unsigned int>(mMaterials.size());
+            mMaterials.push_back(out);
 
             auto const ai_name = aiStringFrom(mat->GetName());
             out->AddProperty(&ai_name, AI_MATKEY_NAME);
@@ -297,7 +289,7 @@ void C4DImporter::ReadMaterials(BaseMaterial* mat) {
 // ------------------------------------------------------------------------------------------------
 void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent) {
     ai_assert(parent != nullptr );
-    std::vector<aiNode*> nodes;
+    NodeArray nodes;
 
     // based on Cineware sample code
     while (object) {
@@ -585,7 +577,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object) {
 unsigned int C4DImporter::ResolveMaterial(PolygonObject* obj) {
     ai_assert(obj != nullptr);
 
-    const unsigned int mat_count = static_cast<unsigned int>(materials.size());
+    const unsigned int mat_count = static_cast<unsigned int>(mMaterials.size());
 
     BaseTag* tag = obj->GetTag(Ttexture);
     if(tag == nullptr) {

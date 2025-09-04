@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -120,10 +120,10 @@ static std::mutex gLogStreamMutex;
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API
-class LogToCallbackRedirector : public LogStream {
+class LogToCallbackRedirector final : public LogStream {
 public:
     explicit LogToCallbackRedirector(const aiLogStream &s) :
-            stream(s) {
+            mStream(s) {
         ai_assert(nullptr != s.callback);
     }
 
@@ -137,7 +137,7 @@ public:
         // might cause strange problems, but the chance is quite low.
 
         PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(),
-                gPredefinedStreams.end(), (Assimp::LogStream *)stream.user);
+                gPredefinedStreams.end(), (Assimp::LogStream *)mStream.user);
 
         if (it != gPredefinedStreams.end()) {
             delete *it;
@@ -147,11 +147,11 @@ public:
 
     /** @copydoc LogStream::write */
     void write(const char *message) {
-        stream.callback(message, stream.user);
+        mStream.callback(message, mStream.user);
     }
 
 private:
-    aiLogStream stream;
+    const aiLogStream &mStream;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -354,25 +354,31 @@ ASSIMP_API const aiScene *aiApplyCustomizedPostProcessing(const aiScene *scene,
 void CallbackToLogRedirector(const char *msg, char *dt) {
     ai_assert(nullptr != msg);
     ai_assert(nullptr != dt);
-    LogStream *s = (LogStream *)dt;
-
-    s->write(msg);
+    LogStream *stream = (LogStream *)dt;
+    if (stream != nullptr) {
+        stream->write(msg);
+    }
 }
+
+static LogStream *DefaultStream = nullptr;
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, const char *file) {
     aiLogStream sout;
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
-    LogStream *stream = LogStream::createDefaultStream(pStream, file);
-    if (!stream) {
+    if (DefaultStream == nullptr) {
+        DefaultStream = LogStream::createDefaultStream(pStream, file);
+    }
+
+    if (!DefaultStream) {
         sout.callback = nullptr;
         sout.user = nullptr;
     } else {
         sout.callback = &CallbackToLogRedirector;
-        sout.user = (char *)stream;
+        sout.user = (char *)DefaultStream;
     }
-    gPredefinedStreams.push_back(stream);
+    gPredefinedStreams.push_back(DefaultStream);
     ASSIMP_END_EXCEPTION_REGION(aiLogStream);
     return sout;
 }
@@ -410,6 +416,10 @@ ASSIMP_API aiReturn aiDetachLogStream(const aiLogStream *stream) {
     }
     DefaultLogger::get()->detachStream(it->second);
     delete it->second;
+
+    if ((Assimp::LogStream *)stream->user == DefaultStream) {
+        DefaultStream = nullptr;
+    }
 
     gActiveLogStreams.erase(it);
 

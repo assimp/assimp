@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -271,7 +270,7 @@ void Q3BSPFileImporter::CreateNodes(const Q3BSP::Q3BSPModel *pModel, aiScene *pS
     }
 
     unsigned int matIdx(0);
-    std::vector<aiMesh *> MeshArray;
+    MeshArray MeshArray;
     std::vector<aiNode *> NodeArray;
     for (FaceMapIt it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it) {
         std::vector<Q3BSP::sQ3BSPFace *> *pArray = (*it).second;

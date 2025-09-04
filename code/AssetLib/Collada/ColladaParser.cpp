@@ -1,4 +1,4 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -560,7 +560,8 @@ void ColladaParser::UriDecodePath(aiString &ss) {
 // ------------------------------------------------------------------------------------------------
 // Reads the contents of the file
 void ColladaParser::ReadContents(XmlNode &node) {
-    if (const std::string name = node.name(); name == "COLLADA") {
+    const std::string name = node.name();
+    if (name == "COLLADA") {
         std::string version;
         if (XmlParser::getStdStrAttribute(node, "version", version)) {
             aiString v;
@@ -585,7 +586,8 @@ void ColladaParser::ReadContents(XmlNode &node) {
 // Reads the structure of the file
 void ColladaParser::ReadStructure(XmlNode &node) {
     for (XmlNode &currentNode : node.children()) {
-        if (const std::string &currentName = currentNode.name(); currentName == "asset") {
+        const std::string &currentName = currentNode.name(); 
+        if (currentName == "asset") {
             ReadAssetInfo(currentNode);
         } else if (currentName == "library_animations") {
             ReadAnimationLibrary(currentNode);
@@ -626,7 +628,8 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
     }
 
     for (XmlNode &currentNode : node.children()) {
-        if (const std::string &currentName = currentNode.name(); currentName == "unit") {
+        const std::string &currentName = currentNode.name();
+        if ( currentName == "unit") {
             mUnitSize = 1.f;
             std::string tUnitSizeString;
             if (XmlParser::getStdStrAttribute(currentNode, "meter", tUnitSizeString)) {
@@ -848,7 +851,8 @@ void ColladaParser::ReadControllerLibrary(XmlNode &node) {
         if (currentName != "controller") {
             continue;
         }
-        if (std::string id; XmlParser::getStdStrAttribute(currentNode, "id", id)) {
+        std::string id;
+        if (XmlParser::getStdStrAttribute(currentNode, "id", id)) {
             mControllerLibrary[id] = Controller();
             ReadController(currentNode, mControllerLibrary[id]);
         }
@@ -865,11 +869,13 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
     XmlNodeIterator xmlIt(node, XmlNodeIterator::PreOrderMode);
     XmlNode currentNode;
     while (xmlIt.getNext(currentNode)) {
-        if (const std::string &currentName = currentNode.name(); currentName == "morph") {
+        const std::string &currentName = currentNode.name();
+        if (currentName == "morph") {
             controller.mType = Morph;
             std::string id = currentNode.attribute("source").as_string();
             controller.mMeshId = id.substr(1, id.size() - 1);
-            if (const int methodIndex = currentNode.attribute("method").as_int(); methodIndex > 0) {
+            const int methodIndex = currentNode.attribute("method").as_int(); 
+            if (methodIndex > 0) {
                 std::string method;
                 XmlParser::getValueAsString(currentNode, method);
 
@@ -878,7 +884,8 @@ void ColladaParser::ReadController(XmlNode &node, Collada::Controller &controlle
                 }
             }
         } else if (currentName == "skin") {
-            if (std::string id; XmlParser::getStdStrAttribute(currentNode, "source", id)) {
+            std::string id; 
+            if (XmlParser::getStdStrAttribute(currentNode, "source", id)) {
                 controller.mMeshId = id.substr(1, id.size() - 1);
             }
         } else if (currentName == "bind_shape_matrix") {
@@ -922,7 +929,8 @@ void ColladaParser::ReadImageLibrary(const XmlNode &node) {
     for (XmlNode &currentNode : node.children()) {
         const std::string &currentName = currentNode.name();
         if (currentName == "image") {
-            if (std::basic_string<char> id; XmlParser::getStdStrAttribute(currentNode, "id", id)) {
+            std::basic_string<char> id; 
+            if (XmlParser::getStdStrAttribute(currentNode, "id", id)) {
                 mImageLibrary[id] = Image();
                 // read on from there
                 ReadImage(currentNode, mImageLibrary[id]);
@@ -1494,7 +1502,7 @@ void ColladaParser::ReadDataArray(XmlNode &node) {
 
                 // read a number
                 ai_real value;
-                content = fast_atoreal_move(content, value);
+                content = fast_atoreal_move<ai_real>(content, value);
                 data.mValues.push_back(value);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd(&content, end);
@@ -2243,7 +2251,8 @@ void ColladaParser::ReadMaterialVertexInputBinding(XmlNode &node, Collada::Seman
 void ColladaParser::ReadEmbeddedTextures(ZipArchiveIOSystem &zip_archive) {
     // Attempt to load any undefined Collada::Image in ImageLibrary
     for (auto &it : mImageLibrary) {
-        if (Image &image = it.second; image.mImageData.empty()) {
+        Image &image = it.second;
+        if (image.mImageData.empty()) {
             std::unique_ptr<IOStream> image_file(zip_archive.Open(image.mFileName.c_str()));
             if (image_file) {
                 image.mImageData.resize(image_file->FileSize());

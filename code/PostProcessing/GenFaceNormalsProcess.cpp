@@ -217,7 +217,7 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     if (pMesh->mNumVertices != std::size(duplicatedVertices)) {
         updateXMeshVertices(pMesh, duplicatedVertices);
     }
-    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    pMesh->mNormals = new aiVector3D[normals.size()];
     memcpy(pMesh->mNormals, normals.data(), normals.size() * sizeof(aiVector3D));
 
     return true;

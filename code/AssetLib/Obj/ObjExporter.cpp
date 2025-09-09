@@ -4,7 +4,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2025, assimp team
 
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -396,9 +395,12 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent, bool merge_identical_vertices) {
+    if (nd == nullptr) {
+        return;
+    }
+    
     const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
-
-    aiMesh *cm( nullptr );
+    aiMesh *cm{nullptr};
     for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
         cm = pScene->mMeshes[nd->mMeshes[i]];
         if (nullptr != cm) {

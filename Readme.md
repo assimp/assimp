@@ -23,14 +23,14 @@ Additionally, assimp features various __mesh post-processing tools__: normals an
 Read [our latest documentation](https://the-asset-importer-lib-documentation.readthedocs.io/en/latest/).
 
 ### Pre-built binaries ###
-Download binaries from [our Itchi Projectspace](https://kimkulling.itch.io/the-asset-importer-lib).
+Download binaries from [our Itch Projectspace](https://kimkulling.itch.io/the-asset-importer-lib).
 
 ### Test data ###
-Clone [our model database](https://github.com/assimp/assimp-mdb).
+Clone [our model database for testing purposes](https://github.com/assimp/assimp-mdb).
 
 ### Communities ###
 - Ask questions at [the Assimp Discussion Board](https://github.com/assimp/assimp/discussions).
-- Find us on [https://discord.gg/s9KJfaem](https://discord.gg/kKazXMXDy2)
+- Find us on [discord](https://discord.gg/kKazXMXDy2)
 - Ask [the Assimp community on Reddit](https://www.reddit.com/r/Assimp/).
 - Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest).
 - Nothing has worked? File a question or an issue report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
@@ -83,7 +83,7 @@ The source code is organized in the following way:
 	code/AssetLib/<FormatName>	Implementation for import and export of the format
 
 ### Contributing ###
-I would greatly appreciate contributing to assimp. The easiest way to get involved is to submit
+We would greatly appreciate for you to contribute to assimp. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
 
 ## Contributors

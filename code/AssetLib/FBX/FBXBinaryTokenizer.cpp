@@ -91,7 +91,9 @@ AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
 
 // ------------------------------------------------------------------------------------------------
 size_t Offset(const char* begin, const char* cursor) {
-    ai_assert(begin <= cursor);
+    if (begin > cursor) {
+		return 0;
+	}
 
     return cursor - begin;
 }

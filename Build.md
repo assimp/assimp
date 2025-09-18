@@ -110,5 +110,5 @@ You need to have pip installed:
 pip install pyassimp
 ```
 
-### Get the SDK from itchi.io
-Just check [itchi.io](https://kimkulling.itch.io/the-asset-importer-lib)
+### Get the SDK from itch.io
+Just check [itch.io](https://kimkulling.itch.io/the-asset-importer-lib)

@@ -347,6 +347,21 @@ struct ReadHelper<int64_t> {
     }
 };
 
+#ifdef __APPLE__
+
+// On Mac size_t and uint64_t are not the same, so we need a specialized version
+// here to properly parse byteOffset and other parameters > 2^31
+// On Windows and Linux the types match andno additional specialization is required
+
+template <>
+struct ReadHelper<size_t> {
+    static bool Read(Value &val, size_t &out) {
+        return val.IsInt64() ? out = val.GetInt64(), true : false;
+    }
+};
+
+#endif
+
 template <class T>
 inline static bool ReadValue(Value &val, T &out) {
     return ReadHelper<T>::Read(val, out);

@@ -524,6 +524,9 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                         auto update_color = [&](int idx) {
                             if (pindex[idx] != IdNotSet) {
                                 size_t vertex_index = face.mIndices[idx];
+                                if (vertex_index >= mesh->mNumVertices) {
+                                    return;
+                                }
                                 mesh->mColors[0][vertex_index] = group->mColors[pindex[idx]];
                             }
                         };

@@ -495,13 +495,16 @@ void XmlSerializer::ImportTriangles(XmlNode &node, aiMesh *mesh) {
                             }
                             mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
                             for (unsigned int vertex_index = 0; vertex_index < mesh->mNumVertices; vertex_index++) {
-                                mesh->mTextureCoords[0][vertex_index].z = IdNotSet;//mark not set
+                                mesh->mTextureCoords[0][vertex_index].z = IdNotSet; //mark not set
                             }
                         }
 
                         auto update_texture = [&](int idx) {
                             if (pindex[idx] != IdNotSet) {
                                 size_t vertex_index = face.mIndices[idx];
+                                if (vertex_index >= mesh->mNumVertices) {
+                                    return;
+                                }
                                 mesh->mTextureCoords[0][vertex_index] =
                                         aiVector3D(group->mTex2dCoords[pindex[idx]].x, group->mTex2dCoords[pindex[idx]].y, 0.0f);
                             }

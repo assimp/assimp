@@ -58,9 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <vector>
 
-namespace Assimp {
+namespace Assimp::D3MF {
 
-namespace D3MF {
 // ------------------------------------------------------------------------------------------------
 
 using OpcPackageRelationshipPtr = std::shared_ptr<OpcPackageRelationship>;
@@ -132,9 +131,11 @@ static bool IsEmbeddedTexture( const std::string &filename ) {
 // ------------------------------------------------------------------------------------------------
 D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
         mRootStream(nullptr),
-        mZipArchive() {
+        mZipArchive(nullptr) {
     mZipArchive = new ZipArchiveIOSystem(pIOHandler, rFile);
     if (!mZipArchive->isOpen()) {
+        delete mZipArchive;
+        mZipArchive = nullptr;
         throw DeadlyImportError("Failed to open file ", rFile, ".");
     }
 
@@ -184,7 +185,9 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    mZipArchive->Close(mRootStream);
+    if (mRootStream && mZipArchive) {
+        mZipArchive->Close(mRootStream);
+    }
     delete mZipArchive;
 }
 
@@ -250,7 +253,6 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
     mEmbeddedTextures.emplace_back(texture);
 }
 
-} // Namespace D3MF
-} // Namespace Assimp
+} // Namespace Assimp::D3MF
 
 #endif //ASSIMP_BUILD_NO_3MF_IMPORTER

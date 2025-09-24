@@ -229,7 +229,7 @@ private:
     /// Fill the scene-graph recursively
     void GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             BatchLoader &batch,
-            MeshArray &meshes,
+            std::vector<aiMesh *> &meshes,
             std::vector<aiNodeAnim *> &anims,
             std::vector<AttachmentInfo> &attach,
             std::vector<aiMaterial *> &materials,
@@ -248,7 +248,7 @@ private:
     /// @param meshes Receives 6 output meshes
     /// @param materials The last 6 materials are assigned to the newly
     ///                  created meshes. The names of the materials are adjusted.
-    void BuildSkybox(MeshArray &meshes,
+    void BuildSkybox(std::vector<aiMesh *> &meshes,
             std::vector<aiMaterial *> materials);
 
     // -------------------------------------------------------------------

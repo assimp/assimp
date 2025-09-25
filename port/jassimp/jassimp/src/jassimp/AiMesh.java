@@ -314,7 +314,7 @@ public final class AiMesh {
      * @return true if tangents and bitangents are available
      */
     public boolean hasTangentsAndBitangents() {
-        return m_tangents != null && m_tangents != null;
+        return m_tangents != null && m_bitangents != null;
     }
     
     

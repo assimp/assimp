@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 
 
@@ -221,13 +221,11 @@ void DefaultLogger::set(Logger *logger) {
 #endif
 
     if (nullptr == logger) {
-        logger = &s_pNullLogger;
+        m_pLogger = &s_pNullLogger;
     }
-    if (nullptr != m_pLogger && !isNullLogger()) {
-        delete m_pLogger;
+    else {
+        m_pLogger = logger;
     }
-
-    DefaultLogger::m_pLogger = logger;
 }
 
 // ----------------------------------------------------------------------------------
@@ -320,8 +318,12 @@ bool DefaultLogger::attachStream(LogStream *pStream, unsigned int severity) {
     }
 
     if (0 == severity) {
-        severity = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
+        severity = SeverityAll;
     }
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+    std::lock_guard<std::mutex> lock(m_arrayMutex);
+#endif
 
     for (StreamIt it = m_StreamArray.begin();
             it != m_StreamArray.end();
@@ -347,6 +349,10 @@ bool DefaultLogger::detachStream(LogStream *pStream, unsigned int severity) {
     if (0 == severity) {
         severity = SeverityAll;
     }
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+    std::lock_guard<std::mutex> lock(m_arrayMutex);
+#endif
 
     bool res(false);
     for (StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
@@ -386,6 +392,10 @@ DefaultLogger::~DefaultLogger() {
 //  Writes message to stream
 void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) {
     ai_assert(nullptr != message);
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+    std::lock_guard<std::mutex> lock(m_arrayMutex);
+#endif
 
     // Check whether this is a repeated message
     auto thisLen = ::strlen(message);

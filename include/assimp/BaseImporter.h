@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -277,7 +277,8 @@ public: // static utilities
             const std::string &pFile,
             const char *ext0,
             const char *ext1 = nullptr,
-            const char *ext2 = nullptr);
+            const char *ext2 = nullptr,
+            const char *ext3 = nullptr);
 
     // -------------------------------------------------------------------
     /** @brief Check whether a file has one of the passed file extensions

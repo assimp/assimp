@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -62,7 +61,7 @@ namespace Assimp {
 class glTFImporter : public BaseImporter {
 public:
     glTFImporter();
-    ~glTFImporter() override;
+    ~glTFImporter() override = default;
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:

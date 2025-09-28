@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 // ----------------------------------------------------------------------------
 #include "ScenePrivate.h"
-#include "time.h"
 #include <assimp/Hash.h>
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
@@ -61,8 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/metadata.h>
 #include <assimp/scene.h>
-#include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
+
+#include <unordered_set>
+#include <ctime>
+#include <cstdio>
 
 namespace Assimp {
 
@@ -78,7 +79,7 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
     if (string.length >= 1 && string.data[0] == '$')
         return;
 
-    if (len + string.length >= MAXLEN - 1) {
+    if (len + string.length >= AI_MAXLEN - 1) {
         ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
         ai_assert(false);
         return;
@@ -95,6 +96,11 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
 // ------------------------------------------------------------------------------------------------
 // Add node identifiers to a hashing set
 void SceneCombiner::AddNodeHashes(aiNode *node, std::set<unsigned int> &hashes) {
+    if (node == nullptr) {
+        ASSIMP_LOG_ERROR("Pointer to aiNode is nullptr.");
+        return;
+    }
+
     // Add node name to hashing set if it is non-empty - empty nodes are allowed
     // and they can't have any anims assigned so its absolutely safe to duplicate them.
     if (node->mName.length) {
@@ -252,6 +258,14 @@ void SceneCombiner::AttachToGraph(aiScene *master, std::vector<NodeAttachmentInf
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<AttachmentInfo> &srcList, unsigned int flags) {
     if (nullptr == _dest) {
+        std::unordered_set<aiScene *> uniqueScenes;
+        uniqueScenes.insert(master);
+        for (const auto &item : srcList) {
+            uniqueScenes.insert(item.scene);
+        }
+        for (const auto &item : uniqueScenes) {
+            delete item;
+        }
         return;
     }
 
@@ -259,6 +273,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
     if (srcList.empty()) {
         if (*_dest) {
             SceneCombiner::CopySceneFlat(_dest, master);
+            delete master;
         } else
             *_dest = master;
         return;
@@ -306,15 +321,6 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
         boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);
 #endif
         for (unsigned int i = 1; i < src.size(); ++i) {
-            //if (i != duplicates[i])
-            //{
-            //  // duplicate scenes share the same UID
-            //  ::strcpy( src[i].id, src[duplicates[i]].id );
-            //  src[i].idlen = src[duplicates[i]].idlen;
-
-            //  continue;
-            //}
-
             src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_", i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
@@ -408,7 +414,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                             // where n is the index of the texture.
                             // Copy here because we overwrite the string data in-place and the buffer inside of aiString
                             // will be a lie if we just reinterpret from prop->mData. The size of mData is not guaranteed to be
-                            // MAXLEN in size.
+                            // AI_MAXLEN in size.
                             aiString s(*(aiString *)prop->mData);
                             if ('*' == s.data[0]) {
                                 // Offset the index and write it back ..
@@ -672,8 +678,8 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
 // ------------------------------------------------------------------------------------------------
 // Build a list of unique bones
 void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
-        std::vector<aiMesh *>::const_iterator it,
-        std::vector<aiMesh *>::const_iterator end) {
+        MeshArray::const_iterator it,
+        MeshArray::const_iterator end) {
     unsigned int iOffset = 0;
     for (; it != end; ++it) {
         for (unsigned int l = 0; l < (*it)->mNumBones; ++l) {
@@ -706,8 +712,7 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
 
 // ------------------------------------------------------------------------------------------------
 // Merge a list of bones
-void SceneCombiner::MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterator it,
-        std::vector<aiMesh *>::const_iterator end) {
+void SceneCombiner::MergeBones(aiMesh *out, MeshArray::const_iterator it, MeshArray::const_iterator end) {
     if (nullptr == out || out->mNumBones == 0) {
         return;
     }
@@ -765,8 +770,8 @@ void SceneCombiner::MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterato
 // ------------------------------------------------------------------------------------------------
 // Merge a list of meshes
 void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
-        std::vector<aiMesh *>::const_iterator begin,
-        std::vector<aiMesh *>::const_iterator end) {
+        MeshArray::const_iterator begin,
+        MeshArray::const_iterator end) {
     if (nullptr == _out) {
         return;
     }
@@ -782,7 +787,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
 
     std::string name;
     // Find out how much output storage we'll need
-    for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+    for (MeshArray::const_iterator it = begin; it != end; ++it) {
         const char *meshName((*it)->mName.C_Str());
         name += std::string(meshName);
         if (it != end - 1) {
@@ -804,7 +809,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         if ((**begin).HasPositions()) {
 
             pv2 = out->mVertices = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mVertices) {
                     ::memcpy(pv2, (*it)->mVertices, (*it)->mNumVertices * sizeof(aiVector3D));
                 } else
@@ -816,7 +821,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         if ((**begin).HasNormals()) {
 
             pv2 = out->mNormals = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mNormals) {
                     ::memcpy(pv2, (*it)->mNormals, (*it)->mNumVertices * sizeof(aiVector3D));
                 } else {
@@ -831,7 +836,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
             pv2 = out->mTangents = new aiVector3D[out->mNumVertices];
             aiVector3D *pv2b = out->mBitangents = new aiVector3D[out->mNumVertices];
 
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mTangents) {
                     ::memcpy(pv2, (*it)->mTangents, (*it)->mNumVertices * sizeof(aiVector3D));
                     ::memcpy(pv2b, (*it)->mBitangents, (*it)->mNumVertices * sizeof(aiVector3D));
@@ -848,7 +853,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
             out->mNumUVComponents[n] = (*begin)->mNumUVComponents[n];
 
             pv2 = out->mTextureCoords[n] = new aiVector3D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mTextureCoords[n]) {
                     ::memcpy(pv2, (*it)->mTextureCoords[n], (*it)->mNumVertices * sizeof(aiVector3D));
                 } else {
@@ -862,7 +867,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         n = 0;
         while ((**begin).HasVertexColors(n)) {
             aiColor4D *pVec2 = out->mColors[n] = new aiColor4D[out->mNumVertices];
-            for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+            for (MeshArray::const_iterator it = begin; it != end; ++it) {
                 if ((*it)->mColors[n]) {
                     ::memcpy(pVec2, (*it)->mColors[n], (*it)->mNumVertices * sizeof(aiColor4D));
                 } else {
@@ -881,7 +886,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         aiFace *pf2 = out->mFaces;
 
         unsigned int ofs = 0;
-        for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it) {
+        for (MeshArray::const_iterator it = begin; it != end; ++it) {
             for (unsigned int m = 0; m < (*it)->mNumFaces; ++m, ++pf2) {
                 aiFace &face = (*it)->mFaces[m];
                 pf2->mNumIndices = face.mNumIndices;
@@ -904,7 +909,7 @@ void SceneCombiner::MergeMeshes(aiMesh **_out, unsigned int /*flags*/,
         MergeBones(out, begin, end);
 
     // delete all source meshes
-    for (std::vector<aiMesh *>::const_iterator it = begin; it != end; ++it)
+    for (MeshArray::const_iterator it = begin; it != end; ++it)
         delete *it;
 }
 
@@ -984,7 +989,7 @@ inline void GetArrayCopy(Type *&dest, ai_uint num) {
     Type *old = dest;
 
     dest = new Type[num];
-    ::memcpy(dest, old, sizeof(Type) * num);
+    std::copy(old, old+num, dest);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1057,7 +1062,7 @@ void SceneCombiner::CopyScene(aiScene **_dest, const aiScene *src, bool allocate
     dest->mFlags = src->mFlags;
 
     // source private data might be nullptr if the scene is user-allocated (i.e. for use with the export API)
-    if (dest->mPrivate != nullptr) {
+    if (src->mPrivate != nullptr) {
         ScenePriv(dest)->mPPStepsApplied = ScenePriv(src) ? ScenePriv(src)->mPPStepsApplied : 0;
     }
 }
@@ -1094,10 +1099,6 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces, dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces; ++i) {
-        aiFace &f = dest->mFaces[i];
-        GetArrayCopy(f.mIndices, f.mNumIndices);
-    }
 
     // make a deep copy of all blend shapes
     CopyPtrArray(dest->mAnimMeshes, dest->mAnimMeshes, dest->mNumAnimMeshes);

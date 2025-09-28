@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -271,7 +270,7 @@ void Q3BSPFileImporter::CreateNodes(const Q3BSP::Q3BSPModel *pModel, aiScene *pS
     }
 
     unsigned int matIdx(0);
-    std::vector<aiMesh *> MeshArray;
+    MeshArray MeshArray;
     std::vector<aiNode *> NodeArray;
     for (FaceMapIt it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it) {
         std::vector<Q3BSP::sQ3BSPFace *> *pArray = (*it).second;
@@ -588,7 +587,7 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
 
             aiString name;
             name.data[0] = '*';
-            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+            name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
             archive->Close(pTextureStream);
 
@@ -641,7 +640,7 @@ bool Q3BSPFileImporter::importLightmap(const Q3BSP::Q3BSPModel *pModel, aiScene 
 
     aiString name;
     name.data[0] = '*';
-    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
+    name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(mTextures.size()));
 
     pMatHelper->AddProperty(&name, AI_MATKEY_TEXTURE_LIGHTMAP(1));
     mTextures.push_back(pTexture);

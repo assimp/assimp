@@ -1,10 +1,8 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -110,7 +108,7 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char Token[] = "BLENDER";
+static constexpr char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -359,7 +357,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
+        name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
         aiTexture *curTex = conv_data.textures->back();
@@ -433,7 +431,7 @@ void BlenderImporter::AddSentinelTexture(aiMaterial *out, const Material *mat, c
     (void)conv_data;
 
     aiString name;
-    name.length = ai_snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
+    name.length = ai_snprintf(name.data, AI_MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
             GetTextureTypeDisplayString(tex->tex->type));
     out->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(
                                     conv_data.next_texture[aiTextureType_DIFFUSE]++));
@@ -495,8 +493,9 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
             if (index == static_cast<unsigned int>(-1)) {
                 // Setup a default material.
                 std::shared_ptr<Material> p(new Material());
-                ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name) - 2);
-                strcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME);
+                const size_t len = ::strlen(AI_DEFAULT_MATERIAL_NAME);
+                ai_assert(len < sizeof(p->id.name) - 2);
+                memcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
                 // Thus all relevant fields should be explicitly initialized. We cannot add
@@ -962,7 +961,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>(mesh->mtface.size())) {
             ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
             const auto itMatTexUvMapping = matTexUvMappings.find((*it)->mMaterialIndex);
@@ -1031,7 +1030,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>(mesh->tface.size())) {
             ThrowException("Number of faces is larger than the corresponding UV face array (#2)");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
 
@@ -1058,7 +1057,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         if (mesh->totface > static_cast<int>((mesh->mcol.size() / 4))) {
             ThrowException("Number of faces is larger than the corresponding color face array");
         }
-        for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
+        for (MeshArray::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
 

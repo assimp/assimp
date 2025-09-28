@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -65,7 +65,7 @@ class Importer;
 */
 class NDOImporter : public BaseImporter {
 public:
-    NDOImporter() = default; 
+    NDOImporter() = default;
     ~NDOImporter() override = default;
 
     //! Represents a single edge

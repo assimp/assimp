@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_IRRLOADER_H_INCLUDED
 #define AI_IRRLOADER_H_INCLUDED
 
-#include "AssetLib/Irr/IRRShared.h"
+#include "IRRShared.h"
 #include "Common/Importer.h"
 
 #include <assimp/SceneCombiner.h>
@@ -229,7 +229,7 @@ private:
     /// Fill the scene-graph recursively
     void GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             BatchLoader &batch,
-            std::vector<aiMesh *> &meshes,
+            MeshArray &meshes,
             std::vector<aiNodeAnim *> &anims,
             std::vector<AttachmentInfo> &attach,
             std::vector<aiMaterial *> &materials,
@@ -248,7 +248,7 @@ private:
     /// @param meshes Receives 6 output meshes
     /// @param materials The last 6 materials are assigned to the newly
     ///                  created meshes. The names of the materials are adjusted.
-    void BuildSkybox(std::vector<aiMesh *> &meshes,
+    void BuildSkybox(MeshArray &meshes,
             std::vector<aiMaterial *> materials);
 
     // -------------------------------------------------------------------

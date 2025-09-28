@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -158,8 +158,8 @@ void CatmullClarkSubdivider::Subdivide(
         return;
     }
 
-    std::vector<aiMesh *> inmeshes;
-    std::vector<aiMesh *> outmeshes;
+    MeshArray inmeshes;
+    MeshArray outmeshes;
     std::vector<unsigned int> maptbl;
 
     inmeshes.reserve(nmesh);
@@ -528,7 +528,7 @@ void CatmullClarkSubdivider::InternSubdivide(
                                     continue;
                                 }
 
-                                ai_assert(adj[o] - moffsets[nidx].first < mp->mNumFaces);                                
+                                ai_assert(adj[o] - moffsets[nidx].first < mp->mNumFaces);
                                 const aiFace &f = mp->mFaces[adj[o] - moffsets[nidx].first];
                                 bool haveit = false;
 
@@ -577,7 +577,7 @@ void CatmullClarkSubdivider::InternSubdivide(
     // 7. Apply the next subdivision step.
     // ---------------------------------------------------------------------
     if (num != 1) {
-        std::vector<aiMesh *> tmp(nmesh);
+        MeshArray tmp(nmesh);
         InternSubdivide(out, nmesh, &tmp.front(), num - 1);
         for (size_t i = 0; i < nmesh; ++i) {
             delete out[i];

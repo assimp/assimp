@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -87,6 +87,11 @@ private:
 };
 
 } // namespace Assimp
+
+/// @brief Fixes an undefined reference error when linking in certain build environments.
+//         May throw warnings about needing stdc++17, but should compile without issues on modern compilers.
+inline const size_t Assimp::StackAllocator::g_maxBytesPerBlock;
+inline const size_t Assimp::StackAllocator::g_startBytesPerBlock;
 
 #include "StackAllocator.inl"
 

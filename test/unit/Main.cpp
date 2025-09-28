@@ -1,7 +1,6 @@
 #include "../../include/assimp/DefaultLogger.hpp"
 #include "UnitTestPCH.h"
-#include <math.h>
-#include <time.h>
+#include <ctime>
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
@@ -14,12 +13,12 @@ int main(int argc, char *argv[]) {
     // ............................................................................
 
     // create a logger from both CPP
-    Assimp::DefaultLogger::create("AssimpLog_Cpp.txt", Assimp::Logger::VERBOSE,
+    Assimp::DefaultLogger::create("AssimpLog_Cpp.log", Assimp::Logger::VERBOSE,
             aiDefaultLogStream_STDOUT | aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE);
 
     // .. and C. They should smoothly work together
     aiEnableVerboseLogging(AI_TRUE);
-    aiLogStream logstream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "AssimpLog_C.txt");
+    aiLogStream logstream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "AssimpLog_C.log");
     aiAttachLogStream(&logstream);
 
     int result = RUN_ALL_TESTS();

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -124,7 +124,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     // Allocate storage and copy the contents of the file to a memory buffer
     std::vector<char> mBuffer2;
     TextFileToBuffer(file.get(), mBuffer2);
-
+    const size_t fileSize = mBuffer2.size();
     this->mBuffer = &mBuffer2[0];
     this->pcScene = pScene;
 
@@ -146,7 +146,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     };
 
     // Construct an ASE parser and parse the file
-    ASE::Parser parser(mBuffer, defaultFormat);
+    ASE::Parser parser(mBuffer, fileSize, defaultFormat);
     mParser = &parser;
     mParser->Parse();
 
@@ -162,7 +162,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
 
         // process all meshes
         bool tookNormals = false;
-        std::vector<aiMesh *> avOutMeshes;
+        MeshArray avOutMeshes;
         avOutMeshes.reserve(mParser->m_vMeshes.size() * 2);
         for (std::vector<ASE::Mesh>::iterator i = mParser->m_vMeshes.begin(); i != mParser->m_vMeshes.end(); ++i) {
             if ((*i).bSkip) {
@@ -187,7 +187,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         // Now build the output mesh list. Remove dummies
         pScene->mNumMeshes = (unsigned int)avOutMeshes.size();
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-        for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
+        for (MeshArray::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
                 continue;
             }
@@ -446,10 +446,9 @@ void ASEImporter::BuildLights() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
-        aiNode *pcParent, const char *szName) {
+void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParent, const std::string &name) {
     aiMatrix4x4 m;
-    AddNodes(nodes, pcParent, szName, m);
+    AddNodes(nodes, pcParent, name, m);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -506,10 +505,9 @@ void ASEImporter::AddMeshes(const ASE::BaseNode *snode, aiNode *node) {
 
 // ------------------------------------------------------------------------------------------------
 // Add child nodes to a given parent node
-void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
-        aiNode *pcParent, const char *szName,
+void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParent, const std::string &name,
         const aiMatrix4x4 &mat) {
-    const size_t len = szName ? ::strlen(szName) : 0;
+    const size_t len = name.size();
     ai_assert(4 <= AI_MAX_NUMBER_OF_COLOR_SETS);
 
     // Receives child nodes for the pcParent node
@@ -519,16 +517,18 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
     // which has *us* as parent.
     for (std::vector<BaseNode *>::const_iterator it = nodes.begin(), end = nodes.end(); it != end; ++it) {
         const BaseNode *snode = *it;
-        if (szName) {
-            if (len != snode->mParent.length() || ::strcmp(szName, snode->mParent.c_str()))
+        if (!name.empty()) {
+            if (len != snode->mParent.length() || name != snode->mParent.c_str()) {
                 continue;
-        } else if (snode->mParent.length())
+            }
+        } else if (snode->mParent.length()) {
             continue;
+        }
 
         (*it)->mProcessed = true;
 
         // Allocate a new node and add it to the output data structure
-        apcNodes.push_back(new aiNode());
+        apcNodes.push_back(new aiNode);
         aiNode *node = apcNodes.back();
 
         node->mName.Set((snode->mName.length() ? snode->mName.c_str() : "Unnamed_Node"));
@@ -541,7 +541,7 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes,
 
         // Add sub nodes - prevent stack overflow due to recursive parenting
         if (node->mName != node->mParent->mName && node->mName != node->mParent->mParent->mName) {
-            AddNodes(nodes, node, node->mName.data, snode->mTransform);
+            AddNodes(nodes, node, node->mName.C_Str(), snode->mTransform);
         }
 
         // Further processing depends on the type of the node
@@ -619,7 +619,8 @@ void ASEImporter::BuildNodes(std::vector<BaseNode *> &nodes) {
     }
 
     // add all nodes
-    AddNodes(nodes, ch, nullptr);
+    static const std::string none = "";
+    AddNodes(nodes, ch, none);
 
     // now iterate through al nodes and find those that have not yet
     // been added to the nodegraph (= their parent could not be recognized)
@@ -730,6 +731,10 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
     unsigned int iCurrent = 0, fi = 0;
     for (std::vector<ASE::Face>::iterator i = mesh.mFaces.begin(); i != mesh.mFaces.end(); ++i, ++fi) {
         for (unsigned int n = 0; n < 3; ++n, ++iCurrent) {
+            const uint32_t curIndex = (*i).mIndices[n];
+            if (curIndex >= mesh.mPositions.size()) {
+                throw DeadlyImportError("ASE: Invalid vertex index in face ", fi, ".");
+            }
             mPositions[iCurrent] = mesh.mPositions[(*i).mIndices[n]];
 
             // add texture coordinates
@@ -897,7 +902,7 @@ void ASEImporter::ConvertMaterial(ASE::Material &mat) {
 
 // ------------------------------------------------------------------------------------------------
 // Build output meshes
-void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMeshes) {
+void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, MeshArray &avOutMeshes) {
     // validate the material index of the mesh
     if (mesh.iMaterialIndex >= mParser->m_vMaterials.size()) {
         mesh.iMaterialIndex = (unsigned int)mParser->m_vMaterials.size() - 1;

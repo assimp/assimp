@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -181,7 +181,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     mBuffer = &buffer2[0];
 
     // the default vertex color is light gray.
-    mClrColorDefault.r = mClrColorDefault.g = mClrColorDefault.b = mClrColorDefault.a = (ai_real)0.6;
+    mClrColorDefault.r = mClrColorDefault.g = mClrColorDefault.b = mClrColorDefault.a = 0.6f;
 
     // allocate a single node
     mScene->mRootNode = new aiNode();
@@ -209,7 +209,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D(ai_real(0.05), ai_real(0.05), ai_real(0.05), ai_real(1.0));
+    clrDiffuse = aiColor4D(0.05f, 0.05f, 0.05f, 1.0f);
     pcMat->AddProperty(&clrDiffuse, 1, AI_MATKEY_COLOR_AMBIENT);
 
     mScene->mNumMaterials = 1;
@@ -222,7 +222,7 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file
 void STLImporter::LoadASCIIFile(aiNode *root) {
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
     std::vector<aiNode *> nodes;
     const char *sz = mBuffer;
     const char *bufferEnd = mBuffer + mFileSize;
@@ -257,7 +257,7 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
         size_t temp = (size_t)(sz - szMe);
         // setup the name of the node
         if (temp) {
-            if (temp >= MAXLEN) {
+            if (temp >= AI_MAXLEN) {
                 throw DeadlyImportError("STL: Node name too long");
             }
             std::string name(szMe, temp);
@@ -294,11 +294,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     aiVector3D vn;
                     sz += 7;
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.x);
+                    sz = fast_atoreal_move(sz, vn.x);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.y);
+                    sz = fast_atoreal_move(sz, vn.y);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.z);
+                    sz = fast_atoreal_move(sz, vn.z);
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
@@ -315,11 +315,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     SkipSpaces(&sz, bufferEnd);
                     positionBuffer.emplace_back();
                     aiVector3D *vn = &positionBuffer.back();
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->x);
+                    sz = fast_atoreal_move(sz, vn->x);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->y);
+                    sz = fast_atoreal_move(sz, vn->y);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->z);
+                    sz = fast_atoreal_move(sz, vn->z);
                     faceVertexCounter++;
                 }
             } else if (!::strncmp(sz, "endsolid", 8)) {

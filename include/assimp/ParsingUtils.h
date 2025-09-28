@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -119,7 +119,7 @@ AI_FORCE_INLINE bool SkipSpaces(const char_t **inout, const char_t *end) {
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t *end) {
-    while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && in != end) {
+    while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && *in != (char_t)'#' && in != end) {
         ++in;
     }
 
@@ -161,13 +161,13 @@ AI_FORCE_INLINE bool GetNextLine(const char_t *&buffer, char_t out[BufferSize]) 
     }
 
     char *_out = out;
-    char *const end = _out + BufferSize;
+    char *const end = _out + BufferSize - 1;
     while (!IsLineEnd(*buffer) && _out < end) {
         *_out++ = *buffer++;
     }
     *_out = (char_t)'\0';
 
-    while (IsLineEnd(*buffer) && '\0' != *buffer) {
+    while (IsLineEnd(*buffer) && '\0' != *buffer && buffer != end) {
         ++buffer;
     }
 

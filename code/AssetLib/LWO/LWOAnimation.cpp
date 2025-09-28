@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -212,7 +212,7 @@ void AnimResolver::UpdateAnimRangeSetup() {
             unsigned int tt = 1;
             for (const double tmp = delta * (num + 1); cur_minus <= tmp; cur_minus += delta, ++tt) {
                 m = (delta == tmp ? (*it).keys.begin() : n - (old_size + 1));
-                for (; m != n; --n) {
+                for (; m < n; --n) {
                     (*n).time -= cur_minus;
 
                     // offset repeat? add delta offset to key value

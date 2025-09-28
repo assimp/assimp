@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -381,7 +381,14 @@ inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& poi
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Winvalid-offsetof"
 #endif // __clang__
+#if defined __GNUC__
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif // __GNUC__
     unsigned int pointOffset = offsetof( PointP2T, point2D );
+#if defined __GNUC__
+#    pragma GCC diagnostic pop
+#endif // __GNUC__
 #if defined __clang__
 #    pragma clang diagnostic pop
 #endif

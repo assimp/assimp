@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -1277,7 +1277,7 @@ ai_real XFileParser::ReadFloat() {
     }
 
     ai_real result = 0.0;
-    mP = fast_atoreal_move<ai_real>(mP, result);
+    mP = fast_atoreal_move(mP, result);
 
     CheckForSeparator();
 

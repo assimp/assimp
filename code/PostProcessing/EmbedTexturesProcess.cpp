@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 
 #include <fstream>
+#include <algorithm>
 
 using namespace Assimp;
 
@@ -91,25 +92,47 @@ void EmbedTexturesProcess::Execute(aiScene* pScene) {
     ASSIMP_LOG_INFO("EmbedTexturesProcess finished. Embedded ", embeddedTexturesCount, " textures." );
 }
 
+std::string EmbedTexturesProcess::tryToFindValidPath(const std::string &imagePath) const
+{
+    // Test path directly
+    if (mIOHandler->Exists(imagePath)) {
+        return imagePath;
+    }
+    ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
+
+    // Test path in root path
+    std::string testPath = mRootPath + imagePath;
+    if (mIOHandler->Exists(testPath)) {
+        return testPath;
+    }
+
+    // Test path basename in root path
+    testPath = mRootPath + imagePath.substr(imagePath.find_last_of("\\/") + 1u);
+    if (mIOHandler->Exists(testPath)) {
+        return testPath;
+    }
+
+    // In unix systems, '\' is a valid file name character, but some files may use \ as a directory separator.
+    // Try replacing '\' by '/'.
+    if (mIOHandler->getOsSeparator() != '\\' && imagePath.find('\\') != std::string::npos) {
+        ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image '", imagePath, "' in root folder. Will try replacing directory separators.");
+        testPath = imagePath;
+        std::replace(testPath.begin(), testPath.end(), '\\', mIOHandler->getOsSeparator());
+        return tryToFindValidPath(testPath);
+    }
+
+    ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", imagePath, ".");
+    return {};
+}
+
 bool EmbedTexturesProcess::addTexture(aiScene *pScene, const std::string &path) const {
     std::streampos imageSize = 0;
-    std::string    imagePath = path;
+    std::string    imagePath = tryToFindValidPath(path);
 
-    // Test path directly
-    if (!mIOHandler->Exists(imagePath)) {
-        ASSIMP_LOG_WARN("EmbedTexturesProcess: Cannot find image: ", imagePath, ". Will try to find it in root folder.");
-
-        // Test path in root path
-        imagePath = mRootPath + path;
-        if (!mIOHandler->Exists(imagePath)) {
-            // Test path basename in root path
-            imagePath = mRootPath + path.substr(path.find_last_of("\\/") + 1u);
-            if (!mIOHandler->Exists(imagePath)) {
-                ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");
-                return false;
-            }
-        }
+    if (imagePath.empty()) {
+        return false;
     }
+
     IOStream* pFile = mIOHandler->Open(imagePath);
     if (pFile == nullptr) {
         ASSIMP_LOG_ERROR("EmbedTexturesProcess: Unable to embed texture: ", path, ".");

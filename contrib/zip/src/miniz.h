@@ -5267,7 +5267,7 @@ struct mz_zip_internal_state_tag {
   (array_ptr)->m_element_size = element_size
 
 #if defined(DEBUG) || defined(_DEBUG)
-static MZ_FORCEINLINE mz_uint
+static MZ_FORCEINLINE size_t
 mz_zip_array_range_check(const mz_zip_array *pArray, mz_uint index) {
   MZ_ASSERT(index < pArray->m_size);
   return index;

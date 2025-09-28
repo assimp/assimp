@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -842,7 +842,7 @@ void OpenAsset() {
     aiString sz;
     aiGetExtensionList(&sz);
 
-    char szList[MAXLEN + 100];
+    char szList[AI_MAXLEN + 100];
     strcpy(szList,"ASSIMP assets");
     char* szCur = szList + 14;
     strcpy(szCur,sz.data);

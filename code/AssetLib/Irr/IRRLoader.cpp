@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/StringComparison.h"
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
-#include "AssetLib/Irr/IRRLoader.h"
+#include "IRRLoader.h"
 #include "Common/Importer.h"
 
 #include <assimp/GenericProperty.h>
@@ -162,13 +162,13 @@ aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<aiMaterial *> materials) {
+void IRRImporter::BuildSkybox(MeshArray &meshes, std::vector<aiMaterial *> materials) {
     // Update the material of the skybox - replace the name and disable shading for skyboxes.
     for (unsigned int i = 0; i < 6; ++i) {
         aiMaterial *out = (aiMaterial *)(*(materials.end() - (6 - i)));
 
         aiString s;
-        s.length = ::ai_snprintf(s.data, MAXLEN, "SkyboxSide_%u", i);
+        s.length = ::ai_snprintf(s.data, AI_MAXLEN, "SkyboxSide_%u", i);
         out->AddProperty(&s, AI_MATKEY_NAME);
 
         int shading = aiShadingMode_NoShading;
@@ -316,7 +316,7 @@ void IRRImporter::ComputeAnimations(Node *root, aiNode *real, std::vector<aiNode
         if (cur != total - 1) {
             // Build a new name - a prefix instead of a suffix because it is
             // easier to check against
-            anim->mNodeName.length = ::ai_snprintf(anim->mNodeName.data, MAXLEN,
+            anim->mNodeName.length = ::ai_snprintf(anim->mNodeName.data, AI_MAXLEN,
                     "$INST_DUMMY_%i_%s", total - 1,
                     (root->name.length() ? root->name.c_str() : ""));
 
@@ -602,7 +602,7 @@ void SetupMapping(aiMaterial *mat, aiTextureMapping mode, const aiVector3D &axis
 // ------------------------------------------------------------------------------------------------
 void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         BatchLoader &batch,
-        std::vector<aiMesh *> &meshes,
+        MeshArray &meshes,
         std::vector<aiNodeAnim *> &anims,
         std::vector<AttachmentInfo> &attach,
         std::vector<aiMaterial *> &materials,
@@ -1283,7 +1283,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::vector<aiNodeAnim *> anims;
     std::vector<aiMaterial *> materials;
     std::vector<AttachmentInfo> attach;
-    std::vector<aiMesh *> meshes;
+    MeshArray meshes;
 
     // try to guess how much storage we'll need
     anims.reserve(guessedAnimCnt + (guessedAnimCnt >> 2));

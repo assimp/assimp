@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/fast_atof.h>
 #include <assimp/ParsingUtils.h>
 
-namespace Assimp    {
+namespace Assimp {
 
 inline bool IsHex(char s) {
     return (s>='0' && s<='9') || (s>='a' && s<='f') || (s>='A' && s<='F');

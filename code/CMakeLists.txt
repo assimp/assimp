@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -271,7 +271,6 @@ MACRO(ADD_ASSIMP_IMPORTER name)
 ENDMACRO()
 
 if (NOT ASSIMP_NO_EXPORT)
-
   # if this variable is set to TRUE, the user can manually disable exporters by setting
   # ASSIMP_BUILD_XXX_EXPORTER to FALSE for each exporter
   # if this variable is set to FALSE, the user can manually enable exporters by setting
@@ -417,14 +416,12 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+if (ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_ASSIMP_IMPORTER( M3D
+            AssetLib/M3D/M3DImporter.cpp
+            AssetLib/M3D/M3DWrapper.cpp
+    )
+endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
@@ -664,9 +661,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assxml/AssxmlFileWriter.h
     AssetLib/Assxml/AssxmlFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER(M3D
-    AssetLib/M3D/M3DExporter.h
-    AssetLib/M3D/M3DExporter.cpp)
+  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
+      ADD_ASSIMP_EXPORTER(M3D
+              AssetLib/M3D/M3DExporter.cpp)
+  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
 
   ADD_ASSIMP_EXPORTER(COLLADA
     AssetLib/Collada/ColladaExporter.h
@@ -828,6 +826,17 @@ ADD_ASSIMP_IMPORTER( 3D
   AssetLib/Unreal/UnrealLoader.h
 )
 
+ADD_ASSIMP_IMPORTER( USD
+  AssetLib/USD/USDLoader.cpp
+  AssetLib/USD/USDLoader.h
+  AssetLib/USD/USDLoaderImplTinyusdz.cpp
+  AssetLib/USD/USDLoaderImplTinyusdz.h
+  AssetLib/USD/USDLoaderImplTinyusdzHelper.cpp
+  AssetLib/USD/USDLoaderImplTinyusdzHelper.h
+  AssetLib/USD/USDLoaderUtil.cpp
+  AssetLib/USD/USDLoaderUtil.h
+)
+
 ADD_ASSIMP_IMPORTER( X
   AssetLib/X/XFileHelper.h
   AssetLib/X/XFileImporter.cpp
@@ -855,11 +864,15 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DGeoHelper.h
   AssetLib/X3D/X3DXmlHelper.cpp
   AssetLib/X3D/X3DXmlHelper.h
+  AssetLib/VRML/VrmlConverter.cpp
 )
+SET(glTFCommon_src
+  AssetLib/glTFCommon/glTFCommon.h
+  AssetLib/glTFCommon/glTFCommon.cpp
+)
+SOURCE_GROUP( glTFCommon FILES ${glTFCommon_src})
 
 ADD_ASSIMP_IMPORTER( GLTF
-  AssetLib/glTF/glTFCommon.h
-  AssetLib/glTF/glTFCommon.cpp
   AssetLib/glTF/glTFAsset.h
   AssetLib/glTF/glTFAsset.inl
   AssetLib/glTF/glTFAssetWriter.h
@@ -921,13 +934,188 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
+# VRML (.wrl/.x3dv) support
+IF (ASSIMP_BUILD_VRML_IMPORTER)
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch name
+    #       can lead to non-deterministic (unpredictable) results since the code is potentially in flux
+    # "main" branch, 18 Nov 2024
+    set(Meshlab_GIT_TAG "ad55b47a9b0700e7b427db6db287bb3a39aa31e7")
+    message("****")
+    message("\n\n**** Cloning meshlab repo, git tag ${Meshlab_GIT_TAG}\n\n")
+
+    # Note: Depending on user's OS, build environment etc it may be necessary to change line endings of
+    #       "patches/meshlab.patch" file from CRLF to LF in order for patch operation to succeed
+    # Patch required to
+    #  - replace QtXml w/pugixml
+    #  - disable meshlab cmake scripts to prevent breaking assimp build
+    #  - address compiler warnings to avoid breaking build for users who wisely treat warnings-as-errors
+    set(Meshlab_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab/patches/meshlab.patch")
+    set(Meshlab_PATCH_CMD git apply ${Meshlab_PATCHFILE_PATH})
+
+    # Note: cloning entire meshlab repo is wasteful since we require literally only two source files.
+    #       There is a technique using "git archive" e.g.
+    #           execute_process(
+    #              COMMAND git archive --remote=${Meshlab_GIT_REPO} ${Meshlab_GIT_TAG} <files> | \
+    #                  tar -x -C ${Meshlab_BASE_ABSPATH}
+    #              RESULT_VARIABLE result
+    #           )
+    #       But this doesn't work with git "https" protocol so not a viable solution
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
+    set(Meshlab_GIT_REPO "https://github.com/cnr-isti-vclab/meshlab")
+    FetchContent_Declare(
+            meshlab_repo
+            GIT_REPOSITORY ${Meshlab_GIT_REPO}
+            GIT_TAG        ${Meshlab_GIT_TAG}
+            PATCH_COMMAND  ${Meshlab_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(meshlab_repo)
+    message("**** Finished cloning meshlab repo")
+    message("****")
+    set(Meshlab_REPO_BASEPATH "${CMAKE_BINARY_DIR}/_deps/meshlab_repo-src/src")
+    set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_BASEPATH}/meshlabplugins/io_x3d/vrml")
+    set(Meshlab_SRCS
+            ${Meshlab_SRC_ABSPATH}/Parser.cpp
+            ${Meshlab_SRC_ABSPATH}/Scanner.cpp
+    )
+    INCLUDE_DIRECTORIES(
+            ${Meshlab_SRC_ABSPATH}
+            # Add this to avoid include of generic-looking "Parser.h" (for sonarCloud)
+            ${Meshlab_REPO_BASEPATH}
+    )
+    MESSAGE(STATUS "VRML enabled")
+ELSE() # IF (ASSIMP_BUILD_VRML_IMPORTER)
+    set(Meshlab_SRCS "")
+    MESSAGE(STATUS "VRML disabled")
+ENDIF() # IF (ASSIMP_BUILD_VRML_IMPORTER)
+
+# USD/USDA/USDC/USDZ support
+# tinyusdz
+IF (ASSIMP_BUILD_USD_IMPORTER)
+    if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
+        ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
+    endif ()
+
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
+    #       name can lead to non-deterministic (unpredictable) results since the code is potentially
+    #       in flux
+    # "dev" branch, 14 Mar 2025
+    set(TINYUSDZ_GIT_TAG "6050eef932f7d2788656d63297aa488fb0961ed1")
+    message("****")
+    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+
+    # Patch required to build arm32 on android
+    set(TINYUSDZ_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz/patches/tinyusdz.patch")
+    set(TINYUSDZ_PATCH_CMD git apply ${TINYUSDZ_PATCHFILE_PATH})
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
+    FetchContent_Declare(
+            tinyusdz_repo
+            EXCLUDE_FROM_ALL TRUE
+            GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
+            GIT_TAG        ${TINYUSDZ_GIT_TAG}
+            PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(tinyusdz_repo)
+    message("**** Finished cloning tinyusdz repo")
+    message("****")
+
+    set(Tinyusdz_SRC_ABSPATH "${CMAKE_BINARY_DIR}/_deps/tinyusdz_repo-src/src")
+    set(Tinyusdz_SRCS
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples.cc
+            ${Tinyusdz_SRC_ABSPATH}/ascii-parser-timesamples-array.cc
+            ${Tinyusdz_SRC_ABSPATH}/asset-resolution.cc
+            ${Tinyusdz_SRC_ABSPATH}/composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/crate-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-loader.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/image-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/io-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/linear-algebra.cc
+            ${Tinyusdz_SRC_ABSPATH}/path-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/pprinter.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-composition.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct.cc
+            ${Tinyusdz_SRC_ABSPATH}/prim-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/primvar.cc
+            ${Tinyusdz_SRC_ABSPATH}/stage.cc
+            ${Tinyusdz_SRC_ABSPATH}/str-util.cc
+            ${Tinyusdz_SRC_ABSPATH}/tiny-format.cc
+            ${Tinyusdz_SRC_ABSPATH}/tinyusdz.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-fallback.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/facial.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/prim-apply.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/render-data.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access.cc
+            ${Tinyusdz_SRC_ABSPATH}/tydra/shader-network.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usda-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-reader.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdc-writer.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdGeom.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdLux.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdMtlx.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdShade.cc
+            ${Tinyusdz_SRC_ABSPATH}/usdSkel.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-pprint.cc
+            ${Tinyusdz_SRC_ABSPATH}/value-types.cc
+            ${Tinyusdz_SRC_ABSPATH}/xform.cc
+    )
+
+    set(Tinyusdz_DEP_SOURCES
+            ${Tinyusdz_SRC_ABSPATH}/external/fpng.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/staticstruct.cc
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/database.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/error.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/string_id/string_id.cpp
+            #${Tinyusdz_SRC_ABSPATH}/external/tinyxml2/tinyxml2.cpp
+            ${Tinyusdz_SRC_ABSPATH}/integerCoding.cpp
+            ${Tinyusdz_SRC_ABSPATH}/lz4-compression.cc
+            ${Tinyusdz_SRC_ABSPATH}/lz4/lz4.c
+    )
+
+    set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")
+    INCLUDE_DIRECTORIES(${tinyusdz_INCLUDE_DIRS})
+    SOURCE_GROUP( Contrib\\Tinyusdz
+            FILES
+            ${Tinyusdz_SRCS}
+            ${Tinyusdz_DEP_SOURCES}
+    )
+    MESSAGE(STATUS "tinyusdz enabled")
+ELSE() # IF (ASSIMP_BUILD_USD_IMPORTER)
+    set(Tinyusdz_SRCS "")
+    set(Tinyusdz_DEP_SOURCES "")
+    MESSAGE(STATUS "tinyusdz disabled")
+ENDIF() # IF (ASSIMP_BUILD_USD_IMPORTER)
+
 # pugixml
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(pugixml)
   find_package(pugixml CONFIG REQUIRED)
-ELSE()
+ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.cpp
     ../contrib/pugixml/src/pugixml.hpp
   )
   INCLUDE_DIRECTORIES("../contrib/pugixml/src")
@@ -1123,11 +1311,6 @@ if(MSVC10)
   endif()
 endif()
 
-IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
-  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
-  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-endif ()
-
 IF(NOT ASSIMP_HUNTER_ENABLED)
   if (UNZIP_FOUND)
     SET (unzip_compile_SRCS "")
@@ -1158,6 +1341,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
+  ${glTFCommon_src}
 #  ${Step_SRCS} check if we need a different approach
 
   # Model Support
@@ -1171,6 +1355,9 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Meshlab_SRCS}
+  ${Tinyusdz_SRCS}
+  ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
   ${stb_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
@@ -1204,7 +1391,7 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
 IF (BUILD_SHARED_LIBS)
   TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
 ELSE ()
-  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY)
+  TARGET_COMPILE_DEFINITIONS(assimp PRIVATE OPENDDL_STATIC_LIBARY P2T_STATIC_EXPORTS)
 ENDIF ()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
@@ -1216,7 +1403,6 @@ add_compile_options(
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
   IF (MSVC)
-
     IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
       TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
         -Wno-microsoft-enum-value
@@ -1266,6 +1452,8 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-unused-template
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
+        -Wno-deprecated-declarations
+	      -Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)
@@ -1287,9 +1475,7 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
@@ -1308,6 +1494,9 @@ ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp ${draco_LIBRARIES})
+  endif()
+  if(TARGET pugixml::pugixml)
+    target_link_libraries(assimp pugixml::pugixml)
   endif()
 ENDIF()
 
@@ -1445,7 +1634,7 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
       COMPILE_PDB_NAME_DEBUG assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}
     )
 
-    IF(GENERATOR_IS_MULTI_CONFIG)
+    IF(is_multi_config)
       install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
         DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
         CONFIGURATIONS Debug

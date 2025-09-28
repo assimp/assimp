@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -50,8 +50,8 @@ namespace Assimp {
 namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolyLine(const Schema_2x3::IfcPolyline& def, 
-        TempMesh& meshout, 
+void ProcessPolyLine(const Schema_2x3::IfcPolyline& def,
+        TempMesh& meshout,
         ConversionData& /*conv*/) {
     // this won't produce a valid mesh, it just spits out a list of vertices
     IfcVector3 t;
@@ -63,8 +63,8 @@ void ProcessPolyLine(const Schema_2x3::IfcPolyline& def,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessCurve(const Schema_2x3::IfcCurve& curve,  
-        TempMesh& meshout, 
+bool ProcessCurve(const Schema_2x3::IfcCurve& curve,
+        TempMesh& meshout,
         ConversionData& conv) {
     std::unique_ptr<const Curve> cv(Curve::Convert(curve,conv));
     if (!cv) {
@@ -90,22 +90,22 @@ bool ProcessCurve(const Schema_2x3::IfcCurve& curve,
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessClosedProfile(const Schema_2x3::IfcArbitraryClosedProfileDef& def, 
-        TempMesh& meshout, 
+void ProcessClosedProfile(const Schema_2x3::IfcArbitraryClosedProfileDef& def,
+        TempMesh& meshout,
         ConversionData& conv) {
     ProcessCurve(def.OuterCurve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessOpenProfile(const Schema_2x3::IfcArbitraryOpenProfileDef& def, 
-        TempMesh& meshout, 
+void ProcessOpenProfile(const Schema_2x3::IfcArbitraryOpenProfileDef& def,
+        TempMesh& meshout,
         ConversionData& conv) {
     ProcessCurve(def.Curve,meshout,conv);
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& def, 
-        TempMesh& meshout, 
+void ProcessParametrizedProfile(const Schema_2x3::IfcParameterizedProfileDef& def,
+        TempMesh& meshout,
         ConversionData& conv) {
     if(const Schema_2x3::IfcRectangleProfileDef* const cprofile = def.ToPtr<Schema_2x3::IfcRectangleProfileDef>()) {
         const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;

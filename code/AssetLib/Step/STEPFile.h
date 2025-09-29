@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #    pragma warning(disable : 4127 4456 4245 4512 )
 #endif // _MSC_VER
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
+#if _MSC_VER > 1500 || (defined __GNUC__)
 #    define ASSIMP_STEP_USE_UNORDERED_MULTIMAP
 #else
 #    define step_unordered_map map

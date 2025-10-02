@@ -388,12 +388,12 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
     if (need_default && materials.size()) {
         ASSIMP_LOG_WARN("MS3D: Found group with no material assigned, spawning default material");
-        // if one of the groups has no material assigned, but there are other
+          // if one of the groups has no material assigned, but there are other
         // groups with materials, a default material needs to be added (
         // scenepreprocessor adds a default material only if nummat==0).
         materials.emplace_back();
         TempMaterial& m = materials.back();
-        m.name ={'\0'};
+        memset(m.name, '\0', 33);
         strncpy(m.name,"<MS3D_DefaultMat>", 17);
         m.diffuse = aiColor4D(0.6f,0.6f,0.6f,1.0);
         m.transparency = 1.f;

@@ -130,7 +130,6 @@ public:
      */
     static const unsigned int MaxLenHint = 200;
 
-public:
     // -------------------------------------------------------------------
     /** Constructor. Creates an empty importer object.
      *

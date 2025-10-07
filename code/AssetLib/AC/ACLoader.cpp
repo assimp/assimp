@@ -418,7 +418,7 @@ void AC3DImporter::ConvertMaterial(const Object &object,
 // ------------------------------------------------------------------------------------------------
 // Converts the loaded data to the internal verbose representation
 aiNode *AC3DImporter::ConvertObjectSection(Object &object,
-        MeshArray &meshes,
+        std::vector<aiMesh *> &meshes,
         std::vector<aiMaterial *> &outMaterials,
         const std::vector<Material> &materials,
         aiNode *parent) {
@@ -710,7 +710,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
                     ASSIMP_LOG_INFO("AC3D: Evaluating subdivision surface: ", object.name);
 
-                    MeshArray cpy(meshes.size() - oldm, nullptr);
+                    std::vector<aiMesh *> cpy(meshes.size() - oldm, nullptr);
                     div->Subdivide(&meshes[oldm], cpy.size(), &cpy.front(), object.subDiv, true);
                     std::copy(cpy.begin(), cpy.end(), meshes.begin() + oldm);
 
@@ -846,7 +846,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     }
 
     mNumMeshes += (mNumMeshes >> 2u) + 1;
-    MeshArray meshes;
+    std::vector<aiMesh *> meshes;
     meshes.reserve(mNumMeshes);
 
     std::vector<aiMaterial *> omaterials;

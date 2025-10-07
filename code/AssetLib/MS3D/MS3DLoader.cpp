@@ -394,7 +394,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         materials.emplace_back();
         TempMaterial& m = materials.back();
         memset(m.name, '\0', 33);
-        strncpy(m.name,"<MS3D_DefaultMat>", 17);
+        constexpr char DefaultMat[18] = "<MS3D_DefaultMat>";
+	strncpy(m.name, DefaultMat, sizeof(m.name));
         m.diffuse = aiColor4D(0.6f,0.6f,0.6f,1.0);
         m.transparency = 1.f;
         m.shininess = 0.f;

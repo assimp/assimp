@@ -156,13 +156,13 @@ public:
     FlipUVsProcess();
 
     /** Destructor, private as well */
-    ~FlipUVsProcess();
+    ~FlipUVsProcess() override;
 
     // -------------------------------------------------------------------
-    bool IsActive( unsigned int pFlags) const;
+    bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    void Execute( aiScene* pScene);
+    void Execute( aiScene* pScene) override;
 
 protected:
     void ProcessMesh( aiMesh* pMesh);

@@ -72,7 +72,7 @@ public:
         explicit THeapData(T *in) :
                 data(in) {}
 
-        ~THeapData() {
+        ~THeapData() override {
             delete data;
         }
         T *data;
@@ -84,7 +84,7 @@ public:
         explicit TStaticData(T in) :
                 data(in) {}
 
-        ~TStaticData() = default;
+        ~TStaticData() override= default;
 
         T data;
     };

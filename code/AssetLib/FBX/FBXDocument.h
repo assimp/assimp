@@ -174,7 +174,7 @@ class NodeAttribute : public Object {
 public:
     NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~NodeAttribute() = default;
+    ~NodeAttribute() override = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -190,7 +190,7 @@ class CameraSwitcher : public NodeAttribute {
 public:
     CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~CameraSwitcher() = default;
+    ~CameraSwitcher() override= default;
 
     int CameraID() const {
         return cameraId;
@@ -235,7 +235,7 @@ class Camera : public NodeAttribute {
 public:
     Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual  ~Camera() = default;
+    ~Camera() override = default;
 
     fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0))
     fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0))
@@ -260,21 +260,21 @@ public:
 class Null : public NodeAttribute {
 public:
     Null(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Null() = default;
+    ~Null() override = default;
 };
 
 /** DOM base class for FBX limb node markers attached to a node */
 class LimbNode : public NodeAttribute {
 public:
     LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~LimbNode() = default;
+    ~LimbNode() override = default;
 };
 
 /** DOM base class for FBX lights attached to a node */
 class Light : public NodeAttribute {
 public:
     Light(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~Light() = default;
+    ~Light() override = default;
 
     enum Type {
         Type_Point,
@@ -354,7 +354,7 @@ public:
 
     Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Model() = default;
+    ~Model() override = default;
 
     fbx_simple_property(QuaternionInterpolate, int, 0)
 
@@ -481,7 +481,7 @@ class Texture : public Object {
 public:
     Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Texture();
+    ~Texture() override;
 
     const std::string& Type() const {
         return type;
@@ -545,7 +545,7 @@ private:
 class LayeredTexture : public Object {
 public:
     LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    virtual ~LayeredTexture();
+    ~LayeredTexture() override;
 
     // Can only be called after construction of the layered texture object due to construction flag.
     void fillTexture(const Document& doc);
@@ -612,7 +612,7 @@ class Video : public Object {
 public:
     Video(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    virtual ~Video();
+    ~Video() override;
 
     const std::string& Type() const {
         return type;
@@ -700,7 +700,7 @@ using KeyValueList = std::vector<float>;
 class AnimationCurve : public Object {
 public:
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    virtual ~AnimationCurve() = default;
+    ~AnimationCurve() override = default;
 
     /** get list of keyframe positions (time).
      *  Invariant: |GetKeys()| > 0 */
@@ -741,7 +741,7 @@ public:
     AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
             const char *const *target_prop_whitelist = nullptr, size_t whitelist_size = 0);
 
-    virtual ~AnimationCurveNode() = default;
+   ~AnimationCurveNode() override = default;
 
     const PropertyTable& Props() const {
         ai_assert(props.get());

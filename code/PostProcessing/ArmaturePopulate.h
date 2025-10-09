@@ -71,16 +71,16 @@ public:
     ArmaturePopulate() = default;
 
     /// The class destructor.
-    virtual ~ArmaturePopulate() = default;
+    ~ArmaturePopulate() override = default;
 
     /// Overwritten, @see BaseProcess
-    virtual bool IsActive( unsigned int pFlags ) const;
+    bool IsActive( unsigned int pFlags ) const override;
 
     /// Overwritten, @see BaseProcess
-    virtual void SetupProperties( const Importer* pImp );
+    void SetupProperties( const Importer* pImp ) override;
 
     /// Overwritten, @see BaseProcess
-    virtual void Execute( aiScene* pScene );
+    void Execute( aiScene* pScene ) override;
 
     static aiNode *GetArmatureRoot(aiNode *bone_node,
                                       std::vector<aiBone *> &bone_list);

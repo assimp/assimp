@@ -127,7 +127,7 @@ public:
         ai_assert(nullptr != s.callback);
     }
 
-    ~LogToCallbackRedirector() {
+    ~LogToCallbackRedirector() override {
 #ifndef ASSIMP_BUILD_SINGLETHREADED
         std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif

@@ -115,7 +115,7 @@ struct Material : public D3DS::Material {
         return *this;
     }
 
-    ~Material() = default;
+    ~Material() override = default;
 
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;

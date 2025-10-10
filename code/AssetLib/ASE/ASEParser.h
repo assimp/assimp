@@ -64,7 +64,7 @@ using namespace D3DS;
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing an ASE material */
-struct Material : public D3DS::Material {
+struct Material final : D3DS::Material {
     //! Default constructor has been deleted
     Material() = delete;
 

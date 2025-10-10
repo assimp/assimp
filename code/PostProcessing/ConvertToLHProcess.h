@@ -72,7 +72,7 @@ namespace Assimp {
  *
  * @note RH-LH and LH-RH is the same, so this class can be used for both
  */
-class MakeLeftHandedProcess : public BaseProcess {
+class MakeLeftHandedProcess final : public BaseProcess {
 public:
     MakeLeftHandedProcess() = default;
     ~MakeLeftHandedProcess() override = default;
@@ -147,7 +147,7 @@ public:
 // ---------------------------------------------------------------------------
 /** Postprocessing step to flip the UV coordinate system of the import data
  */
-class FlipUVsProcess : public BaseProcess
+class FlipUVsProcess final : public BaseProcess
 {
     friend class Importer;
 

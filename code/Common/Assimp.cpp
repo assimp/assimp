@@ -67,13 +67,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace Assimp {
+
 // underlying structure for aiPropertyStore
-typedef BatchLoader::PropertyMap PropertyMap;
+using PropertyMap =  BatchLoader::PropertyMap ;
 
 #if defined(__has_warning)
-#if __has_warning("-Wordered-compare-function-pointers")
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
+#   if __has_warning("-Wordered-compare-function-pointers")
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
 #endif
 #endif
 
@@ -111,6 +112,7 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out);
 
 /** will delete all registered importers. */
 void DeleteImporterInstanceList(std::vector<BaseImporter *> &out);
+
 } // namespace Assimp
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -146,7 +148,7 @@ public:
     }
 
     /** @copydoc LogStream::write */
-    void write(const char *message) {
+    void write(const char *message) override {
         mStream.callback(message, mStream.user);
     }
 

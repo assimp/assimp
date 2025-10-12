@@ -83,12 +83,7 @@ public:
     std::string mTilestyleV;
     std::vector<char> mBuffer;
 
-    EmbeddedTexture(int id) :
-            Resource(id),
-            mPath(),
-            mContentType(),
-            mTilestyleU(),
-            mTilestyleV() {
+    explicit EmbeddedTexture(int id) : Resource(id) {
         // empty
     }
 
@@ -103,9 +98,8 @@ class Texture2DGroup final : public Resource {
 public:
     std::vector<aiVector2D> mTex2dCoords;
     int mTexId;
-    Texture2DGroup(int id) :
-            Resource(id),
-            mTexId(-1) {
+
+    explicit Texture2DGroup(int id) : Resource(id), mTexId(-1) {
         // empty
     }
 

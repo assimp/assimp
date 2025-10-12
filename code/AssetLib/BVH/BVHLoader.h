@@ -61,7 +61,7 @@ namespace Assimp {
  * the hierarchy. It contains no actual mesh data, but we generate a dummy mesh
  * inside the loader just to be able to see something.
 */
-class BVHLoader final  public BaseImporter {
+class BVHLoader final : public BaseImporter {
 
     /** Possible animation channels for which the motion data holds the values */
     enum ChannelType {

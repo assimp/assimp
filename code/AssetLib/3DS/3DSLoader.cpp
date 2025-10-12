@@ -75,7 +75,7 @@ static constexpr aiImporterDesc desc = {
 // - computes its length
 #define ASSIMP_3DS_BEGIN_CHUNK()                                              \
     while (true) {                                                            \
-        if (stream->GetRemainingSizeToLimit() < sizeof(Discreet3DS::Chunk)) { \
+        if (mStream->GetRemainingSizeToLimit() < sizeof(Discreet3DS::Chunk)) { \
             return;                                                           \
         }                                                                     \
         Discreet3DS::Chunk chunk;                                             \
@@ -83,16 +83,16 @@ static constexpr aiImporterDesc desc = {
         int chunkSize = chunk.Size - sizeof(Discreet3DS::Chunk);              \
         if (chunkSize <= 0)                                                   \
             continue;                                                         \
-        const unsigned int oldReadLimit = stream->SetReadLimit(               \
-                stream->GetCurrentPos() + chunkSize);
+        const unsigned int oldReadLimit = mStream->SetReadLimit(               \
+                mStream->GetCurrentPos() + chunkSize);
 
 // ------------------------------------------------------------------------------------------------
 // End a parsing block
 // Must follow at the end of each parsing block, reset chunk end marker to previous value
 #define ASSIMP_3DS_END_CHUNK()                  \
-    stream->SkipToReadLimit();                  \
-    stream->SetReadLimit(oldReadLimit);         \
-    if (stream->GetRemainingSizeToLimit() == 0) \
+    mStream->SkipToReadLimit();                  \
+    mStream->SetReadLimit(oldReadLimit);         \
+    if (mStream->GetRemainingSizeToLimit() == 0) \
         return;                                 \
     }
 

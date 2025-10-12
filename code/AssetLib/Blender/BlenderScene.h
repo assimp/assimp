@@ -647,10 +647,9 @@ struct ModifierData final : ElemBase {
 
 
 // ------------------------------------------------------------------------------------------------
-struct SharedModifierData final : ElemBase {
+struct SharedModifierData : ElemBase {
     ModifierData modifier;
 };
-
 
 // -------------------------------------------------------------------------------
 struct SubsurfModifierData final : SharedModifierData {

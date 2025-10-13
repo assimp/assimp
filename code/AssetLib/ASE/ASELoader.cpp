@@ -1270,5 +1270,4 @@ bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
 }
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
-
-#endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER
+#endif // ASSIMP_BUILD_NO_ASE_IMPORTER

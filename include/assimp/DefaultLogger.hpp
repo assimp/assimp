@@ -82,7 +82,7 @@ struct LogStreamInfo;
  *  If you wish to customize the logging at an even deeper level supply your own
  *  implementation of #Logger to #set().
  *  @note The whole logging stuff causes a small extra overhead for all imports. */
-class ASSIMP_API DefaultLogger : public Logger {
+class ASSIMP_API DefaultLogger final : public Logger {
 public:
     // ----------------------------------------------------------------------
     /** @brief Creates a logging instance.

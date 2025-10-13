@@ -680,7 +680,7 @@ void XmlSerializer::ReadColor(XmlNode &node, ColorGroup *colorGroup) {
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == XmlTag::color_item) {
-            const char *color = currentNode.attribute(XmlTag::color_vaule).as_string();
+            const char *color = currentNode.attribute(XmlTag::color_value).as_string();
             aiColor4D color_value;
             if (parseColor(color, color_value)) {
                 colorGroup->mColors.push_back(color_value);

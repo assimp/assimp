@@ -105,7 +105,7 @@ class BlenderModifier;
  *  call it is outsourced to BlenderDNA.cpp/BlenderDNA.h. This class only performs the
  *  conversion from intermediate format to aiScene. */
 // -------------------------------------------------------------------------------------------
-class BlenderImporter : public BaseImporter, public LogFunctions<BlenderImporter> {
+class BlenderImporter final : public BaseImporter, public LogFunctions<BlenderImporter> {
 public:
     BlenderImporter();
     ~BlenderImporter() override;

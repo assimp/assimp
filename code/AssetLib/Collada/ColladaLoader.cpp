@@ -1819,4 +1819,4 @@ std::string ColladaLoader::FindNameForNode(const Node *pNode) {
 
 } // Namespace Assimp
 
-#endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_COLLADA_IMPORTER

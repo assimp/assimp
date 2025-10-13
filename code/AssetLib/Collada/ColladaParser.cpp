@@ -2423,4 +2423,4 @@ InputType ColladaParser::GetTypeForSemantic(const std::string &semantic) {
     return IT_Invalid;
 }
 
-#endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_COLLADA_IMPORTER

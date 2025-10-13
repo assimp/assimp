@@ -65,7 +65,7 @@ class IOSystem;
 
 /// Helper class to export a given scene to a Collada file. Just for my personal
 /// comfort when implementing it.
-class ColladaExporter {
+class ColladaExporter final {
 public:
     /// Constructor for a specific scene to export
     ColladaExporter(const aiScene *pScene, IOSystem *pIOSystem, const std::string &path, const std::string &file);

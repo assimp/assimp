@@ -53,7 +53,7 @@ namespace Assimp {
 /**
  *  @brief Internal default implementation of the #ProgressHandler interface.
  */
-class DefaultProgressHandler : public ProgressHandler    {
+class DefaultProgressHandler final : public ProgressHandler    {
 public:
     ///	@brief Ignores the update callback.
     bool Update(float) override {

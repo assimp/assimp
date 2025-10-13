@@ -58,7 +58,7 @@ namespace Assimp {
  *  Link to file format specification:
  *  <max_8_dvd>\samples\Motion\Docs\CSM.rtf
 */
-class CSMImporter : public BaseImporter {
+class CSMImporter final : public BaseImporter {
 public:
     CSMImporter();
     ~CSMImporter() override = default;

@@ -104,7 +104,7 @@ public:
 /** FOR EXPORTER PLUGINS ONLY: Simple exception class to be thrown if an
  *  unrecoverable error occurs while exporting. Exporting APIs return
  *  nullptr instead of a valid aiScene then.  */
-class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
+class ASSIMP_API DeadlyExportError final : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
     template<typename... T>

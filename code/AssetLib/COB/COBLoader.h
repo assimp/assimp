@@ -72,7 +72,7 @@ namespace COB {
  *
  *  Currently relatively limited, loads only ASCII files and needs more test coverage. */
 // -------------------------------------------------------------------------------------------
-class COBImporter : public BaseImporter {
+class COBImporter final : public BaseImporter {
 public:
     COBImporter() = default;
     ~COBImporter() override = default;

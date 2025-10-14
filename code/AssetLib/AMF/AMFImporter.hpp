@@ -97,7 +97,7 @@ namespace Assimp {
 ///            new - <texmap> and children <utex1>, <utex2>, <utex3>, <vtex1>, <vtex2>, <vtex3>
 ///            old - <map> and children <u1>, <u2>, <u3>, <v1>, <v2>, <v3>
 ///
-class AMFImporter : public BaseImporter {
+class AMFImporter final : public BaseImporter {
     using AMFMetaDataArray = std::vector<AMFMetadata *>;
 
 public:

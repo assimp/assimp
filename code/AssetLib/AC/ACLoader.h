@@ -60,7 +60,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /** AC3D (*.ac) importer class
 */
-class AC3DImporter : public BaseImporter {
+class AC3DImporter final : public BaseImporter {
 public:
     AC3DImporter();
     ~AC3DImporter() override = default;

@@ -52,21 +52,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <deque>
 #include <map>
 
-namespace Assimp {
-namespace COB {
+namespace Assimp::COB {
 
 // ------------------
 /** Represents a single vertex index in a face */
-struct VertexIndex
-{
+struct VertexIndex {
     // intentionally uninitialized
     unsigned int pos_idx,uv_idx;
 };
 
 // ------------------
 /** COB Face data structure */
-struct Face
-{
+struct Face {
     // intentionally uninitialized
     unsigned int material, flags;
     std::vector<VertexIndex> indices;
@@ -74,10 +71,9 @@ struct Face
 
 // ------------------
 /** COB chunk header information */
-const unsigned int NO_SIZE = UINT_MAX;
+constexpr unsigned int NO_SIZE = UINT_MAX;
 
-struct ChunkInfo
-{
+struct ChunkInfo {
     ChunkInfo ()
         :   id        (0)
         ,   parent_id (0)
@@ -101,8 +97,7 @@ struct ChunkInfo
 
 // ------------------
 /** A node in the scenegraph */
-struct Node : public ChunkInfo
-{
+struct Node : ChunkInfo {
     enum Type {
         TYPE_MESH,TYPE_GROUP,TYPE_LIGHT,TYPE_CAMERA,TYPE_BONE
     };
@@ -128,7 +123,7 @@ struct Node : public ChunkInfo
 
 // ------------------
 /** COB Mesh data structure */
-struct Mesh : public Node
+struct Mesh final : Node
 {
     using ChunkInfo::operator=;
     enum DrawFlags {
@@ -162,24 +157,21 @@ struct Mesh : public Node
 
 // ------------------
 /** COB Group data structure */
-struct Group : public Node
-{
+struct Group final : Node {
     using ChunkInfo::operator=;
     Group() : Node(TYPE_GROUP) {}
 };
 
 // ------------------
 /** COB Bone data structure */
-struct Bone : public Node
-{
+struct Bone final : Node {
     using ChunkInfo::operator=;
     Bone() : Node(TYPE_BONE) {}
 };
 
 // ------------------
 /** COB Light data structure */
-struct Light : public Node
-{
+struct Light final : Node {
     enum LightType {
         SPOT,LOCAL,INFINITE
     };
@@ -195,24 +187,23 @@ struct Light : public Node
 
 // ------------------
 /** COB Camera data structure */
-struct Camera : public Node
-{
+struct Camera final : Node {
     using ChunkInfo::operator=;
-    Camera() : Node(TYPE_CAMERA) {}
+    Camera() : Node(TYPE_CAMERA) {
+        // empty
+    }
 };
 
 // ------------------
 /** COB Texture data structure */
-struct Texture
-{
+struct Texture {
     std::string path;
     aiUVTransform transform;
 };
 
 // ------------------
 /** COB Material data structure */
-struct Material : ChunkInfo
-{
+struct Material : ChunkInfo {
     using ChunkInfo::operator=;
     enum Shader {
         FLAT,PHONG,METAL
@@ -244,11 +235,13 @@ struct Material : ChunkInfo
 
 // ------------------
 /** Embedded bitmap, for instance for the thumbnail image */
-struct Bitmap : ChunkInfo
-{
-    Bitmap() : orig_size() {}
-    struct BitmapHeader
-    {
+struct Bitmap : ChunkInfo {
+    Bitmap() : orig_size() {
+        // empty
+    }
+
+    struct BitmapHeader {
+        // empty
     };
 
     BitmapHeader head;
@@ -256,13 +249,12 @@ struct Bitmap : ChunkInfo
     std::vector<char> buff_zipped;
 };
 
-typedef std::deque< std::shared_ptr<Node> > NodeList;
-typedef std::vector< Material > MaterialList;
+using NodeList      = std::deque< std::shared_ptr<Node>>;
+using MaterialList = std::vector< Material >;
 
 // ------------------
 /** Represents a master COB scene, even if we loaded just a single COB file */
-struct Scene
-{
+struct Scene {
     NodeList nodes;
     MaterialList materials;
 
@@ -270,7 +262,6 @@ struct Scene
     Bitmap thumbnail;
 };
 
-    } // end COB
-} // end Assimp
+} // end Assimp::COB
 
 #endif

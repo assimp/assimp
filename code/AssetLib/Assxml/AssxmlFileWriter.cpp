@@ -302,7 +302,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
 
             // mesh header
             std::string name = "unknown";
-            if (tex->mFilename.data != nullptr) {
+            if (tex->mFilename.length != 0u) {
                 name = tex->mFilename.data;
             }
             ioprintf(io, "\t<Texture name=\"%s\" width=\"%u\" height=\"%u\" compressed=\"%s\"> \n", name.c_str(),

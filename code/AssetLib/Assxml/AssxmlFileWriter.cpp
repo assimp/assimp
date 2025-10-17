@@ -301,7 +301,11 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
             bool compressed = (tex->mHeight == 0);
 
             // mesh header
-            ioprintf(io, "\t<Texture width=\"%u\" height=\"%u\" compressed=\"%s\"> \n",
+            char *name = "unknown";
+            if (text->mFileName.data != nullptr) {
+                name = text->mFileName.data;
+            }
+            ioprintf(io, "\t<Texture name=\"%s\" width=\"%u\" height=\"%u\" compressed=\"%s\"> \n", tex->mFileName.C_Str()
                     (compressed ? -1 : tex->mWidth), (compressed ? -1 : tex->mHeight),
                     (compressed ? "true" : "false"));
 

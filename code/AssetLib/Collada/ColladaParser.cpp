@@ -1944,7 +1944,7 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     }
 
     // store the vertex-data index for later assignment of bone vertex weights
-    if (const auto indexOffset = baseOffset + perVertexOffset; indexOffset < indices.size()) {
+    if (const auto indexOffset = baseOffset + perVertexOffset; indexOffset >= indices.size()) {
         throw DeadlyImportError("index offset out of range");
     }
     pMesh.mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);

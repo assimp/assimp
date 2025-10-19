@@ -142,7 +142,7 @@ public:
         return std::make_pair(std::string(item->GetName().C_Str()), stream.str());
     }
 
-    static IdNameString GetItemIdName(aiTexture *item, size_t index) {
+    static IdNameString GetItemIdName(const aiTexture *item, size_t index) {
         std::ostringstream stream;
         stream << typeid(aiTexture).name() << "@" << index;
         return std::make_pair(std::string(item->mFilename.C_Str()), stream.str());
@@ -432,7 +432,7 @@ TEST_F(utColladaZaeImportExport, importMakeHumanTest) {
     EXPECT_STREQ("1.4.1", value.C_Str());
 }
 
-static constexpr  char kData[] = "\
+static constexpr  char kData[] = " \
 <?xml version=\"1.0\" encoding=\"utf-8\"?> \
 <COLLADA version=\"1.4.1\"> \
   <library_geometries> \

@@ -1929,7 +1929,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh &pMesh,
         std::vector<InputChannel> &pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t> &indices) {
     // calculate the base offset of the vertex whose attributes we ant to copy
-    size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
+    const auto baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
 
     // don't overrun the boundaries of the index list
     ai_assert((baseOffset + numOffsets - 1) < indices.size());
@@ -1944,6 +1944,9 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     }
 
     // store the vertex-data index for later assignment of bone vertex weights
+    if (const auto indexOffset = baseOffset + perVertexOffset; indexOffset >= indices.size()) {
+        throw DeadlyImportError("index offset out of range");
+    }
     pMesh.mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);
 }
 

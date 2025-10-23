@@ -105,7 +105,7 @@ struct Node : ChunkInfo {
         TYPE_COUNT
     };
 
-    virtual ~Node() = default;
+    ~Node() override = default;
     Node(Type type) : type(type), unit_scale(1.f){}
 
     Type type;

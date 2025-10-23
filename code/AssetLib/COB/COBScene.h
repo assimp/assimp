@@ -220,6 +220,7 @@ struct Texture {
 /** COB Material data structure */
 struct Material : ChunkInfo {
     using ChunkInfo::operator=;
+
     enum Shader {
         FLAT,
         PHONG,
@@ -232,39 +233,35 @@ struct Material : ChunkInfo {
         SMOOTH
     };
 
-    Material() : alpha(),exp(),ior(),ka(),ks(1.f),
-        matnum(UINT_MAX),
-        shader(FLAT),autofacet(FACETED),
-        autofacet_angle()
-    {}
+    Material() : shader(FLAT) {
+        // empty
+    }
 
     std::string type;
-
     aiColor3D rgb;
-    float alpha, exp, ior,ka,ks;
-
-    unsigned int matnum;
+    float alpha{ 0.0f };
+    float exp{ 0.0f };
+    float ior{ 0.0f };
+    float ka{ 0.0f };
+    float ks{ 1.0f };
+    unsigned int matnum{ UINT_MAX };
     Shader shader;
-
-    AutoFacet autofacet;
-    float autofacet_angle;
-
+    AutoFacet autofacet{FACETED};
+    float autofacet_angle{ 0.0f };
     std::shared_ptr<Texture> tex_env,tex_bump,tex_color;
 };
 
 // ------------------
 /** Embedded bitmap, for instance for the thumbnail image */
 struct Bitmap : ChunkInfo {
-    Bitmap() : orig_size() {
-        // empty
-    }
+    Bitmap() = default;
 
     struct BitmapHeader {
         // empty
     };
 
     BitmapHeader head;
-    size_t orig_size;
+    size_t orig_size{ 0u };
     std::vector<char> buff_zipped;
 };
 

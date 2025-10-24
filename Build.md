@@ -30,7 +30,7 @@ cmake --build .
 Note that by default this builds a shared library into the `bin` directory. If you want to build it as a static library see the build options at the bottom of this file.
 
 ### Build instructions for Windows with Visual-Studio
-First, you have to install Visual-Studio on your windows-system. You can get the Community-Version for free here: https://visualstudio.microsoft.com/de/downloads/
+First, you have to install Visual-Studio on your windows-system. You can get the Community-Version for free [here](https://visualstudio.microsoft.com/downloads/)
 To generate the build environment for your IDE open a command prompt, navigate to your repo and type:
 ```bash
 cmake CMakeLists.txt

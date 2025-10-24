@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyassimp"
+version = "5.2.5"
+license = "ISC"
+authors = [
+    { name = "ASSIMP Developers", email = "assimp-discussions@lists.sourceforge.net" },
+]
+maintainers = [{ name = "Séverin Lemaignan", email = "severin@guakamole.org" }]
+description = "Python bindings for the Open Asset Import Library (ASSIMP)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy"]

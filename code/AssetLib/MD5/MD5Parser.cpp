@@ -393,11 +393,15 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                 else if (TokenMatch(sz, "tri", 3)) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     const unsigned int idx = strtoul10(sz, &sz);
-                    if (idx >= desc.mFaces.size())
+                    if (idx >= desc.mFaces.size()) {
                         desc.mFaces.resize(idx + 1);
+					}
 
                     aiFace &face = desc.mFaces[idx];
-                    face.mIndices = new unsigned int[face.mNumIndices = 3];
+                    if (face.mNumIndices != 3) {
+						delete [] face.mIndices;
+						face.mIndices = new unsigned int[face.mNumIndices = 3];
+					}
                     for (unsigned int i = 0; i < 3; ++i) {
                         AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                         face.mIndices[i] = strtoul10(sz, &sz);

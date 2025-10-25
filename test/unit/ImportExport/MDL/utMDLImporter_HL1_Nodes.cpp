@@ -76,7 +76,7 @@ public:
 
     // Given a model, verify that the bones nodes hierarchy is correctly formed.
     void checkBoneHierarchy() {
-        Assimp::Importer importer;
+        Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "multiple_roots.mdl", aiProcess_ValidateDataStructure);
         ASSERT_NE(nullptr, scene);
         ASSERT_NE(nullptr, scene->mRootNode);
@@ -207,7 +207,7 @@ public:
         $body "Bodypart_4"
     */
     void duplicateBodypartsNames() {
-        Assimp::Importer importer;
+        Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_bodyparts.mdl", aiProcess_ValidateDataStructure);
         ASSERT_NE(nullptr, scene);
 
@@ -252,7 +252,7 @@ public:
         }
     */
     void duplicateSubModelsNames() {
-        Assimp::Importer importer;
+        Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "duplicate_submodels.mdl", aiProcess_ValidateDataStructure);
         ASSERT_NE(nullptr, scene);
 

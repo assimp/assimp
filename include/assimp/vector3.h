@@ -81,10 +81,6 @@ public:
     /// @param  _xyz  The value for x, y and z.
     explicit aiVector3t (TReal _xyz ) : x(_xyz), y(_xyz), z(_xyz) {}
 
-    /// @brief  The copy constructor.
-    /// @param  o The instance to copy from.
-    aiVector3t( const aiVector3t& o ) = default;
-
     /// @brief  combined operators
     /// @brief  The copy constructor.
     const aiVector3t& operator += (const aiVector3t& o);

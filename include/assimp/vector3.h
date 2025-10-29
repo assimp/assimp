@@ -85,6 +85,10 @@ public:
     /// @param  o The instance to copy from.
     aiVector3t( const aiVector3t& o ) = default;
 
+    /// @brief  The copy assignment operator.
+    /// @param  o The instance to copy.
+    aiVector3t& operator=(const aiVector3t& o) = default;
+
     /// @brief  combined operators
     /// @brief  The copy constructor.
     const aiVector3t& operator += (const aiVector3t& o);

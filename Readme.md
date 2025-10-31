@@ -64,7 +64,7 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 	/code		Source code
 	/contrib	Third-party libraries
 	/doc		Documentation (Doxygen source and pre-compiled docs)
-	/fuzz           Contains the test code for the Google Fuzzer project
+	/fuzz       Contains the test code for the Google Fuzzer project
 	/include	Public header C and C++ header files
 	/scripts 	Scripts are used to generate the loading code for some formats
 	/port		Ports to other languages and scripts to maintain those.
@@ -74,12 +74,12 @@ Open Asset Import Library is implemented in C++. The directory structure looks l
 
 The source code is organized in the following way:
 
-	code/Common			The base implementation for importers and the infrastructure
-	code/CApi                       Special implementations which are only used for the C-API
-	code/Geometry                   A collection of geometry tools
-	code/Material                   The material system
-	code/PBR                        An exporter for physical-based models
-	code/PostProcessing		The post-processing steps
+	code/Common			        The base implementation for importers and the infrastructure
+	code/CApi                   Special implementations which are only used for the C-API
+	code/Geometry               A collection of geometry tools
+	code/Material               The material system
+	code/PBR                    An exporter for physical-based models
+	code/PostProcessing		    The post-processing steps
 	code/AssetLib/<FormatName>	Implementation for import and export of the format
 
 ### Contributing ###

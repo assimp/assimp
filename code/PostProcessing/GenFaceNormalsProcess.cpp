@@ -94,7 +94,7 @@ namespace {
 template<class XMesh>
 void updateXMeshVertices(XMesh *pMesh, std::vector<int> &uniqueVertices) {
     // replace vertex data with the unique data sets
-    pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
+    pMesh->mNumVertices = static_cast<unsigned int>(uniqueVertices.size());
 
     // ----------------------------------------------------------------------------
     // NOTE - we're *not* calling Vertex::SortBack() because it would check for
@@ -106,37 +106,42 @@ void updateXMeshVertices(XMesh *pMesh, std::vector<int> &uniqueVertices) {
     if (pMesh->mVertices) {
         std::unique_ptr<aiVector3D[]> oldVertices(pMesh->mVertices);
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
-        for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
             pMesh->mVertices[a] = oldVertices[uniqueVertices[a]];
+        }
     }
 
     // Tangents, if present
     if (pMesh->mTangents) {
         std::unique_ptr<aiVector3D[]> oldTangents(pMesh->mTangents);
         pMesh->mTangents = new aiVector3D[pMesh->mNumVertices];
-        for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
             pMesh->mTangents[a] = oldTangents[uniqueVertices[a]];
+        }
     }
     // Bitangents as well
     if (pMesh->mBitangents) {
         std::unique_ptr<aiVector3D[]> oldBitangents(pMesh->mBitangents);
         pMesh->mBitangents = new aiVector3D[pMesh->mNumVertices];
-        for (unsigned int a = 0; a < pMesh->mNumVertices; a++)
+        for (unsigned int a = 0; a < pMesh->mNumVertices; a++) {
             pMesh->mBitangents[a] = oldBitangents[uniqueVertices[a]];
+        }
     }
     // Vertex colors
     for (unsigned int a = 0; pMesh->HasVertexColors(a); a++) {
         std::unique_ptr<aiColor4D[]> oldColors(pMesh->mColors[a]);
         pMesh->mColors[a] = new aiColor4D[pMesh->mNumVertices];
-        for (unsigned int b = 0; b < pMesh->mNumVertices; b++)
+        for (unsigned int b = 0; b < pMesh->mNumVertices; b++) {
             pMesh->mColors[a][b] = oldColors[uniqueVertices[b]];
+        }
     }
     // Texture coords
     for (unsigned int a = 0; pMesh->HasTextureCoords(a); a++) {
         std::unique_ptr<aiVector3D[]> oldTextureCoords(pMesh->mTextureCoords[a]);
         pMesh->mTextureCoords[a] = new aiVector3D[pMesh->mNumVertices];
-        for (unsigned int b = 0; b < pMesh->mNumVertices; b++)
+        for (unsigned int b = 0; b < pMesh->mNumVertices; b++) {
             pMesh->mTextureCoords[a][b] = oldTextureCoords[uniqueVertices[b]];
+        }
     }
 }
 

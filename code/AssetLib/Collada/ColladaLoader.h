@@ -82,7 +82,7 @@ struct ColladaMeshIndex {
  * Collada is over-engineered to death, with every new iteration bringing  more useless stuff,
  * so I limited the data to what I think is useful for games.
 */
-class ColladaLoader : public BaseImporter {
+class ColladaLoader final : public BaseImporter {
 public:
     /// The class constructor.
     ColladaLoader();
@@ -206,10 +206,10 @@ private:
     std::map<std::string, size_t> mMaterialIndexByName;
 
     /** Accumulated meshes for the target scene */
-    MeshArray mMeshes;
+    std::vector<aiMesh *> mMeshes;
 
     /** Accumulated morph target meshes */
-    MeshArray mTargetMeshes;
+    std::vector<aiMesh *> mTargetMeshes;
 
     /** Temporary material list */
     std::vector<std::pair<Collada::Effect *, aiMaterial *>> newMats;

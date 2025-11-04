@@ -57,13 +57,13 @@ namespace Assimp {
 static constexpr unsigned int NotSet = 0xcdcdcdcd;
 
 // ------------------------------------------------------------------------------------------------
-// Setup final material indices, generae a default material if necessary
+// Setup final material indices, generate a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial() {
     // Try to find an existing material that matches the
     // typical default material setting:
     // - no textures
     // - diffuse color (in grey!)
-    // NOTE: This is here to workaround the fact that some
+    // NOTE: This is here to work-around the fact that some
     // exporters are writing a default material, too.
     unsigned int idx(NotSet);
     for (unsigned int i = 0; i < mScene->mMaterials.size(); ++i) {
@@ -72,7 +72,9 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
             it = static_cast<char>(::tolower(static_cast<unsigned char>(it)));
         }
 
-        if (std::string::npos == s.find("default")) continue;
+        if (std::string::npos == s.find("default")) {
+            continue;
+        }
 
         if (mScene->mMaterials[i].mDiffuse.r !=
                         mScene->mMaterials[i].mDiffuse.g ||
@@ -85,22 +87,22 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
         idx = i;
     }
     if (NotSet == idx) {
-        idx = (unsigned int)mScene->mMaterials.size();
+        idx = static_cast<unsigned int>(mScene->mMaterials.size());
     }
 
     // now iterate through all meshes and through all faces and
     // find all faces that are using the default material
     unsigned int cnt = 0;
     for (auto i = mScene->mMeshes.begin(); i != mScene->mMeshes.end(); ++i) {
-        for (auto a = (*i).mFaceMaterials.begin(); a != (*i).mFaceMaterials.end(); ++a) {
+        for (auto a = i->mFaceMaterials.begin(); a != i->mFaceMaterials.end(); ++a) {
             // NOTE: The additional check seems to be necessary,
             // some exporters seem to generate invalid data here
 
-            if (NotSet == (*a)) {
-                (*a) = idx;
+            if (NotSet == *a) {
+                *a = idx;
                 ++cnt;
             } else if ((*a) >= mScene->mMaterials.size()) {
-                (*a) = idx;
+                *a = idx;
                 ASSIMP_LOG_WARN("Material index overflow in 3DS file. Using default material");
                 ++cnt;
             }
@@ -319,14 +321,14 @@ void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
 // ------------------------------------------------------------------------------------------------
 // Split meshes by their materials and generate output aiMesh'es
 void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
-    MeshArray avOutMeshes;
+    std::vector<aiMesh *> avOutMeshes;
     avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
     unsigned int iFaceCnt = 0, num = 0;
     aiString name;
 
     // we need to split all meshes by their materials
-    for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(); i != mScene->mMeshes.end(); ++i) {
+    for (auto i = mScene->mMeshes.begin(); i != mScene->mMeshes.end(); ++i) {
         std::unique_ptr<std::vector<unsigned int>[]> aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
 
         name.length = ASSIMP_itoa10(name.data, num++);
@@ -341,7 +343,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
             if (aiSplit[p].empty()) {
                 continue;
             }
-            aiMesh *meshOut = new aiMesh();
+            auto *meshOut = new aiMesh();
             meshOut->mName = name;
             meshOut->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
@@ -410,7 +412,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
 
     // Find all meshes with the same name as the node
     for (unsigned int a = 0; a < pcSOut->mNumMeshes; ++a) {
-        const D3DS::Mesh *pcMesh = (const D3DS::Mesh *)pcSOut->mMeshes[a]->mColors[0];
+        const auto *pcMesh = (const D3DS::Mesh *)pcSOut->mMeshes[a]->mColors[0];
         ai_assert(nullptr != pcMesh);
 
         if (pcIn->mName == pcMesh->mName)
@@ -419,7 +421,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     if (!iArray.empty()) {
         // The matrix should be identical for all meshes with the
         // same name. It HAS to be identical for all meshes .....
-        D3DS::Mesh *imesh = ((D3DS::Mesh *)pcSOut->mMeshes[iArray[0]]->mColors[0]);
+        auto *imesh = ((D3DS::Mesh *)pcSOut->mMeshes[iArray[0]]->mColors[0]);
 
         // Compute the inverse of the transformation matrix to move the
         // vertices back to their relative and local space
@@ -487,7 +489,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     if (pcIn->aRotationKeys.size()) {
 
         // FIX to get to Assimp's quaternion conventions
-        for (std::vector<aiQuatKey>::iterator it = pcIn->aRotationKeys.begin(); it != pcIn->aRotationKeys.end(); ++it) {
+        for (auto it = pcIn->aRotationKeys.begin(); it != pcIn->aRotationKeys.end(); ++it) {
             (*it).mValue.w *= -1.f;
         }
 
@@ -781,7 +783,7 @@ void Discreet3DSImporter::ConvertScene(aiScene *pcOut) {
 
     //  ... and convert the 3DS materials to aiMaterial's
     for (unsigned int i = 0; i < pcOut->mNumMaterials; ++i) {
-        aiMaterial *pcNew = new aiMaterial();
+        auto *pcNew = new aiMaterial();
         ConvertMaterial(mScene->mMaterials[i], *pcNew);
         pcOut->mMaterials[i] = pcNew;
     }

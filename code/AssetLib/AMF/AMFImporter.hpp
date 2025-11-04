@@ -99,6 +99,8 @@ namespace Assimp {
 ///
 class AMFImporter final : public BaseImporter {
     using AMFMetaDataArray = std::vector<AMFMetadata *>;
+    using MeshArray = std::vector<aiMesh *>;
+    using NodeArray = std::vector<aiNode *>;
 
 public:
     struct SPP_Material;

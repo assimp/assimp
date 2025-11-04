@@ -226,7 +226,7 @@ private:
      *  @param materials Material list
      *  @param Scenegraph node for the object */
     aiNode *ConvertObjectSection(Object &object,
-            MeshArray &meshes,
+            std::vector<aiMesh *> &meshes,
             std::vector<aiMaterial *> &outMaterials,
             const std::vector<Material> &materials,
             aiNode *parent = nullptr);

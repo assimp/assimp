@@ -192,7 +192,7 @@ static bool CheckValidFacesIndices(const aiFace *faces, unsigned nFaces, unsigne
 }
 
 void glTFImporter::ImportMeshes(Asset &r) {
-    MeshArray meshes;
+    std::vector<aiMesh *> meshes;
 
     unsigned int k = 0;
     meshOffsets.clear();

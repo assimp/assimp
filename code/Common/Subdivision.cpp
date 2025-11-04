@@ -158,8 +158,8 @@ void CatmullClarkSubdivider::Subdivide(
         return;
     }
 
-    MeshArray inmeshes;
-    MeshArray outmeshes;
+    std::vector<aiMesh *> inmeshes;
+    std::vector<aiMesh *> outmeshes;
     std::vector<unsigned int> maptbl;
 
     inmeshes.reserve(nmesh);
@@ -577,7 +577,7 @@ void CatmullClarkSubdivider::InternSubdivide(
     // 7. Apply the next subdivision step.
     // ---------------------------------------------------------------------
     if (num != 1) {
-        MeshArray tmp(nmesh);
+        std::vector<aiMesh *> tmp(nmesh);
         InternSubdivide(out, nmesh, &tmp.front(), num - 1);
         for (size_t i = 0; i < nmesh; ++i) {
             delete out[i];

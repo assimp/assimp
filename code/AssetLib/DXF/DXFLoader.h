@@ -66,7 +66,7 @@ namespace DXF {
 /**
  *  @brief  DXF importer implementation.
  */
-class DXFImporter : public BaseImporter {
+class DXFImporter final : public BaseImporter {
 public:
     DXFImporter() = default;
     ~DXFImporter() override = default;

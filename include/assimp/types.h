@@ -77,17 +77,6 @@ typedef uint32_t ai_uint32;
 #include <new>    // for std::nothrow_t
 #include <string> // for aiString::Set(const std::string&)
 
-struct aiNode;
-struct aiMesh;
-struct aiMaterial;
-
-#include <vector>
-
-
-using MeshArray = std::vector<aiMesh *>;
-using NodeArray = std::vector<aiNode *>;
-using MaterialArray = std::vector<aiMaterial*>;
-
 namespace Assimp {
 //! @cond never
 namespace Intern {

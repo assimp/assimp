@@ -121,7 +121,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
     // final data
     std::vector<aiMaterial *> materials;
-    MeshArray meshes;
+    std::vector<aiMesh *> meshes;
     materials.reserve(5);
     meshes.reserve(5);
 

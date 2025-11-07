@@ -67,7 +67,7 @@ namespace Assimp
     {
     public:
         explicit BlenderBMeshConverter( const Blender::Mesh* mesh );
-        ~BlenderBMeshConverter() final;
+        ~BlenderBMeshConverter();
         bool ContainsBMesh() const;
         const Blender::Mesh* TriangulateBMesh( );
 

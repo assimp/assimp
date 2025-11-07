@@ -69,7 +69,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     // exporters are writing a default material, too.
     unsigned int idx(NotSet);
     for (unsigned int i = 0; i < mScene->mMaterials.size(); ++i) {
-        std::string s = mScene->mMaterials[i].mName;
+        auto s = mScene->mMaterials[i].mName;
         for (char &it : s) {
             it = static_cast<char>(::tolower(static_cast<unsigned char>(it)));
         }
@@ -357,7 +357,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
             avOutMeshes.push_back(meshOut);
 
             // convert vertices
-            meshOut->mNumFaces = (unsigned int)aiSplit[p].size();
+            meshOut->mNumFaces = static_cast<unsigned int>(aiSplit[p].size());
             meshOut->mNumVertices = meshOut->mNumFaces * 3;
 
             // allocate enough storage for faces
@@ -405,8 +405,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
 
 // ------------------------------------------------------------------------------------------------
 // Add a node to the scenegraph and setup its final transformation
-void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
-        D3DS::Node *pcIn, aiMatrix4x4 & /*absTrafo*/) {
+void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut, D3DS::Node *pcIn, aiMatrix4x4 & /*absTrafo*/) {
     std::vector<unsigned int> iArray;
     iArray.reserve(3);
 
@@ -432,7 +431,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
         mInvTransposed.Transpose();
         aiVector3D pivot = pcIn->vPivot;
 
-        pcOut->mNumMeshes = (unsigned int)iArray.size();
+        pcOut->mNumMeshes = static_cast<unsigned int>(iArray.size());
         pcOut->mMeshes = new unsigned int[iArray.size()];
         for (unsigned int i = 0; i < iArray.size(); ++i) {
             const unsigned int iIndex = iArray[i];
@@ -451,7 +450,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
 
                 // Handle negative transformation matrix determinant -> invert vertex x
                 if (imesh->mMat.Determinant() < 0.0f) {
-                    /* we *must* have normals */
+                    // we *must* have normals
                     for (pvCurrent = mesh->mVertices, t2 = mesh->mNormals; pvCurrent != pvEnd; ++pvCurrent, ++t2) {
                         pvCurrent->x *= -1.f;
                         t2->x *= -1.f;
@@ -603,7 +602,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
         }
 
         // Allocate a new node anim and setup its name
-        aiNodeAnim *nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
+        auto *nda = anim->mChannels[anim->mNumChannels++] = new aiNodeAnim();
         nda->mNodeName.Set(pcIn->mName);
 
         // POSITION keys
@@ -640,7 +639,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
     }
 
     // Allocate storage for children
-    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
+    const auto size = static_cast<unsigned int>(pcIn->mChildren.size());
 
     pcOut->mNumChildren = size;
     if (size == 0) {
@@ -717,7 +716,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
 
         // Build dummy nodes for all cameras
         for (unsigned int i = 0; i < (unsigned int)mScene->mCameras.size(); ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
+            auto *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
             pcNode->mParent = pcOut->mRootNode;
 
             // Build a name for the node
@@ -726,7 +725,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
 
         // Build dummy nodes for all lights
         for (unsigned int i = 0; i < (unsigned int)mScene->mLights.size(); ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
+            auto *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
             pcNode->mParent = pcOut->mRootNode;
 
             // Build a name for the node
@@ -742,7 +741,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
             // Allocate a primary animation channel
             pcOut->mNumAnimations = 1;
             pcOut->mAnimations = new aiAnimation *[1];
-            aiAnimation *anim = pcOut->mAnimations[0] = new aiAnimation();
+            auto *anim = pcOut->mAnimations[0] = new aiAnimation();
 
             anim->mName.Set("3DSMasterAnim");
 

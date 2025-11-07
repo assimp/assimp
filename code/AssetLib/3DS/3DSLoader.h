@@ -56,8 +56,6 @@ struct aiNode;
 
 namespace Assimp {
 
-using namespace D3DS;
-
 // ---------------------------------------------------------------------------------
 /** Importer class for 3D Studio r3 and r4 3DS files
  */

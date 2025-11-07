@@ -605,7 +605,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
         nda->mNodeName.Set(pcIn->mName);
 
         // POSITION keys
-        if (pcIn->aPositionKeys.size() > 0) {
+        if (!pcIn->aPositionKeys.empty()) {
             nda->mNumPositionKeys = (unsigned int)pcIn->aPositionKeys.size();
             nda->mPositionKeys = new aiVectorKey[nda->mNumPositionKeys];
             ::memcpy(nda->mPositionKeys, &pcIn->aPositionKeys[0],
@@ -613,7 +613,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
         }
 
         // ROTATION keys
-        if (pcIn->aRotationKeys.size() > 0) {
+        if (!pcIn->aRotationKeys.empty()) {
             nda->mNumRotationKeys = (unsigned int)pcIn->aRotationKeys.size();
             nda->mRotationKeys = new aiQuatKey[nda->mNumRotationKeys];
 
@@ -629,7 +629,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut,
         }
 
         // SCALING keys
-        if (pcIn->aScalingKeys.size() > 0) {
+        if (!pcIn->aScalingKeys.empty()) {
             nda->mNumScalingKeys = (unsigned int)pcIn->aScalingKeys.size();
             nda->mScalingKeys = new aiVectorKey[nda->mNumScalingKeys];
             ::memcpy(nda->mScalingKeys, &pcIn->aScalingKeys[0],
@@ -681,7 +681,7 @@ void CountTracks(D3DS::Node *node, unsigned int &cnt) {
 // Generate the output node graph
 void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
     pcOut->mRootNode = new aiNode();
-    if (0 == mRootNode->mChildren.size()) {
+    if (mRootNode->mChildren.empty()) {
         //////////////////////////////////////////////////////////////////////////////
         // It seems the file is so messed up that it has not even a hierarchy.
         // generate a flat hiearachy which looks like this:

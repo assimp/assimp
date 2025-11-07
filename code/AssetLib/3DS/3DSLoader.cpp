@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+using namespace D3DS;
+
 static constexpr aiImporterDesc desc = {
     "Discreet 3DS Importer",
     "",
@@ -124,9 +126,7 @@ void Discreet3DSImporter::SetupProperties(const Importer * /*pImp*/) {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void Discreet3DSImporter::InternReadFile(const std::string &pFile,
-        aiScene *pScene, IOSystem *pIOHandler) {
-
+void Discreet3DSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     auto theFile = pIOHandler->Open(pFile, "rb");
     if (!theFile) {
         throw DeadlyImportError("3DS: Could not open ", pFile);
@@ -166,7 +166,7 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile,
     // vectors from the smoothing groups we read from the
     // file.
     for (auto &mesh : mScene->mMeshes) {
-        if (mesh.mFaces.size() > 0 && mesh.mPositions.empty()) {
+        if (!mesh.mFaces.empty() && mesh.mPositions.empty()) {
             throw DeadlyImportError("3DS file contains faces but no vertices: ", pFile);
         }
         CheckIndices(mesh);
@@ -258,7 +258,7 @@ void Discreet3DSImporter::ParseMainChunk() {
     case Discreet3DS::CHUNK_MAIN:
         ParseEditorChunk();
         break;
-    };
+    }
 
     ASSIMP_3DS_END_CHUNK();
 #if defined(__clang__)
@@ -274,30 +274,29 @@ void Discreet3DSImporter::ParseMainChunk() {
 
 // ------------------------------------------------------------------------------------------------
 void Discreet3DSImporter::ParseEditorChunk() {
-    ASSIMP_3DS_BEGIN_CHUNK();
+    ASSIMP_3DS_BEGIN_CHUNK()
 
     // get chunk type
     switch (chunk.Flag) {
-    case Discreet3DS::CHUNK_OBJMESH:
+        case Discreet3DS::CHUNK_OBJMESH:
+            ParseObjectChunk();
+            break;
 
-        ParseObjectChunk();
+        // NOTE: In several documentations in the internet this
+        // chunk appears at different locations
+        case Discreet3DS::CHUNK_KEYFRAMER:
+            ParseKeyframeChunk();
+            break;
+    
+        case Discreet3DS::CHUNK_VERSION: {
+            // print the version number
+            char buff[10];
+            ASSIMP_itoa10(buff, mStream->GetI2());
+            ASSIMP_LOG_INFO("3DS file format version: ", buff);
+        }
         break;
-
-    // NOTE: In several documentations in the internet this
-    // chunk appears at different locations
-    case Discreet3DS::CHUNK_KEYFRAMER:
-
-        ParseKeyframeChunk();
-        break;
-
-    case Discreet3DS::CHUNK_VERSION: {
-        // print the version number
-        char buff[10];
-        ASSIMP_itoa10(buff, mStream->GetI2());
-        ASSIMP_LOG_INFO("3DS file format version: ", buff);
-    } break;
     };
-    ASSIMP_3DS_END_CHUNK();
+    ASSIMP_3DS_END_CHUNK()
 }
 
 // ------------------------------------------------------------------------------------------------

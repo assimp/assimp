@@ -122,8 +122,7 @@ std::string GetMaterialName(const aiMaterial &mat, unsigned int index) {
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
-    aiString mat_name;
-    if (AI_SUCCESS == mat.Get(AI_MATKEY_NAME, mat_name)) {
+    if (aiString mat_name; AI_SUCCESS == mat.Get(AI_MATKEY_NAME, mat_name)) {
         return mat_name.C_Str() + underscore + postfix;
     }
 
@@ -303,8 +302,7 @@ void Discreet3DSExporter::WriteMaterials() {
             WriteColor(color);
         }
 
-        aiShadingMode shading_mode = aiShadingMode_Flat;
-        if (mat.Get(AI_MATKEY_SHADING_MODEL, shading_mode) == AI_SUCCESS) {
+        if (aiShadingMode shading_mode = aiShadingMode_Flat; mat.Get(AI_MATKEY_SHADING_MODEL, shading_mode) == AI_SUCCESS) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_SHADING);
 
             Discreet3DS::shadetype3ds shading_mode_out;
@@ -332,7 +330,7 @@ void Discreet3DSExporter::WriteMaterials() {
             default:
                 shading_mode_out = Discreet3DS::Flat;
                 ai_assert(false);
-            };
+            }
             writer.PutU2(static_cast<uint16_t>(shading_mode_out));
         }
 
@@ -346,8 +344,7 @@ void Discreet3DSExporter::WriteMaterials() {
             WritePercentChunk(f);
         }
 
-        int twosided;
-        if (mat.Get(AI_MATKEY_TWOSIDED, twosided) == AI_SUCCESS && twosided != 0) {
+        if (int twosided; mat.Get(AI_MATKEY_TWOSIDED, twosided) == AI_SUCCESS && twosided != 0) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_TWO_SIDE);
             writer.PutI2(1);
         }

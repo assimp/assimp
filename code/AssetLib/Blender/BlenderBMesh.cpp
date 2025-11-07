@@ -74,7 +74,9 @@ BlenderBMeshConverter::~BlenderBMeshConverter() {
 
 // ------------------------------------------------------------------------------------------------
 bool BlenderBMeshConverter::ContainsBMesh() const {
-    // TODO - Should probably do some additional verification here
+    if (BMesh == nullptr) {
+        return false;
+    }
     return BMesh->totpoly && BMesh->totloop && BMesh->totvert;
 }
 

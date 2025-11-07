@@ -57,8 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "AssetLib/3DS/3DSLoader.h"
 
-namespace Assimp {
-namespace ASE {
+namespace Assimp::ASE {
 
 using namespace D3DS;
 
@@ -373,8 +372,8 @@ struct Dummy : public BaseNode {
 };
 
 // Parameters to Parser::Parse()
-#define AI_ASE_NEW_FILE_FORMAT 200
-#define AI_ASE_OLD_FILE_FORMAT 110
+static constexpr unsigned int AI_ASE_NEW_FILE_FORMAT = 200;
+static constexpr unsigned int AI_ASE_OLD_FILE_FORMAT = 110;
 
 // Internally we're a little bit more tolerant
 #define AI_ASE_IS_NEW_FILE_FORMAT() (iFileFormat >= 200)
@@ -668,8 +667,7 @@ public:
     unsigned int iFileFormat;
 };
 
-} // Namespace ASE
-} // namespace Assimp
+} // Namespace Assimp::ASE
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 

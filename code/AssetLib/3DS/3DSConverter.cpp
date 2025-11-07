@@ -56,6 +56,8 @@ namespace Assimp {
 
 static constexpr unsigned int NotSet = 0xcdcdcdcd;
 
+using namespace D3DS;
+
 // ------------------------------------------------------------------------------------------------
 // Setup final material indices, generate a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial() {

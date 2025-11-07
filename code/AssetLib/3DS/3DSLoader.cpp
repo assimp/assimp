@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+using namespace D3DS;
+
 static constexpr aiImporterDesc desc = {
     "Discreet 3DS Importer",
     "",

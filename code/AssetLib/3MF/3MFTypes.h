@@ -147,7 +147,7 @@ struct Component {
 
 class Object final : public Resource {
 public:
-    MeshArray mMeshes;
+    std::vector<aiMesh *> mMeshes;
     std::vector<unsigned int> mMeshIndex;
     std::vector<Component> mComponents;
     std::string mName;

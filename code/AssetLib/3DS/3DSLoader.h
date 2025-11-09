@@ -56,8 +56,6 @@ struct aiNode;
 
 namespace Assimp {
 
-using namespace D3DS;
-
 // ---------------------------------------------------------------------------------
 /** Importer class for 3D Studio r3 and r4 3DS files
  */
@@ -98,14 +96,14 @@ protected:
     // -------------------------------------------------------------------
     /** Converts a temporary material to the outer representation
      */
-    void ConvertMaterial(Material& p_cMat, aiMaterial& p_pcOut);
+    void ConvertMaterial(D3DS::Material& p_cMat, aiMaterial& p_pcOut);
 
     // -------------------------------------------------------------------
     /** Read a chunk
      *
      *  @param pcOut Receives the current chunk
      */
-    void ReadChunk(Discreet3DS::Chunk* pcOut);
+    void ReadChunk(D3DS::Discreet3DS::Chunk* pcOut);
 
     // -------------------------------------------------------------------
     /** Parse a percentage chunk. mCurrent will point to the next
@@ -188,7 +186,7 @@ protected:
     // -------------------------------------------------------------------
     /** Parse a texture chunk in the file
     */
-    void ParseTextureChunk(Texture* pcOut);
+    void ParseTextureChunk(D3DS::Texture* pcOut);
 
     // -------------------------------------------------------------------
     /** Convert the meshes in the file
@@ -217,19 +215,19 @@ protected:
     // -------------------------------------------------------------------
     /** generate unique vertices for a mesh
     */
-    void MakeUnique(Mesh& sMesh);
+    void MakeUnique(D3DS::Mesh& sMesh);
 
     // -------------------------------------------------------------------
     /** Add a node to the node graph
     */
-    void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,Node* pcIn,
+    void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut, D3DS::Node* pcIn,
         aiMatrix4x4& absTrafo);
 
     // -------------------------------------------------------------------
     /** Search for a node in the graph.
     * Called recursively
     */
-    void InverseNodeSearch(Node* pcNode, Node* pcCurrent);
+    void InverseNodeSearch(D3DS::Node* pcNode, D3DS::Node* pcCurrent);
 
     // -------------------------------------------------------------------
     /** Apply the master scaling factor to the mesh
@@ -239,7 +237,7 @@ protected:
     // -------------------------------------------------------------------
     /** Clamp all indices in the file to a valid range
     */
-    void CheckIndices(Mesh& sMesh);
+    void CheckIndices(D3DS::Mesh& sMesh);
 
     // -------------------------------------------------------------------
     /** Skip the TCB info in a track key
@@ -247,29 +245,25 @@ protected:
     void SkipTCBInfo();
 
 private:
-    /** Stream to read from */
+    /// Stream to read from
     StreamReaderLE* mStream;
-
-    /** Last touched node index */
+    /// Last touched node index
     short mLastNodeIndex;
-
-    /** Current node, root node */
-    Node* mCurrentNode, *mRootNode;
-
-    /** Scene under construction */
-    Scene* mScene;
-
-    /** Ambient base color of the scene */
+    /// Current node
+    D3DS::Node* mCurrentNode;
+    /// Root node
+    D3DS::Node *mRootNode;
+    /// Scene under construction
+    D3DS::Scene* mScene;
+    /// Ambient base color of the scene
     aiColor3D mClrAmbient;
-
-    /** Master scaling factor of the scene */
+    /// Master scaling factor of the scene
     ai_real mMasterScale;
-
-    /** Path to the background image of the scene */
+    /// Path to the background image of the scene
     std::string mBackgroundImage;
+    /// true for has a background
     bool bHasBG;
-
-    /** true if PRJ file */
+    /// true if PRJ file
     bool bIsPrj;
 };
 

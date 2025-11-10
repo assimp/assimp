@@ -106,7 +106,7 @@ struct Node : ChunkInfo {
     };
 
     ~Node() override = default;
-    Node(Type type) : type(type), unit_scale(1.f){}
+    explicit Node(Type type) : type(type), unit_scale(1.f){}
 
     Type type;
 

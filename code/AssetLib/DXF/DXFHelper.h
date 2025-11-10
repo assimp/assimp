@@ -53,15 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <assimp/DefaultLogger.hpp>
 
-namespace Assimp {
-namespace DXF {
+namespace Assimp::DXF {
 
 // read pairs of lines, parse group code and value and provide utilities
 // to convert the data to the target data type.
 // do NOT skip empty lines. In DXF files, they count as valid data.
 class LineReader {
 public:
-    LineReader(StreamReaderLE& reader) : splitter(reader,false,true), groupcode( 0 ), end() {
+    explicit LineReader(StreamReaderLE& reader) : splitter(reader,false,true), groupcode( 0 ), end() {
         // empty
     }
 
@@ -203,7 +202,6 @@ struct FileData {
     std::vector<Block> blocks;
 };
 
-} // namespace DXF
-} // namespace Assimp
+} // namespace Assimp::DXF
 
 #endif // INCLUDED_DXFHELPER_H

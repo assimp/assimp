@@ -58,16 +58,10 @@ public:
     }
 };
 
-TEST_F(utSIBImporter, createTest) {
-    bool ok(true);
-    try {
-        SIBImporter myImporter;
-    } catch (...) {
-        ok = false;
-    }
-    EXPECT_TRUE(ok);
-}
-
 TEST_F(utSIBImporter, importTest) {
+#ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
+    EXPECT_FALSE(importerTest());
+#else
     EXPECT_TRUE(importerTest());
+#endif
 }

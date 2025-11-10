@@ -65,10 +65,9 @@ namespace D3MF {
 
 using OpcPackageRelationshipPtr = std::shared_ptr<OpcPackageRelationship>;
 
-class OpcPackageRelationshipReader {
+class OpcPackageRelationshipReader final {
 public:
-    OpcPackageRelationshipReader(XmlParser &parser) :
-            mRelations() {
+    explicit OpcPackageRelationshipReader(XmlParser &parser) : mRelations() {
         XmlNode root = parser.getRootNode();
         ParseRootNode(root);
     }

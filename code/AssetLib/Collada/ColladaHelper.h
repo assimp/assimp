@@ -341,7 +341,7 @@ struct SubMesh {
 
 /// Contains data for a single mesh
 struct Mesh {
-    Mesh(const std::string &id) :
+    explicit Mesh(const std::string &id) :
             mId(id) {
         for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
             mNumUVComponents[i] = 2;

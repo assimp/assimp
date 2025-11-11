@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyassimp"
-version = "5.2.5"
+version = "6.0.2"
 license = "ISC"
 authors = [
-    { name = "ASSIMP Developers", email = "assimp-discussions@lists.sourceforge.net" },
+    { name = "ASSIMP Developers", email = "kim.kulling@assimp.org" },
 ]
 maintainers = [{ name = "Séverin Lemaignan", email = "severin@guakamole.org" }]
 description = "Python bindings for the Open Asset Import Library (ASSIMP)"

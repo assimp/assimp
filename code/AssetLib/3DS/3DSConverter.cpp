@@ -74,7 +74,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
             it = static_cast<char>(::tolower(static_cast<unsigned char>(it)));
         }
 
-        if (!s.contains("default")) {
+        if (std::string::npos == s.find("default")) {
             continue;
         }
 

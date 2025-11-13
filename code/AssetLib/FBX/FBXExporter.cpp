@@ -1043,6 +1043,10 @@ aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene) {
 }
 
 inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
+        return static_cast<int64_t>(ticks * FBX::SECOND);
+    }
+    
     // Defensive: handle zero or near-zero mTicksPerSecond
     double tps = anim->mTicksPerSecond;
     double timeVal;
@@ -1062,7 +1066,7 @@ inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (timeVal < kMin) {
         return INT64_MIN;
     }
-    return static_cast<int64_t>(timeVal * FBX::SECOND);
+    return static_cast<int64_t>((ticks / anim->mTicksPerSecond) * FBX::SECOND);
 }
 
 inline int64_t to_ktime(double time) {
@@ -1094,6 +1098,7 @@ void FBXExporter::WriteObjects () {
     bool bJoinIdenticalVertices = mProperties->GetPropertyBool("bJoinIdenticalVertices", true);
     // save vertex_indices as it is needed later
     std::vector<std::vector<int32_t>> vVertexIndice(mScene->mNumMeshes);
+    std::vector<uint32_t> uniq_v_before_mi;
 
     const auto bTransparencyFactorReferencedToOpacity = mProperties->GetPropertyBool(AI_CONFIG_EXPORT_FBX_TRANSPARENCY_FACTOR_REFER_TO_OPACITY, false);
 
@@ -1140,6 +1145,7 @@ void FBXExporter::WriteObjects () {
           const aiMesh *m = mScene->mMeshes[mi];
 
           size_t v_offset = vertex_indices.size();
+          size_t uniq_v_before = flattened_vertices.size() / 3;
 
           // map of vertex value to its index in the data vector
           std::map<aiVector3D,size_t> index_by_vertex_value;
@@ -1182,10 +1188,16 @@ void FBXExporter::WriteObjects () {
             if (f.mNumIndices == 0) continue;
             size_t pvi = 0;
             for (; pvi < f.mNumIndices - 1; pvi++) {
-              polygon_data.push_back(vertex_indices[v_offset + f.mIndices[pvi]]);
+              polygon_data.push_back(
+                static_cast<int32_t>(uniq_v_before + vertex_indices[v_offset + f.mIndices[pvi]])
+              );
             }
-            polygon_data.push_back(-1 - vertex_indices[v_offset+f.mIndices[pvi]]);
+            polygon_data.push_back(
+              static_cast<int32_t>(-1 ^ (uniq_v_before + vertex_indices[v_offset+f.mIndices[pvi]]))
+            );
           }
+
+          uniq_v_before_mi.push_back(static_cast<uint32_t>(uniq_v_before));
 
           if (m->HasNormals()) {
             normal_data.reserve(3 * polygon_data.size());
@@ -1329,14 +1341,13 @@ void FBXExporter::WriteObjects () {
         } else {
           mat.AddChild("MappingInformationType", "ByPolygon");
           mat.AddChild("ReferenceInformationType", "IndexToDirect");
-          std::vector<int32_t> mat_indices(polygon_data.size());
-          uint32_t curr_offset = 0;
-          for (uint32_t mi = 0; mi < node->mNumMeshes; mi++) {
-            uint32_t num_faces = mScene->mMeshes[node->mMeshes[mi]]->mNumFaces;
-            for (uint32_t fi = 0; fi < num_faces; fi++) {
-              mat_indices[curr_offset + fi] = mi;
+          std::vector<int32_t> mat_indices;
+          for (uint32_t n_mi = 0; n_mi < node->mNumMeshes; n_mi++) {
+            const auto mi = node->mMeshes[n_mi];
+            const auto *const m = mScene->mMeshes[mi];
+            for (size_t fi = 0; fi < m->mNumFaces; fi++) {
+              mat_indices.push_back(n_mi);
             }
-            curr_offset += num_faces;
           }
           mat.AddChild("Materials", mat_indices);
         }
@@ -2059,7 +2070,8 @@ void FBXExporter::WriteObjects () {
                   			ASSIMP_LOG_ERROR("UNREAL: Skipping vertex index to prevent buffer overflow.");
                         continue;
                     }
-                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId];
+                    int32_t vi = vVertexIndice[mi][b->mWeights[wi].mVertexId]
+                      + uniq_v_before_mi[mi];
                     bool bIsWeightedAlready = (setWeightedVertex.find(vi) != setWeightedVertex.end());
                     if (vi == last_index || bIsWeightedAlready) {
                         // only for vertices we exported to fbx

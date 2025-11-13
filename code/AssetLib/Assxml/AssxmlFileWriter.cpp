@@ -77,8 +77,7 @@ static int ioprintf(IOStream *io, const char *format, ...) {
     }
 
     static const int Size = 4096;
-    char sz[Size];
-    ::memset(sz, '\0', Size);
+    char sz[Size] = {};
     va_list va;
     va_start(va, format);
     const unsigned int nSize = vsnprintf(sz, Size - 1, format, va);
@@ -302,7 +301,11 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
             bool compressed = (tex->mHeight == 0);
 
             // mesh header
-            ioprintf(io, "\t<Texture width=\"%u\" height=\"%u\" compressed=\"%s\"> \n",
+            std::string texName = "unknown";
+            if (tex->mFilename.length != 0u) {
+                texName = tex->mFilename.data;
+            }
+            ioprintf(io, "\t<Texture name=\"%s\" width=\"%u\" height=\"%u\" compressed=\"%s\"> \n", texName.c_str(),
                     (compressed ? -1 : tex->mWidth), (compressed ? -1 : tex->mHeight),
                     (compressed ? "true" : "false"));
 
@@ -350,7 +353,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
             for (unsigned int n = 0; n < mat->mNumProperties; ++n) {
 
                 const aiMaterialProperty *prop = mat->mProperties[n];
-                const char *sz = "";
+                auto sz = "";
                 if (prop->mType == aiPTI_Float) {
                     sz = "float";
                 } else if (prop->mType == aiPTI_Integer) {

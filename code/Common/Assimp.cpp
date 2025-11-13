@@ -67,13 +67,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 namespace Assimp {
+
 // underlying structure for aiPropertyStore
-typedef BatchLoader::PropertyMap PropertyMap;
+using PropertyMap =  BatchLoader::PropertyMap ;
 
 #if defined(__has_warning)
-#if __has_warning("-Wordered-compare-function-pointers")
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
+#   if __has_warning("-Wordered-compare-function-pointers")
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wordered-compare-function-pointers"
 #endif
 #endif
 
@@ -111,6 +112,7 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out);
 
 /** will delete all registered importers. */
 void DeleteImporterInstanceList(std::vector<BaseImporter *> &out);
+
 } // namespace Assimp
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -120,14 +122,14 @@ static std::mutex gLogStreamMutex;
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API
-class LogToCallbackRedirector : public LogStream {
+class LogToCallbackRedirector final : public LogStream {
 public:
     explicit LogToCallbackRedirector(const aiLogStream &s) :
-            stream(s) {
+            mStream(s) {
         ai_assert(nullptr != s.callback);
     }
 
-    ~LogToCallbackRedirector() {
+    ~LogToCallbackRedirector() override {
 #ifndef ASSIMP_BUILD_SINGLETHREADED
         std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif
@@ -137,7 +139,7 @@ public:
         // might cause strange problems, but the chance is quite low.
 
         PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(),
-                gPredefinedStreams.end(), (Assimp::LogStream *)stream.user);
+                gPredefinedStreams.end(), (Assimp::LogStream *)mStream.user);
 
         if (it != gPredefinedStreams.end()) {
             delete *it;
@@ -146,12 +148,12 @@ public:
     }
 
     /** @copydoc LogStream::write */
-    void write(const char *message) {
-        stream.callback(message, stream.user);
+    void write(const char *message) override {
+        mStream.callback(message, mStream.user);
     }
 
 private:
-    aiLogStream stream;
+    const aiLogStream &mStream;
 };
 
 // ------------------------------------------------------------------------------------------------

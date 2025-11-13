@@ -706,7 +706,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
         unsigned int a = 0;
         for (unsigned int i = 0; i < pcOut->mNumMeshes; ++i, ++a) {
             pcOut->mRootNode->mChildren[a] = new aiNode();  
-            auto *pcNode = pcOut->mRootNode->mChildren[a]
+            auto *pcNode = pcOut->mRootNode->mChildren[a];
             pcNode->mParent = pcOut->mRootNode;
             pcNode->mMeshes = new unsigned int[1];
             pcNode->mMeshes[0] = i;

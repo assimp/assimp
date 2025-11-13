@@ -4,7 +4,9 @@
 ### Install prerequisites
 You need to install
 * cmake
-* Your compiler
+* Your compiler (must support C++17 and C99 at least)
+* For Windows
+  *  DX-SDK 9 if you want to use our 3D-Viewer
 
 ### Get the source
 Make sure you have a working git-installation. Open a command prompt and clone the Asset-Importer-Lib via:
@@ -28,7 +30,7 @@ cmake --build .
 Note that by default this builds a shared library into the `bin` directory. If you want to build it as a static library see the build options at the bottom of this file.
 
 ### Build instructions for Windows with Visual-Studio
-First, you have to install Visual-Studio on your windows-system. You can get the Community-Version for free here: https://visualstudio.microsoft.com/de/downloads/
+First, you have to install Visual-Studio on your windows-system. You can get the Community-Version for free [here](https://visualstudio.microsoft.com/downloads/)
 To generate the build environment for your IDE open a command prompt, navigate to your repo and type:
 ```bash
 cmake CMakeLists.txt
@@ -39,7 +41,7 @@ This will generate the project files for the visual studio. All dependencies use
 See <https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app>
 
 ### Build instructions for MinGW
- Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag 
+ Older versions of MinGW's compiler (e.g. 5.1.0) do not support the -mbig_obj flag
 required to compile some of assimp's files, especially for debug builds.
 Version 7.3.0 of g++-mingw-w64 & gcc-mingw-w64 appears to work.
 
@@ -65,7 +67,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **ASSIMP_NO_EXPORT (default OFF)**: Disable Assimp's export functionality.
 - **ASSIMP_BUILD_ZLIB (default OFF)**: Build our own zlib.
 - **ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all exporters enabled.
-- **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with all importers enabled.
+- **ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT (default ON)**: Build Assimp with (most) importers enabled. Currently, USD importer is not included. See ASSIMP_BUILD_USD_IMPORTER.
 - **ASSIMP_BUILD_ASSIMP_TOOLS (default OFF)**: If the supplementary tools for Assimp are built in addition to the library.
 - **ASSIMP_BUILD_SAMPLES (default OFF)**: If the official samples are built as well (needs Glut).
 - **ASSIMP_BUILD_TESTS (default ON)**: If the test suite for Assimp is built in addition to the library.
@@ -81,6 +83,7 @@ The cmake-build-environment provides options to configure the build. The followi
 - **USE_STATIC_CRT (default OFF)**: Link against the static MSVC runtime libraries.
 - **ASSIMP_BUILD_DRACO (default OFF)**: Build Draco libraries. Primarily for glTF.
 - **ASSIMP_BUILD_ASSIMP_VIEW (default ON, if DirectX found, OFF otherwise)**: Build Assimp view tool (requires DirectX).
+- **ASSIMP_BUILD_USD_IMPORTER (default OFF, requires ASSIMP_WARNINGS_AS_ERRORS to be OFF)**: Build USD importer, defaults to off for CI purposes
 
 ### Install prebuild binaries
 ## Install on all platforms using vcpkg
@@ -107,5 +110,5 @@ You need to have pip installed:
 pip install pyassimp
 ```
 
-### Get the SDK from itchi.io
-Just check [itchi.io](https://kimkulling.itch.io/the-asset-importer-lib)
+### Get the SDK from itch.io
+Just check [itch.io](https://kimkulling.itch.io/the-asset-importer-lib)

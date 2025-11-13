@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -85,8 +85,8 @@ SMDImporter::SMDImporter() :
         configFrameID(),
         mBuffer(),
         mEnd(nullptr),
-        pScene(nullptr), 
-        iFileSize( 0 ), 
+        pScene(nullptr),
+        iFileSize( 0 ),
         iSmallestFrame( INT_MAX ),
         dLengthOfAnim( 0.0 ),
         bHasUVs(false ),
@@ -455,11 +455,10 @@ void SMDImporter::CreateOutputNodes() {
         delete pcOldRoot;
 
         pScene->mRootNode->mParent = nullptr;
-    }
-    else
-    {
-        ::strcpy(pScene->mRootNode->mName.data, "<SMD_root>");
+    } else {
+        static constexpr char rootName[11] = "<SMD_root>";
         pScene->mRootNode->mName.length = 10;
+        ::strncpy(pScene->mRootNode->mName.data, rootName, pScene->mRootNode->mName.length);
     }
 }
 
@@ -983,7 +982,7 @@ bool SMDImporter::ParseFloat(const char *szCurrent, const char **szCurrentOut, c
         return false;
     }
 
-    *szCurrentOut = fast_atoreal_move<float>(szCurrent,out);
+    *szCurrentOut = fast_atoreal_move(szCurrent,out);
     return true;
 }
 

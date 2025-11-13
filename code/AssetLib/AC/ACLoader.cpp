@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -75,6 +75,8 @@ static constexpr aiImporterDesc desc = {
     "ac acc ac3d"
 };
 
+static constexpr auto ACDoubleSidedFlag = 0x20;
+
 // ------------------------------------------------------------------------------------------------
 // skip to the next token
 inline const char *AcSkipToNextToken(const char *buffer, const char *end) {
@@ -123,10 +125,34 @@ inline const char *TAcCheckedLoadFloatArray(const char *buffer, const char *end,
     }
     for (unsigned int _i = 0; _i < num; ++_i) {
         buffer = AcSkipToNextToken(buffer, end);
-        buffer = fast_atoreal_move<float>(buffer, ((float *)out)[_i]);
+        buffer = fast_atoreal_move(buffer, ((float *)out)[_i]);
     }
 
     return buffer;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Reverses vertex indices in a face.
+static void flipWindingOrder(aiFace &f) {
+    std::reverse(f.mIndices, f.mIndices + f.mNumIndices);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Duplicates a face and inverts it. Also duplicates all vertices (so the new face gets its own
+// set of normals and isn’t smoothed against the original).
+static void buildBacksideOfFace(const aiFace &origFace, aiFace *&outFaces, aiVector3D *&outVertices, const aiVector3D *allVertices,
+    aiVector3D *&outUV, const aiVector3D *allUV, unsigned &curIdx) {
+    auto &newFace = *outFaces++;
+    newFace = origFace;
+    flipWindingOrder(newFace);
+    for (unsigned f = 0; f < newFace.mNumIndices; ++f) {
+        *outVertices++ = allVertices[newFace.mIndices[f]];
+        if (outUV) {
+            *outUV = allUV[newFace.mIndices[f]];
+            outUV++;
+        }
+        newFace.mIndices[f] = curIdx++;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -145,13 +171,9 @@ AC3DImporter::AC3DImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-AC3DImporter::~AC3DImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool AC3DImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = { AI_MAKE_MAGIC("AC3D") };
+    static constexpr uint32_t tokens[] = { AI_MAKE_MAGIC("AC3D") };
     return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
@@ -171,8 +193,9 @@ bool AC3DImporter::GetNextLine() {
 // ------------------------------------------------------------------------------------------------
 // Parse an object section in an AC file
 bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
-    if (!TokenMatch(mBuffer.data, "OBJECT", 6))
+    if (!TokenMatch(mBuffer.data, "OBJECT", 6)) {
         return false;
+    }
 
     SkipSpaces(&mBuffer.data, mBuffer.end);
 
@@ -192,7 +215,6 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         light->mAttenuationConstant = 1.f;
 
         // Generate a default name for both the light source and the node
-        // FIXME - what's the right way to print a size_t? Is 'zu' universally available? stick with the safe version.
         light->mName.length = ::ai_snprintf(light->mName.data, AI_MAXLEN, "ACLight_%i", static_cast<unsigned int>(mLights->size()) - 1);
         obj.name = std::string(light->mName.data);
 
@@ -202,8 +224,10 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         obj.type = Object::Group;
     } else if (!ASSIMP_strincmp(mBuffer.data, "world", 5)) {
         obj.type = Object::World;
-    } else
+    } else {
         obj.type = Object::Poly;
+    }
+
     while (GetNextLine()) {
         if (TokenMatch(mBuffer.data, "kids", 4)) {
             SkipSpaces(&mBuffer.data, mBuffer.end);
@@ -344,6 +368,7 @@ bool AC3DImporter::LoadObjectSection(std::vector<Object> &objects) {
         }
     }
     ASSIMP_LOG_ERROR("AC3D: Unexpected EOF: \'kids\' line was expected");
+
     return false;
 }
 
@@ -452,6 +477,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 if ((*it).entries.empty()) {
                     ASSIMP_LOG_WARN("AC3D: surface has zero vertex references");
                 }
+                const bool isDoubleSided = ACDoubleSidedFlag == (it->flags & ACDoubleSidedFlag);
+                const int doubleSidedFactor = isDoubleSided ? 2 : 1;
 
                 // validate all vertex indices to make sure we won't crash here
                 for (it2 = (*it).entries.begin(),
@@ -481,8 +508,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
 
                     // triangle strip
                 case Surface::TriangleStrip:
-                    needMat[idx].first += (unsigned int)(*it).entries.size() - 2;
-                    needMat[idx].second += ((unsigned int)(*it).entries.size() - 2) * 3;
+                    needMat[idx].first += static_cast<unsigned int>(it->entries.size() - 2) * doubleSidedFactor;
+                    needMat[idx].second += static_cast<unsigned int>(it->entries.size() - 2) * 3 * doubleSidedFactor;
                     break;
 
                 default:
@@ -495,8 +522,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 case Surface::Polygon:
                     // the number of faces increments by one, the number
                     // of vertices by surface.numref.
-                    needMat[idx].first++;
-                    needMat[idx].second += (unsigned int)(*it).entries.size();
+                    needMat[idx].first += doubleSidedFactor;
+                    needMat[idx].second += static_cast<unsigned int>(it->entries.size()) * doubleSidedFactor;
                 };
             }
             unsigned int *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
@@ -546,6 +573,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 for (it = object.surfaces.begin(); it != end; ++it) {
                     if (mat == (*it).mat) {
                         const Surface &src = *it;
+                        const bool isDoubleSided = ACDoubleSidedFlag == (src.flags & ACDoubleSidedFlag);
 
                         // closed polygon
                         uint8_t type = (*it).GetType();
@@ -571,6 +599,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                         ++uv;
                                     }
                                 }
+                                if(isDoubleSided) // Need a backface?
+                                    buildBacksideOfFace(faces[-1], faces, vertices, mesh->mVertices, uv, mesh->mTextureCoords[0], cur);
                             }
                         } else if (type == Surface::TriangleStrip) {
                             for (unsigned int i = 0; i < (unsigned int)src.entries.size() - 2; ++i) {
@@ -620,6 +650,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                     uv->y = entry3.second.y;
                                     ++uv;
                                 }
+                                if(isDoubleSided) // Need a backface?
+                                    buildBacksideOfFace(faces[-1], faces, vertices, mesh->mVertices, uv, mesh->mTextureCoords[0], cur);
                             }
                         } else {
 

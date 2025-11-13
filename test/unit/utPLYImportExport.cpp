@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -136,6 +136,27 @@ TEST_F(utPLYImportExport, importBinaryPLYWithRNNewline) {
     ASSERT_EQ(12u, scene->mMeshes[0]->mNumFaces);
     // Also check if the indices were parsed correctly
     ASSERT_EQ(3u, scene->mMeshes[0]->mFaces[0].mNumIndices);
+    EXPECT_EQ(0u, scene->mMeshes[0]->mFaces[0].mIndices[0]);
+    EXPECT_EQ(1u, scene->mMeshes[0]->mFaces[0].mIndices[1]);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mFaces[0].mIndices[2]);
+}
+
+// Tests of a PLY file gets read with \n as the fist character in the BINARY part
+TEST_F(utPLYImportExport, importBinaryPLYWithNewlineInBinary) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary_starts_with_nl.ply", aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_NE(nullptr, scene->mMeshes[0]);
+    ASSERT_EQ(8u, scene->mMeshes[0]->mNumVertices);
+    // Make sure the first binary float was read correctly
+    ASSERT_FLOAT_EQ(5.967534f, scene->mMeshes[0]->mVertices[0][0]);
+    ASSERT_FLOAT_EQ(0, scene->mMeshes[0]->mVertices[0][1]);
+    ASSERT_FLOAT_EQ(0, scene->mMeshes[0]->mVertices[0][2]);
+
+    ASSERT_EQ(6u, scene->mMeshes[0]->mNumFaces);
+    // Also check if the indices were parsed correctly
+    ASSERT_EQ(4u, scene->mMeshes[0]->mFaces[0].mNumIndices);
     EXPECT_EQ(0u, scene->mMeshes[0]->mFaces[0].mIndices[0]);
     EXPECT_EQ(1u, scene->mMeshes[0]->mFaces[0].mIndices[1]);
     EXPECT_EQ(2u, scene->mMeshes[0]->mFaces[0].mIndices[2]);

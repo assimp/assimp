@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -111,8 +111,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = bytesToProcess;
-    unsigned int processed = 0;
-    size_t lastFilePos(0);
+    unsigned int processed = 0u;
+    size_t lastFilePos = 0u;
 
     bool insideCstype = false;
     std::vector<char> buffer;
@@ -120,6 +120,13 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
         mEnd = &buffer[buffer.size() - 1] + 1;
+
+        if (processed == 0 && std::distance(m_DataIt, m_DataItEnd) >= 3 &&
+            static_cast<unsigned char>(*m_DataIt) == 0xEF &&
+            static_cast<unsigned char>(*(m_DataIt + 1)) == 0xBB &&
+            static_cast<unsigned char>(*(m_DataIt + 2)) == 0xBF) {
+            m_DataIt += 3; // skip BOM
+        }
 
         // Handle progress reporting
         const size_t filePos(streamBuffer.getFilePos());
@@ -300,7 +307,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         } else if (IsLineEnd(*tmp)) {
             end_of_definition = true;
         }
-        if (!SkipSpaces(&tmp, mEnd)) {
+        if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
         const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
@@ -308,11 +315,11 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (isNum) {
             ++numComponents;
         }
-        if (!SkipSpaces(&tmp, mEnd)) {
+        if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
     }
-    
+
     return numComponents;
 }
 
@@ -451,7 +458,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     while (m_DataIt < m_DataItEnd) {
         int iStep = 1;
 
-        if (IsLineEnd(*m_DataIt)) {
+        if (IsLineEnd(*m_DataIt) || *m_DataIt == '#') {
             break;
         }
 
@@ -660,13 +667,13 @@ void ObjFileParser::getMaterialLib() {
     } else {
         absName = strMatName;
     }
-
-    IOStream *pFile = m_pIO->Open(absName);
+	
+	std::unique_ptr<IOStream> pFile(m_pIO->Open(absName));
     if (nullptr == pFile) {
         ASSIMP_LOG_ERROR("OBJ: Unable to locate material file ", strMatName);
         std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
         ASSIMP_LOG_INFO("OBJ: Opening fallback material file ", strMatFallbackName);
-        pFile = m_pIO->Open(strMatFallbackName);
+        pFile.reset(m_pIO->Open(strMatFallbackName));
         if (!pFile) {
             ASSIMP_LOG_ERROR("OBJ: Unable to locate fallback material file ", strMatFallbackName);
             m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -679,8 +686,8 @@ void ObjFileParser::getMaterialLib() {
     // material files if the model doesn't use any materials, so we
     // allow that.
     std::vector<char> buffer;
-    BaseImporter::TextFileToBuffer(pFile, buffer, BaseImporter::ALLOW_EMPTY);
-    m_pIO->Close(pFile);
+    BaseImporter::TextFileToBuffer(pFile.get(), buffer, BaseImporter::ALLOW_EMPTY);
+    //m_pIO->Close(pFile);
 
     // Importing the material library
     ObjFileMtlImporter mtlImporter(buffer, strMatName, m_pModel.get());

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
+
+#include <limits>
 
 namespace Assimp {
 
@@ -307,6 +309,11 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
                 if (!tex->mWidth || !tex->mHeight) {
                     throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
+                }
+
+                const unsigned int uint_max = std::numeric_limits<unsigned int>::max();
+                if (tex->mWidth > (uint_max / tex->mHeight)) {
+                    throw DeadlyImportError("Quick3D: Texture dimensions are too large, resulting in overflow.");
                 }
 
                 unsigned int mul = tex->mWidth * tex->mHeight;

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
-#include "AssetLib/IFC/IFCUtil.h"
+#include "IFCUtil.h"
 #include "Common/PolyTools.h"
 #include "PostProcessing/ProcessHelper.h"
 
@@ -669,7 +669,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const Schema_2x3::IfcPoly
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as, 
+void ProcessBooleanExtrudedAreaSolidDifference(const Schema_2x3::IfcExtrudedAreaSolid *as,
         TempMesh &result,
         const TempMesh &first_operand,
         ConversionData &conv) {

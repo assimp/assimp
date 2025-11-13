@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -36,7 +35,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 
@@ -79,8 +77,7 @@ static int ioprintf(IOStream *io, const char *format, ...) {
     }
 
     static const int Size = 4096;
-    char sz[Size];
-    ::memset(sz, '\0', Size);
+    char sz[Size] = {};
     va_list va;
     va_start(va, format);
     const unsigned int nSize = vsnprintf(sz, Size - 1, format, va);
@@ -223,7 +220,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
     const unsigned int majorVersion(aiGetVersionMajor());
     const unsigned int minorVersion(aiGetVersionMinor());
     const unsigned int rev(aiGetVersionRevision());
-    const char *curtime(asctime(p));
+    const char *curtime = asctime(p);
     ioprintf(io, header.c_str(), majorVersion, minorVersion, rev, pFile, c.c_str(), curtime, scene->mFlags, 0u);
 
     // write the node graph
@@ -304,7 +301,11 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
             bool compressed = (tex->mHeight == 0);
 
             // mesh header
-            ioprintf(io, "\t<Texture width=\"%u\" height=\"%u\" compressed=\"%s\"> \n",
+            std::string texName = "unknown";
+            if (tex->mFilename.length != 0u) {
+                texName = tex->mFilename.data;
+            }
+            ioprintf(io, "\t<Texture name=\"%s\" width=\"%u\" height=\"%u\" compressed=\"%s\"> \n", texName.c_str(),
                     (compressed ? -1 : tex->mWidth), (compressed ? -1 : tex->mHeight),
                     (compressed ? "true" : "false"));
 
@@ -352,7 +353,7 @@ static void WriteDump(const char *pFile, const char *cmd, const aiScene *scene, 
             for (unsigned int n = 0; n < mat->mNumProperties; ++n) {
 
                 const aiMaterialProperty *prop = mat->mProperties[n];
-                const char *sz = "";
+                auto sz = "";
                 if (prop->mType == aiPTI_Float) {
                     sz = "float";
                 } else if (prop->mType == aiPTI_Integer) {

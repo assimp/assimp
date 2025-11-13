@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <assimp/IOStreamBuffer.h>
 #include "TestIOStream.h"
+#include "Tools/TestTools.h"
 #include "UnitTestFileGenerator.h"
 
 class IOStreamBufferTest : public ::testing::Test {
@@ -86,18 +85,21 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
     const auto dataCount = dataSize / sizeof(*data);
 
     char fname[]={ "octest.XXXXXX" };
-    auto* fs = MakeTmpFile(fname);
+    std::string tmpName;
+    auto* fs = MakeTmpFile(fname, std::strlen(fname), tmpName);
     ASSERT_NE(nullptr, fs);
 
-    auto written = std::fwrite( data, sizeof(*data), dataCount, fs );
+    auto written = std::fwrite(data, sizeof(*data), dataCount, fs);
     EXPECT_NE( 0U, written );
     auto flushResult = std::fflush( fs );
 	ASSERT_EQ(0, flushResult);
-	std::fclose( fs );
-	fs = std::fopen(fname, "r");
-	ASSERT_NE(nullptr, fs);
+	fclose(fs);
+
+    FILE *new_fs{ nullptr };
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(&new_fs, tmpName.c_str(), "r"));
+    ASSERT_NE(nullptr, new_fs);
     {
-        TestDefaultIOStream myStream( fs, fname );
+        TestDefaultIOStream myStream(new_fs, fname);
 
         EXPECT_TRUE( myBuffer.open( &myStream ) );
         EXPECT_FALSE( myBuffer.open( &myStream ) );
@@ -111,8 +113,9 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
     const auto dataSize = sizeof(data);
     const auto dataCount = dataSize / sizeof(*data);
 
-    char fname[]={ "readlinetest.XXXXXX" };
-    auto* fs = MakeTmpFile(fname);
+    char fname[]={ "readlinetest.XXXXXX\0" };
+    std::string tmpName;
+    auto* fs = MakeTmpFile(fname, std::strlen(fname), tmpName);
     ASSERT_NE(nullptr, fs);
 
     auto written = std::fwrite( data, sizeof(*data), dataCount, fs );
@@ -121,23 +124,25 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
 	auto flushResult = std::fflush(fs);
 	ASSERT_EQ(0, flushResult);
 	std::fclose(fs);
-	fs = std::fopen(fname, "r");
-	ASSERT_NE(nullptr, fs);
+
+    FILE *new_fs{ nullptr };
+    EXPECT_TRUE(Unittest::TestTools::openFilestream(&new_fs, tmpName.c_str(), "r"));
+    ASSERT_NE(nullptr, new_fs);
 
     const auto tCacheSize = 26u;
 
-    IOStreamBuffer<char> myBuffer( tCacheSize );
-    EXPECT_EQ(tCacheSize, myBuffer.cacheSize() );
+    IOStreamBuffer<char> myBuffer(tCacheSize);
+    EXPECT_EQ(tCacheSize, myBuffer.cacheSize());
 
-    TestDefaultIOStream myStream( fs, fname );
+    TestDefaultIOStream myStream(new_fs, fname);
     auto size = myStream.FileSize();
     auto numBlocks = size / myBuffer.cacheSize();
     if ( size % myBuffer.cacheSize() > 0 ) {
         numBlocks++;
     }
-    EXPECT_TRUE( myBuffer.open( &myStream ) );
-    EXPECT_EQ( numBlocks, myBuffer.getNumBlocks() );
-    EXPECT_TRUE( myBuffer.close() );
+    EXPECT_TRUE(myBuffer.open(&myStream));
+    EXPECT_EQ(numBlocks, myBuffer.getNumBlocks() );
+    EXPECT_TRUE(myBuffer.close() );
 }
 
 TEST_F( IOStreamBufferTest, accessBlockIndexTest ) {

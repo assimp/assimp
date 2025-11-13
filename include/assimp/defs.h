@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,8 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/config.h>
 
 //////////////////////////////////////////////////////////////////////////
-/** 
- * @brief Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific file format loader. 
+/**
+ * @brief Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific file format loader.
  *
  * The loader is be excluded from the
  * build in this case. 'XX' stands for the most common file
@@ -135,14 +135,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * OPTIMIZEGRAPH
  * GENENTITYMESHES
  * FIXTEXTUREPATHS
- * GENBOUNDINGBOXES 
+ * GENBOUNDINGBOXES
  */
 
 //////////////////////////////////////////////////////////////////////////
-/** @brief Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library 
+/** @brief Define 'ASSIMP_BUILD_DLL_EXPORT' to build a DLL of the library
  *
  * Define 'ASSIMP_DLL' before including Assimp to link to ASSIMP in
- * an external DLL under Windows. Default is static linkage. 
+ * an external DLL under Windows. Default is static linkage.
  */
 //////////////////////////////////////////////////////////////////////////
 #ifdef _WIN32
@@ -157,7 +157,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #    define ASSIMP_API
 #    define ASSIMP_API_WINONLY
 #  endif
-#else 
+#else
 #  define ASSIMP_API __attribute__((visibility("default")))
 #  define ASSIMP_API_WINONLY
 #endif // _WIN32
@@ -169,12 +169,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @brief Force the compiler to inline a function, if possible
  *
  * @def   AI_WONT_RETURN
- * @brief Tells the compiler that a function never returns. 
+ * @brief Tells the compiler that a function never returns.
  *
  * Used in code analysis to skip dead paths (e.g. after an assertion evaluated to false).
  */
 #ifdef _MSC_VER
-    #pragma warning(disable : 4521 4512 4714 4127 4351 4510)
+    #pragma warning(disable : 4521 4512 4714 4127 4510)
+    #if _MSC_VER < 1900
+        #pragma warning(disable : 4351)
+    #endif
     #ifdef ASSIMP_BUILD_DLL_EXPORT
         #pragma warning(disable : 4251)
     #endif
@@ -244,7 +247,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * Define ASSIMP_BUILD_SINGLETHREADED to compile assimp
  * without threading support. The library doesn't utilize
- * threads then and is itself not threadsafe. 
+ * threads then and is itself not threadsafe.
  */
 //////////////////////////////////////////////////////////////////////////
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -303,7 +306,7 @@ constexpr ai_real ai_epsilon = (ai_real) 1e-6;
 
 /**
  * @brief Support for big-endian builds
- * 
+ *
  * This will check which byte ordering is used on the target architecture.
  */
 #if defined(__BYTE_ORDER__)

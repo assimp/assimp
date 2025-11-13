@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -84,6 +84,7 @@ struct MaterialTransmission;
 struct MaterialVolume;
 struct MaterialIOR;
 struct MaterialEmissiveStrength;
+struct MaterialAnisotropy;
 
 // Vec/matrix types, as raw float arrays
 typedef float(vec2)[2];
@@ -126,6 +127,7 @@ protected:
     bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
     bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);
     bool GetMatEmissiveStrength(const aiMaterial &mat, glTF2::MaterialEmissiveStrength &emissiveStrength);
+    bool GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAnisotropy &anisotropy);
     void ExportMetadata();
     void ExportMaterials();
     void ExportMeshes();

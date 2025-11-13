@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -65,6 +65,10 @@ public:
             aiScene *pScene,
             IOSystem *pIOHandler);
 
+    void animations(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
+
     void meshes(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,
@@ -120,22 +124,14 @@ public:
             aiScene *pScene,
             const std::string &nameWExt);
 
-    void setupNodes(
-            const tinyusdz::tydra::RenderScene &render_scene,
-            aiScene *pScene,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
-            const std::string &nameWExt
-            );
-
-    aiNode *nodes(
-            const tinyusdz::tydra::RenderScene &render_scene,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
-            const std::string &nameWExt);
-
     aiNode *nodesRecursive(
             aiNode *pNodeParent,
             const tinyusdz::tydra::Node &node,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes);
+            const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons);
+
+    aiNode *skeletonNodesRecursive(
+            aiNode *pNodeParent,
+            const tinyusdz::tydra::SkelNode &joint);
 
     void sanityCheckNodesRecursive(
             aiNode *pNode);

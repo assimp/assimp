@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -74,13 +73,13 @@ public:
     ai_real getScale() const;
 
     /// Overwritten, @see BaseProcess
-    virtual bool IsActive( unsigned int pFlags ) const override;
+    bool IsActive( unsigned int pFlags ) const override;
 
     /// Overwritten, @see BaseProcess
-    virtual void SetupProperties( const Importer* pImp ) override;
+    void SetupProperties( const Importer* pImp ) override;
 
     /// Overwritten, @see BaseProcess
-    virtual void Execute( aiScene* pScene ) override;
+    void Execute( aiScene* pScene ) override;
 
 private:
     void traverseNodes( aiNode *currentNode, unsigned int nested_node_id = 0 );

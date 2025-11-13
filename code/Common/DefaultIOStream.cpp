@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -157,9 +157,9 @@ size_t DefaultIOStream::FileSize() const {
             return 0;
         mCachedSize = (size_t)(fileStat.st_size);
 #elif defined _WIN32
-        struct _stat32 fileStat;
+        struct _stat fileStat;
         //using fileno + fstat avoids having to handle the filename
-        int err = _fstat32(_fileno(mFile), &fileStat);
+        int err = _fstat(_fileno(mFile), &fileStat);
         if (0 != err)
             return 0;
         mCachedSize = (size_t)(fileStat.st_size);

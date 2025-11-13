@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -133,10 +133,6 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
         }
     }
 }
-
-
-// ------------------------------------------------------------------------------------------------
-Material::~Material() = default;
 
 // ------------------------------------------------------------------------------------------------
 Texture::Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name) :

@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,8 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/qnan.h>
 #include <cstdio> //sprintf
 
-namespace Assimp {
-namespace D3DS {
+namespace Assimp::D3DS {
 
 #include <assimp/Compiler/pushpack1.h>
 
@@ -580,7 +578,6 @@ struct Scene {
     // Node* pcRootNode;
 };
 
-} // end of namespace D3DS
-} // end of namespace Assimp
+} // end of namespace Assimp::D3DS
 
 #endif // AI_XFILEHELPER_H_INC

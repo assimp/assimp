@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -59,7 +59,7 @@ namespace Assimp {
 /** Importer class for the 3DS ASE ASCII format.
  *
  */
-class ASEImporter : public BaseImporter {
+class ASEImporter final : public BaseImporter {
 public:
     ASEImporter();
     ~ASEImporter() override = default;

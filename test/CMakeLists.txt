@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -59,6 +59,10 @@ endif()
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
+SET(TOOLS
+    unit/Tools/TestTools.h
+)
+
 SET( COMMON
   unit/utSimd.cpp
   unit/utIOSystem.cpp
@@ -86,6 +90,7 @@ SET( COMMON
   unit/TestModelFactory.h
   unit/utTypes.cpp
   unit/utVersion.cpp
+  unit/Common/utParsingUtils.cpp
   unit/utProfiler.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
@@ -149,7 +154,6 @@ SET( IMPORTERS
   #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
-  unit/utUSDImport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
   unit/ImportExport/utCOBImportExport.cpp
   unit/ImportExport/utOgreImportExport.cpp
@@ -169,6 +173,12 @@ SET( IMPORTERS
   unit/ImportExport/Terragen/utTerragenImportExport.cpp
   unit/ImportExport/Pbrt/utPbrtImportExport.cpp
 )
+
+if(ASSIMP_BUILD_USD_IMPORTER)
+  list( APPEND IMPORTERS
+    unit/utUSDImport.cpp
+  )
+endif()
 
 SET( MATERIAL
   unit/utMaterialSystem.cpp
@@ -213,6 +223,7 @@ SOURCE_GROUP( UnitTests\\GeometryTools FILES ${Geometry} )
 SOURCE_GROUP( UnitTests\\ImportExport  FILES ${IMPORTERS} )
 SOURCE_GROUP( UnitTests\\Material      FILES ${MATERIAL} )
 SOURCE_GROUP( UnitTests\\Math          FILES ${MATH} )
+SOURCE_GROUP( UnitTests\\Tools         FILES ${TOOLS} )
 SOURCE_GROUP( UnitTests\\PostProcess   FILES ${POST_PROCESSES})
 
 add_executable( unit
@@ -221,11 +232,12 @@ add_executable( unit
     ../code/Common/Version.cpp
 	../code/Common/Base64.cpp
 	${COMMON}
-  ${Geometry}
+    ${Geometry}
 	${IMPORTERS}
 	${MATERIAL}
 	${MATH}
-  ${POST_PROCESSES}
+    ${POST_PROCESSES}
+    ${TOOLS}
 )
 
 if(ASSIMP_HUNTER_ENABLED)

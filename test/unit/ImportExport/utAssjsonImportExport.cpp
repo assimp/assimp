@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,15 +57,26 @@ public:
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
 
         Exporter exporter;
-        aiReturn res = exporter.Export(scene, "assjson", "./spider_test.json");
+        const char *testFileName = "./spider_test.json";
+        aiReturn res = exporter.Export(scene, "assjson", testFileName);
         if (aiReturn_SUCCESS != res) {
             return false;
         }
 
         Assimp::ExportProperties exportProperties;
         exportProperties.SetPropertyBool("JSON_SKIP_WHITESPACES", true);
-        aiReturn resNoWhitespace = exporter.Export(scene, "assjson", "./spider_test_nowhitespace.json", 0u, &exportProperties);
+        const char *testNoWhitespaceFileName = "./spider_test_nowhitespace.json";
+        aiReturn resNoWhitespace = exporter.Export(scene, "assjson", testNoWhitespaceFileName, 0u, &exportProperties);
         if (aiReturn_SUCCESS != resNoWhitespace) {
+            return false;
+        }
+
+        // Cleanup, remove generated json
+        if (0 != std::remove(testFileName)) {
+            return false;
+        }
+
+        if (0 != std::remove(testNoWhitespaceFileName)) {
             return false;
         }
 

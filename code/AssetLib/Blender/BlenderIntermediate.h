@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -117,7 +116,7 @@ namespace Blender {
         mywrap arr;
     };
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1900
 #   pragma warning(disable:4351)
 #endif
 
@@ -172,7 +171,7 @@ namespace Blender {
         // original file data
         const FileDatabase& db;
     };
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1900
 #   pragma warning(default:4351)
 #endif
 

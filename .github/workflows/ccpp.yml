@@ -16,10 +16,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, ubuntu-latest-clang++]
+        name: [ubuntu-latest-g++, macos-latest-clang++, windows-latest-cl.exe, windows-latest-clang.exe, ubuntu-latest-clang++]
         # For Windows msvc, for Linux and macOS let's use the clang compiler, use gcc for Linux.
         include:
+          - name: windows-latest-clang.exe
+            os: windows-latest
+            cxx: clang++.exe
+            cc: clang.exe
           - name: windows-latest-cl.exe
+            os: windows-latest
+            cxx: cl.exe
+            cc: cl.exe
+          - name: windows-hunter-latest-cl.exe
             os: windows-latest
             cxx: cl.exe
             cc: cl.exe
@@ -40,7 +48,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
           submodules: true
           
@@ -65,13 +73,13 @@ jobs:
           ${{ runner.os }}-DX_SDK
 
     - name: Download DXSetup
-      if: contains(matrix.name, 'windows') && steps.dxcache.outputs.cache-hit != 'true'
+      if: contains(matrix.name, 'windows-latest-cl.exe') && steps.dxcache.outputs.cache-hit != 'true'
       run: |
         curl -s -o DXSDK_Jun10.exe --location https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
         cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
 
     - name: Set Windows specific CMake arguments
-      if: contains(matrix.name, 'windows')
+      if: contains(matrix.name, 'windows-latest-cl.exe')
       id: windows_extra_cmake_args
       run: echo ":set-output name=args::=-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1" >> $GITHUB_OUTPUT
     
@@ -101,7 +109,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}'
@@ -133,7 +141,7 @@ jobs:
           prerelease: true
       - run: |
           echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: create-release
           path: release_upload_url.txt
@@ -180,7 +188,7 @@ jobs:
       - id: upload-url
         run: |
           echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
       - uses: actions/upload-release-asset@v1

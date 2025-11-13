@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -73,7 +72,7 @@ namespace COB {
  *
  *  Currently relatively limited, loads only ASCII files and needs more test coverage. */
 // -------------------------------------------------------------------------------------------
-class COBImporter : public BaseImporter {
+class COBImporter final : public BaseImporter {
 public:
     COBImporter() = default;
     ~COBImporter() override = default;
@@ -81,6 +80,10 @@ public:
     // --------------------
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
             bool checkSig) const override;
+
+    // -------------------------------------------------------------------
+    /** Prepend 'COB: ' and throw msg.*/
+    AI_WONT_RETURN static void ThrowException(const std::string &msg) AI_WONT_RETURN_SUFFIX;
 
 protected:
     // --------------------
@@ -94,10 +97,6 @@ protected:
             IOSystem *pIOHandler) override;
 
 private:
-    // -------------------------------------------------------------------
-    /** Prepend 'COB: ' and throw msg.*/
-    AI_WONT_RETURN static void ThrowException(const std::string &msg) AI_WONT_RETURN_SUFFIX;
-
     // -------------------------------------------------------------------
     /** @brief Read from an ascii scene/object file
      *  @param out Receives output data.
@@ -149,4 +148,5 @@ private:
 }; // !class COBImporter
 
 } // end of namespace Assimp
+
 #endif // AI_UNREALIMPORTER_H_INC

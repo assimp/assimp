@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -127,7 +127,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
             }
         }
     }
-	
+
     if (outer_polygon_it == end) {
 		return;
 	}
@@ -234,7 +234,7 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
         return;
     }
 
-    const unsigned int cnt_segments = 
+    const unsigned int cnt_segments =
         std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
     const IfcFloat delta = max_angle/cnt_segments;
 
@@ -294,8 +294,8 @@ void ProcessRevolvedAreaSolid(const Schema_2x3::IfcRevolvedAreaSolid& solid, Tem
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid, 
-        TempMesh& result, 
+void ProcessSweptDiskSolid(const Schema_2x3::IfcSweptDiskSolid &solid,
+        TempMesh& result,
         ConversionData& conv) {
     const Curve* const curve = Curve::Convert(*solid.Directrix, conv);
     if(!curve) {
@@ -687,9 +687,9 @@ void ProcessExtrudedArea(const Schema_2x3::IfcExtrudedAreaSolid& solid, const Te
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid, 
+void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid,
         TempMesh& result,
-        ConversionData& conv, 
+        ConversionData& conv,
         bool collect_openings) {
     TempMesh meshout;
 
@@ -728,7 +728,7 @@ void ProcessExtrudedAreaSolid(const Schema_2x3::IfcExtrudedAreaSolid& solid,
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept, 
+void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept,
         TempMesh& meshout,
         ConversionData& conv) {
     if(const Schema_2x3::IfcExtrudedAreaSolid* const solid = swept.ToPtr<Schema_2x3::IfcExtrudedAreaSolid>()) {
@@ -741,8 +741,8 @@ void ProcessSweptAreaSolid(const Schema_2x3::IfcSweptAreaSolid& swept,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo, 
-        unsigned int matid, 
+bool ProcessGeometricItem(const Schema_2x3::IfcRepresentationItem& geo,
+        unsigned int matid,
         std::set<unsigned int>& mesh_indices,
         ConversionData& conv) {
     bool fix_orientation = false;
@@ -841,7 +841,7 @@ void AssignAddedMeshes(std::set<unsigned int>& mesh_indices,aiNode* nd, Conversi
 
 // ------------------------------------------------------------------------------------------------
 bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-        std::set<unsigned int>& mesh_indices, 
+        std::set<unsigned int>& mesh_indices,
         unsigned int mat_index,
         ConversionData& conv) {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
@@ -855,7 +855,7 @@ bool TryQueryMeshCache(const Schema_2x3::IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 void PopulateMeshCache(const Schema_2x3::IfcRepresentationItem& item,
-        const std::set<unsigned int>& mesh_indices, 
+        const std::set<unsigned int>& mesh_indices,
         unsigned int mat_index,
         ConversionData& conv) {
     ConversionData::MeshCacheIndex idx(&item, mat_index);
@@ -863,7 +863,7 @@ void PopulateMeshCache(const Schema_2x3::IfcRepresentationItem& item,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item, 
+bool ProcessRepresentationItem(const Schema_2x3::IfcRepresentationItem& item,
         unsigned int matid,
         std::set<unsigned int>& mesh_indices,
         ConversionData& conv) {

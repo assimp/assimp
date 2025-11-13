@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -67,7 +66,7 @@ namespace Assimp {
 * the bone are split from the mesh. The split off (new) mesh is boneless. At any
 * point in time, bones without affect upon a given mesh are to be removed.
 */
-class DeboneProcess : public BaseProcess {
+class DeboneProcess final : public BaseProcess {
 public:
     DeboneProcess();
     ~DeboneProcess() override = default;

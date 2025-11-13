@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -72,4 +72,26 @@ TEST_F(utX3DImportExport, importX3DIndexedLineSet) {
     for (unsigned int i = 0; i < scene->mMeshes[0]->mNumFaces; i++) {
         ASSERT_EQ(scene->mMeshes[0]->mFaces[i].mNumIndices, 2u);
     }
+}
+
+TEST_F(utX3DImportExport, importX3DComputerKeyboard) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
+    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
+    //   ComputerKeyboard.x3d should have 100 meshes but broken importer only has 4
+    ASSERT_EQ(4u, scene->mNumMeshes);  // Incorrect value from currently broken importer
+    ASSERT_NE(100u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
+}
+
+TEST_F(utX3DImportExport, importX3DChevyTahoe) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X3D/Chevy/ChevyTahoe.x3d", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
+    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
+    //   ChevyTahoe.x3d should have 20 meshes but broken importer only has 19
+    ASSERT_EQ(19u, scene->mNumMeshes); // Incorrect value from currently broken importer
+    ASSERT_NE(20u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
 }

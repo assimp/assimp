@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,9 +63,7 @@ TEST(utCOBImporter, importDwarf) {
 TEST(utCOBImporter, importMoleculeASCII) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/molecule_ascii.cob", aiProcess_ValidateDataStructure);
-    // FIXME: this is wrong, it should succeed
-    // change to ASSERT_NE after it's been fixed
-    ASSERT_EQ(nullptr, scene);
+    ASSERT_NE(nullptr, scene);
 }
 
 TEST(utCOBImporter, importMolecule) {
@@ -96,4 +94,11 @@ TEST(utCOBImporter, importSpider66) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST(utCOBImporter, importInvalidHeader) {
+    Assimp::Importer importer;
+    constexpr char Header[] = "Caligari ??LZSCALEb";
+    const aiScene *scene = importer.ReadFileFromMemory(Header, sizeof(Header), aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
 }

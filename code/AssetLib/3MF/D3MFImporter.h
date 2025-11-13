@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +53,7 @@ namespace Assimp {
 ///
 /// Implements the basic topology import and embedded textures.
 // ---------------------------------------------------------------------------
-class D3MFImporter : public BaseImporter {
+class D3MFImporter final : public BaseImporter {
 public:
     /// @brief The default class constructor.
     D3MFImporter() = default;

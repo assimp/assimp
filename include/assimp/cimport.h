@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -170,10 +170,11 @@ ASSIMP_API const C_STRUCT aiScene *aiImportFileExWithProperties(
 // --------------------------------------------------------------------------------
 /** Reads the given file from a given memory buffer,
  *
- * If the call succeeds, the contents of the file are returned as a pointer to an
- * aiScene object. The returned data is intended to be read-only, the importer keeps
- * ownership of the data and will destroy it upon destruction. If the import fails,
- * NULL is returned.
+ * If the call succeeds, the imported data is returned in an aiScene structure.
+ * The data is intended to be read-only, it stays property of the ASSIMP
+ * library and will be stable until aiReleaseImport() is called. After you're
+ * done with it, call aiReleaseImport() to free the resources associated with
+ * this file. If the import fails, NULL is returned.
  * A human-readable error description can be retrieved by calling aiGetErrorString().
  * @param pBuffer Pointer to the file data
  * @param pLength Length of pBuffer, in bytes

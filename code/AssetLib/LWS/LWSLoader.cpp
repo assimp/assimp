@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
 
-#include "AssetLib/LWS/LWSLoader.h"
+#include "LWSLoader.h"
 #include "Common/Importer.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
@@ -149,7 +149,7 @@ LWSImporter::LWSImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool LWSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_MAKE_MAGIC("LWSC"),
         AI_MAKE_MAGIC("LWMO")
     };
@@ -208,9 +208,9 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
             float f;
             SkipSpaces(&c, end);
-            c = fast_atoreal_move<float>(c, key.value);
+            c = fast_atoreal_move(c, key.value);
             SkipSpaces(&c, end);
-            c = fast_atoreal_move<float>(c, f);
+            c = fast_atoreal_move(c, f);
 
             key.time = f;
 
@@ -242,7 +242,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
             }
             for (unsigned int i = 0; i < num; ++i) {
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, key.params[i]);
+                c = fast_atoreal_move(c, key.params[i]);
             }
         } else if ((*it).tokens[0] == "Behaviors") {
             SkipSpaces(&c, end);
@@ -255,7 +255,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
 
 // ------------------------------------------------------------------------------------------------
 // Read animation channels in the old LightWave animation format
-void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt, 
+void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,const std::list<LWS::Element>::const_iterator &endIt,
         LWS::NodeDesc &nodes, unsigned int) {
     if (++it == endIt) {
         ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
@@ -274,7 +274,7 @@ void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,c
             ASSIMP_LOG_ERROR("LWS: Encountered unexpected end of file while parsing object motion");
             return;
         }
-        
+
         const unsigned int sub_num = strtoul10((*it).tokens[0].c_str());
         for (unsigned int n = 0; n < sub_num; ++n) {
             if (++it == endIt) {
@@ -284,11 +284,11 @@ void LWSImporter::ReadEnvelope_Old(std::list<LWS::Element>::const_iterator &it,c
 
             // parse value and time, skip the rest for the moment.
             LWO::Key key;
-            const char *c = fast_atoreal_move<float>((*it).tokens[0].c_str(), key.value);
+            const char *c = fast_atoreal_move((*it).tokens[0].c_str(), key.value);
             const char *end = c + (*it).tokens[0].size();
             SkipSpaces(&c, end);
             float f;
-            fast_atoreal_move<float>((*it).tokens[0].c_str(), f);
+            fast_atoreal_move((*it).tokens[0].c_str(), f);
             key.time = f;
 
             envl.keys.emplace_back(key);
@@ -585,6 +585,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             // and add the file to the import list
             SkipSpaces(&c, end);
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObjectLayer: self reference.");
+            }
+
             d.path = path;
             d.id = batch.AddLoadRequest(path, 0, &props);
 
@@ -602,6 +611,15 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 d.number = cur_object++;
             }
             std::string path = FindLWOFile(c);
+
+            if (path.empty()) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: empty path.");
+            }
+
+            if (path == pFile) {
+                throw DeadlyImportError("LWS: Invalid LoadObject: self reference.");
+            }
+
             d.id = batch.AddLoadRequest(path, 0, nullptr);
 
             d.path = path;
@@ -757,7 +775,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                     ASSIMP_LOG_ERROR("LWS: envelopes for  LightIntensity not supported, set to 1.0");
                     nodes.back().lightIntensity = (ai_real)1.0;
                 } else {
-                    fast_atoreal_move<float>(c, nodes.back().lightIntensity);
+                    fast_atoreal_move(c, nodes.back().lightIntensity);
                 }
             }
         }
@@ -798,11 +816,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             if (nodes.empty() || nodes.back().type != LWS::NodeDesc::LIGHT) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'LightColor\'");
             } else {
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.r);
+                c = fast_atoreal_move(c, nodes.back().lightColor.r);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.g);
+                c = fast_atoreal_move(c, nodes.back().lightColor.g);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().lightColor.b);
+                c = fast_atoreal_move(c, nodes.back().lightColor.b);
             }
         }
 
@@ -811,11 +829,11 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
             if (nodes.empty()) {
                 ASSIMP_LOG_ERROR("LWS: Unexpected keyword: \'PivotPosition\'");
             } else {
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.x);
+                c = fast_atoreal_move(c, nodes.back().pivotPos.x);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.y);
+                c = fast_atoreal_move(c, nodes.back().pivotPos.y);
                 SkipSpaces(&c, end);
-                c = fast_atoreal_move<float>(c, (float &)nodes.back().pivotPos.z);
+                c = fast_atoreal_move(c, nodes.back().pivotPos.z);
                 // Mark pivotPos as set
                 nodes.back().isPivotSet = true;
             }

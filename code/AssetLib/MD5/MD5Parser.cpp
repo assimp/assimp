@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 // internal headers
-#include "AssetLib/MD5/MD5Loader.h"
+#include "MD5Loader.h"
 #include "Material/MaterialSystem.h"
 
 #include <assimp/ParsingUtils.h>
@@ -115,15 +115,19 @@ void MD5Parser::ParseHeader() {
         ReportError("MD5 version tag is unknown (10 is expected)");
     }
     SkipLine();
+
+    // print the command line options to the console
+    char *sz = buffer;
+    while (buffer < bufferEnd) {
+        if (IsLineEnd(*buffer++)) {
+            break;
+        }
+    }
+
     if (buffer == bufferEnd) {
         return;
     }
 
-    // print the command line options to the console
-    // FIX: can break the log length limit, so we need to be careful
-    char *sz = buffer;
-    while (!IsLineEnd(*buffer++));
-    
     ASSIMP_LOG_INFO(std::string(sz, std::min((uintptr_t)MAX_LOG_MESSAGE_LENGTH, (uintptr_t)(buffer - sz))));
     SkipSpacesAndLineEnd();
 }
@@ -242,11 +246,11 @@ inline void AI_MD5_READ_TRIPLE(aiVector3D &vec, const char **sz, const char *buf
         return;
     ++*sz;
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.x);
+    *sz = fast_atoreal_move(*sz, vec.x);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.y);
+    *sz = fast_atoreal_move(*sz, vec.y);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
-    *sz = fast_atoreal_move<float>(*sz, (float &)vec.z);
+    *sz = fast_atoreal_move(*sz, vec.z);
     AI_MD5_SKIP_SPACES(sz, bufferEnd, linenumber);
     if (')' != **sz) {
         MD5Parser::ReportWarning("Unexpected token: ) was expected", linenumber);
@@ -273,6 +277,8 @@ inline bool AI_MD5_PARSE_STRING(const char **sz, const char *bufferEnd, aiString
         }
     }
     out.length = (ai_uint32)(szEnd - szStart);
+    if (out.length >= AI_MAXLEN)
+        out.length = AI_MAXLEN - 1;
     ::memcpy(out.data, szStart, out.length);
     out.data[out.length] = '\0';
 
@@ -287,7 +293,7 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
     }
     if ('\0' != **sz) {
         const char *szStart = ++(*sz);
-        
+
         while (('\"' != **sz && '\0' != **sz) && *sz != bufferEnd) {
             ++*sz;
         }
@@ -295,6 +301,8 @@ inline void AI_MD5_PARSE_STRING_IN_QUOTATION(const char **sz, const char *buffer
             const char *szEnd = *sz;
             ++*sz;
             out.length = (ai_uint32)(szEnd - szStart);
+            if (out.length >= AI_MAXLEN)
+                out.length = AI_MAXLEN - 1;
             ::memcpy(out.data, szStart, out.length);
         }
     }
@@ -320,7 +328,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
 
                 const char *sz = elem.szStart;
                 AI_MD5_PARSE_STRING_IN_QUOTATION(&sz, elem.end, desc.mName);
-                
+
                 AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
 
                 // negative values, at least -1, is allowed here
@@ -369,9 +377,9 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     if ('(' != *sz++)
                         MD5Parser::ReportWarning("Unexpected token: ( was expected", elem.iLineNumber);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, (float &)vert.mUV.x);
+                    sz = fast_atoreal_move(sz, vert.mUV.x);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, (float &)vert.mUV.y);
+                    sz = fast_atoreal_move(sz, vert.mUV.y);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     if (')' != *sz++)
                         MD5Parser::ReportWarning("Unexpected token: ) was expected", elem.iLineNumber);
@@ -385,11 +393,15 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                 else if (TokenMatch(sz, "tri", 3)) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     const unsigned int idx = strtoul10(sz, &sz);
-                    if (idx >= desc.mFaces.size())
+                    if (idx >= desc.mFaces.size()) {
                         desc.mFaces.resize(idx + 1);
+					}
 
                     aiFace &face = desc.mFaces[idx];
-                    face.mIndices = new unsigned int[face.mNumIndices = 3];
+                    if (face.mNumIndices != 3) {
+						delete [] face.mIndices;
+						face.mIndices = new unsigned int[face.mNumIndices = 3];
+					}
                     for (unsigned int i = 0; i < 3; ++i) {
                         AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                         face.mIndices[i] = strtoul10(sz, &sz);
@@ -407,7 +419,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     WeightDesc &weight = desc.mWeights[idx];
                     weight.mBone = strtoul10(sz, &sz);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    sz = fast_atoreal_move<float>(sz, weight.mWeight);
+                    sz = fast_atoreal_move(sz, weight.mWeight);
                     AI_MD5_READ_TRIPLE(weight.vOffsetPosition, &sz, elem.end, elem.iLineNumber);
                 }
             }
@@ -478,7 +490,7 @@ MD5AnimParser::MD5AnimParser(SectionArray &mSections) {
                 const char *sz = elem.szStart;
                 while (SkipSpacesAndLineEnd(&sz, elem.end)) {
                     float f;
-                    sz = fast_atoreal_move<float>(sz, f);
+                    sz = fast_atoreal_move(sz, f);
                     desc.mValues.push_back(f);
                 }
             }
@@ -495,7 +507,7 @@ MD5AnimParser::MD5AnimParser(SectionArray &mSections) {
         } else if ((*iter).mName == "numAnimatedComponents") {
             mAnimatedBones.reserve(strtoul10((*iter).mGlobalValue.c_str()));
         } else if ((*iter).mName == "frameRate") {
-            fast_atoreal_move<float>((*iter).mGlobalValue.c_str(), fFrameRate);
+            fast_atoreal_move((*iter).mGlobalValue.c_str(), fFrameRate);
         }
     }
     ASSIMP_LOG_DEBUG("MD5AnimParser end");

@@ -1,10 +1,8 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -51,20 +49,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/types.h>
 
-
 #include "3DSHelper.h"
 #include <assimp/StreamReader.h>
 
 struct aiNode;
 
-namespace Assimp    {
-
-using namespace D3DS;
+namespace Assimp {
 
 // ---------------------------------------------------------------------------------
 /** Importer class for 3D Studio r3 and r4 3DS files
  */
-class Discreet3DSImporter : public BaseImporter {
+class Discreet3DSImporter final : public BaseImporter {
 public:
     Discreet3DSImporter();
     ~Discreet3DSImporter() override = default;
@@ -101,15 +96,14 @@ protected:
     // -------------------------------------------------------------------
     /** Converts a temporary material to the outer representation
      */
-    void ConvertMaterial(D3DS::Material& p_cMat,
-        aiMaterial& p_pcOut);
+    void ConvertMaterial(D3DS::Material& p_cMat, aiMaterial& p_pcOut);
 
     // -------------------------------------------------------------------
     /** Read a chunk
      *
      *  @param pcOut Receives the current chunk
      */
-    void ReadChunk(Discreet3DS::Chunk* pcOut);
+    void ReadChunk(D3DS::Discreet3DS::Chunk* pcOut);
 
     // -------------------------------------------------------------------
     /** Parse a percentage chunk. mCurrent will point to the next
@@ -119,13 +113,10 @@ protected:
     ai_real ParsePercentageChunk();
 
     // -------------------------------------------------------------------
-    /** Parse a color chunk. mCurrent will point to the next
-    * chunk behind afterwards. If no color chunk is found
-    * QNAN is returned in all members.
-    */
-    void ParseColorChunk(aiColor3D* p_pcOut,
-        bool p_bAcceptPercent = true);
-
+    /** Parse a color chunk. mCurrent will point to the next chunk behind
+     * afterward. If no color chunk is found QNAN is returned in all members.
+     */
+    void ParseColorChunk(aiColor3D* p_pcOut, bool p_bAcceptPercent = true);
 
     // -------------------------------------------------------------------
     /** Skip a chunk in the file
@@ -133,7 +124,7 @@ protected:
     void SkipChunk();
 
     // -------------------------------------------------------------------
-    /** Generate the nodegraph
+    /** Generate the node-graph
     */
     void GenerateNodeGraph(aiScene* pcOut);
 
@@ -229,19 +220,19 @@ protected:
     // -------------------------------------------------------------------
     /** Add a node to the node graph
     */
-    void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,D3DS::Node* pcIn,
+    void AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut, D3DS::Node* pcIn,
         aiMatrix4x4& absTrafo);
 
     // -------------------------------------------------------------------
     /** Search for a node in the graph.
     * Called recursively
     */
-    void InverseNodeSearch(D3DS::Node* pcNode,D3DS::Node* pcCurrent);
+    void InverseNodeSearch(D3DS::Node* pcNode, D3DS::Node* pcCurrent);
 
     // -------------------------------------------------------------------
     /** Apply the master scaling factor to the mesh
     */
-    void ApplyMasterScale(aiScene* pScene);
+    void ApplyMasterScale(const aiScene* pScene);
 
     // -------------------------------------------------------------------
     /** Clamp all indices in the file to a valid range
@@ -253,31 +244,26 @@ protected:
     */
     void SkipTCBInfo();
 
-protected:
-
-    /** Stream to read from */
-    StreamReaderLE* stream;
-
-    /** Last touched node index */
+private:
+    /// Stream to read from
+    StreamReaderLE* mStream;
+    /// Last touched node index
     short mLastNodeIndex;
-
-    /** Current node, root node */
-    D3DS::Node* mCurrentNode, *mRootNode;
-
-    /** Scene under construction */
+    /// Current node
+    D3DS::Node* mCurrentNode;
+    /// Root node
+    D3DS::Node *mRootNode;
+    /// Scene under construction
     D3DS::Scene* mScene;
-
-    /** Ambient base color of the scene */
+    /// Ambient base color of the scene
     aiColor3D mClrAmbient;
-
-    /** Master scaling factor of the scene */
+    /// Master scaling factor of the scene
     ai_real mMasterScale;
-
-    /** Path to the background image of the scene */
+    /// Path to the background image of the scene
     std::string mBackgroundImage;
+    /// true for has a background
     bool bHasBG;
-
-    /** true if PRJ file */
+    /// true if PRJ file
     bool bIsPrj;
 };
 

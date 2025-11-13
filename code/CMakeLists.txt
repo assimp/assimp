@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2024, assimp team
+# Copyright (c) 2006-2025, assimp team
 #
 # All rights reserved.
 #
@@ -416,14 +416,12 @@ ADD_ASSIMP_IMPORTER( LWS
   AssetLib/LWS/LWSLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( M3D
-  AssetLib/M3D/M3DMaterials.h
-  AssetLib/M3D/M3DImporter.h
-  AssetLib/M3D/M3DImporter.cpp
-  AssetLib/M3D/M3DWrapper.h
-  AssetLib/M3D/M3DWrapper.cpp
-  AssetLib/M3D/m3d.h
-)
+if (ASSIMP_BUILD_M3D_IMPORTER)
+    ADD_ASSIMP_IMPORTER( M3D
+            AssetLib/M3D/M3DImporter.cpp
+            AssetLib/M3D/M3DWrapper.cpp
+    )
+endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
@@ -663,9 +661,10 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assxml/AssxmlFileWriter.h
     AssetLib/Assxml/AssxmlFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER(M3D
-    AssetLib/M3D/M3DExporter.h
-    AssetLib/M3D/M3DExporter.cpp)
+  if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
+      ADD_ASSIMP_EXPORTER(M3D
+              AssetLib/M3D/M3DExporter.cpp)
+  endif () # if (ASSIMP_BUILD_M3D_EXPORTER)
 
   ADD_ASSIMP_EXPORTER(COLLADA
     AssetLib/Collada/ColladaExporter.h
@@ -865,11 +864,15 @@ ADD_ASSIMP_IMPORTER( X3D
   AssetLib/X3D/X3DGeoHelper.h
   AssetLib/X3D/X3DXmlHelper.cpp
   AssetLib/X3D/X3DXmlHelper.h
+  AssetLib/VRML/VrmlConverter.cpp
 )
+SET(glTFCommon_src
+  AssetLib/glTFCommon/glTFCommon.h
+  AssetLib/glTFCommon/glTFCommon.cpp
+)
+SOURCE_GROUP( glTFCommon FILES ${glTFCommon_src})
 
 ADD_ASSIMP_IMPORTER( GLTF
-  AssetLib/glTF/glTFCommon.h
-  AssetLib/glTF/glTFCommon.cpp
   AssetLib/glTF/glTFAsset.h
   AssetLib/glTF/glTFAsset.inl
   AssetLib/glTF/glTFAssetWriter.h
@@ -931,39 +934,96 @@ SET( Extra_SRCS
 )
 SOURCE_GROUP( Extra FILES ${Extra_SRCS})
 
-# USD/USDA/USDC/USDZ support
-# tinyusdz
-IF (ASSIMP_BUILD_USD_IMPORTER)
-    if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
-        ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
-    endif ()
-    # Use CMAKE_CURRENT_SOURCE_DIR which provides assimp-local path (CMAKE_SOURCE_DIR is
-    # relative to top-level/main project)
-    set(Tinyusdz_BASE_ABSPATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz")
-    set(Tinyusdz_REPO_ABSPATH "${Tinyusdz_BASE_ABSPATH}/autoclone")
-
-    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
-    #       name can lead to non-deterministic (unpredictable) results since the code is potentially
-    #       in flux
-    # "dev" branch, 9 Jul 2024
-    set(TINYUSDZ_GIT_TAG "bd2a1edbbf69f352a6c40730114db9918c384848")
+# VRML (.wrl/.x3dv) support
+IF (ASSIMP_BUILD_VRML_IMPORTER)
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch name
+    #       can lead to non-deterministic (unpredictable) results since the code is potentially in flux
+    # "main" branch, 18 Nov 2024
+    set(Meshlab_GIT_TAG "ad55b47a9b0700e7b427db6db287bb3a39aa31e7")
     message("****")
-    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+    message("\n\n**** Cloning meshlab repo, git tag ${Meshlab_GIT_TAG}\n\n")
 
-    # Patch required to build arm32 on android
-    set(TINYUSDZ_PATCH_CMD git apply ${Tinyusdz_BASE_ABSPATH}/patches/tinyusdz.patch)
+    # Note: Depending on user's OS, build environment etc it may be necessary to change line endings of
+    #       "patches/meshlab.patch" file from CRLF to LF in order for patch operation to succeed
+    # Patch required to
+    #  - replace QtXml w/pugixml
+    #  - disable meshlab cmake scripts to prevent breaking assimp build
+    #  - address compiler warnings to avoid breaking build for users who wisely treat warnings-as-errors
+    set(Meshlab_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/meshlab/patches/meshlab.patch")
+    set(Meshlab_PATCH_CMD git apply ${Meshlab_PATCHFILE_PATH})
+
+    # Note: cloning entire meshlab repo is wasteful since we require literally only two source files.
+    #       There is a technique using "git archive" e.g.
+    #           execute_process(
+    #              COMMAND git archive --remote=${Meshlab_GIT_REPO} ${Meshlab_GIT_TAG} <files> | \
+    #                  tar -x -C ${Meshlab_BASE_ABSPATH}
+    #              RESULT_VARIABLE result
+    #           )
+    #       But this doesn't work with git "https" protocol so not a viable solution
 
     # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
     #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
     #       block (wait) as long as necessary until cloning is complete, so we immediately have full
     #       access to the cloned source files
     include(FetchContent)
-    # Only want to clone once (on Android, using SOURCE_DIR will clone per-ABI (x86, x86_64 etc))
-    set(FETCHCONTENT_BASE_DIR ${Tinyusdz_REPO_ABSPATH})
+    set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
+    set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
+    set(Meshlab_GIT_REPO "https://github.com/cnr-isti-vclab/meshlab")
+    FetchContent_Declare(
+            meshlab_repo
+            GIT_REPOSITORY ${Meshlab_GIT_REPO}
+            GIT_TAG        ${Meshlab_GIT_TAG}
+            PATCH_COMMAND  ${Meshlab_PATCH_CMD}
+    )
+    FetchContent_MakeAvailable(meshlab_repo)
+    message("**** Finished cloning meshlab repo")
+    message("****")
+    set(Meshlab_REPO_BASEPATH "${CMAKE_BINARY_DIR}/_deps/meshlab_repo-src/src")
+    set(Meshlab_SRC_ABSPATH "${Meshlab_REPO_BASEPATH}/meshlabplugins/io_x3d/vrml")
+    set(Meshlab_SRCS
+            ${Meshlab_SRC_ABSPATH}/Parser.cpp
+            ${Meshlab_SRC_ABSPATH}/Scanner.cpp
+    )
+    INCLUDE_DIRECTORIES(
+            ${Meshlab_SRC_ABSPATH}
+            # Add this to avoid include of generic-looking "Parser.h" (for sonarCloud)
+            ${Meshlab_REPO_BASEPATH}
+    )
+    MESSAGE(STATUS "VRML enabled")
+ELSE() # IF (ASSIMP_BUILD_VRML_IMPORTER)
+    set(Meshlab_SRCS "")
+    MESSAGE(STATUS "VRML disabled")
+ENDIF() # IF (ASSIMP_BUILD_VRML_IMPORTER)
+
+# USD/USDA/USDC/USDZ support
+# tinyusdz
+IF (ASSIMP_BUILD_USD_IMPORTER)
+    if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
+        ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
+    endif ()
+
+    # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
+    #       name can lead to non-deterministic (unpredictable) results since the code is potentially
+    #       in flux
+    # "dev" branch, 14 Mar 2025
+    set(TINYUSDZ_GIT_TAG "6050eef932f7d2788656d63297aa488fb0961ed1")
+    message("****")
+    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+
+    # Patch required to build arm32 on android
+    set(TINYUSDZ_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz/patches/tinyusdz.patch")
+    set(TINYUSDZ_PATCH_CMD git apply ${TINYUSDZ_PATCHFILE_PATH})
+
+    # Note: CMake's "FetchContent" (which executes at configure time) is much better for this use case
+    #       than "ExternalProject" (which executes at build time); we just want to clone a repo and
+    #       block (wait) as long as necessary until cloning is complete, so we immediately have full
+    #       access to the cloned source files
+    include(FetchContent)
     set(FETCHCONTENT_QUIET on) # Turn off to troubleshoot repo clone problems
     set(FETCHCONTENT_UPDATES_DISCONNECTED on) # Prevent other ABIs from re-cloning/re-patching etc
     FetchContent_Declare(
             tinyusdz_repo
+            EXCLUDE_FROM_ALL TRUE
             GIT_REPOSITORY "https://github.com/lighttransport/tinyusdz"
             GIT_TAG        ${TINYUSDZ_GIT_TAG}
             PATCH_COMMAND  ${TINYUSDZ_PATCH_CMD}
@@ -972,7 +1032,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     message("**** Finished cloning tinyusdz repo")
     message("****")
 
-    set(Tinyusdz_SRC_ABSPATH "${Tinyusdz_REPO_ABSPATH}/tinyusdz_repo-src/src")
+    set(Tinyusdz_SRC_ABSPATH "${CMAKE_BINARY_DIR}/_deps/tinyusdz_repo-src/src")
     set(Tinyusdz_SRCS
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser.cc
             ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype.cc
@@ -1055,6 +1115,7 @@ IF(ASSIMP_HUNTER_ENABLED)
 ELSEIF(NOT TARGET pugixml::pugixml)
   SET( Pugixml_SRCS
     ../contrib/pugixml/src/pugiconfig.hpp
+    ../contrib/pugixml/src/pugixml.cpp
     ../contrib/pugixml/src/pugixml.hpp
   )
   INCLUDE_DIRECTORIES("../contrib/pugixml/src")
@@ -1250,11 +1311,6 @@ if(MSVC10)
   endif()
 endif()
 
-IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
-  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
-  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
-endif ()
-
 IF(NOT ASSIMP_HUNTER_ENABLED)
   if (UNZIP_FOUND)
     SET (unzip_compile_SRCS "")
@@ -1285,6 +1341,7 @@ SET( assimp_src
   ${PostProcessing_SRCS}
   ${MaterialSystem_SRCS}
   ${STEPParser_SRCS}
+  ${glTFCommon_src}
 #  ${Step_SRCS} check if we need a different approach
 
   # Model Support
@@ -1298,6 +1355,7 @@ SET( assimp_src
   ${openddl_parser_SRCS}
   ${open3dgc_SRCS}
   ${ziplib_SRCS}
+  ${Meshlab_SRCS}
   ${Tinyusdz_SRCS}
   ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
@@ -1345,7 +1403,6 @@ add_compile_options(
 IF (ASSIMP_WARNINGS_AS_ERRORS)
   MESSAGE(STATUS "Treating all warnings as errors (for assimp library only)")
   IF (MSVC)
-
     IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
       TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
         -Wno-microsoft-enum-value
@@ -1396,7 +1453,7 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undefined-func-template
         -Wno-declaration-after-statement
         -Wno-deprecated-declarations
-	-Wno-deprecated-non-prototype
+	      -Wno-deprecated-non-prototype
       )
     ELSE()
       TARGET_COMPILE_OPTIONS(assimp PRIVATE /W4 /WX)

@@ -178,7 +178,7 @@ void CopyTexture(aiMaterial &mat, Texture &texture, aiTextureType type) {
         mat.AddProperty<ai_real>(&texture.mTextureBlend, 1, AI_MATKEY_TEXBLEND(type, 0));
 
     // Setup the texture mapping mode
-    int mapMode = static_cast<int>(texture.mMapMode);
+    auto mapMode = static_cast<int>(texture.mMapMode);
     mat.AddProperty<int>(&mapMode, 1, AI_MATKEY_MAPPINGMODE_U(type, 0));
     mat.AddProperty<int>(&mapMode, 1, AI_MATKEY_MAPPINGMODE_V(type, 0));
 
@@ -333,7 +333,8 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
     for (auto i = mScene->mMeshes.begin(); i != mScene->mMeshes.end(); ++i) {
         std::unique_ptr<std::vector<unsigned int>[]> aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
 
-        name.length = ASSIMP_itoa10(name.data, num++);
+        name.length = ASSIMP_itoa10(name.data, num);
+        ++num;
 
         unsigned int iNum = 0;
         for (std::vector<unsigned int>::const_iterator a = (*i).mFaceMaterials.begin();
@@ -477,7 +478,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut, D3DS::N
     // Setup the name of the node
     // First instance keeps its name otherwise something might break, all others will be postfixed with their instance number
     if (pcIn->mInstanceNumber > 1) {
-        char tmp[12];
+        char tmp[12] = {'\0'};
         ASSIMP_itoa10(tmp, pcIn->mInstanceNumber);
         std::string tempStr = pcIn->mName + "_inst_";
         tempStr += tmp;
@@ -704,7 +705,8 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene *pcOut) {
         // Build dummy nodes for all meshes
         unsigned int a = 0;
         for (unsigned int i = 0; i < pcOut->mNumMeshes; ++i, ++a) {
-            aiNode *pcNode = pcOut->mRootNode->mChildren[a] = new aiNode();
+            pcOut->mRootNode->mChildren[a] = new aiNode();  
+            auto *pcNode = pcOut->mRootNode->mChildren[a];
             pcNode->mParent = pcOut->mRootNode;
             pcNode->mMeshes = new unsigned int[1];
             pcNode->mMeshes[0] = i;

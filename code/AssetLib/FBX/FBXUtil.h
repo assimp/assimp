@@ -49,10 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 #include <stdint.h>
 
-namespace Assimp {
-namespace FBX {
-
-namespace Util {
+namespace Assimp::FBX::Util {
 
 /** helper for std::for_each to delete all heap-allocated items in a container */
 template<typename T>
@@ -73,11 +70,8 @@ struct destructor_fun {
     }
 };
 
-
 /** Get a string representation for a #TokenType. */
 const char* TokenTypeString(TokenType t);
-
-
 
 /** Format log/error messages using a given offset in the source binary file
  *
@@ -129,8 +123,6 @@ char EncodeBase64(char byte);
 *  @return base64-encoded string*/
 std::string EncodeBase64(const char* data, size_t length);
 
-}
-}
 }
 
 #endif // ! INCLUDED_AI_FBX_UTIL_H

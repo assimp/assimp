@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -58,6 +58,7 @@ using AiAssertHandler = void (*)(const char* failedExpression, const char* file,
 // ---------------------------------------------------------------------------
 /**
  *  @brief  Set the assert handler.
+ *  @param  handler  The assertion handler to use.
  */
 ASSIMP_API void setAiAssertHandler(AiAssertHandler handler);
 
@@ -65,12 +66,18 @@ ASSIMP_API void setAiAssertHandler(AiAssertHandler handler);
 /** The assert handler which is set by default.
  *
  *  @brief  This issues a message to stderr and calls abort.
+ *  @param failedExpression   The failed expression as a string.
+ *  @param file               The name of the source file.
+ *  @param line               The line in the source file.
  */
 AI_WONT_RETURN ASSIMP_API void defaultAiAssertHandler(const char* failedExpression, const char* file, int line) AI_WONT_RETURN_SUFFIX;
 
 // ---------------------------------------------------------------------------
 /**
- *  @brief  Dispatches an assert violation to the assert handler.
+ *  @brief Dispatches an assert violation to the assert handler.
+ *  @param failedExpression   The failed expression as a string.
+ *  @param file               The name of the source file.
+ *  @param line               The line in the source file.
  */
 ASSIMP_API void aiAssertViolation(const char* failedExpression, const char* file, int line);
 

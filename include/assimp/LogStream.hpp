@@ -69,11 +69,11 @@ class ASSIMP_API LogStream
 {
 protected:
     /** @brief  Default constructor */
-    LogStream() AI_NO_EXCEPT;
+    LogStream() AI_NO_EXCEPT = default;
 
 public:
     /** @brief  Virtual destructor  */
-    virtual ~LogStream();
+    virtual ~LogStream() = default;
 
     // -------------------------------------------------------------------
     /** @brief  Overwrite this for your own output methods
@@ -98,10 +98,6 @@ public:
             IOSystem *io = nullptr);
 
 }; // !class LogStream
-
-inline LogStream::LogStream() AI_NO_EXCEPT = default;
-
-inline LogStream::~LogStream() = default;
 
 } // Namespace Assimp
 

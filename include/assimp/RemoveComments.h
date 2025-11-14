@@ -65,7 +65,7 @@ class ASSIMP_API CommentRemover {
 public:
     // class cannot be instanced
     CommentRemover() = delete;
-    ~CommentRemover() = delete
+    ~CommentRemover() = delete;
 
     /// @brief    Remove single-line comments. 
     /// The end of a line is expected to be either NL or CR or NLCR.

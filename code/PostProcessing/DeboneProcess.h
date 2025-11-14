@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <utility>
 
-#// Forward declarations
+// Forward declarations
 class DeboneTest;
 
 namespace Assimp {
@@ -72,7 +72,9 @@ public:
     ~DeboneProcess() override = default;
 
     // -------------------------------------------------------------------
-    /** Returns whether the processing step is present in the given flag.
+    /** 
+    * @brief Returns whether the processing step is present in the given flag.
+    *
     * @param pFlags The processing flags the importer was called with.
     *   A bitwise combination of #aiPostProcessSteps.
     * @return true if the process is present in this flag fields,
@@ -81,7 +83,9 @@ public:
     bool IsActive( unsigned int pFlags) const override;
 
     // -------------------------------------------------------------------
-    /** Called prior to ExecuteOnScene().
+    /** 
+    * @brief Called prior to ExecuteOnScene().
+    * 
     * The function is a request to the process to update its configuration
     * basing on the Importer's configuration property list.
     */
@@ -89,33 +93,41 @@ public:
 
 protected:
     // -------------------------------------------------------------------
-    /** Executes the post processing step on the given imported data.
-    * At the moment a process is not supposed to fail.
-    * @param pScene The imported data to work at.
-    */
+    /** 
+     * @brief Executes the post processing step on the given imported data.
+     * 
+     * At the moment a process is not supposed to fail.
+     * @param pScene The imported data to work at.
+     */
     void Execute( aiScene* pScene) override;
 
     // -------------------------------------------------------------------
-    /** Counts bones total/removable in a given mesh.
+    /** 
+    * @brief Counts bones total/removable in a given mesh.
+    *
     * @param pMesh The mesh to process.
+    * @return false in case of an error.
     */
     bool ConsiderMesh( const aiMesh* pMesh);
 
-    /// Splits the given mesh by bone count.
+    /// @brief Splits the given mesh by bone count.
     /// @param pMesh the Mesh to split. Is not changed at all, but might be superfluous in case it was split.
     /// @param poNewMeshes Array of submeshes created in the process. Empty if splitting was not necessary.
     void SplitMesh(const aiMesh* pMesh, std::vector< std::pair< aiMesh*,const aiBone* > >& poNewMeshes) const;
 
-    /// Recursively updates the node's mesh list to account for the changed mesh list
+    /// @brief Recursively updates the node's mesh list to account for the changed mesh list
+    /// @param pNode  The root node to update.
     void UpdateNode(aiNode* pNode) const;
 
     // -------------------------------------------------------------------
-    // Apply transformation to a mesh
+    /// @brief Apply transformation to a mesh
+    /// @param mesh  The mesh to apply the transformation
+    /// @param mat   The transformation to appy
     void ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat)const;
 
 public:
-    /** Number of bones present in the scene. */
-    unsigned int mNumBones;
+    /// Number of bones present in the scene.
+    unsigned int mNumBones;       
     unsigned int mNumBonesCanDoWithout;
 
     float mThreshold;

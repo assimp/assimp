@@ -147,7 +147,7 @@ private:
     explicit DefaultLogger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
-    /** @briefDestructor    */
+    /** @brief  Destructor    */
     ~DefaultLogger() override;
 
     /** @brief  Logs debug infos, only been written when severity level DEBUG or higher is set */

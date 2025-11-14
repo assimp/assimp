@@ -60,13 +60,13 @@ namespace Assimp {
 struct find_node_by_name_predicate {
     /// @brief The default constructor.
     find_node_by_name_predicate() = default;
-
-
-    std::string mName; ///< The name to find.
-    find_node_by_name_predicate(const std::string &name) :
-            mName(name) {
+    /// @brief Constructor with the predicate name
+    /// @param name    The name.
+    find_node_by_name_predicate(const std::string &name) : mName(name) {
         // empty
     }
+
+    std::string mName; ///< The name to find.
 
     bool operator()(pugi::xml_node node) const {
         return node.name() == mName;
@@ -78,6 +78,9 @@ struct find_node_by_name_predicate {
 template <class TNodeType>
 struct NodeConverter {
 public:
+    /// @brief Will convert the attribute from the node to an int.
+    /// @param node            The XML-node.
+    /// @param attribName      The name of the attribute.
     static int to_int(TNodeType &node, const char *attribName) {
         ai_assert(nullptr != attribName);
         return node.attribute(attribName).to_int();

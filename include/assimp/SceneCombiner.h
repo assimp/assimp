@@ -99,7 +99,7 @@ struct NodeAttachmentInfo {
     aiNode *node{nullptr};
     aiNode *attachToNode{nullptr};
     bool resolved{false};
-    size_t src_idx(SIZE_MAX);
+    size_t src_idx{SIZE_MAX};
 };
 
 // ---------------------------------------------------------------------------

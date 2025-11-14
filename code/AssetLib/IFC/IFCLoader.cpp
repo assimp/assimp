@@ -185,7 +185,7 @@ void IFCImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 size_t total = 0;
                 int read = 0;
                 do {
-                    int bufferSize = fileInfo.uncompressed_size < INT16_MAX ? fileInfo.uncompressed_size : INT16_MAX;
+                    unsigned int bufferSize = static_cast<unsigned int>(fileInfo.uncompressed_size) < INT16_MAX ? static_cast<unsigned int>(fileInfo.uncompressed_size) : INT16_MAX;
                     void *buffer = malloc(bufferSize);
                     read = unzReadCurrentFile(zip, buffer, bufferSize);
                     if (read > 0) {

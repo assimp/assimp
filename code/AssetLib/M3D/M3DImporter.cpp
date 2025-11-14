@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 Copyright (c) 2019 bzt
 
 All rights reserved.
@@ -85,7 +85,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       are listed in aiScene->mRootNode->children, but all without meshes
 */
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Model 3D Importer",
     "",
     "",
@@ -332,7 +332,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
             /* if we have the texture loaded, set format hint and pcData too */
             tx->mWidth = t->w;
             tx->mHeight = t->h;
-            strcpy(tx->achFormatHint, formatHint[t->f - 1]);
+            strncpy(tx->achFormatHint, formatHint[t->f - 1], 8);
             tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
             for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
                 switch (t->f) {

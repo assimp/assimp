@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -52,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
-#include "AssetLib/MD3/MD3Loader.h"
+#include "MD3Loader.h"
 #include "Common/Importer.h"
 
 #include <assimp/GenericProperty.h>
@@ -70,7 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Quake III Mesh Importer",
     "",
     "",
@@ -123,12 +121,12 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
     // remove comments from it (C++ style)
     CommentRemover::RemoveLineComments("//", &_buff[0]);
     const char *buff = &_buff[0];
-
+    const char *end = buff + _buff.size();
     Q3Shader::ShaderDataBlock *curData = nullptr;
     Q3Shader::ShaderMapBlock *curMap = nullptr;
 
     // read line per line
-    for (; SkipSpacesAndLineEnd(&buff); SkipLine(&buff)) {
+    for (; SkipSpacesAndLineEnd(&buff, end); SkipLine(&buff, end)) {
 
         if (*buff == '{') {
             ++buff;
@@ -140,21 +138,21 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
             }
 
             // read this data section
-            for (; SkipSpacesAndLineEnd(&buff); SkipLine(&buff)) {
+            for (; SkipSpacesAndLineEnd(&buff, end); SkipLine(&buff, end)) {
                 if (*buff == '{') {
                     ++buff;
                     // add new map section
                     curData->maps.emplace_back();
                     curMap = &curData->maps.back();
 
-                    for (; SkipSpacesAndLineEnd(&buff); SkipLine(&buff)) {
+                    for (; SkipSpacesAndLineEnd(&buff, end); SkipLine(&buff, end)) {
                         // 'map' - Specifies texture file name
                         if (TokenMatchI(buff, "map", 3) || TokenMatchI(buff, "clampmap", 8)) {
-                            curMap->name = GetNextToken(buff);
+                            curMap->name = GetNextToken(buff, end);
                         }
                         // 'blendfunc' - Alpha blending mode
                         else if (TokenMatchI(buff, "blendfunc", 9)) {
-                            const std::string blend_src = GetNextToken(buff);
+                            const std::string blend_src = GetNextToken(buff, end);
                             if (blend_src == "add") {
                                 curMap->blend_src = Q3Shader::BLEND_GL_ONE;
                                 curMap->blend_dest = Q3Shader::BLEND_GL_ONE;
@@ -166,12 +164,12 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
                                 curMap->blend_dest = Q3Shader::BLEND_GL_ONE_MINUS_SRC_ALPHA;
                             } else {
                                 curMap->blend_src = StringToBlendFunc(blend_src);
-                                curMap->blend_dest = StringToBlendFunc(GetNextToken(buff));
+                                curMap->blend_dest = StringToBlendFunc(GetNextToken(buff, end));
                             }
                         }
                         // 'alphafunc' - Alpha testing mode
                         else if (TokenMatchI(buff, "alphafunc", 9)) {
-                            const std::string at = GetNextToken(buff);
+                            const std::string at = GetNextToken(buff, end);
                             if (at == "GT0") {
                                 curMap->alpha_test = Q3Shader::AT_GT0;
                             } else if (at == "LT128") {
@@ -186,7 +184,6 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
                             break;
                         }
                     }
-
                 } else if (*buff == '}') {
                     ++buff;
                     curData = nullptr;
@@ -195,7 +192,7 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
 
                 // 'cull' specifies culling behaviour for the model
                 else if (TokenMatchI(buff, "cull", 4)) {
-                    SkipSpaces(&buff);
+                    SkipSpaces(&buff, end);
                     if (!ASSIMP_strincmp(buff, "back", 4)) { // render face's backside, does not function in Q3 engine (bug)
                         curData->cull = Q3Shader::CULL_CCW;
                     } else if (!ASSIMP_strincmp(buff, "front", 5)) { // is not valid keyword in Q3, but occurs in shaders
@@ -213,9 +210,10 @@ bool Q3Shader::LoadShader(ShaderData &fill, const std::string &pFile, IOSystem *
             curData = &fill.blocks.back();
 
             // get the name of this section
-            curData->name = GetNextToken(buff);
+            curData->name = GetNextToken(buff, end);
         }
     }
+
     return true;
 }
 
@@ -232,6 +230,7 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
     const size_t s = file->FileSize();
     std::vector<char> _buff(s + 1);
     const char *buff = &_buff[0];
+    const char *end = buff + _buff.size();
     file->Read(&_buff[0], s, 1);
     _buff[s] = 0;
 
@@ -240,10 +239,10 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
 
     // read token by token and fill output table
     for (; *buff;) {
-        SkipSpacesAndLineEnd(&buff);
+        SkipSpacesAndLineEnd(&buff, end);
 
         // get first identifier
-        std::string ss = GetNextToken(buff);
+        std::string ss = GetNextToken(buff, end);
 
         // ignore tokens starting with tag_
         if (!::strncmp(&ss[0], "tag_", std::min((size_t)4, ss.length())))
@@ -253,8 +252,9 @@ bool Q3Shader::LoadSkin(SkinData &fill, const std::string &pFile, IOSystem *io) 
         SkinData::TextureEntry &entry = fill.textures.back();
 
         entry.first = ss;
-        entry.second = GetNextToken(buff);
+        entry.second = GetNextToken(buff, end);
     }
+
     return true;
 }
 
@@ -293,7 +293,7 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial *out, const ShaderDataBlock &s
         //  - in any case: set it as diffuse texture
         //
         // If the texture is using 'filter' blending
-        //  - take as lightmap
+        //  - take as light-map
         //
         // Textures with alpha funcs
         //  - aiTextureFlags_UseAlpha is set (otherwise aiTextureFlags_NoAlpha is explicitly set)
@@ -350,7 +350,7 @@ MD3Importer::~MD3Importer() = default;
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MD3Importer::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MD3_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 
@@ -722,6 +722,7 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::vector<unsigned char> mBuffer2(fileSize);
     file->Read(&mBuffer2[0], 1, fileSize);
     mBuffer = &mBuffer2[0];
+    const unsigned char* bufferEnd = mBuffer + fileSize;
 
     pcHeader = (BE_NCONST MD3::Header *)mBuffer;
 
@@ -747,9 +748,15 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Navigate to the list of surfaces
     BE_NCONST MD3::Surface *pcSurfaces = (BE_NCONST MD3::Surface *)(mBuffer + pcHeader->OFS_SURFACES);
+    if ((const unsigned char*)pcSurfaces + sizeof(MD3::Surface) * pcHeader->NUM_SURFACES > bufferEnd) {
+        throw DeadlyImportError("MD3 surface headers are outside the file");
+    }
 
     // Navigate to the list of tags
     BE_NCONST MD3::Tag *pcTags = (BE_NCONST MD3::Tag *)(mBuffer + pcHeader->OFS_TAGS);
+    if ((const unsigned char*)pcTags + sizeof(MD3::Tag) * pcHeader->NUM_TAGS > bufferEnd) {
+        throw DeadlyImportError("MD3 tags are outside the file");
+    }
 
     // Allocate output storage
     pScene->mNumMeshes = pcHeader->NUM_SURFACES;
@@ -1024,6 +1031,10 @@ void MD3Importer::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
         for (unsigned int i = 0; i < pcHeader->NUM_TAGS; ++i, ++pcTags) {
             aiNode *nd = pScene->mRootNode->mChildren[i] = new aiNode();
+            if ((const unsigned char*)pcTags + sizeof(MD3::Tag) > bufferEnd) {
+                throw DeadlyImportError("MD3 tag is outside the file");
+            }
+
             nd->mName.Set((const char *)pcTags->NAME);
             nd->mParent = pScene->mRootNode;
 

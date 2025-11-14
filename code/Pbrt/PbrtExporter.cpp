@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -89,29 +89,40 @@ using namespace Assimp;
 
 namespace Assimp {
 
-void ExportScenePbrt (
-    const char* pFile,
-    IOSystem* pIOSystem,
-    const aiScene* pScene,
-    const ExportProperties* /*pProperties*/
-){
+void ExportScenePbrt(const char *pFile, IOSystem *pIOSystem, const aiScene *pScene,
+        const ExportProperties *) {
     std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
     std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
-
+    std::string texturesPath = path;
+    if (!texturesPath.empty()) {
+        texturesPath+=pIOSystem->getOsSeparator(); 
+    }
+    texturesPath+="textures";
+    
     // initialize the exporter
-    PbrtExporter exporter(pScene, pIOSystem, path, file);
+    PbrtExporter exporter(pScene, pIOSystem, path, file, texturesPath);
 }
 
 } // end of namespace Assimp
 
-// Constructor
+static void create_embedded_textures_folder(const aiScene *scene, IOSystem *pIOSystem, const std::string &texturesPath) {
+    if (scene->mNumTextures > 0) {
+        if (!pIOSystem->Exists(texturesPath)) {
+            if (!pIOSystem->CreateDirectory(texturesPath)) {
+                throw DeadlyExportError("Could not create textures/ directory.");
+            }
+        }
+    }
+}
+
 PbrtExporter::PbrtExporter(
         const aiScene *pScene, IOSystem *pIOSystem,
-        const std::string &path, const std::string &file) :
+        const std::string &path, const std::string &file, const std::string &texturesPath) :
         mScene(pScene),
         mIOSystem(pIOSystem),
         mPath(path),
         mFile(file),
+        mTexturesPath(texturesPath),
         mRootTransform(
             // rotates the (already left-handed) CRS -90 degrees around the x axis in order to
             // make +Z 'up' and +Y 'towards viewer', as in default in pbrt
@@ -127,10 +138,10 @@ PbrtExporter::PbrtExporter(
         0.f,  0.f,  1.f, 0.f, //
         0.f,  0.f,  0.f, 1.f  //
     ) * mRootTransform;
+
     // Export embedded textures.
-    if (mScene->mNumTextures > 0)
-        if (!mIOSystem->CreateDirectory("textures"))
-            throw DeadlyExportError("Could not create textures/ directory.");
+    create_embedded_textures_folder(mScene, mIOSystem, mTexturesPath);
+
     for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
         aiTexture* tex = mScene->mTextures[i];
         std::string fn = CleanTextureFilename(tex->mFilename, false);
@@ -169,15 +180,18 @@ PbrtExporter::PbrtExporter(
     WriteWorldDefinition();
 
     // And write the file to disk...
-    std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath,"wt"));
+    std::string outputFilePath = mPath;
+    if (!outputFilePath.empty()) {
+        outputFilePath = outputFilePath + mIOSystem->getOsSeparator();
+    }
+    outputFilePath = outputFilePath + mFile +".pbrt";
+
+    std::unique_ptr<IOStream> outfile(mIOSystem->Open(outputFilePath,"wt"));
     if (!outfile) {
         throw DeadlyExportError("could not open output .pbrt file: " + std::string(mFile));
     }
     outfile->Write(mOutput.str().c_str(), mOutput.str().length(), 1);
 }
-
-// Destructor
-PbrtExporter::~PbrtExporter() = default;
 
 void PbrtExporter::WriteMetaData() {
     mOutput << "#############################\n";
@@ -676,7 +690,7 @@ std::string PbrtExporter::CleanTextureFilename(const aiString &f, bool rewriteEx
     }
 
     // Expect all textures in textures
-    fn = std::string("textures") + mIOSystem->getOsSeparator() + fn;
+    fn = mTexturesPath + mIOSystem->getOsSeparator() + fn;
 
     // Rewrite extension for unsupported file formats.
     if (rewriteExtension) {
@@ -798,10 +812,20 @@ void PbrtExporter::WriteLights() {
 
 void PbrtExporter::WriteMesh(aiMesh* mesh) {
     mOutput << "# - Mesh: ";
+    const char* mName;
     if (mesh->mName == aiString(""))
-        mOutput << "<No Name>\n";
+        mName = "<No Name>";
     else
-        mOutput << mesh->mName.C_Str() << "\n";
+        mName = mesh->mName.C_Str();
+    mOutput << mName << "\n";
+
+    // Check if any types other than tri
+    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+           || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
+        std::cerr << "Error: ignoring point / line / polygon mesh " << mName << ".\n";
+        return;
+    }
 
     mOutput << "AttributeBegin\n";
     aiMaterial* material = mScene->mMaterials[mesh->mMaterialIndex];
@@ -813,14 +837,6 @@ void PbrtExporter::WriteMesh(aiMesh* mesh) {
         (emission.r > 0 || emission.g > 0 || emission.b > 0))
         mOutput << "    AreaLightSource \"diffuse\" \"rgb L\" [ " << emission.r <<
             " " << emission.g << " " << emission.b << " ]\n";
-
-    // Check if any types other than tri
-    if (   (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
-        || (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)) {
-        std::cerr << "Error: ignoring point / line / polygon mesh " << mesh->mName.C_Str() << ".\n";
-        return;
-    }
 
     // Alpha mask
     std::string alpha;

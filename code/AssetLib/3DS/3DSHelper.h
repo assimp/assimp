@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,8 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/qnan.h>
 #include <cstdio> //sprintf
 
-namespace Assimp {
-namespace D3DS {
+namespace Assimp::D3DS {
 
 #include <assimp/Compiler/pushpack1.h>
 
@@ -365,14 +363,13 @@ struct Texture {
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // _MSC_VER
-
 // ---------------------------------------------------------------------------
 /** Helper structure representing a 3ds material */
 struct Material {
     //! Default constructor has been deleted
     Material() :
             mName(),
-            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            mDiffuse(0.6f, 0.6f, 0.6f),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
             mShading(Discreet3DS::Gouraud),
@@ -385,7 +382,7 @@ struct Material {
     //! Constructor with explicit name
     explicit Material(const std::string &name) :
             mName(name),
-            mDiffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
+            mDiffuse(0.6f, 0.6f, 0.6f),
             mSpecularExponent(ai_real(0.0)),
             mShininessStrength(ai_real(1.0)),
             mShading(Discreet3DS::Gouraud),
@@ -581,7 +578,6 @@ struct Scene {
     // Node* pcRootNode;
 };
 
-} // end of namespace D3DS
-} // end of namespace Assimp
+} // end of namespace Assimp::D3DS
 
 #endif // AI_XFILEHELPER_H_INC

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -467,9 +467,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
-        if (uvIndices.size() != vertex_count) {
+        if (uvIndices.size() != mapping_offsets.size()) {
             FBXImporter::LogError("length of input data unexpected for ByVertice mapping: ",
-                                  uvIndices.size(), ", expected ", vertex_count);
+                                  uvIndices.size(), ", expected ", mapping_offsets.size());
             return;
         }
 
@@ -644,10 +644,12 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
         return;
     }
 
-    // materials are handled separately. First of all, they are assigned per-face
-    // and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
-    // has a slightly different meaning for materials.
-    ParseVectorDataArray(materials_out,GetRequiredElement(source,"Materials"));
+    if (source["Materials"]) {
+        // materials are handled separately. First of all, they are assigned per-face
+        // and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
+        // has a slightly different meaning for materials.
+        ParseVectorDataArray(materials_out, GetRequiredElement(source, "Materials"));
+    }
 
     if (MappingInformationType == "AllSame") {
         // easy - same material for all faces
@@ -683,11 +685,14 @@ ShapeGeometry::ShapeGeometry(uint64_t id, const Element& element, const std::str
         DOMError("failed to read Geometry object (class: Shape), no data scope found");
     }
     const Element& Indexes = GetRequiredElement(*sc, "Indexes", &element);
-    const Element& Normals = GetRequiredElement(*sc, "Normals", &element);
     const Element& Vertices = GetRequiredElement(*sc, "Vertices", &element);
     ParseVectorDataArray(m_indices, Indexes);
     ParseVectorDataArray(m_vertices, Vertices);
-    ParseVectorDataArray(m_normals, Normals);
+
+    if ((*sc)["Normals"]) {
+        const Element& Normals = GetRequiredElement(*sc, "Normals", &element);
+        ParseVectorDataArray(m_normals, Normals);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

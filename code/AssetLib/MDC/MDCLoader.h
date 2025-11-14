@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -62,7 +61,7 @@ using namespace MDC;
 class MDCImporter : public BaseImporter {
 public:
     MDCImporter();
-    ~MDCImporter() override;
+    ~MDCImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

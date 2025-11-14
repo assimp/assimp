@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,9 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
-using namespace Assimp;
+#include <limits>
 
-static const aiImporterDesc desc = {
+namespace Assimp {
+
+static constexpr aiImporterDesc desc = {
     "Quick3D Importer",
     "",
     "",
@@ -127,7 +129,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     std::vector<Material> materials;
     try {
         materials.reserve(numMats);
-    } catch(const std::bad_alloc&) {
+    } catch (const std::bad_alloc &) {
         ASSIMP_LOG_ERROR("Invalid alloc for materials.");
         throw DeadlyImportError("Invalid Quick3D-file, material allocation failed.");
     }
@@ -135,7 +137,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     std::vector<Mesh> meshes;
     try {
         meshes.reserve(numMeshes);
-    } catch(const std::bad_alloc&) {
+    } catch (const std::bad_alloc &) {
         ASSIMP_LOG_ERROR("Invalid alloc for meshes.");
         throw DeadlyImportError("Invalid Quick3D-file, mesh allocation failed.");
     }
@@ -237,7 +239,6 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 if (minor > '0' && major == '3')
                     stream.IncPtr(mesh.faces.size());
             }
-            // stream.IncPtr(4); // unknown value here
         } break;
 
             // materials chunk
@@ -251,6 +252,10 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 c = stream.GetI1();
                 while (c) {
                     mat.name.data[mat.name.length++] = c;
+                    if (mat.name.length == AI_MAXLEN) {
+                        ASSIMP_LOG_ERROR("String ouverflow detected, skipped material name parsing.");
+                        break;
+                    }
                     c = stream.GetI1();
                 }
 
@@ -275,8 +280,6 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 // read the transparency
                 mat.transparency = stream.GetF4();
 
-                // unknown value here
-                // stream.IncPtr(4);
                 // FIX: it could be the texture index ...
                 mat.texIdx = (unsigned int)stream.GetI4();
             }
@@ -306,6 +309,11 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
                 if (!tex->mWidth || !tex->mHeight) {
                     throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
+                }
+
+                const unsigned int uint_max = std::numeric_limits<unsigned int>::max();
+                if (tex->mWidth > (uint_max / tex->mHeight)) {
+                    throw DeadlyImportError("Quick3D: Texture dimensions are too large, resulting in overflow.");
                 }
 
                 unsigned int mul = tex->mWidth * tex->mHeight;
@@ -425,7 +433,8 @@ outer:
     pScene->mMeshes = new aiMesh *[pScene->mNumMaterials];
 
     for (unsigned int i = 0, real = 0; i < (unsigned int)materials.size(); ++i) {
-        if (fidx[i].empty()) continue;
+        if (fidx[i].empty())
+            continue;
 
         // Allocate a mesh and a material
         aiMesh *mesh = pScene->mMeshes[real] = new aiMesh();
@@ -548,14 +557,9 @@ outer:
     // Now we need to attach the meshes to the root node of the scene
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
-    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
+    for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         pScene->mRootNode->mMeshes[i] = i;
-
-    /*pScene->mRootNode->mTransformation *= aiMatrix4x4(
-        1.f, 0.f, 0.f, 0.f,
-        0.f, -1.f,0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f);*/
+    }
 
     // Add cameras and light sources to the scene root node
     pScene->mRootNode->mNumChildren = pScene->mNumLights + pScene->mNumCameras;
@@ -576,5 +580,7 @@ outer:
         nd->mTransformation = pScene->mRootNode->mChildren[0]->mTransformation;
     }
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_Q3D_IMPORTER

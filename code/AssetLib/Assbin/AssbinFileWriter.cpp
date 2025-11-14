@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -50,11 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/version.h>
 #include <assimp/IOStream.hpp>
 
-#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#include <zlib.h>
-#else
-#include "../contrib/zlib/zlib.h"
-#endif
+#include "zlib.h"
 
 #include <ctime>
 
@@ -243,29 +239,7 @@ inline size_t WriteArray(IOStream *stream, const T *in, unsigned int size) {
  *  and the chunk contents to the container stream. This allows relatively easy chunk
  *  chunk construction, even recursively.
  */
-class AssbinChunkWriter : public IOStream {
-private:
-    uint8_t *buffer;
-    uint32_t magic;
-    IOStream *container;
-    size_t cur_size, cursor, initial;
-
-private:
-    // -------------------------------------------------------------------
-    void Grow(size_t need = 0) {
-        size_t new_size = std::max(initial, std::max(need, cur_size + (cur_size >> 1)));
-
-        const uint8_t *const old = buffer;
-        buffer = new uint8_t[new_size];
-
-        if (old) {
-            memcpy(buffer, old, cur_size);
-            delete[] old;
-        }
-
-        cur_size = new_size;
-    }
-
+class AssbinChunkWriter final : public IOStream {
 public:
     AssbinChunkWriter(IOStream *container, uint32_t magic, size_t initial = 4096) :
             buffer(nullptr),
@@ -319,6 +293,28 @@ public:
 
         return pCount;
     }
+
+private:
+    // -------------------------------------------------------------------
+    void Grow(size_t need = 0) {
+        size_t new_size = std::max(initial, std::max(need, cur_size + (cur_size >> 1)));
+
+        const uint8_t *const old = buffer;
+        buffer = new uint8_t[new_size];
+
+        if (old) {
+            memcpy(buffer, old, cur_size);
+            delete[] old;
+        }
+
+        cur_size = new_size;
+    }
+
+private:
+    uint8_t *buffer;
+    uint32_t magic;
+    IOStream *container;
+    size_t cur_size, cursor, initial;
 };
 
 // ----------------------------------------------------------------------------------

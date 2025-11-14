@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -41,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
 
 /** @file Implementation of the MD2 importer class */
@@ -65,7 +62,7 @@ using namespace Assimp::MD2;
 #   define ARRAYSIZE(_array) (int(sizeof(_array) / sizeof(_array[0])))
 #endif
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Quake II Mesh Importer",
     "",
     "",
@@ -79,7 +76,7 @@ static const aiImporterDesc desc = {
 };
 
 // ------------------------------------------------------------------------------------------------
-// Helper function to lookup a normal in Quake 2's precalculated table
+// Helper function to lookup a normal in Quake 2's pre-calculated table
 void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
 {
     // make sure the normal index has a valid value
@@ -101,14 +98,10 @@ MD2Importer::MD2Importer()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MD2Importer::~MD2Importer() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MD2Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/) const
 {
-    static const uint32_t tokens[] = { AI_MD2_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MD2_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler,pFile,tokens,AI_COUNT_OF(tokens));
 }
 
@@ -326,15 +319,21 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         clr.b = clr.g = clr.r = 0.05f;
         pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
-        if (pcSkins->name[0])
+        const ai_uint32 MaxNameLength = AI_MAXLEN - 1; // one byte reserved for \0
+        ai_uint32 iLen = static_cast<ai_uint32>(::strlen(pcSkins->name));
+        bool nameTooLong = iLen > MaxNameLength;
+
+        if (pcSkins->name[0] && !nameTooLong)
         {
             aiString szString;
-            const ai_uint32 iLen = (ai_uint32) ::strlen(pcSkins->name);
-            ::memcpy(szString.data,pcSkins->name,iLen);
+            ::memcpy(szString.data, pcSkins->name, iLen);
             szString.data[iLen] = '\0';
             szString.length = iLen;
 
             pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
+        }
+        else if (nameTooLong) {
+            ASSIMP_LOG_WARN("Texture file name is too long. It will be skipped.");
         }
         else{
             ASSIMP_LOG_WARN("Texture file name has zero length. It will be skipped.");

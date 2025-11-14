@@ -18,6 +18,9 @@ crash.
 FILES
 *********************************************************
 
+box_nested_animation_4286.dae - This was reported as GH#4286.
+  The "count" parameter in "Cube-mesh-positions-array" is too small.
+
 OutOfMemory.off - the number of faces is invalid. There won't be
   enough memory so std::vector::reserve() will most likely fail.
   The exception should be caught in Importer.cpp.

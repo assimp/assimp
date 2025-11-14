@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -65,10 +65,9 @@ namespace D3MF {
 
 using OpcPackageRelationshipPtr = std::shared_ptr<OpcPackageRelationship>;
 
-class OpcPackageRelationshipReader {
+class OpcPackageRelationshipReader final {
 public:
-    OpcPackageRelationshipReader(XmlParser &parser) :
-            m_relationShips() {
+    explicit OpcPackageRelationshipReader(XmlParser &parser) : mRelations() {
         XmlNode root = parser.getRootNode();
         ParseRootNode(root);
     }
@@ -108,20 +107,20 @@ public:
                 relPtr->type = currentNode.attribute(XmlTag::RELS_ATTRIB_TYPE).as_string();
                 relPtr->target = currentNode.attribute(XmlTag::RELS_ATTRIB_TARGET).as_string();
                 if (validateRels(relPtr)) {
-                    m_relationShips.push_back(relPtr);
+                    mRelations.push_back(relPtr);
                 }
             }
         }
     }
 
-    std::vector<OpcPackageRelationshipPtr> m_relationShips;
+    std::vector<OpcPackageRelationshipPtr> mRelations;
 };
 
 static bool IsEmbeddedTexture( const std::string &filename ) {
     const std::string extension = BaseImporter::GetExtension(filename);
-    if (extension == "jpg" || extension == "png") {
+    if (extension == "jpg" || extension == "png" || extension == "jpeg") {
         std::string::size_type pos = filename.find("thumbnail");
-        if (pos == std::string::npos) {
+        if (pos != std::string::npos) {
             return false;
         }
         return true;
@@ -186,9 +185,6 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 D3MFOpcPackage::~D3MFOpcPackage() {
     mZipArchive->Close(mRootStream);
     delete mZipArchive;
-    for (auto tex : mEmbeddedTextures) {
-        delete tex;
-    }
 }
 
 IOStream *D3MFOpcPackage::RootStream() const {
@@ -217,11 +213,11 @@ std::string D3MFOpcPackage::ReadPackageRootRelationship(IOStream *stream) {
 
     OpcPackageRelationshipReader reader(xmlParser);
 
-    auto itr = std::find_if(reader.m_relationShips.begin(), reader.m_relationShips.end(), [](const OpcPackageRelationshipPtr &rel) {
+    auto itr = std::find_if(reader.mRelations.begin(), reader.mRelations.end(), [](const OpcPackageRelationshipPtr &rel) {
         return rel->type == XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE;
     });
 
-    if (itr == reader.m_relationShips.end()) {
+    if (itr == reader.mRelations.end()) {
         throw DeadlyImportError("Cannot find ", XmlTag::PACKAGE_START_PART_RELATIONSHIP_TYPE);
     }
 

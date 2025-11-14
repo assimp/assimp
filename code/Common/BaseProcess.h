@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -68,11 +68,11 @@ public:
 
     //! Represents data that is allocated on the heap, thus needs to be deleted
     template <typename T>
-    struct THeapData : public Base {
+    struct THeapData final : Base {
         explicit THeapData(T *in) :
                 data(in) {}
 
-        ~THeapData() {
+        ~THeapData() override {
             delete data;
         }
         T *data;
@@ -80,11 +80,11 @@ public:
 
     //! Represents static, by-value data not allocated on the heap
     template <typename T>
-    struct TStaticData : public Base {
+    struct TStaticData final : Base {
         explicit TStaticData(T in) :
                 data(in) {}
 
-        ~TStaticData() = default;
+        ~TStaticData() override= default;
 
         T data;
     };
@@ -179,11 +179,11 @@ class ASSIMP_API BaseProcess {
     friend class Importer;
 
 public:
-    /** @brief onstructor to be privately used by Importer */
+    /** @brief Constructor to be privately used by Importer */
     BaseProcess() AI_NO_EXCEPT;
 
-    /** @brief Destructor, private as well */
-    virtual ~BaseProcess();
+    /** @brief Destructor */
+    virtual ~BaseProcess() = default;
 
     // -------------------------------------------------------------------
     /**

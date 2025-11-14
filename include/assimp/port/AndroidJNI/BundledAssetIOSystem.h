@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStream.hpp>
 
-namespace Assimp        {
+namespace Assimp {
 
 class BundledAssetIOSystem : public Assimp::DefaultIOSystem {
 

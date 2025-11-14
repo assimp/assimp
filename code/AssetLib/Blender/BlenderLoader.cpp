@@ -1,10 +1,8 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -69,11 +67,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
 #include "Common/Compression.h"
-/* #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
-#    include <zlib.h>
-#  else
-#    include "../contrib/zlib/zlib.h"
-#  endif*/
 #endif
 
 namespace Assimp {
@@ -89,7 +82,7 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-static const aiImporterDesc blenderDesc = {
+static constexpr aiImporterDesc blenderDesc = {
     "Blender 3D Importer (http://www.blender3d.org)",
     "",
     "",
@@ -115,7 +108,7 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char Token[] = "BLENDER";
+static constexpr char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -364,7 +357,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
+        name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
         aiTexture *curTex = conv_data.textures->back();
@@ -438,7 +431,7 @@ void BlenderImporter::AddSentinelTexture(aiMaterial *out, const Material *mat, c
     (void)conv_data;
 
     aiString name;
-    name.length = ai_snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
+    name.length = ai_snprintf(name.data, AI_MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
             GetTextureTypeDisplayString(tex->tex->type));
     out->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(
                                     conv_data.next_texture[aiTextureType_DIFFUSE]++));
@@ -500,8 +493,9 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
             if (index == static_cast<unsigned int>(-1)) {
                 // Setup a default material.
                 std::shared_ptr<Material> p(new Material());
-                ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name) - 2);
-                strcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME);
+                const size_t len = ::strlen(AI_DEFAULT_MATERIAL_NAME);
+                ai_assert(len < sizeof(p->id.name) - 2);
+                memcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
                 // Thus all relevant fields should be explicitly initialized. We cannot add

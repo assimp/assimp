@@ -23,6 +23,7 @@
 #include <dxgi1_2.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <utf8.h>
 
 #include "ModelLoader.h"
 #include "SafeRelease.hpp"
@@ -156,7 +157,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 
 	// Retrieve the model file path.
     std::wstring filename(argv[1]);
-    
+
 	char *targetStart = new char[filename.size()+1];
     memset(targetStart, '\0', filename.size() + 1);
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2023, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ObjMaterial.h>
 #include <memory>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Wavefront Object Importer",
     "",
     "",
@@ -67,7 +67,7 @@ static const aiImporterDesc desc = {
     "obj"
 };
 
-static const unsigned int ObjMinSize = 16;
+static constexpr unsigned int ObjMinSize = 16u;
 
 namespace Assimp {
 
@@ -78,7 +78,9 @@ using namespace std;
 ObjFileImporter::ObjFileImporter() :
         m_Buffer(),
         m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -101,8 +103,13 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
+    if (m_pRootObject != nullptr) {
+        delete m_pRootObject;
+        m_pRootObject = nullptr;
+    }
+
     // Read file into memory
-    static const std::string mode = "rb";
+    static constexpr char mode[] = "rb";
     auto streamCloser = [&](IOStream *pStream) {
         pIOHandler->Close(pStream);
     };
@@ -156,7 +163,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
 // ------------------------------------------------------------------------------------------------
 //  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene *pScene) {
-    if (nullptr == pModel) {
+    if (pModel == nullptr) {
         return;
     }
 
@@ -171,7 +178,6 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
     }
 
     if (!pModel->mObjects.empty()) {
-
         unsigned int meshCount = 0;
         unsigned int childCount = 0;
 
@@ -186,7 +192,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
         pScene->mRootNode->mChildren = new aiNode *[childCount];
 
         // Create nodes for the whole scene
-        std::vector<aiMesh *> MeshArray;
+        std::vector<std::unique_ptr<aiMesh>> MeshArray;
         MeshArray.reserve(meshCount);
         for (size_t index = 0; index < pModel->mObjects.size(); ++index) {
             createNodes(pModel, pModel->mObjects[index], pScene->mRootNode, pScene, MeshArray);
@@ -198,7 +204,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
         if (pScene->mNumMeshes > 0) {
             pScene->mMeshes = new aiMesh *[MeshArray.size()];
             for (size_t index = 0; index < MeshArray.size(); ++index) {
-                pScene->mMeshes[index] = MeshArray[index];
+                pScene->mMeshes[index] = MeshArray[index].release();
             }
         }
 
@@ -250,9 +256,8 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
 //  Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile::Object *pObject,
         aiNode *pParent, aiScene *pScene,
-        std::vector<aiMesh *> &MeshArray) {
-    ai_assert(nullptr != pModel);
-    if (nullptr == pObject) {
+        std::vector<std::unique_ptr<aiMesh>> &MeshArray) {
+    if (nullptr == pObject || pModel == nullptr) {
         return nullptr;
     }
 
@@ -268,12 +273,10 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 
     for (size_t i = 0; i < pObject->m_Meshes.size(); ++i) {
         unsigned int meshId = pObject->m_Meshes[i];
-        aiMesh *pMesh = createTopology(pModel, pObject, meshId);
+        std::unique_ptr<aiMesh> pMesh = createTopology(pModel, pObject, meshId);
         if (pMesh != nullptr) {
             if (pMesh->mNumFaces > 0) {
-                MeshArray.push_back(pMesh);
-            } else {
-                delete pMesh;
+                MeshArray.push_back(std::move(pMesh));
             }
         }
     }
@@ -305,17 +308,14 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
-aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
-    // Checking preconditions
-    ai_assert(nullptr != pModel);
-
-    if (nullptr == pData) {
+std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
+    if (nullptr == pData || pModel == nullptr) {
         return nullptr;
     }
 
     // Create faces
     ObjFile::Mesh *pObjMesh = pModel->mMeshes[meshIndex];
-    if (!pObjMesh) {
+    if (pObjMesh == nullptr) {
         return nullptr;
     }
 
@@ -330,6 +330,9 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
 
     for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
         const ObjFile::Face *inp = pObjMesh->m_Faces[index];
+        if (inp == nullptr) {
+            continue;
+        }
 
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
             pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
@@ -347,14 +350,14 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
         }
     }
 
-    unsigned int uiIdxCount(0u);
+    unsigned int uiIdxCount = 0u;
     if (pMesh->mNumFaces > 0) {
         pMesh->mFaces = new aiFace[pMesh->mNumFaces];
         if (pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial) {
             pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
         }
 
-        unsigned int outIndex(0);
+        unsigned int outIndex = 0u;
 
         // Copy all data from all stored meshes
         for (auto &face : pObjMesh->m_Faces) {
@@ -387,7 +390,7 @@ aiMesh *ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjF
     // Create mesh vertices
     createVertexArray(pModel, pData, meshIndex, pMesh.get(), uiIdxCount);
 
-    return pMesh.release();
+    return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -398,11 +401,14 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
         aiMesh *pMesh,
         unsigned int numIndices) {
     // Checking preconditions
-    ai_assert(nullptr != pCurrentObject);
+    if (pCurrentObject == nullptr || pModel == nullptr || pMesh == nullptr) {
+        return;
+    }
 
     // Break, if no faces are stored in object
-    if (pCurrentObject->m_Meshes.empty())
+    if (pCurrentObject->m_Meshes.empty()) {
         return;
+    }
 
     // Get current mesh
     ObjFile::Mesh *pObjMesh = pModel->mMeshes[uiMeshIndex];
@@ -581,11 +587,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         it = pModel->mMaterialMap.find(pModel->mMaterialLib[matIndex]);
 
         // No material found, use the default material
-        if (pModel->mMaterialMap.end() == it)
+        if (pModel->mMaterialMap.end() == it) {
             continue;
+        }
 
         aiMaterial *mat = new aiMaterial;
-        ObjFile::Material *pCurrentMaterial = (*it).second;
+        ObjFile::Material *pCurrentMaterial = it->second;
         mat->AddProperty(&pCurrentMaterial->MaterialName, AI_MATKEY_NAME);
 
         // convert illumination model
@@ -772,8 +779,11 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
 //  Appends this node to the parent node
 void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild) {
     // Checking preconditions
-    ai_assert(nullptr != pParent);
-    ai_assert(nullptr != pChild);
+    if (pParent == nullptr || pChild == nullptr) {
+        ai_assert(nullptr != pParent);
+        ai_assert(nullptr != pChild);
+        return;
+    }
 
     // Assign parent to child
     pChild->mParent = pParent;

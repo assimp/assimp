@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -39,10 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-/**  @file MDLLoader.h
- *   @brief Declaration of the loader for MDL files
- */
+/// @file MDLLoader.h
+/// @brief Declaration of the loader for MDL files
 #pragma once
 #ifndef AI_MDLLOADER_H_INCLUDED
 #define AI_MDLLOADER_H_INCLUDED
@@ -50,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include "MDLFileData.h"
 #include "AssetLib/HMP/HalfLifeFileData.h"
-#include "AssetLib/MDL/HalfLife/HL1ImportSettings.h"
+#include "HalfLife/HL1ImportSettings.h"
 
 struct aiNode;
 struct aiTexture;
@@ -83,11 +81,10 @@ using namespace MDL;
  *  them all with a single 1000-line function-beast. However, it has been
  *  split into several code paths to make the code easier to read and maintain.
 */
-class MDLImporter : public BaseImporter
-{
+class MDLImporter : public BaseImporter {
 public:
     MDLImporter();
-    ~MDLImporter() override;
+    ~MDLImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.

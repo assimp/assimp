@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp    {
+namespace Assimp {
 
 namespace XFile {
     struct Scene;
@@ -68,7 +68,7 @@ namespace XFile {
  */
 class XFileImporter : public BaseImporter {
 public:
-    XFileImporter();
+    XFileImporter() = default;
     ~XFileImporter() override = default;
 
     // -------------------------------------------------------------------

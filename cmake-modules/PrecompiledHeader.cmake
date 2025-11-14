@@ -9,14 +9,14 @@ MACRO(ADD_MSVC_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar
       OBJECT_OUTPUTS "${PrecompiledBinary}")
 
     # Do not consider .c files
-    foreach(fname ${Sources}) 
+    foreach(fname ${Sources})
       GET_FILENAME_COMPONENT(fext ${fname} EXT)
       if(fext STREQUAL ".cpp")
 	SET_SOURCE_FILES_PROPERTIES(${fname}
 	  PROPERTIES COMPILE_FLAGS "/Yu\"${PrecompiledBinary}\" /FI\"${PrecompiledBinary}\" /Fp\"${PrecompiledBinary}\""
-          OBJECT_DEPENDS "${PrecompiledBinary}")     
+          OBJECT_DEPENDS "${PrecompiledBinary}")
       endif(fext STREQUAL ".cpp")
-    endforeach(fname) 
+    endforeach(fname)
 
   ENDIF(MSVC)
   # Add precompiled header to SourcesVar

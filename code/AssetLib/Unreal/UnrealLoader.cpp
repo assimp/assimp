@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,36 +63,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdint>
 #include <memory>
 
-using namespace Assimp;
+namespace Assimp {
 
 namespace Unreal {
 
-/*
-    0 = Normal one-sided
-    1 = Normal two-sided
-    2 = Translucent two-sided
-    3 = Masked two-sided
-    4 = Modulation blended two-sided
-    8 = Placeholder triangle for weapon positioning (invisible)
-*/
+// Mesh-specific fags.
 enum MeshFlags {
-    MF_NORMAL_OS = 0,
-    MF_NORMAL_TS = 1,
-    MF_NORMAL_TRANS_TS = 2,
-    MF_NORMAL_MASKED_TS = 3,
-    MF_NORMAL_MOD_TS = 4,
-    MF_WEAPON_PLACEHOLDER = 8
+    MF_INVALID = -1,            // Not set
+    MF_NORMAL_OS = 0,           // Normal one-sided
+    MF_NORMAL_TS = 1,           // Normal two-sided
+    MF_NORMAL_TRANS_TS = 2,     // Translucent two-sided
+    MF_NORMAL_MASKED_TS = 3,    // Masked two-sided
+    MF_NORMAL_MOD_TS = 4,       // Modulation blended two-sided
+    MF_WEAPON_PLACEHOLDER = 8   // Placeholder triangle for weapon positioning (invisible)
 };
 
 // a single triangle
 struct Triangle {
-    uint16_t mVertex[3]; // Vertex indices
-    char mType; // James' Mesh Type
-    char mColor; // Color for flat and Gourand Shaded
-    unsigned char mTex[3][2]; // Texture UV coordinates
-    unsigned char mTextureNum; // Source texture offset
-    char mFlags; // Unreal Mesh Flags (unused)
-    unsigned int matIndex;
+    uint16_t mVertex[3];        // Vertex indices
+    char mType;                 // James' Mesh Type
+    char mColor;                // Color for flat and Gourand Shaded
+    unsigned char mTex[3][2];   // Texture UV coordinates
+    unsigned char mTextureNum;  // Source texture offset
+    char mFlags;                // Unreal Mesh Flags (unused)
+    unsigned int matIndex;      // Material index
 };
 
 // temporary representation for a material
@@ -118,6 +112,7 @@ struct TempMat {
     }
 };
 
+// A single vertex in an unsigned int 32 bit
 struct Vertex {
     int32_t X : 11;
     int32_t Y : 11;
@@ -152,7 +147,7 @@ inline void DecompressVertex(aiVector3D &v, int32_t in) {
 
 } // end namespace Unreal
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Unreal Mesh Importer",
     "",
     "",
@@ -173,12 +168,8 @@ UnrealImporter::UnrealImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-UnrealImporter::~UnrealImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
-bool UnrealImporter::CanRead(const std::string & filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
+bool UnrealImporter::CanRead(const std::string &filename, IOSystem * /*pIOHandler*/, bool /*checkSig*/) const {
     return SimpleExtensionCheck(filename, "3d", "uc");
 }
 
@@ -243,8 +234,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     const uint16_t numTris = d_reader.GetI2();
     const uint16_t numVert = d_reader.GetI2();
     d_reader.IncPtr(44);
-    if (!numTris || numVert < 3)
+    if (!numTris || numVert < 3) {
         throw DeadlyImportError("UNREAL: Invalid number of vertices/triangles");
+    }
 
     // maximum texture index
     unsigned int maxTexIdx = 0;
@@ -253,7 +245,6 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     std::vector<Unreal::Triangle> triangles(numTris);
     for (auto &tri : triangles) {
         for (unsigned int i = 0; i < 3; ++i) {
-
             tri.mVertex[i] = d_reader.GetI2();
             if (tri.mVertex[i] >= numTris) {
                 ASSIMP_LOG_WARN("UNREAL: vertex index out of range");
@@ -263,18 +254,20 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         tri.mType = d_reader.GetI1();
 
         // handle mesh flagss?
-        if (mConfigHandleFlags)
+        if (mConfigHandleFlags) {
             tri.mType = Unreal::MF_NORMAL_OS;
-        else {
+        } else {
             // ignore MOD and MASKED for the moment, treat them as two-sided
             if (tri.mType == Unreal::MF_NORMAL_MOD_TS || tri.mType == Unreal::MF_NORMAL_MASKED_TS)
                 tri.mType = Unreal::MF_NORMAL_TS;
         }
         d_reader.IncPtr(1);
 
-        for (unsigned int i = 0; i < 3; ++i)
-            for (unsigned int i2 = 0; i2 < 2; ++i2)
+        for (unsigned int i = 0; i < 3; ++i) {
+            for (unsigned int i2 = 0; i2 < 2; ++i2) {
                 tri.mTex[i][i2] = d_reader.GetI1();
+            }
+        }
 
         tri.mTextureNum = d_reader.GetI1();
         maxTexIdx = std::max(maxTexIdx, (unsigned int)tri.mTextureNum);
@@ -282,8 +275,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     }
 
     p.reset(pIOHandler->Open(a_path));
-    if (!p)
+    if (!p) {
         throw DeadlyImportError("UNREAL: Unable to open _a file");
+    }
     StreamReaderLE a_reader(pIOHandler->Open(a_path));
 
     // read number of frames
@@ -292,9 +286,10 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         throw DeadlyImportError("UNREAL: The requested frame does not exist");
     }
 
-    uint32_t st = a_reader.GetI2();
-    if (st != numVert * 4u)
+    // read aniv file length
+    if (uint32_t st = a_reader.GetI2(); st != numVert * 4u) {
         throw DeadlyImportError("UNREAL: Unexpected aniv file length");
+    }
 
     // skip to our frame
     a_reader.IncPtr(mConfigFrameID * numVert * 4);
@@ -320,42 +315,44 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         std::vector<char> _data;
         TextFileToBuffer(pb.get(), _data);
         const char *data = &_data[0];
+        const char *end = &_data[_data.size() - 1] + 1;
 
         std::vector<std::pair<std::string, std::string>> tempTextures;
 
         // do a quick search in the UC file for some known, usually texture-related, tags
         for (; *data; ++data) {
             if (TokenMatchI(data, "#exec", 5)) {
-                SkipSpacesAndLineEnd(&data);
+                SkipSpacesAndLineEnd(&data, end);
 
                 // #exec TEXTURE IMPORT [...] NAME=jjjjj [...] FILE=jjjj.pcx [...]
                 if (TokenMatchI(data, "TEXTURE", 7)) {
-                    SkipSpacesAndLineEnd(&data);
+                    SkipSpacesAndLineEnd(&data, end);
 
                     if (TokenMatchI(data, "IMPORT", 6)) {
                         tempTextures.emplace_back();
                         std::pair<std::string, std::string> &me = tempTextures.back();
                         for (; !IsLineEnd(*data); ++data) {
-                            if (!::ASSIMP_strincmp(data, "NAME=", 5)) {
+                            if (!ASSIMP_strincmp(data, "NAME=", 5)) {
                                 const char *d = data += 5;
                                 for (; !IsSpaceOrNewLine(*data); ++data)
                                     ;
                                 me.first = std::string(d, (size_t)(data - d));
-                            } else if (!::ASSIMP_strincmp(data, "FILE=", 5)) {
+                            } else if (!ASSIMP_strincmp(data, "FILE=", 5)) {
                                 const char *d = data += 5;
                                 for (; !IsSpaceOrNewLine(*data); ++data)
                                     ;
                                 me.second = std::string(d, (size_t)(data - d));
                             }
                         }
-                        if (!me.first.length() || !me.second.length())
+                        if (!me.first.length() || !me.second.length()) {
                             tempTextures.pop_back();
+                        }
                     }
                 }
                 // #exec MESHMAP SETTEXTURE MESHMAP=box NUM=1 TEXTURE=Jtex1
                 // #exec MESHMAP SCALE MESHMAP=box X=0.1 Y=0.1 Z=0.2
                 else if (TokenMatchI(data, "MESHMAP", 7)) {
-                    SkipSpacesAndLineEnd(&data);
+                    SkipSpacesAndLineEnd(&data, end);
 
                     if (TokenMatchI(data, "SETTEXTURE", 10)) {
 
@@ -363,14 +360,13 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                         std::pair<unsigned int, std::string> &me = textures.back();
 
                         for (; !IsLineEnd(*data); ++data) {
-                            if (!::ASSIMP_strincmp(data, "NUM=", 4)) {
+                            if (!ASSIMP_strincmp(data, "NUM=", 4)) {
                                 data += 4;
                                 me.first = strtoul10(data, &data);
-                            } else if (!::ASSIMP_strincmp(data, "TEXTURE=", 8)) {
+                            } else if (!ASSIMP_strincmp(data, "TEXTURE=", 8)) {
                                 data += 8;
                                 const char *d = data;
-                                for (; !IsSpaceOrNewLine(*data); ++data)
-                                    ;
+                                for (; !IsSpaceOrNewLine(*data); ++data);
                                 me.second = std::string(d, (size_t)(data - d));
 
                                 // try to find matching path names, doesn't care if we don't find them
@@ -387,11 +383,11 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
                         for (; !IsLineEnd(*data); ++data) {
                             if (data[0] == 'X' && data[1] == '=') {
-                                data = fast_atoreal_move<float>(data + 2, (float &)nd->mTransformation.a1);
+                                data = fast_atoreal_move(data + 2, nd->mTransformation.a1);
                             } else if (data[0] == 'Y' && data[1] == '=') {
-                                data = fast_atoreal_move<float>(data + 2, (float &)nd->mTransformation.b2);
+                                data = fast_atoreal_move(data + 2, nd->mTransformation.b2);
                             } else if (data[0] == 'Z' && data[1] == '=') {
-                                data = fast_atoreal_move<float>(data + 2, (float &)nd->mTransformation.c3);
+                                data = fast_atoreal_move(data + 2, nd->mTransformation.c3);
                             }
                         }
                     }
@@ -406,9 +402,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     materials.reserve(textures.size() * 2 + 5);
 
     // find out how many output meshes and materials we'll have and build material indices
-    for (Unreal::Triangle &tri : triangles) {
+    for (auto &tri : triangles) {
         Unreal::TempMat mat(tri);
-        std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(), materials.end(), mat);
+        auto nt = std::find(materials.begin(), materials.end(), mat);
         if (nt == materials.end()) {
             // add material
             tri.matIndex = static_cast<unsigned int>(materials.size());
@@ -451,7 +447,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         aiColor3D color(1.f, 1.f, 1.f);
 
         aiString s;
-        ::ai_snprintf(s.data, MAXLEN, "mat%u_tx%u_", i, materials[i].tex);
+        ::ai_snprintf(s.data, AI_MAXLEN, "mat%u_tx%u_", i, materials[i].tex);
 
         // set the two-sided flag
         if (materials[i].type == Unreal::MF_NORMAL_TS) {
@@ -471,7 +467,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
         // a special name for the weapon attachment point
         if (materials[i].type == Unreal::MF_WEAPON_PLACEHOLDER) {
-            s.length = ::ai_snprintf(s.data, MAXLEN, "$WeaponTag$");
+            s.length = ::ai_snprintf(s.data, AI_MAXLEN, "$WeaponTag$");
             color = aiColor3D(0.f, 0.f, 0.f);
         }
 
@@ -482,7 +478,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
 
         // set texture, if any
         const unsigned int tex = materials[i].tex;
-        for (std::vector<std::pair<unsigned int, std::string>>::const_iterator it = textures.begin(); it != textures.end(); ++it) {
+        for (auto it = textures.begin(); it != textures.end(); ++it) {
             if ((*it).first == tex) {
                 s.Set((*it).second);
                 mat->AddProperty(&s, AI_MATKEY_TEXTURE_DIFFUSE(0));
@@ -494,7 +490,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     // fill them.
     for (const Unreal::Triangle &tri : triangles) {
         Unreal::TempMat mat(tri);
-        std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(), materials.end(), mat);
+        auto nt = std::find(materials.begin(), materials.end(), mat);
 
         aiMesh *mesh = pScene->mMeshes[nt - materials.begin()];
         aiFace &f = mesh->mFaces[mesh->mNumFaces++];
@@ -515,5 +511,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     FlipWindingOrderProcess flipper;
     flipper.Execute(pScene);
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_3D_IMPORTER

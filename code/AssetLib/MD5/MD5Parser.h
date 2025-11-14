@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -69,12 +68,14 @@ struct Element {
     //! Elements are terminated with \0
     char* szStart;
 
+    const char *end;
+
     //! Original line number (can be used in error messages
     //! if a parsing error occurs)
     unsigned int iLineNumber;
 };
 
-using ElementList = std::vector<Element>;
+using ElementArray = std::vector<Element>;
 
 // ---------------------------------------------------------------------------
 /** Represents a section of a MD5 file (such as the mesh or the joints section)
@@ -87,17 +88,17 @@ struct Section {
     unsigned int iLineNumber;
 
     //! List of all elements which have been parsed in this section.
-    ElementList mElements;
+    ElementArray mElements;
 
     //! Name of the section
     std::string mName;
 
     //! For global elements: the value of the element as string
-    //! Iif !length() the section is not a global element
+    //! if !length() the section is not a global element
     std::string mGlobalValue;
 };
 
-using SectionList = std::vector<Section>;
+using SectionArray = std::vector<Section>;
 
 // ---------------------------------------------------------------------------
 /** Basic information about a joint
@@ -133,7 +134,7 @@ struct BoneDesc : BaseJointDescription {
     unsigned int mMap;
 };
 
-using BoneList = std::vector<BoneDesc>;
+using BoneArray = std::vector<BoneDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a bone (joint) descriptor in a MD5Anim file
@@ -146,7 +147,7 @@ struct AnimBoneDesc : BaseJointDescription {
     unsigned int iFirstKeyIndex;
 };
 
-using AnimBoneList = std::vector< AnimBoneDesc >;
+using AnimBoneArray = std::vector< AnimBoneDesc >;
 
 // ---------------------------------------------------------------------------
 /** Represents a base frame descriptor in a MD5Anim file
@@ -156,7 +157,7 @@ struct BaseFrameDesc {
     aiVector3D vRotationQuat;
 };
 
-using BaseFrameList = std::vector<BaseFrameDesc>;
+using BaseFrameArray = std::vector<BaseFrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a camera animation frame in a MDCamera file
@@ -165,7 +166,7 @@ struct CameraAnimFrameDesc : BaseFrameDesc {
     float fFOV;
 };
 
-using CameraFrameList = std::vector<CameraAnimFrameDesc>;
+using CameraFrameArray = std::vector<CameraAnimFrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a frame descriptor in a MD5Anim file
@@ -178,14 +179,14 @@ struct FrameDesc {
     std::vector< float > mValues;
 };
 
-using FrameList = std::vector<FrameDesc>;
+using FrameArray = std::vector<FrameDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a vertex  descriptor in a MD5 file
 */
 struct VertexDesc {
     VertexDesc() AI_NO_EXCEPT
-    : mFirstWeight(0), mNumWeights(0) {
+            : mFirstWeight(0), mNumWeights(0) {
         // empty
     }
 
@@ -200,7 +201,7 @@ struct VertexDesc {
     unsigned int mNumWeights;
 };
 
-using VertexList = std::vector<VertexDesc>;
+using VertexArray = std::vector<VertexDesc>;
 
 // ---------------------------------------------------------------------------
 /** Represents a vertex weight descriptor in a MD5 file
@@ -217,27 +218,27 @@ struct WeightDesc {
     aiVector3D vOffsetPosition;
 };
 
-using WeightList = std::vector<WeightDesc>;
-using FaceList   = std::vector<aiFace>;
+using WeightArray = std::vector<WeightDesc>;
+using FaceArray   = std::vector<aiFace>;
 
 // ---------------------------------------------------------------------------
 /** Represents a mesh in a MD5 file
 */
 struct MeshDesc {
     //! Weights of the mesh
-    WeightList mWeights;
+    WeightArray mWeights;
 
     //! Vertices of the mesh
-    VertexList mVertices;
+    VertexArray mVertices;
 
     //! Faces of the mesh
-    FaceList mFaces;
+    FaceArray mFaces;
 
     //! Name of the shader (=texture) to be assigned to the mesh
     aiString mShader;
 };
 
-using MeshList = std::vector<MeshDesc>;
+using MeshArray = std::vector<MeshDesc>;
 
 // ---------------------------------------------------------------------------
 // Convert a quaternion to its usual representation
@@ -270,13 +271,13 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5MeshParser(SectionList& mSections);
+    explicit MD5MeshParser(SectionArray& mSections);
 
     //! List of all meshes
-    MeshList mMeshes;
+    MeshArray mMeshes;
 
     //! List of all joints
-    BoneList mJoints;
+    BoneArray mJoints;
 };
 
 // remove this flag if you need to the bounding box data
@@ -293,20 +294,20 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5AnimParser(SectionList& mSections);
+    explicit MD5AnimParser(SectionArray& mSections);
 
 
     //! Output frame rate
     float fFrameRate;
 
     //! List of animation bones
-    AnimBoneList mAnimatedBones;
+    AnimBoneArray mAnimatedBones;
 
     //! List of base frames
-    BaseFrameList mBaseFrames;
+    BaseFrameArray mBaseFrames;
 
     //! List of animation frames
-    FrameList mFrames;
+    FrameArray mFrames;
 
     //! Number of animated components
     unsigned int mNumAnimatedComponents;
@@ -323,7 +324,7 @@ public:
      *
      *  @param mSections List of file sections (output of MD5Parser)
      */
-    explicit MD5CameraParser(SectionList& mSections);
+    explicit MD5CameraParser(SectionArray& mSections);
 
     //! Output frame rate
     float fFrameRate;
@@ -332,7 +333,7 @@ public:
     std::vector<unsigned int> cuts;
 
     //! Frames
-    CameraFrameList frames;
+    CameraFrameArray frames;
 };
 
 // ---------------------------------------------------------------------------
@@ -349,66 +350,65 @@ public:
      */
     MD5Parser(char* buffer, unsigned int fileSize);
 
-
     // -------------------------------------------------------------------
     /** Report a specific error message and throw an exception
      *  @param error Error message to be reported
      *  @param line Index of the line where the error occurred
      */
-    AI_WONT_RETURN static void ReportError (const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN static void ReportError(const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Report a specific warning
      *  @param warn Warn message to be reported
      *  @param line Index of the line where the error occurred
      */
-    static void ReportWarning (const char* warn, unsigned int line);
+    static void ReportWarning(const char* warn, unsigned int line);
 
-
+    // -------------------------------------------------------------------
+    /** Report a specific error
+     *  @param error Error message to be reported
+     */
     AI_WONT_RETURN void ReportError (const char* error) AI_WONT_RETURN_SUFFIX;
 
-    void ReportWarning (const char* warn) {
-        return ReportWarning(warn, lineNumber);
-    }
+    // -------------------------------------------------------------------
+    /** Report a specific warning
+     *  @param error Warn message to be reported
+     */
+    void ReportWarning (const char* warn);
 
     //! List of all sections which have been read
-    SectionList mSections;
+    SectionArray mSections;
 
 private:
-    // -------------------------------------------------------------------
-    /** Parses a file section. The current file pointer must be outside
-     *  of a section.
-     *  @param out Receives the section data
-     *  @return true if the end of the file has been reached
-     *  @throws ImportErrorException if an error occurs
-     */
     bool ParseSection(Section& out);
-
-    // -------------------------------------------------------------------
-    /** Parses the file header
-     *  @throws ImportErrorException if an error occurs
-     */
     void ParseHeader();
-
     bool SkipLine(const char* in, const char** out);
     bool SkipLine( );
     bool SkipSpacesAndLineEnd( const char* in, const char** out);
     bool SkipSpacesAndLineEnd();
     bool SkipSpaces();
 
+private:
     char* buffer;
-    char* bufferEnd;
+    const char* bufferEnd;
     unsigned int fileSize;
     unsigned int lineNumber;
 };
 
+// -------------------------------------------------------------------
+inline void MD5Parser::ReportWarning (const char* warn) {
+    return ReportWarning(warn, lineNumber);
+}
+
+// -------------------------------------------------------------------
 inline void MD5Parser::ReportError(const char* error) {
     ReportError(error, lineNumber);
 }
+
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipLine(const char* in, const char** out) {
     ++lineNumber;
-    return Assimp::SkipLine(in ,out);
+    return Assimp::SkipLine(in, out, bufferEnd);
 }
 
 // -------------------------------------------------------------------
@@ -418,18 +418,24 @@ inline bool MD5Parser::SkipLine( ) {
 
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipSpacesAndLineEnd( const char* in, const char** out) {
-    bool bHad = false;
-    bool running = true;
+    if (in == bufferEnd) {
+        *out = in;
+        return false;
+    }
+
+    bool bHad = false, running = true;
     while (running) {
         if( *in == '\r' || *in == '\n') {
-                // we open files in binary mode, so there could be \r\n sequences ...
+            // we open files in binary mode, so there could be \r\n sequences ...
             if (!bHad)  {
                 bHad = true;
                 ++lineNumber;
             }
+        } else if (*in == '\t' || *in == ' ') {
+            bHad = false;
+        } else {
+            break;
         }
-        else if (*in == '\t' || *in == ' ')bHad = false;
-        else break;
         ++in;
         if (in == bufferEnd) {
             break;
@@ -446,7 +452,7 @@ inline bool MD5Parser::SkipSpacesAndLineEnd() {
 
 // -------------------------------------------------------------------
 inline bool MD5Parser::SkipSpaces() {
-    return Assimp::SkipSpaces((const char**)&buffer);
+    return Assimp::SkipSpaces((const char**)&buffer, bufferEnd);
 }
 
 } // namespace Assimp

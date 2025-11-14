@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -43,8 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Implementation of the NDO importer class.
  */
 
-
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
+
 #include "NDOLoader.h"
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Nendo Mesh Importer",
     "",
     "",
@@ -68,14 +68,6 @@ static const aiImporterDesc desc = {
     0,
     "ndo"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-NDOImporter::NDOImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-NDOImporter::~NDOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -97,6 +89,36 @@ const aiImporterDesc* NDOImporter::GetInfo () const
 void NDOImporter::SetupProperties(const Importer* /*pImp*/)
 {
     // nothing to be done for the moment
+}
+
+// ------------------------------------------------------------------------------------------------
+// Helper function to process edges and vertices for a face
+void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
+    unsigned int start_edge, unsigned int key,
+    std::vector<aiVector3D>& vertices, std::vector<unsigned int>& indices)
+{
+    unsigned int cur_edge = start_edge;
+    do {
+        unsigned int next_edge, next_vert;
+        if (key == obj.edges[cur_edge].edge[3]) {
+            next_edge = obj.edges[cur_edge].edge[5];
+            next_vert = obj.edges[cur_edge].edge[1];
+        }
+        else {
+            next_edge = obj.edges[cur_edge].edge[4];
+            next_vert = obj.edges[cur_edge].edge[0];
+        }
+        indices.push_back( static_cast<unsigned int>(vertices.size()) );
+        if (next_vert < obj.vertices.size()) {
+            vertices.push_back(obj.vertices[ next_vert ].val);
+        }
+        else {
+            ASSIMP_LOG_WARN("NDOImporter: next_vert is out of bounds, skipping invalid access.");
+            break;
+        }
+
+        cur_edge = next_edge;
+    } while (cur_edge != start_edge);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -270,26 +292,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
             aiFace& f = *faces++;
 
-            const unsigned int key = v.first;
-            unsigned int cur_edge = v.second;
-            while (true) {
-                unsigned int next_edge, next_vert;
-                if (key == obj.edges[cur_edge].edge[3]) {
-                    next_edge = obj.edges[cur_edge].edge[5];
-                    next_vert = obj.edges[cur_edge].edge[1];
-                }
-                else {
-                    next_edge = obj.edges[cur_edge].edge[4];
-                    next_vert = obj.edges[cur_edge].edge[0];
-                }
-                indices.push_back( static_cast<unsigned int>(vertices.size()) );
-                vertices.push_back(obj.vertices[ next_vert ].val);
-
-                cur_edge = next_edge;
-                if (cur_edge == v.second) {
-                    break;
-                }
-            }
+            ProcessFaceEdgesAndVertices(obj, v.second, v.first, vertices, indices);
 
             f.mIndices = new unsigned int[f.mNumIndices = static_cast<unsigned int>(indices.size())];
             std::copy(indices.begin(),indices.end(),f.mIndices);

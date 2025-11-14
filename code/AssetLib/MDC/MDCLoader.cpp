@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
 
 // internal headers
-#include "AssetLib/MDC/MDCLoader.h"
+#include "MDCLoader.h"
 #include "AssetLib/MD3/MD3FileData.h"
-#include "AssetLib/MDC/MDCNormalTable.h" // shouldn't be included by other units
+#include "MDCNormalTable.h" // shouldn't be included by other units
 
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::MDC;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Return To Castle Wolfenstein Mesh Importer",
     "",
     "",
@@ -104,13 +104,9 @@ MDCImporter::MDCImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MDCImporter::~MDCImporter() = default;
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MDCImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = { AI_MDC_MAGIC_NUMBER_LE };
+    static constexpr uint32_t tokens[] = { AI_MDC_MAGIC_NUMBER_LE };
     return CheckMagicToken(pIOHandler, pFile, tokens, AI_COUNT_OF(tokens));
 }
 

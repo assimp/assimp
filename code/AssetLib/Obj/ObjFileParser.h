@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJ_FILEPARSER_H_INC
 #define OBJ_FILEPARSER_H_INC
 
+#include "ObjFileData.h"
+
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/material.h>
 #include <assimp/mesh.h>
@@ -53,33 +55,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-namespace ObjFile {
-struct Model;
-struct Object;
-struct Material;
-struct Point3;
-struct Point2;
-} // namespace ObjFile
-
+// Forward declarations
 class ObjFileImporter;
 class IOSystem;
 class ProgressHandler;
 
+// ------------------------------------------------------------------------------------------------
 /// \class  ObjFileParser
 /// \brief  Parser for a obj waveform file
+// ------------------------------------------------------------------------------------------------
 class ASSIMP_API ObjFileParser {
 public:
-    static const size_t Buffersize = 4096;
-    typedef std::vector<char> DataArray;
-    typedef std::vector<char>::iterator DataArrayIt;
-    typedef std::vector<char>::const_iterator ConstDataArrayIt;
+    static constexpr size_t Buffersize = 4096;
+    using DataArray = std::vector<char>;
+    using DataArrayIt = std::vector<char>::iterator;
+    using ConstDataArrayIt = std::vector<char>::const_iterator;
 
     /// @brief  The default constructor.
     ObjFileParser();
     /// @brief  Constructor with data array.
     ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem *io, ProgressHandler *progress, const std::string &originalObjFileName);
     /// @brief  Destructor
-    ~ObjFileParser();
+    ~ObjFileParser() = default;
     /// @brief  If you want to load in-core data.
     void setBuffer(std::vector<char> &buffer);
     /// @brief  Model getter.
@@ -93,8 +90,6 @@ protected:
     void parseFile(IOStreamBuffer<char> &streamBuffer);
     /// Method to copy the new delimited word in the current line.
     void copyNextWord(char *pBuffer, size_t length);
-    /// Method to copy the new line.
-    //    void copyNextLine(char *pBuffer, size_t length);
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();
     /// Stores the vector
@@ -149,6 +144,8 @@ private:
     unsigned int m_uiLine;
     //! Helper buffer
     char m_buffer[Buffersize];
+	/// End of buffer
+    const char *mEnd;
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
     //! Pointer to progress handler

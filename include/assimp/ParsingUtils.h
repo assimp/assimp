@@ -196,6 +196,10 @@ AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t **inout, const char_t *en
 }
 
 // ---------------------------------------------------------------------------------
+/// @brief Will return point showing to the next line.
+/// @param buffer    The in buffer.
+/// @param out       The next line.
+/// @return true if a new lne was found, else false.
 template <class char_t>
 AI_FORCE_INLINE bool GetNextLine(const char_t *&buffer, char_t out[BufferSize]) {
     if ((char_t)'\0' == *buffer) {
@@ -260,6 +264,9 @@ AI_FORCE_INLINE bool TokenMatchI(const char *&in, const char *token, unsigned in
 }
 
 // ---------------------------------------------------------------------------------
+/// @brief Will skip the next token.
+/// @param in   The incoming buffer.
+/// @param end  The end marker of the buffer.
 AI_FORCE_INLINE void SkipToken(const char *&in, const char *end) {
     SkipSpaces(&in, end);
     while (!IsSpaceOrNewLine(*in)) {
@@ -268,6 +275,10 @@ AI_FORCE_INLINE void SkipToken(const char *&in, const char *end) {
 }
 
 // ---------------------------------------------------------------------------------
+/// @brief Will return the next token as a string.
+/// @param in    The incoming buffer.
+/// @param end  The end marker of the buffer.
+/// @return The next token.
 AI_FORCE_INLINE std::string GetNextToken(const char *&in, const char *end) {
     SkipSpacesAndLineEnd(&in, end);
     const char *cur = in;
@@ -278,12 +289,11 @@ AI_FORCE_INLINE std::string GetNextToken(const char *&in, const char *end) {
 }
 
 // ---------------------------------------------------------------------------------
-/** @brief  Will perform a simple tokenize.
- *  @param  str         String to tokenize.
- *  @param  tokens      Array with tokens, will be empty if no token was found.
- *  @param  delimiters  Delimiter for tokenize.
- *  @return Number of found token.
- */
+/// @brief  Will perform a simple tokenize.
+/// @param  str         String to tokenize.
+/// @param  tokens      Array with tokens, will be empty if no token was found.
+/// @param  delimiters  Delimiter for tokenize.
+/// @return Number of found token.
 template <class string_type>
 AI_FORCE_INLINE unsigned int tokenize(const string_type &str, std::vector<string_type> &tokens,
         const string_type &delimiters) {
@@ -308,6 +318,10 @@ AI_FORCE_INLINE unsigned int tokenize(const string_type &str, std::vector<string
     return static_cast<unsigned int>(tokens.size());
 }
 
+// ---------------------------------------------------------------------------------
+/// @brief  Will convert the given string to lowercase with stl-strings.
+/// @param  str    The stl-string to convert.
+/// @return The lowercase string as a stl-string.
 inline std::string ai_stdStrToLower(const std::string &str) {
     std::string out(str);
     for (size_t i = 0; i < str.size(); ++i) {

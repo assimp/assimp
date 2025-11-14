@@ -157,6 +157,7 @@ AI_FORCE_INLINE LineSplitter::LineSplitter(StreamReaderLE& stream, bool skip_emp
         mCur(),
         mEnd(nullptr),
         mStream(stream),
+        mSwallow(false),
         mSkip_empty_lines(skip_empty_lines),
         mTrim(trim) {
     mCur.reserve(1024);

@@ -145,19 +145,17 @@ public:
     LineSplitter &operator = ( const LineSplitter & ) = delete;
 
 private:
-    line_idx mIdx;
-    std::string mCur;
-    const char *mEnd;
-    StreamReaderLE& mStream;
-    bool mSwallow, mSkip_empty_lines, mTrim;
+    line_idx mIdx{0};
+    std::string mCur{};
+    const char *mEnd{nullptr};
+    StreamReaderLE &mStream;
+    bool mSwallow{false};
+    bool mSkip_empty_lines{ false };
+    bool mTrim{ false };
 };
 
 AI_FORCE_INLINE LineSplitter::LineSplitter(StreamReaderLE& stream, bool skip_empty_lines, bool trim ) :
-        mIdx(0),
-        mCur(),
-        mEnd(nullptr),
         mStream(stream),
-        mSwallow(false),
         mSkip_empty_lines(skip_empty_lines),
         mTrim(trim) {
     mCur.reserve(1024);

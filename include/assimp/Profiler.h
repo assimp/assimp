@@ -82,8 +82,7 @@ public:
     /// @brief End a specific named timer and write its end time to the log.
     /// @param region    The profiling region name.
     void EndRegion(const std::string& region) {
-        auto it = mRegions.find(region);
-        if (it == mRegions.end()) {
+        if (auto it = mRegions.find(region); it == mRegions.end()) {
             return;
         }
 

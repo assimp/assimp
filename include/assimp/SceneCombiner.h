@@ -82,7 +82,9 @@ namespace Assimp {
  */
 struct AttachmentInfo {
     AttachmentInfo() = default;
-    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) : scene(_scene), attachToNode(_attachToNode) {}
+    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) : scene(_scene), attachToNode(_attachToNode) {
+        // empty
+    }
     ~AttachmentInfo() = default;
 
     aiScene *scene{nullptr};
@@ -90,11 +92,14 @@ struct AttachmentInfo {
 };
 
 // ---------------------------------------------------------------------------
+/// @brief Helper data structure for SceneCombiner.
 struct NodeAttachmentInfo {
     NodeAttachmentInfo() = default;
     ~NodeAttachmentInfo() = default;
     NodeAttachmentInfo(aiNode *_scene, aiNode *_attachToNode, size_t idx) :
-            node(_scene), attachToNode(_attachToNode), resolved(false), src_idx(idx) {}
+            node(_scene), attachToNode(_attachToNode), src_idx(idx) {
+        // empty
+    }
 
     aiNode *node{nullptr};
     aiNode *attachToNode{nullptr};

@@ -94,7 +94,7 @@ public:
     };
 
     /** @brief  Virtual destructor */
-    virtual ~Logger();
+    virtual ~Logger() = default;
 
     // ----------------------------------------------------------------------
     /** @brief  Writes a debug message
@@ -192,11 +192,6 @@ protected:
      *  @brief Construction with a given log severity
      */
     explicit Logger(LogSeverity severity);
-
-    /**
-     * @brief The class destructor.
-     */
-    virtual ~Logger() = default;
 
     // ----------------------------------------------------------------------
     /**

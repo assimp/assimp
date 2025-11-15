@@ -56,8 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 
-//#include <memory>
-
 using namespace Assimp;
 using namespace glTF;
 
@@ -470,21 +468,20 @@ void glTFImporter::ImportCameras(Asset &r) const {
     mScene->mCameras = new aiCamera *[r.cameras.Size()];
     for (size_t i = 0; i < r.cameras.Size(); ++i) {
         const Camera &cam = r.cameras[i];
-
-        const auto aicam = mScene->mCameras[i] = new aiCamera();
-
+        mScene->mCameras[i] = new aiCamera();
+        const auto aiCameraPtr = mScene->mCameras[i];
         if (cam.type == Camera::Perspective) {
-            aicam->mAspect = cam.perspective.aspectRatio;
-            aicam->mHorizontalFOV = cam.perspective.yfov * ((aicam->mAspect == 0.f) ? 1.f : aicam->mAspect);
-            aicam->mClipPlaneFar = cam.perspective.zfar;
-            aicam->mClipPlaneNear = cam.perspective.znear;
+            aiCameraPtr->mAspect = cam.perspective.aspectRatio;
+            aiCameraPtr->mHorizontalFOV = cam.perspective.yfov * ((aiCameraPtr->mAspect == 0.f) ? 1.f : aiCameraPtr->mAspect);
+            aiCameraPtr->mClipPlaneFar = cam.perspective.zfar;
+            aiCameraPtr->mClipPlaneNear = cam.perspective.znear;
         } else {
-            aicam->mClipPlaneFar = cam.ortographic.zfar;
-            aicam->mClipPlaneNear = cam.ortographic.znear;
-            aicam->mHorizontalFOV = 0.0;
-            aicam->mAspect = 1.0f;
+            aiCameraPtr->mClipPlaneFar = cam.ortographic.zfar;
+            aiCameraPtr->mClipPlaneNear = cam.ortographic.znear;
+            aiCameraPtr->mHorizontalFOV = 0.0;
+            aiCameraPtr->mAspect = 1.0f;
             if (0.f != cam.ortographic.ymag) {
-                aicam->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
+                aiCameraPtr->mAspect = cam.ortographic.xmag / cam.ortographic.ymag;
             }
         }
     }
@@ -615,7 +612,7 @@ void glTFImporter::ImportNodes(Asset &r) {
     std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
     // The root nodes
-    if (unsigned int numRootNodes = static_cast<unsigned>(rootNodes.size()); numRootNodes == 1) { // a single root node: use it
+    if (auto numRootNodes = static_cast<unsigned>(rootNodes.size()); numRootNodes == 1) { // a single root node: use it
         mScene->mRootNode = ImportNode(mScene, r, meshOffsets, rootNodes[0]);
     } else if (numRootNodes > 1) { // more than one root node: create a fake root
         aiNode *root = new aiNode("ROOT");
@@ -677,7 +674,7 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
     }
 }
 
-void glTFImporter::ImportCommonMetadata(Asset &a) const {
+void glTFImporter::ImportCommonMetadata(const Asset &a) const {
     ai_assert(mScene->mMetaData == nullptr);
 
     const bool hasVersion = !a.asset.version.empty();

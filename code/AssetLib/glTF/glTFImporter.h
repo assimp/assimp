@@ -75,7 +75,7 @@ private:
     void ImportCameras(glTF::Asset &a) const;
     void ImportLights(glTF::Asset &a) const;
     void ImportNodes(glTF::Asset &a);
-    void ImportCommonMetadata(glTF::Asset &a) const;
+    void ImportCommonMetadata(const glTF::Asset &a) const;
 
 private:
     std::vector<unsigned int> meshOffsets;

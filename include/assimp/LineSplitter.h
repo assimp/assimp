@@ -159,7 +159,7 @@ AI_FORCE_INLINE LineSplitter::LineSplitter(StreamReaderLE& stream, bool skip_emp
         mSkip_empty_lines(skip_empty_lines),
         mTrim(trim) {
     mCur.reserve(1024);
-    mEnd = mCur.c_str() + 1024;
+    mEnd = mCur.c_str() + mCur.capacity();
     operator++();
     mIdx = 0;
 }
@@ -176,6 +176,7 @@ AI_FORCE_INLINE LineSplitter& LineSplitter::operator++() {
 
     char s;
     mCur.clear();
+    mEnd = mCur.c_str() + mCur.capacity();
     while (mStream.GetRemainingSize() && (s = mStream.GetI1(), 1)) {
         if (s == '\n' || s == '\r') {
             if (mSkip_empty_lines) {
@@ -198,6 +199,7 @@ AI_FORCE_INLINE LineSplitter& LineSplitter::operator++() {
             break;
         }
         mCur += s;
+        mEnd = mCur.c_str() + mCur.capacity();
     }
     ++mIdx;
 

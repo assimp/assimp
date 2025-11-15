@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 
-#include <memory>
+//#include <memory>
 
 using namespace Assimp;
 using namespace glTF;
@@ -77,6 +77,74 @@ static constexpr aiImporterDesc desc = {
     0,
     "gltf glb"
 };
+
+namespace {
+
+    void SetMaterialColorProperty(const std::vector<int> &embeddedTexIdxs, Asset &, TexProperty prop, aiMaterial *mat,
+            aiTextureType texType, const char *pKey, unsigned int type, unsigned int idx) {
+        if (prop.texture) {
+            if (prop.texture->source) {
+                aiString uri(prop.texture->source->uri);
+
+                if (const int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()]; texIdx != -1) { // embedded
+                    // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
+                    uri.data[0] = '*';
+                    uri.length = 1 + ASSIMP_itoa10(uri.data + 1, AI_MAXLEN - 1, texIdx);
+                }
+
+                mat->AddProperty(&uri, _AI_MATKEY_TEXTURE_BASE, texType, 0);
+            }
+            return;
+        }
+
+        aiColor4D col;
+        CopyValue(prop.color, col);
+        mat->AddProperty(&col, 1, pKey, type, idx);
+    }
+
+    void SetFace(aiFace &face, int a) {
+        face.mNumIndices = 1;
+        face.mIndices = new unsigned int[1];
+        face.mIndices[0] = a;
+    }
+
+    void SetFace(aiFace &face, int a, int b) {
+        face.mNumIndices = 2;
+        face.mIndices = new unsigned int[2];
+        face.mIndices[0] = a;
+        face.mIndices[1] = b;
+    }
+
+    void SetFace(aiFace &face, int a, int b, int c) {
+        face.mNumIndices = 3;
+        face.mIndices = new unsigned int[3];
+        face.mIndices[0] = a;
+        face.mIndices[1] = b;
+        face.mIndices[2] = c;
+    }
+
+    bool CheckValidFacesIndices(const aiFace *faces, unsigned nFaces, unsigned nVerts) {
+        for (unsigned i = 0; i < nFaces; ++i) {
+            for (unsigned j = 0; j < faces[i].mNumIndices; ++j) {
+                unsigned idx = faces[i].mIndices[j];
+                if (idx >= nVerts)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    void createDefaultMaterial(aiScene *scene) {
+        if (scene == nullptr) {
+            return;
+        }
+        scene->mNumMaterials = 1;
+        scene->mMaterials = nullptr;
+        scene->mMaterials = new aiMaterial *[1];
+        scene->mMaterials[0] = new aiMaterial();
+    }
+
+} // Anonymous namespace
 
 glTFImporter::glTFImporter() :
         mScene(nullptr) {
@@ -99,33 +167,15 @@ bool glTFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool 
         return false;
     }
 }
-
-inline void SetMaterialColorProperty(const std::vector<int> &embeddedTexIdxs, Asset &, TexProperty prop, aiMaterial *mat,
-        aiTextureType texType, const char *pKey, unsigned int type, unsigned int idx) {
-    if (prop.texture) {
-        if (prop.texture->source) {
-            aiString uri(prop.texture->source->uri);
-
-            if (const int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()]; texIdx != -1) { // embedded
-                // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
-                uri.data[0] = '*';
-                uri.length = 1 + ASSIMP_itoa10(uri.data + 1, AI_MAXLEN - 1, texIdx);
-            }
-
-            mat->AddProperty(&uri, _AI_MATKEY_TEXTURE_BASE, texType, 0);
-        }
+ 
+void glTFImporter::ImportMaterials(Asset &r) const {
+    mScene->mNumMaterials = r.materials.Size();
+    if (mScene->mNumMaterials == 0) {
+        createDefaultMaterial(mScene);
         return;
     }
 
-    aiColor4D col;
-    CopyValue(prop.color, col);
-    mat->AddProperty(&col, 1, pKey, type, idx);
-}
-
-void glTFImporter::ImportMaterials(Asset &r) {
-    mScene->mNumMaterials = static_cast<unsigned int>(r.materials.Size());
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
-
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         aiMaterial *aimat = mScene->mMaterials[i] = new aiMaterial();
 
@@ -148,47 +198,6 @@ void glTFImporter::ImportMaterials(Asset &r) {
             aimat->AddProperty(&mat.shininess, 1, AI_MATKEY_SHININESS);
         }
     }
-
-    if (mScene->mNumMaterials == 0) {
-        mScene->mNumMaterials = 1;
-        // Delete the array of length zero created above.
-        delete[] mScene->mMaterials;
-        mScene->mMaterials = nullptr;
-        mScene->mMaterials = new aiMaterial *[1];
-        mScene->mMaterials[0] = new aiMaterial();
-    }
-}
-
-static void SetFace(aiFace &face, int a) {
-    face.mNumIndices = 1;
-    face.mIndices = new unsigned int[1];
-    face.mIndices[0] = a;
-}
-
-static void SetFace(aiFace &face, int a, int b) {
-    face.mNumIndices = 2;
-    face.mIndices = new unsigned int[2];
-    face.mIndices[0] = a;
-    face.mIndices[1] = b;
-}
-
-static void SetFace(aiFace &face, int a, int b, int c) {
-    face.mNumIndices = 3;
-    face.mIndices = new unsigned int[3];
-    face.mIndices[0] = a;
-    face.mIndices[1] = b;
-    face.mIndices[2] = c;
-}
-
-static bool CheckValidFacesIndices(const aiFace *faces, unsigned nFaces, unsigned nVerts) {
-    for (unsigned i = 0; i < nFaces; ++i) {
-        for (unsigned j = 0; j < faces[i].mNumIndices; ++j) {
-            unsigned idx = faces[i].mIndices[j];
-            if (idx >= nVerts)
-                return false;
-        }
-    }
-    return true;
 }
 
 void glTFImporter::ImportMeshes(Asset &r) {
@@ -452,7 +461,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
-void glTFImporter::ImportCameras(Asset &r) {
+void glTFImporter::ImportCameras(Asset &r) const {
     if (!r.cameras.Size()) {
         return;
     }
@@ -460,9 +469,9 @@ void glTFImporter::ImportCameras(Asset &r) {
     mScene->mNumCameras = r.cameras.Size();
     mScene->mCameras = new aiCamera *[r.cameras.Size()];
     for (size_t i = 0; i < r.cameras.Size(); ++i) {
-        Camera &cam = r.cameras[i];
+        const Camera &cam = r.cameras[i];
 
-        aiCamera *aicam = mScene->mCameras[i] = new aiCamera();
+        const auto aicam = mScene->mCameras[i] = new aiCamera();
 
         if (cam.type == Camera::Perspective) {
             aicam->mAspect = cam.perspective.aspectRatio;
@@ -481,8 +490,10 @@ void glTFImporter::ImportCameras(Asset &r) {
     }
 }
 
-void glTFImporter::ImportLights(Asset &r) {
-    if (!r.lights.Size()) return;
+void glTFImporter::ImportLights(Asset &r) const {
+    if (!r.lights.Size()) {
+        return;
+    }
 
     mScene->mNumLights = r.lights.Size();
     mScene->mLights = new aiLight *[r.lights.Size()];
@@ -529,7 +540,7 @@ aiNode *ImportNode(aiScene *pScene, Asset &r, std::vector<unsigned int> &meshOff
     aiNode *ainode = new aiNode(node.id);
 
     if (!node.children.empty()) {
-        ainode->mNumChildren = unsigned(node.children.size());
+        ainode->mNumChildren = static_cast<unsigned>(node.children.size());
         ainode->mChildren = new aiNode *[ainode->mNumChildren];
 
         for (unsigned int i = 0; i < ainode->mNumChildren; ++i) {
@@ -578,7 +589,7 @@ aiNode *ImportNode(aiScene *pScene, Asset &r, std::vector<unsigned int> &meshOff
 
         int k = 0;
         for (size_t i = 0; i < node.meshes.size(); ++i) {
-            int idx = node.meshes[i].GetIndex();
+            const int idx = node.meshes[i].GetIndex();
             for (unsigned int j = meshOffsets[idx]; j < meshOffsets[idx + 1]; ++j, ++k) {
                 ainode->mMeshes[k] = j;
             }
@@ -597,13 +608,14 @@ aiNode *ImportNode(aiScene *pScene, Asset &r, std::vector<unsigned int> &meshOff
 }
 
 void glTFImporter::ImportNodes(Asset &r) {
-    if (!r.scene) return;
+    if (!r.scene) {
+        return;
+    }
 
     std::vector<Ref<Node>> rootNodes = r.scene->nodes;
 
     // The root nodes
-    unsigned int numRootNodes = static_cast<unsigned>(rootNodes.size());
-    if (numRootNodes == 1) { // a single root node: use it
+    if (unsigned int numRootNodes = static_cast<unsigned>(rootNodes.size()); numRootNodes == 1) { // a single root node: use it
         mScene->mRootNode = ImportNode(mScene, r, meshOffsets, rootNodes[0]);
     } else if (numRootNodes > 1) { // more than one root node: create a fake root
         aiNode *root = new aiNode("ROOT");
@@ -648,11 +660,10 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
         tex->mFilename = img.name;
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
-        tex->pcData = reinterpret_cast<aiTexel *>(data);
+        tex->pcData = static_cast<aiTexel *>(data);
 
         if (!img.mimeType.empty()) {
-            const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
-            if (ext) {
+            if (const char *ext = strchr(img.mimeType.c_str(), '/') + 1) {
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 }
@@ -666,7 +677,7 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
     }
 }
 
-void glTFImporter::ImportCommonMetadata(Asset &a) {
+void glTFImporter::ImportCommonMetadata(Asset &a) const {
     ai_assert(mScene->mMetaData == nullptr);
 
     const bool hasVersion = !a.asset.version.empty();

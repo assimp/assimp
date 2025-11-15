@@ -70,12 +70,12 @@ protected:
 
 private:
     void ImportEmbeddedTextures(glTF::Asset &a);
-    void ImportMaterials(glTF::Asset &a);
+    void ImportMaterials(glTF::Asset &a) const;
     void ImportMeshes(glTF::Asset &a);
-    void ImportCameras(glTF::Asset &a);
-    void ImportLights(glTF::Asset &a);
+    void ImportCameras(glTF::Asset &a) const;
+    void ImportLights(glTF::Asset &a) const;
     void ImportNodes(glTF::Asset &a);
-    void ImportCommonMetadata(glTF::Asset &a);
+    void ImportCommonMetadata(glTF::Asset &a) const;
 
 private:
     std::vector<unsigned int> meshOffsets;

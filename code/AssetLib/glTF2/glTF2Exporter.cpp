@@ -41,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
-//#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
-
 #include "AssetLib/glTF2/glTF2Exporter.h"
 #include "AssetLib/glTF2/glTF2AssetWriter.h"
 #include "PostProcessing/SplitLargeMeshes.h"
@@ -1740,6 +1738,5 @@ void glTF2Exporter::ExportAnimations() {
     } // End: for-loop mNumAnimations
 }
 
-//#endif 
 #endif // ASSIMP_BUILD_NO_GLTF_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

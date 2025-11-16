@@ -65,6 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
+#include <rapidjson/error/en.h>
 
 using namespace Assimp;
 using namespace glTF2;

@@ -11,5 +11,5 @@ The current version of Assimp that's being supported with security updates:
 ## Reporting a Vulnerability
 
 If you have found any security vulnerability you can contact us via
-kim.kulling@googlemail.com
+kim.kulling@assimp.org
 

@@ -41,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GLFTCOMMON_H_INC
 #define AI_GLFTCOMMON_H_INC
 
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
-
 #include <assimp/Exceptional.h>
 #include <assimp/DefaultLogger.hpp>
 
@@ -69,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define ai_assert
 #endif
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
+#if _MSC_VER > 1500 || (defined __GNUC__)
 #   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
 #   define gltf_unordered_map map
@@ -531,7 +529,5 @@ inline Value *FindNumber(Value &val, const char *id) {
 }
 
 } // namespace glTFCommon
-
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // AI_GLFTCOMMON_H_INC

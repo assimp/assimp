@@ -52,22 +52,16 @@ using namespace ::Assimp;
 class utSIBImporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
-        Assimp::Importer importer;
+        Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/SIB/heffalump.sib", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F(utSIBImporter, createTest) {
-    bool ok(true);
-    try {
-        SIBImporter myImporter;
-    } catch (...) {
-        ok = false;
-    }
-    EXPECT_TRUE(ok);
-}
-
 TEST_F(utSIBImporter, importTest) {
+#ifdef ASSIMP_BUILD_NO_SIB_IMPORTER
+    EXPECT_FALSE(importerTest());
+#else
     EXPECT_TRUE(importerTest());
+#endif
 }

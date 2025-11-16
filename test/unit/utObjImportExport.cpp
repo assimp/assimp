@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const float VertComponents[24 * 3] = {
+static constexpr float VertComponents[24 * 3] = {
     -0.500000, 0.500000, 0.500000,
     -0.500000, 0.500000, -0.500000,
     -0.500000, -0.500000, -0.500000,
@@ -76,7 +76,7 @@ static const float VertComponents[24 * 3] = {
     0.500000, -0.500000, 0.500000f
 };
 
-static const char *ObjModel =
+static constexpr char ObjModel[] =
         "o 1\n"
         "\n"
         "# Vertex list\n"
@@ -103,7 +103,7 @@ static const char *ObjModel =
         "\n"
         "# End of file\n";
 
-static const char *ObjModel_Issue1111 =
+static constexpr char ObjModel_Issue1111[] =
         "o 1\n"
         "\n"
         "# Vertex list\n"
@@ -408,7 +408,7 @@ TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
     EXPECT_EQ(nullptr, scene);
 }
 
-TEST_F(utObjImportExport, 0based_array_Test) {
+TEST_F(utObjImportExport, zero_based_array_Test) {
     static const char *curObjModel =
             "v -0.500000 0.000000 0.400000\n"
             "v -0.500000 0.000000 -0.800000\n"

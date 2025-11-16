@@ -41,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GLFTCOMMON_H_INC
 #define AI_GLFTCOMMON_H_INC
 
-#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
-
 #include <assimp/Exceptional.h>
 #include <assimp/DefaultLogger.hpp>
 
@@ -531,7 +529,5 @@ inline Value *FindNumber(Value &val, const char *id) {
 }
 
 } // namespace glTFCommon
-
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // AI_GLFTCOMMON_H_INC

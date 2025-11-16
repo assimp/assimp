@@ -38,22 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
+
 #include "AssetLib/Obj/ObjFileParser.h"
 #include "AssetLib/Obj/ObjTools.h"
 #include "UnitTestPCH.h"
 
 using namespace ::Assimp;
 
-class utObjTools : public ::testing::Test {
-    // empty
-};
+class utObjTools : public ::testing::Test {};
 
 class TestObjFileParser : public ObjFileParser {
 public:
-    TestObjFileParser() :
-            ObjFileParser() {
-        // empty
-    }
+    TestObjFileParser() = default;
 
     ~TestObjFileParser() = default;
 
@@ -84,7 +81,7 @@ TEST_F(utObjTools, skipDataLine_TwoLines_Success) {
     buffer.resize(data.size());
     ::memcpy(&buffer[0], &data[0], data.size());
     test_parser.setBuffer(buffer);
-    static const size_t Size = 4096UL;
+    static constexpr size_t Size = 4096UL;
     char data_buffer[Size];
 
     test_parser.testCopyNextWord(data_buffer, Size);
@@ -112,3 +109,5 @@ TEST_F(utObjTools, countComponents_TwoLines_Success) {
     size_t numComps = test_parser.testGetNumComponentsInDataDefinition();
     EXPECT_EQ(3U, numComps);
 }
+
+#endif // ASSIMP_BUILD_NO_OBJ_IMPORTER

@@ -57,8 +57,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTF2ASSETWRITER_H_INC
 #define GLTF2ASSETWRITER_H_INC
 
-#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
-
 #include "glTF2Asset.h"
 
 namespace glTF2
@@ -97,7 +95,5 @@ public:
 
 // Include the implementation of the methods
 #include "glTF2AssetWriter.inl"
-
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // GLTF2ASSETWRITER_H_INC

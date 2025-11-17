@@ -79,13 +79,14 @@ for(LineSplitter splitter(stream);splitter;++splitter) {
 class LineSplitter {
 public:
     /// The current line index in the data block.
-    typedef size_t line_idx;
+    using line_idx = size_t;
 
     // -----------------------------------------
     /// @brief The class constructor.
     /// @note  trim is *always* assumed true if skyp_empty_lines==true
     LineSplitter(StreamReaderLE& stream, bool skip_empty_lines = true, bool trim = true);
 
+    // -----------------------------------------    
     /// @brief The class destructor.
     ~LineSplitter() = default;
 
@@ -98,7 +99,9 @@ public:
     LineSplitter& operator++(int);
 
     // -----------------------------------------
-    /** get a pointer to the beginning of a particular token */
+    /// @brief  Get a pointer to the beginning of a particular token.
+    /// @param  idx     The index into the token.
+    /// @return The token.
     const char* operator[] (size_t idx) const;
 
     // -----------------------------------------
@@ -107,9 +110,11 @@ public:
     void get_tokens(const char* (&tokens)[N]) const;
 
     // -----------------------------------------
-    /** member access */
+    /// member access via -> operator.
     const std::string* operator -> () const;
 
+    // -----------------------------------------
+    /// member access via * operator.
     std::string operator* () const;
     
     /// @brief  Will return the end marker, end of the buffer plus one.
@@ -117,11 +122,11 @@ public:
     const char *getEnd() const;
 
     // -----------------------------------------
-    /** boolean context */
+    /// boolean context.
     operator bool() const;
 
     // -----------------------------------------
-    /** line indices are zero-based, empty lines are included */
+    /// line indices are zero-based, empty lines are included
     operator line_idx() const;
 
     /// @brief  Will return the current index.
@@ -129,15 +134,17 @@ public:
     line_idx get_index() const;
 
     // -----------------------------------------
-    /** access the underlying stream object */
+    /// @brief Access the underlying stream object.
+    /// @return Reference to the stream reader.
     StreamReaderLE& get_stream();
 
     // -----------------------------------------
-    /** !strcmp((*this)->substr(0,strlen(check)),check) */
+    /// !strcmp((*this)->substr(0,strlen(check)),check)
+    /// @return true if token matches.
     bool match_start(const char* check);
 
     // -----------------------------------------
-    /** swallow the next call to ++, return the previous value. */
+    /// @brief Swallow the next call to ++, return the previous value.
     void swallow_next_increment();
 
     LineSplitter( const LineSplitter & ) = delete;

@@ -58,13 +58,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
 
-#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
+//#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
 
 #include <assimp/Exceptional.h>
 
 #include <algorithm>
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -95,7 +95,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define ai_assert
 #endif
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
+#if _MSC_VER > 1500 || (defined __GNUC__)
 #   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #else
 #   define gltf_unordered_map map
@@ -1266,9 +1266,8 @@ private:
     size_t mSceneLength;
     size_t mBodyOffset;
     size_t mBodyLength;
-    IdMap mUsedIds;
-    std::map<std::string, int, std::less<>> mUsedNamesMap;
     Ref<Buffer> mBodyBuffer;
+    std::unordered_map<std::string, int> lastUsedID;
 };
 
 inline std::string getContextForErrorMessages(const std::string &id, const std::string &name) {
@@ -1284,6 +1283,6 @@ inline std::string getContextForErrorMessages(const std::string &id, const std::
 // Include the implementation of the methods
 #include "glTF2Asset.inl"
 
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+//#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // GLTF2ASSET_H_INC

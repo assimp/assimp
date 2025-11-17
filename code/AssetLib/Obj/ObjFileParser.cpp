@@ -80,7 +80,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
         m_buffer(),
         m_pIO(io),
         m_progress(progress),
-        m_originalObjFileName(originalObjFileName) {
+        m_originalObjFileName(originalObjFileName) { 
     std::fill_n(m_buffer, Buffersize, '\0');
 
     // Create the model instance to store all the data
@@ -120,6 +120,13 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
         mEnd = &buffer[buffer.size() - 1] + 1;
+
+        if (processed == 0 && std::distance(m_DataIt, m_DataItEnd) >= 3 &&
+            static_cast<unsigned char>(*m_DataIt) == 0xEF &&
+            static_cast<unsigned char>(*(m_DataIt + 1)) == 0xBB &&
+            static_cast<unsigned char>(*(m_DataIt + 2)) == 0xBF) {
+            m_DataIt += 3; // skip BOM
+        }
 
         // Handle progress reporting
         const size_t filePos(streamBuffer.getFilePos());

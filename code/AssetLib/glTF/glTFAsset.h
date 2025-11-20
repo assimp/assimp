@@ -49,8 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTFASSET_H_INC
 #define GLTFASSET_H_INC
 
-#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
-
 #include "AssetLib/glTFCommon/glTFCommon.h"
 #include <assimp/Exceptional.h>
 #include <list>
@@ -1007,7 +1005,5 @@ private:
 
 // Include the implementation of the methods
 #include "glTFAsset.inl"
-
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // GLTFASSET_H_INC

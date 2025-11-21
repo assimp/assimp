@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -74,7 +74,7 @@ class PbrtExporter {
 public:
     /// Constructor for a specific scene to export
     PbrtExporter(const aiScene *pScene, IOSystem *pIOSystem,
-            const std::string &path, const std::string &file);
+            const std::string &path, const std::string &file, const std::string &texturesPath);
 
     /// Destructor
     virtual ~PbrtExporter() = default;
@@ -113,6 +113,9 @@ private:
 
     /// Name of the file (without extension) where the scene will be exported
     const std::string mFile;
+
+    /// Path of the textures directory (inlcuding seperator)
+    const std::string mTexturesPath;
 
     //  A private set to keep track of which textures have been declared
     std::set<std::string> mTextureSet;

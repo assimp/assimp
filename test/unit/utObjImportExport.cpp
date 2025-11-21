@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const float VertComponents[24 * 3] = {
+static constexpr float VertComponents[24 * 3] = {
     -0.500000, 0.500000, 0.500000,
     -0.500000, 0.500000, -0.500000,
     -0.500000, -0.500000, -0.500000,
@@ -76,7 +76,7 @@ static const float VertComponents[24 * 3] = {
     0.500000, -0.500000, 0.500000f
 };
 
-static const char *ObjModel =
+static constexpr char ObjModel[] =
         "o 1\n"
         "\n"
         "# Vertex list\n"
@@ -103,7 +103,7 @@ static const char *ObjModel =
         "\n"
         "# End of file\n";
 
-static const char *ObjModel_Issue1111 =
+static constexpr char ObjModel_Issue1111[] =
         "o 1\n"
         "\n"
         "# Vertex list\n"
@@ -408,7 +408,7 @@ TEST_F(utObjImportExport, homogeneous_coordinates_divide_by_zero_Test) {
     EXPECT_EQ(nullptr, scene);
 }
 
-TEST_F(utObjImportExport, 0based_array_Test) {
+TEST_F(utObjImportExport, zero_based_array_Test) {
     static const char *curObjModel =
             "v -0.500000 0.000000 0.400000\n"
             "v -0.500000 0.000000 -0.800000\n"
@@ -524,4 +524,18 @@ TEST_F(utObjImportExport, import_with_line_continuations) {
     EXPECT_NEAR(vertices[2].x, -0.5f, threshold);
     EXPECT_NEAR(vertices[2].y, 0.5f, threshold);
     EXPECT_NEAR(vertices[2].z, -0.5f, threshold);
+}
+
+TEST_F(utObjImportExport, issue2355_mtl_texture_prefix) {
+    ::Assimp::Importer importer;
+    const aiScene *const scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/mtl_different_folder.obj", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+
+    EXPECT_EQ(scene->mNumMaterials, 2U);
+    const aiMaterial *const material = scene->mMaterials[1];
+
+    aiString texturePath;
+    material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+    // The MTL file is in `folder`, the image path should have been prefixed with the folder
+    EXPECT_STREQ("folder/image.jpg", texturePath.C_Str());
 }

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
-#include "AssetLib/IFC/IFCUtil.h"
+#include "IFCUtil.h"
 #include "Common/PolyTools.h"
 #include "Geometry/GeometryUtils.h"
 #include "PostProcessing/ProcessHelper.h"
@@ -375,7 +375,7 @@ void TempMesh::RemoveAdjacentDuplicates() {
         ArrayBounds(&*base, cnt ,vmin,vmax);
 
         const IfcFloat epsilon = (vmax-vmin).SquareLength() / static_cast<IfcFloat>(1e9);
-        
+
         // drop any identical, adjacent vertices. this pass will collect the dropouts
         // of the previous pass as a side-effect.
         FuzzyVectorCompare fz(epsilon);
@@ -461,7 +461,7 @@ void ConvertColor(aiColor4D& out, const Schema_2x3::IfcColourRgb& in) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertColor(aiColor4D& out, 
+void ConvertColor(aiColor4D& out,
         const Schema_2x3::IfcColourOrFactor& in,
         ConversionData& conv,
         const aiColor4D* base) {

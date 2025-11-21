@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -40,85 +40,80 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
-namespace Assimp {
-namespace D3MF {
-
-namespace XmlTag {
+namespace Assimp::D3MF::XmlTag {
     // Root tag
-    const char* const RootTag = "3MF";
+    constexpr char RootTag[] = "3MF";
 
     // Meta-data
-    const char* const meta = "metadata";
-    const char* const meta_name = "name";
+    constexpr char meta[] = "metadata";
+    constexpr char meta_name[] = "name";
 
     // Model-data specific tags
-    const char* const model = "model";
-    const char* const model_unit = "unit";
-    const char* const metadata = "metadata";
-    const char* const resources = "resources";
-    const char* const object = "object";
-    const char* const mesh = "mesh";
-    const char* const components = "components";
-    const char* const component = "component";
-    const char* const vertices = "vertices";
-    const char* const vertex = "vertex";
-    const char* const triangles = "triangles";
-    const char* const triangle = "triangle";
-    const char* const x = "x";
-    const char* const y = "y";
-    const char* const z = "z";
-    const char* const v1 = "v1";
-    const char* const v2 = "v2";
-    const char* const v3 = "v3";
-    const char* const id = "id";
-    const char* const pid = "pid";
-    const char* const pindex = "pindex";
-    const char* const p1 = "p1";
-    const char *const p2 = "p2";
-    const char *const p3 = "p3";
-    const char* const name = "name";
-    const char* const type = "type";
-    const char* const build = "build";
-    const char* const item = "item";
-    const char* const objectid = "objectid";
-    const char* const transform = "transform";
-    const char *const path = "path";
+    constexpr char model[] = "model";
+    constexpr char model_unit[] = "unit";
+    constexpr char metadata[] = "metadata";
+    constexpr char resources[] = "resources";
+    constexpr char object[] = "object";
+    constexpr char mesh[] = "mesh";
+    constexpr char components[] = "components";
+    constexpr char component[] = "component";
+    constexpr char vertices[] = "vertices";
+    constexpr char vertex[] = "vertex";
+    constexpr char triangles[] = "triangles";
+    constexpr char triangle[] = "triangle";
+    constexpr char x[] = "x";
+    constexpr char y[] = "y";
+    constexpr char z[] = "z";
+    constexpr char v1[] = "v1";
+    constexpr char v2[] = "v2";
+    constexpr char v3[] = "v3";
+    constexpr char id[] = "id";
+    constexpr char pid[] = "pid";
+    constexpr char pindex[] = "pindex";
+    constexpr char p1[] = "p1";
+    constexpr char p2[] = "p2";
+    constexpr char p3[] = "p3";
+    constexpr char name[] = "name";
+    constexpr char type[] = "type";
+    constexpr char build[] = "build";
+    constexpr char item[] = "item";
+    constexpr char objectid[] = "objectid";
+    constexpr char transform[] = "transform";
+    constexpr char path[] = "path";
 
     // Material definitions
-    const char* const basematerials = "basematerials";
-    const char* const basematerials_base = "base";
-    const char* const basematerials_name = "name";
-    const char* const basematerials_displaycolor = "displaycolor";
-    const char* const texture_2d = "m:texture2d";
-    const char *const texture_group = "m:texture2dgroup";
-    const char *const texture_content_type = "contenttype";
-    const char *const texture_tilestyleu = "tilestyleu";
-    const char *const texture_tilestylev = "tilestylev";
-    const char *const texture_2d_coord = "m:tex2coord";
-    const char *const texture_cuurd_u = "u";
-    const char *const texture_cuurd_v = "v";
+    constexpr char basematerials[] = "basematerials";
+    constexpr char basematerials_base[] = "base";
+    constexpr char basematerials_name[] = "name";
+    constexpr char basematerials_displaycolor[] = "displaycolor";
+    constexpr char texture_2d[] = "m:texture2d";
+    constexpr char texture_group[] = "m:texture2dgroup";
+    constexpr char texture_content_type[] = "contenttype";
+    constexpr char texture_tilestyleu[] = "tilestyleu";
+    constexpr char texture_tilestylev[] = "tilestylev";
+    constexpr char texture_2d_coord[] = "m:tex2coord";
+    constexpr char texture_cuurd_u[] = "u";
+    constexpr char texture_cuurd_v[] = "v";
 
     // vertex color definitions
-    const char *const colorgroup = "m:colorgroup";
-    const char *const color_item = "m:color";
-    const char *const color_vaule = "color";
+    constexpr char colorgroup[] = "m:colorgroup";
+    constexpr char color_item[] = "m:color";
+    constexpr char color_value[] = "color";
 
     // Meta info tags
-    const char* const CONTENT_TYPES_ARCHIVE = "[Content_Types].xml";
-    const char* const ROOT_RELATIONSHIPS_ARCHIVE = "_rels/.rels";
-    const char* const SCHEMA_CONTENTTYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
-    const char* const SCHEMA_RELATIONSHIPS = "http://schemas.openxmlformats.org/package/2006/relationships";
-    const char* const RELS_RELATIONSHIP_CONTAINER = "Relationships";
-    const char* const RELS_RELATIONSHIP_NODE = "Relationship";
-    const char* const RELS_ATTRIB_TARGET = "Target";
-    const char* const RELS_ATTRIB_TYPE = "Type";
-    const char* const RELS_ATTRIB_ID = "Id";
-    const char* const PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
-    const char* const PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
-    const char* const PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
-    const char* const PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
-    const char* const PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-}
+    constexpr char CONTENT_TYPES_ARCHIVE[] = "[Content_Types].xml";
+    constexpr char ROOT_RELATIONSHIPS_ARCHIVE[] = "_rels/.rels";
+    constexpr char SCHEMA_CONTENTTYPES[] = "http://schemas.openxmlformats.org/package/2006/content-types";
+    constexpr char SCHEMA_RELATIONSHIPS[] = "http://schemas.openxmlformats.org/package/2006/relationships";
+    constexpr char RELS_RELATIONSHIP_CONTAINER[] = "Relationships";
+    constexpr char RELS_RELATIONSHIP_NODE[] = "Relationship";
+    constexpr char RELS_ATTRIB_TARGET[] = "Target";
+    constexpr char RELS_ATTRIB_TYPE[] = "Type";
+    constexpr char RELS_ATTRIB_ID[] = "Id";
+    constexpr char PACKAGE_START_PART_RELATIONSHIP_TYPE[] = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+    constexpr char PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE[] = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+    constexpr char PACKAGE_TEXTURE_RELATIONSHIP_TYPE[] = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
+    constexpr char PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE[] = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
+    constexpr char PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE[] = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
 
-} // Namespace D3MF
-} // Namespace Assimp
+} // namespace Assimp::D3MF

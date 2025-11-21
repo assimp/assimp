@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyassimp"
+version = "6.0.2"
+license = "ISC"
+authors = [
+    { name = "ASSIMP Developers", email = "kim.kulling@assimp.org" },
+]
+maintainers = [{ name = "Séverin Lemaignan", email = "severin@guakamole.org" }]
+description = "Python bindings for the Open Asset Import Library (ASSIMP)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy"]

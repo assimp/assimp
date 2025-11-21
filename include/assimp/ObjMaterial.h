@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -55,16 +55,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 
-// the original illum property
+/// @brief The original illum property
 #define AI_MATKEY_OBJ_ILLUM "$mat.illum", 0, 0
 
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Pure key names for all obj texture-related properties
+/// @brief Pure key names for all obj texture-related properties
 //! @cond MATS_DOC_FULL
 
-// support for bump -bm
+/// @brief Support for bump -bm
 #define _AI_MATKEY_OBJ_BUMPMULT_BASE "$tex.bumpmult"
 //! @endcond
 
@@ -80,5 +80,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! @endcond
 
-
-#endif
+#endif // AI_OBJMATERIAL_H_INC

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -62,6 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/TriangulateProcess.h"
 #include "PostProcessing/ProcessHelper.h"
 #include "Common/PolyTools.h"
+#include "contrib/earcut-hpp/earcut.hpp"
 
 #include <memory>
 #include <cstdint>
@@ -73,6 +74,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define POLY_GRID_X 70
 #define POLY_GRID_XPAD 20
 #define POLY_OUTPUT_FILE "assimp_polygons_debug.txt"
+
+namespace mapbox::util {
+
+template <>
+struct nth<0, aiVector2D> {
+    inline static auto get(const aiVector2D& t) {
+        return t.x;
+    }
+};
+template <>
+struct nth<1, aiVector2D> {
+    inline static auto get(const aiVector2D& t) {
+        return t.y;
+    }
+};
+
+} // namespace mapbox::util
 
 using namespace Assimp;
 
@@ -225,7 +243,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
         ASSIMP_LOG_ERROR( "Invalidation detected in the number of indices: does not fit to the primitive type." );
         return false;
     }
-    
+
     aiVector3D *nor_out = nullptr;
 
     // if we don't have normals yet, but expect them to be a cheap side
@@ -244,7 +262,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
 
     aiFace* out = new aiFace[numOut](), *curOut = out;
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
-    std::vector<aiVector2D> temp_verts(max_out+2);
+    std::vector<std::vector<aiVector2D>> temp_poly(1); /* temporary storage for earcut.hpp */
+    std::vector<aiVector2D>& temp_verts = temp_poly[0];
+    temp_verts.reserve(max_out + 2);
 
     NGONEncoder ngonEncoder;
 
@@ -264,13 +284,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
 
     const aiVector3D* verts = pMesh->mVertices;
 
-    // use std::unique_ptr to avoid slow std::vector<bool> specialiations
-    std::unique_ptr<bool[]> done(new bool[max_out]);
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
 
         unsigned int* idx = face.mIndices;
-        int num = (int)face.mNumIndices, ear = 0, tmp, prev = num-1, next = 0, max = num;
+        unsigned int num = face.mNumIndices;
 
         // Apply vertex colors to represent the face winding?
 #ifdef AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
@@ -363,16 +381,16 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
             // We project it onto a plane to get a 2d triangle.
 
             // Collect all vertices of of the polygon.
-            for (tmp = 0; tmp < max; ++tmp) {
+            for (unsigned int tmp = 0; tmp < num; ++tmp) {
                 temp_verts3d[tmp] = verts[idx[tmp]];
             }
 
             // Get newell normal of the polygon. Store it for future use if it's a polygon-only mesh
             aiVector3D n;
-            NewellNormal<3,3,3>(n,max,&temp_verts3d.front().x,&temp_verts3d.front().y,&temp_verts3d.front().z);
+            NewellNormal<3, 3, 3>(n, num, &temp_verts3d.front().x, &temp_verts3d.front().y, &temp_verts3d.front().z);
             if (nor_out) {
-                 for (tmp = 0; tmp < max; ++tmp)
-                     nor_out[idx[tmp]] = n;
+                for (unsigned int tmp = 0; tmp < num; ++tmp)
+                    nor_out[idx[tmp]] = n;
             }
 
             // Select largest normal coordinate to ignore for projection
@@ -398,10 +416,20 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
                 std::swap(ac,bc);
             }
 
-            for (tmp =0; tmp < max; ++tmp) {
+            temp_verts.resize(num);
+            for (unsigned int tmp = 0; tmp < num; ++tmp) {
                 temp_verts[tmp].x = verts[idx[tmp]][ac];
                 temp_verts[tmp].y = verts[idx[tmp]][bc];
-                done[tmp] = false;
+            }
+
+            auto indices = mapbox::earcut(temp_poly);
+            for (size_t i = 0; i < indices.size(); i += 3) {
+                aiFace& nface = *curOut++;
+                nface.mIndices = new unsigned int[3];
+                nface.mNumIndices = 3;
+                nface.mIndices[0] = indices[i];
+                nface.mIndices[1] = indices[i + 1];
+                nface.mIndices[2] = indices[i + 2];
             }
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
@@ -431,120 +459,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh) {
 
             fprintf(fout,"\ntriangulation sequence: ");
 #endif
-
-            //
-            // FIXME: currently this is the slow O(kn) variant with a worst case
-            // complexity of O(n^2) (I think). Can be done in O(n).
-            while (num > 3) {
-
-                // Find the next ear of the polygon
-                int num_found = 0;
-                for (ear = next;;prev = ear,ear = next) {
-
-                    // break after we looped two times without a positive match
-                    for (next=ear+1;done[(next>=max?next=0:next)];++next);
-                    if (next < ear) {
-                        if (++num_found == 2) {
-                            break;
-                        }
-                    }
-                    const aiVector2D* pnt1 = &temp_verts[ear],
-                        *pnt0 = &temp_verts[prev],
-                        *pnt2 = &temp_verts[next];
-
-                    // Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
-                    if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1) == 1) {
-                        continue;
-                    }
-
-                    // Skip when three point is in a line
-                    aiVector2D left = *pnt0 - *pnt1;
-                    aiVector2D right = *pnt2 - *pnt1;
-
-                    left.Normalize();
-                    right.Normalize();
-                    auto mul = left * right;
-
-                    // if the angle is 0 or 180
-                    if (std::abs(mul - 1.f) < ai_epsilon || std::abs(mul + 1.f) < ai_epsilon) {
-                        // skip this ear
-                        ASSIMP_LOG_WARN("Skip a ear, due to its angle is near 0 or 180.");
-                        continue;
-                    }
-
-                    // and no other point may be contained in this triangle
-                    for ( tmp = 0; tmp < max; ++tmp) {
-
-                        // We need to compare the actual values because it's possible that multiple indexes in
-                        // the polygon are referring to the same position. concave_polygon.obj is a sample
-                        //
-                        // FIXME: Use 'epsiloned' comparisons instead? Due to numeric inaccuracies in
-                        // PointInTriangle() I'm guessing that it's actually possible to construct
-                        // input data that would cause us to end up with no ears. The problem is,
-                        // which epsilon? If we chose a too large value, we'd get wrong results
-                        const aiVector2D& vtmp = temp_verts[tmp];
-                        if ( vtmp != *pnt1 && vtmp != *pnt2 && vtmp != *pnt0 && PointInTriangle2D(*pnt0,*pnt1,*pnt2,vtmp)) {
-                            break;
-                        }
-                    }
-                    if (tmp != max) {
-                        continue;
-                    }
-
-                    // this vertex is an ear
-                    break;
-                }
-                if (num_found == 2) {
-
-                    // Due to the 'two ear theorem', every simple polygon with more than three points must
-                    // have 2 'ears'. Here's definitely something wrong ... but we don't give up yet.
-                    //
-
-                    // Instead we're continuing with the standard tri-fanning algorithm which we'd
-                    // use if we had only convex polygons. That's life.
-                    ASSIMP_LOG_ERROR("Failed to triangulate polygon (no ear found). Probably not a simple polygon?");
-
-#ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
-                    fprintf(fout,"critical error here, no ear found! ");
-#endif
-                    num = 0;
-                    break;
-                }
-
-                aiFace& nface = *curOut++;
-                nface.mNumIndices = 3;
-
-                if (!nface.mIndices) {
-                    nface.mIndices = new unsigned int[3];
-                }
-
-                // setup indices for the new triangle ...
-                nface.mIndices[0] = prev;
-                nface.mIndices[1] = ear;
-                nface.mIndices[2] = next;
-
-                // exclude the ear from most further processing
-                done[ear] = true;
-                --num;
-            }
-            if (num > 0) {
-                // We have three indices forming the last 'ear' remaining. Collect them.
-                aiFace& nface = *curOut++;
-                nface.mNumIndices = 3;
-                if (!nface.mIndices) {
-                    nface.mIndices = new unsigned int[3];
-                }
-
-                for (tmp = 0; done[tmp]; ++tmp);
-                nface.mIndices[0] = tmp;
-
-                for (++tmp; done[tmp]; ++tmp);
-                nface.mIndices[1] = tmp;
-
-                for (++tmp; done[tmp]; ++tmp);
-                nface.mIndices[2] = tmp;
-
-            }
         }
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS

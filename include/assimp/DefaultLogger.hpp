@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -56,6 +56,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NullLogger.hpp"
 #include <vector>
 
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#include <mutex>
+#include <thread>
+#endif
+
 namespace Assimp {
 // ------------------------------------------------------------------------------------
 class IOStream;
@@ -77,7 +82,7 @@ struct LogStreamInfo;
  *  If you wish to customize the logging at an even deeper level supply your own
  *  implementation of #Logger to #set().
  *  @note The whole logging stuff causes a small extra overhead for all imports. */
-class ASSIMP_API DefaultLogger : public Logger {
+class ASSIMP_API DefaultLogger final : public Logger {
 public:
     // ----------------------------------------------------------------------
     /** @brief Creates a logging instance.
@@ -103,6 +108,9 @@ public:
      *  your needs. If the provided message formatting is OK for you,
      *  it's much easier to use #create() and to attach your own custom
      *  output streams to it.
+     *  Since set is intended to be used for custom loggers, the user is
+     *  responsible for instantiation and destruction (new / delete).
+     *  Before deletion of the custom logger, set(nullptr); must be called.
      *  @param logger Pass NULL to setup a default NullLogger*/
     static void set(Logger *logger);
 
@@ -120,8 +128,8 @@ public:
     static bool isNullLogger();
 
     // ----------------------------------------------------------------------
-    /** @brief  Kills the current singleton logger and replaces it with a
-     *  #NullLogger instance. */
+    /** @brief  Kills and deletes the current singleton logger and replaces
+     *  it with a #NullLogger instance. */
     static void kill();
 
     // ----------------------------------------------------------------------
@@ -139,7 +147,7 @@ private:
     explicit DefaultLogger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
-    /** @briefDestructor    */
+    /** @brief  Destructor    */
     ~DefaultLogger() override;
 
     /** @brief  Logs debug infos, only been written when severity level DEBUG or higher is set */
@@ -180,6 +188,10 @@ private:
 
     //! Attached streams
     StreamArray m_StreamArray;
+
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+    std::mutex m_arrayMutex;
+#endif
 
     bool noRepeatMsg;
     char lastMsg[MAX_LOG_MESSAGE_LENGTH * 2];

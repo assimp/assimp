@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -102,10 +102,10 @@ class Circle : public Conic {
 public:
     // --------------------------------------------------
     Circle(const Schema_2x3::IfcCircle& entity, ConversionData& conv) : Conic(entity,conv) , entity(entity) {}
-    
+
     // --------------------------------------------------
     ~Circle() override = default;
-    
+
     // --------------------------------------------------
     IfcVector3 Eval(IfcFloat u) const override {
         u = -conv.angle_scale * u;

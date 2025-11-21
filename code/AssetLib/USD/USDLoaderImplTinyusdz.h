@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -64,6 +64,10 @@ public:
             const std::string &pFile,
             aiScene *pScene,
             IOSystem *pIOHandler);
+
+    void animations(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene);
 
     void meshes(
             const tinyusdz::tydra::RenderScene &render_scene,
@@ -138,7 +142,11 @@ public:
             aiNode *pNodeParent,
             const tinyusdz::Prim &prim,
             const tinyusdz::tydra::Node &node,
-            std::map<size_t, tinyusdz::tydra::Node> &meshNodes);
+            const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons);
+
+    aiNode *skeletonNodesRecursive(
+            aiNode *pNodeParent,
+            const tinyusdz::tydra::SkelNode &joint);
 
     void sanityCheckNodesRecursive(
             aiNode *pNode);

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -263,22 +263,22 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
             const std::string &name = currentNode.name();
             if (name == "utex1") {
 				read_flag[0] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[0].x);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[0].x);
             } else if (name == "utex2") {
 				read_flag[1] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[1].x);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[1].x);
             } else if (name == "utex3") {
 				read_flag[2] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[2].x);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[2].x);
             } else if (name == "vtex1") {
 				read_flag[3] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[0].y);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[0].y);
             } else if (name == "vtex2") {
 				read_flag[4] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[1].y);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[1].y);
             } else if (name == "vtex3") {
 				read_flag[5] = true;
-                XmlParser::getValueAsReal(node, als.TextureCoordinate[2].y);
+                XmlParser::getValueAsReal(currentNode, als.TextureCoordinate[2].y);
 			}
 		}
         ParseHelper_Node_Exit();

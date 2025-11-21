@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -59,14 +59,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
-/** Wrapper class around IOStream to allow for consistent reading of binary data in both
- *  little and big endian format. Don't attempt to instance the template directly. Use
- *  StreamReaderLE to read from a little-endian stream and StreamReaderBE to read from a
- *  BE stream. The class expects that the endianness of any input data is known at
- *  compile-time, which should usually be true (#BaseImporter::ConvertToUTF8 implements
- *  runtime endianness conversions for text files).
+/**
+ * @brief  Wrapper class around IOStream to allow for consistent reading of binary data in both
+ *         little and big endian format.
  *
- *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
+ * Don't attempt to instance the template directly. Use StreamReaderLE to read from a
+ * little-endian stream and StreamReaderBE to read from a BE stream. The class expects that
+ * the endianness of any input data is known at compile-time, which should usually be true
+ * (#BaseImporter::ConvertToUTF8 implements runtime endianness conversions for text files).
+ *
+ *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?
+ */
 // --------------------------------------------------------------------------------------------
 template <bool SwapEndianness = false, bool RuntimeSwitch = false>
 class StreamReader {

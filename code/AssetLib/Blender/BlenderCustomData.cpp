@@ -96,7 +96,7 @@ struct CustomDataTypeDescription {
         *           other (like CD_ORCO, ...) uses arrays of rawtypes or even arrays of Structures
         *           use a special readfunction for that cases
         */
-static std::array<CustomDataTypeDescription, CD_NUMTYPES> customDataTypeDescriptions = { {
+static const std::array<CustomDataTypeDescription, CD_NUMTYPES> customDataTypeDescriptions = { {
         DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(MVert),
         DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
         DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
@@ -142,7 +142,8 @@ static std::array<CustomDataTypeDescription, CD_NUMTYPES> customDataTypeDescript
         DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
 
         DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION,
-        DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION } };
+        DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION 
+} };
 
 bool isValidCustomDataType(const int cdtype) {
     return cdtype >= 0 && cdtype < CD_NUMTYPES;

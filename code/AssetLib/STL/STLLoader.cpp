@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -294,11 +294,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     aiVector3D vn;
                     sz += 7;
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.x);
+                    sz = fast_atoreal_move(sz, vn.x);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.y);
+                    sz = fast_atoreal_move(sz, vn.y);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn.z);
+                    sz = fast_atoreal_move(sz, vn.z);
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
                     normalBuffer.emplace_back(vn);
@@ -315,11 +315,11 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
                     SkipSpaces(&sz, bufferEnd);
                     positionBuffer.emplace_back();
                     aiVector3D *vn = &positionBuffer.back();
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->x);
+                    sz = fast_atoreal_move(sz, vn->x);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->y);
+                    sz = fast_atoreal_move(sz, vn->y);
                     SkipSpaces(&sz, bufferEnd);
-                    sz = fast_atoreal_move<ai_real>(sz, (ai_real &)vn->z);
+                    sz = fast_atoreal_move(sz, vn->z);
                     faceVertexCounter++;
                 }
             } else if (!::strncmp(sz, "endsolid", 8)) {

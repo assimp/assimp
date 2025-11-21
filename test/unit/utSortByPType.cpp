@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/ScenePreprocessor.h"
 #include "PostProcessing/SortByPTypeProcess.h"
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 using namespace std;
 using namespace Assimp;
@@ -201,4 +202,10 @@ TEST_F(SortByPTypeProcessTest, SortByPTypeStep) {
             }
         }
     }
+}
+
+TEST_F(SortByPTypeProcessTest, issue389327770Test) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/fuzzer_data/clusterfuzz-testcase-minimized-assimp_fuzzer-4751812606885888", aiProcessPreset_TargetRealtime_Fast);
+    EXPECT_NE(nullptr, scene);
 }

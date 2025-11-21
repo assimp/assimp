@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -247,7 +247,7 @@ void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // fill the mesh list
     pScene->mNumMeshes = 1;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-    pScene->mMeshes[0] = mGeneratedMesh;    
+    pScene->mMeshes[0] = mGeneratedMesh;
 
     // Move the mesh ownership into the scene instance
     mGeneratedMesh = nullptr;
@@ -447,6 +447,9 @@ void PLYImporter::LoadVertex(const PLY::Element *pcElement, const PLY::ElementIn
         if (nullptr == mGeneratedMesh->mVertices) {
             mGeneratedMesh->mNumVertices = pcElement->NumOccur;
             mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
+        }
+        if (pos >= mGeneratedMesh->mNumVertices) {
+            throw DeadlyImportError("Invalid .ply file: Too many vertices");
         }
 
         mGeneratedMesh->mVertices[pos] = vOut;

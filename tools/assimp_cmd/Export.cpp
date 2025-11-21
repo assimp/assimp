@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -165,4 +165,4 @@ int Assimp_Export(const char *const *params, unsigned int num) {
     return AssimpCmdError::Success;
 }
 
-#endif // no export
+#endif // ASSIMP_BUILD_NO_EXPORT

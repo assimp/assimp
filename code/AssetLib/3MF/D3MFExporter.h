@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -68,7 +68,7 @@ class D3MFExporter {
 public:
     D3MFExporter( const char* pFile, const aiScene* pScene );
     ~D3MFExporter();
-    bool validate();
+    bool validate() const;
     bool exportArchive( const char *file );
     bool exportContentTypes();
     bool exportRelations();

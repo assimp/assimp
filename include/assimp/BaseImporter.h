@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -70,7 +70,8 @@ class BaseProcess;
 class SharedPostProcessInfo;
 class IOStream;
 
-// utility to do char4 to uint32 in a portable manner
+/// @def   AI_MAKE_MAGIC
+/// @brief Utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \
                                           (string[1] << 16) + (string[2] << 8) + string[3]))
 
@@ -188,60 +189,7 @@ public:
      *  @param extension set to collect file extensions in*/
     void GetExtensionList(std::set<std::string> &extensions);
 
-protected:
-    double importerScale = 1.0;
-    double fileScale = 1.0;
-
-    // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure. The
-     * function is expected to throw an ImportErrorException if there is
-     * an error. If it terminates normally, the data in aiScene is
-     * expected to be correct. Override this function to implement the
-     * actual importing.
-     * <br>
-     *  The output scene must meet the following requirements:<br>
-     * <ul>
-     * <li>At least a root node must be there, even if its only purpose
-     *     is to reference one mesh.</li>
-     * <li>aiMesh::mPrimitiveTypes may be 0. The types of primitives
-     *   in the mesh are determined automatically in this case.</li>
-     * <li>the vertex data is stored in a pseudo-indexed "verbose" format.
-     *   In fact this means that every vertex that is referenced by
-     *   a face is unique. Or the other way round: a vertex index may
-     *   not occur twice in a single aiMesh.</li>
-     * <li>aiAnimation::mDuration may be -1. Assimp determines the length
-     *   of the animation automatically in this case as the length of
-     *   the longest animation channel.</li>
-     * <li>aiMesh::mBitangents may be nullptr if tangents and normals are
-     *   given. In this case bitangents are computed as the cross product
-     *   between normal and tangent.</li>
-     * <li>There needn't be a material. If none is there a default material
-     *   is generated. However, it is recommended practice for loaders
-     *   to generate a default material for yourself that matches the
-     *   default material setting for the file format better than Assimp's
-     *   generic default material. Note that default materials *should*
-     *   be named AI_DEFAULT_MATERIAL_NAME if they're just color-shaded
-     *   or AI_DEFAULT_TEXTURED_MATERIAL_NAME if they define a (dummy)
-     *   texture. </li>
-     * </ul>
-     * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is <b>not</b> set:<ul>
-     * <li> at least one mesh must be there</li>
-     * <li> there may be no meshes with 0 vertices or faces</li>
-     * </ul>
-     * This won't be checked (except by the validation step): Assimp will
-     * crash if one of the conditions is not met!
-     *
-     * @param pFile Path of the file to be imported.
-     * @param pScene The scene object to hold the imported data.
-     * nullptr is not a valid parameter.
-     * @param pIOHandler The IO handler to use for any file access.
-     * nullptr is not a valid parameter. */
-    virtual void InternReadFile(
-            const std::string &pFile,
-            aiScene *pScene,
-            IOSystem *pIOHandler) = 0;
-
-public: // static utilities
+    // static utilities
     // -------------------------------------------------------------------
     /** A utility for CanRead().
      *
@@ -393,6 +341,59 @@ public: // static utilities
             std::for_each(vec.begin(), vec.end(), [&outPtr](std::unique_ptr<T>& uPtr){*outPtr = uPtr.release(); ++outPtr; });
         }
     }
+
+protected:
+    double importerScale = 1.0;
+    double fileScale = 1.0;
+
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure. The
+     * function is expected to throw an ImportErrorException if there is
+     * an error. If it terminates normally, the data in aiScene is
+     * expected to be correct. Override this function to implement the
+     * actual importing.
+     * <br>
+     *  The output scene must meet the following requirements:<br>
+     * <ul>
+     * <li>At least a root node must be there, even if its only purpose
+     *     is to reference one mesh.</li>
+     * <li>aiMesh::mPrimitiveTypes may be 0. The types of primitives
+     *   in the mesh are determined automatically in this case.</li>
+     * <li>the vertex data is stored in a pseudo-indexed "verbose" format.
+     *   In fact this means that every vertex that is referenced by
+     *   a face is unique. Or the other way round: a vertex index may
+     *   not occur twice in a single aiMesh.</li>
+     * <li>aiAnimation::mDuration may be -1. Assimp determines the length
+     *   of the animation automatically in this case as the length of
+     *   the longest animation channel.</li>
+     * <li>aiMesh::mBitangents may be nullptr if tangents and normals are
+     *   given. In this case bitangents are computed as the cross product
+     *   between normal and tangent.</li>
+     * <li>There needn't be a material. If none is there a default material
+     *   is generated. However, it is recommended practice for loaders
+     *   to generate a default material for yourself that matches the
+     *   default material setting for the file format better than Assimp's
+     *   generic default material. Note that default materials *should*
+     *   be named AI_DEFAULT_MATERIAL_NAME if they're just color-shaded
+     *   or AI_DEFAULT_TEXTURED_MATERIAL_NAME if they define a (dummy)
+     *   texture. </li>
+     * </ul>
+     * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is <b>not</b> set:<ul>
+     * <li> at least one mesh must be there</li>
+     * <li> there may be no meshes with 0 vertices or faces</li>
+     * </ul>
+     * This won't be checked (except by the validation step): Assimp will
+     * crash if one of the conditions is not met!
+     *
+     * @param pFile Path of the file to be imported.
+     * @param pScene The scene object to hold the imported data.
+     * nullptr is not a valid parameter.
+     * @param pIOHandler The IO handler to use for any file access.
+     * nullptr is not a valid parameter. */
+    virtual void InternReadFile(
+            const std::string &pFile,
+            aiScene *pScene,
+            IOSystem *pIOHandler) = 0;
 
 private:
     /* Pushes state into importer for the importer scale */

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjFileData.h"
 #include "ObjTools.h"
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/material.h>
@@ -89,8 +90,9 @@ static constexpr char TypeOption[] = "-type";
 // -------------------------------------------------------------------
 //  Constructor
 ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
-        const std::string &,
+        const std::string &strAbsPath,
         ObjFile::Model *pModel) :
+        m_strAbsPath(strAbsPath),
         m_DataIt(buffer.begin()),
         m_DataItEnd(buffer.end()),
         m_pModel(pModel),
@@ -103,12 +105,22 @@ ObjFileMtlImporter::ObjFileMtlImporter(std::vector<char> &buffer,
         m_pModel->mDefaultMaterial = new ObjFile::Material;
         m_pModel->mDefaultMaterial->MaterialName.Set("default");
     }
+
+    // Try with OS folder separator first
+    char folderSeparator = DefaultIOSystem().getOsSeparator();
+    std::size_t found = m_strAbsPath.find_last_of(folderSeparator);
+    if (found == std::string::npos) {
+        // Not found, try alternative folder separator
+        folderSeparator = (folderSeparator == '/' ? '\\' : '/');
+        found = m_strAbsPath.find_last_of(folderSeparator);
+    }
+    if (found != std::string::npos) {
+        m_strAbsPath = m_strAbsPath.substr(0, found + 1);
+    } else {
+        m_strAbsPath = "";
+    }
     load();
 }
-
-// -------------------------------------------------------------------
-//  Destructor
-ObjFileMtlImporter::~ObjFileMtlImporter() = default;
 
 // -------------------------------------------------------------------
 //  Loads the material description
@@ -223,21 +235,61 @@ void ObjFileMtlImporter::load() {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_roughness);
-                        } else {
+                        } else if (*m_DataIt == 't') {
+                            ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_thickness);
+                        } else {
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->clearcoat);
                         }
                         break;
                     }
                     m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
                 }
                 break;
+            
+            case 'm': // Texture or metallic
+            {
+                // Save start of token (after 'm')
+                auto tokenStart = m_DataIt;  // points to 'm'
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd); // move iterator to end of token
 
-            case 'm': // Texture
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd; // advance iterator
+
+                if (keyword.compare(0, 3, "map") == 0) {
+                    // starts with "map", treat as texture map
+                    m_DataIt = tokenStart;
+                    getTexture();
+                } else if (keyword == "metallic" || keyword == "metal" || keyword == "metalness") {
+                    // parse metallic float value instead of texture
+                    getFloatIfMaterialValid(&ObjFile::Material::metallic);
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
             case 'b': // quick'n'dirty - for 'bump' sections
-            case 'r': // quick'n'dirty - for 'refl' sections
             {
                 getTexture();
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 'r': // refl (map) or roughness (float)
+            {
+                auto tokenStart = m_DataIt;  // points to 'r'
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "roughness" || keyword == "rough") {
+                    getFloatIfMaterialValid(&ObjFile::Material::roughness);
+                } else if (keyword == "refl" || keyword == "reflection") {
+                    m_DataIt = tokenStart;
+                    getTexture();
+                }
+
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -249,11 +301,60 @@ void ObjFileMtlImporter::load() {
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
-            case 'a': // Anisotropy
-            {
-                ++m_DataIt;
-                if (m_pModel->mCurrentMaterial != nullptr)
-                    getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
+            case 'a': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "aniso" || keyword == "anisotropy") {
+                    getFloatIfMaterialValid(&ObjFile::Material::anisotropy);
+                } else if (keyword == "ao") {
+                    getFloatIfMaterialValid(&ObjFile::Material::ambient_occlusion);
+                } else if (keyword == "anisor" || ai_stdStrToLower(keyword) == "anisotropicrotation") {
+                    getFloatIfMaterialValid(&ObjFile::Material::anisotropy_rotation);
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 's': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (keyword == "subsurface" || keyword == "scattering") {
+                    getFloatIfMaterialValid(&ObjFile::Material::subsurface_scattering);
+                } else if (ai_stdStrToLower(keyword) == "speculartint") {
+                    getFloatIfMaterialValid(&ObjFile::Material::specular_tint);
+                } else if (keyword == "sheen") {
+                    getFloatIfMaterialValid(&ObjFile::Material::sheen_grazing);
+                } else if (ai_stdStrToLower(keyword) == "sheentint") {
+                    getFloatIfMaterialValid(&ObjFile::Material::sheen_tint);
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+
+            case 'c': {
+                auto tokenStart = m_DataIt;
+                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                std::string keyword(tokenStart, tokenEnd);
+                m_DataIt = tokenEnd;
+
+                if (ai_stdStrToLower(keyword) == "clearcoat") {
+                    getFloatIfMaterialValid(&ObjFile::Material::clearcoat);
+                } else if (ai_stdStrToLower(keyword) == "clearcoatgloss") {
+                    getFloatIfMaterialValid(&ObjFile::Material::clearcoat_gloss);
+                } else {
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                }
+
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
 
@@ -318,6 +419,23 @@ void ObjFileMtlImporter::getFloatValue(Maybe<ai_real> &value) {
         value = Maybe<ai_real>(fast_atof(&m_buffer[0]));
     else
         value = Maybe<ai_real>();
+}
+
+// -------------------------------------------------------------------
+//  Writes a loaded single float value if material not null
+void ObjFileMtlImporter::getFloatIfMaterialValid(ai_real ObjFile::Material::*member) {
+    if (m_pModel != nullptr && m_pModel->mCurrentMaterial != nullptr) {
+        // This will call getFloatValue(ai_real&)
+        getFloatValue(m_pModel->mCurrentMaterial->*member);
+    }
+}
+
+// -------------------------------------------------------------------
+void ObjFileMtlImporter::getFloatIfMaterialValid(Maybe<ai_real> ObjFile::Material::*member) {
+    // It can directly access `m_pModel` because it's part of the class
+    if (m_pModel != nullptr && m_pModel->mCurrentMaterial != nullptr) {
+        getFloatValue(m_pModel->mCurrentMaterial->*member);
+    }
 }
 
 // -------------------------------------------------------------------
@@ -446,7 +564,7 @@ void ObjFileMtlImporter::getTexture() {
     std::string texture;
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, texture);
     if (nullptr != out) {
-        out->Set(texture);
+        out->Set(m_strAbsPath + texture);
     }
 }
 

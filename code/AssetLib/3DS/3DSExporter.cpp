@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -77,33 +76,33 @@ class ChunkWriter {
 
 public:
     ChunkWriter(StreamWriterLE &writer, uint16_t chunk_type) :
-            writer(writer) {
-        chunk_start_pos = writer.GetCurrentPos();
+            mWriter(writer) {
+        mChunkStartPos = writer.GetCurrentPos();
         writer.PutU2(chunk_type);
         writer.PutU4((uint32_t)CHUNK_SIZE_NOT_SET);
     }
 
     ~ChunkWriter() {
-        std::size_t head_pos = writer.GetCurrentPos();
+        std::size_t head_pos = mWriter.GetCurrentPos();
 
-        ai_assert(head_pos > chunk_start_pos);
-        const std::size_t chunk_size = head_pos - chunk_start_pos;
+        ai_assert(head_pos > mChunkStartPos);
+        const std::size_t chunk_size = head_pos - mChunkStartPos;
 
-        writer.SetCurrentPos(chunk_start_pos + SIZE_OFFSET);
-        writer.PutU4(static_cast<uint32_t>(chunk_size));
-        writer.SetCurrentPos(head_pos);
+        mWriter.SetCurrentPos(mChunkStartPos + SIZE_OFFSET);
+        mWriter.PutU4(static_cast<uint32_t>(chunk_size));
+        mWriter.SetCurrentPos(head_pos);
     }
 
 private:
-    StreamWriterLE &writer;
-    std::size_t chunk_start_pos;
+    StreamWriterLE &mWriter;
+    std::size_t mChunkStartPos;
 };
 
 // Return an unique name for a given |mesh| attached to |node| that
 // preserves the mesh's given name if it has one. |index| is the index
 // of the mesh in |aiScene::mMeshes|.
 std::string GetMeshName(const aiMesh &mesh, unsigned int index, const aiNode &node) {
-    static const char underscore = '_';
+    static constexpr char underscore = '_';
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
@@ -123,8 +122,7 @@ std::string GetMaterialName(const aiMaterial &mat, unsigned int index) {
     char postfix[10] = { 0 };
     ASSIMP_itoa10(postfix, index);
 
-    aiString mat_name;
-    if (AI_SUCCESS == mat.Get(AI_MATKEY_NAME, mat_name)) {
+    if (aiString mat_name; AI_SUCCESS == mat.Get(AI_MATKEY_NAME, mat_name)) {
         return mat_name.C_Str() + underscore + postfix;
     }
 
@@ -208,9 +206,6 @@ Discreet3DSExporter::Discreet3DSExporter(std::shared_ptr<IOStream> &outfile, con
         WriteHierarchy(*scene->mRootNode, -1, -1);
     }
 }
-
-// ------------------------------------------------------------------------------------------------
-Discreet3DSExporter::~Discreet3DSExporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 int Discreet3DSExporter::WriteHierarchy(const aiNode &node, int seq, int sibling_level) {
@@ -307,8 +302,7 @@ void Discreet3DSExporter::WriteMaterials() {
             WriteColor(color);
         }
 
-        aiShadingMode shading_mode = aiShadingMode_Flat;
-        if (mat.Get(AI_MATKEY_SHADING_MODEL, shading_mode) == AI_SUCCESS) {
+        if (aiShadingMode shading_mode = aiShadingMode_Flat; mat.Get(AI_MATKEY_SHADING_MODEL, shading_mode) == AI_SUCCESS) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_SHADING);
 
             Discreet3DS::shadetype3ds shading_mode_out;
@@ -336,7 +330,7 @@ void Discreet3DSExporter::WriteMaterials() {
             default:
                 shading_mode_out = Discreet3DS::Flat;
                 ai_assert(false);
-            };
+            }
             writer.PutU2(static_cast<uint16_t>(shading_mode_out));
         }
 
@@ -350,8 +344,7 @@ void Discreet3DSExporter::WriteMaterials() {
             WritePercentChunk(f);
         }
 
-        int twosided;
-        if (mat.Get(AI_MATKEY_TWOSIDED, twosided) == AI_SUCCESS && twosided != 0) {
+        if (int twosided; mat.Get(AI_MATKEY_TWOSIDED, twosided) == AI_SUCCESS && twosided != 0) {
             ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_TWO_SIDE);
             writer.PutI2(1);
         }
@@ -545,7 +538,7 @@ void Discreet3DSExporter::WriteFaceMaterialChunk(const aiMesh &mesh) {
 
 // ------------------------------------------------------------------------------------------------
 void Discreet3DSExporter::WriteString(const std::string &s) {
-    for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {
+    for (auto it = s.begin(); it != s.end(); ++it) {
         writer.PutI1(*it);
     }
     writer.PutI1('\0');

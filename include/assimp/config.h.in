@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -675,6 +675,19 @@ enum aiComponent
  */
 #define AI_CONFIG_FBX_CONVERT_TO_M \
     "AI_CONFIG_FBX_CONVERT_TO_M"
+
+// ---------------------------------------------------------------------------
+/** @brief  Set whether the FBX importer shall ignore the provided axis configuration
+ *
+ * If this property is set to true, the axis directions provided in the FBX file
+ * will be ignored and the file will be loaded as is.
+ *
+ * Set to true for Assimp 5.3.x and earlier behavior
+ * Equivalent to AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_FBX_IGNORE_UP_DIRECTION \
+    "AI_CONFIG_IMPORT_FBX_IGNORE_UP_DIRECTION"
 
 // ---------------------------------------------------------------------------
 /** @brief  Will enable the skeleton struct to store bone data.

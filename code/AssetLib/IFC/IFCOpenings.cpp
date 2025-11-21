@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -69,7 +69,7 @@ AI_FORCE_INLINE ulong64 to_int64(IfcFloat p) {
 
 AI_FORCE_INLINE IfcFloat from_int64(ulong64 p) {
     return (static_cast<IfcFloat>((p)) / max_ulong64);
-} 
+}
 
 AI_FORCE_INLINE void fillRectangle(const IfcVector2& pmin, const IfcVector2& pmax, std::vector<IfcVector2>& out) {
     out.emplace_back(pmin.x, pmin.y);
@@ -176,7 +176,7 @@ struct ProjectedWindowContour {
     SkipList skiplist;
     bool is_rectangular;
 
-    ProjectedWindowContour(const Contour& contour, const BoundingBox& bb, bool is_rectangular) 
+    ProjectedWindowContour(const Contour& contour, const BoundingBox& bb, bool is_rectangular)
             : contour(contour), bb(bb) , is_rectangular(is_rectangular) {}
 
     ~ProjectedWindowContour() = default;
@@ -215,7 +215,7 @@ static bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2
 }
 
 // ------------------------------------------------------------------------------------------------
-void ExtractVerticesFromClipper(const ClipperLib::Path& poly, std::vector<IfcVector2>& temp_contour, 
+void ExtractVerticesFromClipper(const ClipperLib::Path& poly, std::vector<IfcVector2>& temp_contour,
         bool filter_duplicates = false) {
     temp_contour.clear();
     for(const ClipperLib::IntPoint& point : poly) {
@@ -362,7 +362,7 @@ void InsertWindowContours(const ContourVector& contours, const std::vector<TempO
 }
 
 // ------------------------------------------------------------------------------------------------
-void MergeWindowContours (const std::vector<IfcVector2>& a, const std::vector<IfcVector2>& b, 
+void MergeWindowContours (const std::vector<IfcVector2>& a, const std::vector<IfcVector2>& b,
         ClipperLib::Paths& out) {
     out.clear();
 
@@ -988,16 +988,16 @@ void Quadrify(const ContourVector& contours, TempMesh& curmesh) {
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, 
+IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour,
         const TempMesh& in_mesh,
-        bool &ok, 
+        bool &ok,
         IfcVector3& nor_out) {
     const std::vector<IfcVector3>& in_verts = in_mesh.mVerts;
     if (in_verts.empty()){
         ok = false;
         return IfcMatrix4();
     }
-    
+
     ok = true;
     IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(in_mesh, ok, nor_out));
     if(!ok) {

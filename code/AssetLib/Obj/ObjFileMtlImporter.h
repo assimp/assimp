@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -71,13 +71,12 @@ public:
             ObjFile::Model *pModel);
 
     //! \brief  The class destructor
-    ~ObjFileMtlImporter();
+    ~ObjFileMtlImporter() = default;
 
     ObjFileMtlImporter(const ObjFileMtlImporter &rOther) = delete;
     ObjFileMtlImporter &operator=(const ObjFileMtlImporter &rOther) = delete;
 
 private:
-    /// Copy constructor, empty.
     /// Load the whole material description
     void load();
     /// Get color data.
@@ -88,6 +87,8 @@ private:
     /// Gets a float value from data.
     void getFloatValue(ai_real &value);
     void getFloatValue(Maybe<ai_real> &value);
+    void getFloatIfMaterialValid(ai_real ObjFile::Material::*member);
+    void getFloatIfMaterialValid(Maybe<ai_real> ObjFile::Material::*member);
     /// Creates a new material from loaded data.
     void createMaterial();
     /// Get texture name from loaded data.
@@ -108,8 +109,6 @@ private:
     //! Helper buffer
     std::vector<char> m_buffer;
 };
-
-// ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
 

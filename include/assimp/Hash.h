@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -52,15 +52,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 
 // ------------------------------------------------------------------------------------------------
-// Hashing function taken from
-// http://www.azillionmonkeys.com/qed/hash.html
-// (incremental version)
-//
-// This code is Copyright 2004-2008 by Paul Hsieh. It is used here in the belief that
-// Assimp's license is considered compatible with Pauls's derivative license as specified
-// on his web page.
-//
-// (stdint.h should have been been included here)
+/// @brief Hashing function taken from
+/// http://www.azillionmonkeys.com/qed/hash.html
+/// (incremental version)
+///
+/// This code is Copyright 2004-2008 by Paul Hsieh. It is used here in the belief that
+/// Assimp's license is considered compatible with Pauls's derivative license as specified
+/// on his web page.
+///
+/// (stdint.h should have been been included here)
 // ------------------------------------------------------------------------------------------------
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \

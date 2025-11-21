@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -53,7 +53,7 @@ namespace Assimp {
 /**
  *  @brief Internal default implementation of the #ProgressHandler interface.
  */
-class DefaultProgressHandler : public ProgressHandler    {
+class DefaultProgressHandler final : public ProgressHandler    {
 public:
     ///	@brief Ignores the update callback.
     bool Update(float) override {

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -107,6 +107,10 @@ namespace Assimp {
 * instance. Actually, constructing Importer objects involves quite many
 * allocations and may take some time, so it's better to reuse them as often as
 * possible.
+*
+* If you want to let assimp deal with OutOfMemory-exception make sure that
+* ASSIMP_CATCH_GLOBAL_EXCEPTIONS is set.
+* If this is not the case you need to catch the exception by yourself.
 *
 * If you need the Importer to do custom file handling to access the files,
 * implement IOSystem and IOStream and supply an instance of your custom

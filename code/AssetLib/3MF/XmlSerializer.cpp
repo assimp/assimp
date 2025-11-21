@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -199,11 +199,11 @@ void assignDiffuseColor(XmlNode &node, aiMaterial *mat) {
 
 } // namespace
 
-XmlSerializer::XmlSerializer(XmlParser *xmlParser) :
+XmlSerializer::XmlSerializer(XmlParser &xmlParser) :
         mResourcesDictionnary(),
         mMeshCount(0),
         mXmlParser(xmlParser) {
-    ai_assert(nullptr != xmlParser);
+    // empty
 }
 
 XmlSerializer::~XmlSerializer() {
@@ -218,7 +218,7 @@ void XmlSerializer::ImportXml(aiScene *scene) {
     }
 
     scene->mRootNode = new aiNode(XmlTag::RootTag);
-    XmlNode node = mXmlParser->getRootNode().child(XmlTag::model);
+    XmlNode node = mXmlParser.getRootNode().child(XmlTag::model);
     if (node.empty()) {
         return;
     }
@@ -680,7 +680,7 @@ void XmlSerializer::ReadColor(XmlNode &node, ColorGroup *colorGroup) {
     for (XmlNode currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == XmlTag::color_item) {
-            const char *color = currentNode.attribute(XmlTag::color_vaule).as_string();
+            const char *color = currentNode.attribute(XmlTag::color_value).as_string();
             aiColor4D color_value;
             if (parseColor(color, color_value)) {
                 colorGroup->mColors.push_back(color_value);

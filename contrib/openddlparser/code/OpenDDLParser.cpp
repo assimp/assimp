@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014-2020 Kim Kulling
+Copyright (c) 2014-2025 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -74,12 +74,11 @@ const char *getTypeToken(Value::ValueType type) {
     return Grammar::PrimitiveTypeToken[(size_t)type];
 }
 
-static void logInvalidTokenError(const char *in, const std::string &exp, OpenDDLParser::logCallback callback) {
-    if (callback) {
-        std::string full(in);
-        std::string part(full.substr(0, 50));
+static void logInvalidTokenError(const std::string &in, const std::string &exp, OpenDDLParser::logCallback callback) {
+    if (callback) {\
+        std::string part(in.substr(0, 50));
         std::stringstream stream;
-        stream << "Invalid token \"" << *in << "\" "
+        stream << "Invalid token \"" << in << "\" "
                << "(expected \"" << exp << "\") "
                << "in: \"" << part << "\"";
         callback(ddl_error_msg, stream.str());
@@ -150,7 +149,7 @@ void OpenDDLParser::logToStream(FILE *f, LogSeverity severity, const std::string
 
 OpenDDLParser::logCallback OpenDDLParser::StdLogCallback (FILE *destination) {
     using namespace std::placeholders;
-    return std::bind(logToStream, destination ? destination : stderr, _1, _2);
+    return [capture0 = destination ? destination : stderr](auto && PH1, auto && PH2) { logToStream(capture0, std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
 }
 
 void OpenDDLParser::setLogCallback(logCallback callback) {
@@ -290,8 +289,8 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
         if (nullptr != name && nullptr != node && nullptr != name->m_id->m_buffer) {
             const std::string nodeName(name->m_id->m_buffer);
             node->setName(nodeName);
-            delete name;
         }
+        delete name;
 
         Property *first(nullptr);
         in = lookForNextToken(in, end);
@@ -306,7 +305,7 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
                 }
 
                 if (*in != Grammar::CommaSeparator[0] && *in != Grammar::ClosePropertyToken[0]) {
-                    logInvalidTokenError(in, Grammar::ClosePropertyToken, m_logCallback);
+                    logInvalidTokenError(std::string(in, end), Grammar::ClosePropertyToken, m_logCallback);
                     return nullptr;
                 }
 
@@ -355,8 +354,7 @@ char *OpenDDLParser::parseStructure(char *in, char *end) {
                 ++in;
             }
         } else {
-            ++in;
-            logInvalidTokenError(in, std::string(Grammar::OpenBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::OpenBracketToken), m_logCallback);
             error = true;
             return nullptr;
         }
@@ -427,7 +425,7 @@ char *OpenDDLParser::parseStructureBody(char *in, char *end, bool &error) {
 
         in = lookForNextToken(in, end);
         if (in == end || *in != '}') {
-            logInvalidTokenError(in == end ? "" : in, std::string(Grammar::CloseBracketToken), m_logCallback);
+            logInvalidTokenError(std::string(in, end), std::string(Grammar::CloseBracketToken), m_logCallback);
             return nullptr;
         } else {
             //in++;
@@ -585,6 +583,9 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
     size_t prim_len(0);
     for (size_t i = 0; i < (size_t) Value::ValueType::ddl_types_max; i++) {
         prim_len = strlen(Grammar::PrimitiveTypeToken[i]);
+        if (static_cast<size_t>(end - in) < prim_len) {
+            continue;
+        }
         if (0 == strncmp(in, Grammar::PrimitiveTypeToken[i], prim_len)) {
             type = static_cast<Value::ValueType>(i);
             break;
@@ -597,6 +598,9 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
     } else {
         in += prim_len;
     }
+    if (in >= end) {
+        return in;
+    }
 
     bool ok(true);
     if (*in == Grammar::OpenArrayToken[0]) {
@@ -604,13 +608,13 @@ char *OpenDDLParser::parsePrimitiveDataType(char *in, char *end, Value::ValueTyp
         ++in;
         char *start(in);
         while (in != end) {
-            ++in;
             if (*in == Grammar::CloseArrayToken[0]) {
                 len = ::atoi(start);
                 ok = true;
                 ++in;
                 break;
             }
+            ++in;
         }
     } else {
         len = 1;
@@ -632,9 +636,9 @@ char *OpenDDLParser::parseReference(char *in, char *end, std::vector<Name *> &na
     if (nextName) {
         names.push_back(nextName);
     }
-    while (Grammar::CommaSeparator[0] == *in) {
+    while (in != end && Grammar::CommaSeparator[0] == *in) {
         in = getNextSeparator(in, end);
-        if (Grammar::CommaSeparator[0] == *in) {
+        if (in != end && Grammar::CommaSeparator[0] == *in) {
             in = parseName(in, end, &nextName);
             if (nextName) {
                 names.push_back(nextName);
@@ -657,7 +661,7 @@ char *OpenDDLParser::parseBooleanLiteral(char *in, char *end, Value **boolean) {
     char *start(in);
 
     size_t len(0);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
         ++len;
     }
@@ -690,7 +694,7 @@ char *OpenDDLParser::parseIntegerLiteral(char *in, char *end, Value **integer, V
 
     in = lookForNextToken(in, end);
     char *start(in);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         ++in;
     }
 
@@ -833,7 +837,7 @@ char *OpenDDLParser::parseHexaLiteral(char *in, char *end, Value **data) {
     bool ok(true);
     char *start(in);
     int pos(0);
-    while (!isSeparator(*in) && in != end) {
+    while (in != end && !isSeparator(*in)) {
         if ((*in < '0' && *in > '9') || (*in < 'a' && *in > 'f') || (*in < 'A' && *in > 'F')) {
             ok = false;
             break;

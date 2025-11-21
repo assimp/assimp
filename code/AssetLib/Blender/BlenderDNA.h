@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -56,14 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // enable verbose log output. really verbose, so be careful.
 #ifdef ASSIMP_BUILD_DEBUG
-#define ASSIMP_BUILD_BLENDER_DEBUG
+#   define ASSIMP_BUILD_BLENDER_DEBUG
 #endif
 
 // set this to non-zero to dump BlenderDNA stuff to dna.txt.
 // you could set it on the assimp build command line too without touching it here.
 // !!! please make sure this is set to 0 in the repo !!!
 #ifndef ASSIMP_BUILD_BLENDER_DEBUG_DNA
-#define ASSIMP_BUILD_BLENDER_DEBUG_DNA 0
+#   define ASSIMP_BUILD_BLENDER_DEBUG_DNA 0
 #endif
 
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
@@ -125,22 +124,14 @@ struct ElemBase {
  *  they used to point to.*/
 // -------------------------------------------------------------------------------
 struct Pointer {
-    Pointer() :
-            val() {
-        // empty
-    }
-    uint64_t val;
+    uint64_t val{0};
 };
 
 // -------------------------------------------------------------------------------
 /** Represents a generic offset within a BLEND file */
 // -------------------------------------------------------------------------------
 struct FileOffset {
-    FileOffset() :
-            val() {
-        // empty
-    }
-    uint64_t val;
+    uint64_t val{0};
 };
 
 // -------------------------------------------------------------------------------
@@ -205,7 +196,7 @@ enum ErrorPolicy {
 };
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
-#define ErrorPolicy_Igno ErrorPolicy_Warn
+#   define ErrorPolicy_Igno ErrorPolicy_Warn
 #endif
 
 // -------------------------------------------------------------------------------
@@ -397,10 +388,9 @@ private:
     mutable size_t cache_idx;
 };
 
-// --------------------------------------------------------
-template <>
+// -------------------------------------------------------------------------------------------------------
+template<>
 struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
-
     template <typename T>
     void operator()(T &out, const char *reason = "<add reason>") {
         ASSIMP_LOG_WARN(reason);
@@ -410,9 +400,9 @@ struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
     }
 };
 
-template <>
+// -------------------------------------------------------------------------------------------------------
+template<>
 struct Structure::_defaultInitializer<ErrorPolicy_Fail> {
-
     template <typename T>
     void operator()(T & /*out*/, const char *message = "") {
         // obviously, it is crucial that _DefaultInitializer is used
@@ -620,31 +610,23 @@ public:
 /** Import statistics, i.e. number of file blocks read*/
 // -------------------------------------------------------------------------------
 class Statistics {
-
 public:
-    Statistics() :
-            fields_read(), pointers_resolved(), cache_hits()
-            //      , blocks_read       ()
-            ,
-            cached_objects() {}
+    Statistics() = default;
+    ~Statistics() = default;
 
-public:
-    /** total number of fields we read */
+    /// total number of fields we read
     unsigned int fields_read;
 
-    /** total number of resolved pointers */
+    /// total number of resolved pointers
     unsigned int pointers_resolved;
 
-    /** number of pointers resolved from the cache */
+    /// number of pointers resolved from the cache
     unsigned int cache_hits;
 
-    /** number of blocks (from  FileDatabase::entries)
-      we did actually read from. */
-    // unsigned int blocks_read;
-
-    /** objects in FileData::cache */
+    /// objects in FileData::cache
     unsigned int cached_objects;
 };
+
 #endif
 
 // -------------------------------------------------------------------------------
@@ -657,15 +639,13 @@ public:
     typedef std::map<Pointer, TOUT<ElemBase>> StructureCache;
 
 public:
-    ObjectCache(const FileDatabase &db) :
-            db(db) {
+    explicit ObjectCache(const FileDatabase &db) : db(db) {
         // currently there are only ~400 structure records per blend file.
         // we read only a small part of them and don't cache objects
         // which we don't need, so this should suffice.
         caches.reserve(64);
     }
 
-public:
     // --------------------------------------------------------
     /** Check whether a specific item is in the cache.
      *  @param s Data type of the item
@@ -673,10 +653,7 @@ public:
      *   cache doesn't know the item yet.
      *  @param ptr Item address to look for. */
     template <typename T>
-    void get(
-            const Structure &s,
-            TOUT<T> &out,
-            const Pointer &ptr) const;
+    void get( const Structure &s,TOUT<T> &out, const Pointer &ptr) const;
 
     // --------------------------------------------------------
     /** Add an item to the cache after the item has
@@ -701,7 +678,7 @@ private:
 template <>
 class ObjectCache<Blender::vector> {
 public:
-    ObjectCache(const FileDatabase &) {}
+    explicit ObjectCache(const FileDatabase &) {}
 
     template <typename T>
     void get(const Structure &, vector<T> &, const Pointer &) {}
@@ -710,7 +687,7 @@ public:
 };
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4355)
+#   pragma warning(disable : 4355)
 #endif
 
 // -------------------------------------------------------------------------------
@@ -725,16 +702,6 @@ public:
     FileDatabase() :
             _cacheArrays(*this), _cache(*this), next_cache_idx() {}
 
-public:
-    // publicly accessible fields
-    bool i64bit;
-    bool little;
-
-    DNA dna;
-    std::shared_ptr<StreamReaderAny> reader;
-    vector<FileBlockHead> entries;
-
-public:
     Statistics &stats() const {
         return _stats;
     }
@@ -753,6 +720,15 @@ public:
         return _cacheArrays;
     }
 
+public:
+    // publicly accessible fields
+    bool i64bit;
+    bool little;
+
+    DNA dna;
+    std::shared_ptr<StreamReaderAny> reader;
+    vector<FileBlockHead> entries;
+
 private:
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
     mutable Statistics _stats;
@@ -765,20 +741,19 @@ private:
 };
 
 #ifdef _MSC_VER
-#pragma warning(default : 4355)
+#   pragma warning(default : 4355)
 #endif
 
 // -------------------------------------------------------------------------------
 /** Factory to extract a #DNA from the DNA1 file block in a BLEND file. */
 // -------------------------------------------------------------------------------
 class DNAParser {
-
 public:
     /** Bind the parser to a empty DNA and an input stream */
-    DNAParser(FileDatabase &db) :
-            db(db) {}
+    explicit DNAParser(FileDatabase &db) : db(db) {
+        // empty
+    }
 
-public:
     // --------------------------------------------------------
     /** Locate the DNA in the file and parse it. The input
      *  stream is expected to point to the beginning of the DN1
@@ -789,7 +764,6 @@ public:
      *    afterwards.*/
     void Parse();
 
-public:
     /** Obtain a reference to the extracted DNA information */
     const Blender::DNA &GetDNA() const {
         return db.dna;

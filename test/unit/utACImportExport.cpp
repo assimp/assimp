@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -140,4 +140,15 @@ TEST(utACImportExport, testFormatDetection) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/TestFormatDetection", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST(utACImportExport, importDobuleSidedFaces) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/doubleSidedFace.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    // The scene contains one double-sided, rectangular AC surface. It should resolve to two quads (front + back) with eight
+    // vertices (one per side to guarantee proper normal vectors).
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    ASSERT_EQ(scene->mMeshes[0]->mNumFaces, 2u);
+    ASSERT_EQ(scene->mMeshes[0]->mNumVertices, 8u);
 }

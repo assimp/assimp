@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -106,10 +106,14 @@ TEST_F(utSTLImporterExporter, exporterTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
 
     Assimp::Exporter mAiExporter;
-    mAiExporter.Export(scene, "stl", "spiderExport.stl");
+    const char *stlFileName = "spiderExport.stl";
+    mAiExporter.Export(scene, "stl", stlFileName);
 
-    const aiScene *scene2 = importer.ReadFile("spiderExport.stl", aiProcess_ValidateDataStructure);
+    const aiScene *scene2 = importer.ReadFile(stlFileName, aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene2);
+
+    // Cleanup, delete the exported file
+    std::remove(stlFileName);
 }
 
 TEST_F(utSTLImporterExporter, test_export_pointclouds) {
@@ -162,8 +166,12 @@ TEST_F(utSTLImporterExporter, test_export_pointclouds) {
     Assimp::Exporter mAiExporter;
     ExportProperties *properties = new ExportProperties;
     properties->SetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS, true);
-    mAiExporter.Export(&scene, "stl", "testExport.stl", 0, properties);
 
+    const char *stlFileName = "testExport.stl";
+    mAiExporter.Export(&scene, "stl", stlFileName, 0, properties);
+
+    // Cleanup, delete the exported file
+    ::remove(stlFileName);
     delete properties;
 }
 

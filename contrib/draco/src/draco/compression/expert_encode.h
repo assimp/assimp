@@ -132,6 +132,13 @@ class ExpertEncoder : public EncoderBase<EncoderOptions> {
   Status SetAttributePredictionScheme(int32_t attribute_id,
                                       int prediction_scheme_method);
 
+#ifdef DRACO_TRANSCODER_SUPPORTED
+  // Applies grid quantization to position attribute in point cloud |pc| at
+  // |attribute_index| with a given grid |spacing|.
+  Status SetAttributeGridQuantization(const PointCloud &pc, int attribute_index,
+                                      float spacing);
+#endif  // DRACO_TRANSCODER_SUPPORTED
+
  private:
   Status EncodePointCloudToBuffer(const PointCloud &pc,
                                   EncoderBuffer *out_buffer);
@@ -139,9 +146,9 @@ class ExpertEncoder : public EncoderBase<EncoderOptions> {
   Status EncodeMeshToBuffer(const Mesh &m, EncoderBuffer *out_buffer);
 
 #ifdef DRACO_TRANSCODER_SUPPORTED
-  // Applies compression options stored in |mesh|.
-  Status ApplyCompressionOptions(const Mesh &mesh);
-  Status ApplyGridQuantization(const Mesh &mesh, int attribute_index);
+  // Applies compression options stored in |pc|.
+  Status ApplyCompressionOptions(const PointCloud &pc);
+  Status ApplyGridQuantization(const PointCloud &pc, int attribute_index);
 #endif  // DRACO_TRANSCODER_SUPPORTED
 
   const PointCloud *point_cloud_;

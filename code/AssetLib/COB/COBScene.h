@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -52,68 +52,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <deque>
 #include <map>
 
-namespace Assimp {
-namespace COB {
+namespace Assimp::COB {
 
 // ------------------
 /** Represents a single vertex index in a face */
-struct VertexIndex
-{
+struct VertexIndex {
     // intentionally uninitialized
     unsigned int pos_idx,uv_idx;
 };
 
 // ------------------
 /** COB Face data structure */
-struct Face
-{
+struct Face {
     // intentionally uninitialized
-    unsigned int material, flags;
+    unsigned int material;
+    unsigned int flags;
     std::vector<VertexIndex> indices;
 };
 
 // ------------------
 /** COB chunk header information */
-const unsigned int NO_SIZE = UINT_MAX;
+constexpr unsigned int NO_SIZE = UINT_MAX;
 
-struct ChunkInfo
-{
-    ChunkInfo ()
-        :   id        (0)
-        ,   parent_id (0)
-        ,   version   (0)
-        ,   size      (NO_SIZE)
-    {}
+struct ChunkInfo {
+    ChunkInfo() = default;
+    virtual ~ChunkInfo() = default;
 
     // Id of this chunk, unique within file
-    unsigned int id;
+    unsigned int id{ 0 };
 
     // and the corresponding parent
-    unsigned int parent_id;
+    unsigned int parent_id{ 0 };
 
     // version. v1.23 becomes 123
-    unsigned int version;
+    unsigned int version{ 0 };
 
     // chunk size in bytes, only relevant for binary files
     // NO_SIZE is also valid.
-    unsigned int size;
+    unsigned int size{NO_SIZE};
 };
 
 // ------------------
 /** A node in the scenegraph */
-struct Node : public ChunkInfo
-{
+struct Node : ChunkInfo {
     enum Type {
-        TYPE_MESH,TYPE_GROUP,TYPE_LIGHT,TYPE_CAMERA,TYPE_BONE
+        TYPE_INVALID = -1,
+        TYPE_MESH = 0,
+        TYPE_GROUP,
+        TYPE_LIGHT,
+        TYPE_CAMERA,
+        TYPE_BONE,
+        TYPE_COUNT
     };
 
-    virtual ~Node() = default;
-    Node(Type type) : type(type), unit_scale(1.f){}
+    ~Node() override = default;
+    explicit Node(Type type) : type(type), unit_scale(1.f){}
 
     Type type;
 
     // used during resolving
-    typedef std::deque<const Node*> ChildList;
+    using ChildList = std::deque<const Node*> ;
     mutable ChildList temp_children;
 
     // unique name
@@ -128,8 +126,7 @@ struct Node : public ChunkInfo
 
 // ------------------
 /** COB Mesh data structure */
-struct Mesh : public Node
-{
+struct Mesh final : Node {
     using ChunkInfo::operator=;
     enum DrawFlags {
         SOLID = 0x1,
@@ -162,107 +159,118 @@ struct Mesh : public Node
 
 // ------------------
 /** COB Group data structure */
-struct Group : public Node
-{
+struct Group final : Node {
     using ChunkInfo::operator=;
-    Group() : Node(TYPE_GROUP) {}
+    
+    Group() : Node(TYPE_GROUP) {
+        // empty
+    }
 };
 
 // ------------------
 /** COB Bone data structure */
-struct Bone : public Node
-{
+struct Bone final : Node {
     using ChunkInfo::operator=;
-    Bone() : Node(TYPE_BONE) {}
+    
+    Bone() : Node(TYPE_BONE) {
+        // empty
+    }
 };
 
 // ------------------
 /** COB Light data structure */
-struct Light : public Node
-{
+struct Light final : Node {
     enum LightType {
-        SPOT,LOCAL,INFINITE
+        SPOT,
+        LOCAL,
+        INFINITE
     };
 
     using ChunkInfo::operator=;
-    Light() : Node(TYPE_LIGHT),angle(),inner_angle(),ltype(SPOT) {}
+
+    Light() : Node(TYPE_LIGHT), ltype() {
+        // empty
+    }
 
     aiColor3D color;
-    float angle,inner_angle;
+    float angle{ 0.0f };
+    float inner_angle{ 0.0f };
 
-    LightType ltype;
+    LightType ltype{SPOT};
 };
 
 // ------------------
 /** COB Camera data structure */
-struct Camera : public Node
-{
+struct Camera final : Node {
     using ChunkInfo::operator=;
-    Camera() : Node(TYPE_CAMERA) {}
+
+    Camera() : Node(TYPE_CAMERA) {
+        // empty
+    }
 };
 
 // ------------------
 /** COB Texture data structure */
-struct Texture
-{
+struct Texture {
     std::string path;
     aiUVTransform transform;
 };
 
 // ------------------
 /** COB Material data structure */
-struct Material : ChunkInfo
-{
+struct Material : ChunkInfo {
     using ChunkInfo::operator=;
+
     enum Shader {
-        FLAT,PHONG,METAL
+        FLAT,
+        PHONG,
+        METAL
     };
 
     enum AutoFacet {
-        FACETED,AUTOFACETED,SMOOTH
+        FACETED,
+        AUTOFACETED,
+        SMOOTH
     };
 
-    Material() : alpha(),exp(),ior(),ka(),ks(1.f),
-        matnum(UINT_MAX),
-        shader(FLAT),autofacet(FACETED),
-        autofacet_angle()
-    {}
+    Material() : shader(FLAT) {
+        // empty
+    }
 
     std::string type;
-
     aiColor3D rgb;
-    float alpha, exp, ior,ka,ks;
-
-    unsigned int matnum;
+    float alpha{ 0.0f };
+    float exp{ 0.0f };
+    float ior{ 0.0f };
+    float ka{ 0.0f };
+    float ks{ 1.0f };
+    unsigned int matnum{ UINT_MAX };
     Shader shader;
-
-    AutoFacet autofacet;
-    float autofacet_angle;
-
+    AutoFacet autofacet{FACETED};
+    float autofacet_angle{ 0.0f };
     std::shared_ptr<Texture> tex_env,tex_bump,tex_color;
 };
 
 // ------------------
 /** Embedded bitmap, for instance for the thumbnail image */
-struct Bitmap : ChunkInfo
-{
-    Bitmap() : orig_size() {}
-    struct BitmapHeader
-    {
+struct Bitmap : ChunkInfo {
+    Bitmap() = default;
+
+    struct BitmapHeader {
+        // empty
     };
 
     BitmapHeader head;
-    size_t orig_size;
+    size_t orig_size{ 0u };
     std::vector<char> buff_zipped;
 };
 
-typedef std::deque< std::shared_ptr<Node> > NodeList;
-typedef std::vector< Material > MaterialList;
+using NodeList      = std::deque< std::shared_ptr<Node>>;
+using MaterialList = std::vector< Material >;
 
 // ------------------
 /** Represents a master COB scene, even if we loaded just a single COB file */
-struct Scene
-{
+struct Scene {
     NodeList nodes;
     MaterialList materials;
 
@@ -270,7 +278,6 @@ struct Scene
     Bitmap thumbnail;
 };
 
-    } // end COB
-} // end Assimp
+} // end Assimp::COB
 
-#endif
+#endif // INCLUDED_AI_COB_SCENE_H

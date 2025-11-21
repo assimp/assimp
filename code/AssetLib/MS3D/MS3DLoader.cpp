@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,10 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Written against http://chumbalum.swissquake.ch/ms3d/ms3dspec.txt
  */
 
-
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
 
-// internal headers
 #include "MS3DLoader.h"
 #include <assimp/StreamReader.h>
 #include <assimp/DefaultLogger.hpp>
@@ -392,13 +388,14 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
     if (need_default && materials.size()) {
         ASSIMP_LOG_WARN("MS3D: Found group with no material assigned, spawning default material");
-        // if one of the groups has no material assigned, but there are other
+          // if one of the groups has no material assigned, but there are other
         // groups with materials, a default material needs to be added (
         // scenepreprocessor adds a default material only if nummat==0).
         materials.emplace_back();
         TempMaterial& m = materials.back();
-
-        strcpy(m.name,"<MS3D_DefaultMat>");
+        constexpr char DefaultMat[18] = "<MS3D_DefaultMat>";
+        strncpy(m.name, DefaultMat, sizeof(m.name));
+        m.name[18]='\0';
         m.diffuse = aiColor4D(0.6f,0.6f,0.6f,1.0);
         m.transparency = 1.f;
         m.shininess = 0.f;

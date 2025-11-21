@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -111,6 +111,7 @@ struct Vertex {
     aiColor4D colors[AI_MAX_NUMBER_OF_COLOR_SETS];
 
     Vertex() = default;
+    ~Vertex() = default;
 
     // ----------------------------------------------------------------------------
     /** Extract a particular vertex from a mesh and interleave all components */

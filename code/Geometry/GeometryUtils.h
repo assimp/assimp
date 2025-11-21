@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -54,7 +54,7 @@ public:
     /// @param b  The first vertex of the triangle.
     /// @param c  The first vertex of the triangle.
     static ai_real heron( ai_real a, ai_real b, ai_real c );
-    
+
     /// @brief Will compute the distance between 2 3D-vectors
     /// @param vA  Vector a.
     /// @param vB  Vector b.

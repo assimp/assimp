@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -78,7 +78,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene) {
     if (pScene->mNumMaterials == 0) {
         return;
     }
-        
+
     // Find out which materials are referenced by meshes
     std::vector<bool> abReferenced(pScene->mNumMaterials,false);
     for (unsigned int i = 0;i < pScene->mNumMeshes;++i) {

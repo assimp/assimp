@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -35,7 +35,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -55,37 +54,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory> // shared_ptr
 
 namespace Assimp {
+
 // AddP70<type> helpers... there's no usable pattern here,
 // so all are defined as separate functions.
 // Even "animatable" properties are often completely different
 // from the standard (nonanimated) property definition,
 // so they are specified with an 'A' suffix.
 
-void FBX::Node::AddP70int(
-    const std::string& cur_name, int32_t value
-) {
+void FBX::Node::AddP70int(const std::string& cur_name, int32_t value) {
     FBX::Node n("P");
     n.AddProperties(cur_name, "int", "Integer", "", value);
     AddChild(n);
 }
 
-void FBX::Node::AddP70bool(
-    const std::string& cur_name, bool value
-) {
+void FBX::Node::AddP70bool(const std::string& cur_name, bool value) {
     FBX::Node n("P");
     n.AddProperties(cur_name, "bool", "", "", int32_t(value));
     AddChild(n);
 }
 
-void FBX::Node::AddP70double(
-        const std::string &cur_name, double value) {
-    FBX::Node n("P");
+void FBX::Node::AddP70double(const std::string &cur_name, double value) {    FBX::Node n("P");
     n.AddProperties(cur_name, "double", "Number", "", value);
     AddChild(n);
 }
 
-void FBX::Node::AddP70numberA(
-        const std::string &cur_name, double value) {
+void FBX::Node::AddP70numberA(const std::string &cur_name, double value) {
     FBX::Node n("P");
     n.AddProperties(cur_name, "Number", "", "A", value);
     AddChild(n);
@@ -405,8 +398,7 @@ void FBX::Node::DumpChildrenAscii(std::ostream& s, int indent)
     }
 }
 
-void FBX::Node::EndAscii(std::ostream& s, int indent, bool has_children)
-{
+void FBX::Node::EndAscii(std::ostream& s, int indent, bool has_children) {
     if (!has_children) { return; } // nothing to do
     s << '\n';
     for (int i = 0; i < indent; ++i) { s << '\t'; }
@@ -417,11 +409,10 @@ void FBX::Node::EndAscii(std::ostream& s, int indent, bool has_children)
 
 // ascii property node from vector of doubles
 void FBX::Node::WritePropertyNodeAscii(
-    const std::string& name,
-    const std::vector<double>& v,
-    Assimp::StreamWriterLE& s,
-    int indent
-){
+        const std::string& name,
+        const std::vector<double>& v,
+        Assimp::StreamWriterLE& s,
+        int indent){
     char buffer[32];
     FBX::Node node(name);
     node.Begin(s, false, indent);
@@ -556,6 +547,8 @@ void FBX::Node::WritePropertyNode(
         FBX::Node::WritePropertyNodeAscii(name, v, s, indent);
     }
 }
-}
+
+} // namespace Assimp
+
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

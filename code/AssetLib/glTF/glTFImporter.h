@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -62,7 +61,7 @@ namespace Assimp {
 class glTFImporter : public BaseImporter {
 public:
     glTFImporter();
-    ~glTFImporter() override;
+    ~glTFImporter() override = default;
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
@@ -71,12 +70,12 @@ protected:
 
 private:
     void ImportEmbeddedTextures(glTF::Asset &a);
-    void ImportMaterials(glTF::Asset &a);
+    void ImportMaterials(glTF::Asset &a) const;
     void ImportMeshes(glTF::Asset &a);
-    void ImportCameras(glTF::Asset &a);
-    void ImportLights(glTF::Asset &a);
+    void ImportCameras(glTF::Asset &a) const;
+    void ImportLights(glTF::Asset &a) const;
     void ImportNodes(glTF::Asset &a);
-    void ImportCommonMetadata(glTF::Asset &a);
+    void ImportCommonMetadata(const glTF::Asset &a) const;
 
 private:
     std::vector<unsigned int> meshOffsets;

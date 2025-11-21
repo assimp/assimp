@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -375,6 +375,9 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
     // UTF 32 BE with BOM
     if (*((uint32_t *)&data.front()) == 0xFFFE0000) {
+        if (data.size() % sizeof(uint32_t) != 0) {
+            throw DeadlyImportError("Not valid UTF-32 BE");
+        }
 
         // swap the endianness ..
         for (uint32_t *p = (uint32_t *)&data.front(), *end = (uint32_t *)&data.back(); p <= end; ++p) {
@@ -384,11 +387,14 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
     // UTF 32 LE with BOM
     if (*((uint32_t *)&data.front()) == 0x0000FFFE) {
+        if (data.size() % sizeof(uint32_t) != 0) {
+            throw DeadlyImportError("Not valid UTF-32 LE");
+        }
         ASSIMP_LOG_DEBUG("Found UTF-32 BOM ...");
 
         std::vector<char> output;
-        int *ptr = (int *)&data[0];
-        int *end = ptr + (data.size() / sizeof(int)) + 1;
+        auto *ptr = (uint32_t *)&data[0];
+        uint32_t *end = ptr + (data.size() / sizeof(uint32_t)) + 1;
         utf8::utf32to8(ptr, end, back_inserter(output));
         return;
     }
@@ -396,8 +402,8 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
     // UTF 16 BE with BOM
     if (*((uint16_t *)&data.front()) == 0xFFFE) {
         // Check to ensure no overflow can happen
-        if(data.size() % 2 != 0) {
-            return;
+        if (data.size() % sizeof(uint16_t) != 0) {
+            throw DeadlyImportError("Not valid UTF-16 BE");
         }
         // swap the endianness ..
         for (uint16_t *p = (uint16_t *)&data.front(), *end = (uint16_t *)&data.back(); p <= end; ++p) {
@@ -407,6 +413,9 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
     // UTF 16 LE with BOM
     if (*((uint16_t *)&data.front()) == 0xFEFF) {
+        if (data.size() % sizeof(uint16_t) != 0) {
+            throw DeadlyImportError("Not valid UTF-16 LE");
+        }
         ASSIMP_LOG_DEBUG("Found UTF-16 BOM ...");
 
         std::vector<unsigned char> output;

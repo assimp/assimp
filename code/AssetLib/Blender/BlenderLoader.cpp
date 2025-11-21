@@ -1,10 +1,8 @@
-
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -110,7 +108,7 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char Token[] = "BLENDER";
+static constexpr char Token[] = "BLENDER";
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -495,8 +493,9 @@ void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
             if (index == static_cast<unsigned int>(-1)) {
                 // Setup a default material.
                 std::shared_ptr<Material> p(new Material());
-                ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name) - 2);
-                strcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME);
+                const size_t len = ::strlen(AI_DEFAULT_MATERIAL_NAME);
+                ai_assert(len < sizeof(p->id.name) - 2);
+                memcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
                 // Thus all relevant fields should be explicitly initialized. We cannot add

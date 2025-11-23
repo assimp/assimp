@@ -140,9 +140,11 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         if (insideCstype) {
             switch (*m_DataIt) {
             case 'e': {
-                std::string name;
-                getNameNoSpace(m_DataIt, m_DataItEnd, name);
-                insideCstype = name != "end";
+                char *name{nullptr};
+                size_t len{0};
+                getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
+                //insideCstype = name != "end";
+                insideCstype = strncmp(name, "end", len)  == 0;
             } break;
             }
             goto pf_skip_line;
@@ -198,32 +200,37 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'u': // Parse a material desc. setter
         {
-            std::string name;
+            //std::string name;
+            char *name{nullptr};
+            size_t len{ 0 };
+            getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
 
-            getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            //size_t nextSpace = name.find(' ');
+            //if (nextSpace != std::string::npos)
+            //    name = name.substr(0, nextSpace);
 
-            size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos)
-                name = name.substr(0, nextSpace);
-
-            if (name == "usemtl") {
+            //if (name == "usemtl") {
+            if (strncmp(name, "usemtl", len) == 0) {
                 getMaterialDesc();
             }
         } break;
 
         case 'm': // Parse a material library or merging group ('mg')
         {
-            std::string name;
+//            std::string name;
+            char *name{nullptr};
+            size_t len{ 0 };
+            getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
 
-            getNameNoSpace(m_DataIt, m_DataItEnd, name);
+            //size_t nextSpace = name.find(' ');
+            //if (nextSpace != std::string::npos)
+            //  name = name.substr(0, nextSpace);
 
-            size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos)
-                name = name.substr(0, nextSpace);
-
-            if (name == "mg")
+            if (strncmp(name, "mg", len) == 0)
+            //if (name == "mg")
                 getGroupNumberAndResolution();
-            else if (name == "mtllib")
+            //else if (name == "mtllib")
+            else if (strncmp(name, "mtllib", len) == 0)
                 getMaterialLib();
             else
                 goto pf_skip_line;
@@ -246,9 +253,12 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'c': // handle cstype section start
         {
-            std::string name;
-            getNameNoSpace(m_DataIt, m_DataItEnd, name);
-            insideCstype = name == "cstype";
+            //std::string name;
+            char *name{nullptr};
+            size_t len{0};
+            getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
+            //insideCstype = name == "cstype";
+            insideCstype = strncmp(name, "cstype", len) == 0;
             goto pf_skip_line;
         }
 

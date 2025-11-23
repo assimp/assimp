@@ -177,8 +177,9 @@ inline char_t getName(char_t it, char_t end, std::string &name) {
  *  @return Current-iterator with new position
  */
 template <class char_t>
-inline char_t getNameNoSpace(char_t it, char_t end, std::string &name) {
-    name = "";
+inline char_t getNameNoSpace(char_t it, char_t end, char **name, size_t &len) {
+    *name = nullptr;
+    len = 0;
     if (isEndOfBuffer(it, end)) {
         return end;
     }
@@ -186,22 +187,23 @@ inline char_t getNameNoSpace(char_t it, char_t end, std::string &name) {
     char *pStart = &(*it);
     while (!isEndOfBuffer(it, end) && !IsLineEnd(*it) && !IsSpaceOrNewLine(*it)) {
         ++it;
+        ++len;
     }
 
     while (isEndOfBuffer(it, end) || IsLineEnd(*it) || IsSpaceOrNewLine(*it)) {
         --it;
+        --len;
     }
     ++it;
+    ++len;
 
     // Get name
     // if there is no name, and the previous char is a separator, come back to start
     while (&(*it) < pStart) {
         ++it;
+        ++len;
     }
-    std::string strName(pStart, &(*it));
-    if (!strName.empty()) {
-        name = strName;
-    }
+    *name = pStart;
 
     return it;
 }

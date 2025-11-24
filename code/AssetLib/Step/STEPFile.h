@@ -919,6 +919,10 @@ private:
 #pragma warning(pop)
 #endif // _MSC_VER
 
+#if _MSC_VER > 1920
+#pragma warning(pop)
+#endif
+
 } // namespace STEP
 } // namespace Assimp
 

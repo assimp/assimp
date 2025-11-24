@@ -124,8 +124,23 @@ public:
             aiScene *pScene,
             const std::string &nameWExt);
 
+    void setupNodes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            const tinyusdz::Stage &usdStage,
+            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+            const std::string &nameWExt
+            );
+
+    aiNode *nodes(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            const tinyusdz::Stage &usdStage,
+            std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+            const std::string &nameWExt);
+
     aiNode *nodesRecursive(
             aiNode *pNodeParent,
+            const tinyusdz::Prim &prim,
             const tinyusdz::tydra::Node &node,
             const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons);
 

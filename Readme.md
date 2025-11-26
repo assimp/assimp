@@ -61,28 +61,32 @@ Start by reading [our build instructions](https://github.com/assimp/assimp/blob/
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure looks like this:
 
-	/code		Source code
-	/contrib	Third-party libraries
-	/doc		Documentation (Doxygen source and pre-compiled docs)
-	/fuzz       Contains the test code for the Google Fuzzer project
-	/include	Public header C and C++ header files
-	/scripts 	Scripts are used to generate the loading code for some formats
-	/port		Ports to other languages and scripts to maintain those.
-	/test		Unit- and regression tests, test suite of models
-	/tools		Tools (old assimp viewer, command line `assimp`)
-	/samples	A small number of samples to illustrate possible use cases for Assimp
-
-The source code is organized in the following way:
-
-	code/Common			        The base implementation for importers and the infrastructure
-	code/CApi                   Special implementations which are only used for the C-API
-	code/Geometry               A collection of geometry tools
-	code/Material               The material system
-	code/PBR                    An exporter for physical-based models
-	code/PostProcessing		    The post-processing steps
-	code/AssetLib/<FormatName>	Implementation for import and export of the format
-
+```txt
+code				Source code
+├── AssetLib/		The asset-importer and exporter lib
+├── CApi/			C-API files
+├── Common/			Common code used from all modules
+├── Geometry/		Geometry utilities
+├── Material/		Common materials
+├── Pbrt/			Physical based materials
+├── PostProcessing/	Post-processing steps
+├── res				Resouce files
+contrib				Third-party libraries
+doc					Documentation (Doxygen source and pre-compiled docs)
+fuzz       			Contains the test code for the Google Fuzzer project
+include				Public header C and C++ header files
+scripts 			Scripts are used to generate the loading code for some formats
+port				Ports to other languages and scripts to maintain those.
+test				Unit- and regression tests, test suite of models
+├── headercheck		Implements headerchecks
+├── models-nonbsd	Non-BSP licensed headers
+├── models			BSP-licensed models
+├── unit			Unit tests
+tools				Tools (old assimp viewer, command line `assimp`)
+samples				Small number of samples to illustrate possible use cases for Assimp
+```
 ### Contributing ###
+
 We would greatly appreciate for you to contribute to assimp. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
 

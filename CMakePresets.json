@@ -10,15 +10,17 @@
       "name": "assimp",
       "binaryDir": "${sourceDir}",
       "cacheVariables": {
-        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF",
-        "ASSIMP_DOUBLE_PRECISION": "ON"
+        "CMAKE_BUILD_TYPE": "Release",
+        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF"
       }
     },
     {
       "name": "assimp_double_precision",
       "binaryDir": "${sourceDir}",
       "cacheVariables": {
-        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF"
+        "CMAKE_BUILD_TYPE": "Release",
+        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF",
+        "ASSIMP_DOUBLE_PRECISION": "ON"
       }
     },
     {

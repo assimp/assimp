@@ -100,7 +100,7 @@ public:
     }
 
     // -----------------------------------------
-    float ValueAsFloat() const {
+    ai_real ValueAsFloat() const {
         return fast_atof(value.c_str());
     }
 

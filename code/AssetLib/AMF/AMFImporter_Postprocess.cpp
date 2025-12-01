@@ -1,9 +1,9 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,8 +57,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*pY*/, const float /*pZ*/) const {
-    aiColor4D tcol;
-
     // Check if stored data are supported.
     if (!Composition.empty()) {
         throw DeadlyImportError("IME. GetColor for composition");
@@ -68,7 +66,7 @@ aiColor4D AMFImporter::SPP_Material::GetColor(const float /*pX*/, const float /*
         throw DeadlyImportError("IME. GetColor, composed color");
     }
 
-    tcol = Color->Color;
+    aiColor4D tcol = Color->Color;
 
     // Check if default color must be used
     if ((tcol.r == 0) && (tcol.g == 0) && (tcol.b == 0) && (tcol.a == 0)) {
@@ -224,7 +222,8 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
     }
 
     // Create format hint.
-    strcpy(converted_texture.FormatHint, "rgba0000"); // copy initial string.
+    constexpr char templateColor[] = "rgba0000";
+    memcpy(converted_texture.FormatHint, templateColor, 8);
     if (!r.empty()) converted_texture.FormatHint[4] = '8';
     if (!g.empty()) converted_texture.FormatHint[5] = '8';
     if (!b.empty()) converted_texture.FormatHint[6] = '8';
@@ -332,7 +331,7 @@ void AMFImporter::Postprocess_AddMetadata(const AMFMetaDataArray &metadataList, 
     size_t meta_idx(0);
 
     for (const AMFMetadata *metadata : metadataList) {
-        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->Type, aiString(metadata->Value));
+        sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata->MetaType, aiString(metadata->Value));
     }
 }
 
@@ -531,11 +530,9 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                 col_arr.reserve(VertexCount_Max * 2);
 
                 { // fill arrays
-                    size_t vert_idx_from, vert_idx_to;
-
                     // first iteration.
-                    vert_idx_to = 0;
-                    vert_idx_from = VertexIndex_GetMinimal(face_list_cur, nullptr);
+                    size_t vert_idx_to = 0;
+                    size_t vert_idx_from = VertexIndex_GetMinimal(face_list_cur, nullptr);
                     vert_arr.push_back(pVertexCoordinateArray.at(vert_idx_from));
                     col_arr.push_back(Vertex_CalculateColor(vert_idx_from));
                     if (vert_idx_from != vert_idx_to) VertexIndex_Replace(face_list_cur, vert_idx_from, vert_idx_to);
@@ -867,7 +864,7 @@ nl_clean_loop:
             pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
             pScene->mTextures[idx]->pcData = (aiTexel *)tex_convd.Data;
             // texture format description.
-            strcpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint);
+            strncpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint, HINTMAXTEXTURELEN);
             idx++;
         } // for(const SPP_Texture& tex_convd: mTexture_Converted)
 

@@ -290,7 +290,7 @@ FEATURES:
 	- Added support for 64 bit version header introduced in FbxSdk2016
 	- Travis: enable coverall support.
 	- PyAssimp: New version of the pyASSIMP 3D viewer, with much improved 3D controls
-    - Morph animation support for collada	
+    - Morph animation support for collada
 	- Added support for parameters Ni and Tf in OBJ/MTL file format
 	- aiScene: add method to add children
 	- Added new option to IFC importer to control tessellation angle + removed unused IFC option
@@ -300,7 +300,7 @@ FEATURES:
 	- travis ci: enable sudo support.
 	- openddlparser: integrate release v0.4.0
 	- aiMetaData: Added support for metadata in assbin format
-	
+
 FIXES/HOUSEKEEPING:
     - Introduce usage of #pragma statement
 	- Put cmake-scripts into their own folder
@@ -352,7 +352,7 @@ FIXES/HOUSEKEEPING:
 	- add vertex color export support ( issue 809 )
 	- Fix memory leak in Collada importer ( issue 1169 )
 	- add stp to the list of supported extensions for step-files ( issue 1183 )
-	- fix clang build ( Issue-1169 ) 
+	- fix clang build ( Issue-1169 )
 	- fix for FreeBSD
 	- Import FindPkgMacros to main CMake Configuration
 	- Extended support for tessellation parameter to more IFC shapes
@@ -375,7 +375,7 @@ FIXES/HOUSEKEEPING:
 	- Obj-Importer: do not break when detecting an overflow ( issue 1244 )
 	- Obj-Importer: fix parsing of multible line data definitions
 	- Fixed bug where IFC models with multiple IFCSite only loaded 1 site instead of the complete model
-	- PLYImporter: - optimize memory and speed on ply importer / change parser to use a file stream - manage texture path in ply 
+	- PLYImporter: - optimize memory and speed on ply importer / change parser to use a file stream - manage texture path in ply
 	  import - manage texture coords on faces in ply import - correction on point cloud faces generation
 	- Utf8: integrate new lib ( issue 1158 )
 	- fixed CMAKE_MODULE_PATH overwriting previous values
@@ -400,7 +400,7 @@ FIXES/HOUSEKEEPING:
 	- Remove std functions deprecated by C++11.
 	- X-Importer: make it deal with lines
 	- use correct path for compilers ( issue 1335 )
-	- Collada: add workaround to deal with polygon with holes 
+	- Collada: add workaround to deal with polygon with holes
 	- update python readme
 	- Use unique node names when loading Collada files
 	- Fixed many FBX bugs
@@ -429,7 +429,7 @@ FEATURES:
     - C4D: update to latest Melange-SDK
     - Add a gitter channel
     - Coverity check enabled
-    - Switch to <...> include brackets for public headers 
+    - Switch to <...> include brackets for public headers
     - Enable export by pyAssimp
     - CI: check windows build
     - Add functionality to perform a singlepost-processing step
@@ -564,7 +564,7 @@ API CHANGES:
      currently used, however ...)
    - Some Assimp::Importer methods are const now.
 
-   
+
 1.1 (2010-04-17)
 This is the list of relevant changes from the 1.0 (r412) release to 1.1 (r700).
 

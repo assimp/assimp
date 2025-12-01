@@ -3,8 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -48,9 +47,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ByteSwapper.h>
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
+#include <unordered_set>
 #include <utility>
 
 namespace Assimp {
+
+std::string to_string(EElementSemantic e) {
+
+    switch (e) {
+    case EEST_Vertex:
+        return std::string{ "vertex" };
+    case EEST_TriStrip:
+        return std::string{ "tristrips" };
+    case EEST_Edge:
+        return std::string{ "edge" };
+    case EEST_Material:
+        return std::string{ "material" };
+    case EEST_TextureFile:
+        return std::string{ "TextureFile" };
+    default:
+        return std::string{ "invalid" };
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 PLY::EDataType PLY::Property::ParseDataType(std::vector<char> &buffer) {
@@ -281,6 +299,10 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
         // if the exact semantic can't be determined, just store
         // the original string identifier
         pOut->szName = std::string(&buffer[0], &buffer[0] + strlen(&buffer[0]));
+        auto pos = pOut->szName.find_last_of(' ');
+        if (pos != std::string::npos) {
+            pOut->szName.erase(pos, pOut->szName.size());
+        }
     }
 
     if (!PLY::DOM::SkipSpaces(buffer))
@@ -413,6 +435,7 @@ bool PLY::DOM::SkipComments(std::vector<char> buffer) {
 bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer, bool isBinary) {
     ASSIMP_LOG_VERBOSE_DEBUG("PLY::DOM::ParseHeader() begin");
 
+    std::unordered_set<std::string> definedAlElements;
     // parse all elements
     while (!buffer.empty()) {
         // skip all comments
@@ -421,6 +444,13 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
         PLY::Element out;
         if (PLY::Element::ParseElement(streamBuffer, buffer, &out)) {
             // add the element to the list of elements
+
+            const auto propertyName = (out.szName.empty()) ? to_string(out.eSemantic) : out.szName;
+            auto alreadyDefined = definedAlElements.find(propertyName);
+            if (alreadyDefined != definedAlElements.end()) {
+                throw DeadlyImportError("Property '" + propertyName + "' in header already defined ");
+            }
+            definedAlElements.insert(propertyName);
             alElements.push_back(out);
         } else if (TokenMatch(buffer, "end_header", 10)) {
             // we have reached the end of the header
@@ -798,13 +828,13 @@ bool PLY::PropertyInstance::ParseValue(const char *&pCur,
         // technically this should cast to float, but people tend to use float descriptors for double data
         // this is the best way to not risk losing precision on import and it doesn't hurt to do this
         ai_real f;
-        pCur = fast_atoreal_move<ai_real>(pCur, f);
+        pCur = fast_atoreal_move(pCur, f);
         out->fFloat = (ai_real)f;
         break;
 
     case EDT_Double:
         double d;
-        pCur = fast_atoreal_move<double>(pCur, d);
+        pCur = fast_atoreal_move(pCur, d);
         out->fDouble = (double)d;
         break;
 

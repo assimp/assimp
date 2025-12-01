@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -174,9 +173,12 @@ void ObjExporter::WriteHeader(std::ostringstream& out) {
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter::GetMaterialName(unsigned int index) {
+    static const std::string EmptyStr;
+    if ( nullptr == pScene->mMaterials ) {
+        return EmptyStr;
+    }
     const aiMaterial* const mat = pScene->mMaterials[index];
     if ( nullptr == mat ) {
-        static const std::string EmptyStr;
         return EmptyStr;
     }
 
@@ -393,9 +395,12 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent, bool merge_identical_vertices) {
+    if (nd == nullptr) {
+        return;
+    }
+    
     const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
-
-    aiMesh *cm( nullptr );
+    aiMesh *cm{nullptr};
     for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
         cm = pScene->mMeshes[nd->mMeshes[i]];
         if (nullptr != cm) {

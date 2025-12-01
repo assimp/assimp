@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -84,6 +84,10 @@ public:
     /// @brief  The copy constructor.
     /// @param  o The instance to copy from.
     aiVector3t( const aiVector3t& o ) = default;
+
+    /// @brief  The copy assignment operator.
+    /// @param  o The instance to copy.
+    aiVector3t& operator=(const aiVector3t& o) = default;
 
     /// @brief  combined operators
     /// @brief  The copy constructor.

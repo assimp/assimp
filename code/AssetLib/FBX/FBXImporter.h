@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -67,7 +67,7 @@ typedef class basic_formatter<char, std::char_traits<char>, std::allocator<char>
 ///
 /// See http://en.wikipedia.org/wiki/FBX
 // -------------------------------------------------------------------------------------------
-class FBXImporter : public BaseImporter, public LogFunctions<FBXImporter> {
+class FBXImporter final : public BaseImporter, public LogFunctions<FBXImporter> {
 public:
     /// @brief The class constructor.
     FBXImporter() = default;

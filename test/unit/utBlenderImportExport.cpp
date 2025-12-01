@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -46,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/SpatialSort.h>
 
 using namespace Assimp;
 
@@ -220,4 +219,26 @@ TEST(utBlenderImporter, importFleurOptonl) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/BLEND/fleurOptonl.blend", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+}
+
+/// This test contains a default cube with subdivision surface modifier and a default cube with subdivision surface applied.
+/// Vertices should be identical.
+TEST_F(utBlenderImporterExporter, importBlendWithSubdivisionSurface) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/subdivision_test_277.blend", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mNumMeshes, 2u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, scene->mMeshes[1]->mNumVertices);
+
+    SpatialSort spatialSortVertices0;
+    spatialSortVertices0.Fill(scene->mMeshes[0]->mVertices, scene->mMeshes[0]->mNumVertices, sizeof(aiVector3D), true);
+
+    for (unsigned int i = 0; i < scene->mMeshes[1]->mNumVertices; ++i)
+    {
+        auto positionMesh1 = scene->mMeshes[1]->mVertices[i];
+        std::vector<unsigned int> spatialSortResult;
+        spatialSortVertices0.FindPositions(positionMesh1, 1.0e-6f, spatialSortResult);
+
+        EXPECT_TRUE(scene->mMeshes[0]->mVertices[spatialSortResult[0]].Equal(positionMesh1));
+    }
 }

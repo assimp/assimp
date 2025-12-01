@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 
 
@@ -81,7 +81,7 @@ class sliced_chunk_iterator;
 ///
 /// @brief  Sentinel exception to return quickly from deeply nested control paths
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class compare_fails_exception : public virtual std::exception {
+class compare_fails_exception final : public virtual std::exception {
 public:
 
     enum {MAX_ERR_LEN = 4096};

@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -1150,4 +1148,4 @@ void LWOImporter::LoadLWO3Surface(unsigned int size) {
     }
 }
 
-#endif // !! ASSIMP_BUILD_NO_X_IMPORTER
+#endif // ASSIMP_BUILD_NO_LWO_IMPORTER

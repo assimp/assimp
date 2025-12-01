@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -58,7 +58,7 @@ namespace Assimp {
  *  Link to file format specification:
  *  <max_8_dvd>\samples\Motion\Docs\CSM.rtf
 */
-class CSMImporter : public BaseImporter {
+class CSMImporter final : public BaseImporter {
 public:
     CSMImporter();
     ~CSMImporter() override = default;

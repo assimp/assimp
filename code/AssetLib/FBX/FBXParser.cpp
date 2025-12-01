@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -365,10 +365,14 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
         }
 
         if (data[0] == 'F') {
-            return SafeParse<float>(data+1, t.end());
+            BE_NCONST float id = SafeParse<float>(data+1, t.end());
+            AI_SWAP4(id);
+            return id;
         }
         else {
-            return static_cast<float>( SafeParse<double>(data+1, t.end()) );
+            BE_NCONST double id = SafeParse<double>(data+1, t.end());
+            AI_SWAP8(id);
+            return static_cast<float>(id);
         }
     }
 
@@ -637,9 +641,15 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, d += 3) {
-                out.emplace_back(static_cast<ai_real>(d[0]),
-                    static_cast<ai_real>(d[1]),
-                    static_cast<ai_real>(d[2]));
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
+                BE_NCONST double val3 = d[2];
+                AI_SWAP8(val1);
+                AI_SWAP8(val2);
+                AI_SWAP8(val3);
+                out.emplace_back(static_cast<ai_real>(val1),
+                    static_cast<ai_real>(val2),
+                    static_cast<ai_real>(val3));
             }
             // for debugging
             /*for ( size_t i = 0; i < out.size(); i++ ) {
@@ -652,7 +662,13 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count3; ++i, f += 3) {
-                out.emplace_back(f[0],f[1],f[2]);
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
+                BE_NCONST float val3 = f[2];
+                AI_SWAP4(val1);
+                AI_SWAP4(val2);
+                AI_SWAP4(val3);
+                out.emplace_back(val1,val2,val3);
             }
         }
 
@@ -726,16 +742,32 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, d += 4) {
-                out.emplace_back(static_cast<float>(d[0]),
-                    static_cast<float>(d[1]),
-                    static_cast<float>(d[2]),
-                    static_cast<float>(d[3]));
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
+                BE_NCONST double val3 = d[2];
+                BE_NCONST double val4 = d[3];
+                AI_SWAP8(val1);
+                AI_SWAP8(val2);
+                AI_SWAP8(val3);
+                AI_SWAP8(val4);
+                out.emplace_back(static_cast<float>(val1),
+                    static_cast<float>(val2),
+                    static_cast<float>(val3),
+                    static_cast<float>(val4));
             }
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count4; ++i, f += 4) {
-                out.emplace_back(f[0],f[1],f[2],f[3]);
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
+                BE_NCONST float val3 = f[2];
+                BE_NCONST float val4 = f[3];
+                AI_SWAP4(val1);
+                AI_SWAP4(val2);
+                AI_SWAP4(val3);
+                AI_SWAP4(val4);
+                out.emplace_back(val1,val2,val3,val4);
             }
         }
         return;
@@ -807,13 +839,21 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el) {
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, d += 2) {
-                out.emplace_back(static_cast<float>(d[0]),
-                    static_cast<float>(d[1]));
+                BE_NCONST double val1 = d[0];
+                BE_NCONST double val2 = d[1];
+                AI_SWAP8(val1);
+                AI_SWAP8(val2);
+                out.emplace_back(static_cast<float>(val1),
+                    static_cast<float>(val2));
             }
         } else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count2; ++i, f += 2) {
-                out.emplace_back(f[0],f[1]);
+                BE_NCONST float val1 = f[0];
+                BE_NCONST float val2 = f[1];
+                AI_SWAP4(val1);
+                AI_SWAP4(val2);
+                out.emplace_back(val1,val2);
             }
         }
 
@@ -938,13 +978,17 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
         if (type == 'd') {
             const double* d = reinterpret_cast<const double*>(&buff[0]);
             for (unsigned int i = 0; i < count; ++i, ++d) {
-                out.push_back(static_cast<float>(*d));
+                BE_NCONST double val = *d;
+                AI_SWAP8(val);
+                out.push_back(static_cast<float>(val));
             }
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
             for (unsigned int i = 0; i < count; ++i, ++f) {
-                out.push_back(*f);
+                BE_NCONST float val = *f;
+                AI_SWAP4(val);
+                out.push_back(val);
             }
         }
 

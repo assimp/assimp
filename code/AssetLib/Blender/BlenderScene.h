@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -48,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BlenderDNA.h"
 
-namespace Assimp {
-namespace Blender {
+namespace Assimp::Blender {
 
 // Minor parts of this file are extracts from blender data structures,
 // declared in the ./source/blender/makesdna directory.
@@ -116,32 +114,32 @@ struct Collection;
 static const size_t MaxNameLen = 1024;
 
 // -------------------------------------------------------------------------------
-struct ID : ElemBase {
+struct ID final : ElemBase {
     char name[MaxNameLen] WARN;
     short flag;
 };
 
 // -------------------------------------------------------------------------------
-struct ListBase : ElemBase {
+struct ListBase final : ElemBase {
     std::shared_ptr<ElemBase> first;
     std::weak_ptr<ElemBase> last;
 };
 
 // -------------------------------------------------------------------------------
-struct PackedFile : ElemBase {
+struct PackedFile final : ElemBase {
     int size WARN;
     int seek WARN;
     std::shared_ptr<FileOffset> data WARN;
 };
 
 // -------------------------------------------------------------------------------
-struct GroupObject : ElemBase {
+struct GroupObject final : ElemBase {
     std::shared_ptr<GroupObject> prev, next FAIL;
     std::shared_ptr<Object> ob;
 };
 
 // -------------------------------------------------------------------------------
-struct Group : ElemBase {
+struct Group final : ElemBase {
     ID id FAIL;
     int layer;
 
@@ -149,32 +147,32 @@ struct Group : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct CollectionObject : ElemBase {
+struct CollectionObject final : ElemBase {
     //CollectionObject* prev;
     std::shared_ptr<CollectionObject> next;
     Object *ob;
 };
 
 // -------------------------------------------------------------------------------
-struct CollectionChild : ElemBase {
+struct CollectionChild final : ElemBase {
     std::shared_ptr<CollectionChild> next, prev;
     std::shared_ptr<Collection> collection;
 };
 
 // -------------------------------------------------------------------------------
-struct Collection : ElemBase {
+struct Collection final : ElemBase {
     ID id FAIL;
     ListBase gobject; // CollectionObject
     ListBase children; // CollectionChild
 };
 
 // -------------------------------------------------------------------------------
-struct World : ElemBase {
+struct World final : ElemBase {
     ID id FAIL;
 };
 
 // -------------------------------------------------------------------------------
-struct MVert : ElemBase {
+struct MVert final : ElemBase {
     float co[3] FAIL;
     float no[3] FAIL; // read as short and divided through / 32767.f
     char flag;
@@ -186,31 +184,31 @@ struct MVert : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MEdge : ElemBase {
+struct MEdge final : ElemBase {
     int v1, v2 FAIL;
     char crease, bweight;
     short flag;
 };
 
 // -------------------------------------------------------------------------------
-struct MLoop : ElemBase {
+struct MLoop final : ElemBase {
     int v, e;
 };
 
 // -------------------------------------------------------------------------------
-struct MLoopUV : ElemBase {
+struct MLoopUV final : ElemBase {
     float uv[2];
     int flag;
 };
 
 // -------------------------------------------------------------------------------
 // Note that red and blue are not swapped, as with MCol
-struct MLoopCol : ElemBase {
+struct MLoopCol final : ElemBase {
     unsigned char r, g, b, a;
 };
 
 // -------------------------------------------------------------------------------
-struct MPoly : ElemBase {
+struct MPoly final : ElemBase {
     int loopstart;
     int totloop;
     short mat_nr;
@@ -218,26 +216,26 @@ struct MPoly : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MTexPoly : ElemBase {
+struct MTexPoly final : ElemBase {
     Image *tpage;
     char flag, transp;
     short mode, tile, pad;
 };
 
 // -------------------------------------------------------------------------------
-struct MCol : ElemBase {
+struct MCol final : ElemBase {
     char r, g, b, a FAIL;
 };
 
 // -------------------------------------------------------------------------------
-struct MFace : ElemBase {
+struct MFace final : ElemBase {
     int v1, v2, v3, v4 FAIL;
     int mat_nr FAIL;
     char flag;
 };
 
 // -------------------------------------------------------------------------------
-struct TFace : ElemBase {
+struct TFace final : ElemBase {
     float uv[4][2] FAIL;
     int col[4] FAIL;
     char flag;
@@ -247,7 +245,7 @@ struct TFace : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MTFace : ElemBase {
+struct MTFace final : ElemBase {
     MTFace() :
             flag(0),
             mode(0),
@@ -265,24 +263,24 @@ struct MTFace : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct MDeformWeight : ElemBase {
+struct MDeformWeight final : ElemBase {
     int def_nr FAIL;
     float weight FAIL;
 };
 
 // -------------------------------------------------------------------------------
-struct MDeformVert : ElemBase {
+struct MDeformVert final : ElemBase {
     vector<MDeformWeight> dw WARN;
     int totweight;
 };
 
 // -------------------------------------------------------------------------------
-#define MA_RAYMIRROR 0x40000
-#define MA_TRANSPARENCY 0x10000
-#define MA_RAYTRANSP 0x20000
-#define MA_ZTRANSP 0x00040
+constexpr uint32_t MA_RAYMIRROR    = 0x40000;
+constexpr uint32_t MA_TRANSPARENCY = 0x10000;
+constexpr uint32_t MA_RAYTRANSP    = 0x20000;
+constexpr uint32_t MA_ZTRANSP      = 0x00040;
 
-struct Material : ElemBase {
+struct Material final : ElemBase {
     ID id FAIL;
 
     float r, g, b WARN;
@@ -404,7 +402,7 @@ CustomDataLayer 104
     char name 32 64
     void *data 96 8
 */
-struct CustomDataLayer : ElemBase {
+struct CustomDataLayer final : ElemBase {
     int type;
     int offset;
     int flag;
@@ -442,7 +440,7 @@ CustomData 208
     BLI_mempool *pool 192 8
     CustomDataExternal *external 200 8
 */
-struct CustomData : ElemBase {
+struct CustomData final : ElemBase {
     vector<std::shared_ptr<struct CustomDataLayer>> layers;
     int typemap[42]; // CD_NUMTYPES
     int totlayer;
@@ -455,7 +453,7 @@ struct CustomData : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Mesh : ElemBase {
+struct Mesh final : ElemBase {
     ID id FAIL;
 
     int totface FAIL;
@@ -492,7 +490,7 @@ struct Mesh : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Library : ElemBase {
+struct Library final : ElemBase {
     ID id FAIL;
 
     char name[240] WARN;
@@ -516,7 +514,7 @@ struct Camera : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Lamp : ElemBase {
+struct Lamp final : ElemBase {
 
     enum FalloffType {
         FalloffType_Constant = 0x0,
@@ -603,7 +601,7 @@ struct Lamp : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct ModifierData : ElemBase {
+struct ModifierData final : ElemBase {
     enum ModifierType {
         eModifierType_None = 0,
         eModifierType_Subsurf,
@@ -653,9 +651,8 @@ struct SharedModifierData : ElemBase {
     ModifierData modifier;
 };
 
-
 // -------------------------------------------------------------------------------
-struct SubsurfModifierData : SharedModifierData {
+struct SubsurfModifierData final : SharedModifierData {
 
     enum Type {
 
@@ -675,7 +672,7 @@ struct SubsurfModifierData : SharedModifierData {
 };
 
 // -------------------------------------------------------------------------------
-struct MirrorModifierData : SharedModifierData {
+struct MirrorModifierData final : SharedModifierData {
 
     enum Flags {
         Flags_CLIPPING = 1 << 0,
@@ -693,7 +690,7 @@ struct MirrorModifierData : SharedModifierData {
 };
 
 // -------------------------------------------------------------------------------
-struct Object : ElemBase {
+struct Object final : ElemBase {
     ID id FAIL;
 
     enum Type {
@@ -734,7 +731,7 @@ struct Object : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Base : ElemBase {
+struct Base final : ElemBase {
     Base *prev WARN;
     std::shared_ptr<Base> next WARN;
     std::shared_ptr<Object> object WARN;
@@ -746,7 +743,7 @@ struct Base : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Scene : ElemBase {
+struct Scene final : ElemBase {
     ID id FAIL;
 
     std::shared_ptr<Object> camera WARN;
@@ -760,7 +757,7 @@ struct Scene : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Image : ElemBase {
+struct Image final : ElemBase {
     ID id FAIL;
 
     char name[240] WARN;
@@ -790,7 +787,7 @@ struct Image : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
-struct Tex : ElemBase {
+struct Tex final : ElemBase {
 
     // actually, the only texture type we support is Type_IMAGE
     enum Type {
@@ -875,14 +872,13 @@ struct Tex : ElemBase {
 
     //char use_nodes;
 
-    Tex() :
-            imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS) {
+    Tex() : imaflag(ImageFlags_INTERPOL), type(Type_CLOUDS) {
         // empty
     }
 };
 
 // -------------------------------------------------------------------------------
-struct MTex : ElemBase {
+struct MTex final : ElemBase {
 
     enum Projection {
         Proj_N = 0,
@@ -971,6 +967,6 @@ struct MTex : ElemBase {
     MTex() = default;
 };
 
-} // namespace Blender
-} // namespace Assimp
+} // namespace Assimp::Blender
+
 #endif

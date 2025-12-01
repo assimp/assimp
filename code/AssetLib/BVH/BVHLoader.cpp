@@ -4,9 +4,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -85,11 +83,9 @@ BVHLoader::BVHLoader() :
         mLine(),
         mAnimTickDuration(),
         mAnimNumFrames(),
-        noSkeletonMesh() {}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-BVHLoader::~BVHLoader() = default;
+        noSkeletonMesh() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -389,7 +385,7 @@ float BVHLoader::GetNextTokenAsFloat() {
     // check if the float is valid by testing if the atof() function consumed every char of the token
     const char *ctoken = token.c_str();
     float result = 0.0f;
-    ctoken = fast_atoreal_move<float>(ctoken, result);
+    ctoken = fast_atoreal_move(ctoken, result);
 
     if (ctoken != token.c_str() + token.length())
         ThrowException("Expected a floating point number, but found \"", token, "\".");

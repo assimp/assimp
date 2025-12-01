@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "assimp",
+      "binaryDir": "${sourceDir}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF"
+      }
+    },
+    {
+      "name": "assimp_double_precision",
+      "binaryDir": "${sourceDir}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ASSIMP_BUILD_ASSIMP_TOOLS": "OFF",
+        "ASSIMP_DOUBLE_PRECISION": "ON"
+      }
+    },
+    {
+      "name": "assimp_with_tools",
+      "binaryDir": "${sourceDir}",
+      "cacheVariables": {
+        "ASSIMP_BUILD_ASSIMP_TOOLS": "ON"
+      }
+    }
+  ]
+}

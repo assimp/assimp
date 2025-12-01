@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -57,14 +57,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ASE is quite similar to 3ds. We can reuse some structures
 #include "AssetLib/3DS/3DSLoader.h"
 
-namespace Assimp {
-namespace ASE {
+namespace Assimp::ASE {
 
 using namespace D3DS;
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing an ASE material */
-struct Material : public D3DS::Material {
+struct Material final : D3DS::Material {
     //! Default constructor has been deleted
     Material() = delete;
 
@@ -115,7 +114,7 @@ struct Material : public D3DS::Material {
         return *this;
     }
 
-    ~Material() = default;
+    ~Material() override = default;
 
     //! Contains all sub materials of this material
     std::vector<Material> avSubMaterials;
@@ -373,8 +372,8 @@ struct Dummy : public BaseNode {
 };
 
 // Parameters to Parser::Parse()
-#define AI_ASE_NEW_FILE_FORMAT 200
-#define AI_ASE_OLD_FILE_FORMAT 110
+static constexpr unsigned int AI_ASE_NEW_FILE_FORMAT = 200;
+static constexpr unsigned int AI_ASE_OLD_FILE_FORMAT = 110;
 
 // Internally we're a little bit more tolerant
 #define AI_ASE_IS_NEW_FILE_FORMAT() (iFileFormat >= 200)
@@ -391,11 +390,11 @@ public:
     // -------------------------------------------------------------------
     //! Construct a parser from a given input file which is
     //! guaranteed to be terminated with zero.
-    //! @param szFile Input file
+    //! @param file              The name of the input file.
     //! @param fileFormatDefault Assumed file format version. If the
     //!   file format is specified in the file the new value replaces
     //!   the default value.
-    Parser(const char *szFile, unsigned int fileFormatDefault);
+    Parser(const char *file, size_t fileLen, unsigned int fileFormatDefault);
 
     // -------------------------------------------------------------------
     //! Parses the file into the parsers internal representation
@@ -553,13 +552,15 @@ private:
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
     //! \param rIndexOut Output index
-    void ParseLV4MeshFloatTriple(ai_real *apOut, unsigned int &rIndexOut);
+    void ParseLV4MeshRealTriple(ai_real *apOut, unsigned int &rIndexOut);
+    void ParseLV4MeshFloatTriple(float *apOut, unsigned int &rIndexOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_VERT block in a file
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
-    void ParseLV4MeshFloatTriple(ai_real *apOut);
+    void ParseLV4MeshRealTriple(ai_real *apOut);
+    void ParseLV4MeshFloatTriple(float *apOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TFACE block in a file
@@ -577,7 +578,8 @@ private:
     // -------------------------------------------------------------------
     //! Parse a single float element
     //! \param fOut Output float
-    void ParseLV4MeshFloat(ai_real &fOut);
+    void ParseLV4MeshReal(ai_real &fOut);
+    void ParseLV4MeshFloat(float &fOut);
 
     // -------------------------------------------------------------------
     //! Parse a single int element
@@ -617,11 +619,8 @@ private:
     bool ParseString(std::string &out, const char *szName);
 
 public:
-    //! Pointer to current data
-    const char *filePtr;
-
-    /// The end pointer of the file data
-    const char *mEnd;
+    const char *mFilePtr; ////< Pointer to current data
+    const char *mEnd;     ///< The end pointer of the file data
 
     //! background color to be passed to the viewer
     //! QNAN if none was found
@@ -668,8 +667,7 @@ public:
     unsigned int iFileFormat;
 };
 
-} // Namespace ASE
-} // namespace Assimp
+} // Namespace Assimp::ASE
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 
 
@@ -78,7 +78,7 @@ void LWOImporter::LoadLWOBFile() {
                     else
                         LoadLWOBPolygons(head.length);
                 } break;
-                
+
             case AI_LWO_SRFS: // list of tags
                 {
                     if (!mTags->empty())

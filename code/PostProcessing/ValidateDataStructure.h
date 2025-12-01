@@ -2,8 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
-
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -63,7 +62,7 @@ struct aiString;
 struct aiCamera;
 struct aiLight;
 
-namespace Assimp    {
+namespace Assimp {
 
 // --------------------------------------------------------------------------------------
 /** Validates the whole ASSIMP scene data structure for correctness.

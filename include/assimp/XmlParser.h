@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -43,12 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IRRXML_WRAPPER
 
 #include <assimp/ai_assert.h>
+#include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 
 #include "BaseImporter.h"
 #include "IOStream.hpp"
 
 #include <pugixml.hpp>
+#include <istream>
 #include <utility>
 #include <vector>
 
@@ -59,12 +61,13 @@ struct find_node_by_name_predicate {
     /// @brief The default constructor.
     find_node_by_name_predicate() = default;
 
-
-    std::string mName; ///< The name to find.
-    find_node_by_name_predicate(const std::string &name) :
-            mName(name) {
+    /// @brief Constructor with the predicate name
+    /// @param name    The name.
+    explicit find_node_by_name_predicate(const std::string &name) : mName(name) {
         // empty
     }
+
+    std::string mName; ///< The name to find.
 
     bool operator()(pugi::xml_node node) const {
         return node.name() == mName;
@@ -76,6 +79,9 @@ struct find_node_by_name_predicate {
 template <class TNodeType>
 struct NodeConverter {
 public:
+    /// @brief Will convert the attribute from the node to an int.
+    /// @param node            The XML-node.
+    /// @param attribName      The name of the attribute.
     static int to_int(TNodeType &node, const char *attribName) {
         ai_assert(nullptr != attribName);
         return node.attribute(attribName).to_int();
@@ -126,6 +132,11 @@ public:
     /// @param[in] stream      The input stream.
     /// @return true, if the parsing was successful, false if not.
     bool parse(IOStream *stream);
+
+    /// @brief  Will parse an xml-file from a stringstream.
+    /// @param[in] str      The input istream (note: not "const" to match pugixml param)
+    /// @return true, if the parsing was successful, false if not.
+    bool parse(std::istream &inStream);
 
     /// @brief  Will return true if a root node is there.
     /// @return true in case of an existing root.
@@ -210,21 +221,27 @@ public:
     /// @return true, if the value can be read out.
     static inline bool getValueAsString(XmlNode &node, std::string &text);
 
+    /// @brief Will try to get the value of the node as a real.
+    /// @param[in]  node   The node to search in.
+    /// @param[out] v      The value as a ai_real.
+    /// @return true, if the value can be read out.
+    static inline bool getValueAsReal(XmlNode &node, ai_real &v);
+
     /// @brief Will try to get the value of the node as a float.
     /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a float.
+    /// @param[out]v        The value as a float.
     /// @return true, if the value can be read out.
-    static inline bool getValueAsFloat(XmlNode &node, ai_real &v);
+    static inline bool getValueAsFloat(XmlNode &node, float &v);
 
     /// @brief Will try to get the value of the node as an integer.
-    /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a int.
+    /// @param[in]  node    The node to search in.
+    /// @param[out] i       The value as a int.
     /// @return true, if the value can be read out.
     static inline bool getValueAsInt(XmlNode &node, int &v);
 
     /// @brief Will try to get the value of the node as an bool.
-    /// @param[in] node     The node to search in.
-    /// @param[out] text    The value as a bool.
+    /// @param[in]  node    The node to search in.
+    /// @param[out] v       The value as a bool.
     /// @return true, if the value can be read out.
     static inline bool getValueAsBool(XmlNode &node, bool &v);
 
@@ -304,7 +321,23 @@ bool TXmlParser<TNodeType>::parse(IOStream *stream) {
     mDoc = new pugi::xml_document();
     // load_string assumes native encoding (aka always utf-8 per build options)
     //pugi::xml_parse_result parse_result = mDoc->load_string(&mData[0], pugi::parse_full);
-     pugi::xml_parse_result parse_result = mDoc->load_buffer(&mData[0], mData.size(), pugi::parse_full);
+    pugi::xml_parse_result parse_result = mDoc->load_buffer(&mData[0], mData.size(), pugi::parse_full);
+    if (parse_result.status == pugi::status_ok) {
+        return true;
+    }
+
+    ASSIMP_LOG_DEBUG("Error while parse xml.", std::string(parse_result.description()), " @ ", parse_result.offset);
+
+    return false;
+}
+
+template <class TNodeType>
+bool TXmlParser<TNodeType>::parse(std::istream &inStream) {
+    if (hasRoot()) {
+        clear();
+    }
+    mDoc = new pugi::xml_document();
+    pugi::xml_parse_result parse_result = mDoc->load(inStream);
     if (parse_result.status == pugi::status_ok) {
         return true;
     }
@@ -447,12 +480,25 @@ inline bool TXmlParser<TNodeType>::getValueAsString(XmlNode &node, std::string &
     }
 
     text = node.text().as_string();
+    text = ai_trim(text);
 
     return true;
 }
 
 template <class TNodeType>
-inline bool TXmlParser<TNodeType>::getValueAsFloat(XmlNode &node, ai_real &v) {
+inline bool TXmlParser<TNodeType>::getValueAsReal(XmlNode& node, ai_real& v) {
+    if (node.empty()) {
+        return false;
+    }
+
+    v = node.text().as_float();
+
+    return true;
+}
+
+
+template <class TNodeType>
+inline bool TXmlParser<TNodeType>::getValueAsFloat(XmlNode &node, float &v) {
     if (node.empty()) {
         return false;
     }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -322,7 +322,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             // NOTE this might explode for UTF-16 and wchars
             const char *sz = indicesNode.text().get();
             const char *end = sz + std::strlen(sz);
-            
+
             // For each index loop over aiMesh faces
             while (SkipSpacesAndLineEnd(&sz, end)) {
                 if (curFace >= faceEnd) {
@@ -380,7 +380,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             aiMaterial *mat = (aiMaterial *)curMat;
             mat->AddProperty(&curColors[0].a, 1, AI_MATKEY_OPACITY);
         }
-        
+
         // end of previous buffer. A material and a mesh should be there
         if (!curMat || !curMesh) {
             ASSIMP_LOG_ERROR("IRRMESH: A buffer must contain a mesh and a material");
@@ -433,24 +433,24 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, const char *end, Verte
         aiColor4D c;
 
         // Read the vertex position
-        sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+        sz = fast_atoreal_move(sz, temp.x);
         SkipSpaces(&sz, end);
 
-        sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+        sz = fast_atoreal_move(sz, temp.y);
         SkipSpaces(&sz, end);
 
-        sz = fast_atoreal_move<float>(sz, (float &)temp.z);
+        sz = fast_atoreal_move(sz, temp.z);
         SkipSpaces(&sz, end);
         vertices.push_back(temp);
 
         // Read the vertex normals
-        sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+        sz = fast_atoreal_move(sz, temp.x);
         SkipSpaces(&sz, end);
 
-        sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+        sz = fast_atoreal_move(sz, temp.y);
         SkipSpaces(&sz, end);
 
-        sz = fast_atoreal_move<float>(sz, (float &)temp.z);
+        sz = fast_atoreal_move(sz, temp.z);
         SkipSpaces(&sz, end);
         normals.push_back(temp);
 
@@ -466,10 +466,10 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, const char *end, Verte
         SkipSpaces(&sz, end);
 
         // read the first UV coordinate set
-        sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+        sz = fast_atoreal_move(sz, temp.x);
         SkipSpaces(&sz, end);
 
-        sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+        sz = fast_atoreal_move(sz, temp.y);
         SkipSpaces(&sz, end);
         temp.z = 0.f;
         temp.y = 1.f - temp.y; // DX to OGL
@@ -479,35 +479,35 @@ void IRRMeshImporter::ParseBufferVertices(const char *sz, const char *end, Verte
         // So by definition, all buffers have either UV2 or tangents or neither
         // read the (optional) second UV coordinate set
         if (vertexFormat == VertexFormat::t2coord) {
-            sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+            sz = fast_atoreal_move(sz, temp.x);
             SkipSpaces(&sz, end);
 
-            sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+            sz = fast_atoreal_move(sz, temp.y);
             temp.y = 1.f - temp.y; // DX to OGL
             UV2s.push_back(temp);
         }
         // read optional tangent and bitangent vectors
         else if (vertexFormat == VertexFormat::tangent) {
             // tangents
-            sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+            sz = fast_atoreal_move(sz, temp.x);
             SkipSpaces(&sz, end);
 
-            sz = fast_atoreal_move<float>(sz, (float &)temp.z);
+            sz = fast_atoreal_move(sz, temp.z);
             SkipSpaces(&sz, end);
 
-            sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+            sz = fast_atoreal_move(sz, temp.y);
             SkipSpaces(&sz, end);
             temp.y *= -1.0f;
             tangents.push_back(temp);
 
             // bitangents
-            sz = fast_atoreal_move<float>(sz, (float &)temp.x);
+            sz = fast_atoreal_move(sz, temp.x);
             SkipSpaces(&sz, end);
 
-            sz = fast_atoreal_move<float>(sz, (float &)temp.z);
+            sz = fast_atoreal_move(sz, temp.z);
             SkipSpaces(&sz, end);
 
-            sz = fast_atoreal_move<float>(sz, (float &)temp.y);
+            sz = fast_atoreal_move(sz, temp.y);
             SkipSpaces(&sz, end);
             temp.y *= -1.0f;
             bitangents.push_back(temp);

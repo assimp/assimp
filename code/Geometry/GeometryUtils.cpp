@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -47,8 +47,8 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 ai_real GeometryUtils::heron( ai_real a, ai_real b, ai_real c ) {
-    const ai_real s = (a + b + c) / 2;
-    const ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), (ai_real)0.5 );
+    const ai_real s    = (a + b + c) * 0.5;
+    const ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), static_cast<ai_real>(0.5));
     return area;
 }
 
@@ -57,8 +57,8 @@ ai_real GeometryUtils::distance3D( const aiVector3D &vA, const aiVector3D &vB ) 
     const ai_real lx = ( vB.x - vA.x );
     const ai_real ly = ( vB.y - vA.y );
     const ai_real lz = ( vB.z - vA.z );
-    const ai_real a = lx*lx + ly*ly + lz*lz;
-    const ai_real d = pow( a, (ai_real)0.5 );
+    const ai_real a  = lx*lx + ly*ly + lz*lz;
+    const ai_real d  = pow( a, static_cast<ai_real>(0.5));
 
     return d;
 }
@@ -66,6 +66,9 @@ ai_real GeometryUtils::distance3D( const aiVector3D &vA, const aiVector3D &vB ) 
 // ------------------------------------------------------------------------------------------------
 ai_real GeometryUtils::calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh ) {
     ai_real area = 0;
+    if (mesh == nullptr) {
+        return area;
+    }
 
     const aiVector3D vA( mesh->mVertices[ face.mIndices[ 0 ] ] );
     const aiVector3D vB( mesh->mVertices[ face.mIndices[ 1 ] ] );
@@ -81,8 +84,7 @@ ai_real GeometryUtils::calculateAreaOfTriangle( const aiFace& face, aiMesh* mesh
 
 // ------------------------------------------------------------------------------------------------
 // Check whether a ray intersects a plane and find the intersection point
-bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, 
-        const aiVector3D& planeNormal, aiVector3D& pos) {
+bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos, const aiVector3D& planeNormal, aiVector3D& pos) {
     const ai_real b = planeNormal * (planePos - ray.pos);
     ai_real h = ray.dir * planeNormal;
     if ((h < 10e-5 && h > -10e-5) || (h = b/h) < 0)
@@ -93,11 +95,14 @@ bool GeometryUtils::PlaneIntersect(const aiRay& ray, const aiVector3D& planePos,
 }
 
 // ------------------------------------------------------------------------------------------------
-void GeometryUtils::normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, 
-        size_t numVectors) {
+void GeometryUtils::normalizeVectorArray(aiVector3D *vectorArrayIn, aiVector3D *vectorArrayOut, size_t numVectors) {
+    if (vectorArrayIn == nullptr || vectorArrayOut == nullptr) {
+        return;
+    }
+	
     for (size_t i=0; i<numVectors; ++i) {
-		    vectorArrayOut[i] = vectorArrayIn[i].Normalize();
-	  }
+	vectorArrayOut[i] = vectorArrayIn[i].Normalize();
+    }
 }
 
 } // namespace Assimp

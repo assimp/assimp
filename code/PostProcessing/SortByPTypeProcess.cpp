@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -66,36 +66,46 @@ void SortByPTypeProcess::SetupProperties(const Importer *pImp) {
 }
 
 // ------------------------------------------------------------------------------------------------
+static void clearMeshesInNode(aiNode *node) {
+    delete[] node->mMeshes;
+    node->mNumMeshes = 0;
+    node->mMeshes = nullptr;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int> &replaceMeshIndex, aiNode *node) {
+    ai_assert(node != nullptr);
+
     if (node->mNumMeshes) {
         unsigned int newSize = 0;
         for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
             unsigned int add = node->mMeshes[m] << 2;
             for (unsigned int i = 0; i < 4; ++i) {
-                if (UINT_MAX != replaceMeshIndex[add + i]) ++newSize;
-            }
-        }
-        if (!newSize) {
-            delete[] node->mMeshes;
-            node->mNumMeshes = 0;
-            node->mMeshes = nullptr;
-        } else {
-            // Try to reuse the old array if possible
-            unsigned int *newMeshes = (newSize > node->mNumMeshes ? new unsigned int[newSize] : node->mMeshes);
-
-            for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
-                unsigned int add = node->mMeshes[m] << 2;
-                for (unsigned int i = 0; i < 4; ++i) {
-                    if (UINT_MAX != replaceMeshIndex[add + i])
-                        *newMeshes++ = replaceMeshIndex[add + i];
+                if (UINT_MAX != replaceMeshIndex[add + i]) {
+                    ++newSize;
                 }
             }
-            if (newSize > node->mNumMeshes)
-                delete[] node->mMeshes;
-
-            node->mMeshes = newMeshes - (node->mNumMeshes = newSize);
         }
+        if (newSize == 0) {
+            clearMeshesInNode(node);
+            return;
+        }
+
+        // Try to reuse the old array if possible
+        unsigned int *newMeshes = (newSize > node->mNumMeshes ? new unsigned int[newSize] : node->mMeshes);
+        for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
+            unsigned int add = node->mMeshes[m] << 2;
+            for (unsigned int i = 0; i < 4; ++i) {
+                if (UINT_MAX != replaceMeshIndex[add + i]) {
+                    *newMeshes++ = replaceMeshIndex[add + i];
+                }
+            }
+        }
+        if (newSize > node->mNumMeshes) {
+            clearMeshesInNode(node);
+        }
+        node->mMeshes = newMeshes - (node->mNumMeshes = newSize);
     }
 
     // call all subnodes recursively
@@ -126,6 +136,9 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         aiMesh *const mesh = pScene->mMeshes[i];
         if (mesh->mPrimitiveTypes == 0) {
+            for (size_t idx = 0; idx < outMeshes.size(); ++idx) {
+                delete outMeshes[idx];
+            }
             throw DeadlyImportError("Mesh with invalid primitive type: ", mesh->mName.C_Str());
         }
 
@@ -152,6 +165,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
             if (!(mConfigRemoveMeshes & mesh->mPrimitiveTypes)) {
                 *meshIdx = static_cast<unsigned int>(outMeshes.size());
                 outMeshes.emplace_back(mesh);
+                pScene->mMeshes[i] = nullptr; // Indicate ownership transfer
             } else {
                 delete mesh;
                 pScene->mMeshes[i] = nullptr;
@@ -167,15 +181,22 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
         // with the largest number of primitives
         unsigned int aiNumPerPType[4] = { 0, 0, 0, 0 };
         aiFace *pFirstFace = mesh->mFaces;
+        if (pFirstFace == nullptr) {
+            continue;
+        }
+
         aiFace *const pLastFace = pFirstFace + mesh->mNumFaces;
 
         unsigned int numPolyVerts = 0;
         for (; pFirstFace != pLastFace; ++pFirstFace) {
-            if (pFirstFace->mNumIndices <= 3)
+            if (pFirstFace->mNumIndices >= 1 && pFirstFace->mNumIndices <= 3)
                 ++aiNumPerPType[pFirstFace->mNumIndices - 1];
             else {
                 ++aiNumPerPType[3];
                 numPolyVerts += pFirstFace->mNumIndices;
+            }
+            if (pFirstFace->mNumIndices == 0) {
+                ASSIMP_LOG_WARN("Face with 0 indices treated as polygon");
             }
         }
 
@@ -308,7 +329,7 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                     if (vert) {
                         *vert++ = mesh->mVertices[idx];
                     }
-                    if (nor) 
+                    if (nor)
                         *nor++ = mesh->mNormals[idx];
                     if (tan) {
                         *tan++ = mesh->mTangents[idx];
@@ -316,13 +337,13 @@ void SortByPTypeProcess::Execute(aiScene *pScene) {
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++pp) {
-                        if (!uv[pp]) 
+                        if (!uv[pp])
                             break;
                         *uv[pp]++ = mesh->mTextureCoords[pp][idx];
                     }
 
                     for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_COLOR_SETS; ++pp) {
-                        if (!cols[pp]) 
+                        if (!cols[pp])
                             break;
                         *cols[pp]++ = mesh->mColors[pp][idx];
                     }

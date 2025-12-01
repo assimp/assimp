@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -50,7 +50,7 @@ class utNFFImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NFF/NFF/ManyEarthsNotJustOne.nff", 0);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NFF/ManyEarthsNotJustOne.nff", 0);
         return nullptr != scene;
     }
 };

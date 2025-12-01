@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
-#include "AssetLib/X/XFileImporter.h"
-#include "AssetLib/X/XFileParser.h"
+#include "XFileImporter.h"
+#include "XFileParser.h"
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/TinyFormatter.h>
@@ -77,7 +77,7 @@ static constexpr aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool XFileImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t token[] = { AI_MAKE_MAGIC("xof ") };
+    static constexpr uint32_t token[] = { AI_MAKE_MAGIC("xof ") };
     return CheckMagicToken(pIOHandler, pFile, token, AI_COUNT_OF(token));
 }
 
@@ -366,7 +366,7 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                     // TODO  In cases like this unit tests are less useful, since the model still has
                     // TODO  meshes, textures, animations etc. and asserts against these values may pass;
                     // TODO  when touching importer code, it is crucial that developers also run manual, visual
-                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch 
+                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch
                     //const unsigned int boneIdx = obone.mWeights[d].mVertex;
                     //if (boneIdx < obone.mWeights.size()) {
                         oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;

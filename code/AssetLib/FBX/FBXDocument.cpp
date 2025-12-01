@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -269,7 +269,7 @@ Document::~Document()
 {
 	// The document does not own the memory for the following objects, but we need to call their d'tor
 	// so they can properly free memory like string members:
-	
+
     for (ObjectMap::value_type &v : objects) {
         delete_LazyObject(v.second);
     }
@@ -663,6 +663,10 @@ LazyObject& Connection::LazyDestinationObject() const {
 const Object* Connection::SourceObject() const {
     LazyObject* const lazy = doc.GetObject(src);
     ai_assert(lazy);
+    if (lazy == nullptr) {
+        return nullptr;
+    }
+
     return lazy->Get();
 }
 
@@ -670,6 +674,10 @@ const Object* Connection::SourceObject() const {
 const Object* Connection::DestinationObject() const {
     LazyObject* const lazy = doc.GetObject(dest);
     ai_assert(lazy);
+    if (lazy == nullptr) {
+        return nullptr;
+    }
+
     return lazy->Get();
 }
 

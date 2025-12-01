@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -104,7 +104,7 @@ public:
 /** FOR EXPORTER PLUGINS ONLY: Simple exception class to be thrown if an
  *  unrecoverable error occurs while exporting. Exporting APIs return
  *  nullptr instead of a valid aiScene then.  */
-class ASSIMP_API DeadlyExportError : public DeadlyErrorBase {
+class ASSIMP_API DeadlyExportError final : public DeadlyErrorBase {
 public:
     /** Constructor with arguments */
     template<typename... T>

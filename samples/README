@@ -12,16 +12,16 @@ use in various real-world environments. Workspaces to build the
 samples can be found in the respective directories. The VC workspaces
 copy the created executables to the ./bin directory.
 
-All GL-based samples depend on FreeGLUT, the image loading will be done 
+All GL-based samples depend on FreeGLUT, the image loading will be done
 by a header-only library. For convenience, these libraries are included
 in the repository in their respective Windows/x86 prebuilt versions.
-To build on linux, install freeglut using the package manager of your 
+To build on linux, install freeglut using the package manager of your
 choice. For instance on Ubuntu to install freeglut you can use the following
 command:
 
 > sudo apt install freeglut
 
-All samples will be placed at 
+All samples will be placed at
 
 Win32: <assimp_repo>/<config>/bin
 
@@ -45,7 +45,7 @@ SimpleOpenGL
 
 SimpleTexturedOpenGL
 
-  An extended OpenGL sample, featuring texturing using the DevIL 
+  An extended OpenGL sample, featuring texturing using the DevIL
   library. Based on SimpleOpenGL and the NeHe GL tutorial style.
 
   This is a Windows-only sample.
@@ -56,7 +56,7 @@ SimpleTexturedOpenGL
 
 SimpleAssimpViewX
 
-  A Mac OSX-based viewer app. This sample was kindly provided by drparallax. 
+  A Mac OSX-based viewer app. This sample was kindly provided by drparallax.
   See http://sourceforge.net/projects/assimp/forums/forum/817654/topic/3917829
 
 

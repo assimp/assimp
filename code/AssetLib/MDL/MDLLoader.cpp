@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -48,10 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-#include "AssetLib/MDL/MDLLoader.h"
+#include "MDLLoader.h"
 #include "AssetLib/MD2/MD2FileData.h"
-#include "AssetLib/MDL/HalfLife/HL1MDLLoader.h"
-#include "AssetLib/MDL/MDLDefaultColorMap.h"
+#include "HalfLife/HL1MDLLoader.h"
+#include "HalfLife/HL1FileData.h"
+#include "MDLDefaultColorMap.h"
 
 #include <assimp/StringUtils.h>
 #include <assimp/importerdesc.h>
@@ -99,7 +100,7 @@ MDLImporter::MDLImporter() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool MDLImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
-    static const uint32_t tokens[] = {
+    static constexpr uint32_t tokens[] = {
         AI_MDL_MAGIC_NUMBER_LE_HL2a,
         AI_MDL_MAGIC_NUMBER_LE_HL2b,
         AI_MDL_MAGIC_NUMBER_LE_GS7,
@@ -138,12 +139,27 @@ void MDLImporter::SetupProperties(const Importer *pImp) {
     mHL1ImportSettings.read_bone_controllers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_BONE_CONTROLLERS, true);
     mHL1ImportSettings.read_hitboxes = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_HITBOXES, true);
     mHL1ImportSettings.read_misc_global_info = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_READ_MISC_GLOBAL_INFO, true);
+    mHL1ImportSettings.transform_coord_system = pImp->GetPropertyBool(AI_CONFIG_IMPORT_MDL_HL1_TRANSFORM_COORD_SYSTEM);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get a list of all supported extensions
 const aiImporterDesc *MDLImporter::GetInfo() const {
     return &desc;
+}
+
+// ------------------------------------------------------------------------------------------------
+static void transformCoordinateSystem(const aiScene *pScene) {
+    if (pScene == nullptr) {
+        return;
+    }
+
+    pScene->mRootNode->mTransformation = aiMatrix4x4(
+        0.f, -1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        -1.f, 0.f, 0.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -246,18 +262,16 @@ void MDLImporter::InternReadFile(const std::string &pFile,
                                     ". Magic word (", ai_str_toprintable((const char *)&iMagicWord, sizeof(iMagicWord)), ") is not known");
         }
 
-        if (is_half_life){
+        if (is_half_life && mHL1ImportSettings.transform_coord_system) {
             // Now rotate the whole scene 90 degrees around the z and x axes to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(
-                    0.f, -1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    -1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 0.f, 1.f);
-        }
-        else {
+            transformCoordinateSystem(pScene);
+        } else {
             // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
-            pScene->mRootNode->mTransformation = aiMatrix4x4(1.f, 0.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+            pScene->mRootNode->mTransformation = aiMatrix4x4(
+                1.f,  0.f, 0.f, 0.f,
+                0.f,  0.f, 1.f, 0.f,
+                0.f, -1.f, 0.f, 0.f,
+                0.f,  0.f, 0.f, 1.f);
         }
 
         DeleteBufferAndCleanup();
@@ -312,13 +326,13 @@ void MDLImporter::SizeCheck(const void *szPos, const char *szFile, unsigned int 
 // Validate a quake file header
 void MDLImporter::ValidateHeader_Quake1(const MDL::Header *pcHeader) {
     // some values may not be nullptr
-    if (!pcHeader->num_frames)
+    if (pcHeader->num_frames <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no frames in the file");
 
-    if (!pcHeader->num_verts)
+    if (pcHeader->num_verts <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no vertices in the file");
 
-    if (!pcHeader->num_tris)
+    if (pcHeader->num_tris <= 0)
         throw DeadlyImportError("[Quake 1 MDL] There are no triangles in the file");
 
     // check whether the maxima are exceeded ...however, this applies for Quake 1 MDLs only
@@ -407,7 +421,7 @@ void MDLImporter::InternReadFile_Quake1() {
                 }
                 // go to the end of the skin section / the beginning of the next skin
                 bool overflow = false;
-                if (pcHeader->skinwidth != 0 || pcHeader->skinheight != 0) {
+                if (pcHeader->skinwidth != 0 && pcHeader->skinheight != 0) {
                     if ((pcHeader->skinheight > INT_MAX / pcHeader->skinwidth) || (pcHeader->skinwidth > INT_MAX / pcHeader->skinheight)){
                         overflow = true;
                     }
@@ -962,7 +976,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7 **apcOutBones)
 
                 if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size) {
                     // no real name for our poor bone is specified :-(
-                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, MAXLEN,
+                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, AI_MAXLEN,
                             "UnnamedBone_%i", iBone);
                 } else {
                     // Make sure we won't run over the buffer's end if there is no
@@ -1567,7 +1581,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
             } else {
                 pcNode->mName.length = (ai_uint32)::strlen(szBuffer);
             }
-            ::strncpy(pcNode->mName.data, szBuffer, MAXLEN - 1);
+            ::strncpy(pcNode->mName.data, szBuffer, AI_MAXLEN - 1);
             ++p;
         }
     }
@@ -1966,6 +1980,11 @@ void MDLImporter::InternReadFile_HL1(const std::string &pFile, const uint32_t iM
     // We can't correctly load an MDL from a MDL "sequence" file.
     if (iMagicWord == AI_MDL_MAGIC_NUMBER_BE_HL2b || iMagicWord == AI_MDL_MAGIC_NUMBER_LE_HL2b)
         throw DeadlyImportError("Impossible to properly load a model from an MDL sequence file.");
+
+    // Check if the buffer is large enough to hold the header
+    if (iFileSize < sizeof(HalfLife::Header_HL1)) {
+        throw DeadlyImportError("HL1 MDL file is too small to contain header.");
+    }
 
     // Read the MDL file.
     HalfLife::HL1MDLLoader loader(

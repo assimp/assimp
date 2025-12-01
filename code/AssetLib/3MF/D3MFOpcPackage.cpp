@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -65,10 +65,9 @@ namespace D3MF {
 
 using OpcPackageRelationshipPtr = std::shared_ptr<OpcPackageRelationship>;
 
-class OpcPackageRelationshipReader {
+class OpcPackageRelationshipReader final {
 public:
-    OpcPackageRelationshipReader(XmlParser &parser) :
-            mRelations() {
+    explicit OpcPackageRelationshipReader(XmlParser &parser) : mRelations() {
         XmlNode root = parser.getRootNode();
         ParseRootNode(root);
     }

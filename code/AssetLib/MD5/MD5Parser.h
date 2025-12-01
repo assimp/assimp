@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -422,7 +422,7 @@ inline bool MD5Parser::SkipSpacesAndLineEnd( const char* in, const char** out) {
         *out = in;
         return false;
     }
-    
+
     bool bHad = false, running = true;
     while (running) {
         if( *in == '\r' || *in == '\n') {

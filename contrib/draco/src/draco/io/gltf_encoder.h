@@ -84,6 +84,9 @@ class GltfEncoder {
   void set_output_type(OutputType type) { output_type_ = type; }
   OutputType output_type() const { return output_type_; }
 
+  void set_copyright(const std::string &copyright) { copyright_ = copyright; }
+  std::string copyright() const { return copyright_; }
+
   // The name of the attribute metadata that contains the glTF attribute
   // name. For application-specific generic attributes, if the metadata for
   // an attribute contains this key, then the value will be used as the
@@ -126,6 +129,7 @@ class GltfEncoder {
 
   EncoderBuffer *out_buffer_;
   OutputType output_type_;
+  std::string copyright_;
 };
 
 }  // namespace draco

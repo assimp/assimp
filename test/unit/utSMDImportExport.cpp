@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2025, assimp team
 
 All rights reserved.
 
@@ -56,18 +56,12 @@ public:
     }
 };
 
-TEST_F(utSMDImporter, createTest) {
-    bool ok(true);
-    try {
-        SMDImporter myImporter;
-    } catch (...) {
-        ok = false;
-    }
-    EXPECT_TRUE(ok);
-}
-
 TEST_F(utSMDImporter, importTest) {
+#ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
     EXPECT_TRUE(importerTest());
+#else
+    EXPECT_FALSE(importerTest());
+#endif
 }
 
 TEST_F(utSMDImporter, issue_899_Texture_garbage_at_end_of_string_Test) {

@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/MemoryIOWrapper.h"
 #include <assimp/StringUtils.h>
 #include <assimp/StreamReader.h>
+#include <assimp/metadata.h>
 
 #include "io-util.hh" // namespace tinyusdz::io
 #include "tydra/scene-access.hh"
@@ -219,6 +220,9 @@ void USDImporterImplTinyusdz::InternReadFile(
     textures(render_scene, pScene, nameWExt);
     textureImages(render_scene, pScene, nameWExt);
     buffers(render_scene, pScene, nameWExt);
+
+    std::map<size_t, tinyusdz::tydra::Node> meshNodes;
+    setupNodes(render_scene, pScene, stage, meshNodes, nameWExt);
     pScene->mRootNode = nodesRecursive(nullptr, render_scene.nodes[0], render_scene.skeletons);
 
     setupBlendShapes(render_scene, pScene, nameWExt);
@@ -798,11 +802,50 @@ void USDImporterImplTinyusdz::buffers(
     }
 }
 
+void USDImporterImplTinyusdz::setupNodes(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        const tinyusdz::Stage &usdStage,
+        std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+        const std::string &nameWExt) {
+    stringstream ss;
+
+    pScene->mRootNode = nodes(render_scene, usdStage, meshNodes, nameWExt);
+    pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
+    pScene->mRootNode->mMeshes = new unsigned int[pScene->mRootNode->mNumMeshes];
+    ss.str("");
+    ss << "setupNodes(): pScene->mNumMeshes: " << pScene->mNumMeshes;
+    if (pScene->mRootNode != nullptr) {
+        ss << ", mRootNode->mNumMeshes: " << pScene->mRootNode->mNumMeshes;
+    }
+    TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+
+    for (unsigned int meshIdx = 0; meshIdx < pScene->mNumMeshes; meshIdx++) {
+        pScene->mRootNode->mMeshes[meshIdx] = meshIdx;
+    }
+
+}
+
+aiNode *USDImporterImplTinyusdz::nodes(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        const tinyusdz::Stage &usdStage,
+        std::map<size_t, tinyusdz::tydra::Node> &meshNodes,
+        const std::string &nameWExt) {
+    const size_t numNodes{render_scene.nodes.size()};
+    (void) numNodes; // Ignore unused variable when -Werror enabled
+    stringstream ss;
+    ss.str("");
+    ss << "nodes(): model" << nameWExt << ", numNodes: " << numNodes;
+    TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+    return nodesRecursive(nullptr, usdStage.root_prims()[0], render_scene.nodes[0], meshNodes);
+}
+
 using Assimp::tinyusdzNodeTypeFor;
 using Assimp::tinyUsdzMat4ToAiMat4;
 using tinyusdz::tydra::NodeType;
 aiNode *USDImporterImplTinyusdz::nodesRecursive(
         aiNode *pNodeParent,
+        const tinyusdz::Prim& prim,
         const tinyusdz::tydra::Node &node,
         const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons) {
     stringstream ss;
@@ -844,6 +887,22 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(
         }
     }
 
+    // Composition: references
+    if (prim.metas().references.has_value())
+    {
+        const tinyusdz::ListEditQual referenceQual = prim.metas().references->first;
+        const std::vector<tinyusdz::Reference> references = prim.metas().references->second;
+
+        for (const auto &reference : references)
+        {
+            cNode->mMetaData = aiMetadata::Alloc(1);
+            cNode->mMetaData->Add("ref", aiString(reference.asset_path.GetAssetPath()));
+        }
+    }
+
+    size_t i{0};
+    for (const auto &childNode: node.children) {
+        cNode->mChildren[i] = nodesRecursive(cNode, prim.children()[i], childNode, meshNodes);
     cNode->mNumChildren = numChildren;
 
     // Done. No more children.

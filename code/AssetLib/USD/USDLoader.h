@@ -53,9 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "USDLoaderImplTinyusdz.h"
 
 namespace Assimp {
-class USDImporter : public BaseImporter {
+
+/// @brief USD Importer class
+class USDImporter final : public BaseImporter {
 public:
+    /// @brief  Constructor
     USDImporter();
+
+    /// @brief  Destructor
     ~USDImporter() override = default;
 
     /// \brief  Returns whether the class can handle the format of the given file.

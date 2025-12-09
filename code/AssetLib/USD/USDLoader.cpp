@@ -77,7 +77,6 @@ static constexpr aiImporterDesc desc = {
 };
 
 namespace Assimp {
-using namespace std;
 
 // Constructor to be privately used by Importer
 USDImporter::USDImporter() :

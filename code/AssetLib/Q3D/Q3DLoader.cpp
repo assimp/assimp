@@ -379,7 +379,7 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
             light->mColorSpecular = light->mColorDiffuse;
 
             // We don't need the rest, but we need to know where this chunk ends.
-            const auto t1 = <stream.GetI4();
+            const auto t1 = stream.GetI4();
             const auto t2 = stream.GetI4();
             if (t1 < 0 || t2 < 0) {
                 throw DeadlyImportError("Quick3D: Overflow detected.");

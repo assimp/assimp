@@ -64,7 +64,7 @@ class Parser;
 class Element;
 
 using ScopeList = std::vector<Scope*>;
-using ElementMap = std::fbx_unordered_multimap< std::string, Element*>;
+using ElementMap = std::multimap< std::string, Element*>;
 using ElementCollection = std::pair<ElementMap::const_iterator,ElementMap::const_iterator>;
 
 #define new_Scope new (allocator.Allocate(sizeof(Scope))) Scope

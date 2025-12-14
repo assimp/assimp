@@ -331,11 +331,11 @@ private:
 // --------------------------------------------------------------------------------------------
 // `static` StreamReaders. Their byte order is fixed and they might be a little bit faster.
 #ifdef AI_BUILD_BIG_ENDIAN
-typedef StreamReader<true> StreamReaderLE;
-typedef StreamReader<false> StreamReaderBE;
+using StreamReaderLE = StreamReader<true> ;
+using StreamReaderBE = StreamReader<false> ;
 #else
-typedef StreamReader<true> StreamReaderBE;
-typedef StreamReader<false> StreamReaderLE;
+using StreamReaderBE = StreamReader<true> ;
+using StreamReaderLE = StreamReader<false> ;
 #endif
 
 // `dynamic` StreamReader. The byte order of the input data is specified in the

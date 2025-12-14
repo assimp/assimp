@@ -156,8 +156,8 @@ private:
     std::string mCur{};
     const char *mEnd{nullptr};
     StreamReaderLE &mStream;
-    bool mSwallow{false};
-    bool mSkip_empty_lines{ false };
+    bool mSwallow{ false };
+    bool mSkip_empty_lines{ false };1
     bool mTrim{ false };
 };
 

@@ -197,4 +197,13 @@ jobs:
         with:
           files: |
             *.zip
- 
+          upload_url: '${{ steps.upload-url.outputs.url }}'
+      - name: Upload EXE files
+        if: contains(matrix.name, 'windows-msvc-hunter')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: '${{secrets.GITHUB_TOKEN}}'
+        with:
+          files: |
+            build/bin/assimp*.exe   
+          upload_url: '${{ steps.upload-url.outputs.url }}'

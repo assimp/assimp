@@ -914,29 +914,16 @@ class Asset {
     friend struct Buffer; // To access OpenFile
     friend class AssetWriter;
 
-private:
-    IOSystem *mIOSystem;
-
-    std::string mCurrentAssetDir;
-
-    size_t mSceneLength;
-    size_t mBodyOffset, mBodyLength;
-
-    std::vector<LazyDictBase *> mDicts;
-
-    IdMap mUsedIds;
-
-    Ref<Buffer> mBodyBuffer;
-
-    Asset(Asset &);
-    Asset &operator=(const Asset &);
 
 public:
+    // Copy policies
+    Asset(Asset &) = delete;
+    Asset &operator=(const Asset &) = delete;
+
     //! Keeps info about the enabled extensions
     struct Extensions {
-        bool KHR_binary_glTF;
-        bool KHR_materials_common;
-
+        bool KHR_binary_glTF{ false };
+        bool KHR_materials_common{ false };
     } extensionsUsed;
 
     AssetMetadata asset;
@@ -961,8 +948,7 @@ public:
 
     Ref<Scene> scene;
 
-public:
-    Asset(IOSystem *io = nullptr) :
+    explicit Asset(IOSystem *io = nullptr) :
             mIOSystem(io),
             asset(),
             accessors(*this, "accessors"),
@@ -979,7 +965,7 @@ public:
             skins(*this, "skins"),
             textures(*this, "textures"),
             lights(*this, "lights", "KHR_materials_common") {
-        memset(&extensionsUsed, 0, sizeof(extensionsUsed));
+        // empty
     }
 
     //! Main function
@@ -995,10 +981,17 @@ public:
 
 private:
     void ReadBinaryHeader(IOStream &stream);
-
     void ReadExtensionsUsed(Document &doc);
-
     IOStream *OpenFile(const std::string &path, const char *mode, bool absolute = false);
+
+private:
+    IOSystem *mIOSystem;
+    std::string mCurrentAssetDir;
+    size_t mSceneLength;
+    size_t mBodyOffset, mBodyLength;
+    std::vector<LazyDictBase *> mDicts;
+    IdMap mUsedIds;
+    Ref<Buffer> mBodyBuffer;
 };
 
 } // namespace glTF

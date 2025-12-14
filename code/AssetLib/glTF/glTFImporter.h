@@ -49,7 +49,6 @@ struct aiNode;
 
 namespace glTF {
     class Asset;
-
 }
 
 namespace Assimp {
@@ -58,7 +57,7 @@ namespace Assimp {
  * Load the glTF format.
  * https://github.com/KhronosGroup/glTF/tree/master/specification
  */
-class glTFImporter : public BaseImporter {
+class glTFImporter final : public BaseImporter {
 public:
     glTFImporter();
     ~glTFImporter() override = default;

@@ -401,6 +401,11 @@ ADD_ASSIMP_IMPORTER( IRR
   AssetLib/Irr/IRRShared.h
 )
 
+ADD_ASSIMP_IMPORTER(JT
+    AssetLib/JT/JTImporter.cpp
+    AssetLib/JT/JTImporter.h
+)
+
 ADD_ASSIMP_IMPORTER( LWO
   AssetLib/LWO/LWOAnimation.cpp
   AssetLib/LWO/LWOAnimation.h

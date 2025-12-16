@@ -109,7 +109,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}'
@@ -141,7 +141,7 @@ jobs:
           prerelease: true
       - run: |
           echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: create-release
           path: release_upload_url.txt

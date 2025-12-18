@@ -29,8 +29,12 @@ inline bool ForceFormat(Assimp::Importer& importer, const char* targetExtension)
         
         bool isTarget = false;
         const char* extList = desc->mFileExtensions;
+        if (!extList) {
+            toRemove.push_back(imp);
+            continue;
+        }
         const size_t targetLen = strlen(targetExtension);
-        
+
         const char* p = extList;
         while ((p = strstr(p, targetExtension)) != nullptr) {
             // Check boundaries

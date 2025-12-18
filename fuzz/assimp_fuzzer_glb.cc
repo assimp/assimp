@@ -51,13 +51,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
     }
 
     Importer importer;
-    // Force glTF text format only (see assimp_fuzzer_glb.cc for binary GLB)
-    if (!AssimpFuzz::ForceFormat(importer, "gltf")) {
+    // Force GLB binary format only (see assimp_fuzzer_gltf.cc for text glTF)
+    if (!AssimpFuzz::ForceFormat(importer, "glb")) {
         return 0;
     }
 
     unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
-    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, "gltf");
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, "glb");
 
     return 0;
 }

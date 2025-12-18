@@ -1838,6 +1838,10 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
     const unsigned int iNumOutBones = pcHeader->bones_num;
 
     for (std::vector<aiMaterial *>::size_type i = 0; i < shared.pcMats.size(); ++i) {
+        if (splitGroupData.aiSplit == nullptr) {
+            continue;
+        }
+
         if (!splitGroupData.aiSplit[i]->empty()) {
 
             // allocate the output mesh

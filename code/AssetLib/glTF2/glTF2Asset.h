@@ -1150,6 +1150,7 @@ public:
         bool KHR_draco_mesh_compression;
         bool FB_ngon_encoding;
         bool KHR_texture_basisu;
+        bool EXT_texture_webp;
 
         Extensions() :
                 KHR_materials_pbrSpecularGlossiness(false),
@@ -1166,7 +1167,8 @@ public:
                 KHR_materials_anisotropy(false),
                 KHR_draco_mesh_compression(false),
                 FB_ngon_encoding(false),
-                KHR_texture_basisu(false) {
+                KHR_texture_basisu(false),
+                EXT_texture_webp(false) {
             // empty
         }
     } extensionsUsed;
@@ -1175,8 +1177,9 @@ public:
     struct RequiredExtensions {
         bool KHR_draco_mesh_compression;
         bool KHR_texture_basisu;
+        bool EXT_texture_webp;
 
-        RequiredExtensions() : KHR_draco_mesh_compression(false), KHR_texture_basisu(false) {
+        RequiredExtensions() : KHR_draco_mesh_compression(false), KHR_texture_basisu(false), EXT_texture_webp(false) {
             // empty
         }
     } extensionsRequired;

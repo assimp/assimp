@@ -1663,6 +1663,8 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
                     ext = "kx2";
                 } else if (strcmp(ext, "basis") == 0) { // basisu
                     ext = "bu";
+                } else if (strcmp(ext, "webp") == 0) { // webp
+                    ext = "webp";
                 }
 
                 size_t len = strlen(ext);

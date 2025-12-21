@@ -1135,42 +1135,25 @@ class Asset {
 public:
     //! Keeps info about the enabled extensions
     struct Extensions {
-        bool KHR_materials_pbrSpecularGlossiness;
-        bool KHR_materials_specular;
-        bool KHR_materials_unlit;
-        bool KHR_lights_punctual;
-        bool KHR_texture_transform;
-        bool KHR_materials_sheen;
-        bool KHR_materials_clearcoat;
-        bool KHR_materials_transmission;
-        bool KHR_materials_volume;
-        bool KHR_materials_ior;
-        bool KHR_materials_emissive_strength;
-        bool KHR_materials_anisotropy;
-        bool KHR_draco_mesh_compression;
-        bool FB_ngon_encoding;
-        bool KHR_texture_basisu;
-        bool EXT_texture_webp;
+        bool KHR_materials_pbrSpecularGlossiness{false};
+        bool KHR_materials_specular{false};
+        bool KHR_materials_unlit{false};
+        bool KHR_lights_punctual{false};
+        bool KHR_texture_transform{false};
+        bool KHR_materials_sheen{false};
+        bool KHR_materials_clearcoat{false};
+        bool KHR_materials_transmission{false};
+        bool KHR_materials_volume{false};
+        bool KHR_materials_ior{false};
+        bool KHR_materials_emissive_strength{false};
+        bool KHR_materials_anisotropy{false};
+        bool KHR_draco_mesh_compression{false};
+        bool FB_ngon_encoding{false};
+        bool KHR_texture_basisu{false};
+        bool EXT_texture_webp{false};
 
-        Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false),
-                KHR_materials_specular(false),
-                KHR_materials_unlit(false),
-                KHR_lights_punctual(false),
-                KHR_texture_transform(false),
-                KHR_materials_sheen(false),
-                KHR_materials_clearcoat(false),
-                KHR_materials_transmission(false),
-                KHR_materials_volume(false),
-                KHR_materials_ior(false),
-                KHR_materials_emissive_strength(false),
-                KHR_materials_anisotropy(false),
-                KHR_draco_mesh_compression(false),
-                FB_ngon_encoding(false),
-                KHR_texture_basisu(false),
-                EXT_texture_webp(false) {
-            // empty
-        }
+        Extensions() = default;
+        ~Extensions() = default;
     } extensionsUsed;
 
     //! Keeps info about the required extensions

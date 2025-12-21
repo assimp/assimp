@@ -362,7 +362,7 @@ ELSEIF(MSVC)
   elseif((GENERATOR_IS_MULTI_CONFIG) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("-- MSVC PDB generation disabled. Release binary will not be debuggable.")
   endif()
-  if(NOT /utf-8 IN_LIST CMAKE_CXX_FLAGS)
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/utf-8")
     # Source code is encoded in UTF-8
     ADD_COMPILE_OPTIONS(/source-charset:utf-8)
   endif()

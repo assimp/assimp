@@ -364,11 +364,8 @@ struct CustomExtension {
     }
 
     CustomExtension() = default;
-
     ~CustomExtension() = default;
-
     CustomExtension(const CustomExtension &other) = default;
-
     CustomExtension& operator=(const CustomExtension&) = default;
 };
 
@@ -423,7 +420,6 @@ public:
         Type_text
     };
 
-    /// \struct SEncodedRegion
     /// Descriptor of encoded region in "bufferView".
     struct SEncodedRegion {
         const size_t Offset; ///< Offset from begin of "bufferView" to encoded region, in bytes.
@@ -432,7 +428,6 @@ public:
         const size_t DecodedData_Length; ///< Size of decoded region, in bytes.
         const std::string ID; ///< ID of the region.
 
-        /// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
         /// Constructor.
         /// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
         /// \param [in] pEncodedData_Length - size of encoded region, in bytes.
@@ -446,7 +441,6 @@ public:
                 DecodedData_Length(pDecodedData_Length),
                 ID(pID) {}
 
-        /// \fn ~SEncodedRegion()
         /// Destructor.
         ~SEncodedRegion() { delete[] DecodedData; }
     };
@@ -460,7 +454,6 @@ public:
 
     Type type;
 
-    /// \var EncodedRegion_Current
     /// Pointer to currently active encoded region.
     /// Why not decoding all regions at once and not to set one buffer with decoded data?
     /// Yes, why not? Even "accessor" point to decoded data. I mean that fields "byteOffset", "byteStride" and "count" has values which describes decoded
@@ -500,7 +493,6 @@ public:
 
     bool LoadFromStream(IOStream &stream, size_t length = 0, size_t baseOffset = 0);
 
-    /// \fn void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
     /// Mark region of "bufferView" as encoded. When data is request from such region then "bufferView" use decoded data.
     /// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
     /// \param [in] pEncodedData_Length - size of encoded region, in bytes.
@@ -509,12 +501,10 @@ public:
     /// \param [in] pID - ID of the region.
     void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t *pDecodedData, const size_t pDecodedData_Length, const std::string &pID);
 
-    /// \fn void EncodedRegion_SetCurrent(const std::string& pID)
     /// Select current encoded region by ID. \sa EncodedRegion_Current.
     /// \param [in] pID - ID of the region.
     void EncodedRegion_SetCurrent(const std::string &pID);
 
-    /// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
     /// Replace part of buffer data. Pay attention that function work with original array of data (\ref mData) not with encoded regions.
     /// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
     /// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
@@ -1002,27 +992,24 @@ struct Texture : public Object {
 
 struct Animation : public Object {
     struct Sampler {
-        Sampler() :
-                interpolation(Interpolation_LINEAR) {}
+        Sampler() = default;
 
         Ref<Accessor> input; //!< Accessor reference to the buffer storing the key-frame times.
         Ref<Accessor> output; //!< Accessor reference to the buffer storing the key-frame values.
-        Interpolation interpolation; //!< Type of interpolation algorithm to use between key-frames.
+        Interpolation interpolation{Interpolation_LINEAR}; //!< Type of interpolation algorithm to use between key-frames.
     };
 
     struct Target {
-        Target() :
-                path(AnimationPath_TRANSLATION) {}
+        Target() = default;
 
         Ref<Node> node; //!< The node to animate.
-        AnimationPath path; //!< The property of the node to animate.
+        AnimationPath path{AnimationPath_TRANSLATION}; //!< The property of the node to animate.
     };
 
     struct Channel {
-        Channel() :
-                sampler(-1) {}
+        Channel() = default;
 
-        int sampler; //!< The sampler index containing the animation data.
+        int sampler{-1}; //!< The sampler index containing the animation data.
         Target target; //!< The node and property to animate.
     };
 
@@ -1135,50 +1122,34 @@ class Asset {
 public:
     //! Keeps info about the enabled extensions
     struct Extensions {
-        bool KHR_materials_pbrSpecularGlossiness;
-        bool KHR_materials_specular;
-        bool KHR_materials_unlit;
-        bool KHR_lights_punctual;
-        bool KHR_texture_transform;
-        bool KHR_materials_sheen;
-        bool KHR_materials_clearcoat;
-        bool KHR_materials_transmission;
-        bool KHR_materials_volume;
-        bool KHR_materials_ior;
-        bool KHR_materials_emissive_strength;
-        bool KHR_materials_anisotropy;
-        bool KHR_draco_mesh_compression;
-        bool FB_ngon_encoding;
-        bool KHR_texture_basisu;
+        bool KHR_materials_pbrSpecularGlossiness{false};
+        bool KHR_materials_specular{false};
+        bool KHR_materials_unlit{false};
+        bool KHR_lights_punctual{false};
+        bool KHR_texture_transform{false};
+        bool KHR_materials_sheen{false};
+        bool KHR_materials_clearcoat{false};
+        bool KHR_materials_transmission{false};
+        bool KHR_materials_volume{false};
+        bool KHR_materials_ior{false};
+        bool KHR_materials_emissive_strength{false};
+        bool KHR_materials_anisotropy{false};
+        bool KHR_draco_mesh_compression{false};
+        bool FB_ngon_encoding{false};
+        bool KHR_texture_basisu{false};
+        bool EXT_texture_webp{false};
 
-        Extensions() :
-                KHR_materials_pbrSpecularGlossiness(false),
-                KHR_materials_specular(false),
-                KHR_materials_unlit(false),
-                KHR_lights_punctual(false),
-                KHR_texture_transform(false),
-                KHR_materials_sheen(false),
-                KHR_materials_clearcoat(false),
-                KHR_materials_transmission(false),
-                KHR_materials_volume(false),
-                KHR_materials_ior(false),
-                KHR_materials_emissive_strength(false),
-                KHR_materials_anisotropy(false),
-                KHR_draco_mesh_compression(false),
-                FB_ngon_encoding(false),
-                KHR_texture_basisu(false) {
-            // empty
-        }
+        Extensions() = default;
+        ~Extensions() = default;
     } extensionsUsed;
 
     //! Keeps info about the required extensions
     struct RequiredExtensions {
-        bool KHR_draco_mesh_compression;
-        bool KHR_texture_basisu;
+        bool KHR_draco_mesh_compression{false};
+        bool KHR_texture_basisu{false};
+        bool EXT_texture_webp{false};
 
-        RequiredExtensions() : KHR_draco_mesh_compression(false), KHR_texture_basisu(false) {
-            // empty
-        }
+        RequiredExtensions() = default;
     } extensionsRequired;
 
     AssetMetadata asset;

@@ -1221,6 +1221,13 @@ inline void Texture::Read(Value &obj, Asset &r) {
                     source = r.images.Retrieve(sourceVal->GetUint());
                 }
             }
+        } else if(r.extensionsUsed.EXT_texture_webp) {
+            if (Value *curBasisU = FindObject(*extensions, "EXT_texture_webp")) {
+
+                if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
+                    source = r.images.Retrieve(sourceVal->GetUint());
+                }
+            }
         }
     }
 }
@@ -2149,6 +2156,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
 
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
     CHECK_REQUIRED_EXT(KHR_texture_basisu);
+    CHECK_REQUIRED_EXT(EXT_texture_webp);
 
 #undef CHECK_REQUIRED_EXT
 }
@@ -2179,6 +2187,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_anisotropy);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
+    CHECK_EXT(EXT_texture_webp);
 
 #undef CHECK_EXT
 }

@@ -38,40 +38,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#include "fuzzer_common.h"
 #include <assimp/cimport.h>
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 using namespace Assimp;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
-    // Limit input size to 1MB to prevent OOMs and timeouts
     if (dataSize > 1024 * 1024) {
         return 0;
     }
 
-#ifdef _DEBUG
-    aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, nullptr);
-    aiAttachLogStream(&stream);
-#endif
-
     Importer importer;
-    unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
-    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, nullptr);
-
-    if (sc == nullptr) {
+    // Force FBX format
+    if (!AssimpFuzz::ForceFormat(importer, "fbx")) {
         return 0;
     }
 
-    Exporter exporter;
-    exporter.ExportToBlob(sc, "fbx");
-
-#ifdef _DEBUG
-    aiDetachLogStream(&stream);
-#endif
+    unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, "fbx");
 
     return 0;
 }
-

@@ -143,8 +143,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
                 char *name{nullptr};
                 size_t len{0};
                 getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
-                //insideCstype = name != "end";
-                insideCstype = strncmp(name, "end", len)  == 0;
+                insideCstype = !(len == 3 && strncmp(name, "end", 3) == 0);
             } break;
             }
             goto pf_skip_line;

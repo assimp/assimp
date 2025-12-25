@@ -58,8 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
 
-//#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF2_IMPORTER)
-
 #include <assimp/Exceptional.h>
 
 #include <algorithm>
@@ -1282,7 +1280,5 @@ inline std::string getContextForErrorMessages(const std::string &id, const std::
 
 // Include the implementation of the methods
 #include "glTF2Asset.inl"
-
-//#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // GLTF2ASSET_H_INC

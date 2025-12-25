@@ -217,19 +217,11 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'm': // Parse a material library or merging group ('mg')
         {
-//            std::string name;
             char *name{nullptr};
             size_t len{ 0 };
             getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
-
-            //size_t nextSpace = name.find(' ');
-            //if (nextSpace != std::string::npos)
-            //  name = name.substr(0, nextSpace);
-
             if (strncmp(name, "mg", len) == 0)
-            //if (name == "mg")
                 getGroupNumberAndResolution();
-            //else if (name == "mtllib")
             else if (strncmp(name, "mtllib", len) == 0)
                 getMaterialLib();
             else

@@ -185,6 +185,10 @@ inline char_t getNameNoSpace(char_t it, char_t end, char **name, size_t &len) {
     }
 
     char *pStart = &(*it);
+    while (&(*it) > pStart && (isEndOfBuffer(it, end) || IsLineEnd(*it) || IsSpaceOrNewLine(*it))) {
+         --it;
+         --len;
+    }
     while (!isEndOfBuffer(it, end) && !IsLineEnd(*it) && !IsSpaceOrNewLine(*it)) {
         ++it;
         ++len;

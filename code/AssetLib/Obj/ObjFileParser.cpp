@@ -139,12 +139,12 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         // handle c-stype section end (http://paulbourke.net/dataformats/obj/)
         if (insideCstype) {
             switch (*m_DataIt) {
-            case 'e': {
-                char *name{nullptr};
-                size_t len{0};
-                getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
-                insideCstype = !(len == 3 && strncmp(name, "end", 3) == 0);
-            } break;
+            	case 'e': {
+                	char *name{nullptr};
+                	size_t len{0};
+                	getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
+                	insideCstype = !(len == 3 && strncmp(name, "end", 3) == 0);
+            	} break;
             }
             goto pf_skip_line;
         }
@@ -199,16 +199,10 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'u': // Parse a material desc. setter
         {
-            //std::string name;
             char *name{nullptr};
             size_t len{ 0 };
             getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
 
-            //size_t nextSpace = name.find(' ');
-            //if (nextSpace != std::string::npos)
-            //    name = name.substr(0, nextSpace);
-
-            //if (name == "usemtl") {
             if (strncmp(name, "usemtl", len) == 0) {
                 getMaterialDesc();
             }
@@ -248,7 +242,6 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             char *name{nullptr};
             size_t len{0};
             getNameNoSpace(m_DataIt, m_DataItEnd, &name, len);
-            //insideCstype = name == "cstype";
             insideCstype = strncmp(name, "cstype", len) == 0;
             goto pf_skip_line;
         }

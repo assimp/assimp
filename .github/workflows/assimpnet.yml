@@ -1,0 +1,51 @@
+name: Build and Publish Prebuilt Binaries
+
+on:
+  release:
+    types: [created]
+    
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-latest
+            arch: x64
+          - name: windows-x86
+            os: windows-latest
+            arch: x86
+            cmake_args: -A Win32
+          - name: macos-x64
+            os: macos-13
+          - name: macos-arm64
+            os: macos-latest
+          - name: linux-x64
+            os: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: lukka/get-cmake@latest
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+      
+      - name: Build
+        run: |
+          cmake -B build -S . ${{ matrix.cmake_args }} -DBUILD_SHARED_LIBS=ON -DUSE_STATIC_CRT=ON -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
+          cmake --build build --config Release
+
+      - name: Upload Artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/bin/*.dll
+            build/bin/*.dylib
+            build/bin/*.so
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

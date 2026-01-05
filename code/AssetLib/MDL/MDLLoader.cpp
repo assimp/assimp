@@ -610,6 +610,10 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 #endif
     ValidateHeader_Quake1(pcHeader);
 
+    if (pcHeader->synctype < 0) {
+        throw DeadlyImportError("Invalid synctype value in MDL header; possible corrupt file.");
+    }
+
     // current cursor position in the file
     const unsigned char *szCurrent = (const unsigned char *)(pcHeader + 1);
     const unsigned char *szEnd = mBuffer + iFileSize;

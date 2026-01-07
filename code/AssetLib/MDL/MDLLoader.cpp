@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -602,7 +602,7 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1() {
 // Read a MDL 3,4,5 file
 void MDLImporter::InternReadFile_3DGS_MDL345() {
     ai_assert(nullptr != pScene);
-    if (pSene == nullptr) {
+    if (pScene == nullptr) {
         throw DeadlyImportError("INvalid scene pointer detected.");
     }
 

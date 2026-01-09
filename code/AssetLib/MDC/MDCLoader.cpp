@@ -324,6 +324,15 @@ void MDCImporter::InternReadFile(
 
 #endif
 
+        // boundary check for pcVerts
+        auto surfStart = reinterpret_cast<const uint8_t*>(pcSurface);
+        const uint8_t* surfEnd = surfStart + pcSurface->ulOffsetEnd;
+        auto vertBufStart = reinterpret_cast<const uint8_t*>(pcVerts);
+        const size_t needVertBytes = sizeof(MDC::BaseVertex) * pcSurface->ulNumVertices;
+        if (vertBufStart < surfStart || vertBufStart + needVertBytes > surfEnd) {
+            throw DeadlyImportError("MDCImporter: pcVerts points outside of surface block.");
+        }
+
         const MDC::CompressedVertex *pcCVerts = nullptr;
         int16_t *mdcCompVert = nullptr;
 
@@ -335,6 +344,12 @@ void MDCImporter::InternReadFile(
                 pcCVerts = (const MDC::CompressedVertex *)((int8_t *)pcSurface +
                                                            pcSurface->ulOffsetCompVerts) +
                            *mdcCompVert * pcSurface->ulNumVertices;
+                auto cvertBufStart = reinterpret_cast<const uint8_t*>(pcCVerts);
+                const size_t needCompVertBytes = sizeof(MDC::CompressedVertex) * pcSurface->ulNumVertices;
+                if (cvertBufStart < surfStart || cvertBufStart > surfEnd ||
+                    needCompVertBytes > static_cast<size_t>(surfEnd - cvertBufStart)) {
+                    throw DeadlyImportError("MDCImporter: pcCVerts points outside of surface block.");
+                }
             } else
                 mdcCompVert = nullptr;
         }

@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <assimp/Importer.hpp>
+#include <assimp/BaseImporter.h>
 #include <assimp/importerdesc.h>
 #include <cstring>
 #include <vector>
@@ -97,6 +98,7 @@ inline bool ForceFormat(Assimp::Importer& importer, const char* targetExtension)
 
     for (auto* imp : toRemove) {
         importer.UnregisterLoader(imp);
+        delete imp;  // Free the unregistered importer to prevent memory leaks
     }
 
     return found;

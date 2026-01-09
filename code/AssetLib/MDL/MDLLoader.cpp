@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -602,6 +602,9 @@ void MDLImporter::SetupMaterialProperties_3DGS_MDL5_Quake1() {
 // Read a MDL 3,4,5 file
 void MDLImporter::InternReadFile_3DGS_MDL345() {
     ai_assert(nullptr != pScene);
+    if (pScene == nullptr) {
+        throw DeadlyImportError("INvalid scene pointer detected.");
+    }
 
     // the header of MDL 3/4/5 is nearly identical to the original Quake1 header
     BE_NCONST MDL::Header *pcHeader = (BE_NCONST MDL::Header *)this->mBuffer;
@@ -609,6 +612,10 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
     FlipQuakeHeader(pcHeader);
 #endif
     ValidateHeader_Quake1(pcHeader);
+
+    if (pcHeader->synctype < 0) {
+        throw DeadlyImportError("Invalid synctype value in MDL header; possible corrupt file.");
+    }
 
     // current cursor position in the file
     const unsigned char *szCurrent = (const unsigned char *)(pcHeader + 1);
@@ -619,8 +626,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
         if (szCurrent + sizeof(uint32_t) > szEnd) {
             throw DeadlyImportError("Texture data past end of file.");
         }
-        BE_NCONST MDL::Skin *pcSkin;
-        pcSkin = (BE_NCONST MDL::Skin *)szCurrent;
+        BE_NCONST MDL::Skin *pcSkin = (BE_NCONST MDL::Skin *)szCurrent;
         AI_SWAP4(pcSkin->group);
         // create one output image
         unsigned int iSkip = i ? UINT_MAX : 0;

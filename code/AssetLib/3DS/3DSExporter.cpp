@@ -76,14 +76,14 @@ class ChunkWriter {
 
 public:
     ChunkWriter(StreamWriterLE &writer, uint16_t chunk_type) :
-            mWriter(writer) {
-        mChunkStartPos = writer.GetCurrentPos();
+            mWriter(writer),
+            mChunkStartPos(writer.GetCurrentPos()) {
         writer.PutU2(chunk_type);
-        writer.PutU4((uint32_t)CHUNK_SIZE_NOT_SET);
+        writer.PutU4(static_cast<uint32_t>(CHUNK_SIZE_NOT_SET));
     }
 
     ~ChunkWriter() {
-        std::size_t head_pos = mWriter.GetCurrentPos();
+        const std::size_t head_pos = mWriter.GetCurrentPos();
 
         ai_assert(head_pos > mChunkStartPos);
         const std::size_t chunk_size = head_pos - mChunkStartPos;
@@ -95,7 +95,7 @@ public:
 
 private:
     StreamWriterLE &mWriter;
-    std::size_t mChunkStartPos;
+    std::size_t mChunkStartPos{0};
 };
 
 // Return an unique name for a given |mesh| attached to |node| that

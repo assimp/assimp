@@ -47,6 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
+    // Limit input size to 1MB to prevent OOMs and timeouts
+    if (dataSize > 1024 * 1024) {
+        return 0;
+    }
+
 #ifdef _DEBUG
     aiLogStream stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, nullptr);
     aiAttachLogStream(&stream);

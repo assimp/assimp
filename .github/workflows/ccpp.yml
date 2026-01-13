@@ -48,7 +48,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
           submodules: true
           
@@ -65,7 +65,7 @@ jobs:
     - name: Cache DX SDK
       id: dxcache
       if: contains(matrix.name, 'windows')
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: '${{ github.workspace }}/DX_SDK'
         key: ${{ runner.os }}-DX_SDK
@@ -109,7 +109,7 @@ jobs:
       run: cd build/bin && ./unit ${{ steps.hunter_extra_test_args.outputs.args }}
       shell: bash
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       if: matrix.name == 'windows-msvc'
       with:
         name: 'assimp-bins-${{ matrix.name }}'
@@ -141,7 +141,7 @@ jobs:
           prerelease: true
       - run: |
           echo '${{steps.create-release.outputs.upload_url}}' > release_upload_url.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: create-release
           path: release_upload_url.txt
@@ -188,7 +188,7 @@ jobs:
       - id: upload-url
         run: |
           echo "url=$(cat create-release/release_upload_url.txt)" >> $GITHUB_OUTPUT
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: 'assimp-bins-${{ matrix.name }}-${{ github.sha }}'
       - uses: actions/upload-release-asset@v1

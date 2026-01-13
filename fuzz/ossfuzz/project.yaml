@@ -1,0 +1,14 @@
+homepage: "https://github.com/assimp/assimp"
+main_repo: "https://github.com/assimp/assimp"
+language: c++
+primary_contact: "kim.kulling@assimp.org"
+auto_ccs:
+  - "kim.kulling@googlemail.com"
+sanitizers:
+  - address
+  - undefined
+  - memory
+fuzzing_engines:
+  - libfuzzer
+  - afl
+  - honggfuzz

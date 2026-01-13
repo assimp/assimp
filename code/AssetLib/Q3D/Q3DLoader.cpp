@@ -55,6 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include <limits>
+
 namespace Assimp {
 
 static constexpr aiImporterDesc desc = {
@@ -309,6 +311,11 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                     throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
                 }
 
+                const unsigned int uint_max = std::numeric_limits<unsigned int>::max();
+                if (tex->mWidth > (uint_max / tex->mHeight)) {
+                    throw DeadlyImportError("Quick3D: Texture dimensions are too large, resulting in overflow.");
+                }
+
                 unsigned int mul = tex->mWidth * tex->mHeight;
                 aiTexel *begin = tex->pcData = new aiTexel[mul];
                 aiTexel *const end = &begin[mul - 1] + 1;
@@ -372,7 +379,12 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
             light->mColorSpecular = light->mColorDiffuse;
 
             // We don't need the rest, but we need to know where this chunk ends.
-            unsigned int temp = (unsigned int)(stream.GetI4() * stream.GetI4());
+            const auto t1 = stream.GetI4();
+            const auto t2 = stream.GetI4();
+            if (t1 < 0 || t2 < 0) {
+                throw DeadlyImportError("Quick3D: Overflow detected.");
+            }
+            const unsigned int temp = static_cast<unsigned int>(t1*t2);
 
             // skip the background file name
             while (stream.GetI1())

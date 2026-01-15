@@ -426,7 +426,7 @@ protected:
 
     /** Buffer to hold the loaded file */
     unsigned char* mBuffer;
-
+    size_t mBuffersize = 0;
     /** For GameStudio MDL files: The number in the magic word, either 3,4 or 5
      * (MDL7 doesn't need this, the format has a separate loader) */
     unsigned int iGSFileVersion;

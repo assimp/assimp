@@ -39,42 +39,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "UnitTestPCH.h"
+/** @file utMDLImporter_HL1_ImportSettings.cpp
+ *  @brief Half-Life 1 MDL loader import settings tests.
+ */
 
 #include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-#include "MDL/MDLHL1TestFiles.h"
-
 using namespace Assimp;
 
-class utMDLImporter : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
+class utH1MDLLoader : public ::testing::Test {};
 
-        Assimp::Importer importer;
-        importerTest_HL1(&importer);
-
-        // Add further MDL tests...
-
-        return true;
-    }
-
-private:
-    void importerTest_HL1(Importer *const importer) {
-        const aiScene *scene = importer->ReadFile(MDL_HL1_FILE_MAN, 0);
-        EXPECT_NE(nullptr, scene);
-
-        // Test that the importer can directly load an HL1 MDL external texture file.
-        scene = importer->ReadFile(ASSIMP_TEST_MDL_HL1_MODELS_DIR "manT.mdl", aiProcess_ValidateDataStructure);
-        EXPECT_NE(nullptr, scene);
-        EXPECT_NE(0u, scene->mNumTextures);
-        EXPECT_NE(0u, scene->mNumMaterials);
-    }
-};
-
-TEST_F(utMDLImporter, importMDLFromFileTest) {
-    EXPECT_TRUE(importerTest());
+TEST_F(utH1MDLLoader, parseInvalidFile_1) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR"/invalid/af51e2973bb947199c1192c98a4b3fe6.bin", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
 }

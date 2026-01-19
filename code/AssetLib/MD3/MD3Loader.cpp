@@ -390,13 +390,21 @@ void MD3Importer::ValidateHeaderOffsets() {
 void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface *pcSurf) {
     // Calculate the relative offset of the surface
     const int32_t ofs = int32_t((const unsigned char *)pcSurf - this->mBuffer);
+    if (ofs + sizeof(MD3::Surface) > fileSize) {
+        throw DeadlyImportError("Surface header is outside file bounds");
+    }
 
+    auto inRange = [this, ofs](uint32_t rel_offset, uint32_t count, size_t elem_size) -> bool {
+        size_t abs_offset = ofs + rel_offset;
+        if (count > 0 && elem_size > 0 && count > SIZE_MAX / elem_size) return false;
+        size_t total = abs_offset + size_t(count) * elem_size;
+        return abs_offset <= fileSize && total <= fileSize;
+    };
     // Check whether all data chunks are inside the valid range
-    if (pcSurf->OFS_TRIANGLES + ofs + pcSurf->NUM_TRIANGLES * sizeof(MD3::Triangle) > fileSize ||
-            pcSurf->OFS_SHADERS + ofs + pcSurf->NUM_SHADER * sizeof(MD3::Shader) > fileSize ||
-            pcSurf->OFS_ST + ofs + pcSurf->NUM_VERTICES * sizeof(MD3::TexCoord) > fileSize ||
-            pcSurf->OFS_XYZNORMAL + ofs + pcSurf->NUM_VERTICES * sizeof(MD3::Vertex) > fileSize) {
-
+    if (!inRange(pcSurf->OFS_TRIANGLES, pcSurf->NUM_TRIANGLES, sizeof(MD3::Triangle)) ||
+        !inRange(pcSurf->OFS_SHADERS,   pcSurf->NUM_SHADER,    sizeof(MD3::Shader)) ||
+        !inRange(pcSurf->OFS_ST,        pcSurf->NUM_VERTICES,  sizeof(MD3::TexCoord)) ||
+        !inRange(pcSurf->OFS_XYZNORMAL, pcSurf->NUM_VERTICES,  sizeof(MD3::Vertex))) {
         throw DeadlyImportError("Invalid MD3 surface header: some offsets are outside the file");
     }
 

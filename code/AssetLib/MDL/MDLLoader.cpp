@@ -2001,6 +2001,7 @@ void MDLImporter::InternReadFile_HL1(const std::string &pFile, const uint32_t iM
             pScene,
             mIOHandler,
             mBuffer,
+            iFileSize,
             pFile,
             mHL1ImportSettings);
 }

@@ -155,6 +155,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     }
 
     mFileBuffer = &mBuffer[0] + 12;
+    mFileBufferEnd = &mBuffer[0] + fileSize;
     fileSize -= 12;
 
     // Initialize some members with their default values

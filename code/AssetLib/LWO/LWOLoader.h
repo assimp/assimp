@@ -390,6 +390,9 @@ protected:
     /** Size of the file, in bytes */
     unsigned int fileSize;
 
+    /** End of the file buffer (for bounds checking) */
+    uint8_t *mFileBufferEnd;
+
     /** Output scene */
     aiScene *mScene;
 
@@ -482,16 +485,21 @@ inline int LWOImporter::ReadVSizedIntLWO2(uint8_t *&inout) {
 inline void LWOImporter::GetS0(std::string &out, unsigned int max) {
     unsigned int iCursor = 0;
     const char *sz = (const char *)mFileBuffer;
-    while (*mFileBuffer) {
+    while (mFileBuffer < mFileBufferEnd && *mFileBuffer) {
         if (++iCursor > max) {
-            ASSIMP_LOG_WARN("LWO: Invalid file, string is is too long");
+            ASSIMP_LOG_WARN("LWO: Invalid file, string is too long");
             break;
         }
         ++mFileBuffer;
     }
     size_t len = (size_t)((const char *)mFileBuffer - sz);
     out = std::string(sz, len);
-    mFileBuffer += (len & 0x1 ? 1 : 2);
+    unsigned int skip = (len & 0x1 ? 1 : 2);
+    if (mFileBuffer + skip > mFileBufferEnd) {
+        mFileBuffer = mFileBufferEnd;
+    } else {
+        mFileBuffer += skip;
+    }
 }
 
 } // end of namespace Assimp

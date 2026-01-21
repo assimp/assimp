@@ -86,13 +86,13 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd) {
 }
 
 /**
- *  @brief  Returns pointer to end of the current token
+ *  @brief  Returns next space
  *  @param[in] pBuffer  Pointer to data buffer
  *  @param[in] pEnd     Pointer to end of buffer
- *  @return Pointer to last character of current token
+ *  @return Pointer to next space
  */
 template <class Char_T>
-inline Char_T getEndOfToken(Char_T pBuffer, Char_T pEnd) {
+inline Char_T getNextDelimiter(Char_T pBuffer, Char_T pEnd) {
     while (!isEndOfBuffer(pBuffer, pEnd)) {
         if (IsSpaceOrNewLine(*pBuffer)) {
             break;
@@ -110,7 +110,7 @@ inline Char_T getEndOfToken(Char_T pBuffer, Char_T pEnd) {
  */
 template <class Char_T>
 inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd) {
-    pBuffer = getEndOfToken(pBuffer, pEnd);
+    pBuffer = getNextDelimiter(pBuffer, pEnd);
     return getNextWord(pBuffer, pEnd);
 }
 

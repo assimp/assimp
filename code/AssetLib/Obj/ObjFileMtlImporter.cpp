@@ -253,7 +253,7 @@ void ObjFileMtlImporter::load() {
             {
                 // Save start of token (after 'm')
                 auto tokenStart = m_DataIt;  // points to 'm'
-                auto tokenEnd = getEndOfToken(m_DataIt, m_DataItEnd); // move iterator to end of token
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd); // move iterator to end of token
 
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd); // advance iterator
@@ -279,7 +279,7 @@ void ObjFileMtlImporter::load() {
             case 'r': // refl (map) or roughness (float)
             {
                 auto tokenStart = m_DataIt;  // points to 'r'
-                auto tokenEnd = getEndOfToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
@@ -303,7 +303,7 @@ void ObjFileMtlImporter::load() {
 
             case 'a': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getEndOfToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
@@ -322,7 +322,7 @@ void ObjFileMtlImporter::load() {
 
             case 's': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getEndOfToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = getNextWord(tokenEnd,m_DataItEnd);
 
@@ -343,7 +343,7 @@ void ObjFileMtlImporter::load() {
 
             case 'c': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getEndOfToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 

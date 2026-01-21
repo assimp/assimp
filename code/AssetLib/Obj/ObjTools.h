@@ -86,6 +86,23 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd) {
 }
 
 /**
+ *  @brief  Returns pointer to end of the current token
+ *  @param[in] pBuffer  Pointer to data buffer
+ *  @param[in] pEnd     Pointer to end of buffer
+ *  @return Pointer to last character of current token
+ */
+template <class Char_T>
+inline Char_T getEndOfToken(Char_T pBuffer, Char_T pEnd) {
+    while (!isEndOfBuffer(pBuffer, pEnd)) {
+        if (IsSpaceOrNewLine(*pBuffer)) {
+            break;
+        }
+        ++pBuffer;
+    }
+    return pBuffer;
+}
+
+/**
  *  @brief  Returns pointer a next token
  *  @param[in] pBuffer  Pointer to data buffer
  *  @param[in] pEnd     Pointer to end of buffer
@@ -93,12 +110,7 @@ inline Char_T getNextWord(Char_T pBuffer, Char_T pEnd) {
  */
 template <class Char_T>
 inline Char_T getNextToken(Char_T pBuffer, Char_T pEnd) {
-    while (!isEndOfBuffer(pBuffer, pEnd)) {
-        if (IsSpaceOrNewLine(*pBuffer)) {
-            break;
-        }
-        ++pBuffer;
-    }
+    pBuffer = getEndOfToken(pBuffer, pEnd);
     return getNextWord(pBuffer, pEnd);
 }
 

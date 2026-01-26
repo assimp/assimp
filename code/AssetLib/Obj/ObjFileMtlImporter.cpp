@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -253,10 +253,10 @@ void ObjFileMtlImporter::load() {
             {
                 // Save start of token (after 'm')
                 auto tokenStart = m_DataIt;  // points to 'm'
-                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd); // move iterator to end of token
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd); // move iterator to end of token
 
                 std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = tokenEnd; // advance iterator
+                m_DataIt = getNextWord(tokenEnd, m_DataItEnd); // advance iterator
 
                 if (keyword.compare(0, 3, "map") == 0) {
                     // starts with "map", treat as texture map
@@ -279,9 +279,9 @@ void ObjFileMtlImporter::load() {
             case 'r': // refl (map) or roughness (float)
             {
                 auto tokenStart = m_DataIt;  // points to 'r'
-                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = tokenEnd;
+                m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
                 if (keyword == "roughness" || keyword == "rough") {
                     getFloatIfMaterialValid(&ObjFile::Material::roughness);
@@ -303,9 +303,9 @@ void ObjFileMtlImporter::load() {
 
             case 'a': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = tokenEnd;
+                m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
                 if (keyword == "aniso" || keyword == "anisotropy") {
                     getFloatIfMaterialValid(&ObjFile::Material::anisotropy);
@@ -322,9 +322,9 @@ void ObjFileMtlImporter::load() {
 
             case 's': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = tokenEnd;
+                m_DataIt = getNextWord(tokenEnd,m_DataItEnd);
 
                 if (keyword == "subsurface" || keyword == "scattering") {
                     getFloatIfMaterialValid(&ObjFile::Material::subsurface_scattering);
@@ -343,9 +343,9 @@ void ObjFileMtlImporter::load() {
 
             case 'c': {
                 auto tokenStart = m_DataIt;
-                auto tokenEnd = getNextToken(m_DataIt, m_DataItEnd);
+                auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
                 std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = tokenEnd;
+                m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
                 if (ai_stdStrToLower(keyword) == "clearcoat") {
                     getFloatIfMaterialValid(&ObjFile::Material::clearcoat);

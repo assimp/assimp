@@ -607,6 +607,10 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                 const Surface::SurfaceEntry &entry1 = src.entries[i];
                                 const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
                                 const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
+                                const unsigned int verticesNeeded = isDoubleSided ? 6 : 3;
+                                if (static_cast<unsigned>(vertices - mesh->mVertices) + verticesNeeded > mesh->mNumVertices) {
+                                    throw DeadlyImportError("AC3D: Invalid number of vertices");
+                                }
 
                                 aiFace &face = *faces++;
                                 face.mNumIndices = 3;
@@ -661,6 +665,10 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                             unsigned int tmp = (unsigned int)(*it).entries.size();
                             if (Surface::OpenLine == type) --tmp;
                             for (unsigned int m = 0; m < tmp; ++m) {
+                                if (static_cast<unsigned>(vertices - mesh->mVertices) + 2 > mesh->mNumVertices) {
+                                    throw DeadlyImportError("AC3D: Invalid number of vertices");
+                                }
+
                                 aiFace &face = *faces++;
 
                                 face.mNumIndices = 2;

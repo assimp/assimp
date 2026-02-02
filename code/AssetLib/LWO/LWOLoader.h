@@ -363,38 +363,38 @@ protected:
     bool mIsLWO3;
 
     /** Temporary list of layers from the file */
-    LayerList *mLayers;
+    LayerList *mLayers{nullptr};
 
     /** Pointer to the current layer */
-    LWO::Layer *mCurLayer;
+    LWO::Layer *mCurLayer{nullptr};
 
     /** Temporary tag list from the file */
-    TagList *mTags;
+    TagList *mTags{nullptr};
 
     /** Mapping table to convert from tag to surface indices.
         UINT_MAX indicates that a no corresponding surface is available */
-    TagMappingTable *mMapping;
+    TagMappingTable *mMapping{nullptr};
 
     /** Temporary surface list from the file */
-    SurfaceList *mSurfaces;
+    SurfaceList *mSurfaces{nullptr};
 
     /** Temporary clip list from the file */
-    ClipList mClips;
+    ClipList mClips{};
 
     /** Temporary envelope list from the file */
-    EnvelopeList mEnvelopes;
+    EnvelopeList mEnvelopes{};
 
     /** file buffer */
-    uint8_t *mFileBuffer;
+    uint8_t *mFileBuffer{nullptr};
 
     /** Size of the file, in bytes */
-    unsigned int fileSize;
+    unsigned int fileSize{0u};
 
     /** End of the file buffer (for bounds checking) */
-    uint8_t *mFileBufferEnd;
+    uint8_t *mFileBufferEnd{nullptr};
 
     /** Output scene */
-    aiScene *mScene;
+    aiScene *mScene{nullptr};
 
     /** Configuration option: speed flag set? */
     bool configSpeedFlag;

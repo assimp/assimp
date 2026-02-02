@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "LightWave/Modo Object Importer",
     "",
     "",
@@ -76,30 +76,6 @@ static const aiImporterDesc desc = {
     0,
     "lwo lxo"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-LWOImporter::LWOImporter() :
-        mIsLWO2(),
-        mIsLXOB(),
-        mIsLWO3(),
-        mLayers(),
-        mCurLayer(),
-        mTags(),
-        mMapping(),
-        mSurfaces(),
-        mFileBuffer(),
-        fileSize(),
-        mScene(nullptr),
-        configSpeedFlag(),
-        configLayerIndex(),
-        hasNamedLayer() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-LWOImporter::~LWOImporter() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

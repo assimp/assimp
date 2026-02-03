@@ -488,8 +488,10 @@ inline void LWOImporter::GetS0(std::string &out, unsigned int max) {
     }
     size_t len = (size_t)((const char *)mFileBuffer - sz);
     out = std::string(sz, len);
-    unsigned int skip = (len & 0x1 ? 1 : 2);
-    if (mFileBuffer + skip > mFileBufferEnd) {
+
+    const size_t skip = (len & 0x1 ? 1u : 2u);
+    const size_t remaining = static_cast<size_t>(mFileBufferEnd - mFileBuffer);
+    if (remaining < skip) {
         mFileBuffer = mFileBufferEnd;
     } else {
         mFileBuffer += skip;

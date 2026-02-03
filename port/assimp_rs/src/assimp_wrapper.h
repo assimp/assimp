@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assimp/defs.h>
 #include <assimp/camera.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>

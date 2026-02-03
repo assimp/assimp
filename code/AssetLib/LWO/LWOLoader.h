@@ -56,6 +56,7 @@ struct aiNode;
 struct aiMaterial;
 
 namespace Assimp {
+
 using namespace LWO;
 
 // ---------------------------------------------------------------------------

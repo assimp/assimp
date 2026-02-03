@@ -361,7 +361,7 @@ private:
     LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list,
             unsigned int size);
 
-protected:
+private:
     /// true if the file is a LWO2 file
     bool mIsLWO2{false};
     /// true if the file is a LXOB file

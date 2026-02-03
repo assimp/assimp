@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -361,19 +361,19 @@ void MD5Importer::LoadMD5MeshFile() {
 #else
 
     // FIX: MD5 files exported from Blender can have empty meshes
+    unsigned int numMaterials = 0;
     for (std::vector<MD5::MeshDesc>::const_iterator it = meshParser.mMeshes.begin(), end = meshParser.mMeshes.end(); it != end; ++it) {
         if (!(*it).mFaces.empty() && !(*it).mVertices.empty()) {
-            ++mScene->mNumMaterials;
+            ++numMaterials;
         }
     }
 
     // generate all meshes
-    mScene->mNumMeshes = mScene->mNumMaterials;
-    mScene->mMeshes = new aiMesh *[mScene->mNumMeshes];
-    mScene->mMaterials = new aiMaterial *[mScene->mNumMeshes];
+    mScene->mMeshes = new aiMesh *[numMaterials];
+    mScene->mMaterials = new aiMaterial *[numMaterials];
 
     //  storage for node mesh indices
-    pcNode->mNumMeshes = mScene->mNumMeshes;
+    pcNode->mNumMeshes = numMaterials;
     pcNode->mMeshes = new unsigned int[pcNode->mNumMeshes];
     for (unsigned int m = 0; m < pcNode->mNumMeshes; ++m) {
         pcNode->mMeshes[m] = m;
@@ -386,7 +386,10 @@ void MD5Importer::LoadMD5MeshFile() {
             continue;
         }
 
-        aiMesh *mesh = mScene->mMeshes[n] = new aiMesh();
+        aiMesh* mesh = new aiMesh();
+        mScene->mMeshes[n] = mesh;
+        ++mScene->mNumMeshes;
+
         mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
         // generate unique vertices in our internal verbose format
@@ -508,6 +511,7 @@ void MD5Importer::LoadMD5MeshFile() {
         // generate a material for the mesh
         aiMaterial *mat = new aiMaterial();
         mScene->mMaterials[n] = mat;
+        ++mScene->mNumMaterials;
 
         // insert the typical doom3 textures:
         // nnn_local.tga  - normal map

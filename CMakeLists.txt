@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2025, assimp team
+# Copyright (c) 2006-2026, assimp team
 #
 # All rights reserved.
 #
@@ -104,7 +104,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   ADD_DEFINITIONS(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 6.0.2
+PROJECT(Assimp VERSION 6.0.4
   LANGUAGES C CXX
   DESCRIPTION "Open Asset Import Library (Assimp) is a library to import various well-known 3D model formats in a uniform manner."
 )
@@ -362,7 +362,7 @@ ELSEIF(MSVC)
   elseif((GENERATOR_IS_MULTI_CONFIG) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("-- MSVC PDB generation disabled. Release binary will not be debuggable.")
   endif()
-  if(NOT /utf-8 IN_LIST CMAKE_CXX_FLAGS)
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/utf-8")
     # Source code is encoded in UTF-8
     ADD_COMPILE_OPTIONS(/source-charset:utf-8)
   endif()

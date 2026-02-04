@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -56,6 +56,7 @@ struct aiNode;
 struct aiMaterial;
 
 namespace Assimp {
+
 using namespace LWO;
 
 // ---------------------------------------------------------------------------
@@ -68,10 +69,17 @@ using namespace LWO;
  *         they aren't specific to one format version
 */
 // ---------------------------------------------------------------------------
-class LWOImporter : public BaseImporter {
+class LWOImporter final : public BaseImporter {
 public:
-    LWOImporter();
-    ~LWOImporter() override;
+    /**
+     * @brief The class constructor.
+     */
+    LWOImporter() = default;
+
+    /**
+     * @brief The class destructor.
+     */
+    ~LWOImporter() override = default;
 
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
@@ -113,13 +121,13 @@ private:
     // -------------------------------------------------------------------
     /** Parsing functions used for all file format versions
     */
-    inline void GetS0(std::string &out, unsigned int max);
-    inline float GetF4();
-    inline float GetF8();
-    inline uint64_t GetU8();
-    inline uint32_t GetU4();
-    inline uint16_t GetU2();
-    inline uint8_t GetU1();
+    void GetS0(std::string &out, unsigned int max);
+    float GetF4();
+    float GetF8();
+    uint64_t GetU8();
+    uint32_t GetU4();
+    uint16_t GetU2();
+    uint8_t GetU1();
 
     // -------------------------------------------------------------------
     /** Loads a surface chunk from an LWOB file
@@ -353,57 +361,44 @@ private:
     LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list,
             unsigned int size);
 
-protected:
-    /** true if the file is a LWO2 file*/
-    bool mIsLWO2;
-
-    /** true if the file is a LXOB file*/
-    bool mIsLXOB;
-
-    bool mIsLWO3;
-
-    /** Temporary list of layers from the file */
-    LayerList *mLayers;
-
-    /** Pointer to the current layer */
-    LWO::Layer *mCurLayer;
-
-    /** Temporary tag list from the file */
-    TagList *mTags;
-
-    /** Mapping table to convert from tag to surface indices.
-        UINT_MAX indicates that a no corresponding surface is available */
-    TagMappingTable *mMapping;
-
-    /** Temporary surface list from the file */
-    SurfaceList *mSurfaces;
-
-    /** Temporary clip list from the file */
-    ClipList mClips;
-
-    /** Temporary envelope list from the file */
-    EnvelopeList mEnvelopes;
-
-    /** file buffer */
-    uint8_t *mFileBuffer;
-
-    /** Size of the file, in bytes */
-    unsigned int fileSize;
-
-    /** Output scene */
-    aiScene *mScene;
-
-    /** Configuration option: speed flag set? */
-    bool configSpeedFlag;
-
-    /** Configuration option: index of layer to be loaded */
-    unsigned int configLayerIndex;
-
-    /** Configuration option: name of layer to be loaded */
-    std::string configLayerName;
-
-    /** True if we have a named layer */
-    bool hasNamedLayer;
+private:
+    /// true if the file is a LWO2 file
+    bool mIsLWO2{false};
+    /// true if the file is a LXOB file
+    bool mIsLXOB{false};
+    /// true if the file is a LWO3 file
+    bool mIsLWO3{false};
+    /// Temporary list of layers from the file
+    LayerList *mLayers{nullptr};
+    /// Pointer to the current layer
+    LWO::Layer *mCurLayer{nullptr};
+    /// Temporary tag list from the file
+    TagList *mTags{nullptr};
+    /// Mapping table to convert from tag to surface indices.
+    //  UINT_MAX indicates that a no corresponding surface is available 
+    TagMappingTable *mMapping{nullptr};
+    /// Temporary surface list from the file
+    SurfaceList *mSurfaces{nullptr};
+    /// Temporary clip list from the file
+    ClipList mClips{};
+    /// Temporary envelope list from the file
+    EnvelopeList mEnvelopes{};
+    /// Pointer to the file buffer
+    uint8_t *mFileBuffer{nullptr};
+    /// Size of the file, in bytes
+    unsigned int fileSize{0u};
+    /// End of the file buffer (for bounds checking)
+    uint8_t *mFileBufferEnd{nullptr};
+    /// Output scene 
+    aiScene *mScene{nullptr};
+    /// Configuration option: speed flag set?
+    bool configSpeedFlag{false};
+    /// Configuration option: index of layer to be loaded
+    unsigned int configLayerIndex{0};
+    /// Configuration option: name of layer to be loaded */
+    std::string configLayerName{};
+    /// True if we have a named layer
+    bool hasNamedLayer{false};
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -415,6 +410,7 @@ inline float LWOImporter::GetF4() {
     return f;
 }
 
+// ------------------------------------------------------------------------------------------------
 inline float LWOImporter::GetF8() {
     double f;
     ::memcpy(&f, mFileBuffer, 8);
@@ -423,6 +419,7 @@ inline float LWOImporter::GetF8() {
     return (float)f;
 }
 
+// ------------------------------------------------------------------------------------------------
 inline uint64_t LWOImporter::GetU8() {
     uint64_t f;
     ::memcpy(&f, mFileBuffer, 8);
@@ -482,16 +479,23 @@ inline int LWOImporter::ReadVSizedIntLWO2(uint8_t *&inout) {
 inline void LWOImporter::GetS0(std::string &out, unsigned int max) {
     unsigned int iCursor = 0;
     const char *sz = (const char *)mFileBuffer;
-    while (*mFileBuffer) {
+    while (mFileBuffer < mFileBufferEnd && *mFileBuffer) {
         if (++iCursor > max) {
-            ASSIMP_LOG_WARN("LWO: Invalid file, string is is too long");
+            ASSIMP_LOG_WARN("LWO: Invalid file, string is too long");
             break;
         }
         ++mFileBuffer;
     }
     size_t len = (size_t)((const char *)mFileBuffer - sz);
     out = std::string(sz, len);
-    mFileBuffer += (len & 0x1 ? 1 : 2);
+
+    const size_t skip = (len & 0x1 ? 1u : 2u);
+    const size_t remaining = static_cast<size_t>(mFileBufferEnd - mFileBuffer);
+    if (remaining < skip) {
+        mFileBuffer = mFileBufferEnd;
+    } else {
+        mFileBuffer += skip;
+    }
 }
 
 } // end of namespace Assimp

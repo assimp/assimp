@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -81,32 +81,30 @@ namespace Assimp {
  *  Describes to which node a scene must be attached to.
  */
 struct AttachmentInfo {
-    AttachmentInfo() :
-            scene(nullptr),
-            attachToNode(nullptr) {}
+    AttachmentInfo() = default;
+    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) : scene(_scene), attachToNode(_attachToNode) {
+        // empty
+    }
+    ~AttachmentInfo() = default;
 
-    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) :
-            scene(_scene), attachToNode(_attachToNode) {}
-
-    aiScene *scene;
-    aiNode *attachToNode;
+    aiScene *scene{nullptr};
+    aiNode *attachToNode{nullptr};
 };
 
 // ---------------------------------------------------------------------------
+/// @brief Helper data structure for SceneCombiner.
 struct NodeAttachmentInfo {
-    NodeAttachmentInfo() :
-            node(nullptr),
-            attachToNode(nullptr),
-            resolved(false),
-            src_idx(SIZE_MAX) {}
-
+    NodeAttachmentInfo() = default;
+    ~NodeAttachmentInfo() = default;
     NodeAttachmentInfo(aiNode *_scene, aiNode *_attachToNode, size_t idx) :
-            node(_scene), attachToNode(_attachToNode), resolved(false), src_idx(idx) {}
+            node(_scene), attachToNode(_attachToNode), src_idx(idx) {
+        // empty
+    }
 
-    aiNode *node;
-    aiNode *attachToNode;
-    bool resolved;
-    size_t src_idx;
+    aiNode *node{nullptr};
+    aiNode *attachToNode{nullptr};
+    bool resolved{false};
+    size_t src_idx{SIZE_MAX};
 };
 
 // ---------------------------------------------------------------------------
@@ -139,7 +137,7 @@ struct NodeAttachmentInfo {
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
-typedef std::pair<aiBone *, unsigned int> BoneSrcIndex;
+using BoneSrcIndex = std::pair<aiBone *, unsigned int> ;
 
 // ---------------------------------------------------------------------------
 /** @brief Helper data structure for SceneCombiner::MergeBones.
@@ -240,8 +238,8 @@ public:
      *  @param end Points to the mesh after the last mesh to be processed
      */
     static void MergeMeshes(aiMesh **dest, unsigned int flags,
-            MeshArray::const_iterator begin,
-            MeshArray::const_iterator end);
+            std::vector<aiMesh *>::const_iterator begin,
+            std::vector<aiMesh *>::const_iterator end);
 
     // -------------------------------------------------------------------
     /** Merges two or more bones
@@ -251,8 +249,8 @@ public:
      *  @param begin First mesh to be processed
      *  @param end Points to the mesh after the last mesh to be processed
      */
-    static void MergeBones(aiMesh *out, MeshArray::const_iterator it,
-            MeshArray::const_iterator end);
+    static void MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterator it,
+            std::vector<aiMesh *>::const_iterator end);
 
     // -------------------------------------------------------------------
     /** Merges two or more materials
@@ -277,8 +275,8 @@ public:
      *  @param end     Last mesh to be processed
      */
     static void BuildUniqueBoneList(std::list<BoneWithHash> &asBones,
-            MeshArray::const_iterator it,
-            MeshArray::const_iterator end);
+            std::vector<aiMesh *>::const_iterator it,
+            std::vector<aiMesh *>::const_iterator end);
 
     // -------------------------------------------------------------------
     /** Add a name prefix to all nodes in a scene.

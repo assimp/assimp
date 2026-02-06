@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -58,7 +58,7 @@ namespace Assimp {
 /** ComputeUVMappingProcess - converts special mappings, such as spherical,
  *  cylindrical or boxed to proper UV coordinates for rendering.
 */
-class ComputeUVMappingProcess : public BaseProcess {
+class ComputeUVMappingProcess final : public BaseProcess {
 public:
     ComputeUVMappingProcess() = default;
     ~ComputeUVMappingProcess() override = default;

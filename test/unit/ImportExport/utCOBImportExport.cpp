@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -94,4 +94,11 @@ TEST(utCOBImporter, importSpider66) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/spider_6_6.cob", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST(utCOBImporter, importInvalidHeader) {
+    Assimp::Importer importer;
+    constexpr char Header[] = "Caligari ??LZSCALEb";
+    const aiScene *scene = importer.ReadFileFromMemory(Header, sizeof(Header), aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
 }

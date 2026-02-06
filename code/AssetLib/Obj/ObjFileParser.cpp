@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -80,7 +80,7 @@ ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::stri
         m_buffer(),
         m_pIO(io),
         m_progress(progress),
-        m_originalObjFileName(originalObjFileName) {
+        m_originalObjFileName(originalObjFileName) { 
     std::fill_n(m_buffer, Buffersize, '\0');
 
     // Create the model instance to store all the data
@@ -120,6 +120,13 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
         mEnd = &buffer[buffer.size() - 1] + 1;
+
+        if (processed == 0 && std::distance(m_DataIt, m_DataItEnd) >= 3 &&
+            static_cast<unsigned char>(*m_DataIt) == 0xEF &&
+            static_cast<unsigned char>(*(m_DataIt + 1)) == 0xBB &&
+            static_cast<unsigned char>(*(m_DataIt + 2)) == 0xBF) {
+            m_DataIt += 3; // skip BOM
+        }
 
         // Handle progress reporting
         const size_t filePos(streamBuffer.getFilePos());
@@ -464,19 +471,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            int iVal;
-            auto end = m_DataIt;
-            // find either the buffer end or the '\0'
-            while (end < m_DataItEnd && *end != '\0')
-                ++end;
-            // avoid temporary string allocation if there is a zero
-            if (end != m_DataItEnd) {
-                iVal = ::atoi(&(*m_DataIt));
-            } else {
-                // otherwise make a zero terminated copy, which is safe to pass to atoi
-                std::string number(&(*m_DataIt), m_DataItEnd - m_DataIt);
-                iVal = ::atoi(number.c_str());
-            }
+            const int iVal = ::atoi(&(*m_DataIt));
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;

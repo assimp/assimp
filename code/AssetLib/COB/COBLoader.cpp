@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -62,6 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 namespace Assimp {
+
 using namespace Assimp::COB;
 using namespace Assimp::Formatter;
 
@@ -109,8 +110,27 @@ void COBImporter::SetupProperties(const Importer * /*pImp*/) {
 }
 
 // ------------------------------------------------------------------------------------------------
-/*static*/ AI_WONT_RETURN void COBImporter::ThrowException(const std::string &msg) {
+AI_WONT_RETURN void COBImporter::ThrowException(const std::string &msg) {
     throw DeadlyImportError("COB: ", msg);
+}
+
+// ------------------------------------------------------------------------------------------------
+static bool isValidASCIIHeader(const char *head) {
+    ai_assert(head != nullptr);
+
+    if (strncmp(head, "Caligari ", 9) != 0) {
+        COBImporter::ThrowException("Could not found magic id: `Caligari`");
+    }
+
+    if (strncmp(&head[9], "V00.", 4) != 0) {
+        COBImporter::ThrowException("Could not found Version tag: `V00.`");
+    }
+    ASSIMP_LOG_INFO("File format tag: ", std::string(head + 9, 6));
+    if (head[16] != 'L') {
+        COBImporter::ThrowException("File is big-endian, which is not supported");
+    }
+
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -126,19 +146,15 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     std::unique_ptr<StreamReaderLE> stream(new StreamReaderLE(file));
 
     // check header
-    char head[32];
-    stream->CopyAndAdvance(head, 32);
-    if (strncmp(head, "Caligari ", 9) != 0) {
-        ThrowException("Could not found magic id: `Caligari`");
-    }
-
-    ASSIMP_LOG_INFO("File format tag: ", std::string(head + 9, 6));
-    if (head[16] != 'L') {
-        ThrowException("File is big-endian, which is not supported");
-    }
+    static constexpr size_t HeaderSize = 32u;
+    char head[HeaderSize] = {};
+    stream->CopyAndAdvance(head, HeaderSize);
 
     // load data into intermediate structures
     if (head[15] == 'A') {
+        if (!isValidASCIIHeader(head)) {
+            ThrowException("Invalid ASCII file header");
+        }
         ReadAsciiFile(scene, stream.get());
     } else {
         ReadBinaryFile(scene, stream.get());
@@ -1170,6 +1186,6 @@ void COBImporter::ReadUnit_Binary(COB::Scene &out, StreamReaderLE &reader, const
     ASSIMP_LOG_WARN("`Unit` chunk ", nfo.id, " is a child of ", nfo.parent_id, " which does not exist");
 }
 
-}
+} // namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_COB_IMPORTER

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -733,7 +733,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
                     return nullptr;
                 }
             }
-#endif // no validation
+#endif // ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 
             // Preprocess the scene and prepare it for post-processing
             if (profiler) {

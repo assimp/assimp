@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -116,7 +116,7 @@ struct SIBObject {
 
 struct SIB {
     std::vector<aiMaterial *> mtls;
-    MeshArray meshes;
+    std::vector<aiMesh *> meshes;
     std::vector<aiLight *> lights;
     std::vector<SIBObject> objs, insts;
 };

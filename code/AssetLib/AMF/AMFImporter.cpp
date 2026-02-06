@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -327,8 +327,7 @@ void AMFImporter::ParseNode_Root() {
 // Multi elements - Yes.
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Constellation(XmlNode &node) {
-    std::string id;
-    id = node.attribute("id").as_string();
+    std::string id = node.attribute("id").as_string();
 
     // create and if needed - define new grouping object.
     AMFNodeElementBase *ne = new AMFConstellation(mNodeElement_Cur);

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -982,7 +982,7 @@ bool SMDImporter::ParseFloat(const char *szCurrent, const char **szCurrentOut, c
         return false;
     }
 
-    *szCurrentOut = fast_atoreal_move<float>(szCurrent,out);
+    *szCurrentOut = fast_atoreal_move(szCurrent,out);
     return true;
 }
 

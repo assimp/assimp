@@ -2,8 +2,7 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+The current version of Assimp that's being supported with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -12,5 +11,5 @@ currently being supported with security updates.
 ## Reporting a Vulnerability
 
 If you have found any security vulnerability you can contact us via
-kim.kulling@googlemail.com
+kim.kulling@assimp.org
 

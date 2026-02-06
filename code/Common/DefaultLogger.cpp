@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 
 
@@ -334,8 +334,8 @@ bool DefaultLogger::attachStream(LogStream *pStream, unsigned int severity) {
         }
     }
 
-    LogStreamInfo *pInfo = new LogStreamInfo(severity, pStream);
-    m_StreamArray.push_back(pInfo);
+    m_StreamArray.push_back(new LogStreamInfo(severity, pStream));
+
     return true;
 }
 

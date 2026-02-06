@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -58,7 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 #include <exception>
-#include <vector>
 
 namespace Assimp {
 // =======================================================================
@@ -67,7 +66,6 @@ class Importer;
 class IOStream;
 class IOSystem;
 class ProgressHandler;
-
 
 // =======================================================================
 // Plugin development

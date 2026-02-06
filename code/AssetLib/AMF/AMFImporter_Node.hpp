@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -107,16 +107,16 @@ protected:
 }; // class IAMFImporter_NodeElement
 
 /// A collection of objects or constellations with specific relative locations.
-struct AMFConstellation : public AMFNodeElementBase {
+struct AMFConstellation final : public AMFNodeElementBase {
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFConstellation(AMFNodeElementBase *pParent) :
+	explicit AMFConstellation(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_Constellation, pParent) {}
 
 }; // struct CAMFImporter_NodeElement_Constellation
 
 /// Part of constellation.
-struct AMFInstance : public AMFNodeElementBase {
+struct AMFInstance final : public AMFNodeElementBase {
 
 	std::string ObjectID; ///< ID of object for instantiation.
 	/// \var Delta - The distance of translation in the x, y, or z direction, respectively, in the referenced object's coordinate system, to
@@ -129,7 +129,7 @@ struct AMFInstance : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFInstance(AMFNodeElementBase *pParent) :
+	explicit AMFInstance(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_Instance, pParent) {}
 };
 
@@ -141,8 +141,10 @@ struct AMFMetadata : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFMetadata(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Metadata, pParent) {}
+	explicit AMFMetadata(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Metadata, pParent) {
+	    // empty	
+	}
 };
 
 /// Structure that define root node.
@@ -153,8 +155,10 @@ struct AMFRoot : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFRoot(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Root, pParent) {}
+	explicit AMFRoot(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Root, pParent) {
+	    // empty	
+	}
 };
 
 /// Structure that define object node.
@@ -166,7 +170,7 @@ struct AMFColor : public AMFNodeElementBase {
 
 	/// @brief  Constructor.
 	/// @param [in] pParent - pointer to parent node.
-	AMFColor(AMFNodeElementBase *pParent) :
+	explicit AMFColor(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_Color, pParent), Composed(false), Color() {
 		// empty
 	}
@@ -174,53 +178,62 @@ struct AMFColor : public AMFNodeElementBase {
 
 /// Structure that define material node.
 struct AMFMaterial : public AMFNodeElementBase {
-
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFMaterial(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Material, pParent) {}
+	explicit AMFMaterial(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Material, pParent) {
+	    // empty	
+	}
 };
 
 /// Structure that define object node.
 struct AMFObject : public AMFNodeElementBase {
-
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFObject(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Object, pParent) {}
+	explicit AMFObject(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Object, pParent) {
+	    // empty	
+	}
 };
 
-/// \struct CAMFImporter_NodeElement_Mesh
 /// Structure that define mesh node.
 struct AMFMesh : public AMFNodeElementBase {
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFMesh(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Mesh, pParent) {}
+	explicit AMFMesh(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Mesh, pParent) {
+	    // empty	
+	}
 };
 
 /// Structure that define vertex node.
 struct AMFVertex : public AMFNodeElementBase {
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFVertex(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Vertex, pParent) {}
+	explicit AMFVertex(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Vertex, pParent) {
+		// empty
+	}
 };
 
 /// Structure that define edge node.
 struct AMFEdge : public AMFNodeElementBase {
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFEdge(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Edge, pParent) {}
+	explicit AMFEdge(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Edge, pParent) {
+		// empty
+	}
 };
 
 /// Structure that define vertices node.
 struct AMFVertices : public AMFNodeElementBase {
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFVertices(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Vertices, pParent) {}
+	explicit AMFVertices(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Vertices, pParent) {
+		// empty
+	}
 };
 
 /// Structure that define volume node.
@@ -230,8 +243,10 @@ struct AMFVolume : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFVolume(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Volume, pParent) {}
+	explicit AMFVolume(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Volume, pParent) {
+		// empty
+	}
 };
 
 /// Structure that define coordinates node.
@@ -240,8 +255,10 @@ struct AMFCoordinates : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFCoordinates(AMFNodeElementBase *pParent) :
-			AMFNodeElementBase(ENET_Coordinates, pParent) {}
+	explicit AMFCoordinates(AMFNodeElementBase *pParent) :
+			AMFNodeElementBase(ENET_Coordinates, pParent) {
+		// empty
+	}
 };
 
 /// Structure that define texture coordinates node.
@@ -254,7 +271,7 @@ struct AMFTexMap : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFTexMap(AMFNodeElementBase *pParent) :
+	explicit AMFTexMap(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_TexMap, pParent), TextureCoordinate{} {
 		// empty
 	}
@@ -266,7 +283,7 @@ struct AMFTriangle : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFTriangle(AMFNodeElementBase *pParent) :
+	explicit AMFTriangle(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_Triangle, pParent) {
 		// empty
 	}
@@ -280,7 +297,7 @@ struct AMFTexture : public AMFNodeElementBase {
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
-	AMFTexture(AMFNodeElementBase *pParent) :
+	explicit AMFTexture(AMFNodeElementBase *pParent) :
 			AMFNodeElementBase(ENET_Texture, pParent), Width(0), Height(0), Depth(0), Data(), Tiled(false) {
 		// empty
 	}

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -438,7 +438,6 @@ unsigned int LazyDict<T>::Remove(const char *id) {
 
     const unsigned int index = objIt->second;
 
-    mAsset.mUsedIds[id] = false;
     mObjsById.erase(id);
     mObjsByOIndex.erase(index);
     delete mObjs[index];
@@ -472,7 +471,6 @@ unsigned int LazyDict<T>::Remove(const char *id) {
 
 template <class T>
 Ref<T> LazyDict<T>::Retrieve(unsigned int i) {
-
     typename Dict::iterator it = mObjsByOIndex.find(i);
     if (it != mObjsByOIndex.end()) { // already created?
         return Ref<T>(mObjs, it->second);
@@ -540,16 +538,11 @@ Ref<T> LazyDict<T>::Add(T *obj) {
     mObjs.push_back(obj);
     mObjsByOIndex[obj->oIndex] = idx;
     mObjsById[obj->id] = idx;
-    mAsset.mUsedIds[obj->id] = true;
     return Ref<T>(mObjs, idx);
 }
 
 template <class T>
 Ref<T> LazyDict<T>::Create(const char *id) {
-    Asset::IdMap::iterator it = mAsset.mUsedIds.find(id);
-    if (it != mAsset.mUsedIds.end()) {
-        throw DeadlyImportError("GLTF: two objects with the same ID exist");
-    }
     T *inst = new T();
     unsigned int idx = unsigned(mObjs.size());
     inst->id = id;
@@ -565,11 +558,12 @@ inline Buffer::Buffer() :
         byteLength(0),
         type(Type_arraybuffer),
         EncodedRegion_Current(nullptr),
-        mIsSpecial(false) {}
+        mIsSpecial(false) {
+    // empty
+}
 
 inline Buffer::~Buffer() {
-    for (SEncodedRegion *reg : EncodedRegion_List)
-        delete reg;
+    for (SEncodedRegion *reg : EncodedRegion_List) delete reg;
 }
 
 inline const char *Buffer::TranslateId(Asset & /*r*/, const char *id) {
@@ -693,7 +687,6 @@ inline void Buffer::EncodedRegion_SetCurrent(const std::string &pID) {
 }
 
 inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t *pReplace_Data, const size_t pReplace_Count) {
-
     if ((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) {
         return false;
     }
@@ -809,8 +802,7 @@ inline uint8_t *BufferView::GetPointerAndTailSize(size_t accOffset, size_t& outT
         }
     }
 
-    if (offset >= buffer->byteLength)
-    {
+    if (offset >= buffer->byteLength) {
         outTailSize = 0;
         return nullptr;
     }
@@ -1224,6 +1216,13 @@ inline void Texture::Read(Value &obj, Asset &r) {
     if (Value *extensions = FindObject(obj, "extensions")) {
         if (r.extensionsUsed.KHR_texture_basisu) {
             if (Value *curBasisU = FindObject(*extensions, "KHR_texture_basisu")) {
+
+                if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
+                    source = r.images.Retrieve(sourceVal->GetUint());
+                }
+            }
+        } else if(r.extensionsUsed.EXT_texture_webp) {
+            if (Value *curBasisU = FindObject(*extensions, "EXT_texture_webp")) {
 
                 if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
                     source = r.images.Retrieve(sourceVal->GetUint());
@@ -2157,6 +2156,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
 
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
     CHECK_REQUIRED_EXT(KHR_texture_basisu);
+    CHECK_REQUIRED_EXT(EXT_texture_webp);
 
 #undef CHECK_REQUIRED_EXT
 }
@@ -2187,6 +2187,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_anisotropy);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
+    CHECK_EXT(EXT_texture_webp);
 
 #undef CHECK_EXT
 }
@@ -2206,29 +2207,27 @@ inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool
 
 inline std::string Asset::FindUniqueID(const std::string &str, const char *suffix) {
     std::string id = str;
-
-    if (!id.empty()) {
-        if (mUsedIds.find(id) == mUsedIds.end()){
-            mUsedNamesMap[id] = 0;
+    int n = 1;
+    if(!id.empty()) {
+        n = lastUsedID[id];
+        if(!n) {
+            lastUsedID[id] = n+1;
             return id;
         }
-
         id += "_";
     }
 
-    id += suffix;
-
-    Asset::IdMap::iterator it = mUsedIds.find(id);
-    if (it == mUsedIds.end()) {
-        mUsedNamesMap[id] = 0;
-        return id;
+    if(suffix) {
+        id += suffix;
+        n = lastUsedID[id];
+        if(!n) {
+            lastUsedID[id] = n+1;
+            return id;
+        }
     }
 
-    auto key = id;
-    id += "_" + std::to_string(mUsedNamesMap[key]);
-    mUsedNamesMap[key] = mUsedNamesMap[key] + 1;
-
-    return id;
+    lastUsedID[id] = n+1;
+    return id + "_" + std::to_string(n-1);
 }
 
 #if _MSC_VER

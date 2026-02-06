@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -52,7 +52,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /** The DropFaceNormalsProcess computes face normals for all faces of all meshes
 */
-class ASSIMP_API_WINONLY DropFaceNormalsProcess : public BaseProcess {
+class ASSIMP_API_WINONLY DropFaceNormalsProcess final : public BaseProcess {
 public:
     DropFaceNormalsProcess() = default;
     ~DropFaceNormalsProcess() override = default;

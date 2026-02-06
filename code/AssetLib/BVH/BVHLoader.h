@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -61,7 +61,7 @@ namespace Assimp {
  * the hierarchy. It contains no actual mesh data, but we generate a dummy mesh
  * inside the loader just to be able to see something.
 */
-class BVHLoader : public BaseImporter {
+class BVHLoader final : public BaseImporter {
 
     /** Possible animation channels for which the motion data holds the values */
     enum ChannelType {

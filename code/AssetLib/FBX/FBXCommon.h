@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -47,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 static constexpr size_t NumNullRecords = 25;
 
@@ -84,8 +83,7 @@ enum TransformInheritance {
     TransformInheritance_MAX // end-of-enum sentinel
 };
 
-} // namespace FBX
-} // namespace Assimp
+} // namespace Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_EXPORTER
 

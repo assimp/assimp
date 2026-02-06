@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -58,7 +58,7 @@ namespace Assimp
  * because the joining of vertices also considers tangents and bitangents for
  * uniqueness.
  */
-class ASSIMP_API_WINONLY CalcTangentsProcess : public BaseProcess {
+class ASSIMP_API_WINONLY CalcTangentsProcess final : public BaseProcess {
 public:
     CalcTangentsProcess();
     ~CalcTangentsProcess() override = default;

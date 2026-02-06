@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -159,7 +159,7 @@ aiReturn GetMaterialFloatArray(const aiMaterial *pMat,
         ai_assert(prop->mDataLength >= 5);
         ai_assert(!prop->mData[prop->mDataLength - 1]);
         for (unsigned int a = 0;; ++a) {
-            cur = fast_atoreal_move<TReal>(cur, pOut[a]);
+            cur = fast_atoreal_move(cur, pOut[a]);
             if (a == iWrite - 1) {
                 break;
             }

@@ -888,7 +888,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     if (bufferView) {
         // Check length
-        unsigned long long byteLength = (unsigned long long)GetStride() * (unsigned long long)count;
+        unsigned long long byteLength = count > 0
+            ? (unsigned long long)GetStride() * (unsigned long long)(count - 1) + (unsigned long long)GetElementSize()
+            : 0;
 
         // handle integer overflow
         if (byteLength < count) {

@@ -892,7 +892,7 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
     m_currentMesh->mVertices = new aiVector3D[m_currentMesh->mNumVertices];
     bool hasColors(false);
     if (m_currentVertices.m_numColors > 0) {
-        m_currentMesh->mColors[0] = new aiColor4D[m_currentVertices.m_numColors];
+        m_currentMesh->mColors[0] = new aiColor4D[m_currentMesh->mNumVertices];
         hasColors = true;
     }
     bool hasNormalCoords(false);
@@ -924,7 +924,7 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
             ai_assert(index < m_currentMesh->mNumVertices);
             aiVector3D &pos = (m_currentVertices.m_vertices[idx]);
             m_currentMesh->mVertices[index].Set(pos.x, pos.y, pos.z);
-            if (hasColors) {
+            if (hasColors && static_cast<size_t>(idx) < m_currentVertices.m_numColors) {
                 aiColor4D &col = m_currentVertices.m_colors[idx];
                 m_currentMesh->mColors[0][index] = col;
             }

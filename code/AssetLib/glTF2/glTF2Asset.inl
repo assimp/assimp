@@ -888,7 +888,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     if (bufferView) {
         // Check length
-        unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
+        unsigned long long byteLength = count > 0
+            ? (unsigned long long)GetStride() * (unsigned long long)(count - 1) + (unsigned long long)GetElementSize()
+            : 0;
 
         // handle integer overflow
         if (byteLength < count) {
@@ -1004,7 +1006,15 @@ inline size_t Accessor::GetMaxByteSize() {
     if (decodedBuffer)
         return decodedBuffer->byteLength;
 
-    return (bufferView ? bufferView->byteLength : sparse->data.size());
+    if (sparse) {
+        return sparse->data.size();
+    }
+
+    if (bufferView) {
+        return byteOffset <= bufferView->byteLength ? bufferView->byteLength - byteOffset : 0;
+    }
+
+    return 0;
 }
 
 template <class T>

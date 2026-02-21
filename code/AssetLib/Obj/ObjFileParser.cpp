@@ -467,7 +467,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 ASSIMP_LOG_ERROR("Obj: Separator unexpected in point statement");
             }
             iPos++;
-        } else if (IsSpaceOrNewLine(*m_DataIt)) {
+        } else if (IsSpaceOrNewLine(*m_DataIt) || *m_DataIt == '\v') {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!

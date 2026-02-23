@@ -3,6 +3,9 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    // Rerun if wrapper header changes
+    println!("cargo:rerun-if-changed=./src/assimp_wrapper.h");
+
     // Tell cargo to look for shared libraries in the specified directory
     println!("cargo:rustc-link-search=../../lib/");
 

@@ -104,7 +104,7 @@ IF(ASSIMP_HUNTER_ENABLED)
   ADD_DEFINITIONS(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 6.0.4
+PROJECT(Assimp VERSION 6.0.5
   LANGUAGES C CXX
   DESCRIPTION "Open Asset Import Library (Assimp) is a library to import various well-known 3D model formats in a uniform manner."
 )

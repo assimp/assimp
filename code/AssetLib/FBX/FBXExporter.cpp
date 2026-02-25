@@ -134,6 +134,17 @@ namespace FBX {
 
 } // end of namespace Assimp
 
+inline int64_t to_ktime(double ticks, const aiAnimation *anim) {
+    if (FP_ZERO == std::fpclassify(anim->mTicksPerSecond)) {
+        return static_cast<int64_t>(ticks) * FBX::SECOND;
+    }
+    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond * FBX::SECOND));
+}
+
+inline int64_t to_ktime(double time) {
+    return (static_cast<int64_t>(time * FBX::SECOND));
+}
+
 FBXExporter::FBXExporter ( const aiScene* pScene, const ExportProperties* pProperties )
 : binary(false)
 , mScene(pScene)
@@ -471,11 +482,18 @@ void FBXExporter::WriteGlobalSettings () {
     WritePropDouble(mScene, p, "OriginalUnitScaleFactor", 1.0);
     WritePropColor(mScene, p, "AmbientColor", aiVector3D((ai_real)0.0, (ai_real)0.0, (ai_real)0.0));
     WritePropString(mScene, p,"DefaultCamera", "Producer Perspective");
-    WritePropEnum(mScene, p, "TimeMode", 11);
+    WritePropEnum(mScene, p, "TimeMode", 6);
     WritePropEnum(mScene, p, "TimeProtocol", 2);
     WritePropEnum(mScene, p, "SnapOnFrameMode", 0);
     p.AddP70time("TimeSpanStart", 0); // TODO: animation support
-    p.AddP70time("TimeSpanStop", FBX::SECOND); // TODO: animation support
+    int64_t duration = FBX::SECOND;
+    if (mScene->HasAnimations())
+    {
+        duration = 0;
+        for (unsigned int i = 0; i < mScene->mNumAnimations; ++i)
+            duration += to_ktime(mScene->mAnimations[i]->mDuration, mScene->mAnimations[i]);
+    }
+    p.AddP70time("TimeSpanStop", duration); // TODO: animation support
     WritePropDouble(mScene, p, "CustomFrameRate", -1.0);
     p.AddP70("TimeMarker", "Compound", "", ""); // not sure what this is
     WritePropInt(mScene, p, "CurrentTimeMarker", -1);
@@ -1495,6 +1513,9 @@ void FBXExporter::WriteObjects () {
                 p.AddP70colorA("SpecularColor", c.r, c.g, c.b);
             }
             if (m->Get(AI_MATKEY_SHININESS_STRENGTH, f) == aiReturn_SUCCESS) {
+                p.AddP70numberA("SpecularFactor", f);
+            }
+            if (m->Get(AI_MATKEY_SHININESS_STRENGTH, f) == aiReturn_SUCCESS) {
                 p.AddP70numberA("ShininessFactor", f);
             }
             if (m->Get(AI_MATKEY_SHININESS, f) == aiReturn_SUCCESS) {
@@ -1967,7 +1988,7 @@ void FBXExporter::WriteObjects () {
             // or else the node containing the mesh,
             // or else the parent of a node containing the mesh.
             for (
-                const aiNode* parent = n->mParent;
+                aiNode* parent = n->mParent;
                 parent && parent != mScene->mRootNode;
                 parent = parent->mParent
             ) {
@@ -2002,6 +2023,12 @@ void FBXExporter::WriteObjects () {
 
                 // if it was the skeleton root we can finish here
                 if (end) { break; }
+
+				if (node_by_bone.count(node_name) == 0)
+					node_by_bone[node_name] = parent;
+				if (limbnodes.count(parent) == 0)
+					limbnodes.insert(parent);
+                skeleton.insert(parent);
             }
         }
         skeleton_by_mesh[mi] = skeleton;
@@ -2428,7 +2455,7 @@ void FBXExporter::WriteObjects () {
 
             // scale
             WriteAnimationCurveNode(outstream,
-                ids[2], "S", S, "Lcl Scale",
+                ids[2], "S", S, "Lcl Scaling",
                 layer_uid, node_uids[node]
             );
 
@@ -2479,6 +2506,42 @@ void FBXExporter::WriteObjects () {
                 aiVector3D qs, qr, qt;
                 m.Decompose(qs, qr, qt);
                 qr = AI_RAD_TO_DEG(qr);
+
+                if (ki > 0)
+                {
+                    float lastX = xval[ki - 1];
+                    float lastY = yval[ki - 1];
+                    float lastZ = zval[ki - 1];
+
+                    float diffX = lastX - qr.x;
+                    float diffY = lastY - qr.y;
+                    float diffZ = lastZ - qr.z;
+
+                    float disX = abs(diffX);
+                    float disY = abs(diffY);
+                    float disZ = abs(diffZ);
+
+                    if (disX > 180.0f)
+                    {
+                        float count = floor((disX - 180.0f) / 360.0f) + 1;
+                        float sign = diffX >= 0 ? 1 : -1;
+                        qr.x = qr.x + count * 360.0f * sign;
+                    }
+
+                    if (disY > 180.0f)
+                    {
+                        float count = floor((disY - 180.0f) / 360.0f) + 1;
+                        float sign = diffY >= 0 ? 1 : -1;
+                        qr.y = qr.y + count * 360.0f * sign;
+                    }
+
+                    if (disZ > 180.0f)
+                    {
+                        float count = floor((disZ - 180.0f) / 360.0f) + 1;
+                        float sign = diffZ >= 0 ? 1 : -1;
+                        qr.z = qr.z + count * 360.0f * sign;
+                    }
+                }
                 xval.push_back(qr.x);
                 yval.push_back(qr.y);
                 zval.push_back(qr.z);
@@ -2855,8 +2918,8 @@ void FBXExporter::WriteAnimationCurve(
     n.AddChild("KeyTime", times);
     n.AddChild("KeyValueFloat", values);
     // TODO: keyattr flags and data (STUB for now)
-    n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
-    n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
+    n.AddChild("KeyAttrFlags", std::vector<int32_t>{8456});
+    n.AddChild("KeyAttrDataFloat", std::vector<int32_t>{ 0, 0, 218434821, 0 });
     n.AddChild(
         "KeyAttrRefCount",
         std::vector<int32_t>{static_cast<int32_t>(times.size())}

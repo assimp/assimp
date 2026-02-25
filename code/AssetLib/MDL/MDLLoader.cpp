@@ -450,12 +450,14 @@ void MDLImporter::InternReadFile_Quake1() {
     BE_NCONST MDL::Frame *pcFrames = (BE_NCONST MDL::Frame *)szCurrent;
     MDL::SimpleFrame *pcFirstFrame;
 
+    VALIDATE_FILE_SIZE((const unsigned char *)(pcFrames + 1));
     if (0 == pcFrames->type) {
         // get address of single frame
         pcFirstFrame = (MDL::SimpleFrame *)&pcFrames->frame;
     } else {
         // get the first frame in the group
         BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)szCurrent;
+        VALIDATE_FILE_SIZE((const unsigned char *)(pcFrames2 + 1));
         pcFirstFrame = (MDL::SimpleFrame *)( szCurrent + sizeof(MDL::GroupFrame::type) + sizeof(MDL::GroupFrame::numframes)
         + sizeof(MDL::GroupFrame::min) + sizeof(MDL::GroupFrame::max) + sizeof(*MDL::GroupFrame::times) * pcFrames2->numframes );
     }
@@ -703,6 +705,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345() {
 
     // now get a pointer to the first frame in the file
     BE_NCONST MDL::Frame *pcFrames = (BE_NCONST MDL::Frame *)szCurrent;
+    VALIDATE_FILE_SIZE((const unsigned char *)(pcFrames + 1));
     AI_SWAP4(pcFrames->type);
 
     // byte packed vertices
@@ -1173,6 +1176,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
     for (unsigned int iFrame = 0; iFrame < (unsigned int)groupInfo.pcGroup->numframes; ++iFrame) {
         MDL::IntFrameInfo_MDL7 frame((BE_NCONST MDL::Frame_MDL7 *)szCurrent, iFrame);
 
+        VALIDATE_FILE_SIZE((const unsigned char *)(frame.pcFrame + 1));
         AI_SWAP4(frame.pcFrame->vertices_count);
         AI_SWAP4(frame.pcFrame->transmatrix_count);
 

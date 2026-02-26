@@ -56,6 +56,7 @@ struct aiNode;
 struct aiMaterial;
 
 namespace Assimp {
+
 using namespace LWO;
 
 // ---------------------------------------------------------------------------
@@ -360,7 +361,7 @@ private:
     LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list,
             unsigned int size);
 
-protected:
+private:
     /// true if the file is a LWO2 file
     bool mIsLWO2{false};
     /// true if the file is a LXOB file
@@ -394,7 +395,7 @@ protected:
     bool configSpeedFlag{false};
     /// Configuration option: index of layer to be loaded
     unsigned int configLayerIndex{0};
-    /// Configuration option: name of layer to be loaded */
+    /// Configuration option: name of layer to be loaded 
     std::string configLayerName{};
     /// True if we have a named layer
     bool hasNamedLayer{false};
@@ -487,8 +488,10 @@ inline void LWOImporter::GetS0(std::string &out, unsigned int max) {
     }
     size_t len = (size_t)((const char *)mFileBuffer - sz);
     out = std::string(sz, len);
-    unsigned int skip = (len & 0x1 ? 1 : 2);
-    if (mFileBuffer + skip > mFileBufferEnd) {
+
+    const size_t skip = (len & 0x1 ? 1u : 2u);
+    const size_t remaining = static_cast<size_t>(mFileBufferEnd - mFileBuffer);
+    if (remaining < skip) {
         mFileBuffer = mFileBufferEnd;
     } else {
         mFileBuffer += skip;

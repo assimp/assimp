@@ -7,7 +7,7 @@ fn main() {
     println!("cargo:rerun-if-changed=./src/assimp_wrapper.h");
 
     // Tell cargo to look for shared libraries in the specified directory
-    println!("cargo:rustc-link-search=../../lib/");
+    println!("cargo:rustc-link-search=../../bin/");
 
     // Tell cargo to tell rustc to link the assimp shared library.
     println!("cargo:rustc-link-lib=assimp");

@@ -1316,6 +1316,15 @@ struct AnimationSamplers {
 struct vec4f {
     float x, y, z, w;
 };
+
+static aiAnimInterpolation MapInterpolation(Interpolation interp) {
+    switch (interp) {
+        case Interpolation_STEP: return aiAnimInterpolation_Step;
+        case Interpolation_CUBICSPLINE: return aiAnimInterpolation_Cubic_Spline;
+        default: return aiAnimInterpolation_Linear;
+    }
+}
+
 aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &samplers) {
     aiNodeAnim *anim = new aiNodeAnim();
 
@@ -1327,7 +1336,6 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
         if (samplers.translation && samplers.translation->input && samplers.translation->output) {
             float *times = nullptr;
             samplers.translation->input->ExtractData(times);
-            //aiVector3D *values = nullptr;
             vec4f *tmp_values = nullptr;
             size_t numItems = samplers.translation->output->ExtractData(tmp_values);
             aiVector3D *values = new aiVector3D[numItems];
@@ -1338,13 +1346,31 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             }
             delete[] tmp_values;
 
-            anim->mNumPositionKeys = static_cast<unsigned int>(samplers.translation->input->count);
-            anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
-            unsigned int ii = (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
-            for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
-                anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-                anim->mPositionKeys[i].mValue = values[ii];
-                ii += (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
+            const bool isCubic = (samplers.translation->interpolation == Interpolation_CUBICSPLINE);
+            const aiAnimInterpolation interpType = MapInterpolation(samplers.translation->interpolation);
+            const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.translation->input->count);
+
+            if (isCubic) {
+                // Store as triplets: in-tangent, value, out-tangent per logical key
+                anim->mNumPositionKeys = numLogicalKeys * 3;
+                anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+                for (unsigned int i = 0; i < numLogicalKeys; ++i) {
+                    unsigned int srcBase = i * 3;
+                    unsigned int dstBase = i * 3;
+                    for (unsigned int t = 0; t < 3; ++t) {
+                        anim->mPositionKeys[dstBase + t].mTime = times[i] * kMillisecondsFromSeconds;
+                        anim->mPositionKeys[dstBase + t].mValue = values[srcBase + t];
+                        anim->mPositionKeys[dstBase + t].mInterpolation = interpType;
+                    }
+                }
+            } else {
+                anim->mNumPositionKeys = numLogicalKeys;
+                anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
+                for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
+                    anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                    anim->mPositionKeys[i].mValue = values[i];
+                    anim->mPositionKeys[i].mInterpolation = interpType;
+                }
             }
             delete[] times;
             delete[] values;
@@ -1362,16 +1388,36 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
             samplers.rotation->output->ExtractData(values);
-            anim->mNumRotationKeys = static_cast<unsigned int>(samplers.rotation->input->count);
-            anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
-            unsigned int ii = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
-            for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
-                anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-                anim->mRotationKeys[i].mValue.x = values[ii].w;
-                anim->mRotationKeys[i].mValue.y = values[ii].x;
-                anim->mRotationKeys[i].mValue.z = values[ii].y;
-                anim->mRotationKeys[i].mValue.w = values[ii].z;
-                ii += (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
+            const bool isCubic = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE);
+            const aiAnimInterpolation interpType = MapInterpolation(samplers.rotation->interpolation);
+            const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.rotation->input->count);
+
+            if (isCubic) {
+                anim->mNumRotationKeys = numLogicalKeys * 3;
+                anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+                for (unsigned int i = 0; i < numLogicalKeys; ++i) {
+                    unsigned int srcBase = i * 3;
+                    unsigned int dstBase = i * 3;
+                    for (unsigned int t = 0; t < 3; ++t) {
+                        anim->mRotationKeys[dstBase + t].mTime = times[i] * kMillisecondsFromSeconds;
+                        anim->mRotationKeys[dstBase + t].mValue.x = values[srcBase + t].w;
+                        anim->mRotationKeys[dstBase + t].mValue.y = values[srcBase + t].x;
+                        anim->mRotationKeys[dstBase + t].mValue.z = values[srcBase + t].y;
+                        anim->mRotationKeys[dstBase + t].mValue.w = values[srcBase + t].z;
+                        anim->mRotationKeys[dstBase + t].mInterpolation = interpType;
+                    }
+                }
+            } else {
+                anim->mNumRotationKeys = numLogicalKeys;
+                anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
+                for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
+                    anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                    anim->mRotationKeys[i].mValue.x = values[i].w;
+                    anim->mRotationKeys[i].mValue.y = values[i].x;
+                    anim->mRotationKeys[i].mValue.z = values[i].y;
+                    anim->mRotationKeys[i].mValue.w = values[i].z;
+                    anim->mRotationKeys[i].mInterpolation = interpType;
+                }
             }
             delete[] times;
             delete[] values;
@@ -1390,13 +1436,30 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             samplers.scale->input->ExtractData(times);
             aiVector3D *values = nullptr;
             samplers.scale->output->ExtractData(values);
-            anim->mNumScalingKeys = static_cast<unsigned int>(samplers.scale->input->count);
-            anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
-            unsigned int ii = (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
-            for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
-                anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
-                anim->mScalingKeys[i].mValue = values[ii];
-                ii += (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
+            const bool isCubic = (samplers.scale->interpolation == Interpolation_CUBICSPLINE);
+            const aiAnimInterpolation interpType = MapInterpolation(samplers.scale->interpolation);
+            const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.scale->input->count);
+
+            if (isCubic) {
+                anim->mNumScalingKeys = numLogicalKeys * 3;
+                anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+                for (unsigned int i = 0; i < numLogicalKeys; ++i) {
+                    unsigned int srcBase = i * 3;
+                    unsigned int dstBase = i * 3;
+                    for (unsigned int t = 0; t < 3; ++t) {
+                        anim->mScalingKeys[dstBase + t].mTime = times[i] * kMillisecondsFromSeconds;
+                        anim->mScalingKeys[dstBase + t].mValue = values[srcBase + t];
+                        anim->mScalingKeys[dstBase + t].mInterpolation = interpType;
+                    }
+                }
+            } else {
+                anim->mNumScalingKeys = numLogicalKeys;
+                anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
+                for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
+                    anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                    anim->mScalingKeys[i].mValue = values[i];
+                    anim->mScalingKeys[i].mInterpolation = interpType;
+                }
             }
             delete[] times;
             delete[] values;

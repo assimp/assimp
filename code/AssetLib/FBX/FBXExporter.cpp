@@ -1766,8 +1766,8 @@ void FBXExporter::WriteObjects () {
             // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
             // these being incorrect is a common problem with FBX anyway.
-            tnode.AddChild("FileName", tp_elem->second);
-            tnode.AddChild("RelativeFilename", tp_elem->second);
+            tnode.AddChild("FileName", tfile_path);
+            tnode.AddChild("RelativeFilename", tfile_path);
             tnode.AddChild("ModelUVTranslation", double(0.0), double(0.0));
             tnode.AddChild("ModelUVScaling", double(1.0), double(1.0));
             tnode.AddChild("Texture_Alpha_Source", "None");

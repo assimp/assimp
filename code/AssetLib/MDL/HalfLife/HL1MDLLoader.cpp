@@ -971,7 +971,7 @@ void HL1MDLLoader::read_animations() {
 
     pseqdesc = get_buffer_data<SequenceDesc_HL1>(header_->seqindex, header_->numseq);
 
-    aiAnimation **scene_animations_ptr = scene_->mAnimations = new aiAnimation *[scene_->mNumAnimations];
+    aiAnimation **scene_animations_ptr = scene_->mAnimations = new aiAnimation *[scene_->mNumAnimations]();
 
     for (int sequence = 0; sequence < header_->numseq; ++sequence, ++pseqdesc) {
         pseqgroup = get_buffer_data<SequenceGroup_HL1>(header_->seqgroupindex + pseqdesc->seqgroup * sizeof(SequenceGroup_HL1), 1);
@@ -992,7 +992,7 @@ void HL1MDLLoader::read_animations() {
             scene_animation->mTicksPerSecond = pseqdesc->fps;
             scene_animation->mDuration = static_cast<double>(pseqdesc->fps) * pseqdesc->numframes;
             scene_animation->mNumChannels = static_cast<unsigned int>(header_->numbones);
-            scene_animation->mChannels = new aiNodeAnim *[scene_animation->mNumChannels];
+            scene_animation->mChannels = new aiNodeAnim *[scene_animation->mNumChannels]();
 
             for (int bone = 0; bone < header_->numbones; bone++, ++pbone, ++panim) {
                 aiNodeAnim *node_anim = scene_animation->mChannels[bone] = new aiNodeAnim();

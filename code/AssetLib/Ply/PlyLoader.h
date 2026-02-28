@@ -60,70 +60,60 @@ namespace Assimp {
 using namespace PLY;
 
 // ---------------------------------------------------------------------------
-/** Importer class to load the stanford PLY file format
-*/
+/// @brief Importer class to load the stanford PLY file format
+// ---------------------------------------------------------------------------
 class PLYImporter final : public BaseImporter {
 public:
-    PLYImporter();
+    /// @brief Default constructor
+    PLYImporter() = default;
+
+    /// @brief Destructor
     ~PLYImporter() override;
 
     // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details.
-     */
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const override;
+    /// Returns whether the class can handle the format of the given file.
+    /// @see BaseImporter::CanRead() for details.
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
     // -------------------------------------------------------------------
-    /** Extract a vertex from the DOM
-    */
+    /// Extract a vertex from the DOM
     void LoadVertex(const PLY::Element *pcElement, const PLY::ElementInstance *instElement, unsigned int pos);
 
     // -------------------------------------------------------------------
-    /** Extract a face from the DOM
-    */
+    /// @brief Extract a face from the DOM
+    /// The function will also take care of the correct winding order of the triangles.
+    /// @param pcElement The element containing the face data
+    /// @param instElement The element instance containing the face data
+    /// @param pos The position of the face in the element instance. This is needed to correctly assign the face to the mesh.
     void LoadFace(const PLY::Element *pcElement, const PLY::ElementInstance *instElement, unsigned int pos);
+
+    /// @brief Will create a triangle from a triangle strip. 
+    /// The function will use the first three vertices of the strip to create the first triangle, then the second,
+    /// third and fourth vertex to create the second triangle and so on. The function will also take care of the correct 
+    /// winding order of the triangles.
+    /// @param instElement The element instance containing the triangle strip data
+    /// @param iProperty   The index of the property containing the triangle strip data
+    /// @param eType       The data type of the triangle strip data
+    void createFromeTriStrip(const Assimp::PLY::ElementInstance *instElement, unsigned int iProperty, Assimp::PLY::EDataType eType);
 
 protected:
     // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
-     */
     const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
-    * See BaseImporter::InternReadFile() for details
-    */
-    void InternReadFile(const std::string &pFile, aiScene *pScene,
-            IOSystem *pIOHandler) override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
-    /** Extract a material list from the DOM
-    */
+    /// @brief  Extract a material list from the DOM    
+    /// @param pvOut          The output material list. The function will fill the list with the extracted materials.
+    /// @param defaultTexture The default texture to use for the materials. This is needed to correctly assign the texture to the materials.
+    /// @param pointsOnly     Whether the file contains only points. This is needed to correctly assign the material properties.
     void LoadMaterial(std::vector<aiMaterial *> *pvOut, std::string &defaultTexture, const bool pointsOnly);
 
-    // -------------------------------------------------------------------
-    /** Static helper to parse a color from four single channels in
-    */
-    static void GetMaterialColor(
-            const std::vector<PLY::PropertyInstance> &avList,
-            unsigned int aiPositions[4],
-            PLY::EDataType aiTypes[4],
-            aiColor4D *clrOut);
-
-    // -------------------------------------------------------------------
-    /** Static helper to parse a color channel value. The input value
-    *  is normalized to 0-1.
-    */
-    static ai_real NormalizeColorValue(
-            PLY::PropertyInstance::ValueUnion val,
-            PLY::EDataType eType);
-
 private:
-    unsigned char *mBuffer;
-    PLY::DOM *pcDOM;
-    aiMesh *mGeneratedMesh;
+    unsigned char *mBuffer{nullptr};
+    PLY::DOM *pcDOM{nullptr};
+    aiMesh *mGeneratedMesh{nullptr};
 };
 
 } // end of namespace Assimp

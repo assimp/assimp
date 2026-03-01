@@ -511,14 +511,6 @@ void USDImporterImplTinyusdz::uvsForMesh(
     }
 }
 
-static aiColor3D *ownedColorPtrFor(const std::array<float, 3> &color) {
-    aiColor3D *colorPtr = new aiColor3D();
-    colorPtr->r = color[0];
-    colorPtr->g = color[1];
-    colorPtr->b = color[2];
-    return colorPtr;
-}
-
 static std::string nameForTextureWithId(const RenderScene &render_scene, const int targetId) {
     std::stringstream ss;
     std::string texName;

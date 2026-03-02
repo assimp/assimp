@@ -69,7 +69,7 @@ using namespace Assimp;
 namespace Assimp {
 
 // underlying structure for aiPropertyStore
-using PropertyMap =  BatchLoader::PropertyMap ;
+using PropertyMap = BatchLoader::PropertyMap ;
 
 #if defined(__has_warning)
 #   if __has_warning("-Wordered-compare-function-pointers")

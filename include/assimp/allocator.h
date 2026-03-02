@@ -42,28 +42,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ALLOCATOR_H_INC
 #define AI_ALLOCATOR_H_INC
 
+#include <assimp/types.h>
+
 #include <stddef.h>
+#include <stdlib.h>
+#include <memory.h>
 
 typedef void* (*alloc_func)(size_t size);
 typedef void  (*free_func)(void* ptr);
 
-struct Allocator {
-    static alloc_func alloc{nullptr};
-    static free_func free{nullptr};
-
-    static void init(alloc_func alloc_fn, free_func free_fn) {
-        alloc = alloc_fn;
-        free = free_fn;
-    }
-};
-
-static void aiRegisterAllocator(alloc_func alloc_fn, free_func free_fn) {
-    Allocator::init(alloc_fn, free_fn);
+static void *aiDefaultAlloc(size_t size) {
+    return malloc(size);
 }
 
-#define AI_NEW(ai_type,...) new ai_type(__VA_ARGS__)
-#define AI_NEW_ARRAY(ai_type,count) new ai_type[count]()
+static void aiDefaultFree(void *ptr) {
+    free(ptr);
+}
+
+struct aiAllocator {
+    static alloc_func allocFunc;
+    static free_func freeFunc;
+
+    static void DefaultInit() {
+        allocFunc = aiDefaultAlloc;
+        freeFunc = aiDefaultFree;
+    }
+
+    static void init(alloc_func alloc_fn, free_func free_fn) {
+        allocFunc = alloc_fn;
+        freeFunc = free_fn;
+    }
+} gAllocatoMod;
+
+static void aiRegisterAllocator(alloc_func alloc_fn, free_func free_fn) {
+    aiAllocator::init(alloc_fn, free_fn);
+}
+
+ASSIMP_API void *aiAlloc(size_t size);
+ASSIMP_API void aiFree(void *ptr);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define AI_NEW(ai_type, ...) new ai_type(__VA_ARGS__)
+#define AI_NEW_ARRAY(ai_type, count) new ai_type[count]()
 #define AI_DELETE(ptr) delete ptr
 #define AI_DELETE_ARRAY(ptr) delete[] ptr
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // AI_ALLOCATOR_H_INC

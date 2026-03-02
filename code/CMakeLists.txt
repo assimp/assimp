@@ -58,6 +58,7 @@ SET( COMPILER_HEADERS
 SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 
 SET( PUBLIC_HEADERS
+  ${HEADER_PATH}/allocator.h
   ${HEADER_PATH}/anim.h
   ${HEADER_PATH}/aabb.h
   ${HEADER_PATH}/ai_assert.h
@@ -167,6 +168,7 @@ SET( Logging_SRCS
 SOURCE_GROUP(Logging FILES ${Logging_SRCS})
 
 SET( Common_SRCS
+  Common/allocator.cpp
   Common/StbCommon.h
   Common/Compression.cpp
   Common/Compression.h

@@ -136,7 +136,7 @@ namespace Assimp {
 
         // ------------------------------------------------------------------------------------------------
         // Get a RGBA color in [0...1] range
-        void GetMaterialColor(const std::vector<PLY::PropertyInstance> &avList, unsigned int positions[4], EDataType types[4],
+        void GetMaterialColor(const std::vector<PLY::PropertyInstance> &avList, const unsigned int positions[4], EDataType types[4],
                 aiColor4D *clrOut) {
             ai_assert(nullptr != clrOut);
 
@@ -322,13 +322,10 @@ namespace Assimp {
 
         ai_uint aiPositions[3] = { NotSet, NotSet, NotSet };
         EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
-
         ai_uint aiNormal[3] = { NotSet, NotSet, NotSet };
         EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
-
         unsigned int aiColors[4] = { NotSet, NotSet, NotSet, NotSet };
         EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
-
         unsigned int aiTexcoord[2] = { NotSet, NotSet };
         EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
 

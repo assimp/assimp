@@ -165,32 +165,24 @@ struct aiRay {
 struct aiColor3D {
 #ifdef __cplusplus
     aiColor3D() AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
-    aiColor3D(float _r, float _g, float _b) :
+    aiColor3D(float _r, float _g, float _b) AI_NO_EXCEPT :
             r(_r), g(_g), b(_b) {}
-    explicit aiColor3D(float _r) :
+    explicit aiColor3D(float _r) AI_NO_EXCEPT :
             r(_r), g(_r), b(_r) {}
-    aiColor3D(const aiColor3D &o) :
-            r(o.r), g(o.g), b(o.b) {}
 
-    aiColor3D &operator=(const aiColor3D &o) {
-        r = o.r;
-        g = o.g;
-        b = o.b;
-        return *this;
+    /** Component-wise comparison */
+    bool operator==(const aiColor3D &other) const {
+        constexpr float epsilon = float(1e-2);
+        return std::fabs(r - other.r) < epsilon && std::fabs(g - other.g) < epsilon && std::fabs(b - other.b) < epsilon;
     }
 
-    /** Component-wise comparison */
-    // TODO: add epsilon?
-    bool operator==(const aiColor3D &other) const { return r == other.r && g == other.g && b == other.b; }
-
     /** Component-wise inverse comparison */
-    // TODO: add epsilon?
-    bool operator!=(const aiColor3D &other) const { return r != other.r || g != other.g || b != other.b; }
+    bool operator!=(const aiColor3D &other) const { return !(*this == other); }
 
     /** Component-wise comparison */
-    // TODO: add epsilon?
     bool operator<(const aiColor3D &other) const {
-        return r < other.r || (r == other.r && (g < other.g || (g == other.g && b < other.b)));
+        constexpr float epsilon = float(1e-2);
+        return r < other.r || (std::fabs(r - other.r) < epsilon && (g < other.g || (std::fabs(g - other.g) < epsilon && b < other.b)));
     }
 
     /** Component-wise addition */
@@ -215,24 +207,33 @@ struct aiColor3D {
 
     /** Access a specific color component */
     float operator[](unsigned int i) const {
-        return *(&r + i);
+        switch (i) {
+        default:
+        case 0:
+            return r;
+        case 1:
+            return g;
+        case 2:
+            return b;
+        }
     }
 
     /** Access a specific color component */
     float &operator[](unsigned int i) {
-        if (0 == i) {
+        switch (i) {
+        default:
+        case 0:
             return r;
-        } else if (1 == i) {
+        case 1:
             return g;
-        } else if (2 == i) {
+        case 2:
             return b;
         }
-        return r;
     }
 
     /** Check whether a color is black */
     bool IsBlack() const {
-        static const float epsilon = float(10e-3);
+        constexpr float epsilon = float(1e-2);
         return std::fabs(r) < epsilon && std::fabs(g) < epsilon && std::fabs(b) < epsilon;
     }
 

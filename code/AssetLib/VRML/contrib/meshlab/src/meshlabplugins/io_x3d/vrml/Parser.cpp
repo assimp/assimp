@@ -184,7 +184,9 @@ void Parser::ExportStatement() {
 
 void Parser::NodeNameId(std::string& str) {
 		Expect(1);
-		str = std::string(coco_string_create_char(t->val));
+        char* temp = coco_string_create_char(t->val);
+        str = std::string(temp);
+        coco_string_delete(temp);
 }
 
 void Parser::ExportedNodeNameId() {

@@ -682,13 +682,12 @@ namespace Assimp {
             face.mIndices[0] = aiTable[0];
             face.mIndices[1] = aiTable[1];
             face.mIndices[2] = p;
-            cache.push_back(face);
-
-            // every second pass swap the indices.
-            flip = !flip;
             if (flip) {
                 std::swap(face.mIndices[0], face.mIndices[1]);
             }
+            cache.push_back(face);
+            // every second pass swap the indices.
+            flip = !flip;
 
             aiTable[0] = aiTable[1];
             aiTable[1] = p;

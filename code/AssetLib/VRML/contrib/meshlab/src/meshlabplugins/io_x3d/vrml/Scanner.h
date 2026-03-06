@@ -58,16 +58,18 @@
 
 #ifdef WIN32
   #ifndef __MINGW32__
-    #if _MSC_VER >= 1400
+    #if _MSC_VER >= 1900
+      #define coco_swprintf swprintf
+    #elif _MSC_VER >= 1400
       #define coco_swprintf swprintf_s
     #elif _MSC_VER >= 1300
        #define coco_swprintf _snwprintf
     #else
        #error unknown compiler!
     #endif
-   #else
+  #else
      #define coco_swprintf _snwprintf
-   #endif
+  #endif
 #elif defined __GNUC__                 // Linux
   #define coco_swprintf swprintf
 #endif

@@ -117,7 +117,7 @@ public:
 	  x3dNode.insert("Disk2D"); x3dNode.insert("DoubleAxisHingeJoint"); x3dNode.insert("EaseInEaseOut");
 	  x3dNode.insert("EspduTransform"); x3dNode.insert("ExplosionEmitter");
 	  x3dNode.insert("FillProperties"); x3dNode.insert("FloatVertexAttribute");
-	  x3dNode.insert("FogCoordinate"); x3dNode.insert(" GeneratedCubeMapTexture");
+	  x3dNode.insert("FogCoordinate"); x3dNode.insert("GeneratedCubeMapTexture");
 	  x3dNode.insert("GeoCoordinate"); x3dNode.insert("GeoElevationGrid"); x3dNode.insert("GeoLocation");
 	  x3dNode.insert("GeoLOD"); x3dNode.insert("GeoMetadata"); x3dNode.insert("GeoOrigin");
 	  x3dNode.insert("GeoPositionInterpolator"); x3dNode.insert("GeoProximitySensor");
@@ -161,7 +161,7 @@ public:
 	  x3dNode.insert("TimeTrigger"); x3dNode.insert("TransformSensor"); x3dNode.insert("TransmitterPdu");
 	  x3dNode.insert("TriangleFanSet"); x3dNode.insert("TriangleSet"); x3dNode.insert("TriangleSet2D");
 	  x3dNode.insert("TriangleStripSet"); x3dNode.insert("TwoSidedMaterial"); x3dNode.insert("UniversalJoint");
-	  x3dNode.insert(" Viewpoint"); x3dNode.insert("ViewpointGroup"); x3dNode.insert("VolumeEmitter");
+	  x3dNode.insert("Viewpoint"); x3dNode.insert("ViewpointGroup"); x3dNode.insert("VolumeEmitter");
 	  x3dNode.insert("VolumePicker"); x3dNode.insert("WindPhysicsModel"); x3dNode.insert("Cylinder"); x3dNode.insert("Sphere");
 	}
 

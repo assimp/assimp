@@ -32,6 +32,7 @@
 
 *****************************************************************************/
 #include <memory.h>
+#include <stdexcept>
 #include <string.h>
 #include "Scanner.h"
 
@@ -328,9 +329,7 @@ void Buffer::SetPos(int value) {
 	}
 
 	if ((value < 0) || (value > fileLen)) {
-		char msg[50];
-		snprintf(msg, 50, "Buffer out of bounds access, position: %d", value);
-		throw msg;
+        throw std::runtime_error("Buffer out of bounds access, position: " + std::to_string(value));
 
 	}
 
@@ -415,10 +414,10 @@ Scanner::Scanner(const wchar_t* fileName) {
 	FILE* stream;
 	char *chFileName = coco_string_create_char(fileName);
 	if ((stream = fopen(chFileName, "rb")) == NULL) {
-		char msg[50];
-		snprintf(msg, 50, "Can not open file: %s", chFileName);
+        std::string errorMsg = "Can not open file: ";
+        errorMsg += chFileName;
 		coco_string_delete(chFileName);
-		throw msg;
+        throw std::runtime_error(errorMsg);
 	}
 	coco_string_delete(chFileName);
 	buffer = new Buffer(stream, false);

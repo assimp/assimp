@@ -549,6 +549,9 @@ void Scanner::Init() {
 
 	// HEAP_BLOCK_SIZE byte heap + pointer to next heap block
 	heap = malloc(HEAP_BLOCK_SIZE + sizeof(void*));
+    if (heap == NULL) {
+        throw std::bad_alloc();
+    }
 	firstHeap = heap;
 	heapEnd = (void**) (((char*) heap) + HEAP_BLOCK_SIZE);
 	*heapEnd = 0;
@@ -628,6 +631,9 @@ void Scanner::CreateHeapBlock() {
 
 	// HEAP_BLOCK_SIZE byte heap + pointer to next heap block
 	newHeap = malloc(HEAP_BLOCK_SIZE + sizeof(void*));
+    if (newHeap == NULL) {
+        throw std::bad_alloc();
+    }
 	*heapEnd = newHeap;
 	heapEnd = (void**) (((char*) newHeap) + HEAP_BLOCK_SIZE);
 	*heapEnd = 0;

@@ -40,6 +40,10 @@ SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.22 )
 
+# VRML (.wrl/.x3dv) file import support by leveraging X3D importer and 3rd party file
+# format converter to convert .wrl/.x3dv files to X3D-compatible .xml
+OPTION(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" on)
+
 #================================================================================#
 #                    Model formats not enabled by default
 #
@@ -59,11 +63,6 @@ OPTION(ASSIMP_BUILD_M3D_EXPORTER "Enable M3D file export" off)
 # auto-cloned during build; so MUST disable the feature or the PR will be rejected
 OPTION(ASSIMP_BUILD_USD_IMPORTER "Enable USD file import" off)
 OPTION(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" off)
-
-# VRML (.wrl/.x3dv) file import support by leveraging X3D importer and 3rd party file
-# format converter to convert .wrl/.x3dv files to X3D-compatible .xml
-# (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
-OPTION(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
 
 #--------------------------------------------------------------------------------#
 #                  Internal impl for optional model formats

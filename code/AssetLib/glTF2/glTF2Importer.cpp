@@ -462,9 +462,9 @@ template <typename T>
 aiColor4D *GetVertexColorsForType(Ref<Accessor> input, std::vector<unsigned int> *vertexRemappingTable) {
     constexpr float max = std::numeric_limits<T>::max();
     aiColor4t<T> *colors;
-    input->ExtractData(colors, vertexRemappingTable);
-    auto output = new aiColor4D[input->count];
-    for (size_t i = 0; i < input->count; i++) {
+    size_t count = input->ExtractData(colors, vertexRemappingTable);
+    auto output = new aiColor4D[count];
+    for (size_t i = 0; i < count; i++) {
         output[i] = aiColor4D(
                 colors[i].r / max, colors[i].g / max,
                 colors[i].b / max, colors[i].a / max);

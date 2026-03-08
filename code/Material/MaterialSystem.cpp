@@ -564,7 +564,7 @@ uint32_t Assimp::ComputeMaterialHash(const aiMaterial *mat, bool includeMatName 
     for (unsigned int i = 0; i < mat->mNumProperties; ++i) {
         // Exclude all properties whose first character is '?' from the hash
         // See doc for aiMaterialProperty.
-        aiMaterialProperty *prop = mat->mProperties[i];
+        const aiMaterialProperty *prop = mat->mProperties[i];
         if (nullptr != prop && (includeMatName || prop->mKey.data[0] != '?')) {
 
             hash = SuperFastHash(prop->mKey.data, (unsigned int)prop->mKey.length, hash);

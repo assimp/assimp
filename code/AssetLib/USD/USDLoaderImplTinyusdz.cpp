@@ -511,14 +511,6 @@ void USDImporterImplTinyusdz::uvsForMesh(
     }
 }
 
-static aiColor3D *ownedColorPtrFor(const std::array<float, 3> &color) {
-    aiColor3D *colorPtr = new aiColor3D();
-    colorPtr->r = color[0];
-    colorPtr->g = color[1];
-    colorPtr->b = color[2];
-    return colorPtr;
-}
-
 static std::string nameForTextureWithId(const RenderScene &render_scene, const int targetId) {
     std::stringstream ss;
     std::string texName;
@@ -544,14 +536,14 @@ static void assignTexture(
         const int textureId,
         const int aiTextureType) {
     std::string name = nameForTextureWithId(render_scene, textureId);
-    aiString *texName = new aiString();
-    texName->Set(name);
+    aiString texName;
+    texName.Set(name);
     std::stringstream ss;
     ss.str("");
     ss << "assignTexture(): name: " << name;
     TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
     // TODO: verify hard-coded '0' index is correct
-    mat->AddProperty(texName, _AI_MATKEY_TEXTURE_BASE, aiTextureType, 0);
+    mat->AddProperty(&texName, _AI_MATKEY_TEXTURE_BASE, aiTextureType, 0);
 }
 
 void USDImporterImplTinyusdz::materials(
@@ -575,18 +567,18 @@ void USDImporterImplTinyusdz::materials(
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         aiMaterial *mat = new aiMaterial;
 
-        aiString *materialName = new aiString();
-        materialName->Set(material.name);
+        aiString materialName;
+        materialName.Set(material.name);
         mat->AddProperty(materialName, AI_MATKEY_NAME);
 
         mat->AddProperty(
-                ownedColorPtrFor(material.surfaceShader.diffuseColor.value),
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader.diffuseColor.value.data()),
                 1, AI_MATKEY_COLOR_DIFFUSE);
         mat->AddProperty(
-                ownedColorPtrFor(material.surfaceShader.specularColor.value),
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader.specularColor.value.data()),
                 1, AI_MATKEY_COLOR_SPECULAR);
         mat->AddProperty(
-                ownedColorPtrFor(material.surfaceShader.emissiveColor.value),
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader.emissiveColor.value.data()),
                 1, AI_MATKEY_COLOR_EMISSIVE);
 
         ss.str("");

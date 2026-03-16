@@ -291,16 +291,13 @@ public:
 // ---------------------------------------------------------------------------------
 /** \brief Instance of a property in a PLY file
  */
-class PropertyInstance
-{
+class PropertyInstance {
 public:
-
     //! Default constructor
     PropertyInstance() AI_NO_EXCEPT = default;
 
     union ValueUnion
     {
-
         //! uInt32 representation of the property. All
         // uint types are automatically converted to uint32
         uint32_t iUInt;
@@ -351,9 +348,11 @@ public:
     static TYPE ConvertTo(ValueUnion v, EDataType eType);
 };
 
+using PropertyInstVec = std::vector<PropertyInstance::ValueUnion>;
+
 // ---------------------------------------------------------------------------------
-/** \brief Class for an element instance in a PLY file
- */
+/// @brief Class for an element instance in a PLY file
+// ---------------------------------------------------------------------------------
 class ElementInstance {
 public:
     //! Default constructor
@@ -374,20 +373,18 @@ public:
 };
 
 // ---------------------------------------------------------------------------------
-/** \brief Class for an element instance list in a PLY file
- */
-class ElementInstanceList
-{
+/// @brief Class for an element instance list in a PLY file
+// ---------------------------------------------------------------------------------
+class ElementInstanceList {
 public:
-
-    //! Default constructor
+    /// Default constructor
     ElementInstanceList() AI_NO_EXCEPT = default;
 
-    //! List of all element instances
+    /// List of all element instances
     std::vector< ElementInstance > alInstances;
 
     // -------------------------------------------------------------------
-    //! Parse an element instance list
+    /// Parse an element instance list
     static bool ParseInstanceList(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer,
         const Element* pcElement, ElementInstanceList* p_pcOut, PLYImporter* loader);
 
@@ -400,17 +397,15 @@ public:
 /** \brief Class to represent the document object model of an ASCII or binary
  * (both little and big-endian) PLY file
  */
-class DOM
-{
+class DOM {
 public:
-
-    //! Default constructor
+    /// Default constructor
     DOM() AI_NO_EXCEPT = default;
 
 
-    //! Contains all elements of the file format
+    /// Contains all elements of the file format
     std::vector<Element> alElements;
-    //! Contains the real data of each element's instance list
+    /// Contains the real data of each element's instance list
     std::vector<ElementInstanceList> alElementData;
 
     //! Parse the DOM for a PLY file. The input string is assumed
@@ -446,11 +441,8 @@ private:
 
 // ---------------------------------------------------------------------------------
 template <typename TYPE>
-inline TYPE PLY::PropertyInstance::ConvertTo(
-    PLY::PropertyInstance::ValueUnion v, PLY::EDataType eType)
-{
-    switch (eType)
-    {
+inline TYPE PLY::PropertyInstance::ConvertTo(PLY::PropertyInstance::ValueUnion v, PLY::EDataType eType) {
+    switch (eType) {
     case EDT_Float:
         return (TYPE)v.fFloat;
     case EDT_Double:

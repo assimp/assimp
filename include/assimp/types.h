@@ -124,8 +124,9 @@ static constexpr size_t AI_MAXLEN = 1024;
 #endif
 
 // ----------------------------------------------------------------------------------
-/** Represents a plane in a three-dimensional, euclidean space
-*/
+/** 
+ * @brief Represents a plane in a three-dimensional, euclidean space
+ */
 struct aiPlane {
 #ifdef __cplusplus
     aiPlane() AI_NO_EXCEPT : a(0.f), b(0.f), c(0.f), d(0.f) {}
@@ -142,8 +143,9 @@ struct aiPlane {
 }; // !struct aiPlane
 
 // ----------------------------------------------------------------------------------
-/** Represents a ray
-*/
+/** 
+ * @brief Represents a ray
+ */
 struct aiRay {
 #ifdef __cplusplus
     aiRay() AI_NO_EXCEPT {}
@@ -160,8 +162,9 @@ struct aiRay {
 }; // !struct aiRay
 
 // ----------------------------------------------------------------------------------
-/** Represents a color in Red-Green-Blue space.
-*/
+/** 
+ * @brief Represents a color in Red-Green-Blue space.
+ */
 struct aiColor3D {
 #ifdef __cplusplus
     aiColor3D() AI_NO_EXCEPT : r(0.0f), g(0.0f), b(0.0f) {}
@@ -172,7 +175,7 @@ struct aiColor3D {
 
     /** Component-wise comparison */
     bool operator==(const aiColor3D &other) const {
-        constexpr float epsilon = float(1e-2);
+        constexpr auto epsilon{float(1e-2)};
         return std::fabs(r - other.r) < epsilon && std::fabs(g - other.g) < epsilon && std::fabs(b - other.b) < epsilon;
     }
 
@@ -181,7 +184,7 @@ struct aiColor3D {
 
     /** Component-wise comparison */
     bool operator<(const aiColor3D &other) const {
-        constexpr float epsilon = float(1e-2);
+        constexpr auto epsilon{float(1e-2)};
         return r < other.r || (std::fabs(r - other.r) < epsilon && (g < other.g || (std::fabs(g - other.g) < epsilon && b < other.b)));
     }
 
@@ -233,7 +236,7 @@ struct aiColor3D {
 
     /** Check whether a color is black */
     bool IsBlack() const {
-        constexpr float epsilon = float(1e-2);
+        constexpr auto epsilon{float(1e-2)};
         return std::fabs(r) < epsilon && std::fabs(g) < epsilon && std::fabs(b) < epsilon;
     }
 
@@ -414,7 +417,9 @@ struct aiString {
 }; // !struct aiString
 
 // ----------------------------------------------------------------------------------
-/** Standard return type for some library functions.
+/** 
+ * @brief Standard return type for some library functions.
+ *
  * Rarely used, and if, mostly in the C API.
  */
 typedef enum aiReturn {
@@ -465,8 +470,10 @@ enum aiOrigin {
 }; // !enum aiOrigin
 
 // ----------------------------------------------------------------------------------
-/** @brief Enumerates predefined log streaming destinations.
- *  Logging to these streams can be enabled with a single call to
+/** 
+ *  @brief Enumerates predefined log streaming destinations.
+ *  
+ * Logging to these streams can be enabled with a single call to
  *   #LogStream::createDefaultStream.
  */
 enum aiDefaultLogStream {
@@ -498,10 +505,12 @@ enum aiDefaultLogStream {
 #define DLS_DEBUGGER aiDefaultLogStream_DEBUGGER
 
 // ----------------------------------------------------------------------------------
-/** Stores the memory requirements for different components (e.g. meshes, materials,
+/** 
+ * @brief Stores the memory requirements for different components (e.g. meshes, materials,
  *  animations) of an import. All sizes are in bytes.
+ *
  *  @see Importer::GetMemoryRequirements()
-*/
+ */
 struct aiMemoryInfo {
 #ifdef __cplusplus
 

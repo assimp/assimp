@@ -590,7 +590,7 @@ void ColladaParser::ReadStructure(XmlNode &node) {
         } else if (currentName == "library_animations") {
             ReadAnimationLibrary(currentNode);
         } else if (currentName == "library_animation_clips") {
-            (currentNode);
+            ReadAnimationClipLibrary(currentNode);
         } else if (currentName == "library_controllers") {
             ReadControllerLibrary(currentNode);
         } else if (currentName == "library_images") {

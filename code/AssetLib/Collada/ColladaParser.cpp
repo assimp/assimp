@@ -590,7 +590,7 @@ void ColladaParser::ReadStructure(XmlNode &node) {
         } else if (currentName == "library_animations") {
             ReadAnimationLibrary(currentNode);
         } else if (currentName == "library_animation_clips") {
-            ReadAnimationClipLibrary(currentNode);
+            (currentNode);
         } else if (currentName == "library_controllers") {
             ReadControllerLibrary(currentNode);
         } else if (currentName == "library_images") {
@@ -667,29 +667,31 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node /*NODE: library_anima
         return;
     }
     for (XmlNode &animationClip : node.children()) {
+        const std::string& currentNodeName = currentNode.name();
+        if (currentNodeName == "animation_clip") {
+	        std::string animName;
+	        if (!XmlParser::getStdStrAttribute(animationClip, "name", animName)) {
+		        if (!XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
+			        animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
+		        }
+	        }
 
-	    std::string animName;
-	    if (!XmlParser::getStdStrAttribute(animationClip, "name", animName)) {
-		    if (!XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
-			    animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
-		    }
-	    }
+	        std::pair<std::string, std::vector<std::string>> clip;
+	        clip.first = animName;
 
-	    std::pair<std::string, std::vector<std::string>> clip;
-	    clip.first = animName;
+	        for (XmlNode &instanceAnimation : animationClip.children()) {
+		        const std::string &currentName = instanceAnimation.name();
+		        if (currentName == "instance_animation") {
+			        std::string url;
+			        readUrlAttribute(instanceAnimation, url);
+			        clip.second.push_back(url);
+		        }	
+	        }
 
-	    for (XmlNode &instanceAnimation : animationClip.children()) {
-		    const std::string &currentName = instanceAnimation.name();
-		    if (currentName == "instance_animation") {
-			    std::string url;
-			    readUrlAttribute(instanceAnimation, url);
-			    clip.second.push_back(url);
-		    }	
-	    }
-
-	    if (clip.second.size() > 0) {
-		    mAnimationClipLibrary.push_back(clip);
-	    }
+	        if (clip.second.size() > 0) {
+		        mAnimationClipLibrary.push_back(clip);
+	        }
+        }
     }
 }
 

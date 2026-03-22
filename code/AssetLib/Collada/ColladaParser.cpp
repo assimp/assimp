@@ -673,10 +673,8 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node /*NODE: library_anima
 		}
 		
 	    std::string animName;
-	    if (!XmlParser::getStdStrAttribute(animationClip, "name", animName)) {
-		    if (!XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
-			    animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
-		    }
+	    if (!XmlParser::getStdStrAttribute(animationClip, "name", animName) && !XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
+            animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
 	    }
 
 	    std::pair<std::string, std::vector<std::string>> clip;

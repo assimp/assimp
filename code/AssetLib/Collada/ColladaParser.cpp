@@ -666,21 +666,21 @@ void ColladaParser::ReadAnimationClipLibrary(XmlNode &node /*NODE: library_anima
     if (node.empty()) {
         return;
     }
-    for (XmlNode &animationClip : node.children()) {
+    for (XmlNode &currentNode : node.children()) {
         const std::string& currentNodeName = currentNode.name();
         if (currentNodeName != "animation_clip") {
             continue;
 		}
 		
 	    std::string animName;
-	    if (!XmlParser::getStdStrAttribute(animationClip, "name", animName) && !XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
+	    if (!XmlParser::getStdStrAttribute(currentNode, "name", animName) && !XmlParser::getStdStrAttribute(currentNode, "id", animName)) {
             animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
 	    }
 
 	    std::pair<std::string, std::vector<std::string>> clip;
 	    clip.first = animName;
 
-	    for (XmlNode &instanceAnimation : animationClip.children()) {
+	    for (XmlNode &instanceAnimation : currentNode.children()) {
 		    const std::string &currentName = instanceAnimation.name();
 		    if (currentName == "instance_animation") {
 			    std::string url;

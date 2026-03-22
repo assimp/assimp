@@ -662,32 +662,34 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads the animation clips
-void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
+void ColladaParser::ReadAnimationClipLibrary(XmlNode &node /*NODE: library_animation_clips*/) {
     if (node.empty()) {
         return;
     }
+    for (XmlNode &animationClip : node.children()) {
 
-    std::string animName;
-    if (!XmlParser::getStdStrAttribute(node, "name", animName)) {
-        if (!XmlParser::getStdStrAttribute(node, "id", animName)) {
-            animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
-        }
-    }
+	    std::string animName;
+	    if (!XmlParser::getStdStrAttribute(animationClip, "name", animName)) {
+		    if (!XmlParser::getStdStrAttribute(animationClip, "id", animName)) {
+			    animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
+		    }
+	    }
 
-    std::pair<std::string, std::vector<std::string>> clip;
-    clip.first = animName;
+	    std::pair<std::string, std::vector<std::string>> clip;
+	    clip.first = animName;
 
-    for (XmlNode &currentNode : node.children()) {
-        const std::string &currentName = currentNode.name();
-        if (currentName == "instance_animation") {
-            std::string url;
-            readUrlAttribute(currentNode, url);
-            clip.second.push_back(url);
-        }
+	    for (XmlNode &instanceAnimation : animationClip.children()) {
+		    const std::string &currentName = instanceAnimation.name();
+		    if (currentName == "instance_animation") {
+			    std::string url;
+			    readUrlAttribute(instanceAnimation, url);
+			    clip.second.push_back(url);
+		    }	
+	    }
 
-        if (clip.second.size() > 0) {
-            mAnimationClipLibrary.push_back(clip);
-        }
+	    if (clip.second.size() > 0) {
+		    mAnimationClipLibrary.push_back(clip);
+	    }
     }
 }
 

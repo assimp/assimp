@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -43,21 +43,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Declaration of the USD importer class.
  */
 #pragma once
+
 #ifndef AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 #define AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 
+#include "tinyusdz.hh"
+#include "tydra/render-data.hh"
 #include <assimp/BaseImporter.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
-#include <vector>
 #include <cstdint>
-#include "tinyusdz.hh"
-#include "tydra/render-data.hh"
+#include <vector>
 
 namespace Assimp {
+
+/**
+ * @brief USD Importer implementation using tinyusdz.
+ */
 class USDImporterImplTinyusdz {
 public:
+    /// @brief The class constructor.
     USDImporterImplTinyusdz() = default;
+
+    /// @brief The class destructor.
     ~USDImporterImplTinyusdz() = default;
 
     void InternReadFile(
@@ -147,5 +155,7 @@ public:
             size_t meshIdx,
             const std::string &nameWExt);
 };
+
 } // namespace Assimp
+
 #endif // AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED

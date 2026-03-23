@@ -1,0 +1,40 @@
+# OBJ
+"v "
+"vn "
+"vt "
+"f "
+"mtllib "
+"usemtl "
+
+# GLTF (JSON)
+"asset"
+"scene"
+"scenes"
+"nodes"
+"meshes"
+"accessors"
+"bufferViews"
+"buffers"
+
+# PLY
+"ply"
+"format"
+"element"
+"property"
+"vertex"
+"face"
+
+# STL
+"solid"
+"facet"
+"normal"
+"outer loop"
+"vertex"
+"endloop"
+"endfacet"
+"endsolid"
+
+# Collada (XML)
+"COLLADA"
+"library_geometries"
+"library_visual_scenes"

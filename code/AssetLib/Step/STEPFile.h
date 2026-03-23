@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -918,6 +918,10 @@ private:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif // _MSC_VER
+
+#if _MSC_VER > 1920
+#pragma warning(pop)
+#endif
 
 } // namespace STEP
 } // namespace Assimp

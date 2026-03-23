@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -77,7 +77,6 @@ static constexpr aiImporterDesc desc = {
 };
 
 namespace Assimp {
-using namespace std;
 
 // Constructor to be privately used by Importer
 USDImporter::USDImporter() :

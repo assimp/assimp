@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -190,7 +190,7 @@ void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
 
     // Allocate and initialize with large values.
     for (unsigned int i = 0; i < numCompsOut; i++) {
-        acc->min.push_back(std::numeric_limits<double>::min());
+        acc->min.push_back(std::numeric_limits<double>::max());
         acc->max.push_back(-std::numeric_limits<double>::max());
     }
 

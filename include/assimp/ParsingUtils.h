@@ -128,7 +128,7 @@ AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out, const char
         ++in;
     }
     *out = in;
-    return in < end && !IsLineEnd<char_t>(*in);
+    return ((in < end) && !IsLineEnd<char_t>(*in));
 }
 
 // ---------------------------------------------------------------------------------

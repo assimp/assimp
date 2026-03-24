@@ -57,6 +57,7 @@ namespace Assimp {
 
 constexpr const char ObjFileParser::DEFAULT_MATERIAL[];
 
+// -------------------------------------------------------------------
 static bool isDataDefinitionEnd(const char *tmp) {
     if (*tmp == '\\') {
         ++tmp;
@@ -67,12 +68,14 @@ static bool isDataDefinitionEnd(const char *tmp) {
     return false;
 }
 
+// -------------------------------------------------------------------
 static bool isNanOrInf(const char *in) {
     // Look for "nan" or "inf", case insensitive
     return ((in[0] == 'N' || in[0] == 'n') && ASSIMP_strincmp(in, "nan", 3) == 0) ||
            ((in[0] == 'I' || in[0] == 'i') && ASSIMP_strincmp(in, "inf", 3) == 0);
 }
 
+// -------------------------------------------------------------------
 ObjFileParser::ObjFileParser() :
         mDataIt(),
         mDataItEnd(),
@@ -81,6 +84,7 @@ ObjFileParser::ObjFileParser() :
     std::fill_n(mBuffer, Buffersize, '\0');
 }
 
+// -------------------------------------------------------------------
 ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName,
         IOSystem *io, ProgressHandler *progress, const std::string &originalObjFileName) :
             mDataIt(),
@@ -114,13 +118,15 @@ void ObjFileParser::setBuffer(std::vector<char> &buffer) {
 	}
 }
 
+// -------------------------------------------------------------------
 ObjFile::Model *ObjFileParser::GetModel() const {
     return mModel.get();
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     // only update every 100KB or it'll be too slow
-    //const unsigned int updateProgressEveryBytes = 100 * 1024;
+    // const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = bytesToProcess;
     unsigned int processed = 0u;
@@ -271,6 +277,7 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     }
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     mDataIt = getNextWord<DataArrayIt>(mDataIt, mDataItEnd);
@@ -292,6 +299,7 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     pBuffer[index] = '\0';
 }
 
+// -------------------------------------------------------------------
 size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents(0);
     const char *tmp = &mDataIt[0];
@@ -318,6 +326,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
     return numComponents;
 }
 
+// -------------------------------------------------------------------
 size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) {
     size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
@@ -356,6 +365,7 @@ size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) 
     return numComponents;
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
     ai_real x, y, z;
     copyNextWord(mBuffer, Buffersize);
@@ -371,6 +381,7 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array) {
     ai_real x, y, z, w;
     copyNextWord(mBuffer, Buffersize);
@@ -392,6 +403,7 @@ void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b) {
     ai_real x, y, z;
     copyNextWord(mBuffer, Buffersize);
@@ -419,6 +431,7 @@ void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
     ai_real x, y;
     copyNextWord(mBuffer, Buffersize);
@@ -434,6 +447,7 @@ void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
 
 static constexpr char DefaultObjName[] = "defaultobject";
 
+// -------------------------------------------------------------------
 void ObjFileParser::getFace(aiPrimitiveType type) {
     mDataIt = getNextToken<DataArrayIt>(mDataIt, mDataItEnd);
     if (mDataIt == mDataItEnd || *mDataIt == '\0') {
@@ -550,6 +564,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 
+// -------------------------------------------------------------------
 void ObjFileParser::getMaterialDesc() {
     // Get next data for material data
     mDataIt = getNextToken<DataArrayIt>(mDataIt, mDataItEnd);
@@ -617,7 +632,6 @@ void ObjFileParser::skipComment() {
 }
 
 // -------------------------------------------------------------------
-//  Get material library from file.
 void ObjFileParser::getMaterialLib() {
     // Translate tuple
     mDataIt = getNextToken<DataArrayIt>(mDataIt, mDataItEnd);
@@ -677,7 +691,6 @@ void ObjFileParser::getMaterialLib() {
 }
 
 // -------------------------------------------------------------------
-//  Set a new material definition as the current material.
 void ObjFileParser::getNewMaterial() {
     mDataIt = getNextToken<DataArrayIt>(mDataIt, mDataItEnd);
     mDataIt = getNextWord<DataArrayIt>(mDataIt, mDataItEnd);
@@ -706,11 +719,11 @@ void ObjFileParser::getNewMaterial() {
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 
-static constexpr int InvalidMateralIndex = -1;
+static constexpr int InvalidMaterialIndex = -1;
 
 // -------------------------------------------------------------------
 int ObjFileParser::getMaterialIndex(const std::string &strMaterialName) {
-    int mat_index = InvalidMateralIndex;
+    int mat_index = InvalidMaterialIndex;
     if (strMaterialName.empty()) {
         return mat_index;
     }
@@ -757,7 +770,6 @@ void ObjFileParser::getGroupName() {
 }
 
 // -------------------------------------------------------------------
-//  Not supported
 void ObjFileParser::skipGroupNumber() {
     // Not used
 
@@ -765,7 +777,6 @@ void ObjFileParser::skipGroupNumber() {
 }
 
 // -------------------------------------------------------------------
-//  Not supported
 void ObjFileParser::skipGroupNumberAndResolution() {
     // Not used
 

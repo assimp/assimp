@@ -109,8 +109,9 @@ void ObjFileParser::setBuffer(std::vector<char> &buffer) {
     mDataIt = buffer.begin();
     mDataItEnd = buffer.end();
     ai_assert(mDataIt < mDataItEnd);
-
-    mEnd = &buffer[buffer.size() - 1] + 1;
+	if (!buffer.empty()) {
+    	mEnd = &buffer[buffer.size() - 1] + 1;
+	}
 }
 
 ObjFile::Model *ObjFileParser::GetModel() const {

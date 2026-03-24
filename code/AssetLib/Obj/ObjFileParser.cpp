@@ -80,20 +80,13 @@ static bool isNanOrInf(const char *in) {
 }
 
 // -------------------------------------------------------------------
-ObjFileParser::ObjFileParser() :
-        mDataIt(),
-        mDataItEnd(),
-        mBuffer(),
-        mEnd(&mBuffer[Buffersize-1]+1) {
+ObjFileParser::ObjFileParser() : mEnd(&mBuffer[Buffersize-1]+1) {
     std::fill_n(mBuffer, Buffersize, '\0');
 }
 
 // -------------------------------------------------------------------
 ObjFileParser::ObjFileParser(IOStreamBuffer<char> &streamBuffer, const std::string &modelName,
         IOSystem *io, ProgressHandler *progress, const std::string &originalObjFileName) :
-            mDataIt(),
-            mDataItEnd(),
-            mBuffer(),
             mIO(io),
             mProgress(progress),
             mOriginalObjFileName(originalObjFileName) { 

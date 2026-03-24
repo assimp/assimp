@@ -135,11 +135,11 @@ private:
     /// Default material name
     static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
-    DataArrayIt mDataIt;
+    DataArrayIt mDataIt{};
     //! Iterator to end position of buffer
-    DataArrayIt mDataItEnd;
+    DataArrayIt mDataItEnd{};
     //! Pointer to model instance
-    std::unique_ptr<ObjFile::Model> mModel;
+    std::unique_ptr<ObjFile::Model> mModel{};
     //! Current line (for debugging)
     unsigned int mLine{ 0 };
     //! Helper buffer
@@ -151,7 +151,7 @@ private:
     //! Pointer to progress handler
     ProgressHandler *mProgress{ nullptr };
     /// Path to the current model, name of the obj file where the buffer comes from
-    const std::string mOriginalObjFileName;
+    const std::string mOriginalObjFileName{};
 };
 
 } // Namespace Assimp

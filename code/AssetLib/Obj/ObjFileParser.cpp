@@ -59,6 +59,8 @@ constexpr const char ObjFileParser::DEFAULT_MATERIAL[];
 
 // -------------------------------------------------------------------
 static bool isDataDefinitionEnd(const char *tmp) {
+	ai_assert(tmp != nullptr);
+	
     if (*tmp == '\\') {
         ++tmp;
         if (IsLineEnd(*tmp)) {
@@ -70,6 +72,8 @@ static bool isDataDefinitionEnd(const char *tmp) {
 
 // -------------------------------------------------------------------
 static bool isNanOrInf(const char *in) {
+	ai_assert(in != nullptr);
+	
     // Look for "nan" or "inf", case insensitive
     return ((in[0] == 'N' || in[0] == 'n') && ASSIMP_strincmp(in, "nan", 3) == 0) ||
            ((in[0] == 'I' || in[0] == 'i') && ASSIMP_strincmp(in, "inf", 3) == 0);
@@ -140,9 +144,9 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         mEnd = &buffer[buffer.size() - 1] + 1;
 
         if (processed == 0 && std::distance(mDataIt, mDataItEnd) >= 3 &&
-            static_cast<unsigned char>(*mDataIt) == 0xEF &&
-            static_cast<unsigned char>(*(mDataIt + 1)) == 0xBB &&
-            static_cast<unsigned char>(*(mDataIt + 2)) == 0xBF) {
+            	static_cast<unsigned char>(*mDataIt) == 0xEF &&
+            	static_cast<unsigned char>(*(mDataIt + 1)) == 0xBB &&
+            	static_cast<unsigned char>(*(mDataIt + 2)) == 0xBF) {
             mDataIt += 3; // skip BOM
         }
 
@@ -151,7 +155,9 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         if (lastFilePos < filePos) {
             processed = static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
-            mProgress->UpdateFileRead(processed, progressTotal);
+			if (mProgress != nullptr) {
+				mProgress->UpdateFileRead(processed, progressTotal);
+			}
         }
 
         // handle c-stype section end (http://paulbourke.net/dataformats/obj/)

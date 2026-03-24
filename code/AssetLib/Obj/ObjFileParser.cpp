@@ -156,11 +156,13 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         // handle c-stype section end (http://paulbourke.net/dataformats/obj/)
         if (insideCstype) {
             switch (*mDataIt) {
-            case 'e': {
-                std::string name;
-                getNameNoSpace(mDataIt, mDataItEnd, name);
-                insideCstype = name != "end";
-            } break;
+	            case 'e': {
+	                std::string name;
+	                getNameNoSpace(mDataIt, mDataItEnd, name);
+	                insideCstype = name != "end";
+	            } break;
+				default:
+					break;
             }
             goto pf_skip_line;
         }
@@ -331,20 +333,20 @@ size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) 
     ai_real x, y, z;
     if (2 == numComponents) {
         copyNextWord(mBuffer, Buffersize);
-        x = (ai_real)fast_atof(mBuffer);
+        x = fast_atof(mBuffer);
 
         copyNextWord(mBuffer, Buffersize);
-        y = (ai_real)fast_atof(mBuffer);
+        y = fast_atof(mBuffer);
         z = 0.0;
     } else if (3 == numComponents) {
         copyNextWord(mBuffer, Buffersize);
-        x = (ai_real) fast_atof(mBuffer);
+        x = fast_atof(mBuffer);
 
         copyNextWord(mBuffer, Buffersize);
-        y = (ai_real)fast_atof(mBuffer);
+        y = fast_atof(mBuffer);
 
         copyNextWord(mBuffer, Buffersize);
-        z = (ai_real)fast_atof(mBuffer);
+        z = fast_atof(mBuffer);
     } else {
         throw DeadlyImportError("OBJ: Invalid number of components");
     }
@@ -368,13 +370,13 @@ size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) 
 void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
     ai_real x, y, z;
     copyNextWord(mBuffer, Buffersize);
-    x = (ai_real)fast_atof(mBuffer);
+    x = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    y = (ai_real)fast_atof(mBuffer);
+    y = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    z = (ai_real)fast_atof(mBuffer);
+    z = fast_atof(mBuffer);
 
     point3d_array.emplace_back(x, y, z);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -384,16 +386,16 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
 void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array) {
     ai_real x, y, z, w;
     copyNextWord(mBuffer, Buffersize);
-    x = (ai_real)fast_atof(mBuffer);
+    x = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    y = (ai_real)fast_atof(mBuffer);
+    y = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    z = (ai_real)fast_atof(mBuffer);
+    z = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    w = (ai_real)fast_atof(mBuffer);
+    w = fast_atof(mBuffer);
 
     if (w == 0)
         throw DeadlyImportError("OBJ: Invalid component in homogeneous vector (Division by zero)");
@@ -406,24 +408,24 @@ void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array
 void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b) {
     ai_real x, y, z;
     copyNextWord(mBuffer, Buffersize);
-    x = (ai_real)fast_atof(mBuffer);
+    x = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    y = (ai_real)fast_atof(mBuffer);
+    y = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    z = (ai_real)fast_atof(mBuffer);
+    z = fast_atof(mBuffer);
 
     point3d_array_a.emplace_back(x, y, z);
 
     copyNextWord(mBuffer, Buffersize);
-    x = (ai_real)fast_atof(mBuffer);
+    x = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    y = (ai_real)fast_atof(mBuffer);
+    y = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    z = (ai_real)fast_atof(mBuffer);
+    z = fast_atof(mBuffer);
 
     point3d_array_b.emplace_back(x, y, z);
 
@@ -434,10 +436,10 @@ void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std
 void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
     ai_real x, y;
     copyNextWord(mBuffer, Buffersize);
-    x = (ai_real)fast_atof(mBuffer);
+    x = fast_atof(mBuffer);
 
     copyNextWord(mBuffer, Buffersize);
-    y = (ai_real)fast_atof(mBuffer);
+    y = fast_atof(mBuffer);
 
     point2d_array.emplace_back(x, y);
 

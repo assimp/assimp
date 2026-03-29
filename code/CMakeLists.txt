@@ -744,6 +744,8 @@ SET( PostProcessing_SRCS
   PostProcessing/GenFaceNormalsProcess.h
   PostProcessing/GenVertexNormalsProcess.cpp
   PostProcessing/GenVertexNormalsProcess.h
+  PostProcessing/GenerateMikkTSpaceTangents.cpp
+  PostProcessing/GenerateMikkTSpaceTangents.h
   PostProcessing/PretransformVertices.cpp
   PostProcessing/PretransformVertices.h
   PostProcessing/ImproveCacheLocality.cpp
@@ -1167,6 +1169,12 @@ ENDIF()
   SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
 #ENDIF()
 
+# mikktspacetangets
+  SET( MikkTSpaceTangents_SRCS
+    ../contrib/MikkTSpace/mikktspace.c
+    ../contrib/MikkTSpace/mikktspace.h
+  )
+
 # minizip/unzip
 IF(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(minizip)
@@ -1366,6 +1374,7 @@ SET( assimp_src
   ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
   ${stb_SRCS}
+  ${MikkTSpaceTangents_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}

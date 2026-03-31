@@ -299,7 +299,7 @@ typedef unsigned int ai_uint;
 
 /* Numerical limits */
 #ifdef __cplusplus
-inline constexpr ai_real ai_epsilon = (ai_real) 1e-6;
+static constexpr ai_real ai_epsilon = (ai_real) 1e-6;
 #else
 #  define ai_epsilon ((ai_real)1e-6)
 #endif

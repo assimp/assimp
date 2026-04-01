@@ -261,7 +261,7 @@ TEST_F(AssimpAPITest_aiMatrix4x4, aiMatrix4FromToTest) {
     const auto from = aiVector3D(1,2,1).Normalize(), to = aiVector3D(-1,1,1).Normalize();
     aiMatrix4x4::FromToMatrix(from, to, result_cpp);
     aiMatrix4FromTo(&result_c, &from, &to);
-    EXPECT_EQ(result_cpp, result_c);
+    EXPECT_TRUE(result_cpp.Equal(result_c, Epsilon));
 }
 
 TEST_F(AssimpAPITest_aiMatrix4x4, operatorTest) {

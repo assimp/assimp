@@ -178,7 +178,22 @@ ESemantic Property::ParseSemantic(std::vector<char> &buffer) {
         eOut = EST_YNormal;
     } else if (DOM::TokenMatch(buffer, "nz", 2)) {
         eOut = EST_ZNormal;
-    } else {
+    }
+    //GAUSSIAN PROPERTIES
+    else if(PLY::DOM::TokenMatchP(buffer, "f_dc", 4, 6)){
+      eOut = PLY::EST_GaussianDC;
+    }
+    else if(PLY::DOM::TokenMatchP(buffer, "f_rest", 6, 8) || PLY::DOM::TokenMatchP(buffer, "f_rest", 6, 9)){
+      eOut = PLY::EST_GaussianRest;
+    }
+    else if(PLY::DOM::TokenMatchP(buffer, "scale", 5, 7)){
+      eOut = PLY::EST_GaussianScale;
+    }
+    else if(PLY::DOM::TokenMatchP(buffer, "rot", 3, 5)){
+      eOut = PLY::EST_GaussianRot;
+    }
+    //END OF GAUSSIANS PROPERTIES
+    else {
         ASSIMP_LOG_INFO("Found unknown property semantic in file. This is ok");
         DOM::SkipLine(buffer);
     }
@@ -391,6 +406,23 @@ bool PLY::DOM::TokenMatch(std::vector<char> &buffer, const char *token, unsigned
     }
 
     return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool PLY::DOM::TokenMatchP(std::vector<char> &buffer, const char* token, unsigned int len, unsigned int real_len){
+        const char* pCur = buffer.empty() ? NULL : (char*)&buffer[0];
+        bool ret = false;
+        if (pCur)
+        {
+          const char* szCur = pCur;
+          ret = Assimp::TokenMatchP(pCur, token, len, real_len);
+
+          uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
+          buffer.erase(buffer.begin(), buffer.begin() + iDiff);
+          return ret;
+        }
+
+        return ret;
 }
 
 // ------------------------------------------------------------------------------------------------

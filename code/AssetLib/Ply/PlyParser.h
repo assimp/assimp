@@ -168,6 +168,22 @@ enum ESemantic {
     //! opacity between 0 and 1
     EST_Opacity,
 
+    /************* Gaussians's Properties ****************/
+
+    //! sh coeff for each channel (0-2)
+    EST_GaussianDC,
+
+    //! rest of the coeff for each channel (0-44)
+    EST_GaussianRest,
+
+    //! scale of the gaussian
+    EST_GaussianScale,
+
+    //! rotation of the gaussian
+    EST_GaussianRot,
+
+    /******** End of Gaussians's Properties **************/
+
     //! Marks invalid entries
     EST_INVALID
 };
@@ -421,6 +437,8 @@ public:
     static bool SkipLine(std::vector<char> &buffer);
 
     static bool TokenMatch(std::vector<char> &buffer, const char* token, unsigned int len);
+
+    static bool TokenMatchP(std::vector<char> &buffer, const char* token, unsigned int len, unsigned int real_len);
 
     static bool SkipSpacesAndLineEnd(std::vector<char> &buffer);
 

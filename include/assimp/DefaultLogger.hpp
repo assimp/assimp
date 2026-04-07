@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -147,7 +147,7 @@ private:
     explicit DefaultLogger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
-    /** @briefDestructor    */
+    /** @brief  Destructor    */
     ~DefaultLogger() override;
 
     /** @brief  Logs debug infos, only been written when severity level DEBUG or higher is set */

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -106,7 +106,7 @@ struct Node : ChunkInfo {
     };
 
     ~Node() override = default;
-    Node(Type type) : type(type), unit_scale(1.f){}
+    explicit Node(Type type) : type(type), unit_scale(1.f){}
 
     Type type;
 

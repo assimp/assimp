@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2025, assimp team
+# Copyright (c) 2006-2026, assimp team
 #
 # All rights reserved.
 #
@@ -457,6 +457,7 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/MDLLoader.h
   AssetLib/MDL/MDLMaterialLoader.cpp
   AssetLib/MDL/HalfLife/HalfLifeMDLBaseHeader.h
+  AssetLib/MDL/HalfLife/HL1DataBuffer.h
   AssetLib/MDL/HalfLife/HL1FileData.h
   AssetLib/MDL/HalfLife/HL1MDLLoader.cpp
   AssetLib/MDL/HalfLife/HL1MDLLoader.h
@@ -602,6 +603,12 @@ ADD_ASSIMP_IMPORTER( XGL
   AssetLib/XGL/XGLLoader.h
 )
 
+SET( FBX_COMMON_SRCS
+  AssetLib/FBX/FBXUtil.h
+  AssetLib/FBX/FBXUtil.cpp
+  AssetLib/FBX/FBXCommon.h
+)
+
 ADD_ASSIMP_IMPORTER( FBX
   AssetLib/FBX/FBXImporter.cpp
   AssetLib/FBX/FBXCompileConfig.h
@@ -613,8 +620,6 @@ ADD_ASSIMP_IMPORTER( FBX
   AssetLib/FBX/FBXImportSettings.h
   AssetLib/FBX/FBXConverter.h
   AssetLib/FBX/FBXConverter.cpp
-  AssetLib/FBX/FBXUtil.h
-  AssetLib/FBX/FBXUtil.cpp
   AssetLib/FBX/FBXDocument.h
   AssetLib/FBX/FBXDocument.cpp
   AssetLib/FBX/FBXProperties.h
@@ -628,7 +633,6 @@ ADD_ASSIMP_IMPORTER( FBX
   AssetLib/FBX/FBXDeformer.cpp
   AssetLib/FBX/FBXBinaryTokenizer.cpp
   AssetLib/FBX/FBXDocumentUtil.cpp
-  AssetLib/FBX/FBXCommon.h
 )
 
 if (NOT ASSIMP_NO_EXPORT)
@@ -1348,6 +1352,8 @@ SET( assimp_src
   ${ASSIMP_LOADER_SRCS}
   ${ASSIMP_EXPORTER_SRCS}
 
+  ${FBX_COMMON_SRCS}
+  
   # Third-party libraries
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}

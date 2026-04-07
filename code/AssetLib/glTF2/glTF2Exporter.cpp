@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -63,6 +63,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <memory>
 #include <iostream>
+
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 
 using namespace rapidjson;
 
@@ -186,7 +190,7 @@ void SetAccessorRange(Ref<Accessor> acc, void *data, size_t count,
 
     // Allocate and initialize with large values.
     for (unsigned int i = 0; i < numCompsOut; i++) {
-        acc->min.push_back(std::numeric_limits<double>::min());
+        acc->min.push_back(std::numeric_limits<double>::max());
         acc->max.push_back(-std::numeric_limits<double>::max());
     }
 

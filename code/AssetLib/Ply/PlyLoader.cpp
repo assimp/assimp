@@ -350,9 +350,6 @@ namespace Assimp {
         unsigned int aiGaussianOpacity = NotSet;
         PLY::EDataType aiGaussianOpacityType = EDT_Char;
 
-        // gaussian's properties counter
-        unsigned int gDC(0), gRest(0), gScal(0), gRot(0);
-
         // now check whether which normal components are available
         unsigned int _a(0), cnt(0);
         for (auto a = pcElement->alProperties.begin(); a != pcElement->alProperties.end(); ++a, ++_a) {
@@ -414,29 +411,62 @@ namespace Assimp {
                 aiTexcoordTypes[1] = a->eType;
             }
             // Gaussian's properties
-            else if(PLY::EST_GaussianDC == a->Semantic){
+            else if(PLY::EST_GaussianDC0 == a->Semantic){
                 ++cnt;
-                aiGaussianDC[gDC] = _a;
-                aiGaussianDCTypes[gDC] = a->eType;
-                ++gDC;
+                aiGaussianDC[0] = _a;
+                aiGaussianDCTypes[0] = a->eType;
             }
-            else if(PLY::EST_GaussianRest == a->Semantic){
+            else if(PLY::EST_GaussianDC1 == a->Semantic){
                 ++cnt;
-                aiGaussianRest[gRest] = _a;
-                aiGaussianRestTypes[gRest] = a->eType;
-                ++gRest;
+                aiGaussianDC[1] = _a;
+                aiGaussianDCTypes[1] = a->eType;
             }
-            else if(PLY::EST_GaussianScale == a->Semantic){
+            else if(PLY::EST_GaussianDC2 == a->Semantic){
                 ++cnt;
-                aiGaussianScale[gScal] = _a;
-                aiGaussianScaleTypes[gScal] = a->eType;
-                ++gScal;
+                aiGaussianDC[2] = _a;
+                aiGaussianDCTypes[2] = a->eType;
             }
-            else if(PLY::EST_GaussianRot == a->Semantic){
+            else if(PLY::EST_GaussianRest >= a->Semantic &&
+                    PLY::EST_GaussianRestFinal <= a->Semantic){
                 ++cnt;
-                aiGaussianRot[gRot] = _a;
-                aiGaussianRotTypes[gRot] = a->eType;
-                ++gRot;
+                unsigned int idx = a->Semantic - PLY::EST_GaussianRest;
+                aiGaussianRest[idx] = _a;
+                aiGaussianRestTypes[idx] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale0 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[0] = _a;
+                aiGaussianScaleTypes[0] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale1 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[1] = _a;
+                aiGaussianScaleTypes[1] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale2 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[2] = _a;
+                aiGaussianScaleTypes[2] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot0 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[0] = _a;
+                aiGaussianRotTypes[0] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot1 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[1] = _a;
+                aiGaussianRotTypes[1] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot2 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[2] = _a;
+                aiGaussianRotTypes[2] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot3 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[3] = _a;
+                aiGaussianRotTypes[3] = a->eType;
             }
             else if(PLY::EST_Opacity == a->Semantic){
                 ++cnt;
@@ -561,7 +591,7 @@ namespace Assimp {
                 haveGaussianDC = true;
             }
 
-            float g_restOut[45];
+            ai_real g_restOut[45];
             bool haveGaussianRest = false;
             for(int i = 0; i < 45; ++i){
                 if (NotSet != aiGaussianRest[i]) {
@@ -617,7 +647,7 @@ namespace Assimp {
                     haveGaussianRot = true;
             }
 
-            float g_opacityOut = 0.0f;
+            ai_real g_opacityOut = 0.0f;
             bool haveGaussianOpacity = false;
             if(NotSet != aiGaussianOpacity){
                 g_opacityOut = PropertyInstance::ConvertTo<ai_real>(
@@ -669,7 +699,7 @@ namespace Assimp {
 
             if (haveGaussianRest) {
                     if (nullptr == mGeneratedMesh->mGaussianRest)
-                        mGeneratedMesh->mGaussianRest = new float[mGeneratedMesh->mNumVertices * 45];
+                        mGeneratedMesh->mGaussianRest = new ai_real[mGeneratedMesh->mNumVertices * 45];
                     unsigned int initPos = pos * 45;
                     for(int i = 0; i < 45; ++i){
                         mGeneratedMesh->mGaussianRest[initPos + i] = g_restOut[i];
@@ -690,7 +720,7 @@ namespace Assimp {
 
             if(haveGaussianOpacity){
                 if(nullptr == mGeneratedMesh->mGaussianOpacity)
-                    mGeneratedMesh->mGaussianOpacity = new float[mGeneratedMesh->mNumVertices];
+                    mGeneratedMesh->mGaussianOpacity = new ai_real[mGeneratedMesh->mNumVertices];
                 mGeneratedMesh->mGaussianOpacity[pos] = g_opacityOut;
             }
         }

@@ -840,7 +840,7 @@ struct aiMesh {
      * This array is NOT always present in a gaussian splat. The array is
      * mNumVertices * 45 in size.
      */
-    float* mGaussianRest;
+    ai_real* mGaussianRest;
 
     /** Scale value(needed for the covariance).
      * This array is always present in a gaussian splat. The array is
@@ -858,7 +858,7 @@ struct aiMesh {
      * This array is always present in a gaussian splat. The array is
      * mNumVertices in size.
      */
-    float* mGaussianOpacity;
+    ai_real* mGaussianOpacity;
 
 
 #ifdef __cplusplus

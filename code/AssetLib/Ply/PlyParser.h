@@ -171,16 +171,26 @@ enum ESemantic {
     /************* Gaussians's Properties ****************/
 
     //! sh coeff for each channel (0-2)
-    EST_GaussianDC,
+    EST_GaussianDC0,
+    EST_GaussianDC1,
+    EST_GaussianDC2,
+
+    //! scale of the gaussian
+    EST_GaussianScale0,
+    EST_GaussianScale1,
+    EST_GaussianScale2,
+
+    //! rotation of the gaussian
+    EST_GaussianRot0,
+    EST_GaussianRot1,
+    EST_GaussianRot2,
+    EST_GaussianRot3,
 
     //! rest of the coeff for each channel (0-44)
     EST_GaussianRest,
 
-    //! scale of the gaussian
-    EST_GaussianScale,
-
-    //! rotation of the gaussian
-    EST_GaussianRot,
+    //! final rest of the coeff for each channel
+    EST_GaussianRestFinal = EST_GaussianRest + 44,
 
     /******** End of Gaussians's Properties **************/
 
@@ -438,7 +448,7 @@ public:
 
     static bool TokenMatch(std::vector<char> &buffer, const char* token, unsigned int len);
 
-    static bool TokenMatchP(std::vector<char> &buffer, const char* token, unsigned int len, unsigned int real_len);
+    static bool GaussianTokenMatch(std::vector<char> &buffer, const char* token, unsigned int len, unsigned int real_len, int &indexOut);
 
     static bool SkipSpacesAndLineEnd(std::vector<char> &buffer);
 

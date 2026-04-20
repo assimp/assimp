@@ -556,12 +556,6 @@ void glTF2Exporter::GetMatTexProp(const aiMaterial &mat, unsigned int &prop, con
     mat.Get(textureKey.c_str(), tt, slot, prop);
 }
 
-void glTF2Exporter::GetMatTexProp(const aiMaterial &mat, float &prop, const char *propName, aiTextureType tt, unsigned int slot) {
-    std::string textureKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName;
-
-    mat.Get(textureKey.c_str(), tt, slot, prop);
-}
-
 void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot = 0) {
     if (mat.GetTextureCount(tt) == 0) {
         return;
@@ -652,7 +646,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, NormalTextureInfo &prop, ai
 
     if (texture) {
         // GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
-        GetMatTexProp(mat, prop.scale, "scale", tt, slot);
+        mat.Get(AI_MATKEY_GLTF_TEXTURE_SCALE(tt, slot), prop.scale);
     }
 }
 
@@ -663,7 +657,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, OcclusionTextureInfo &prop,
 
     if (texture) {
         // GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
-        GetMatTexProp(mat, prop.strength, "strength", tt, slot);
+        mat.Get(AI_MATKEY_GLTF_TEXTURE_STRENGTH(tt, slot), prop.strength);
     }
 }
 

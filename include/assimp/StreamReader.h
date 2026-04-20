@@ -234,8 +234,8 @@ public:
 
     /// @brief Get the current offset from the beginning of the file
     /// @return The current offset from the beginning of the file.
-    size_t GetCurrentPos() const {
-        return static_cast<size_t>(mCurrent - mBuffer);
+    int GetCurrentPos() const {
+        return static_cast<int>(mCurrent - mBuffer);
     }
 
     void SetCurrentPos(size_t pos) {
@@ -265,9 +265,10 @@ public:
 
     // ---------------------------------------------------------------------
     /** Get the current read limit in bytes. Reading over this limit
-     *  accidentally raises an exception.  */
+     *  accidentally raises an exception.
+     *  @return The current limit. */
     unsigned int GetReadLimit() const {
-        return (unsigned int)(mLimit - mBuffer);
+        return static_cast<unsigned int>(mLimit - mBuffer);
     }
 
     // ---------------------------------------------------------------------

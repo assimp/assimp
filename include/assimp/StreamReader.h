@@ -233,8 +233,9 @@ public:
     }
 
     /// @brief Get the current offset from the beginning of the file
-    int GetCurrentPos() const {
-        return static_cast<int>(mCurrent - mBuffer);
+    /// @return The current offset from the beginning of the file.
+    size_t GetCurrentPos() const {
+        return static_cast<size_t>(mCurrent - mBuffer);
     }
 
     void SetCurrentPos(size_t pos) {
@@ -247,7 +248,7 @@ public:
      *  @param _limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
      *    resets the limit to the original end of the stream.
-     *  Returns the previously set limit. */
+     *  @return The previously set limit. */
     unsigned int SetReadLimit(unsigned int _limit) {
         unsigned int prev = GetReadLimit();
         if (UINT_MAX == _limit) {

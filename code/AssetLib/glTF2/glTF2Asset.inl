@@ -1038,20 +1038,25 @@ size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remap
 
     const size_t maxSize = GetMaxByteSize();
 
+    if (elemSize > maxSize) {
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+    }
+
+    const unsigned int maxCount = static_cast<unsigned int>((maxSize - elemSize) / stride + 1);
+
     outData = new T[usedCount];
 
     if (remappingIndices != nullptr) {
-        const unsigned int maxIndexCount = static_cast<unsigned int>(maxSize / stride);
         for (size_t i = 0; i < usedCount; ++i) {
             size_t srcIdx = (*remappingIndices)[i];
-            if (srcIdx >= maxIndexCount) {
-                throw DeadlyImportError("GLTF: index*stride ", (srcIdx * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+            if (srcIdx >= maxCount) {
+                throw DeadlyImportError("GLTF: index ", srcIdx, " >= maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
             }
             memcpy(outData + i, data + srcIdx * stride, elemSize);
         }
     } else { // non-indexed cases
-        if (usedCount * stride > maxSize) {
-            throw DeadlyImportError("GLTF: count*stride ", (usedCount * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+        if (usedCount > maxCount) {
+            throw DeadlyImportError("GLTF: count ", usedCount, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
         }
         if (stride == elemSize && targetElemSize == elemSize) {
             memcpy(outData, data, totalSize);

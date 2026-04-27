@@ -157,10 +157,8 @@ aiString Read<aiString>(IOStream *stream) {
         throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
     }
     s.length = len;
-    if (s.length > 0) {
-        if (stream->Read(s.data, s.length, 1) != 1) {
-            throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
-        }
+    if ((s.length > 0) && (stream->Read(s.data, s.length, 1) != 1)) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
     }
     s.data[s.length] = '\0';
 

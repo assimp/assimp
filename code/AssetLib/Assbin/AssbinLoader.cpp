@@ -149,11 +149,18 @@ aiQuaternion Read<aiQuaternion>(IOStream *stream) {
 template <>
 aiString Read<aiString>(IOStream *stream) {
     aiString s;
-    stream->Read(&s.length, 4, 1);
-    if (s.length) {
-        stream->Read(s.data, s.length, 1);
+    uint32_t len;
+    if (stream->Read(&len, 4, 1) != 1) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string length");
     }
-    s.data[s.length] = 0;
+    if (len >= AI_MAXLEN) {
+        throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
+    }
+    s.length = len;
+    if ((s.length > 0) && (stream->Read(s.data, s.length, 1) != 1)) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+    }
+    s.data[s.length] = '\0';
 
     return s;
 }

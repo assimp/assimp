@@ -196,10 +196,23 @@ public:
     // ---------------------------------------------------------------------
     /** Increase the file pointer (relative seeking)  */
     void IncPtr(intptr_t plus) {
-        mCurrent += plus;
-        if (mCurrent > mLimit) {
-            throw DeadlyImportError("End of file or read limit was reached");
+        // Ensure internal pointer invariants hold
+        if (mCurrent < mBuffer || mCurrent > mLimit) {
+            throw DeadlyImportError("StreamReader: Invalid internal pointer state");
         }
+
+        if (plus < 0) {
+            const size_t absPlus = static_cast<size_t>(-(plus + 1)) + 1;
+            if (absPlus > static_cast<size_t>(mCurrent - mBuffer)) {
+                throw DeadlyImportError("StreamReader: Attempted to seek outside buffer bounds");
+            }
+        } else if (plus > 0) {
+            if (static_cast<size_t>(plus) > static_cast<size_t>(mLimit - mCurrent)) {
+                throw DeadlyImportError("StreamReader: Attempted to seek outside buffer bounds");
+            }
+        }
+
+        mCurrent += plus;
     }
 
     // ---------------------------------------------------------------------

@@ -55,6 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+
+#include <climits>
 #include <memory>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
@@ -552,8 +554,13 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
             tex->pcData = new aiTexel[tex->mWidth];
             stream->Read(tex->pcData, 1, tex->mWidth);
         } else {
-            tex->pcData = new aiTexel[tex->mWidth * tex->mHeight];
-            stream->Read(tex->pcData, 1, tex->mWidth * tex->mHeight * 4);
+            if (tex->mWidth != 0 && tex->mHeight > UINT_MAX / tex->mWidth) {
+                throw DeadlyImportError("ASSBIN: Texture dimensions are too large: ",
+                        tex->mWidth, " x ", tex->mHeight);
+            }
+            const unsigned int texelCount = tex->mWidth * tex->mHeight;
+            tex->pcData = new aiTexel[texelCount];
+            stream->Read(tex->pcData, 1, static_cast<size_t>(texelCount) * 4u);
         }
     }
 }

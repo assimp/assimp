@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <memory>
+#include <climits>
 
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
@@ -333,8 +334,13 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
             tx->mWidth = t->w;
             tx->mHeight = t->h;
             strncpy(tx->achFormatHint, formatHint[t->f - 1], 8);
-            tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
-            for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
+            if (tx->mWidth != 0 && tx->mHeight > UINT_MAX / tx->mWidth) {
+                throw DeadlyImportError("M3D: Texture dimensions are too large: ",
+                        tx->mWidth, " x ", tx->mHeight);
+            }
+            const unsigned int texelCount = tx->mWidth * tx->mHeight;
+            tx->pcData = new aiTexel[texelCount];
+            for (j = k = 0; j < texelCount; j++) {
                 switch (t->f) {
                     case 1: tx->pcData[j].g = t->d[k++]; break;
                     case 2:

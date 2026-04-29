@@ -182,7 +182,7 @@ public:
     // ---------------------------------------------------------------------
     /// Get the remaining stream size (to the end of the stream)
     size_t GetRemainingSize() const {
-        return (unsigned int)(mEnd - mCurrent);
+        return static_cast<size_t>(mEnd - mCurrent);
     }
 
     // ---------------------------------------------------------------------
@@ -190,7 +190,7 @@ public:
      *  return value is the remaining size of the stream if no custom
      *  read limit has been set. */
     size_t GetRemainingSizeToLimit() const {
-        return (unsigned int)(mLimit - mCurrent);
+        return static_cast<size_t>(mLimit - mCurrent);
     }
 
     // ---------------------------------------------------------------------
@@ -233,8 +233,9 @@ public:
     }
 
     /// @brief Get the current offset from the beginning of the file
+    /// @return The current offset from the beginning of the file.
     int GetCurrentPos() const {
-        return (unsigned int)(mCurrent - mBuffer);
+        return static_cast<int>(mCurrent - mBuffer);
     }
 
     void SetCurrentPos(size_t pos) {
@@ -244,10 +245,10 @@ public:
     // ---------------------------------------------------------------------
     /** Setup a temporary read limit
      *
-     *  @param limit Maximum number of bytes to be read from
+     *  @param _limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
      *    resets the limit to the original end of the stream.
-     *  Returns the previously set limit. */
+     *  @return The previously set limit. */
     unsigned int SetReadLimit(unsigned int _limit) {
         unsigned int prev = GetReadLimit();
         if (UINT_MAX == _limit) {
@@ -264,9 +265,10 @@ public:
 
     // ---------------------------------------------------------------------
     /** Get the current read limit in bytes. Reading over this limit
-     *  accidentally raises an exception.  */
+     *  accidentally raises an exception.
+     *  @return The current limit. */
     unsigned int GetReadLimit() const {
-        return (unsigned int)(mLimit - mBuffer);
+        return static_cast<unsigned int>(mLimit - mBuffer);
     }
 
     // ---------------------------------------------------------------------

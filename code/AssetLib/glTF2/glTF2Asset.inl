@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -888,7 +888,9 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     if (bufferView) {
         // Check length
-        unsigned long long byteLength = (unsigned long long)GetBytesPerComponent() * (unsigned long long)count;
+        unsigned long long byteLength = count > 0
+            ? (unsigned long long)GetStride() * (unsigned long long)(count - 1) + (unsigned long long)GetElementSize()
+            : 0;
 
         // handle integer overflow
         if (byteLength < count) {
@@ -1004,7 +1006,15 @@ inline size_t Accessor::GetMaxByteSize() {
     if (decodedBuffer)
         return decodedBuffer->byteLength;
 
-    return (bufferView ? bufferView->byteLength : sparse->data.size());
+    if (sparse) {
+        return sparse->data.size();
+    }
+
+    if (bufferView) {
+        return byteOffset <= bufferView->byteLength ? bufferView->byteLength - byteOffset : 0;
+    }
+
+    return 0;
 }
 
 template <class T>
@@ -1028,21 +1038,27 @@ size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remap
 
     const size_t maxSize = GetMaxByteSize();
 
+    if (elemSize > maxSize) {
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+    }
+
+    const size_t maxCount = (maxSize - elemSize) / stride + 1;
+
+    if (count > maxCount) {
+        throw DeadlyImportError("GLTF: count ", count, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
+    }
+
     outData = new T[usedCount];
 
     if (remappingIndices != nullptr) {
-        const unsigned int maxIndexCount = static_cast<unsigned int>(maxSize / stride);
         for (size_t i = 0; i < usedCount; ++i) {
             size_t srcIdx = (*remappingIndices)[i];
-            if (srcIdx >= maxIndexCount) {
-                throw DeadlyImportError("GLTF: index*stride ", (srcIdx * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+            if (srcIdx >= count) {
+                throw DeadlyImportError("GLTF: index ", srcIdx, " >= count ", count, " in ", getContextForErrorMessages(id, name));
             }
             memcpy(outData + i, data + srcIdx * stride, elemSize);
         }
     } else { // non-indexed cases
-        if (usedCount * stride > maxSize) {
-            throw DeadlyImportError("GLTF: count*stride ", (usedCount * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
-        }
         if (stride == elemSize && targetElemSize == elemSize) {
             memcpy(outData, data, totalSize);
         } else {
@@ -1216,6 +1232,13 @@ inline void Texture::Read(Value &obj, Asset &r) {
     if (Value *extensions = FindObject(obj, "extensions")) {
         if (r.extensionsUsed.KHR_texture_basisu) {
             if (Value *curBasisU = FindObject(*extensions, "KHR_texture_basisu")) {
+
+                if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
+                    source = r.images.Retrieve(sourceVal->GetUint());
+                }
+            }
+        } else if(r.extensionsUsed.EXT_texture_webp) {
+            if (Value *curBasisU = FindObject(*extensions, "EXT_texture_webp")) {
 
                 if (Value *sourceVal = FindUInt(*curBasisU, "source")) {
                     source = r.images.Retrieve(sourceVal->GetUint());
@@ -2149,6 +2172,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
 
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
     CHECK_REQUIRED_EXT(KHR_texture_basisu);
+    CHECK_REQUIRED_EXT(EXT_texture_webp);
 
 #undef CHECK_REQUIRED_EXT
 }
@@ -2179,6 +2203,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_anisotropy);
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
+    CHECK_EXT(EXT_texture_webp);
 
 #undef CHECK_EXT
 }

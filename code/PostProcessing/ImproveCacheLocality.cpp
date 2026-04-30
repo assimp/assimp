@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -58,11 +58,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stack>
 
 namespace Assimp {
+namespace {
+    ai_real calculateInputACMR(aiMesh *pMesh, const aiFace *const pcEnd,
+            unsigned int configCacheDepth, unsigned int meshNum) {
+        ai_real fACMR = 0.0f;
+        unsigned int *piFIFOStack = new unsigned int[configCacheDepth];
+        memset(piFIFOStack, 0xff, configCacheDepth * sizeof(unsigned int));
+        unsigned int *piCur = piFIFOStack;
+        const unsigned int *const piCurEnd = piFIFOStack + configCacheDepth;
+
+        // count the number of cache misses
+        unsigned int iCacheMisses = 0;
+        for (const aiFace *pcFace = pMesh->mFaces; pcFace != pcEnd; ++pcFace) {
+            for (unsigned int qq = 0; qq < 3; ++qq) {
+                bool bInCache = false;
+                for (unsigned int *pp = piFIFOStack; pp < piCurEnd; ++pp) {
+                    if (*pp == pcFace->mIndices[qq]) {
+                        // the vertex is in cache
+                        bInCache = true;
+                        break;
+                    }
+                }
+                if (!bInCache) {
+                    ++iCacheMisses;
+                    if (piCurEnd == piCur) {
+                        piCur = piFIFOStack;
+                    }
+                    *piCur++ = pcFace->mIndices[qq];
+                }
+            }
+        }
+        delete[] piFIFOStack;
+        fACMR = (ai_real)iCacheMisses / pMesh->mNumFaces;
+        if (3.0 == fACMR) {
+            char szBuff[128]; // should be sufficiently large in every case
+
+            // the JoinIdenticalVertices process has not been executed on this
+            // mesh, otherwise this value would normally be at least minimally
+            // smaller than 3.0 ...
+            ai_snprintf(szBuff, 128, "Mesh %u: Not suitable for vcache optimization", meshNum);
+            ASSIMP_LOG_WARN(szBuff);
+            return static_cast<ai_real>(0.f);
+        }
+        return fACMR;
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ImproveCacheLocalityProcess::ImproveCacheLocalityProcess() :
-        mConfigCacheDepth(PP_ICL_PTCACHE_SIZE) {
+ImproveCacheLocalityProcess::ImproveCacheLocalityProcess() : mConfigCacheDepth(PP_ICL_PTCACHE_SIZE) {
     // empty
 }
 
@@ -105,51 +149,6 @@ void ImproveCacheLocalityProcess::Execute(aiScene *pScene) {
         }
         ASSIMP_LOG_DEBUG("ImproveCacheLocalityProcess finished. ");
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-static ai_real calculateInputACMR(aiMesh *pMesh, const aiFace *const pcEnd,
-        unsigned int configCacheDepth, unsigned int meshNum) {
-    ai_real fACMR = 0.0f;
-    unsigned int *piFIFOStack = new unsigned int[configCacheDepth];
-    memset(piFIFOStack, 0xff, configCacheDepth * sizeof(unsigned int));
-    unsigned int *piCur = piFIFOStack;
-    const unsigned int *const piCurEnd = piFIFOStack + configCacheDepth;
-
-    // count the number of cache misses
-    unsigned int iCacheMisses = 0;
-    for (const aiFace *pcFace = pMesh->mFaces; pcFace != pcEnd; ++pcFace) {
-        for (unsigned int qq = 0; qq < 3; ++qq) {
-            bool bInCache = false;
-            for (unsigned int *pp = piFIFOStack; pp < piCurEnd; ++pp) {
-                if (*pp == pcFace->mIndices[qq]) {
-                    // the vertex is in cache
-                    bInCache = true;
-                    break;
-                }
-            }
-            if (!bInCache) {
-                ++iCacheMisses;
-                if (piCurEnd == piCur) {
-                    piCur = piFIFOStack;
-                }
-                *piCur++ = pcFace->mIndices[qq];
-            }
-        }
-    }
-    delete[] piFIFOStack;
-    fACMR = (ai_real)iCacheMisses / pMesh->mNumFaces;
-    if (3.0 == fACMR) {
-        char szBuff[128]; // should be sufficiently large in every case
-
-        // the JoinIdenticalVertices process has not been executed on this
-        // mesh, otherwise this value would normally be at least minimally
-        // smaller than 3.0 ...
-        ai_snprintf(szBuff, 128, "Mesh %u: Not suitable for vcache optimization", meshNum);
-        ASSIMP_LOG_WARN(szBuff);
-        return static_cast<ai_real>(0.f);
-    }
-    return fACMR;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2025, assimp team
+# Copyright (c) 2006-2026, assimp team
 #
 # All rights reserved.
 #
@@ -457,6 +457,7 @@ ADD_ASSIMP_IMPORTER( MDL
   AssetLib/MDL/MDLLoader.h
   AssetLib/MDL/MDLMaterialLoader.cpp
   AssetLib/MDL/HalfLife/HalfLifeMDLBaseHeader.h
+  AssetLib/MDL/HalfLife/HL1DataBuffer.h
   AssetLib/MDL/HalfLife/HL1FileData.h
   AssetLib/MDL/HalfLife/HL1MDLLoader.cpp
   AssetLib/MDL/HalfLife/HL1MDLLoader.h

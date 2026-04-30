@@ -3,7 +3,7 @@ Open Asset Import Library (assimp)
 
 Open Asset Import Library is a library that loads various 3D file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
-### Current project status
+## Current project status
 ![C/C++ CI](https://github.com/assimp/assimp/workflows/C/C++%20CI/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9973693b7bdd4543b07084d5d9cf4745)](https://www.codacy.com/gh/assimp/assimp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=assimp/assimp&amp;utm_campaign=Badge_Grade)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=assimp_assimp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=assimp_assimp)
@@ -19,29 +19,38 @@ Additionally, assimp features various __mesh post-processing tools__: normals an
 ## Project activity
 ![Alt](https://repobeats.axiom.co/api/embed/997f84e5f9fcf772da1e687f3a4f3a8afdbf4cf0.svg "Repobeats analytics image")
 
-### Documentation
+## Developer quickstart
+```bash
+git clone https://github.com/assimp/assimp
+cd assimp
+cmake -G Ninja -DASSIMP_BUILD_TESTS=off -DASSIMP_INSTALL=off -S . -B build
+cd build
+ninja
+```
+
+## Documentation
 Read [our latest documentation](https://the-asset-importer-lib-documentation.readthedocs.io/en/latest/).
 
-### Pre-built binaries
+## Pre-built binaries
 Download binaries from [our Itch Projectspace](https://kimkulling.itch.io/the-asset-importer-lib).
 
-### Test data
+## Test data
 Clone [our model database for testing purposes](https://github.com/assimp/assimp-mdb).
 
-### Communities
+## Communities
 - Ask questions at [the Assimp Discussion Board](https://github.com/assimp/assimp/discussions).
 - Find us on [discord](https://discord.gg/kKazXMXDy2)
 - Ask [the Assimp community on Reddit](https://www.reddit.com/r/Assimp/).
 - Ask on [StackOverflow with the assimp-tag](http://stackoverflow.com/questions/tagged/assimp?sort=newest).
 - Nothing has worked? File a question or an issue report at [The Assimp-Issue Tracker](https://github.com/assimp/assimp/issues)
 
-#### Supported file formats
+## Supported file formats
 See [the complete list of supported formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md).
 
-### Building
+## Building
 Start by reading [our build instructions](https://github.com/assimp/assimp/blob/master/Build.md). We are available in vcpkg, and our build system is CMake; if you used CMake before there is a good chance you know what to do.
 
-### Ports
+## Ports
 * [Android](port/AndroidJNI/README.md)
 * [Python](port/PyAssimp/README.md)
 * [.NET](https://github.com/Saalvage/AssimpNetter)
@@ -54,11 +63,11 @@ Start by reading [our build instructions](https://github.com/assimp/assimp/blob/
 * [HAXE-Port](https://github.com/longde123/assimp-haxe) The Assimp-HAXE-port.
 * [Rust](https://github.com/jkvargas/russimp)
 
-### Other tools
+## Other tools
 [Qt5-ModelViewer](https://github.com/sharjith/ModelViewer-Qt5) is a powerful viewer based on Qt5 and Assimp's import and export abilities.<br>
 [Assimp-Viewer](https://github.com/assimp/assimp_view) is an experimental implementation for an Asset-Viewer based on ImGUI and Assimp (experimental).
 
-#### Repository structure ####
+### Repository structure
 Open Asset Import Library is implemented in C++. The directory structure looks like this:
 
 ```txt
@@ -85,7 +94,7 @@ test				Unit- and regression tests, test suite of models
 tools				Tools (old assimp viewer, command line `assimp`)
 samples				Small number of samples to illustrate possible use cases for Assimp
 ```
-### Contributing
+## Contributing
 
 We would greatly appreciate for you to contribute to assimp. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
@@ -113,7 +122,7 @@ You can support the project with your organization. Your logo will show up here 
 
 <a href="https://opencollective.com/assimp/organization/0/website"><img src="https://opencollective.com/assimp/organization/0/avatar.svg"></a>
 
-### License ###
+## License ###
 Our license is based on the modified, __3-clause BSD__-License.
 
 An _informal_ summary is: do whatever you want, but include Assimp's license text with your product -

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -110,7 +110,6 @@ protected:
     void WriteBinaryData(IOStream *outfile, std::size_t sceneLength);
     void GetTexSampler(const aiMaterial &mat, glTFCommon::Ref<glTF2::Texture> texture, aiTextureType tt, unsigned int slot);
     void GetMatTexProp(const aiMaterial &mat, unsigned int &prop, const char *propName, aiTextureType tt, unsigned int idx);
-    void GetMatTexProp(const aiMaterial &mat, float &prop, const char *propName, aiTextureType tt, unsigned int idx);
     void GetMatTex(const aiMaterial &mat, glTFCommon::Ref<glTF2::Texture> &texture, unsigned int &texCoord, aiTextureType tt, unsigned int slot);
     void GetMatTex(const aiMaterial &mat, glTF2::TextureInfo &prop, aiTextureType tt, unsigned int slot);
     void GetMatTex(const aiMaterial &mat, glTF2::NormalTextureInfo &prop, aiTextureType tt, unsigned int slot);

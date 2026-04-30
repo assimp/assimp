@@ -224,7 +224,6 @@ void ReadBounds(IOStream *stream, T * /*p*/, unsigned int n) {
     stream->Seek(sizeof(T) * n, aiOrigin_CUR);
 }
 
-// -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *parent) {
     if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AINODE)
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
@@ -549,27 +548,31 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
     tex->mHeight = Read<unsigned int>(stream);
     stream->Read(tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1);
 
-    if (!shortened) {
-        if (!tex->mHeight) {
-            if (tex->mWidth > 0) {
-                tex->pcData = new aiTexel[tex->mWidth];
-                if (stream->Read(tex->pcData, 1, tex->mWidth) != tex->mWidth) {
-                    throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed texture data");
-                }
+    if (shortened) {
+        return;
+    }
+
+    if (!tex->mHeight) {
+        if (tex->mWidth > 0) {
+            tex->pcData = new aiTexel[tex->mWidth];
+            if (stream->Read(tex->pcData, 1, tex->mWidth) != tex->mWidth) {
+                throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed texture data");
             }
-        } else {
-            if (tex->mWidth != 0 && tex->mHeight > UINT_MAX / tex->mWidth) {
-                throw DeadlyImportError("ASSBIN: Texture dimensions are too large: ",
-                        tex->mWidth, " x ", tex->mHeight);
-            }
-            const unsigned int texelCount = tex->mWidth * tex->mHeight;
-            if (texelCount > 0) {
-                tex->pcData = new aiTexel[texelCount];
-                const size_t bytesToRead = static_cast<size_t>(texelCount) * sizeof(aiTexel);
-                if (stream->Read(tex->pcData, 1, bytesToRead) != bytesToRead) {
-                    throw DeadlyImportError("ASSBIN: Unexpected EOF while reading texture data");
-                }
-            }
+        }
+        return;
+    }
+
+    if (tex->mWidth != 0 && tex->mHeight > UINT_MAX / tex->mWidth) {
+        throw DeadlyImportError("ASSBIN: Texture dimensions are too large: ",
+                tex->mWidth, " x ", tex->mHeight);
+    }
+
+    const unsigned int texelCount = tex->mWidth * tex->mHeight;
+    if (texelCount > 0) {
+        tex->pcData = new aiTexel[texelCount];
+        const size_t bytesToRead = static_cast<size_t>(texelCount) * sizeof(aiTexel);
+        if (stream->Read(tex->pcData, 1, bytesToRead) != bytesToRead) {
+            throw DeadlyImportError("ASSBIN: Unexpected EOF while reading texture data");
         }
     }
 }

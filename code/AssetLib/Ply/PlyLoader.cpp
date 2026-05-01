@@ -332,6 +332,24 @@ namespace Assimp {
         unsigned int aiTexcoord[2] = { NotSet, NotSet };
         EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
 
+        // GAUSSIAN PROPERTIES
+        unsigned int aiGaussianDC[3] = { NotSet, NotSet, NotSet };
+        PLY::EDataType aiGaussianDCTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
+
+        unsigned int aiGaussianRest[45];
+        std::fill_n(aiGaussianRest, 45, NotSet);
+        PLY::EDataType aiGaussianRestTypes[45];
+        std::fill_n(aiGaussianRestTypes, 45, EDT_Char);
+
+        unsigned int aiGaussianScale[3] = { NotSet, NotSet, NotSet };
+        PLY::EDataType aiGaussianScaleTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
+
+        unsigned int aiGaussianRot[4] = { NotSet, NotSet, NotSet, NotSet };
+        PLY::EDataType aiGaussianRotTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
+
+        unsigned int aiGaussianOpacity = NotSet;
+        PLY::EDataType aiGaussianOpacityType = EDT_Char;
+
         // now check whether which normal components are available
         unsigned int _a(0), cnt(0);
         for (auto a = pcElement->alProperties.begin(); a != pcElement->alProperties.end(); ++a, ++_a) {
@@ -391,6 +409,69 @@ namespace Assimp {
                 ++cnt;
                 aiTexcoord[1] = _a;
                 aiTexcoordTypes[1] = a->eType;
+            }
+            // Gaussian's properties
+            else if(PLY::EST_GaussianDC0 == a->Semantic){
+                ++cnt;
+                aiGaussianDC[0] = _a;
+                aiGaussianDCTypes[0] = a->eType;
+            }
+            else if(PLY::EST_GaussianDC1 == a->Semantic){
+                ++cnt;
+                aiGaussianDC[1] = _a;
+                aiGaussianDCTypes[1] = a->eType;
+            }
+            else if(PLY::EST_GaussianDC2 == a->Semantic){
+                ++cnt;
+                aiGaussianDC[2] = _a;
+                aiGaussianDCTypes[2] = a->eType;
+            }
+            else if(PLY::EST_GaussianRest >= a->Semantic &&
+                    PLY::EST_GaussianRestFinal <= a->Semantic){
+                ++cnt;
+                unsigned int idx = a->Semantic - PLY::EST_GaussianRest;
+                aiGaussianRest[idx] = _a;
+                aiGaussianRestTypes[idx] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale0 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[0] = _a;
+                aiGaussianScaleTypes[0] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale1 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[1] = _a;
+                aiGaussianScaleTypes[1] = a->eType;
+            }
+            else if(PLY::EST_GaussianScale2 == a->Semantic){
+                ++cnt;
+                aiGaussianScale[2] = _a;
+                aiGaussianScaleTypes[2] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot0 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[0] = _a;
+                aiGaussianRotTypes[0] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot1 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[1] = _a;
+                aiGaussianRotTypes[1] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot2 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[2] = _a;
+                aiGaussianRotTypes[2] = a->eType;
+            }
+            else if(PLY::EST_GaussianRot3 == a->Semantic){
+                ++cnt;
+                aiGaussianRot[3] = _a;
+                aiGaussianRotTypes[3] = a->eType;
+            }
+            else if(PLY::EST_Opacity == a->Semantic){
+                ++cnt;
+                aiGaussianOpacity = _a;
+                aiGaussianOpacityType = a->eType;
             }
         }
 
@@ -488,6 +569,91 @@ namespace Assimp {
                         GetProperty(instElement->alProperties, aiTexcoord[1]).avList.front(), aiTexcoordTypes[1]);
                 haveTextureCoords = true;
             }
+            
+            // Gaussian's Properties
+            aiVector3D g_dcOut;
+            bool haveGaussianDC = false;
+            if (NotSet != aiGaussianDC[0]) {
+                g_dcOut.x = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianDC[0]).avList.front(), aiGaussianDCTypes[0]);
+                haveGaussianDC = true;
+            }
+
+            if (NotSet != aiGaussianDC[1]) {
+                g_dcOut.y = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianDC[1]).avList.front(), aiGaussianDCTypes[1]);
+                haveGaussianDC = true;
+            }
+
+            if (NotSet != aiGaussianDC[2]) {
+                g_dcOut.z = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianDC[2]).avList.front(), aiGaussianDCTypes[2]);
+                haveGaussianDC = true;
+            }
+
+            ai_real g_restOut[45];
+            bool haveGaussianRest = false;
+            for(int i = 0; i < 45; ++i){
+                if (NotSet != aiGaussianRest[i]) {
+                    g_restOut[i] = PropertyInstance::ConvertTo<ai_real>(
+                        GetProperty(instElement->alProperties, aiGaussianRest[i]).avList.front(), aiGaussianRestTypes[i]);
+                    haveGaussianRest = true;
+                }
+            }
+
+            aiVector3D g_scalOut;
+            bool haveGaussianScal = false;
+            if (NotSet != aiGaussianScale[0]) {
+                g_scalOut.x = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianScale[0]).avList.front(), aiGaussianScaleTypes[0]);
+                haveGaussianScal = true;
+            }
+
+            if (NotSet != aiGaussianScale[1]) {
+                g_scalOut.y = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianScale[1]).avList.front(), aiGaussianScaleTypes[1]);
+                haveGaussianScal = true;
+            }
+
+            if (NotSet != aiGaussianScale[2]) {
+                g_scalOut.z = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianScale[2]).avList.front(), aiGaussianScaleTypes[2]);
+                haveGaussianScal = true;
+            }
+
+            aiColor4D g_rotOut;
+            bool haveGaussianRot = false;
+            if (NotSet != aiGaussianRot[0]) {
+                g_rotOut.r = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianRot[0]).avList.front(), aiGaussianRotTypes[0]);
+                haveGaussianRot = true;
+            }
+
+            if (NotSet != aiGaussianRot[1]) {
+                g_rotOut.g = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianRot[1]).avList.front(), aiGaussianRotTypes[1]);
+                haveGaussianRot = true;
+            }
+
+            if (NotSet != aiGaussianRot[2]) {
+                g_rotOut.b = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianRot[2]).avList.front(), aiGaussianRotTypes[2]);
+                haveGaussianRot = true;
+            }
+
+            if (NotSet != aiGaussianRot[3]) {
+                    g_rotOut.a = PropertyInstance::ConvertTo<ai_real>(
+                        GetProperty(instElement->alProperties, aiGaussianRot[3]).avList.front(), aiGaussianRotTypes[3]);
+                    haveGaussianRot = true;
+            }
+
+            ai_real g_opacityOut = 0.0f;
+            bool haveGaussianOpacity = false;
+            if(NotSet != aiGaussianOpacity){
+                g_opacityOut = PropertyInstance::ConvertTo<ai_real>(
+                    GetProperty(instElement->alProperties, aiGaussianOpacity).avList.front(), aiGaussianOpacityType);
+                haveGaussianOpacity = true;
+            }
 
             // create aiMesh if needed
             if (nullptr == mGeneratedMesh) {
@@ -523,6 +689,39 @@ namespace Assimp {
                     mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];
                 }
                 mGeneratedMesh->mTextureCoords[0][pos] = tOut;
+            }
+
+            if (haveGaussianDC) {
+                if (nullptr == mGeneratedMesh->mGaussianDC)
+                    mGeneratedMesh->mGaussianDC = new aiVector3D[mGeneratedMesh->mNumVertices];
+                mGeneratedMesh->mGaussianDC[pos] = g_dcOut;
+            }
+
+            if (haveGaussianRest) {
+                    if (nullptr == mGeneratedMesh->mGaussianRest)
+                        mGeneratedMesh->mGaussianRest = new ai_real[mGeneratedMesh->mNumVertices * 45];
+                    unsigned int initPos = pos * 45;
+                    for(int i = 0; i < 45; ++i){
+                        mGeneratedMesh->mGaussianRest[initPos + i] = g_restOut[i];
+                    }
+            }
+
+            if (haveGaussianScal) {
+                if (nullptr == mGeneratedMesh->mGaussianScal)
+                    mGeneratedMesh->mGaussianScal = new aiVector3D[mGeneratedMesh->mNumVertices];
+                mGeneratedMesh->mGaussianScal[pos] = g_scalOut;
+            }
+
+            if (haveGaussianRot) {
+                if (nullptr == mGeneratedMesh->mGaussianRot)
+                    mGeneratedMesh->mGaussianRot = new aiColor4D[mGeneratedMesh->mNumVertices];
+                mGeneratedMesh->mGaussianRot[pos] = g_rotOut;
+            }
+
+            if(haveGaussianOpacity){
+                if(nullptr == mGeneratedMesh->mGaussianOpacity)
+                    mGeneratedMesh->mGaussianOpacity = new ai_real[mGeneratedMesh->mNumVertices];
+                mGeneratedMesh->mGaussianOpacity[pos] = g_opacityOut;
             }
         }
     }

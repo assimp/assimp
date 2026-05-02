@@ -450,8 +450,11 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
 
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
-    prop->mData = new char[prop->mDataLength];
-    stream->Read(prop->mData, 1, prop->mDataLength);
+    std::unique_ptr<char[]> data(new char[prop->mDataLength]);
+    if (stream->Read(data.get(), 1, prop->mDataLength) != prop->mDataLength) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF while reading material property data");
+    }
+    prop->mData = data.release();
 }
 
 // -----------------------------------------------------------------------------------
@@ -554,10 +557,11 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!tex->mHeight) {
         if (tex->mWidth > 0) {
-            tex->pcData = new aiTexel[tex->mWidth];
-            if (stream->Read(tex->pcData, 1, tex->mWidth) != tex->mWidth) {
+            std::unique_ptr<aiTexel[]> data(new aiTexel[tex->mWidth]);
+            if (stream->Read(data.get(), 1, tex->mWidth) != tex->mWidth) {
                 throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed texture data");
             }
+            tex->pcData = data.release();
         }
         return;
     }
@@ -569,11 +573,12 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     const unsigned int texelCount = tex->mWidth * tex->mHeight;
     if (texelCount > 0) {
-        tex->pcData = new aiTexel[texelCount];
+        std::unique_ptr<aiTexel[]> data(new aiTexel[texelCount]);
         const size_t bytesToRead = static_cast<size_t>(texelCount) * sizeof(aiTexel);
-        if (stream->Read(tex->pcData, 1, bytesToRead) != bytesToRead) {
+        if (stream->Read(data.get(), 1, bytesToRead) != bytesToRead) {
             throw DeadlyImportError("ASSBIN: Unexpected EOF while reading texture data");
         }
+        tex->pcData = data.release();
     }
 }
 
@@ -737,26 +742,24 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         uLongf uncompressedSize = Read<uint32_t>(stream);
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
-        unsigned char *compressedData = new unsigned char[compressedSize];
-        size_t len = stream->Read(compressedData, 1, compressedSize);
-        ai_assert(len == compressedSize);
+        std::unique_ptr<unsigned char[]> compressedData(new unsigned char[compressedSize]);
+        size_t len = stream->Read(compressedData.get(), 1, compressedSize);
+        if (len != compressedSize) {
+            pIOHandler->Close(stream);
+            throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed data");
+        }
 
-        unsigned char *uncompressedData = new unsigned char[uncompressedSize];
+        std::unique_ptr<unsigned char[]> uncompressedData(new unsigned char[uncompressedSize]);
 
-        int res = uncompress(uncompressedData, &uncompressedSize, compressedData, (uLong)len);
+        int res = uncompress(uncompressedData.get(), &uncompressedSize, compressedData.get(), (uLong)len);
         if (res != Z_OK) {
-            delete[] uncompressedData;
-            delete[] compressedData;
             pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");
         }
 
-        MemoryIOStream io(uncompressedData, uncompressedSize);
+        MemoryIOStream io(uncompressedData.get(), uncompressedSize);
 
         ReadBinaryScene(&io, pScene);
-
-        delete[] uncompressedData;
-        delete[] compressedData;
     } else {
         ReadBinaryScene(stream, pScene);
     }

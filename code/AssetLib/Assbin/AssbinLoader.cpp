@@ -224,8 +224,28 @@ void SafeReadArray(IOStream *stream, T *&out, unsigned int size) {
         out = nullptr;
         return;
     }
+    if (size > SIZE_MAX / sizeof(T)) {
+        throw DeadlyImportError("ASSBIN: Array size too large");
+    }
     std::unique_ptr<T[]> data(new T[size]);
     ReadArray<T>(stream, data.get(), size);
+    out = data.release();
+}
+
+// -----------------------------------------------------------------------------------
+template <typename T>
+void SafeReadBulkArray(IOStream *stream, T *&out, unsigned int size) {
+    if (size == 0) {
+        out = nullptr;
+        return;
+    }
+    if (size > SIZE_MAX / sizeof(T)) {
+        throw DeadlyImportError("ASSBIN: Array size too large");
+    }
+    std::unique_ptr<T[]> data(new T[size]);
+    if (stream->Read(data.get(), sizeof(T), size) != size) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF");
+    }
     out = data.release();
 }
 
@@ -462,7 +482,7 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
 
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
-    SafeReadArray(stream, prop->mData, prop->mDataLength);
+    SafeReadBulkArray(stream, prop->mData, prop->mDataLength);
 }
 
 // -----------------------------------------------------------------------------------
@@ -558,7 +578,11 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!tex->mHeight) {
         if (tex->mWidth > 0) {
-            SafeReadArray(stream, tex->pcData, tex->mWidth);
+            unsigned int texelCount = (tex->mWidth + sizeof(aiTexel) - 1) / sizeof(aiTexel);
+            SafeReadBulkArray(stream, tex->pcData, texelCount);
+            // The bulk read might read more than tex->mWidth bytes if we read full texels,
+            // but the stream position should be adjusted to exactly tex->mWidth.
+            stream->Seek(-(long)((size_t)texelCount * sizeof(aiTexel) - tex->mWidth), aiOrigin_CUR);
         }
         return;
     }
@@ -570,7 +594,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     const unsigned int texelCount = tex->mWidth * tex->mHeight;
     if (texelCount > 0) {
-        SafeReadArray(stream, tex->pcData, texelCount);
+        SafeReadBulkArray(stream, tex->pcData, texelCount);
     }
 }
 
@@ -734,6 +758,9 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         uLongf uncompressedSize = Read<uint32_t>(stream);
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
+        if (compressedSize > SIZE_MAX) {
+            throw DeadlyImportError("ASSBIN: Compressed size too large");
+        }
         std::unique_ptr<unsigned char[]> compressedData(new unsigned char[compressedSize]);
         size_t len = stream->Read(compressedData.get(), 1, compressedSize);
         if (len != compressedSize) {
@@ -741,6 +768,9 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
             throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed data");
         }
 
+        if (uncompressedSize > SIZE_MAX) {
+            throw DeadlyImportError("ASSBIN: Uncompressed size too large");
+        }
         std::unique_ptr<unsigned char[]> uncompressedData(new unsigned char[uncompressedSize]);
 
         int res = uncompress(uncompressedData.get(), &uncompressedSize, compressedData.get(), (uLong)len);

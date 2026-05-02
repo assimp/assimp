@@ -219,6 +219,18 @@ void ReadArray(IOStream *stream, T *out, unsigned int size) {
 
 // -----------------------------------------------------------------------------------
 template <typename T>
+void SafeReadArray(IOStream *stream, T *&out, unsigned int size) {
+    if (size == 0) {
+        out = nullptr;
+        return;
+    }
+    std::unique_ptr<T[]> data(new T[size]);
+    ReadArray<T>(stream, data.get(), size);
+    out = data.release();
+}
+
+// -----------------------------------------------------------------------------------
+template <typename T>
 void ReadBounds(IOStream *stream, T * /*p*/, unsigned int n) {
     // not sure what to do here, the data isn't really useful.
     stream->Seek(sizeof(T) * n, aiOrigin_CUR);
@@ -242,19 +254,17 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
     }
 
     if (numMeshes) {
-        node->mMeshes = new unsigned int[numMeshes];
-        for (unsigned int i = 0; i < numMeshes; ++i) {
-            node->mMeshes[i] = Read<unsigned int>(stream);
-            node->mNumMeshes++;
-        }
+        SafeReadArray(stream, node->mMeshes, numMeshes);
+        node->mNumMeshes = numMeshes;
     }
 
     if (numChildren) {
-        node->mChildren = new aiNode *[numChildren];
+        std::unique_ptr<aiNode *[]> children(new aiNode *[numChildren]());
         for (unsigned int i = 0; i < numChildren; ++i) {
-            ReadBinaryNode(stream, &node->mChildren[i], node.get());
-            node->mNumChildren++;
+            ReadBinaryNode(stream, &children[i], node.get());
         }
+        node->mChildren = children.release();
+        node->mNumChildren = numChildren;
     }
 
     if (nb_metadata > 0) {
@@ -265,27 +275,41 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
             void *data = nullptr;
 
             switch (node->mMetaData->mValues[i].mType) {
-            case AI_BOOL:
-                data = new bool(Read<bool>(stream));
+            case AI_BOOL: {
+                std::unique_ptr<bool> data_ptr(new bool(Read<bool>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_INT32:
-                data = new int32_t(Read<int32_t>(stream));
+            }
+            case AI_INT32: {
+                std::unique_ptr<int32_t> data_ptr(new int32_t(Read<int32_t>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_UINT64:
-                data = new uint64_t(Read<uint64_t>(stream));
+            }
+            case AI_UINT64: {
+                std::unique_ptr<uint64_t> data_ptr(new uint64_t(Read<uint64_t>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_FLOAT:
-                data = new ai_real(Read<ai_real>(stream));
+            }
+            case AI_FLOAT: {
+                std::unique_ptr<ai_real> data_ptr(new ai_real(Read<ai_real>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_DOUBLE:
-                data = new double(Read<double>(stream));
+            }
+            case AI_DOUBLE: {
+                std::unique_ptr<double> data_ptr(new double(Read<double>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_AISTRING:
-                data = new aiString(Read<aiString>(stream));
+            }
+            case AI_AISTRING: {
+                std::unique_ptr<aiString> data_ptr(new aiString(Read<aiString>(stream)));
+                data = data_ptr.release();
                 break;
-            case AI_AIVECTOR3D:
-                data = new aiVector3D(Read<aiVector3D>(stream));
+            }
+            case AI_AIVECTOR3D: {
+                std::unique_ptr<aiVector3D> data_ptr(new aiVector3D(Read<aiVector3D>(stream)));
+                data = data_ptr.release();
                 break;
+            }
 #ifndef SWIG
             case FORCE_32BIT:
 #endif // SWIG
@@ -314,9 +338,7 @@ void AssbinImporter::ReadBinaryBone(IOStream *stream, aiBone *b) {
     if (shortened) {
         ReadBounds(stream, b->mWeights, b->mNumWeights);
     } else {
-        // else write as usual
-        b->mWeights = new aiVertexWeight[b->mNumWeights];
-        ReadArray<aiVertexWeight>(stream, b->mWeights, b->mNumWeights);
+        SafeReadArray(stream, b->mWeights, b->mNumWeights);
     }
 }
 
@@ -344,18 +366,14 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mVertices, mesh->mNumVertices);
         } else {
-            // else write as usual
-            mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mVertices, mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mVertices, mesh->mNumVertices);
         }
     }
     if (c & ASSBIN_MESH_HAS_NORMALS) {
         if (shortened) {
             ReadBounds(stream, mesh->mNormals, mesh->mNumVertices);
         } else {
-            // else write as usual
-            mesh->mNormals = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mNormals, mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mNormals, mesh->mNumVertices);
         }
     }
     if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS) {
@@ -363,11 +381,8 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
             ReadBounds(stream, mesh->mTangents, mesh->mNumVertices);
             ReadBounds(stream, mesh->mBitangents, mesh->mNumVertices);
         } else {
-            // else write as usual
-            mesh->mTangents = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mTangents, mesh->mNumVertices);
-            mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mBitangents, mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mTangents, mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mBitangents, mesh->mNumVertices);
         }
     }
     for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS; ++n) {
@@ -378,9 +393,7 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mColors[n], mesh->mNumVertices);
         } else {
-            // else write as usual
-            mesh->mColors[n] = new aiColor4D[mesh->mNumVertices];
-            ReadArray<aiColor4D>(stream, mesh->mColors[n], mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mColors[n], mesh->mNumVertices);
         }
     }
     for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++n) {
@@ -394,9 +407,7 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
         } else {
-            // else write as usual
-            mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
+            SafeReadArray(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
         }
     }
 
@@ -415,16 +426,17 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
 
             static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
             f.mNumIndices = Read<uint16_t>(stream);
-            f.mIndices = new unsigned int[f.mNumIndices];
+            std::unique_ptr<unsigned int[]> indices(new unsigned int[f.mNumIndices]);
 
             for (unsigned int a = 0; a < f.mNumIndices; ++a) {
                 // Check if unsigned  short ( 16 bit  ) are big enough for the indices
                 if (fitsIntoUI16(mesh->mNumVertices)) {
-                    f.mIndices[a] = Read<uint16_t>(stream);
+                    indices[a] = Read<uint16_t>(stream);
                 } else {
-                    f.mIndices[a] = Read<unsigned int>(stream);
+                    indices[a] = Read<unsigned int>(stream);
                 }
             }
+            f.mIndices = indices.release();
         }
     }
 
@@ -450,11 +462,7 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
 
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
-    std::unique_ptr<char[]> data(new char[prop->mDataLength]);
-    if (stream->Read(data.get(), 1, prop->mDataLength) != prop->mDataLength) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF while reading material property data");
-    }
-    prop->mData = data.release();
+    SafeReadArray(stream, prop->mData, prop->mDataLength);
 }
 
 // -----------------------------------------------------------------------------------
@@ -468,11 +476,12 @@ void AssbinImporter::ReadBinaryMaterial(IOStream *stream, aiMaterial *mat) {
         if (mat->mProperties) {
             delete[] mat->mProperties;
         }
-        mat->mProperties = new aiMaterialProperty *[mat->mNumProperties];
+        std::unique_ptr<aiMaterialProperty *[]> props(new aiMaterialProperty *[mat->mNumProperties]());
         for (unsigned int i = 0; i < mat->mNumProperties; ++i) {
-            mat->mProperties[i] = new aiMaterialProperty();
-            ReadBinaryMaterialProperty(stream, mat->mProperties[i]);
+            props[i] = new aiMaterialProperty();
+            ReadBinaryMaterialProperty(stream, props[i]);
         }
+        mat->mProperties = props.release();
     }
 }
 
@@ -492,31 +501,22 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream *stream, aiNodeAnim *nd) {
     if (nd->mNumPositionKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mPositionKeys, nd->mNumPositionKeys);
-
-        } // else write as usual
-        else {
-            nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
-            ReadArray<aiVectorKey>(stream, nd->mPositionKeys, nd->mNumPositionKeys);
+        } else {
+            SafeReadArray(stream, nd->mPositionKeys, nd->mNumPositionKeys);
         }
     }
     if (nd->mNumRotationKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mRotationKeys, nd->mNumRotationKeys);
-
         } else {
-            // else write as usual
-            nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
-            ReadArray<aiQuatKey>(stream, nd->mRotationKeys, nd->mNumRotationKeys);
+            SafeReadArray(stream, nd->mRotationKeys, nd->mNumRotationKeys);
         }
     }
     if (nd->mNumScalingKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mScalingKeys, nd->mNumScalingKeys);
-
         } else {
-            // else write as usual
-            nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
-            ReadArray<aiVectorKey>(stream, nd->mScalingKeys, nd->mNumScalingKeys);
+            SafeReadArray(stream, nd->mScalingKeys, nd->mNumScalingKeys);
         }
     }
 }
@@ -533,11 +533,12 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
     anim->mNumChannels = Read<unsigned int>(stream);
 
     if (anim->mNumChannels) {
-        anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
+        std::unique_ptr<aiNodeAnim *[]> channels(new aiNodeAnim *[anim->mNumChannels]());
         for (unsigned int a = 0; a < anim->mNumChannels; ++a) {
-            anim->mChannels[a] = new aiNodeAnim();
-            ReadBinaryNodeAnim(stream, anim->mChannels[a]);
+            channels[a] = new aiNodeAnim();
+            ReadBinaryNodeAnim(stream, channels[a]);
         }
+        anim->mChannels = channels.release();
     }
 }
 
@@ -557,11 +558,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!tex->mHeight) {
         if (tex->mWidth > 0) {
-            std::unique_ptr<aiTexel[]> data(new aiTexel[tex->mWidth]);
-            if (stream->Read(data.get(), 1, tex->mWidth) != tex->mWidth) {
-                throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed texture data");
-            }
-            tex->pcData = data.release();
+            SafeReadArray(stream, tex->pcData, tex->mWidth);
         }
         return;
     }
@@ -573,12 +570,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     const unsigned int texelCount = tex->mWidth * tex->mHeight;
     if (texelCount > 0) {
-        std::unique_ptr<aiTexel[]> data(new aiTexel[texelCount]);
-        const size_t bytesToRead = static_cast<size_t>(texelCount) * sizeof(aiTexel);
-        if (stream->Read(data.get(), 1, bytesToRead) != bytesToRead) {
-            throw DeadlyImportError("ASSBIN: Unexpected EOF while reading texture data");
-        }
-        tex->pcData = data.release();
+        SafeReadArray(stream, tex->pcData, texelCount);
     }
 }
 
@@ -647,62 +639,62 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all meshes
     if (scene->mNumMeshes) {
-        scene->mMeshes = new aiMesh *[scene->mNumMeshes];
-        memset(scene->mMeshes, 0, scene->mNumMeshes * sizeof(aiMesh *));
+        std::unique_ptr<aiMesh *[]> meshes(new aiMesh *[scene->mNumMeshes]());
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-            scene->mMeshes[i] = new aiMesh();
-            ReadBinaryMesh(stream, scene->mMeshes[i]);
+            meshes[i] = new aiMesh();
+            ReadBinaryMesh(stream, meshes[i]);
         }
+        scene->mMeshes = meshes.release();
     }
 
     // Read materials
     if (scene->mNumMaterials) {
-        scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
-        memset(scene->mMaterials, 0, scene->mNumMaterials * sizeof(aiMaterial *));
+        std::unique_ptr<aiMaterial *[]> materials(new aiMaterial *[scene->mNumMaterials]());
         for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
-            scene->mMaterials[i] = new aiMaterial();
-            ReadBinaryMaterial(stream, scene->mMaterials[i]);
+            materials[i] = new aiMaterial();
+            ReadBinaryMaterial(stream, materials[i]);
         }
+        scene->mMaterials = materials.release();
     }
 
     // Read all animations
     if (scene->mNumAnimations) {
-        scene->mAnimations = new aiAnimation *[scene->mNumAnimations];
-        memset(scene->mAnimations, 0, scene->mNumAnimations * sizeof(aiAnimation *));
+        std::unique_ptr<aiAnimation *[]> animations(new aiAnimation *[scene->mNumAnimations]());
         for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
-            scene->mAnimations[i] = new aiAnimation();
-            ReadBinaryAnim(stream, scene->mAnimations[i]);
+            animations[i] = new aiAnimation();
+            ReadBinaryAnim(stream, animations[i]);
         }
+        scene->mAnimations = animations.release();
     }
 
     // Read all textures
     if (scene->mNumTextures) {
-        scene->mTextures = new aiTexture *[scene->mNumTextures];
-        memset(scene->mTextures, 0, scene->mNumTextures * sizeof(aiTexture *));
+        std::unique_ptr<aiTexture *[]> textures(new aiTexture *[scene->mNumTextures]());
         for (unsigned int i = 0; i < scene->mNumTextures; ++i) {
-            scene->mTextures[i] = new aiTexture();
-            ReadBinaryTexture(stream, scene->mTextures[i]);
+            textures[i] = new aiTexture();
+            ReadBinaryTexture(stream, textures[i]);
         }
+        scene->mTextures = textures.release();
     }
 
     // Read lights
     if (scene->mNumLights) {
-        scene->mLights = new aiLight *[scene->mNumLights];
-        memset(scene->mLights, 0, scene->mNumLights * sizeof(aiLight *));
+        std::unique_ptr<aiLight *[]> lights(new aiLight *[scene->mNumLights]());
         for (unsigned int i = 0; i < scene->mNumLights; ++i) {
-            scene->mLights[i] = new aiLight();
-            ReadBinaryLight(stream, scene->mLights[i]);
+            lights[i] = new aiLight();
+            ReadBinaryLight(stream, lights[i]);
         }
+        scene->mLights = lights.release();
     }
 
     // Read cameras
     if (scene->mNumCameras) {
-        scene->mCameras = new aiCamera *[scene->mNumCameras];
-        memset(scene->mCameras, 0, scene->mNumCameras * sizeof(aiCamera *));
+        std::unique_ptr<aiCamera *[]> cameras(new aiCamera *[scene->mNumCameras]());
         for (unsigned int i = 0; i < scene->mNumCameras; ++i) {
-            scene->mCameras[i] = new aiCamera();
-            ReadBinaryCamera(stream, scene->mCameras[i]);
+            cameras[i] = new aiCamera();
+            ReadBinaryCamera(stream, cameras[i]);
         }
+        scene->mCameras = cameras.release();
     }
 }
 

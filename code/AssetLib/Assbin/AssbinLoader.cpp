@@ -230,7 +230,7 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
     /*uint32_t size =*/Read<uint32_t>(stream);
 
-    aiNode *node = new aiNode();
+    std::unique_ptr<aiNode> node(new aiNode());
 
     node->mName = Read<aiString>(stream);
     node->mTransformation = Read<aiMatrix4x4>(stream);
@@ -251,7 +251,7 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
     if (numChildren) {
         node->mChildren = new aiNode *[numChildren]();
         for (unsigned int i = 0; i < numChildren; ++i) {
-            ReadBinaryNode(stream, &node->mChildren[i], node);
+            ReadBinaryNode(stream, &node->mChildren[i], node.get());
         }
         node->mNumChildren = numChildren;
     }
@@ -302,7 +302,7 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
             node->mMetaData->mValues[i].mData = data;
         }
     }
-    *onode = node;
+    *onode = node.release();
 }
 
 // -----------------------------------------------------------------------------------

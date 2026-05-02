@@ -339,28 +339,29 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
                         tx->mWidth, " x ", tx->mHeight);
             }
             const unsigned int texelCount = tx->mWidth * tx->mHeight;
-            tx->pcData = new aiTexel[texelCount];
+            std::unique_ptr<aiTexel[]> data = std::make_unique<aiTexel[]>(texelCount);
             for (j = k = 0; j < texelCount; j++) {
                 switch (t->f) {
-                    case 1: tx->pcData[j].g = t->d[k++]; break;
+                    case 1: data[j].g = t->d[k++]; break;
                     case 2:
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].a = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                     case 3:
-                        tx->pcData[j].r = t->d[k++];
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].b = t->d[k++];
-                        tx->pcData[j].a = 255;
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = 255;
                         break;
                     case 4:
-                        tx->pcData[j].r = t->d[k++];
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].b = t->d[k++];
-                        tx->pcData[j].a = t->d[k++];
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                 }
             }
+            tx->pcData = data.release();
         }
         mScene->mTextures[i] = tx;
     }

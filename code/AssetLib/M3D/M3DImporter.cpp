@@ -338,30 +338,31 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
                 throw DeadlyImportError("M3D: Texture dimensions are too large: ",
                         tx->mWidth, " x ", tx->mHeight);
             }
-            const unsigned int texelCount = tx->mWidth * tx->mHeight;
-            std::unique_ptr<aiTexel[]> data = std::make_unique<aiTexel[]>(texelCount);
-            for (j = k = 0; j < texelCount; j++) {
+            const auto texelCount = static_cast<size_t>(tx->mWidth) * static_cast<size_t>(tx->mHeight);
+            auto buffer = std::vector<aiTexel>(texelCount);
+            for (unsigned int j = 0, k = 0; j < texelCount; j++) {
                 switch (t->f) {
-                    case 1: data[j].g = t->d[k++]; break;
+                    case 1: buffer[j].g = t->d[k++]; break;
                     case 2:
-                        data[j].g = t->d[k++];
-                        data[j].a = t->d[k++];
+                        buffer[j].g = t->d[k++];
+                        buffer[j].a = t->d[k++];
                         break;
                     case 3:
-                        data[j].r = t->d[k++];
-                        data[j].g = t->d[k++];
-                        data[j].b = t->d[k++];
-                        data[j].a = 255;
+                        buffer[j].r = t->d[k++];
+                        buffer[j].g = t->d[k++];
+                        buffer[j].b = t->d[k++];
+                        buffer[j].a = 255;
                         break;
                     case 4:
-                        data[j].r = t->d[k++];
-                        data[j].g = t->d[k++];
-                        data[j].b = t->d[k++];
-                        data[j].a = t->d[k++];
+                        buffer[j].r = t->d[k++];
+                        buffer[j].g = t->d[k++];
+                        buffer[j].b = t->d[k++];
+                        buffer[j].a = t->d[k++];
                         break;
                 }
             }
-            tx->pcData = data.release();
+            tx->pcData = new aiTexel[texelCount];
+            std::copy(buffer.begin(), buffer.end(), tx->pcData);
         }
         mScene->mTextures[i] = tx;
     }

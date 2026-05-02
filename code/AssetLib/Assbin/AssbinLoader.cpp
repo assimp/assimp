@@ -230,7 +230,7 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
     /*uint32_t size =*/Read<uint32_t>(stream);
 
-    std::unique_ptr<aiNode> node(new aiNode());
+    auto node = std::make_unique<aiNode>();
 
     node->mName = Read<aiString>(stream);
     node->mTransformation = Read<aiMatrix4x4>(stream);
@@ -551,34 +551,32 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!tex->mHeight) {
         // Compressed texture
-        if (tex->mWidth > SIZE_MAX - sizeof(aiTexel)) {
+        if (static_cast<size_t>(tex->mWidth) > SIZE_MAX - sizeof(aiTexel)) {
             throw DeadlyImportError("ASSBIN: Compressed texture size overflow");
         }
-        const size_t texelCount = (static_cast<size_t>(tex->mWidth) + sizeof(aiTexel) - 1) / sizeof(aiTexel);
-        std::vector<aiTexel> buffer(texelCount);
+        const auto texelCount = (static_cast<size_t>(tex->mWidth) + sizeof(aiTexel) - 1) / sizeof(aiTexel);
+        auto buffer = std::vector<aiTexel>(texelCount);
         if (stream->Read(buffer.data(), 1, tex->mWidth) != tex->mWidth) {
             throw DeadlyImportError("ASSBIN: Unexpected EOF reading compressed texture data");
         }
-        std::unique_ptr<aiTexel[]> data = std::make_unique<aiTexel[]>(texelCount);
-        std::copy(buffer.begin(), buffer.end(), data.get());
-        tex->pcData = data.release();
+        tex->pcData = new aiTexel[texelCount];
+        std::copy(buffer.begin(), buffer.end(), tex->pcData);
         return;
     }
 
     // Uncompressed texture
-    if (tex->mWidth != 0 && static_cast<size_t>(tex->mHeight) > SIZE_MAX / sizeof(aiTexel) / tex->mWidth) {
+    if (static_cast<size_t>(tex->mHeight) > SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
         throw DeadlyImportError("ASSBIN: Texture dimensions overflow");
     }
 
-    const size_t texelCount = static_cast<size_t>(tex->mWidth) * static_cast<size_t>(tex->mHeight);
+    const auto texelCount = static_cast<size_t>(tex->mWidth) * static_cast<size_t>(tex->mHeight);
 
-    std::vector<aiTexel> buffer(texelCount);
+    auto buffer = std::vector<aiTexel>(texelCount);
     if (stream->Read(buffer.data(), sizeof(aiTexel), texelCount) != texelCount) {
         throw DeadlyImportError("ASSBIN: Unexpected EOF reading texture data");
     }
-    std::unique_ptr<aiTexel[]> data = std::make_unique<aiTexel[]>(texelCount);
-    std::copy(buffer.begin(), buffer.end(), data.get());
-    tex->pcData = data.release();
+    tex->pcData = new aiTexel[texelCount];
+    std::copy(buffer.begin(), buffer.end(), tex->pcData);
 }
 
 // -----------------------------------------------------------------------------------
@@ -738,8 +736,8 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         if (compressedSize > SIZE_MAX) {
             throw DeadlyImportError("ASSBIN: Compressed size too large");
         }
-        std::vector<unsigned char> compressedData(compressedSize);
-        size_t len = stream->Read(compressedData.data(), 1, compressedSize);
+        auto compressedData = std::vector<unsigned char>(compressedSize);
+        auto len = stream->Read(compressedData.data(), 1, compressedSize);
         if (len != compressedSize) {
             pIOHandler->Close(stream);
             throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed data");
@@ -748,9 +746,9 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         if (uncompressedSize > SIZE_MAX) {
             throw DeadlyImportError("ASSBIN: Uncompressed size too large");
         }
-        std::vector<unsigned char> uncompressedData(uncompressedSize);
+        auto uncompressedData = std::vector<unsigned char>(uncompressedSize);
 
-        int res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
+        auto res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
         if (res != Z_OK) {
             pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");

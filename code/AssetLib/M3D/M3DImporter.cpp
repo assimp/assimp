@@ -361,8 +361,9 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
                         break;
                 }
             }
-            tx->pcData = new aiTexel[texelCount];
-            std::copy(buffer.begin(), buffer.end(), tx->pcData);
+            auto data = std::make_unique<aiTexel[]>(texelCount);
+            std::copy(buffer.begin(), buffer.end(), data.get());
+            tx->pcData = data.release();
         }
         mScene->mTextures[i] = tx;
     }

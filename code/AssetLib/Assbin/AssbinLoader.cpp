@@ -559,8 +559,9 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
         if (stream->Read(buffer.data(), 1, tex->mWidth) != tex->mWidth) {
             throw DeadlyImportError("ASSBIN: Unexpected EOF reading compressed texture data");
         }
-        tex->pcData = new aiTexel[texelCount];
-        std::copy(buffer.begin(), buffer.end(), tex->pcData);
+        auto data = std::make_unique<aiTexel[]>(texelCount);
+        std::copy(buffer.begin(), buffer.end(), data.get());
+        tex->pcData = data.release();
         return;
     }
 
@@ -575,8 +576,9 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
     if (stream->Read(buffer.data(), sizeof(aiTexel), texelCount) != texelCount) {
         throw DeadlyImportError("ASSBIN: Unexpected EOF reading texture data");
     }
-    tex->pcData = new aiTexel[texelCount];
-    std::copy(buffer.begin(), buffer.end(), tex->pcData);
+    auto data = std::make_unique<aiTexel[]>(texelCount);
+    std::copy(buffer.begin(), buffer.end(), data.get());
+    tex->pcData = data.release();
 }
 
 // -----------------------------------------------------------------------------------

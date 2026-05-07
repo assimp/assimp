@@ -513,7 +513,10 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
 
     const size_t keyLen = ::strlen(pKey);
     pcNew->mKey.length = static_cast<ai_uint32>(std::min<size_t>(keyLen, AI_MAXLEN - 1));
-    memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
+    if (keyLen >= AI_MAXLEN) {
+        ASSIMP_LOG_WARN("aiMaterial: property key '", pKey, "' exceeds AI_MAXLEN and will be truncated.");
+    }
+	memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
     pcNew->mKey.data[pcNew->mKey.length] = '\0';
 
     if (UINT_MAX != iOutIndex) {

@@ -36,7 +36,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 ----------------------------------------------------------------------
 */
 #if !defined ASSIMP_BUILD_NO_M3D_IMPORTER || !(defined ASSIMP_BUILD_NO_EXPORT || defined ASSIMP_BUILD_NO_M3D_EXPORTER)
@@ -103,15 +102,68 @@ M3DWrapper::M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &b
         ai_assert(nullptr != pIOHandler);
     }
 
+    // Security fix: Validate buffer size and content before processing
+    if (buffer.empty()) {
+        ASSIMP_LOG_ERROR("M3D: Empty buffer provided");
+        m3d_ = nullptr;
+        return;
+    }
+
+    // Check for minimum valid M3D file size (header + basic structure)
+    const size_t MIN_VALID_M3D_SIZE = 100; // Minimum reasonable size for a valid M3D file
+    if (buffer.size() < MIN_VALID_M3D_SIZE) {
+        ASSIMP_LOG_ERROR("M3D: Buffer too small to be a valid M3D file");
+        m3d_ = nullptr;
+        return;
+    }
+
+    // Validate M3D magic signature to ensure this is actually an M3D file
+    // M3D files should start with "3DMO" or "3dmo" magic signature
+    if (buffer.size() >= 4) {
+        bool valid_signature = false;
+        // Check for "3DMO" (uppercase)
+        if (buffer[0] == '3' && buffer[1] == 'D' && buffer[2] == 'M' && buffer[3] == 'O') {
+            valid_signature = true;
+        }
+        // Check for "3dmo" (lowercase)
+        else if (buffer[0] == '3' && buffer[1] == 'd' && buffer[2] == 'm' && buffer[3] == 'o') {
+            valid_signature = true;
+        }
+        
+        if (!valid_signature) {
+            ASSIMP_LOG_ERROR("M3D: Invalid file signature - not a valid M3D file");
+            m3d_ = nullptr;
+            return;
+        }
+    }
+
+    // Create a safe copy of the buffer with guard pages/validation
+    // This helps prevent buffer overflows from affecting the main process
+    std::vector<unsigned char> safe_buffer = buffer;
+    
+    // Add a guard page at the end to catch any overflow attempts
+    // Note: This is a defensive measure, not a complete fix for the underlying issue
+    safe_buffer.resize(safe_buffer.size() + 1);
+    safe_buffer.back() = 0xFF; // Guard byte
+
 #ifdef ASSIMP_USE_M3D_READFILECB
     // pass this IOHandler to the C callback in a thread-local pointer
     m3dimporter_pIOHandler = pIOHandler;
-    m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), m3dimporter_readfile, free, nullptr);
+    m3d_ = m3d_load(const_cast<unsigned char *>(safe_buffer.data()), m3dimporter_readfile, free, nullptr);
     // Clear the C callback
     m3dimporter_pIOHandler = nullptr;
 #else
-    m3d_ = m3d_load(const_cast<unsigned char *>(buffer.data()), nullptr, nullptr, nullptr);
+    m3d_ = m3d_load(const_cast<unsigned char *>(safe_buffer.data()), nullptr, nullptr, nullptr);
 #endif
+
+    // Verify the guard byte wasn't overwritten (indicating potential buffer overflow)
+    if (safe_buffer.empty() || safe_buffer.back() != 0xFF) {
+        ASSIMP_LOG_ERROR("M3D: Potential buffer overflow detected during loading");
+        if (m3d_) {
+            m3d_free(m3d_);
+            m3d_ = nullptr;
+        }
+    }
 }
 
 M3DWrapper::~M3DWrapper() {

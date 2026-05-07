@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MathFunctions.h>
 #include <memory>
 
 using namespace Assimp;
@@ -511,9 +512,13 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     pcNew->mData = new char[pSizeInBytes];
     memcpy(pcNew->mData, pInput, pSizeInBytes);
 
-    pcNew->mKey.length = static_cast<ai_uint32>(::strlen(pKey));
-    ai_assert(AI_MAXLEN > pcNew->mKey.length);
-    strcpy(pcNew->mKey.data, pKey);
+    const size_t keyLen = ::strlen(pKey);
+    pcNew->mKey.length = static_cast<ai_uint32>(std::min<size_t>(keyLen, AI_MAXLEN - 1));
+    if (keyLen >= AI_MAXLEN) {
+        ASSIMP_LOG_WARN("aiMaterial: property key '", pKey, "' exceeds AI_MAXLEN and will be truncated.");
+    }
+	memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
+    pcNew->mKey.data[pcNew->mKey.length] = '\0';
 
     if (UINT_MAX != iOutIndex) {
         mProperties[iOutIndex] = pcNew.release();
@@ -523,7 +528,13 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     // resize the array ... double the storage allocated
     if (mNumProperties == mNumAllocated) {
         const unsigned int iOld = mNumAllocated;
-        mNumAllocated *= 2;
+
+        // Safely double the size, checking for integer overflow
+        if (iOld > UINT_MAX / 2) {
+            return AI_OUTOFMEMORY;
+        }
+
+        mNumAllocated = iOld * 2;
 
         aiMaterialProperty **ppTemp;
         try {
@@ -585,6 +596,14 @@ void aiMaterial::CopyPropertyList(aiMaterial *const pcDest,
     ai_assert(nullptr != pcSrc);
     ai_assert(pcDest->mNumProperties <= pcDest->mNumAllocated);
     ai_assert(pcSrc->mNumProperties <= pcSrc->mNumAllocated);
+
+    // Safely check for integer overflow before adding allocations
+    if (pcDest->mNumAllocated > UINT_MAX - pcSrc->mNumAllocated) {
+        throw std::bad_alloc();  // Overflow would occur
+    }
+    if (pcDest->mNumProperties > UINT_MAX - pcSrc->mNumProperties) {
+        throw std::bad_alloc();  // Overflow would occur
+    }
 
     const unsigned int iOldNum = pcDest->mNumProperties;
     pcDest->mNumAllocated += pcSrc->mNumAllocated;

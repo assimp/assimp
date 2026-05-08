@@ -336,6 +336,13 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
     mesh->mNumBones = Read<unsigned int>(stream);
     mesh->mMaterialIndex = Read<unsigned int>(stream);
 
+    if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiVector3D)) {
+        throw DeadlyImportError("Assbin: Too many vertices, would overflow");
+    }
+    if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace) || (size_t)mesh->mNumFaces > SIZE_MAX / sizeof(aiFace)) {
+        throw DeadlyImportError("Assbin: Too many faces, would overflow");
+    }
+
     // first of all, write bits for all existent vertex components
     unsigned int c = Read<unsigned int>(stream);
 
@@ -414,6 +421,9 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
 
             static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
             f.mNumIndices = Read<uint16_t>(stream);
+            if (f.mNumIndices > AI_MAX_FACE_INDICES) {
+                throw DeadlyImportError("Assbin: Too many face indices, would overflow");
+            }
             f.mIndices = new unsigned int[f.mNumIndices];
 
             for (unsigned int a = 0; a < f.mNumIndices; ++a) {
@@ -449,6 +459,7 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
 
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
+
     prop->mData = new char[prop->mDataLength];
     stream->Read(prop->mData, 1, prop->mDataLength);
 }
@@ -549,9 +560,18 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!shortened) {
         if (!tex->mHeight) {
+            if (tex->mWidth > AI_MAX_ALLOC(aiTexel)) {
+                throw DeadlyImportError("Assbin: Texture width too large, would overflow");
+            }
             tex->pcData = new aiTexel[tex->mWidth];
             stream->Read(tex->pcData, 1, tex->mWidth);
         } else {
+            if (tex->mWidth > AI_MAX_ALLOC(aiTexel) || tex->mHeight > AI_MAX_ALLOC(aiTexel) ||
+                    (size_t)tex->mWidth > SIZE_MAX / sizeof(aiTexel) || (size_t)tex->mHeight > SIZE_MAX / sizeof(aiTexel) ||
+                    (size_t)tex->mWidth * (size_t)tex->mHeight > AI_MAX_ALLOC(aiTexel) ||
+                    (size_t)tex->mWidth * (size_t)tex->mHeight > SIZE_MAX / sizeof(aiTexel)) {
+                throw DeadlyImportError("Assbin: Texture dimensions too large, would overflow");
+            }
             tex->pcData = new aiTexel[tex->mWidth * tex->mHeight];
             stream->Read(tex->pcData, 1, tex->mWidth * tex->mHeight * 4);
         }

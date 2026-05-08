@@ -460,6 +460,10 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
 
+    if (prop->mDataLength > AI_MAX_ALLOC(char)) {
+        throw DeadlyImportError("Assbin: Material property data too large");
+    }
+
     prop->mData = new char[prop->mDataLength];
     stream->Read(prop->mData, 1, prop->mDataLength);
 }
@@ -566,14 +570,21 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
             tex->pcData = new aiTexel[tex->mWidth];
             stream->Read(tex->pcData, 1, tex->mWidth);
         } else {
-            if (tex->mWidth > AI_MAX_ALLOC(aiTexel) || tex->mHeight > AI_MAX_ALLOC(aiTexel) ||
-                    (size_t)tex->mWidth > SIZE_MAX / sizeof(aiTexel) || (size_t)tex->mHeight > SIZE_MAX / sizeof(aiTexel) ||
-                    (size_t)tex->mWidth * (size_t)tex->mHeight > AI_MAX_ALLOC(aiTexel) ||
-                    (size_t)tex->mWidth * (size_t)tex->mHeight > SIZE_MAX / sizeof(aiTexel)) {
-                throw DeadlyImportError("Assbin: Texture dimensions too large, would overflow");
+            if (tex->mWidth != 0 &&
+                static_cast<size_t>(tex->mHeight) >
+                    AI_MAX_ALLOC(aiTexel) / static_cast<size_t>(tex->mWidth)) {
+                throw DeadlyImportError("Assbin: Texture dimensions too large");
             }
-            tex->pcData = new aiTexel[tex->mWidth * tex->mHeight];
-            stream->Read(tex->pcData, 1, tex->mWidth * tex->mHeight * 4);
+
+            if (tex->mWidth != 0 &&
+                static_cast<size_t>(tex->mHeight) >
+                    SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
+                throw DeadlyImportError("Assbin: Texture dimensions too large");
+            }
+
+            const size_t pixelCount = static_cast<size_t>(tex->mWidth) * tex->mHeight;
+            tex->pcData = new aiTexel[pixelCount];
+            stream->Read(tex->pcData, 1, pixelCount * sizeof(aiTexel));
         }
     }
 }

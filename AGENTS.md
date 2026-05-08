@@ -1,6 +1,9 @@
 # AGENTS.md - Agent Guidelines for Assimp
 
-This document provides guidelines for AI agents working on the Assimp codebase. Never answer from memory. 
+This document provides guidelines for AI agents working on the Assimp codebase.
+
+## Methology
+Never answer from memory. First try it and then show the results.
 
 ## Project Overview
 

@@ -2,7 +2,7 @@
 
 This document provides guidelines for AI agents working on the Assimp codebase.
 
-## Methology
+## Methodology
 Never answer from memory. First try it and then show the results.
 
 ## Project Overview

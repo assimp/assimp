@@ -336,7 +336,8 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
     mesh->mNumBones = Read<unsigned int>(stream);
     mesh->mMaterialIndex = Read<unsigned int>(stream);
 
-    if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiVector3D)) {
+    if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiVector3D) ||
+        mesh->mNumVertices > AI_MAX_ALLOC(aiColor4D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiColor4D)) {
         throw DeadlyImportError("Assbin: Too many vertices, would overflow");
     }
     if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace) || (size_t)mesh->mNumFaces > SIZE_MAX / sizeof(aiFace)) {

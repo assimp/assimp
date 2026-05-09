@@ -236,6 +236,16 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
     unsigned numMeshes = Read<unsigned int>(stream);
     unsigned int nb_metadata = Read<unsigned int>(stream);
 
+    if (numMeshes > AI_MAX_ALLOC(unsigned int)) {
+        throw DeadlyImportError("Assbin: Too many meshes in node, would overflow");
+    }
+    if (numChildren > AI_MAX_ALLOC(aiNode *)) {
+        throw DeadlyImportError("Assbin: Too many children in node, would overflow");
+    }
+    if (nb_metadata > AI_MAX_ALLOC(aiMetadataEntry)) {
+        throw DeadlyImportError("Assbin: Too many metadata properties, would overflow");
+    }
+
     if (parent) {
         node->mParent = parent;
     }
@@ -308,6 +318,10 @@ void AssbinImporter::ReadBinaryBone(IOStream *stream, aiBone *b) {
     b->mNumWeights = Read<unsigned int>(stream);
     b->mOffsetMatrix = Read<aiMatrix4x4>(stream);
 
+    if (b->mNumWeights > AI_MAX_ALLOC(aiVertexWeight) || (size_t)b->mNumWeights > SIZE_MAX / sizeof(aiVertexWeight)) {
+        throw DeadlyImportError("Assbin: Too many weights, would overflow");
+    }
+
     // for the moment we write dumb min/max values for the bones, too.
     // maybe I'll add a better, hash-like solution later
     if (shortened) {
@@ -342,6 +356,9 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
     }
     if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace) || (size_t)mesh->mNumFaces > SIZE_MAX / sizeof(aiFace)) {
         throw DeadlyImportError("Assbin: Too many faces, would overflow");
+    }
+    if (mesh->mNumBones > AI_MAX_ALLOC(aiBone *) || (size_t)mesh->mNumBones > SIZE_MAX / sizeof(aiBone *)) {
+        throw DeadlyImportError("Assbin: Too many bones, would overflow");
     }
 
     // first of all, write bits for all existent vertex components
@@ -501,6 +518,16 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream *stream, aiNodeAnim *nd) {
     nd->mPreState = (aiAnimBehaviour)Read<unsigned int>(stream);
     nd->mPostState = (aiAnimBehaviour)Read<unsigned int>(stream);
 
+    if (nd->mNumPositionKeys > AI_MAX_ALLOC(aiVectorKey) || (size_t)nd->mNumPositionKeys > SIZE_MAX / sizeof(aiVectorKey)) {
+        throw DeadlyImportError("Assbin: Too many position keys, would overflow");
+    }
+    if (nd->mNumRotationKeys > AI_MAX_ALLOC(aiQuatKey) || (size_t)nd->mNumRotationKeys > SIZE_MAX / sizeof(aiQuatKey)) {
+        throw DeadlyImportError("Assbin: Too many rotation keys, would overflow");
+    }
+    if (nd->mNumScalingKeys > AI_MAX_ALLOC(aiVectorKey) || (size_t)nd->mNumScalingKeys > SIZE_MAX / sizeof(aiVectorKey)) {
+        throw DeadlyImportError("Assbin: Too many scaling keys, would overflow");
+    }
+
     if (nd->mNumPositionKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mPositionKeys, nd->mNumPositionKeys);
@@ -543,6 +570,10 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
     anim->mDuration = Read<double>(stream);
     anim->mTicksPerSecond = Read<double>(stream);
     anim->mNumChannels = Read<unsigned int>(stream);
+
+    if (anim->mNumChannels > AI_MAX_ALLOC(aiNodeAnim *) || (size_t)anim->mNumChannels > SIZE_MAX / sizeof(aiNodeAnim *)) {
+        throw DeadlyImportError("Assbin: Too many animation channels, would overflow");
+    }
 
     if (anim->mNumChannels) {
         anim->mChannels = new aiNodeAnim *[anim->mNumChannels];

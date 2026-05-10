@@ -201,6 +201,13 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
     if (depth == 0) {
         depth = (uint32_t)(als.Data.size() / (width * height));
     }
+    // Check for integer overflow and size validation
+    if (width > 0 && height > UINT_MAX / width) {
+        throw DeadlyImportError("Texture dimensions overflow");
+    }
+    if (depth > 0 && (uint64_t)width * height > UINT_MAX / depth) {
+        throw DeadlyImportError("Texture data size overflow");
+    }
     // check data size
     if ((width * height * depth) != als.Data.size()) {
         throw DeadlyImportError("Texture has incorrect data size.");

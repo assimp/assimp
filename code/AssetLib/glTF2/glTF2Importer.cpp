@@ -1720,8 +1720,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         tex->pcData = reinterpret_cast<aiTexel *>(data);
 
         if (!img.mimeType.empty()) {
-            const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
-            if (ext) {
+            const char *slash = strchr(img.mimeType.c_str(), '/');
+            if (slash != nullptr) {
+                const char *ext = slash + 1;
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 } else if (strcmp(ext, "ktx2") == 0) { // basisu: ktx remains

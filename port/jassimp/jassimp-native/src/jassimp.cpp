@@ -5,7 +5,26 @@
 #include <assimp/scene.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <limits>
 
+// Safe arithmetic helpers for overflow protection
+template <typename T>
+bool SafeAdd(T a, T b, T& result) {
+    if (a > std::numeric_limits<T>::max() - b) {
+        return false;
+    }
+    result = a + b;
+    return true;
+}
+
+template <typename T>
+bool SafeMultiply(T a, T b, T& result) {
+    if (b != 0 && a > std::numeric_limits<T>::max() / b) {
+        return false;
+    }
+    result = a * b;
+    return true;
+}
 
 #ifdef JNI_LOG
 #ifdef ANDROID
@@ -680,7 +699,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			int numVertexReferences = 0;
 			for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 			{
-				numVertexReferences += cMesh->mFaces[face].mNumIndices;
+				size_t updatedCount;
+				if (!SafeAdd(numVertexReferences, cMesh->mFaces[face].mNumIndices, updatedCount))
+				{
+					throw DeadlyImportError("Face index accumulation overflow");
+				}
+				numVertexReferences = updatedCount;
 			}
 
 			faceBufferSize = numVertexReferences * sizeof(unsigned int);

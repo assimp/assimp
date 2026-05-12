@@ -1612,10 +1612,16 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if ((nullptr != iter.second.rotation) || (nullptr != iter.second.scale) || (nullptr != iter.second.translation)) {
-                    ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    if (!targetNode || nullptr == targetNode.operator->()) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping channel.");
+                        continue;
+                    }
+                    ai_anim->mChannels[j] = CreateNodeAnim(r, *targetNode, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumChannels = j;
         }
 
         ai_anim->mNumMorphMeshChannels = numMorphMeshChannels;
@@ -1625,10 +1631,16 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if (nullptr != iter.second.weight) {
-                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    if (!targetNode || nullptr == targetNode.operator->()) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping morph channel.");
+                        continue;
+                    }
+                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, *targetNode, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumMorphMeshChannels = j;
         }
 
         // Use the latest key-frame for the duration of the animation

@@ -39,10 +39,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "AbstractImportExportBase.h"
+#include "Common/assbin_chunks.h"
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/texture.h>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 using namespace Assimp;
 
@@ -64,6 +69,69 @@ public:
 
 TEST_F(utAssbinImportExport, import3ExportAssbinDFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utAssbinImportExport, rejectOverflowingEmbeddedTextureDimensions) {
+    std::vector<uint8_t> blob;
+
+    auto appendZeros = [&blob](size_t count) {
+        blob.insert(blob.end(), count, 0);
+    };
+
+    auto appendUint16LE = [&blob](uint16_t value) {
+        blob.push_back(static_cast<uint8_t>(value & 0xffu));
+        blob.push_back(static_cast<uint8_t>((value >> 8u) & 0xffu));
+    };
+
+    auto appendUint32LE = [&blob](uint32_t value) {
+        blob.push_back(static_cast<uint8_t>(value & 0xffu));
+        blob.push_back(static_cast<uint8_t>((value >> 8u) & 0xffu));
+        blob.push_back(static_cast<uint8_t>((value >> 16u) & 0xffu));
+        blob.push_back(static_cast<uint8_t>((value >> 24u) & 0xffu));
+    };
+
+    const char magic[] = "ASSIMP.binary-dump.";
+    blob.insert(blob.end(), magic, magic + sizeof(magic) - 1u);
+    appendZeros(44u - (sizeof(magic) - 1u));
+    appendUint32LE(ASSBIN_VERSION_MAJOR);
+    appendUint32LE(ASSBIN_VERSION_MINOR);
+    appendUint32LE(0);
+    appendUint32LE(0);
+    appendUint16LE(0);
+    appendUint16LE(0);
+    appendZeros(256u + 128u + 64u);
+    ASSERT_EQ(static_cast<size_t>(ASSBIN_HEADER_LENGTH), blob.size());
+
+    appendUint32LE(ASSBIN_CHUNK_AISCENE);
+    appendUint32LE(0);
+    appendUint32LE(0); // scene flags
+    appendUint32LE(0); // meshes
+    appendUint32LE(0); // materials
+    appendUint32LE(0); // animations
+    appendUint32LE(1); // textures
+    appendUint32LE(0); // lights
+    appendUint32LE(0); // cameras
+
+    appendUint32LE(ASSBIN_CHUNK_AINODE);
+    appendUint32LE(0);
+    appendUint32LE(0); // empty node name
+    appendZeros(sizeof(ai_real) * 16u);
+    appendUint32LE(0); // children
+    appendUint32LE(0); // meshes
+    appendUint32LE(0); // metadata
+
+    appendUint32LE(ASSBIN_CHUNK_AITEXTURE);
+    appendUint32LE(0);
+    appendUint32LE(UINT32_MAX);
+    appendUint32LE(UINT32_MAX);
+    appendZeros(HINTMAXTEXTURELEN - 1u);
+
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(blob.data(), blob.size(), 0, "assbin");
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos,
+            std::string(importer.GetErrorString())
+                    .find("texture"));
 }
 
 #endif // #ifndef ASSIMP_BUILD_NO_EXPORT

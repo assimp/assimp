@@ -80,7 +80,7 @@ static bool isNanOrInf(const char *in) {
 }
 
 // -------------------------------------------------------------------
-ObjFileParser::ObjFileParser() : mEnd(&mBuffer[Buffersize-1]+1) {
+ObjFileParser::ObjFileParser() {
     mBuffer.clear();
 }
 

@@ -5,6 +5,19 @@
 #include <assimp/scene.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <limits>
+#include <vector>
+#include <algorithm>
+
+// Maximum allowed allocation for direct buffers (1 GiB)
+static const size_t JASSIMP_MAX_DIRECT_ALLOC = (1ULL << 30);
+
+static bool safe_mul_size(size_t a, size_t b, size_t* out)
+{
+	if (b != 0 && a > std::numeric_limits<size_t>::max() / b) return false;
+	*out = a * b;
+	return true;
+}
 
 
 #ifdef JNI_LOG
@@ -401,7 +414,17 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 		return false;
 	}
 
-	memcpy(jBufferPtr, cData, size);
+	if (size == 0) {
+		lprintf("refusing zero-length buffer copy\n");
+		return false;
+	}
+
+	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
+		lprintf("requested buffer copy too large: %llu\n", (unsigned long long)size);
+		return false;
+	}
+
+	std::copy((char*)cData, (char*)cData + size, (char*)jBufferPtr);
 
 	return true;
 }
@@ -420,6 +443,16 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 	jobject jBuffer = env->GetObjectArrayElement((jobjectArray) jBufferArray, index);
 	SmartLocalRef bufferRef(env, jBuffer);
 
+	if (size == 0) {
+		lprintf("refusing zero-length buffer copyArray\n");
+		return false;
+	}
+
+	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
+		lprintf("requested buffer copyArray too large: %llu\n", (unsigned long long)size);
+		return false;
+	}
+
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
 		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
@@ -434,7 +467,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 		return false;
 	}
 
-	memcpy(jBufferPtr, cData, size);
+	std::copy((char*)cData, (char*)cData + size, (char*)jBufferPtr);
 
 	return true;
 }
@@ -444,30 +477,29 @@ class JavaIOStream : public Assimp::IOStream
 private:
 	size_t pos;
 	size_t size;
+	// buffer owned as a std::vector<char>
+	std::vector<char> bufferVec;
 	char* buffer;
 	jobject jIOStream;
 
 
 public:
-	JavaIOStream(size_t size, char* buffer, jobject jIOStream) :
+	JavaIOStream(size_t size, std::vector<char>&& bufferVecArg, jobject jIOStream) :
 	pos(0),
 	size(size),
-	buffer(buffer),
+	bufferVec(std::move(bufferVecArg)),
+	buffer(bufferVec.data()),
 	jIOStream(jIOStream)
 	{};
 
-
-    ~JavaIOStream(void)
-    {
-    	free(buffer);
-    };
+	~JavaIOStream(void) {}
 
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount)
     {
     	const size_t cnt = std::min(pCount,(size - pos)/pSize);
 		const size_t ofs = pSize*cnt;
 
-	    memcpy(pvBuffer, buffer + pos, ofs);
+		std::copy((char*)buffer + pos, (char*)buffer + pos + ofs, (char*)pvBuffer);
 	    pos += ofs;
 
 	    return cnt;
@@ -559,22 +591,38 @@ class JavaIOSystem : public Assimp::IOSystem {
 	    	return NULL;
 	    }
 
-	    size_t size = calli(mJniEnv, jStream, "jassimp/AiIOStream", "getFileSize", "()I");
-	    lprintf("Model file size is %d\n", size);
+		int sizeInt = calli(mJniEnv, jStream, "jassimp/AiIOStream", "getFileSize", "()I");
+		if (sizeInt <= 0) {
+			lprintf("invalid or empty model file size: %d\n", sizeInt);
+			return NULL;
+		}
 
-	    char* buffer = (char*)malloc(size);
-	    jobject javaBuffer = mJniEnv->NewDirectByteBuffer(buffer, size);
+		if ((size_t)sizeInt > JASSIMP_MAX_DIRECT_ALLOC) {
+			lprintf("model file too large: %d\n", sizeInt);
+			return NULL;
+		}
 
-	    jvalue readParams[1];
-	    readParams[0].l = javaBuffer;
-	    if(call(mJniEnv, jStream, "jassimp/AiIOStream", "read", "(Ljava/nio/ByteBuffer;)Z", readParams))
-	    {
-	    	return new JavaIOStream(size, buffer, jStream);
+		size_t size = (size_t) sizeInt;
+		lprintf("Model file size is %zu\n", size);
+
+		// allocate a vector and move it into JavaIOStream to transfer ownership
+		std::vector<char> bufferVec(size);
+		if (bufferVec.size() != size) {
+			lprintf("vector allocation failed for model buffer, size %zu\n", size);
+			return NULL;
+		}
+
+		jobject javaBuffer = mJniEnv->NewDirectByteBuffer(bufferVec.data(), size);
+
+		jvalue readParams[1];
+		readParams[0].l = javaBuffer;
+		if(call(mJniEnv, jStream, "jassimp/AiIOStream", "read", "(Ljava/nio/ByteBuffer;)Z", readParams))
+		{
+			return new JavaIOStream(size, std::move(bufferVec), jStream);
 		}
 		else
 		{
 			lprintf("Read failure on AiIOStream.read");
-			free(buffer);
 			return NULL;
 		}
 
@@ -673,17 +721,30 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		size_t faceBufferSize;
 		if (isPureTriangle)
 		{
-			faceBufferSize = cMesh->mNumFaces * 3 * sizeof(unsigned int);
+			size_t faceCount = (size_t)cMesh->mNumFaces;
+			size_t faceEntries;
+			if (!safe_mul_size(faceCount, 3, &faceEntries) || !safe_mul_size(faceEntries, sizeof(unsigned int), &faceBufferSize)) {
+				lprintf("face buffer size overflow or too large\n");
+				return false;
+			}
 		}
 		else
 		{
-			int numVertexReferences = 0;
+			size_t numVertexReferences = 0;
 			for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 			{
-				numVertexReferences += cMesh->mFaces[face].mNumIndices;
+				numVertexReferences += (size_t)cMesh->mFaces[face].mNumIndices;
 			}
 
-			faceBufferSize = numVertexReferences * sizeof(unsigned int);
+			if (!safe_mul_size(numVertexReferences, sizeof(unsigned int), &faceBufferSize)) {
+				lprintf("face buffer size overflow or too large\n");
+				return false;
+			}
+		}
+
+		if (faceBufferSize == 0 || faceBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+			lprintf("invalid face buffer size: %zu\n", faceBufferSize);
+			return false;
 		}
 
 
@@ -702,7 +763,13 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		if (cMesh->mNumVertices > 0)
 		{
 			/* push vertex data to java */
-			if (!copyBuffer(env, jMesh, "m_vertices", cMesh->mVertices, cMesh->mNumVertices * sizeof(aiVector3D)))
+			size_t vertBufferSize;
+			if (!safe_mul_size((size_t)cMesh->mNumVertices, sizeof(aiVector3D), &vertBufferSize) || vertBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("vertex buffer size overflow or too large\n");
+				return false;
+			}
+
+			if (!copyBuffer(env, jMesh, "m_vertices", cMesh->mVertices, vertBufferSize))
 			{
 				lprintf("could not copy vertex data\n");
 				return false;
@@ -717,17 +784,25 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		{
 			if (isPureTriangle)
 			{
-				char* faceBuffer = (char*) malloc(faceBufferSize);
+				// use vector for face buffer
+				std::vector<char> faceBufferVec(faceBufferSize);
+				if (faceBufferVec.size() != faceBufferSize) {
+					lprintf("allocation failed for faceBuffer, size %zu\n", faceBufferSize);
+					return false;
+				}
+				char* faceBuffer = faceBufferVec.data();
 
 				size_t faceDataSize = 3 * sizeof(unsigned int);
 				for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 				{
-					memcpy(faceBuffer + face * faceDataSize, cMesh->mFaces[face].mIndices, faceDataSize);
+					unsigned int* dst = reinterpret_cast<unsigned int*>(faceBuffer) + face * 3;
+					unsigned int* src = cMesh->mFaces[face].mIndices;
+					std::copy(src, src + 3, dst);
 				}
 
 				bool res = copyBuffer(env, jMesh, "m_faces", faceBuffer, faceBufferSize);
 
-				free(faceBuffer);
+				// faceBufferVec freed automatically
 
 				if (!res)
 				{
@@ -737,18 +812,39 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			}
 			else
 			{
-				char* faceBuffer = (char*) malloc(faceBufferSize);
-				char* offsetBuffer = (char*) malloc(cMesh->mNumFaces * sizeof(unsigned int));
+				// use vector for face buffer and offset buffer
+				std::vector<char> faceBufferVec(faceBufferSize);
+				if (faceBufferVec.size() != faceBufferSize) {
+					lprintf("allocation failed for faceBuffer, size %zu\n", faceBufferSize);
+					return false;
+				}
+				char* faceBuffer = faceBufferVec.data();
+
+				size_t offsetBufferSize;
+				if (!safe_mul_size((size_t)cMesh->mNumFaces, sizeof(unsigned int), &offsetBufferSize) || offsetBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("offset buffer size overflow or too large\n");
+					return false;
+				}
+
+				std::vector<unsigned int> offsetBufferVec(cMesh->mNumFaces);
+				if ((size_t)offsetBufferVec.size() * sizeof(unsigned int) != offsetBufferSize) {
+					lprintf("allocation failed for offsetBuffer, size %zu\n", offsetBufferSize);
+					return false;
+				}
+				char* offsetBuffer = reinterpret_cast<char*>(offsetBufferVec.data());
 
 				size_t faceBufferPos = 0;
 				for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 				{
 					size_t faceBufferOffset = faceBufferPos / sizeof(unsigned int);
-					memcpy(offsetBuffer + face * sizeof(unsigned int), &faceBufferOffset, sizeof(unsigned int));
+					// write single unsigned int offset
+					((unsigned int*)offsetBuffer)[face] = (unsigned int)faceBufferOffset;
 
-					size_t faceDataSize = cMesh->mFaces[face].mNumIndices * sizeof(unsigned int);
-					memcpy(faceBuffer + faceBufferPos, cMesh->mFaces[face].mIndices, faceDataSize);
-					faceBufferPos += faceDataSize;
+					size_t faceDataElems = cMesh->mFaces[face].mNumIndices;
+					unsigned int* dst = reinterpret_cast<unsigned int*>(faceBuffer) + (faceBufferPos / sizeof(unsigned int));
+					unsigned int* src = cMesh->mFaces[face].mIndices;
+					std::copy(src, src + faceDataElems, dst);
+					faceBufferPos += faceDataElems * sizeof(unsigned int);
 				}
 
 				if (faceBufferPos != faceBufferSize)
@@ -761,10 +857,9 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 
 				bool res = copyBuffer(env, jMesh, "m_faces", faceBuffer, faceBufferSize);
-				res &= copyBuffer(env, jMesh, "m_faceOffsets", offsetBuffer, cMesh->mNumFaces * sizeof(unsigned int));
+				res &= copyBuffer(env, jMesh, "m_faceOffsets", offsetBuffer, offsetBufferSize);
 
-				free(faceBuffer);
-				free(offsetBuffer);
+				// faceBufferVec and offsetBufferVec freed automatically
 
 				if (!res)
 				{
@@ -788,7 +883,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				lprintf("could not allocate normal data channel\n");
 				return false;
 			}
-			if (!copyBuffer(env, jMesh, "m_normals", cMesh->mNormals, cMesh->mNumVertices * 3 * sizeof(float)))
+			size_t normalsSize;
+			if (!safe_mul_size((size_t)cMesh->mNumVertices, 3, &normalsSize) || !safe_mul_size(normalsSize, sizeof(float), &normalsSize) || normalsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("normals buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jMesh, "m_normals", cMesh->mNormals, normalsSize))
 			{
 				lprintf("could not copy normal data\n");
 				return false;
@@ -809,7 +909,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				lprintf("could not allocate tangents data channel\n");
 				return false;
 			}
-			if (!copyBuffer(env, jMesh, "m_tangents", cMesh->mTangents, cMesh->mNumVertices * 3 * sizeof(float)))
+			size_t tangentsSize;
+			if (!safe_mul_size((size_t)cMesh->mNumVertices, 3, &tangentsSize) || !safe_mul_size(tangentsSize, sizeof(float), &tangentsSize) || tangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("tangents buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jMesh, "m_tangents", cMesh->mTangents, tangentsSize))
 			{
 				lprintf("could not copy tangents data\n");
 				return false;
@@ -830,7 +935,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				lprintf("could not allocate bitangents data channel\n");
 				return false;
 			}
-			if (!copyBuffer(env, jMesh, "m_bitangents", cMesh->mBitangents, cMesh->mNumVertices * 3 * sizeof(float)))
+			size_t bitangentsSize;
+			if (!safe_mul_size((size_t)cMesh->mNumVertices, 3, &bitangentsSize) || !safe_mul_size(bitangentsSize, sizeof(float), &bitangentsSize) || bitangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("bitangents buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jMesh, "m_bitangents", cMesh->mBitangents, bitangentsSize))
 			{
 				lprintf("could not copy bitangents data\n");
 				return false;
@@ -853,7 +963,12 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 					lprintf("could not allocate colorset data channel\n");
 					return false;
 				}
-				if (!copyBufferArray(env, jMesh, "m_colorsets", c, cMesh->mColors[c], cMesh->mNumVertices * 4 * sizeof(float)))
+				size_t colorsetSizeStep;
+				if (!safe_mul_size((size_t)cMesh->mNumVertices, 4, &colorsetSizeStep) || !safe_mul_size(colorsetSizeStep, sizeof(float), &colorsetSizeStep) || colorsetSizeStep > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("colorset buffer size overflow or too large\n");
+					return false;
+				}
+				if (!copyBufferArray(env, jMesh, "m_colorsets", c, cMesh->mColors[c], colorsetSizeStep))
 				{
 					lprintf("could not copy colorset data\n");
 					return false;
@@ -894,14 +1009,28 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				/* gather data */
-				size_t coordBufferSize = cMesh->mNumVertices * cMesh->mNumUVComponents[c] * sizeof(float);
-				char* coordBuffer = (char*) malloc(coordBufferSize);
+				size_t coordBufferSizeStep;
+				size_t coordBufferSize;
+				if (!safe_mul_size((size_t)cMesh->mNumVertices, (size_t)cMesh->mNumUVComponents[c], &coordBufferSizeStep) || !safe_mul_size(coordBufferSizeStep, sizeof(float), &coordBufferSize) || coordBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("coord buffer size overflow or too large\n");
+					return false;
+				}
+
+				std::vector<char> coordBufferVec(coordBufferSize);
+				if (coordBufferVec.size() != coordBufferSize) {
+					lprintf("malloc failed for coordBuffer, size %zu\n", coordBufferSize);
+					return false;
+				}
+				char* coordBuffer = coordBufferVec.data();
 				size_t coordBufferOffset = 0;
 
 				for (unsigned int v = 0; v < cMesh->mNumVertices; v++)
 				{
-					memcpy(coordBuffer + coordBufferOffset, &cMesh->mTextureCoords[c][v], cMesh->mNumUVComponents[c] * sizeof(float));
-					coordBufferOffset += cMesh->mNumUVComponents[c] * sizeof(float);
+					float* dstf = reinterpret_cast<float*>(coordBuffer) + (coordBufferOffset / sizeof(float));
+					float* srcf = const_cast<float*>(&cMesh->mTextureCoords[c][v][0]);
+					size_t ncomp = (size_t)cMesh->mNumUVComponents[c];
+					std::copy(srcf, srcf + ncomp, dstf);
+					coordBufferOffset += ncomp * sizeof(float);
 				}
 
 				if (coordBufferOffset != coordBufferSize)
@@ -914,7 +1043,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 				bool res = copyBufferArray(env, jMesh, "m_texcoords", c, coordBuffer, coordBufferSize);
 
-				free(coordBuffer);
+				// coordBufferVec freed automatically
 
 				if (!res)
 				{
@@ -1205,15 +1334,23 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	jintArray jMeshrefArr = env->NewIntArray(cNode->mNumMeshes);
 	SmartLocalRef refMeshrefArr(env, jMeshrefArr);
 
-	jint *temp = (jint*) malloc(sizeof(jint) * cNode->mNumMeshes);
+	size_t meshRefSize;
+	if (!safe_mul_size(sizeof(jint), (size_t)cNode->mNumMeshes, &meshRefSize) || meshRefSize > JASSIMP_MAX_DIRECT_ALLOC) {
+		lprintf("mesh refs buffer size overflow or too large\n");
+		return false;
+	}
+
+	std::vector<jint> tempVec(cNode->mNumMeshes);
+	if ((size_t)tempVec.size() * sizeof(jint) != meshRefSize) {
+		lprintf("allocation failed for mesh refs, size %zu\n", meshRefSize);
+		return false;
+	}
 
 	for (unsigned int i = 0; i < cNode->mNumMeshes; i++)
 	{
-		temp[i] = cNode->mMeshes[i];
+		tempVec[i] = cNode->mMeshes[i];
 	}
-	env->SetIntArrayRegion(jMeshrefArr, 0, cNode->mNumMeshes, (jint*) temp);
-
-	free(temp);
+	env->SetIntArrayRegion(jMeshrefArr, 0, cNode->mNumMeshes, tempVec.data());
 
 
 	/* convert name */
@@ -1494,7 +1631,11 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 					return false;
 				}
 
-				memcpy(jBufferPtr, cProperty->mData, cProperty->mDataLength);
+				if (cProperty->mDataLength == 0 || (size_t)cProperty->mDataLength > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("property data length invalid or too large: %u\n", cProperty->mDataLength);
+					return false;
+				}
+				std::copy((char*)cProperty->mData, (char*)cProperty->mData + cProperty->mDataLength, (char*)jBufferPtr);
 			}
 
 
@@ -1603,21 +1744,30 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			}
 
 			/* copy keys */
-			if (!copyBuffer(env, jNodeAnim, "m_posKeys", cNodeAnim->mPositionKeys,
-				cNodeAnim->mNumPositionKeys * sizeof(aiVectorKey)))
-			{
+			size_t posKeysSize;
+			if (!safe_mul_size((size_t)cNodeAnim->mNumPositionKeys, sizeof(aiVectorKey), &posKeysSize) || posKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("position keys buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jNodeAnim, "m_posKeys", cNodeAnim->mPositionKeys, posKeysSize)) {
 				return false;
 			}
 
-			if (!copyBuffer(env, jNodeAnim, "m_rotKeys", cNodeAnim->mRotationKeys,
-				cNodeAnim->mNumRotationKeys * sizeof(aiQuatKey)))
-			{
+			size_t rotKeysSize;
+			if (!safe_mul_size((size_t)cNodeAnim->mNumRotationKeys, sizeof(aiQuatKey), &rotKeysSize) || rotKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("rotation keys buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jNodeAnim, "m_rotKeys", cNodeAnim->mRotationKeys, rotKeysSize)) {
 				return false;
 			}
 
-			if (!copyBuffer(env, jNodeAnim, "m_scaleKeys", cNodeAnim->mScalingKeys,
-				cNodeAnim->mNumScalingKeys * sizeof(aiVectorKey)))
-			{
+			size_t scaleKeysSize;
+			if (!safe_mul_size((size_t)cNodeAnim->mNumScalingKeys, sizeof(aiVectorKey), &scaleKeysSize) || scaleKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("scaling keys buffer size overflow or too large\n");
+				return false;
+			}
+			if (!copyBuffer(env, jNodeAnim, "m_scaleKeys", cNodeAnim->mScalingKeys, scaleKeysSize)) {
 				return false;
 			}
 		}

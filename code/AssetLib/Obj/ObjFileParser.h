@@ -88,7 +88,9 @@ public:
 protected:
     /// Parse the loaded file
     void parseFile(IOStreamBuffer<char> &streamBuffer);
-    /// Method to copy the new delimited word in the current line.
+    /// Method to copy the next delimited word from the current line into mBuffer.
+    void copyNextWord();
+    /// Legacy overload for unit tests and external callers.
     void copyNextWord(char *pBuffer, size_t length);
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();

@@ -282,10 +282,19 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 void ObjFileParser::copyNextWord() {
     mBuffer.clear();
     mDataIt = getNextWord<DataArrayIt>(mDataIt, mDataItEnd);
+	if (mDataIt == mDataItEnd) {
+        return;
+    }
     if (*mDataIt == '\\') {
         ++mDataIt;
+		if (mDataIt == mDataItEnd) {
+        	return;
+    	}
         ++mDataIt;
         mDataIt = getNextWord<DataArrayIt>(mDataIt, mDataItEnd);
+		if (mDataIt == mDataItEnd) {
+    	    return;
+    	}
     }
     while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt)) {
         mBuffer.push_back(*mDataIt);

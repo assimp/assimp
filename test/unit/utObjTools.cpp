@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ::Assimp;
 
-class utObjTools final : public ::testing::Test {};
+class utObjTools : public ::testing::Test {};
 
 class TestObjFileParser final : public ObjFileParser {
 public:

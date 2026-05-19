@@ -52,7 +52,7 @@ class TestObjFileParser : public ObjFileParser {
 public:
     TestObjFileParser() = default;
     
-    ~TestObjFileParser() override = default;
+    ~TestObjFileParser() = default;
     
     void testCopyNextWord() {
         copyNextWord();

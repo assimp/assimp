@@ -83,10 +83,55 @@ static void init_keys(const char* passwd,unsigned long* pkeys,const z_crc_t* pcr
 #ifdef INCLUDECRYPTINGCODE_IFCRYPTALLOWED
 
 #define RAND_HEAD_LEN  12
-   /* "last resort" source for second part of crypt seed pattern */
-#  ifndef ZCR_SEED2
-#    define ZCR_SEED2 3141592654UL      /* use PI as default pattern */
-#  endif
+
+/* Prefer platform CSPRNG sources over rand(). Provide a small
+ * cross-platform helper that attempts to use the OS crypto API and
+ * falls back to /dev/urandom. Only if those fail it falls back to
+ * the legacy rand() behaviour to preserve compatibility.
+ */
+
+#if defined(_WIN32)
+#  include <windows.h>
+#  include <wincrypt.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+static int secure_random_byte(void)
+{
+#if defined(_WIN32)
+    HCRYPTPROV hProv = 0;
+    if (CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+        BYTE b = 0;
+        if (CryptGenRandom(hProv, 1, &b)) {
+            CryptReleaseContext(hProv, 0);
+            return (int)b;
+        }
+        CryptReleaseContext(hProv, 0);
+    }
+#endif
+#if defined(__unix__) || defined(__APPLE__)
+    {
+        unsigned char b = 0;
+        FILE *f = fopen("/dev/urandom", "rb");
+        if (f) {
+            if (fread(&b, 1, 1, f) == 1) {
+                fclose(f);
+                return (int)b;
+            }
+            fclose(f);
+        }
+    }
+#endif
+    /* Last resort: seed & use rand(), kept for compatibility only. */
+    static int seeded = 0;
+    if (!seeded) {
+        srand((unsigned)(time(NULL)));
+        seeded = 1;
+    }
+    return (rand() >> 7) & 0xff;
+}
 
 static unsigned crypthead(const char* passwd,       /* password string */
                           unsigned char* buf,       /* where to write header */
@@ -99,23 +144,15 @@ static unsigned crypthead(const char* passwd,       /* password string */
     int t;                       /* temporary */
     int c;                       /* random byte */
     unsigned char header[RAND_HEAD_LEN-2]; /* random header */
-    static unsigned calls = 0;   /* ensure different random header each time */
 
-    if (bufSize<RAND_HEAD_LEN)
-      return 0;
+    if (bufSize < RAND_HEAD_LEN)
+        return 0;
 
-    /* First generate RAND_HEAD_LEN-2 random bytes. We encrypt the
-     * output of rand() to get less predictability, since rand() is
-     * often poorly implemented.
-     */
-    if (++calls == 1)
-    {
-        srand((unsigned)(time(NULL) ^ ZCR_SEED2));
-    }
+    /* Use a cryptographically secure random source when available. */
     init_keys(passwd, pkeys, pcrc_32_tab);
     for (n = 0; n < RAND_HEAD_LEN-2; n++)
     {
-        c = (rand() >> 7) & 0xff;
+        c = secure_random_byte() & 0xff;
         header[n] = (unsigned char)zencode(pkeys, pcrc_32_tab, c, t);
     }
     /* Encrypt random header (last two bytes is high word of crc) */

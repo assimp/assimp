@@ -80,10 +80,61 @@ static void init_keys(const char* passwd, unsigned long* pkeys, const z_crc_t* p
 #ifdef INCLUDECRYPTINGCODE_IFCRYPTALLOWED
 
 #define RAND_HEAD_LEN  12
-   /* "last resort" source for second part of crypt seed pattern */
-#  ifndef ZCR_SEED2
-#    define ZCR_SEED2 3141592654UL      /* use PI as default pattern */
-#  endif
+
+/* Cryptographically secure random source selection:
+ * Windows: CryptGenRandom (FIPS 140-2 certified)
+ * Unix/macOS: /dev/urandom (non-blocking, cryptographically secure)
+ * Fallback: Enhanced rand() with entropy mixing
+ */
+#if defined(_WIN32) || defined(_WIN64)
+#  include <windows.h>
+#  include <wincrypt.h>
+#endif
+#include <stdlib.h>
+#include <time.h>
+#if defined(__unix__) || defined(__APPLE__)
+#  include <fcntl.h>
+#  include <unistd.h>
+#  include <sys/types.h>
+#endif
+
+static int secure_random_byte(unsigned char* byte) {
+#if defined(_WIN32) || defined(_WIN64)
+    HCRYPTPROV hCryptProv = 0;
+    if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+        goto fallback;
+    }
+    if (!CryptGenRandom(hCryptProv, 1, byte)) {
+        CryptReleaseContext(hCryptProv, 0);
+        goto fallback;
+    }
+    CryptReleaseContext(hCryptProv, 0);
+    return 1;
+#elif defined(__unix__) || defined(__APPLE__)
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd >= 0) {
+        unsigned char b = 0;
+        if (read(fd, &b, 1) == 1) {
+            *byte = b;
+            close(fd);
+            return 1;
+        }
+        close(fd);
+    }
+    goto fallback;
+#endif
+fallback:
+    /* Fallback with entropy mixing: time + counter + rand */
+    static int initialized = 0;
+    static unsigned int counter = 0;
+    if (!initialized) {
+        srand((unsigned int)(time(NULL) ^ 0xDEADBEEFUL));
+        initialized = 1;
+    }
+    counter++;
+    *byte = (unsigned char)(((rand() >> 7) ^ (counter & 0xFF)) & 0xFF);
+    return 0;
+}
 
 static unsigned crypthead(const char* passwd,       /* password string */
                           unsigned char* buf,       /* where to write header */
@@ -93,31 +144,21 @@ static unsigned crypthead(const char* passwd,       /* password string */
                           unsigned long crcForCrypting) {
     unsigned n;                  /* index in random header */
     int t;                       /* temporary */
-    int c;                       /* random byte */
     unsigned char header[RAND_HEAD_LEN-2]; /* random header */
-    static unsigned calls = 0;   /* ensure different random header each time */
 
     if (bufSize<RAND_HEAD_LEN)
       return 0;
 
-    /* First generate RAND_HEAD_LEN-2 random bytes. We encrypt the
-     * output of rand() to get less predictability, since rand() is
-     * often poorly implemented.
-     */
-    if (++calls == 1)
-    {
-        srand((unsigned)(time(NULL) ^ ZCR_SEED2));
-    }
+    /* Generate RAND_HEAD_LEN-2 random bytes using cryptographically secure source */
     init_keys(passwd, pkeys, pcrc_32_tab);
-    for (n = 0; n < RAND_HEAD_LEN-2; n++)
-    {
-        c = (rand() >> 7) & 0xff;
+    for (n = 0; n < RAND_HEAD_LEN-2; n++) {
+        unsigned char c = 0;
+        secure_random_byte(&c);
         header[n] = (unsigned char)zencode(pkeys, pcrc_32_tab, c, t);
     }
     /* Encrypt random header (last two bytes is high word of crc) */
     init_keys(passwd, pkeys, pcrc_32_tab);
-    for (n = 0; n < RAND_HEAD_LEN-2; n++)
-    {
+    for (n = 0; n < RAND_HEAD_LEN-2; n++) {
         buf[n] = (unsigned char)zencode(pkeys, pcrc_32_tab, header[n], t);
     }
     buf[n++] = (unsigned char)zencode(pkeys, pcrc_32_tab, (int)(crcForCrypting >> 16) & 0xff, t);

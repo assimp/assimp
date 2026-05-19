@@ -48,7 +48,7 @@ using namespace ::Assimp;
 
 class utObjTools : public ::testing::Test {};
 
-class TestObjFileParser final : public ObjFileParser {
+class TestObjFileParser : public ObjFileParser {
 public:
     TestObjFileParser() = default;
     

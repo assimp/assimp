@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 
 #include "STLLoader.h"
+#include <assimp/ByteSwapper.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
@@ -81,6 +82,8 @@ static bool IsBinarySTL(const char *buffer, size_t fileSize) {
     const char *facecount_pos = buffer + 80;
     uint32_t faceCount(0);
     ::memcpy(&faceCount, facecount_pos, sizeof(uint32_t));
+    // The facet count is stored little-endian on disk; swap on big-endian hosts.
+    AI_SWAP4(faceCount);
     const uint32_t expectedBinaryFileSize = faceCount * 50 + 84;
 
     return expectedBinaryFileSize == fileSize;
@@ -434,7 +437,9 @@ bool STLImporter::LoadBinaryFile() {
     // now read the number of facets
     mScene->mRootNode->mName.Set("<STL_BINARY>");
 
-    pMesh->mNumFaces = *((uint32_t *)sz);
+    // The facet count is stored little-endian on disk.
+    ::memcpy(&pMesh->mNumFaces, sz, sizeof(uint32_t));
+    AI_SWAP4(pMesh->mNumFaces);
     sz += 4;
 
     if (mFileSize < 84ull + pMesh->mNumFaces * 50ull) {
@@ -461,6 +466,10 @@ bool STLImporter::LoadBinaryFile() {
         // for vertex normals
         theVec = (aiVector3f *)sz;
         ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
+        // Vertex/normal floats are stored little-endian on disk.
+        AI_SWAP4(theVec3F.x);
+        AI_SWAP4(theVec3F.y);
+        AI_SWAP4(theVec3F.z);
         vn->x = theVec3F.x;
         vn->y = theVec3F.y;
         vn->z = theVec3F.z;
@@ -471,6 +480,10 @@ bool STLImporter::LoadBinaryFile() {
 
         // vertex 1
         ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
+        // Vertex/normal floats are stored little-endian on disk.
+        AI_SWAP4(theVec3F.x);
+        AI_SWAP4(theVec3F.y);
+        AI_SWAP4(theVec3F.z);
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -479,6 +492,10 @@ bool STLImporter::LoadBinaryFile() {
 
         // vertex 2
         ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
+        // Vertex/normal floats are stored little-endian on disk.
+        AI_SWAP4(theVec3F.x);
+        AI_SWAP4(theVec3F.y);
+        AI_SWAP4(theVec3F.z);
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -487,6 +504,10 @@ bool STLImporter::LoadBinaryFile() {
 
         // vertex 3
         ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
+        // Vertex/normal floats are stored little-endian on disk.
+        AI_SWAP4(theVec3F.x);
+        AI_SWAP4(theVec3F.y);
+        AI_SWAP4(theVec3F.z);
         vp->x = theVec3F.x;
         vp->y = theVec3F.y;
         vp->z = theVec3F.z;
@@ -495,7 +516,9 @@ bool STLImporter::LoadBinaryFile() {
 
         sz = (const unsigned char *)theVec;
 
-        uint16_t color = *((uint16_t *)sz);
+        uint16_t color = 0;
+        ::memcpy(&color, sz, sizeof(uint16_t));
+        AI_SWAP2(color);
         sz += 2;
 
         if (color & (1 << 15)) {

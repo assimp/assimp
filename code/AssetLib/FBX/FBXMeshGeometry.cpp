@@ -170,6 +170,10 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
         const TokenList& tokens = (*it).second->Tokens();
 
+        if (tokens.empty()) {
+            DOMError("expected Layer index token", &element);
+        }
+
         const char* err;
         const int index = ParseTokenAsInt(*tokens[0], err);
         if(err) {

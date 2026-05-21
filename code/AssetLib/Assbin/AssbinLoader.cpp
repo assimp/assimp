@@ -86,6 +86,10 @@ const aiImporterDesc *AssbinImporter::GetInfo() const {
 
 // -----------------------------------------------------------------------------------
 bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    if (pIOHandler == nullptr) {
+        return false;
+    }
+
     IOStream *in = pIOHandler->Open(pFile);
     if (nullptr == in) {
         return false;

@@ -125,6 +125,9 @@ TEST_F(utAssbinImportExport, rejectOverflowingEmbeddedTextureDimensions) {
     appendUint32LE(UINT32_MAX);
     appendUint32LE(UINT32_MAX);
     appendZeros(HINTMAXTEXTURELEN - 1u);
+    // 4-byte payload prevents EOF/truncation from masking overflow regression
+    // in implementations where dimensions wrap to a tiny allocation/read size.
+    appendUint32LE(0);
 
     Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(blob.data(), blob.size(), 0, "assbin");

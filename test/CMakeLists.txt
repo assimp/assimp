@@ -108,7 +108,7 @@ SET( COMMON
   unit/Common/utLogger.cpp
 )
 
-SET(Geometry 
+SET(Geometry
     unit/Geometry/utGeometryUtils.cpp
 )
 
@@ -157,6 +157,7 @@ SET( IMPORTERS
   unit/ImportExport/utOgreImportExport.cpp
   unit/ImportExport/utQ3BSPFileImportExport.cpp
   unit/ImportExport/utOFFImportExport.cpp
+  unit/utOFFSecurity.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
   unit/ImportExport/utMD2Importer.cpp
@@ -277,6 +278,8 @@ ENDIF()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
+enable_testing()
+
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 
@@ -303,7 +306,8 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
 ENDIF()
 
 target_link_libraries( unit assimp ${platform_libs} )
+set_target_properties(unit PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${ASSIMP_RUNTIME_OUTPUT_DIRECTORY})
 
 add_subdirectory(headercheck)
 
-add_test( unittests unit )
+add_test( unittests "${CMAKE_CURRENT_BINARY_DIR}/../bin/Release/unit.exe")

@@ -630,8 +630,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             if ((*it).posFrames.size()) {
                 nd->mPositionKeys = new aiVectorKey[(*it).posFrames.size()];
 
-                aiQuatKey* qu = nd->mRotationKeys;
-                for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos,++qu) {
+                for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos) {
                     aiVectorKey& v = nd->mPositionKeys[nd->mNumPositionKeys++];
 
                     v.mTime = (*pos).time*animfps;

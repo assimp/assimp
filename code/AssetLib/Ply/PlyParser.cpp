@@ -110,6 +110,7 @@ ESemantic Property::ParseSemantic(std::vector<char> &buffer) {
     ai_assert(!buffer.empty());
 
     ESemantic eOut = PLY::EST_INVALID;
+    int indexOut = 0;
     if (DOM::TokenMatch(buffer, "red", 3)) {
         eOut = EST_Red;
     } else if (DOM::TokenMatch(buffer, "green", 5)) {
@@ -178,7 +179,23 @@ ESemantic Property::ParseSemantic(std::vector<char> &buffer) {
         eOut = EST_YNormal;
     } else if (DOM::TokenMatch(buffer, "nz", 2)) {
         eOut = EST_ZNormal;
-    } else {
+    }
+    //GAUSSIAN PROPERTIES
+    else if(PLY::DOM::GaussianTokenMatch(buffer, "f_dc_", 5, 6, indexOut)){
+      eOut = (PLY::ESemantic)(PLY::EST_GaussianDC0 + indexOut);
+    }
+    else if(PLY::DOM::GaussianTokenMatch(buffer, "f_rest_", 7, 8, indexOut) || 
+            PLY::DOM::GaussianTokenMatch(buffer, "f_rest_", 7, 9, indexOut)){
+      eOut = (PLY::ESemantic)(PLY::EST_GaussianRest + indexOut);
+    }
+    else if(PLY::DOM::GaussianTokenMatch(buffer, "scale_", 6, 7, indexOut)){
+      eOut = (PLY::ESemantic)(PLY::EST_GaussianScale0 + indexOut);
+    }
+    else if(PLY::DOM::GaussianTokenMatch(buffer, "rot_", 4, 5, indexOut)){
+      eOut = (PLY::ESemantic)(PLY::EST_GaussianRot0 + indexOut);
+    }
+    //END OF GAUSSIANS PROPERTIES
+    else {
         ASSIMP_LOG_INFO("Found unknown property semantic in file. This is ok");
         DOM::SkipLine(buffer);
     }
@@ -391,6 +408,34 @@ bool PLY::DOM::TokenMatch(std::vector<char> &buffer, const char *token, unsigned
     }
 
     return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool PLY::DOM::GaussianTokenMatch(std::vector<char> &buffer, const char* token, unsigned int len, unsigned int real_len, int &indexOut){
+        const char* pCur = buffer.empty() ? nullptr : &buffer[0];
+        bool ret = false;
+
+        if (pCur)
+        {
+          const char* numStart = pCur + len;
+          const char* numEnd = nullptr;
+          int idx = strtol10(numStart, &numEnd);
+
+          if(numEnd != numStart 
+             && idx >= 0 && idx < 45){
+              const char* szCur = pCur;
+              ret = Assimp::TokenMatchP(pCur, token, len, real_len);
+
+              if(ret)
+                indexOut = idx;
+
+              uintptr_t iDiff = (uintptr_t)pCur - (uintptr_t)szCur;
+              buffer.erase(buffer.begin(), buffer.begin() + iDiff);
+            }
+          return ret;
+        }
+
+        return ret;
 }
 
 // ------------------------------------------------------------------------------------------------

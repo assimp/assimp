@@ -573,7 +573,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         ParseError("binary data array length mismatch", &el);
     }
 
-    const uint32_t full_length = static_cast<uint32_t>(full_length64);
+    const auto full_length = static_cast<uint32_t>(full_length64);
     buff.resize(full_length);
 
     if(encmode == 0) {

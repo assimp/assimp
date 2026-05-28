@@ -1306,6 +1306,14 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     ai_assert(mindices.size());
 
+    const std::vector<unsigned int> &faces = mesh.GetFaceIndexCounts();
+    if (mindices.size() != faces.size()) {
+        FBXImporter::LogError("material index count (", mindices.size(),
+            ") does not match face count (", faces.size(),
+            "), ignoring mesh");
+        return std::vector<unsigned int>();
+    }
+
     std::set<MatIndexArray::value_type> had;
     std::vector<unsigned int> indices;
 

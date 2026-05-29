@@ -328,7 +328,7 @@ def load(filename,
                                      processing,
                                      c_char_p(file_type.encode(sys.getfilesystemencoding())))
     else:
-        # a filename string has been passed -> ENTIÈREMENT REMPLACÉ PAR CE BLOC :
+        # a filename string has been passed
 
         # Create a store to pass to the C importer
         store = _assimp_lib.create_store()

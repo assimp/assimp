@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <memory>
+#include <cstdint>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
@@ -166,15 +167,40 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     strtoul10(car, &car); // skip edge count
     NextToken(&car, end);
 
+    // ===== SECURITY VALIDATION =====
+    constexpr uint64_t OFF_MAX_VERTICES = 10000000;   // 10 million vertices
+    constexpr uint64_t OFF_MAX_FACES = 10000000;      // 10 million faces
+
     if (!numVertices) {
         throw DeadlyImportError("OFF: There are no valid vertices");
     }
     if (!numFaces) {
         throw DeadlyImportError("OFF: There are no valid faces");
     }
+    if (numVertices > OFF_MAX_VERTICES) {
+        throw DeadlyImportError("OFF file has ", numVertices, " vertices, exceeds limit of ", OFF_MAX_VERTICES);
+    }
+    if (numFaces > OFF_MAX_FACES) {
+        throw DeadlyImportError("OFF file has ", numFaces, " faces, exceeds limit of ", OFF_MAX_FACES);
+    }
+    uint64_t requiredVertices = static_cast<uint64_t>(numVertices);
+    uint64_t requiredFaces = static_cast<uint64_t>(numFaces);
+    if (requiredVertices > SIZE_MAX / sizeof(aiVector3D)) {
+        throw DeadlyImportError("Vertex count would cause size_t overflow");
+    }
+    if (requiredFaces > SIZE_MAX / sizeof(aiFace)) {
+        throw DeadlyImportError("Face count would cause size_t overflow");
+    }
+    // Defense in depth: reject files that are too small to contain the vertex text data.
+    const uint64_t minimumVertexTextBytes = requiredVertices * 6; // "x y z\n" minimum
+    if (static_cast<uint64_t>(end - car) < minimumVertexTextBytes) {
+        throw DeadlyImportError("File size inconsistent with vertex count");
+    }
+    ASSIMP_LOG_DEBUG("OFF security validation passed: ", numVertices, " vertices, ", numFaces, " faces");
 
     pScene->mNumMeshes = 1;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
+
 
     aiMesh *mesh = new aiMesh();
     pScene->mMeshes[0] = mesh;

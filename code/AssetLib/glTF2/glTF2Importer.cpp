@@ -1687,6 +1687,11 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
 
         ai_anim->mDuration = maxDuration;
         ai_anim->mTicksPerSecond = 1000.0;
+
+        if (anim.extras.HasExtras()) {
+            ai_anim->mMetaData = new aiMetadata;
+            ParseExtras(ai_anim->mMetaData, anim.extras);
+        }
     }
 }
 

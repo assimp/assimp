@@ -318,13 +318,29 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
     }
 
     if (aiPTI_String == prop->mType) {
-        ai_assert(prop->mDataLength >= 5);
+        // Validate minimum size for length prefix
+        if (prop->mDataLength < 5) {
+            ASSIMP_LOG_ERROR("Material property", pKey, " has invalid data length");
+            return AI_FAILURE;
+        }
 
-        // The string is stored as 32 but length prefix followed by zero-terminated UTF8 data
-        pOut->length = static_cast<unsigned int>(*reinterpret_cast<uint32_t *>(prop->mData));
+        // The string is stored as 32 bit length prefix followed by zero-terminated UTF8 data
+        uint32_t stored_length = *reinterpret_cast<uint32_t *>(prop->mData);
 
-        ai_assert(pOut->length + 1 + 4 == prop->mDataLength);
-        ai_assert(!prop->mData[prop->mDataLength - 1]);
+        // Validate: stored length + 1 (null) + 4 (length field) must equal data length
+        // AND string must not exceed buffer bounds
+        if (stored_length + 1 + 4 != prop->mDataLength || stored_length >= AI_MAXLEN) {
+            ASSIMP_LOG_ERROR("Material string property", pKey, " has length mismatch or exceeds max");
+            return AI_FAILURE;
+        }
+
+        // Verify null terminator exists
+        if (prop->mData[prop->mDataLength - 1] != '\0') {
+            ASSIMP_LOG_ERROR("Material string property", pKey, " is not null-terminated");
+            return AI_FAILURE;
+        }
+
+        pOut->length = stored_length;
         memcpy(pOut->data, prop->mData + 4, pOut->length + 1);
     } else {
         // TODO - implement lexical cast as well

@@ -408,8 +408,12 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
     } else {
         // append a new-line character to the message to be printed
         lastLen = thisLen;
-        ::memcpy(lastMsg, message, lastLen + 1);
-        ::strcat(lastMsg + lastLen, "\n");
+        if (lastLen + 2 > sizeof(lastMsg)) {
+            throw std::runtime_error("Log message too long");
+        }
+        ::memcpy(lastMsg, message, lastLen);
+        lastMsg[lastLen] = '\n';
+        lastMsg[lastLen + 1] = '\0';
 
         message = lastMsg;
         noRepeatMsg = false;

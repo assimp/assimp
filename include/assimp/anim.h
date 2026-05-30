@@ -457,6 +457,10 @@ struct aiAnimation {
      *  The array is mNumMorphMeshChannels in size. */
     C_STRUCT aiMeshMorphAnim **mMorphMeshChannels;
 
+    /** Metadata of the animation, if any. May be nullptr.
+     *  Populated from animation.extras in glTF2 files. */
+    C_STRUCT aiMetadata *mMetaData;
+
 #ifdef __cplusplus
     aiAnimation() AI_NO_EXCEPT
             : mDuration(-1.),

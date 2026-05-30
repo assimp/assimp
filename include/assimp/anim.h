@@ -470,7 +470,8 @@ struct aiAnimation {
               mNumMeshChannels(0),
               mMeshChannels(nullptr),
               mNumMorphMeshChannels(0),
-              mMorphMeshChannels(nullptr) {
+              mMorphMeshChannels(nullptr),
+              mMetaData(nullptr) {
         // empty
     }
 
@@ -497,6 +498,7 @@ struct aiAnimation {
 
             delete[] mMorphMeshChannels;
         }
+        delete mMetaData;
     }
 #endif // __cplusplus
 };

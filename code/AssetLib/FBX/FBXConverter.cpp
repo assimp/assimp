@@ -1350,11 +1350,25 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             continue;
         }
         ++count_faces;
+
+        if (*itf > AI_MAX_FACE_INDICES) {
+            FBXImporter::LogError("ConvertMeshMultiMaterial: face index count ",
+                    *itf, " exceeds limit ", AI_MAX_FACE_INDICES,
+                    ". Rejecting malformed mesh.");
+            return static_cast<unsigned int>(mMeshes.size() - 1);
+        }
         count_vertices += *itf;
     }
 
     ai_assert(count_faces);
     ai_assert(count_vertices);
+
+    if (count_vertices > vertices.size()) {
+        FBXImporter::LogError("ConvertMeshMultiMaterial: face index counts sum to ",
+                count_vertices, " but mesh only has ", vertices.size(),
+                " vertices. Rejecting malformed mesh.");
+        return static_cast<unsigned int>(mMeshes.size() - 1);
+    }
 
     // mapping from output indices to DOM indexing, needed to resolve weights or blendshapes
     std::vector<unsigned int> reverseMapping;

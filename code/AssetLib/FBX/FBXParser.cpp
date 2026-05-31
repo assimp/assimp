@@ -534,7 +534,7 @@ void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uin
 // ------------------------------------------------------------------------------------------------
 // read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
 void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end,
-        std::vector<char>& buff, const Element& /*el*/) {
+        std::vector<char>& buff, const Element& el) {
     BE_NCONST uint32_t encmode = SafeParse<uint32_t>(data, end);
     AI_SWAP4(encmode);
     data += 4;
@@ -564,7 +564,16 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
             ai_assert(false);
     };
 
-    const uint32_t full_length = stride * count;
+    // Validate that count does not cause excessive allocation
+    const uint64_t full_length64 = static_cast<uint64_t>(stride) * count;
+    if (full_length64 > SIZE_MAX || full_length64 > AI_MAX_ALLOC(char)) {
+        ParseError("binary data array too large", &el);
+    }
+    if (encmode == 0 && full_length64 != static_cast<uint64_t>(comp_len)) {
+        ParseError("binary data array length mismatch", &el);
+    }
+
+    const auto full_length = static_cast<uint32_t>(full_length64);
     buff.resize(full_length);
 
     if(encmode == 0) {

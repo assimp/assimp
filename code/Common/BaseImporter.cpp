@@ -380,7 +380,9 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
         }
 
         // swap the endianness ..
-        for (uint32_t *p = (uint32_t *)&data.front(), *end = (uint32_t *)&data.back(); p <= end; ++p) {
+        uint32_t *p = (uint32_t *)&data.front();
+        uint32_t *end = p + (data.size() / sizeof(uint32_t));
+        for (; p < end; ++p) {
             AI_SWAP4P(p);
         }
     }
@@ -394,7 +396,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
         std::vector<char> output;
         auto *ptr = (uint32_t *)&data[0];
-        uint32_t *end = ptr + (data.size() / sizeof(uint32_t)) + 1;
+        uint32_t *end = ptr + (data.size() / sizeof(uint32_t));
         utf8::utf32to8(ptr, end, back_inserter(output));
         return;
     }
@@ -406,7 +408,9 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
             throw DeadlyImportError("Not valid UTF-16 BE");
         }
         // swap the endianness ..
-        for (uint16_t *p = (uint16_t *)&data.front(), *end = (uint16_t *)&data.back(); p <= end; ++p) {
+        uint16_t *p = (uint16_t *)&data.front();
+        uint16_t *end = p + (data.size() / sizeof(uint16_t));
+        for (; p < end; ++p) {
             ByteSwap::Swap2(p);
         }
     }

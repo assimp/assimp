@@ -863,8 +863,9 @@ nl_clean_loop:
             pScene->mTextures[idx]->mWidth = static_cast<unsigned int>(tex_convd.Width);
             pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
             pScene->mTextures[idx]->pcData = (aiTexel *)tex_convd.Data;
-            // texture format description.
-            strncpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint, HINTMAXTEXTURELEN);
+            // texture format description - ensure null termination
+            strncpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint, HINTMAXTEXTURELEN - 1);
+            pScene->mTextures[idx]->achFormatHint[HINTMAXTEXTURELEN - 1] = '\0';
             idx++;
         } // for(const SPP_Texture& tex_convd: mTexture_Converted)
 

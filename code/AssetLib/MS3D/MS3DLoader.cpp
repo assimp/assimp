@@ -393,9 +393,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         // scenepreprocessor adds a default material only if nummat==0).
         materials.emplace_back();
         TempMaterial& m = materials.back();
-        constexpr char DefaultMat[18] = "<MS3D_DefaultMat>";
-        strncpy(m.name, DefaultMat, sizeof(m.name));
-        m.name[18]='\0';
+        constexpr char DefaultMat[] = "<MS3D_DefaultMat>";
+        strncpy(m.name, DefaultMat, sizeof(m.name) - 1);
+        m.name[sizeof(m.name) - 1] = '\0';
         m.diffuse = aiColor4D(0.6f,0.6f,0.6f,1.0);
         m.transparency = 1.f;
         m.shininess = 0.f;

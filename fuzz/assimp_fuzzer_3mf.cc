@@ -12,18 +12,18 @@ with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
-copyright notice, this list of conditions and the
-following disclaimer.
+  copyright notice, this list of conditions and the
+  following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the
-following disclaimer in the documentation and/or other
-materials provided with the distribution.
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
 
 * Neither the name of the assimp team, nor the names of its
-contributors may be used to endorse or promote products
-derived from this software without specific prior
-written permission of the assimp team.
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -38,29 +38,28 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "AbstractImportExportBase.h"
-#include "UnitTestPCH.h"
-
+#include "fuzzer_common.h"
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-class utCSMImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/ThomasFechten.csm", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataSize) {
+    // Limit input size to 1MB
+    if (dataSize > 1024 * 1024) {
+        return 0;
     }
-};
 
-TEST_F(utCSMImportExport, importBlenFromFileTest) {
-    EXPECT_TRUE(importerTest());
-}
+    Importer importer;
+    // Force 3MF format
+    if (!AssimpFuzz::ForceFormat(importer, "3mf")) {
+        return 0;
+    }
 
-TEST_F(utCSMImportExport, importMalformedZeroFrameRange) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/malformed_zero_framerange.csm", 0);
-    EXPECT_NE(nullptr, scene);
+    unsigned int flags = aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure;
+    // We pass "3mf" hint as well, though only 3MF loader is registered now.
+    const aiScene *sc = importer.ReadFileFromMemory(data, dataSize, flags, "3mf");
+
+    return 0;
 }

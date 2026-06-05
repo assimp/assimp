@@ -436,10 +436,10 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 
 class JavaIOStream : public Assimp::IOStream {
 public:
-	JavaIOStream(size_t size, char* buffer, jobject jIOStream) :
-			size(size),
-			buffer(buffer),
-			jIOStream(jIOStream) {
+	JavaIOStream(size_t size_, char* buffer_, jobject jIOStream_) :
+			size(size_),
+			buffer(buffer_),
+			jIOStream(jIOStream_) {
 		// empty	
 	}
 

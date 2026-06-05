@@ -49,6 +49,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <limits>
 
+#ifdef JNI_LOG
+#  ifdef ANDROID
+#    include <android/log.h>
+#    define lprintf(...) __android_log_print(ANDROID_LOG_VERBOSE, __func__, __VA_ARGS__)
+#  else
+#    define lprintf(...) printf (__VA_ARGS__)
+#  endif /* ANDROID */
+#else
+#  define lprintf
+#endif // JNI_LOG
+
 // Safe arithmetic helpers for overflow protection
 template <typename T>
 bool SafeAdd(T a, T b, T& result) {
@@ -67,17 +78,6 @@ bool SafeMultiply(T a, T b, T& result) {
     result = a * b;
     return true;
 }
-
-#ifdef JNI_LOG
-#  ifdef ANDROID
-#    include <android/log.h>
-#    define lprintf(...) __android_log_print(ANDROID_LOG_VERBOSE, __func__, __VA_ARGS__)
-#  else
-#    define lprintf(...) printf (__VA_ARGS__)
-#  endif /* ANDROID */
-#else
-#  define lprintf
-#endif // JNI_LOG
 
 static std::string gLastErrorString;
 

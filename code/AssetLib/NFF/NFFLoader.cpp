@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -86,7 +86,7 @@ const aiImporterDesc *NFFImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
     SkipSpaces(&sz, lineEnd);          \
-    if (!IsLineEnd(*sz)) sz = fast_atoreal_move<ai_real>(sz, (ai_real &)f);
+    if (!IsLineEnd(*sz)) sz = fast_atoreal_move(sz, (ai_real &)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
@@ -548,8 +548,12 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
                         // pass the validation step for the moment.
                         // TODO: fix naming of objects in the scene-graph later
                         if (objectName.length()) {
-                            ::strncpy(mesh->name, objectName.c_str(), objectName.size());
-                            ASSIMP_itoa10(&mesh->name[objectName.length()], 30, subMeshIdx++);
+                            const size_t copyLen = objectName.length() < (sizeof(mesh->name) - 1u) ? objectName.length() : (sizeof(mesh->name) - 1u);
+                            ::memcpy(mesh->name, objectName.c_str(), copyLen);
+                            mesh->name[copyLen] = '\0';
+                            if (copyLen < sizeof(mesh->name) - 1u) {
+                                ASSIMP_itoa10(&mesh->name[copyLen], static_cast<unsigned int>(sizeof(mesh->name) - copyLen), subMeshIdx++);
+                            }
                         }
 
                         // copy the shader to the mesh.

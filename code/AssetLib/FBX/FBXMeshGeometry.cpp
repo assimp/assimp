@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+#include <algorithm>
 #include <functional>
 
 #include "FBXMeshGeometry.h"
@@ -69,8 +70,10 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
         }
         const BlendShape* const bsp = ProcessSimpleConnection<BlendShape>(*con, false, "BlendShape -> Geometry", element);
         if (bsp) {
-            auto pr = blendShapes.insert(bsp);
-            if (!pr.second) {
+            // Only add a blendshape if it doesn't exist already
+            if (std::find(blendShapes.begin(), blendShapes.end(), bsp) == blendShapes.end()) {
+                blendShapes.push_back(bsp);
+            } else {
                 FBXImporter::LogWarn("there is the same blendShape id ", bsp->ID());
             }
         }
@@ -78,7 +81,7 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
 }
 
 // ------------------------------------------------------------------------------------------------
-const std::unordered_set<const BlendShape*>& Geometry::GetBlendShapes() const {
+const std::vector<const BlendShape*>& Geometry::GetBlendShapes() const {
     return blendShapes;
 }
 
@@ -165,7 +168,11 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     // if settings.readAllLayers is false:
     //  * read only the layer with index 0, but warn about any further layers
     for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
-        const TokenList& tokens = (*it).second->Tokens();
+		const TokenList& tokens = (*it).second->Tokens();
+
+        if (tokens.empty()) {
+            DOMError("expected Layer index token", &element);
+        }
 
         const char* err;
         const int index = ParseTokenAsInt(*tokens[0], err);

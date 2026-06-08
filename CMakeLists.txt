@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# Copyright (c) 2006-2025, assimp team
+# Copyright (c) 2006-2026, assimp team
 #
 # All rights reserved.
 #
@@ -34,6 +34,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #----------------------------------------------------------------------
+
+# Enable Clang unsafe buffer usage warning for memory safety
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wunsafe-buffer-usage)
+endif()
+
 SET(CMAKE_POLICY_DEFAULT_CMP0012 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
@@ -98,13 +104,13 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.8.tar.gz"
-    SHA1 "26c79d587883ec910bce168e25f6ac4595f97033"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.9.tar.gz"
+    SHA1 "a962c9f0cfd6f8fc62ea25943d89debfa61d4d4a"
   )
   ADD_DEFINITIONS(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 6.0.2
+PROJECT(Assimp VERSION 6.0.5
   LANGUAGES C CXX
   DESCRIPTION "Open Asset Import Library (Assimp) is a library to import various well-known 3D model formats in a uniform manner."
 )
@@ -362,7 +368,7 @@ ELSEIF(MSVC)
   elseif((GENERATOR_IS_MULTI_CONFIG) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("-- MSVC PDB generation disabled. Release binary will not be debuggable.")
   endif()
-  if(NOT /utf-8 IN_LIST CMAKE_CXX_FLAGS)
+  if(NOT CMAKE_CXX_FLAGS MATCHES "/utf-8")
     # Source code is encoded in UTF-8
     ADD_COMPILE_OPTIONS(/source-charset:utf-8)
   endif()
@@ -591,7 +597,7 @@ ELSE()
     SET(ASSIMP_BUILD_MINIZIP 1)
   ELSE()
     ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
-    SET(ZLIB_LIBRARIES_LINKED -lz)
+    SET(ZLIB_LIBRARIES_LINKED -l${ZLIB_LIBRARIES})
   ENDIF()
   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ENDIF()

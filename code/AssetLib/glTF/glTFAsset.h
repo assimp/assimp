@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -49,8 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLTFASSET_H_INC
 #define GLTFASSET_H_INC
 
-#if !defined(ASSIMP_BUILD_NO_GLTF_IMPORTER) && !defined(ASSIMP_BUILD_NO_GLTF1_IMPORTER)
-
 #include "AssetLib/glTFCommon/glTFCommon.h"
 #include <assimp/Exceptional.h>
 #include <list>
@@ -83,7 +81,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
+#if _MSC_VER > 1500 || (defined __GNUC__)
 #       define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
 #   else
 #       define gltf_unordered_map map
@@ -1007,7 +1005,5 @@ private:
 
 // Include the implementation of the methods
 #include "glTFAsset.inl"
-
-#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #endif // GLTFASSET_H_INC

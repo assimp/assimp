@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -81,32 +81,30 @@ namespace Assimp {
  *  Describes to which node a scene must be attached to.
  */
 struct AttachmentInfo {
-    AttachmentInfo() :
-            scene(nullptr),
-            attachToNode(nullptr) {}
+    AttachmentInfo() = default;
+    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) : scene(_scene), attachToNode(_attachToNode) {
+        // empty
+    }
+    ~AttachmentInfo() = default;
 
-    AttachmentInfo(aiScene *_scene, aiNode *_attachToNode) :
-            scene(_scene), attachToNode(_attachToNode) {}
-
-    aiScene *scene;
-    aiNode *attachToNode;
+    aiScene *scene{nullptr};
+    aiNode *attachToNode{nullptr};
 };
 
 // ---------------------------------------------------------------------------
+/// @brief Helper data structure for SceneCombiner.
 struct NodeAttachmentInfo {
-    NodeAttachmentInfo() :
-            node(nullptr),
-            attachToNode(nullptr),
-            resolved(false),
-            src_idx(SIZE_MAX) {}
-
+    NodeAttachmentInfo() = default;
+    ~NodeAttachmentInfo() = default;
     NodeAttachmentInfo(aiNode *_scene, aiNode *_attachToNode, size_t idx) :
-            node(_scene), attachToNode(_attachToNode), resolved(false), src_idx(idx) {}
+            node(_scene), attachToNode(_attachToNode), src_idx(idx) {
+        // empty
+    }
 
-    aiNode *node;
-    aiNode *attachToNode;
-    bool resolved;
-    size_t src_idx;
+    aiNode *node{nullptr};
+    aiNode *attachToNode{nullptr};
+    bool resolved{false};
+    size_t src_idx{SIZE_MAX};
 };
 
 // ---------------------------------------------------------------------------
@@ -139,7 +137,7 @@ struct NodeAttachmentInfo {
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
-typedef std::pair<aiBone *, unsigned int> BoneSrcIndex;
+using BoneSrcIndex = std::pair<aiBone *, unsigned int> ;
 
 // ---------------------------------------------------------------------------
 /** @brief Helper data structure for SceneCombiner::MergeBones.

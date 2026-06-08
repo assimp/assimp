@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -299,7 +299,7 @@ typedef unsigned int ai_uint;
 
 /* Numerical limits */
 #ifdef __cplusplus
-constexpr ai_real ai_epsilon = (ai_real) 1e-6;
+inline constexpr ai_real ai_epsilon = (ai_real) 1e-6;
 #else
 #  define ai_epsilon ((ai_real)1e-6)
 #endif

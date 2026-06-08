@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -1270,5 +1270,4 @@ bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
 }
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
-
-#endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER
+#endif // ASSIMP_BUILD_NO_ASE_IMPORTER

@@ -128,13 +128,17 @@ void X3DGeoHelper::rect_parallel_epiped(const aiVector3D &pSize, std::list<aiVec
 
 #undef MESH_RectParallelepiped_CREATE_VERT
 
+static constexpr int InvalidIndex = -1;
+
 void X3DGeoHelper::coordIdx_str2faces_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces, unsigned int &pPrimitiveTypes) {
     std::vector<int32_t> f_data(pCoordIdx);
     std::vector<unsigned int> inds;
     unsigned int prim_type = 0;
 
-    if (f_data.back() != (-1)) {
-        f_data.push_back(-1);
+    if (!f_data.empty()) {
+        if (f_data.back() != InvalidIndex) {
+            f_data.push_back(InvalidIndex);
+        }
     }
 
     // reserve average size.
@@ -191,8 +195,10 @@ mg_m_err:
 void X3DGeoHelper::coordIdx_str2lines_arr(const std::vector<int32_t> &pCoordIdx, std::vector<aiFace> &pFaces) {
     std::vector<int32_t> f_data(pCoordIdx);
 
-    if (f_data.back() != (-1)) {
-        f_data.push_back(-1);
+    if (!f_data.empty()) {
+        if (f_data.back() != InvalidIndex) {
+            f_data.push_back(InvalidIndex);
+        }
     }
 
     // reserve average size.

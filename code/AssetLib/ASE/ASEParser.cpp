@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -1427,7 +1427,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices, ASE::Mesh &mes
 
                     // then parse the vertex weight
                     if (!SkipSpaces(&mFilePtr, mEnd)) break;
-                    mFilePtr = fast_atoreal_move<float>(mFilePtr, pairOut.second);
+                    mFilePtr = fast_atoreal_move(mFilePtr, pairOut.second);
 
                     // -1 marks unused entries
                     if (-1 != pairOut.first) {
@@ -1893,7 +1893,7 @@ void Parser::ParseLV4MeshReal(ai_real &fOut) {
         return;
     }
     // parse the first float
-    mFilePtr = fast_atoreal_move<ai_real>(mFilePtr, fOut);
+    mFilePtr = fast_atoreal_move(mFilePtr, fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFloat(float &fOut) {
@@ -1906,7 +1906,7 @@ void Parser::ParseLV4MeshFloat(float &fOut) {
         return;
     }
     // parse the first float
-    mFilePtr = fast_atoreal_move<float>(mFilePtr, fOut);
+    mFilePtr = fast_atoreal_move(mFilePtr, fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int &iOut) {

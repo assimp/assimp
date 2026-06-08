@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /** AC3D (*.ac) importer class
 */
-class AC3DImporter : public BaseImporter {
+class AC3DImporter final : public BaseImporter {
 public:
     AC3DImporter();
     ~AC3DImporter() override = default;

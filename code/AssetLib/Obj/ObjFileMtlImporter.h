@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -87,6 +87,8 @@ private:
     /// Gets a float value from data.
     void getFloatValue(ai_real &value);
     void getFloatValue(Maybe<ai_real> &value);
+    void getFloatIfMaterialValid(ai_real ObjFile::Material::*member);
+    void getFloatIfMaterialValid(Maybe<ai_real> ObjFile::Material::*member);
     /// Creates a new material from loaded data.
     void createMaterial();
     /// Get texture name from loaded data.

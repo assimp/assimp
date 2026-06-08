@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
-#include "contrib/meshlab/autoclone/meshlab_repo-src/src/meshlabplugins/io_x3d/vrml/Parser.h"
+#include "meshlabplugins/io_x3d/vrml/Parser.h"
 #endif // #if !defined(ASSIMP_BUILD_NO_VRML_IMPORTER)
 
 namespace Assimp {

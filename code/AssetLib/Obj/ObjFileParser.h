@@ -89,7 +89,7 @@ protected:
     /// Parse the loaded file
     void parseFile(IOStreamBuffer<char> &streamBuffer);
     /// Method to copy the new delimited word in the current line.
-    void copyNextWord(char *pBuffer, size_t length);
+    void copyNextWord();
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();
     /// Stores the vector
@@ -106,8 +106,8 @@ protected:
     void getFace(aiPrimitiveType type);
     /// Reads the material description.
     void getMaterialDesc();
-    /// Gets a comment.
-    void getComment();
+    /// Skip a comment.
+    void skipComment();
     /// Gets a a material library.
     void getMaterialLib();
     /// Creates a new material.
@@ -115,9 +115,9 @@ protected:
     /// Gets the group name from file.
     void getGroupName();
     /// Gets the group number from file.
-    void getGroupNumber();
+    void skipGroupNumber();
     /// Gets the group number and resolution from file.
-    void getGroupNumberAndResolution();
+    void skipGroupNumberAndResolution();
     /// Returns the index of the material. Is -1 if not material was found.
     int getMaterialIndex(const std::string &strMaterialName);
     /// Parse object name
@@ -131,27 +131,29 @@ protected:
     /// Error report in token
     void reportErrorTokenInFace();
 
-private:
+protected:
     /// Default material name
     static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
-    DataArrayIt m_DataIt;
+    DataArrayIt mDataIt{};
     //! Iterator to end position of buffer
-    DataArrayIt m_DataItEnd;
+    DataArrayIt mDataItEnd{};
     //! Pointer to model instance
-    std::unique_ptr<ObjFile::Model> m_pModel;
+    std::unique_ptr<ObjFile::Model> mModel{};
     //! Current line (for debugging)
-    unsigned int m_uiLine;
-    //! Helper buffer
-    char m_buffer[Buffersize];
+    unsigned int mLine{ 0 };
+    //! Helper buffer (safe)
+    std::string mBuffer;
 	/// End of buffer
-    const char *mEnd;
+    const char *mEnd{ nullptr };
     /// Pointer to IO system instance.
-    IOSystem *m_pIO;
+    IOSystem *mIO{ nullptr };
     //! Pointer to progress handler
-    ProgressHandler *m_progress;
+    ProgressHandler *mProgress{ nullptr };
     /// Path to the current model, name of the obj file where the buffer comes from
-    const std::string m_originalObjFileName;
+    const std::string mOriginalObjFileName{};
+
+private:
 };
 
 } // Namespace Assimp

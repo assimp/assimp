@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -135,7 +135,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
             else if (TokenMatchI(buffer,"rate",4))  {
                 SkipSpaces(&buffer, end);
                 float d = { 0.0f };
-                buffer = fast_atoreal_move<float>(buffer,d);
+                buffer = fast_atoreal_move(buffer,d);
                 anim->mTicksPerSecond = d;
             }
             else if (TokenMatchI(buffer,"order",5)) {
@@ -175,7 +175,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
                 // If we know how many frames we'll read, we can preallocate some storage
                 unsigned int alloc = 100;
-                if (last != 0x00ffffff) {
+                if (last != 0x00ffffff && last > first) {
                     // re-init if the file has last frame data
                     alloc = last-first;
                     alloc += alloc>>2u; // + 25%
@@ -226,17 +226,17 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                         } else {
                             aiVectorKey* sub = s->mPositionKeys + s->mNumPositionKeys;
                             sub->mTime = (double)frame;
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.x);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.x);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample y coord");
                             }
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.y);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.y);
 
                             if (!SkipSpacesAndLineEnd(&buffer, end)) {
                                 throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample z coord");
                             }
-                            buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.z);
+                            buffer = fast_atoreal_move(buffer, sub->mValue.z);
 
                             ++s->mNumPositionKeys;
                         }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2025, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -77,12 +77,12 @@ static constexpr aiImporterDesc desc = {
     "dae xml zae"
 };
 
-static const float kMillisecondsFromSeconds = 1000.f;
+static constexpr float kMillisecondsFromSeconds = 1000.f;
 
 // Add an item of metadata to a node
 // Assumes the key is not already in the list
 template <typename T>
-inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
+void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
     if (nullptr == node->mMetaData) {
         node->mMetaData = new aiMetadata();
     }
@@ -92,7 +92,7 @@ inline void AddNodeMetaData(aiNode *node, const std::string &key, const T &value
 // ------------------------------------------------------------------------------------------------
 // Reads a float value from an accessor and its data array.
 static ai_real ReadFloat(const Accessor &pAccessor, const Data &pData, size_t pIndex, size_t pOffset) {
-    size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;
+    const size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;
     ai_assert(pos < pData.mValues.size());
     return pData.mValues[pos];
 }
@@ -507,16 +507,20 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
             }
 
             if (table && !table->mMap.empty()) {
-                std::pair<Collada::Effect *, aiMaterial *> &mat = newMats[matIdx];
+                if (matIdx < newMats.size()) {
+                    std::pair<Collada::Effect *, aiMaterial *> &mat = newMats[matIdx];
 
-                // Iterate through all texture channels assigned to the effect and
-                // check whether we have mapping information for it.
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexDiffuse, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexAmbient, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexSpecular, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexEmissive, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexTransparent, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexBump, *table);
+                    // Iterate through all texture channels assigned to the effect and
+                    // check whether we have mapping information for it.
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexDiffuse, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexAmbient, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexSpecular, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexEmissive, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexTransparent, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexBump, *table);
+                } else {
+                    ASSIMP_LOG_WARN("Collada: Ignoring material mapping for mesh \"", mid.mMeshOrController, "\". Material index ", matIdx, " is out of bounds (newMats.size()=", newMats.size(), ").");
+                }
             }
 
             // built lookup index of the Mesh-Submesh-Material combination
@@ -1819,4 +1823,4 @@ std::string ColladaLoader::FindNameForNode(const Node *pNode) {
 
 } // Namespace Assimp
 
-#endif // !! ASSIMP_BUILD_NO_DAE_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_COLLADA_IMPORTER

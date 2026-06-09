@@ -59,6 +59,12 @@ TEST(utMD5Importer, importSimpleCube) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utMD5Importer, importMalformedWeightIndex) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/malformed_weight_index.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
 TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);

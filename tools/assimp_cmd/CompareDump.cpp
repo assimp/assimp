@@ -84,22 +84,17 @@ class sliced_chunk_iterator;
 class compare_fails_exception final : public virtual std::exception {
 public:
 
-    enum {MAX_ERR_LEN = 4096};
+    compare_fails_exception(std::string msg) noexcept
+        : mywhat(std::move(msg) + "\n")
+    {}
 
-    /* public c'tors */
-    compare_fails_exception(const char* msg) {
-        strncpy(mywhat,msg,MAX_ERR_LEN-1);
-        strcat(mywhat,"\n");
-    }
-
-    /* public member functions */
-    const char* what() const throw() {
-        return mywhat;
+    const char* what() const noexcept override {
+        return mywhat.c_str();
     }
 
 private:
 
-    char mywhat[MAX_ERR_LEN+1];
+    std::string mywhat;
 };
 
 

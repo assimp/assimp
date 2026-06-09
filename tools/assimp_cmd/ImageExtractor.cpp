@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/StringComparison.h>
 #include <assimp/fast_atof.h>
+#include <vector>
 
 static const char *AICMD_MSG_DUMP_HELP_E =
         "assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]\n"
@@ -119,13 +120,24 @@ int SaveAsBMP(FILE *file, const aiTexel *data, unsigned int width, unsigned int 
         return 1;
     }
 
-    const unsigned int numc = (SaveAlpha ? 4 : 3);
-    unsigned char *buffer = new unsigned char[width * height * numc];
+    const size_t numc = (SaveAlpha ? 4u : 3u);
+    const size_t widthSize = static_cast<size_t>(width);
+    if (widthSize > SIZE_MAX / numc) {
+        return 1;
+    }
+
+    const size_t row = widthSize * numc;
+    if (height > 0 && row > SIZE_MAX / height) {
+        return 1;
+    }
+
+    const size_t bufferSize = row * static_cast<size_t>(height);
+    std::vector<unsigned char> buffer(bufferSize);
 
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
 
-            unsigned char *s = &buffer[(y * width + x) * numc];
+            unsigned char *s = buffer.data() + (y * width + x) * numc;
             const aiTexel *t = &data[y * width + x];
             s[0] = t->b;
             s[1] = t->g;
@@ -159,15 +171,13 @@ int SaveAsBMP(FILE *file, const aiTexel *data, unsigned int width, unsigned int 
 
     fwrite(&info, sizeof(BITMAPINFOHEADER), 1, file);
 
-    unsigned char *temp = buffer + info.biSizeImage;
-    const unsigned int row = width * numc;
+    unsigned char *temp = buffer.data() + info.biSizeImage;
+    const size_t rowSize = widthSize * numc;
 
-    for (int y = 0; temp -= row, y < info.biHeight; ++y) {
-        fwrite(temp, row, 1, file);
+    for (int y = 0; temp -= rowSize, y < info.biHeight; ++y) {
+        fwrite(temp, rowSize, 1, file);
     }
 
-    // delete the buffer
-    delete[] buffer;
     return 0;
 }
 
@@ -317,10 +327,12 @@ int Assimp_Extract(const char *const *params, unsigned int num) {
         // append suffix if necessary - always if all textures are exported
         if (!nosuffix || (texIdx == 0xffffffff)) {
             out_cpy.append("_img");
-            char tmp[10];
-            Assimp::ASSIMP_itoa10(tmp, i);
-
-            out_cpy.append(std::string(tmp));
+            if (i < 10u) {
+                out_cpy.append("00");
+            } else if (i < 100u) {
+                out_cpy.append("0");
+            }
+            out_cpy.append(std::to_string(i));
         }
 
         // if the texture is a compressed one, we'll export

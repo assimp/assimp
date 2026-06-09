@@ -189,6 +189,8 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
+                (*i)->mColors[2] = nullptr;
+                delete *i;
                 continue;
             }
             *pp++ = *i;

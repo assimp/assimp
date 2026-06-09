@@ -1836,6 +1836,31 @@ inline void Skin::Read(Value &obj, Asset &r) {
             }
         }
     }
+
+    // Validate inverseBindMatrices accessor per glTF 2.0 spec
+    if (inverseBindMatrices) {
+        if (inverseBindMatrices->type != AttribType::MAT4) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor must have MAT4 type");
+        }
+        if (inverseBindMatrices->componentType != ComponentType_FLOAT) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor must have FLOAT componentType");
+        }
+        if (inverseBindMatrices->count < jointNames.size()) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor count must be >= number of joints");
+        }
+
+        // Validate that the fourth row of each matrix is [0, 0, 0, 1]
+        uint8_t *ptr = inverseBindMatrices->GetPointer();
+        if (ptr) {
+            const size_t stride = inverseBindMatrices->GetStride();
+            for (size_t i = 0; i < inverseBindMatrices->count; ++i) {
+                const float *m = reinterpret_cast<const float *>(ptr + i * stride);
+                if (m[3] != 0.0f || m[7] != 0.0f || m[11] != 0.0f || m[15] != 1.0f) {
+                    throw DeadlyImportError("GLTF: inverseBindMatrices[", i, "] fourth row must be [0, 0, 0, 1]");
+                }
+            }
+        }
+    }
 }
 
 inline void Animation::Read(Value &obj, Asset &r) {

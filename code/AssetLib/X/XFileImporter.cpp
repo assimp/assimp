@@ -263,7 +263,7 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
             // or referenced material, it should already have a valid index
             mesh->mMaterialIndex = 0;
             if (!sourceMesh->mFaceMaterials.empty()) {
-                if (sourceMesh->mMaterials) != nullptr) {
+                if (sourceMesh->mMaterials != nullptr) {
                     mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
                 }
             }

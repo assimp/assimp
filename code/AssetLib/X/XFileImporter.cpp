@@ -261,10 +261,11 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
 
             // find the material in the scene's material list. Either own material
             // or referenced material, it should already have a valid index
+            mesh->mMaterialIndex = 0;
             if (!sourceMesh->mFaceMaterials.empty()) {
-                mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
-            } else {
-                mesh->mMaterialIndex = 0;
+                if (sourceMesh->mMaterials) != nullptr) {
+                    mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
+                }
             }
 
             // Create properly sized data arrays in the mesh. We store unique vertices per face,

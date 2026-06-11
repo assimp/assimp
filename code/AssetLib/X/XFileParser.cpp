@@ -564,6 +564,7 @@ void XFileParser::ParseDataObjectMeshTextureCoords(Mesh *pMesh) {
     CheckForClosingBrace();
 }
 
+// ------------------------------------------------------------------------------------------------
 void XFileParser::ParseDataObjectMeshFVFData(Mesh *pMesh) {
     readHeadOfDataObject();
 
@@ -583,18 +584,16 @@ void XFileParser::ParseDataObjectMeshFVFData(Mesh *pMesh) {
     pMesh->mNumTextures += channels;
 
     if (channels > 0) {
-
-        unsigned int coordCount = numCoords / (2 * channels);
+        const unsigned int coordCount = numCoords / (2 * channels);
         for (unsigned int uvSet = 0; uvSet < channels; uvSet++) {
-
-            std::vector<aiVector2D> &coords = pMesh->mTexCoords[baseUvSetCount + uvSet];
+            auto &coords = pMesh->mTexCoords[baseUvSetCount + uvSet];
             // UVs are saved as ints, so two for each vertex
             coords.resize(coordCount);
         }
 
         for (unsigned int a = 0; a < coordCount; a++) {
             for (unsigned int uvSet = 0; uvSet < channels; uvSet++) {
-                std::vector<aiVector2D> &coords = pMesh->mTexCoords[baseUvSetCount + uvSet];
+                auto &coords = pMesh->mTexCoords[baseUvSetCount + uvSet];
 
                 // They're saved as ints but they're actually floats.
                 unsigned int val = ReadInt();

@@ -73,7 +73,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial *pMat,
         aiMaterialProperty *prop = pMat->mProperties[i];
 
         if (prop /* just for safety ... */
-                && 0 == strncmp(prop->mKey.data, pKey, strlen(pKey)) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
+                && 0 == strncmp(prop->mKey.data, pKey, AI_MAXLEN) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
                 && (UINT_MAX == index || prop->mIndex == index)) {
             *pPropOut = pMat->mProperties[i];
             return AI_SUCCESS;
@@ -511,9 +511,13 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     pcNew->mData = new char[pSizeInBytes];
     memcpy(pcNew->mData, pInput, pSizeInBytes);
 
-    pcNew->mKey.length = static_cast<ai_uint32>(::strlen(pKey));
-    ai_assert(AI_MAXLEN > pcNew->mKey.length);
-    strcpy(pcNew->mKey.data, pKey);
+    const size_t keyLen = ::strlen(pKey);
+    pcNew->mKey.length = static_cast<ai_uint32>(std::min<size_t>(keyLen, AI_MAXLEN - 1));
+    if (keyLen >= AI_MAXLEN) {
+        ASSIMP_LOG_WARN("aiMaterial: property key '", pKey, "' exceeds AI_MAXLEN and will be truncated.");
+    }
+	memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
+    pcNew->mKey.data[pcNew->mKey.length] = '\0';
 
     if (UINT_MAX != iOutIndex) {
         mProperties[iOutIndex] = pcNew.release();

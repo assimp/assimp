@@ -212,8 +212,13 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
 
     for (FaceArray::const_iterator iter = meshSrc.mFaces.begin(), iterEnd = meshSrc.mFaces.end(); iter != iterEnd; ++iter) {
         const aiFace &face = *iter;
+        // Reject unpopulated faces (numtris > tri-lines leaves mIndices == nullptr).
+        if (face.mNumIndices != 3 || face.mIndices == nullptr) {
+            throw DeadlyImportError("MD5MESH: face is missing its three vertex indices");
+        }
         for (unsigned int i = 0; i < 3; ++i) {
-            if (face.mIndices[0] >= meshSrc.mVertices.size()) {
+            // Check mIndices[i] not [0]: catches out-of-range indices on faces 1 and 2.
+            if (face.mIndices[i] >= meshSrc.mVertices.size()) {
                 throw DeadlyImportError("MD5MESH: Invalid vertex index");
             }
 

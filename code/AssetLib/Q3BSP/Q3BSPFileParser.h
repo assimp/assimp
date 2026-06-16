@@ -69,6 +69,7 @@ protected:
     bool parseFile();
     bool validateFormat();
     void getLumps();
+    void validateLumps();
     void countLumps();
     void getVertices();
     void getIndices();

@@ -42,7 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Material/MaterialSystem.h"
 #include <assimp/scene.h>
-#include <random>
+#include <cstdint>
+#include <string>
 
 using namespace ::std;
 using namespace ::Assimp;
@@ -109,6 +110,32 @@ static void AddPropertyToMaterial(aiMaterial *material, aiMaterialProperty *prop
     }
     material->mProperties[material->mNumProperties++] = prop;
 }
+
+// Small, fully deterministic pseudo-random generator (SplitMix64). A hand-rolled
+// generator is used here instead of <random> for two reasons:
+//   * std::uniform_int_distribution is undefined for narrow integer types such
+//     as uint8_t and is rejected at compile time by the MSVC standard library;
+//   * the engine output is identical on every platform and standard library,
+//     so this fuzz test is fully reproducible (std::uniform_int_distribution
+//     maps engine output to a range differently across implementations).
+class DeterministicFuzzRng {
+public:
+    explicit DeterministicFuzzRng(uint64_t seed) :
+            mState(seed) {}
+
+    // Returns a pseudo-random value in the inclusive range [0, maxInclusive].
+    uint32_t Next(uint32_t maxInclusive) {
+        mState += 0x9E3779B97F4A7C15ull;
+        uint64_t z = mState;
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+        z ^= (z >> 31);
+        return static_cast<uint32_t>(z % (static_cast<uint64_t>(maxInclusive) + 1ull));
+    }
+
+private:
+    uint64_t mState;
+};
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testFloatProperty) {
@@ -225,25 +252,26 @@ TEST_F(MaterialSystemTest, testNonNullTerminatedStringPropertyFails) {
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testRandomMalformedStringProperties) {
-    std::mt19937_64 engine(0xDEADBEEF);
-    std::uniform_int_distribution<uint32_t> lengthDist(0, AI_MAXLEN + 10u);
-    std::uniform_int_distribution<uint32_t> sizeDist(0, 64u);
-    std::uniform_int_distribution<uint8_t> byteDist(0, 255);
+    DeterministicFuzzRng rng(0xDEADBEEFull);
 
     for (unsigned int i = 0; i < 100; ++i) {
-        uint32_t declaredLen = lengthDist(engine);
-        uint32_t payloadSize = sizeDist(engine);
+        const uint32_t declaredLen = rng.Next(AI_MAXLEN + 10u);
+        const uint32_t payloadSize = rng.Next(64u);
         std::vector<char> payload(payloadSize);
         for (uint32_t j = 0; j < payloadSize; ++j) {
-            payload[j] = static_cast<char>(byteDist(engine));
+            payload[j] = static_cast<char>(rng.Next(255u));
         }
-        auto prop = CreateMaterialStringProperty("testFuzz", declaredLen, payload);
+        // Each property needs a distinct key: aiGetMaterialProperty returns the
+        // first property matching a key, so reusing one key would only ever test
+        // the first property while the oracle is computed for the i-th one.
+        const std::string key = "testFuzz" + std::to_string(i);
+        auto prop = CreateMaterialStringProperty(key.c_str(), declaredLen, payload);
         AddPropertyToMaterial(this->pcMat, prop);
 
         const bool shouldBeValid = IsValidMaterialStringProperty(prop);
         aiString s;
         EXPECT_EQ(shouldBeValid ? AI_SUCCESS : AI_FAILURE,
-                aiGetMaterialString(this->pcMat, "testFuzz", 0, 0, &s));
+                aiGetMaterialString(this->pcMat, key.c_str(), 0, 0, &s));
     }
 }
 

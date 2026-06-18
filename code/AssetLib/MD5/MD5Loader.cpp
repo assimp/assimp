@@ -117,7 +117,9 @@ void MD5Importer::SetupProperties(const Importer *pImp) {
 void MD5Importer::InternReadFile(const std::string &pFile, aiScene *_pScene, IOSystem *pIOHandler) {
     mIOHandler = pIOHandler;
     mScene = _pScene;
-    mHadMD5Mesh = mHadMD5Anim = mHadMD5Camera = false;
+    mHadMD5Mesh = false;
+    mHadMD5Anim = false;
+    mHadMD5Camera = false;
 
     // remove the file extension
     const std::string::size_type pos = pFile.find_last_of('.');
@@ -356,9 +358,10 @@ void MD5Importer::LoadMD5MeshFile() {
     pcNode->mParent = mScene->mRootNode;
     AttachChilds_Mesh(-1, pcNode, meshParser.mJoints);
 
-    pcNode = mScene->mRootNode->mChildren[0] = new aiNode();
+    pcNode = new aiNode();
     pcNode->mName.Set("<MD5_Mesh>");
     pcNode->mParent = mScene->mRootNode;
+    mScene->mRootNode->mChildren[0] = pcNode;
 
 #if 0
     if (pScene->mRootNode->mChildren[1]->mNumChildren) /* start at the right hierarchy level */
@@ -727,10 +730,10 @@ void MD5Importer::LoadMD5CameraFile() {
         nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
         nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
         for (unsigned int i = 0; i < nd->mNumPositionKeys; ++i) {
-
             nd->mPositionKeys[i].mValue = frames[*it + i].vPositionXYZ;
             MD5::ConvertQuaternion(frames[*it + i].vRotationQuat, nd->mRotationKeys[i].mValue);
-            nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime = *it + i;
+            nd->mPositionKeys[i].mTime = *it + i;  
+            nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime;
         }
     }
 }

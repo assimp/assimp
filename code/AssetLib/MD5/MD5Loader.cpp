@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <memory>
+#include <vector>
 
 using namespace Assimp;
 
@@ -76,6 +77,27 @@ static constexpr aiImporterDesc desc = {
     0,
     "md5mesh md5camera md5anim"
 };
+
+// ------------------------------------------------------------------------------------------------
+// Validate one vertex's weight references and accumulate, per bone, how many non-negligible
+// weights influence it. Weight and bone indices are read straight from the file, so reject
+// out-of-range values here to keep all later piCount[] and joint lookups in bounds.
+static void CountVertexBoneWeights(const MD5::VertexDesc &vertex, const MD5::WeightArray &weights,
+        std::vector<unsigned int> &boneWeightCount) {
+    for (unsigned int w = vertex.mFirstWeight; w < vertex.mFirstWeight + vertex.mNumWeights; ++w) {
+        if (w >= weights.size()) {
+            throw DeadlyImportError("MD5MESH: Invalid weight index");
+        }
+        const MD5::WeightDesc &weightDesc = weights[w];
+        if (weightDesc.mBone >= boneWeightCount.size()) {
+            throw DeadlyImportError("MD5MESH: Invalid bone index");
+        }
+        // FIX for some invalid exporters
+        if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON)) {
+            ++boneWeightCount[weightDesc.mBone];
+        }
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -420,17 +442,12 @@ void MD5Importer::LoadMD5MeshFile() {
         }
 
         // sort all bone weights - per bone
-        unsigned int *piCount = new unsigned int[meshParser.mJoints.size()];
-        ::memset(piCount, 0, sizeof(unsigned int) * meshParser.mJoints.size());
+        // Use a vector so the buffer is released automatically even if a malformed
+        // file makes the validation below throw.
+        std::vector<unsigned int> piCount(meshParser.mJoints.size(), 0);
 
-        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
-            for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
-                MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
-                /* FIX for some invalid exporters */
-                if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON)) {
-                    ++piCount[weightDesc.mBone];
-                }
-            }
+        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter) {
+            CountVertexBoneWeights(*iter, meshSrc.mWeights, piCount);
         }
 
         // check how many we will need
@@ -503,8 +520,6 @@ void MD5Importer::LoadMD5MeshFile() {
                 mesh->mBones[p]->mWeights -= mesh->mBones[p]->mNumWeights;
             }
         }
-
-        delete[] piCount;
 
         // now setup all faces - we can directly copy the list
         // (however, take care that the aiFace destructor doesn't delete the mIndices array)

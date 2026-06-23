@@ -53,10 +53,14 @@ using namespace Assimp;
 
 class utSTLImporterExporter : public AbstractImportExportBase {
 public:
+    // Import an STL model with structure validation and return its scene.
+    // The supplied importer owns the returned scene and must outlive it.
+    const aiScene *importValidatedSTL(Assimp::Importer &importer, const char *file) {
+        return importer.ReadFile(file, aiProcess_ValidateDataStructure);
+    }
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        return nullptr != importValidatedSTL(importer, ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl");
     }
 };
 
@@ -71,7 +75,7 @@ TEST_F(utSTLImporterExporter, importBinarySTLFromFileTest) {
     // counts and coordinates ensures both the facet count and the per-float
     // geometry are decoded correctly rather than read as byte-swapped values.
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_binary.stl", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importValidatedSTL(importer, ASSIMP_TEST_MODELS_DIR "/STL/Spider_binary.stl");
     ASSERT_NE(nullptr, scene);
     ASSERT_EQ(1u, scene->mNumMeshes);
     const aiMesh *mesh = scene->mMeshes[0];

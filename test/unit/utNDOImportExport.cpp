@@ -47,38 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-TEST(utMD2Importer, importFaerie) {
+TEST(utNDOImportExport, importMalformedEdgeIndex) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/faerie.md2", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD2Importer, importSydney) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/sydney.md2", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD2Importer, importDolphin) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD2/dolphin.md2", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD2Importer, importFlag) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD2/flag.md2", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD2Importer, importHorse) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD2/horse.md2", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD2Importer, importMalformedZeroNumVertices) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_zero_numvertices.md2", 0);
-    ASSERT_EQ(nullptr, scene);
+    // An edge whose linked next-edge index points past the edge table must not
+    // be dereferenced while walking the face edge loop.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NDO/malformed_edge_index.ndo", 0);
+    EXPECT_NE(nullptr, scene);
 }

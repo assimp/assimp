@@ -1137,43 +1137,34 @@ ELSE()
 ENDIF()
 
 # polyclipping
-#IF(ASSIMP_HUNTER_ENABLED)
-#  hunter_add_package(polyclipping)
-#  find_package(polyclipping CONFIG REQUIRED)
-#ELSE()
-  SET( Clipper_SRCS
-    ../contrib/clipper/clipper.hpp
-    ../contrib/clipper/clipper.cpp
-  )
-  SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
-#ENDIF()
+SET( Clipper_SRCS
+../contrib/clipper/clipper.hpp
+../contrib/clipper/clipper.cpp
+)
+SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
 
 # poly2tri
-#IF(ASSIMP_HUNTER_ENABLED)
-#  hunter_add_package(poly2tri)
-#  find_package(poly2tri CONFIG REQUIRED)
-#ELSE()
-  SET( Poly2Tri_SRCS
-    ../contrib/poly2tri/poly2tri/common/shapes.cc
-    ../contrib/poly2tri/poly2tri/common/shapes.h
-    ../contrib/poly2tri/poly2tri/common/utils.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.h
-    ../contrib/poly2tri/poly2tri/sweep/advancing_front.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.cc
-    ../contrib/poly2tri/poly2tri/sweep/cdt.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep.h
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
-    ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
-  )
-  SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
-#ENDIF()
+SET( Poly2Tri_SRCS
+../contrib/poly2tri/poly2tri/common/shapes.cc
+../contrib/poly2tri/poly2tri/common/shapes.h
+../contrib/poly2tri/poly2tri/common/utils.h
+../contrib/poly2tri/poly2tri/sweep/advancing_front.h
+../contrib/poly2tri/poly2tri/sweep/advancing_front.cc
+../contrib/poly2tri/poly2tri/sweep/cdt.cc
+../contrib/poly2tri/poly2tri/sweep/cdt.h
+../contrib/poly2tri/poly2tri/sweep/sweep.cc
+../contrib/poly2tri/poly2tri/sweep/sweep.h
+../contrib/poly2tri/poly2tri/sweep/sweep_context.cc
+../contrib/poly2tri/poly2tri/sweep/sweep_context.h
+)
+SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
 
 # mikktspacetangets
-  SET( MikkTSpaceTangents_SRCS
-    ../contrib/MikkTSpace/mikktspace.c
-    ../contrib/MikkTSpace/mikktspace.h
-  )
+SET( MikkTSpaceTangents_SRCS
+../contrib/MikkTSpace/mikktspace.c
+../contrib/MikkTSpace/mikktspace.h
+)
+SOURCE_GROUP(Contrib\\mikktspacetangents FILES ${MikkTSpaceTangents_SRCS})
 
 # minizip/unzip
 IF(ASSIMP_HUNTER_ENABLED)

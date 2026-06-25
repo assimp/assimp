@@ -7,18 +7,18 @@ struct aiMesh;
 
 namespace Assimp {
 
-class GenerateMikkTSpaceTangents final : public BaseProcess {
+class ASSIMP_API GenerateMikkTSpaceTangents final : public BaseProcess {
 public:
     GenerateMikkTSpaceTangents() = default;
-    ~GenerateMikkTSpaceTangents() override = default;
-    bool IsActive(unsigned int pFlags) const override;
-    void Execute(aiScene* pScene) override;
-    void SetupProperties(const Importer *pImp) override;
+    ~GenerateMikkTSpaceTangents() final = default;
+    bool IsActive(unsigned int pFlags) const final;
+    void Execute(aiScene* pScene) final;
+    void SetupProperties(const Importer *pImp) final;
     void ExecutePerMesh(aiMesh *mesh);
 
 private:
     bool mActive = false;
-    SMikkTSpaceInterface mIface;
+    SMikkTSpaceInterface mIface{};
     SMikkTSpaceContext mContext;
 };
 

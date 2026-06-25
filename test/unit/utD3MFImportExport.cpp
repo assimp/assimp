@@ -82,6 +82,12 @@ TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+TEST_F(utD3MFImporterExporter, importMalformedPropertyIndexOob) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/malformed_property_index_oob.3mf", 0);
+    EXPECT_NE(nullptr, scene);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utD3MFImporterExporter, export3MFtoMemTest) {

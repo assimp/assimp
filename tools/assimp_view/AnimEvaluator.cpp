@@ -100,7 +100,7 @@ void AnimEvaluator::Evaluate(double pTime) {
             }
             if (diffTime > 0) {
                 float factor = float((time - key.mTime) / diffTime);
-                presentPosition = key.mValue + (nextKey.mValue - key.mValue) * factor;
+                presentPosition = key.mValue + ((nextKey.mValue - key.mValue) * factor);
             } else {
                 presentPosition = key.mValue;
             }

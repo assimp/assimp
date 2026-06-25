@@ -1,6 +1,7 @@
 #include "GenerateMikkTSpaceTangents.h"
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/Exceptional.h>
 
 namespace Assimp {
 
@@ -21,6 +22,7 @@ static int get_num_faces(const SMikkTSpaceContext *context) {
 static int get_num_vertices_of_face(const SMikkTSpaceContext *context, int iFace) {
     const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiFace &face = currentMesh->mFaces[iFace];
+
     return face.mNumIndices;
 }
 
@@ -93,7 +95,10 @@ void GenerateMikkTSpaceTangents::ExecutePerMesh(aiMesh *mesh) {
     }
 
     mContext.m_pUserData = mesh;
-    genTangSpaceDefault(&mContext);
+    const tbool result = genTangSpaceDefault(&mContext);
+    if (!result) {
+        throw DeadlyImportError("MikkTSpace tangent space generation failed");
+    }
 }
 
 } // namespace Assimp

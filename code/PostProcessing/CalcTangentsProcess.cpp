@@ -61,11 +61,7 @@ CalcTangentsProcess::CalcTangentsProcess() :
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool CalcTangentsProcess::IsActive(unsigned int pFlags) const {
-    const bool active = ((pFlags & aiProcess_CalcTangentSpace) != 0);
-    if (mActive) {
-        return active;
-    }
-    return false;
+    return mActive && ((pFlags & aiProcess_CalcTangentSpace) != 0u);
 }
 
 // ------------------------------------------------------------------------------------------------

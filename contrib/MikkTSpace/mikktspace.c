@@ -720,7 +720,7 @@ static void MergeVertsSlow(int piTriList_in_and_out[], const SMikkTSpaceContext 
 
 static void GenerateSharedVerticesIndexListSlow(int piTriList_in_and_out[], const SMikkTSpaceContext * pContext, const int iNrTrianglesIn)
 {
-    int iNumUniqueVerts=0, t = 0, i = 0;
+    int /* iNumUniqueVerts = 0*/t = 0, i = 0;
 	for (t=0; t<iNrTrianglesIn; t++)
 	{
 		for (i=0; i<3; i++)
@@ -754,7 +754,7 @@ static void GenerateSharedVerticesIndexListSlow(int piTriList_in_and_out[], cons
 
 			assert(bFound);
 			// if we found our own
-			if (index2rec == index) { ++iNumUniqueVerts; }
+			//if (index2rec == index) { ++iNumUniqueVerts; }
 
 			piTriList_in_and_out[offs] = index2rec;
 		}
@@ -905,8 +905,9 @@ static SVec3 GetTexCoord(const SMikkTSpaceContext * pContext, const int index)
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #if (_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4201)
+#   pragma warning(push)
+#   pragma warning(disable : 4201)
+#endif
 typedef union {
 	struct
 	{
@@ -915,7 +916,8 @@ typedef union {
 	int array[3];
 } SEdge;
 
-#pragma warning(pop)
+#if (_MSC_VER)
+#   pragma warning(pop)
 #endif 
 
 static void BuildNeighborsFast(STriInfo pTriInfos[], SEdge * pEdges, const int piTriListIn[], const int iNrTrianglesIn);

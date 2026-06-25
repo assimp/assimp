@@ -234,7 +234,18 @@ string B3DImporter::ReadChunk() {
     ASSIMP_LOG_DEBUG("ReadChunk: ", tag);
 #endif
     unsigned sz = (unsigned)ReadInt();
-    _stack.push_back(_pos + sz);
+    // Validate the chunk extent before trusting it: a chunk must lie within
+    // the file and within its enclosing chunk. Without this check a crafted
+    // size lets ChunkSize() -- and the element counts derived from it in
+    // ReadVRTS()/ReadTRIS() -- run far past the buffer.
+    if (sz > _buf.size() - _pos) {
+        Fail("Bad chunk size");
+    }
+    const size_t end = _pos + sz;
+    if (!_stack.empty() && end > _stack.back()) {
+        Fail("Bad chunk size");
+    }
+    _stack.push_back(end);
     return tag;
 }
 
@@ -246,7 +257,9 @@ void B3DImporter::ExitChunk() {
 
 // ------------------------------------------------------------------------------------------------
 size_t B3DImporter::ChunkSize() {
-    return _stack.back() - _pos;
+    // _stack.back() is the validated end offset of the current chunk; guard
+    // against unsigned underflow should _pos ever be advanced past it.
+    return _stack.back() > _pos ? _stack.back() - _pos : 0;
 }
 // ------------------------------------------------------------------------------------------------
 

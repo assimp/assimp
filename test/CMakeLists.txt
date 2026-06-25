@@ -149,6 +149,7 @@ SET( IMPORTERS
   unit/utBVHImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utNDOImportExport.cpp
   #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp

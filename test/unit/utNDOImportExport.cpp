@@ -38,68 +38,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "AbstractImportExportBase.h"
+
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
-#include "AssetLib/3MF/D3MFExporter.h"
+using namespace Assimp;
 
-class utD3MFImporterExporter : public AbstractImportExportBase {
-public:
-    bool importerTest() override {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", aiProcess_ValidateDataStructure);
-        if (nullptr == scene) {
-            return false;
-        }
-
-        EXPECT_EQ(1u, scene->mNumMeshes);
-        aiMesh *mesh = scene->mMeshes[0];
-        EXPECT_NE(nullptr, mesh);
-        EXPECT_EQ(12u, mesh->mNumFaces);
-        EXPECT_EQ(8u, mesh->mNumVertices);
-
-        return (nullptr != scene);
-    }
-
-#ifndef ASSIMP_BUILD_NO_EXPORT
-
-    bool exporterTest() override {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0);
-
-        Assimp::Exporter exporter;
-        return AI_SUCCESS == exporter.Export(scene, "3mf", "test.3mf");
-    }
-#endif // ASSIMP_BUILD_NO_EXPORT
-};
-
-TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
-    EXPECT_TRUE(importerTest());
-}
-
-TEST_F(utD3MFImporterExporter, importMalformedPropertyIndexOob) {
+TEST(utNDOImportExport, importMalformedEdgeIndex) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/malformed_property_index_oob.3mf", 0);
+    // An edge whose linked next-edge index points past the edge table must not
+    // be dereferenced while walking the face edge loop.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NDO/malformed_edge_index.ndo", 0);
     EXPECT_NE(nullptr, scene);
 }
-
-#ifndef ASSIMP_BUILD_NO_EXPORT
-
-TEST_F(utD3MFImporterExporter, export3MFtoMemTest) {
-    //EXPECT_TRUE(exporterTest());
-}
-
-TEST_F(utD3MFImporterExporter, roundtrip3MFtoMemTest) {
-    /*EXPECT_TRUE(exporterTest());
-
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile("test.3mf", 0);
-    EXPECT_NE(nullptr, scene));*/
-}
-
-#endif // ASSIMP_BUILD_NO_EXPORT

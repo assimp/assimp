@@ -425,6 +425,9 @@ void MD5Importer::LoadMD5MeshFile() {
 
         for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
             for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
+                if (w >= meshSrc.mWeights.size()) {
+                    throw DeadlyImportError("MD5MESH: Invalid weight index");
+                }
                 MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
                 /* FIX for some invalid exporters */
                 if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON)) {
@@ -465,6 +468,9 @@ void MD5Importer::LoadMD5MeshFile() {
                 // there are models which have weights which don't sum to 1 ...
                 ai_real fSum = 0.0;
                 for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
+                    if (w >= meshSrc.mWeights.size()) {
+                        throw DeadlyImportError("MD5MESH: Invalid weight index");
+                    }
                     fSum += meshSrc.mWeights[w].mWeight;
                 }
                 if (!fSum) {

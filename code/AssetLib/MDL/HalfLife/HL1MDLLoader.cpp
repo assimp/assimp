@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <sstream>
 #include <map>
+#include <limits>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER
@@ -72,6 +73,41 @@ namespace HalfLife {
 #ifdef _MSC_VER
 #    pragma warning(disable : 4706)
 #endif // _MSC_VER
+
+// ------------------------------------------------------------------------------------------------
+static void validate_index(int index, int count, const char *name) {
+    if (index < 0 || index >= count) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid ", name, " index");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+static void validate_bone_index(int bone_index, size_t bone_count) {
+    if (bone_index < 0 || static_cast<size_t>(bone_index) >= bone_count) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid bone index");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+static int advance_mesh_command_offset(int offset, size_t bytes) {
+    if (offset < 0) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
+    }
+
+    const size_t max_int = static_cast<size_t>(std::numeric_limits<int>::max());
+    if (bytes > max_int || static_cast<size_t>(offset) > max_int - bytes) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
+    }
+
+    return offset + static_cast<int>(bytes);
+}
+
+// ------------------------------------------------------------------------------------------------
+static void validate_mesh_command_vertex_count(size_t count) {
+    if (count < 3) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command vertex count");
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 HL1MDLLoader::HL1MDLLoader(
@@ -631,9 +667,6 @@ void HL1MDLLoader::read_meshes() {
 
     unsigned int mesh_index = 0;
 
-    // Value-initialize so every slot is nullptr. The aiMesh objects are
-    // created lazily below; if parsing throws part-way through, aiScene's
-    // destructor must not delete[] uninitialized pointers.
     scene_->mMeshes = new aiMesh *[scene_->mNumMeshes]();
 
     pbodypart = get_buffer_data<Bodypart_HL1>(header_->bodypartindex, header_->numbodyparts);
@@ -747,22 +780,16 @@ void HL1MDLLoader::read_meshes() {
             bind_pose_vertices.resize(pmodel->numverts);
             bind_pose_normals.resize(pmodel->numnorms);
             for (size_t k = 0; k < bind_pose_vertices.size(); ++k) {
-                const uint8_t boneIndex = pvertbone[k];
-                if (static_cast<size_t>(boneIndex) >= temp_bones_.size()) {
-                    throw DeadlyImportError("Invalid vertex bone index in HL1 MDL model");
-                }
+                validate_bone_index(pvertbone[k], temp_bones_.size());
                 const vec3_t &vert = pstudioverts[k];
-                bind_pose_vertices[k] = temp_bones_[boneIndex].absolute_transform * aiVector3D(vert[0], vert[1], vert[2]);
+                bind_pose_vertices[k] = temp_bones_[pvertbone[k]].absolute_transform * aiVector3D(vert[0], vert[1], vert[2]);
             }
             for (size_t k = 0; k < bind_pose_normals.size(); ++k) {
-                const uint8_t boneIndex = pnormbone[k];
-                if (static_cast<size_t>(boneIndex) >= temp_bones_.size()) {
-                    throw DeadlyImportError("Invalid normal bone index in HL1 MDL model");
-                }
+                validate_bone_index(pnormbone[k], temp_bones_.size());
                 const vec3_t &norm = pstudionorms[k];
                 // Compute the normal matrix to transform the normal into bind pose,
                 // without affecting its length.
-                const aiMatrix4x4 normal_matrix = aiMatrix4x4(temp_bones_[boneIndex].absolute_transform).Inverse().Transpose();
+                const aiMatrix4x4 normal_matrix = aiMatrix4x4(temp_bones_[pnormbone[k]].absolute_transform).Inverse().Transpose();
                 bind_pose_normals[k] = normal_matrix * aiVector3D(norm[0], norm[1], norm[2]);
             }
 
@@ -776,30 +803,11 @@ void HL1MDLLoader::read_meshes() {
             for (int k = 0; k < pmodel->nummesh; ++k, ++pmesh, ++mesh_index, ++model_meshes_ptr) {
                 *model_meshes_ptr = mesh_index;
 
-                // The skin reference and the triangle-command offset are read
-                // straight from the file. Validate them against the texture
-                // table and the buffer bounds before use: a crafted MDL can
-                // otherwise drive out-of-bounds reads through pskinref/ptexture
-                // and through the ptricmds walk below.
-                if (pmesh->skinref < 0 || pmesh->skinref >= texture_header_->numskinref) {
-                    throw DeadlyImportError("Invalid skin reference in HL1 MDL mesh");
-                }
-                const short texture_index = pskinref[pmesh->skinref];
-                if (texture_index < 0 || texture_index >= texture_header_->numtextures) {
-                    throw DeadlyImportError("Invalid texture index in HL1 MDL skin reference");
-                }
-
-                // Read triverts. ptricmds walks a variable-length command list;
-                // bound it against the end of the model buffer.
-                const auto *const bufferBase = reinterpret_cast<const std::byte *>(header_);
-                const auto *const tricmds_end = reinterpret_cast<const short *>(bufferBase + buffer_.size());
-                if (pmesh->triindex < 0 ||
-                        bufferBase + pmesh->triindex >
-                                reinterpret_cast<const std::byte *>(tricmds_end)) {
-                    throw DeadlyImportError("Invalid triangle command offset in HL1 MDL mesh");
-                }
-                // Use a separate mutable pointer for walking — avoids const_cast UB.
-                auto *ptricmds = reinterpret_cast<short *>(reinterpret_cast<uint8_t *>(header_) + pmesh->triindex);
+                // Read triverts.
+                int tricmds_offset = pmesh->triindex;
+                validate_index(pmesh->skinref, texture_header_->numskinref, "skin reference");
+                const int texture_index = pskinref[pmesh->skinref];
+                validate_index(texture_index, texture_header_->numtextures, "texture");
                 float texcoords_s_scale = 1.0f / (float)ptexture[texture_index].width;
                 float texcoords_t_scale = 1.0f / (float)ptexture[texture_index].height;
 
@@ -812,9 +820,8 @@ void HL1MDLLoader::read_meshes() {
                 bone_triverts.clear();
 
                 int l;
-                while (ptricmds < tricmds_end) {
-                    l = *(ptricmds++);
-                    if (l == 0) break;
+                while ((l = *get_buffer_data<short>(tricmds_offset, 1))) {
+                    tricmds_offset = advance_mesh_command_offset(tricmds_offset, sizeof(short));
                     bool is_triangle_fan = false;
 
                     if (l < 0) {
@@ -825,26 +832,11 @@ void HL1MDLLoader::read_meshes() {
                     // Clear the list of tris for the upcoming tris.
                     tricmds.clear();
 
-                    for (; l > 0; l--, ptricmds += 4) {
-                        // Each trivert command is four shorts; make sure the
-                        // whole record lies inside the buffer before reading it,
-                        // and that its vertex index is in range.
-                        if (ptricmds + 4 > tricmds_end) {
-                            throw DeadlyImportError("Truncated triangle command in HL1 MDL mesh");
-                        }
-                        const Trivert *input_trivert = reinterpret_cast<const Trivert *>(ptricmds);
-                        if (input_trivert->vertindex < 0 ||
-                                input_trivert->vertindex >= pmodel->numverts) {
-                            throw DeadlyImportError("Invalid vertex index in HL1 MDL triangle command");
-                        }
-                        if (input_trivert->normindex < 0 ||
-                                input_trivert->normindex >= pmodel->numnorms) {
-                            throw DeadlyImportError("Invalid normal index in HL1 MDL triangle command");
-                        }
+                    for (; l > 0; --l, tricmds_offset = advance_mesh_command_offset(tricmds_offset, sizeof(Trivert))) {
+                        const Trivert *input_trivert = get_buffer_data<Trivert>(tricmds_offset, 1);
+                        validate_index(input_trivert->vertindex, pmodel->numverts, "vertex");
+                        validate_index(input_trivert->normindex, pmodel->numnorms, "normal");
                         const int bone = pvertbone[input_trivert->vertindex];
-                        if (bone < 0 || static_cast<size_t>(bone) >= temp_bones_.size()) {
-                            throw DeadlyImportError("Invalid bone index in HL1 MDL triangle command");
-                        }
 
                         HL1MeshTrivert *private_trivert = &triverts[input_trivert->vertindex];
                         if (private_trivert->localindex == -1) {
@@ -883,6 +875,7 @@ void HL1MDLLoader::read_meshes() {
                     }
 
                     // Build mesh faces.
+                    validate_mesh_command_vertex_count(tricmds.size());
                     const int num_faces = static_cast<int>(tricmds.size() - 2);
                     mesh_faces.reserve(num_faces);
 
@@ -916,7 +909,7 @@ void HL1MDLLoader::read_meshes() {
                 // Create the scene mesh.
                 aiMesh *scene_mesh = scene_->mMeshes[mesh_index] = new aiMesh();
                 scene_mesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_TRIANGLE;
-                scene_mesh->mMaterialIndex = pskinref[pmesh->skinref];
+                scene_mesh->mMaterialIndex = texture_index;
 
                 scene_mesh->mNumVertices = static_cast<unsigned int>(mesh_triverts_indices.size());
 

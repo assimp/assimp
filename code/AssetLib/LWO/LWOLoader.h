@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LWOFileData.h"
 #include <assimp/BaseImporter.h>
+#include <assimp/Exceptional.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 
@@ -453,24 +454,25 @@ inline uint8_t LWOImporter::GetU1() {
 
 // ------------------------------------------------------------------------------------------------
 inline int LWOImporter::ReadVSizedIntLWO2(uint8_t *&inout) {
+    // A variable-sized index is 2 bytes long, or 4 bytes when the first byte
+    // is 0xFF. Guard every byte read against the end of the file buffer so a
+    // truncated or malformed chunk cannot trigger an out-of-bounds read.
+    auto readByte = [&]() -> int {
+        if (inout >= mFileBufferEnd) {
+            throw DeadlyImportError("LWO2: Unexpected end of file while reading a variable-sized index");
+        }
+        return *inout++;
+    };
+
     int i;
-    int c = *inout;
-    inout++;
+    int c = readByte();
     if (c != 0xFF) {
         i = c << 8;
-        c = *inout;
-        inout++;
-        i |= c;
+        i |= readByte();
     } else {
-        c = *inout;
-        inout++;
-        i = c << 16;
-        c = *inout;
-        inout++;
-        i |= c << 8;
-        c = *inout;
-        inout++;
-        i |= c;
+        i = readByte() << 16;
+        i |= readByte() << 8;
+        i |= readByte();
     }
     return i;
 }

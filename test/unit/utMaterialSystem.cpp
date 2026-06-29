@@ -62,9 +62,7 @@ static aiMaterialProperty *CreateMaterialStringProperty(const char *key,
         const std::vector<char> &payload) {
     auto prop = new aiMaterialProperty();
 
-    prop->mKey.length = static_cast<unsigned int>(strlen(key));
-    memcpy(prop->mKey.data, key, prop->mKey.length);
-    prop->mKey.data[prop->mKey.length] = '\0';
+    prop->mKey.Set(std::string(key));
 
     prop->mType = aiPTI_String;
     prop->mSemantic = 0;

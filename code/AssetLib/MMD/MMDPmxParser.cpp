@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 #include <utility>
+#include <vector>
+#include <climits>
 #include "MMDPmxParser.h"
 #include <assimp/StringUtils.h>
 #include "utf8.h"
@@ -83,31 +85,54 @@ namespace pmx
 	{
 		int size;
 		stream->read((char*) &size, sizeof(int));
-		std::vector<char> buffer;
-		if (size == 0)
-		{
+		
+		// FIX 1: Bounds check on size
+		const size_t MAX_STRING_SIZE = 10 * 1024 * 1024;
+		if (size < 0) {
+			throw DeadlyImportError("MMD: invalid string size");
+		}
+		if (size == 0) {
 			return std::string();
 		}
-		buffer.resize(size);
-		stream->read((char*) buffer.data(), size);
-		if (encoding == 0)
-		{
-			// UTF16 to UTF8
-			const uint16_t* sourceStart = (uint16_t*)buffer.data();
-			const unsigned int targetSize = size * 3; // enough to encode
-			char *targetStart = new char[targetSize];
-            std::memset(targetStart, 0, targetSize * sizeof(char));
-
-            utf8::utf16to8( sourceStart, sourceStart + size/2, targetStart );
-
-			std::string result(targetStart);
-            delete [] targetStart;
-			return result;
+		if (static_cast<size_t>(size) > MAX_STRING_SIZE) {
+			throw DeadlyImportError("MMD: string size exceeds limit");
 		}
-		else
-		{
-			// the name is already UTF8
-			return std::string((const char*)buffer.data(), size);
+		
+		size_t sz = static_cast<size_t>(size);
+		
+		// FIX 2 & 3: Use std::vector instead of new[], and check for overflow
+		if (encoding == 0) {
+			// UTF16 to UTF8
+			if (sz % 2 != 0) {
+				throw DeadlyImportError("MMD: invalid UTF16 size");
+			}
+			
+			// FIX 2: Safe multiplication check (prevent SIZE_MAX / 3 overflow)
+			if (sz > SIZE_MAX / 3) {
+				throw DeadlyImportError("MMD: string size overflow");
+			}
+			
+			std::vector<char> buffer(sz);
+			stream->read(buffer.data(), sz);
+			
+			const uint16_t* sourceStart = (uint16_t*)buffer.data();
+			
+			// FIX 3: Use std::vector instead of new[]
+			size_t targetSize = sz * 3;
+			std::vector<char> target(targetSize, 0);
+			
+			char* targetEnd = utf8::utf16to8(sourceStart, sourceStart + sz/2, target.data());
+
+			// FIX 4: Return string with explicit length, not just null-terminated
+			return std::string(target.data(), static_cast<size_t>(targetEnd - target.data()));
+		}
+		else {
+			// UTF8 - use vector instead of new[]
+			std::vector<char> buffer(sz);
+			stream->read(buffer.data(), sz);
+			
+			// FIX 4: Return string with explicit length
+			return std::string(buffer.data(), sz);
 		}
 	}
 

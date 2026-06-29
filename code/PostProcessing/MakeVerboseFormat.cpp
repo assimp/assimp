@@ -75,7 +75,10 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     ai_assert(nullptr != pcMesh);
 
     unsigned int iOldNumVertices = pcMesh->mNumVertices;
-    const unsigned int iNumVerts = pcMesh->mNumFaces * 3;
+    unsigned int iNumVerts = 0;
+    for (unsigned int a = 0; a < pcMesh->mNumFaces; ++a) {
+        iNumVerts += pcMesh->mFaces[a].mNumIndices;
+    }
 
     aiVector3D *pvPositions = new aiVector3D[iNumVerts];
 
@@ -103,7 +106,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     // allocate enough memory to hold output bones and vertex weights ...
     std::vector<aiVertexWeight> *newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
     for (unsigned int i = 0; i < pcMesh->mNumBones; ++i) {
-        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights * 3);
+        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights);
     }
 
     // iterate through all faces and build a clean list

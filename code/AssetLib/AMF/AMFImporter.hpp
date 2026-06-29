@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MathFunctions.h>
 
 // Header files, stdlib.
 #include <set>

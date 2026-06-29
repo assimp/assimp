@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MathFunctions.h>
 #include <memory>
 
 using namespace Assimp;
@@ -527,7 +528,13 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     // resize the array ... double the storage allocated
     if (mNumProperties == mNumAllocated) {
         const unsigned int iOld = mNumAllocated;
-        mNumAllocated *= 2;
+
+        // Safely double the size, checking for integer overflow
+        if (iOld > UINT_MAX / 2) {
+            return AI_OUTOFMEMORY;
+        }
+
+        mNumAllocated = iOld * 2;
 
         aiMaterialProperty **ppTemp;
         try {
@@ -589,6 +596,14 @@ void aiMaterial::CopyPropertyList(aiMaterial *const pcDest,
     ai_assert(nullptr != pcSrc);
     ai_assert(pcDest->mNumProperties <= pcDest->mNumAllocated);
     ai_assert(pcSrc->mNumProperties <= pcSrc->mNumAllocated);
+
+    // Safely check for integer overflow before adding allocations
+    if (pcDest->mNumAllocated > UINT_MAX - pcSrc->mNumAllocated) {
+        throw std::bad_alloc();  // Overflow would occur
+    }
+    if (pcDest->mNumProperties > UINT_MAX - pcSrc->mNumProperties) {
+        throw std::bad_alloc();  // Overflow would occur
+    }
 
     const unsigned int iOldNum = pcDest->mNumProperties;
     pcDest->mNumAllocated += pcSrc->mNumAllocated;

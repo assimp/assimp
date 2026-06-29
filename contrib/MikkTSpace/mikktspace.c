@@ -1311,7 +1311,7 @@ static tbool GenerateTSpaces(STSpace psTspace[], const STriInfo pTriInfos[], con
 				{
 					// clean up and return false
 					int s1=0;
-					for (s1=0; s<iUniqueSubGroups; s1++)
+					for (s1=0; s1<iUniqueSubGroups; s1++)
 						free(pUniSubGroups[s1].pTriMembers);
 					free(pUniSubGroups);
 					free(pTmpMembers);

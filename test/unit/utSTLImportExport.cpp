@@ -53,15 +53,41 @@ using namespace Assimp;
 
 class utSTLImporterExporter : public AbstractImportExportBase {
 public:
+    // Import an STL model with structure validation and return its scene.
+    // The supplied importer owns the returned scene and must outlive it.
+    const aiScene *importValidatedSTL(Assimp::Importer &importer, const char *file) {
+        return importer.ReadFile(file, aiProcess_ValidateDataStructure);
+    }
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl", aiProcess_ValidateDataStructure);
-        return nullptr != scene;
+        return nullptr != importValidatedSTL(importer, ASSIMP_TEST_MODELS_DIR "/STL/Spider_ascii.stl");
     }
 };
 
 TEST_F(utSTLImporterExporter, importSTLFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utSTLImporterExporter, importBinarySTLFromFileTest) {
+    // Regression test for issue #5509: binary STL files were not recognized on
+    // big-endian hosts (e.g. s390x) because the little-endian on-disk facet
+    // count and geometry were read without byte-swapping. Asserting concrete
+    // counts and coordinates ensures both the facet count and the per-float
+    // geometry are decoded correctly rather than read as byte-swapped values.
+    Assimp::Importer importer;
+    const aiScene *scene = importValidatedSTL(importer, ASSIMP_TEST_MODELS_DIR "/STL/Spider_binary.stl");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    const aiMesh *mesh = scene->mMeshes[0];
+    EXPECT_EQ(1368u, mesh->mNumFaces);
+    EXPECT_EQ(4104u, mesh->mNumVertices);
+    // First facet's first vertex and normal (stored as little-endian floats).
+    EXPECT_NEAR(0.90712798f, mesh->mVertices[0].x, 1e-4f);
+    EXPECT_NEAR(0.64616501f, mesh->mVertices[0].y, 1e-4f);
+    EXPECT_NEAR(0.79519337f, mesh->mVertices[0].z, 1e-4f);
+    EXPECT_NEAR(0.46828195f, mesh->mNormals[0].x, 1e-4f);
+    EXPECT_NEAR(-0.86349779f, mesh->mNormals[0].y, 1e-4f);
+    EXPECT_NEAR(-0.18730624f, mesh->mNormals[0].z, 1e-4f);
 }
 
 TEST_F(utSTLImporterExporter, test_multiple) {

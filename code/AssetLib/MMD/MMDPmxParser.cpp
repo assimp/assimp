@@ -88,8 +88,14 @@ namespace pmx
 		
 		// FIX 1: Bounds check on size
 		const size_t MAX_STRING_SIZE = 10 * 1024 * 1024;
-		if (size <= 0 || static_cast<size_t>(size) > MAX_STRING_SIZE) {
+		if (size < 0) {
 			throw DeadlyImportError("MMD: invalid string size");
+		}
+		if (size == 0) {
+			return std::string();
+		}
+		if (static_cast<size_t>(size) > MAX_STRING_SIZE) {
+			throw DeadlyImportError("MMD: string size exceeds limit");
 		}
 		
 		size_t sz = static_cast<size_t>(size);
@@ -115,10 +121,10 @@ namespace pmx
 			size_t targetSize = sz * 3;
 			std::vector<char> target(targetSize, 0);
 			
-			utf8::utf16to8(sourceStart, sourceStart + sz/2, target.data());
-			
+			char* targetEnd = utf8::utf16to8(sourceStart, sourceStart + sz/2, target.data());
+
 			// FIX 4: Return string with explicit length, not just null-terminated
-			return std::string(target.data());
+			return std::string(target.data(), static_cast<size_t>(targetEnd - target.data()));
 		}
 		else {
 			// UTF8 - use vector instead of new[]

@@ -69,9 +69,17 @@ Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, ZipArchiveIOSystem
 
     m_pModel = new Q3BSPModel;
     m_pModel->m_ModelName = mapName;
-    if ( !parseFile() ) {
+    try {
+        if ( !parseFile() ) {
+            delete m_pModel;
+            m_pModel = nullptr;
+        }
+    } catch ( ... ) {
+        // parseFile() may throw on a malformed file; the destructor does not run
+        // when the constructor exits via an exception, so free the model here.
         delete m_pModel;
         m_pModel = nullptr;
+        throw;
     }
 }
 

@@ -412,8 +412,7 @@ void MD5Importer::LoadMD5MeshFile() {
         }
 
         // sort all bone weights - per bone
-        unsigned int *piCount = new unsigned int[meshParser.mJoints.size()];
-        ::memset(piCount, 0, sizeof(unsigned int) * meshParser.mJoints.size());
+        std::vector<unsigned int> piCount(meshParser.mJoints.size(), 0);
 
         for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
             for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
@@ -501,8 +500,6 @@ void MD5Importer::LoadMD5MeshFile() {
                 mesh->mBones[p]->mWeights -= mesh->mBones[p]->mNumWeights;
             }
         }
-
-        delete[] piCount;
 
         // now setup all faces - we can directly copy the list
         // (however, take care that the aiFace destructor doesn't delete the mIndices array)

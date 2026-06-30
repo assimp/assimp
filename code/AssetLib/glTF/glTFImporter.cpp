@@ -279,7 +279,11 @@ void glTFImporter::ImportMeshes(Asset &r) {
             if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+                if (!attr.texcoord[tc] || !attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc])) {
+                    for (auto *m : meshes) { delete m; }
+                    throw DeadlyImportError("Mesh \"", mesh.id, "\": failed to extract data for texcoord ", ai_to_string(tc));
+                }
+
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D *values = aim->mTextureCoords[tc];

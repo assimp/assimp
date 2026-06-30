@@ -67,8 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <sstream>
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 using namespace Util;
 
@@ -3834,7 +3833,6 @@ void ConvertToAssimpScene(aiScene *out, const Document &doc, bool removeEmptyBon
     FBXConverter converter(out, doc, removeEmptyBones);
 }
 
-} // namespace FBX
-} // namespace Assimp
+} // namespace Assimp::FBX
 
 #endif

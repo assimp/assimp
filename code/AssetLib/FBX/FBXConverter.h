@@ -69,10 +69,10 @@ struct morphKeyData {
     std::vector<unsigned int> values;
     std::vector<float> weights;
 };
+
 using morphAnimData = std::map<int64_t, morphKeyData*> ;
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 class MeshGeometry;
 
@@ -465,24 +465,13 @@ private:
     aiScene* const mSceneOut;
     const FBX::Document& doc;
     bool mRemoveEmptyBones;
-    static void BuildBoneList(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
-                             std::vector<aiBone*>& bones);
 
     void BuildBoneStack(aiNode *current_node, const aiNode *root_node, const aiScene *scene,
                    const std::vector<aiBone *> &bones,
                    std::map<aiBone *, aiNode *> &bone_stack,
                    std::vector<aiNode*> &node_stack );
-
-    static void BuildNodeList(aiNode *current_node, std::vector<aiNode *> &nodes);
-
-    static aiNode *GetNodeFromStack(const aiString &node_name, std::vector<aiNode *> &nodes);
-
-    static aiNode *GetArmatureRoot(aiNode *bone_node, std::vector<aiBone*> &bone_list);
-
-    static bool IsBoneNode(const aiString &bone_name, std::vector<aiBone *> &bones);
 };
 
-}
-}
+} // Namespace Assimp::FBX
 
 #endif // INCLUDED_AI_FBX_CONVERTER_H

@@ -265,8 +265,7 @@ Document::Document(Parser& parser, const ImportSettings& settings) :
 }
 
 // ------------------------------------------------------------------------------------------------
-Document::~Document()
-{
+Document::~Document() {
 	// The document does not own the memory for the following objects, but we need to call their d'tor
 	// so they can properly free memory like string members:
 
@@ -281,8 +280,8 @@ Document::~Document()
 }
 
 // ------------------------------------------------------------------------------------------------
-static const unsigned int LowerSupportedVersion = 7100;
-static const unsigned int UpperSupportedVersion = 7400;
+static constexpr unsigned int LowerSupportedVersion = 7100;
+static constexpr unsigned int UpperSupportedVersion = 7400;
 
 void Document::ReadHeader() {
     // Read ID objects from "Objects" section
@@ -301,12 +300,11 @@ void Document::ReadHeader() {
     if(fbxVersion < LowerSupportedVersion ) {
         DOMError("unsupported, old format version, supported are only FBX 2011, FBX 2012 and FBX 2013");
     }
-    if(fbxVersion > UpperSupportedVersion ) {
+    if (fbxVersion > UpperSupportedVersion ) {
         if(Settings().strictMode) {
             DOMError("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013"
                 " (turn off strict mode to try anyhow) ");
-        }
-        else {
+        } else {
             DOMWarning("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013,"
                 " trying to read it nevertheless");
         }
@@ -342,8 +340,6 @@ void Document::ReadGlobalSettings() {
 
     std::shared_ptr<const PropertyTable> props = GetPropertyTable( *this, "", *ehead, *ehead->Compound(), true );
 
-    //double v = PropertyGet<float>( *props.get(), std::string("UnitScaleFactor"), 1.0 );
-
     if(!props) {
         DOMError("GlobalSettings dictionary contains no property table");
     }
@@ -367,7 +363,7 @@ void Document::ReadObjects() {
     objects[0] = new_LazyObject(0L, *eobjects, *this);
 
     const Scope& sobjects = *eobjects->Compound();
-    for(const ElementMap::value_type& el : sobjects.Elements()) {
+    for (auto& el : sobjects.Elements()) {
 
         // extract ID
         const TokenList& tok = el.second->Tokens();
@@ -449,7 +445,7 @@ void Document::ReadPropertyTemplates() {
 
             const Element *Properties70 = (*innerSc)["Properties70"];
             if(Properties70) {
-                std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
+                auto props = std::make_shared<const PropertyTable>(
                         *Properties70, std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable *>(nullptr))
                 );
 
@@ -460,8 +456,7 @@ void Document::ReadPropertyTemplates() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void Document::ReadConnections()
-{
+void Document::ReadConnections() {
     StackAllocator &allocator = parser.GetAllocator();
     const Scope &sc = parser.GetRootScope();
     // read property templates from "Definitions" section

@@ -56,8 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXUtil.h"
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 using namespace Util;
 
@@ -234,9 +233,6 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
     }
 }
 
-
-Texture::~Texture() = default;
-
 LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name) :
         Object(id,element,name),
         blendMode(BlendMode_Modulate),
@@ -368,7 +364,6 @@ Video::~Video() {
     }
 }
 
-} //!FBX
-} //!Assimp
+} // !Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

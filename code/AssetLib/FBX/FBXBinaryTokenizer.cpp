@@ -49,15 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
 #include <assimp/defs.h>
-#include <stdint.h>
-#include <cstdint>
 #include <assimp/Exceptional.h>
 #include <assimp/ByteSwapper.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/StringUtils.h>
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 // ------------------------------------------------------------------------------------------------
 Token::Token(const char* sbegin, const char* send, TokenType type, size_t offset) :
@@ -83,8 +80,7 @@ namespace {
 // ------------------------------------------------------------------------------------------------
 // signal tokenization error, this is always unrecoverable. Throws DeadlyImportError.
 AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset) AI_WONT_RETURN_SUFFIX;
-AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
-{
+AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset) {
     throw DeadlyImportError("FBX-Tokenize", Util::GetOffsetText(offset), message);
 }
 
@@ -106,13 +102,13 @@ void TokenizeError(const std::string& message, const char* begin, const char* cu
 
 // ------------------------------------------------------------------------------------------------
 uint32_t ReadWord(const char* input, const char*& cursor, const char* end) {
-    const size_t k_to_read = sizeof( uint32_t );
-    if(Offset(cursor, end) < k_to_read ) {
+    static constexpr size_t k_to_read = sizeof(uint32_t);
+    if (Offset(cursor, end) < k_to_read ) {
         TokenizeError("cannot ReadWord, out of bounds",input, cursor);
     }
 
     uint32_t word;
-    ::memcpy(&word, cursor, 4);
+    ::memcpy(&word, cursor, k_to_read);
     AI_SWAP4(word);
 
     cursor += k_to_read;
@@ -122,13 +118,13 @@ uint32_t ReadWord(const char* input, const char*& cursor, const char* end) {
 
 // ------------------------------------------------------------------------------------------------
 uint64_t ReadDoubleWord(const char* input, const char*& cursor, const char* end) {
-    const size_t k_to_read = sizeof(uint64_t);
+    static constexpr size_t k_to_read = sizeof(uint64_t);
     if(Offset(cursor, end) < k_to_read) {
         TokenizeError("cannot ReadDoubleWord, out of bounds",input, cursor);
     }
 
-    uint64_t dword /*= *reinterpret_cast<const uint64_t*>(cursor)*/;
-    ::memcpy( &dword, cursor, sizeof( uint64_t ) );
+    uint64_t dword;
+    ::memcpy(&dword, cursor, k_to_read);
     AI_SWAP8(dword);
 
     cursor += k_to_read;
@@ -138,12 +134,13 @@ uint64_t ReadDoubleWord(const char* input, const char*& cursor, const char* end)
 
 // ------------------------------------------------------------------------------------------------
 uint8_t ReadByte(const char* input, const char*& cursor, const char* end) {
-    if(Offset(cursor, end) < sizeof( uint8_t ) ) {
+    static constexpr size_t k_to_read = sizeof(uint8_t);
+    if (Offset(cursor, end) < k_to_read) {
         TokenizeError("cannot ReadByte, out of bounds",input, cursor);
     }
 
-    uint8_t word;/* = *reinterpret_cast< const uint8_t* >( cursor )*/
-    ::memcpy( &word, cursor, sizeof( uint8_t ) );
+    uint8_t word;
+    ::memcpy(&word, cursor, k_to_read);
     ++cursor;
 
     return word;
@@ -188,108 +185,106 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
     const char type = *cursor;
     sbegin_out = cursor++;
 
-    switch(type)
-    {
+    switch(type) {
         // 16 bit int
-    case 'Y':
-        cursor += 2;
-        break;
+        case 'Y':
+            cursor += 2;
+            break;
 
         // 1 bit bool flag (yes/no)
-    case 'C':
-        cursor += 1;
-        break;
+        case 'C':
+            cursor += 1;
+            break;
 
         // 32 bit int
-    case 'I':
-        // <- fall through
+        case 'I':
+            // <- fall through
 
         // float
-    case 'F':
-        cursor += 4;
-        break;
+        case 'F':
+            cursor += 4;
+            break;
 
         // double
-    case 'D':
-        cursor += 8;
-        break;
+        case 'D':
+            cursor += 8;
+            break;
 
         // 64 bit int
-    case 'L':
-        cursor += 8;
-        break;
+        case 'L':
+            cursor += 8;
+            break;
 
-        // note: do not write cursor += ReadWord(...cursor) as this would be UB
+            // note: do not write cursor += ReadWord(...cursor) as this would be UB
+            // raw binary data
+        case 'R':
+        {
+            const uint32_t length = ReadWord(input, cursor, end);
+            cursor += length;
+            break;
+        }
 
-        // raw binary data
-    case 'R':
-    {
-        const uint32_t length = ReadWord(input, cursor, end);
-        cursor += length;
-        break;
-    }
-
-    case 'b':
-        // TODO: what is the 'b' type code? Right now we just skip over it /
-        // take the full range we could get
-        cursor = end;
-        break;
+        case 'b':
+            // TODO: what is the 'b' type code? Right now we just skip over it /
+            // take the full range we could get
+            cursor = end;
+            break;
 
         // array of *
-    case 'f':
-    case 'd':
-    case 'l':
-    case 'i':
-    case 'c':   {
-        const uint32_t length = ReadWord(input, cursor, end);
-        const uint32_t encoding = ReadWord(input, cursor, end);
+        case 'f':
+        case 'd':
+        case 'l':
+        case 'i':
+        case 'c':   {
+            const uint32_t length = ReadWord(input, cursor, end);
+            const uint32_t encoding = ReadWord(input, cursor, end);
+            const uint32_t comp_len = ReadWord(input, cursor, end);
 
-        const uint32_t comp_len = ReadWord(input, cursor, end);
+            // compute length based on type and check against the stored value
+            if (encoding == 0) {
+                uint32_t stride = 0;
+                switch(type) {
+                    case 'f':
+                    case 'i':
+                        stride = 4;
+                        break;
 
-        // compute length based on type and check against the stored value
-        if(encoding == 0) {
-            uint32_t stride = 0;
-            switch(type)
-            {
-            case 'f':
-            case 'i':
-                stride = 4;
-                break;
+                    case 'd':
+                    case 'l':
+                        stride = 8;
+                        break;
 
-            case 'd':
-            case 'l':
-                stride = 8;
-                break;
+                    case 'c':
+                        stride = 1;
+                        break;
 
-            case 'c':
-                stride = 1;
-                break;
-
-            default:
-                ai_assert(false);
-            };
-            ai_assert(stride > 0);
-            if(length * stride != comp_len) {
-                TokenizeError("cannot ReadData, calculated data stride differs from what the file claims",input, cursor);
+                    default:
+                        ai_assert(false);
+                }
+                ai_assert(stride > 0);
+                if(length * stride != comp_len) {
+                    TokenizeError("cannot ReadData, calculated data stride differs from what the file claims",input, cursor);
+                }   
             }
+            // zip/deflate algorithm (encoding==1)? take given length. anything else? die
+            else if (encoding != 1) {
+                TokenizeError("cannot ReadData, unknown encoding",input, cursor);
+            }
+            cursor += comp_len;
+            break;
         }
-        // zip/deflate algorithm (encoding==1)? take given length. anything else? die
-        else if (encoding != 1) {
-            TokenizeError("cannot ReadData, unknown encoding",input, cursor);
-        }
-        cursor += comp_len;
-        break;
-    }
 
         // string
-    case 'S': {
-        const char* sb, *se;
-        // 0 characters can legally happen in such strings
-        ReadString(sb, se, input, cursor, end, true, true);
-        break;
-    }
-    default:
-        TokenizeError("cannot ReadData, unexpected type code: " + std::string(&type, 1),input, cursor);
+        case 'S': 
+        {
+            const char* sb, *se;
+            // 0 characters can legally happen in such strings
+            ReadString(sb, se, input, cursor, end, true, true);
+            break;
+        }
+    
+        default:
+            TokenizeError("cannot ReadData, unexpected type code: " + std::string(&type, 1),input, cursor);
     }
 
     if(cursor > end) {
@@ -302,7 +297,8 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 
 // ------------------------------------------------------------------------------------------------
-bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const char *input, const char *&cursor, const char *end, bool const is64bits) {
+bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const char *input, 
+        const char *&cursor, const char *end, bool const is64bits) {
     // the first word contains the offset at which this block ends
 	const uint64_t end_offset = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
@@ -399,14 +395,6 @@ void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, 
         TokenizeError("file is too short",0);
     }
 
-    //uint32_t offset = 0x15;
-/*    const char* cursor = input + 0x15;
-
-    const uint32_t flags = ReadWord(input, cursor, input + length);
-
-    const uint8_t padding_0 = ReadByte(input, cursor, input + length); // unused
-    const uint8_t padding_1 = ReadByte(input, cursor, input + length); // unused*/
-
     if (strncmp(input,"Kaydara FBX Binary",18)) {
         TokenizeError("magic bytes not found",0);
     }
@@ -421,16 +409,13 @@ void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, 
 	ASSIMP_LOG_DEBUG("FBX version: ", version);
 	const bool is64bits = version >= 7500;
     const char *end = input + length;
-    try
-    {
+    try {
         while (cursor < end ) {
             if (!ReadScope(output_tokens, token_allocator, input, cursor, input + length, is64bits)) {
                 break;
             }
         }
-    }
-    catch (const DeadlyImportError& e)
-    {
+    } catch (const DeadlyImportError& e) {
         if (!is64bits && (length > std::numeric_limits<uint32_t>::max())) {
             throw DeadlyImportError("The FBX file is invalid. This may be because the content is too big for this older version (", ai_to_string(version), ") of the FBX format. (", e.what(), ")");
         }
@@ -438,7 +423,6 @@ void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, 
     }
 }
 
-} // !FBX
-} // !Assimp
+} // !Assimp::FBX
 
-#endif
+#endif // ASSIMP_BUILD_NO_FBX_IMPORTER

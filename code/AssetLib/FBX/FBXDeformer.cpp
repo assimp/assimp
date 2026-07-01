@@ -53,8 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 using namespace Util;
 
@@ -69,8 +68,7 @@ Deformer::Deformer(uint64_t id, const Element& element, const Document& doc, con
 
 // ------------------------------------------------------------------------------------------------
 Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-: Deformer(id,element,doc,name)
-, node()
+: Deformer(id,element,doc,name), node()
 {
     const Scope& sc = GetRequiredScope(element);
 
@@ -184,7 +182,6 @@ BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const 
     }
 }
 
-} // namespace FBX
-} // Namespace Assimp
+} // namespace Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

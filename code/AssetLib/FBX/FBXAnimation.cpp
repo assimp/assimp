@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 #include "FBXParser.h"
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 using namespace Util;
 
@@ -75,13 +74,11 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element &element, const std::s
         DOMError("the keyframes are not in ascending order", &KeyTime);
     }
 
-    const Element *KeyAttrDataFloat = sc["KeyAttrDataFloat"];
-    if (KeyAttrDataFloat) {
+    if (const Element *KeyAttrDataFloat = sc["KeyAttrDataFloat"]; KeyAttrDataFloat != nullptr) {
         ParseVectorDataArray(attributes, *KeyAttrDataFloat);
     }
 
-    const Element *KeyAttrFlags = sc["KeyAttrFlags"];
-    if (KeyAttrFlags) {
+    if (const Element *KeyAttrFlags = sc["KeyAttrFlags"]; KeyAttrFlags != nullptr) {
         ParseVectorDataArray(flags, *KeyAttrFlags);
     }
 }
@@ -163,8 +160,8 @@ const AnimationCurveMap &AnimationCurveNode::Curves() const {
             continue;
         }
 
-        const AnimationCurve *const anim = dynamic_cast<const AnimationCurve *>(ob);
-        if (nullptr == anim) {
+        auto *anim = dynamic_cast<const AnimationCurve *>(ob);
+        if (anim == nullptr) {
             DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve", &element);
             continue;
         }
@@ -194,7 +191,6 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char *const *target_prop_whit
     nodes.reserve(conns.size());
 
     for (const Connection *con : conns) {
-
         // link should not go to a property
         if (con->PropertyName().length()) {
             continue;
@@ -206,7 +202,7 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char *const *target_prop_whit
             continue;
         }
 
-        const AnimationCurveNode *const anim = dynamic_cast<const AnimationCurveNode *>(ob);
+        const auto *const anim = dynamic_cast<const AnimationCurveNode *>(ob);
         if (!anim) {
             DOMWarning("source object for ->AnimationLayer link is not an AnimationCurveNode", &element);
             continue;
@@ -232,8 +228,8 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char *const *target_prop_whit
 }
 
 // ------------------------------------------------------------------------------------------------
-AnimationStack::AnimationStack(uint64_t id, const Element &element, const std::string &name, const Document &doc) :
-        Object(id, element, name) {
+AnimationStack::AnimationStack(uint64_t id, const Element &element, const std::string &name, 
+        const Document &doc) : Object(id, element, name) {
     const Scope &sc = GetRequiredScope(element);
 
     // note: we don't currently use any of these properties so we shouldn't bother if it is missing
@@ -256,8 +252,8 @@ AnimationStack::AnimationStack(uint64_t id, const Element &element, const std::s
             continue;
         }
 
-        const AnimationLayer *const anim = dynamic_cast<const AnimationLayer *>(ob);
-        if (!anim) {
+        auto *anim = dynamic_cast<const AnimationLayer *>(ob);
+        if (anim == nullptr) {
             DOMWarning("source object for ->AnimationStack link is not an AnimationLayer", &element);
             continue;
         }
@@ -265,7 +261,6 @@ AnimationStack::AnimationStack(uint64_t id, const Element &element, const std::s
     }
 }
 
-} // namespace FBX
-} // namespace Assimp
+} // namespace Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

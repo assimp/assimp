@@ -481,7 +481,7 @@ class Texture final : public Object {
 public:
     Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
 
-    ~Texture() override;
+    ~Texture() override = default;
 
     const std::string& Type() const {
         return type;

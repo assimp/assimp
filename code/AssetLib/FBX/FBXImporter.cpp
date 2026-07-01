@@ -125,7 +125,7 @@ void FBXImporter::SetupProperties(const Importer *pImp) {
 // Imports the given file into the given scene structure.
 void FBXImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
 	auto streamCloser = [&](IOStream *pStream) {
-		pIOHandler->Close(pStream);
+ 		pIOHandler->Close(pStream);
 	};
 	std::unique_ptr<IOStream, decltype(streamCloser)> stream(pIOHandler->Open(pFile, "rb"), streamCloser);
 	if (!stream) {

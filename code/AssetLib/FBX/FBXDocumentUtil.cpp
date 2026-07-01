@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXProperties.h"
 
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 namespace Util {
 
 // ------------------------------------------------------------------------------------------------
@@ -121,7 +120,6 @@ std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
 }
 
 } // !Util
-} // !FBX
-} // !Assimp
+} // !Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

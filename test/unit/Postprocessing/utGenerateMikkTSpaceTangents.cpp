@@ -65,6 +65,9 @@ TEST_F(utGenerateMikkTSpaceTangents, calculateMikkTSpaceTangents) {
     mesh->mFaces = new aiFace[1];
     mesh->mFaces[0].mNumIndices = 3;
     mesh->mFaces[0].mIndices = new unsigned int[3];
+    mesh->mFaces[0].mIndices[0] = 0;
+    mesh->mFaces[0].mIndices[1] = 1;
+    mesh->mFaces[0].mIndices[2] = 2;
 
     // Set up a simple triangle with positions, normals, and texture coordinates
     mesh->mVertices[0] = aiVector3D(0.5f, 0.5f, 0.0f);

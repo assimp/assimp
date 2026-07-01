@@ -13,21 +13,21 @@ static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int
 static void set_tspace_basic(const SMikkTSpaceContext *context, const float tangentu[], float fSign, int iFace, int iVert);
 
 static int get_num_faces(const SMikkTSpaceContext *context) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
-    const int numFaces = static_cast<int>(currentMesh->mNumFaces);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto numFaces = static_cast<int>(currentMesh->mNumFaces);
 
     return numFaces;
 }
 
 static int get_num_vertices_of_face(const SMikkTSpaceContext *context, int iFace) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiFace &face = currentMesh->mFaces[iFace];
 
     return face.mNumIndices;
 }
 
 static void get_position(const SMikkTSpaceContext *context, float outpos[], int /*iFace*/, int iVert) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiVector3D &v = currentMesh->mVertices[static_cast<size_t>(iVert)];
     outpos[0] = v.x;
     outpos[1] = v.y;
@@ -35,7 +35,7 @@ static void get_position(const SMikkTSpaceContext *context, float outpos[], int 
 }
 
 static void get_normal(const SMikkTSpaceContext *context, float outnormal[], int /*iFace*/, int iVert) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     const aiVector3D &n = currentMesh->mNormals[static_cast<size_t>(iVert)];
     outnormal[0] = n.x;
     outnormal[1] = n.y;
@@ -43,7 +43,7 @@ static void get_normal(const SMikkTSpaceContext *context, float outnormal[], int
 }
 
 static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int /*iFace*/, int iVert) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     aiVector3D &t = currentMesh->mTextureCoords[static_cast<size_t>(iVert)][0];
     if (currentMesh->mNumUVComponents[iVert] == 2) {
         outuv[0] = t.x;
@@ -56,7 +56,7 @@ static void get_tex_coords(const SMikkTSpaceContext *context, float outuv[], int
 }
 
 static void set_tspace_basic(const SMikkTSpaceContext *context, const float tangentu[], float /*fSign*/, int /*iFace*/, int iVert) {
-    const aiMesh *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
+    const auto *currentMesh = static_cast<aiMesh*>(context->m_pUserData);
     currentMesh->mTangents[iVert].x = tangentu[0];
     currentMesh->mTangents[iVert].y = tangentu[1];
     currentMesh->mTangents[iVert].z = tangentu[2];

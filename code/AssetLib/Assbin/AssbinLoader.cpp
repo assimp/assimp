@@ -598,14 +598,10 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
                 throw DeadlyImportError("Assbin: Texture width too large, would overflow");
             }
             tex->pcData = new aiTexel[tex->mWidth];
-            stream->Read(tex->pcData, 1, tex->mWidth);
-        } else {
-            if (tex->mWidth != 0 &&
-                static_cast<size_t>(tex->mHeight) >
-                    AI_MAX_ALLOC(aiTexel) / static_cast<size_t>(tex->mWidth)) {
-                throw DeadlyImportError("Assbin: Texture dimensions too large");
+            if (stream->Read(tex->pcData, 1, tex->mWidth) != tex->mWidth) {
+                throw DeadlyImportError("Assbin: Unexpected EOF reading compressed texture data");
             }
-
+        } else {
             if (tex->mWidth != 0 &&
                 static_cast<size_t>(tex->mHeight) >
                     SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
@@ -613,29 +609,13 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
             }
 
             const size_t pixelCount = static_cast<size_t>(tex->mWidth) * tex->mHeight;
+            const size_t byteCount = pixelCount * sizeof(aiTexel);
             tex->pcData = new aiTexel[pixelCount];
-            stream->Read(tex->pcData, 1, pixelCount * sizeof(aiTexel));
+            if (stream->Read(tex->pcData, 1, byteCount) != byteCount) {
+                throw DeadlyImportError("Assbin: Unexpected EOF reading texture data");
+            }
         }
-        auto data = std::make_unique<aiTexel[]>(texelCount);
-        std::copy(buffer.begin(), buffer.end(), data.get());
-        tex->pcData = data.release();
-        return;
     }
-
-    // Uncompressed texture
-    if (static_cast<size_t>(tex->mHeight) > SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
-        throw DeadlyImportError("ASSBIN: Texture dimensions overflow");
-    }
-
-    const auto texelCount = static_cast<size_t>(tex->mWidth) * static_cast<size_t>(tex->mHeight);
-
-    auto buffer = std::vector<aiTexel>(texelCount);
-    if (stream->Read(buffer.data(), sizeof(aiTexel), texelCount) != texelCount) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading texture data");
-    }
-    auto data = std::make_unique<aiTexel[]>(texelCount);
-    std::copy(buffer.begin(), buffer.end(), data.get());
-    tex->pcData = data.release();
 }
 
 // -----------------------------------------------------------------------------------

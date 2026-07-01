@@ -319,7 +319,6 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 
     mScene->mTextures = new aiTexture *[m3d->numtexture];
     for (i = 0; i < m3d->numtexture; i++) {
-        unsigned int j, k;
         t = &m3d->texture[i];
         aiTexture *tx = new aiTexture;
         tx->mFilename = aiString(std::string(t->name) + ".png");

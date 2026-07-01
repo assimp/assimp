@@ -102,6 +102,7 @@ private:
     /** Configuration option: maximum smoothing angle, in radians*/
     float configMaxAngle;
     unsigned int configSourceUV;
+    bool mActive = true;
 };
 
 } // end of namespace Assimp

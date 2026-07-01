@@ -44,26 +44,22 @@ INCLUDE_DIRECTORIES(
 )
 
 if(NOT ASSIMP_HUNTER_ENABLED)
-  INCLUDE_DIRECTORIES(
-    ${Assimp_SOURCE_DIR}/contrib/googletest/googletest/include
-    ${Assimp_SOURCE_DIR}/contrib/googletest/googletest/
-    ${Assimp_SOURCE_DIR}/contrib/pugixml/src
-  )
-endif()
-
-if (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+    INCLUDE_DIRECTORIES(
+        ${Assimp_SOURCE_DIR}/contrib/googletest/googletest/include
+        ${Assimp_SOURCE_DIR}/contrib/googletest/googletest/
+        ${Assimp_SOURCE_DIR}/contrib/pugixml/src
+    )
 endif()
 
 # Add the temporary output directories to the library path to make sure the
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
-SET(TOOLS
+set(TOOLS
     unit/Tools/TestTools.h
 )
 
-SET( COMMON
+set( COMMON
   unit/utSimd.cpp
   unit/utIOSystem.cpp
   unit/utIOStreamBuffer.cpp
@@ -108,11 +104,11 @@ SET( COMMON
   unit/Common/utLogger.cpp
 )
 
-SET(Geometry 
+set(Geometry 
     unit/Geometry/utGeometryUtils.cpp
 )
 
-SET( IMPORTERS
+set( IMPORTERS
   unit/ImportExport/Assxml/utAssxmlImportExport.cpp
   unit/utLWSImportExport.cpp
   unit/utLWOImportExport.cpp
@@ -191,62 +187,63 @@ if(ASSIMP_BUILD_COLLADA_IMPORTER)
   )
 endif()
 
-SET( MATERIAL
+set( MATERIAL
   unit/utMaterialSystem.cpp
 )
 
-SET( MATH
+set( MATH
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
   unit/utVector3.cpp
 )
 
-SET( POST_PROCESSES
-  unit/utImproveCacheLocality.cpp
-  unit/utFixInfacingNormals.cpp
-  unit/utGenNormals.cpp
-  unit/utTriangulate.cpp
-  unit/utTextureTransform.cpp
-  unit/utRemoveRedundantMaterials.cpp
-  unit/utRemoveVCProcess.cpp
-  unit/utScaleProcess.cpp
-  unit/utArmaturePopulate.cpp
-  unit/utJoinVertices.cpp
-  unit/utRemoveComments.cpp
-  unit/utRemoveComponent.cpp
-  unit/utVertexTriangleAdjacency.cpp
-  unit/utJoinVertices.cpp
-  unit/utSplitLargeMeshes.cpp
-  unit/utFindDegenerates.cpp
-  unit/utFindInvalidData.cpp
-  unit/utLimitBoneWeights.cpp
-  unit/utPretransformVertices.cpp
-  unit/utScenePreprocessor.cpp
-  unit/utTargetAnimation.cpp
-  unit/utSortByPType.cpp
-  unit/utSceneCombiner.cpp
-  unit/utGenBoundingBoxesProcess.cpp
+set( POST_PROCESSES
+  unit/Postprocessing/utImproveCacheLocality.cpp
+  unit/Postprocessing/utFixInfacingNormals.cpp
+  unit/Postprocessing/utGenNormals.cpp
+  unit/Postprocessing/utTriangulate.cpp
+  unit/Postprocessing/utTextureTransform.cpp
+  unit/Postprocessing/utRemoveRedundantMaterials.cpp
+  unit/Postprocessing/utRemoveVCProcess.cpp
+  unit/Postprocessing/utScaleProcess.cpp
+  unit/Postprocessing/utArmaturePopulate.cpp
+  unit/Postprocessing/utJoinVertices.cpp
+  unit/Postprocessing/utRemoveComments.cpp
+  unit/Postprocessing/utRemoveComponent.cpp
+  unit/Postprocessing/utVertexTriangleAdjacency.cpp
+  unit/Postprocessing/utJoinVertices.cpp
+  unit/Postprocessing/utSplitLargeMeshes.cpp
+  unit/Postprocessing/utFindDegenerates.cpp
+  unit/Postprocessing/utFindInvalidData.cpp
+  unit/Postprocessing/utLimitBoneWeights.cpp
+  unit/Postprocessing/utPretransformVertices.cpp
+  unit/Postprocessing/utScenePreprocessor.cpp
+  unit/Postprocessing/utTargetAnimation.cpp
+  unit/Postprocessing/utSortByPType.cpp
+  unit/Postprocessing/utSceneCombiner.cpp
+  unit/Postprocessing/utGenBoundingBoxesProcess.cpp
+  unit/Postprocessing/utGenerateMikkTSpaceTangents.cpp
 )
 
-SOURCE_GROUP( UnitTests\\Compiler      FILES unit/CCompilerTest.c )
-SOURCE_GROUP( UnitTests\\Common        FILES ${COMMON} )
-SOURCE_GROUP( UnitTests\\GeometryTools FILES ${Geometry} )
-SOURCE_GROUP( UnitTests\\ImportExport  FILES ${IMPORTERS} )
-SOURCE_GROUP( UnitTests\\Material      FILES ${MATERIAL} )
-SOURCE_GROUP( UnitTests\\Math          FILES ${MATH} )
-SOURCE_GROUP( UnitTests\\Tools         FILES ${TOOLS} )
-SOURCE_GROUP( UnitTests\\PostProcess   FILES ${POST_PROCESSES})
+source_group( UnitTests\\Compiler      FILES unit/CCompilerTest.c )
+source_group( UnitTests\\Common        FILES ${COMMON} )
+source_group( UnitTests\\GeometryTools FILES ${Geometry} )
+source_group( UnitTests\\ImportExport  FILES ${IMPORTERS} )
+source_group( UnitTests\\Material      FILES ${MATERIAL} )
+source_group( UnitTests\\Math          FILES ${MATH} )
+source_group( UnitTests\\Tools         FILES ${TOOLS} )
+source_group( UnitTests\\PostProcess   FILES ${POST_PROCESSES})
 
 add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Common/Version.cpp
-	../code/Common/Base64.cpp
-	${COMMON}
+	  ../code/Common/Base64.cpp
+	  ${COMMON}
     ${Geometry}
-	${IMPORTERS}
-	${MATERIAL}
-	${MATH}
+	  ${IMPORTERS}
+  	${MATERIAL}
+	  ${MATH}
     ${POST_PROCESSES}
     ${TOOLS}
 )
@@ -260,48 +257,49 @@ else()
 endif()
 
 # RapidJSON
-IF(ASSIMP_HUNTER_ENABLED)
+if(ASSIMP_HUNTER_ENABLED)
   hunter_add_package(RapidJSON)
   find_package(RapidJSON CONFIG REQUIRED)
-ELSE()
+else()
   INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
     ADD_DEFINITIONS( -DRAPIDJSON_NOMEMBERITERATORCLASS )
   endif()
-ENDIF()
+endif()
 
-IF (ASSIMP_BUILD_DRACO)
+if (ASSIMP_BUILD_DRACO)
   ADD_DEFINITIONS( -DASSIMP_ENABLE_DRACO )
-ENDIF()
+endif()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
 
-SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
+set_property( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
-IF( WIN32 )
+if( WIN32 )
     SET( platform_libs )
-ELSEIF(ANDROID)
+elseif(ANDROID)
     SET( platform_libs )
-ELSE()
+else()
     SET( platform_libs pthread )
-ENDIF()
+endif()
 
-IF(MSVC)
+if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+endif()
 
-IF (ASSIMP_WARNINGS_AS_ERRORS)
-  IF (MSVC)
+if (ASSIMP_WARNINGS_AS_ERRORS)
+  if (MSVC)
     TARGET_COMPILE_OPTIONS(unit PRIVATE /W4 /WX)
-  ELSE()
+  else()
     TARGET_COMPILE_OPTIONS(unit PRIVATE -Wall -Werror)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
 target_link_libraries( unit assimp ${platform_libs} )
 

@@ -381,9 +381,10 @@ tbool genTangSpace(const SMikkTSpaceContext * pContext, const float fAngularThre
 		// vary between left/right hand coordinate systems at the vertices.
 		// All healthy triangles on the other hand are built to always be either or.
 
-		/*// force the coordinate system orientation to be uniform for every face.
+		// force the coordinate system orientation to be uniform for every face.
 		// (this is already the case for good triangles but not for
 		// degenerate ones and those with bGroupWithAnything==true)
+		/*
 		bool bOrient = psTspace[index].bOrient;
 		if (psTspace[index].iCounter == 0)	// tspace was not derived from a group
 		{

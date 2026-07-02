@@ -94,7 +94,7 @@ static int advance_mesh_command_offset(int offset, size_t bytes) {
         throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
     }
 
-    const size_t max_int = static_cast<size_t>(std::numeric_limits<int>::max());
+    const auto max_int = static_cast<size_t>(std::numeric_limits<int>::max());
     if (bytes > max_int || static_cast<size_t>(offset) > max_int - bytes) {
         throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
     }

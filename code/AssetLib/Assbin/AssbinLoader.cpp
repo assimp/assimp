@@ -1,35 +1,25 @@
 /*
 ---------------------------------------------------------------------------
-Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+    aiString s;
+    // Read length as 32-bit unsigned
+    const ai_uint32 len = Read<ai_uint32>(stream);
 
-Copyright (c) 2006-2026, assimp team
+    if (len >= AI_MAXLEN) {
+        throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
+    }
 
-All rights reserved.
+    s.length = len;
+    if (s.length > 0) {
+        const size_t bytesRead = stream->Read(s.data, sizeof(char), s.length);
+        if (bytesRead != s.length) {
+            throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+        }
+    }
 
-Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+    // Ensure null termination
+    s.data[s.length] = '\0';
 
-* Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
-
-* Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
-
-* Neither the name of the assimp team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the assimp team.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    return s;
 SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
@@ -149,16 +139,16 @@ aiQuaternion Read<aiQuaternion>(IOStream *stream) {
 template <>
 aiString Read<aiString>(IOStream *stream) {
     aiString s;
-    uint32_t len;
-    if (stream->Read(&len, 4, 1) != 1) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string length");
-    }
+    const ai_uint32 len = Read<ai_uint32>(stream);
     if (len >= AI_MAXLEN) {
         throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
     }
     s.length = len;
-    if ((s.length > 0) && (stream->Read(s.data, s.length, 1) != 1)) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+    if (s.length > 0) {
+        const size_t bytesRead = stream->Read(s.data, sizeof(char), s.length);
+        if (bytesRead != s.length) {
+            throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+        }
     }
     s.data[s.length] = '\0';
 
@@ -747,7 +737,19 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
 // -----------------------------------------------------------------------------------
 void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    IOStream *stream = pIOHandler->Open(pFile, "rb");
+    struct IOStreamDeleter {
+        IOSystem* io;
+        void operator()(IOStream* s) const {
+            if (s) {
+                io->Close(s);
+            }
+        }
+    };
+
+    auto stream = std::unique_ptr<IOStream, IOStreamDeleter>(
+        pIOHandler->Open(pFile, "rb"),
+        IOStreamDeleter{pIOHandler}
+    );
     if (nullptr == stream) {
         throw DeadlyImportError("ASSBIN: Could not open ", pFile);
     }
@@ -755,21 +757,19 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     // signature
     stream->Seek(44, aiOrigin_CUR);
 
-    unsigned int versionMajor = Read<unsigned int>(stream);
-    unsigned int versionMinor = Read<unsigned int>(stream);
+    unsigned int versionMajor = Read<unsigned int>(stream.get());
+    unsigned int versionMinor = Read<unsigned int>(stream.get());
     if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Invalid version, data format not compatible!");
     }
 
-    /*unsigned int versionRevision =*/Read<unsigned int>(stream);
-    /*unsigned int compileFlags =*/Read<unsigned int>(stream);
+    /*unsigned int versionRevision =*/Read<unsigned int>(stream.get());
+    /*unsigned int compileFlags =*/Read<unsigned int>(stream.get());
 
-    shortened = Read<uint16_t>(stream) > 0;
-    compressed = Read<uint16_t>(stream) > 0;
+    shortened = Read<uint16_t>(stream.get()) > 0;
+    compressed = Read<uint16_t>(stream.get()) > 0;
 
     if (shortened) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Shortened binaries are not supported!");
     }
 
@@ -778,7 +778,7 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     stream->Seek(64, aiOrigin_CUR); // padding
 
     if (compressed) {
-        uLongf uncompressedSize = Read<uint32_t>(stream);
+        uLongf uncompressedSize = Read<uint32_t>(stream.get());
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
         unsigned char *compressedData = new unsigned char[compressedSize];
@@ -791,7 +791,6 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         if (res != Z_OK) {
             delete[] uncompressedData;
             delete[] compressedData;
-            pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");
         }
 
@@ -802,10 +801,8 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         delete[] uncompressedData;
         delete[] compressedData;
     } else {
-        ReadBinaryScene(stream, pScene);
+        ReadBinaryScene(stream.get(), pScene);
     }
-
-    pIOHandler->Close(stream);
 }
 
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

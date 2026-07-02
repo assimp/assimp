@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+#include <limits>
 #include <memory>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
@@ -85,6 +86,10 @@ const aiImporterDesc *AssbinImporter::GetInfo() const {
 
 // -----------------------------------------------------------------------------------
 bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    if (pIOHandler == nullptr) {
+        return false;
+    }
+
     IOStream *in = pIOHandler->Open(pFile);
     if (nullptr == in) {
         return false;
@@ -111,6 +116,30 @@ T Read(IOStream *stream) {
         throw DeadlyImportError("Unexpected EOF");
     }
     return t;
+}
+
+// -----------------------------------------------------------------------------------
+void ReadBytes(IOStream *stream, void *out, size_t size, const char *what) {
+    ai_assert(nullptr != stream);
+    ai_assert(nullptr != out || size == 0);
+
+    if (size == 0) {
+        return;
+    }
+
+    const size_t res = stream->Read(out, 1, size);
+    if (res != size) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading ", what);
+    }
+}
+
+// -----------------------------------------------------------------------------------
+size_t CheckedMultiply(size_t left, size_t right, const char *what) {
+    if (left != 0 && right > std::numeric_limits<size_t>::max() / left) {
+        throw DeadlyImportError("ASSBIN: ", what, " size overflows addressable memory");
+    }
+
+    return left * right;
 }
 
 // -----------------------------------------------------------------------------------
@@ -149,16 +178,13 @@ aiQuaternion Read<aiQuaternion>(IOStream *stream) {
 template <>
 aiString Read<aiString>(IOStream *stream) {
     aiString s;
-    uint32_t len;
-    if (stream->Read(&len, 4, 1) != 1) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string length");
-    }
+    const ai_uint32 len = Read<ai_uint32>(stream);
     if (len >= AI_MAXLEN) {
-        throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
+        throw DeadlyImportError("ASSBIN: Invalid aiString length");
     }
     s.length = len;
-    if ((s.length > 0) && (stream->Read(s.data, s.length, 1) != 1)) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+    if (s.length > 0) {
+        ReadBytes(stream, s.data, s.length, "string data");
     }
     s.data[s.length] = '\0';
 
@@ -592,7 +618,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     tex->mWidth = Read<unsigned int>(stream);
     tex->mHeight = Read<unsigned int>(stream);
-    stream->Read(tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1);
+    ReadBytes(stream, tex->achFormatHint, HINTMAXTEXTURELEN - 1, "texture format hint");
 
     if (!shortened) {
         if (!tex->mHeight) {
@@ -600,23 +626,11 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
                 throw DeadlyImportError("Assbin: Texture width too large, would overflow");
             }
             tex->pcData = new aiTexel[tex->mWidth];
-            stream->Read(tex->pcData, 1, tex->mWidth);
+            ReadBytes(stream, tex->pcData, tex->mWidth, "compressed texture data");
         } else {
-            if (tex->mWidth != 0 &&
-                static_cast<size_t>(tex->mHeight) >
-                    AI_MAX_ALLOC(aiTexel) / static_cast<size_t>(tex->mWidth)) {
-                throw DeadlyImportError("Assbin: Texture dimensions too large");
-            }
-
-            if (tex->mWidth != 0 &&
-                static_cast<size_t>(tex->mHeight) >
-                    SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
-                throw DeadlyImportError("Assbin: Texture dimensions too large");
-            }
-
-            const size_t pixelCount = static_cast<size_t>(tex->mWidth) * tex->mHeight;
-            tex->pcData = new aiTexel[pixelCount];
-            stream->Read(tex->pcData, 1, pixelCount * sizeof(aiTexel));
+            const size_t texelCount = CheckedMultiply(static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), "texture");
+            tex->pcData = new aiTexel[texelCount];
+            ReadBytes(stream, tex->pcData, CheckedMultiply(texelCount, sizeof(aiTexel), "texture byte"), "texture data");
         }
     }
 }
@@ -781,31 +795,24 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         uLongf uncompressedSize = Read<uint32_t>(stream);
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
-        unsigned char *compressedData = new unsigned char[compressedSize];
-        size_t len = stream->Read(compressedData, 1, compressedSize);
-        ai_assert(len == compressedSize);
+        std::unique_ptr<unsigned char[]> compressedData(new unsigned char[compressedSize]);
+        ReadBytes(stream, compressedData.get(), compressedSize, "compressed data");
 
-        unsigned char *uncompressedData = new unsigned char[uncompressedSize];
+        std::unique_ptr<unsigned char[]> uncompressedData(new unsigned char[uncompressedSize]);
 
-        int res = uncompress(uncompressedData, &uncompressedSize, compressedData, (uLong)len);
+        int res = uncompress(uncompressedData.get(), &uncompressedSize, compressedData.get(), static_cast<uLong>(compressedSize));
         if (res != Z_OK) {
-            delete[] uncompressedData;
-            delete[] compressedData;
             pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");
         }
 
-        MemoryIOStream io(uncompressedData, uncompressedSize);
+        MemoryIOStream io(uncompressedData.get(), uncompressedSize);
 
         ReadBinaryScene(&io, pScene);
-
-        delete[] uncompressedData;
-        delete[] compressedData;
     } else {
         ReadBinaryScene(stream, pScene);
     }
 
     pIOHandler->Close(stream);
 }
-
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

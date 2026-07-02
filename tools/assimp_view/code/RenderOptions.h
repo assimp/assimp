@@ -47,10 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-------------------------------------------------------------------------------
 class RenderOptions {
 public:
-    // enumerates different drawing modi. POINT is currently
-    // not supported and probably will never be.
-    enum DrawMode {NORMAL, WIREFRAME, POINT};
-
     RenderOptions() = default;
     RenderOptions(const RenderOptions&) = default;
     RenderOptions& operator=(const RenderOptions&) = default;
@@ -71,6 +67,9 @@ public:
 
     /// @brief Render the normals
     bool bRenderNormals{false};
+
+    /// @brief Render the tangents
+    bool bRenderTangents{false};
 
     /// @brief Use 2 directional light sources
     bool b3Lights{false};

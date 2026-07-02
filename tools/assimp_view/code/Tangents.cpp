@@ -40,57 +40,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
-#include "Tangets.h"
+#include "Tangents.h"
+#include "winerror.h"
 
 namespace AssimpView {
 
-    void Tangents::render(IDirect3DDevice9 *piDevice) {
-        if (mScene == nullptr) {
-            return;
-        }   
-
-
-        for (unsigned int i=0; i<mScene->mNumMeshes; i++) {
-            const aiMesh *mesh = mScene->mMeshes[i];
-            if (mesh == nullptr) {
-                continue;
-            }
-
-            // create vertex buffer
-            if (FAILED(piDevice->CreateVertexBuffer(sizeof(AssetHelper::LineVertex) *
-                        mesh->mNumVertices * 2,
-                        D3DUSAGE_WRITEONLY,
-                        AssetHelper::LineVertex::GetFVF(),
-                        D3DPOOL_DEFAULT, &pcMesh->piVBNormals, nullptr))) {
-                CLogDisplay::Instance().AddEntry("Failed to create vertex buffer for the normal list", D3DCOLOR_ARGB(0xFF, 0xFF, 0, 0));
-                return 2;
-            }
-
-            for (unsigned int x = 0; x < mesh->mNumVertices; ++x) {
-                AssetHelper::LineVertex *pbData2;
-                if (mesh->HasTangentsAndBitangents()) {
-                    pbData2->vPosition = mesh->mVertices[x];
-                    ++pbData2;
-
-                    aiVector3D vTangent = mesh->mTangents[x];
-                    vTangent.Normalize();
-
-                    // scalo with the inverse of the world scaling to make sure
-                    // the normals have equal length in each case
-                    // TODO: Check whether this works in every case, I don't think so
-                    vTangent.x /= g_mWorld.a1 * 4;
-                    vTangent.y /= g_mWorld.b2 * 4;
-                    vTangent.z /= g_mWorld.c3 * 4;
-
-                    pbData2->vPosition = pcSource->mVertices[x] + vTangent;
-
-                    ++pbData2;
-                
-                    
-                }
-            }
-            pcMesh->piVBNormals->Unlock();
+    int Tangents::createBuffers(IDirect3DDevice9 *piDevice, AssetHelper::MeshHelper *meshHelper) {
+        if (mMesh == nullptr) {
+            return 1;
         }
+
+        // create vertex buffer
+        const UINT size = sizeof(AssetHelper::LineVertex) * mMesh->mNumVertices * 2;
+        if (FAILED(piDevice->CreateVertexBuffer(size, D3DUSAGE_WRITEONLY,
+                                                AssetHelper::LineVertex::GetFVF(),
+                                                D3DPOOL_DEFAULT, &meshHelper->piTangents, nullptr))) {
+            CLogDisplay::Instance().AddEntry("Failed to create vertex buffer for the tangent list", D3DCOLOR_ARGB(0xFF, 0xFF, 0, 0));
+            return 2;
+        }
+
+        if (mMesh->HasTangentsAndBitangents()) {
+            AssetHelper::LineVertex *pbData2{ nullptr };
+            meshHelper->piTangents->Lock(0, 0, (void **)&pbData2, 0);
+            for (unsigned int x = 0; x < mMesh->mNumVertices; ++x) {
+                pbData2->vPosition = mMesh->mVertices[x];
+                ++pbData2;
+
+                aiVector3D vTangent = mMesh->mTangents[x];
+                vTangent.Normalize();
+
+                vTangent.x /= g_mWorld.a1 * 4;
+                vTangent.y /= g_mWorld.b2 * 4;
+                vTangent.z /= g_mWorld.c3 * 4;
+
+                pbData2->vPosition = mMesh->mVertices[x] + vTangent;
+
+                ++pbData2;  
+            }
+        }
+        meshHelper->piTangents->Unlock();
+        return 0;
     }
 
 } // namespace AssimpView

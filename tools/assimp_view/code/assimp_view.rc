@@ -1,7 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include <assimp/revision.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -16,7 +15,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -29,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico"
+IDI_ASSIMP_VIEW         ICON                    "../../shared/assimp_tools_icon.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,7 +43,7 @@ FONT 9, "Courier New", 400, 0, 0x0
 BEGIN
     LTEXT           "Open Asset Import Library (Assimp)",IDC_STATIC,30,14,144,9
     LTEXT           "A free C/C++ library to read various well-known 3D model formats into a straightforward in-memory format for easy processing by applications. Licensed under a 3-clause BSD license and totally awesome.",IDC_STATIC,31,34,204,24
-    LTEXT           "\xA9 2008-2022. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
+    LTEXT           "© 2008-2022. Assimp Development Team. See the CREDITS file for a list of all contributors.",IDC_STATIC,30,65,204,23
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,0,27,282,1
     LTEXT           "https://assimp.org",IDC_STATIC,31,101,127,22
     DEFPUSHBUTTON   "Love this library",IDOK,186,110,84,14
@@ -106,6 +105,7 @@ BEGIN
     CONTROL         "Button1",IDC_LCOLOR2,"Button",BS_OWNERDRAW | WS_TABSTOP,463,374,35,14
     CONTROL         "Button1",IDC_LCOLOR3,"Button",BS_OWNERDRAW | WS_TABSTOP,463,393,35,14
     PUSHBUTTON      "Reset",IDC_LRESET,463,411,35,14
+    CONTROL         "Display tangents [T]",IDC_TOGGLETANGENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,93,429,80,10
 END
 
 IDD_LOADDIALOG DIALOGEX 0, 0, 143, 60
@@ -188,14 +188,17 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION VER_FILEVERSION
- PRODUCTVERSION VER_FILEVERSION
- FILEFLAGSMASK VS_FF_DEBUG
+ FILEVERSION 6,0,5,0
+ PRODUCTVERSION 6,0,5,0
+ FILEFLAGSMASK 0x1L
 #ifdef _DEBUG
- FILEFLAGS VS_FF_DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
 #endif
- FILEOS VOS_NT
- FILETYPE VFT_APP
+ FILEOS 0x40000L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -204,12 +207,12 @@ BEGIN
             VALUE "Comments", "Licensed under a 3-clause BSD license"
             VALUE "CompanyName", "ASSIMP Team"
             VALUE "FileDescription", "ASSIMP Viewer Application"
-            VALUE "FileVersion", VER_FILEVERSION_STR
+            VALUE "FileVersion", "6.0.5.0 (Commit 0d23780f)"
             VALUE "InternalName", "assimp_view"
-            VALUE "LegalCopyright", VER_COPYRIGHT_STR
+            VALUE "LegalCopyright", "© 2006-2023"
             VALUE "OriginalFilename", "assimp_viewer.exe"
             VALUE "ProductName", "ASSIMP Viewer Application"
-            VALUE "ProductVersion", VER_FILEVERSION_STR
+            VALUE "ProductVersion", "6.0.5.0 (Commit 0d23780f)"
         END
     END
     BLOCK "VarFileInfo"
@@ -276,27 +279,27 @@ END
 // Bitmap
 //
 
-IDB_BITMAP1             BITMAP                  "banner.bmp"
+IDB_BITMAP1             BITMAP                  "..\\banner.bmp"
 
-IDB_BANIM               BITMAP                  "base_anim.bmp"
+IDB_BANIM               BITMAP                  "..\\base_anim.bmp"
 
-IDB_BDISPLAY            BITMAP                  "base_display.bmp"
+IDB_BDISPLAY            BITMAP                  "..\\base_display.bmp"
 
-IDB_BINTER              BITMAP                  "base_inter.bmp"
+IDB_BINTER              BITMAP                  "..\\base_inter.bmp"
 
-IDB_BRENDERING          BITMAP                  "base_rendering.bmp"
+IDB_BRENDERING          BITMAP                  "..\\base_rendering.bmp"
 
-IDB_BSTATS              BITMAP                  "base_stats.bmp"
+IDB_BSTATS              BITMAP                  "..\\base_stats.bmp"
 
-IDB_BTX                 BITMAP                  "tx.bmp"
+IDB_BTX                 BITMAP                  "..\\tx.bmp"
 
-IDB_BFX                 BITMAP                  "fx.bmp"
+IDB_BFX                 BITMAP                  "..\\fx.bmp"
 
-IDB_BNODE               BITMAP                  "n.bmp"
+IDB_BNODE               BITMAP                  "..\\n.bmp"
 
-IDB_BROOT               BITMAP                  "root.bmp"
+IDB_BROOT               BITMAP                  "..\\root.bmp"
 
-IDB_BTXI                BITMAP                  "txi.bmp"
+IDB_BTXI                BITMAP                  "..\\txi.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -379,8 +382,8 @@ BEGIN
     BEGIN
         POPUP "Feedback"
         BEGIN
-            MENUITEM "Report bug",              ID_REPORTBUG
-            MENUITEM "Feature request",         ID_FR
+            MENUITEM "Report bug",                  ID_REPORTBUG
+            MENUITEM "Feature request",             ID_FR
         END
         MENUITEM "Help",                        ID__HELP
         MENUITEM SEPARATOR
@@ -438,7 +441,7 @@ END
 // TEXT
 //
 
-IDR_TEXT1               TEXT                    "text1.bin"
+IDR_TEXT1               TEXT                    "../text1.bin"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -446,11 +449,11 @@ IDR_TEXT1               TEXT                    "text1.bin"
 // RCDATA
 //
 
-IDR_HUD                 RCDATA                  "HUD.png"
+IDR_HUD                 RCDATA                  "../HUD.png"
 
-IDR_HUDMASK             RCDATA                  "HUDMask.png"
+IDR_HUDMASK             RCDATA                  "../HUDMask.png"
 
-#endif    // English (U.S.) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

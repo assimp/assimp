@@ -218,6 +218,9 @@ void ToggleNormals() {
     RegSetValueExA(g_hRegistry,"RenderNormals",0,REG_DWORD,(const BYTE*)&dwValue,4);
 }
 
+//-------------------------------------------------------------------------------
+// Store registry key for a boolean option
+//-------------------------------------------------------------------------------
 static void storeRegKey(bool option, LPCSTR name) {
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -225,8 +228,21 @@ static void storeRegKey(bool option, LPCSTR name) {
         dwValue = 1;
     }
     RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE*)&dwValue, 4);
-
 }
+
+//-------------------------------------------------------------------------------
+// Toggle the "Dispay Tangents" state
+//-------------------------------------------------------------------------------
+void TogglTangents() {
+    g_sOptions.bRenderTangents = !g_sOptions.bRenderTangents;
+
+    // store this in the registry, too
+    DWORD dwValue = 0;
+    if (g_sOptions.bRenderTangents)
+        dwValue = 1;
+    RegSetValueExA(g_hRegistry, "RenderTangents", 0, REG_DWORD, (const BYTE *)&dwValue, 4);
+}
+
 //-------------------------------------------------------------------------------
 // Toggle the "AutoRotate" state
 //-------------------------------------------------------------------------------
@@ -1138,6 +1154,17 @@ void InitUI() {
     } else {
         g_sOptions.bRenderNormals = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_CHECKED);
+    }
+
+    // DisplayTangents
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "RenderTangets", nullptr, nullptr,
+                                         (BYTE *)&dwValue, &dwTemp)) dwValue = 0;
+    if (0 == dwValue) {
+        g_sOptions.bRenderTangents = false;
+        CheckDlgButton(g_hDlg, IDC_TOGGLETANGENTS, BST_UNCHECKED);
+    } else {
+        g_sOptions.bRenderTangents = true;
+        CheckDlgButton(g_hDlg, IDC_TOGGLETANGENTS, BST_CHECKED);
     }
 
     // NoMaterials

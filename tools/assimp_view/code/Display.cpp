@@ -2074,6 +2074,25 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
                 piEnd->EndPass();
                 piEnd->End();
             }
+
+            // render tangents vectors?
+            if (g_sOptions.bRenderTangents && helper->piTangents) {
+                // this is very similar to the code in SetupMaterial()
+                ID3DXEffect *piEnd = g_piNormalsEffect;
+
+                piEnd->SetVector("OUTPUT_COLOR", &vVector);
+                piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX *)&pcProj);
+
+                UINT dwPasses = 0;
+                piEnd->Begin(&dwPasses, 0);
+                piEnd->BeginPass(0);
+
+                g_piDevice->SetStreamSource(0, helper->piTangents, 0, sizeof(AssetHelper::LineVertex));
+                g_piDevice->DrawPrimitive(D3DPT_LINELIST, 0, g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mNumVertices);
+
+                piEnd->EndPass();
+                piEnd->End();
+            }
         }
         // end the default material
         if (!g_sOptions.bRenderMats)

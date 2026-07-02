@@ -41,20 +41,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMPVIEW_TANGENTS_H_INC
 #define ASSIMPVIEW_TANGENTS_H_INC
 
-struct aiScene;
+#include "AssetHelper.h"
+
+struct aiMesh;
+struct IDirect3DDevice9;
 
 namespace AssimpView {
 
 class Tangents {
 public: 
-    explicit Tangents(aiScene *scene) : mScene(scene) {
+    explicit Tangents(const aiMesh *mesh) : mMesh(mesh) {
         // empty
     }
     ~Tangents() = default;
-    void render();
+    int createBuffers(IDirect3DDevice9 *piDevice, AssetHelper::MeshHelper *meshHelper);
 
 private:
-    aiScene *mScene{nullptr}
+    const aiMesh *mMesh{ nullptr };
 };
 
 } // namespace AssimpView

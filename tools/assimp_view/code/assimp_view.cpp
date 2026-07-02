@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
+#include "Tangents.h"
 #include <assimp/StringUtils.h>
 #include <map>
 
@@ -613,6 +614,11 @@ int CreateAssetData() {
         if (!g_pcAsset->apcMeshes[i]->piVBNormals) {
             GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i], mesh);
         }
+
+        if (g_pcAsset->apcMeshes[i]->piTangents) {
+            Tangents meshTangents(mesh);
+            meshTangents.createBuffers(g_piDevice, g_pcAsset->apcMeshes[i]);
+        }
     }
     return 1;
 }
@@ -633,6 +639,10 @@ int DeleteAssetData(bool bNoMaterials) {
         if (g_pcAsset->apcMeshes[i]->piVBNormals) {
             g_pcAsset->apcMeshes[i]->piVBNormals->Release();
             g_pcAsset->apcMeshes[i]->piVBNormals = nullptr;
+        }
+        if (g_pcAsset->apcMeshes[i]->piTangents) {
+            g_pcAsset->apcMeshes[i]->piTangents->Release();
+            g_pcAsset->apcMeshes[i]->piTangents = nullptr;
         }
         if (g_pcAsset->apcMeshes[i]->piIB) {
             g_pcAsset->apcMeshes[i]->piIB->Release();

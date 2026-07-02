@@ -143,6 +143,7 @@ public:
                 piVB(NULL),
                 piIB(NULL),
                 piVBNormals(NULL),
+                piTangents(NULL),
                 piEffect(NULL),
                 bSharedFX(false),
                 piDiffuseTexture(NULL),
@@ -179,6 +180,8 @@ public:
         // vertex buffer to be used to draw vertex normals
         // (vertex normals are generated in every case)
         IDirect3DVertexBuffer9 *piVBNormals;
+
+        IDirect3DVertexBuffer9 *piTangents;
 
         // shader to be used
         ID3DXEffect *piEffect;

@@ -80,6 +80,7 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
   code/SceneAnimator.h
   code/MaterialManager.h
   code/AssetHelper.h
+  code/RenderOptions.h
   code/assimp_view.cpp
   code/stdafx.cpp
   code/assimp_view.rc

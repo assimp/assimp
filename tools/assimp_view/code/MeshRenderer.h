@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -39,25 +39,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#if (!defined AV_SHADERS_H_INCLUDED)
-#define AV_SHADERS_H_INCLUDED
+#if (!defined AV_MESH_RENDERER_H_INCLUDED)
+#define AV_MESH_RENDERER_H_INCLUDED
 
-// Shader used for rendering a skybox background
-extern std::string  g_szSkyboxShader;
+namespace AssimpView {
 
-// Shader used for visualizing normal vectors
-extern std::string  g_szNormalsShader;
 
-// Default shader
-extern std::string  g_szDefaultShader;
+    //-------------------------------------------------------------------------------
+    /* Helper class tp render meshes
+    */
+    //-------------------------------------------------------------------------------
+    class CMeshRenderer {
+    public:
+        ~CMeshRenderer() = default;
 
-// Material shader
-extern std::string  g_szMaterialShader;
+        //------------------------------------------------------------------
+        // Singleton accessors
+        static CMeshRenderer s_cInstance;
 
-// Shader used to draw the yellow circle on top of everything
-extern std::string  g_szPassThroughShader;
+        inline static CMeshRenderer& Instance() {
+            return s_cInstance;
+        }
 
-// Shader used to draw the checker pattern background for the texture view
-extern std::string  g_szCheckerBackgroundShader;
 
-#endif // !! AV_SHADERS_H_INCLUDED
+        //------------------------------------------------------------------
+        // Draw a mesh in the global mesh list using the current pipeline state
+        // iIndex Index of the mesh to be drawn
+        //
+        // The function draws all faces in order, regardless of their distance
+        int DrawUnsorted( unsigned int iIndex );
+
+        //------------------------------------------------------------------
+        // Draw a mesh in the global mesh list using the current pipeline state
+        // iIndex Index of the mesh to be drawn
+        //
+        // The method sorts all vertices by their distance (back to front)
+        //
+        // mWorld World matrix for the node
+        int DrawSorted( unsigned int iIndex, const aiMatrix4x4& mWorld );
+
+    private:
+        // default constructor
+        CMeshRenderer() = default;
+
+    private:
+    };
+}
+
+#endif //!! include guard

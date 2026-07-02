@@ -38,48 +38,55 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#pragma once
 
-#if (!defined AV_CAMERA_H_INCLUDED)
-#define AV_CAMERA_H_INCLUDED
+#include <list>
 
-//-------------------------------------------------------------------------------
-/** \brief Camera class
-*/
-//-------------------------------------------------------------------------------
-class Camera
-    {
+namespace AssimpView {
+
+    //-------------------------------------------------------------------------------
+    /** \brief Class to display log strings in the upper right corner of the view
+    */
+    //-------------------------------------------------------------------------------
+    class CLogDisplay {
+    private:
+        CLogDisplay() = default;
+
     public:
+        // data structure for an entry in the log queue
+        struct SEntry {
+            SEntry() : clrColor(D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 )), dwStartTicks(0)
+            {}
 
+            std::string szText;
+            D3DCOLOR clrColor;
+            DWORD dwStartTicks;
+        };
 
-        Camera ()
-            :
+        // Singleton accessors
+        static CLogDisplay s_cInstance;
+        inline static CLogDisplay& Instance()
+        {
+            return s_cInstance;
+        }
 
-            vPos(0.0f,0.0f,-10.0f),
-            vUp(0.0f,1.0f,0.0f),
-            vLookAt(0.0f,0.0f,1.0f),
-            vRight(0.0f,1.0f,0.0f)
-            {
+        // Add an entry to the log queue
+        void AddEntry( const std::string& szText,
+            const D3DCOLOR clrColor = D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) );
 
-            }
-    public:
+        // Release any native resources associated with the instance
+        void ReleaseNativeResource();
 
-        // position of the camera
-        aiVector3D vPos;
+        // Recreate any native resources associated with the instance
+        void RecreateNativeResource();
 
-        // up-vector of the camera
-        aiVector3D vUp;
+        // Called during the render loop
+        void OnRender();
 
-        // camera's looking point is vPos + vLookAt
-        aiVector3D vLookAt;
+    private:
 
-        // right vector of the camera
-        aiVector3D vRight;
+        std::list<SEntry> asEntries;
+        ID3DXFont* piFont;
+    };
 
-
-        // Equation
-        // (vRight ^ vUp) - vLookAt == 0
-        // needn't apply
-
-    } ;
-
-#endif // !!IG
+}

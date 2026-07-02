@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -38,62 +38,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
 
-#include <list>
+#if (!defined AV_SHADERS_H_INCLUDED)
+#define AV_SHADERS_H_INCLUDED
 
-namespace AssimpView
-{
+// Shader used for rendering a skybox background
+extern std::string  g_szSkyboxShader;
 
-    //-------------------------------------------------------------------------------
-    /** \brief Class to display log strings in the upper right corner of the view
-    */
-    //-------------------------------------------------------------------------------
-    class CLogDisplay
-    {
-    private:
+// Shader used for visualizing normal vectors
+extern std::string  g_szNormalsShader;
 
-        CLogDisplay()  {}
+// Default shader
+extern std::string  g_szDefaultShader;
 
-    public:
+// Material shader
+extern std::string  g_szMaterialShader;
 
-        // data structure for an entry in the log queue
-        struct SEntry
-        {
-            SEntry()
-                :
-                clrColor( D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) ), dwStartTicks( 0 )
-            {}
+// Shader used to draw the yellow circle on top of everything
+extern std::string  g_szPassThroughShader;
 
-            std::string szText;
-            D3DCOLOR clrColor;
-            DWORD dwStartTicks;
-        };
+// Shader used to draw the checker pattern background for the texture view
+extern std::string  g_szCheckerBackgroundShader;
 
-        // Singleton accessors
-        static CLogDisplay s_cInstance;
-        inline static CLogDisplay& Instance()
-        {
-            return s_cInstance;
-        }
-
-        // Add an entry to the log queue
-        void AddEntry( const std::string& szText,
-            const D3DCOLOR clrColor = D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) );
-
-        // Release any native resources associated with the instance
-        void ReleaseNativeResource();
-
-        // Recreate any native resources associated with the instance
-        void RecreateNativeResource();
-
-        // Called during the render loop
-        void OnRender();
-
-    private:
-
-        std::list<SEntry> asEntries;
-        ID3DXFont* piFont;
-    };
-
-}
+#endif // !! AV_SHADERS_H_INCLUDED

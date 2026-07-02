@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -38,62 +38,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#ifndef ASSIMPVIEW_TANGENTS_H_INC
+#define ASSIMPVIEW_TANGENTS_H_INC
 
-#if (!defined AV_MESH_RENDERER_H_INCLUDED)
-#define AV_MESH_RENDERER_H_INCLUDED
+struct aiScene;
 
 namespace AssimpView {
 
+class Tangents {
+public: 
+    explicit Tangents(aiScene *scene) : mScene(scene) {
+        // empty
+    }
+    ~Tangents() = default;
+    void render();
 
-    //-------------------------------------------------------------------------------
-    /* Helper class tp render meshes
-    */
-    //-------------------------------------------------------------------------------
-    class CMeshRenderer
-    {
-    private:
+private:
+    aiScene *mScene{nullptr}
+};
 
-        // default constructor
-        CMeshRenderer()
+} // namespace AssimpView
 
-        {
-            // no other members to initialize
-        }
-
-    public:
-
-        //------------------------------------------------------------------
-        // Singleton accessors
-        static CMeshRenderer s_cInstance;
-        inline static CMeshRenderer& Instance()
-        {
-            return s_cInstance;
-        }
-
-
-        //------------------------------------------------------------------
-        // Draw a mesh in the global mesh list using the current pipeline state
-        // iIndex Index of the mesh to be drawn
-        //
-        // The function draws all faces in order, regardless of their distance
-        int DrawUnsorted( unsigned int iIndex );
-
-        //------------------------------------------------------------------
-        // Draw a mesh in the global mesh list using the current pipeline state
-        // iIndex Index of the mesh to be drawn
-        //
-        // The method sorts all vertices by their distance (back to front)
-        //
-        // mWorld World matrix for the node
-        int DrawSorted( unsigned int iIndex,
-            const aiMatrix4x4& mWorld );
-
-
-
-    private:
-
-
-    };
-
-}
-#endif //!! include guard
+#endif // !defined ASSIMPVIEW_TANGENTS_H_INCASSIMPVIEW_TANGENTS_H_INC  

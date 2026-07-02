@@ -285,7 +285,7 @@ int LoadAsset() {
 // Delete the loaded asset
 // The function does nothing if no asset is loaded
 //-------------------------------------------------------------------------------
-int DeleteAsset(void) {
+int DeleteAsset() {
     if (!g_pcAsset) {
         return 0;
     }
@@ -395,7 +395,9 @@ int GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcS
     ai_assert(nullptr != pcMesh);
     ai_assert(nullptr != pcSource);
 
-    if (!pcSource->mNormals) return 0;
+    if (!pcSource->mNormals) {
+        return 0;
+    }
 
     // create vertex buffer
     if (FAILED(g_piDevice->CreateVertexBuffer(sizeof(AssetHelper::LineVertex) *

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -39,75 +39,68 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#if (!defined AV_RO_H_INCLUDED)
+#ifndef AV_RO_H_INCLUDED
 #define AV_RO_H_INCLUDED
 
-
 //-------------------------------------------------------------------------------
-/** \brief Class to manage render options. One global instance
-*/
+/// @brief Class to manage render options. One global instance
 //-------------------------------------------------------------------------------
-class RenderOptions
-    {
-    public:
+class RenderOptions {
+public:
+    // enumerates different drawing modi. POINT is currently
+    // not supported and probably will never be.
+    enum DrawMode {NORMAL, WIREFRAME, POINT};
 
-        // enumerates different drawing modi. POINT is currently
-        // not supported and probably will never be.
-        enum DrawMode {NORMAL, WIREFRAME, POINT};
+    RenderOptions() = default;
+    RenderOptions(const RenderOptions&) = default;
+    RenderOptions& operator=(const RenderOptions&) = default;
+    ~RenderOptions() = default;
 
-        inline RenderOptions    (void) :
-            bMultiSample    (true),
-            bSuperSample    (false),
-            bRenderMats     (true),
-            bRenderNormals  (false),
-            b3Lights        (false),
-            bLightRotate    (false),
-            bRotate         (true),
-            bLowQuality     (false),
-            bNoSpecular     (false),
-            bStereoView     (false),
-            bNoAlphaBlending(false),
-            eDrawMode       (NORMAL),
-            bCulling        (false),
-            bSkeleton       (false)
+    /// enumerates different drawing modi. POINT is currently
+    /// not supported and probably will never be.
+    enum DrawMode {NORMAL, WIREFRAME, POINT};
 
-            {}
+    /// @brief Enable/disable multi-sampling. This is a global setting and will be applied to all windows.
+    bool bMultiSample{true};
 
-        bool bMultiSample;
+    /// @brief SuperSampling has not yet been implemented
+    bool bSuperSample{false};
 
-        // SuperSampling has not yet been implemented
-        bool bSuperSample;
+    /// @brief Display the real material of the object
+    bool bRenderMats{true};
 
-        // Display the real material of the object
-        bool bRenderMats;
+    /// @brief Render the normals
+    bool bRenderNormals{false};
 
-        // Render the normals
-        bool bRenderNormals;
+    /// @brief Use 2 directional light sources
+    bool b3Lights{false};
 
-        // Use 2 directional light sources
-        bool b3Lights;
+    /// @brief Automatically rotate the light source(s)
+    bool bLightRotate{false}  ;
 
-        // Automatically rotate the light source(s)
-        bool bLightRotate;
+    /// @brief Automatically rotate the asset around its origin
+    bool bRotate{true};
 
-        // Automatically rotate the asset around its origin
-        bool bRotate;
+    /// @brief use standard lambertian lighting
+    bool bLowQuality{false} ;
 
-        // use standard lambertian lighting
-        bool bLowQuality;
+    /// @brief disable specular lighting for all elements in the scene
+    bool bNoSpecular{false};
 
-        // disable specular lighting got all elements in the scene
-        bool bNoSpecular;
+    /// @brief enable stereo view
+    bool bStereoView{false};
 
-        // enable stereo view
-        bool bStereoView;
+    /// @brief disable alpha blending for all elements in the scene
+    bool bNoAlphaBlending{false};
 
-        bool bNoAlphaBlending;
+    /// @brief wireframe or solid rendering?
+    DrawMode eDrawMode;
 
-        // wireframe or solid rendering?
-        DrawMode eDrawMode;
+    /// @brief enable face culling
+    bool bCulling{false};
+    
+    /// @brief enable skeleton rendering
+    bool bSkeleton{false};
+};
 
-        bool bCulling,bSkeleton;
-    };
-
-#endif // !! IG
+#endif // AV_RO_H_INCLUDED

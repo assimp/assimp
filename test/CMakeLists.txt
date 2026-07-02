@@ -68,6 +68,7 @@ SET( COMMON
   unit/utIOSystem.cpp
   unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp
+  unit/utJassimpOverflow.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/AssimpAPITest_aiMatrix3x3.cpp
@@ -108,7 +109,7 @@ SET( COMMON
   unit/Common/utLogger.cpp
 )
 
-SET(Geometry 
+SET(Geometry
     unit/Geometry/utGeometryUtils.cpp
 )
 

@@ -35,7 +35,7 @@ class AssimpLib(object):
     """
     Assimp-Singleton
     """
-    load, load_mem, export, export_blob, release, dll = helper.search_library()
+    load, load_mem, export, export_blob, release, dll, create_store, set_prop_int, set_prop_float, set_prop_string, import_props, release_store = helper.search_library()
 _assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
@@ -288,7 +288,8 @@ def release(scene):
 @contextmanager
 def load(filename,
          file_type  = None,
-         processing = postprocess.aiProcess_Triangulate):
+         processing = postprocess.aiProcess_Triangulate,
+         properties = None):
     '''
     Load a model into a scene. On failure throws AssimpError.
 
@@ -328,7 +329,39 @@ def load(filename,
                                      c_char_p(file_type.encode(sys.getfilesystemencoding())))
     else:
         # a filename string has been passed
-        model = _assimp_lib.load(filename.encode(sys.getfilesystemencoding()), processing)
+
+        # Create a store to pass to the C importer
+        store = _assimp_lib.create_store()
+
+        # Autofill the store with the properties passed to the function
+        if properties:
+            for key, val in properties.items():
+                key_bytes = key.encode('utf-8') if isinstance(key, str) else key
+
+                if isinstance(val, bool):  # Les booléens héritent d'int en Python, on traite d'abord
+                    _assimp_lib.set_prop_int(store, key_bytes, 1 if val else 0)
+                elif isinstance(val, int):
+                    _assimp_lib.set_prop_int(store, key_bytes, val)
+                elif isinstance(val, float):
+                    _assimp_lib.set_prop_float(store, key_bytes, val)
+                elif isinstance(val, (str, bytes)):
+                    val_bytes = val.encode('utf-8') if isinstance(val, str) else val
+                    # Assimp exige une structure aiString (structs.String) passée par référence
+                    ai_str = structs.String()
+                    ai_str.data = val_bytes
+                    ai_str.length = len(val_bytes)
+                    _assimp_lib.set_prop_string(store, key_bytes, ctypes.byref(ai_str))
+
+        # File loading with the C importer that support properties
+        model = _assimp_lib.import_props(
+            filename.encode(sys.getfilesystemencoding()),
+            processing,
+            None,
+            store
+        )
+
+        # Free the store, as it is no longer needed.
+        _assimp_lib.release_store(store)
 
     if not model:
         raise AssimpError('Could not import file!')

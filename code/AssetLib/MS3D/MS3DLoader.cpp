@@ -133,7 +133,8 @@ void MS3DImporter :: ReadComments(StreamReaderLE& stream, std::vector<T>& outp)
 }
 
 // ------------------------------------------------------------------------------------------------
-template <typename T, typename T2, typename T3> bool inrange(const T& in, const T2& lower, const T3& higher)
+template <typename T, typename T2, typename T3> 
+bool inrange(const T& in, const T2& lower, const T3& higher)
 {
     return in > lower && in <= higher;
 }
@@ -608,7 +609,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         // anim->mDuration = totalframes/animfps;
 
         anim->mChannels = new aiNodeAnim*[joints.size()]();
-        for(std::vector<TempJoint>::const_iterator it = joints.begin(); it != joints.end(); ++it) {
+        for (auto it = joints.begin(); it != joints.end(); ++it) {
             if ((*it).rotFrames.empty() && (*it).posFrames.empty()) {
                 continue;
             }
@@ -618,7 +619,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
             if ((*it).rotFrames.size()) {
                 nd->mRotationKeys = new aiQuatKey[(*it).rotFrames.size()];
-                for(std::vector<TempKeyFrame>::const_iterator rot = (*it).rotFrames.begin(); rot != (*it).rotFrames.end(); ++rot) {
+                for (auto rot = (*it).rotFrames.begin(); rot != (*it).rotFrames.end(); ++rot) {
                     aiQuatKey& q = nd->mRotationKeys[nd->mNumRotationKeys++];
 
                     q.mTime = (*rot).time*animfps;
@@ -630,8 +631,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             if ((*it).posFrames.size()) {
                 nd->mPositionKeys = new aiVectorKey[(*it).posFrames.size()];
 
-                aiQuatKey* qu = nd->mRotationKeys;
-                for(std::vector<TempKeyFrame>::const_iterator pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos,++qu) {
+                for(auto pos = (*it).posFrames.begin(); pos != (*it).posFrames.end(); ++pos) {
                     aiVectorKey& v = nd->mPositionKeys[nd->mNumPositionKeys++];
 
                     v.mTime = (*pos).time*animfps;

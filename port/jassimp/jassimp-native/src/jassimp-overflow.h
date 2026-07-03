@@ -70,12 +70,12 @@ inline bool computeFaceBufferSize(const aiMesh* cMesh, size_t &faceBufferSize)
         }
     }
 
-        /* ensure the computed buffer size fits into a Java int (jint) */
-        if (!fitsInJavaInt(faceBufferSize)) {
-            return false;
-        }
+    /* ensure the computed buffer size fits into a Java int (jint) */
+    if (!fitsInJavaInt(faceBufferSize)) {
+        return false;
+    }
 
-        return true;
+    return true;
 }
 
 } // namespace jassimp

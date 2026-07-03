@@ -173,7 +173,7 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
     aiReleasePropertyStore(props);
 
     // get the end time of zje operation, calculate delta t
-    double fEnd = (double)timeGetTime();
+    auto fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
     g_bLoadingFinished = true;
 
@@ -615,7 +615,7 @@ int CreateAssetData() {
             GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i], mesh);
         }
 
-        if (g_pcAsset->apcMeshes[i]->piTangents) {
+        if (!g_pcAsset->apcMeshes[i]->piTangents) {
             Tangents meshTangents(mesh);
             meshTangents.createBuffers(g_piDevice, g_pcAsset->apcMeshes[i]);
         }
@@ -670,6 +670,10 @@ int DeleteAssetData(bool bNoMaterials) {
                 g_pcAsset->apcMeshes[i]->piNormalTexture->Release();
                 g_pcAsset->apcMeshes[i]->piNormalTexture = nullptr;
             }
+            if (g_pcAsset->apcMeshes[i]->piTangents) {
+                g_pcAsset->apcMeshes[i]->piTangents->Release();
+                g_pcAsset->apcMeshes[i]->piTangents = nullptr;
+            }
             if (g_pcAsset->apcMeshes[i]->piSpecularTexture) {
                 g_pcAsset->apcMeshes[i]->piSpecularTexture->Release();
                 g_pcAsset->apcMeshes[i]->piSpecularTexture = nullptr;
@@ -719,24 +723,16 @@ int SetupFPSView() {
 // Initialize the IDIrect3D interface
 // Called by the WinMain
 //-------------------------------------------------------------------------------
-int InitD3D(void) {
-    if (nullptr == g_piD3D) {
-        g_piD3D = Direct3DCreate9(D3D_SDK_VERSION);
-        if (nullptr == g_piD3D) return 0;
-    }
-    return 1;
-}
-
-//-------------------------------------------------------------------------------
-// Release the IDirect3D interface.
-// NOTE: Assumes that the device has already been deleted
-//-------------------------------------------------------------------------------
-int ShutdownD3D(void) {
-    ShutdownDevice();
+int InitD3D() {
     if (nullptr != g_piD3D) {
-        g_piD3D->Release();
-        g_piD3D = nullptr;
+        return 0;
     }
+
+    g_piD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    if (nullptr == g_piD3D) {
+        return 0;
+    }
+
     return 1;
 }
 
@@ -749,10 +745,22 @@ inline void SafeRelease(TComPtr *&ptr) {
 }
 
 //-------------------------------------------------------------------------------
+// Release the IDirect3D interface.
+// NOTE: Assumes that the device has already been deleted
+//-------------------------------------------------------------------------------
+int ShutdownD3D() {
+    ShutdownDevice();
+    SafeRelease(g_piD3D);
+
+    return 1;
+}
+
+
+//-------------------------------------------------------------------------------
 // Shutdown the D3D device object and all resources associated with it
 // NOTE: Assumes that the asset has already been deleted
 //-------------------------------------------------------------------------------
-int ShutdownDevice(void) {
+int ShutdownDevice() {
     // release other subsystems
     CBackgroundPainter::Instance().ReleaseNativeResource();
     CLogDisplay::Instance().ReleaseNativeResource();

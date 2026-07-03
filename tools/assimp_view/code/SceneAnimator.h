@@ -52,10 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpView {
 
 // ---------------------------------------------------------------------------------
-/** A little tree structure to match the scene's node structure, but holding
- *  additional data. Needs to be public to allow using it in templates at
- *  certain compilers.
- */
+/// @brief A little tree structure to match the scene's node structure, but holding
+/// additional data. Needs to be public to allow using it in templates at
+///  certain compilers.
+// ---------------------------------------------------------------------------------
 struct SceneAnimNode {
     std::string mName;
     SceneAnimNode *mParent;
@@ -113,7 +113,7 @@ public:
      */
     SceneAnimator(const aiScene *pScene, size_t pAnimIndex = 0);
 
-    /** Destructor */
+    /// Destructor
     ~SceneAnimator();
 
     // ----------------------------------------------------------------------------
@@ -180,8 +180,8 @@ public:
             size_t pMeshIndex = 0);
 
     // ----------------------------------------------------------------------------
-    /** @brief Get the current animation index
-     */
+    /// @brief Get the current animation index
+    /// @return The current animation index
     size_t CurrentAnimIndex() const {
         return mCurrentAnimIndex;
     }

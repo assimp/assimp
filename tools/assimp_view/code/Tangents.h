@@ -48,12 +48,25 @@ struct IDirect3DDevice9;
 
 namespace AssimpView {
 
+// ---------------------------------------------------------------------------------
+/// @brief Class to generate tangents for a given aiMesh and create a vertex 
+///        buffer for it, which can be used to render the tangents in the scene.
+// ---------------------------------------------------------------------------------
 class Tangents {
 public: 
+    /// @brief Constructor. Takes a pointer to an aiMesh for which tangents should be generated.
+    /// @param mesh Pointer to the aiMesh for which tangents should be generated.
     explicit Tangents(const aiMesh *mesh) : mMesh(mesh) {
         // empty
     }
+
+    /// @brief Destructor.
     ~Tangents() = default;
+
+    /// @brief Creates vertex buffers for the generated tangents.
+    /// @param piDevice Pointer to the Direct3D device.
+    /// @param meshHelper Pointer to the mesh helper.
+    /// @returns Result of the operation.
     int createBuffers(IDirect3DDevice9 *piDevice, AssetHelper::MeshHelper *meshHelper);
 
 private:

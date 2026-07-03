@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpView {
 
     int Tangents::createBuffers(IDirect3DDevice9 *piDevice, AssetHelper::MeshHelper *meshHelper) {
-        if (mMesh == nullptr) {
+        if (mMesh == nullptr || meshHelper == nullptr) {
             return 1;
         }
 
@@ -79,6 +79,7 @@ namespace AssimpView {
             }
         }
         meshHelper->piTangents->Unlock();
+        
         return 0;
     }
 

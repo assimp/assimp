@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 
 #include <commdlg.h>
+#include <array>
 
 namespace AssimpView {
 
@@ -58,7 +59,7 @@ struct SVertex
 
 CDisplay CDisplay::s_cInstance;
 
-extern COLORREF g_aclCustomColors[16] /*= {0}*/;
+extern std::array<COLORREF, 16> g_aclCustomColors;
 extern HKEY g_hRegistry;
 extern float g_fLoadTime;
 
@@ -1262,7 +1263,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
             clamp<unsigned char>(clrOld.r * 255.0f),
             clamp<unsigned char>(clrOld.g * 255.0f),
             clamp<unsigned char>(clrOld.b * 255.0f));
-        clr.lpCustColors = g_aclCustomColors;
+        clr.lpCustColors = g_aclCustomColors.data();
         clr.lpfnHook = nullptr;
         clr.lpTemplateName = nullptr;
         clr.lCustData = 0;

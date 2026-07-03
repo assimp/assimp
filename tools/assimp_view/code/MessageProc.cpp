@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 #include <assimp/Exporter.hpp>
 #include <algorithm>
+#include <array>
 
 #include <windowsx.h>
 #include <commdlg.h>
@@ -57,7 +58,7 @@ namespace AssimpView {
 using namespace Assimp;
 
 // Static array to keep custom color values
-COLORREF g_aclCustomColors[16] = {0};
+std::array<COLORREF, 16> g_aclCustomColors = {0};
 
 // Global registry key
 HKEY g_hRegistry = nullptr;
@@ -233,7 +234,7 @@ static void storeRegKey(bool option, LPCSTR name) {
 //-------------------------------------------------------------------------------
 // Toggle the "Dispay Tangents" state
 //-------------------------------------------------------------------------------
-void TogglTangents() {
+void ToggleTangents() {
     g_sOptions.bRenderTangents = !g_sOptions.bRenderTangents;
 
     // store this in the registry, too
@@ -463,7 +464,7 @@ void DisplayColorDialog(D3DCOLOR* pclrResult) {
     clr.hwndOwner = g_hDlg;
     clr.Flags = CC_RGBINIT | CC_FULLOPEN;
     clr.rgbResult = RGB((*pclrResult >> 16) & 0xff,(*pclrResult >> 8) & 0xff,*pclrResult & 0xff);
-    clr.lpCustColors = g_aclCustomColors;
+    clr.lpCustColors = g_aclCustomColors.data();
     clr.lpfnHook = nullptr;
     clr.lpTemplateName = nullptr;
     clr.lCustData = 0;
@@ -487,7 +488,7 @@ void DisplayColorDialog(D3DXVECTOR4* pclrResult) {
     clr.rgbResult = RGB(clamp<unsigned char>(pclrResult->x * 255.0f),
         clamp<unsigned char>(pclrResult->y * 255.0f),
         clamp<unsigned char>(pclrResult->z * 255.0f));
-    clr.lpCustColors = g_aclCustomColors;
+    clr.lpCustColors = g_aclCustomColors.data();
     clr.lpfnHook = nullptr;
     clr.lpTemplateName = nullptr;
     clr.lCustData = 0;
@@ -2032,13 +2033,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 else if (IDC_TOGGLENORMALS == LOWORD(wParam))
                     {
                     ToggleNormals();
-                    }
-                else if (IDC_LOWQUALITY == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLETANGENTS == LOWORD(wParam)) {
+                    ToggleTangents();
+                } else if (IDC_LOWQUALITY == LOWORD(wParam)) {
                     ToggleLowQuality();
-                    }
-                else if (IDC_3LIGHTS == LOWORD(wParam))
-                    {
+                } else if (IDC_3LIGHTS == LOWORD(wParam)) {
                     ToggleMultipleLights();
                     }
                 else if (IDC_LIGHTROTATE == LOWORD(wParam))
@@ -2100,7 +2099,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
         };
     return FALSE;
-    }
+}
 
 
 //-------------------------------------------------------------------------------

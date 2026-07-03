@@ -1,5 +1,5 @@
 #include "jassimp.h"
-#include "jassimp_overflow.h"
+#include "jassimp-overflow.h"
 
 using namespace jassimp;
 

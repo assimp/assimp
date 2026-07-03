@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <sstream>
 #include <map>
+#include <limits>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER
@@ -72,6 +73,41 @@ namespace HalfLife {
 #ifdef _MSC_VER
 #    pragma warning(disable : 4706)
 #endif // _MSC_VER
+
+// ------------------------------------------------------------------------------------------------
+static void validate_index(int index, int count, const char *name) {
+    if (index < 0 || index >= count) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid ", name, " index");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+static void validate_bone_index(int bone_index, size_t bone_count) {
+    if (bone_index < 0 || static_cast<size_t>(bone_index) >= bone_count) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid bone index");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+static int advance_mesh_command_offset(int offset, size_t bytes) {
+    if (offset < 0) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
+    }
+
+    const auto max_int = static_cast<size_t>(std::numeric_limits<int>::max());
+    if (bytes > max_int || static_cast<size_t>(offset) > max_int - bytes) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command offset");
+    }
+
+    return offset + static_cast<int>(bytes);
+}
+
+// ------------------------------------------------------------------------------------------------
+static void validate_mesh_command_vertex_count(size_t count) {
+    if (count < 3) {
+        throw DeadlyImportError(MDL_HALFLIFE_LOG_HEADER "Invalid mesh command vertex count");
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 HL1MDLLoader::HL1MDLLoader(
@@ -631,7 +667,7 @@ void HL1MDLLoader::read_meshes() {
 
     unsigned int mesh_index = 0;
 
-    scene_->mMeshes = new aiMesh *[scene_->mNumMeshes];
+    scene_->mMeshes = new aiMesh *[scene_->mNumMeshes]();
 
     pbodypart = get_buffer_data<Bodypart_HL1>(header_->bodypartindex, header_->numbodyparts);
 
@@ -744,10 +780,12 @@ void HL1MDLLoader::read_meshes() {
             bind_pose_vertices.resize(pmodel->numverts);
             bind_pose_normals.resize(pmodel->numnorms);
             for (size_t k = 0; k < bind_pose_vertices.size(); ++k) {
+                validate_bone_index(pvertbone[k], temp_bones_.size());
                 const vec3_t &vert = pstudioverts[k];
                 bind_pose_vertices[k] = temp_bones_[pvertbone[k]].absolute_transform * aiVector3D(vert[0], vert[1], vert[2]);
             }
             for (size_t k = 0; k < bind_pose_normals.size(); ++k) {
+                validate_bone_index(pnormbone[k], temp_bones_.size());
                 const vec3_t &norm = pstudionorms[k];
                 // Compute the normal matrix to transform the normal into bind pose,
                 // without affecting its length.
@@ -766,9 +804,12 @@ void HL1MDLLoader::read_meshes() {
                 *model_meshes_ptr = mesh_index;
 
                 // Read triverts.
-                short *ptricmds = (short *)((uint8_t *)header_ + pmesh->triindex);
-                float texcoords_s_scale = 1.0f / (float)ptexture[pskinref[pmesh->skinref]].width;
-                float texcoords_t_scale = 1.0f / (float)ptexture[pskinref[pmesh->skinref]].height;
+                int tricmds_offset = pmesh->triindex;
+                validate_index(pmesh->skinref, texture_header_->numskinref, "skin reference");
+                const int texture_index = pskinref[pmesh->skinref];
+                validate_index(texture_index, texture_header_->numtextures, "texture");
+                float texcoords_s_scale = 1.0f / (float)ptexture[texture_index].width;
+                float texcoords_t_scale = 1.0f / (float)ptexture[texture_index].height;
 
                 // Reset the data for the upcoming mesh.
                 triverts.clear();
@@ -779,7 +820,8 @@ void HL1MDLLoader::read_meshes() {
                 bone_triverts.clear();
 
                 int l;
-                while ((l = *(ptricmds++))) {
+                while ((l = *get_buffer_data<short>(tricmds_offset, 1))) {
+                    tricmds_offset = advance_mesh_command_offset(tricmds_offset, sizeof(short));
                     bool is_triangle_fan = false;
 
                     if (l < 0) {
@@ -790,8 +832,10 @@ void HL1MDLLoader::read_meshes() {
                     // Clear the list of tris for the upcoming tris.
                     tricmds.clear();
 
-                    for (; l > 0; l--, ptricmds += 4) {
-                        const Trivert *input_trivert = reinterpret_cast<const Trivert *>(ptricmds);
+                    for (; l > 0; --l, tricmds_offset = advance_mesh_command_offset(tricmds_offset, sizeof(Trivert))) {
+                        const Trivert *input_trivert = get_buffer_data<Trivert>(tricmds_offset, 1);
+                        validate_index(input_trivert->vertindex, pmodel->numverts, "vertex");
+                        validate_index(input_trivert->normindex, pmodel->numnorms, "normal");
                         const int bone = pvertbone[input_trivert->vertindex];
 
                         HL1MeshTrivert *private_trivert = &triverts[input_trivert->vertindex];
@@ -831,6 +875,7 @@ void HL1MDLLoader::read_meshes() {
                     }
 
                     // Build mesh faces.
+                    validate_mesh_command_vertex_count(tricmds.size());
                     const int num_faces = static_cast<int>(tricmds.size() - 2);
                     mesh_faces.reserve(num_faces);
 
@@ -864,7 +909,7 @@ void HL1MDLLoader::read_meshes() {
                 // Create the scene mesh.
                 aiMesh *scene_mesh = scene_->mMeshes[mesh_index] = new aiMesh();
                 scene_mesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_TRIANGLE;
-                scene_mesh->mMaterialIndex = pskinref[pmesh->skinref];
+                scene_mesh->mMaterialIndex = texture_index;
 
                 scene_mesh->mNumVertices = static_cast<unsigned int>(mesh_triverts_indices.size());
 

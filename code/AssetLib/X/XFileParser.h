@@ -84,6 +84,7 @@ protected:
     void ParseDataObjectSkinMeshHeader( XFile::Mesh* pMesh);
     void ParseDataObjectMeshNormals( XFile::Mesh* pMesh);
     void ParseDataObjectMeshTextureCoords( XFile::Mesh* pMesh);
+    void ParseDataObjectMeshFVFData(XFile::Mesh *pMesh);
     void ParseDataObjectMeshVertexColors( XFile::Mesh* pMesh);
     void ParseDataObjectMeshMaterialList( XFile::Mesh* pMesh);
     void ParseDataObjectMaterial( XFile::Material* pMaterial);

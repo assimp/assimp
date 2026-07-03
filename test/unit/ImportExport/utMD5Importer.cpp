@@ -68,6 +68,15 @@ TEST(utMD5Importer, importInvalidBoneIndex) {
     ASSERT_EQ(nullptr, scene);
 }
 
+TEST(utMD5Importer, importInvalidCameraCut) {
+    // Regression test: a crafted .md5camera whose cut list references a frame
+    // index past the parsed frame array used to read out of bounds while
+    // building the camera animations. The importer must reject it gracefully.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidCameraCut.md5camera", 0);
+    ASSERT_EQ(nullptr, scene);
+}
+
 TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);

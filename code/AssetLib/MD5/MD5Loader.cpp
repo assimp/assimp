@@ -741,13 +741,21 @@ void MD5Importer::LoadMD5CameraFile() {
         aiNodeAnim *nd = anim->mChannels[0] = new aiNodeAnim();
         nd->mNodeName.Set("<MD5Camera>");
 
-        nd->mNumPositionKeys = nd->mNumRotationKeys = *(it + 1) - (*it);
+        const unsigned int firstFrame = *it;
+        const unsigned int lastFrame = *(it + 1);
+        // Cut indices come straight from the file and are used to index into
+        // frames; reject ranges that run past the end (or wrap) before use.
+        if (lastFrame < firstFrame || lastFrame > frames.size()) {
+            throw DeadlyImportError("MD5CAMERA: Cut references a frame out of range");
+        }
+
+        nd->mNumPositionKeys = nd->mNumRotationKeys = lastFrame - firstFrame;
         nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
         nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
         for (unsigned int i = 0; i < nd->mNumPositionKeys; ++i) {
-            nd->mPositionKeys[i].mValue = frames[*it + i].vPositionXYZ;
-            MD5::ConvertQuaternion(frames[*it + i].vRotationQuat, nd->mRotationKeys[i].mValue);
-            nd->mPositionKeys[i].mTime = *it + i;  
+            nd->mPositionKeys[i].mValue = frames[firstFrame + i].vPositionXYZ;
+            MD5::ConvertQuaternion(frames[firstFrame + i].vRotationQuat, nd->mRotationKeys[i].mValue);
+            nd->mPositionKeys[i].mTime = firstFrame + i;
             nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime;
         }
     }

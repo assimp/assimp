@@ -733,47 +733,46 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		return false;
 	}
 
-
 	if (cMesh->mNumVertices > 0)
+	{
+		/* push vertex data to java */
+		size_t vertexBufferSize;
+		if (!safeMultiplySize(cMesh->mNumVertices, sizeof(aiVector3D), vertexBufferSize) ||
+			!copyBuffer(env, jMesh, "m_vertices", cMesh->mVertices, vertexBufferSize))
 		{
-			/* push vertex data to java */
-			size_t vertexBufferSize;
-			if (!safeMultiplySize(cMesh->mNumVertices, sizeof(aiVector3D), vertexBufferSize) ||
-			    !copyBuffer(env, jMesh, "m_vertices", cMesh->mVertices, vertexBufferSize))
-			{
-				lprintf("could not copy vertex data\n");
-				return false;
-			}
-
-			lprintf("    with %u vertices\n", cMesh->mNumVertices);
+			lprintf("could not copy vertex data\n");
+			return false;
 		}
 
+		lprintf("    with %u vertices\n", cMesh->mNumVertices);
+	}
 
-		/* push face data to java */
-		if (cMesh->mNumFaces > 0)
+
+	/* push face data to java */
+	if (cMesh->mNumFaces > 0)
+	{
+		if (isPureTriangle)
 		{
-			if (isPureTriangle)
+			char* faceBuffer = (char*) malloc(faceBufferSize);
+
+			size_t faceDataSize = 3 * sizeof(unsigned int);
+			for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 			{
-				char* faceBuffer = (char*) malloc(faceBufferSize);
-
-				size_t faceDataSize = 3 * sizeof(unsigned int);
-				for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
-				{
-					memcpy(faceBuffer + face * faceDataSize, cMesh->mFaces[face].mIndices, faceDataSize);
-				}
-
-				bool res = copyBuffer(env, jMesh, "m_faces", faceBuffer, faceBufferSize);
-
-				free(faceBuffer);
-
-				if (!res)
-				{
-					lprintf("could not copy face data\n");
-					return false;
-				}
+				memcpy(faceBuffer + face * faceDataSize, cMesh->mFaces[face].mIndices, faceDataSize);
 			}
-			else
+
+			bool res = copyBuffer(env, jMesh, "m_faces", faceBuffer, faceBufferSize);
+
+			free(faceBuffer);
+
+			if (!res)
 			{
+				lprintf("could not copy face data\n");
+				return false;
+			}
+		}
+		else
+		{
 			size_t offsetBufferSize;
 			if (!safeMultiplySize(cMesh->mNumFaces, sizeof(unsigned int), offsetBufferSize))
 			{
@@ -787,7 +786,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			size_t faceBufferPos = 0;
 			for (unsigned int face = 0; face < cMesh->mNumFaces; face++)
 			{
-				size_t faceBufferOffset = faceBufferPos / sizeof(unsigned int);
+				const unsigned int faceBufferOffset = faceBufferPos / sizeof(unsigned int);
 				memcpy(offsetBuffer.data() + face * sizeof(unsigned int), &faceBufferOffset, sizeof(unsigned int));
 
 				size_t faceDataSize;
@@ -805,12 +804,11 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			{
 				/* this should really not happen */
 				lprintf("faceBufferPos %llu, faceBufferSize %llu\n",
-				    static_cast<unsigned long long>(faceBufferPos),
-				    static_cast<unsigned long long>(faceBufferSize));
+				static_cast<unsigned long long>(faceBufferPos),
+				static_cast<unsigned long long>(faceBufferSize));
 				env->FatalError("error copying face data");
 				exit(-1);
 			}
-
 
 			bool res = copyBuffer(env, jMesh, "m_faces", faceBuffer.data(), faceBufferSize);
 			res &= copyBuffer(env, jMesh, "m_faceOffsets", offsetBuffer.data(), offsetBufferSize);
@@ -822,152 +820,146 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			}
 		}
 
-			lprintf("    with %u faces\n", cMesh->mNumFaces);
+		lprintf("    with %u faces\n", cMesh->mNumFaces);
+	}
+
+
+	/* push normals to java */
+	if (cMesh->HasNormals())
+	{
+		jvalue allocateDataChannelParams[2];
+		allocateDataChannelParams[0].i = 0;
+		allocateDataChannelParams[1].i = 0;
+		if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+		{
+			lprintf("could not allocate normal data channel\n");
+			return false;
 		}
 
+		size_t normalBufferSize;
+		if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), normalBufferSize) ||
+		    !copyBuffer(env, jMesh, "m_normals", cMesh->mNormals, normalBufferSize))
+		{
+			lprintf("could not copy normal data\n");
+			return false;
+		}
 
-		/* push normals to java */
-		if (cMesh->HasNormals())
+		lprintf("    with normals\n");
+	}
+
+	/* push tangents to java */
+	if (cMesh->mTangents != NULL)
+	{
+		jvalue allocateDataChannelParams[2];
+		allocateDataChannelParams[0].i = 1;
+		allocateDataChannelParams[1].i = 0;
+		if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+		{
+			lprintf("could not allocate tangents data channel\n");
+			return false;
+		}
+
+		size_t tangentBufferSize;
+		if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), tangentBufferSize) ||
+		    !copyBuffer(env, jMesh, "m_tangents", cMesh->mTangents, tangentBufferSize))
+		{
+			lprintf("could not copy tangents data\n");
+			return false;
+		}
+
+		lprintf("    with tangents\n");
+	}
+
+	/* push bitangents to java */
+	if (cMesh->mBitangents != NULL)
+	{
+		jvalue allocateDataChannelParams[2];
+		allocateDataChannelParams[0].i = 2;
+		allocateDataChannelParams[1].i = 0;
+		if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+		{
+			lprintf("could not allocate bitangents data channel\n");
+			return false;
+		}
+
+		size_t bitangentBufferSize;
+		if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), bitangentBufferSize) ||
+		    !copyBuffer(env, jMesh, "m_bitangents", cMesh->mBitangents, bitangentBufferSize))
+		{
+			lprintf("could not copy bitangents data\n");
+			return false;
+		}
+		lprintf("    with bitangents\n");
+	}
+
+	/* push color sets to java */
+	for (int c = 0; c < AI_MAX_NUMBER_OF_COLOR_SETS; c++)
+	{
+		if (cMesh->mColors[c] != NULL)
 		{
 			jvalue allocateDataChannelParams[2];
-			allocateDataChannelParams[0].i = 0;
-			allocateDataChannelParams[1].i = 0;
+			allocateDataChannelParams[0].i = 3;
+			allocateDataChannelParams[1].i = c;
 			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
-				lprintf("could not allocate normal data channel\n");
+				lprintf("could not allocate colorset data channel\n");
 				return false;
 			}
 
-			size_t normalBufferSize;
-			if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), normalBufferSize) ||
-			    !copyBuffer(env, jMesh, "m_normals", cMesh->mNormals, normalBufferSize))
+			size_t colorBufferSize;
+			if (!safeMultiplySize(cMesh->mNumVertices, 4u * sizeof(float), colorBufferSize) ||
+			    !copyBufferArray(env, jMesh, "m_colorsets", c, cMesh->mColors[c], colorBufferSize))
 			{
-				lprintf("could not copy normal data\n");
+				lprintf("could not copy colorset data\n");
 				return false;
 			}
 
-			lprintf("    with normals\n");
+			lprintf("    with colorset[%d]\n", c);
 		}
+	}
 
-
-		/* push tangents to java */
-		if (cMesh->mTangents != NULL)
+	/* push tex coords to java */
+	for (int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; c++)
+	{
+		if (cMesh->mTextureCoords[c] != NULL)
 		{
 			jvalue allocateDataChannelParams[2];
-			allocateDataChannelParams[0].i = 1;
-			allocateDataChannelParams[1].i = 0;
+			switch (cMesh->mNumUVComponents[c])
+			{
+			case 1:
+				allocateDataChannelParams[0].i = 4;
+				break;
+			case 2:
+				allocateDataChannelParams[0].i = 5;
+				break;
+			case 3:
+				allocateDataChannelParams[0].i = 6;
+				break;
+			default:
+				return false;
+			}
+
+			allocateDataChannelParams[1].i = c;
 			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
-				lprintf("could not allocate tangents data channel\n");
+				lprintf("could not allocate texture coordinates data channel\n");
 				return false;
 			}
 
-			size_t tangentBufferSize;
-			if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), tangentBufferSize) ||
-			    !copyBuffer(env, jMesh, "m_tangents", cMesh->mTangents, tangentBufferSize))
-			{
-				lprintf("could not copy tangents data\n");
-				return false;
-			}
-
-			lprintf("    with tangents\n");
-		}
-
-
-		/* push bitangents to java */
-		if (cMesh->mBitangents != NULL)
-		{
-			jvalue allocateDataChannelParams[2];
-			allocateDataChannelParams[0].i = 2;
-			allocateDataChannelParams[1].i = 0;
-			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
-			{
-				lprintf("could not allocate bitangents data channel\n");
-				return false;
-			}
-
-			size_t bitangentBufferSize;
-			if (!safeMultiplySize(cMesh->mNumVertices, 3u * sizeof(float), bitangentBufferSize) ||
-			    !copyBuffer(env, jMesh, "m_bitangents", cMesh->mBitangents, bitangentBufferSize))
-			{
-				lprintf("could not copy bitangents data\n");
-				return false;
-			}
-
-			lprintf("    with bitangents\n");
-		}
-
-
-		/* push color sets to java */
-		for (int c = 0; c < AI_MAX_NUMBER_OF_COLOR_SETS; c++)
-		{
-			if (cMesh->mColors[c] != NULL)
-			{
-				jvalue allocateDataChannelParams[2];
-				allocateDataChannelParams[0].i = 3;
-				allocateDataChannelParams[1].i = c;
-				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
-				{
-					lprintf("could not allocate colorset data channel\n");
-					return false;
-				}
-
-				size_t colorBufferSize;
-				if (!safeMultiplySize(cMesh->mNumVertices, 4u * sizeof(float), colorBufferSize) ||
-				    !copyBufferArray(env, jMesh, "m_colorsets", c, cMesh->mColors[c], colorBufferSize))
-				{
-					lprintf("could not copy colorset data\n");
-					return false;
-				}
-
-				lprintf("    with colorset[%d]\n", c);
-			}
-		}
-
-
-		/* push tex coords to java */
-		for (int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; c++)
-		{
-			if (cMesh->mTextureCoords[c] != NULL)
-			{
-				jvalue allocateDataChannelParams[2];
-
-				switch (cMesh->mNumUVComponents[c])
-				{
-				case 1:
-					allocateDataChannelParams[0].i = 4;
-					break;
-				case 2:
-					allocateDataChannelParams[0].i = 5;
-					break;
-				case 3:
-					allocateDataChannelParams[0].i = 6;
-					break;
-				default:
-					return false;
-				}
-
-				allocateDataChannelParams[1].i = c;
-				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
-				{
-					lprintf("could not allocate texture coordinates data channel\n");
-					return false;
-				}
-
-				/* gather data */
+			/* gather data */
 			size_t vertexStride;
-				size_t coordBufferSize;
-				if (!safeMultiplySize(cMesh->mNumUVComponents[c], sizeof(float), vertexStride) ||
-				    !safeMultiplySize(cMesh->mNumVertices, vertexStride, coordBufferSize))
-				{
-					lprintf("coordinate data too large for Java buffer\n");
-					return false;
-				}
-std::vector<char> coordBuffer(coordBufferSize);
-				size_t coordBufferOffset = 0;
+			size_t coordBufferSize;
+			if (!safeMultiplySize(cMesh->mNumUVComponents[c], sizeof(float), vertexStride) ||
+			    !safeMultiplySize(cMesh->mNumVertices, vertexStride, coordBufferSize))
+			{
+				lprintf("coordinate data too large for Java buffer\n");
+				return false;
+			}
+			std::vector<char> coordBuffer(coordBufferSize);
+			size_t coordBufferOffset = 0;
 
-				for (unsigned int v = 0; v < cMesh->mNumVertices; v++)
-				{
+			for (unsigned int v = 0; v < cMesh->mNumVertices; v++)
+			{
 				memcpy(coordBuffer.data() + coordBufferOffset, &cMesh->mTextureCoords[c][v], cMesh->mNumUVComponents[c] * sizeof(float));
 				coordBufferOffset += cMesh->mNumUVComponents[c] * sizeof(float);
 			}
@@ -993,7 +985,7 @@ std::vector<char> coordBuffer(coordBufferSize);
 			}
 		}
 
-
+		/* Copy the bones */
 		for (unsigned int b = 0; b < cMesh->mNumBones; b++)
 		{
 			aiBone *cBone = cMesh->mBones[b];
@@ -1066,14 +1058,12 @@ std::vector<char> coordBuffer(coordBufferSize);
 					return false;
 				}
 
-
 				jvalue addBwParams[1];
 				addBwParams[0].l = jBoneWeight;
 				if (!call(env, jBoneWeights, "java/util/Collection", "add", "(Ljava/lang/Object;)Z", addBwParams))
 				{
 					return false;
 				}
-
 
 				if (!setIntField(env, jBoneWeight, "m_vertexId", cBone->mWeights[w].mVertexId))
 				{

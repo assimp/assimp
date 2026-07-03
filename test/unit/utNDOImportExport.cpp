@@ -47,35 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-TEST(utMD5Importer, importEmpty) {
+TEST(utNDOImportExport, importMalformedEdgeIndex) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/empty.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_EQ(nullptr, scene);
-}
-
-TEST(utMD5Importer, importSimpleCube) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/SimpleCube.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD5Importer, importInvalidBoneIndex) {
-    // Regression test: a crafted .md5mesh whose weight references a bone index
-    // beyond numJoints used to cause an out-of-bounds heap access in the loader.
-    // The importer must reject the file gracefully instead of corrupting memory.
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidBoneIndex.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_EQ(nullptr, scene);
-}
-
-TEST(utMD5Importer, importBoarMan) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD5Importer, importBob) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/Bob.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
+    // An edge whose linked next-edge index points past the edge table must not
+    // be dereferenced while walking the face edge loop.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NDO/malformed_edge_index.ndo", 0);
+    EXPECT_NE(nullptr, scene);
 }

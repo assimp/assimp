@@ -131,7 +131,6 @@ void MakeFileAssociations() {
 //-------------------------------------------------------------------------------
 void HandleCommandLine(char* p_szCommand) {
     char* sz = p_szCommand;
-    //bool bQuak = false;
 
     if (strlen(sz) < 2) {
         return;

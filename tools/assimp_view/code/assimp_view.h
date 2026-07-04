@@ -99,6 +99,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace AssimpView {
 
+/// @brief Safely releases a COM pointer and sets it to nullptr.
+/// @tparam TComPtr The type of the COM pointer.
+/// @param ptr A reference to the COM pointer to be released.
+template <class TComPtr>
+inline void SafeRelease(TComPtr *&ptr) {
+    if (nullptr != ptr) {
+        ptr->Release();
+        ptr = nullptr;
+    }
+}
+
 //-------------------------------------------------------------------------------
 // Function prototypes
 //-------------------------------------------------------------------------------

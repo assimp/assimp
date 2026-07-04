@@ -148,7 +148,7 @@ float g_fLoadTime = 0.0f;
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID) {
     // get current time
-    double fCur = (double)timeGetTime();
+    auto fCur = static_cast<double>(timeGetTime());
 
     aiPropertyStore *props = aiCreatePropertyStore();
     aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
@@ -156,7 +156,6 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
     aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0);
 
     aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
-    //aiSetImportPropertyInteger(props,AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 
     // Call ASSIMPs C-API to load the file
     g_pcAsset->pcScene = (aiScene *)aiImportFileExWithProperties(g_szFileName,
@@ -200,13 +199,9 @@ int AssimpViewer::LoadAsset() {
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
-    //char szTemp[MAX_PATH+64];
-    //sprintf(szTemp,"Starting to load %s",g_szFileName);
     CLogWindow::Instance().WriteLine(
             "----------------------------------------------------------------------------");
-    //CLogWindow::Instance().WriteLine(szTemp);
-    //	CLogWindow::Instance().WriteLine(
-    //		"----------------------------------------------------------------------------");
+
     CLogWindow::Instance().SetAutoUpdate(false);
 
     // create a helper thread to load the asset
@@ -327,8 +322,13 @@ int AssimpViewer::DeleteAsset() {
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
 int AssimpViewer::CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMatrix) {
-    ai_assert(nullptr != piNode);
-    ai_assert(nullptr != p_avOut);
+    if (nullptr == piNode) {
+        return 0;
+    }
+    
+    if (nullptr == p_avOut) {
+        return 0;
+    }
 
     aiMatrix4x4 mTemp = piNode->mTransformation;
     mTemp.Transpose();
@@ -393,13 +393,10 @@ int AssimpViewer::ScaleAsset() {
 // pcSource Source mesh from ASSIMP
 //-------------------------------------------------------------------------------
 int AssimpViewer::GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource) {
-    ai_assert(nullptr != pcMesh);
-    ai_assert(nullptr != pcSource);
-
-    if (!pcSource->mNormals) {
+    if (!pcMesh || !pcSource || !pcSource->mNormals) {
         return 0;
     }
-
+    
     // create vertex buffer
     if (FAILED(g_piDevice->CreateVertexBuffer(sizeof(AssetHelper::LineVertex) *
                                                       pcSource->mNumVertices * 2,
@@ -632,22 +629,10 @@ int AssimpViewer::DeleteAssetData(bool bNoMaterials) {
 
     // TODO: Move this to a proper destructor
     for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes; ++i) {
-        if (g_pcAsset->apcMeshes[i]->piVB) {
-            g_pcAsset->apcMeshes[i]->piVB->Release();
-            g_pcAsset->apcMeshes[i]->piVB = nullptr;
-        }
-        if (g_pcAsset->apcMeshes[i]->piVBNormals) {
-            g_pcAsset->apcMeshes[i]->piVBNormals->Release();
-            g_pcAsset->apcMeshes[i]->piVBNormals = nullptr;
-        }
-        if (g_pcAsset->apcMeshes[i]->piTangents) {
-            g_pcAsset->apcMeshes[i]->piTangents->Release();
-            g_pcAsset->apcMeshes[i]->piTangents = nullptr;
-        }
-        if (g_pcAsset->apcMeshes[i]->piIB) {
-            g_pcAsset->apcMeshes[i]->piIB->Release();
-            g_pcAsset->apcMeshes[i]->piIB = nullptr;
-        }
+        SafeRelease(g_pcAsset->apcMeshes[i]->piVB);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piIB);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piVBNormals);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piTangents);
 
         // TODO ... unfixed memory leak
         // delete storage eventually allocated to hold a copy
@@ -658,42 +643,15 @@ int AssimpViewer::DeleteAssetData(bool bNoMaterials) {
         //}
 
         if (!bNoMaterials) {
-            if (g_pcAsset->apcMeshes[i]->piEffect) {
-                g_pcAsset->apcMeshes[i]->piEffect->Release();
-                g_pcAsset->apcMeshes[i]->piEffect = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piDiffuseTexture) {
-                g_pcAsset->apcMeshes[i]->piDiffuseTexture->Release();
-                g_pcAsset->apcMeshes[i]->piDiffuseTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piNormalTexture) {
-                g_pcAsset->apcMeshes[i]->piNormalTexture->Release();
-                g_pcAsset->apcMeshes[i]->piNormalTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piTangents) {
-                g_pcAsset->apcMeshes[i]->piTangents->Release();
-                g_pcAsset->apcMeshes[i]->piTangents = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piSpecularTexture) {
-                g_pcAsset->apcMeshes[i]->piSpecularTexture->Release();
-                g_pcAsset->apcMeshes[i]->piSpecularTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piAmbientTexture) {
-                g_pcAsset->apcMeshes[i]->piAmbientTexture->Release();
-                g_pcAsset->apcMeshes[i]->piAmbientTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piEmissiveTexture) {
-                g_pcAsset->apcMeshes[i]->piEmissiveTexture->Release();
-                g_pcAsset->apcMeshes[i]->piEmissiveTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piOpacityTexture) {
-                g_pcAsset->apcMeshes[i]->piOpacityTexture->Release();
-                g_pcAsset->apcMeshes[i]->piOpacityTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piShininessTexture) {
-                g_pcAsset->apcMeshes[i]->piShininessTexture->Release();
-                g_pcAsset->apcMeshes[i]->piShininessTexture = nullptr;
-            }
+            SafeRelease(g_pcAsset->apcMeshes[i]->piEffect);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piDiffuseTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piNormalTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piTangents);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piSpecularTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piAmbientTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piEmissiveTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piOpacityTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piShininessTexture);
         }
     }
     return 1;
@@ -736,14 +694,6 @@ int AssimpViewer::InitD3D() {
     return 1;
 }
 
-template <class TComPtr>
-inline void SafeRelease(TComPtr *&ptr) {
-    if (nullptr != ptr) {
-        ptr->Release();
-        ptr = nullptr;
-    }
-}
-
 //-------------------------------------------------------------------------------
 // Release the IDirect3D interface.
 // NOTE: Assumes that the device has already been deleted
@@ -754,7 +704,6 @@ int AssimpViewer::ShutdownD3D() {
 
     return 1;
 }
-
 
 //-------------------------------------------------------------------------------
 // Shutdown the D3D device object and all resources associated with it
@@ -784,6 +733,7 @@ int AssimpViewer::ShutdownDevice() {
 }
 
 //-------------------------------------------------------------------------------
+// Create the HUD texture and the mask texture
 //-------------------------------------------------------------------------------
 int AssimpViewer::CreateHUDTexture() {
     // lock the memory resource ourselves
@@ -872,7 +822,7 @@ int AssimpViewer::CreateHUDTexture() {
 }
 
 //-------------------------------------------------------------------------------
-int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) {
+int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW) {
     D3DDEVTYPE eType = bHW ? D3DDEVTYPE_HAL : D3DDEVTYPE_REF;
 
     // get the client rectangle of the window.
@@ -902,8 +852,9 @@ int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bH
     if (SUCCEEDED(g_piD3D->CheckDepthStencilMatch(0, eType,
                 D3DFMT_X8R8G8B8, D3DFMT_X8R8G8B8, D3DFMT_D32))) {
         sParams.AutoDepthStencilFormat = D3DFMT_D32;
-    } else
+    } else {
         sParams.AutoDepthStencilFormat = D3DFMT_D24X8;
+    }
 
     // find the highest multisample type available on this device
     D3DMULTISAMPLE_TYPE sMS = D3DMULTISAMPLE_2_SAMPLES;
@@ -968,10 +919,7 @@ int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bH
         }
         return 0;
     }
-    if (piBuffer) {
-        piBuffer->Release();
-        piBuffer = nullptr;
-    }
+    SafeRelease(piBuffer);
 
     // use Fixed Function effect when working with shaderless cards
     if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))
@@ -987,10 +935,7 @@ int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bH
         }
         return 0;
     }
-    if (piBuffer) {
-        piBuffer->Release();
-        piBuffer = nullptr;
-    }
+    SafeRelease(piBuffer);
 
     // use Fixed Function effect when working with shaderless cards
     if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))

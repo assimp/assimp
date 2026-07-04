@@ -146,8 +146,7 @@ CMaterialManager CMaterialManager::s_cInstance;
 VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
                      CONST D3DXVECTOR2* pTexCoord,
                      CONST D3DXVECTOR2* pTexelSize,
-                     LPVOID pData)
-{
+                     LPVOID pData) {
     UNREFERENCED_PARAMETER(pData);
     UNREFERENCED_PARAMETER(pTexelSize);
 
@@ -157,21 +156,15 @@ VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
     unsigned int iY = (unsigned int)(pTexCoord->y * 256.0f);
 
     bool bBlack = false;
-    if ((iX / 32) % 2 == 0)
-    {
+    if ((iX / 32) % 2 == 0) {
         if ((iY / 32) % 2 == 0)bBlack = true;
-    }
-    else
-    {
+    } else {
         if ((iY / 32) % 2 != 0)bBlack = true;
     }
     pOut->w = 1.0f;
-    if (bBlack)
-    {
+    if (bBlack) {
         pOut->x = pOut->y = pOut->z = 0.0f;
-    }
-    else
-    {
+    } else {
         pOut->x = pOut->y = 1.0f;
         pOut->z = 0.0f;
     }

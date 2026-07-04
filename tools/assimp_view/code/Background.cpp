@@ -437,4 +437,5 @@ void CBackgroundPainter::RecreateNativeResource() {
         piSkyBoxEffect->SetTechnique("RenderImage2D");
     }
 }
-}; // namespace AssimpView
+
+} // namespace AssimpView

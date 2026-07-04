@@ -100,4 +100,4 @@ INT_PTR CALLBACK AssimpViewer::HelpDialogProc(HWND hwndDlg,UINT uMsg, WPARAM wPa
     return FALSE;
 }
 
-}
+} // namespace AssimpView

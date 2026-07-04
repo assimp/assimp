@@ -1707,8 +1707,7 @@ int CDisplay::DrawHUD()
 }
 //-------------------------------------------------------------------------------
 // Render the full scene, all nodes
-int CDisplay::RenderFullScene()
-{
+int CDisplay::RenderFullScene() {
     // reset the color index used for drawing normals
     g_iCurrentColor = 0;
 
@@ -2321,5 +2320,5 @@ int CDisplay::RenderTextureView()
     return 1;
 }
 
-}
+} // namespace AssimpViewer
 

@@ -51,12 +51,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/RemoveComments.h>
 #include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/StringComparison.h>
+#include <assimp/defs.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -232,15 +234,37 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
     // only faces * 3, as before, overflowed the heap buffer whenever
     // numOrigVerts plus the duplicates exceeded it (e.g. a mesh declaring more
     // vertices than triangle corners), causing a heap-buffer-overflow write.
-    const unsigned int iNewNum = static_cast<unsigned int>(meshSrc.mFaces.size() * 3);
-    unsigned int iNewIndex = static_cast<unsigned int>(numOrigVerts);
+    if (meshSrc.mFaces.size() > (std::numeric_limits<size_t>::max() / 3)) {
+        throw DeadlyImportError("MD5MESH: too many faces");
+    }
+    const size_t iNewNum = meshSrc.mFaces.size() * 3;
+    if (numOrigVerts > std::numeric_limits<size_t>::max() - iNewNum) {
+        throw DeadlyImportError("MD5MESH: too many vertices");
+    }
+    const size_t maxVertices = AI_MAX_ALLOC(MD5::VertexDesc);
+    if (numOrigVerts > maxVertices || iNewNum > maxVertices - numOrigVerts) {
+        throw DeadlyImportError("MD5MESH: too many vertices");
+    }
+    size_t iNewIndex = numOrigVerts;
     meshSrc.mVertices.resize(numOrigVerts + iNewNum);
 
     // try to guess how much storage we'll need for new weights
     if (numOrigVerts) {
-        const float fWeightsPerVert = meshSrc.mWeights.size() / (float)numOrigVerts;
-        const unsigned int guess = (unsigned int)(fWeightsPerVert * iNewNum);
-        meshSrc.mWeights.reserve(guess + (guess >> 3)); // + 12.5% as buffer
+        size_t guess = 0;
+        if (iNewNum && meshSrc.mWeights.size() > std::numeric_limits<size_t>::max() / iNewNum) {
+            throw DeadlyImportError("MD5MESH: too many weights");
+        }
+        if (iNewNum) {
+            guess = (meshSrc.mWeights.size() * iNewNum) / numOrigVerts;
+        }
+        if (guess > AI_MAX_ALLOC(MD5::WeightDesc)) {
+            throw DeadlyImportError("MD5MESH: too many weights");
+        }
+        const size_t guessPadding = guess >> 3;
+        if (guess > std::numeric_limits<size_t>::max() - guessPadding) {
+            throw DeadlyImportError("MD5MESH: too many weights");
+        }
+        meshSrc.mWeights.reserve(guess + guessPadding); // + 12.5% as buffer
     }
 
     for (FaceArray::const_iterator iter = meshSrc.mFaces.begin(), iterEnd = meshSrc.mFaces.end(); iter != iterEnd; ++iter) {
@@ -260,7 +284,10 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
             if (abHad[face.mIndices[i]]) {
                 // generate a new vertex
                 meshSrc.mVertices[iNewIndex] = meshSrc.mVertices[face.mIndices[i]];
-                face.mIndices[i] = iNewIndex++;
+                if (iNewIndex > std::numeric_limits<unsigned int>::max()) {
+                    throw DeadlyImportError("MD5MESH: too many duplicated vertices");
+                }
+                face.mIndices[i] = static_cast<unsigned int>(iNewIndex++);
             } else
                 abHad[face.mIndices[i]] = true;
         }

@@ -198,6 +198,18 @@ void LoadCheckerPatternColors() {
 }
 
 //-------------------------------------------------------------------------------
+// Store registry key for a boolean option
+//-------------------------------------------------------------------------------
+static void storeRegKey(bool option, LPCSTR name) {
+    // store this in the registry, too
+    DWORD dwValue = 0;
+    if (option) {
+        dwValue = 1;
+    }
+    RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE *)&dwValue, 4);
+}
+
+//-------------------------------------------------------------------------------
 // Changed pp setup
 //-------------------------------------------------------------------------------
 void UpdatePPSettings() {
@@ -211,23 +223,7 @@ void UpdatePPSettings() {
 //-------------------------------------------------------------------------------
 void ToggleNormals() {
     g_sOptions.bRenderNormals = !g_sOptions.bRenderNormals;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bRenderNormals)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"RenderNormals",0,REG_DWORD,(const BYTE*)&dwValue,4);
-}
-
-//-------------------------------------------------------------------------------
-// Store registry key for a boolean option
-//-------------------------------------------------------------------------------
-static void storeRegKey(bool option, LPCSTR name) {
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (option) {
-        dwValue = 1;
-    }
-    RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE*)&dwValue, 4);
+    storeRegKey(g_sOptions.bRenderNormals, "RenderNormals");
 }
 
 //-------------------------------------------------------------------------------
@@ -235,12 +231,7 @@ static void storeRegKey(bool option, LPCSTR name) {
 //-------------------------------------------------------------------------------
 void ToggleTangents() {
     g_sOptions.bRenderTangents = !g_sOptions.bRenderTangents;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bRenderTangents)
-        dwValue = 1;
-    RegSetValueExA(g_hRegistry, "RenderTangents", 0, REG_DWORD, (const BYTE *)&dwValue, 4);
+    storeRegKey(g_sOptions.bRenderTangents, "RenderTangents");
 }
 
 //-------------------------------------------------------------------------------

@@ -111,50 +111,151 @@ inline void SafeRelease(TComPtr *&ptr) {
 }
 
 //-------------------------------------------------------------------------------
-// Function prototypes
+/// @brief  The AssimpViewer class provides static methods for initializing and 
+///         managing the Assimp viewer application, including Direct3D device 
+///         creation, asset loading, and input handling.
 //-------------------------------------------------------------------------------
 class AssimpViewer {
 public:
-    static int InitD3D(void);
-    static int ShutdownD3D(void);
+    /// @brief Initializes the Direct3D environment.
+    /// @returns An integer indicating the success or failure of the initialization.
+    static int InitD3D();
+
+    /// @brief Shuts down the Direct3D environment.
+    /// @returns An integer indicating the success or failure of the shutdown.
+    static int ShutdownD3D();
+
+    /// @brief Creates the Direct3D device.
+    /// @param p_bMultiSample Indicates whether multisampling is enabled.
+    /// @param p_bSuperSample Indicates whether supersampling is enabled.
+    /// @param bHW Indicates whether hardware acceleration is used.
+    /// @returns An integer indicating the success or failure of the operation.
     static int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW = true);
-    static int CreateDevice(void);
-    static int ShutdownDevice(void);
+
+    /// @brief Shuts down the Direct3D device.
+    /// @returns An integer indicating the success or failure of the shutdown.
+    static int CreateDevice();
+    
+    /// @brief Shuts down the Direct3D device.
+    /// @returns An integer indicating the success or failure of the shutdown.
+    static int ShutdownDevice();
+    
+    /// @brief Resets the Direct3D device.
+    /// @p_mOut The projection matrix to be updated after the reset.
+    /// @returns An integer indicating the success or failure of the reset operation.
     static int GetProjectionMatrix(aiMatrix4x4 &p_mOut);
-    static int LoadAsset(void);
-    static int CreateAssetData(void);
+    
+    /// @brief Loads an asset into the viewer.
+    /// @returns An integer indicating the success or failure of the asset loading.
+    static int LoadAsset();
+
+    /// @brief Creates asset data for rendering.
+    /// @returns An integer indicating the success or failure of the asset data creation.
+    static int CreateAssetData();
+
+    /// @brief Deletes asset data from the viewer.
+    /// @param bNoMaterials Indicates whether to delete materials along with the asset data.
+    /// @returns An integer indicating the success or failure of the asset data deletion.
     static int DeleteAssetData(bool bNoMaterials = false);
-    static int ScaleAsset(void);
-    static int DeleteAsset(void);
+    
+    /// @brief Scales the loaded asset.
+    /// @returns An integer indicating the success or failure of the scaling operation.
+    static int ScaleAsset();
+
+    /// @brief Deletes the loaded asset from the viewer.
+    /// @returns An integer indicating the success or failure of the asset deletion.
+    static int DeleteAsset();
+    
+    /// @brief Sets up the FPS view for the viewer.
+    /// @returns An integer indicating the success or failure of the setup operation.
     static int SetupFPSView();
+
+    /// @brief Retrieves the camera matrix for the viewer.
+    //  @param p_mOut The matrix to be filled with the camera transformation.
+    /// @returns An integer indicating the success or failure of the operation.
     static aiVector3D GetCameraMatrix(aiMatrix4x4 &p_mOut);
+
+    /// @brief Creates a material for rendering.
+    /// @param pcMesh The mesh helper containing the mesh data.
+    /// @param pcSource The source mesh from which to create the material.
+    /// @returns An integer indicating the success or failure of the material creation.
     static int CreateMaterial(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
-    static void HandleMouseInputFPS(void);
-    static void HandleMouseInputLightRotate(void);
-    static void HandleMouseInputLocal(void);
-    static void HandleKeyboardInputFPS(void);
-    static void HandleMouseInputLightIntensityAndColor(void);
-    static void HandleMouseInputSkyBox(void);
-    static void HandleKeyboardInputTextureView(void);
-    static void HandleMouseInputTextureView(void);
+
+    /// @brief Creates a shader effect for rendering.
+    static void HandleMouseInputFPS();
+
+    /// @brief Handles mouse input for light rotation.
+    static void HandleMouseInputLightRotate();
+    
+    /// @brief Handles mouse input for light position.
+    static void HandleMouseInputLocal();
+    
+    /// @brief Handles mouse input for camera rotation.
+    static void HandleKeyboardInputFPS();
+    
+    /// @brief Handles mouse input for camera rotation.
+    static void HandleMouseInputLightIntensityAndColor();
+    
+    /// @brief Handles mouse input for camera rotation.
+    static void HandleMouseInputSkyBox();
+
+    /// @brief Handles mouse input for camera rotation.
+    static void HandleKeyboardInputTextureView();
+
+    /// @brief Handles mouse input for camera rotation.
+    static void HandleMouseInputTextureView();
+    
+    /// @brief Creates a Heads-Up Display (HUD) texture for the viewer.
+    /// @returns An integer indicating the success or failure of the HUD texture creation.
     static int CreateHUDTexture();
+
+    /// @brief Calculates the bounding box of a node in the scene.
+    /// @param piNode The node for which to calculate the bounding box.
+    /// @param p_avOut The output vector to store the calculated bounding box.
+    /// @param piMatrix The transformation matrix to apply to the node's vertices.
+    /// @returns An integer indicating the success or failure of the bounding box calculation.
     static int CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMatrix);
 
+    /// @brief Generates normals for a mesh as a line list.
+    /// @param pcMesh The mesh helper containing the mesh data.
+    /// @param pcSource The source mesh from which to generate normals.
+    /// @returns An integer indicating the success or failure of the normal generation.
     static int GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
 
+    /// @brief Generates tangents for a mesh as a line list.
+    /// @paran hwndDlg The handle to the dialog window.
+    /// @param uMsg    The message identifier. 
+    /// @param wParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @param lParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @returns A boolean value indicating whether the message was processed.
+    static INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    static INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg, UINT uMsg,
-                                         WPARAM wParam, LPARAM lParam);
+    /// @brief Handles messages for the main dialog window.
+    /// @paran hwndDlg The handle to the dialog window.
+    /// @param uMsg    The message identifier.
+    /// @param wParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @param lParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @returns A boolean value indicating whether the message was processed.
+    static INT_PTR CALLBACK MessageProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    static INT_PTR CALLBACK MessageProc(HWND hwndDlg, UINT uMsg,
-                                 WPARAM wParam, LPARAM lParam);
+    /// @brief Handles messages for the "About" dialog window.
+    /// @paran hwndDlg The handle to the dialog window.
+    /// @param uMsg    The message identifier.
+    /// @param wParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @param lParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @returns A boolean value indicating whether the message was processed.
+    static INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    static INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg, UINT uMsg,
-                                      WPARAM wParam, LPARAM lParam);
+    /// @brief Handles messages for the "Help" dialog window.
+    /// @paran hwndDlg The handle to the dialog window.
+    /// @param uMsg    The message identifier.
+    /// @param wParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @param lParam  Additional message information. The contents of this parameter depend on the value of the uMsg parameter.
+    /// @returns A boolean value indicating whether the message was processed.
+    static INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    static INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg,
-                                    WPARAM wParam, LPARAM lParam);
-
+    /// @brief Handles command line arguments for the viewer application.
+    /// @param p_szCommand The command line arguments as a string.
     static void HandleCommandLine(char *p_szCommand);
 };
 

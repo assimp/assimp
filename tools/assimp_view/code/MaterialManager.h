@@ -48,23 +48,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace AssimpView {
 
 //-------------------------------------------------------------------------------
-/* Helper class to create, access and destroy materials
-    */
+/// @brief Helper class to create, access and destroy materials
 //-------------------------------------------------------------------------------
 class CMaterialManager {
     friend class CDisplay;
 
 public:
-    //------------------------------------------------------------------
-    // Singleton accessors
+    /// @brief Singleton accessors
+    /// @return Reference to the singleton instance of CMaterialManager
     inline static CMaterialManager &Instance() {
         return s_cInstance;
     }
 
-    //------------------------------------------------------------------
-    // Delete all resources of a given material
-    //
-    // Must be called before CreateMaterial() to prevent memory leaking
+    /// @brief  Delete all resources of a given material
+    ///         be called before CreateMaterial() to prevent memory leaking
+    /// @param pcIn Pointer to the material to delete
     void DeleteMaterial(AssetHelper::MeshHelper *pcIn);
 
     /// @brief  Create the material for a mesh.
@@ -87,37 +85,32 @@ public:
             const aiMatrix4x4 &pcCam,
             const aiVector3D &vPos);
 
-    //------------------------------------------------------------------
-    // End the material for a given mesh
-    // Called after mesh rendering is complete
-    // pcMesh Mesh object
+    /// @brief End the material for a given mesh
+    /// @param pcMesh Mesh object
+    /// @return 0 if successful.
     int EndMaterial(AssetHelper::MeshHelper *pcMesh);
 
-    //------------------------------------------------------------------
-    // Recreate all specular materials depending on the current
-    // specularity settings
-    //
-    // Diffuse-only materials are ignored.
-    // Must be called after specular highlights have been toggled
+    /// @brief Recreate all specular materials depending on the current
+    /// @brief specularity settings
+    ///
+    /// Diffuse-only materials are ignored.
+    /// Must be called after specular highlights have been toggled
+    /// @return 0 if successful.
     int UpdateSpecularMaterials();
 
-    //------------------------------------------------------------------
-    // find a valid path to a texture file
-    //
-    // Handle 8.3 syntax correctly, search the environment of the
-    // executable and the asset for a texture with a name very similar
-    // to a given one
+    /// @brief find a valid path to a texture file
+    /// @param p_szString Pointer to the string containing the texture name
+    /// @return 0 if successful.
     int FindValidPath(aiString *p_szString);
 
-    //------------------------------------------------------------------
-    // Load a texture into memory and create a native D3D texture resource
-    //
-    // The function tries to find a valid path for a texture
+    /// @brief Load a texture into memory and create a native D3D texture resource
+    /// @param p_ppiOut Pointer to the output texture pointer
+    /// @param szPath Pointer to the string containing the texture path
+    /// @return 0 if successful.
     int LoadTexture(IDirect3DTexture9 **p_ppiOut, aiString *szPath);
 
-    //------------------------------------------------------------------
-    // Getter for m_iShaderCount
-    //
+    /// @brief Get the number of different shaders generated for the current asset
+    /// @return The shader count
     inline unsigned int GetShaderCount() {
         return this->m_iShaderCount;
     }

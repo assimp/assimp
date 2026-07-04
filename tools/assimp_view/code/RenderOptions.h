@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-------------------------------------------------------------------------------
 class RenderOptions {
 public:
-    // No copying, no moving
+    // Copyable; move falls back to copy since no move members are declared
     RenderOptions() = default;
     RenderOptions(const RenderOptions&) = default;
     RenderOptions& operator=(const RenderOptions&) = default;

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/anim.h>
 #include <assimp/ai_assert.h>
 
-using namespace AssimpView;
+namespace AssimpView {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor on a given animation.
@@ -128,7 +128,7 @@ void AnimEvaluator::Evaluate(double pTime) {
                 diffTime += mAnim->mDuration;
             }
             if (diffTime > 0) {
-                float factor = float((time - key.mTime) / diffTime);
+                auto factor = float((time - key.mTime) / diffTime);
                 aiQuaternion::Interpolate(presentRotation, key.mValue, nextKey.mValue, factor);
             } else {
                 presentRotation = key.mValue;
@@ -172,3 +172,5 @@ void AnimEvaluator::Evaluate(double pTime) {
 
     mLastTime = time;
 }
+
+} // namespace AssimpView   

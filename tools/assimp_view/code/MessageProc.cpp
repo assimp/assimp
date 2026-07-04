@@ -833,9 +833,9 @@ void OpenAsset() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH);
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -850,13 +850,14 @@ void OpenAsset() {
     aiGetExtensionList(&sz);
 
     char szList[AI_MAXLEN + 100];
-    strcpy(szList,"ASSIMP assets");
+    strncpy(szList,"ASSIMP assets",sizeof(szList));
     char* szCur = szList + 14;
-    strcpy(szCur,sz.data);
+    strncpy(szCur,sz.data,sz.length);
+    szCur[sz.length] = '\0';
     szCur += sz.length+1;
-    strcpy(szCur,"All files");
-    szCur += 10;
-    strcpy(szCur,"*.*");
+    strncpy(szCur,"All files",10);
+    szCur[9] = '\0';
+    strncpy(szCur,"*.*",5);
     szCur[4] = 0;
 
     OPENFILENAME sFilename1;
@@ -884,7 +885,7 @@ void OpenAsset() {
         AssimpViewer::DeleteAssetData();
         AssimpViewer::DeleteAsset();
 
-        strcpy(g_szFileName, szFileName);
+        strncpy(g_szFileName, szFileName, MAX_PATH);
         AssimpViewer::LoadAsset();
 
         // update the history
@@ -899,21 +900,25 @@ void OpenAsset() {
 void SetupPPUIState() {
     // that's ugly. anyone willing to rewrite me from scratch?
     HMENU hMenu = GetMenu(g_hDlg);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
+    if (!hMenu) {
+        return;
+    }
+
+    CheckMenuItem(hMenu, ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -948,9 +953,9 @@ void DoExport(size_t formatId) {
     const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
     ai_assert(e);
 
-    char szFileName[MAX_PATH*2];
+    char szFileName[MAX_PATH*2] = {0};
     DWORD dwTemp = sizeof(szFileName);
-    if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",nullptr,nullptr,(BYTE*)szFileName, &dwTemp)) {
+    if (ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",nullptr,nullptr,(BYTE*)szFileName, &dwTemp)) {
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
         // invent a nice default file name
@@ -958,8 +963,7 @@ void DoExport(size_t formatId) {
         if (sz) {
             strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
         }
-    }
-    else {
+    } else {
         // Key was not found. Use the folder where the asset comes from
         strncpy(szFileName,g_szFileName,MAX_PATH);
     }

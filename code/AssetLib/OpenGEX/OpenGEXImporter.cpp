@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
+#include <limits>
 
 static constexpr aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -928,18 +929,28 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
             if (nullptr == next) {
                 throw DeadlyImportError("OpenGEX: index array entry has fewer than three indices");
             }
-            int idx = -1;
-            if (next->m_type == Value::ValueType::ddl_unsigned_int16) {
+            size_t idx = 0;
+            if (next->m_type == Value::ValueType::ddl_unsigned_int8) {
+                idx = next->getUnsignedInt8();
+            } else if (next->m_type == Value::ValueType::ddl_unsigned_int16) {
                 idx = next->getUnsignedInt16();
             } else if (next->m_type == Value::ValueType::ddl_unsigned_int32) {
                 idx = next->getUnsignedInt32();
+            } else if (next->m_type == Value::ValueType::ddl_unsigned_int64) {
+                const auto idx64 = next->getUnsignedInt64();
+                if (idx64 > static_cast<decltype(idx64)>(std::numeric_limits<size_t>::max())) {
+                    throw DeadlyImportError("OpenGEX: vertex index is too large");
+                }
+                idx = static_cast<size_t>(idx64);
+            } else {
+                throw DeadlyImportError("OpenGEX: index array uses an unsupported index type");
             }
 
             // idx comes straight from the file. Validate it (and the output
             // cursor) at runtime -- the previous ai_assert()s are compiled out
             // of release builds, so an out-of-range index read past the end of
             // the vertex arrays (heap-buffer-overflow).
-            if (idx < 0 || static_cast<size_t>(idx) >= m_currentVertices.m_vertices.size()) {
+            if (idx >= m_currentVertices.m_vertices.size()) {
                 throw DeadlyImportError("OpenGEX: vertex index is out of range");
             }
             if (index >= m_currentMesh->mNumVertices) {

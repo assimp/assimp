@@ -48,7 +48,7 @@ namespace AssimpView {
 //-------------------------------------------------------------------------------
 // Message procedure for the help dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM ) {
+INT_PTR CALLBACK AssimpViewer::HelpDialogProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM ) {
     switch (uMsg) {
         case WM_INITDIALOG:
         {

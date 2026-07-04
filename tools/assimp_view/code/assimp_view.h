@@ -102,79 +102,50 @@ namespace AssimpView {
 //-------------------------------------------------------------------------------
 // Function prototypes
 //-------------------------------------------------------------------------------
-class AssimpVew {
+class AssimpViewer {
 public:
-    AssimpVew();
-    ~AssimpVew();
+    static int InitD3D(void);
+    static int ShutdownD3D(void);
+    static int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW = true);
+    static int CreateDevice(void);
+    static int ShutdownDevice(void);
+    static int GetProjectionMatrix(aiMatrix4x4 &p_mOut);
+    static int LoadAsset(void);
+    static int CreateAssetData(void);
+    static int DeleteAssetData(bool bNoMaterials = false);
+    static int ScaleAsset(void);
+    static int DeleteAsset(void);
+    static int SetupFPSView();
+    static aiVector3D GetCameraMatrix(aiMatrix4x4 &p_mOut);
+    static int CreateMaterial(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
+    static void HandleMouseInputFPS(void);
+    static void HandleMouseInputLightRotate(void);
+    static void HandleMouseInputLocal(void);
+    static void HandleKeyboardInputFPS(void);
+    static void HandleMouseInputLightIntensityAndColor(void);
+    static void HandleMouseInputSkyBox(void);
+    static void HandleKeyboardInputTextureView(void);
+    static void HandleMouseInputTextureView(void);
+    static int CreateHUDTexture();
+    static int CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMatrix);
+
+    static int GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
+
+
+    static INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg, UINT uMsg,
+                                         WPARAM wParam, LPARAM lParam);
+
+    static INT_PTR CALLBACK MessageProc(HWND hwndDlg, UINT uMsg,
+                                 WPARAM wParam, LPARAM lParam);
+
+    static INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg, UINT uMsg,
+                                      WPARAM wParam, LPARAM lParam);
+
+    static INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg,
+                                    WPARAM wParam, LPARAM lParam);
+
+    static void HandleCommandLine(char *p_szCommand);
 };
-
-int InitD3D(void);
-int ShutdownD3D(void);
-int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW = true);
-int CreateDevice(void);
-int ShutdownDevice(void);
-int GetProjectionMatrix(aiMatrix4x4 &p_mOut);
-int LoadAsset(void);
-int CreateAssetData(void);
-int DeleteAssetData(bool bNoMaterials = false);
-int ScaleAsset(void);
-int DeleteAsset(void);
-int SetupFPSView();
-
-aiVector3D GetCameraMatrix(aiMatrix4x4 &p_mOut);
-int CreateMaterial(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource);
-
-void HandleMouseInputFPS(void);
-void HandleMouseInputLightRotate(void);
-void HandleMouseInputLocal(void);
-void HandleKeyboardInputFPS(void);
-void HandleMouseInputLightIntensityAndColor(void);
-void HandleMouseInputSkyBox(void);
-void HandleKeyboardInputTextureView(void);
-void HandleMouseInputTextureView(void);
-
-//-------------------------------------------------------------------------------
-//
-// Dialog procedure for the progress bar window
-//
-//-------------------------------------------------------------------------------
-INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg, UINT uMsg,
-        WPARAM wParam, LPARAM lParam);
-
-//-------------------------------------------------------------------------------
-// Main message procedure of the application
-//
-// The function handles all incoming messages for the main window.
-// However, if does not directly process input commands.
-// NOTE: Due to the impossibility to process WM_CHAR messages in dialogs
-// properly the code for all hotkeys has been moved to the WndMain
-//-------------------------------------------------------------------------------
-INT_PTR CALLBACK MessageProc(HWND hwndDlg, UINT uMsg,
-        WPARAM wParam, LPARAM lParam);
-
-//-------------------------------------------------------------------------------
-//
-// Dialog procedure for the about dialog
-//
-//-------------------------------------------------------------------------------
-INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg, UINT uMsg,
-        WPARAM wParam, LPARAM lParam);
-
-//-------------------------------------------------------------------------------
-//
-// Dialog procedure for the help dialog
-//
-//-------------------------------------------------------------------------------
-INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg, UINT uMsg,
-        WPARAM wParam, LPARAM lParam);
-
-//-------------------------------------------------------------------------------
-// Handle command line parameters
-//
-// The function loads an asset specified on the command line as first argument
-// Other command line parameters are not handled
-//-------------------------------------------------------------------------------
-void HandleCommandLine(char *p_szCommand);
 
 //-------------------------------------------------------------------------------
 template <class type, class intype>

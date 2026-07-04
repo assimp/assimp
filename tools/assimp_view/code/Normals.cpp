@@ -77,8 +77,8 @@ void AssetHelper::FlipNormals() {
     FlipNormalsInt();
 
     // recreate native data
-    DeleteAssetData(true);
-    CreateAssetData();
+    AssimpViewer::DeleteAssetData(true);
+    AssimpViewer::CreateAssetData();
     g_bWasFlipped = !g_bWasFlipped;
 }
 
@@ -88,7 +88,7 @@ void AssetHelper::FlipNormals() {
 void AssetHelper::SetNormalSet(unsigned int iSet) {
     // we need to build an unique set of vertices for this ...
     {
-        MakeVerboseFormatProcess *pcProcess = new MakeVerboseFormatProcess();
+        auto *pcProcess = new MakeVerboseFormatProcess();
         pcProcess->Execute(pcScene);
         delete pcProcess;
 
@@ -105,12 +105,12 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
 
     // now we can start to calculate a new set of normals
     if (HARD == iSet) {
-        GenFaceNormalsProcess *pcProcess = new GenFaceNormalsProcess();
+        auto *pcProcess = new GenFaceNormalsProcess();
         pcProcess->Execute(pcScene);
         FlipNormalsInt();
         delete pcProcess;
     } else if (SMOOTH == iSet) {
-        GenVertexNormalsProcess *pcProcess = new GenVertexNormalsProcess();
+        auto *pcProcess = new GenVertexNormalsProcess();
         pcProcess->SetMaxSmoothAngle((float)AI_DEG_TO_RAD(g_smoothAngle));
         pcProcess->Execute(pcScene);
         FlipNormalsInt();
@@ -148,8 +148,8 @@ void AssetHelper::SetNormalSet(unsigned int iSet) {
     }
 
     // recreate native data
-    DeleteAssetData(true);
-    CreateAssetData();
+    AssimpViewer::DeleteAssetData(true);
+    AssimpViewer::CreateAssetData();
 }
 
 } // namespace AssimpView

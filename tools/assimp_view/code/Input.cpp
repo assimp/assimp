@@ -48,7 +48,7 @@ namespace AssimpView {
 //
 // Movement in x and y axis is possible
 //-------------------------------------------------------------------------------
-void HandleMouseInputFPS( void )
+void AssimpViewer::HandleMouseInputFPS( void )
     {
     POINT mousePos;
     GetCursorPos( &mousePos );
@@ -90,8 +90,8 @@ void HandleMouseInputFPS( void )
 //
 // Movement in x and y axis is possible
 //-------------------------------------------------------------------------------
-void HandleMouseInputTextureView( void )
-    {
+void AssimpViewer::HandleMouseInputTextureView(void)
+{
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -116,8 +116,8 @@ void HandleMouseInputTextureView( void )
 //
 // Axes: global x/y axis
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightRotate( void )
-    {
+void AssimpViewer::HandleMouseInputLightRotate(void)
+{
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -142,8 +142,7 @@ void HandleMouseInputLightRotate( void )
             (const D3DXVECTOR3*)&g_avLightDirs[0],(const D3DXMATRIX*)&mTemp);
         }
     return;
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Handle mouse input for movements of the skybox
@@ -151,8 +150,8 @@ void HandleMouseInputLightRotate( void )
 // The skybox can be moved by holding both the left and the right mouse button
 // pressed. Rotation is possible in x and y direction.
 //-------------------------------------------------------------------------------
-void HandleMouseInputSkyBox( void )
-    {
+void AssimpViewer::HandleMouseInputSkyBox( void )
+{
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -194,8 +193,8 @@ void HandleMouseInputSkyBox( void )
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightIntensityAndColor()
-    {
+void AssimpViewer::HandleMouseInputLightIntensityAndColor()
+{
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -204,7 +203,7 @@ void HandleMouseInputLightIntensityAndColor()
     g_mousePos.y = mousePos.y;
 
     if (g_bMousePressedM)
-        {
+    {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
@@ -221,13 +220,11 @@ void HandleMouseInputLightIntensityAndColor()
             }
         }
     }
-    return;
-    }
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLocal( void )
-    {
+void AssimpViewer::HandleMouseInputLocal( void ) {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -238,31 +235,31 @@ void HandleMouseInputLocal( void )
     aiMatrix4x4 matRotation;
 
     if (g_bMousePressed)
-        {
+    {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
         aiMatrix4x4 matWorld;
         if (g_eClick != EClickPos_Outside)
-            {
+        {
             if( 0 != nYDiff && g_eClick != EClickPos_CircleHor)
-                {
+            {
                 aiVector3D v = aiVector3D(1.0f,0.0f,0.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*) &matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nYDiff / 2.0f));
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
+            }
 
             if( 0 != nXDiff && g_eClick != EClickPos_CircleVert)
-                {
+            {
                 aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
             }
+        }
         else
-            {
+        {
             if(0 != nYDiff || 0 != nXDiff)
-                {
+            {
                 // rotate around the z-axis
                 RECT sRect;
                 GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
@@ -292,26 +289,26 @@ void HandleMouseInputLocal( void )
                 fAngle -= fAngle2;
 
                 if (bSign1 != bSign2)
-                    {
+                {
                     g_bInvert = !g_bInvert;
-                    }
+                }
                 if (g_bInvert)fAngle *= -1.0f;
 
                 aiVector3D v = aiVector3D(0.0f,0.0f,1.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, (float) (fAngle * 1.2) );
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
             }
         }
+    }
 
     g_LastmousePos.x = g_mousePos.x;
     g_LastmousePos.y = g_mousePos.y;
-    }
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleKeyboardInputFPS( void )
-    {
+void AssimpViewer::HandleKeyboardInputFPS( void )
+{
     unsigned char keys[256];
     GetKeyboardState( keys );
 
@@ -343,13 +340,12 @@ void HandleKeyboardInputFPS( void )
     // End Key - View elevates down
     if( keys[VK_END] & 0x80 )
         g_sCamera.vPos.y -= MOVE_SPEED*g_fElpasedTime;
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleKeyboardInputTextureView( void )
-    {
+void AssimpViewer::HandleKeyboardInputTextureView( void )
+{
     unsigned char keys[256];
     GetKeyboardState( keys );
 
@@ -368,5 +364,6 @@ void HandleKeyboardInputTextureView( void )
     // Right Arrow Key
     if( keys[VK_RIGHT] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetX ( -g_fElpasedTime * 150.0f );
-    }
-};
+}
+
+}

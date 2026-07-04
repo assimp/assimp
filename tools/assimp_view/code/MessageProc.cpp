@@ -144,7 +144,7 @@ void HandleCommandLine(char* p_szCommand) {
     }
 
     strcpy( g_szFileName, sz );
-    LoadAsset();
+    AssimpViewer::LoadAsset();
 
     // update the history
     UpdateHistory();
@@ -258,7 +258,7 @@ void ToggleAutoRotate() {
 //-------------------------------------------------------------------------------
 void ToggleFPSView() {
     g_bFPSView = !g_bFPSView;
-    SetupFPSView();
+    AssimpViewer::SetupFPSView();
     storeRegKey(g_bFPSView, "FPSView");
 }
 
@@ -352,15 +352,15 @@ void ToggleWireFrame() {
 //-------------------------------------------------------------------------------
 void ToggleMS() {
     g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
-    DeleteAssetData();
-    ShutdownDevice();
-    if (0 == CreateDevice()) {
+    AssimpViewer::DeleteAssetData();
+    AssimpViewer::ShutdownDevice();
+    if (0 == AssimpViewer::CreateDevice()) {
         CLogDisplay::Instance().AddEntry(
             "[ERROR] Failed to toggle MultiSampling mode");
         g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
-        CreateDevice();
+        AssimpViewer::CreateDevice();
     }
-    CreateAssetData();
+    AssimpViewer::CreateAssetData();
 
     if (g_sOptions.bMultiSample) {
         CLogDisplay::Instance().AddEntry(
@@ -891,11 +891,11 @@ void OpenAsset() {
     RegSetValueExA(g_hRegistry,"CurrentApp",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
 
     if (0 != strcmp(g_szFileName,szFileName)) {
-        DeleteAssetData();
-        DeleteAsset();
+        AssimpViewer::DeleteAssetData();
+        AssimpViewer::DeleteAsset();
 
         strcpy(g_szFileName, szFileName);
-        LoadAsset();
+        AssimpViewer::LoadAsset();
 
         // update the history
         UpdateHistory();
@@ -1698,10 +1698,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         }
                         fclose(pFile);
                     } else {
-                        DeleteAsset();
+                        AssimpViewer::DeleteAsset();
 
                         strcpy(g_szFileName, szFile);
-                        LoadAsset();
+                        AssimpViewer::LoadAsset();
 
                         UpdateHistory();
                         SaveHistory();
@@ -1739,10 +1739,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 CBackgroundPainter::Instance().ResetSB();
             } else if (ID__HELP == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_AVHELP),
-                    hwndDlg,&HelpDialogProc);
+                          hwndDlg, &AssimpViewer::HelpDialogProc);
             } else if (ID__ABOUT == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_ABOUTBOX),
-                    hwndDlg,&AboutMessageProc);
+                          hwndDlg, &AssimpViewer::AboutMessageProc);
             } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
                 CLogWindow::Instance().Show();
             } else if (ID__WEBSITE == LOWORD(wParam)) {
@@ -1866,10 +1866,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 // Save the filename to reload and clear
                 char toReloadFileName[MAX_PATH];
                 strcpy(toReloadFileName, g_szFileName);
-                DeleteAsset();
+                AssimpViewer::DeleteAsset();
 
                 strcpy(g_szFileName, toReloadFileName);
-                LoadAsset();
+                AssimpViewer::LoadAsset();
             }
             else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
             {
@@ -1934,10 +1934,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_DIALOGSMOOTH),g_hDlg,&SMMessageProc);
             } else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam)) {
                 ClearHistory();
-            } else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) {
-                DeleteAssetData();
-                DeleteAsset();
-                }
+            } 
+            else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) 
+            {
+                AssimpViewer::DeleteAssetData();
+                AssimpViewer::DeleteAsset();
+            }
             else if (BN_CLICKED == HIWORD(wParam))
                 {
                 if (IDC_TOGGLEMS == LOWORD(wParam))
@@ -2075,11 +2077,11 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             {
                 if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam))
                 {
-                    DeleteAssetData();
-                    DeleteAsset();
+                    AssimpViewer::DeleteAssetData();
+                    AssimpViewer::DeleteAsset();
 
                     strcpy(g_szFileName, g_aPreviousFiles[i].c_str());
-                    LoadAsset();
+                    AssimpViewer::LoadAsset();
 
                     // update and safe the history
                     UpdateHistory();
@@ -2105,7 +2107,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 //-------------------------------------------------------------------------------
 // Message prcoedure for the progress dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg,UINT uMsg,
+INT_PTR CALLBACK AssimpViewer::ProgressMessageProc(HWND hwndDlg,UINT uMsg,
      WPARAM wParam,LPARAM lParam)
     {
     UNREFERENCED_PARAMETER(lParam);
@@ -2163,7 +2165,7 @@ INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg,UINT uMsg,
 //-------------------------------------------------------------------------------
 // Message procedure for the about dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
+INT_PTR CALLBACK AssimpViewer::AboutMessageProc(HWND hwndDlg,UINT uMsg,
     WPARAM wParam,LPARAM lParam)
     {
     UNREFERENCED_PARAMETER(lParam);
@@ -2206,7 +2208,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     // initialize the IDirect3D9 interface
     g_hInstance = hInstance;
-    if (0 == InitD3D()) {
+    if (0 == AssimpViewer::InitD3D()) {
         MessageBox(nullptr,"Failed to initialize Direct3D 9",
             "ASSIMP ModelViewer",MB_OK);
         return -6;
@@ -2241,7 +2243,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UpdateWindow( hDlg );
 
     // create the D3D device object
-    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true)) {
+    if (0 == AssimpViewer::CreateDevice(g_sOptions.bMultiSample,false,true)) {
         MessageBox(nullptr,"Failed to initialize Direct3D 9 (2)",
             "ASSIMP ModelViewer",MB_OK);
         return -4;
@@ -2466,10 +2468,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             }
         }
     }
-    DeleteAsset();
+    AssimpViewer::DeleteAsset();
     Assimp::DefaultLogger::kill();
-    ShutdownDevice();
-    ShutdownD3D();
+    AssimpViewer::ShutdownDevice();
+    AssimpViewer::ShutdownD3D();
 
     return 0;
 }

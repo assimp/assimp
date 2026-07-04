@@ -1552,8 +1552,8 @@ int CDisplay::RenderStereoView(const aiMatrix4x4& m)
 // Process input for the texture view
 int CDisplay::HandleInputTextureView()
 {
-    HandleMouseInputTextureView();
-    HandleKeyboardInputTextureView();
+    AssimpViewer::HandleMouseInputTextureView();
+    AssimpViewer::HandleKeyboardInputTextureView();
     return 1;
 }
 //-------------------------------------------------------------------------------
@@ -1561,17 +1561,17 @@ int CDisplay::HandleInputTextureView()
 int CDisplay::HandleInput()
 {
     if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
-        HandleMouseInputSkyBox();
+        AssimpViewer::HandleMouseInputSkyBox();
 
     // handle input commands
-    HandleMouseInputLightRotate();
-    HandleMouseInputLightIntensityAndColor();
+    AssimpViewer::HandleMouseInputLightRotate();
+    AssimpViewer::HandleMouseInputLightIntensityAndColor();
     if(g_bFPSView)
     {
-        HandleMouseInputFPS();
-        HandleKeyboardInputFPS();
+        AssimpViewer::HandleMouseInputFPS();
+        AssimpViewer::HandleKeyboardInputFPS();
     }
-    else HandleMouseInputLocal();
+    else AssimpViewer::HandleMouseInputLocal();
 
     // compute auto rotation depending on the time which has passed
     if (g_sOptions.bRotate)
@@ -1608,10 +1608,10 @@ int CDisplay::HandleInputEmptyScene()
     {
         if (g_bFPSView)
         {
-            HandleMouseInputFPS();
-            HandleKeyboardInputFPS();
+            AssimpViewer::HandleMouseInputFPS();
+            AssimpViewer::HandleKeyboardInputFPS();
         }
-        HandleMouseInputSkyBox();
+        AssimpViewer::HandleMouseInputSkyBox();
 
         // need to store the last mouse position in the global variable
         // HandleMouseInputFPS() is doing this internally
@@ -1713,9 +1713,9 @@ int CDisplay::RenderFullScene()
     g_iCurrentColor = 0;
 
     aiMatrix4x4 pcProj;
-    GetProjectionMatrix(pcProj);
+    AssimpViewer::GetProjectionMatrix(pcProj);
 
-    vPos = GetCameraMatrix(mViewProjection);
+    vPos = AssimpViewer::GetCameraMatrix(mViewProjection);
     mViewProjection = mViewProjection * pcProj;
 
     // setup wireframe/solid rendering mode

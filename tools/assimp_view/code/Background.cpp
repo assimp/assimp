@@ -283,10 +283,10 @@ void CBackgroundPainter::OnPreRender() {
 void CBackgroundPainter::OnPostRender() {
     if (TEXTURE_CUBE == eMode) {
         aiMatrix4x4 pcProj;
-        GetProjectionMatrix(pcProj);
+        AssimpViewer::GetProjectionMatrix(pcProj);
 
         aiMatrix4x4 pcCam;
-        aiVector3D vPos = GetCameraMatrix(pcCam);
+        aiVector3D vPos = AssimpViewer::GetCameraMatrix(pcCam);
 
         aiMatrix4x4 aiMe;
         aiMe[3][0] = vPos.x;

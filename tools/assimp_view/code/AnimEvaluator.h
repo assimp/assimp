@@ -53,17 +53,17 @@ struct aiAnimation;
 
 namespace AssimpView {
 
-/**
- *  @brief  Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
- *          better use the AnimPlayer class.
- */
+// ---------------------------------------------------------------------------------
+/// @brief Calculates transformations for a given timestamp from a set of animation tracks. Not directly useful,
+///        better use the AnimPlayer class.
+// ---------------------------------------------------------------------------------
 class AnimEvaluator {
 public:
     /// @brief  Constructor on a given animation. The animation is fixed throughout the lifetime of
     /// the object.
     /// @param pAnim    The animation to calculate poses for. Ownership of the animation object stays
     ///                 at the caller, the evaluator just keeps a reference to it as long as it persists.
-    AnimEvaluator(const aiAnimation *pAnim);
+    explicit AnimEvaluator(const aiAnimation *pAnim);
 
     /// @brief  The class destructor.
     ~AnimEvaluator() = default;

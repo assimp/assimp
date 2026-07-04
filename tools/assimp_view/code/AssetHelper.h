@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#if (!defined AV_ASSET_HELPER_H_INCLUDED)
+#ifndef AV_ASSET_HELPER_H_INCLUDED
 #define AV_ASSET_HELPER_H_INCLUDED
 
 #include <d3d9.h>
@@ -69,12 +69,7 @@ public:
     };
 
     // default constructor
-    AssetHelper() :
-            iNormalSet(ORIGINAL) {
-        mAnimator = NULL;
-        apcMeshes = NULL;
-        pcScene = NULL;
-    }
+    AssetHelper() = default;
 
     // set the normal set to be used
     void SetNormalSet(unsigned int iSet);
@@ -120,7 +115,7 @@ public:
     };
 
     //---------------------------------------------------------------
-    // FVF vertex structure used for normals
+    /// @brief FVF vertex structure used for normals
     //---------------------------------------------------------------
     struct LineVertex {
         aiVector3D vPosition;
@@ -133,105 +128,87 @@ public:
     };
 
     //---------------------------------------------------------------
-    // Helper class to store GPU related resources created for
-    // a given aiMesh
+    /// @brief Helper class to store GPU related resources created for
+    /// a given aiMesh
     //---------------------------------------------------------------
-    class MeshHelper {
+    class MeshHelper final {
     public:
-        MeshHelper() :
-                eShadingMode(),
-                piVB(NULL),
-                piIB(NULL),
-                piVBNormals(NULL),
-                piTangents(NULL),
-                piEffect(NULL),
-                bSharedFX(false),
-                piDiffuseTexture(NULL),
-                piSpecularTexture(NULL),
-                piAmbientTexture(NULL),
-                piEmissiveTexture(NULL),
-                piNormalTexture(NULL),
-                piOpacityTexture(NULL),
-                piShininessTexture(NULL),
-                piLightmapTexture(NULL),
-                fOpacity(),
-                fShininess(),
-                fSpecularStrength(),
-                twosided(false),
-                pvOriginalNormals(NULL) {}
+        /// @brief Default constructor.
+        MeshHelper() = default;
 
-        ~MeshHelper() {
-            // NOTE: This is done in DeleteAssetData()
-            // TODO: Make this a proper d'tor
-        }
+        /// @brief Default destructor.
+        ~MeshHelper() = default;
 
-        // shading mode to use. Either Lambert or otherwise phong
-        // will be used in every case
+        /// shading mode to use. Either Lambert or otherwise phong
+        /// will be used in every case
         aiShadingMode eShadingMode;
 
-        // vertex buffer
-        IDirect3DVertexBuffer9 *piVB;
+        /// vertex buffer
+        IDirect3DVertexBuffer9 *piVB{ nullptr };
 
-        // index buffer. For partially transparent meshes
-        // created with dynamic usage to be able to update
-        // the buffer contents quickly
-        IDirect3DIndexBuffer9 *piIB;
+        /// index buffer. For partially transparent meshes
+        /// created with dynamic usage to be able to update
+        /// the buffer contents quickly
+        IDirect3DIndexBuffer9 *piIB{ nullptr };
 
-        // vertex buffer to be used to draw vertex normals
-        // (vertex normals are generated in every case)
-        IDirect3DVertexBuffer9 *piVBNormals;
+        /// Vertex buffer to be used to draw vertex normals
+        IDirect3DVertexBuffer9 *piVBNormals{ nullptr };
 
-        IDirect3DVertexBuffer9 *piTangents;
+        /// Tangets vertex buffer to be used to draw vertex tangents
+        IDirect3DVertexBuffer9 *piTangents{ nullptr };
 
-        // shader to be used
-        ID3DXEffect *piEffect;
-        bool bSharedFX;
+        /// shader to be used
+        ID3DXEffect *piEffect{ nullptr };
+        
+        /// We will share the same effect for all meshes that use the same material. 
+        /// This is to avoid creating a new effect for every mesh, which would be wasteful.
+        bool bSharedFX{ false };
 
-        // material textures
-        IDirect3DTexture9 *piDiffuseTexture;
-        IDirect3DTexture9 *piSpecularTexture;
-        IDirect3DTexture9 *piAmbientTexture;
-        IDirect3DTexture9 *piEmissiveTexture;
-        IDirect3DTexture9 *piNormalTexture;
-        IDirect3DTexture9 *piOpacityTexture;
-        IDirect3DTexture9 *piShininessTexture;
-        IDirect3DTexture9 *piLightmapTexture;
+        /// Material textures
+        IDirect3DTexture9 *piDiffuseTexture{ nullptr };
+        IDirect3DTexture9 *piSpecularTexture{ nullptr };
+        IDirect3DTexture9 *piAmbientTexture{ nullptr };
+        IDirect3DTexture9 *piEmissiveTexture{ nullptr };
+        IDirect3DTexture9 *piNormalTexture{ nullptr };
+        IDirect3DTexture9 *piOpacityTexture{ nullptr };
+        IDirect3DTexture9 *piShininessTexture{ nullptr };
+        IDirect3DTexture9 *piLightmapTexture{ nullptr };
 
-        // material colors
-        D3DXVECTOR4 vDiffuseColor;
-        D3DXVECTOR4 vSpecularColor;
-        D3DXVECTOR4 vAmbientColor;
-        D3DXVECTOR4 vEmissiveColor;
+        /// Material colors
+        D3DXVECTOR4 vDiffuseColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+        D3DXVECTOR4 vSpecularColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+        D3DXVECTOR4 vAmbientColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+        D3DXVECTOR4 vEmissiveColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 
-        // opacity for the material
-        float fOpacity;
+        /// Opacity for the material
+        float fOpacity{ 1.0f };
 
-        // shininess for the material
-        float fShininess;
+        /// Shininess for the material
+        float fShininess{ 0.0f };
 
-        // strength of the specular highlight
-        float fSpecularStrength;
+        /// Strength of the specular highlight
+        float fSpecularStrength{ 0.0f };
 
-        // two-sided?
-        bool twosided;
+        /// Two-sided?
+        bool twosided{ false };
 
-        // Stores a pointer to the original normal set of the asset
-        aiVector3D *pvOriginalNormals;
+        /// Stores a pointer to the original normal set of the asset
+        aiVector3D *pvOriginalNormals{ nullptr };
     };
 
-    // One instance per aiMesh in the globally loaded asset
-    MeshHelper **apcMeshes;
+    /// One instance per aiMesh in the globally loaded asset
+    MeshHelper **apcMeshes{ nullptr };
 
-    // Scene wrapper instance
-    aiScene *pcScene;
+    /// Scene wrapper instance
+    aiScene *pcScene{ nullptr };
 
-    // Animation player to animate the scene if necessary
-    SceneAnimator *mAnimator;
+    /// Animation player to animate the scene if necessary
+    SceneAnimator *mAnimator{ nullptr };
 
-    // Specifies the normal set to be used
-    unsigned int iNormalSet;
+    /// Specifies the normal set to be used
+    unsigned int iNormalSet{ ORIGINAL };
 };
 
 } // namespace AssimpView
 
-#endif // !! IG
+#endif // AV_ASSET_HELPER_H_INCLUDED

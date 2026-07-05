@@ -733,7 +733,7 @@ void MD5Importer::LoadMD5CameraFile() {
     // frames; reject any range that runs past the end (or wraps) before we
     // allocate or read anything, so a mid-loop throw can't leave the scene
     // holding half-initialized animations.
-    for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end() - 1; ++it) {
+    for (auto it = cuts.begin(); it != cuts.end() - 1; ++it) {
         if (*(it + 1) < *it || *(it + 1) > frames.size()) {
             throw DeadlyImportError("MD5CAMERA: Cut references a frame out of range");
         }

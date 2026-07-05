@@ -140,7 +140,7 @@ TEST_F(utAssbinImportExport, rejectOversizedNodeNameLengthInAssbin) {
     EXPECT_EQ(nullptr, corruptedScene);
     EXPECT_NE(std::string::npos,
             std::string(corruptedImporter.GetErrorString())
-                    .find("Invalid aiString length"));
+                    .find("String length too large"));
 }
 
 #endif // #ifndef ASSIMP_BUILD_NO_EXPORT

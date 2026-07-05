@@ -1,6 +1,11 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "wheel==0.46.3",
+    "packaging",
+    "pyMSVC@git+https://github.com/kdschlosser/python_msvc ; sys_platform=='win32'",
+]
+build-backend = "builder._backend"
+backend-path = ["."]
 
 [project]
 name = "pyassimp"
@@ -14,3 +19,7 @@ description = "Python bindings for the Open Asset Import Library (ASSIMP)"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
+
+[project.urls]
+"Homepage" = "https://github.com/assimp/assimp"
+"Source" = "https://github.com/assimp/assimp"

@@ -686,8 +686,8 @@ static aiTexture *ownedEmbeddedTextureFor(const RenderScene &render_scene, const
         memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], imageBytesCount);
     } else {
         std::string formatHint{ "rgba8888" };
-        strncpy(tex->achFormatHint, formatHint.c_str(), 7);
-        tex->achFormatHint[7] = '\0';  // Ensure null termination
+        strncpy(tex->achFormatHint, formatHint.c_str(), HINTMAXTEXTURELEN - 1);
+        tex->achFormatHint[HINTMAXTEXTURELEN - 1] = '\0';  // Ensure null termination
         const size_t imageTexelsCount{ tex->mWidth * tex->mHeight };
         tex->pcData = (aiTexel *)new char[imageTexelsCount * image.channels];
         const float *floatPtr = reinterpret_cast<const float *>(&render_scene.buffers[image.buffer_id].data[0]);

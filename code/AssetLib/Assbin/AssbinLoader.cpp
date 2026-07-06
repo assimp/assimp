@@ -552,8 +552,9 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
             tex->pcData = new aiTexel[tex->mWidth];
             stream->Read(tex->pcData, 1, tex->mWidth);
         } else {
-            // Check for integer overflow in multiplication
-            if (tex->mWidth > 0 && tex->mHeight > UINT_MAX / tex->mWidth) {
+            // Check for integer overflow when computing the pixel and byte counts
+            const uint64_t pixelCount = (uint64_t)tex->mWidth * tex->mHeight;
+            if (tex->mWidth == 0 || tex->mHeight == 0 || pixelCount > UINT_MAX / 4) {
                 throw DeadlyImportError("Texture dimensions too large (overflow)");
             }
             tex->pcData = new aiTexel[tex->mWidth * tex->mHeight];

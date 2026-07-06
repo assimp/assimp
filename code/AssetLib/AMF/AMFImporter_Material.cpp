@@ -198,12 +198,15 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 	als.Depth = depth;
 	als.Tiled = tiled;
 	ParseHelper_Decode_Base64(enc64_data, als.Data);
+    // Validate dimensions and guard against overflow before any multiplication or division
+    if (width == 0 || height == 0) {
+        throw DeadlyImportError("Texture has invalid dimensions.");
+    }
+    if (height > UINT_MAX / width) {
+        throw DeadlyImportError("Texture dimensions overflow");
+    }
     if (depth == 0) {
         depth = (uint32_t)(als.Data.size() / (width * height));
-    }
-    // Check for integer overflow and size validation
-    if (width > 0 && height > UINT_MAX / width) {
-        throw DeadlyImportError("Texture dimensions overflow");
     }
     if (depth > 0 && (uint64_t)width * height > UINT_MAX / depth) {
         throw DeadlyImportError("Texture data size overflow");

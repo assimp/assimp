@@ -332,8 +332,8 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
             /* if we have the texture loaded, set format hint and pcData too */
             tx->mWidth = t->w;
             tx->mHeight = t->h;
-            strncpy(tx->achFormatHint, formatHint[t->f - 1], 7);
-            tx->achFormatHint[7] = '\0';  // Ensure null termination
+            strncpy(tx->achFormatHint, formatHint[t->f - 1], HINTMAXTEXTURELEN - 1);
+            tx->achFormatHint[HINTMAXTEXTURELEN - 1] = '\0';  // Ensure null termination
             tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
             for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
                 switch (t->f) {

@@ -223,10 +223,6 @@ IF (WIN32)
   ENDIF()
 ENDIF()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-  add_compile_options(-Wunsafe-buffer-usage)
-endif()
-
 IF (IOS AND NOT ASSIMP_HUNTER_ENABLED)
   IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Release")

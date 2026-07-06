@@ -110,8 +110,14 @@ public:
             return 0;
         }
 
-        if (cursor + total_size > cur_size) {
-            Grow(cursor + total_size);
+        // Guard cursor + total_size against overflow before growing
+        if (total_size > SIZE_MAX - cursor) {
+            return 0;
+        }
+
+        const size_t newEnd = cursor + total_size;
+        if (newEnd > cur_size) {
+            Grow(newEnd);
         }
 
         memcpy(buffer + cursor, pvBuffer, total_size);

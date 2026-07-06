@@ -850,7 +850,7 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     }
     
     if (requiredValuesSize > valuesTailDataSize) {
-        throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");
+        throw DeadlyImportError("Invalid sparse accessor. Values outside allocated memory.");
     }
     while (pIndices != indicesEnd) {
         size_t offset;

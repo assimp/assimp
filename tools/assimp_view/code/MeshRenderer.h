@@ -46,43 +46,39 @@ namespace AssimpView {
 
 
     //-------------------------------------------------------------------------------
-    /* Helper class tp render meshes
-    */
+    /// @brief Helper class tp render meshes.
     //-------------------------------------------------------------------------------
     class CMeshRenderer {
     public:
+        /// @brief Destructor
         ~CMeshRenderer() = default;
 
         //------------------------------------------------------------------
-        // Singleton accessors
+        /// @brief Singleton accessors
         static CMeshRenderer s_cInstance;
 
+        /// @brief Get the singleton instance of the mesh renderer
+        /// @return Reference to the singleton instance of the mesh renderer
         inline static CMeshRenderer& Instance() {
             return s_cInstance;
         }
 
-
         //------------------------------------------------------------------
-        // Draw a mesh in the global mesh list using the current pipeline state
-        // iIndex Index of the mesh to be drawn
-        //
-        // The function draws all faces in order, regardless of their distance
+        /// @brief Draw a mesh in the global mesh list using the current pipeline state
+        /// @param iIndex Index of the mesh to be drawn
+        /// @return Result of the operation
         int DrawUnsorted( unsigned int iIndex );
 
         //------------------------------------------------------------------
-        // Draw a mesh in the global mesh list using the current pipeline state
-        // iIndex Index of the mesh to be drawn
-        //
-        // The method sorts all vertices by their distance (back to front)
-        //
-        // mWorld World matrix for the node
+        /// @brief Draw a mesh in the global mesh list using the current pipeline state
+        /// @param iIndex Index of the mesh to be drawn
+        /// @param mWorld World matrix for the node
+        /// @return Result of the operation
         int DrawSorted( unsigned int iIndex, const aiMatrix4x4& mWorld );
 
     private:
         // default constructor
         CMeshRenderer() = default;
-
-    private:
     };
 }
 

@@ -50,8 +50,10 @@ CMeshRenderer CMeshRenderer::s_cInstance;
 
 //-------------------------------------------------------------------------------
 int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
-    ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
-
+    if (!g_pcAsset || !g_pcAsset->pcScene || !g_pcAsset->apcMeshes) {
+        return -1;
+    }
+    
     // set vertex and index buffer
     g_piDevice->SetStreamSource(0,g_pcAsset->apcMeshes[iIndex]->piVB,0,
         sizeof(AssetHelper::Vertex));
@@ -80,7 +82,9 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
 }
 //-------------------------------------------------------------------------------
 int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
-    ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
+    if (!g_pcAsset || !g_pcAsset->pcScene || !g_pcAsset->apcMeshes) {
+        return -1;
+    }
 
     AssetHelper::MeshHelper* pcHelper = g_pcAsset->apcMeshes[iIndex];
     const aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
@@ -106,8 +110,7 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
     for (unsigned int iFace = 0; iFace < pcMesh->mNumFaces;++iFace) {
         const aiFace* pcFace = &pcMesh->mFaces[iFace];
         float fDist = 0.0f;
-        for (unsigned int c = 0; c < 3;++c)
-        {
+        for (unsigned int c = 0; c < 3;++c) {
             aiVector3D vPos = pcMesh->mVertices[pcFace->mIndices[c]];
             vPos -= vLocalCamera;
             fDist += vPos.SquareLength();

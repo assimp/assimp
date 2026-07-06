@@ -546,9 +546,9 @@ void LoadSkybox() {
     return;
 }
 
+//-------------------------------------------------------------------------------
 template<class T>
-inline
-void SaveRelease(T **iface ) {
+inline void SaveRelease(T **iface ) {
     if (nullptr != iface) {
         (*iface)->Release();
         *iface = nullptr;
@@ -1329,7 +1329,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_MOUSELEAVE:
-
             g_bMousePressed = false;
             g_bMousePressedR = false;
             g_bMousePressedM = false;
@@ -1337,7 +1336,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_LBUTTONDBLCLK:
-
             CheckDlgButton(hwndDlg,IDC_AUTOROTATE,
                 IsDlgButtonChecked(hwndDlg,IDC_AUTOROTATE) == BST_CHECKED
                 ? BST_UNCHECKED : BST_CHECKED);
@@ -1352,15 +1350,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_NOTIFY:
-
-            if (IDC_TREE1 == wParam)
-            {
+            if (IDC_TREE1 == wParam) {
                 NMTREEVIEW* pnmtv = (LPNMTREEVIEW) lParam;
 
                 if (TVN_SELCHANGED == pnmtv->hdr.code)
                     CDisplay::Instance().OnSetup( pnmtv->itemNew.hItem );
-                else if (NM_RCLICK == pnmtv->hdr.code)
-                {
+                else if (NM_RCLICK == pnmtv->hdr.code) {
                     // determine in which item the click was ...
                     POINT sPoint;
                     GetCursorPos(&sPoint);
@@ -1387,24 +1382,18 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 
                 bool bDraw = false;
 
-                if(IDC_LCOLOR1 == pcStruct->CtlID)
-                {
+                if(IDC_LCOLOR1 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->x * 255.0f);
                         g = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->y * 255.0f);
                         b = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->z * 255.0f);
                         szText = "Background #0";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[0]) & 0xFF);
@@ -1419,25 +1408,18 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
                     TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
-                }
-                else if(IDC_LCOLOR2 == pcStruct->CtlID)
-                {
+                } else if(IDC_LCOLOR2 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->x * 255.0f);
                         g = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->y * 255.0f);
                         b = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->z * 255.0f);
                         szText = "Background #1";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[1]) & 0xFF);
@@ -1450,23 +1432,16 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
                     TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
-                }
-                else if(IDC_LCOLOR3 == pcStruct->CtlID)
-                {
+                } else if(IDC_LCOLOR3 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = g = b = 0;
                         szText = "";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[2]) & 0xFF);
@@ -1481,8 +1456,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     bDraw = true;
                 }
                 // draw the black border around the rects
-                if (bDraw)
-                {
+                if (bDraw) {
                     SetBkColor(pcStruct->hDC,RGB(0,0,0));
                     MoveToEx(pcStruct->hDC,0,0,nullptr);
                     LineTo(pcStruct->hDC,sRect.right-1,0);
@@ -1494,7 +1468,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_DESTROY:
-
             // close the open registry key
             RegCloseKey(g_hRegistry);
             return TRUE;
@@ -1510,19 +1483,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sEvent.dwHoverTime = HOVER_DEFAULT;
             TrackMouseEvent(&sEvent);
 
-            if (g_bMousePressedR)
-                {
+            if (g_bMousePressedR) {
                 g_bMousePressed = false;
                 g_bMousePressedR = false;
                 g_bMousePressedBoth = true;
                 return TRUE;
-                }
+            }
 
             // need to determine the position of the mouse and the
             // distance from the center
-            //xPos = (int)(short)LOWORD(lParam);
-            //yPos = (int)(short)HIWORD(lParam);
-
             POINT sPoint;
             GetCursorPos(&sPoint);
             ScreenToClient(GetDlgItem(g_hDlg,IDC_RT),&sPoint);
@@ -1536,10 +1505,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 
             // if the mouse click was inside the viewer panel
             // give the focus to it
-            if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom)
-                {
+            if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom) {
                 SetFocus(GetDlgItem(g_hDlg,IDC_RT));
-                }
+            }
 
             // g_bInvert stores whether the mouse has started on the negative
             // x or on the positive x axis of the imaginary coordinate system
@@ -1559,27 +1527,21 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             // Determine the input operation to perform for this position
             g_eClick = EClickPos_Outside;
             if (xPos2 >= fHalfX && xPos2 < fHalfX + (int)sDesc.Width &&
-                yPos2 >= fHalfY && yPos2 < fHalfY + (int)sDesc.Height &&
-                nullptr != g_szImageMask)
-                {
+                    yPos2 >= fHalfY && yPos2 < fHalfY + (int)sDesc.Height &&
+                    nullptr != g_szImageMask) {
                 // inside the texture. Lookup the grayscale value from it
                 xPos2 -= fHalfX;
                 yPos2 -= fHalfY;
 
                 unsigned char chValue = g_szImageMask[xPos2 + yPos2 * sDesc.Width];
-                if (chValue > 0xFF-20)
-                    {
+                if (chValue > 0xFF-20) {
                     g_eClick = EClickPos_Circle;
-                    }
-                else if (chValue < 0xFF-20 && chValue > 185)
-                    {
+                } else if (chValue < 0xFF-20 && chValue > 185) {
                     g_eClick = EClickPos_CircleHor;
-                    }
-                else if (chValue > 0x10 && chValue < 185)
-                    {
+                } else if (chValue > 0x10 && chValue < 185) {
                     g_eClick = EClickPos_CircleVert;
-                    }
                 }
+            }
             return TRUE;
 
         case WM_RBUTTONDOWN:
@@ -1591,18 +1553,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sEvent.dwHoverTime = HOVER_DEFAULT;
             TrackMouseEvent(&sEvent);
 
-            if (g_bMousePressed)
-                {
+            if (g_bMousePressed) {
                 g_bMousePressedR = false;
                 g_bMousePressed = false;
                 g_bMousePressedBoth = true;
-                }
+            }
 
             return TRUE;
 
         case WM_MBUTTONDOWN:
-
-
             g_bMousePressedM = true;
 
             sEvent.cbSize = sizeof(TRACKMOUSEEVENT);
@@ -1789,74 +1748,59 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 ppsteps ^= aiProcess_FindInvalidData;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FIM == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FIM == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FindInstances;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FIN == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FIN == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FixInfacingNormals;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_GUV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_GUV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_GenUVCoords;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_ICL == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_ICL == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_ImproveCacheLocality;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_OG == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_OG == LOWORD(wParam)) {
                 if (ppsteps & aiProcess_PreTransformVertices) {
                     CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Pretransform Vertices\'");
-                }
-                else {
+                } else {
                     ppsteps ^= aiProcess_OptimizeGraph;
                     CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
                     UpdatePPSettings();
                 }
-            }
-            else if (ID_VIEWER_PP_OM == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_OM == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_OptimizeMeshes;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_PTV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_PTV == LOWORD(wParam))    {
                 if (ppsteps & aiProcess_OptimizeGraph) {
                     CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Optimize Scenegraph\'");
-                }
-                else {
+                } else {
                     ppsteps ^= aiProcess_PreTransformVertices;
                     CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
                     UpdatePPSettings();
                 }
-            }
-            else if (ID_VIEWER_PP_RRM2 == LOWORD(wParam))   {
+            } else if (ID_VIEWER_PP_RRM2 == LOWORD(wParam))   {
                 ppsteps ^= aiProcess_RemoveRedundantMaterials;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_TUV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_TUV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_TransformUVCoords;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_DB == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_DB == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_Debone;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_VDS == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_VDS == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_ValidateDataStructure;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_RELOAD == LOWORD(wParam))
-            {
+            } else if (ID_VIEWER_RELOAD == LOWORD(wParam))  {
                 // Save the filename to reload and clear
                 char toReloadFileName[MAX_PATH];
                 strcpy(toReloadFileName, g_szFileName);
@@ -1864,63 +1808,45 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 
                 strcpy(g_szFileName, toReloadFileName);
                 AssimpViewer::LoadAsset();
-            }
-            else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
-            {
+            } else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam)) {
                 ppsteps = ppstepsdefault;
                 UpdatePPSettings();
                 SetupPPUIState();
-            }
-            else if (ID_IMPORTSETTINGS_OPENPOST == LOWORD(wParam))
-            {
+            } else if (ID_IMPORTSETTINGS_OPENPOST == LOWORD(wParam)) {
                 ShellExecute(nullptr,"open","http://assimp.sourceforge.net/lib_html/ai_post_process_8h.html","","",SW_SHOW);
-            }
-            else if (ID_TOOLS_ORIGINALNORMALS == LOWORD(wParam))
-            {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_ORIGINALNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::ORIGINAL);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_CHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
-                    }
                 }
-
-            else if (ID_TOOLS_SMOOTHNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_SMOOTHNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::SMOOTH);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_CHECKED);
-                    }
                 }
-            else if (ID_TOOLS_HARDNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_HARDNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::HARD);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_CHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
-                    }
                 }
-            else if (ID_TOOLS_STEREOVIEW == LOWORD(wParam))
-                {
+            } else if (ID_TOOLS_STEREOVIEW == LOWORD(wParam)) {
                     g_sOptions.bStereoView =! g_sOptions.bStereoView;
 
                     HMENU menu = ::GetMenu(g_hDlg);
                     if (g_sOptions.bStereoView) {
                         ::ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
-
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to stereo mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
                     } else {
                         ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
-
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to mono mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
                     }
@@ -1928,75 +1854,50 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_DIALOGSMOOTH),g_hDlg,&SMMessageProc);
             } else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam)) {
                 ClearHistory();
-            } 
-            else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) 
-            {
+            }  else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) {
                 AssimpViewer::DeleteAssetData();
                 AssimpViewer::DeleteAsset();
-            }
-            else if (BN_CLICKED == HIWORD(wParam))
-                {
-                if (IDC_TOGGLEMS == LOWORD(wParam))
-                    {
+            } else if (BN_CLICKED == HIWORD(wParam)) {
+                if (IDC_TOGGLEMS == LOWORD(wParam)) {
                     ToggleMS();
-                    }
-                else if (IDC_TOGGLEMAT == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLEMAT == LOWORD(wParam)) {
                     ToggleMats();
-                    }
-                else if (IDC_LCOLOR1 == LOWORD(wParam))
-                    {
-
+                } else if (IDC_LCOLOR1 == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         // hey, I'm tired and yes, I KNOW IT IS EVIL!
                         DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetFirstCheckerColor()));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         DisplayColorDialog(&g_avLightColors[0]);
                         SaveLightColors();
                     }
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
-                    }
-                else if (IDC_LCOLOR2 == LOWORD(wParam))
-                    {
+                } else if (IDC_LCOLOR2 == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         // hey, I'm tired and yes, I KNOW IT IS EVIL!
                         DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetSecondCheckerColor()));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         DisplayColorDialog(&g_avLightColors[1]);
                         SaveLightColors();
                     }
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
-                    }
-                else if (IDC_LCOLOR3 == LOWORD(wParam))
-                    {
+                } else if (IDC_LCOLOR3 == LOWORD(wParam)) {
                     DisplayColorDialog(&g_avLightColors[2]);
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
                     SaveLightColors();
-                }
-                else if (IDC_LRESET == LOWORD(wParam))
-                {
+                } else if (IDC_LRESET == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         CDisplay::Instance().SetFirstCheckerColor(D3DXVECTOR4(0.4f,0.4f,0.4f,1.0f));
                         CDisplay::Instance().SetSecondCheckerColor(D3DXVECTOR4(0.6f,0.6f,0.6f,1.0f));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         g_avLightColors[0] = D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF);
                         g_avLightColors[1] = D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00);
                         g_avLightColors[2] = D3DCOLOR_ARGB(0xFF,0x05,0x05,0x05);
@@ -2009,25 +1910,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
-                    }
-                else if (IDC_NOSPECULAR == LOWORD(wParam))
-                    {
+                } else if (IDC_NOSPECULAR == LOWORD(wParam)) {
                     ToggleSpecular();
-                    }
-                else if (IDC_NOAB == LOWORD(wParam))
-                    {
+                } else if (IDC_NOAB == LOWORD(wParam)) {
                     ToggleTransparency();
-                    }
-                else if (IDC_ZOOM == LOWORD(wParam))
-                    {
+                } else if (IDC_ZOOM == LOWORD(wParam)) {
                     ToggleFPSView();
-                    }
-                else if (IDC_BLUBB == LOWORD(wParam))
-                    {
+                } else if (IDC_BLUBB == LOWORD(wParam)) {
                     ToggleUIState();
-                    }
-                else if (IDC_TOGGLENORMALS == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLENORMALS == LOWORD(wParam)) {
                     ToggleNormals();
                 } else if (IDC_TOGGLETANGENTS == LOWORD(wParam)) {
                     ToggleTangents();
@@ -2035,29 +1926,17 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     ToggleLowQuality();
                 } else if (IDC_3LIGHTS == LOWORD(wParam)) {
                     ToggleMultipleLights();
-                    }
-                else if (IDC_LIGHTROTATE == LOWORD(wParam))
-                    {
-                    ToggleLightRotate();
-                    }
-                else if (IDC_AUTOROTATE == LOWORD(wParam))
-                    {
+                } else if (IDC_LIGHTROTATE == LOWORD(wParam)) {
+                    ToggleLightRotate(); 
+                } else if (IDC_AUTOROTATE == LOWORD(wParam)) {
                     ToggleAutoRotate();
-                    }
-                else if (IDC_TOGGLEWIRE == LOWORD(wParam))
-                    {
-                    ToggleWireFrame();
-                    }
-                else if (IDC_SHOWSKELETON == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLEWIRE == LOWORD(wParam)) {
+                    ToggleWireFrame(); 
+                } else if (IDC_SHOWSKELETON == LOWORD(wParam)) {
                     ToggleSkeleton();
-                    }
-                else if (IDC_BFCULL == LOWORD(wParam))
-                    {
+                } else if (IDC_BFCULL == LOWORD(wParam)) {
                     ToggleCulling();
-                    }
-                else if (IDC_PLAY == LOWORD(wParam))
-                    {
+                } else if (IDC_PLAY == LOWORD(wParam)) {
                         g_bPlay = !g_bPlay;
                         SetDlgItemText(g_hDlg,IDC_PLAY,(g_bPlay ? "Stop" : "Play"));
 
@@ -2067,10 +1946,8 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     }
                 }
             // check the file history
-            for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
-            {
-                if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam))
-                {
+            for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i) {
+                if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam)) {
                     AssimpViewer::DeleteAssetData();
                     AssimpViewer::DeleteAsset();
 
@@ -2097,18 +1974,13 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
     return FALSE;
 }
 
-
 //-------------------------------------------------------------------------------
 // Message prcoedure for the progress dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK AssimpViewer::ProgressMessageProc(HWND hwndDlg,UINT uMsg,
-     WPARAM wParam,LPARAM lParam)
-    {
+INT_PTR CALLBACK AssimpViewer::ProgressMessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
-    switch (uMsg)
-        {
+    switch (uMsg) {
         case WM_INITDIALOG:
-
             SendDlgItemMessage(hwndDlg,IDC_PROGRESS,PBM_SETRANGE,0,
                 MAKELPARAM(0,500));
 
@@ -2144,42 +2016,38 @@ INT_PTR CALLBACK AssimpViewer::ProgressMessageProc(HWND hwndDlg,UINT uMsg,
             if (iPos > 490)iPos = 0;
             SendDlgItemMessage(hwndDlg,IDC_PROGRESS,PBM_SETPOS,iPos,0);
 
-            if (g_bLoadingFinished)
-                {
+            if (g_bLoadingFinished) {
                 EndDialog(hwndDlg,0);
                 return TRUE;
-                }
+            }
 
             return TRUE;
-        }
-    return FALSE;
     }
-
+    return FALSE;
+}
 
 //-------------------------------------------------------------------------------
 // Message procedure for the about dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK AssimpViewer::AboutMessageProc(HWND hwndDlg,UINT uMsg,
-    WPARAM wParam,LPARAM lParam)
-    {
+INT_PTR CALLBACK AssimpViewer::AboutMessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
-    switch (uMsg)
-        {
+    switch (uMsg) {
         case WM_CLOSE:
             EndDialog(hwndDlg,0);
             return TRUE;
 
         case WM_COMMAND:
-
             if (IDOK == LOWORD(wParam))
-                {
+            {
                 EndDialog(hwndDlg,0);
                 return TRUE;
-                }
-        }
-    return FALSE;
+            }
     }
+    
+    return FALSE;
 }
+
+} // namespace AssimpViewer
 
 using namespace AssimpView;
 
@@ -2189,8 +2057,7 @@ using namespace AssimpView;
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
-                       int       nCmdShow)
-{
+                       int       nCmdShow) {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -2262,20 +2129,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     RegCreateKeyEx(HKEY_CURRENT_USER,
         "Software\\ASSIMP\\Viewer",0,nullptr,0,KEY_ALL_ACCESS, nullptr, &hRegistry,nullptr);
     if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastSkyBoxSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
-        {
+            (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0]) {
         CBackgroundPainter::Instance().SetCubeMapBG(szFileName);
-        }
-    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastTextureSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
-        {
+    } else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastTextureSrc",nullptr,nullptr,
+                (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0]) {
         CBackgroundPainter::Instance().SetTextureBG(szFileName);
-        }
-    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"Color",nullptr,nullptr,
-        (BYTE*)&clrColor,&dwTemp))
-        {
+    } else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"Color",nullptr,nullptr,
+                (BYTE*)&clrColor,&dwTemp)) {
         CBackgroundPainter::Instance().SetColor(clrColor);
-        }
+    }
     RegCloseKey(hRegistry);
 
     // now handle command line arguments
@@ -2287,18 +2149,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     double g_dCurTime = 0;
     double g_dLastTime = 0;
-    while( uMsg.message != WM_QUIT )
-        {
-        if( PeekMessage( &uMsg, nullptr, 0, 0, PM_REMOVE ) )
-            {
+    while( uMsg.message != WM_QUIT ) {
+        if( PeekMessage( &uMsg, nullptr, 0, 0, PM_REMOVE ) ) {
             TranslateMessage( &uMsg );
             DispatchMessage( &uMsg );
 
-            if (WM_CHAR == uMsg.message)
-                {
+            if (WM_CHAR == uMsg.message) {
 
-                switch ((char)uMsg.wParam)
-                    {
+                switch ((char)uMsg.wParam) {
                     case 'M':
                     case 'm':
 

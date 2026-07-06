@@ -104,31 +104,28 @@ struct SceneAnimNode {
 class SceneAnimator {
  public:
     // ----------------------------------------------------------------------------
-    /** Constructor for a given scene.
-     *
-     * The object keeps a reference to the scene during its lifetime, but
-     * ownership stays at the caller.
-     * @param pScene The scene to animate.
-     * @param pAnimIndex [optional] Index of the animation to play. Assumed to
-     *  be 0 if not given.
-     */
+    /// @brief Constructor for a given scene.
+    ///
+    /// The object keeps a reference to the scene during its lifetime, but
+    /// ownership stays at the caller.
+    /// @param pScene The scene to animate.
+    /// @param pAnimIndex [optional] Index of the animation to play. Assumed to
+    ///        be 0 if not given.
     SceneAnimator(const aiScene *pScene, size_t pAnimIndex = 0);
 
-    /// Destructor
+    ///@brief Destructor
     ~SceneAnimator();
 
     // ----------------------------------------------------------------------------
-    /** Sets the animation to use for playback. This also recreates the internal
-     * mapping structures, which might take a few cycles.
-     * @param pAnimIndex Index of the animation in the scene's animation array
-     */
+    /// @brief Sets the animation to use for playback. This also recreates the internal
+    /// mapping structures, which might take a few cycles.
+    /// @param pAnimIndex Index of the animation in the scene's animation array
     void SetAnimIndex(size_t pAnimIndex);
 
     // ----------------------------------------------------------------------------
-    /** Calculates the node transformations for the scene. Call this to get
-     * up-to-date results before calling one of the getters.
-     * @param pTime Current time. Can be an arbitrary range.
-     */
+    /// @brief Calculates the node transformations for the scene. Call this to get
+    /// up-to-date results before calling one of the getters.
+    /// @param pTime Current time. Can be an arbitrary range.
     void Calculate(double pTime);
 
     // ----------------------------------------------------------------------------
@@ -186,7 +183,7 @@ class SceneAnimator {
     // ----------------------------------------------------------------------------
     /// @brief Get the current animation or NULL
     aiAnimation *CurrentAnim() const {
-        return static_cast<unsigned int>(mCurrentAnimIndex) < mScene->mNumAnimations ? mScene->mAnimations[mCurrentAnimIndex] : NULL;
+        return static_cast<unsigned int>(mCurrentAnimIndex) < mScene->mNumAnimations ? mScene->mAnimations[mCurrentAnimIndex] : nullptr;
     }
 
 protected:
@@ -208,10 +205,10 @@ protected:
     void CalculateGlobalTransform(SceneAnimNode *pInternalNode);
 
 protected:
-    const aiScene *mScene;
-    int mCurrentAnimIndex;
-    AnimEvaluator *mAnimEvaluator;
-    SceneAnimNode *mRootNode;
+    const aiScene *mScene{nullptr};
+    int mCurrentAnimIndex{-1};
+    AnimEvaluator *mAnimEvaluator{nullptr};
+    SceneAnimNode *mRootNode{nullptr};
     using NodeMap = std::map<const aiNode *, SceneAnimNode *>;
     NodeMap mNodesByName;
     using BoneMap = std::map<const char *, const aiNode *>;

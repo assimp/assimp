@@ -1,14 +1,12 @@
 /**
- * pugixml parser - version 1.15
+ * pugixml parser - version 1.16
  * --------------------------------------------------------
- * Copyright (C) 2006-2026, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
  *
- * This library is distributed under the MIT License. See notice at the end
- * of this file.
+ * SPDX-FileCopyrightText: Copyright (C) 2006-2026, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * SPDX-License-Identifier: MIT
  *
- * This work is based on the pugxml parser, which is:
- * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
+ * See LICENSE.md or notice at the end of this file.
  */
 
 #ifndef HEADER_PUGICONFIG_HPP
@@ -16,6 +14,9 @@
 
 // Uncomment this to enable wchar_t mode
 // #define PUGIXML_WCHAR_MODE
+
+// Uncomment this to enable from_chars/to_chars for number conversion
+// #define PUGIXML_CHARCONV_FLOAT
 
 // Uncomment this to enable compact mode
 // #define PUGIXML_COMPACT
@@ -30,14 +31,9 @@
 // #define PUGIXML_NO_EXCEPTIONS
 
 // Set this to control attributes for public classes/functions, i.e.:
-#ifdef _WIN32
-#   define PUGIXML_API __declspec(dllexport) // to export all public symbols from DLL
-#else
-#  define PUGIXML_API __attribute__((visibility("default")))
-#endif // _WIN32
-#
-//define PUGIXML_CLASS __declspec(dllimport) // to import all classes from DLL
-//#define PUGIXML_FUNCTION __fastcall // to set calling conventions to all public functions to fastcall
+// #define PUGIXML_API __declspec(dllexport) // to export all public symbols from DLL
+// #define PUGIXML_CLASS __declspec(dllimport) // to import all classes from DLL
+// #define PUGIXML_FUNCTION __fastcall // to set calling conventions to all public functions to fastcall
 // In absence of PUGIXML_CLASS/PUGIXML_FUNCTION definitions PUGIXML_API is used instead
 
 // Tune these constants to adjust memory-related behavior

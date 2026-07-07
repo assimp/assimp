@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include <cstring>
 #include <memory>
 
 using namespace Assimp;
@@ -643,10 +644,19 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
         VALIDATE_FILE_SIZE(szCurrent);
-        int32_t iMe = *((int32_t *)szCurrent);
+        const size_t remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
+        if (remaining_size < sizeof(int32_t)) {
+            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+        }
+
+        int32_t iMe = 0;
+        ::memcpy(&iMe, szCurrent, sizeof(int32_t));
         AI_SWAP4(iMe);
-        szCurrent += sizeof(char) * iMe + sizeof(int32_t);
-        VALIDATE_FILE_SIZE(szCurrent);
+        if (iMe < 0 || static_cast<size_t>(iMe) > remaining_size - sizeof(int32_t)) {
+            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+        }
+
+        szCurrent += sizeof(int32_t) + static_cast<size_t>(iMe);
     }
 
     // If an embedded texture has been loaded setup the corresponding
@@ -737,12 +747,20 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     // if an ASCII effect description (HLSL?) is contained in the file,
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
-        VALIDATE_FILE_SIZE(szCurrent + sizeof(int32_t));
+        VALIDATE_FILE_SIZE(szCurrent);
+        const size_t remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
+        if (remaining_size < sizeof(int32_t)) {
+            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+        }
+
         int32_t iMe = 0;
         ::memcpy(&iMe, szCurrent, sizeof(int32_t));
         AI_SWAP4(iMe);
-        szCurrent += sizeof(char) * iMe + sizeof(int32_t);
-        VALIDATE_FILE_SIZE(szCurrent);
+        if (iMe < 0 || static_cast<size_t>(iMe) > remaining_size - sizeof(int32_t)) {
+            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+        }
+
+        szCurrent += sizeof(int32_t) + static_cast<size_t>(iMe);
     }
     *szCurrentOut = szCurrent;
 }

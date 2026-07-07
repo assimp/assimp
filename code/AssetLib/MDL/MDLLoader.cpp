@@ -62,6 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 
+#include <limits>
 #include <memory>
 
 using namespace Assimp;
@@ -160,6 +161,24 @@ static void transformCoordinateSystem(const aiScene *pScene) {
         -1.f, 0.f, 0.f, 0.f,
         0.f, 0.f, 0.f, 1.f
     );
+}
+
+static bool checkedMultiply(size_t lhs, size_t rhs, size_t &result) {
+    if (lhs != 0 && rhs > std::numeric_limits<size_t>::max() / lhs) {
+        return false;
+    }
+
+    result = lhs * rhs;
+    return true;
+}
+
+static bool checkedAdd(size_t lhs, size_t rhs, size_t &result) {
+    if (rhs > std::numeric_limits<size_t>::max() - lhs) {
+        return false;
+    }
+
+    result = lhs + rhs;
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -458,8 +477,24 @@ void MDLImporter::InternReadFile_Quake1() {
         // get the first frame in the group
         BE_NCONST MDL::GroupFrame *pcFrames2 = (BE_NCONST MDL::GroupFrame *)szCurrent;
         VALIDATE_FILE_SIZE((const unsigned char *)(pcFrames2 + 1));
-        pcFirstFrame = (MDL::SimpleFrame *)( szCurrent + sizeof(MDL::GroupFrame::type) + sizeof(MDL::GroupFrame::numframes)
-        + sizeof(MDL::GroupFrame::min) + sizeof(MDL::GroupFrame::max) + sizeof(*MDL::GroupFrame::times) * pcFrames2->numframes );
+        if (pcFrames2->numframes <= 0 || pcFrames2->numframes > pcHeader->num_frames) {
+            throw DeadlyImportError("[Quake 1 MDL] Invalid group frame count");
+        }
+
+        const size_t group_frame_header_size = sizeof(MDL::GroupFrame::type) + sizeof(MDL::GroupFrame::numframes) +
+                                               sizeof(MDL::GroupFrame::min) + sizeof(MDL::GroupFrame::max);
+        const size_t group_frame_times_size = sizeof(*MDL::GroupFrame::times) * static_cast<size_t>(pcFrames2->numframes);
+        if (group_frame_times_size > std::numeric_limits<size_t>::max() - group_frame_header_size) {
+            throw DeadlyImportError("[Quake 1 MDL] Invalid group frame count");
+        }
+
+        const size_t first_frame_offset = group_frame_header_size + group_frame_times_size;
+        const size_t remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
+        if (first_frame_offset > remaining_size) {
+            throw DeadlyImportError("[Quake 1 MDL] Invalid group frame data");
+        }
+
+        pcFirstFrame = (MDL::SimpleFrame *)(szCurrent + first_frame_offset);
     }
     BE_NCONST MDL::Vertex *pcVertices = (BE_NCONST MDL::Vertex *)((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
     VALIDATE_FILE_SIZE((const unsigned char *)(pcVertices + pcHeader->num_verts));
@@ -902,6 +937,7 @@ void MDLImporter::CalculateUVCoordinates_MDL5() {
 // Validate the header of a MDL7 file
 void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7 *pcHeader) {
     ai_assert(nullptr != pcHeader);
+    const size_t file_size = static_cast<size_t>(this->iFileSize);
 
     // There are some fixed sizes ...
     if (sizeof(MDL::ColorValue_MDL7) != pcHeader->colorvalue_stc_size) {
@@ -920,6 +956,13 @@ void MDLImporter::ValidateHeader_3DGS_MDL7(const MDL::Header_MDL7 *pcHeader) {
     // if there are no groups ... how should we load such a file?
     if (!pcHeader->groups_num) {
         throw DeadlyImportError("[3DGS MDL7] No frames found");
+    }
+    if (pcHeader->data_size > file_size) {
+        throw DeadlyImportError("[3DGS MDL7] Invalid file data size");
+    }
+    if (file_size < sizeof(MDL::Header_MDL7) ||
+            pcHeader->groups_num > (file_size - sizeof(MDL::Header_MDL7)) / sizeof(MDL::Group_MDL7)) {
+        throw DeadlyImportError("[3DGS MDL7] Invalid group count");
     }
 }
 
@@ -1053,7 +1096,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInfo,
 
             // validate the vertex index
             unsigned int iIndex = pcGroupTris->v_index[c];
-            if (iIndex > (unsigned int)groupInfo.pcGroup->numverts) {
+            if (iIndex >= (unsigned int)groupInfo.pcGroup->numverts) {
                 // (we might need to read this section a second time - to process frame vertices correctly)
                 pcGroupTris->v_index[c] = (uint16_t)(iIndex = groupInfo.pcGroup->numverts - 1);
                 ASSIMP_LOG_WARN("Index overflow in MDL7 vertex list");
@@ -1101,7 +1144,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInfo,
                     AI_SWAP2(pcGroupTris->skinsets[0].st_index[2]);
 
                     iIndex = pcGroupTris->skinsets[0].st_index[c];
-                    if (iIndex > (unsigned int)groupInfo.pcGroup->num_stpts) {
+                    if (iIndex >= (unsigned int)groupInfo.pcGroup->num_stpts) {
                         iIndex = groupInfo.pcGroup->num_stpts - 1;
                         ASSIMP_LOG_WARN("Index overflow in MDL7 UV coordinate list (#1)");
                     }
@@ -1128,7 +1171,7 @@ void MDLImporter::ReadFaces_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInfo,
                     AI_SWAP4(pcGroupTris->skinsets[1].material);
 
                     iIndex = pcGroupTris->skinsets[1].st_index[c];
-                    if (iIndex > (unsigned int)groupInfo.pcGroup->num_stpts) {
+                    if (iIndex >= (unsigned int)groupInfo.pcGroup->num_stpts) {
                         iIndex = groupInfo.pcGroup->num_stpts - 1;
                         ASSIMP_LOG_WARN("Index overflow in MDL7 UV coordinate list (#2)");
                     }
@@ -1180,11 +1223,26 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
         AI_SWAP4(frame.pcFrame->vertices_count);
         AI_SWAP4(frame.pcFrame->transmatrix_count);
 
-        const unsigned int iAdd = pcHeader->frame_stc_size +
-                                  frame.pcFrame->vertices_count * pcHeader->framevertex_stc_size +
-                                  frame.pcFrame->transmatrix_count * pcHeader->bonetrans_stc_size;
+        size_t frame_vertex_size = 0;
+        size_t frame_transform_size = 0;
+        size_t frame_data_size = 0;
+        size_t frame_size = 0;
+        if (!checkedMultiply(static_cast<size_t>(frame.pcFrame->vertices_count),
+                    static_cast<size_t>(pcHeader->framevertex_stc_size), frame_vertex_size) ||
+                !checkedMultiply(static_cast<size_t>(frame.pcFrame->transmatrix_count),
+                        static_cast<size_t>(pcHeader->bonetrans_stc_size), frame_transform_size) ||
+                !checkedAdd(static_cast<size_t>(pcHeader->frame_stc_size), frame_vertex_size, frame_data_size) ||
+                !checkedAdd(frame_data_size, frame_transform_size, frame_size)) {
+            ASSIMP_LOG_WARN("Index overflow in frame area. "
+                            "Ignoring all frames and all further mesh groups, too.");
 
-        if (((const char *)szCurrent - (const char *)pcHeader) + iAdd > (unsigned int)pcHeader->data_size) {
+            *szCurrentOut = szCurrent;
+            return false;
+        }
+
+        const size_t current_offset = static_cast<size_t>((const unsigned char *)szCurrent - (const unsigned char *)pcHeader);
+        if (current_offset > pcHeader->data_size || frame_size > static_cast<size_t>(pcHeader->data_size) - current_offset ||
+                frame_size > static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent)) {
             ASSIMP_LOG_WARN("Index overflow in frame area. "
                             "Ignoring all frames and all further mesh groups, too.");
 
@@ -1257,7 +1315,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
         if (shared.apcOutBones) {
             ParseBoneTrafoKeys_3DGS_MDL7(groupInfo, frame, shared);
         }
-        szCurrent += iAdd;
+        szCurrent += frame_size;
     }
     *szCurrentOut = szCurrent;
     return true;
@@ -1408,10 +1466,18 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     // sizes that are expected by the loader to be constant
     this->ValidateHeader_3DGS_MDL7(pcHeader);
 
+    const unsigned char *const file_end = this->mBuffer + this->iFileSize;
+
     // load all bones (they are shared by all groups, so
     // we'll need to add them to all groups/meshes later)
     // apcBonesOut is a list of all bones or nullptr if they could not been loaded
-    szCurrent += pcHeader->bones_num * pcHeader->bone_stc_size;
+    size_t bone_table_size = 0;
+    if (!checkedMultiply(static_cast<size_t>(pcHeader->bones_num),
+                static_cast<size_t>(pcHeader->bone_stc_size), bone_table_size) ||
+            bone_table_size > static_cast<size_t>(file_end - szCurrent)) {
+        throw DeadlyImportError("[3DGS MDL7] Invalid bone count");
+    }
+    szCurrent += bone_table_size;
     sharedData.apcOutBones = this->LoadBones_3DGS_MDL7();
 
     // vector to held all created meshes
@@ -1423,7 +1489,11 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         avOutList[i].reserve(3);
 
     // buffer to held the names of all groups in the file
-    const size_t buffersize(AI_MDL7_MAX_GROUPNAMESIZE * pcHeader->groups_num);
+    size_t buffersize = 0;
+    if (!checkedMultiply(static_cast<size_t>(AI_MDL7_MAX_GROUPNAMESIZE),
+                static_cast<size_t>(pcHeader->groups_num), buffersize)) {
+        throw DeadlyImportError("[3DGS MDL7] Invalid group count");
+    }
     char *aszGroupNameBuffer = new char[buffersize];
 
     // read all groups
@@ -1440,6 +1510,21 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         AI_SWAP4(groupInfo.pcGroup->numverts);
         AI_SWAP4(groupInfo.pcGroup->numframes);
 
+        if (groupInfo.pcGroup->groupdata_size < static_cast<int32_t>(sizeof(MDL::Group_MDL7)) ||
+                groupInfo.pcGroup->numskins < 0 ||
+                groupInfo.pcGroup->num_stpts < 0 ||
+                groupInfo.pcGroup->numtris < 0 ||
+                groupInfo.pcGroup->numverts < 0 ||
+                groupInfo.pcGroup->numframes < 0) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid group metadata");
+        }
+
+        const size_t skin_count = static_cast<size_t>(groupInfo.pcGroup->numskins);
+        const size_t texcoord_count = static_cast<size_t>(groupInfo.pcGroup->num_stpts);
+        const size_t triangle_count = static_cast<size_t>(groupInfo.pcGroup->numtris);
+        const size_t vertex_count = static_cast<size_t>(groupInfo.pcGroup->numverts);
+        const size_t frame_count = static_cast<size_t>(groupInfo.pcGroup->numframes);
+
         if (1 != groupInfo.pcGroup->typ) {
             // Not a triangle-based mesh
             ASSIMP_LOG_WARN("[3DGS MDL7] Not a triangle mesh group. Continuing happily");
@@ -1454,12 +1539,23 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         aszGroupNameBuffer[ofs + AI_MDL7_MAX_GROUPNAMESIZE - 1] = '\0';
 
         // read all skins
-        sharedData.pcMats.reserve(sharedData.pcMats.size() + groupInfo.pcGroup->numskins);
-        sharedData.abNeedMaterials.resize(sharedData.abNeedMaterials.size() +
-                                                  groupInfo.pcGroup->numskins,
-                false);
+        size_t skin_header_size = 0;
+        if (!checkedMultiply(skin_count, sizeof(MDL::Skin_MDL7), skin_header_size) ||
+                skin_header_size > static_cast<size_t>(file_end - szCurrent)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid skin count");
+        }
 
-        for (unsigned int iSkin = 0; iSkin < (unsigned int)groupInfo.pcGroup->numskins; ++iSkin) {
+        size_t material_count = 0;
+        size_t needed_material_count = 0;
+        if (!checkedAdd(sharedData.pcMats.size(), skin_count, material_count) ||
+                !checkedAdd(sharedData.abNeedMaterials.size(), skin_count, needed_material_count)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid skin count");
+        }
+
+        sharedData.pcMats.reserve(material_count);
+        sharedData.abNeedMaterials.resize(needed_material_count, false);
+
+        for (size_t iSkin = 0; iSkin < skin_count; ++iSkin) {
             ParseSkinLump_3DGS_MDL7(szCurrent, &szCurrent, sharedData.pcMats);
         }
         // if we have absolutely no skin loaded we need to generate a default material
@@ -1485,18 +1581,33 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         }
 
         // now get a pointer to all texture coords in the group
+        size_t texcoord_table_size = 0;
+        if (!checkedMultiply(texcoord_count, static_cast<size_t>(pcHeader->skinpoint_stc_size), texcoord_table_size) ||
+                texcoord_table_size > static_cast<size_t>(file_end - szCurrent)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid texture coordinate count");
+        }
         groupInfo.pcGroupUVs = (BE_NCONST MDL::TexCoord_MDL7 *)szCurrent;
         for (int i = 0; i < groupInfo.pcGroup->num_stpts; ++i) {
             AI_SWAP4(groupInfo.pcGroupUVs[i].u);
             AI_SWAP4(groupInfo.pcGroupUVs[i].v);
         }
-        szCurrent += pcHeader->skinpoint_stc_size * groupInfo.pcGroup->num_stpts;
+        szCurrent += texcoord_table_size;
 
         // now get a pointer to all triangle in the group
+        size_t triangle_table_size = 0;
+        if (!checkedMultiply(triangle_count, static_cast<size_t>(pcHeader->triangle_stc_size), triangle_table_size) ||
+                triangle_table_size > static_cast<size_t>(file_end - szCurrent)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid triangle count");
+        }
         groupInfo.pcGroupTris = (Triangle_MDL7 *)szCurrent;
-        szCurrent += pcHeader->triangle_stc_size * groupInfo.pcGroup->numtris;
+        szCurrent += triangle_table_size;
 
         // now get a pointer to all vertices in the group
+        size_t vertex_table_size = 0;
+        if (!checkedMultiply(vertex_count, static_cast<size_t>(pcHeader->mainvertex_stc_size), vertex_table_size) ||
+                vertex_table_size > static_cast<size_t>(file_end - szCurrent)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid vertex count");
+        }
         groupInfo.pcGroupVerts = (BE_NCONST MDL::Vertex_MDL7 *)szCurrent;
         for (int i = 0; i < groupInfo.pcGroup->numverts; ++i) {
             AI_SWAP4(groupInfo.pcGroupVerts[i].x);
@@ -1506,14 +1617,20 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
             AI_SWAP2(groupInfo.pcGroupVerts[i].vertindex);
             //We can not swap the normal information now as we don't know which of the two kinds it is
         }
-        szCurrent += pcHeader->mainvertex_stc_size * groupInfo.pcGroup->numverts;
+        szCurrent += vertex_table_size;
         VALIDATE_FILE_SIZE(szCurrent);
 
         MDL::IntSplitGroupData_MDL7 splitGroupData(sharedData, avOutList[iGroup]);
         MDL::IntGroupData_MDL7 groupData;
         if (groupInfo.pcGroup->numtris && groupInfo.pcGroup->numverts) {
             // build output vectors
-            const unsigned int iNumVertices = groupInfo.pcGroup->numtris * 3;
+            size_t num_vertices = 0;
+            if (!checkedMultiply(triangle_count, static_cast<size_t>(3), num_vertices) ||
+                    num_vertices > static_cast<size_t>(std::numeric_limits<unsigned int>::max())) {
+                throw DeadlyImportError("[3DGS MDL7] Invalid triangle count");
+            }
+
+            const unsigned int iNumVertices = static_cast<unsigned int>(num_vertices);
             groupData.vPositions.resize(iNumVertices);
             groupData.vNormals.resize(iNumVertices);
 
@@ -1548,6 +1665,11 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
                             "vertices or faces. It will be skipped.");
 
         // process all frames and generate output meshes
+        size_t frame_table_size = 0;
+        if (!checkedMultiply(frame_count, sizeof(MDL::Frame_MDL7), frame_table_size) ||
+                frame_table_size > static_cast<size_t>(file_end - szCurrent)) {
+            throw DeadlyImportError("[3DGS MDL7] Invalid frame count");
+        }
         ProcessFrames_3DGS_MDL7(groupInfo, groupData, sharedData, szCurrent, &szCurrent);
         GenerateOutputMeshes_3DGS_MDL7(groupData, splitGroupData);
     }

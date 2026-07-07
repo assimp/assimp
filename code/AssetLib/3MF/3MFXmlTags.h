@@ -81,6 +81,9 @@ namespace Assimp::D3MF::XmlTag {
     constexpr char transform[] = "transform";
     constexpr char path[] = "path";
 
+    // Production extension (namespace prefix "p" by convention)
+    constexpr char p_path[] = "p:path";
+
     // Material definitions
     constexpr char basematerials[] = "basematerials";
     constexpr char basematerials_base[] = "base";

@@ -57,6 +57,19 @@ namespace AssimpView {
 
 using namespace Assimp;
 
+struct ConfigDatabase {
+    HKEY mHandleRegistry{nullptr};
+
+    bool init() {
+        // store the key in a global variable for later use
+        RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
+            0,nullptr,0,KEY_ALL_ACCESS, nullptr, &mHandleRegistry, nullptr);
+        
+        return true;
+    }
+    
+} g_ConfigDatabase;
+
 // Static array to keep custom color values
 std::array<COLORREF, 16> g_aclCustomColors = {0};
 
@@ -157,18 +170,18 @@ void HandleCommandLine(char* p_szCommand) {
 //-------------------------------------------------------------------------------
 void LoadLightColors() {
     DWORD dwTemp = 4;
-    RegQueryValueEx(g_hRegistry,"LightColor0",nullptr,nullptr, (BYTE*)&g_avLightColors[0],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor1",nullptr,nullptr, (BYTE*)&g_avLightColors[1],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor2",nullptr,nullptr, (BYTE*)&g_avLightColors[2],&dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor0", nullptr, nullptr, (BYTE*)&g_avLightColors[0], &dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor1", nullptr, nullptr, (BYTE*)&g_avLightColors[1], &dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor2", nullptr, nullptr, (BYTE*)&g_avLightColors[2], &dwTemp);
 }
 
 //-------------------------------------------------------------------------------
 // Save the light colors to the registry
 //-------------------------------------------------------------------------------
 void SaveLightColors() {
-    RegSetValueExA(g_hRegistry,"LightColor0",0,REG_DWORD,(const BYTE*)&g_avLightColors[0],4);
-    RegSetValueExA(g_hRegistry,"LightColor1",0,REG_DWORD,(const BYTE*)&g_avLightColors[1],4);
-    RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
+    RegSetValueExA(g_hRegistry, "LightColor0", 0, REG_DWORD, (const BYTE*)&g_avLightColors[0], 4);
+    RegSetValueExA(g_hRegistry, "LightColor1", 0, REG_DWORD, (const BYTE*)&g_avLightColors[1], 4);
+    RegSetValueExA(g_hRegistry, "LightColor2", 0, REG_DWORD, (const BYTE*)&g_avLightColors[2], 4);
 }
 
 //-------------------------------------------------------------------------------

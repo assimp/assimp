@@ -1201,13 +1201,10 @@ void InitUI() {
     // WireFrame
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"Wireframe",nullptr,nullptr,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.eDrawMode = RenderOptions::NORMAL;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
     }

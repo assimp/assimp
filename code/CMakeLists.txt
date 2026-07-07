@@ -743,6 +743,8 @@ SET( PostProcessing_SRCS
   PostProcessing/GenFaceNormalsProcess.cpp
   PostProcessing/GenFaceNormalsProcess.h
   PostProcessing/GenVertexNormalsProcess.cpp
+  PostProcessing/GenerateMikkTSpaceTangents.cpp
+  PostProcessing/GenerateMikkTSpaceTangents.h
   PostProcessing/GenVertexNormalsProcess.h
   PostProcessing/PretransformVertices.cpp
   PostProcessing/PretransformVertices.h
@@ -1267,6 +1269,11 @@ ELSE()
   SOURCE_GROUP( Contrib\\open3dgc FILES ${open3dgc_SRCS})
 ENDIF()
 
+SET( MikkTSpace_SRCS
+  ../contrib/mikktspace/mikktspace.h
+  ../contrib/mikktspace/mikktspace.c
+)
+
 # Check dependencies for glTF importer with Open3DGC-compression.
 # RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
 # has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
@@ -1366,6 +1373,7 @@ SET( assimp_src
   ${Tinyusdz_DEP_SOURCES}
   ${Pugixml_SRCS}
   ${stb_SRCS}
+  ${MikkTSpace_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
 
   ${PUBLIC_HEADERS}

@@ -50,8 +50,10 @@ CMeshRenderer CMeshRenderer::s_cInstance;
 
 //-------------------------------------------------------------------------------
 int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
-    ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
-
+    if (!g_pcAsset || !g_pcAsset->pcScene || !g_pcAsset->apcMeshes) {
+        return -1;
+    }
+    
     // set vertex and index buffer
     g_piDevice->SetStreamSource(0,g_pcAsset->apcMeshes[iIndex]->piVB,0,
         sizeof(AssetHelper::Vertex));
@@ -80,7 +82,9 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex) {
 }
 //-------------------------------------------------------------------------------
 int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
-    ai_assert(iIndex < g_pcAsset->pcScene->mNumMeshes);
+    if (!g_pcAsset || !g_pcAsset->pcScene || !g_pcAsset->apcMeshes) {
+        return -1;
+    }
 
     AssetHelper::MeshHelper* pcHelper = g_pcAsset->apcMeshes[iIndex];
     const aiMesh* pcMesh = g_pcAsset->pcScene->mMeshes[iIndex];
@@ -103,12 +107,10 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
     // to a map which sorts it
     std::map<float,unsigned int, std::greater<float> > smap;
 
-    for (unsigned int iFace = 0; iFace < pcMesh->mNumFaces;++iFace)
-    {
+    for (unsigned int iFace = 0; iFace < pcMesh->mNumFaces;++iFace) {
         const aiFace* pcFace = &pcMesh->mFaces[iFace];
         float fDist = 0.0f;
-        for (unsigned int c = 0; c < 3;++c)
-        {
+        for (unsigned int c = 0; c < 3;++c) {
             aiVector3D vPos = pcMesh->mVertices[pcFace->mIndices[c]];
             vPos -= vLocalCamera;
             fDist += vPos.SquareLength();
@@ -120,30 +122,21 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
     D3DINDEXBUFFER_DESC sDesc;
     pcHelper->piIB->GetDesc(&sDesc);
 
-    if (D3DFMT_INDEX16 == sDesc.Format)
-    {
-        uint16_t* aiIndices;
+    if (D3DFMT_INDEX16 == sDesc.Format) {
+        uint16_t* aiIndices{nullptr};
         pcHelper->piIB->Lock(0,0,(void**)&aiIndices,D3DLOCK_DISCARD);
 
-        for (std::map<float,unsigned int, std::greater<float> >::const_iterator
-            i =  smap.begin();
-            i != smap.end();++i)
-        {
+        for (auto i =  smap.begin(); i != smap.end(); ++i) {
             const aiFace* pcFace =  &pcMesh->mFaces[(*i).second];
             *aiIndices++ = (uint16_t)pcFace->mIndices[0];
             *aiIndices++ = (uint16_t)pcFace->mIndices[1];
             *aiIndices++ = (uint16_t)pcFace->mIndices[2];
         }
-    }
-    else if (D3DFMT_INDEX32 == sDesc.Format)
-    {
+    } else if (D3DFMT_INDEX32 == sDesc.Format) {
         uint32_t* aiIndices;
         pcHelper->piIB->Lock(0,0,(void**)&aiIndices,D3DLOCK_DISCARD);
 
-        for (std::map<float,unsigned int, std::greater<float> >::const_iterator
-            i =  smap.begin();
-            i != smap.end();++i)
-        {
+        for (auto i =  smap.begin(); i != smap.end();++i) {
             const aiFace* pcFace =  &pcMesh->mFaces[(*i).second];
             *aiIndices++ = (uint32_t)pcFace->mIndices[0];
             *aiIndices++ = (uint32_t)pcFace->mIndices[1];
@@ -164,4 +157,5 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld) {
 
     return 1;
 }
-}
+
+} // namespace AssimpView

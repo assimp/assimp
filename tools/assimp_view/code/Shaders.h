@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -39,47 +39,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#if (!defined AV_CAMERA_H_INCLUDED)
-#define AV_CAMERA_H_INCLUDED
+#if (!defined AV_SHADERS_H_INCLUDED)
+#define AV_SHADERS_H_INCLUDED
 
-//-------------------------------------------------------------------------------
-/** \brief Camera class
-*/
-//-------------------------------------------------------------------------------
-class Camera
-    {
-    public:
+// Shader used for rendering a skybox background
+extern std::string  g_szSkyboxShader;
 
+// Shader used for visualizing normal vectors
+extern std::string  g_szNormalsShader;
 
-        Camera ()
-            :
+// Default shader
+extern std::string  g_szDefaultShader;
 
-            vPos(0.0f,0.0f,-10.0f),
-            vUp(0.0f,1.0f,0.0f),
-            vLookAt(0.0f,0.0f,1.0f),
-            vRight(0.0f,1.0f,0.0f)
-            {
+// Material shader
+extern std::string  g_szMaterialShader;
 
-            }
-    public:
+// Shader used to draw the yellow circle on top of everything
+extern std::string  g_szPassThroughShader;
 
-        // position of the camera
-        aiVector3D vPos;
+// Shader used to draw the checker pattern background for the texture view
+extern std::string  g_szCheckerBackgroundShader;
 
-        // up-vector of the camera
-        aiVector3D vUp;
-
-        // camera's looking point is vPos + vLookAt
-        aiVector3D vLookAt;
-
-        // right vector of the camera
-        aiVector3D vRight;
-
-
-        // Equation
-        // (vRight ^ vUp) - vLookAt == 0
-        // needn't apply
-
-    } ;
-
-#endif // !!IG
+#endif // !! AV_SHADERS_H_INCLUDED

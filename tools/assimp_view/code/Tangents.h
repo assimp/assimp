@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -38,62 +38,41 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
+#ifndef ASSIMPVIEW_TANGENTS_H_INC
+#define ASSIMPVIEW_TANGENTS_H_INC
 
-#include <list>
+#include "AssetHelper.h"
 
-namespace AssimpView
-{
+struct aiMesh;
+struct IDirect3DDevice9;
 
-    //-------------------------------------------------------------------------------
-    /** \brief Class to display log strings in the upper right corner of the view
-    */
-    //-------------------------------------------------------------------------------
-    class CLogDisplay
-    {
-    private:
+namespace AssimpView {
 
-        CLogDisplay()  {}
+// ---------------------------------------------------------------------------------
+/// @brief Class to generate tangents for a given aiMesh and create a vertex 
+///        buffer for it, which can be used to render the tangents in the scene.
+// ---------------------------------------------------------------------------------
+class Tangents {
+public: 
+    /// @brief Constructor. Takes a pointer to an aiMesh for which tangents should be generated.
+    /// @param mesh Pointer to the aiMesh for which tangents should be generated.
+    explicit Tangents(const aiMesh *mesh) : mMesh(mesh) {
+        // empty
+    }
 
-    public:
+    /// @brief Destructor.
+    ~Tangents() = default;
 
-        // data structure for an entry in the log queue
-        struct SEntry
-        {
-            SEntry()
-                :
-                clrColor( D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) ), dwStartTicks( 0 )
-            {}
+    /// @brief Creates vertex buffers for the generated tangents.
+    /// @param piDevice Pointer to the Direct3D device.
+    /// @param meshHelper Pointer to the mesh helper.
+    /// @returns Result of the operation.
+    int createBuffers(IDirect3DDevice9 *piDevice, AssetHelper::MeshHelper *meshHelper);
 
-            std::string szText;
-            D3DCOLOR clrColor;
-            DWORD dwStartTicks;
-        };
+private:
+    const aiMesh *mMesh{ nullptr };
+};
 
-        // Singleton accessors
-        static CLogDisplay s_cInstance;
-        inline static CLogDisplay& Instance()
-        {
-            return s_cInstance;
-        }
+} // namespace AssimpView
 
-        // Add an entry to the log queue
-        void AddEntry( const std::string& szText,
-            const D3DCOLOR clrColor = D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) );
-
-        // Release any native resources associated with the instance
-        void ReleaseNativeResource();
-
-        // Recreate any native resources associated with the instance
-        void RecreateNativeResource();
-
-        // Called during the render loop
-        void OnRender();
-
-    private:
-
-        std::list<SEntry> asEntries;
-        ID3DXFont* piFont;
-    };
-
-}
+#endif // !defined ASSIMPVIEW_TANGENTS_H_INCASSIMPVIEW_TANGENTS_H_INC  

@@ -4,5 +4,3 @@
 
 #include "stdafx.h"
 
-// TODO: Auf zusätzliche Header verweisen, die in STDAFX.H
-// und nicht in dieser Datei erforderlich sind.

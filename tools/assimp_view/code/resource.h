@@ -1,8 +1,12 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by assimp_view.rc
+// Von Microsoft Visual C++ generierte Includedatei.
+// Verwendet durch assimp_view.rc
 //
+#define VER_MINOR                       0
+#define VER_BUILD                       0
 #define IDC_MYICON                      2
+#define VER_PATCH                       5
+#define VER_MAJOR                       6
 #define IDD_ASSIMP_VIEW_DIALOG          102
 #define IDD_ABOUTBOX                    103
 #define IDI_ASSIMP_VIEW                 107
@@ -82,6 +86,8 @@
 #define IDC_3LIGHTS2                    1025
 #define IDC_NOAB                        1025
 #define IDC_SPEED                       1026
+#define IDC_TOGGLENORMALS2              1026
+#define IDC_TOGGLETANGENTS              1026
 #define IDC_COMBO1                      1027
 #define IDC_PINORDER                    1028
 #define IDC_NOSPECULAR2                 1028
@@ -223,7 +229,7 @@
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1

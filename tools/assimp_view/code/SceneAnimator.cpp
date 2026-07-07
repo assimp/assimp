@@ -51,11 +51,7 @@ const aiMatrix4x4 IdentityMatrix;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a given scene.
-SceneAnimator::SceneAnimator(const aiScene *pScene, size_t pAnimIndex) :
-        mScene(pScene),
-        mCurrentAnimIndex(-1),
-        mAnimEvaluator(nullptr),
-        mRootNode(nullptr) {
+SceneAnimator::SceneAnimator(const aiScene *pScene, size_t pAnimIndex) : mScene(pScene){
     // build the nodes-for-bones table
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         const aiMesh *mesh = pScene->mMeshes[i];

@@ -48,8 +48,7 @@ namespace AssimpView {
 //
 // Movement in x and y axis is possible
 //-------------------------------------------------------------------------------
-void HandleMouseInputFPS( void )
-    {
+void AssimpViewer::HandleMouseInputFPS() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -59,39 +58,34 @@ void HandleMouseInputFPS( void )
 
     D3DXMATRIX matRotation;
 
-    if (g_bMousePressed)
-        {
+    if (g_bMousePressed) {
         int nXDiff = (g_mousePos.x - g_LastmousePos.x);
         int nYDiff = (g_mousePos.y - g_LastmousePos.y);
 
-        if( 0 != nYDiff)
-            {
+        if( 0 != nYDiff) {
             D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)& g_sCamera.vRight, D3DXToRadian((float)nYDiff / 6.0f));
             D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)& g_sCamera.vLookAt, &matRotation );
             D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vUp, (D3DXVECTOR3*)&g_sCamera.vUp, &matRotation );
-            }
+        }
 
-        if( 0 != nXDiff )
-            {
+        if( 0 != nXDiff ) {
             D3DXVECTOR3 v(0,1,0);
             D3DXMatrixRotationAxis( &matRotation, (D3DXVECTOR3*)&g_sCamera.vUp, D3DXToRadian((float)nXDiff / 6.0f) );
             D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vLookAt, (D3DXVECTOR3*)&g_sCamera.vLookAt, &matRotation );
             D3DXVec3TransformCoord( (D3DXVECTOR3*)&g_sCamera.vRight,(D3DXVECTOR3*) &g_sCamera.vRight, &matRotation );
-            }
         }
+    }
 
     g_LastmousePos.x = g_mousePos.x;
     g_LastmousePos.y = g_mousePos.y;
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Handle mouse input for the FPS input behaviour
 //
 // Movement in x and y axis is possible
 //-------------------------------------------------------------------------------
-void HandleMouseInputTextureView( void )
-    {
+void AssimpViewer::HandleMouseInputTextureView() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -101,23 +95,21 @@ void HandleMouseInputTextureView( void )
 
     D3DXMATRIX matRotation;
 
-    if (g_bMousePressed)
-        {
+    if (g_bMousePressed) {
         CDisplay::Instance().SetTextureViewOffsetX((float)(g_mousePos.x - g_LastmousePos.x));
         CDisplay::Instance().SetTextureViewOffsetY((float)(g_mousePos.y - g_LastmousePos.y));
-        }
+    }
 
     g_LastmousePos.x = g_mousePos.x;
     g_LastmousePos.y = g_mousePos.y;
-    }
+}
 
 //-------------------------------------------------------------------------------
 // handle mouse input for the light rotation
 //
 // Axes: global x/y axis
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightRotate( void )
-    {
+void AssimpViewer::HandleMouseInputLightRotate() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -125,8 +117,7 @@ void HandleMouseInputLightRotate( void )
     g_mousePos.x = mousePos.x;
     g_mousePos.y = mousePos.y;
 
-    if (g_bMousePressedR)
-        {
+    if (g_bMousePressedR) {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
@@ -140,10 +131,8 @@ void HandleMouseInputLightRotate( void )
         D3DXMatrixRotationAxis( (D3DXMATRIX*) &mTemp, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f));
         D3DXVec3TransformCoord((D3DXVECTOR3*)&g_avLightDirs[0],
             (const D3DXVECTOR3*)&g_avLightDirs[0],(const D3DXMATRIX*)&mTemp);
-        }
-    return;
     }
-
+}
 
 //-------------------------------------------------------------------------------
 // Handle mouse input for movements of the skybox
@@ -151,8 +140,7 @@ void HandleMouseInputLightRotate( void )
 // The skybox can be moved by holding both the left and the right mouse button
 // pressed. Rotation is possible in x and y direction.
 //-------------------------------------------------------------------------------
-void HandleMouseInputSkyBox( void )
-    {
+void AssimpViewer::HandleMouseInputSkyBox() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -162,40 +150,35 @@ void HandleMouseInputSkyBox( void )
 
     aiMatrix4x4 matRotation;
 
-    if (g_bMousePressedBoth )
-        {
+    if (g_bMousePressedBoth ) {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
         aiMatrix4x4 matWorld;
 
-        if( 0 != nYDiff)
-            {
+        if( 0 != nYDiff) {
             aiVector3D v = aiVector3D(1.0f,0.0f,0.0f);
             D3DXMatrixRotationAxis( (D3DXMATRIX*) &matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nYDiff / 2.0f));
             CBackgroundPainter::Instance().RotateSB(&matWorld);
-            }
+        }
 
-        if( 0 != nXDiff)
-            {
+        if( 0 != nXDiff) {
             aiMatrix4x4 matWorldOld;
-            if( 0 != nYDiff)
-                {
+            if( 0 != nYDiff) {
                 matWorldOld = matWorld;
-                }
+            }
 
             aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
             D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
             matWorld =  matWorldOld * matWorld;
             CBackgroundPainter::Instance().RotateSB(&matWorld);
-            }
         }
     }
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLightIntensityAndColor()
-    {
+void AssimpViewer::HandleMouseInputLightIntensityAndColor() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -203,31 +186,24 @@ void HandleMouseInputLightIntensityAndColor()
     g_mousePos.x = mousePos.x;
     g_mousePos.y = mousePos.y;
 
-    if (g_bMousePressedM)
-        {
+    if (g_bMousePressedM) {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
         g_fLightIntensity -= (float)nXDiff / 400.0f;
-        if ((nYDiff > 2 || nYDiff < -2) && (nXDiff < 20 && nXDiff > -20))
-        {
-            if (!g_bFPSView)
-            {
+        if ((nYDiff > 2 || nYDiff < -2) && (nXDiff < 20 && nXDiff > -20)) {
+            if (!g_bFPSView) {
                 g_sCamera.vPos.z += nYDiff / 120.0f;
-            }
-            else
-            {
+            } else {
                 g_sCamera.vPos += (nYDiff / 120.0f) * g_sCamera.vLookAt.Normalize();
             }
         }
     }
-    return;
-    }
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleMouseInputLocal( void )
-    {
+void AssimpViewer::HandleMouseInputLocal() {
     POINT mousePos;
     GetCursorPos( &mousePos );
     ScreenToClient( GetDlgItem(g_hDlg,IDC_RT), &mousePos );
@@ -237,32 +213,25 @@ void HandleMouseInputLocal( void )
 
     aiMatrix4x4 matRotation;
 
-    if (g_bMousePressed)
-        {
+    if (g_bMousePressed) {
         int nXDiff = -(g_mousePos.x - g_LastmousePos.x);
         int nYDiff = -(g_mousePos.y - g_LastmousePos.y);
 
         aiMatrix4x4 matWorld;
-        if (g_eClick != EClickPos_Outside)
-            {
-            if( 0 != nYDiff && g_eClick != EClickPos_CircleHor)
-                {
+        if (g_eClick != EClickPos_Outside) {
+            if( 0 != nYDiff && g_eClick != EClickPos_CircleHor) {
                 aiVector3D v = aiVector3D(1.0f,0.0f,0.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*) &matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nYDiff / 2.0f));
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
+            }
 
-            if( 0 != nXDiff && g_eClick != EClickPos_CircleVert)
-                {
+            if( 0 != nXDiff && g_eClick != EClickPos_CircleVert) {
                 aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
             }
-        else
-            {
-            if(0 != nYDiff || 0 != nXDiff)
-                {
+        } else {
+            if(0 != nYDiff || 0 != nXDiff) {
                 // rotate around the z-axis
                 RECT sRect;
                 GetWindowRect(GetDlgItem(g_hDlg,IDC_RT),&sRect);
@@ -274,9 +243,10 @@ void HandleMouseInputLocal( void )
                 float fXDist = (float)xPos;
                 float fYDist = (float)yPos / sqrtf((float)(yPos * yPos + xPos * xPos));
 
-                bool bSign1;
-                if (fXDist < 0.0f)bSign1 = false;
-                else bSign1 = true;
+                bool bSign1{ true };
+                if (fXDist < 0.0f) 
+                    bSign1 = false;
+                
                 float fAngle = asin(fYDist);
 
                 xPos = g_LastmousePos.x - sRect.right/2;
@@ -285,33 +255,32 @@ void HandleMouseInputLocal( void )
                 fXDist = (float)xPos;
                 fYDist = (float)yPos / sqrtf((float)(yPos * yPos + xPos * xPos));
 
-                bool bSign2;
-                if (fXDist < 0.0f)bSign2 = false;
-                else bSign2 = true;
+                bool bSign2{true};
+                if (fXDist < 0.0f) 
+                    bSign2 = false;
                 float fAngle2 = asin(fYDist);
                 fAngle -= fAngle2;
 
-                if (bSign1 != bSign2)
-                    {
+                if (bSign1 != bSign2) {
                     g_bInvert = !g_bInvert;
-                    }
-                if (g_bInvert)fAngle *= -1.0f;
+                }
+                if (g_bInvert)
+                    fAngle *= -1.0f;
 
                 aiVector3D v = aiVector3D(0.0f,0.0f,1.0f);
                 D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, (float) (fAngle * 1.2) );
                 g_mWorldRotate = g_mWorldRotate * matWorld;
-                }
             }
         }
+    }
 
     g_LastmousePos.x = g_mousePos.x;
     g_LastmousePos.y = g_mousePos.y;
-    }
+}
 
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
-void HandleKeyboardInputFPS( void )
-    {
+void AssimpViewer::HandleKeyboardInputFPS() {
     unsigned char keys[256];
     GetKeyboardState( keys );
 
@@ -343,13 +312,12 @@ void HandleKeyboardInputFPS( void )
     // End Key - View elevates down
     if( keys[VK_END] & 0x80 )
         g_sCamera.vPos.y -= MOVE_SPEED*g_fElpasedTime;
-    }
-
+}
 
 //-------------------------------------------------------------------------------
+// 
 //-------------------------------------------------------------------------------
-void HandleKeyboardInputTextureView( void )
-    {
+void AssimpViewer::HandleKeyboardInputTextureView() {
     unsigned char keys[256];
     GetKeyboardState( keys );
 
@@ -368,5 +336,6 @@ void HandleKeyboardInputTextureView( void )
     // Right Arrow Key
     if( keys[VK_RIGHT] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetX ( -g_fElpasedTime * 150.0f );
-    }
-};
+}
+
+} // namespace AssimpView

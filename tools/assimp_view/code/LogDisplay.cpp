@@ -57,39 +57,37 @@ void CLogDisplay::AddEntry(const std::string& szText, const D3DCOLOR clrColor) {
 
 //-------------------------------------------------------------------------------
 void CLogDisplay::ReleaseNativeResource() {
-    if (this->piFont) {
-        this->piFont->Release();
-        this->piFont = nullptr;
-    }
+    SafeRelease(this->piFont);
 }
 
 //-------------------------------------------------------------------------------
 void CLogDisplay::RecreateNativeResource() {
-    if (!this->piFont) {
-        if (FAILED(D3DXCreateFont(g_piDevice,
-                     16,                    //Font height
-                     0,                     //Font width
-                     FW_BOLD,               //Font Weight
-                     1,                     //MipLevels
-                     false,                 //Italic
-                     DEFAULT_CHARSET,       //CharSet
-                     OUT_DEFAULT_PRECIS,    //OutputPrecision
-                     //CLEARTYPE_QUALITY,   //Quality
-                     5, //Quality
-                     DEFAULT_PITCH|FF_DONTCARE, //PitchAndFamily
-                     "Verdana",                 //pFacename,
-                     &this->piFont))) {
-            CLogDisplay::Instance().AddEntry("Unable to load font",D3DCOLOR_ARGB(0xFF,0xFF,0,0));
+    if (this->piFont) {
+        return;
+    }
+    if (FAILED(D3DXCreateFont(g_piDevice,
+                    16,                    //Font height
+                    0,                     //Font width
+                    FW_BOLD,               //Font Weight
+                    1,                     //MipLevels
+                    false,                 //Italic
+                    DEFAULT_CHARSET,       //CharSet
+                    OUT_DEFAULT_PRECIS,    //OutputPrecision
+                    //CLEARTYPE_QUALITY,   //Quality
+                    5, //Quality
+                    DEFAULT_PITCH|FF_DONTCARE, //PitchAndFamily
+                    "Verdana",                 //pFacename,
+                    &this->piFont))) {
+        CLogDisplay::Instance().AddEntry("Unable to load font",D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 
-            this->piFont = nullptr;
-            return;
-        }
+        this->piFont = nullptr;
+        return;
     }
 }
 
 //-------------------------------------------------------------------------------
 void CLogDisplay::OnRender() {
-    DWORD dwTick = (DWORD) GetTickCount();
+    auto dwTick = static_cast<DWORD>(GetTickCount());
     DWORD dwLimit = dwTick - 8000;
     DWORD dwLimit2 = dwLimit + 3000;
 
@@ -218,4 +216,4 @@ void CLogDisplay::OnRender() {
     }
 }
 
-}
+} // namespace AssimpView

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 
 #include <commdlg.h>
+#include <array>
 
 namespace AssimpView {
 
@@ -58,7 +59,7 @@ struct SVertex
 
 CDisplay CDisplay::s_cInstance;
 
-extern COLORREF g_aclCustomColors[16] /*= {0}*/;
+extern std::array<COLORREF, 16> g_aclCustomColors;
 extern HKEY g_hRegistry;
 extern float g_fLoadTime;
 
@@ -1262,7 +1263,7 @@ int CDisplay::HandleTreeViewPopup(WPARAM wParam,LPARAM lParam)
             clamp<unsigned char>(clrOld.r * 255.0f),
             clamp<unsigned char>(clrOld.g * 255.0f),
             clamp<unsigned char>(clrOld.b * 255.0f));
-        clr.lpCustColors = g_aclCustomColors;
+        clr.lpCustColors = g_aclCustomColors.data();
         clr.lpfnHook = nullptr;
         clr.lpTemplateName = nullptr;
         clr.lCustData = 0;
@@ -1551,8 +1552,8 @@ int CDisplay::RenderStereoView(const aiMatrix4x4& m)
 // Process input for the texture view
 int CDisplay::HandleInputTextureView()
 {
-    HandleMouseInputTextureView();
-    HandleKeyboardInputTextureView();
+    AssimpViewer::HandleMouseInputTextureView();
+    AssimpViewer::HandleKeyboardInputTextureView();
     return 1;
 }
 //-------------------------------------------------------------------------------
@@ -1560,17 +1561,17 @@ int CDisplay::HandleInputTextureView()
 int CDisplay::HandleInput()
 {
     if(CBackgroundPainter::TEXTURE_CUBE == CBackgroundPainter::Instance().GetMode())
-        HandleMouseInputSkyBox();
+        AssimpViewer::HandleMouseInputSkyBox();
 
     // handle input commands
-    HandleMouseInputLightRotate();
-    HandleMouseInputLightIntensityAndColor();
+    AssimpViewer::HandleMouseInputLightRotate();
+    AssimpViewer::HandleMouseInputLightIntensityAndColor();
     if(g_bFPSView)
     {
-        HandleMouseInputFPS();
-        HandleKeyboardInputFPS();
+        AssimpViewer::HandleMouseInputFPS();
+        AssimpViewer::HandleKeyboardInputFPS();
     }
-    else HandleMouseInputLocal();
+    else AssimpViewer::HandleMouseInputLocal();
 
     // compute auto rotation depending on the time which has passed
     if (g_sOptions.bRotate)
@@ -1607,10 +1608,10 @@ int CDisplay::HandleInputEmptyScene()
     {
         if (g_bFPSView)
         {
-            HandleMouseInputFPS();
-            HandleKeyboardInputFPS();
+            AssimpViewer::HandleMouseInputFPS();
+            AssimpViewer::HandleKeyboardInputFPS();
         }
-        HandleMouseInputSkyBox();
+        AssimpViewer::HandleMouseInputSkyBox();
 
         // need to store the last mouse position in the global variable
         // HandleMouseInputFPS() is doing this internally
@@ -1706,15 +1707,14 @@ int CDisplay::DrawHUD()
 }
 //-------------------------------------------------------------------------------
 // Render the full scene, all nodes
-int CDisplay::RenderFullScene()
-{
+int CDisplay::RenderFullScene() {
     // reset the color index used for drawing normals
     g_iCurrentColor = 0;
 
     aiMatrix4x4 pcProj;
-    GetProjectionMatrix(pcProj);
+    AssimpViewer::GetProjectionMatrix(pcProj);
 
-    vPos = GetCameraMatrix(mViewProjection);
+    vPos = AssimpViewer::GetCameraMatrix(mViewProjection);
     mViewProjection = mViewProjection * pcProj;
 
     // setup wireframe/solid rendering mode
@@ -2074,6 +2074,25 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
                 piEnd->EndPass();
                 piEnd->End();
             }
+
+            // render tangents vectors?
+            if (g_sOptions.bRenderTangents && helper->piTangents) {
+                // this is very similar to the code in SetupMaterial()
+                ID3DXEffect *piEnd = g_piNormalsEffect;
+
+                piEnd->SetVector("OUTPUT_COLOR", &vVector);
+                piEnd->SetMatrix("WorldViewProjection", (const D3DXMATRIX *)&pcProj);
+
+                UINT dwPasses = 0;
+                piEnd->Begin(&dwPasses, 0);
+                piEnd->BeginPass(0);
+
+                g_piDevice->SetStreamSource(0, helper->piTangents, 0, sizeof(AssetHelper::LineVertex));
+                g_piDevice->DrawPrimitive(D3DPT_LINELIST, 0, g_pcAsset->pcScene->mMeshes[piNode->mMeshes[i]]->mNumVertices);
+
+                piEnd->EndPass();
+                piEnd->End();
+            }
         }
         // end the default material
         if (!g_sOptions.bRenderMats)
@@ -2301,5 +2320,5 @@ int CDisplay::RenderTextureView()
     return 1;
 }
 
-}
+} // namespace AssimpViewer
 

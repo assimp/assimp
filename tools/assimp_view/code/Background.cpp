@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp_view.h"
 #include <assimp/StringUtils.h>
+#include <array>
 
 namespace AssimpView {
 
@@ -60,7 +61,7 @@ struct SkyBoxVertex {
 /** \brief Vertices for the skybox
 */
 // ------------------------------------------------------------------------------
-SkyBoxVertex g_cubeVertices_indexed[] = {
+constexpr SkyBoxVertex g_cubeVertices_indexed[] = {
     { -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f }, // 0
     { 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f }, // 1
     { -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f }, // 2
@@ -75,43 +76,19 @@ SkyBoxVertex g_cubeVertices_indexed[] = {
 /** \brief Indices for the skybox
 */
 // ------------------------------------------------------------------------------
-unsigned short g_cubeIndices[] = {
-    0,
-    1,
-    2,
-    3,
-    2,
-    1,
-    4,
-    5,
-    6,
-    7,
-    6,
-    5,
-    4,
-    6,
-    0,
-    1,
-    6,
-    0,
-    5,
-    2,
-    7,
-    3,
-    2,
-    7,
-    1,
-    6,
-    3,
-    7,
-    3,
-    6,
-    0,
-    2,
-    4,
-    5,
-    4,
-    2,
+constexpr std::array<unsigned short, 36> g_cubeIndices = {
+    0, 1, 2,
+    3, 2, 1,
+    4, 5, 6,
+    7, 6, 5,
+    4, 6, 0,
+    1, 6, 0,
+    5, 2, 7,
+    3, 2, 7,
+    1, 6, 3,
+    7, 3, 6,
+    0, 2, 4,
+    5, 4, 2
 };
 
 CBackgroundPainter CBackgroundPainter::s_cInstance;
@@ -306,10 +283,10 @@ void CBackgroundPainter::OnPreRender() {
 void CBackgroundPainter::OnPostRender() {
     if (TEXTURE_CUBE == eMode) {
         aiMatrix4x4 pcProj;
-        GetProjectionMatrix(pcProj);
+        AssimpViewer::GetProjectionMatrix(pcProj);
 
         aiMatrix4x4 pcCam;
-        aiVector3D vPos = GetCameraMatrix(pcCam);
+        aiVector3D vPos = AssimpViewer::GetCameraMatrix(pcCam);
 
         aiMatrix4x4 aiMe;
         aiMe[3][0] = vPos.x;
@@ -331,7 +308,7 @@ void CBackgroundPainter::OnPostRender() {
         g_piDevice->SetFVF(D3DFVF_XYZ | D3DFVF_TEX1 | D3DFVF_TEXCOORDSIZE3(0));
 
         g_piDevice->DrawIndexedPrimitiveUP(
-                D3DPT_TRIANGLELIST, 0, 8, 12, g_cubeIndices, D3DFMT_INDEX16,
+                D3DPT_TRIANGLELIST, 0, 8, 12, g_cubeIndices.data(), D3DFMT_INDEX16,
                 g_cubeVertices_indexed, sizeof(SkyBoxVertex));
 
         g_piDevice->SetFVF(dw2);
@@ -460,4 +437,5 @@ void CBackgroundPainter::RecreateNativeResource() {
         piSkyBoxEffect->SetTechnique("RenderImage2D");
     }
 }
-}; // namespace AssimpView
+
+} // namespace AssimpView

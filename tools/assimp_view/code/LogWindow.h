@@ -42,10 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_LOG_WINDOW_H_INCLUDED)
 #define AV_LOG_WINDOW_H_INCLUDE
 
-namespace AssimpView
-{
-
-
+namespace AssimpView {
     //-------------------------------------------------------------------------------
     /** \brief Subclass of Assimp::LogStream used to add all log messages to the
      *         log window.

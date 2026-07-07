@@ -38,26 +38,55 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#pragma once
 
-#if (!defined AV_SHADERS_H_INCLUDED)
-#define AV_SHADERS_H_INCLUDED
+#include <list>
 
-// Shader used for rendering a skybox background
-extern std::string  g_szSkyboxShader;
+namespace AssimpView {
 
-// Shader used for visualizing normal vectors
-extern std::string  g_szNormalsShader;
+    //-------------------------------------------------------------------------------
+    /** \brief Class to display log strings in the upper right corner of the view
+    */
+    //-------------------------------------------------------------------------------
+    class CLogDisplay {
+    private:
+        CLogDisplay() = default;
 
-// Default shader
-extern std::string  g_szDefaultShader;
+    public:
+        // data structure for an entry in the log queue
+        struct SEntry {
+            SEntry() : clrColor(D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 )), dwStartTicks(0)
+            {}
 
-// Material shader
-extern std::string  g_szMaterialShader;
+            std::string szText;
+            D3DCOLOR clrColor;
+            DWORD dwStartTicks;
+        };
 
-// Shader used to draw the yellow circle on top of everything
-extern std::string  g_szPassThroughShader;
+        // Singleton accessors
+        static CLogDisplay s_cInstance;
+        inline static CLogDisplay& Instance()
+        {
+            return s_cInstance;
+        }
 
-// Shader used to draw the checker pattern background for the texture view
-extern std::string  g_szCheckerBackgroundShader;
+        // Add an entry to the log queue
+        void AddEntry( const std::string& szText,
+            const D3DCOLOR clrColor = D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) );
 
-#endif // !! AV_SHADERS_H_INCLUDED
+        // Release any native resources associated with the instance
+        void ReleaseNativeResource();
+
+        // Recreate any native resources associated with the instance
+        void RecreateNativeResource();
+
+        // Called during the render loop
+        void OnRender();
+
+    private:
+
+        std::list<SEntry> asEntries;
+        ID3DXFont* piFont;
+    };
+
+}

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2020, assimp team
+Copyright (c) 2006-2026, assimp team
 
 All rights reserved.
 
@@ -39,75 +39,65 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#if (!defined AV_RO_H_INCLUDED)
-#define AV_RO_H_INCLUDED
+#include "assimp_view.h"
 
+#include "richedit.h"
+
+namespace AssimpView {
 
 //-------------------------------------------------------------------------------
-/** \brief Class to manage render options. One global instance
-*/
+// Message procedure for the help dialog
 //-------------------------------------------------------------------------------
-class RenderOptions
-    {
-    public:
+INT_PTR CALLBACK AssimpViewer::HelpDialogProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM ) {
+    switch (uMsg) {
+        case WM_INITDIALOG:
+        {
+            // load the help file ...
+            HRSRC res = FindResource(nullptr,MAKEINTRESOURCE(IDR_TEXT1),"TEXT");
+            HGLOBAL hg = LoadResource(nullptr,res);
+            void* pData = LockResource(hg);
 
-        // enumerates different drawing modi. POINT is currently
-        // not supported and probably will never be.
-        enum DrawMode {NORMAL, WIREFRAME, POINT};
+            SETTEXTEX sInfo;
+            sInfo.flags = ST_DEFAULT;
+            sInfo.codepage = CP_ACP;
 
-        inline RenderOptions    (void) :
-            bMultiSample    (true),
-            bSuperSample    (false),
-            bRenderMats     (true),
-            bRenderNormals  (false),
-            b3Lights        (false),
-            bLightRotate    (false),
-            bRotate         (true),
-            bLowQuality     (false),
-            bNoSpecular     (false),
-            bStereoView     (false),
-            bNoAlphaBlending(false),
-            eDrawMode       (NORMAL),
-            bCulling        (false),
-            bSkeleton       (false)
+            SendDlgItemMessage(hwndDlg,IDC_RICHEDIT21,
+                EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM) pData);
 
-            {}
+            FreeResource(hg);
+            return TRUE;
+        }
 
-        bool bMultiSample;
+        case WM_CLOSE:
+            EndDialog(hwndDlg,0);
+            return TRUE;
 
-        // SuperSampling has not yet been implemented
-        bool bSuperSample;
+        case WM_COMMAND:
+            if (IDOK == LOWORD(wParam)) {
+                EndDialog(hwndDlg,0);
+                return TRUE;
+            }
 
-        // Display the real material of the object
-        bool bRenderMats;
+        case WM_PAINT:
+            {
+                PAINTSTRUCT sPaint;
+                HDC hdc = BeginPaint(hwndDlg,&sPaint);
 
-        // Render the normals
-        bool bRenderNormals;
+                HBRUSH hBrush = CreateSolidBrush(RGB(0xFF,0xFF,0xFF));
 
-        // Use 2 directional light sources
-        bool b3Lights;
+                RECT sRect;
+                sRect.left = 0;
+                sRect.top = 26;
+                sRect.right = 1000;
+                sRect.bottom = 507;
+                FillRect(hdc, &sRect, hBrush);
 
-        // Automatically rotate the light source(s)
-        bool bLightRotate;
+                EndPaint(hwndDlg,&sPaint);
+                return TRUE;
+            }
+    }
 
-        // Automatically rotate the asset around its origin
-        bool bRotate;
+    return FALSE;
+}
 
-        // use standard lambertian lighting
-        bool bLowQuality;
-
-        // disable specular lighting got all elements in the scene
-        bool bNoSpecular;
-
-        // enable stereo view
-        bool bStereoView;
-
-        bool bNoAlphaBlending;
-
-        // wireframe or solid rendering?
-        DrawMode eDrawMode;
-
-        bool bCulling,bSkeleton;
-    };
-
-#endif // !! IG
+} // namespace AssimpView

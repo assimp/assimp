@@ -40,13 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
+#include "Tangents.h"
 #include <assimp/StringUtils.h>
 #include <map>
 
 #ifdef __MINGW32__
-#include <mmsystem.h>
+#   include <mmsystem.h>
 #else
-#include <timeapi.h>
+#   include <timeapi.h>
 #endif
 
 using namespace std;
@@ -147,7 +148,7 @@ float g_fLoadTime = 0.0f;
 //-------------------------------------------------------------------------------
 DWORD WINAPI LoadThreadProc(LPVOID) {
     // get current time
-    double fCur = (double)timeGetTime();
+    auto fCur = static_cast<double>(timeGetTime());
 
     aiPropertyStore *props = aiCreatePropertyStore();
     aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
@@ -155,7 +156,6 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
     aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, nopointslines ? aiPrimitiveType_LINE | aiPrimitiveType_POINT : 0);
 
     aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
-    //aiSetImportPropertyInteger(props,AI_CONFIG_PP_PTV_KEEP_HIERARCHY,1);
 
     // Call ASSIMPs C-API to load the file
     g_pcAsset->pcScene = (aiScene *)aiImportFileExWithProperties(g_szFileName,
@@ -172,7 +172,7 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
     aiReleasePropertyStore(props);
 
     // get the end time of zje operation, calculate delta t
-    double fEnd = (double)timeGetTime();
+    auto fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
     g_bLoadingFinished = true;
 
@@ -194,18 +194,14 @@ DWORD WINAPI LoadThreadProc(LPVOID) {
 // Load the current asset
 // The path to the asset is specified in the global variable g_szFileName
 //-------------------------------------------------------------------------------
-int LoadAsset() {
+int AssimpViewer::LoadAsset() {
     // set the world and world rotation matrices to the identity
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
-    //	char szTemp[MAX_PATH+64];
-    //	sprintf(szTemp,"Starting to load %s",g_szFileName);
     CLogWindow::Instance().WriteLine(
             "----------------------------------------------------------------------------");
-    //	CLogWindow::Instance().WriteLine(szTemp);
-    //	CLogWindow::Instance().WriteLine(
-    //		"----------------------------------------------------------------------------");
+
     CLogWindow::Instance().SetAutoUpdate(false);
 
     // create a helper thread to load the asset
@@ -285,7 +281,7 @@ int LoadAsset() {
 // Delete the loaded asset
 // The function does nothing if no asset is loaded
 //-------------------------------------------------------------------------------
-int DeleteAsset(void) {
+int AssimpViewer::DeleteAsset() {
     if (!g_pcAsset) {
         return 0;
     }
@@ -325,9 +321,14 @@ int DeleteAsset(void) {
 // p_avOut Receives the min/max boundaries. Must point to 2 vec3s
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
-int CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMatrix) {
-    ai_assert(nullptr != piNode);
-    ai_assert(nullptr != p_avOut);
+int AssimpViewer::CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMatrix) {
+    if (nullptr == piNode) {
+        return 0;
+    }
+    
+    if (nullptr == p_avOut) {
+        return 0;
+    }
 
     aiMatrix4x4 mTemp = piNode->mTransformation;
     mTemp.Transpose();
@@ -359,7 +360,7 @@ int CalculateBounds(aiNode *piNode, aiVector3D *p_avOut, const aiMatrix4x4 &piMa
 // The function calculates the boundaries of the mesh and modifies the
 // global world transformation matrix according to the aset AABB
 //-------------------------------------------------------------------------------
-int ScaleAsset() {
+int AssimpViewer::ScaleAsset() {
     aiVector3D aiVecs[2] = { aiVector3D(1e10f, 1e10f, 1e10f),
         aiVector3D(-1e10f, -1e10f, -1e10f) };
 
@@ -391,12 +392,11 @@ int ScaleAsset() {
 // pcMesh Input mesh
 // pcSource Source mesh from ASSIMP
 //-------------------------------------------------------------------------------
-int GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource) {
-    ai_assert(nullptr != pcMesh);
-    ai_assert(nullptr != pcSource);
-
-    if (!pcSource->mNormals) return 0;
-
+int AssimpViewer::GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcSource) {
+    if (!pcMesh || !pcSource || !pcSource->mNormals) {
+        return 0;
+    }
+    
     // create vertex buffer
     if (FAILED(g_piDevice->CreateVertexBuffer(sizeof(AssetHelper::LineVertex) *
                                                       pcSource->mNumVertices * 2,
@@ -438,7 +438,7 @@ int GenerateNormalsAsLineList(AssetHelper::MeshHelper *pcMesh, const aiMesh *pcS
 // Create the native D3D representation of the asset: vertex buffers,
 // index buffers, materials ...
 //-------------------------------------------------------------------------------
-int CreateAssetData() {
+int AssimpViewer::CreateAssetData() {
     if (!g_pcAsset) return 0;
 
     // reset all subsystems
@@ -609,7 +609,12 @@ int CreateAssetData() {
 
         // now generate the second vertex buffer, holding all normals
         if (!g_pcAsset->apcMeshes[i]->piVBNormals) {
-            GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i], mesh);
+            AssimpViewer::GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i], mesh);
+        }
+
+        if (!g_pcAsset->apcMeshes[i]->piTangents) {
+            Tangents meshTangents(mesh);
+            meshTangents.createBuffers(g_piDevice, g_pcAsset->apcMeshes[i]);
         }
     }
     return 1;
@@ -619,23 +624,15 @@ int CreateAssetData() {
 // Delete all effects, textures, vertex buffers ... associated with
 // an asset
 //-------------------------------------------------------------------------------
-int DeleteAssetData(bool bNoMaterials) {
+int AssimpViewer::DeleteAssetData(bool bNoMaterials) {
     if (!g_pcAsset) return 0;
 
     // TODO: Move this to a proper destructor
     for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes; ++i) {
-        if (g_pcAsset->apcMeshes[i]->piVB) {
-            g_pcAsset->apcMeshes[i]->piVB->Release();
-            g_pcAsset->apcMeshes[i]->piVB = nullptr;
-        }
-        if (g_pcAsset->apcMeshes[i]->piVBNormals) {
-            g_pcAsset->apcMeshes[i]->piVBNormals->Release();
-            g_pcAsset->apcMeshes[i]->piVBNormals = nullptr;
-        }
-        if (g_pcAsset->apcMeshes[i]->piIB) {
-            g_pcAsset->apcMeshes[i]->piIB->Release();
-            g_pcAsset->apcMeshes[i]->piIB = nullptr;
-        }
+        SafeRelease(g_pcAsset->apcMeshes[i]->piVB);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piIB);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piVBNormals);
+        SafeRelease(g_pcAsset->apcMeshes[i]->piTangents);
 
         // TODO ... unfixed memory leak
         // delete storage eventually allocated to hold a copy
@@ -646,38 +643,15 @@ int DeleteAssetData(bool bNoMaterials) {
         //}
 
         if (!bNoMaterials) {
-            if (g_pcAsset->apcMeshes[i]->piEffect) {
-                g_pcAsset->apcMeshes[i]->piEffect->Release();
-                g_pcAsset->apcMeshes[i]->piEffect = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piDiffuseTexture) {
-                g_pcAsset->apcMeshes[i]->piDiffuseTexture->Release();
-                g_pcAsset->apcMeshes[i]->piDiffuseTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piNormalTexture) {
-                g_pcAsset->apcMeshes[i]->piNormalTexture->Release();
-                g_pcAsset->apcMeshes[i]->piNormalTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piSpecularTexture) {
-                g_pcAsset->apcMeshes[i]->piSpecularTexture->Release();
-                g_pcAsset->apcMeshes[i]->piSpecularTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piAmbientTexture) {
-                g_pcAsset->apcMeshes[i]->piAmbientTexture->Release();
-                g_pcAsset->apcMeshes[i]->piAmbientTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piEmissiveTexture) {
-                g_pcAsset->apcMeshes[i]->piEmissiveTexture->Release();
-                g_pcAsset->apcMeshes[i]->piEmissiveTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piOpacityTexture) {
-                g_pcAsset->apcMeshes[i]->piOpacityTexture->Release();
-                g_pcAsset->apcMeshes[i]->piOpacityTexture = nullptr;
-            }
-            if (g_pcAsset->apcMeshes[i]->piShininessTexture) {
-                g_pcAsset->apcMeshes[i]->piShininessTexture->Release();
-                g_pcAsset->apcMeshes[i]->piShininessTexture = nullptr;
-            }
+            SafeRelease(g_pcAsset->apcMeshes[i]->piEffect);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piDiffuseTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piNormalTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piTangents);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piSpecularTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piAmbientTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piEmissiveTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piOpacityTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piShininessTexture);
         }
     }
     return 1;
@@ -687,7 +661,7 @@ int DeleteAssetData(bool bNoMaterials) {
 // Switch between zoom/rotate view and the standard FPS view
 // g_bFPSView specifies the view mode to setup
 //-------------------------------------------------------------------------------
-int SetupFPSView() {
+int AssimpViewer::SetupFPSView() {
     if (!g_bFPSView) {
         g_sCamera.vPos = aiVector3D(0.0f, 0.0f, g_fWheelPos);
         g_sCamera.vLookAt = aiVector3D(0.0f, 0.0f, 1.0f);
@@ -707,11 +681,16 @@ int SetupFPSView() {
 // Initialize the IDIrect3D interface
 // Called by the WinMain
 //-------------------------------------------------------------------------------
-int InitD3D(void) {
-    if (nullptr == g_piD3D) {
-        g_piD3D = Direct3DCreate9(D3D_SDK_VERSION);
-        if (nullptr == g_piD3D) return 0;
+int AssimpViewer::InitD3D() {
+    if (nullptr != g_piD3D) {
+        return 0;
     }
+
+    g_piD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    if (nullptr == g_piD3D) {
+        return 0;
+    }
+
     return 1;
 }
 
@@ -719,28 +698,18 @@ int InitD3D(void) {
 // Release the IDirect3D interface.
 // NOTE: Assumes that the device has already been deleted
 //-------------------------------------------------------------------------------
-int ShutdownD3D(void) {
+int AssimpViewer::ShutdownD3D() {
     ShutdownDevice();
-    if (nullptr != g_piD3D) {
-        g_piD3D->Release();
-        g_piD3D = nullptr;
-    }
-    return 1;
-}
+    SafeRelease(g_piD3D);
 
-template <class TComPtr>
-inline void SafeRelease(TComPtr *&ptr) {
-    if (nullptr != ptr) {
-        ptr->Release();
-        ptr = nullptr;
-    }
+    return 1;
 }
 
 //-------------------------------------------------------------------------------
 // Shutdown the D3D device object and all resources associated with it
 // NOTE: Assumes that the asset has already been deleted
 //-------------------------------------------------------------------------------
-int ShutdownDevice(void) {
+int AssimpViewer::ShutdownDevice() {
     // release other subsystems
     CBackgroundPainter::Instance().ReleaseNativeResource();
     CLogDisplay::Instance().ReleaseNativeResource();
@@ -764,8 +733,9 @@ int ShutdownDevice(void) {
 }
 
 //-------------------------------------------------------------------------------
+// Create the HUD texture and the mask texture
 //-------------------------------------------------------------------------------
-int CreateHUDTexture() {
+int AssimpViewer::CreateHUDTexture() {
     // lock the memory resource ourselves
     HRSRC res = FindResource(nullptr, MAKEINTRESOURCE(IDR_HUD), RT_RCDATA);
     HGLOBAL hg = LoadResource(nullptr, res);
@@ -852,8 +822,7 @@ int CreateHUDTexture() {
 }
 
 //-------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------
-int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) {
+int AssimpViewer::CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW) {
     D3DDEVTYPE eType = bHW ? D3DDEVTYPE_HAL : D3DDEVTYPE_REF;
 
     // get the client rectangle of the window.
@@ -883,8 +852,9 @@ int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) 
     if (SUCCEEDED(g_piD3D->CheckDepthStencilMatch(0, eType,
                 D3DFMT_X8R8G8B8, D3DFMT_X8R8G8B8, D3DFMT_D32))) {
         sParams.AutoDepthStencilFormat = D3DFMT_D32;
-    } else
+    } else {
         sParams.AutoDepthStencilFormat = D3DFMT_D24X8;
+    }
 
     // find the highest multisample type available on this device
     D3DMULTISAMPLE_TYPE sMS = D3DMULTISAMPLE_2_SAMPLES;
@@ -949,10 +919,7 @@ int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) 
         }
         return 0;
     }
-    if (piBuffer) {
-        piBuffer->Release();
-        piBuffer = nullptr;
-    }
+    SafeRelease(piBuffer);
 
     // use Fixed Function effect when working with shaderless cards
     if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))
@@ -968,10 +935,7 @@ int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) 
         }
         return 0;
     }
-    if (piBuffer) {
-        piBuffer->Release();
-        piBuffer = nullptr;
-    }
+    SafeRelease(piBuffer);
 
     // use Fixed Function effect when working with shaderless cards
     if (g_sCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))
@@ -1010,13 +974,13 @@ int CreateDevice(bool p_bMultiSample, bool p_bSuperSample, bool bHW /*= true*/) 
 }
 
 //-------------------------------------------------------------------------------
-int CreateDevice() {
+int AssimpViewer::CreateDevice() {
     return CreateDevice(g_sOptions.bMultiSample,
             g_sOptions.bSuperSample);
 }
 
 //-------------------------------------------------------------------------------
-int GetProjectionMatrix(aiMatrix4x4 &p_mOut) {
+int AssimpViewer::GetProjectionMatrix(aiMatrix4x4 &p_mOut) {
     const float fFarPlane = 100.0f;
     const float fNearPlane = 0.1f;
     const float fFOV = (float)(45.0 * 0.0174532925);
@@ -1039,7 +1003,7 @@ int GetProjectionMatrix(aiMatrix4x4 &p_mOut) {
 }
 
 //-------------------------------------------------------------------------------
-aiVector3D GetCameraMatrix(aiMatrix4x4 &p_mOut) {
+aiVector3D AssimpViewer::GetCameraMatrix(aiMatrix4x4 &p_mOut) {
     D3DXMATRIX view;
     D3DXMatrixIdentity(&view);
 

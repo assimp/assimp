@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 #include <assimp/Exporter.hpp>
 #include <algorithm>
+#include <array>
 
 #include <windowsx.h>
 #include <commdlg.h>
@@ -56,8 +57,21 @@ namespace AssimpView {
 
 using namespace Assimp;
 
+struct ConfigDatabase {
+    HKEY mHandleRegistry{nullptr};
+
+    bool init() {
+        // store the key in a global variable for later use
+        RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
+            0,nullptr,0,KEY_ALL_ACCESS, nullptr, &mHandleRegistry, nullptr);
+        
+        return true;
+    }
+    
+} g_ConfigDatabase;
+
 // Static array to keep custom color values
-COLORREF g_aclCustomColors[16] = {0};
+std::array<COLORREF, 16> g_aclCustomColors = {0};
 
 // Global registry key
 HKEY g_hRegistry = nullptr;
@@ -130,7 +144,6 @@ void MakeFileAssociations() {
 //-------------------------------------------------------------------------------
 void HandleCommandLine(char* p_szCommand) {
     char* sz = p_szCommand;
-    //bool bQuak = false;
 
     if (strlen(sz) < 2) {
         return;
@@ -142,8 +155,9 @@ void HandleCommandLine(char* p_szCommand) {
         sz++; // skip the starting quote
     }
 
-    strcpy( g_szFileName, sz );
-    LoadAsset();
+    strncpy( g_szFileName, sz, MAX_PATH - 1 );
+    g_szFileName[MAX_PATH - 1] = '\0';
+    AssimpViewer::LoadAsset();
 
     // update the history
     UpdateHistory();
@@ -157,18 +171,18 @@ void HandleCommandLine(char* p_szCommand) {
 //-------------------------------------------------------------------------------
 void LoadLightColors() {
     DWORD dwTemp = 4;
-    RegQueryValueEx(g_hRegistry,"LightColor0",nullptr,nullptr, (BYTE*)&g_avLightColors[0],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor1",nullptr,nullptr, (BYTE*)&g_avLightColors[1],&dwTemp);
-    RegQueryValueEx(g_hRegistry,"LightColor2",nullptr,nullptr, (BYTE*)&g_avLightColors[2],&dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor0", nullptr, nullptr, (BYTE*)&g_avLightColors[0], &dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor1", nullptr, nullptr, (BYTE*)&g_avLightColors[1], &dwTemp);
+    RegQueryValueEx(g_hRegistry, "LightColor2", nullptr, nullptr, (BYTE*)&g_avLightColors[2], &dwTemp);
 }
 
 //-------------------------------------------------------------------------------
 // Save the light colors to the registry
 //-------------------------------------------------------------------------------
 void SaveLightColors() {
-    RegSetValueExA(g_hRegistry,"LightColor0",0,REG_DWORD,(const BYTE*)&g_avLightColors[0],4);
-    RegSetValueExA(g_hRegistry,"LightColor1",0,REG_DWORD,(const BYTE*)&g_avLightColors[1],4);
-    RegSetValueExA(g_hRegistry,"LightColor2",0,REG_DWORD,(const BYTE*)&g_avLightColors[2],4);
+    RegSetValueExA(g_hRegistry, "LightColor0", 0, REG_DWORD, (const BYTE*)&g_avLightColors[0], 4);
+    RegSetValueExA(g_hRegistry, "LightColor1", 0, REG_DWORD, (const BYTE*)&g_avLightColors[1], 4);
+    RegSetValueExA(g_hRegistry, "LightColor2", 0, REG_DWORD, (const BYTE*)&g_avLightColors[2], 4);
 }
 
 //-------------------------------------------------------------------------------
@@ -198,6 +212,18 @@ void LoadCheckerPatternColors() {
 }
 
 //-------------------------------------------------------------------------------
+// Store registry key for a boolean option
+//-------------------------------------------------------------------------------
+static void storeRegKey(bool option, LPCSTR name) {
+    // store this in the registry, too
+    DWORD dwValue = 0;
+    if (option) {
+        dwValue = 1;
+    }
+    RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE *)&dwValue, 4);
+}
+
+//-------------------------------------------------------------------------------
 // Changed pp setup
 //-------------------------------------------------------------------------------
 void UpdatePPSettings() {
@@ -211,22 +237,17 @@ void UpdatePPSettings() {
 //-------------------------------------------------------------------------------
 void ToggleNormals() {
     g_sOptions.bRenderNormals = !g_sOptions.bRenderNormals;
-
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (g_sOptions.bRenderNormals)dwValue = 1;
-    RegSetValueExA(g_hRegistry,"RenderNormals",0,REG_DWORD,(const BYTE*)&dwValue,4);
+    storeRegKey(g_sOptions.bRenderNormals, "RenderNormals");
 }
 
-static void storeRegKey(bool option, LPCSTR name) {
-    // store this in the registry, too
-    DWORD dwValue = 0;
-    if (option) {
-        dwValue = 1;
-    }
-    RegSetValueExA(g_hRegistry, name, 0, REG_DWORD, (const BYTE*)&dwValue, 4);
-
+//-------------------------------------------------------------------------------
+// Toggle the "Dispay Tangents" state
+//-------------------------------------------------------------------------------
+void ToggleTangents() {
+    g_sOptions.bRenderTangents = !g_sOptions.bRenderTangents;
+    storeRegKey(g_sOptions.bRenderTangents, "RenderTangents");
 }
+
 //-------------------------------------------------------------------------------
 // Toggle the "AutoRotate" state
 //-------------------------------------------------------------------------------
@@ -241,7 +262,7 @@ void ToggleAutoRotate() {
 //-------------------------------------------------------------------------------
 void ToggleFPSView() {
     g_bFPSView = !g_bFPSView;
-    SetupFPSView();
+    AssimpViewer::SetupFPSView();
     storeRegKey(g_bFPSView, "FPSView");
 }
 
@@ -335,15 +356,15 @@ void ToggleWireFrame() {
 //-------------------------------------------------------------------------------
 void ToggleMS() {
     g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
-    DeleteAssetData();
-    ShutdownDevice();
-    if (0 == CreateDevice()) {
+    AssimpViewer::DeleteAssetData();
+    AssimpViewer::ShutdownDevice();
+    if (0 == AssimpViewer::CreateDevice()) {
         CLogDisplay::Instance().AddEntry(
             "[ERROR] Failed to toggle MultiSampling mode");
         g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
-        CreateDevice();
+        AssimpViewer::CreateDevice();
     }
-    CreateAssetData();
+    AssimpViewer::CreateAssetData();
 
     if (g_sOptions.bMultiSample) {
         CLogDisplay::Instance().AddEntry(
@@ -396,7 +417,8 @@ void LoadBGTexture() {
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"TextureSrc",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -447,7 +469,7 @@ void DisplayColorDialog(D3DCOLOR* pclrResult) {
     clr.hwndOwner = g_hDlg;
     clr.Flags = CC_RGBINIT | CC_FULLOPEN;
     clr.rgbResult = RGB((*pclrResult >> 16) & 0xff,(*pclrResult >> 8) & 0xff,*pclrResult & 0xff);
-    clr.lpCustColors = g_aclCustomColors;
+    clr.lpCustColors = g_aclCustomColors.data();
     clr.lpfnHook = nullptr;
     clr.lpTemplateName = nullptr;
     clr.lCustData = 0;
@@ -471,7 +493,7 @@ void DisplayColorDialog(D3DXVECTOR4* pclrResult) {
     clr.rgbResult = RGB(clamp<unsigned char>(pclrResult->x * 255.0f),
         clamp<unsigned char>(pclrResult->y * 255.0f),
         clamp<unsigned char>(pclrResult->z * 255.0f));
-    clr.lpCustColors = g_aclCustomColors;
+    clr.lpCustColors = g_aclCustomColors.data();
     clr.lpfnHook = nullptr;
     clr.lpTemplateName = nullptr;
     clr.lCustData = 0;
@@ -505,13 +527,11 @@ void LoadSkybox() {
 
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"SkyBoxSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp))
-    {
+            (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
-    }
-    else
-    {
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -528,7 +548,8 @@ void LoadSkybox() {
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".dds", 0, nullptr, nullptr
     };
-    if(GetOpenFileName(&sFilename1) == 0) return;
+    if (GetOpenFileName(&sFilename1) == 0) 
+        return;
 
     // Now store the file in the registry
     RegSetValueExA(g_hRegistry,"SkyBoxSrc",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
@@ -539,9 +560,9 @@ void LoadSkybox() {
     return;
 }
 
+//-------------------------------------------------------------------------------
 template<class T>
-inline
-void SaveRelease(T **iface ) {
+inline void SaveRelease(T **iface ) {
     if (nullptr != iface) {
         (*iface)->Release();
         *iface = nullptr;
@@ -557,7 +578,8 @@ void SaveScreenshot() {
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"ScreenShot",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -826,9 +848,9 @@ void OpenAsset() {
     char szFileName[MAX_PATH];
 
     DWORD dwTemp = MAX_PATH;
-    if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"CurrentApp",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH);
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -843,13 +865,14 @@ void OpenAsset() {
     aiGetExtensionList(&sz);
 
     char szList[AI_MAXLEN + 100];
-    strcpy(szList,"ASSIMP assets");
+    strncpy(szList,"ASSIMP assets",sizeof(szList));
     char* szCur = szList + 14;
-    strcpy(szCur,sz.data);
+    strncpy(szCur,sz.data,sz.length);
+    szCur[sz.length] = '\0';
     szCur += sz.length+1;
-    strcpy(szCur,"All files");
-    szCur += 10;
-    strcpy(szCur,"*.*");
+    strncpy(szCur,"All files",10);
+    szCur[9] = '\0';
+    strncpy(szCur,"*.*",5);
     szCur[4] = 0;
 
     OPENFILENAME sFilename1;
@@ -874,11 +897,11 @@ void OpenAsset() {
     RegSetValueExA(g_hRegistry,"CurrentApp",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
 
     if (0 != strcmp(g_szFileName,szFileName)) {
-        DeleteAssetData();
-        DeleteAsset();
+        AssimpViewer::DeleteAssetData();
+        AssimpViewer::DeleteAsset();
 
-        strcpy(g_szFileName, szFileName);
-        LoadAsset();
+        strncpy(g_szFileName, szFileName, MAX_PATH);
+        AssimpViewer::LoadAsset();
 
         // update the history
         UpdateHistory();
@@ -892,21 +915,25 @@ void OpenAsset() {
 void SetupPPUIState() {
     // that's ugly. anyone willing to rewrite me from scratch?
     HMENU hMenu = GetMenu(g_hDlg);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
-    CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
+    if (!hMenu) {
+        return;
+    }
+
+    CheckMenuItem(hMenu, ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FD,ppsteps & aiProcess_FindDegenerates ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(hMenu, ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
@@ -941,9 +968,9 @@ void DoExport(size_t formatId) {
     const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
     ai_assert(e);
 
-    char szFileName[MAX_PATH*2];
+    char szFileName[MAX_PATH*2] = {0};
     DWORD dwTemp = sizeof(szFileName);
-    if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",nullptr,nullptr,(BYTE*)szFileName, &dwTemp)) {
+    if (ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",nullptr,nullptr,(BYTE*)szFileName, &dwTemp)) {
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
         // invent a nice default file name
@@ -951,8 +978,7 @@ void DoExport(size_t formatId) {
         if (sz) {
             strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
         }
-    }
-    else {
+    } else {
         // Key was not found. Use the folder where the asset comes from
         strncpy(szFileName,g_szFileName,MAX_PATH);
     }
@@ -961,15 +987,18 @@ void DoExport(size_t formatId) {
     {   char * const sz = strrchr(szFileName,'.');
         if(sz) {
             ai_assert((sz - &szFileName[0]) + strlen(e->fileExtension) + 1 <= MAX_PATH);
-            strcpy(sz+1,e->fileExtension);
+            strncpy(sz+1,e->fileExtension,MAX_PATH - (sz - &szFileName[0]) - 1);
+            szFileName[MAX_PATH - 1] = '\0';
         }
     }
 
     // build the stupid info string for GetSaveFileName() - can't use sprintf() because the string must contain binary zeros.
     char desc[256] = {0};
-    char* c = strcpy(desc,e->description) + strlen(e->description)+1;
+    char* c = strncpy(desc,e->description,255);
+    c += strlen(e->description)+1;
     c += sprintf(c,"*.%s",e->fileExtension)+1;
-    strcpy(c, "*.*\0"); c += 4;
+    strncpy(c, "*.*\0", 4); 
+    c += 4;
 
     ai_assert(c - &desc[0] <= 256);
 
@@ -1140,6 +1169,17 @@ void InitUI() {
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_CHECKED);
     }
 
+    // DisplayTangents
+    if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "RenderTangets", nullptr, nullptr,
+                                         (BYTE *)&dwValue, &dwTemp)) dwValue = 0;
+    if (0 == dwValue) {
+        g_sOptions.bRenderTangents = false;
+        CheckDlgButton(g_hDlg, IDC_TOGGLETANGENTS, BST_UNCHECKED);
+    } else {
+        g_sOptions.bRenderTangents = true;
+        CheckDlgButton(g_hDlg, IDC_TOGGLETANGENTS, BST_CHECKED);
+    }
+
     // NoMaterials
     if (ERROR_SUCCESS != RegQueryValueEx(g_hRegistry, "RenderMats", nullptr, nullptr,
         (BYTE*)&dwValue, &dwTemp)) {
@@ -1179,13 +1219,10 @@ void InitUI() {
     // WireFrame
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"Wireframe",nullptr,nullptr,
         (BYTE*)&dwValue,&dwTemp))dwValue = 0;
-    if (0 == dwValue)
-    {
+    if (0 == dwValue) {
         g_sOptions.eDrawMode = RenderOptions::NORMAL;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_UNCHECKED);
-    }
-    else
-    {
+    } else {
         g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
     }
@@ -1307,7 +1344,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_MOUSELEAVE:
-
             g_bMousePressed = false;
             g_bMousePressedR = false;
             g_bMousePressedM = false;
@@ -1315,7 +1351,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_LBUTTONDBLCLK:
-
             CheckDlgButton(hwndDlg,IDC_AUTOROTATE,
                 IsDlgButtonChecked(hwndDlg,IDC_AUTOROTATE) == BST_CHECKED
                 ? BST_UNCHECKED : BST_CHECKED);
@@ -1330,15 +1365,12 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_NOTIFY:
-
-            if (IDC_TREE1 == wParam)
-            {
+            if (IDC_TREE1 == wParam) {
                 NMTREEVIEW* pnmtv = (LPNMTREEVIEW) lParam;
 
                 if (TVN_SELCHANGED == pnmtv->hdr.code)
                     CDisplay::Instance().OnSetup( pnmtv->itemNew.hItem );
-                else if (NM_RCLICK == pnmtv->hdr.code)
-                {
+                else if (NM_RCLICK == pnmtv->hdr.code) {
                     // determine in which item the click was ...
                     POINT sPoint;
                     GetCursorPos(&sPoint);
@@ -1365,24 +1397,18 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 
                 bool bDraw = false;
 
-                if(IDC_LCOLOR1 == pcStruct->CtlID)
-                {
+                if(IDC_LCOLOR1 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->x * 255.0f);
                         g = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->y * 255.0f);
                         b = (unsigned char)(CDisplay::Instance().GetFirstCheckerColor()->z * 255.0f);
                         szText = "Background #0";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[0] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[0] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[0]) & 0xFF);
@@ -1397,25 +1423,18 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
                     TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
-                }
-                else if(IDC_LCOLOR2 == pcStruct->CtlID)
-                {
+                } else if(IDC_LCOLOR2 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->x * 255.0f);
                         g = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->y * 255.0f);
                         b = (unsigned char)(CDisplay::Instance().GetSecondCheckerColor()->z * 255.0f);
                         szText = "Background #1";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[1] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[1] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[1]) & 0xFF);
@@ -1428,23 +1447,16 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
                     TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
-                }
-                else if(IDC_LCOLOR3 == pcStruct->CtlID)
-                {
+                } else if(IDC_LCOLOR3 == pcStruct->CtlID) {
                     unsigned char r,g,b;
                     const char* szText;
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         r = g = b = 0;
                         szText = "";
-                    }
-                    else if (!g_pcAsset)
-                    {
+                    } else if (!g_pcAsset) {
                         r = g = b = 150;szText = "";
-                    }
-                    else
-                    {
+                    } else {
                         r = (unsigned char)((g_avLightColors[2] >> 16) & 0xFF);
                         g = (unsigned char)((g_avLightColors[2] >> 8) & 0xFF);
                         b = (unsigned char)((g_avLightColors[2]) & 0xFF);
@@ -1459,8 +1471,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     bDraw = true;
                 }
                 // draw the black border around the rects
-                if (bDraw)
-                {
+                if (bDraw) {
                     SetBkColor(pcStruct->hDC,RGB(0,0,0));
                     MoveToEx(pcStruct->hDC,0,0,nullptr);
                     LineTo(pcStruct->hDC,sRect.right-1,0);
@@ -1472,7 +1483,6 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
 
         case WM_DESTROY:
-
             // close the open registry key
             RegCloseKey(g_hRegistry);
             return TRUE;
@@ -1488,19 +1498,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sEvent.dwHoverTime = HOVER_DEFAULT;
             TrackMouseEvent(&sEvent);
 
-            if (g_bMousePressedR)
-                {
+            if (g_bMousePressedR) {
                 g_bMousePressed = false;
                 g_bMousePressedR = false;
                 g_bMousePressedBoth = true;
                 return TRUE;
-                }
+            }
 
             // need to determine the position of the mouse and the
             // distance from the center
-            //xPos = (int)(short)LOWORD(lParam);
-            //yPos = (int)(short)HIWORD(lParam);
-
             POINT sPoint;
             GetCursorPos(&sPoint);
             ScreenToClient(GetDlgItem(g_hDlg,IDC_RT),&sPoint);
@@ -1514,10 +1520,9 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
 
             // if the mouse click was inside the viewer panel
             // give the focus to it
-            if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom)
-                {
+            if (xPos > 0 && xPos < sRect.right && yPos > 0 && yPos < sRect.bottom) {
                 SetFocus(GetDlgItem(g_hDlg,IDC_RT));
-                }
+            }
 
             // g_bInvert stores whether the mouse has started on the negative
             // x or on the positive x axis of the imaginary coordinate system
@@ -1537,27 +1542,21 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             // Determine the input operation to perform for this position
             g_eClick = EClickPos_Outside;
             if (xPos2 >= fHalfX && xPos2 < fHalfX + (int)sDesc.Width &&
-                yPos2 >= fHalfY && yPos2 < fHalfY + (int)sDesc.Height &&
-                nullptr != g_szImageMask)
-                {
+                    yPos2 >= fHalfY && yPos2 < fHalfY + (int)sDesc.Height &&
+                    nullptr != g_szImageMask) {
                 // inside the texture. Lookup the grayscale value from it
                 xPos2 -= fHalfX;
                 yPos2 -= fHalfY;
 
                 unsigned char chValue = g_szImageMask[xPos2 + yPos2 * sDesc.Width];
-                if (chValue > 0xFF-20)
-                    {
+                if (chValue > 0xFF-20) {
                     g_eClick = EClickPos_Circle;
-                    }
-                else if (chValue < 0xFF-20 && chValue > 185)
-                    {
+                } else if (chValue < 0xFF-20 && chValue > 185) {
                     g_eClick = EClickPos_CircleHor;
-                    }
-                else if (chValue > 0x10 && chValue < 185)
-                    {
+                } else if (chValue > 0x10 && chValue < 185) {
                     g_eClick = EClickPos_CircleVert;
-                    }
                 }
+            }
             return TRUE;
 
         case WM_RBUTTONDOWN:
@@ -1569,18 +1568,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             sEvent.dwHoverTime = HOVER_DEFAULT;
             TrackMouseEvent(&sEvent);
 
-            if (g_bMousePressed)
-                {
+            if (g_bMousePressed) {
                 g_bMousePressedR = false;
                 g_bMousePressed = false;
                 g_bMousePressedBoth = true;
-                }
+            }
 
             return TRUE;
 
         case WM_MBUTTONDOWN:
-
-
             g_bMousePressedM = true;
 
             sEvent.cbSize = sizeof(TRACKMOUSEEVENT);
@@ -1670,10 +1666,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                         }
                         fclose(pFile);
                     } else {
-                        DeleteAsset();
+                        AssimpViewer::DeleteAsset();
 
                         strcpy(g_szFileName, szFile);
-                        LoadAsset();
+                        AssimpViewer::LoadAsset();
 
                         UpdateHistory();
                         SaveHistory();
@@ -1711,10 +1707,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 CBackgroundPainter::Instance().ResetSB();
             } else if (ID__HELP == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_AVHELP),
-                    hwndDlg,&HelpDialogProc);
+                          hwndDlg, &AssimpViewer::HelpDialogProc);
             } else if (ID__ABOUT == LOWORD(wParam)) {
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_ABOUTBOX),
-                    hwndDlg,&AboutMessageProc);
+                          hwndDlg, &AssimpViewer::AboutMessageProc);
             } else if (ID_TOOLS_LOGWINDOW == LOWORD(wParam)) {
                 CLogWindow::Instance().Show();
             } else if (ID__WEBSITE == LOWORD(wParam)) {
@@ -1767,138 +1763,105 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 ppsteps ^= aiProcess_FindInvalidData;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FID,ppsteps & aiProcess_FindInvalidData ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FIM == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FIM == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FindInstances;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FIM,ppsteps & aiProcess_FindInstances ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_FIN == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_FIN == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_FixInfacingNormals;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_FIN,ppsteps & aiProcess_FixInfacingNormals ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_GUV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_GUV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_GenUVCoords;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_GUV,ppsteps & aiProcess_GenUVCoords ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_ICL == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_ICL == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_ImproveCacheLocality;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_ICL,ppsteps & aiProcess_ImproveCacheLocality ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_OG == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_OG == LOWORD(wParam)) {
                 if (ppsteps & aiProcess_PreTransformVertices) {
                     CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Pretransform Vertices\'");
-                }
-                else {
+                } else {
                     ppsteps ^= aiProcess_OptimizeGraph;
                     CheckMenuItem(hMenu,ID_VIEWER_PP_OG,ppsteps & aiProcess_OptimizeGraph ? MF_CHECKED : MF_UNCHECKED);
                     UpdatePPSettings();
                 }
-            }
-            else if (ID_VIEWER_PP_OM == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_OM == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_OptimizeMeshes;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_OM,ppsteps & aiProcess_OptimizeMeshes ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_PTV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_PTV == LOWORD(wParam))    {
                 if (ppsteps & aiProcess_OptimizeGraph) {
                     CLogDisplay::Instance().AddEntry("[ERROR] This setting is incompatible with \'Optimize Scenegraph\'");
-                }
-                else {
+                } else {
                     ppsteps ^= aiProcess_PreTransformVertices;
                     CheckMenuItem(hMenu,ID_VIEWER_PP_PTV,ppsteps & aiProcess_PreTransformVertices ? MF_CHECKED : MF_UNCHECKED);
                     UpdatePPSettings();
                 }
-            }
-            else if (ID_VIEWER_PP_RRM2 == LOWORD(wParam))   {
+            } else if (ID_VIEWER_PP_RRM2 == LOWORD(wParam))   {
                 ppsteps ^= aiProcess_RemoveRedundantMaterials;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_RRM2,ppsteps & aiProcess_RemoveRedundantMaterials ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_TUV == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_TUV == LOWORD(wParam))    {
                 ppsteps ^= aiProcess_TransformUVCoords;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_TUV,ppsteps & aiProcess_TransformUVCoords ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_DB == LOWORD(wParam)) {
+            } else if (ID_VIEWER_PP_DB == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_Debone;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_DB,ppsteps & aiProcess_Debone ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_PP_VDS == LOWORD(wParam))    {
+            } else if (ID_VIEWER_PP_VDS == LOWORD(wParam)) {
                 ppsteps ^= aiProcess_ValidateDataStructure;
                 CheckMenuItem(hMenu,ID_VIEWER_PP_VDS,ppsteps & aiProcess_ValidateDataStructure ? MF_CHECKED : MF_UNCHECKED);
                 UpdatePPSettings();
-            }
-            else if (ID_VIEWER_RELOAD == LOWORD(wParam))
-            {
+            } else if (ID_VIEWER_RELOAD == LOWORD(wParam))  {
                 // Save the filename to reload and clear
                 char toReloadFileName[MAX_PATH];
                 strcpy(toReloadFileName, g_szFileName);
-                DeleteAsset();
+                AssimpViewer::DeleteAsset();
 
                 strcpy(g_szFileName, toReloadFileName);
-                LoadAsset();
-            }
-            else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam))
-            {
+                AssimpViewer::LoadAsset();
+            } else if (ID_IMPORTSETTINGS_RESETTODEFAULT == LOWORD(wParam)) {
                 ppsteps = ppstepsdefault;
                 UpdatePPSettings();
                 SetupPPUIState();
-            }
-            else if (ID_IMPORTSETTINGS_OPENPOST == LOWORD(wParam))
-            {
+            } else if (ID_IMPORTSETTINGS_OPENPOST == LOWORD(wParam)) {
                 ShellExecute(nullptr,"open","http://assimp.sourceforge.net/lib_html/ai_post_process_8h.html","","",SW_SHOW);
-            }
-            else if (ID_TOOLS_ORIGINALNORMALS == LOWORD(wParam))
-            {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_ORIGINALNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::ORIGINAL);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_CHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
-                    }
                 }
-
-            else if (ID_TOOLS_SMOOTHNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_SMOOTHNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::SMOOTH);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_CHECKED);
-                    }
                 }
-            else if (ID_TOOLS_HARDNORMALS == LOWORD(wParam))
-                {
-                if (g_pcAsset && g_pcAsset->pcScene)
-                    {
+            } else if (ID_TOOLS_HARDNORMALS == LOWORD(wParam)) {
+                if (g_pcAsset && g_pcAsset->pcScene) {
                     g_pcAsset->SetNormalSet(AssimpView::AssetHelper::HARD);
                     CheckMenuItem(hMenu,ID_TOOLS_ORIGINALNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_HARDNORMALS,MF_BYCOMMAND | MF_CHECKED);
                     CheckMenuItem(hMenu,ID_TOOLS_SMOOTHNORMALS,MF_BYCOMMAND | MF_UNCHECKED);
-                    }
                 }
-            else if (ID_TOOLS_STEREOVIEW == LOWORD(wParam))
-                {
+            } else if (ID_TOOLS_STEREOVIEW == LOWORD(wParam)) {
                     g_sOptions.bStereoView =! g_sOptions.bStereoView;
 
                     HMENU menu = ::GetMenu(g_hDlg);
                     if (g_sOptions.bStereoView) {
                         ::ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_CHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
-
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to stereo mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
                     } else {
                         ModifyMenu(menu,ID_TOOLS_STEREOVIEW,
                             MF_BYCOMMAND | MF_UNCHECKED | MF_STRING,ID_TOOLS_STEREOVIEW,"Stereo view");
-
                         CLogDisplay::Instance().AddEntry("[INFO] Switched to mono mode",
                             D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0));
                     }
@@ -1906,73 +1869,50 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                 DialogBox(g_hInstance,MAKEINTRESOURCE(IDD_DIALOGSMOOTH),g_hDlg,&SMMessageProc);
             } else if (ID_VIEWER_CLEARHISTORY == LOWORD(wParam)) {
                 ClearHistory();
-            } else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) {
-                DeleteAssetData();
-                DeleteAsset();
-                }
-            else if (BN_CLICKED == HIWORD(wParam))
-                {
-                if (IDC_TOGGLEMS == LOWORD(wParam))
-                    {
+            }  else if (ID_VIEWER_CLOSEASSET == LOWORD(wParam)) {
+                AssimpViewer::DeleteAssetData();
+                AssimpViewer::DeleteAsset();
+            } else if (BN_CLICKED == HIWORD(wParam)) {
+                if (IDC_TOGGLEMS == LOWORD(wParam)) {
                     ToggleMS();
-                    }
-                else if (IDC_TOGGLEMAT == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLEMAT == LOWORD(wParam)) {
                     ToggleMats();
-                    }
-                else if (IDC_LCOLOR1 == LOWORD(wParam))
-                    {
-
+                } else if (IDC_LCOLOR1 == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         // hey, I'm tired and yes, I KNOW IT IS EVIL!
                         DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetFirstCheckerColor()));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         DisplayColorDialog(&g_avLightColors[0]);
                         SaveLightColors();
                     }
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR1),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR1));
-                    }
-                else if (IDC_LCOLOR2 == LOWORD(wParam))
-                    {
+                } else if (IDC_LCOLOR2 == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         // hey, I'm tired and yes, I KNOW IT IS EVIL!
                         DisplayColorDialog(const_cast<D3DXVECTOR4*>(CDisplay::Instance().GetSecondCheckerColor()));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         DisplayColorDialog(&g_avLightColors[1]);
                         SaveLightColors();
                     }
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR2),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
-                    }
-                else if (IDC_LCOLOR3 == LOWORD(wParam))
-                    {
+                } else if (IDC_LCOLOR3 == LOWORD(wParam)) {
                     DisplayColorDialog(&g_avLightColors[2]);
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
                     SaveLightColors();
-                }
-                else if (IDC_LRESET == LOWORD(wParam))
-                {
+                } else if (IDC_LRESET == LOWORD(wParam)) {
                     if (CDisplay::VIEWMODE_TEXTURE == CDisplay::Instance().GetViewMode() ||
-                        CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode())
-                    {
+                            CDisplay::VIEWMODE_MATERIAL == CDisplay::Instance().GetViewMode()) {
                         CDisplay::Instance().SetFirstCheckerColor(D3DXVECTOR4(0.4f,0.4f,0.4f,1.0f));
                         CDisplay::Instance().SetSecondCheckerColor(D3DXVECTOR4(0.6f,0.6f,0.6f,1.0f));
                         SaveCheckerPatternColors();
-                    }
-                    else
-                    {
+                    } else {
                         g_avLightColors[0] = D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF);
                         g_avLightColors[1] = D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00);
                         g_avLightColors[2] = D3DCOLOR_ARGB(0xFF,0x05,0x05,0x05);
@@ -1985,57 +1925,33 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR2));
                     InvalidateRect(GetDlgItem(g_hDlg,IDC_LCOLOR3),nullptr,TRUE);
                     UpdateWindow(GetDlgItem(g_hDlg,IDC_LCOLOR3));
-                    }
-                else if (IDC_NOSPECULAR == LOWORD(wParam))
-                    {
+                } else if (IDC_NOSPECULAR == LOWORD(wParam)) {
                     ToggleSpecular();
-                    }
-                else if (IDC_NOAB == LOWORD(wParam))
-                    {
+                } else if (IDC_NOAB == LOWORD(wParam)) {
                     ToggleTransparency();
-                    }
-                else if (IDC_ZOOM == LOWORD(wParam))
-                    {
+                } else if (IDC_ZOOM == LOWORD(wParam)) {
                     ToggleFPSView();
-                    }
-                else if (IDC_BLUBB == LOWORD(wParam))
-                    {
+                } else if (IDC_BLUBB == LOWORD(wParam)) {
                     ToggleUIState();
-                    }
-                else if (IDC_TOGGLENORMALS == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLENORMALS == LOWORD(wParam)) {
                     ToggleNormals();
-                    }
-                else if (IDC_LOWQUALITY == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLETANGENTS == LOWORD(wParam)) {
+                    ToggleTangents();
+                } else if (IDC_LOWQUALITY == LOWORD(wParam)) {
                     ToggleLowQuality();
-                    }
-                else if (IDC_3LIGHTS == LOWORD(wParam))
-                    {
+                } else if (IDC_3LIGHTS == LOWORD(wParam)) {
                     ToggleMultipleLights();
-                    }
-                else if (IDC_LIGHTROTATE == LOWORD(wParam))
-                    {
-                    ToggleLightRotate();
-                    }
-                else if (IDC_AUTOROTATE == LOWORD(wParam))
-                    {
+                } else if (IDC_LIGHTROTATE == LOWORD(wParam)) {
+                    ToggleLightRotate(); 
+                } else if (IDC_AUTOROTATE == LOWORD(wParam)) {
                     ToggleAutoRotate();
-                    }
-                else if (IDC_TOGGLEWIRE == LOWORD(wParam))
-                    {
-                    ToggleWireFrame();
-                    }
-                else if (IDC_SHOWSKELETON == LOWORD(wParam))
-                    {
+                } else if (IDC_TOGGLEWIRE == LOWORD(wParam)) {
+                    ToggleWireFrame(); 
+                } else if (IDC_SHOWSKELETON == LOWORD(wParam)) {
                     ToggleSkeleton();
-                    }
-                else if (IDC_BFCULL == LOWORD(wParam))
-                    {
+                } else if (IDC_BFCULL == LOWORD(wParam)) {
                     ToggleCulling();
-                    }
-                else if (IDC_PLAY == LOWORD(wParam))
-                    {
+                } else if (IDC_PLAY == LOWORD(wParam)) {
                         g_bPlay = !g_bPlay;
                         SetDlgItemText(g_hDlg,IDC_PLAY,(g_bPlay ? "Stop" : "Play"));
 
@@ -2045,15 +1961,13 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
                     }
                 }
             // check the file history
-            for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
-            {
-                if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam))
-                {
-                    DeleteAssetData();
-                    DeleteAsset();
+            for (unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i) {
+                if (AI_VIEW_RECENT_FILE_ID(i) == LOWORD(wParam)) {
+                    AssimpViewer::DeleteAssetData();
+                    AssimpViewer::DeleteAsset();
 
                     strcpy(g_szFileName, g_aPreviousFiles[i].c_str());
-                    LoadAsset();
+                    AssimpViewer::LoadAsset();
 
                     // update and safe the history
                     UpdateHistory();
@@ -2073,20 +1987,15 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam
             return TRUE;
         };
     return FALSE;
-    }
-
+}
 
 //-------------------------------------------------------------------------------
 // Message prcoedure for the progress dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg,UINT uMsg,
-     WPARAM wParam,LPARAM lParam)
-    {
+INT_PTR CALLBACK AssimpViewer::ProgressMessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
-    switch (uMsg)
-        {
+    switch (uMsg) {
         case WM_INITDIALOG:
-
             SendDlgItemMessage(hwndDlg,IDC_PROGRESS,PBM_SETRANGE,0,
                 MAKELPARAM(0,500));
 
@@ -2122,42 +2031,38 @@ INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg,UINT uMsg,
             if (iPos > 490)iPos = 0;
             SendDlgItemMessage(hwndDlg,IDC_PROGRESS,PBM_SETPOS,iPos,0);
 
-            if (g_bLoadingFinished)
-                {
+            if (g_bLoadingFinished) {
                 EndDialog(hwndDlg,0);
                 return TRUE;
-                }
+            }
 
             return TRUE;
-        }
-    return FALSE;
     }
-
+    return FALSE;
+}
 
 //-------------------------------------------------------------------------------
 // Message procedure for the about dialog
 //-------------------------------------------------------------------------------
-INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
-    WPARAM wParam,LPARAM lParam)
-    {
+INT_PTR CALLBACK AssimpViewer::AboutMessageProc(HWND hwndDlg,UINT uMsg, WPARAM wParam,LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
-    switch (uMsg)
-        {
+    switch (uMsg) {
         case WM_CLOSE:
             EndDialog(hwndDlg,0);
             return TRUE;
 
         case WM_COMMAND:
-
             if (IDOK == LOWORD(wParam))
-                {
+            {
                 EndDialog(hwndDlg,0);
                 return TRUE;
-                }
-        }
-    return FALSE;
+            }
     }
+    
+    return FALSE;
 }
+
+} // namespace AssimpViewer
 
 using namespace AssimpView;
 
@@ -2167,8 +2072,7 @@ using namespace AssimpView;
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR    lpCmdLine,
-                       int       nCmdShow)
-{
+                       int       nCmdShow) {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -2180,7 +2084,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     // initialize the IDirect3D9 interface
     g_hInstance = hInstance;
-    if (0 == InitD3D()) {
+    if (0 == AssimpViewer::InitD3D()) {
         MessageBox(nullptr,"Failed to initialize Direct3D 9",
             "ASSIMP ModelViewer",MB_OK);
         return -6;
@@ -2215,7 +2119,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     UpdateWindow( hDlg );
 
     // create the D3D device object
-    if (0 == CreateDevice(g_sOptions.bMultiSample,false,true)) {
+    if (0 == AssimpViewer::CreateDevice(g_sOptions.bMultiSample,false,true)) {
         MessageBox(nullptr,"Failed to initialize Direct3D 9 (2)",
             "ASSIMP ModelViewer",MB_OK);
         return -4;
@@ -2240,20 +2144,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     RegCreateKeyEx(HKEY_CURRENT_USER,
         "Software\\ASSIMP\\Viewer",0,nullptr,0,KEY_ALL_ACCESS, nullptr, &hRegistry,nullptr);
     if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastSkyBoxSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
-        {
+            (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0]) {
         CBackgroundPainter::Instance().SetCubeMapBG(szFileName);
-        }
-    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastTextureSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
-        {
+    } else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"LastTextureSrc",nullptr,nullptr,
+                (BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0]) {
         CBackgroundPainter::Instance().SetTextureBG(szFileName);
-        }
-    else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"Color",nullptr,nullptr,
-        (BYTE*)&clrColor,&dwTemp))
-        {
+    } else if(ERROR_SUCCESS == RegQueryValueEx(hRegistry,"Color",nullptr,nullptr,
+                (BYTE*)&clrColor,&dwTemp)) {
         CBackgroundPainter::Instance().SetColor(clrColor);
-        }
+    }
     RegCloseKey(hRegistry);
 
     // now handle command line arguments
@@ -2265,18 +2164,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     double g_dCurTime = 0;
     double g_dLastTime = 0;
-    while( uMsg.message != WM_QUIT )
-        {
-        if( PeekMessage( &uMsg, nullptr, 0, 0, PM_REMOVE ) )
-            {
+    while( uMsg.message != WM_QUIT ) {
+        if( PeekMessage( &uMsg, nullptr, 0, 0, PM_REMOVE ) ) {
             TranslateMessage( &uMsg );
             DispatchMessage( &uMsg );
 
-            if (WM_CHAR == uMsg.message)
-                {
+            if (WM_CHAR == uMsg.message) {
 
-                switch ((char)uMsg.wParam)
-                    {
+                switch ((char)uMsg.wParam) {
                     case 'M':
                     case 'm':
 
@@ -2440,10 +2335,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             }
         }
     }
-    DeleteAsset();
+    AssimpViewer::DeleteAsset();
     Assimp::DefaultLogger::kill();
-    ShutdownDevice();
-    ShutdownD3D();
+    AssimpViewer::ShutdownDevice();
+    AssimpViewer::ShutdownD3D();
 
     return 0;
 }

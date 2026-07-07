@@ -155,7 +155,8 @@ void HandleCommandLine(char* p_szCommand) {
         sz++; // skip the starting quote
     }
 
-    strcpy( g_szFileName, sz );
+    strncpy( g_szFileName, sz, MAX_PATH - 1 );
+    g_szFileName[MAX_PATH - 1] = '\0';
     AssimpViewer::LoadAsset();
 
     // update the history
@@ -416,7 +417,8 @@ void LoadBGTexture() {
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"TextureSrc",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -525,13 +527,11 @@ void LoadSkybox() {
 
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"SkyBoxSrc",nullptr,nullptr,
-        (BYTE*)szFileName,&dwTemp))
-    {
+            (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
-    }
-    else
-    {
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
+    } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
         if (!sz)
@@ -548,7 +548,8 @@ void LoadSkybox() {
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".dds", 0, nullptr, nullptr
     };
-    if(GetOpenFileName(&sFilename1) == 0) return;
+    if (GetOpenFileName(&sFilename1) == 0) 
+        return;
 
     // Now store the file in the registry
     RegSetValueExA(g_hRegistry,"SkyBoxSrc",0,REG_SZ,(const BYTE*)szFileName,MAX_PATH);
@@ -577,7 +578,8 @@ void SaveScreenshot() {
     DWORD dwTemp = MAX_PATH;
     if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"ScreenShot",nullptr,nullptr, (BYTE*)szFileName,&dwTemp)) {
         // Key was not found. Use C:
-        strcpy(szFileName,"");
+        strncpy(szFileName,"",MAX_PATH - 1);
+        szFileName[MAX_PATH - 1] = '\0';
     } else {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
@@ -985,15 +987,18 @@ void DoExport(size_t formatId) {
     {   char * const sz = strrchr(szFileName,'.');
         if(sz) {
             ai_assert((sz - &szFileName[0]) + strlen(e->fileExtension) + 1 <= MAX_PATH);
-            strcpy(sz+1,e->fileExtension);
+            strncpy(sz+1,e->fileExtension,MAX_PATH - (sz - &szFileName[0]) - 1);
+            szFileName[MAX_PATH - 1] = '\0';
         }
     }
 
     // build the stupid info string for GetSaveFileName() - can't use sprintf() because the string must contain binary zeros.
     char desc[256] = {0};
-    char* c = strcpy(desc,e->description) + strlen(e->description)+1;
+    char* c = strncpy(desc,e->description,255);
+    c += strlen(e->description)+1;
     c += sprintf(c,"*.%s",e->fileExtension)+1;
-    strcpy(c, "*.*\0"); c += 4;
+    strncpy(c, "*.*\0", 4); 
+    c += 4;
 
     ai_assert(c - &desc[0] <= 256);
 

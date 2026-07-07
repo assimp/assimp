@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exceptional.h>
 #include <assimp/defs.h>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 
 namespace Assimp {
@@ -164,6 +165,36 @@ public:
         }
 
         return reinterpret_cast<const DataType *>(data_ + uoffset);
+    }
+
+    /** \brief Return whether a byte range is inside the buffer. */
+    bool contains_bytes(const void *ptr, size_t bytes) const {
+        if (ptr == nullptr || data_ == nullptr) {
+            return false;
+        }
+
+        const uintptr_t start = reinterpret_cast<uintptr_t>(data_);
+        const uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+        if (address < start) {
+            return false;
+        }
+
+        const size_t offset = static_cast<size_t>(address - start);
+        if (offset > length_) {
+            return false;
+        }
+
+        return bytes <= length_ - offset;
+    }
+
+    /** \brief Return whether a typed range is inside the buffer. */
+    template <typename DataType>
+    bool contains(const DataType *ptr, size_t elements) const {
+        if (elements > length_ / sizeof(DataType)) {
+            return false;
+        }
+
+        return contains_bytes(ptr, elements * sizeof(DataType));
     }
 
     /** \brief Size of the buffer in bytes. */

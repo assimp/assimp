@@ -52,7 +52,10 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
-    ai_assert(nullptr != pScene);
+    if (pScene == nullptr) {
+        ASSIMP_LOG_ERROR("Nullptr to scene, aborted.");
+        return;
+    }
     ASSIMP_LOG_DEBUG("MakeVerboseFormatProcess begin");
 
     bool bHas = false;
@@ -184,13 +187,17 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     }
     pcMesh->mNumVertices = iNumVerts;
 
-    if (pcMesh->HasNormals()) {
+    if (pcMesh->mNormals != nullptr) {
         delete[] pcMesh->mNormals;
         pcMesh->mNormals = pvNormals;
     }
-    if (pcMesh->HasTangentsAndBitangents()) {
+  
+    if (pcMesh->mTangents != nullptr) {
         delete[] pcMesh->mTangents;
         pcMesh->mTangents = pvTangents;
+    }
+
+    if ( pcMesh->mBitangents != nullptr) {
         delete[] pcMesh->mBitangents;
         pcMesh->mBitangents = pvBitangents;
     }

@@ -1723,7 +1723,9 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
 
     // read index offset, if per-index <input>
     if (XmlParser::hasAttribute(node, "offset")) {
-        XmlParser::getUIntAttribute(node, "offset", (unsigned int &)channel.mOffset);
+        unsigned int offsetValue = 0;
+        XmlParser::getUIntAttribute(node, "offset", offsetValue);
+        channel.mOffset = offsetValue;
     }
 
     // read set if texture coordinates

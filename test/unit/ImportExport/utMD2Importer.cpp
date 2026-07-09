@@ -76,3 +76,9 @@ TEST(utMD2Importer, importHorse) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD2/horse.md2", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
+
+TEST(utMD2Importer, importMalformedZeroNumVertices) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_zero_numvertices.md2", 0);
+    ASSERT_EQ(nullptr, scene);
+}

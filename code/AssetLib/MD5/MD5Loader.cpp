@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <memory>
+#include <vector>
 
 using namespace Assimp;
 
@@ -76,6 +77,27 @@ static constexpr aiImporterDesc desc = {
     0,
     "md5mesh md5camera md5anim"
 };
+
+// ------------------------------------------------------------------------------------------------
+// Validate one vertex's weight references and accumulate, per bone, how many non-negligible
+// weights influence it. Weight and bone indices are read straight from the file, so reject
+// out-of-range values here to keep all later piCount[] and joint lookups in bounds.
+static void CountVertexBoneWeights(const MD5::VertexDesc &vertex, const MD5::WeightArray &weights,
+        std::vector<unsigned int> &boneWeightCount) {
+    for (unsigned int w = vertex.mFirstWeight; w < vertex.mFirstWeight + vertex.mNumWeights; ++w) {
+        if (w >= weights.size()) {
+            throw DeadlyImportError("MD5MESH: Invalid weight index");
+        }
+        const MD5::WeightDesc &weightDesc = weights[w];
+        if (weightDesc.mBone >= boneWeightCount.size()) {
+            throw DeadlyImportError("MD5MESH: Invalid bone index");
+        }
+        // FIX for some invalid exporters
+        if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON)) {
+            ++boneWeightCount[weightDesc.mBone];
+        }
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -117,7 +139,9 @@ void MD5Importer::SetupProperties(const Importer *pImp) {
 void MD5Importer::InternReadFile(const std::string &pFile, aiScene *_pScene, IOSystem *pIOHandler) {
     mIOHandler = pIOHandler;
     mScene = _pScene;
-    mHadMD5Mesh = mHadMD5Anim = mHadMD5Camera = false;
+    mHadMD5Mesh = false;
+    mHadMD5Anim = false;
+    mHadMD5Camera = false;
 
     // remove the file extension
     const std::string::size_type pos = pFile.find_last_of('.');
@@ -212,8 +236,13 @@ void MD5Importer::MakeDataUnique(MD5::MeshDesc &meshSrc) {
 
     for (FaceArray::const_iterator iter = meshSrc.mFaces.begin(), iterEnd = meshSrc.mFaces.end(); iter != iterEnd; ++iter) {
         const aiFace &face = *iter;
+        // Reject unpopulated faces (numtris > tri-lines leaves mIndices == nullptr).
+        if (face.mNumIndices != 3 || face.mIndices == nullptr) {
+            throw DeadlyImportError("MD5MESH: face is missing its three vertex indices");
+        }
         for (unsigned int i = 0; i < 3; ++i) {
-            if (face.mIndices[0] >= meshSrc.mVertices.size()) {
+            // Check mIndices[i] not [0]: catches out-of-range indices on faces 1 and 2.
+            if (face.mIndices[i] >= meshSrc.mVertices.size()) {
                 throw DeadlyImportError("MD5MESH: Invalid vertex index");
             }
 
@@ -351,9 +380,10 @@ void MD5Importer::LoadMD5MeshFile() {
     pcNode->mParent = mScene->mRootNode;
     AttachChilds_Mesh(-1, pcNode, meshParser.mJoints);
 
-    pcNode = mScene->mRootNode->mChildren[0] = new aiNode();
+    pcNode = new aiNode();
     pcNode->mName.Set("<MD5_Mesh>");
     pcNode->mParent = mScene->mRootNode;
+    mScene->mRootNode->mChildren[0] = pcNode;
 
 #if 0
     if (pScene->mRootNode->mChildren[1]->mNumChildren) /* start at the right hierarchy level */
@@ -412,17 +442,12 @@ void MD5Importer::LoadMD5MeshFile() {
         }
 
         // sort all bone weights - per bone
-        unsigned int *piCount = new unsigned int[meshParser.mJoints.size()];
-        ::memset(piCount, 0, sizeof(unsigned int) * meshParser.mJoints.size());
+        // Use a vector so the buffer is released automatically even if a malformed
+        // file makes the validation below throw.
+        std::vector<unsigned int> piCount(meshParser.mJoints.size(), 0);
 
-        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter, ++pv) {
-            for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
-                MD5::WeightDesc &weightDesc = meshSrc.mWeights[w];
-                /* FIX for some invalid exporters */
-                if (!(weightDesc.mWeight < AI_MD5_WEIGHT_EPSILON && weightDesc.mWeight >= -AI_MD5_WEIGHT_EPSILON)) {
-                    ++piCount[weightDesc.mBone];
-                }
-            }
+        for (MD5::VertexArray::const_iterator iter = meshSrc.mVertices.begin(); iter != meshSrc.mVertices.end(); ++iter) {
+            CountVertexBoneWeights(*iter, meshSrc.mWeights, piCount);
         }
 
         // check how many we will need
@@ -495,8 +520,6 @@ void MD5Importer::LoadMD5MeshFile() {
                 mesh->mBones[p]->mWeights -= mesh->mBones[p]->mNumWeights;
             }
         }
-
-        delete[] piCount;
 
         // now setup all faces - we can directly copy the list
         // (however, take care that the aiFace destructor doesn't delete the mIndices array)
@@ -722,10 +745,10 @@ void MD5Importer::LoadMD5CameraFile() {
         nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
         nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
         for (unsigned int i = 0; i < nd->mNumPositionKeys; ++i) {
-
             nd->mPositionKeys[i].mValue = frames[*it + i].vPositionXYZ;
             MD5::ConvertQuaternion(frames[*it + i].vRotationQuat, nd->mRotationKeys[i].mValue);
-            nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime = *it + i;
+            nd->mPositionKeys[i].mTime = *it + i;  
+            nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime;
         }
     }
 }

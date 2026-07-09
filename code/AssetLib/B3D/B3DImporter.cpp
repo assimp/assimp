@@ -234,7 +234,18 @@ string B3DImporter::ReadChunk() {
     ASSIMP_LOG_DEBUG("ReadChunk: ", tag);
 #endif
     unsigned sz = (unsigned)ReadInt();
-    _stack.push_back(_pos + sz);
+    // Validate the chunk extent before trusting it: a chunk must lie within
+    // the file and within its enclosing chunk. Without this check a crafted
+    // size lets ChunkSize() -- and the element counts derived from it in
+    // ReadVRTS()/ReadTRIS() -- run far past the buffer.
+    if (sz > _buf.size() - _pos) {
+        Fail("Bad chunk size");
+    }
+    const size_t end = _pos + sz;
+    if (!_stack.empty() && end > _stack.back()) {
+        Fail("Bad chunk size");
+    }
+    _stack.push_back(end);
     return tag;
 }
 
@@ -246,7 +257,9 @@ void B3DImporter::ExitChunk() {
 
 // ------------------------------------------------------------------------------------------------
 size_t B3DImporter::ChunkSize() {
-    return _stack.back() - _pos;
+    // _stack.back() is the validated end offset of the current chunk; guard
+    // against unsigned underflow should _pos ever be advanced past it.
+    return _stack.back() > _pos ? _stack.back() - _pos : 0;
 }
 // ------------------------------------------------------------------------------------------------
 
@@ -469,9 +482,11 @@ void B3DImporter::ReadBONE(int id) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::ReadKEYS(aiNodeAnim *nodeAnim) {
-    vector<aiVectorKey> trans, scale;
-    vector<aiQuatKey> rot;
+void B3DImporter::ReadKEYS(AnimKeys& keys) {
+    vector<aiVectorKey>& trans = keys.positionKeys;
+    vector<aiVectorKey>& scale = keys.scalingKeys;
+    vector<aiQuatKey>& rot = keys.rotationKeys;
+
     int flags = ReadInt();
     while (ChunkSize()) {
         int frame = ReadInt();
@@ -484,21 +499,6 @@ void B3DImporter::ReadKEYS(aiNodeAnim *nodeAnim) {
         if (flags & 4) {
             rot.emplace_back(frame, ReadQuat());
         }
-    }
-
-    if (flags & 1) {
-        nodeAnim->mNumPositionKeys = static_cast<unsigned int>(trans.size());
-        nodeAnim->mPositionKeys = to_array(trans);
-    }
-
-    if (flags & 2) {
-        nodeAnim->mNumScalingKeys = static_cast<unsigned int>(scale.size());
-        nodeAnim->mScalingKeys = to_array(scale);
-    }
-
-    if (flags & 4) {
-        nodeAnim->mNumRotationKeys = static_cast<unsigned int>(rot.size());
-        nodeAnim->mRotationKeys = to_array(rot);
     }
 }
 
@@ -542,6 +542,7 @@ aiNode *B3DImporter::ReadNODE(aiNode *parent) {
     std::unique_ptr<aiNodeAnim> nodeAnim;
     vector<unsigned> meshes;
     vector<aiNode *> children;
+    AnimKeys keys;
 
     while (ChunkSize()) {
         const string chunk = ReadChunk();
@@ -560,7 +561,7 @@ aiNode *B3DImporter::ReadNODE(aiNode *parent) {
                 nodeAnim.reset(new aiNodeAnim);
                 nodeAnim->mNodeName = node->mName;
             }
-            ReadKEYS(nodeAnim.get());
+            ReadKEYS(keys);
         } else if (chunk == "NODE") {
             aiNode *child = ReadNODE(node);
             children.push_back(child);
@@ -569,6 +570,21 @@ aiNode *B3DImporter::ReadNODE(aiNode *parent) {
     }
 
     if (nodeAnim) {
+        if (!keys.positionKeys.empty()) {
+            nodeAnim->mNumPositionKeys = static_cast<unsigned int>(keys.positionKeys.size());
+            nodeAnim->mPositionKeys = to_array(keys.positionKeys);
+        }
+
+        if (!keys.scalingKeys.empty()) {
+            nodeAnim->mNumScalingKeys = static_cast<unsigned int>(keys.scalingKeys.size());
+            nodeAnim->mScalingKeys = to_array(keys.scalingKeys);
+        }
+
+        if (!keys.rotationKeys.empty()) {
+            nodeAnim->mNumRotationKeys = static_cast<unsigned int>(keys.rotationKeys.size());
+            nodeAnim->mRotationKeys = to_array(keys.rotationKeys);
+        }
+
         _nodeAnims.emplace_back(std::move(nodeAnim));
     }
 

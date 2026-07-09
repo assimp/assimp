@@ -840,7 +840,7 @@ void FBXExporter::WriteDefinitions () {
     // TODO: support Maya's Stingray PBS material
     count = mScene->mNumMaterials;
     if (count) {
-        bool has_phong = has_phong_mat(mScene);
+          bool has_phong = has_phong_mat(mScene);
         n = FBX::Node("ObjectType", "Material");
         n.AddChild("Count", count);
         pt = FBX::Node("PropertyTemplate");
@@ -1361,17 +1361,17 @@ void FBXExporter::WriteObjects () {
         FBX::Node le;
 
 		if (!normal_data.empty()) {
-		  le = FBX::Node("LayerElement");
-		  le.AddChild("Type", "LayerElementNormal");
-		  le.AddChild("TypedIndex", int32_t(0));
-		  layer.AddChild(le);
+		    le = FBX::Node("LayerElement");
+		    le.AddChild("Type", "LayerElementNormal");
+		    le.AddChild("TypedIndex", int32_t(0));
+		    layer.AddChild(le);
         }
 
 		if (!color_data.empty()) {
-		  le = FBX::Node("LayerElement");
-		  le.AddChild("Type", "LayerElementColor");
-		  le.AddChild("TypedIndex", int32_t(0));
-		  layer.AddChild(le);
+		    le = FBX::Node("LayerElement");
+		    le.AddChild("Type", "LayerElementColor");
+		    le.AddChild("TypedIndex", int32_t(0));
+		    layer.AddChild(le);
         }
 
         le = FBX::Node("LayerElement");
@@ -1551,6 +1551,14 @@ void FBXExporter::WriteObjects () {
             c.r = 1.0f, c.g = 1.0f, c.b = 1.0f;
             m->Get(AI_MATKEY_COLOR_REFLECTIVE, c);
             p.AddP70double("Reflectivity", f*f*((c.r+c.g+c.b)/3.0));
+        }
+
+        aiTextureMapMode mapU, mapV;
+        if (aiGetMaterialInteger(m, AI_MATKEY_MAPPINGMODE_U(aiTextureType_DIFFUSE, 0), (int *)&mapU) == AI_SUCCESS) {
+            p.AddP70enum("TextureU", mapU);
+        }
+        if (aiGetMaterialInteger(m, AI_MATKEY_MAPPINGMODE_V(aiTextureType_DIFFUSE, 0), (int *)&mapV) == AI_SUCCESS) {
+            p.AddP70enum("TextureV", mapV);
         }
 
         n.AddChild(p);
@@ -1766,8 +1774,8 @@ void FBXExporter::WriteObjects () {
             // can't easily determine which texture path will be correct,
             // so just store what we have in every field.
             // these being incorrect is a common problem with FBX anyway.
-            tnode.AddChild("FileName", tp_elem->second);
-            tnode.AddChild("RelativeFilename", tp_elem->second);
+            tnode.AddChild("FileName", tfile_path);
+            tnode.AddChild("RelativeFilename", tfile_path);
             tnode.AddChild("ModelUVTranslation", double(0.0), double(0.0));
             tnode.AddChild("ModelUVScaling", double(1.0), double(1.0));
             tnode.AddChild("Texture_Alpha_Source", "None");

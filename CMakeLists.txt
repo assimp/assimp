@@ -34,6 +34,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #----------------------------------------------------------------------
+
+# Enable Clang unsafe buffer usage warning for memory safety
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wunsafe-buffer-usage)
+endif()
+
 SET(CMAKE_POLICY_DEFAULT_CMP0012 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 SET(CMAKE_POLICY_DEFAULT_CMP0092 NEW)
@@ -98,13 +104,13 @@ option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.25.8.tar.gz"
-    SHA1 "26c79d587883ec910bce168e25f6ac4595f97033"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.10.tar.gz"
+    SHA1 "3d904b93ba684f0e671a2d44969a1a127abe3e66"
   )
   ADD_DEFINITIONS(-DASSIMP_USE_HUNTER)
 ENDIF()
 
-PROJECT(Assimp VERSION 6.0.4
+PROJECT(Assimp VERSION 6.0.5
   LANGUAGES C CXX
   DESCRIPTION "Open Asset Import Library (Assimp) is a library to import various well-known 3D model formats in a uniform manner."
 )

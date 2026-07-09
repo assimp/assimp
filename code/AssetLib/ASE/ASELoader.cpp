@@ -189,6 +189,8 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
+                (*i)->mColors[2] = nullptr;
+                delete *i;
                 continue;
             }
             *pp++ = *i;
@@ -573,8 +575,8 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParen
             nd->mParent = node;
 
             // The .Target node is always the first child node
-            for (unsigned int m = 0; m < node->mNumChildren; ++m)
-                node->mChildren[m + 1] = node->mChildren[m];
+            for (unsigned int m = node->mNumChildren; m > 0; --m)
+                node->mChildren[m] = node->mChildren[m - 1];
 
             node->mChildren[0] = nd;
             node->mNumChildren++;

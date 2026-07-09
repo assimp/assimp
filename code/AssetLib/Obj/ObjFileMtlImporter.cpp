@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileMtlImporter.h"
 #include "ObjFileData.h"
 #include "ObjTools.h"
+#include <assimp/types.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
@@ -374,6 +375,7 @@ void ObjFileMtlImporter::load() {
             } break;
         }
     }
+}
 }
 
 // -------------------------------------------------------------------

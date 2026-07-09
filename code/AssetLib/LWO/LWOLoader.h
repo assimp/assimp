@@ -290,7 +290,6 @@ private:
     /// @param idx Absolute index of the first vertex
     /// @param data Value of the VMAP to be assigned - read numRead
     ///        floats from this array.
-    */
     void DoRecursiveVMAPAssignment(VMapEntry *base, unsigned int numRead,
             unsigned int idx, float *data);
 

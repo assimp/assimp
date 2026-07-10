@@ -482,6 +482,9 @@ void MD5Importer::LoadMD5MeshFile() {
                 // there are models which have weights which don't sum to 1 ...
                 ai_real fSum = 0.0;
                 for (unsigned int jub = (*iter).mFirstWeight, w = jub; w < jub + (*iter).mNumWeights; ++w) {
+                    if (w >= meshSrc.mWeights.size()) {
+                        throw DeadlyImportError("MD5MESH: Invalid weight index");
+                    }
                     fSum += meshSrc.mWeights[w].mWeight;
                 }
                 if (!fSum) {

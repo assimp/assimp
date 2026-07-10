@@ -237,8 +237,7 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     SetMaterialTextureProperty(embeddedTexIdxs, r, static_cast<TextureInfo>(prop), mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
-        std::string textureStrengthKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + "strength";
-        mat->AddProperty(&prop.strength, 1, textureStrengthKey.c_str(), texType, texSlot);
+        mat->AddProperty(&prop.strength, 1, AI_MATKEY_GLTF_TEXTURE_STRENGTH(texType, texSlot));
     }
 }
 
@@ -1613,10 +1612,17 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if ((nullptr != iter.second.rotation) || (nullptr != iter.second.scale) || (nullptr != iter.second.translation)) {
-                    ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    Node *nodePtr = targetNode ? targetNode.operator->() : nullptr;
+                    if (!nodePtr) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping channel.");
+                        continue;
+                    }
+                    ai_anim->mChannels[j] = CreateNodeAnim(r, *nodePtr, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumChannels = j;
         }
 
         ai_anim->mNumMorphMeshChannels = numMorphMeshChannels;
@@ -1626,10 +1632,17 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if (nullptr != iter.second.weight) {
-                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    Node *nodePtr = targetNode ? targetNode.operator->() : nullptr;
+                    if (!nodePtr) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping morph channel.");
+                        continue;
+                    }
+                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, *nodePtr, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumMorphMeshChannels = j;
         }
 
         // Use the latest key-frame for the duration of the animation
@@ -1721,8 +1734,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         tex->pcData = reinterpret_cast<aiTexel *>(data);
 
         if (!img.mimeType.empty()) {
-            const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
-            if (ext) {
+            const char *slash = strchr(img.mimeType.c_str(), '/');
+            if (slash != nullptr) {
+                const char *ext = slash + 1;
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 } else if (strcmp(ext, "ktx2") == 0) { // basisu: ktx remains

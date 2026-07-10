@@ -152,7 +152,9 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     // before any of them is dereferenced. Arithmetic is done in 64-bit to avoid
     // wrapping a 32-bit product.
     const auto rangeInFile = [fileSize](uint64_t offset, uint64_t bytes) {
-        return offset + bytes <= fileSize;
+        // Written so neither side of the comparison can wrap, even if a caller
+        // passes a byte count that saturated on overflow.
+        return bytes <= fileSize && offset <= fileSize - bytes;
     };
     if (!rangeInFile(hdr.ofs_meshes, (uint64_t)hdr.num_meshes * sizeof(iqmmesh))
      || !rangeInFile(hdr.ofs_vertexarrays, (uint64_t)hdr.num_vertexarrays * sizeof(iqmvertexarray))
@@ -224,6 +226,14 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         for( auto tri = reinterpret_cast<iqmtriangle*>( data + hdr.ofs_triangles ) + imesh->first_triangle, end = tri + imesh->num_triangles; tri != end; ++tri )
         {
             swap_block( tri->vertex, sizeof( tri->vertex ) );
+            // Indices are rebased onto this mesh by subtracting first_vertex, so a
+            // triangle pointing outside [first_vertex, first_vertex + num_vertexes)
+            // would produce an out-of-range vertex index for later stages.
+            for (unsigned int v : tri->vertex) {
+                if (v < imesh->first_vertex || v - imesh->first_vertex >= imesh->num_vertexes) {
+                    throw DeadlyImportError("Corrupt triangle in IQM file ", file, ".");
+                }
+            }
             auto& face = mesh->mFaces[mesh->mNumFaces++];
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[3]{ tri->vertex[0] - imesh->first_vertex,
@@ -239,11 +249,16 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
             // Bound the source region [offset, offset + (first_vertex + nVerts)*step*elemSize)
             // against the file before any element of this array is read.
-            static const unsigned int formatSize[] = { 1, 1, 2, 2, 4, 4, 2, 4, 8 };
-            const unsigned int elemSize = array->format < (sizeof(formatSize) / sizeof(*formatSize))
-                    ? formatSize[array->format] : 0;
-            if (elemSize && !rangeInFile(array->offset,
-                    ((uint64_t)imesh->first_vertex + nVerts) * step * elemSize)) {
+            static const unsigned int kFormatSize[] = { 1, 1, 2, 2, 4, 4, 2, 4, 8 };
+            const unsigned int elemSize = array->format < (sizeof(kFormatSize) / sizeof(*kFormatSize))
+                    ? kFormatSize[array->format] : 0;
+            // Every factor is a 32-bit header field, so the product can exceed
+            // 64 bits; saturate on overflow so the bound check rejects it.
+            const uint64_t count = (uint64_t)imesh->first_vertex + nVerts;
+            const uint64_t stride = (uint64_t)step * elemSize;
+            const uint64_t maxU64 = ~(uint64_t)0;
+            const uint64_t region = (count != 0 && stride > maxU64 / count) ? maxU64 : count * stride;
+            if (elemSize && !rangeInFile(array->offset, region)) {
                 throw DeadlyImportError("Corrupt vertex array in IQM file ", file, ".");
             }
 

@@ -147,6 +147,25 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
     ASSIMP_LOG_DEBUG("IQM: loading ", file);
 
+    // Every offset/count below is taken straight from the (attacker-controlled)
+    // header, so make sure each table and the text blob lie fully inside the file
+    // before any of them is dereferenced. Arithmetic is done in 64-bit to avoid
+    // wrapping a 32-bit product.
+    const auto rangeInFile = [fileSize](uint64_t offset, uint64_t bytes) {
+        return offset + bytes <= fileSize;
+    };
+    if (!rangeInFile(hdr.ofs_meshes, (uint64_t)hdr.num_meshes * sizeof(iqmmesh))
+     || !rangeInFile(hdr.ofs_vertexarrays, (uint64_t)hdr.num_vertexarrays * sizeof(iqmvertexarray))
+     || !rangeInFile(hdr.ofs_triangles, (uint64_t)hdr.num_triangles * sizeof(iqmtriangle))
+     || !rangeInFile(hdr.ofs_text, hdr.num_text)) {
+        throw DeadlyImportError("Corrupt header offsets in IQM file ", file, ".");
+    }
+    // A material name is read with strlen from the text blob, so it must be
+    // NUL-terminated inside that blob.
+    if (hdr.num_text && data[(size_t)hdr.ofs_text + hdr.num_text - 1] != 0) {
+        throw DeadlyImportError("Unterminated text section in IQM file ", file, ".");
+    }
+
     // create the root node
     pScene->mRootNode = new aiNode( "<IQMRoot>" );
     // Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
@@ -178,6 +197,12 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     for( auto imesh = reinterpret_cast<iqmmesh*>( data + hdr.ofs_meshes ), end_ = imesh + hdr.num_meshes; imesh != end_; ++imesh )
     {
         swap_block( &imesh->name, sizeof( iqmmesh ) );
+        // The mesh references sub-ranges of the shared triangle/text tables;
+        // reject anything that reaches past their validated bounds.
+        if (imesh->material >= hdr.num_text
+         || (uint64_t)imesh->first_triangle + imesh->num_triangles > hdr.num_triangles) {
+            throw DeadlyImportError("Corrupt mesh entry in IQM file ", file, ".");
+        }
         // Allocate output mesh & material
         auto mesh = pScene->mMeshes[pScene->mNumMeshes++] = new aiMesh();
         mesh->mMaterialIndex = pScene->mNumMaterials;
@@ -211,6 +236,16 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         {
             const unsigned int nVerts = imesh->num_vertexes;
             const unsigned int step = array->size;
+
+            // Bound the source region [offset, offset + (first_vertex + nVerts)*step*elemSize)
+            // against the file before any element of this array is read.
+            static const unsigned int formatSize[] = { 1, 1, 2, 2, 4, 4, 2, 4, 8 };
+            const unsigned int elemSize = array->format < (sizeof(formatSize) / sizeof(*formatSize))
+                    ? formatSize[array->format] : 0;
+            if (elemSize && !rangeInFile(array->offset,
+                    ((uint64_t)imesh->first_vertex + nVerts) * step * elemSize)) {
+                throw DeadlyImportError("Corrupt vertex array in IQM file ", file, ".");
+            }
 
             switch ( array->type )
             {

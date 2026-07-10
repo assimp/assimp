@@ -42,9 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common/assbin_chunks.h"
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
+#include <assimp/texture.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/texture.h>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -125,7 +125,7 @@ TEST_F(utAssbinImportExport, rejectOverflowingEmbeddedTextureDimensions) {
     appendUint32LE(UINT32_MAX);
     appendUint32LE(UINT32_MAX);
     appendZeros(HINTMAXTEXTURELEN - 1u);
-    
+
     Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(blob.data(), blob.size(), 0, "assbin");
     EXPECT_EQ(nullptr, scene);

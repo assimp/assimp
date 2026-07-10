@@ -629,8 +629,9 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
             ReadBytes(stream, tex->pcData, tex->mWidth, "compressed texture data");
         } else {
             const size_t texelCount = CheckedMultiply(static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), "texture");
+            const size_t texelBytes = CheckedMultiply(texelCount, sizeof(aiTexel), "texture byte");
             tex->pcData = new aiTexel[texelCount];
-            ReadBytes(stream, tex->pcData, CheckedMultiply(texelCount, sizeof(aiTexel), "texture byte"), "texture data");
+            ReadBytes(stream, tex->pcData, texelBytes, "texture data");
         }
     }
 }

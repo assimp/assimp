@@ -145,6 +145,40 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         throw DeadlyImportError("Bad binary header in file ", file, ".");
     }
 
+    // Reject headers whose offset/count fields reference data outside of the
+    // file, otherwise the parsing below reads out of bounds (CWE-125). The
+    // offset is validated (and required to be suitably aligned for the pointer
+    // casts below) even when count is zero, since the parsing code still forms
+    // pointers from these offsets before checking the count.
+    auto region_in_bounds = [fileSize](uint64_t offset, uint64_t count, uint64_t elemSize, uint64_t align) -> bool {
+        if (align != 0 && (offset % align) != 0) {
+            return false;
+        }
+        if (offset > fileSize) {
+            return false;
+        }
+        if (count == 0) {
+            return true;
+        }
+        if (elemSize == 0) {
+            return false;
+        }
+        return count <= (fileSize - offset) / elemSize;
+    };
+
+    if (!region_in_bounds(hdr.ofs_text, hdr.num_text, 1, alignof(char))
+     || !region_in_bounds(hdr.ofs_meshes, hdr.num_meshes, sizeof(iqmmesh), alignof(iqmmesh))
+     || !region_in_bounds(hdr.ofs_vertexarrays, hdr.num_vertexarrays, sizeof(iqmvertexarray), alignof(iqmvertexarray))
+     || !region_in_bounds(hdr.ofs_triangles, hdr.num_triangles, sizeof(iqmtriangle), alignof(iqmtriangle))) {
+        throw DeadlyImportError("IQM-file ", file, " references data outside of the file.");
+    }
+
+    // The text block holds the null-terminated material/joint names read below;
+    // require it to be terminated so those reads cannot run past its end.
+    if (hdr.num_text != 0 && data[hdr.ofs_text + hdr.num_text - 1] != 0) {
+        throw DeadlyImportError("IQM-file ", file, " has a non-terminated text block.");
+    }
+
     ASSIMP_LOG_DEBUG("IQM: loading ", file);
 
     // create the root node
@@ -178,6 +212,13 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     for( auto imesh = reinterpret_cast<iqmmesh*>( data + hdr.ofs_meshes ), end_ = imesh + hdr.num_meshes; imesh != end_; ++imesh )
     {
         swap_block( &imesh->name, sizeof( iqmmesh ) );
+        if (imesh->material >= hdr.num_text
+         || imesh->first_triangle > hdr.num_triangles
+         || imesh->num_triangles > hdr.num_triangles - imesh->first_triangle
+         || imesh->first_vertex > hdr.num_vertexes
+         || imesh->num_vertexes > hdr.num_vertexes - imesh->first_vertex) {
+            throw DeadlyImportError("IQM-file ", file, " has a mesh referencing data outside of the file.");
+        }
         // Allocate output mesh & material
         auto mesh = pScene->mMeshes[pScene->mNumMeshes++] = new aiMesh();
         mesh->mMaterialIndex = pScene->mNumMaterials;
@@ -199,6 +240,15 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         for( auto tri = reinterpret_cast<iqmtriangle*>( data + hdr.ofs_triangles ) + imesh->first_triangle, end = tri + imesh->num_triangles; tri != end; ++tri )
         {
             swap_block( tri->vertex, sizeof( tri->vertex ) );
+            // Each triangle index must reference a vertex owned by this mesh;
+            // otherwise the first_vertex subtraction below underflows and emits
+            // out-of-range face indices (CWE-125/CWE-191).
+            const uint32_t vertexEnd = imesh->first_vertex + imesh->num_vertexes;
+            if (tri->vertex[0] < imesh->first_vertex || tri->vertex[0] >= vertexEnd ||
+                tri->vertex[1] < imesh->first_vertex || tri->vertex[1] >= vertexEnd ||
+                tri->vertex[2] < imesh->first_vertex || tri->vertex[2] >= vertexEnd) {
+                throw DeadlyImportError("IQM-file ", file, " has a triangle referencing vertices outside of its mesh.");
+            }
             auto& face = mesh->mFaces[mesh->mNumFaces++];
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[3]{ tri->vertex[0] - imesh->first_vertex,
@@ -211,6 +261,20 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
         {
             const unsigned int nVerts = imesh->num_vertexes;
             const unsigned int step = array->size;
+
+            uint32_t elemBytes = 0;
+            switch ( array->format )
+            {
+            case IQM_BYTE: case IQM_UBYTE: elemBytes = 1; break;
+            case IQM_SHORT: case IQM_USHORT: case IQM_HALF: elemBytes = 2; break;
+            case IQM_INT: case IQM_UINT: case IQM_FLOAT: elemBytes = 4; break;
+            case IQM_DOUBLE: elemBytes = 8; break;
+            default: break;
+            }
+            if ( elemBytes != 0
+             && !region_in_bounds( array->offset, static_cast<uint64_t>( imesh->first_vertex + nVerts ) * step, elemBytes, elemBytes ) ) {
+                throw DeadlyImportError("IQM-file ", file, " has a vertex array referencing data outside of the file.");
+            }
 
             switch ( array->type )
             {

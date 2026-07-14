@@ -174,7 +174,10 @@ struct aiColor3D {
             r(_r), g(_r), b(_r) {}
 
     /** Component-wise comparison */
-    bool operator==(const aiColor3D &other) const {
+    bool operator==(const aiColor3D &other) const { return r == other.r && g == other.g && b == other.b; }
+
+    /** Component-wise epsilon-based comparison */
+    bool epsilonCompare(const aiColor3D &other) const {
         constexpr auto epsilon{float(1e-2)};
         return std::fabs(r - other.r) < epsilon && std::fabs(g - other.g) < epsilon && std::fabs(b - other.b) < epsilon;
     }

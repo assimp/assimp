@@ -1434,7 +1434,7 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
             if (samplers.rotation->output->normalized) {
-              switch (samplers.rotation->output->componentType) {
+                switch (samplers.rotation->output->componentType) {
                 case ComponentType_BYTE:
                     values = GetQuaternionsForType<int8_t>(samplers.rotation->output);
                     break;
@@ -1560,8 +1560,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;
 
-            if (samplers.weight->output->normalized)
-            {
+            if (samplers.weight->output->normalized) {
                 switch (samplers.weight->output->componentType) {
                 case ComponentType_BYTE:
                     values = GetMorphWeightsForType<int8_t>(samplers.weight->output);
@@ -1578,7 +1577,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
                 default:
                     throw DeadlyImportError("GLTF: Invalid component type for normalized morph weights ", ai_to_string(samplers.weight->output->componentType));
                 }
-            
+
             } else if (samplers.weight->output->componentType == ComponentType_FLOAT) {
                 samplers.weight->output->ExtractData(values);
             } else {

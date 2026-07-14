@@ -478,7 +478,8 @@ aiQuaternion *GetQuaternionsForType(Ref<Accessor> input) {
     constexpr float max = std::numeric_limits<T>::max();
     std::array<T, 4> *quats;
     input->ExtractData(quats);
-    auto output = new aiQuaternion[input->count];
+    std::unique_ptr<std::array<T, 4>[]> quatsPtr(quats);
+    auto output = std::make_unique<aiQuaternion[]>(input->count);
     if constexpr (std::is_signed_v<T>) {
         for (size_t i = 0; i < input->count; i++) {
             output[i] = aiQuaternion(
@@ -492,8 +493,7 @@ aiQuaternion *GetQuaternionsForType(Ref<Accessor> input) {
                     quats[i][2] / max, quats[i][3] / max);
         }
     }
-    delete[] quats;
-    return output;
+    return output.release();
 }
 
 template <typename T>
@@ -501,19 +501,19 @@ float *GetMorphWeightsForType(Ref<Accessor> input) {
     constexpr float max = std::numeric_limits<T>::max();
     T *weights;
     input->ExtractData(weights);
-    auto output = new float[input->count];
+    std::unique_ptr<T[]> weightsPtr(weights);
+    auto output = std::make_unique<float[]>(input->count);
     if constexpr (std::is_signed_v<T>) {
-            for (size_t i = 0; i < input->count; i++) {
-                output[i] = std::max(weights[i] / max, -1.0F);
-            }
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = std::max(weights[i] / max, -1.0F);
         }
+    }
     else {
         for (size_t i = 0; i < input->count; i++) {
             output[i] = weights[i] / max;
         }
     }
-    delete[] weights;
-    return output;
+    return output.release();
 }
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {

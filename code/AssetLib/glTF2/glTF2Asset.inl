@@ -1038,21 +1038,27 @@ size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remap
 
     const size_t maxSize = GetMaxByteSize();
 
+    if (elemSize > maxSize) {
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+    }
+
+    const size_t maxCount = (maxSize - elemSize) / stride + 1;
+
+    if (count > maxCount) {
+        throw DeadlyImportError("GLTF: count ", count, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
+    }
+
     outData = new T[usedCount];
 
     if (remappingIndices != nullptr) {
-        const unsigned int maxIndexCount = static_cast<unsigned int>(maxSize / stride);
         for (size_t i = 0; i < usedCount; ++i) {
             size_t srcIdx = (*remappingIndices)[i];
-            if (srcIdx >= maxIndexCount) {
-                throw DeadlyImportError("GLTF: index*stride ", (srcIdx * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+            if (srcIdx >= count) {
+                throw DeadlyImportError("GLTF: index ", srcIdx, " >= count ", count, " in ", getContextForErrorMessages(id, name));
             }
             memcpy(outData + i, data + srcIdx * stride, elemSize);
         }
     } else { // non-indexed cases
-        if (usedCount * stride > maxSize) {
-            throw DeadlyImportError("GLTF: count*stride ", (usedCount * stride), " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
-        }
         if (stride == elemSize && targetElemSize == elemSize) {
             memcpy(outData, data, totalSize);
         } else {
@@ -1827,6 +1833,37 @@ inline void Skin::Read(Value &obj, Asset &r) {
             Ref<Node> node = r.nodes.Retrieve((*joints)[i].GetUint());
             if (node) {
                 this->jointNames.push_back(node);
+            }
+        }
+    }
+
+    // Validate inverseBindMatrices accessor per glTF 2.0 spec
+    if (inverseBindMatrices) {
+        if (inverseBindMatrices->type != AttribType::MAT4) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor must have MAT4 type");
+        }
+        if (inverseBindMatrices->componentType != ComponentType_FLOAT) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor must have FLOAT componentType");
+        }
+        if (inverseBindMatrices->count < jointNames.size()) {
+            throw DeadlyImportError("GLTF: inverseBindMatrices accessor count must be >= number of joints");
+        }
+
+        // Validate that the fourth row of each matrix is [0, 0, 0, 1]
+        uint8_t *ptr = inverseBindMatrices->GetPointer();
+        if (ptr) {
+            //const size_t stride = inverseBindMatrices->GetStride();
+            const size_t elemSize = inverseBindMatrices->GetElementSize();
+            const size_t stride = inverseBindMatrices->sparse ? elemSize : inverseBindMatrices->GetStride();
+            const size_t requiredSize = inverseBindMatrices->count == 0 ? 0 : (inverseBindMatrices->count - 1) * stride + elemSize;
+            if (inverseBindMatrices->GetMaxByteSize() < requiredSize) {
+                throw DeadlyImportError("GLTF: inverseBindMatrices accessor data is out of range");
+            }
+            for (size_t i = 0; i < inverseBindMatrices->count; ++i) {
+                const float *m = reinterpret_cast<const float *>(ptr + i * stride);
+                if (m[3] != 0.0f || m[7] != 0.0f || m[11] != 0.0f || m[15] != 1.0f) {
+                    throw DeadlyImportError("GLTF: inverseBindMatrices[", i, "] fourth row must be [0, 0, 0, 1]");
+                }
             }
         }
     }

@@ -261,10 +261,11 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
 
             // find the material in the scene's material list. Either own material
             // or referenced material, it should already have a valid index
+            mesh->mMaterialIndex = 0;
             if (!sourceMesh->mFaceMaterials.empty()) {
-                mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
-            } else {
-                mesh->mMaterialIndex = 0;
+                if (sourceMesh->mMaterials.size() > b) {
+                    mesh->mMaterialIndex = static_cast<unsigned int>(sourceMesh->mMaterials[b].sceneIndex);
+                }
             }
 
             // Create properly sized data arrays in the mesh. We store unique vertices per face,
@@ -359,18 +360,15 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                 // set up a vertex-linear array of the weights for quick searching if a bone influences a vertex
                 std::vector<ai_real> oldWeights(sourceMesh->mPositions.size(), 0.0);
                 for (unsigned int d = 0; d < obone.mWeights.size(); ++d) {
-                    // TODO  The conditional against boneIdx which was added in commit f844c33
-                    // TODO      (https://github.com/assimp/assimp/commit/f844c3397d7726477ab0fdca8efd3df56c18366b)
-                    // TODO  causes massive breakage as detailed in:
-                    // TODO      https://github.com/assimp/assimp/issues/5332
-                    // TODO  In cases like this unit tests are less useful, since the model still has
-                    // TODO  meshes, textures, animations etc. and asserts against these values may pass;
-                    // TODO  when touching importer code, it is crucial that developers also run manual, visual
-                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch
-                    //const unsigned int boneIdx = obone.mWeights[d].mVertex;
-                    //if (boneIdx < obone.mWeights.size()) {
-                        oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;
-                    //}
+                    // mVertex comes straight from the file and indexes oldWeights, whose
+                    // length is mPositions.size(); a value past the end is an out-of-bounds
+                    // write. The conditional reverted in #5332 bounded by obone.mWeights.size()
+                    // (the weight count, unrelated to the array), which dropped valid weights;
+                    // bound by oldWeights.size() instead so only genuinely invalid indices skip.
+                    const unsigned int vertexIndex = obone.mWeights[d].mVertex;
+                    if (vertexIndex < oldWeights.size()) {
+                        oldWeights[vertexIndex] = obone.mWeights[d].mWeight;
+                    }
                 }
 
                 // collect all vertex weights that influence a vertex in the new mesh

@@ -1435,13 +1435,13 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             aiQuaternion *values = nullptr;
             if (samplers.rotation->output->normalized) {
                 if (samplers.rotation->output->componentType == ComponentType_BYTE) {
-                    values = GetQuaternionsForType<char>(samplers.rotation->output);
+                    values = GetQuaternionsForType<int8_t>(samplers.rotation->output);
                 } else if (samplers.rotation->output->componentType == ComponentType_UNSIGNED_BYTE) {
-                    values = GetQuaternionsForType<unsigned char>(samplers.rotation->output);
+                    values = GetQuaternionsForType<uint8_t>(samplers.rotation->output);
                 } else if (samplers.rotation->output->componentType == ComponentType_SHORT) {
-                    values = GetQuaternionsForType<short>(samplers.rotation->output);
+                    values = GetQuaternionsForType<int16_t>(samplers.rotation->output);
                 } else if (samplers.rotation->output->componentType == ComponentType_UNSIGNED_SHORT) {
-                    values = GetQuaternionsForType<unsigned short>(samplers.rotation->output);
+                    values = GetQuaternionsForType<uint16_t>(samplers.rotation->output);
                 } else {
                     throw DeadlyImportError("GLTF: Invalid component type for normalized quaternion ", ai_to_string(samplers.rotation->output->componentType));
                 }
@@ -1558,13 +1558,13 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             if (samplers.weight->output->normalized)
             {
                 if (samplers.weight->output->componentType == ComponentType_BYTE) {
-                    values = GetMorphWeightsForType<char>(samplers.weight->output);
+                    values = GetMorphWeightsForType<int8_t>(samplers.weight->output);
                 } else if (samplers.weight->output->componentType == ComponentType_UNSIGNED_BYTE) {
-                    values = GetMorphWeightsForType<unsigned char>(samplers.weight->output);
+                    values = GetMorphWeightsForType<uint8_t>(samplers.weight->output);
                 } else if (samplers.weight->output->componentType == ComponentType_SHORT) {
-                    values = GetMorphWeightsForType<short>(samplers.weight->output);
+                    values = GetMorphWeightsForType<int16_t>(samplers.weight->output);
                 } else if (samplers.weight->output->componentType == ComponentType_UNSIGNED_SHORT) {
-                    values = GetMorphWeightsForType<unsigned short>(samplers.weight->output);
+                    values = GetMorphWeightsForType<uint16_t>(samplers.weight->output);
                 } else {
                     throw DeadlyImportError("GLTF: Invalid component type for normalized morph weights ", ai_to_string(samplers.weight->output->componentType));
                 }

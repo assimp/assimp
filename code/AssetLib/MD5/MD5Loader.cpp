@@ -729,6 +729,16 @@ void MD5Importer::LoadMD5CameraFile() {
             cuts.push_back(static_cast<unsigned int>(frames.size() - 1));
     }
 
+    // Cut indices come straight from the file and are used to index into
+    // frames; reject any range that runs past the end (or wraps) before we
+    // allocate or read anything, so a mid-loop throw can't leave the scene
+    // holding half-initialized animations.
+    for (auto it = cuts.begin(); it != cuts.end() - 1; ++it) {
+        if (*(it + 1) < *it || *(it + 1) > frames.size()) {
+            throw DeadlyImportError("MD5CAMERA: Cut references a frame out of range");
+        }
+    }
+
     mScene->mNumAnimations = static_cast<unsigned int>(cuts.size() - 1);
     aiAnimation **tmp = mScene->mAnimations = new aiAnimation *[mScene->mNumAnimations];
     for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end() - 1; ++it) {
@@ -741,13 +751,15 @@ void MD5Importer::LoadMD5CameraFile() {
         aiNodeAnim *nd = anim->mChannels[0] = new aiNodeAnim();
         nd->mNodeName.Set("<MD5Camera>");
 
-        nd->mNumPositionKeys = nd->mNumRotationKeys = *(it + 1) - (*it);
+        const unsigned int firstFrame = *it;
+        const unsigned int lastFrame = *(it + 1);
+        nd->mNumPositionKeys = nd->mNumRotationKeys = lastFrame - firstFrame;
         nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
         nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
         for (unsigned int i = 0; i < nd->mNumPositionKeys; ++i) {
-            nd->mPositionKeys[i].mValue = frames[*it + i].vPositionXYZ;
-            MD5::ConvertQuaternion(frames[*it + i].vRotationQuat, nd->mRotationKeys[i].mValue);
-            nd->mPositionKeys[i].mTime = *it + i;  
+            nd->mPositionKeys[i].mValue = frames[firstFrame + i].vPositionXYZ;
+            MD5::ConvertQuaternion(frames[firstFrame + i].vRotationQuat, nd->mRotationKeys[i].mValue);
+            nd->mPositionKeys[i].mTime = firstFrame + i;
             nd->mRotationKeys[i].mTime = nd->mPositionKeys[i].mTime;
         }
     }

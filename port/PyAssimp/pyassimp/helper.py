@@ -196,16 +196,36 @@ def try_load_functions(library_path, dll):
         load_mem = dll.aiImportFileFromMemory
         export   = dll.aiExportScene
         export2blob = dll.aiExportSceneToBlob
+
+        create_store    = dll.aiCreatePropertyStore
+        set_prop_int    = dll.aiSetImportPropertyInteger
+        set_prop_float  = dll.aiSetImportPropertyFloat
+        set_prop_string = dll.aiSetImportPropertyString
+        import_props    = dll.aiImportFileExWithProperties # Advanced Import function that allows to set properties
+        release_store   = dll.aiReleasePropertyStore
     except AttributeError:
         #OK, this is a library, but it doesn't have the functions we need
         return None
 
     # library found!
-    from .structs import Scene, ExportDataBlob
+    from .structs import Scene, ExportDataBlob, String
     load.restype = ctypes.POINTER(Scene)
     load_mem.restype = ctypes.POINTER(Scene)
     export2blob.restype = ctypes.POINTER(ExportDataBlob)
-    return (library_path, load, load_mem, export, export2blob, release, dll)
+
+    create_store.restype = ctypes.c_void_p
+
+    set_prop_int.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+    set_prop_float.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_float]
+    set_prop_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(String)]
+
+    import_props.restype = ctypes.POINTER(Scene)
+    import_props.argtypes = [ctypes.c_char_p, ctypes.c_uint, ctypes.c_void_p, ctypes.c_void_p]
+
+    release_store.argtypes = [ctypes.c_void_p]
+
+    return (library_path, load, load_mem, export, export2blob, release, dll,
+            create_store, set_prop_int, set_prop_float, set_prop_string, import_props, release_store)
 
 def search_library():
     '''

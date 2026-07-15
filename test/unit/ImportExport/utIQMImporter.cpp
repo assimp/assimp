@@ -47,44 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-TEST(utMD5Importer, importEmpty) {
+TEST(utIQMImporter, importMrFixit) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/empty.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_EQ(nullptr, scene);
-}
-
-TEST(utMD5Importer, importSimpleCube) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/SimpleCube.md5mesh", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IQM/mrfixit.iqm", 0);
     ASSERT_NE(nullptr, scene);
 }
 
-TEST(utMD5Importer, importInvalidBoneIndex) {
-    // Regression test: a crafted .md5mesh whose weight references a bone index
-    // beyond numJoints used to cause an out-of-bounds heap access in the loader.
-    // The importer must reject the file gracefully instead of corrupting memory.
+TEST(utIQMImporter, importInvalidMeshOffset) {
+    // Regression test: a crafted .iqm whose header ofs_meshes points at the end
+    // of the file used to make the loader read the iqmmesh table out of bounds.
+    // The importer must reject the file instead of reading past the buffer.
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidBoneIndex.md5mesh", aiProcess_ValidateDataStructure);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IQM/invalid/InvalidMeshOffset.iqm", 0);
     ASSERT_EQ(nullptr, scene);
-}
-
-TEST(utMD5Importer, importInvalidCameraCut) {
-    // Regression test: a crafted .md5camera whose cut list references a frame
-    // index past the parsed frame array used to read out of bounds while
-    // building the camera animations. The importer must reject it gracefully.
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidCameraCut.md5camera", 0);
-    ASSERT_EQ(nullptr, scene);
-}
-
-TEST(utMD5Importer, importBoarMan) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
-}
-
-TEST(utMD5Importer, importBob) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/Bob.md5mesh", aiProcess_ValidateDataStructure);
-    ASSERT_NE(nullptr, scene);
 }

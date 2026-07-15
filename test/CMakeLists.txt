@@ -163,6 +163,7 @@ SET( IMPORTERS
   unit/ImportExport/utMD2Importer.cpp
   #unit/ImportExport/utMD3Importer.cpp
   unit/ImportExport/utMD5Importer.cpp
+  unit/ImportExport/utIQMImporter.cpp
   unit/ImportExport/utMDLImporter.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp

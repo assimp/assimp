@@ -510,25 +510,34 @@ outer:
             aiVector3D faceNormal;
             bool fnOK = false;
 
-            for (unsigned int n = 0; n < faces->mNumIndices; ++n, ++cnt, ++norms, ++verts) {
+            // clamp every vertex index up front: the face-normal fallback
+            // below reads sibling indices (0, 1, size - 1), not just the one
+            // for the current iteration
+            for (unsigned int n = 0; n < faces->mNumIndices; ++n) {
                 if (face.indices[n] >= curMesh.verts.size()) {
                     ASSIMP_LOG_WARN("Quick3D: Vertex index overflow");
                     face.indices[n] = 0;
                 }
+            }
 
+            for (unsigned int n = 0; n < faces->mNumIndices; ++n, ++cnt, ++norms, ++verts) {
                 // copy vertices
                 *verts = curMesh.verts[face.indices[n]];
 
-                if (face.indices[n] >= curMesh.normals.size() && faces->mNumIndices >= 3) {
-                    // we have no normal here - assign the face normal
-                    if (!fnOK) {
-                        const aiVector3D &pV1 = curMesh.verts[face.indices[0]];
-                        const aiVector3D &pV2 = curMesh.verts[face.indices[1]];
-                        const aiVector3D &pV3 = curMesh.verts[face.indices.size() - 1];
-                        faceNormal = (pV2 - pV1) ^ (pV3 - pV1).Normalize();
-                        fnOK = true;
+                if (face.indices[n] >= curMesh.normals.size()) {
+                    // no stored normal for this vertex
+                    if (faces->mNumIndices >= 3) {
+                        // assign the face normal instead
+                        if (!fnOK) {
+                            const aiVector3D &pV1 = curMesh.verts[face.indices[0]];
+                            const aiVector3D &pV2 = curMesh.verts[face.indices[1]];
+                            const aiVector3D &pV3 = curMesh.verts[face.indices.size() - 1];
+                            faceNormal = ((pV2 - pV1) ^ (pV3 - pV1)).Normalize();
+                            fnOK = true;
+                        }
+                        *norms = faceNormal;
                     }
-                    *norms = faceNormal;
+                    // otherwise leave the zero-initialised normal in place
                 } else {
                     *norms = curMesh.normals[face.indices[n]];
                 }

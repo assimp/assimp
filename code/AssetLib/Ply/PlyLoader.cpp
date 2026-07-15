@@ -409,73 +409,59 @@ namespace Assimp {
                 ++cnt;
                 aiTexcoord[1] = _a;
                 aiTexcoordTypes[1] = a->eType;
-            }
-            // Gaussian's properties
-            else if(PLY::EST_GaussianDC0 == a->Semantic){
+            } else if(PLY::EST_GaussianDC0 == a->Semantic) { // Gaussian's properties
                 ++cnt;
                 aiGaussianDC[0] = _a;
                 aiGaussianDCTypes[0] = a->eType;
-            }
-            else if(PLY::EST_GaussianDC1 == a->Semantic){
+            } else if(PLY::EST_GaussianDC1 == a->Semantic) {
                 ++cnt;
                 aiGaussianDC[1] = _a;
                 aiGaussianDCTypes[1] = a->eType;
-            }
-            else if(PLY::EST_GaussianDC2 == a->Semantic){
+            } else if(PLY::EST_GaussianDC2 == a->Semantic) {
                 ++cnt;
                 aiGaussianDC[2] = _a;
                 aiGaussianDCTypes[2] = a->eType;
-            }
-            else if(PLY::EST_GaussianRest >= a->Semantic &&
-                    PLY::EST_GaussianRestFinal <= a->Semantic){
+            } else if(PLY::EST_GaussianRest >= a->Semantic && PLY::EST_GaussianRestFinal <= a->Semantic) {
                 ++cnt;
                 unsigned int idx = a->Semantic - PLY::EST_GaussianRest;
                 aiGaussianRest[idx] = _a;
                 aiGaussianRestTypes[idx] = a->eType;
-            }
-            else if(PLY::EST_GaussianScale0 == a->Semantic){
+            } else if(PLY::EST_GaussianScale0 == a->Semantic) {
                 ++cnt;
                 aiGaussianScale[0] = _a;
                 aiGaussianScaleTypes[0] = a->eType;
-            }
-            else if(PLY::EST_GaussianScale1 == a->Semantic){
+            } else if(PLY::EST_GaussianScale1 == a->Semantic) {
                 ++cnt;
                 aiGaussianScale[1] = _a;
                 aiGaussianScaleTypes[1] = a->eType;
-            }
-            else if(PLY::EST_GaussianScale2 == a->Semantic){
+            } else if(PLY::EST_GaussianScale2 == a->Semantic) {
                 ++cnt;
                 aiGaussianScale[2] = _a;
                 aiGaussianScaleTypes[2] = a->eType;
-            }
-            else if(PLY::EST_GaussianRot0 == a->Semantic){
+            } else if(PLY::EST_GaussianRot0 == a->Semantic) {
                 ++cnt;
                 aiGaussianRot[0] = _a;
                 aiGaussianRotTypes[0] = a->eType;
-            }
-            else if(PLY::EST_GaussianRot1 == a->Semantic){
+            } else if(PLY::EST_GaussianRot1 == a->Semantic) {
                 ++cnt;
                 aiGaussianRot[1] = _a;
                 aiGaussianRotTypes[1] = a->eType;
-            }
-            else if(PLY::EST_GaussianRot2 == a->Semantic){
+            } else if(PLY::EST_GaussianRot2 == a->Semantic) {
                 ++cnt;
                 aiGaussianRot[2] = _a;
                 aiGaussianRotTypes[2] = a->eType;
-            }
-            else if(PLY::EST_GaussianRot3 == a->Semantic){
+            } else if(PLY::EST_GaussianRot3 == a->Semantic) {
                 ++cnt;
                 aiGaussianRot[3] = _a;
                 aiGaussianRotTypes[3] = a->eType;
-            }
-            else if(PLY::EST_Opacity == a->Semantic){
+            } else if(PLY::EST_Opacity == a->Semantic) {
                 ++cnt;
                 aiGaussianOpacity = _a;
                 aiGaussianOpacityType = a->eType;
             }
         }
 
-        // check whether we have a valid source for the vertex data
+        // Check whether we have a valid source for the vertex data
         if (0 != cnt) {
             // Position
             aiVector3D vOut;
@@ -519,26 +505,23 @@ namespace Assimp {
             aiColor4D cOut;
             bool haveColor = false;
             if (NotSet != aiColors[0]) {
-                cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[0])
-                                                    .avList.front(),
-                        aiColorsTypes[0]);
+                cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties, 
+                                                    aiColors[0]).avList.front(),
+                                                    aiColorsTypes[0]);
                 haveColor = true;
             }
 
             if (NotSet != aiColors[1]) {
-                cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[1])
-                                                    .avList.front(),
-                        aiColorsTypes[1]);
+                cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties, 
+                                                    aiColors[1]).avList.front(),
+                                                    aiColorsTypes[1]);
                 haveColor = true;
             }
 
             if (NotSet != aiColors[2]) {
                 cOut.b = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[2])
-                                                    .avList.front(),
-                        aiColorsTypes[2]);
+                                                    aiColors[2]).avList.front(),
+                                                    aiColorsTypes[2]);
                 haveColor = true;
             }
 
@@ -547,10 +530,8 @@ namespace Assimp {
                 cOut.a = 1.0;
             } else {
                 cOut.a = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[3])
-                                                    .avList.front(),
-                        aiColorsTypes[3]);
-
+                                                    aiColors[3]).avList.front(),
+                                                    aiColorsTypes[3]);
                 haveColor = true;
             }
 

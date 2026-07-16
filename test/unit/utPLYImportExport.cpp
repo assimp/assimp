@@ -282,3 +282,48 @@ TEST_F(utPLYImportExport, parseInvalidDoubleCustomProperty) {
     const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utPLYImportExport, parseInvalidFaceTexcoordCount) {
+    const char data[] = "ply\n"
+                        "format ascii 1.0\n"
+                        "element vertex 3\n"
+                        "property float x\n"
+                        "property float y\n"
+                        "property float z\n"
+                        "element face 1\n"
+                        "property list uchar int vertex_index\n"
+                        "property list uchar float texcoord\n"
+                        "end_header\n"
+                        "0.0 0.0 0.0\n"
+                        "1.0 0.0 0.0\n"
+                        "0.0 1.0 0.0\n"
+                        "1 0 6 0.0 0.0 1.0 0.0 0.0 1.0\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utPLYImportExport, parseQuadFaceTexcoordCount) {
+    const char data[] = "ply\n"
+                        "format ascii 1.0\n"
+                        "element vertex 4\n"
+                        "property float x\n"
+                        "property float y\n"
+                        "property float z\n"
+                        "element face 1\n"
+                        "property list uchar int vertex_index\n"
+                        "property list uchar float texcoord\n"
+                        "end_header\n"
+                        "0.0 0.0 0.0\n"
+                        "1.0 0.0 0.0\n"
+                        "1.0 1.0 0.0\n"
+                        "0.0 1.0 0.0\n"
+                        "4 0 1 2 3 8 0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_TRUE(scene->mMeshes[0]->HasTextureCoords(0));
+}

@@ -352,7 +352,7 @@ void ConvertUnit(const ::Assimp::STEP::EXPRESS::DataType &dt, ConversionData &co
 
 // ------------------------------------------------------------------------------------------------
 void SetUnits(ConversionData &conv) {
-    if (conv.proj.UnitsInContext == nullptr) {
+    if (!conv.proj.UnitsInContext) {
         IFCImporter::LogError("Skipping conversion data, nullptr.");
         return;
     }

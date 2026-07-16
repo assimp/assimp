@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 
+#include <array>
 #include <memory>
 #include <unordered_map>
 
@@ -470,6 +471,49 @@ aiColor4D *GetVertexColorsForType(Ref<Accessor> input, std::vector<unsigned int>
     }
     delete[] colors;
     return output;
+}
+
+template <typename T>
+aiQuaternion *GetQuaternionsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    std::array<T, 4> *quats;
+    input->ExtractData(quats);
+    std::unique_ptr<std::array<T, 4>[]> quatsPtr(quats);
+    auto output = std::make_unique<aiQuaternion[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    std::max(quats[i][0] / max, -1.0F), std::max(quats[i][1] / max, -1.0F),
+                    std::max(quats[i][2] / max, -1.0F), std::max(quats[i][3] / max, -1.0F));
+        }
+    } else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    quats[i][0] / max, quats[i][1] / max,
+                    quats[i][2] / max, quats[i][3] / max);
+        }
+    }
+    return output.release();
+}
+
+template <typename T>
+float *GetMorphWeightsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    T *weights;
+    input->ExtractData(weights);
+    std::unique_ptr<T[]> weightsPtr(weights);
+    auto output = std::make_unique<float[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = std::max(weights[i] / max, -1.0F);
+        }
+    }
+    else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = weights[i] / max;
+        }
+    }
+    return output.release();
 }
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
@@ -1389,7 +1433,29 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             float *times = nullptr;
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
-            samplers.rotation->output->ExtractData(values);
+            if (samplers.rotation->output->normalized) {
+                switch (samplers.rotation->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetQuaternionsForType<int8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetQuaternionsForType<uint8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetQuaternionsForType<int16_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetQuaternionsForType<uint16_t>(samplers.rotation->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized quaternion ", ai_to_string(samplers.rotation->output->componentType));
+                }
+            } else if (samplers.rotation->output->componentType == ComponentType_FLOAT) {
+                samplers.rotation->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for quaternion ", ai_to_string(samplers.rotation->output->componentType));
+            }
+
             const bool isCubic = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE);
             const aiAnimInterpolation interpType = MapInterpolation(samplers.rotation->interpolation);
             const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.rotation->input->count);
@@ -1493,7 +1559,31 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             float *times = nullptr;
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;
-            samplers.weight->output->ExtractData(values);
+
+            if (samplers.weight->output->normalized) {
+                switch (samplers.weight->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetMorphWeightsForType<int8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetMorphWeightsForType<uint8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetMorphWeightsForType<int16_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetMorphWeightsForType<uint16_t>(samplers.weight->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized morph weights ", ai_to_string(samplers.weight->output->componentType));
+                }
+
+            } else if (samplers.weight->output->componentType == ComponentType_FLOAT) {
+                samplers.weight->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for morph weights ", ai_to_string(samplers.weight->output->componentType));
+            }
+           
             anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
             // for Interpolation_CUBICSPLINE can have more outputs

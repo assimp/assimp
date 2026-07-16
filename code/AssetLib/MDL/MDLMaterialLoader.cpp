@@ -644,7 +644,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
         VALIDATE_FILE_SIZE(szCurrent);
-        const size_t remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
+        const auto remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
         if (remaining_size < sizeof(int32_t)) {
             throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
         }
@@ -748,7 +748,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
         VALIDATE_FILE_SIZE(szCurrent);
-        const size_t remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
+        const auto remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
         if (remaining_size < sizeof(int32_t)) {
             throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
         }

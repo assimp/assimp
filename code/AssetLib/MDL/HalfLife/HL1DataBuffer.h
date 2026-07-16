@@ -168,18 +168,18 @@ public:
     }
 
     /** \brief Return whether a byte range is inside the buffer. */
-    bool contains_bytes(const void *ptr, size_t bytes) const {
+    bool contains_bytes(const uint8_t *ptr, size_t bytes) const {
         if (ptr == nullptr || data_ == nullptr) {
             return false;
         }
 
-        const uintptr_t start = reinterpret_cast<uintptr_t>(data_);
-        const uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+        const auto start = reinterpret_cast<uintptr_t>(data_);
+        const auto address = reinterpret_cast<uintptr_t>(ptr);
         if (address < start) {
             return false;
         }
 
-        const size_t offset = static_cast<size_t>(address - start);
+        const auto offset = static_cast<size_t>(address - start);
         if (offset > length_) {
             return false;
         }
@@ -194,7 +194,7 @@ public:
             return false;
         }
 
-        return contains_bytes(ptr, elements * sizeof(DataType));
+        return contains_bytes(static_cast<const uint8_t *>(static_cast<const void *>(ptr)), elements * sizeof(DataType));
     }
 
     /** \brief Size of the buffer in bytes. */

@@ -494,9 +494,9 @@ void MDLImporter::InternReadFile_Quake1() {
             throw DeadlyImportError("[Quake 1 MDL] Invalid group frame data");
         }
 
-        pcFirstFrame = reinterpret_cast<const MDL::SimpleFrame *>(szCurrent + first_frame_offset);
+        pcFirstFrame = static_cast<const MDL::SimpleFrame *>(static_cast<const void *>(szCurrent + first_frame_offset));
     }
-    const MDL::Vertex *pcVertices = reinterpret_cast<const MDL::Vertex *>((pcFirstFrame->name) + sizeof(pcFirstFrame->name));
+    const auto *pcVertices = static_cast<const MDL::Vertex *>(static_cast<const void *>(pcFirstFrame->name + sizeof(pcFirstFrame->name)));
     VALIDATE_FILE_SIZE((const unsigned char *)(pcVertices + pcHeader->num_verts));
 
 #ifdef AI_BUILD_BIG_ENDIAN
@@ -1240,7 +1240,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
             return false;
         }
 
-        if (const auto current_offset = static_cast<size_t>(szCurrent - reinterpret_cast<const unsigned char *>(pcHeader));
+        if (const auto current_offset = static_cast<size_t>(szCurrent - static_cast<const unsigned char *>(static_cast<const void *>(pcHeader)));
                 current_offset > pcHeader->data_size || frame_size > static_cast<size_t>(pcHeader->data_size) - current_offset ||
                 frame_size > static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent)) {
             ASSIMP_LOG_WARN("Index overflow in frame area. "
@@ -1690,7 +1690,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         }
         // we will later need an extra node to serve as parent for all bones
         if (sharedData.apcOutBones) ++pScene->mRootNode->mNumChildren;
-        this->pScene->mRootNode->mChildren = new aiNode *[pScene->mRootNode->mNumChildren];
+        auto root_children = std::make_unique<aiNode *[]>(pScene->mRootNode->mNumChildren);
+        this->pScene->mRootNode->mChildren = root_children.release();
         p = 0;
         for (uint32_t i = 0; i < pcHeader->groups_num; ++i) {
             if (avOutList[i].empty()) continue;
@@ -1717,8 +1718,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     }
 
     // if there is only one root node with a single child we can optimize it a bit ...
-    if (1 == pScene->mRootNode->mNumChildren && pScene->mRootNode->mChildren != nullptr &&
-            pScene->mRootNode->mChildren[0] != nullptr && !sharedData.apcOutBones) {
+    if (1 == pScene->mRootNode->mNumChildren && !sharedData.apcOutBones) {
         aiNode *pcOldRoot = this->pScene->mRootNode;
         pScene->mRootNode = pcOldRoot->mChildren[0];
         pcOldRoot->mChildren[0] = nullptr;

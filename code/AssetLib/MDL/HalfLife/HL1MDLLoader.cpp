@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <limits>
 #include <cstring>
+#include <memory>
 
 #ifdef MDL_HALFLIFE_LOG_WARN_HEADER
 #undef MDL_HALFLIFE_LOG_WARN_HEADER
@@ -1063,7 +1064,9 @@ void HL1MDLLoader::read_animations() {
 
     pseqdesc = get_buffer_data<SequenceDesc_HL1>(header_->seqindex, header_->numseq);
 
-    aiAnimation **scene_animations_ptr = scene_->mAnimations = new aiAnimation *[scene_->mNumAnimations];
+    auto scene_animations = std::make_unique<aiAnimation *[]>(scene_->mNumAnimations);
+    scene_->mAnimations = scene_animations.release();
+    aiAnimation **scene_animations_ptr = scene_->mAnimations;
 
     for (int sequence = 0; sequence < header_->numseq; ++sequence, ++pseqdesc) {
         validate_index(pseqdesc->seqgroup, header_->numseqgroups, "sequence group");
@@ -1275,7 +1278,8 @@ void HL1MDLLoader::read_sequence_infos() {
             sequence_info_node_children.push_back(pEventsNode);
             pEventsNode->mParent = sequence_info_node;
             pEventsNode->mNumChildren = static_cast<unsigned int>(pseqdesc->numevents);
-            pEventsNode->mChildren = new aiNode *[pEventsNode->mNumChildren]();
+            auto event_children = std::make_unique<aiNode *[]>(pEventsNode->mNumChildren);
+            pEventsNode->mChildren = event_children.release();
 
             for (unsigned int j = 0; j < pEventsNode->mNumChildren; ++j, ++pevent) {
                 aiNode *pEvent = pEventsNode->mChildren[j] = new aiNode();

@@ -57,7 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 
 #include <climits>
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #include <zlib.h>
@@ -218,13 +220,13 @@ void ReadArray(IOStream *stream, T *out, unsigned int size) {
 }
 
 // -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
 template <typename T>
 void ReadBounds(IOStream *stream, T * /*p*/, unsigned int n) {
     // not sure what to do here, the data isn't really useful.
     stream->Seek(sizeof(T) * n, aiOrigin_CUR);
 }
 
+// -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *parent) {
     if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AINODE)
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
@@ -683,7 +685,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all meshes
     if (scene->mNumMeshes) {
-        scene->mMeshes = new aiMesh *[scene->mNumMeshes];
+        scene->mMeshes = new aiMesh *[scene->mNumMeshes]();
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
             scene->mMeshes[i] = new aiMesh();
             ReadBinaryMesh(stream, scene->mMeshes[i]);
@@ -692,7 +694,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read materials
     if (scene->mNumMaterials) {
-        scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
+        scene->mMaterials = new aiMaterial *[scene->mNumMaterials]();
         for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
             scene->mMaterials[i] = new aiMaterial();
             ReadBinaryMaterial(stream, scene->mMaterials[i]);
@@ -701,7 +703,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all animations
     if (scene->mNumAnimations) {
-        scene->mAnimations = new aiAnimation *[scene->mNumAnimations];
+        scene->mAnimations = new aiAnimation *[scene->mNumAnimations]();
         for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
             scene->mAnimations[i] = new aiAnimation();
             ReadBinaryAnim(stream, scene->mAnimations[i]);
@@ -710,7 +712,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all textures
     if (scene->mNumTextures) {
-        scene->mTextures = new aiTexture *[scene->mNumTextures];
+        scene->mTextures = new aiTexture *[scene->mNumTextures]();
         for (unsigned int i = 0; i < scene->mNumTextures; ++i) {
             scene->mTextures[i] = new aiTexture();
             ReadBinaryTexture(stream, scene->mTextures[i]);
@@ -719,7 +721,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read lights
     if (scene->mNumLights) {
-        scene->mLights = new aiLight *[scene->mNumLights];
+        scene->mLights = new aiLight *[scene->mNumLights]();
         for (unsigned int i = 0; i < scene->mNumLights; ++i) {
             scene->mLights[i] = new aiLight();
             ReadBinaryLight(stream, scene->mLights[i]);
@@ -728,7 +730,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read cameras
     if (scene->mNumCameras) {
-        scene->mCameras = new aiCamera *[scene->mNumCameras];
+        scene->mCameras = new aiCamera *[scene->mNumCameras]();
         for (unsigned int i = 0; i < scene->mNumCameras; ++i) {
             scene->mCameras[i] = new aiCamera();
             ReadBinaryCamera(stream, scene->mCameras[i]);
@@ -782,26 +784,16 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         uLongf uncompressedSize = Read<uint32_t>(stream.get());
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
-        if (compressedSize > SIZE_MAX) {
-            throw DeadlyImportError("ASSBIN: Compressed size too large");
-        }
-        auto compressedData = std::vector<unsigned char>(compressedSize);
-        auto len = stream->Read(compressedData.data(), 1, compressedSize);
+        std::vector<unsigned char> compressedData(compressedSize);
+        const size_t len = stream->Read(compressedData.data(), 1, compressedSize);
         if (len != compressedSize) {
-            pIOHandler->Close(stream);
             throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed data");
         }
 
-        if (uncompressedSize > SIZE_MAX) {
-            throw DeadlyImportError("ASSBIN: Uncompressed size too large");
-        }
-        auto uncompressedData = std::vector<unsigned char>(uncompressedSize);
+        std::vector<unsigned char> uncompressedData(uncompressedSize);
 
-        auto res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
+        const int res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
         if (res != Z_OK) {
-            pIOHandler->Close(stream);
-            delete[] uncompressedData;
-            delete[] compressedData;
             throw DeadlyImportError("Zlib decompression failed.");
         }
 

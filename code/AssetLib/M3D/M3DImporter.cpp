@@ -338,30 +338,28 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
                         tx->mWidth, " x ", tx->mHeight);
             }
             const auto texelCount = static_cast<size_t>(tx->mWidth) * static_cast<size_t>(tx->mHeight);
-            auto buffer = std::vector<aiTexel>(texelCount);
-            for (unsigned int j = 0, k = 0; j < texelCount; j++) {
+            auto data = std::make_unique<aiTexel[]>(texelCount);
+            for (size_t j = 0, k = 0; j < texelCount; j++) {
                 switch (t->f) {
-                    case 1: buffer[j].g = t->d[k++]; break;
+                    case 1: data[j].g = t->d[k++]; break;
                     case 2:
-                        buffer[j].g = t->d[k++];
-                        buffer[j].a = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                     case 3:
-                        buffer[j].r = t->d[k++];
-                        buffer[j].g = t->d[k++];
-                        buffer[j].b = t->d[k++];
-                        buffer[j].a = 255;
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = 255;
                         break;
                     case 4:
-                        buffer[j].r = t->d[k++];
-                        buffer[j].g = t->d[k++];
-                        buffer[j].b = t->d[k++];
-                        buffer[j].a = t->d[k++];
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                 }
             }
-            auto data = std::make_unique<aiTexel[]>(texelCount);
-            std::copy(buffer.begin(), buffer.end(), data.get());
             tx->pcData = data.release();
         }
         mScene->mTextures[i] = tx;

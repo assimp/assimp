@@ -61,6 +61,23 @@ using namespace Assimp;
 static aiTexel *const bad_texel = reinterpret_cast<aiTexel *>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
+static const unsigned char *SkipAsciiEffect(const unsigned char *current, const unsigned char *end) {
+    const auto remaining_size = static_cast<size_t>(end - current);
+    if (remaining_size < sizeof(int32_t)) {
+        throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+    }
+
+    int32_t length = 0;
+    ::memcpy(&length, current, sizeof(int32_t));
+    AI_SWAP4(length);
+    if (length < 0 || static_cast<size_t>(length) > remaining_size - sizeof(int32_t)) {
+        throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
+    }
+
+    return current + sizeof(int32_t) + static_cast<size_t>(length);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Find a suitable palette file or take the default one
 void MDLImporter::SearchPalette(const unsigned char **pszColorMap) {
     // now try to find the color map in the current directory
@@ -644,19 +661,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
         VALIDATE_FILE_SIZE(szCurrent);
-        const auto remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
-        if (remaining_size < sizeof(int32_t)) {
-            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
-        }
-
-        int32_t iMe = 0;
-        ::memcpy(&iMe, szCurrent, sizeof(int32_t));
-        AI_SWAP4(iMe);
-        if (iMe < 0 || static_cast<size_t>(iMe) > remaining_size - sizeof(int32_t)) {
-            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
-        }
-
-        szCurrent += sizeof(int32_t) + static_cast<size_t>(iMe);
+        szCurrent = SkipAsciiEffect(szCurrent, this->mBuffer + this->iFileSize);
     }
 
     // If an embedded texture has been loaded setup the corresponding
@@ -748,19 +753,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
     // we can simply ignore it ...
     if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF) {
         VALIDATE_FILE_SIZE(szCurrent);
-        const auto remaining_size = static_cast<size_t>((this->mBuffer + this->iFileSize) - szCurrent);
-        if (remaining_size < sizeof(int32_t)) {
-            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
-        }
-
-        int32_t iMe = 0;
-        ::memcpy(&iMe, szCurrent, sizeof(int32_t));
-        AI_SWAP4(iMe);
-        if (iMe < 0 || static_cast<size_t>(iMe) > remaining_size - sizeof(int32_t)) {
-            throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
-        }
-
-        szCurrent += sizeof(int32_t) + static_cast<size_t>(iMe);
+        szCurrent = SkipAsciiEffect(szCurrent, this->mBuffer + this->iFileSize);
     }
     *szCurrentOut = szCurrent;
 }

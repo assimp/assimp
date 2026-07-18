@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -58,4 +59,16 @@ public:
 
 TEST_F(utQ3BSPImportExport, importerTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utQ3BSPImportExport, truncatedLumpTableTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/invalid/TruncatedLumpTable.pk3", 0);
+    EXPECT_EQ(0u, nullptr == scene ? 0u : scene->mNumMeshes);
+}
+
+TEST_F(utQ3BSPImportExport, lumpOffsetOutOfRangeTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/invalid/LumpOffsetOutOfRange.pk3", 0);
+    EXPECT_EQ(0u, nullptr == scene ? 0u : scene->mNumMeshes);
 }

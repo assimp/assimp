@@ -143,4 +143,62 @@ TEST_F(utAssbinImportExport, rejectOversizedNodeNameLengthInAssbin) {
                     .find("String length too large"));
 }
 
+TEST_F(utAssbinImportExport, rejectOversizedMaterialPropertyCountInAssbin) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+
+    Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "assbin");
+    ASSERT_NE(nullptr, blob);
+    ASSERT_NE(nullptr, blob->data);
+    ASSERT_GT(blob->size, 0u);
+
+    const auto *blobBytes = static_cast<const uint8_t *>(blob->data);
+    std::vector<uint8_t> corruptedBlob(blobBytes, blobBytes + blob->size);
+
+    auto readUint32LE = [&corruptedBlob](size_t offset) -> uint32_t {
+        return static_cast<uint32_t>(corruptedBlob[offset + 0]) |
+                (static_cast<uint32_t>(corruptedBlob[offset + 1]) << 8u) |
+                (static_cast<uint32_t>(corruptedBlob[offset + 2]) << 16u) |
+                (static_cast<uint32_t>(corruptedBlob[offset + 3]) << 24u);
+    };
+
+    auto writeUint32LE = [&corruptedBlob](size_t offset, uint32_t value) {
+        corruptedBlob[offset + 0] = static_cast<uint8_t>(value & 0xffu);
+        corruptedBlob[offset + 1] = static_cast<uint8_t>((value >> 8u) & 0xffu);
+        corruptedBlob[offset + 2] = static_cast<uint8_t>((value >> 16u) & 0xffu);
+        corruptedBlob[offset + 3] = static_cast<uint8_t>((value >> 24u) & 0xffu);
+    };
+
+    // Locate a material chunk that is directly followed by its first property chunk.
+    size_t materialChunkOffset = corruptedBlob.size();
+    for (size_t offset = ASSBIN_HEADER_LENGTH; offset + sizeof(uint32_t) * 4u <= corruptedBlob.size(); ++offset) {
+        if (readUint32LE(offset) != static_cast<uint32_t>(ASSBIN_CHUNK_AIMATERIAL)) {
+            continue;
+        }
+
+        if (readUint32LE(offset + sizeof(uint32_t) * 3u) != static_cast<uint32_t>(ASSBIN_CHUNK_AIMATERIALPROPERTY)) {
+            continue;
+        }
+
+        materialChunkOffset = offset;
+        break;
+    }
+
+    ASSERT_NE(corruptedBlob.size(), materialChunkOffset);
+
+    // Announce more properties than the file provides and break the first property
+    // chunk, so the reader gives up before it has filled a single array slot.
+    writeUint32LE(materialChunkOffset + sizeof(uint32_t) * 2u, 64u);
+    writeUint32LE(materialChunkOffset + sizeof(uint32_t) * 3u, 0u);
+
+    Importer corruptedImporter;
+    const aiScene *corruptedScene = corruptedImporter.ReadFileFromMemory(corruptedBlob.data(), corruptedBlob.size(), 0, "assbin");
+    EXPECT_EQ(nullptr, corruptedScene);
+    EXPECT_NE(std::string::npos,
+            std::string(corruptedImporter.GetErrorString())
+                    .find("Magic chunk identifiers are wrong"));
+}
+
 #endif // #ifndef ASSIMP_BUILD_NO_EXPORT

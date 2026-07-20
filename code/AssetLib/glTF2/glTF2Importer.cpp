@@ -1046,9 +1046,52 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     struct Weights {
         float values[4];
     };
+
+    auto extractWeights = [vertexRemappingTablePtr](Accessor &accessor, Weights *&outWeights) -> size_t {
+        if (accessor.componentType == ComponentType_FLOAT) {
+            return accessor.ExtractData(outWeights, vertexRemappingTablePtr);
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            struct PackedWeights {
+                uint8_t values[4];
+            };
+            PackedWeights *packedWeights = nullptr;
+            const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            outWeights = new Weights[count];
+            const float scale = accessor.normalized ? 1.0f / 255.0f : 1.0f;
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outWeights[i].values[j] = static_cast<float>(packedWeights[i].values[j]) * scale;
+                }
+            }
+            delete[] packedWeights;
+            return count;
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
+            struct PackedWeights {
+                uint16_t values[4];
+            };
+            PackedWeights *packedWeights = nullptr;
+            const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            outWeights = new Weights[count];
+            const float scale = accessor.normalized ? 1.0f / 65535.0f : 1.0f;
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outWeights[i].values[j] = static_cast<float>(packedWeights[i].values[j]) * scale;
+                }
+            }
+            delete[] packedWeights;
+            return count;
+        }
+
+        throw DeadlyImportError("GLTF: unsupported skin weight componentType ", accessor.componentType);
+    };
+
     Weights **weights = new Weights*[attr.weight.size()];
     for (size_t w = 0; w < attr.weight.size(); ++w) {
-        num_vertices = attr.weight[w]->ExtractData(weights[w], vertexRemappingTablePtr);
+        num_vertices = extractWeights(*attr.weight[w], weights[w]);
     }
 
     struct Indices8 {

@@ -550,6 +550,7 @@ struct Accessor : public Object {
     Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
     size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
     ComponentType componentType; //!< The datatype of components in the attribute. (required)
+    bool normalized = false; //!< Specifies whether integer data values are normalized before use.
     size_t count; //!< The number of attributes referenced by this accessor. (required)
     AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
     std::vector<double> max; //!< Maximum value of each component in this attribute.

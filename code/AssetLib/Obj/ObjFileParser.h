@@ -88,10 +88,8 @@ public:
 protected:
     /// Parse the loaded file
     void parseFile(IOStreamBuffer<char> &streamBuffer);
-    /// Method to copy the next delimited word from the current line into mBuffer.
+    /// Method to copy the new delimited word in the current line.
     void copyNextWord();
-    /// Legacy overload for unit tests and external callers.
-    void copyNextWord(char *pBuffer, size_t length);
     /// Get the number of components in a line.
     size_t getNumComponentsInDataDefinition();
     /// Stores the vector
@@ -133,7 +131,7 @@ protected:
     /// Error report in token
     void reportErrorTokenInFace();
 
-private:
+protected:
     /// Default material name
     static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
@@ -144,8 +142,8 @@ private:
     std::unique_ptr<ObjFile::Model> mModel{};
     //! Current line (for debugging)
     unsigned int mLine{ 0 };
-    //! Helper buffer
-    char mBuffer[Buffersize];
+    //! Helper buffer (safe)
+    std::string mBuffer;
 	/// End of buffer
     const char *mEnd{ nullptr };
     /// Pointer to IO system instance.
@@ -154,6 +152,8 @@ private:
     ProgressHandler *mProgress{ nullptr };
     /// Path to the current model, name of the obj file where the buffer comes from
     const std::string mOriginalObjFileName{};
+
+private:
 };
 
 } // Namespace Assimp

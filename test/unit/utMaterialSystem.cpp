@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Material/MaterialSystem.h"
 #include <assimp/scene.h>
+#include <cstdint>
+#include <string>
 
 using namespace ::std;
 using namespace ::Assimp;
@@ -53,6 +55,84 @@ public:
 
 protected:
     aiMaterial *pcMat;
+};
+
+static aiMaterialProperty *CreateMaterialStringProperty(const char *key,
+        uint32_t declaredLength,
+        const std::vector<char> &payload) {
+    auto prop = new aiMaterialProperty();
+
+    prop->mKey.Set(std::string(key));
+
+    prop->mType = aiPTI_String;
+    prop->mSemantic = 0;
+    prop->mIndex = 0;
+
+    prop->mDataLength = static_cast<unsigned int>(4 + payload.size());
+    prop->mData = new char[prop->mDataLength];
+    memcpy(prop->mData, &declaredLength, sizeof(declaredLength));
+
+    if (!payload.empty()) {
+        memcpy(prop->mData + 4, payload.data(), payload.size());
+    }
+    return prop;
+}
+
+static bool IsValidMaterialStringProperty(const aiMaterialProperty *prop) {
+    if (!prop || prop->mType != aiPTI_String || prop->mDataLength < 5u) {
+        return false;
+    }
+
+    uint32_t length = 0;
+    memcpy(&length, prop->mData, sizeof(length));
+    if (length > AI_MAXLEN - 1u) {
+        return false;
+    }
+    if (length + 5u != prop->mDataLength) {
+        return false;
+    }
+    if (prop->mData[prop->mDataLength - 1] != '\0') {
+        return false;
+    }
+    return true;
+}
+
+static void AddPropertyToMaterial(aiMaterial *material, aiMaterialProperty *prop) {
+    if (material->mNumProperties == material->mNumAllocated) {
+        const unsigned int oldAllocated = material->mNumAllocated;
+        material->mNumAllocated *= 2;
+        aiMaterialProperty **ppTemp = new aiMaterialProperty *[material->mNumAllocated];
+        memcpy(ppTemp, material->mProperties, oldAllocated * sizeof(aiMaterialProperty *));
+        delete[] material->mProperties;
+        material->mProperties = ppTemp;
+    }
+    material->mProperties[material->mNumProperties++] = prop;
+}
+
+// Small, fully deterministic pseudo-random generator (SplitMix64). A hand-rolled
+// generator is used here instead of <random> for two reasons:
+//   * std::uniform_int_distribution is undefined for narrow integer types such
+//     as uint8_t and is rejected at compile time by the MSVC standard library;
+//   * the engine output is identical on every platform and standard library,
+//     so this fuzz test is fully reproducible (std::uniform_int_distribution
+//     maps engine output to a range differently across implementations).
+class DeterministicFuzzRng {
+public:
+    explicit DeterministicFuzzRng(uint64_t seed) :
+            mState(seed) {}
+
+    // Returns a pseudo-random value in the inclusive range [0, maxInclusive].
+    uint32_t Next(uint32_t maxInclusive) {
+        mState += 0x9E3779B97F4A7C15ull;
+        uint64_t z = mState;
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+        z ^= (z >> 31);
+        return static_cast<uint32_t>(z % (static_cast<uint64_t>(maxInclusive) + 1ull));
+    }
+
+private:
+    uint64_t mState;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -122,6 +202,75 @@ TEST_F(MaterialSystemTest, testStringProperty) {
     s.Set("358358");
     EXPECT_EQ(AI_SUCCESS, pcMat->Get("testKey6", 0, 0, s));
     EXPECT_STREQ("Hello, this is a small test", s.data);
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testMalformedStringPropertyFails) {
+    auto prop = CreateMaterialStringProperty("testKeyBad", 5u, {'A', '\0'});
+    prop->mDataLength = 6u;
+    delete[] prop->mData;
+    prop->mData = new char[6u]{0, 0, 0, 0, 'A', '\0'};
+    AddPropertyToMaterial(this->pcMat, prop);
+
+    aiString s;
+    EXPECT_EQ(AI_FAILURE, aiGetMaterialString(this->pcMat, "testKeyBad", 0, 0, &s));
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testTruncatedStringPropertyFails) {
+    auto prop = CreateMaterialStringProperty("testTruncated", 0u, {});
+    prop->mDataLength = 2u;
+    delete[] prop->mData;
+    prop->mData = new char[2u]{0, 0};
+    AddPropertyToMaterial(this->pcMat, prop);
+
+    aiString s;
+    EXPECT_EQ(AI_FAILURE, aiGetMaterialString(this->pcMat, "testTruncated", 0, 0, &s));
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testDeclaredLengthTooLargeFails) {
+    std::vector<char> payload = {'a', 'b', 'c', '\0'};
+    auto prop = CreateMaterialStringProperty("testTooLarge", 10u, payload);
+    AddPropertyToMaterial(this->pcMat, prop);
+
+    aiString s;
+    EXPECT_EQ(AI_FAILURE, aiGetMaterialString(this->pcMat, "testTooLarge", 0, 0, &s));
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testNonNullTerminatedStringPropertyFails) {
+    std::vector<char> payload = {'a', 'b', 'c', 'd', 'e'};
+    auto prop = CreateMaterialStringProperty("testNoNull", 5u, payload);
+    AddPropertyToMaterial(this->pcMat, prop);
+
+    aiString s;
+    EXPECT_EQ(AI_FAILURE, aiGetMaterialString(this->pcMat, "testNoNull", 0, 0, &s));
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testRandomMalformedStringProperties) {
+    DeterministicFuzzRng rng(0xDEADBEEFull);
+
+    for (unsigned int i = 0; i < 100; ++i) {
+        const uint32_t declaredLen = rng.Next(AI_MAXLEN + 10u);
+        const uint32_t payloadSize = rng.Next(64u);
+        std::vector<char> payload(payloadSize);
+        for (uint32_t j = 0; j < payloadSize; ++j) {
+            payload[j] = static_cast<char>(rng.Next(255u));
+        }
+        // Each property needs a distinct key: aiGetMaterialProperty returns the
+        // first property matching a key, so reusing one key would only ever test
+        // the first property while the oracle is computed for the i-th one.
+        const std::string key = "testFuzz" + std::to_string(i);
+        auto prop = CreateMaterialStringProperty(key.c_str(), declaredLen, payload);
+        AddPropertyToMaterial(this->pcMat, prop);
+
+        const bool shouldBeValid = IsValidMaterialStringProperty(prop);
+        aiString s;
+        EXPECT_EQ(shouldBeValid ? AI_SUCCESS : AI_FAILURE,
+                aiGetMaterialString(this->pcMat, key.c_str(), 0, 0, &s));
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

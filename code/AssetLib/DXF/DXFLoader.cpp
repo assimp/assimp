@@ -900,13 +900,17 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) 
     }
     else if (!line.indices.size() && !line.counts.size()) {
         // a poly-line - so there are no indices yet.
+        // a polyline is a connected chain of segments, so segment i joins
+        // vertex i to vertex i+1. Emitting disjoint pairs (0,1), (2,3), ...
+        // instead drops every other segment and loses the final vertex when
+        // the vertex count is odd.
         size_t guess = line.positions.size() + (line.flags & DXF_POLYLINE_FLAG_CLOSED ? 1 : 0);
-        line.indices.reserve(guess);
+        line.indices.reserve(guess*2);
 
-        line.counts.reserve(guess/2);
-        for (unsigned int i = 0; i < line.positions.size()/2; ++i) {
-            line.indices.push_back(i*2);
-            line.indices.push_back(i*2+1);
+        line.counts.reserve(guess);
+        for (unsigned int i = 0; i + 1 < line.positions.size(); ++i) {
+            line.indices.push_back(i);
+            line.indices.push_back(i+1);
             line.counts.push_back(2);
         }
 

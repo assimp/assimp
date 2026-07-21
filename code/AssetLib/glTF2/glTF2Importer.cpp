@@ -1058,14 +1058,14 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             };
             PackedWeights *packedWeights = nullptr;
             const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
             outWeights = new Weights[count];
             const float scale = accessor.normalized ? 1.0f / 255.0f : 1.0f;
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
-                    outWeights[i].values[j] = static_cast<float>(packedWeights[i].values[j]) * scale;
+                    outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
                 }
             }
-            delete[] packedWeights;
             return count;
         }
 
@@ -1075,14 +1075,14 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             };
             PackedWeights *packedWeights = nullptr;
             const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
             outWeights = new Weights[count];
             const float scale = accessor.normalized ? 1.0f / 65535.0f : 1.0f;
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
-                    outWeights[i].values[j] = static_cast<float>(packedWeights[i].values[j]) * scale;
+                    outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
                 }
             }
-            delete[] packedWeights;
             return count;
         }
 

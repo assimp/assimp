@@ -842,7 +842,7 @@ static constexpr unsigned int DXF_POLYLINE_FLAG_POLYFACEMESH = 0x40;
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) {
-    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>(DXF::PolyLine()));
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     unsigned int iguess = 0, vguess = 0;
@@ -995,6 +995,9 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
             clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
             break;
         };
+        default:
+            break;
+        }
 
         reader++;
     }

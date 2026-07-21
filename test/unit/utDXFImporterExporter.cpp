@@ -72,6 +72,30 @@ TEST_F(utDXFImporterExporter, issue2229) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utDXFImporterExporter, importPointEntities) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/DXF/points.dxf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+
+    // Both POINT entities live on layer "0" and end up in one point-only mesh.
+    const aiMesh *mesh = scene->mMeshes[0];
+    EXPECT_EQ(static_cast<unsigned int>(aiPrimitiveType_POINT), mesh->mPrimitiveTypes);
+    ASSERT_EQ(2u, mesh->mNumVertices);
+    ASSERT_EQ(2u, mesh->mNumFaces);
+    EXPECT_EQ(1u, mesh->mFaces[0].mNumIndices);
+    EXPECT_EQ(1u, mesh->mFaces[1].mNumIndices);
+
+    // Vertices are checked in mesh-local space, before the root node's
+    // AutoCAD-to-assimp axis conversion is applied.
+    EXPECT_NEAR(1.0, mesh->mVertices[0].x, 1e-6);
+    EXPECT_NEAR(2.0, mesh->mVertices[0].y, 1e-6);
+    EXPECT_NEAR(3.0, mesh->mVertices[0].z, 1e-6);
+    EXPECT_NEAR(-4.0, mesh->mVertices[1].x, 1e-6);
+    EXPECT_NEAR(5.5, mesh->mVertices[1].y, 1e-6);
+    EXPECT_NEAR(0.25, mesh->mVertices[1].z, 1e-6);
+}
+
 
 TEST_F(utDXFImporterExporter, importWuson) {
     Assimp::Importer importer;

@@ -125,6 +125,10 @@ private:
         DXF::FileData& output);
 
     // -----------------------------------------------------
+    void ParsePoint(DXF::LineReader& reader,
+        DXF::FileData& output);
+
+    // -----------------------------------------------------
     void ConvertMeshes(aiScene* pScene,
         DXF::FileData& output);
 

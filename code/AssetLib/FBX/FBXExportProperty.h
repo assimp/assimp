@@ -92,6 +92,7 @@ public:
     // strings can either be stored as 'R' (raw) or 'S' (string) type
     explicit FBXExportProperty(const char* c, bool raw = false);
     explicit FBXExportProperty(const std::string& s, bool raw = false);
+    explicit FBXExportProperty(const std::string_view& s, bool raw = false);
     explicit FBXExportProperty(const std::vector<uint8_t>& r);
     explicit FBXExportProperty(const std::vector<int32_t>& va);
     explicit FBXExportProperty(const std::vector<int64_t>& va);

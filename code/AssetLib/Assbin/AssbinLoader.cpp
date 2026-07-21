@@ -180,7 +180,7 @@ aiString Read<aiString>(IOStream *stream) {
     aiString s;
     const ai_uint32 len = Read<ai_uint32>(stream);
     if (len >= AI_MAXLEN) {
-        throw DeadlyImportError("ASSBIN: Invalid aiString length");
+        throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
     }
     s.length = len;
     if (s.length > 0) {
@@ -762,7 +762,19 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
 // -----------------------------------------------------------------------------------
 void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    IOStream *stream = pIOHandler->Open(pFile, "rb");
+    struct IOStreamDeleter {
+        IOSystem* io;
+        void operator()(IOStream* s) const {
+            if (s) {
+                io->Close(s);
+            }
+        }
+    };
+
+    auto stream = std::unique_ptr<IOStream, IOStreamDeleter>(
+        pIOHandler->Open(pFile, "rb"),
+        IOStreamDeleter{pIOHandler}
+    );
     if (nullptr == stream) {
         throw DeadlyImportError("ASSBIN: Could not open ", pFile);
     }
@@ -770,21 +782,19 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     // signature
     stream->Seek(44, aiOrigin_CUR);
 
-    unsigned int versionMajor = Read<unsigned int>(stream);
-    unsigned int versionMinor = Read<unsigned int>(stream);
+    unsigned int versionMajor = Read<unsigned int>(stream.get());
+    unsigned int versionMinor = Read<unsigned int>(stream.get());
     if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Invalid version, data format not compatible!");
     }
 
-    /*unsigned int versionRevision =*/Read<unsigned int>(stream);
-    /*unsigned int compileFlags =*/Read<unsigned int>(stream);
+    /*unsigned int versionRevision =*/Read<unsigned int>(stream.get());
+    /*unsigned int compileFlags =*/Read<unsigned int>(stream.get());
 
-    shortened = Read<uint16_t>(stream) > 0;
-    compressed = Read<uint16_t>(stream) > 0;
+    shortened = Read<uint16_t>(stream.get()) > 0;
+    compressed = Read<uint16_t>(stream.get()) > 0;
 
     if (shortened) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Shortened binaries are not supported!");
     }
 
@@ -793,17 +803,16 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     stream->Seek(64, aiOrigin_CUR); // padding
 
     if (compressed) {
-        uLongf uncompressedSize = Read<uint32_t>(stream);
+        uLongf uncompressedSize = Read<uint32_t>(stream.get());
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
         std::unique_ptr<unsigned char[]> compressedData(new unsigned char[compressedSize]);
-        ReadBytes(stream, compressedData.get(), compressedSize, "compressed data");
+        ReadBytes(stream.get(), compressedData.get(), compressedSize, "compressed data");
 
         std::unique_ptr<unsigned char[]> uncompressedData(new unsigned char[uncompressedSize]);
 
         int res = uncompress(uncompressedData.get(), &uncompressedSize, compressedData.get(), static_cast<uLong>(compressedSize));
         if (res != Z_OK) {
-            pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");
         }
 
@@ -811,9 +820,7 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
 
         ReadBinaryScene(&io, pScene);
     } else {
-        ReadBinaryScene(stream, pScene);
+        ReadBinaryScene(stream.get(), pScene);
     }
-
-    pIOHandler->Close(stream);
 }
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

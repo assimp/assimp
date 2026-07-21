@@ -82,6 +82,36 @@ TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+TEST_F(utD3MFImporterExporter, importMalformedPropertyIndexOob) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/malformed_property_index_oob.3mf", 0);
+    EXPECT_NE(nullptr, scene);
+}
+
+// Production extension: build items reference objects in separate model parts via a path
+// attribute. Every part here reuses objectid="1", so resources must be scoped per part:
+// a flattened global id map would collapse all 17 references into a single mesh.
+TEST_F(utD3MFImporterExporter, importProductionBuildItemPaths) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/cube_gears_prod_req.3mf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(17u, scene->mNumMeshes);
+    ASSERT_NE(nullptr, scene->mRootNode);
+    EXPECT_EQ(17u, scene->mRootNode->mNumChildren);
+}
+
+// Production extension: a root object's components reference objects in separate model parts.
+// partA.model and partB.model both define objectid="1"; correct per-part scoping yields two
+// distinct meshes attached under the single build item.
+TEST_F(utD3MFImporterExporter, importProductionComponentPaths) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/production_components.3mf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(2u, scene->mNumMeshes);
+    ASSERT_NE(nullptr, scene->mRootNode);
+    EXPECT_EQ(1u, scene->mRootNode->mNumChildren);
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utD3MFImporterExporter, export3MFtoMemTest) {

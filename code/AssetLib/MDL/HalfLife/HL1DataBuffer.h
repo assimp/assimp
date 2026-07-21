@@ -166,6 +166,11 @@ public:
         return reinterpret_cast<const DataType *>(data_ + uoffset);
     }
 
+    /** \brief Size of the buffer in bytes. */
+    size_t size() const {
+        return length_;
+    }
+
 private:
     /** Raw byte pointer (points to owner_.get() when owning, otherwise external). */
     const unsigned char *data_;

@@ -842,7 +842,7 @@ static constexpr unsigned int DXF_POLYLINE_FLAG_POLYFACEMESH = 0x40;
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) {
-    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>(DXF::PolyLine()));
+    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>());
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     unsigned int iguess = 0, vguess = 0;
@@ -994,7 +994,7 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
         case 62:
             clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
             break;
-        };
+
         default:
             break;
         }
@@ -1032,7 +1032,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output) {
     // (note) this is also used for for parsing line entities, so we
     // must handle the vertex_count == 2 case as well.
 
-    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
+    output.blocks.back().lines.push_back( std::make_shared<DXF::PolyLine>() );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     aiVector3D vip[4];
@@ -1160,7 +1160,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output) {
 void DXFImporter::ParsePoint(DXF::LineReader& reader, DXF::FileData& output) {
     // POINT entities are stored as a PolyLine with a single vertex and a
     // single one-index face, which ConvertMeshes() maps to aiPrimitiveType_POINT.
-    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>());
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     aiVector3D pos;
@@ -1202,7 +1202,10 @@ void DXFImporter::ParsePoint(DXF::LineReader& reader, DXF::FileData& output) {
         case 62:
             clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
             break;
-        };
+
+        default:
+            break;
+        }
 
         ++reader;
     }

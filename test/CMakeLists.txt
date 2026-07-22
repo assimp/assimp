@@ -158,6 +158,7 @@ SET( IMPORTERS
   unit/ImportExport/utOgreImportExport.cpp
   unit/ImportExport/utQ3BSPFileImportExport.cpp
   unit/ImportExport/utOFFImportExport.cpp
+  unit/utOFFSecurity.cpp
   unit/ImportExport/utNFFImportExport.cpp
   unit/ImportExport/utXGLImportExport.cpp
   unit/ImportExport/utMD2Importer.cpp

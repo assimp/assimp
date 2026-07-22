@@ -49,11 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OFFLoader.h"
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
-#include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/importerdesc.h>
+#include <cstdint>
+#include <memory>
 
 namespace Assimp {
 
@@ -166,11 +167,37 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     strtoul10(car, &car); // skip edge count
     NextToken(&car, end);
 
+    // Reject header counts large enough to drive the allocations below into
+    // out-of-memory territory (OSS-Fuzz 476180586).
+    constexpr auto OFF_MAX_VERTICES = 10000000u; // 10 million
+    constexpr auto OFF_MAX_FACES = 10000000u;    // 10 million
+
     if (!numVertices) {
         throw DeadlyImportError("OFF: There are no valid vertices");
     }
     if (!numFaces) {
         throw DeadlyImportError("OFF: There are no valid faces");
+    }
+    if (numVertices > OFF_MAX_VERTICES) {
+        throw DeadlyImportError("OFF: File has ", numVertices, " vertices, exceeds limit of ", OFF_MAX_VERTICES);
+    }
+    if (numFaces > OFF_MAX_FACES) {
+        throw DeadlyImportError("OFF: File has ", numFaces, " faces, exceeds limit of ", OFF_MAX_FACES);
+    }
+    const uint64_t requiredVertices = static_cast<uint64_t>(numVertices);
+    const uint64_t requiredFaces = static_cast<uint64_t>(numFaces);
+    if (requiredVertices > SIZE_MAX / sizeof(aiVector3D)) {
+        throw DeadlyImportError("OFF: Vertex count would cause size_t overflow");
+    }
+    if (requiredFaces > SIZE_MAX / sizeof(aiFace)) {
+        throw DeadlyImportError("OFF: Face count would cause size_t overflow");
+    }
+    // Each vertex line holds at least `dimensions` single-character values,
+    // each followed by a separator or newline, so any shorter remainder cannot
+    // contain the declared vertex count.
+    if (const uint64_t minimumVertexTextBytes = requiredVertices * 2u * dimensions;
+            static_cast<uint64_t>(end - car) < minimumVertexTextBytes) {
+        throw DeadlyImportError("OFF: File size inconsistent with vertex count");
     }
 
     pScene->mNumMeshes = 1;

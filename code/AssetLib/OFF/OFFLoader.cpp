@@ -169,8 +169,8 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Reject header counts large enough to drive the allocations below into
     // out-of-memory territory (OSS-Fuzz 476180586).
-    constexpr uint64_t OFF_MAX_VERTICES = 10000000; // 10 million
-    constexpr uint64_t OFF_MAX_FACES = 10000000;    // 10 million
+    constexpr auto OFF_MAX_VERTICES = 10000000u; // 10 million
+    constexpr auto OFF_MAX_FACES = 10000000u;    // 10 million
 
     if (!numVertices) {
         throw DeadlyImportError("OFF: There are no valid vertices");

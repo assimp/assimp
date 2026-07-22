@@ -149,6 +149,7 @@ SET( IMPORTERS
   unit/utBVHImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
+  unit/utNDOImportExport.cpp
   #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
@@ -163,6 +164,7 @@ SET( IMPORTERS
   unit/ImportExport/utMD2Importer.cpp
   #unit/ImportExport/utMD3Importer.cpp
   unit/ImportExport/utMD5Importer.cpp
+  unit/ImportExport/utIQMImporter.cpp
   unit/ImportExport/utMDLImporter.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp

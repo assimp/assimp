@@ -62,15 +62,15 @@ static aiTexel *const bad_texel = reinterpret_cast<aiTexel *>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
 static const unsigned char *SkipAsciiEffect(const unsigned char *current, const unsigned char *end) {
-    const auto remaining_size = static_cast<size_t>(end - current);
-    if (remaining_size < sizeof(int32_t)) {
+    const auto remainingBytes = static_cast<size_t>(end - current);
+    if (remainingBytes < sizeof(int32_t)) {
         throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
     }
 
     int32_t length = 0;
     ::memcpy(&length, current, sizeof(int32_t));
     AI_SWAP4(length);
-    if (length < 0 || static_cast<size_t>(length) > remaining_size - sizeof(int32_t)) {
+    if (length < 0 || static_cast<size_t>(length) > remainingBytes - sizeof(int32_t)) {
         throw DeadlyImportError("Invalid MDL file. The file is too small or contains invalid data.");
     }
 

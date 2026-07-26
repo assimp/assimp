@@ -483,8 +483,9 @@ void MDLImporter::InternReadFile_Quake1() {
 
         const auto group_frame_header_size = sizeof(MDL::GroupFrame::type) + sizeof(MDL::GroupFrame::numframes) +
                                              sizeof(MDL::GroupFrame::min) + sizeof(MDL::GroupFrame::max);
-        const auto group_frame_times_size = sizeof(*MDL::GroupFrame::times) * static_cast<size_t>(pcFrames2->numframes);
-        if (group_frame_times_size > std::numeric_limits<size_t>::max() - group_frame_header_size) {
+        size_t group_frame_times_size = 0;
+        if (!checkedMultiply(sizeof(*MDL::GroupFrame::times), static_cast<size_t>(pcFrames2->numframes), group_frame_times_size) ||
+                group_frame_times_size > std::numeric_limits<size_t>::max() - group_frame_header_size) {
             throw DeadlyImportError("[Quake 1 MDL] Invalid group frame count");
         }
 
@@ -1555,6 +1556,9 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
         sharedData.abNeedMaterials.resize(needed_material_count, false);
 
         for (size_t iSkin = 0; iSkin < skin_count; ++iSkin) {
+            if (szCurrent > file_end || static_cast<size_t>(file_end - szCurrent) < sizeof(MDL::Skin_MDL7)) {
+                throw DeadlyImportError("[3DGS MDL7] Invalid skin count");
+            }
             ParseSkinLump_3DGS_MDL7(szCurrent, &szCurrent, sharedData.pcMats);
         }
         // if we have absolutely no skin loaded we need to generate a default material

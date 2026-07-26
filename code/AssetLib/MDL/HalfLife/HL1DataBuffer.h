@@ -168,7 +168,7 @@ public:
     }
 
     /** \brief Return whether a byte range is inside the buffer. */
-    bool contains_bytes(const uint8_t *ptr, size_t bytes) const {
+    bool ContainsBytes(const uint8_t *ptr, size_t bytes) const {
         if (ptr == nullptr || data_ == nullptr) {
             return false;
         }
@@ -189,12 +189,12 @@ public:
 
     /** \brief Return whether a typed range is inside the buffer. */
     template <typename DataType>
-    bool contains(const DataType *ptr, size_t elements) const {
+    bool Contains(const DataType *ptr, size_t elements) const {
         if (elements > length_ / sizeof(DataType)) {
             return false;
         }
 
-        return contains_bytes(static_cast<const uint8_t *>(static_cast<const void *>(ptr)), elements * sizeof(DataType));
+        return ContainsBytes(static_cast<const uint8_t *>(static_cast<const void *>(ptr)), elements * sizeof(DataType));
     }
 
     /** \brief Size of the buffer in bytes. */

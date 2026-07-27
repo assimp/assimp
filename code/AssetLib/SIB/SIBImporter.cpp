@@ -119,6 +119,20 @@ struct SIB {
     std::vector<aiMesh *> meshes;
     std::vector<aiLight *> lights;
     std::vector<SIBObject> objs, insts;
+
+    ~SIB() {
+        // Anything still held here was not handed over to the aiScene, which happens
+        // when parsing was aborted by an error.
+        for (aiMaterial *mtl : mtls) {
+            delete mtl;
+        }
+        for (aiMesh *mesh : meshes) {
+            delete mesh;
+        }
+        for (aiLight *light : lights) {
+            delete light;
+        }
+    }
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -834,6 +848,11 @@ void SIBImporter::InternReadFile(const std::string &pFile,
     if (pScene->mNumLights)
         memcpy(pScene->mLights, &sib.lights[0], sizeof(aiLight *) * pScene->mNumLights);
 
+    // The scene owns them now, so make sure they are not deleted twice. The light list
+    // is still needed below and is released after the nodes have been built.
+    sib.mtls.clear();
+    sib.meshes.clear();
+
     // Construct the root node.
     size_t childIdx = 0;
     aiNode *root = new aiNode();
@@ -876,6 +895,8 @@ void SIBImporter::InternReadFile(const std::string &pFile,
             node->mParent = root;
         }
     }
+
+    sib.lights.clear();
 }
 
 } // namespace Assimp

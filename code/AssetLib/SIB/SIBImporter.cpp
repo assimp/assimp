@@ -127,7 +127,6 @@ struct SIB {
     // so a copy would hand the same pointers to two destructors.
     SIB(const SIB &) = delete;
     SIB &operator=(const SIB &) = delete;
-
     ~SIB() {
         // Anything still held here was not handed over to the aiScene, which happens
         // when parsing was aborted by an error.
@@ -878,6 +877,11 @@ void SIBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (pScene->mNumLights) {
         memcpy(pScene->mLights, &sib.lights[0], sizeof(aiLight *) * pScene->mNumLights);
     }
+
+    // The scene owns them now, so make sure they are not deleted twice. The light list
+    // is still needed below and is released after the nodes have been built.
+    sib.mtls.clear();
+    sib.meshes.clear();
 
     // The scene owns them now, so make sure they are not deleted twice. The light list
     // is still needed below and is released after the nodes have been built.

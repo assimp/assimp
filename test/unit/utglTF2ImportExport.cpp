@@ -866,6 +866,56 @@ TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
     ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
 }
 
+TEST_F(utglTF2ImportExport, lineLoopWithSingleIndex) {
+    // A LINE_LOOP primitive needs at least two indices. A single index must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineLoopOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, lineStripWithSingleIndex) {
+    // A LINE_STRIP primitive needs at least two indices. A single index must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineStripOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, triangleFanWithTwoIndices) {
+    // A TRIANGLE_FAN primitive needs at least three indices. Two indices must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/TriangleFanTwoIndices.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, triangleStripWithSingleIndex) {
+    // A TRIANGLE_STRIP primitive needs at least three indices. A single index must not
+    // make the face count underflow.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/TriangleStripOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, lineLoopWithOutOfRangeFirstIndex) {
+    // The closing segment of a LINE_LOOP must not dereference the first face when that
+    // face was dropped because its indices were out of range.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineLoopFirstIndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
 /////////////////////////////////
 // Draco decoding
 

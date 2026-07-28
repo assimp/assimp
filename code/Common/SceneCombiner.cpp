@@ -1085,14 +1085,19 @@ void SceneCombiner::Copy(aiMesh **_dest, const aiMesh *src) {
     GetArrayCopy(dest->mTangents, dest->mNumVertices);
     GetArrayCopy(dest->mBitangents, dest->mNumVertices);
 
-    unsigned int n = 0;
-    while (dest->HasTextureCoords(n)) {
-        GetArrayCopy(dest->mTextureCoords[n++], dest->mNumVertices);
+    // Reallocate every populated UV and color channel. The destructor frees
+    // all AI_MAX_NUMBER_OF_* channels, so the copy must own an independent
+    // buffer for each non-null one. Iterating with HasTextureCoords()/
+    // HasVertexColors() would stop at the first empty channel (leaving any
+    // later channel aliased with the source) and also skip channels of a mesh
+    // with mNumVertices == 0, which then double-frees when both meshes are
+    // destroyed.
+    for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++n) {
+        GetArrayCopy(dest->mTextureCoords[n], dest->mNumVertices);
     }
 
-    n = 0;
-    while (dest->HasVertexColors(n)) {
-        GetArrayCopy(dest->mColors[n++], dest->mNumVertices);
+    for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS; ++n) {
+        GetArrayCopy(dest->mColors[n], dest->mNumVertices);
     }
 
     // make a deep copy of all bones

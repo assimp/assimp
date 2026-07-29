@@ -68,8 +68,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 
 #if (__GNUC__ >= 8 && __GNUC_MINOR__ >= 0)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -80,8 +80,7 @@ inline void PrefixString(aiString &string, const char *prefix, unsigned int len)
         return;
 
     if (len + string.length >= AI_MAXLEN - 1) {
-        ASSIMP_LOG_VERBOSE_DEBUG("Can't add an unique prefix because the string is too long");
-        ai_assert(false);
+        ASSIMP_LOG_VERBOSE_ERROR("Can't add an unique prefix because the string is too long");
         return;
     }
 
@@ -116,7 +115,10 @@ void SceneCombiner::AddNodeHashes(aiNode *node, std::set<unsigned int> &hashes) 
 // ------------------------------------------------------------------------------------------------
 // Add a name prefix to all nodes in a hierarchy
 void SceneCombiner::AddNodePrefixes(aiNode *node, const char *prefix, unsigned int len) {
-    ai_assert(nullptr != prefix);
+    if (prefix == nullptr) {
+        ASSIMP_LOG_ERROR("Pointer to prefix is nullptr.");
+        return;
+    }
 
     PrefixString(node->mName, prefix, len);
 
@@ -144,7 +146,10 @@ bool SceneCombiner::FindNameMatch(const aiString &name, std::vector<SceneHelper>
 // Add a name prefix to all nodes in a hierarchy if a hash match is found
 void SceneCombiner::AddNodePrefixesChecked(aiNode *node, const char *prefix, unsigned int len,
         std::vector<SceneHelper> &input, unsigned int cur) {
-    ai_assert(nullptr != prefix);
+    if (prefix == nullptr) {
+        ASSIMP_LOG_ERROR("Pointer to prefix is nullptr.");
+        return;
+    }
 
     const unsigned int hash = SuperFastHash(node->mName.data, static_cast<uint32_t>(node->mName.length));
 
@@ -165,8 +170,9 @@ void SceneCombiner::AddNodePrefixesChecked(aiNode *node, const char *prefix, uns
 // ------------------------------------------------------------------------------------------------
 // Add an offset to all mesh indices in a node graph
 void SceneCombiner::OffsetNodeMeshIndices(aiNode *node, unsigned int offset) {
-    for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+    for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
         node->mMeshes[i] += offset;
+    }
 
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
         OffsetNodeMeshIndices(node->mChildren[i], offset);
@@ -177,6 +183,7 @@ void SceneCombiner::OffsetNodeMeshIndices(aiNode *node, unsigned int offset) {
 // Merges two scenes. Currently only used by the LWS loader.
 void SceneCombiner::MergeScenes(aiScene **_dest, std::vector<aiScene *> &src, unsigned int flags) {
     if (nullptr == _dest) {
+        ASSIMP_LOG_ERROR("Pointer to destination scene is nullptr.");
         return;
     }
 
@@ -211,7 +218,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, std::vector<aiScene *> &src, un
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::AttachToGraph(aiNode *attach, std::vector<NodeAttachmentInfo> &srcList) {
-    unsigned int cnt;
+    unsigned int cnt{0};
     for (cnt = 0; cnt < attach->mNumChildren; ++cnt) {
         AttachToGraph(attach->mChildren[cnt], srcList);
     }
@@ -219,8 +226,9 @@ void SceneCombiner::AttachToGraph(aiNode *attach, std::vector<NodeAttachmentInfo
     cnt = 0;
     for (std::vector<NodeAttachmentInfo>::iterator it = srcList.begin();
             it != srcList.end(); ++it) {
-        if ((*it).attachToNode == attach && !(*it).resolved)
+        if ((*it).attachToNode == attach && !(*it).resolved) {
             ++cnt;
+        }
     }
 
     if (cnt) {
@@ -314,12 +322,6 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
 
     // Generate unique names for all named stuff?
     if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
-#if 0
-        // Construct a proper random number generator
-        boost::mt19937 rng(  );
-        boost::uniform_int<> dist(1u,1 << 24u);
-        boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);
-#endif
         for (unsigned int i = 1; i < src.size(); ++i) {
             src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_", i);
 
@@ -472,7 +474,7 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
                 if ((*pip) != nullptr) {
                     (*pip)->mMaterialIndex += offset[n];
                 } else {
-                    ASSIMP_LOG_ERR("CopyMeshes: Missing mesh instance found, skipped.");
+                    ASSIMP_LOG_ERROR("CopyMeshes: Missing mesh instance found, skipped.");
                 }
                 ++pip;
             }

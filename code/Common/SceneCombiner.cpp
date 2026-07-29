@@ -371,13 +371,14 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
             SceneHelper *cur = &src[n];
             for (unsigned int i = 0; i < (*cur)->mNumTextures; ++i) {
                 if (n != duplicates[n]) {
-                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)
+                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY) {
                         Copy(pip, (*cur)->mTextures[i]);
-
-                    else
+                    } else {
                         continue;
-                } else
+                    }
+                } else {
                     *pip = (*cur)->mTextures[i];
+                }
                 ++pip;
             }
 
@@ -394,13 +395,14 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
             SceneHelper *cur = &src[n];
             for (unsigned int i = 0; i < (*cur)->mNumMaterials; ++i) {
                 if (n != duplicates[n]) {
-                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)
+                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY) {
                         Copy(pip, (*cur)->mMaterials[i]);
-
-                    else
+                    } else {
                         continue;
-                } else
+                    }
+                } else {
                     *pip = (*cur)->mMaterials[i];
+                }
 
                 if ((*cur)->mNumTextures != dest->mNumTextures) {
                     // We need to update all texture indices of the mesh. So we need to search for
@@ -457,16 +459,21 @@ void SceneCombiner::MergeScenes(aiScene **_dest, aiScene *master, std::vector<At
             SceneHelper *cur = &src[n];
             for (unsigned int i = 0; i < (*cur)->mNumMeshes; ++i) {
                 if (n != duplicates[n]) {
-                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)
+                    if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY) {
                         Copy(pip, (*cur)->mMeshes[i]);
-
-                    else
+                    } else {
                         continue;
-                } else
+                    }
+                } else {
                     *pip = (*cur)->mMeshes[i];
+                }
 
                 // update the material index of the mesh
-                (*pip)->mMaterialIndex += offset[n];
+                if ((*pip) != nullptr) {
+                    (*pip)->mMaterialIndex += offset[n];
+                } else {
+                    ASSIMP_LOG_ERR("CopyMeshes: Missing mesh instance found, skipped.");
+                }
                 ++pip;
             }
 

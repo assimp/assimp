@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 
 #include "STLLoader.h"
+#include <assimp/ByteSwapper.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
@@ -81,6 +82,8 @@ static bool IsBinarySTL(const char *buffer, size_t fileSize) {
     const char *facecount_pos = buffer + 80;
     uint32_t faceCount(0);
     ::memcpy(&faceCount, facecount_pos, sizeof(uint32_t));
+    // The facet count is stored little-endian on disk; no-op on little-endian hosts.
+    AI_SWAP4(faceCount);
     const uint32_t expectedBinaryFileSize = faceCount * 50 + 84;
 
     return expectedBinaryFileSize == fileSize;
@@ -396,6 +399,19 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Read one vector of three little-endian floats from a binary STL stream and advance the cursor.
+static inline aiVector3D ReadBinaryVec3(aiVector3f *&cursor) {
+    aiVector3f v;
+    ::memcpy(&v, cursor, sizeof(aiVector3f));
+    // Geometry is stored little-endian on disk; these are no-ops on little-endian hosts.
+    AI_SWAP4(v.x);
+    AI_SWAP4(v.y);
+    AI_SWAP4(v.z);
+    ++cursor;
+    return aiVector3D(v.x, v.y, v.z);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Read a binary STL file
 bool STLImporter::LoadBinaryFile() {
     // allocate one mesh
@@ -434,7 +450,9 @@ bool STLImporter::LoadBinaryFile() {
     // now read the number of facets
     mScene->mRootNode->mName.Set("<STL_BINARY>");
 
-    pMesh->mNumFaces = *((uint32_t *)sz);
+    // The facet count is stored little-endian on disk.
+    ::memcpy(&pMesh->mNumFaces, sz, sizeof(uint32_t));
+    AI_SWAP4(pMesh->mNumFaces);
     sz += 4;
 
     if (mFileSize < 84ull + pMesh->mNumFaces * 50ull) {
@@ -451,7 +469,6 @@ bool STLImporter::LoadBinaryFile() {
     aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
     aiVector3f *theVec;
-    aiVector3f theVec3F;
 
     for (unsigned int i = 0; i < pMesh->mNumFaces; ++i) {
         // NOTE: Blender sometimes writes empty normals ... this is not
@@ -460,42 +477,22 @@ bool STLImporter::LoadBinaryFile() {
         // There's one normal for the face in the STL; use it three times
         // for vertex normals
         theVec = (aiVector3f *)sz;
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
-        vn->x = theVec3F.x;
-        vn->y = theVec3F.y;
-        vn->z = theVec3F.z;
+        *vn = ReadBinaryVec3(theVec);
         *(vn + 1) = *vn;
         *(vn + 2) = *vn;
-        ++theVec;
         vn += 3;
 
-        // vertex 1
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
-        vp->x = theVec3F.x;
-        vp->y = theVec3F.y;
-        vp->z = theVec3F.z;
-        ++theVec;
-        ++vp;
-
-        // vertex 2
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
-        vp->x = theVec3F.x;
-        vp->y = theVec3F.y;
-        vp->z = theVec3F.z;
-        ++theVec;
-        ++vp;
-
-        // vertex 3
-        ::memcpy(&theVec3F, theVec, sizeof(aiVector3f));
-        vp->x = theVec3F.x;
-        vp->y = theVec3F.y;
-        vp->z = theVec3F.z;
-        ++theVec;
-        ++vp;
+        // the three vertices of the facet
+        *vp++ = ReadBinaryVec3(theVec);
+        *vp++ = ReadBinaryVec3(theVec);
+        *vp++ = ReadBinaryVec3(theVec);
 
         sz = (const unsigned char *)theVec;
 
-        uint16_t color = *((uint16_t *)sz);
+        // The per-facet attribute field is stored little-endian on disk.
+        uint16_t color = 0;
+        ::memcpy(&color, sz, sizeof(uint16_t));
+        AI_SWAP2(color);
         sz += 2;
 
         if (color & (1 << 15)) {

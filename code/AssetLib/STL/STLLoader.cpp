@@ -400,14 +400,19 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
 
 // ------------------------------------------------------------------------------------------------
 // Read one vector of three little-endian floats from a binary STL stream and advance the cursor.
-static inline aiVector3D ReadBinaryVec3(aiVector3f *&cursor) {
+static inline aiVector3D ReadBinaryVec3(const unsigned char *&cursor) {
     aiVector3f v;
+    // Read through a byte cursor. A binary STL facet is 50 bytes, so every
+    // other facet starts on an odd offset and an aiVector3f* into the buffer
+    // would point at a misaligned address. Forming that pointer at all is
+    // undefined behaviour under -fsanitize=alignment, even though the memcpy
+    // itself would be fine.
     ::memcpy(&v, cursor, sizeof(aiVector3f));
     // Geometry is stored little-endian on disk; these are no-ops on little-endian hosts.
     AI_SWAP4(v.x);
     AI_SWAP4(v.y);
     AI_SWAP4(v.z);
-    ++cursor;
+    cursor += sizeof(aiVector3f);
     return aiVector3D(v.x, v.y, v.z);
 }
 
@@ -468,7 +473,6 @@ bool STLImporter::LoadBinaryFile() {
     aiVector3D *vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
     aiVector3D *vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-    aiVector3f *theVec;
 
     for (unsigned int i = 0; i < pMesh->mNumFaces; ++i) {
         // NOTE: Blender sometimes writes empty normals ... this is not
@@ -476,18 +480,16 @@ bool STLImporter::LoadBinaryFile() {
 
         // There's one normal for the face in the STL; use it three times
         // for vertex normals
-        theVec = (aiVector3f *)sz;
-        *vn = ReadBinaryVec3(theVec);
+        *vn = ReadBinaryVec3(sz);
         *(vn + 1) = *vn;
         *(vn + 2) = *vn;
         vn += 3;
 
         // the three vertices of the facet
-        *vp++ = ReadBinaryVec3(theVec);
-        *vp++ = ReadBinaryVec3(theVec);
-        *vp++ = ReadBinaryVec3(theVec);
+        *vp++ = ReadBinaryVec3(sz);
+        *vp++ = ReadBinaryVec3(sz);
+        *vp++ = ReadBinaryVec3(sz);
 
-        sz = (const unsigned char *)theVec;
 
         // The per-facet attribute field is stored little-endian on disk.
         uint16_t color = 0;

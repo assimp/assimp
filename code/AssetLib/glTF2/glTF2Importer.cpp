@@ -1058,7 +1058,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
         }
     }
 
-    size_t num_vertices = 0;
+    size_t numVertices = 0;
 
     struct Weights {
         float values[4];
@@ -1175,15 +1175,15 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             throw DeadlyImportError("GLTF: extracted JOINTS_n and WEIGHTS_n counts must match");
         }
         if (w == 0) {
-            num_vertices = weightCount;
-        } else if (weightCount != num_vertices) {
+            numVertices = weightCount;
+        } else if (weightCount != numVertices) {
             throw DeadlyImportError(
                     "GLTF: all JOINTS_n and WEIGHTS_n attributes must have the same count");
         }
     }
 
     for (size_t w = 0; w < attr.weight.size(); ++w) {
-        for (size_t i = 0; i < num_vertices; ++i) {
+        for (size_t i = 0; i < numVertices; ++i) {
             for (int j = 0; j < 4; ++j) {
                 const unsigned int bone = indices[w][i].values[j];
                 const float weight = weights[w][i].values[j];

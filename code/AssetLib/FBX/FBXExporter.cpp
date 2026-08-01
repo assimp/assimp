@@ -1681,7 +1681,8 @@ void FBXExporter::WriteObjects () {
                 // If newPath doesn't end in an extension, add extension from embedded_texture->achFormatHint
                 std::string np = newPath.str();
                 size_t dot_pos = np.find_last_of('.');
-                if (dot_pos == std::string::npos || dot_pos < np.find_last_of("/\\")) {
+                size_t sep_pos = np.find_last_of("/\\");
+                if (dot_pos == std::string::npos || sep_pos != std::string::npos && dot_pos < sep_pos) {
                     // No extension found, add one
                     newPath << "." << embedded_texture->achFormatHint;
                 }

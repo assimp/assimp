@@ -2939,8 +2939,8 @@ void FBXExporter::WriteAnimationCurve(
     n.AddChild("KeyVer", int32_t(4009));
     n.AddChild("KeyTime", times);
     n.AddChild("KeyValueFloat", values);
-    // TODO: keyattr flags and data (STUB for now)
-    n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
+    // keyattr flags and data
+    n.AddChild("KeyAttrFlags", std::vector<int32_t>{ 8452 }); // InterpType = Linear
     n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
     n.AddChild(
         "KeyAttrRefCount",

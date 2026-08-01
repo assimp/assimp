@@ -2192,22 +2192,14 @@ void FBXExporter::WriteObjects () {
                 sdnode.AddChild("Weights", subdef_weights);
             }
 
-            // transform is the transform of the mesh, but in bone space.
-            // if the skeleton is in the bind pose,
-            // we can take the inverse of the world-space bone transform
-            // and multiply by the world-space transform of the mesh.
-            aiMatrix4x4 bone_xform = get_world_transform(bone_node, mScene);
-            aiMatrix4x4 inverse_bone_xform = bone_xform;
-            inverse_bone_xform.Inverse();
-            aiMatrix4x4 tr = inverse_bone_xform * mesh_xform;
+            // add bind matrix
+            if (b) {
+                aiMatrix4x4 invOffsetMatrix = b->mOffsetMatrix; invOffsetMatrix.Inverse();
+                aiMatrix4x4 bone_xform = mesh_xform * invOffsetMatrix; // bone global transform in bind pose
 
-            sdnode.AddChild("Transform", tr);
-
-
+                sdnode.AddChild("Transform", b->mOffsetMatrix); // TransformLink * Transform = mesh_xform
             sdnode.AddChild("TransformLink", bone_xform);
-            // note: this means we ALWAYS rely on the mesh node transform
-            // being unchanged from the time the skeleton was bound.
-            // there's not really any way around this at the moment.
+            }
 
             // done
             sdnode.Dump(outstream, binary, indent);

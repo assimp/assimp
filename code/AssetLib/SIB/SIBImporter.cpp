@@ -267,6 +267,14 @@ static void ReadUVs(SIBMesh *mesh, StreamReaderLE *stream) {
             throw DeadlyImportError("Invalid face index.");
 
         uint32_t pos = mesh->faceStart[faceIdx];
+
+        // mesh->idx[pos] holds the number of points the face was built with in
+        // ReadFaces(). A UV chunk that claims more points than that would walk idx
+        // past the end of the face's index data and off the end of mesh->idx
+        // entirely, so reject it.
+        if (numPoints > mesh->idx[pos])
+            throw DeadlyImportError("SIB: UV point count exceeds face point count.");
+
         uint32_t *idx = &mesh->idx[pos + 1];
 
         for (uint32_t n = 0; n < numPoints; n++, idx += N) {

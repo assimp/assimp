@@ -254,7 +254,7 @@ static void ReadFaces(SIBMesh *mesh, StreamReaderLE *stream) {
         // never have more points than the remaining chunk data can hold. Rejecting
         // larger counts here also keeps the index array size below the point where
         // numPoints * N would wrap around.
-        if (numPoints > stream->GetRemainingSizeToLimit() / 4) {
+        if (numPoints == 0 || numPoints > stream->GetRemainingSizeToLimit() / 4) {
             throw DeadlyImportError("SIB: Invalid face point count.");
         }
 

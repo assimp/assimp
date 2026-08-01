@@ -1047,9 +1047,12 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
         float values[4];
     };
 
-    auto extractWeights = [vertexRemappingTablePtr](Accessor &accessor, Weights *&outWeights) -> size_t {
+    auto extractWeights = [vertexRemappingTablePtr](Accessor &accessor, std::unique_ptr<Weights[]> &outWeights) -> size_t {
         if (accessor.componentType == ComponentType_FLOAT) {
-            return accessor.ExtractData(outWeights, vertexRemappingTablePtr);
+            Weights *weights = nullptr;
+            const size_t count = accessor.ExtractData(weights, vertexRemappingTablePtr);
+            outWeights.reset(weights);
+            return count;
         }
 
         if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
@@ -1059,7 +1062,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             PackedWeights *packedWeights = nullptr;
             const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
             std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
-            outWeights = new Weights[count];
+            outWeights.reset(new Weights[count]);
             const float scale = accessor.normalized ? 1.0f / 255.0f : 1.0f;
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
@@ -1076,7 +1079,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             PackedWeights *packedWeights = nullptr;
             const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
             std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
-            outWeights = new Weights[count];
+            outWeights.reset(new Weights[count]);
             const float scale = accessor.normalized ? 1.0f / 65535.0f : 1.0f;
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
@@ -1089,7 +1092,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
         throw DeadlyImportError("GLTF: unsupported skin weight componentType ", accessor.componentType);
     };
 
-    Weights **weights = new Weights*[attr.weight.size()];
+    std::vector<std::unique_ptr<Weights[]>> weights(attr.weight.size());
     for (size_t w = 0; w < attr.weight.size(); ++w) {
         num_vertices = extractWeights(*attr.weight[w], weights[w]);
     }
@@ -1100,22 +1103,26 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     struct Indices16 {
         uint16_t values[4];
     };
-    Indices8 **indices8 = nullptr;
-    Indices16 **indices16 = nullptr;
+    std::vector<std::unique_ptr<Indices8[]>> indices8;
+    std::vector<std::unique_ptr<Indices16[]>> indices16;
     if (attr.joint[0]->GetElementSize() == 4) {
-        indices8 = new Indices8*[attr.joint.size()];
+        indices8.resize(attr.joint.size());
         for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices8[j], vertexRemappingTablePtr);
+            Indices8 *indices = nullptr;
+            attr.joint[j]->ExtractData(indices, vertexRemappingTablePtr);
+            indices8[j].reset(indices);
         }
     } else {
-        indices16 = new Indices16 *[attr.joint.size()];
+        indices16.resize(attr.joint.size());
         for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
+            Indices16 *indices = nullptr;
+            attr.joint[j]->ExtractData(indices, vertexRemappingTablePtr);
+            indices16[j].reset(indices);
         }
     }
 
     // No indices are an invalid usecase
-    if (nullptr == indices8 && nullptr == indices16) {
+    if (indices8.empty() && indices16.empty()) {
         // Something went completely wrong!
         ai_assert(false);
         return;
@@ -1124,7 +1131,7 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     for (size_t w = 0; w < attr.weight.size(); ++w) {
         for (size_t i = 0; i < num_vertices; ++i) {
             for (int j = 0; j < 4; ++j) {
-                const unsigned int bone = (indices8 != nullptr) ? indices8[w][i].values[j] : indices16[w][i].values[j];
+                const unsigned int bone = !indices8.empty() ? indices8[w][i].values[j] : indices16[w][i].values[j];
                 const float weight = weights[w][i].values[j];
                 if (weight > 0 && bone < map.size()) {
                     map[bone].reserve(8);
@@ -1133,17 +1140,6 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             }
         }
     }
-
-    for (size_t w = 0; w < attr.weight.size(); ++w) {
-        delete[] weights[w];
-        if(indices8)
-            delete[] indices8[w];
-        if (indices16)
-            delete[] indices16[w];
-    }
-    delete[] weights;
-    delete[] indices8;
-    delete[] indices16;
 }
 
 static std::string GetNodeName(const Node &node) {

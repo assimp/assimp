@@ -1091,22 +1091,22 @@ void regulate_euler_angles_in_track(
     // fix Gimbal Lock
     constexpr float half_pi_deg = 90;
     constexpr float epsilon = 1; // 1°
-    if (abs(euler_y - half_pi_deg) < epsilon) {
+    if (fabs(euler_y - half_pi_deg) < epsilon) {
         float delta = euler_z - euler_x;
         float x1 = ref_euler_x, z1 = x1 + delta, d1 = ref_euler_z - z1;
         float z2 = ref_euler_z, x2 = z2 - delta, d2 = ref_euler_x - x2;
-        if (abs(d1) < abs(d2)) {
+        if (fabs(d1) < fabs(d2)) {
             euler_x = x1;
             euler_z = z1;
         } else {
             euler_x = x2;
             euler_z = z2;
         }
-    } else if (abs(euler_y + half_pi_deg) < epsilon) {
+    } else if (fabs(euler_y + half_pi_deg) < epsilon) {
         float sum = euler_z + euler_x;
         float x1 = ref_euler_x, z1 = sum - x1, d1 = ref_euler_z - z1;
         float z2 = ref_euler_z, x2 = sum - z2, d2 = ref_euler_x - x2;
-        if (abs(d1) < abs(d2)) {
+        if (fabs(d1) < fabs(d2)) {
             euler_x = x1;
             euler_z = z1;
         } else {
@@ -1119,16 +1119,16 @@ void regulate_euler_angles_in_track(
     const float ref_euler[3] = { ref_euler_x, ref_euler_y, ref_euler_z };
 
     // makeNearEuler case1: cross border of ±180°, eg. from 179° to -179°
-    constexpr float pi_deg = 180;
-    auto makeNearEuler = [&euler, &ref_euler, pi_deg]() {
+    static constexpr float pi_deg = 180;
+    auto makeNearEuler = [&euler, &ref_euler]() {
         float dist = 0;
         for (int i = 0; i < 3; i++) {
             float delta = ref_euler[i] - euler[i];
-            if (abs(delta) > pi_deg) {
+            if (fabs(delta) > pi_deg) {
                 euler[i].get() += delta > 0 ? pi_deg * 2 : -pi_deg * 2;
                 delta = ref_euler[i] - euler[i];
             }
-            dist += abs(delta);
+            dist += fabs(delta);
         }
         return dist;
     };
@@ -1682,7 +1682,7 @@ void FBXExporter::WriteObjects () {
                 std::string np = newPath.str();
                 size_t dot_pos = np.find_last_of('.');
                 size_t sep_pos = np.find_last_of("/\\");
-                if (dot_pos == std::string::npos || sep_pos != std::string::npos && dot_pos < sep_pos) {
+                if (dot_pos == std::string::npos || (sep_pos != std::string::npos && dot_pos < sep_pos)) {
                     // No extension found, add one
                     newPath << "." << embedded_texture->achFormatHint;
                 }
@@ -2556,7 +2556,7 @@ void FBXExporter::WriteObjects () {
                 if (ki > 0) { // not first
                     regulate_euler_angles_in_track(xval[ki], yval[ki], zval[ki], xval[ki - 1], yval[ki - 1], zval[ki - 1]);
                 } else if (ki + 1 < xval.size()) { // first but not last
-                    if (abs(abs(yval[ki + 1]) - 90) > 1.0) { // not in Gimbal Lock
+                    if (fabs(fabs(yval[ki + 1]) - 90) > 1.0) { // not in Gimbal Lock
                         regulate_euler_angles_in_track(xval[ki], yval[ki], zval[ki], xval[ki + 1], yval[ki + 1], zval[ki + 1]);
                     }
                 }

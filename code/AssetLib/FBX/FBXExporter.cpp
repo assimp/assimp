@@ -1124,7 +1124,7 @@ void regulate_euler_angles_in_track(
         float dist = 0;
         for (int i = 0; i < 3; i++) {
             float delta = ref_euler[i] - euler[i];
-            if (fabs(delta) > pi_deg) {
+            while (fabs(delta) > pi_deg) {
                 euler[i].get() += delta > 0 ? pi_deg * 2 : -pi_deg * 2;
                 delta = ref_euler[i] - euler[i];
             }

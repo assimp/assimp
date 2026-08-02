@@ -120,6 +120,13 @@ struct SIB {
     std::vector<aiLight *> lights;
     std::vector<SIBObject> objs, insts;
 
+    SIB() = default;
+
+    // The lists above own their elements until they are handed over to the aiScene,
+    // so a copy would hand the same pointers to two destructors.
+    SIB(const SIB &) = delete;
+    SIB &operator=(const SIB &) = delete;
+
     ~SIB() {
         // Anything still held here was not handed over to the aiScene, which happens
         // when parsing was aborted by an error.

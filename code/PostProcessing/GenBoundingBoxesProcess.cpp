@@ -96,8 +96,8 @@ void GenBoundingBoxesProcess::Execute(aiScene* pScene) {
             continue;
         }
 
-        constexpr ai_real maxVal = std::numeric_limits<ai_real>::max();
-        aiVector3D min(maxVal, maxVal, maxVal), max(-maxVal, -maxVal, -maxVal);
+        constexpr ai_real kMaxVal = std::numeric_limits<ai_real>::max();
+        aiVector3D min(kMaxVal, kMaxVal, kMaxVal), max(-kMaxVal, -kMaxVal, -kMaxVal);
         checkMesh(mesh, min, max);
         mesh->mAABB.mMin = min;
         mesh->mAABB.mMax = max;

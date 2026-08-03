@@ -92,7 +92,7 @@ TEST_F(utGenBoundingBoxesProcess, executeTest) {
     EXPECT_EQ(99, mesh->mAABB.mMax.z);
 }
 
-TEST_F(utGenBoundingBoxesProcess, executeFarFromOriginTest) {
+TEST_F(utGenBoundingBoxesProcess, ExecuteFarFromOriginTest) {
     // Coordinates beyond the former +/-999999 sentinel values, e.g. from projected
     // geographic coordinate systems, must still yield a tight bounding box.
     const ai_real kOffset = (ai_real)2600000;
@@ -113,7 +113,7 @@ TEST_F(utGenBoundingBoxesProcess, executeFarFromOriginTest) {
     EXPECT_EQ(kOffset + 99, mesh->mAABB.mMax.z);
 }
 
-TEST_F(utGenBoundingBoxesProcess, executeEmptyMeshTest) {
+TEST_F(utGenBoundingBoxesProcess, ExecuteEmptyMeshTest) {
     delete[] mMesh->mVertices;
     mMesh->mVertices = nullptr;
     mMesh->mNumVertices = 0;

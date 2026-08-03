@@ -195,9 +195,16 @@ void OFFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Each vertex line holds at least `dimensions` single-character values,
     // each followed by a separator or newline, so any shorter remainder cannot
     // contain the declared vertex count.
-    if (const uint64_t minimumVertexTextBytes = requiredVertices * 2u * dimensions;
-            static_cast<uint64_t>(end - car) < minimumVertexTextBytes) {
+    const uint64_t minimumVertexTextBytes = requiredVertices * 2u * dimensions;
+    if (static_cast<uint64_t>(end - car) < minimumVertexTextBytes) {
         throw DeadlyImportError("OFF: File size inconsistent with vertex count");
+    }
+    // Each face line needs at least a face vertex count and one vertex index,
+    // separated by whitespace. Reject impossible declarations before allocating
+    // the face array.
+    if (const uint64_t minimumFaceTextBytes = requiredFaces * 3u;
+            static_cast<uint64_t>(end - car) < minimumVertexTextBytes + minimumFaceTextBytes) {
+        throw DeadlyImportError("OFF: File size inconsistent with face count");
     }
 
     pScene->mNumMeshes = 1;

@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <limits>
+
 namespace Assimp {
 
 bool GenBoundingBoxesProcess::IsActive(unsigned int pFlags) const {
@@ -90,11 +92,12 @@ void GenBoundingBoxesProcess::Execute(aiScene* pScene) {
 
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         aiMesh* mesh = pScene->mMeshes[i];
-        if (nullptr == mesh) {
+        if (nullptr == mesh || 0 == mesh->mNumVertices) {
             continue;
         }
 
-        aiVector3D min(999999, 999999, 999999), max(-999999, -999999, -999999);
+        constexpr ai_real maxVal = std::numeric_limits<ai_real>::max();
+        aiVector3D min(maxVal, maxVal, maxVal), max(-maxVal, -maxVal, -maxVal);
         checkMesh(mesh, min, max);
         mesh->mAABB.mMin = min;
         mesh->mAABB.mMax = max;

@@ -2,6 +2,9 @@
 
 This document provides guidelines for AI agents working on the Assimp codebase.
 
+## Methodology
+Never answer from memory. First try it and then show the results.
+
 ## Project Overview
 
 Assimp (Open Asset Import Library) is a C++ library that loads various 3D file formats into a shared, in-memory format. It supports 40+ import formats and several export formats.

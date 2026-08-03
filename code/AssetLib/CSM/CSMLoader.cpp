@@ -175,7 +175,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
                 // If we know how many frames we'll read, we can preallocate some storage
                 unsigned int alloc = 100;
-                if (last != 0x00ffffff) {
+                if (last != 0x00ffffff && last > first) {
                     // re-init if the file has last frame data
                     alloc = last-first;
                     alloc += alloc>>2u; // + 25%

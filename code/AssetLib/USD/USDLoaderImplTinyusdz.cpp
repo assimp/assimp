@@ -569,7 +569,7 @@ void USDImporterImplTinyusdz::materials(
 
         aiString materialName;
         materialName.Set(material.name);
-        mat->AddProperty(materialName, AI_MATKEY_NAME);
+        mat->AddProperty(&materialName, AI_MATKEY_NAME);
 
         mat->AddProperty(
                 reinterpret_cast<const aiColor3D *>(material.surfaceShader.diffuseColor.value.data()),

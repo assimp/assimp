@@ -45,7 +45,7 @@ if os.name=='posix':
     anaconda_keywords = ("conda", "continuum")
     if have_distutils and any(k in sys.version.lower() for k in anaconda_keywords):
       cur_path = get_python_lib()
-      pattern = re.compile('.*\/lib\/')
+      pattern = re.compile(r'.*\/lib\/')
       conda_lib = pattern.match(cur_path).group()
       logger.info("Adding Anaconda lib path:"+ conda_lib)
       additional_dirs.append(conda_lib)

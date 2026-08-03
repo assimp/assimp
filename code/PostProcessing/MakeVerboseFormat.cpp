@@ -52,7 +52,10 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute(aiScene *pScene) {
-    ai_assert(nullptr != pScene);
+    if (pScene == nullptr) {
+        ASSIMP_LOG_ERROR("Nullptr to scene, aborted.");
+        return;
+    }
     ASSIMP_LOG_DEBUG("MakeVerboseFormatProcess begin");
 
     bool bHas = false;
@@ -75,7 +78,10 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     ai_assert(nullptr != pcMesh);
 
     unsigned int iOldNumVertices = pcMesh->mNumVertices;
-    const unsigned int iNumVerts = pcMesh->mNumFaces * 3;
+    unsigned int iNumVerts = 0;
+    for (unsigned int a = 0; a < pcMesh->mNumFaces; ++a) {
+        iNumVerts += pcMesh->mFaces[a].mNumIndices;
+    }
 
     aiVector3D *pvPositions = new aiVector3D[iNumVerts];
 
@@ -103,7 +109,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     // allocate enough memory to hold output bones and vertex weights ...
     std::vector<aiVertexWeight> *newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
     for (unsigned int i = 0; i < pcMesh->mNumBones; ++i) {
-        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights * 3);
+        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights);
     }
 
     // iterate through all faces and build a clean list
@@ -181,13 +187,17 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh *pcMesh) {
     }
     pcMesh->mNumVertices = iNumVerts;
 
-    if (pcMesh->HasNormals()) {
+    if (pcMesh->mNormals != nullptr) {
         delete[] pcMesh->mNormals;
         pcMesh->mNormals = pvNormals;
     }
-    if (pcMesh->HasTangentsAndBitangents()) {
+  
+    if (pcMesh->mTangents != nullptr) {
         delete[] pcMesh->mTangents;
         pcMesh->mTangents = pvTangents;
+    }
+
+    if ( pcMesh->mBitangents != nullptr) {
         delete[] pcMesh->mBitangents;
         pcMesh->mBitangents = pvBitangents;
     }

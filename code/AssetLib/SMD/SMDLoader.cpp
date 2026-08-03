@@ -456,9 +456,7 @@ void SMDImporter::CreateOutputNodes() {
 
         pScene->mRootNode->mParent = nullptr;
     } else {
-        static constexpr char rootName[11] = "<SMD_root>";
-        pScene->mRootNode->mName.length = 10;
-        ::strncpy(pScene->mRootNode->mName.data, rootName, pScene->mRootNode->mName.length);
+        pScene->mRootNode->mName.Set("<SMD_root>");
     }
 }
 
@@ -597,8 +595,7 @@ void SMDImporter::CreateOutputMaterials() {
 
         if (aszTextures[iMat].length())
         {
-            ::strncpy(szName.data, aszTextures[iMat].c_str(), AI_MAXLEN - 1);
-            szName.length = static_cast<ai_uint32>( aszTextures[iMat].length() );
+            szName.Set(aszTextures[iMat]);
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

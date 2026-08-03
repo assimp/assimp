@@ -246,7 +246,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
     for (auto &tri : triangles) {
         for (unsigned int i = 0; i < 3; ++i) {
             tri.mVertex[i] = d_reader.GetI2();
-            if (tri.mVertex[i] >= numTris) {
+            if (tri.mVertex[i] >= numVert) {
                 ASSIMP_LOG_WARN("UNREAL: vertex index out of range");
                 tri.mVertex[i] = 0;
             }

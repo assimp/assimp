@@ -61,6 +61,21 @@ TEST(utOFFSecurity, noOOMOnMaliciousCount) {
                 error.find("no valid faces") != std::string::npos);
 }
 
+TEST(utOFFSecurity, rejectsImpossibleFaceCountBeforeAllocation) {
+    Assimp::Importer importer;
+    const char maliciousOFF[] =
+        "OFF\n"
+        "1 1000000 0\n"
+        "0 0 0\n";
+    const aiScene *scene = importer.ReadFileFromMemory(
+            maliciousOFF, sizeof(maliciousOFF) - 1,
+            aiProcess_ValidateDataStructure, "off");
+
+    EXPECT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    EXPECT_TRUE(error.find("face count") != std::string::npos) << error;
+}
+
 // Test valid OFF file still works (regression)
 TEST(utOFFSecurity, validOFFLoadsSuccessfully) {
     Assimp::Importer importer;

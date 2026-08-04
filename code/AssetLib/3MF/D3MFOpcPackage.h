@@ -65,6 +65,14 @@ public:
     D3MFOpcPackage( IOSystem* pIOHandler, const std::string& file );
     ~D3MFOpcPackage();
     IOStream* RootStream() const;
+    /// @brief Absolute path of the root model part inside the container (production extension).
+    const std::string &RootPath() const;
+    /// @brief Open an arbitrary model part referenced via a production-extension path attribute.
+    ///        The returned stream must be released with CloseStream(). Returns nullptr if missing.
+    IOStream *OpenPart(const std::string &path);
+    void CloseStream(IOStream *stream);
+    /// @brief Strip leading slashes so an OPC absolute path matches the zip entry name.
+    static std::string NormalizePath(const std::string &path);
     bool validate();
     const std::vector<aiTexture*> &GetEmbeddedTextures() const;
 
@@ -74,6 +82,7 @@ protected:
 
 private:
     IOStream* mRootStream;
+    std::string mRootPath;
     ZipArchiveIOSystem *mZipArchive;
     std::vector<aiTexture *> mEmbeddedTextures;
 };

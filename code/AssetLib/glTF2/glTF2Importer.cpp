@@ -1072,38 +1072,29 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             return count;
         }
 
-        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+        auto extractPackedWeights = [&](auto packedZero, float scale) -> size_t {
+            using PackedType = decltype(packedZero);
             struct PackedWeights {
-                uint8_t values[4];
+                PackedType values[4];
             };
             PackedWeights *packedWeights = nullptr;
             const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
             std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
             outWeights.reset(new Weights[count]);
-            const float scale = accessor.normalized ? 1.0f / 255.0f : 1.0f;
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
                     outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
                 }
             }
             return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedWeights(uint8_t{}, accessor.normalized ? 1.0f / 255.0f : 1.0f);
         }
 
         if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
-            struct PackedWeights {
-                uint16_t values[4];
-            };
-            PackedWeights *packedWeights = nullptr;
-            const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
-            std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
-            outWeights.reset(new Weights[count]);
-            const float scale = accessor.normalized ? 1.0f / 65535.0f : 1.0f;
-            for (size_t i = 0; i < count; ++i) {
-                for (size_t j = 0; j < 4; ++j) {
-                    outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
-                }
-            }
-            return count;
+            return extractPackedWeights(uint16_t{}, accessor.normalized ? 1.0f / 65535.0f : 1.0f);
         }
 
         throw DeadlyImportError("GLTF: unsupported skin weight componentType ", accessor.componentType);
@@ -1114,9 +1105,10 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     };
 
     auto extractIndices = [vertexRemappingTablePtr](Accessor &accessor, std::vector<Indices> &outIndices) -> size_t {
-        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+        auto extractPackedIndices = [&](auto packedZero) -> size_t {
+            using PackedType = decltype(packedZero);
             struct PackedIndices {
-                uint8_t values[4];
+                PackedType values[4];
             };
             PackedIndices *packedIndices = nullptr;
             const size_t count = accessor.ExtractData(packedIndices, vertexRemappingTablePtr);
@@ -1124,43 +1116,22 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             outIndices.resize(count);
             for (size_t i = 0; i < count; ++i) {
                 for (size_t j = 0; j < 4; ++j) {
-                    outIndices[i].values[j] = packedIndicesPtr[i].values[j];
+                    outIndices[i].values[j] = static_cast<unsigned int>(packedIndicesPtr[i].values[j]);
                 }
             }
             return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedIndices(uint8_t{});
         }
 
         if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
-            struct PackedIndices {
-                uint16_t values[4];
-            };
-            PackedIndices *packedIndices = nullptr;
-            const size_t count = accessor.ExtractData(packedIndices, vertexRemappingTablePtr);
-            std::unique_ptr<PackedIndices[]> packedIndicesPtr(packedIndices);
-            outIndices.resize(count);
-            for (size_t i = 0; i < count; ++i) {
-                for (size_t j = 0; j < 4; ++j) {
-                    outIndices[i].values[j] = packedIndicesPtr[i].values[j];
-                }
-            }
-            return count;
+            return extractPackedIndices(uint16_t{});
         }
 
         if (accessor.componentType == ComponentType_UNSIGNED_INT) {
-            struct PackedIndices {
-                uint32_t values[4];
-            };
-            PackedIndices *packedIndices = nullptr;
-            const size_t count = accessor.ExtractData(packedIndices, vertexRemappingTablePtr);
-            std::unique_ptr<PackedIndices[]> packedIndicesPtr(packedIndices);
-            outIndices.resize(count);
-            for (size_t i = 0; i < count; ++i) {
-                for (size_t j = 0; j < 4; ++j) {
-                    outIndices[i].values[j] =
-                            static_cast<unsigned int>(packedIndicesPtr[i].values[j]);
-                }
-            }
-            return count;
+            return extractPackedIndices(uint32_t{});
         }
 
         throw DeadlyImportError("GLTF: unsupported skin joint componentType ", accessor.componentType);

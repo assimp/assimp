@@ -109,7 +109,7 @@ Discreet3DSImporter::Discreet3DSImporter() :
 // Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static constexpr uint16_t token[] = { 0x4d4d, 0x3dc2 /*, 0x3daa */ };
-    return CheckMagicToken(pIOHandler, pFile, token, AI_COUNT_OF(token), 0, sizeof token[0]);
+    return CheckMagicToken(pIOHandler, pFile, token, static_cast<std::size>(AI_COUNT_OF(token)), 0, sizeof token[0]);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -203,10 +203,11 @@ void Discreet3DSImporter::InternReadFile(const std::string &pFile, aiScene *pSce
 // Applies a master-scaling factor to the imported scene
 void Discreet3DSImporter::ApplyMasterScale(const aiScene *pScene) {
     // There are some 3DS files with a zero scaling factor
-    if (!mMasterScale)
+    if (!mMasterScale) {
         mMasterScale = 1.0f;
-    else
+    } else {
         mMasterScale = 1.0f / mMasterScale;
+    }
 
     // Construct an uniform scaling matrix and multiply with it
     pScene->mRootNode->mTransformation *= aiMatrix4x4(
@@ -612,7 +613,6 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
     // get chunk type
     switch (chunk.Flag) {
     case Discreet3DS::CHUNK_TRACKOBJNAME:
-
         // This is the name of the object to which the track applies. The chunk also
         // defines the position of this object in the hierarchy.
         {
@@ -621,9 +621,10 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
             unsigned int cnt = 0;
             auto *sz = (const char *)mStream->GetPtr();
 
-            while (mStream->GetI1())
+            while (mStream->GetI1()) {
                 ++cnt;
-            std::string name = std::string(sz, cnt);
+            }
+            auto name = std::string(sz, cnt);
 
             // Now find out whether we have this node already (target animation channels
             // are stored with a separate object ID)
@@ -652,12 +653,10 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
 
             // And find a proper position in the graph for it
             if (mCurrentNode && mCurrentNode->mHierarchyPos == hierarchy) {
-
                 // add to the parent of the last touched node
                 mCurrentNode->mParent->push_back(pcNode);
                 mLastNodeIndex++;
             } else if (hierarchy >= mLastNodeIndex) {
-
                 // place it at the current position in the hierarchy
                 mCurrentNode->push_back(pcNode);
                 mLastNodeIndex = hierarchy;
@@ -672,7 +671,6 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
         break;
 
     case Discreet3DS::CHUNK_TRACKDUMMYOBJNAME:
-
         // This is the "real" name of a $$$DUMMY object
         {
             const char *sz = (const char *)mStream->GetPtr();
@@ -688,7 +686,6 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
         break;
 
     case Discreet3DS::CHUNK_TRACKPIVOT:
-
         if (Discreet3DS::CHUNK_TRACKINFO != parent) {
             ASSIMP_LOG_WARN("3DS: Skipping pivot subchunk for non usual object");
             break;
@@ -700,8 +697,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
         mCurrentNode->vPivot.z = mStream->GetF4();
         break;
 
-        // ////////////////////////////////////////////////////////////////////
-        // POSITION KEYFRAME
+    // ////////////////////////////////////////////////////////////////////
+    // POSITION KEYFRAME
     case Discreet3DS::CHUNK_TRACKPOS: {
         mStream->IncPtr(10);
         const unsigned int numFrames = mStream->GetI4();
@@ -742,11 +739,10 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
             l->erase(std::unique(l->begin(), l->end(), &KeyUniqueCompare<aiVectorKey>), l->end());
         }
     }
-
     break;
 
-        // ////////////////////////////////////////////////////////////////////
-        // CAMERA ROLL KEYFRAME
+    // ////////////////////////////////////////////////////////////////////
+    // CAMERA ROLL KEYFRAME
     case Discreet3DS::CHUNK_TRACKROLL: {
         // roll keys are accepted for cameras only
         if (parent != Discreet3DS::CHUNK_TRACKCAMERA) {
@@ -771,8 +767,9 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
             v.mValue = mStream->GetF4();
 
             // Check whether we'll need to sort the keys
-            if (!l->empty() && v.mTime <= l->back().mTime)
+            if (!l->empty() && v.mTime <= l->back().mTime) {
                 sortKeys = true;
+            }
 
             // Add the new keyframe to the list
             l->push_back(v);
@@ -785,15 +782,15 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
         }
     } break;
 
-        // ////////////////////////////////////////////////////////////////////
-        // CAMERA FOV KEYFRAME
+    // ////////////////////////////////////////////////////////////////////
+    // CAMERA FOV KEYFRAME
     case Discreet3DS::CHUNK_TRACKFOV: {
         ASSIMP_LOG_ERROR("3DS: Skipping FOV animation track. "
                          "This is not supported");
     } break;
 
-        // ////////////////////////////////////////////////////////////////////
-        // ROTATION KEYFRAME
+    // ////////////////////////////////////////////////////////////////////
+    // ROTATION KEYFRAME
     case Discreet3DS::CHUNK_TRACKROTATE: {
         mStream->IncPtr(10);
         const unsigned int numFrames = mStream->GetI4();
@@ -816,15 +813,17 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
             axis.y = mStream->GetF4();
             axis.z = mStream->GetF4();
 
-            if (!axis.x && !axis.y && !axis.z)
+            if (!axis.x && !axis.y && !axis.z) {
                 axis.y = 1.f;
+            }
 
             // Construct a rotation quaternion from the axis-angle pair
             v.mValue = aiQuaternion(axis, rad);
 
             // Check whether we'll need to sort the keys
-            if (!l->empty() && v.mTime <= l->back().mTime)
+            if (!l->empty() && v.mTime <= l->back().mTime) {
                 sortKeys = true;
+            }
 
             // add the new keyframe to the list
             l->push_back(v);
@@ -836,8 +835,8 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
         }
     } break;
 
-        // ////////////////////////////////////////////////////////////////////
-        // SCALING KEYFRAME
+    // ////////////////////////////////////////////////////////////////////
+    // SCALING KEYFRAME
     case Discreet3DS::CHUNK_TRACKSCALE: {
         mStream->IncPtr(10);
         const unsigned int numFrames = mStream->GetI2();
@@ -853,7 +852,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent) {
 
             // Setup a new key
             aiVectorKey v;
-            v.mTime = (double)fidx;
+            v.mTime = static_cast<double>(fidx);
 
             // ... and read its value
             v.mValue.x = mStream->GetF4();

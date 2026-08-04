@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include <iterator>
+
 namespace Assimp {
 
 using namespace D3DS;

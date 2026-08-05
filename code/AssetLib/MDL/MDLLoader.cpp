@@ -1685,6 +1685,8 @@ void MDLImporter::ParseBoneTrafoKeys_3DGS_MDL7(
             // skip all frames vertices. We can't support them
             const MDL::BoneTransform_MDL7 *pcBoneTransforms = (const MDL::BoneTransform_MDL7 *)(((const char *)frame.pcFrame) + pcHeader->frame_stc_size +
                                                                                                 frame.pcFrame->vertices_count * pcHeader->framevertex_stc_size);
+            // Confirm that this frame is within the file.
+            VALIDATE_FILE_SIZE(pcBoneTransforms+sizeof(MDL::BoneTransform_MDL7));
 
             // read all transformation matrices
             for (unsigned int iTrafo = 0; iTrafo < frame.pcFrame->transmatrix_count; ++iTrafo) {

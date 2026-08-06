@@ -65,3 +65,13 @@ TEST_F(utSIBImporter, importTest) {
     EXPECT_TRUE(importerTest());
 #endif
 }
+
+#ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
+TEST_F(utSIBImporter, importInvalidUVFace) {
+    // The UV chunk supplies its own point count per face; a value larger than
+    // the face's actual point count used to walk the index buffer out of bounds.
+    Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/SIB/invalid/InvalidUVFace.sib", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+}
+#endif

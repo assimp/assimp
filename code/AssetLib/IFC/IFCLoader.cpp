@@ -542,10 +542,15 @@ void ProcessProductRepresentation(const Schema_2x3::IfcProduct &el, aiNode *nd, 
     std::copy(src.begin(), src.end(), repr_ordered.begin());
     std::sort(repr_ordered.begin(), repr_ordered.end(), RateRepresentationPredicate());
     for (const Schema_2x3::IfcRepresentation *repr : repr_ordered) {
+        if (repr == nullptr) {
+            continue;
+        }
         bool res = false;
         for (const Schema_2x3::IfcRepresentationItem &item : repr->Items) {
             if (const Schema_2x3::IfcMappedItem *const geo = item.ToPtr<Schema_2x3::IfcMappedItem>()) {
-                res = ProcessMappedItem(*geo, nd, subnodes, matid, conv) || res;
+                if (geo != nullptr) {
+                    res = ProcessMappedItem(*geo, nd, subnodes, matid, conv) || res;
+                }
             } else {
                 res = ProcessRepresentationItem(item, matid, meshes, conv) || res;
             }
@@ -558,7 +563,7 @@ void ProcessProductRepresentation(const Schema_2x3::IfcProduct &el, aiNode *nd, 
     AssignAddedMeshes(meshes, nd, conv);
 }
 
-typedef std::map<std::string, std::string> Metadata;
+using Metadata = std::map<std::string, std::string> ;
 
 // ------------------------------------------------------------------------------------------------
 void ProcessMetadata(const Schema_2x3::ListOf<Schema_2x3::Lazy<Schema_2x3::IfcProperty>, 1, 0> &set, ConversionData &conv, Metadata &properties,

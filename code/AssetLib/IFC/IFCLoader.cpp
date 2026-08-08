@@ -461,8 +461,11 @@ bool ProcessMappedItem(const Schema_2x3::IfcMappedItem &mapped, aiNode *nd_src, 
 // ------------------------------------------------------------------------------------------------
 struct RateRepresentationPredicate {
     int Rate(const Schema_2x3::IfcRepresentation *r) const {
-        // the smaller, the better
-
+        if (r == nullptr) {
+            return -1;
+        }
+        
+      // the smaller, the better
         if (!r->RepresentationIdentifier) {
             // neutral choice if no extra information is specified
             return 0;

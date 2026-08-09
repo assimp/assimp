@@ -68,7 +68,7 @@ TEST_F(utSIBImporter, importTest) {
 
 #ifndef ASSIMP_BUILD_NO_SIB_IMPORTER
 
-TEST_F(utSIBImporter, uvPointCountExceedingFace) {
+TEST_F(utSIBImporter, UvPointCountExceedingFace) {
     // The face is built with a single point, but the UV ('FTVS') chunk claims the
     // face has two. ReadUVs() would then walk its index cursor past the end of the
     // per-face index data and off the end of mesh->idx, an out-of-bounds read. Such

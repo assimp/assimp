@@ -1081,14 +1081,28 @@ inline size_t Accessor::ExtractConvertedData(TTarget_type *&outData, const std::
 
     uint8_t *data = GetPointer();
     if (!data) {
-        // No backing buffer (missing bufferView, unresolved sparse-only accessor,
-        // malformed file, etc). Fail loudly instead of memcpy-ing from garbage.
-        outData = nullptr;
-        return 0;
+        throw DeadlyImportError("GLTF2: data is null when extracting data from ", getContextForErrorMessages(id, name));
     }
 
     unsigned int numComponents = GetNumComponents();
     size_t stride = GetStride();
+
+    // Ensure the accessor components fit within the target type
+    const size_t targetComponents = sizeof(TTarget_type) / sizeof(TScalar);
+    if (numComponents > targetComponents) {
+        throw DeadlyImportError("GLTF: numComponents ", numComponents, " > targetComponents ", targetComponents, " in ", getContextForErrorMessages(id, name));
+    }
+
+    // Validate buffer bounds
+    const size_t elemSize = GetElementSize();
+    const size_t maxSize = GetMaxByteSize();
+    if (elemSize > maxSize) {
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+    }
+    const size_t maxCount = (maxSize - elemSize) / stride + 1;
+    if (count > maxCount) {
+        throw DeadlyImportError("GLTF: count ", count, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
+    }
 
     // Allocate and zero-initialize
     outData = new TTarget_type[usedCount]();
@@ -1099,6 +1113,9 @@ inline size_t Accessor::ExtractConvertedData(TTarget_type *&outData, const std::
 
         for (size_t i = 0; i < usedCount; ++i) {
             const size_t srcIdx = remappingIndices ? (*remappingIndices)[i] : i;
+            if (srcIdx >= count) {
+                throw DeadlyImportError("GLTF: index ", srcIdx, " >= count ", count, " in ", getContextForErrorMessages(id, name));
+            }
             const uint8_t *vptr = data + srcIdx * stride;
             TScalar *out = reinterpret_cast<TScalar *>(&outData[i]);
             for (unsigned int c = 0; c < numComponents; ++c) {

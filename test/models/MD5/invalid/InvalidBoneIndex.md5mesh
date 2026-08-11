@@ -1,0 +1,26 @@
+MD5Version 10
+commandline "crafted regression asset - out-of-range weight bone index"
+
+numJoints 1
+numMeshes 1
+
+joints {
+"origin" -1 ( 0 0 0 ) ( 0 0 0 ) //
+}
+
+mesh {
+shader ""
+
+numverts 3
+vert 0 ( 0 0 ) 0 1
+vert 1 ( 0 0 ) 1 1
+vert 2 ( 0 0 ) 2 1
+
+numtris 1
+tri 0 0 1 2
+
+numweights 3
+weight 0 999 1.0 ( 0 0 0 )
+weight 1 999 1.0 ( 0 0 0 )
+weight 2 999 1.0 ( 0 0 0 )
+}

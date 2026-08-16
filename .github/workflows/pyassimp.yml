@@ -1,0 +1,119 @@
+name: PyAssimp
+
+# Builds the pyassimp wheel (port/PyAssimp) for Linux, macOS, and Windows
+# using its custom PEP 517 backend (port/PyAssimp/builder) — see that
+# package for how the wheel is assembled; no setuptools involved anywhere
+# in this pipeline.
+#
+# The wheel's tag is `py3-none-<platform>`: pyassimp itself is pure Python
+# (ctypes bindings), so one build per OS covers every supported CPython
+# version — no Python-version matrix needed here.
+#
+# macOS is arm64-only (Apple Silicon) by project decision — pinned to
+# macos-14 rather than macos-latest so that stays true regardless of which
+# architecture GitHub points -latest at later. No Intel/universal2 leg.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # Installs both CMake and Ninja, which builder/assimp_build.py shells
+      # out to in order to compile assimp itself before bundling it into the
+      # wheel. On Windows, the MSVC toolchain (cl.exe) is located and
+      # activated by pyMSVC from inside the build backend (see
+      # port/PyAssimp/builder/msvc_env.py) — no separate dev-cmd action
+      # needed, pyMSVC just needs Visual Studio Build Tools to already be
+      # present, which windows-latest runners ship by default.
+      - uses: lukka/get-cmake@latest
+
+      - name: Build wheel
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel --outdir dist port/PyAssimp
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pyassimp-wheel-${{ matrix.os }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------
+  # PyPI release — commented out until the release process is set up.
+  #
+  # To enable this job:
+  #
+  #   1. Register a "trusted publisher" for the pyassimp project on PyPI
+  #      (https://pypi.org/manage/project/pyassimp/settings/publishing/,
+  #      or the initial-publish flow at https://pypi.org/manage/account/publishing/
+  #      if the project doesn't exist on PyPI yet). Point it at this repo,
+  #      this workflow filename, and the environment name used below
+  #      ("pypi"). Trusted publishing uses OIDC, so no PyPI API token needs
+  #      to be stored as a secret.
+  #   2. Create a "pypi" environment under this repo's Settings > Environments.
+  #      Optionally add required reviewers / restrict it to tag pushes for
+  #      an extra manual gate before a release actually publishes.
+  #   3. Decide the release trigger: as written below this job only runs on
+  #      `v*` tag pushes (see the `if:` condition) — e.g. `git tag v6.0.2 &&
+  #      git push origin v6.0.2`. A GitHub Release-published event
+  #      (`on: release: types: [published]`) is a common alternative if a
+  #      changelog/release-notes step should happen first.
+  #   4. Linux wheels built directly on `ubuntu-latest` are tagged
+  #      `py3-none-linux_x86_64`, which PyPI's upload validation *rejects*
+  #      (bare "linux" platform tags aren't allowed — only manylinux/
+  #      musllinux tags are). Before this can actually publish, either:
+  #        a) switch the Linux leg of the `build` job to run inside a
+  #           manylinux container (e.g. via `pypa/manylinux2014_x86_64`) and
+  #           have builder/wheel_build.py's _wheel_tag() emit a manylinux
+  #           tag instead of the raw platform tag, or
+  #        b) run `auditwheel repair` on the built wheel before upload, or
+  #        c) publish Linux users a build-from-sdist-only story and skip a
+  #           Linux binary wheel entirely.
+  #      The macOS wheel (built on macos-14, arm64-only per project
+  #      decision) doesn't have this problem — macOS platform tags don't
+  #      have a manylinux-style allowlist.
+  #   5. Uncomment the job below once 1-4 are done.
+  #
+  # release:
+  #   name: publish to PyPI
+  #   needs: [build]
+  #   runs-on: ubuntu-latest
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/project/pyassimp/
+  #   permissions:
+  #     id-token: write  # required for PyPI trusted publishing (OIDC)
+  #   steps:
+  #     - uses: actions/download-artifact@v8
+  #       with:
+  #         pattern: pyassimp-wheel-*
+  #         path: dist
+  #         merge-multiple: true
+  #
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         packages-dir: dist

@@ -1709,6 +1709,9 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
 
     // if this is an embedded texture image setup an aiTexture for it
     if (!imIt->second.mImageData.empty()) {
+        if (imIt->second.mImageData.size() == 0)
+            throw DeadlyImportError("Collada: Texture size must be greater than 0.");
+
         auto *tex = new aiTexture();
 
         // Store embedded texture name reference

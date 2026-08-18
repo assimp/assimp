@@ -1197,16 +1197,17 @@ void SceneCombiner::Copy(aiTexture **_dest, const aiTexture *src) {
     // and reallocate all arrays. We must do it manually here
     const char *old = (const char *)dest->pcData;
     if (old) {
-        unsigned int cpy;
-        if (!dest->mHeight)
-            cpy = dest->mWidth;
-        else
-            cpy = dest->mHeight * dest->mWidth * sizeof(aiTexel);
-
-        if (!cpy) {
+        if (dest->mWidth == 0) {
             dest->pcData = nullptr;
             return;
         }
+
+        size_t cpy = (size_t)dest->mWidth;
+        if (dest->mHeight == 0) 
+            cpy *= sizeof(aiTexel);
+        else
+            cpy *= dest->mHeight;
+
         // the cast is legal, the aiTexel c'tor does nothing important
         dest->pcData = (aiTexel *)new char[cpy];
         ::memcpy(dest->pcData, old, cpy);

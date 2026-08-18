@@ -571,6 +571,8 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
         IOStream *pTextureStream = archive->Open(textureName.c_str());
         if (pTextureStream) {
             size_t texSize = pTextureStream->FileSize();
+            if (texSize == 0)
+                throw DeadlyImportError("Texture size must be greater than 0.");
             aiTexture *curTexture = new aiTexture;
             curTexture->mHeight = 0;
             curTexture->mWidth = static_cast<unsigned int>(texSize);

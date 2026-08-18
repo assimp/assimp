@@ -356,6 +356,9 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
 
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
+        if (img->packedfile->size == 0)
+            ThrowException("Image has size 0.");
+
         name.data[0] = '*';
         name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(conv_data.textures->size()));
 
@@ -375,7 +378,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
         curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower((unsigned char)s[3]);
         curTex->achFormatHint[3] = '\0';
 
-        // tex->mHeight = 0;
+        curTex->mHeight = 0;
         curTex->mWidth = img->packedfile->size;
         uint8_t *ch = new uint8_t[curTex->mWidth];
 

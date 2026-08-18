@@ -1197,16 +1197,17 @@ void SceneCombiner::Copy(aiTexture **_dest, const aiTexture *src) {
     // and reallocate all arrays. We must do it manually here
     const char *old = (const char *)dest->pcData;
     if (old) {
-        unsigned int cpy;
-        if (!dest->mHeight)
-            cpy = dest->mWidth;
-        else
-            cpy = dest->mHeight * dest->mWidth * sizeof(aiTexel);
-
-        if (!cpy) {
+        if (dest->mWidth == 0) {
             dest->pcData = nullptr;
             return;
         }
+
+        // A compressed texture (mHeight == 0) stores mWidth raw bytes.
+        // An uncompressed texture stores mWidth * mHeight aiTexel elements.
+        size_t cpy = (size_t)dest->mWidth;
+        if (dest->mHeight != 0)
+            cpy *= (size_t)dest->mHeight * sizeof(aiTexel);
+
         // the cast is legal, the aiTexel c'tor does nothing important
         dest->pcData = (aiTexel *)new char[cpy];
         ::memcpy(dest->pcData, old, cpy);

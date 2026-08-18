@@ -381,6 +381,8 @@ void HL1MDLLoader::load_sequence_groups_files() {
 void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
         const uint8_t *data, const uint8_t *pal, aiTexture *pResult,
         aiColor3D &last_palette_color) {
+    if (!ptexture->width || !ptexture->height)
+        throw DeadlyImportError("Invalid HL1MD file. Texture dimensions must be greater than 0.");
     pResult->mFilename = ptexture->name;
     pResult->mWidth = static_cast<unsigned int>(ptexture->width);
     pResult->mHeight = static_cast<unsigned int>(ptexture->height);
@@ -394,11 +396,11 @@ void HL1MDLLoader::read_texture(const Texture_HL1 *ptexture,
     pResult->achFormatHint[7] = '8';
     pResult->achFormatHint[8] = '\0';
 
-    const size_t num_pixels = pResult->mWidth * pResult->mHeight;
-    aiTexel *out = pResult->pcData = new aiTexel[num_pixels];
+    const size_t numPixels = (size_t)pResult->mWidth * pResult->mHeight;
+    aiTexel *out = pResult->pcData = new aiTexel[numPixels];
 
     // Convert indexed 8 bit to 32 bit RGBA.
-    for (size_t i = 0; i < num_pixels; ++i, ++out) {
+    for (size_t i = 0; i < numPixels; ++i, ++out) {
         out->r = pal[data[i] * 3];
         out->g = pal[data[i] * 3 + 1];
         out->b = pal[data[i] * 3 + 2];

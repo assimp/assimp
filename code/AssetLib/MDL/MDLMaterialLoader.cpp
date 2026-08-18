@@ -156,7 +156,11 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture *pcTexture) {
 // Read a texture from a MDL3 file
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     const MDL::Header *pcHeader = (const MDL::Header *)mBuffer; //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
-    const size_t len = pcHeader->skinwidth * pcHeader->skinheight;
+
+    // Sanity check header before creating aiTexture
+    const size_t len = (size_t)pcHeader->skinwidth * pcHeader->skinheight;
+    if (!len)
+        throw DeadlyImportError("Invalid MDL file. Texture dimensions must be greater than 0.");
     VALIDATE_FILE_SIZE(szData + len);
 
     // allocate a new texture object
@@ -164,16 +168,17 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     pcNew->mWidth = pcHeader->skinwidth;
     pcNew->mHeight = pcHeader->skinheight;
 
-    if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
+
+    if(pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
         throw DeadlyImportError("Invalid MDL file. A texture is too big.");
     }
-    pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
+    pcNew->pcData = new aiTexel[len];
 
     const unsigned char *szColorMap;
     this->SearchPalette(&szColorMap);
 
     // copy texture data
-    for (unsigned int i = 0; i < pcNew->mWidth * pcNew->mHeight; ++i) {
+    for (unsigned int i = 0; i < len; ++i) {
         const unsigned char val = szData[i];
         const unsigned char *sz = &szColorMap[val * 3];
 
@@ -203,12 +208,16 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char *szData,
         unsigned int *piSkip) {
     ai_assert(nullptr != piSkip);
 
-    const MDL::Header *pcHeader = (const MDL::Header *)mBuffer; //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
-
     if (iType == 1 || iType > 3) {
         ASSIMP_LOG_ERROR("Unsupported texture file format");
         return;
     }
+
+    const MDL::Header *pcHeader = (const MDL::Header *)mBuffer; //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
+
+    // Sanity check header before creating aiTexture
+    if (!pcHeader->skinwidth || !pcHeader->skinheight)
+        throw DeadlyImportError("Invalid MDL file. Texture dimensions must be greater than 0.");
 
     const bool bNoRead = *piSkip == UINT_MAX;
 
@@ -249,7 +258,7 @@ static const uint32_t MaxTextureSize = 4096;
 void MDLImporter::ParseTextureColorData(const unsigned char *szData,
         unsigned int iType,
         unsigned int *piSkip,
-        aiTexture *pcNew) {
+        aiTexture *pcNew) {    
     const bool do_read = bad_texel != pcNew->pcData;
 
     // allocate storage for the texture image
@@ -436,6 +445,8 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
     if (6 == iType) {
         // this is a compressed texture in DDS format
         *piSkip = pcNew->mWidth;
+        if (!pcNew->mWidth)
+            throw DeadlyImportError("DDS texture width must be greater than 0.");
         VALIDATE_FILE_SIZE(szData + *piSkip);
 
         if (!bNoRead) {
@@ -450,6 +461,10 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
             ::memcpy(pcNew->pcData, szData, pcNew->mWidth);
         }
     } else {
+        // sanity check dimensions
+        if (!pcNew->mWidth || !pcNew->mHeight)
+            throw DeadlyImportError("Texture dimensions must be greater than 0.");
+
         // parse the color data of the texture
         ParseTextureColorData(szData, iType, piSkip, pcNew);
     }

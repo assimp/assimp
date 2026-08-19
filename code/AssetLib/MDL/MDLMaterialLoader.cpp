@@ -61,6 +61,21 @@ using namespace Assimp;
 static aiTexel *const bad_texel = reinterpret_cast<aiTexel *>(SIZE_MAX);
 
 // ------------------------------------------------------------------------------------------------
+static size_t ExternalTexturePathLength(const unsigned char *current, const unsigned char *end) {
+    if (current >= end) {
+        throw DeadlyImportError("Invalid MDL file. External texture path is not null-terminated.");
+    }
+
+    const auto *terminator = static_cast<const unsigned char *>(
+            std::memchr(current, '\0', static_cast<size_t>(end - current)));
+    if (terminator == nullptr) {
+        throw DeadlyImportError("Invalid MDL file. External texture path is not null-terminated.");
+    }
+
+    return static_cast<size_t>(terminator - current);
+}
+
+// ------------------------------------------------------------------------------------------------
 static const unsigned char *SkipAsciiEffect(const unsigned char *current, const unsigned char *end) {
     const auto remainingBytes = static_cast<size_t>(end - current);
     if (remainingBytes < sizeof(int32_t)) {
@@ -518,13 +533,13 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         }
 
         aiString szFile;
-        const size_t iLen = strlen((const char *)szCurrent);
+        const size_t iLen = ExternalTexturePathLength(szCurrent, this->mBuffer + this->iFileSize);
         size_t iLen2 = iLen > (AI_MAXLEN - 1) ? (AI_MAXLEN - 1) : iLen;
         memcpy(szFile.data, (const char *)szCurrent, iLen2);
         szFile.data[iLen2] = '\0';
         szFile.length = static_cast<ai_uint32>(iLen2);
 
-        szCurrent += iLen2 + 1;
+        szCurrent += iLen + 1;
 
         // place this as diffuse texture
         pcMatOut->AddProperty(&szFile, AI_MATKEY_TEXTURE_DIFFUSE(0));
@@ -714,7 +729,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
         szCurrent += iWidth;
     }
     if (0x7 == iMasked) {
-        const size_t iLen = std::strlen((const char *)szCurrent);
+        const size_t iLen = ExternalTexturePathLength(szCurrent, this->mBuffer + this->iFileSize);
         szCurrent += iLen + 1;
     } else if (iMasked || !iType) {
         if (iMasked || !iType || (iType && iWidth && iHeight)) {

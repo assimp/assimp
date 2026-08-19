@@ -82,3 +82,11 @@ PyAssimp requires a assimp dynamic library (`DLL` on windows,
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./pyassimp/helper.py`.
 There's an `additional_dirs` list waiting for your entries.
+
+TEST
+----
+
+```console
+$ pip install -e ".[test]"
+$ LD_LIBRARY_PATH=/path/to/libassimp pytest
+```

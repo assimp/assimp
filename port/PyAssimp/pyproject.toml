@@ -15,5 +15,11 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
 
+[project.optional-dependencies]
+test = ["pytest"]
+
 [tool.setuptools]
 packages = ["pyassimp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

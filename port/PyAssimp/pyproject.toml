@@ -16,10 +16,12 @@ requires-python = ">=3.10"
 dependencies = ["numpy"]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest>=9"]
 
 [tool.setuptools]
 packages = ["pyassimp"]
 
-[tool.pytest.ini_options]
+[tool.pytest]
+minversion = "9.0"
 testpaths = ["tests"]
+addopts = ["--strict-markers", "--strict-config", "-ra"]

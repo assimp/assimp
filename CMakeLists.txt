@@ -153,6 +153,10 @@ OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
   ON
 )
+OPTION ( ASSIMP_INSTALL_TESTS
+  "If the test suite for Assimp should be installed."
+  OFF
+)
 OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF

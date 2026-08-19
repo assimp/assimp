@@ -207,6 +207,13 @@ bool Q3BSPFileParser::validateLumps()
         }
     }
 
+    // getIndices copies iSize bytes into a vector sized iSize / sizeof(int), so a
+    // mesh-vert lump whose length is not a whole number of ints would overrun it.
+    if ( m_pModel->m_Lumps[ kMeshVerts ]->iSize % sizeof( int ) != 0 )
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -242,6 +249,10 @@ void Q3BSPFileParser::getIndices()
     size_t Offset = (size_t) lump->iOffset;
     const size_t nIndices = lump->iSize / sizeof( int );
     m_pModel->m_Indices.resize( nIndices );
+    if ( nIndices == 0 )
+    {
+        return;
+    }
     memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], lump->iSize );
 }
 

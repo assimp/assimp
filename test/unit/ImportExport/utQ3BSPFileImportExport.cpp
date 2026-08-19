@@ -72,3 +72,9 @@ TEST_F(utQ3BSPImportExport, lumpOffsetOutOfRangeTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/invalid/LumpOffsetOutOfRange.pk3", 0);
     EXPECT_EQ(0u, nullptr == scene ? 0u : scene->mNumMeshes);
 }
+
+TEST_F(utQ3BSPImportExport, meshVertsMisalignedTest) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/invalid/MeshVertsMisaligned.pk3", 0);
+    EXPECT_EQ(0u, nullptr == scene ? 0u : scene->mNumMeshes);
+}

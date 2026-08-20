@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/schema.h>
 
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 
@@ -794,6 +795,44 @@ TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.glb"));
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.gltf"));
 }
+
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
+TEST_F(utglTF2ImportExport, export_animation_without_tick_rate) {
+    // 3DS carries no tick rate, so aiAnimation::mTicksPerSecond stays at its default 0.
+    // The exporter divides keyframe times by it to convert ticks to seconds, which used
+    // to write inf/NaN timestamps and leave the accessor bounds at their sentinel values.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube.3DS", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    ASSERT_EQ(0.0, scene->mAnimations[0]->mTicksPerSecond);
+
+    const char *outPath = ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube_out.gltf";
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", outPath));
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFile(outPath, aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, exported);
+    ASSERT_NE(0u, exported->mNumAnimations);
+
+    for (unsigned int animIndex = 0; animIndex < exported->mNumAnimations; ++animIndex) {
+        const aiAnimation *anim = exported->mAnimations[animIndex];
+        for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
+            const aiNodeAnim *channel = anim->mChannels[channelIndex];
+            for (unsigned int i = 0; i < channel->mNumPositionKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mPositionKeys[i].mTime));
+            }
+            for (unsigned int i = 0; i < channel->mNumRotationKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mRotationKeys[i].mTime));
+            }
+            for (unsigned int i = 0; i < channel->mNumScalingKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mScalingKeys[i].mTime));
+            }
+        }
+    }
+}
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 
 TEST_F(utglTF2ImportExport, export_normalized_normals) {
     Assimp::Importer importer;

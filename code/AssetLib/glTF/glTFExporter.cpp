@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/config.h>
 
 // Header files, standard library.
+#include <cmath>
 #include <memory>
 #include <limits>
 #include <inttypes.h>
@@ -910,6 +911,22 @@ void glTFExporter::ExportMetadata()
 	}
 }
 
+// Keyframe times are stored in ticks and glTF wants seconds, so the exporters divide
+// by the tick rate. Formats that carry no tick rate leave aiAnimation::mTicksPerSecond
+// at its default 0 (3DS and Irr never set it, X leaves it 0 when the file has no
+// AnimTicksPerSecond object), which turned every exported timestamp into inf or NaN.
+// Fall back to treating ticks as seconds, the same way the FBX exporter does.
+static float GetSafeTicksPerSecond(const aiAnimation* anim)
+{
+    // Classify after the narrowing cast so a double that underflows to 0.0f is caught too.
+    const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+    if (FP_ZERO == std::fpclassify(ticksPerSecond) || !std::isfinite(ticksPerSecond)) {
+        return 1.0f;
+    }
+
+    return ticksPerSecond;
+}
+
 inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)
 {
     // Loop over the data and check to see if it exactly matches an existing buffer.
@@ -1020,7 +1037,7 @@ void glTFExporter::ExportAnimations()
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
             /******************* Parameters ********************/
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, static_cast<float>(anim->mTicksPerSecond));
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, GetSafeTicksPerSecond(anim));
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;

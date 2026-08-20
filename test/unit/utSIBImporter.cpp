@@ -91,6 +91,9 @@ TEST_F(utSIBImporter, UvPointCountExceedingFace) {
 
     Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(kSibData, sizeof(kSibData), 0, "sib");
+    EXPECT_EQ(nullptr, scene);
+}
+
 TEST_F(utSIBImporter, faceWithOverflowingPointCount) {
     // The point count of a face is multiplied by the number of index channels to size
     // the index array. 0x55555556 * 3 wraps around to 2 in 32-bit arithmetic, so the

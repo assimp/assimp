@@ -1632,6 +1632,21 @@ void glTF2Exporter::ExportMetadata() {
     }
 }
 
+// Keyframe times are stored in ticks and glTF wants seconds, so the exporters divide
+// by the tick rate. Formats that carry no tick rate leave aiAnimation::mTicksPerSecond
+// at its default 0 (3DS and Irr never set it, X leaves it 0 when the file has no
+// AnimTicksPerSecond object), which turned every exported timestamp into inf or NaN.
+// Fall back to treating ticks as seconds, the same way the FBX exporter does.
+static float GetSafeTicksPerSecond(const aiAnimation *anim) {
+    // Classify after the narrowing cast so a double that underflows to 0.0f is caught too.
+    const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+    if (FP_ZERO == std::fpclassify(ticksPerSecond) || !std::isfinite(ticksPerSecond)) {
+        return 1.0f;
+    }
+
+    return ticksPerSecond;
+}
+
 inline Ref<Accessor> GetSamplerInputRef(Asset &asset, std::string &animId, Ref<Buffer> &buffer, std::vector<ai_real> &times) {
     return ExportData(asset, animId, buffer, (unsigned int)times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
 }
@@ -1708,9 +1723,7 @@ void glTF2Exporter::ExportAnimations() {
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation *anim = mScene->mAnimations[i];
-        // A zero ticks-per-second rate means "not specified" - treat key
-        // times as seconds instead of dividing by zero.
-        const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
+        const float ticksPerSecond = GetSafeTicksPerSecond(anim);
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {

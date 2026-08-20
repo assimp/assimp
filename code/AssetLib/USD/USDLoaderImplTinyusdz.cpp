@@ -677,16 +677,22 @@ static aiTexture *ownedEmbeddedTextureFor(const RenderScene &render_scene, const
     tex->mHeight = image.height;
 
     tex->mWidth = image.width;
-    if (tex->mHeight == 0) {
+    if (tex->mWidth == 0) {
+        throw DeadlyImportError("Texture width must be greatur than 0");
+    } else if (tex->mHeight == 0) {
         pos = embTexName.find_last_of('.');
         strncpy(tex->achFormatHint, embTexName.substr(pos + 1).c_str(), 3);
         const size_t imageBytesCount{ render_scene.buffers[image.buffer_id].data.size() };
+        if (imageBytesCount == 0)
+            throw DeadlyImportError("Texture size must be greatur than 0");
         tex->pcData = (aiTexel *)new char[imageBytesCount];
         memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], imageBytesCount);
     } else {
         std::string formatHint{ "rgba8888" };
         strncpy(tex->achFormatHint, formatHint.c_str(), 8);
         const size_t imageTexelsCount{ tex->mWidth * tex->mHeight };
+        if (image.channels == 0)
+            throw DeadlyImportError("Texture channels must be greatur than 0");
         tex->pcData = (aiTexel *)new char[imageTexelsCount * image.channels];
         const float *floatPtr = reinterpret_cast<const float *>(&render_scene.buffers[image.buffer_id].data[0]);
         ss.str("");

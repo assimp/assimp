@@ -595,26 +595,18 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
     stream->Read(tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1);
 
     if (!shortened) {
-        if (!tex->mHeight) {
-            if (tex->mWidth > AI_MAX_ALLOC(aiTexel)) {
+        if (!tex->mWidth) {
+            throw DeadlyImportError("Assbin: Texture width must be greater than 0");
+        } else if (!tex->mHeight) {
+            if (tex->mWidth > AI_MAX_ALLOC(aiTexel))
                 throw DeadlyImportError("Assbin: Texture width too large, would overflow");
-            }
             tex->pcData = new aiTexel[tex->mWidth];
             stream->Read(tex->pcData, 1, tex->mWidth);
         } else {
-            if (tex->mWidth != 0 &&
-                static_cast<size_t>(tex->mHeight) >
-                    AI_MAX_ALLOC(aiTexel) / static_cast<size_t>(tex->mWidth)) {
+            const size_t pixelCount = (size_t)tex->mWidth * tex->mWidth;
+            if (pixelCount > AI_MAX_ALLOC(aiTexel) || pixelCount > SIZE_MAX / sizeof(aiTexel))
                 throw DeadlyImportError("Assbin: Texture dimensions too large");
-            }
 
-            if (tex->mWidth != 0 &&
-                static_cast<size_t>(tex->mHeight) >
-                    SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
-                throw DeadlyImportError("Assbin: Texture dimensions too large");
-            }
-
-            const size_t pixelCount = static_cast<size_t>(tex->mWidth) * tex->mHeight;
             tex->pcData = new aiTexel[pixelCount];
             stream->Read(tex->pcData, 1, pixelCount * sizeof(aiTexel));
         }

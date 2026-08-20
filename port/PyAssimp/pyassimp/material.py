@@ -4,34 +4,34 @@
 #  (#aiMaterialProperty::mSemantic) for all material properties
 #  *not* related to textures.
 #
-aiTextureType_NONE = 0
+aiTextureType_NONE = 0x0
 
 # The texture is combined with the result of the diffuse
 #  lighting equation.
 #
-aiTextureType_DIFFUSE = 1
+aiTextureType_DIFFUSE = 0x1
 
 # The texture is combined with the result of the specular
 #  lighting equation.
 #
-aiTextureType_SPECULAR = 2
+aiTextureType_SPECULAR = 0x2
 
 # The texture is combined with the result of the ambient
 #  lighting equation.
 #
-aiTextureType_AMBIENT = 3
+aiTextureType_AMBIENT = 0x3
 
 # The texture is added to the result of the lighting
 #  calculation. It isn't influenced by incoming light.
 #
-aiTextureType_EMISSIVE = 4
+aiTextureType_EMISSIVE = 0x4
 
 # The texture is a height map.
 #
 #  By convention, higher gray-scale values stand for
 #  higher elevations from the base height.
 #
-aiTextureType_HEIGHT = 5
+aiTextureType_HEIGHT = 0x5
 
 # The texture is a (tangent space) normal-map.
 #
@@ -39,7 +39,7 @@ aiTextureType_HEIGHT = 5
 #  normal maps. Assimp does (intentionally) not
 #  distinguish here.
 #
-aiTextureType_NORMALS = 6
+aiTextureType_NORMALS = 0x6
 
 # The texture defines the glossiness of the material.
 #
@@ -48,21 +48,21 @@ aiTextureType_NORMALS = 6
 #  function defined to map the linear color values in the
 #  texture to a suitable exponent. Have fun.
 #
-aiTextureType_SHININESS = 7
+aiTextureType_SHININESS = 0x7
 
 # The texture defines per-pixel opacity.
 #
 #  Usually 'white' means opaque and 'black' means
 #  'transparency'. Or quite the opposite. Have fun.
 #
-aiTextureType_OPACITY = 8
+aiTextureType_OPACITY = 0x8
 
 # Displacement texture
 #
 #  The exact purpose and format is application-dependent.
 #  Higher color values stand for higher vertex displacements.
 #
-aiTextureType_DISPLACEMENT = 9
+aiTextureType_DISPLACEMENT = 0x9
 
 # Lightmap texture (aka Ambient Occlusion)
 #
@@ -71,22 +71,22 @@ aiTextureType_DISPLACEMENT = 9
 #  scaling value for the final color value of a pixel. Its
 #  intensity is not affected by incoming light.
 #
-aiTextureType_LIGHTMAP = 10
+aiTextureType_LIGHTMAP = 0xA
 
 # Reflection texture
 #
 # Contains the color of a perfect mirror reflection.
 # Rarely used, almost never for real-time applications.
 #
-aiTextureType_REFLECTION = 11
+aiTextureType_REFLECTION = 0xB
 
 # PBR Materials
-aiTextureType_BASE_COLOR = 12
-aiTextureType_NORMAL_CAMERA = 13
-aiTextureType_EMISSION_COLOR = 14
-aiTextureType_METALNESS = 15
-aiTextureType_DIFFUSE_ROUGHNESS = 16
-aiTextureType_AMBIENT_OCCLUSION = 17
+aiTextureType_BASE_COLOR = 0xC
+aiTextureType_NORMAL_CAMERA = 0xD
+aiTextureType_EMISSION_COLOR = 0xE
+aiTextureType_METALNESS = 0xF
+aiTextureType_DIFFUSE_ROUGHNESS = 0x10
+aiTextureType_AMBIENT_OCCLUSION = 0x11
 
 # Unknown texture
 #
@@ -94,21 +94,21 @@ aiTextureType_AMBIENT_OCCLUSION = 17
 #  above is considered to be 'unknown'. It is still imported
 #  but is excluded from any further postprocessing.
 #
-aiTextureType_UNKNOWN = 18
+aiTextureType_UNKNOWN = 0x12
 
 # PBR Material Modifiers
-aiTextureType_SHEEN = 19
-aiTextureType_CLEARCOAT = 20
-aiTextureType_TRANSMISSION = 21
+aiTextureType_SHEEN = 0x13
+aiTextureType_CLEARCOAT = 0x14
+aiTextureType_TRANSMISSION = 0x15
 
 # Maya material declarations
-aiTextureType_MAYA_BASE = 22
-aiTextureType_MAYA_SPECULAR = 23
-aiTextureType_MAYA_SPECULAR_COLOR = 24
-aiTextureType_MAYA_SPECULAR_ROUGHNESS = 25
+aiTextureType_MAYA_BASE = 0x16
+aiTextureType_MAYA_SPECULAR = 0x17
+aiTextureType_MAYA_SPECULAR_COLOR = 0x18
+aiTextureType_MAYA_SPECULAR_ROUGHNESS = 0x19
 
 # Anisotropy
-aiTextureType_ANISOTROPY = 26
+aiTextureType_ANISOTROPY = 0x1A
 
 # glTF metallic-roughness packed texture
-aiTextureType_GLTF_METALLIC_ROUGHNESS = 27
+aiTextureType_GLTF_METALLIC_ROUGHNESS = 0x1B

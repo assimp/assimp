@@ -24,4 +24,4 @@ packages = ["pyassimp"]
 [tool.pytest]
 minversion = "9.0"
 testpaths = ["tests"]
-addopts = ["--strict-markers", "--strict-config", "-ra"]
+strict = true

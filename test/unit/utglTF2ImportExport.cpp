@@ -506,6 +506,51 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utglTF2ImportExport, import_normalized_unsigned_short_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/normalized_skin_weights/normalized_skin_weights.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(1u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone->mNumWeights);
+    EXPECT_EQ(0u, bone->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone->mWeights[2].mWeight, 0.0001f);
+}
+
+TEST_F(utglTF2ImportExport, import_mixed_joint_component_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/mixed_skin_joints/mixed_skin_joints.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(2u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone0 = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone0->mNumWeights);
+    EXPECT_EQ(0u, bone0->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone0->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone0->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone0->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone0->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone0->mWeights[2].mWeight, 0.0001f);
+
+    const aiBone *bone1 = scene->mMeshes[0]->mBones[1];
+    ASSERT_EQ(2u, bone1->mNumWeights);
+    EXPECT_EQ(1u, bone1->mWeights[0].mVertexId);
+    EXPECT_NEAR(32767.0f / 65535.0f, bone1->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone1->mWeights[1].mVertexId);
+    EXPECT_NEAR(49151.0f / 65535.0f, bone1->mWeights[1].mWeight, 0.0001f);
+}
+
 bool checkSkinnedScene(const aiScene *scene){
     float eps = 0.001f;
     bool result = true;
@@ -1055,4 +1100,3 @@ TEST_F(utglTF2ImportExport, testSetIdentityMatrixEpsilon) {
     m = aiMatrix4x4(1.00009f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     EXPECT_TRUE(m.IsIdentity(epsilon));
 }
-

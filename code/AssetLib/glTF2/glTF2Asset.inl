@@ -875,6 +875,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     byteOffset = MemberOrDefault(obj, "byteOffset", size_t(0));
     componentType = MemberOrDefault(obj, "componentType", ComponentType_BYTE);
+    normalized = MemberOrDefault(obj, "normalized", false);
     {
         const Value *countValue = FindUInt(obj, "count");
         if (!countValue) {

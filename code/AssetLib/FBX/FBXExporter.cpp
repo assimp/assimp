@@ -67,6 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <sstream> // stringstream
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -80,22 +81,22 @@ using namespace Assimp;
 using namespace Assimp::FBX;
 
 // some constants that we'll use for writing metadata
-namespace Assimp {
-namespace FBX {
-    const std::string EXPORT_VERSION_STR = "7.5.0";
-    const uint32_t EXPORT_VERSION_INT = 7500; // 7.5 == 2016+
+namespace Assimp::FBX {
+
+    constexpr std::string_view EXPORT_VERSION_STR = "7.5.0";
+    constexpr uint32_t EXPORT_VERSION_INT = 7500; // 7.5 == 2016+
     // FBX files have some hashed values that depend on the creation time field,
     // but for now we don't actually know how to generate these.
     // what we can do is set them to a known-working version.
     // this is the data that Blender uses in their FBX export process.
-    const std::string GENERIC_CTIME = "1970-01-01 10:00:00:000";
-    const std::string GENERIC_FILEID =
+    constexpr std::string_view GENERIC_CTIME = "1970-01-01 10:00:00:000";
+    constexpr std::string_view GENERIC_FILEID =
         "\x28\xb3\x2a\xeb\xb6\x24\xcc\xc2\xbf\xc8\xb0\x2a\xa9\x2b\xfc\xf1";
-    const std::string GENERIC_FOOTID =
+    constexpr std::string_view GENERIC_FOOTID =
         "\xfa\xbc\xab\x09\xd0\xc8\xd4\x66\xb1\x76\xfb\x83\x1c\xf7\x26\x7e";
-    const std::string FOOT_MAGIC =
+    constexpr std::string_view FOOT_MAGIC =
         "\xf8\x5a\x8c\x6a\xde\xf5\xd9\x7e\xec\xe9\x0c\xe3\x75\x8f\x29\x0b";
-    const std::string COMMENT_UNDERLINE =
+    constexpr std::string_view COMMENT_UNDERLINE =
         ";------------------------------------------------------------------";
 }
 
@@ -123,7 +124,6 @@ namespace FBX {
         IOSystem* pIOSystem,
         const aiScene* pScene,
         const ExportProperties* pProperties
-
     ){
         // initialize the exporter
         FBXExporter exporter(pScene, pProperties);
@@ -138,11 +138,7 @@ FBXExporter::FBXExporter ( const aiScene* pScene, const ExportProperties* pPrope
 : binary(false)
 , mScene(pScene)
 , mProperties(pProperties)
-, outfile()
-, connections()
-, mesh_uids()
-, material_uids()
-, node_uids() {
+{
     // will probably need to determine UIDs, connections, etc here.
     // basically anything that needs to be known
     // before we start writing sections to the stream.
@@ -258,7 +254,7 @@ void FBXExporter::WriteBinaryFooter()
 {
     outfile->Write(NULL_RECORD, NumNullRecords, 1);
 
-    outfile->Write(GENERIC_FOOTID.c_str(), GENERIC_FOOTID.size(), 1);
+    outfile->Write(GENERIC_FOOTID.data(), GENERIC_FOOTID.size(), 1);
 
     // here some padding is added for alignment to 16 bytes.
     // if already aligned, the full 16 bytes is added.
@@ -283,7 +279,7 @@ void FBXExporter::WriteBinaryFooter()
     for (size_t i = 0; i < 120; ++i) {
         outfile->Write("\x00", 1, 1);
     }
-    outfile->Write(FOOT_MAGIC.c_str(), FOOT_MAGIC.size(), 1);
+    outfile->Write(FOOT_MAGIC.data(), FOOT_MAGIC.size(), 1);
 }
 
 void FBXExporter::WriteAllNodes ()
@@ -2819,9 +2815,7 @@ void FBXExporter::WriteModelNodes(
 
     // now recurse into children
     for (size_t i = 0; i < node->mNumChildren; ++i) {
-        WriteModelNodes(
-            outstream, node->mChildren[i], node_uid, limbnodes
-        );
+        WriteModelNodes( outstream, node->mChildren[i], node_uid, limbnodes);
     }
 }
 

@@ -84,17 +84,17 @@ namespace Assimp {
 
     private:
         bool binary; // whether current export is in binary or ascii format
-        const aiScene* mScene; // the scene to export
-        const ExportProperties* mProperties; // currently unused
+        const aiScene* mScene{nullptr}; // the scene to export
+        const ExportProperties* mProperties{nullptr}; // currently unused
         std::shared_ptr<IOStream> outfile; // file to write to
 
-        std::vector<FBX::Node> connections; // connection storage
+        std::vector<FBX::Node> connections{}; // connection storage
 
-        std::map<const aiNode*, int64_t> mesh_uids;
-        std::vector<int64_t> blendshape_uids;
-        std::vector<int64_t> material_uids;
+        std::map<const aiNode*, int64_t> mesh_uids{};
+        std::vector<int64_t> blendshape_uids{};
+        std::vector<int64_t> material_uids{};
         std::map<const aiNode*,int64_t> node_uids;
-        std::map<std::string,int64_t> lights_uids;
+        std::map<std::string,int64_t> lights_uids{};
 
         // this crude unique-ID system is actually fine
         int64_t last_uid = 999999;

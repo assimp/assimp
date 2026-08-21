@@ -91,6 +91,41 @@ TEST_F(utSIBImporter, UvPointCountExceedingFace) {
 
     Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(kSibData, sizeof(kSibData), 0, "sib");
+TEST_F(utSIBImporter, faceWithOverflowingPointCount) {
+    // The point count of a face is multiplied by the number of index channels to size
+    // the index array. 0x55555556 * 3 wraps around to 2 in 32-bit arithmetic, so the
+    // array is sized for two entries while the face loop writes many more. Such a face
+    // must be rejected instead.
+    static const unsigned char kSibData[] = {
+        // 'SHAP' chunk, 0x28 bytes of payload
+        0x53, 0x48, 0x41, 0x50, 0x28, 0x00, 0x00, 0x00,
+        // 'VRTS' chunk: a single vertex at the origin
+        0x56, 0x52, 0x54, 0x53, 0x0c, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // 'FACS' chunk: one face claiming 0x55555556 points
+        0x46, 0x41, 0x43, 0x53, 0x0c, 0x00, 0x00, 0x00,
+        0x56, 0x55, 0x55, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(kSibData, sizeof(kSibData), 0, "sib");
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utSIBImporter, faceWithZeroPointCount) {
+    static const unsigned char kSibData[] = {
+        // 'SHAP' chunk, 0x20 bytes of payload
+        0x53, 0x48, 0x41, 0x50, 0x20, 0x00, 0x00, 0x00,
+        // 'VRTS' chunk: a single vertex at the origin
+        0x56, 0x52, 0x54, 0x53, 0x0c, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // 'FACS' chunk: one face claiming zero points
+        0x46, 0x41, 0x43, 0x53, 0x04, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(kSibData, sizeof(kSibData), 0, "sib");
     EXPECT_EQ(nullptr, scene);
 }
 

@@ -68,6 +68,7 @@ protected:
     bool readData(const std::string &rMapName);
     bool parseFile();
     bool validateFormat();
+    bool validateLumps();
     void getLumps();
     void countLumps();
     void getVertices();

@@ -668,7 +668,6 @@ void AMFImporter::Postprocess_BuildMaterial(const AMFMaterial &pMaterial) {
 }
 
 void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const {
-    std::unique_ptr<aiNode> con_node;
     std::list<std::unique_ptr<aiNode> > ch_node;
 
     // We will build next hierarchy:
@@ -676,25 +675,24 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
     //  |- aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
     //  ...
     //  \_ aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
-    con_node.reset(new aiNode);
+    std::unique_ptr<aiNode> con_node(new aiNode);
     con_node->mName = pConstellation.ID;
     // Walk through children and search for instances of another objects, constellations.
     for (const AMFNodeElementBase *ne : pConstellation.Child) {
-        aiMatrix4x4 tmat;
-        aiNode *found_node;
-
         if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
         if (ne->Type != AMFNodeElementBase::ENET_Instance) throw DeadlyImportError("Only <instance> nodes can be in <constellation>.");
 
         // create alias for convenience
         AMFInstance &als = *((AMFInstance *)ne);
         // find referenced object
+        aiNode *found_node;
         if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
         // create node for applying transformation
         std::unique_ptr<aiNode> t_node(new aiNode);
         t_node->mParent = con_node.get();
         // apply transformation
+        aiMatrix4x4 tmat;
         aiMatrix4x4::Translation(als.Delta, tmat), t_node->mTransformation *= tmat;
         aiMatrix4x4::RotationX(als.Rotation.x, tmat), t_node->mTransformation *= tmat;
         aiMatrix4x4::RotationY(als.Rotation.y, tmat), t_node->mTransformation *= tmat;

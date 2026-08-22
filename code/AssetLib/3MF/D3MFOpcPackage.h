@@ -64,6 +64,9 @@ class D3MFOpcPackage {
 public:
     D3MFOpcPackage( IOSystem* pIOHandler, const std::string& file );
     ~D3MFOpcPackage();
+    // The package owns the archive through a raw pointer, so copying one would free it twice.
+    D3MFOpcPackage(const D3MFOpcPackage &) = delete;
+    D3MFOpcPackage &operator=(const D3MFOpcPackage &) = delete;
     IOStream* RootStream() const;
     /// @brief Absolute path of the root model part inside the container (production extension).
     const std::string &RootPath() const;
@@ -74,17 +77,24 @@ public:
     /// @brief Strip leading slashes so an OPC absolute path matches the zip entry name.
     static std::string NormalizePath(const std::string &path);
     bool validate();
-    const std::vector<aiTexture*> &GetEmbeddedTextures() const;
+    const std::vector<std::unique_ptr<aiTexture>> &GetEmbeddedTextures() const;
+    /// @brief Hand the embedded textures to the caller, who owns them from then on.
+    ///        Until then the package frees them itself.
+    std::vector<std::unique_ptr<aiTexture>> TakeEmbeddedTextures();
 
 protected:
     std::string ReadPackageRootRelationship(IOStream* stream);
     void LoadEmbeddedTextures(IOStream *fileStream, const std::string &filename);
 
 private:
+    /// @brief Free everything the package still owns. The destructor calls this, and so does
+    ///        the constructor's failure path, which the destructor does not cover.
+    void FreeResources() noexcept;
+
     IOStream* mRootStream;
     std::string mRootPath;
     ZipArchiveIOSystem *mZipArchive;
-    std::vector<aiTexture *> mEmbeddedTextures;
+    std::vector<std::unique_ptr<aiTexture>> mEmbeddedTextures;
 };
 
 } // namespace D3MF

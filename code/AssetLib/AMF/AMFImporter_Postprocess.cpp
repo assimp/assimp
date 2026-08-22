@@ -837,7 +837,8 @@ nl_clean_loop:
             // Objects and constellation that must be showed placed at top of hierarchy in <amf> node. So all aiNode's in node_list must have
             // mRootNode only as parent.
             (*nl_it)->mParent = pScene->mRootNode;
-            pScene->mRootNode->mChildren[i] = *nl_it++;
+            pScene->mRootNode->mChildren[i] = *nl_it;
+            nl_it++;
         }
     } // if(node_list.size() > 0)
 

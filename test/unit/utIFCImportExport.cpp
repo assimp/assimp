@@ -78,3 +78,21 @@ TEST_F(utIFCImportExport, importComplextypeAsColor) {
     const aiScene *scene = importer.ReadFileFromMemory(asset.c_str(), asset.size(), 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utIFCImportExport, rejectsInvalidStepCp1252EscapeInSchema) {
+    std::string asset =
+            "ISO-10303-21;\n"
+            "HEADER;\n"
+            "FILE_SCHEMA( ( 'IFC2X3\\S\\";
+    asset.push_back(static_cast<char>(0x80));
+    asset +=
+            "' ) );\n"
+            "ENDSEC;\n"
+            "DATA;\n"
+            "ENDSEC;\n"
+            "END-ISO-10303-21;\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(asset.data(), asset.size(), 0, "ifc");
+    EXPECT_EQ(nullptr, scene);
+}

@@ -812,7 +812,9 @@ nl_clean_loop:
             for (; next_it != nodeArray.end(); ++next_it) {
                 if ((*next_it)->FindNode((*nl_it)->mName) != nullptr) {
                     // if current top node(nl_it) found in another top node then erase it from node_list and restart search loop.
-                    // FIXME: this leaks memory on test models test8.amf and test9.amf
+                    // TODO: use unique_ptr for NodeArray
+                    delete *nl_it;
+                    *nl_it = nullptr;
                     nodeArray.erase(nl_it);
 
                     goto nl_clean_loop;

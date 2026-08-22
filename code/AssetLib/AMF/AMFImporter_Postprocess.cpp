@@ -846,8 +846,9 @@ nl_clean_loop:
 
         pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-        for (size_t i = 0; i < pScene->mNumMeshes; i++)
+        for (size_t i = 0; i < pScene->mNumMeshes; i++) {
             pScene->mMeshes[i] = *ml_it++;
+        }
     } // if(mesh_list.size() > 0)
 
     //

@@ -668,7 +668,7 @@ void AMFImporter::Postprocess_BuildMaterial(const AMFMaterial &pMaterial) {
 }
 
 void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const {
-    aiNode *con_node;
+    std::unique_ptr<aiNode> con_node;
     std::list<aiNode *> ch_node;
 
     // We will build next hierarchy:
@@ -676,7 +676,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
     //  |- aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
     //  ...
     //  \_ aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
-    con_node = new aiNode;
+    con_node.reset(new aiNode);
     con_node->mName = pConstellation.ID;
     // Walk through children and search for instances of another objects, constellations.
     for (const AMFNodeElementBase *ne : pConstellation.Child) {
@@ -694,7 +694,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
 
         // create node for applying transformation
         t_node = new aiNode;
-        t_node->mParent = con_node;
+        t_node->mParent = con_node.get();
         // apply transformation
         aiMatrix4x4::Translation(als.Delta, tmat), t_node->mTransformation *= tmat;
         aiMatrix4x4::RotationX(als.Rotation.x, tmat), t_node->mTransformation *= tmat;
@@ -719,7 +719,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         con_node->mChildren[ch_idx++] = node;
 
     // and place "root" of <constellation> node to node list
-    nodeArray.push_back(con_node);
+    nodeArray.emplace_back(std::move(con_node));
 }
 
 void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
@@ -773,7 +773,7 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
             // for <object> mesh and node must be built: object ID assigned to aiNode name and will be used in future for <instance>
             Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
             if (tnode != nullptr) {
-                nodeArray.push_back(tnode);
+                nodeArray.emplace_back(tnode);
             }
         }
     } // for(const CAMFImporter_NodeElement* root_child: root_el->Child)
@@ -812,9 +812,6 @@ nl_clean_loop:
             for (; next_it != nodeArray.end(); ++next_it) {
                 if ((*next_it)->FindNode((*nl_it)->mName) != nullptr) {
                     // if current top node(nl_it) found in another top node then erase it from node_list and restart search loop.
-                    // TODO: use unique_ptr for NodeArray
-                    delete *nl_it;
-                    *nl_it = nullptr;
                     nodeArray.erase(nl_it);
 
                     goto nl_clean_loop;
@@ -829,7 +826,7 @@ nl_clean_loop:
     //
     // Nodes
     if (!nodeArray.empty()) {
-        NodeArray::const_iterator nl_it = nodeArray.begin();
+        NodeArray::iterator nl_it = nodeArray.begin();
 
         pScene->mRootNode->mNumChildren = static_cast<unsigned int>(nodeArray.size());
         pScene->mRootNode->mChildren = new aiNode *[pScene->mRootNode->mNumChildren];
@@ -837,7 +834,7 @@ nl_clean_loop:
             // Objects and constellation that must be showed placed at top of hierarchy in <amf> node. So all aiNode's in node_list must have
             // mRootNode only as parent.
             (*nl_it)->mParent = pScene->mRootNode;
-            pScene->mRootNode->mChildren[i] = *nl_it;
+            pScene->mRootNode->mChildren[i] = nl_it->release();
             nl_it++;
         }
     } // if(node_list.size() > 0)

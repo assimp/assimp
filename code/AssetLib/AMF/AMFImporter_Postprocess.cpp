@@ -669,7 +669,7 @@ void AMFImporter::Postprocess_BuildMaterial(const AMFMaterial &pMaterial) {
 
 void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellation, NodeArray &nodeArray) const {
     std::unique_ptr<aiNode> con_node;
-    std::list<aiNode *> ch_node;
+    std::list<std::unique_ptr<aiNode> > ch_node;
 
     // We will build next hierarchy:
     // aiNode as parent (<constellation>) for set of nodes as a children
@@ -681,7 +681,6 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
     // Walk through children and search for instances of another objects, constellations.
     for (const AMFNodeElementBase *ne : pConstellation.Child) {
         aiMatrix4x4 tmat;
-        aiNode *t_node;
         aiNode *found_node;
 
         if (ne->Type == AMFNodeElementBase::ENET_Metadata) continue;
@@ -693,7 +692,7 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         if (!Find_ConvertedNode(als.ObjectID, nodeArray, &found_node)) Throw_ID_NotFound(als.ObjectID);
 
         // create node for applying transformation
-        t_node = new aiNode;
+        std::unique_ptr<aiNode> t_node(new aiNode);
         t_node->mParent = con_node.get();
         // apply transformation
         aiMatrix4x4::Translation(als.Delta, tmat), t_node->mTransformation *= tmat;
@@ -704,8 +703,8 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
         t_node->mNumChildren = 1;
         t_node->mChildren = new aiNode *[t_node->mNumChildren];
         SceneCombiner::Copy(&t_node->mChildren[0], found_node);
-        t_node->mChildren[0]->mParent = t_node;
-        ch_node.push_back(t_node);
+        t_node->mChildren[0]->mParent = t_node.get();
+        ch_node.emplace_back(std::move(t_node));
     } // for(const CAMFImporter_NodeElement* ne: pConstellation.Child)
 
     // copy found aiNode's as children
@@ -715,8 +714,8 @@ void AMFImporter::Postprocess_BuildConstellation(AMFConstellation &pConstellatio
 
     con_node->mNumChildren = static_cast<unsigned int>(ch_node.size());
     con_node->mChildren = new aiNode *[con_node->mNumChildren];
-    for (aiNode *node : ch_node)
-        con_node->mChildren[ch_idx++] = node;
+    for (auto &node : ch_node)
+        con_node->mChildren[ch_idx++] = node.release();
 
     // and place "root" of <constellation> node to node list
     nodeArray.emplace_back(std::move(con_node));

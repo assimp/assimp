@@ -224,7 +224,8 @@ void RAWImporter::InternReadFile(const std::string &pFile,
 
         aiNode *node;
         if (pScene->mRootNode->mNumChildren) {
-            node = *cc = new aiNode();
+            node = new aiNode();
+            *cc = node;
             node->mParent = pScene->mRootNode;
         } else {
             node = *cc;

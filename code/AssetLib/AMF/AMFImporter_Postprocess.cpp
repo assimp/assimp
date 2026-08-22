@@ -509,7 +509,7 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                     } // if((vi < pVertexColorArray.size()) && (pVertexColorArray[vi] != nullptr)) else
                 }; // auto Vertex_CalculateColor = [&](const size_t pIdx) -> aiColor4D
 
-                aiMesh *tmesh = new aiMesh;
+                std::unique_ptr<aiMesh> tmesh(new aiMesh);
 
                 tmesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE; // Only triangles is supported by AMF.
                 //
@@ -635,7 +635,7 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
 
                 // store new aiMesh
                 mesh_idx.push_back(static_cast<unsigned int>(pMeshList.size()));
-                pMeshList.push_back(tmesh);
+                pMeshList.emplace_back(std::move(tmesh));
             } // for(const std::list<SComplexFace>& face_list_cur: complex_faces_toplist)
         } // if(ne_child->Type == CAMFImporter_NodeElement::ENET_Volume)
     } // for(const CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
@@ -842,12 +842,12 @@ nl_clean_loop:
     //
     // Meshes
     if (!mesh_list.empty()) {
-        MeshArray::const_iterator ml_it = mesh_list.begin();
+        MeshArray::iterator ml_it = mesh_list.begin();
 
         pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (size_t i = 0; i < pScene->mNumMeshes; i++) {
-            pScene->mMeshes[i] = *ml_it;
+            pScene->mMeshes[i] = ml_it->release();
             ml_it++;
         }
     } // if(mesh_list.size() > 0)

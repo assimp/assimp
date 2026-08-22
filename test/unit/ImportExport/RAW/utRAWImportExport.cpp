@@ -62,3 +62,50 @@ public:
 TEST_F(utRAWImportExport, importSimpleRAWTest) {
     EXPECT_TRUE(importerTest());
 }
+
+
+TEST_F(utRAWImportExport, importInvalid) {
+    Assimp::Importer importer;
+    int flags = 0;
+    flags |= aiProcess_ValidateDataStructure;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/empty.raw", flags);
+    ASSERT_EQ(scene, nullptr);
+}
+
+
+// FIXME: these leak memory
+#if 0
+
+
+TEST_F(utRAWImportExport, importColor) {
+    Assimp::Importer importer;
+    int flags = 0;
+    // FIXME: faild validation (A node of the scene-graph is nullptr)
+    // flags |= aiProcess_ValidateDataStructure;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/RAW/WithColor.raw", flags);
+#ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
+    ASSERT_NE(scene, nullptr);
+#else  // ASSIMP_BUILD_NO_RAW_IMPORTER
+    ASSERT_EQ(scene, nullptr);
+#endif  // ASSIMP_BUILD_NO_RAW_IMPORTER
+}
+
+
+TEST_F(utRAWImportExport, importTexture) {
+    Assimp::Importer importer;
+    int flags = 0;
+    // FIXME: faild validation (A node of the scene-graph is nullptr)
+    // flags |= aiProcess_ValidateDataStructure;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/RAW/WithTexture.raw", flags);
+#ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
+    ASSERT_NE(scene, nullptr);
+#else  // ASSIMP_BUILD_NO_RAW_IMPORTER
+    ASSERT_EQ(scene, nullptr);
+#endif  // ASSIMP_BUILD_NO_RAW_IMPORTER
+}
+
+
+#endif  // 0

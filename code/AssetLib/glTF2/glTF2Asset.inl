@@ -826,8 +826,15 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     if (!indices || !values) {
         throw DeadlyImportError("Invalid sparse accessor. Missing required indices or values.");
     }
+
     size_t indicesTailDataSize;
     uint8_t *pIndices = indices->GetPointerAndTailSize(indicesByteOffset, indicesTailDataSize);
+    
+    // GUARD 1: Block pointer arithmetic if indices data stream fails to resolve
+    if (!pIndices) {
+        throw DeadlyImportError("Invalid sparse accessor. Incomplete or missing indices data stream.");
+    }
+
     const unsigned int indexSize = int(ComponentTypeSize(indicesType));
     uint8_t *indicesEnd = pIndices + count * indexSize;
 
@@ -837,6 +844,11 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 
     size_t valuesTailDataSize;
     uint8_t* pValues = values->GetPointerAndTailSize(valuesByteOffset, valuesTailDataSize);
+
+    // GUARD 2: Block memory copying if values data stream fails to resolve
+    if (!pValues) {
+        throw DeadlyImportError("Invalid sparse accessor. Incomplete or missing values data stream.");
+    }
 
     if (elementSize * count > valuesTailDataSize) {
         throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");

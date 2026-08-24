@@ -14,3 +14,14 @@ description = "Python bindings for the Open Asset Import Library (ASSIMP)"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
+
+[project.optional-dependencies]
+test = ["pytest>=9"]
+
+[tool.setuptools]
+packages = ["pyassimp"]
+
+[tool.pytest]
+minversion = "9.0"
+testpaths = ["tests"]
+strict = true

@@ -154,7 +154,7 @@ void IQMImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
     // offset is validated (and required to be suitably aligned for the pointer
     // casts below) even when count is zero, since the parsing code still forms
     // pointers from these offsets before checking the count.
-    auto region_in_bounds = [fileSize](uint64_t offset, uint64_t count, uint64_t elemSize, uint64_t align) -> bool {
+    bool region_in_bounds = [fileSize](uint64_t offset, uint64_t count, uint64_t elemSize, uint64_t align) {
         if (align != 0 && (offset % align) != 0) {
             return false;
         }

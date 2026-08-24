@@ -1,0 +1,72 @@
+name: PyAssimp
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "port/PyAssimp/**"
+      - ".github/workflows/pyassimp.yml"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "port/PyAssimp/**"
+      - ".github/workflows/pyassimp.yml"
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  build-lib:
+    name: ubuntu-latest-build-libassimp
+    runs-on: ubuntu-latest
+    steps:
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - uses: lukka/get-cmake@latest
+
+    - name: configure and build
+      run: |
+        cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
+        cmake --build build --parallel --target assimp
+      shell: bash
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: libassimp
+        path: build/bin/libassimp.so*
+        if-no-files-found: error
+
+  test:
+    name: ubuntu-latest-python-${{ matrix.python-version }}
+    needs: build-lib
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/download-artifact@v7
+      with:
+        name: libassimp
+        path: build/bin
+
+    - name: test
+      working-directory: port/PyAssimp
+      env:
+        LD_LIBRARY_PATH: ${{ github.workspace }}/build/bin
+      run: |
+        python -m venv .venv
+        .venv/bin/pip install -e ".[test]"
+        .venv/bin/pytest -q
+      shell: bash

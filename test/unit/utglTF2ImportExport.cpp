@@ -1056,3 +1056,15 @@ TEST_F(utglTF2ImportExport, testSetIdentityMatrixEpsilon) {
     EXPECT_TRUE(m.IsIdentity(epsilon));
 }
 
+TEST_F(utglTF2ImportExport, importMalformedSparseAccessor) {
+    Assimp::Importer importer;
+    // Attempt to load the proof-of-concept file we generated earlier
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/malformed_sparse.gltf", 0);
+    
+    // ASSERTION: The file must fail to load safely instead of crashing the program
+    EXPECT_EQ(scene, nullptr);
+    
+    // ASSERTION: The thrown parser error must match our custom fail-fast string
+    std::string errorString = importer.GetErrorString();
+    EXPECT_NE(errorString.find("Invalid sparse accessor: missing required 'values' object."), std::string::npos);
+}

@@ -224,10 +224,13 @@ void RAWImporter::InternReadFile(const std::string &pFile,
 
         aiNode *node;
         if (pScene->mRootNode->mNumChildren) {
-            node = *cc = new aiNode();
+            node = new aiNode();
+            *cc = node;
+            cc++;
             node->mParent = pScene->mRootNode;
-        } else
+        } else {
             node = *cc;
+        }
         node->mName.Set(outGroup.name);
 
         // add all meshes

@@ -68,6 +68,28 @@ TEST(utMD5Importer, importInvalidBoneIndex) {
     ASSERT_EQ(nullptr, scene);
 }
 
+TEST(utMD5Importer, importOverflowingVertexIndex) {
+    // Regression test: a vertex index of 0xffffffff makes idx + 1 wrap to zero, so the
+    // vertex array is resized to nothing and then indexed with the original value.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingVertexIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importOverflowingTriangleIndex) {
+    // Same wraparound through the triangle index.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingTriangleIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importOverflowingWeightIndex) {
+    // Same wraparound through the weight index.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingWeightIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
 TEST(utMD5Importer, importInvalidCameraCut) {
     // Regression test: a crafted .md5camera whose cut list references a frame
     // index past the parsed frame array used to read out of bounds while

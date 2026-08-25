@@ -634,7 +634,7 @@ struct Frame_MDL7
     char    frame_name[AI_MDL7_MAX_FRAMENAMESIZE];
     uint32_t    vertices_count;
     uint32_t    transmatrix_count;
-};
+} PACK_STRUCT;
 
 
 // -------------------------------------------------------------------------------------

@@ -5,15 +5,6 @@ This is the main-module of PyAssimp.
 """
 
 import sys
-if sys.version_info < (2,6):
-    raise RuntimeError('pyassimp: need python 2.6 or newer')
-
-# xrange was renamed range in Python 3 and the original range from Python 2 was removed.
-# To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
-if sys.version_info >= (3,0):
-    xrange = range
-
-
 try: 
     import numpy
 except ImportError: 
@@ -51,13 +42,13 @@ def make_tuple(ai_obj, type = None):
             #import pdb;pdb.set_trace()
         else:
             res = [getattr(ai_obj, e[0]) for e in ai_obj._fields_]
-            res = [res[i:i+4] for i in xrange(0,16,4)]
+            res = [res[i:i+4] for i in range(0,16,4)]
     elif isinstance(ai_obj, structs.Matrix3x3):
         if numpy:
             res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((3,3))
         else:
             res = [getattr(ai_obj, e[0]) for e in ai_obj._fields_]
-            res = [res[i:i+3] for i in xrange(0,9,3)]
+            res = [res[i:i+3] for i in range(0,9,3)]
     else:
         if numpy:
             res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
@@ -66,12 +57,8 @@ def make_tuple(ai_obj, type = None):
 
     return res
 
-# Returns unicode object for Python 2, and str object for Python 3.
 def _convert_assimp_string(assimp_string):
-    if sys.version_info >= (3, 0):
-        return str(assimp_string.data, errors='ignore')
-    else:
-        return unicode(assimp_string.data, errors='ignore')
+    return str(assimp_string.data, errors='ignore')
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):

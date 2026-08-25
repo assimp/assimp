@@ -548,6 +548,9 @@ struct Trivert {
 #if (!defined AI_MDL_HL1_MAX_SEQUENCES)
 #define AI_MDL_HL1_MAX_SEQUENCES 2048
 #endif
+#if (!defined AI_MDL_HL1_MAX_SEQUENCE_FRAMES)
+#define AI_MDL_HL1_MAX_SEQUENCE_FRAMES 256
+#endif
 #if (!defined AI_MDL_HL1_MAX_SEQUENCE_GROUPS)
 #define AI_MDL_HL1_MAX_SEQUENCE_GROUPS 32
 #endif

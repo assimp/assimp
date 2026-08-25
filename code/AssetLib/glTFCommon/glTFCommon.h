@@ -467,7 +467,13 @@ inline Value *FindObjectInContext(Value &val, const char * memberId, const char 
         return nullptr;
     }
     if (!it->value.IsObject()) {
-        ASSIMP_LOG_ERROR("Member \"", memberId, "\" was not of type \"", context, "\" when reading ", extraContext);
+        std::string fullContext = context;
+        if (extraContext && extraContext[0] != '\0') {
+            fullContext += " (";
+            fullContext += extraContext;
+            fullContext += ")";
+        }
+        ASSIMP_LOG_ERROR("Member \"", memberId, "\" was not of type \"object\" when reading ", fullContext);
         return nullptr;
    }
     return &it->value;

@@ -1,6 +1,5 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
 # Copyright (c) 2006-2026, assimp team
 # All rights reserved.
 #
@@ -33,7 +32,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 3.10 )
 
@@ -46,17 +44,17 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${Assimp_BINARY_DIR}/lib )
 
 if(WIN32)
-  set ( ASSIMP_CMD_RC assimp_cmd.rc)
+  set ( ASSIMP_CMD_RC code/assimp_cmd.rc)
 endif()
 
 ADD_EXECUTABLE( assimp_cmd
-  CompareDump.cpp
-  ImageExtractor.cpp
-  Main.cpp
-  Main.h
-  WriteDump.cpp
-  Info.cpp
-  Export.cpp
+  code/CompareDump.cpp
+  code/ImageExtractor.cpp
+  code/Main.cpp
+  code/Main.h
+  code/WriteDump.cpp
+  code/Info.cpp
+  code/Export.cpp
   ${ASSIMP_CMD_RC}
 )
 

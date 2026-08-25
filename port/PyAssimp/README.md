@@ -2,9 +2,7 @@ PyAssimp Readme
 ===============
 
 A simple Python wrapper for Assimp using `ctypes` to access the library.
-Requires Python >= 2.6.
-
-Python 3 support is mostly here, but not well tested.
+Requires Python >= 3.10.
 
 Note that pyassimp is not complete. Many ASSIMP features are missing.
 
@@ -72,7 +70,7 @@ INSTALL
 Install `pyassimp` by running:
 
 ```console
-$ python setup.py install
+$ pip install .
 ```
 
 PyAssimp requires a assimp dynamic library (`DLL` on windows,
@@ -84,3 +82,11 @@ PyAssimp requires a assimp dynamic library (`DLL` on windows,
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./pyassimp/helper.py`.
 There's an `additional_dirs` list waiting for your entries.
+
+TEST
+----
+
+```console
+$ pip install -e ".[test]"
+$ LD_LIBRARY_PATH=/path/to/libassimp pytest
+```

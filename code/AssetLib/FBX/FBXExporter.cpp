@@ -840,7 +840,7 @@ void FBXExporter::WriteDefinitions () {
     // TODO: support Maya's Stingray PBS material
     count = mScene->mNumMaterials;
     if (count) {
-        bool has_phong = has_phong_mat(mScene);
+          bool has_phong = has_phong_mat(mScene);
         n = FBX::Node("ObjectType", "Material");
         n.AddChild("Count", count);
         pt = FBX::Node("PropertyTemplate");
@@ -1081,6 +1081,74 @@ inline int64_t to_ktime(double time) {
         return INT64_MIN;
     }
     return static_cast<int64_t>(time * FBX::SECOND);
+}
+
+// fix Gimbal Lock problem and cross border problem like 179° to -179°
+void regulate_euler_angles_in_track(
+    float& euler_x, float& euler_y, float& euler_z, 
+    const float ref_euler_x, const float ref_euler_y, const float ref_euler_z
+){
+    // fix Gimbal Lock
+    constexpr float half_pi_deg = 90;
+    constexpr float epsilon = 1; // 1°
+    if (fabs(euler_y - half_pi_deg) < epsilon) {
+        float delta = euler_z - euler_x;
+        float x1 = ref_euler_x, z1 = x1 + delta, d1 = ref_euler_z - z1;
+        float z2 = ref_euler_z, x2 = z2 - delta, d2 = ref_euler_x - x2;
+        if (fabs(d1) < fabs(d2)) {
+            euler_x = x1;
+            euler_z = z1;
+        } else {
+            euler_x = x2;
+            euler_z = z2;
+        }
+    } else if (fabs(euler_y + half_pi_deg) < epsilon) {
+        float sum = euler_z + euler_x;
+        float x1 = ref_euler_x, z1 = sum - x1, d1 = ref_euler_z - z1;
+        float z2 = ref_euler_z, x2 = sum - z2, d2 = ref_euler_x - x2;
+        if (fabs(d1) < fabs(d2)) {
+            euler_x = x1;
+            euler_z = z1;
+        } else {
+            euler_x = x2;
+            euler_z = z2;
+        }
+    }
+
+    std::reference_wrapper<float> euler[3] = { euler_x, euler_y, euler_z };
+    const float ref_euler[3] = { ref_euler_x, ref_euler_y, ref_euler_z };
+
+    // makeNearEuler case1: cross border of ±180°, eg. from 179° to -179°
+    static constexpr float pi_deg = 180;
+    auto makeNearEuler = [&euler, &ref_euler]() {
+        float dist = 0;
+        for (int i = 0; i < 3; i++) {
+            float delta = ref_euler[i] - euler[i];
+            while (fabs(delta) > pi_deg) {
+                euler[i].get() += delta > 0 ? pi_deg * 2 : -pi_deg * 2;
+                delta = ref_euler[i] - euler[i];
+            }
+            dist += fabs(delta);
+        }
+        return dist;
+    };
+    float dist1 = makeNearEuler();
+    
+    // makeNearEuler case2: pitch cross border of ±90°, eg. from 85° to 95°
+    if (dist1 > half_pi_deg) {
+        const float euler_save[3] = { euler_x, euler_y, euler_z };
+
+        // euler(a, ±(90+d), b) equals euler(a±180, ±(90-d), b±180) in the meaning of corresponding rotation matrix.
+        float border = euler_y > 0 ? half_pi_deg : -half_pi_deg;
+        euler_y += (border - euler_y) * 2;
+        euler_x += (ref_euler_x > euler_x ? pi_deg : -pi_deg);
+        euler_z += (ref_euler_z > euler_z ? pi_deg : -pi_deg);
+
+        float dist2 = makeNearEuler();
+        if (dist1 < dist2) {
+            euler_x = euler_save[0], euler_y = euler_save[1], euler_z = euler_save[2];
+        }
+    }
 }
 
 void FBXExporter::WriteObjects () {
@@ -1361,17 +1429,17 @@ void FBXExporter::WriteObjects () {
         FBX::Node le;
 
 		if (!normal_data.empty()) {
-		  le = FBX::Node("LayerElement");
-		  le.AddChild("Type", "LayerElementNormal");
-		  le.AddChild("TypedIndex", int32_t(0));
-		  layer.AddChild(le);
+		    le = FBX::Node("LayerElement");
+		    le.AddChild("Type", "LayerElementNormal");
+		    le.AddChild("TypedIndex", int32_t(0));
+		    layer.AddChild(le);
         }
 
 		if (!color_data.empty()) {
-		  le = FBX::Node("LayerElement");
-		  le.AddChild("Type", "LayerElementColor");
-		  le.AddChild("TypedIndex", int32_t(0));
-		  layer.AddChild(le);
+		    le = FBX::Node("LayerElement");
+		    le.AddChild("Type", "LayerElementColor");
+		    le.AddChild("TypedIndex", int32_t(0));
+		    layer.AddChild(le);
         }
 
         le = FBX::Node("LayerElement");
@@ -1553,6 +1621,14 @@ void FBXExporter::WriteObjects () {
             p.AddP70double("Reflectivity", f*f*((c.r+c.g+c.b)/3.0));
         }
 
+        aiTextureMapMode mapU, mapV;
+        if (aiGetMaterialInteger(m, AI_MATKEY_MAPPINGMODE_U(aiTextureType_DIFFUSE, 0), (int *)&mapU) == AI_SUCCESS) {
+            p.AddP70enum("TextureU", mapU);
+        }
+        if (aiGetMaterialInteger(m, AI_MATKEY_MAPPINGMODE_V(aiTextureType_DIFFUSE, 0), (int *)&mapV) == AI_SUCCESS) {
+            p.AddP70enum("TextureV", mapV);
+        }
+
         n.AddChild(p);
 
         n.Dump(outstream, binary, indent);
@@ -1605,7 +1681,8 @@ void FBXExporter::WriteObjects () {
                 // If newPath doesn't end in an extension, add extension from embedded_texture->achFormatHint
                 std::string np = newPath.str();
                 size_t dot_pos = np.find_last_of('.');
-                if (dot_pos == std::string::npos || dot_pos < np.find_last_of("/\\")) {
+                size_t sep_pos = np.find_last_of("/\\");
+                if (dot_pos == std::string::npos || (sep_pos != std::string::npos && dot_pos < sep_pos)) {
                     // No extension found, add one
                     newPath << "." << embedded_texture->achFormatHint;
                 }
@@ -2116,22 +2193,14 @@ void FBXExporter::WriteObjects () {
                 sdnode.AddChild("Weights", subdef_weights);
             }
 
-            // transform is the transform of the mesh, but in bone space.
-            // if the skeleton is in the bind pose,
-            // we can take the inverse of the world-space bone transform
-            // and multiply by the world-space transform of the mesh.
-            aiMatrix4x4 bone_xform = get_world_transform(bone_node, mScene);
-            aiMatrix4x4 inverse_bone_xform = bone_xform;
-            inverse_bone_xform.Inverse();
-            aiMatrix4x4 tr = inverse_bone_xform * mesh_xform;
+            // add bind matrix
+            if (b) {
+                aiMatrix4x4 invOffsetMatrix = b->mOffsetMatrix; invOffsetMatrix.Inverse();
+                aiMatrix4x4 bone_xform = mesh_xform * invOffsetMatrix; // bone global transform in bind pose
 
-            sdnode.AddChild("Transform", tr);
-
-
+                sdnode.AddChild("Transform", b->mOffsetMatrix); // TransformLink * Transform = mesh_xform
             sdnode.AddChild("TransformLink", bone_xform);
-            // note: this means we ALWAYS rely on the mesh node transform
-            // being unchanged from the time the skeleton was bound.
-            // there's not really any way around this at the moment.
+            }
 
             // done
             sdnode.Dump(outstream, binary, indent);
@@ -2482,6 +2551,15 @@ void FBXExporter::WriteObjects () {
                 xval.push_back(qr.x);
                 yval.push_back(qr.y);
                 zval.push_back(qr.z);
+            }
+            for (size_t ki = 0; ki < xval.size(); ki++) {
+                if (ki > 0) { // not first
+                    regulate_euler_angles_in_track(xval[ki], yval[ki], zval[ki], xval[ki - 1], yval[ki - 1], zval[ki - 1]);
+                } else if (ki + 1 < xval.size()) { // first but not last
+                    if (fabs(fabs(yval[ki + 1]) - 90) > 1.0) { // not in Gimbal Lock
+                        regulate_euler_angles_in_track(xval[ki], yval[ki], zval[ki], xval[ki + 1], yval[ki + 1], zval[ki + 1]);
+                    }
+                }
             }
             WriteAnimationCurve(outstream, R.x, times, xval, ids[1], "d|X");
             WriteAnimationCurve(outstream, R.y, times, yval, ids[1], "d|Y");
@@ -2854,8 +2932,8 @@ void FBXExporter::WriteAnimationCurve(
     n.AddChild("KeyVer", int32_t(4009));
     n.AddChild("KeyTime", times);
     n.AddChild("KeyValueFloat", values);
-    // TODO: keyattr flags and data (STUB for now)
-    n.AddChild("KeyAttrFlags", std::vector<int32_t>{0});
+    // keyattr flags and data
+    n.AddChild("KeyAttrFlags", std::vector<int32_t>{ 8452 }); // InterpType = Linear
     n.AddChild("KeyAttrDataFloat", std::vector<float>{0,0,0,0});
     n.AddChild(
         "KeyAttrRefCount",

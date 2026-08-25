@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
 #include <memory>
+#include <cstring>
 
 using namespace Assimp;
 
@@ -73,7 +74,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial *pMat,
         aiMaterialProperty *prop = pMat->mProperties[i];
 
         if (prop /* just for safety ... */
-                && 0 == strncmp(prop->mKey.data, pKey, strlen(pKey)) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
+                && 0 == strncmp(prop->mKey.data, pKey, AI_MAXLEN) && (UINT_MAX == type || prop->mSemantic == type) /* UINT_MAX is a wild-card, but this is undocumented :-) */
                 && (UINT_MAX == index || prop->mIndex == index)) {
             *pPropOut = pMat->mProperties[i];
             return AI_SUCCESS;
@@ -304,6 +305,16 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial *pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a string from the material
+//
+// Security hardening: material string properties are deserialized from
+// untrusted asset data, and malformed metadata can trigger out-of-bounds
+// reads or undefined behavior. The previous implementation read the string
+// length via reinterpret_cast<uint32_t*> from a byte buffer, which is unsafe
+// for unaligned data and violates strict aliasing rules.
+//
+// This function now validates the serialized length prefix, buffer size,
+// and null termination before copying payload data into aiString.
+// Invalid or corrupted material properties are rejected with AI_FAILURE.
 aiReturn aiGetMaterialString(const aiMaterial *pMat,
         const char *pKey,
         unsigned int type,
@@ -318,30 +329,27 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
     }
 
     if (aiPTI_String == prop->mType) {
-        // Validate minimum size for length prefix
-        if (prop->mDataLength < 5) {
-            ASSIMP_LOG_ERROR("Material property", pKey, " has invalid data length");
+        if (prop->mDataLength < 5u) {
+            ASSIMP_LOG_ERROR("Material property ", pKey, " has invalid string data length");
             return AI_FAILURE;
         }
 
-        // The string is stored as 32 bit length prefix followed by zero-terminated UTF8 data
-        uint32_t stored_length = *reinterpret_cast<uint32_t *>(prop->mData);
+        uint32_t length = 0;
+        std::memcpy(&length, prop->mData, sizeof(length));
 
-        // Validate: stored length + 1 (null) + 4 (length field) must equal data length
-        // AND string must not exceed buffer bounds
-        if (stored_length + 1 + 4 != prop->mDataLength || stored_length >= AI_MAXLEN) {
-            ASSIMP_LOG_ERROR("Material string property", pKey, " has length mismatch or exceeds max");
+        if (length > AI_MAXLEN - 1u || length + 1u + 4u != prop->mDataLength) {
+            ASSIMP_LOG_ERROR("Material property ", pKey, " has malformed string data");
             return AI_FAILURE;
         }
 
-        // Verify null terminator exists
         if (prop->mData[prop->mDataLength - 1] != '\0') {
-            ASSIMP_LOG_ERROR("Material string property", pKey, " is not null-terminated");
+            ASSIMP_LOG_ERROR("Material property ", pKey, " string is not null terminated");
             return AI_FAILURE;
         }
 
-        pOut->length = stored_length;
-        memcpy(pOut->data, prop->mData + 4, pOut->length + 1);
+        pOut->length = static_cast<unsigned int>(length);
+        std::memcpy(pOut->data, prop->mData + 4, length);
+        pOut->data[length] = '\0';
     } else {
         // TODO - implement lexical cast as well
         ASSIMP_LOG_ERROR("Material property", pKey, " was found, but is no string");

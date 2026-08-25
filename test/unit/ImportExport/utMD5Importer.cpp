@@ -59,6 +59,46 @@ TEST(utMD5Importer, importSimpleCube) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utMD5Importer, importInvalidBoneIndex) {
+    // Regression test: a crafted .md5mesh whose weight references a bone index
+    // beyond numJoints used to cause an out-of-bounds heap access in the loader.
+    // The importer must reject the file gracefully instead of corrupting memory.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidBoneIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importOverflowingVertexIndex) {
+    // Regression test: a vertex index of 0xffffffff makes idx + 1 wrap to zero, so the
+    // vertex array is resized to nothing and then indexed with the original value.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingVertexIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importOverflowingTriangleIndex) {
+    // Same wraparound through the triangle index.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingTriangleIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importOverflowingWeightIndex) {
+    // Same wraparound through the weight index.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/OverflowingWeightIndex.md5mesh", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
+TEST(utMD5Importer, importInvalidCameraCut) {
+    // Regression test: a crafted .md5camera whose cut list references a frame
+    // index past the parsed frame array used to read out of bounds while
+    // building the camera animations. The importer must reject it gracefully.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD5/invalid/InvalidCameraCut.md5camera", 0);
+    ASSERT_EQ(nullptr, scene);
+}
+
 TEST(utMD5Importer, importBoarMan) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/MD5/BoarMan.md5mesh", aiProcess_ValidateDataStructure);

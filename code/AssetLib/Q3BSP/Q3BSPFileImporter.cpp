@@ -597,8 +597,7 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
             // If it doesn't exist in the archive, it is probably just a reference to an external file.
             // We'll leave it up to the user to figure out which extension the file has.
             aiString name;
-            strncpy(name.data, pTexture->strName, sizeof name.data);
-            name.length = static_cast<ai_uint32>(strlen(name.data));
+            name.Set(pTexture->strName, sizeof(name.data));
             pMatHelper->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

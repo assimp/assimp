@@ -688,7 +688,8 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 			for (unsigned int face = 0; face < cMesh->mNumFaces; face++) {
 				size_t updatedCount;
 				if (!SafeAdd(numVertexReferences, (size_t)cMesh->mFaces[face].mNumIndices, updatedCount)) {
-					throw DeadlyImportError("Face index accumulation overflow");
+					lprintf("face index accumulation overflow\n");
+					return false;
 				}
 				numVertexReferences = updatedCount;
 			}
@@ -1207,14 +1208,14 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	}
 
 	// create mesh references array
-	jintArray jMeshrefArr = env->NewIntArray(cNode->mNumMeshes);
-	SmartLocalRef refMeshrefArr(env, jMeshrefArr);
-
 	size_t meshRefSize;
 	if (!SafeMultiply(sizeof(jint), (size_t)cNode->mNumMeshes, meshRefSize) || meshRefSize > JASSIMP_MAX_DIRECT_ALLOC) {
 		lprintf("mesh refs buffer size overflow or too large\n");
 		return false;
 	}
+
+	jintArray jMeshrefArr = env->NewIntArray(cNode->mNumMeshes);
+	SmartLocalRef refMeshrefArr(env, jMeshrefArr);
 
 	std::vector<jint> tempVec(cNode->mNumMeshes);
 

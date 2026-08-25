@@ -2,9 +2,7 @@ PyAssimp: Python bindings for libassimp
 =======================================
 
 A simple Python wrapper for Assimp using ``ctypes`` to access the
-library. Requires Python >= 2.6.
-
-Python 3 support is mostly here, but not well tested.
+library. Requires Python >= 3.10.
 
 Note that pyassimp is not complete. Many ASSIMP features are missing.
 
@@ -78,7 +76,7 @@ Install ``pyassimp`` by running:
 
 ::
 
-    $ python setup.py install
+    $ pip install .
 
 PyAssimp requires a assimp dynamic library (``DLL`` on windows, ``.so``
 on linux, ``.dylib`` on macOS) in order to work. The default search

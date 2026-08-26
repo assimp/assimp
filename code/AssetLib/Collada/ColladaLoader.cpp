@@ -1720,6 +1720,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture(const ColladaParser &pParse
             ASSIMP_LOG_WARN("Collada: texture format hint is too long, truncating to 3 characters");
         }
         strncpy(tex->achFormatHint, imIt->second.mEmbeddedFormat.c_str(), 3);
+        tex->achFormatHint[3] = '\0';  // Ensure null termination
 
         // and copy texture data
         tex->mHeight = 0;

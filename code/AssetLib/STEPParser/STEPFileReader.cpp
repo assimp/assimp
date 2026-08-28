@@ -434,7 +434,7 @@ std::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout, co
 
     // estimate the number of items upfront - lists can grow large
     size_t count = 1;
-    for(const char* c=cur; *c && *c != ')'; ++c) {
+    for(const char* c=cur; *c && c != end && *c != ')'; ++c) {
         count += (*c == ',' ? 1 : 0);
     }
 

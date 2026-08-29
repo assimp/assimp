@@ -827,7 +827,8 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         rootOut->mChildren = new aiNode *[rootOut->mNumChildren];
         for (unsigned int i = 0; i < rootOut->mNumChildren; ++i) {
 
-            aiNode *node = rootOut->mChildren[i] = new aiNode();
+            aiNode *node = new aiNode();
+            rootOut->mChildren[i] = node;
             node->mParent = rootOut;
             GenerateGraph(root->children[i], node, scene, batch, meshes,
                     anims, attach, materials, defMatIdx);

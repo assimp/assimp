@@ -162,10 +162,10 @@ aiMesh *IRRImporter::BuildSingleQuadMesh(const SkyboxVertex &v1,
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<aiMaterial *> materials) {
+void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<std::unique_ptr<aiMaterial> > &materials) {
     // Update the material of the skybox - replace the name and disable shading for skyboxes.
     for (unsigned int i = 0; i < 6; ++i) {
-        aiMaterial *out = (aiMaterial *)(*(materials.end() - (6 - i)));
+        aiMaterial *out = (*(materials.end() - (6 - i))).get();
 
         aiString s;
         s.length = ::ai_snprintf(s.data, AI_MAXLEN, "SkyboxSide_%u", i);
@@ -231,8 +231,8 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh *> &meshes, std::vector<aiMater
 }
 
 // ------------------------------------------------------------------------------------------------
-void IRRImporter::CopyMaterial(std::vector<aiMaterial *> &materials,
-        std::vector<std::pair<aiMaterial *, unsigned int>> &inmaterials,
+void IRRImporter::CopyMaterial(std::vector<std::unique_ptr<aiMaterial> > &materials,
+        std::vector<std::pair<std::unique_ptr<aiMaterial>, unsigned int>> &inmaterials,
         unsigned int &defMatIdx,
         aiMesh *mesh) {
     if (inmaterials.empty()) {
@@ -256,7 +256,7 @@ void IRRImporter::CopyMaterial(std::vector<aiMaterial *> &materials,
     }
 
     mesh->mMaterialIndex = (unsigned int)materials.size();
-    materials.push_back(inmaterials[0].first);
+    materials.emplace_back(std::move(inmaterials[0].first));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -605,7 +605,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         std::vector<aiMesh *> &meshes,
         std::vector<aiNodeAnim *> &anims,
         std::vector<AttachmentInfo> &attach,
-        std::vector<aiMaterial *> &materials,
+        std::vector<std::unique_ptr<aiMaterial> > &materials,
         unsigned int &defMatIdx) {
     unsigned int oldMeshSize = (unsigned int)meshes.size();
     // unsigned int meshTrafoAssign = 0;
@@ -643,7 +643,8 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             delete localScene->mMaterials[i];
 
             auto &src = root->materials[i];
-            localScene->mMaterials[i] = src.first;
+            // store a pointer in localScene but don't release yet, the next loop needs them too
+            localScene->mMaterials[i] = src.first.get();
         }
 
         // NOTE: Each mesh should have exactly one material assigned,
@@ -658,7 +659,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             // often the case so we can simply extract it to a shared oacity
             // value.
             auto &src = root->materials[mesh->mMaterialIndex];
-            aiMaterial *mat = src.first;
+            aiMaterial *mat = src.first.get();
 
             if (mesh->HasVertexColors(0) && src.second & AI_IRRMESH_MAT_trans_vertex_alpha) {
                 bool bdo = true;
@@ -693,6 +694,12 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
                 }
             }
         }
+
+        // now release the pointers in root->materials
+        for (unsigned int i = 0; i < localScene->mNumMaterials; ++i) {
+            // just release, they were already stored in localScene two loops ago
+            root->materials[i].first.release();
+        }
     } break;
 
     case Node::LIGHT:
@@ -726,7 +733,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 
         // Now adjust this output material - if there is a first texture
         // set, setup spherical UV mapping around the Y axis.
-        SetupMapping((aiMaterial *)materials.back(), aiTextureMapping_SPHERE);
+        SetupMapping(materials.back().get(), aiTextureMapping_SPHERE);
     } break;
 
     case Node::CUBE: {
@@ -742,7 +749,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
 
         // Now adjust this output material - if there is a first texture
         // set, setup cubic UV mapping
-        SetupMapping((aiMaterial *)materials.back(), aiTextureMapping_BOX);
+        SetupMapping(materials.back().get(), aiTextureMapping_BOX);
     } break;
 
     case Node::SKYBOX: {
@@ -755,7 +762,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         // copy those materials and generate 6 meshes for our new sky-box
         materials.reserve(materials.size() + 6);
         for (unsigned int i = 0; i < 6; ++i)
-            materials.insert(materials.end(), root->materials[i].first);
+            materials.emplace(materials.end(), std::move(root->materials[i].first));
 
         BuildSkybox(meshes, materials);
 
@@ -1281,7 +1288,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // temporary data
     std::vector<aiNodeAnim *> anims;
-    std::vector<aiMaterial *> materials;
+    std::vector<std::unique_ptr<aiMaterial> > materials;
     std::vector<AttachmentInfo> attach;
     std::vector<aiMesh *> meshes;
 
@@ -1327,7 +1334,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
         tempScene->mNumMaterials = (unsigned int)materials.size();
         tempScene->mMaterials = new aiMaterial *[tempScene->mNumMaterials];
         for (unsigned int i = 0; i < tempScene->mNumMaterials; i++) {
-            tempScene->mMaterials[i] = materials[i];
+            tempScene->mMaterials[i] = materials[i].release();
         }
     }
 

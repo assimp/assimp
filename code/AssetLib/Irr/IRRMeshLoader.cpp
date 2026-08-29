@@ -87,12 +87,6 @@ const aiImporterDesc *IRRMeshImporter::GetInfo() const {
     return &desc;
 }
 
-static void releaseMaterial(aiMaterial **mat) {
-    if (*mat != nullptr) {
-        delete *mat;
-        *mat = nullptr;
-    }
-}
 
 static void releaseMesh(aiMesh **mesh) {
     if (*mesh != nullptr) {
@@ -120,14 +114,14 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     XmlNode root = parser.getRootNode();
 
     // final data
-    std::vector<aiMaterial *> materials;
+    std::vector<std::unique_ptr<aiMaterial> > materials;
     std::vector<aiMesh *> meshes;
     materials.reserve(5);
     meshes.reserve(5);
 
     // temporary data - current mesh buffer
     // TODO move all these to inside loop
-    aiMaterial *curMat = nullptr;
+    std::unique_ptr<aiMaterial> curMat;
     aiMesh *curMesh = nullptr;
     unsigned int curMatFlags = 0;
 
@@ -191,7 +185,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             if (vertexCount == 0) {
                 // This is possible ... remove the mesh from the list and skip further reading
                 ASSIMP_LOG_WARN("IRRMESH: Found mesh with zero vertices");
-                releaseMaterial(&curMat);
+                curMat.reset();
                 continue; // Bail out early
             };
 
@@ -214,7 +208,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                     // map (normal_..., parallax_...)
                     // *********************************************************
                     int idx = 1;
-                    aiMaterial *mat = curMat;
+                    aiMaterial *mat = curMat.get();
 
                     if (curMatFlags & AI_IRRMESH_MAT_lightmap) {
                         mat->AddProperty(&idx, 1, AI_MATKEY_UVWSRC_LIGHTMAP(0));
@@ -234,7 +228,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                 // Unsupported format, discard whole buffer/mesh
                 // Assuming we have a correct material, then release it
                 // We don't have a correct mesh for sure here
-                releaseMaterial(&curMat);
+                curMat.reset();
                 ASSIMP_LOG_ERROR("IRRMESH: Unknown vertex format");
                 continue; // Skip rest of buffer
             };
@@ -266,8 +260,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                 // mesh - away
                 releaseMesh(&curMesh);
 
-                // material - away
-                releaseMaterial(&curMat);
+                curMat.reset();
                 continue; // Go to next buffer
             }
 
@@ -377,17 +370,16 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
         if (curMatFlags & AI_IRRMESH_MAT_trans_vertex_alpha && !useColors) {
             // Take the opacity value of the current material
             // from the common vertex color alpha
-            aiMaterial *mat = curMat;
-            mat->AddProperty(&curColors[0].a, 1, AI_MATKEY_OPACITY);
+            curMat.get()->AddProperty(&curColors[0].a, 1, AI_MATKEY_OPACITY);
         }
 
         // end of previous buffer. A material and a mesh should be there
         if (!curMat || !curMesh) {
             ASSIMP_LOG_ERROR("IRRMESH: A buffer must contain a mesh and a material");
-            releaseMaterial(&curMat);
+            curMat.reset();
             releaseMesh(&curMesh);
         } else {
-            materials.push_back(curMat);
+            materials.emplace_back(std::move(curMat));
             meshes.push_back(curMesh);
         }
     }
@@ -410,7 +402,7 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
     pScene->mNumMaterials = (unsigned int)materials.size();
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
     for (unsigned int i = 0; i < materials.size(); i++) {
-        pScene->mMaterials[i] = materials[i];
+        pScene->mMaterials[i] = materials[i].release();
     }
 
     pScene->mRootNode = new aiNode();

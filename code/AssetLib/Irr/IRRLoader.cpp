@@ -1326,7 +1326,9 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (!materials.empty()) {
         tempScene->mNumMaterials = (unsigned int)materials.size();
         tempScene->mMaterials = new aiMaterial *[tempScene->mNumMaterials];
-        ::memcpy(tempScene->mMaterials, &materials[0], sizeof(void *) * tempScene->mNumMaterials);
+        for (unsigned int i = 0; i < tempScene->mNumMaterials; i++) {
+            tempScene->mMaterials[i] = materials[i];
+        }
     }
 
     //  Now merge all sub scenes and attach them to the correct

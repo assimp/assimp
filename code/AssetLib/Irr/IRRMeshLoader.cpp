@@ -409,7 +409,9 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
 
     pScene->mNumMaterials = (unsigned int)materials.size();
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
-    ::memcpy(pScene->mMaterials, &materials[0], sizeof(void *) * pScene->mNumMaterials);
+    for (unsigned int i = 0; i < materials.size(); i++) {
+        pScene->mMaterials[i] = materials[i];
+    }
 
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mName.Set("<IRRMesh>");

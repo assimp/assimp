@@ -642,7 +642,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             // Delete the old material, we don't need it anymore
             delete localScene->mMaterials[i];
 
-            std::pair<aiMaterial *, unsigned int> &src = root->materials[i];
+            auto &src = root->materials[i];
             localScene->mMaterials[i] = src.first;
         }
 
@@ -657,7 +657,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             // and check whether they have a common alpha value. This is quite
             // often the case so we can simply extract it to a shared oacity
             // value.
-            std::pair<aiMaterial *, unsigned int> &src = root->materials[mesh->mMaterialIndex];
+            auto &src = root->materials[mesh->mMaterialIndex];
             aiMaterial *mat = (aiMaterial *)src.first;
 
             if (mesh->HasVertexColors(0) && src.second & AI_IRRMESH_MAT_trans_vertex_alpha) {
@@ -1179,7 +1179,7 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
                 // Each material should contain an <attributes> node
                 // with everything specified
                 nd->materials.emplace_back();
-                std::pair<aiMaterial *, unsigned int> &p = nd->materials.back();
+                auto &p = nd->materials.back();
                 p.first = ParseMaterial(subNode, p.second);
                 guessedMatCnt += 1;
             }

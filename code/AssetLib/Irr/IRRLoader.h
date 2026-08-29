@@ -164,7 +164,7 @@ private:
         std::string name;
 
         // List of all child nodes
-        std::vector<Node *> children;
+        std::vector<std::unique_ptr<Node> > children;
 
         // Parent node
         Node *parent;
@@ -211,7 +211,7 @@ private:
     // Parse <node> tag from XML file and extract child node
     // @param node XML node
     // @param guessedMeshesContained number of extra guessed meshes
-    IRRImporter::Node *ParseNode(pugi::xml_node &node, BatchLoader& batch);
+    std::unique_ptr<IRRImporter::Node> ParseNode(pugi::xml_node &node, BatchLoader& batch);
 
     // -------------------------------------------------------------------
     // Parse <attributes> tags within <node> tags and apply to scene node

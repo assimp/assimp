@@ -827,11 +827,11 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         rootOut->mChildren = new aiNode *[rootOut->mNumChildren];
         for (unsigned int i = 0; i < rootOut->mNumChildren; ++i) {
 
-            aiNode *node = new aiNode();
+            auto node = std::make_unique<aiNode>();
             node->mParent = rootOut;
-            GenerateGraph(root->children[i], node, scene, batch, meshes,
+            GenerateGraph(root->children[i].get(), node.get(), scene, batch, meshes,
                     anims, attach, materials, defMatIdx);
-            rootOut->mChildren[i] = node;
+            rootOut->mChildren[i] = node.release();
         }
     }
 }
@@ -1085,7 +1085,7 @@ void IRRImporter::ParseAnimators(pugi::xml_node &animatorNode, IRRImporter::Node
     }
 }
 
-IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &batch) {
+std::unique_ptr<IRRImporter::Node> IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &batch) {
     // Parse <node> tags.
     // <node> tags have various types
     // <node> tags can contain <attribute>, <material>
@@ -1111,42 +1111,42 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
      *  Said materials and animators are all collected at the bottom
      */
     // ***********************************************************************
-    Node *nd;
+    std::unique_ptr<Node> nd;
     pugi::xml_attribute nodeTypeAttrib = node.attribute("type");
     if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "mesh") || !ASSIMP_stricmp(nodeTypeAttrib.value(), "octTree")) {
         // OctTree's and meshes are treated equally
-        nd = new Node(Node::MESH);
+        nd = std::make_unique<Node>(Node::MESH);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "cube")) {
-        nd = new Node(Node::CUBE);
+        nd = std::make_unique<Node>(Node::CUBE);
         guessedMeshCnt += 1; // Cube is only one mesh
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "skybox")) {
-        nd = new Node(Node::SKYBOX);
+        nd = std::make_unique<Node>(Node::SKYBOX);
         guessedMeshCnt += 6; // Skybox is a box, with 6 meshes?
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "camera")) {
-        nd = new Node(Node::CAMERA);
+        nd = std::make_unique<Node>(Node::CAMERA);
         // Setup a temporary name for the camera
         aiCamera *cam = new aiCamera();
         cam->mName.Set(nd->name);
         cameras.push_back(cam);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "light")) {
-        nd = new Node(Node::LIGHT);
+        nd = std::make_unique<Node>(Node::LIGHT);
         // Setup a temporary name for the light
         aiLight *cam = new aiLight();
         cam->mName.Set(nd->name);
         lights.push_back(cam);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "sphere")) {
-        nd = new Node(Node::SPHERE);
+        nd = std::make_unique<Node>(Node::SPHERE);
         guessedMeshCnt += 1;
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "animatedMesh")) {
-        nd = new Node(Node::ANIMMESH);
+        nd = std::make_unique<Node>(Node::ANIMMESH);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "empty")) {
-        nd = new Node(Node::DUMMY);
+        nd = std::make_unique<Node>(Node::DUMMY);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "terrain")) {
-        nd = new Node(Node::TERRAIN);
+        nd = std::make_unique<Node>(Node::TERRAIN);
     } else if (!ASSIMP_stricmp(nodeTypeAttrib.value(), "billBoard")) {
         // We don't support billboards, so ignore them
         ASSIMP_LOG_ERROR("IRR: Billboards are not supported by Assimp");
-        nd = new Node(Node::DUMMY);
+        nd = std::make_unique<Node>(Node::DUMMY);
     } else {
         ASSIMP_LOG_WARN("IRR: Found unknown node: ", nodeTypeAttrib.value());
 
@@ -1154,21 +1154,21 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
          *  We parse the transformation and all animators
          *  and skip the rest.
          */
-        nd = new Node(Node::DUMMY);
+        nd = std::make_unique<Node>(Node::DUMMY);
     }
 
     // TODO: consolidate all into one loop
     for (pugi::xml_node subNode : node.children()) {
         // Collect node attributes first
         if (!ASSIMP_stricmp(subNode.name(), "attributes")) {
-            ParseNodeAttributes(subNode, nd, batch); // Parse attributes into this node
+            ParseNodeAttributes(subNode, nd.get(), batch); // Parse attributes into this node
         } else if (!ASSIMP_stricmp(subNode.name(), "animators")) {
             // Then parse any animators
             // All animators should contain an <attributes> tag
 
             //  This is an animation path - add a new animator
             //  to the list.
-            ParseAnimators(subNode, nd); // Function modifies nd's animator vector
+            ParseAnimators(subNode, nd.get()); // Function modifies nd's animator vector
             guessedAnimCnt += 1;
         }
 
@@ -1191,8 +1191,8 @@ IRRImporter::Node *IRRImporter::ParseNode(pugi::xml_node &node, BatchLoader &bat
     // Attach the newly created node to the scene-graph
     for (pugi::xml_node child : node.children()) {
         if (!ASSIMP_stricmp(child.name(), "node")) { // Is a child node
-            Node *childNd = ParseNode(child, batch); // Repeat this function for all children
-            nd->children.push_back(childNd);
+            std::unique_ptr<Node> childNd = ParseNode(child, batch); // Repeat this function for all children
+            nd->children.emplace_back(std::move(childNd));
         };
     }
 
@@ -1217,7 +1217,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     pugi::xml_node documentRoot = st.getRootNode();
 
     // The root node of the scene
-    Node *root = new Node(Node::DUMMY);
+    auto root = std::make_unique<Node>(Node::DUMMY);
     root->parent = nullptr;
     root->name = "<IRRSceneRoot>";
 
@@ -1236,16 +1236,15 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Find the scene root from document root.
     const pugi::xml_node &sceneRoot = documentRoot.child("irr_scene");
     if (!sceneRoot) {
-        delete root;
         throw new DeadlyImportError("IRR: <irr_scene> not found in file");
     }
     for (pugi::xml_node &child : sceneRoot.children()) {
         // XML elements are either nodes, animators, attributes, or materials
         if (!ASSIMP_stricmp(child.name(), "node")) {
             // Recursive collect subtree children
-            Node *nd = ParseNode(child, batch);
+            std::unique_ptr<Node> nd = ParseNode(child, batch);
             // Attach to root
-            root->children.push_back(nd);
+            root->children.emplace_back(std::move(nd));
         }
     }
 
@@ -1294,7 +1293,7 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     // Now process our scene-graph recursively: generate final
     // meshes and generate animation channels for all nodes.
     unsigned int defMatIdx = UINT_MAX;
-    GenerateGraph(root, tempScene->mRootNode, tempScene,
+    GenerateGraph(root.get(), tempScene->mRootNode, tempScene,
             batch, meshes, anims, attach, materials, defMatIdx);
 
     if (!anims.empty()) {
@@ -1346,7 +1345,6 @@ void IRRImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 
     // Finished ... everything destructs automatically and all
     // temporary scenes have already been deleted by MergeScenes()
-    delete root;
 }
 
 #endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER

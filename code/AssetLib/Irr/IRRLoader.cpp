@@ -828,10 +828,10 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
         for (unsigned int i = 0; i < rootOut->mNumChildren; ++i) {
 
             aiNode *node = new aiNode();
-            rootOut->mChildren[i] = node;
             node->mParent = rootOut;
             GenerateGraph(root->children[i], node, scene, batch, meshes,
                     anims, attach, materials, defMatIdx);
+            rootOut->mChildren[i] = node;
         }
     }
 }

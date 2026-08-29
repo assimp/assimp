@@ -658,7 +658,7 @@ void IRRImporter::GenerateGraph(Node *root, aiNode *rootOut, aiScene *scene,
             // often the case so we can simply extract it to a shared oacity
             // value.
             auto &src = root->materials[mesh->mMaterialIndex];
-            aiMaterial *mat = (aiMaterial *)src.first;
+            aiMaterial *mat = src.first;
 
             if (mesh->HasVertexColors(0) && src.second & AI_IRRMESH_MAT_trans_vertex_alpha) {
                 bool bdo = true;

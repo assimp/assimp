@@ -50,18 +50,9 @@ class utIrrImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-
-#if 0  // FIXME: this leaks memory
-
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box.irr", aiProcess_ValidateDataStructure);
         // Only one box thus only one mesh
         return nullptr != scene && scene->mNumMeshes == 1;
-
-#else
-
-        return true;
-
-#endif  // 0
     }
 };
 
@@ -70,8 +61,6 @@ TEST_F(utIrrImportExport, importSimpleIrrTest) {
     EXPECT_TRUE(importerTest());
 }
 
-
-#if 0  // FIXME: these leak memory
 
 TEST_F(utIrrImportExport, importAnimMesh) {
     Assimp::Importer importer;
@@ -100,8 +89,6 @@ TEST_F(utIrrImportExport, importBoxUTF16) {
     ASSERT_NE(nullptr, scene);
 }
 
-#endif  // 0
-
 
 TEST_F(utIrrImportExport, importCellar) {
     Assimp::Importer importer;
@@ -116,8 +103,6 @@ TEST_F(utIrrImportExport, importCellarUTF16) {
     ASSERT_NE(nullptr, scene);
 }
 
-
-#if 0  // FIXME: these leak memory
 
 TEST_F(utIrrImportExport, importDawfInCellar) {
     Assimp::Importer importer;
@@ -257,8 +242,6 @@ TEST_F(utIrrImportExport, importSphereUTF16) {
     ASSERT_NE(nullptr, scene);
 }
 
-#endif  // 0
-
 
 TEST_F(utIrrImportExport, importSpider) {
     Assimp::Importer importer;
@@ -274,8 +257,6 @@ TEST_F(utIrrImportExport, importSpiderUTF166) {
 }
 
 
-#if 0  // FIXME: these leak memory
-
 TEST_F(utIrrImportExport, importSkybox) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/IRR/skybox.xml", aiProcess_ValidateDataStructure);
@@ -288,5 +269,3 @@ TEST_F(utIrrImportExport, importSkyboxUTF16) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/IRR/skybox_UTF16LE.xml", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
-#endif  // 0

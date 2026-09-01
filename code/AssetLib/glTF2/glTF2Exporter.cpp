@@ -82,14 +82,6 @@ std::string BasisUniversalMimeType(const std::string &path) {
         lower_path.compare(lower_path.size() - 5, 5, ".ktx2") == 0) {
         return "image/ktx2";
     }
-    if (lower_path.size() >= 4 &&
-        lower_path.compare(lower_path.size() - 4, 4, ".ktx") == 0) {
-        return "image/ktx";
-    }
-    if (lower_path.size() >= 6 &&
-        lower_path.compare(lower_path.size() - 6, 6, ".basis") == 0) {
-        return "image/basis";
-    }
     return {};
 }
 

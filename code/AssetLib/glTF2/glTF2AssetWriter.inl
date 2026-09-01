@@ -56,8 +56,7 @@ namespace glTF2 {
 
         inline bool IsBasisUniversalMimeType(const std::string &mime_type)
         {
-            return mime_type == "image/ktx" || mime_type == "image/ktx2" ||
-                    mime_type == "image/basis";
+            return mime_type == "image/ktx2";
         }
 
         template<typename T, size_t N>

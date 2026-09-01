@@ -77,8 +77,8 @@ using namespace glTF2;
 namespace {
 
 std::string BasisUniversalMimeType(const std::string &path) {
-    const std::string lower_path = ai_tolower(path);
-    if (lower_path.size() >= 5 &&
+    if (const std::string lower_path = ai_tolower(path);
+        lower_path.size() >= 5 &&
         lower_path.compare(lower_path.size() - 5, 5, ".ktx2") == 0) {
         return "image/ktx2";
     }

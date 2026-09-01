@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/config.h>
+#include <assimp/StringUtils.h>
 
 // Header files, standard library.
 #include <cinttypes>
@@ -72,6 +73,27 @@ using namespace rapidjson;
 
 using namespace Assimp;
 using namespace glTF2;
+
+namespace {
+
+std::string BasisUniversalMimeType(const std::string &path) {
+    const std::string lower_path = ai_tolower(path);
+    if (lower_path.size() >= 5 &&
+        lower_path.compare(lower_path.size() - 5, 5, ".ktx2") == 0) {
+        return "image/ktx2";
+    }
+    if (lower_path.size() >= 4 &&
+        lower_path.compare(lower_path.size() - 4, 4, ".ktx") == 0) {
+        return "image/ktx";
+    }
+    if (lower_path.size() >= 6 &&
+        lower_path.compare(lower_path.size() - 6, 6, ".basis") == 0) {
+        return "image/basis";
+    }
+    return {};
+}
+
+}  // namespace
 
 namespace Assimp {
 
@@ -616,8 +638,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
                     texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                 } else {
                     texture->source->uri = path;
-                    if (texture->source->uri.find(".ktx") != std::string::npos ||
-                            texture->source->uri.find(".basis") != std::string::npos) {
+                    texture->source->mimeType = BasisUniversalMimeType(path);
+                    if (!texture->source->mimeType.empty()) {
                         useBasisUniversal = true;
                     }
                 }

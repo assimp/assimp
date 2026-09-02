@@ -78,3 +78,45 @@ private:
 TEST_F(utMDLImporter, importMDLFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+
+#ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
+// Regression test for OSS-Fuzz issue #6793:
+// CreateTextureARGB8_3DGS_MDL3() computed skinwidth * skinheight as signed int32,
+// triggering UBSan integer-overflow when the product exceeds INT32_MAX.
+// After the fix the importer rejects the file before reaching the multiply.
+TEST_F(utMDLImporter, Quake1MDL3SkinDimensionOverflow) {
+    // Minimal Quake 1 MDL (ident="IDPO", version=6) with a group-skin whose
+    // skinwidth * skinheight = 50000 * 43000 = 2,150,000,000 > INT32_MAX.
+    // The importer must reject the file (return nullptr) rather than causing a
+    // signed-integer overflow UBSan crash.
+    static const unsigned char kMalformedMDL3[] = {
+        // Header: ident="IDPO"
+        0x49, 0x44, 0x50, 0x4F,
+        // version=6
+        0x06, 0x00, 0x00, 0x00,
+        // scale[3]=1.0,1.0,1.0
+        0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
+        // translate[3]=0.0,0.0,0.0
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // boundingradius=1.0
+        0x00, 0x00, 0x80, 0x3F,
+        // vEyePos[3]=0.0,0.0,0.0
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // num_skins=1, skinwidth=50000 (0xC350), skinheight=43000 (0xA7F8)
+        0x01, 0x00, 0x00, 0x00, 0x50, 0xC3, 0x00, 0x00, 0xF8, 0xA7, 0x00, 0x00,
+        // num_verts=3, num_tris=1, num_frames=1, synctype=0, flags=0
+        0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        // Skin data: group=1 (group skin), nb=1 (one image)
+        0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        // 1 float of group skin timing, then pixel stub (all zeros)
+        0xCD, 0xCC, 0xCC, 0x3D, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(
+        kMalformedMDL3, sizeof(kMalformedMDL3), 0, "mdl");
+    EXPECT_EQ(nullptr, scene);
+}
+#endif // ASSIMP_BUILD_NO_MDL_IMPORTER

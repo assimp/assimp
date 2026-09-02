@@ -747,6 +747,10 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output) {
             Parse3DFace(++reader, output);
             continue;
         }
+        else if (reader.Is(0,"POINT")) {
+            ParsePoint(++reader, output);
+            continue;
+        }
         ++reader;
     }
 }
@@ -773,6 +777,11 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output) 
         else if (reader.Is(0,"3DFACE") || reader.Is(0,"LINE") || reader.Is(0,"3DLINE")) {
             //http://sourceforge.net/tracker/index.php?func=detail&aid=2970566&group_id=226462&atid=1067632
             Parse3DFace(++reader, output);
+            continue;
+        }
+
+        else if (reader.Is(0,"POINT")) {
+            ParsePoint(++reader, output);
             continue;
         }
 
@@ -833,7 +842,7 @@ static constexpr unsigned int DXF_POLYLINE_FLAG_POLYFACEMESH = 0x40;
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) {
-    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>());
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     unsigned int iguess = 0, vguess = 0;
@@ -985,7 +994,10 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
         case 62:
             clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
             break;
-        };
+
+        default:
+            break;
+        }
 
         reader++;
     }
@@ -1020,7 +1032,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output) {
     // (note) this is also used for for parsing line entities, so we
     // must handle the vertex_count == 2 case as well.
 
-    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
+    output.blocks.back().lines.push_back( std::make_shared<DXF::PolyLine>() );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     aiVector3D vip[4];
@@ -1142,6 +1154,73 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output) {
         line.positions.push_back(vip[i]);
         line.colors.push_back(clr);
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+void DXFImporter::ParsePoint(DXF::LineReader& reader, DXF::FileData& output) {
+    // POINT entities are stored as a PolyLine with a single vertex and a
+    // single one-index face, which ConvertMeshes() maps to aiPrimitiveType_POINT.
+    output.blocks.back().lines.push_back(std::make_shared<DXF::PolyLine>());
+    DXF::PolyLine& line = *output.blocks.back().lines.back();
+
+    aiVector3D pos;
+    aiColor4D  clr = AI_DXF_DEFAULT_COLOR;
+    bool has_position = false;
+
+    while( !reader.End() ) {
+
+        // next entity with a groupcode == 0 is probably already the next entity
+        if (reader.GroupCode() == 0) {
+            break;
+        }
+        switch (reader.GroupCode()) {
+
+        // 8 specifies the layer
+        case 8:
+            line.layer = reader.Value();
+            break;
+
+        // x position
+        case GroupCode_XComp:
+            pos.x = reader.ValueAsFloat();
+            has_position = true;
+            break;
+
+        // y position
+        case GroupCode_YComp:
+            pos.y = reader.ValueAsFloat();
+            has_position = true;
+            break;
+
+        // z position
+        case GroupCode_ZComp:
+            pos.z = reader.ValueAsFloat();
+            has_position = true;
+            break;
+
+        // color
+        case 62:
+            clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
+            break;
+
+        default:
+            break;
+        }
+
+        ++reader;
+    }
+
+    // sanity check to see if we got something meaningful
+    if (!has_position) {
+        ASSIMP_LOG_WARN("DXF: POINT entity has no position; ignoring");
+        output.blocks.back().lines.pop_back();
+        return;
+    }
+
+    line.counts.push_back(1);
+    line.indices.push_back(0);
+    line.positions.push_back(pos);
+    line.colors.push_back(clr);
 }
 
 #endif // !! ASSIMP_BUILD_NO_DXF_IMPORTER

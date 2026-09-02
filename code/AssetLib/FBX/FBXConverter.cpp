@@ -156,6 +156,13 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     if (doc.Settings().readAllMaterials) {
         // unfortunately this means we have to evaluate all objects
         for (const ObjectMap::value_type &v : doc.Objects()) {
+            // id 0 is the synthetic Model::RootNode placeholder added by
+            // Document::ReadObjects(). Its element is the Objects scope itself,
+            // which carries no id/name/class-tag tokens, so it must not be
+            // evaluated as an object.
+            if (v.first == 0) {
+                continue;
+            }
 
             const Object *ob = v.second->Get();
             if (!ob) {

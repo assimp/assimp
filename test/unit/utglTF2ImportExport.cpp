@@ -41,6 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include "Tools/TestTools.h"
+#ifndef ASSIMP_BUILD_NO_EXPORT
+#include "AssetLib/glTF2/glTF2AssetWriter.h"
+#endif
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/config.h>
@@ -53,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/schema.h>
 
 #include <array>
+#include <fstream>
+#include <sstream>
 
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
@@ -200,6 +205,83 @@ TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_clearcoat) {
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utglTF2ImportExport, exportExternalBasisUniversalTexture) {
+    glTF2::Asset asset;
+    asset.extensionsUsed.KHR_texture_basisu = true;
+
+    auto image = asset.images.Create("image");
+    image->uri = "textures/albedo.KTX2";
+    image->mimeType = "image/ktx2";
+
+    auto texture = asset.textures.Create("texture");
+    texture->source = image;
+
+    glTF2::AssetWriter writer(asset);
+    ASSERT_TRUE(writer.mDoc.HasMember("images"));
+    ASSERT_EQ(writer.mDoc["images"].Size(), 1u);
+    const auto &image_json = writer.mDoc["images"][0];
+    ASSERT_TRUE(image_json.HasMember("uri"));
+    EXPECT_STREQ(image_json["uri"].GetString(), "textures/albedo.KTX2");
+    ASSERT_TRUE(image_json.HasMember("mimeType"));
+    EXPECT_STREQ(image_json["mimeType"].GetString(), "image/ktx2");
+
+    ASSERT_TRUE(writer.mDoc.HasMember("textures"));
+    ASSERT_EQ(writer.mDoc["textures"].Size(), 1u);
+    const auto &texture_json = writer.mDoc["textures"][0];
+    EXPECT_FALSE(texture_json.HasMember("source"));
+    ASSERT_TRUE(texture_json.HasMember("extensions"));
+    ASSERT_TRUE(texture_json["extensions"].HasMember("KHR_texture_basisu"));
+    const auto &basisu = texture_json["extensions"]["KHR_texture_basisu"];
+    ASSERT_TRUE(basisu.HasMember("source"));
+    EXPECT_EQ(basisu["source"].GetUint(), 0u);
+}
+
+TEST_F(utglTF2ImportExport, exportExternalBasisUniversalTexturePath) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf",
+            aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    ASSERT_GT(scene->mNumMaterials, 0u);
+
+    scene->mMaterials[0]->Clear();
+    aiString texture_path("textures/albedo.KTX2");
+    scene->mMaterials[0]->AddProperty(
+            &texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+
+    const std::string output =
+            std::string(ASSIMP_TEST_MODELS_DIR) +
+            "/glTF2/external_basis_texture_path_test.gltf";
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS,
+              exporter.Export(scene, "gltf2", output.c_str()))
+            << exporter.GetErrorString();
+
+    std::ifstream input(output);
+    ASSERT_TRUE(input.good());
+    std::stringstream contents;
+    contents << input.rdbuf();
+    rapidjson::Document document;
+    document.Parse(contents.str().c_str());
+    ASSERT_FALSE(document.HasParseError());
+
+    ASSERT_TRUE(document.HasMember("images"));
+    ASSERT_EQ(document["images"].Size(), 1u);
+    EXPECT_STREQ(document["images"][0]["mimeType"].GetString(),
+                 "image/ktx2");
+    ASSERT_TRUE(document.HasMember("textures"));
+    ASSERT_EQ(document["textures"].Size(), 1u);
+    EXPECT_FALSE(document["textures"][0].HasMember("source"));
+    EXPECT_EQ(document["textures"][0]["extensions"]["KHR_texture_basisu"]
+                      ["source"]
+                              .GetUint(),
+              0u);
+
+    ::remove(output.c_str());
+    const std::string binary = output.substr(0, output.size() - 5) + ".bin";
+    ::remove(binary.c_str());
+}
 
 TEST_F(utglTF2ImportExport, importglTF2AndExport_KHR_materials_clearcoat) {
     {

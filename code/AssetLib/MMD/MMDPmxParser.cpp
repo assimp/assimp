@@ -121,6 +121,10 @@ namespace pmx
 		}
 		stream->read((char*) &encoding, sizeof(uint8_t));
 		stream->read((char*) &uv, sizeof(uint8_t));
+		if (uv > 4)
+		{
+			throw DeadlyImportError("MMD: invalid additional uv count");
+		}
 		stream->read((char*) &vertex_index_size, sizeof(uint8_t));
 		stream->read((char*) &texture_index_size, sizeof(uint8_t));
 		stream->read((char*) &material_index_size, sizeof(uint8_t));

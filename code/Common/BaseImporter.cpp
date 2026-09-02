@@ -495,6 +495,7 @@ struct LoadRequest {
             flags(_flags),
             refCnt(1),
             scene(nullptr),
+            sceneClaimed(false),
             loaded(false),
             id(_id) {
         if (_map) {
@@ -510,6 +511,7 @@ struct LoadRequest {
     unsigned int flags;
     unsigned int refCnt;
     aiScene *scene;
+    bool sceneClaimed;
     bool loaded;
     BatchLoader::PropertyMap map;
     unsigned int id;
@@ -564,7 +566,9 @@ BatchLoader::BatchLoader(IOSystem *pIO, bool validate) {
 BatchLoader::~BatchLoader() {
     // delete all scenes what have not been polled by the user
     for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
-        delete (*it).scene;
+        if (!(*it).sceneClaimed) {
+            delete (*it).scene;
+        }
     }
     delete m_data;
 }
@@ -611,6 +615,7 @@ aiScene *BatchLoader::GetImport(unsigned int which) {
     for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
         if ((*it).id == which && (*it).loaded) {
             aiScene *sc = (*it).scene;
+            (*it).sceneClaimed = true;
             if (!(--(*it).refCnt)) {
                 m_data->requests.erase(it);
             }
@@ -643,6 +648,7 @@ void BatchLoader::LoadAll() {
         }
         m_data->pImporter->ReadFile((*it).file, pp);
         (*it).scene = m_data->pImporter->GetOrphanedScene();
+        (*it).sceneClaimed = false;
         (*it).loaded = true;
 
         ASSIMP_LOG_INFO("%%% END EXTERNAL FILE %%%");

@@ -581,6 +581,42 @@ TEST_F(utglTF2ImportExport, importglTF2FromMemory) {
     EXPECT_EQ( nullptr, Scene );*/
 }
 
+TEST_F(utglTF2ImportExport, test_KHR_mesh_quantization) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/Triangle-Mesh-Quantized/triangle_mesh_quantized.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+
+    aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_EQ(3u, mesh->mNumVertices);
+
+    // Positions were SHORT (5122) unnormalized: 0, 100, 100
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[0].x);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[0].y);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[0].z);
+
+    EXPECT_FLOAT_EQ(100.0f, mesh->mVertices[1].x);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[1].y);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[1].z);
+
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[2].x);
+    EXPECT_FLOAT_EQ(100.0f, mesh->mVertices[2].y);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[2].z);
+
+    // Normals were BYTE (5120) normalized: max(0/127, -1), max(127/127, -1) = 0, 1
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[0].x);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[0].y);
+    EXPECT_FLOAT_EQ(1.0f, mesh->mNormals[0].z);
+
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[1].x);
+    EXPECT_FLOAT_EQ(1.0f, mesh->mNormals[1].y);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[1].z);
+
+    EXPECT_FLOAT_EQ(1.0f, mesh->mNormals[2].x);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[2].y);
+    EXPECT_FLOAT_EQ(0.0f, mesh->mNormals[2].z);
+}
+
 TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/simple_skin/simple_skin.gltf",

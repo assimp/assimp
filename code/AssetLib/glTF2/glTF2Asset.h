@@ -556,6 +556,7 @@ struct Accessor : public Object {
     std::vector<double> min; //!< Minimum value of each component in this attribute.
     std::unique_ptr<Sparse> sparse;
     std::unique_ptr<Buffer> decodedBuffer; // Packed decoded data, returned instead of original bufferView if present
+    bool normalized = false;
 
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();
@@ -567,6 +568,8 @@ struct Accessor : public Object {
 
     template <class T>
     size_t ExtractData(T *&outData, const std::vector<unsigned int> *remappingIndices = nullptr);
+    template <class TTarget_type, class TScalar>
+    size_t ExtractConvertedData(TTarget_type *&outData, const std::vector<unsigned int> *remappingIndices = nullptr);
 
     void WriteData(size_t count, const void *src_buffer, size_t src_stride);
     void WriteSparseValues(size_t count, const void *src_data, size_t src_dataStride);
@@ -1138,6 +1141,7 @@ public:
         bool FB_ngon_encoding{false};
         bool KHR_texture_basisu{false};
         bool EXT_texture_webp{false};
+        bool KHR_mesh_quantization{false};
 
         Extensions() = default;
         ~Extensions() = default;
@@ -1148,6 +1152,7 @@ public:
         bool KHR_draco_mesh_compression{false};
         bool KHR_texture_basisu{false};
         bool EXT_texture_webp{false};
+        bool KHR_mesh_quantization{false};
 
         RequiredExtensions() = default;
     } extensionsRequired;

@@ -900,6 +900,7 @@ inline void Accessor::Read(Value &obj, Asset &r) {
 
     const char *typestr;
     type = ReadMember(obj, "type", typestr) ? AttribType::FromString(typestr) : AttribType::SCALAR;
+    normalized = MemberOrDefault(obj, "normalized", false);
 
     if (bufferView) {
         // Check length
@@ -1086,6 +1087,126 @@ size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remap
             }
         }
     }
+    return usedCount;
+}
+
+template <class TTarget_type, class TScalar>
+inline size_t Accessor::ExtractConvertedData(TTarget_type *&outData, const std::vector<unsigned int> *remappingIndices) {
+    size_t usedCount = remappingIndices ? remappingIndices->size() : count;
+    if (usedCount == 0) {
+        outData = nullptr;
+        return 0;
+    }
+
+    uint8_t *data = GetPointer();
+    if (!data) {
+        throw DeadlyImportError("GLTF2: data is null when extracting data from ", getContextForErrorMessages(id, name));
+    }
+
+    unsigned int numComponents = GetNumComponents();
+    size_t stride = GetStride();
+
+    // Ensure the accessor components fit within the target type
+    const size_t targetComponents = sizeof(TTarget_type) / sizeof(TScalar);
+    if (numComponents > targetComponents) {
+        throw DeadlyImportError("GLTF: numComponents ", numComponents, " > targetComponents ", targetComponents, " in ", getContextForErrorMessages(id, name));
+    }
+
+    // Validate buffer bounds
+    const size_t elemSize = GetElementSize();
+    const size_t maxSize = GetMaxByteSize();
+    if (elemSize > maxSize) {
+        throw DeadlyImportError("GLTF: elemSize ", elemSize, " > maxSize ", maxSize, " in ", getContextForErrorMessages(id, name));
+    }
+    const size_t maxCount = (maxSize - elemSize) / stride + 1;
+    if (count > maxCount) {
+        throw DeadlyImportError("GLTF: count ", count, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
+    }
+
+    // Allocate and zero-initialize
+    outData = new TTarget_type[usedCount]();
+
+    // Unified extraction loop. The compiler stamps out optimized versions via the lambda.
+    auto executeExtraction = [&](auto dummyType, auto normalizeFunc) {
+        using SrcType = decltype(dummyType);
+
+        for (size_t i = 0; i < usedCount; ++i) {
+            const size_t srcIdx = remappingIndices ? (*remappingIndices)[i] : i;
+            if (srcIdx >= count) {
+                throw DeadlyImportError("GLTF: index ", srcIdx, " >= count ", count, " in ", getContextForErrorMessages(id, name));
+            }
+            const uint8_t *vptr = data + srcIdx * stride;
+            TScalar *out = reinterpret_cast<TScalar *>(&outData[i]);
+            for (unsigned int c = 0; c < numComponents; ++c) {
+                SrcType val;
+                std::memcpy(&val, vptr + c * sizeof(SrcType), sizeof(SrcType));
+                out[c] = normalizeFunc(val);
+            }
+        }
+    };
+
+    // Default pass-through function for unnormalized types
+    auto no_norm = [](auto v) { return static_cast<TScalar>(v); };
+
+    // Note: glTF 2.0 spec requires clamping signed normalized integers to -1.0
+    // to prevent underflow from the most-negative representable values.
+    switch (componentType) {
+    case ComponentType_BYTE:
+        if (normalized) {
+            executeExtraction(int8_t{}, [](int8_t v) {
+                return std::max(static_cast<TScalar>(v) / static_cast<TScalar>(127.0), static_cast<TScalar>(-1.0));
+            });
+        } else {
+            executeExtraction(int8_t{}, no_norm);
+        }
+        break;
+
+    case ComponentType_UNSIGNED_BYTE:
+        if (normalized) {
+            executeExtraction(uint8_t{}, [](uint8_t v) {
+                return static_cast<TScalar>(v) / static_cast<TScalar>(255.0);
+            });
+        } else {
+            executeExtraction(uint8_t{}, no_norm);
+        }
+        break;
+
+    case ComponentType_SHORT:
+        if (normalized) {
+            executeExtraction(int16_t{}, [](int16_t v) {
+                return std::max(static_cast<TScalar>(v) / static_cast<TScalar>(32767.0), static_cast<TScalar>(-1.0));
+            });
+        } else {
+            executeExtraction(int16_t{}, no_norm);
+        }
+        break;
+
+    case ComponentType_UNSIGNED_SHORT:
+        if (normalized) {
+            executeExtraction(uint16_t{}, [](uint16_t v) {
+                return static_cast<TScalar>(v) / static_cast<TScalar>(65535.0);
+            });
+        } else {
+            executeExtraction(uint16_t{}, no_norm);
+        }
+        break;
+
+    case ComponentType_FLOAT:
+        // FAST PATH: For standard, tightly packed float arrays with exact type matches.
+        if (!remappingIndices && stride == GetElementSize() && sizeof(TTarget_type) == GetElementSize() && !normalized) {
+            std::memcpy(outData, data, usedCount * GetElementSize());
+        } else {
+            executeExtraction(float{}, no_norm);
+        }
+        break;
+
+    default:
+        // Warn on unsupported component types instead of silently copying garbage.
+        DefaultLogger::get()->warn("glTF2: Accessor::ExtractConvertedData - unsupported componentType (",
+                static_cast<int>(componentType), "), returning zeroed data.");
+        break;
+    }
+
     return usedCount;
 }
 
@@ -2223,6 +2344,7 @@ inline void Asset::ReadExtensionsRequired(Document &doc) {
     CHECK_REQUIRED_EXT(KHR_draco_mesh_compression);
     CHECK_REQUIRED_EXT(KHR_texture_basisu);
     CHECK_REQUIRED_EXT(EXT_texture_webp);
+    CHECK_REQUIRED_EXT(KHR_mesh_quantization);
 
 #undef CHECK_REQUIRED_EXT
 }
@@ -2254,6 +2376,7 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_draco_mesh_compression);
     CHECK_EXT(KHR_texture_basisu);
     CHECK_EXT(EXT_texture_webp);
+    CHECK_EXT(KHR_mesh_quantization);
 
 #undef CHECK_EXT
 }

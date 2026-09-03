@@ -714,9 +714,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
             }
 
-            aiFace *faces = nullptr;
-            aiFace *facePtr = nullptr;
-            size_t nFaces = 0;
+            aiFace *faces{nullptr};
+            aiFace *facePtr{nullptr};
+            size_t nFaces{0};
 
             if (useIndexBuffer) {
                 size_t count = indexBuffer.size();
@@ -1721,7 +1721,7 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         void *data = img.StealData();
 
         tex->mFilename = img.name;
-        if (img.name.empty() && img.bufferView != nullptr) {
+        if (img.name.empty() && img.bufferView) {
             tex->mFilename = img.bufferView->name;
         }
         tex->mWidth = static_cast<unsigned int>(length);

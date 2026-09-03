@@ -116,7 +116,13 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
             components |= PLY_EXPORT_HAS_TANGENTS_BITANGENTS;
         }
         for (unsigned int t = 0; m.HasTextureCoords(t); ++t) {
+            if (m.mNumUVComponents[t] != 2 && m.mNumUVComponents[t] != 3) {
+                throw DeadlyExportError("Invalid number of texture coordinates detected: " + std::to_string(m.mNumUVComponents[t]));
+            }
             components |= PLY_EXPORT_HAS_TEXCOORDS << t;
+            if (m.mNumUVComponents[t] > mUVComponents[t]) {
+                mUVComponents[t] = m.mNumUVComponents[t];
+            }
         }
         for (unsigned int t = 0; m.HasVertexColors(t); ++t) {
             components |= PLY_EXPORT_HAS_COLORS << t;
@@ -167,17 +173,20 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     // but in reality most importers only know about vertex positions, normals
     // and texture coordinates).
     for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
-        if (!c) {
-            mOutput << "property " << "uchar" << " red" << endl;
-            mOutput << "property " << "uchar" << " green" << endl;
-            mOutput << "property " << "uchar" << " blue" << endl;
-            mOutput << "property " << "uchar" << " alpha" << endl;
-        } else {
-            mOutput << "property " << "uchar" << " red" << c << endl;
-            mOutput << "property " << "uchar" << " green" << c << endl;
-            mOutput << "property " << "uchar" << " blue" << c << endl;
-            mOutput << "property " << "uchar" << " alpha" << c << endl;
+        const std::string suffix = c ? std::to_string(c) : std::string();
+        mOutput << "property " << typeName << " s" << suffix << endl;
+        mOutput << "property " << typeName << " t" << suffix << endl;
+        if (mUVComponents[c] == 3) {
+            mOutput << "property " << typeName << " w" << suffix << endl;
         }
+    }
+
+    for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
+        const std::string suffix = c ? std::to_string(c) : std::string();
+        mOutput << "property " << "uchar" << " red" << suffix << endl;
+        mOutput << "property " << "uchar" << " green" << suffix << endl;
+        mOutput << "property " << "uchar" << " blue" << suffix << endl;
+        mOutput << "property " << "uchar" << " alpha" << suffix << endl;
     }
 
     if(components & PLY_EXPORT_HAS_TANGENTS_BITANGENTS) {
@@ -238,21 +247,19 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components) {
         }
 
         for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
+            // Always emit exactly as many components as the header declared for this channel.
             if (m->HasTextureCoords(c)) {
-                if (m->mNumUVComponents[c] == 3) {
-                    mOutput <<
-                        " " << m->mTextureCoords[c][i].x <<
-                        " " << m->mTextureCoords[c][i].y <<
-                        " " << m->mTextureCoords[c][i].z;
-                } else if (m->mNumUVComponents[c] == 2) {
-                    mOutput <<
-                        " " << m->mTextureCoords[c][i].x <<
-                        " " << m->mTextureCoords[c][i].y;
-                } else {
-                    throw DeadlyExportError("Invalid number of texture coordinates detected: " + std::to_string(m->mNumUVComponents[c]));
+                mOutput <<
+                    " " << m->mTextureCoords[c][i].x <<
+                    " " << m->mTextureCoords[c][i].y;
+                if (mUVComponents[c] == 3) {
+                    mOutput << " " << m->mTextureCoords[c][i].z;
                 }
             } else {
                 mOutput << " -1.0 -1.0";
+                if (mUVComponents[c] == 3) {
+                    mOutput << " -1.0";
+                }
             }
         }
 
@@ -264,7 +271,7 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components) {
                     " " << (int)(m->mColors[c][i].b * 255) <<
                     " " << (int)(m->mColors[c][i].a * 255);
             } else {
-                mOutput << " 0 0 0";
+                mOutput << " 0 0 0 0";
             }
         }
 
@@ -291,7 +298,7 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
     // If a component (for instance normal vectors) is present in at least one mesh in the scene,
     // then default values are written for meshes that do not contain this component.
     aiVector3D defaultNormal(0, 0, 0);
-    aiVector2D defaultUV(-1, -1);
+    aiVector3D defaultUV(-1, -1, -1);
     aiColor4D defaultColor(-1, -1, -1, -1);
     for (unsigned int i = 0; i < m->mNumVertices; ++i) {
         mOutput.write(reinterpret_cast<const char*>(&m->mVertices[i].x), 12);
@@ -304,10 +311,12 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
         }
 
         for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
+            // Always emit exactly as many components as the header declared for this channel.
+            const std::streamsize uvBytes = static_cast<std::streamsize>(mUVComponents[c] * sizeof(ai_real));
             if (m->HasTextureCoords(c)) {
-                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 8);
+                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), uvBytes);
             } else {
-                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 8);
+                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), uvBytes);
             }
         }
 

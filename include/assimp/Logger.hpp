@@ -231,7 +231,7 @@ protected:
      *  @note  The message string is only valid until the scope of
      *    the function is left.
      */
-    virtual void OnWarn(const char* essage) = 0;
+    virtual void OnWarn(const char* message) = 0;
 
     // ----------------------------------------------------------------------
     /**

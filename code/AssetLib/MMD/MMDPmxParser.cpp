@@ -98,7 +98,7 @@ namespace pmx
 			throw DeadlyImportError("MMD: string size exceeds limit");
 		}
 		
-		size_t sz = static_cast<size_t>(size);
+		auto sz = static_cast<size_t>(size);
 		
 		// FIX 2 & 3: Use std::vector instead of new[], and check for overflow
 		if (encoding == 0) {
@@ -121,12 +121,11 @@ namespace pmx
 			size_t targetSize = sz * 3;
 			std::vector<char> target(targetSize, 0);
 			
-			char* targetEnd = utf8::utf16to8(sourceStart, sourceStart + sz/2, target.data());
+			const char* targetEnd = utf8::utf16to8(sourceStart, sourceStart + sz/2, target.data());
 
 			// FIX 4: Return string with explicit length, not just null-terminated
 			return std::string(target.data(), static_cast<size_t>(targetEnd - target.data()));
-		}
-		else {
+		} else {
 			// UTF8 - use vector instead of new[]
 			std::vector<char> buffer(sz);
 			stream->read(buffer.data(), sz);

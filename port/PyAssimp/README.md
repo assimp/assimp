@@ -90,3 +90,23 @@ TEST
 $ pip install -e ".[test]"
 $ LD_LIBRARY_PATH=/path/to/libassimp pytest
 ```
+
+BUILD AND DEPLOY
+----------------
+
+PyAssimp is a pure-Python package. Wheels do not bundle `libassimp`; users still
+need a matching Assimp shared library at runtime.
+
+Bump `version` in `pyproject.toml` before a release. PyPI does not allow
+replacing an existing version; yank and ship a new version if a bad release
+goes out.
+
+```console
+$ pip install -e ".[release]"
+$ python -m build
+$ twine check dist/*
+$ twine upload dist/*
+```
+
+Upload requires PyPI maintainer access for the `pyassimp` project. Prefer
+Trusted Publishing from CI when that is set up.

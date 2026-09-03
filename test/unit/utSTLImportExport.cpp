@@ -64,6 +64,28 @@ TEST_F(utSTLImporterExporter, importSTLFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+TEST_F(utSTLImporterExporter, importBinarySTLFromFileTest) {
+    // Regression test for issue #5509: binary STL was rejected on big-endian
+    // hosts because the little-endian on-disk facet count and geometry were
+    // read without byte-swapping. Checking concrete counts and coordinates
+    // covers both the facet count and the per-float geometry, so a byte-swap
+    // regression cannot pass silently.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/STL/Spider_binary.stl", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    const aiMesh *mesh = scene->mMeshes[0];
+    EXPECT_EQ(1368u, mesh->mNumFaces);
+    EXPECT_EQ(4104u, mesh->mNumVertices);
+    EXPECT_NEAR(0.90712798f, mesh->mVertices[0].x, 1e-4f);
+    EXPECT_NEAR(0.64616501f, mesh->mVertices[0].y, 1e-4f);
+    EXPECT_NEAR(0.79519337f, mesh->mVertices[0].z, 1e-4f);
+    EXPECT_NEAR(0.46828195f, mesh->mNormals[0].x, 1e-4f);
+    EXPECT_NEAR(-0.86349779f, mesh->mNormals[0].y, 1e-4f);
+    EXPECT_NEAR(-0.18730624f, mesh->mNormals[0].z, 1e-4f);
+}
+
 TEST_F(utSTLImporterExporter, test_multiple) {
     // import same file twice, each with its own importer
     // must work both times and not crash

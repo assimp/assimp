@@ -823,8 +823,18 @@ inline void Accessor::Sparse::PopulateData(size_t numBytes, const uint8_t *bytes
 }
 
 inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
+    if (!indices || !values) {
+        throw DeadlyImportError("Invalid sparse accessor. Missing required indices or values.");
+    }
+
     size_t indicesTailDataSize;
     uint8_t *pIndices = indices->GetPointerAndTailSize(indicesByteOffset, indicesTailDataSize);
+    
+    // GUARD 1: Block pointer arithmetic if indices data stream fails to resolve
+    if (!pIndices) {
+        throw DeadlyImportError("Invalid sparse accessor. Incomplete or missing indices data stream.");
+    }
+
     const unsigned int indexSize = int(ComponentTypeSize(indicesType));
     uint8_t *indicesEnd = pIndices + count * indexSize;
 
@@ -834,6 +844,11 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 
     size_t valuesTailDataSize;
     uint8_t* pValues = values->GetPointerAndTailSize(valuesByteOffset, valuesTailDataSize);
+
+    // GUARD 2: Block memory copying if values data stream fails to resolve
+    if (!pValues) {
+        throw DeadlyImportError("Invalid sparse accessor. Incomplete or missing values data stream.");
+    }
 
     if (elementSize * count > valuesTailDataSize) {
         throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");
@@ -908,36 +923,40 @@ inline void Accessor::Read(Value &obj, Asset &r) {
         ReadMember(*sparseValue, "count", sparse->count);
 
         // indices
-        if (Value *indicesValue = FindObject(*sparseValue, "indices")) {
-            //indices bufferView
-            Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
-            if (!indiceViewID) {
-                throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
-            }
-            sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
-            //indices byteOffset
-            sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
-            //indices componentType
-            sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
-            //sparse->indices->Read(*indicesValue, r);
-        } else {
-            // indicesType
+        Value *indicesValue = FindObject(*sparseValue, "indices");
+        if (!indicesValue) {
+            throw DeadlyImportError("Invalid sparse accessor: missing required 'indices' object.");
+        }
+        
+        // indices bufferView
+        Value *indiceViewID = FindUInt(*indicesValue, "bufferView");
+        if (!indiceViewID) {
+            throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+        }
+        sparse->indices = r.bufferViews.Retrieve(indiceViewID->GetUint());
+        // indices byteOffset
+        sparse->indicesByteOffset = MemberOrDefault(*indicesValue, "byteOffset", size_t(0));
+        // indices componentType
+        sparse->indicesType = MemberOrDefault(*indicesValue, "componentType", ComponentType_BYTE);
+
+        if (!FindUInt(*indicesValue, "componentType")) {
             sparse->indicesType = MemberOrDefault(*sparseValue, "componentType", ComponentType_UNSIGNED_SHORT);
         }
 
-        // value
-        if (Value *valuesValue = FindObject(*sparseValue, "values")) {
-            //value bufferView
-            Value *valueViewID = FindUInt(*valuesValue, "bufferView");
-            if (!valueViewID) {
-                throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
-            }
-            sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
-            //value byteOffset
-            sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
-            //sparse->values->Read(*valuesValue, r);
+        // values
+        Value *valuesValue = FindObject(*sparseValue, "values");
+        if (!valuesValue) {
+            throw DeadlyImportError("Invalid sparse accessor: missing required 'values' object.");
         }
 
+        // value bufferView
+        Value *valueViewID = FindUInt(*valuesValue, "bufferView");
+        if (!valueViewID) {
+            throw DeadlyImportError("A bufferView value is required, when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
+        }
+        sparse->values = r.bufferViews.Retrieve(valueViewID->GetUint());
+        // value byteOffset
+        sparse->valuesByteOffset = MemberOrDefault(*valuesValue, "byteOffset", size_t(0));
 
         const unsigned int elementSize = GetElementSize();
         const size_t dataSize = count * elementSize;
@@ -948,13 +967,13 @@ inline void Accessor::Read(Value &obj, Asset &r) {
                 throw DeadlyImportError("Invalid buffer when reading ", id.c_str(), name.empty() ? "" : " (" + name + ")");
             }
             sparse->PopulateData(dataSize, bufferViewPointer);
-        }
-        else {
+        } else {
             sparse->PopulateData(dataSize, nullptr);
         }
         sparse->PatchData(elementSize);
     }
 }
+
 
 inline unsigned int Accessor::GetNumComponents() {
     return AttribType::GetNumComponents(type);

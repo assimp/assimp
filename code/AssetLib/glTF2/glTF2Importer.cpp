@@ -1035,51 +1035,126 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
     }
-    if (attr.weight[0]->count != attr.joint[0]->count) {
-        return;
+    if (attr.weight.size() != attr.joint.size()) {
+        throw DeadlyImportError("GLTF: JOINTS_n and WEIGHTS_n attribute counts must match");
+    }
+    for (size_t w = 0; w < attr.weight.size(); ++w) {
+        if (attr.weight[w]->count != attr.joint[w]->count) {
+            throw DeadlyImportError("GLTF: JOINTS_n and WEIGHTS_n accessor counts must match");
+        }
+        if (attr.weight[w]->componentType != ComponentType_FLOAT &&
+                attr.weight[w]->componentType != ComponentType_UNSIGNED_BYTE &&
+                attr.weight[w]->componentType != ComponentType_UNSIGNED_SHORT) {
+            throw DeadlyImportError(
+                    "GLTF: unsupported skin weight componentType ", attr.weight[w]->componentType);
+        }
+        if (attr.joint[w]->componentType != ComponentType_UNSIGNED_BYTE &&
+                attr.joint[w]->componentType != ComponentType_UNSIGNED_SHORT &&
+                attr.joint[w]->componentType != ComponentType_UNSIGNED_INT) {
+            throw DeadlyImportError(
+                    "GLTF: unsupported skin joint componentType ", attr.joint[w]->componentType);
+        }
     }
 
-    size_t num_vertices = 0;
+    size_t numVertices = 0;
 
     struct Weights {
         float values[4];
     };
-    Weights **weights = new Weights*[attr.weight.size()];
-    for (size_t w = 0; w < attr.weight.size(); ++w) {
-        num_vertices = attr.weight[w]->ExtractData(weights[w], vertexRemappingTablePtr);
-    }
 
-    struct Indices8 {
-        uint8_t values[4];
-    };
-    struct Indices16 {
-        uint16_t values[4];
-    };
-    Indices8 **indices8 = nullptr;
-    Indices16 **indices16 = nullptr;
-    if (attr.joint[0]->GetElementSize() == 4) {
-        indices8 = new Indices8*[attr.joint.size()];
-        for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices8[j], vertexRemappingTablePtr);
+    auto extractWeights = [vertexRemappingTablePtr](Accessor &accessor, std::unique_ptr<Weights[]> &outWeights) -> size_t {
+        if (accessor.componentType == ComponentType_FLOAT) {
+            Weights *weights = nullptr;
+            const size_t count = accessor.ExtractData(weights, vertexRemappingTablePtr);
+            outWeights.reset(weights);
+            return count;
         }
-    } else {
-        indices16 = new Indices16 *[attr.joint.size()];
-        for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
+
+        auto extractPackedWeights = [&](auto packedZero, float scale) -> size_t {
+            using PackedType = decltype(packedZero);
+            struct PackedWeights {
+                PackedType values[4];
+            };
+            PackedWeights *packedWeights = nullptr;
+            const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
+            outWeights.reset(new Weights[count]);
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
+                }
+            }
+            return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedWeights(uint8_t{}, accessor.normalized ? 1.0f / 255.0f : 1.0f);
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
+            return extractPackedWeights(uint16_t{}, accessor.normalized ? 1.0f / 65535.0f : 1.0f);
+        }
+
+        throw DeadlyImportError("GLTF: unsupported skin weight componentType ", accessor.componentType);
+    };
+
+    struct Indices {
+        unsigned int values[4];
+    };
+
+    auto extractIndices = [vertexRemappingTablePtr](Accessor &accessor, std::vector<Indices> &outIndices) -> size_t {
+        auto extractPackedIndices = [&](auto packedZero) -> size_t {
+            using PackedType = decltype(packedZero);
+            struct PackedIndices {
+                PackedType values[4];
+            };
+            PackedIndices *packedIndices = nullptr;
+            const size_t count = accessor.ExtractData(packedIndices, vertexRemappingTablePtr);
+            std::unique_ptr<PackedIndices[]> packedIndicesPtr(packedIndices);
+            outIndices.resize(count);
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outIndices[i].values[j] = static_cast<unsigned int>(packedIndicesPtr[i].values[j]);
+                }
+            }
+            return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedIndices(uint8_t{});
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
+            return extractPackedIndices(uint16_t{});
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_INT) {
+            return extractPackedIndices(uint32_t{});
+        }
+
+        throw DeadlyImportError("GLTF: unsupported skin joint componentType ", accessor.componentType);
+    };
+
+    std::vector<std::unique_ptr<Weights[]>> weights(attr.weight.size());
+    std::vector<std::vector<Indices>> indices(attr.joint.size());
+    for (size_t w = 0; w < attr.weight.size(); ++w) {
+        const size_t weightCount = extractWeights(*attr.weight[w], weights[w]);
+        const size_t jointCount = extractIndices(*attr.joint[w], indices[w]);
+        if (weightCount != jointCount) {
+            throw DeadlyImportError("GLTF: extracted JOINTS_n and WEIGHTS_n counts must match");
+        }
+        if (w == 0) {
+            numVertices = weightCount;
+        } else if (weightCount != numVertices) {
+            throw DeadlyImportError(
+                    "GLTF: all JOINTS_n and WEIGHTS_n attributes must have the same count");
         }
     }
 
-    // No indices are an invalid usecase
-    if (nullptr == indices8 && nullptr == indices16) {
-        // Something went completely wrong!
-        ai_assert(false);
-        return;
-    }
-
     for (size_t w = 0; w < attr.weight.size(); ++w) {
-        for (size_t i = 0; i < num_vertices; ++i) {
+        for (size_t i = 0; i < numVertices; ++i) {
             for (int j = 0; j < 4; ++j) {
-                const unsigned int bone = (indices8 != nullptr) ? indices8[w][i].values[j] : indices16[w][i].values[j];
+                const unsigned int bone = indices[w][i].values[j];
                 const float weight = weights[w][i].values[j];
                 if (weight > 0 && bone < map.size()) {
                     map[bone].reserve(8);
@@ -1088,17 +1163,6 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             }
         }
     }
-
-    for (size_t w = 0; w < attr.weight.size(); ++w) {
-        delete[] weights[w];
-        if(indices8)
-            delete[] indices8[w];
-        if (indices16)
-            delete[] indices16[w];
-    }
-    delete[] weights;
-    delete[] indices8;
-    delete[] indices16;
 }
 
 static std::string GetNodeName(const Node &node) {

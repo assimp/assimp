@@ -59,6 +59,10 @@ endif()
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
+if(ASSIMP_INSTALL_TESTS)
+  include(GNUInstallDirs)
+endif()
+
 SET(TOOLS
     unit/Tools/TestTools.h
 )
@@ -166,6 +170,7 @@ SET( IMPORTERS
   unit/ImportExport/utMD5Importer.cpp
   unit/ImportExport/utIQMImporter.cpp
   unit/ImportExport/utMDLImporter.cpp
+  unit/ImportExport/IRR/utIrrImportExport.cpp
   unit/ImportExport/MDL/MDLHL1TestFiles.h
   unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
   unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
@@ -280,8 +285,13 @@ ENDIF()
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(unit)
 
-add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
-add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
+if(ASSIMP_INSTALL_TESTS)
+  add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_INSTALL_FULL_DATADIR}/assimp/models")
+  add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_INSTALL_FULL_DATADIR}/assimp/models-nonbsd")
+else()
+  add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+  add_definitions(-DASSIMP_TEST_MODELS_NONBSD_DIR="${CMAKE_CURRENT_LIST_DIR}/models-nonbsd")
+endif()
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
@@ -308,5 +318,14 @@ ENDIF()
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
+
+if(ASSIMP_INSTALL_TESTS)
+  set_target_properties(unit PROPERTIES OUTPUT_NAME "assimp-unit")
+  install(TARGETS unit
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+  install(DIRECTORY models/ DESTINATION ${CMAKE_INSTALL_DATADIR}/assimp/models)
+  install(DIRECTORY models-nonbsd/ DESTINATION ${CMAKE_INSTALL_DATADIR}/assimp/models-nonbsd)
+endif()
 
 add_test( unittests unit )

@@ -156,6 +156,7 @@ private:
     * \param[in,out] value The decompressed anim value at \p frame.
     */
     void extract_anim_value(const AnimValue_HL1 *panimvalue,
+            const HL1DataBuffer &anim_buffer,
             int frame, float bone_scale, ai_real &value);
 
     /**

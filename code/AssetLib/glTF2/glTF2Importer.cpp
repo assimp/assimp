@@ -179,13 +179,17 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             // A change of coordinates is required to map glTF UV transformations into the space used by
             // Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
             // rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
-            // texture origin. All three can be corrected for solely by a change of the translation since
-            // the transformations available are shape preserving. Note the importer already flips the V
-            // coordinate of the actual meshes during import.
-            const ai_real rcos(cos(-transform.mRotation));
-            const ai_real rsin(sin(-transform.mRotation));
-            transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-            transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
+            // texture origin. Furthermore, Assimp's TextureTransformProcess applies translation BEFORE scaling
+            // and rotation, whereas glTF applies translation AFTER scaling and rotation.
+            // Note the importer already flips the V coordinate of the actual meshes during import.
+            const ai_real rcos(std::cos(-transform.mRotation));
+            const ai_real rsin(std::sin(-transform.mRotation));
+            const ai_real Sx = transform.mScaling.x != 0.0 ? transform.mScaling.x : 1.0;
+            const ai_real Sy = transform.mScaling.y != 0.0 ? transform.mScaling.y : 1.0;
+            const ai_real Vx = (prop.TextureTransformExt_t.offset[0] - static_cast<ai_real>(0.5)) / Sx;
+            const ai_real Vy = (prop.TextureTransformExt_t.offset[1] - static_cast<ai_real>(0.5)) / Sy;
+            transform.mTranslation.x = rcos * Vx - rsin * Vy + static_cast<ai_real>(0.5);
+            transform.mTranslation.y = -rsin * Vx - rcos * Vy - static_cast<ai_real>(0.5);
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }

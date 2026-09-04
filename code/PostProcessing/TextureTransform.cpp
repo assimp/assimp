@@ -98,68 +98,73 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info) {
     /* Optimize UV translation in the U direction. To determine whether
      * or not we can optimize we need to look at the requested mapping
      * type (e.g. if mirroring is active there IS a difference between
-     * offset 2 and 3)
+     * offset 2 and 3).
+     * Note: We can ONLY safely simplify translations if there is no scaling or
+     * rotation applied, because Assimp applies translation BEFORE scaling/rotation,
+     * so translations > 1.0 do not necessarily correspond to a full texture wrap.
      */
-    rounded = (int)info.mTranslation.x;
-    if (rounded) {
-        float out = 0.0f;
-        szTemp[0] = 0;
-        if (aiTextureMapMode_Wrap == info.mapU) {
-            // Wrap - simple take the fraction of the field
-            out = info.mTranslation.x-(float)rounded;
-			ai_snprintf(szTemp, 512, "[w] UV U offset %f can be simplified to %f", info.mTranslation.x, out);
-        }
-        else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)  {
-            // Mirror
-            if (rounded % 2)
-                rounded--;
-            out = info.mTranslation.x-(float)rounded;
+    if (info.mScaling.x == 1.0f && info.mScaling.y == 1.0f && info.mRotation == 0.0f) {
+        rounded = (int)info.mTranslation.x;
+        if (rounded) {
+            float out = 0.0f;
+            szTemp[0] = 0;
+            if (aiTextureMapMode_Wrap == info.mapU) {
+                // Wrap - simple take the fraction of the field
+                out = info.mTranslation.x-(float)rounded;
+                ai_snprintf(szTemp, 512, "[w] UV U offset %f can be simplified to %f", info.mTranslation.x, out);
+            }
+            else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)  {
+                // Mirror
+                if (rounded % 2)
+                    rounded--;
+                out = info.mTranslation.x-(float)rounded;
 
-            ai_snprintf(szTemp,512,"[m/d] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
-        }
-        else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)    {
-            // Clamp - translations beyond 1,1 are senseless
-            ai_snprintf(szTemp,512,"[c] UV U offset %f can be clamped to 1.0f",info.mTranslation.x);
+                ai_snprintf(szTemp,512,"[m/d] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
+            }
+            else if (aiTextureMapMode_Clamp == info.mapU || aiTextureMapMode_Decal == info.mapU)    {
+                // Clamp - translations beyond 1,1 are senseless
+                ai_snprintf(szTemp,512,"[c] UV U offset %f can be clamped to 1.0f",info.mTranslation.x);
 
-            out = 1.f;
+                out = 1.f;
+            }
+            if (szTemp[0])      {
+                ASSIMP_LOG_INFO(szTemp);
+                info.mTranslation.x = out;
+            }
         }
-        if (szTemp[0])      {
-            ASSIMP_LOG_INFO(szTemp);
-            info.mTranslation.x = out;
-        }
-    }
 
-    /* Optimize UV translation in the V direction. To determine whether
-     * or not we can optimize we need to look at the requested mapping
-     * type (e.g. if mirroring is active there IS a difference between
-     * offset 2 and 3)
-     */
-    rounded = (int)info.mTranslation.y;
-    if (rounded) {
-        float out = 0.0f;
-        szTemp[0] = 0;
-        if (aiTextureMapMode_Wrap == info.mapV) {
-            // Wrap - simple take the fraction of the field
-            out = info.mTranslation.y-(float)rounded;
-            ::ai_snprintf(szTemp,512,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
-        }
-        else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded) {
-            // Mirror
-            if (rounded % 2)
-                rounded--;
-            out = info.mTranslation.x-(float)rounded;
+        /* Optimize UV translation in the V direction. To determine whether
+         * or not we can optimize we need to look at the requested mapping
+         * type (e.g. if mirroring is active there IS a difference between
+         * offset 2 and 3)
+         */
+        rounded = (int)info.mTranslation.y;
+        if (rounded) {
+            float out = 0.0f;
+            szTemp[0] = 0;
+            if (aiTextureMapMode_Wrap == info.mapV) {
+                // Wrap - simple take the fraction of the field
+                out = info.mTranslation.y-(float)rounded;
+                ::ai_snprintf(szTemp,512,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
+            }
+            else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded) {
+                // Mirror
+                if (rounded % 2)
+                    rounded--;
+                out = info.mTranslation.y-(float)rounded;
 
-            ::ai_snprintf(szTemp,512,"[m/d] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
-        }
-        else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)    {
-            // Clamp - translations beyond 1,1 are senseless
-            ::ai_snprintf(szTemp,512,"[c] UV V offset %f can be clamped to 1.0f",info.mTranslation.y);
+                ::ai_snprintf(szTemp,512,"[m/d] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
+            }
+            else if (aiTextureMapMode_Clamp == info.mapV || aiTextureMapMode_Decal == info.mapV)    {
+                // Clamp - translations beyond 1,1 are senseless
+                ::ai_snprintf(szTemp,512,"[c] UV V offset %f can be clamped to 1.0f",info.mTranslation.y);
 
-            out = 1.f;
-        }
-        if (szTemp[0])  {
-            ASSIMP_LOG_INFO(szTemp);
-            info.mTranslation.y = out;
+                out = 1.f;
+            }
+            if (szTemp[0])  {
+                ASSIMP_LOG_INFO(szTemp);
+                info.mTranslation.y = out;
+            }
         }
     }
 }

@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 
-
 namespace Assimp {
 namespace FBX {
 namespace Util {
@@ -68,7 +67,6 @@ void DOMError(const std::string& message, const Element* element /*= nullptr*/) 
     }
     throw DeadlyImportError("FBX-DOM ", message);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // print warning, do return

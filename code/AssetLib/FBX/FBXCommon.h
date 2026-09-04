@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_FBXCOMMON_H_INC
 #define AI_FBXCOMMON_H_INC
 
+#include <string_view>
+
 #ifndef ASSIMP_BUILD_NO_FBX_EXPORTER
 
 namespace Assimp::FBX {
@@ -58,7 +60,7 @@ constexpr char NULL_RECORD[NumNullRecords] = { // 25 null bytes in 64-bit and 13
 static std::string NULL_RECORD_STRING(NumNullRecords, '\0');
 const std::string SEPARATOR = { '\x00', '\x01' }; // for use inside strings
 const std::string MAGIC_NODE_TAG = "_$AssimpFbx$"; // from import
-const int64_t SECOND = 46186158000; // FBX's kTime unit
+constexpr int64_t SECOND = 46186158000; // FBX's kTime unit
 
 // rotation order. We'll probably use EulerXYZ for everything
 enum RotOrder {

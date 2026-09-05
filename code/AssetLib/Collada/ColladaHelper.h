@@ -593,6 +593,14 @@ struct Animation {
     /// the sub-animations, if any
     std::vector<Animation *> mSubAnims;
 
+    Animation() {}
+
+    Animation(const Animation &)            = delete;
+    Animation &operator=(const Animation &) = delete;
+
+    Animation(Animation &&) noexcept            = default;
+    Animation &operator=(Animation &&) noexcept = default;
+
     /// Destructor
     ~Animation() {
         for (auto it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {

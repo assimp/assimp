@@ -743,10 +743,7 @@ void ColladaParser::PostProcessRootAnimations() {
         }
     }
 
-    mAnims = temp;
-
-    // Ensure no double deletes.
-    temp.mSubAnims.clear();
+    mAnims = std::move(temp);
 }
 
 // ------------------------------------------------------------------------------------------------

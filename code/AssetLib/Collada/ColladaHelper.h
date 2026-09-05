@@ -593,9 +593,17 @@ struct Animation {
     /// the sub-animations, if any
     std::vector<Animation *> mSubAnims;
 
+    Animation() {}
+
+    Animation(const Animation &)            = delete;
+    Animation &operator=(const Animation &) = delete;
+
+    Animation(Animation &&) noexcept            = default;
+    Animation &operator=(Animation &&) noexcept = default;
+
     /// Destructor
     ~Animation() {
-        for (std::vector<Animation *>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
+        for (auto it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
             delete *it;
         }
     }
@@ -604,7 +612,7 @@ struct Animation {
     void CollectChannelsRecursively(std::vector<AnimationChannel> &channels) {
         channels.insert(channels.end(), mChannels.begin(), mChannels.end());
 
-        for (std::vector<Animation *>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
+        for (auto it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
             Animation *pAnim = (*it);
             pAnim->CollectChannelsRecursively(channels);
         }
@@ -619,7 +627,7 @@ struct Animation {
         std::set<std::string> childrenTargets;
         bool childrenAnimationsHaveDifferentChannels = true;
 
-        for (std::vector<Animation *>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
+        for (auto it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
             Animation *anim = *it;
             // Assign the first animation name to the parent if empty.
             // This prevents the animation name from being lost when animations are combined
@@ -640,7 +648,7 @@ struct Animation {
 
         // We only want to combine animations if they have different channels
         if (childrenAnimationsHaveDifferentChannels) {
-            for (std::vector<Animation *>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
+            for (auto it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
                 Animation *anim = *it;
 
                 pParent->mChannels.push_back(anim->mChannels[0]);

@@ -470,6 +470,7 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaParser::~ColladaParser() {
+    // FIXME: some animations in mAnimationLibrary leak
     for (auto &it : mNodeLibrary) {
         delete it.second;
     }
@@ -726,6 +727,7 @@ void ColladaParser::PostProcessRootAnimations() {
     for (auto &it : mAnimationClipLibrary) {
         std::string clipName = it.first;
 
+        // FIXME: this leaks
         auto *clip = new Animation();
         clip->mName = clipName;
 
@@ -741,10 +743,7 @@ void ColladaParser::PostProcessRootAnimations() {
         }
     }
 
-    mAnims = temp;
-
-    // Ensure no double deletes.
-    temp.mSubAnims.clear();
+    mAnims = std::move(temp);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -151,6 +151,8 @@ SET( IMPORTERS
   unit/utBlendImportMaterials.cpp
   unit/utBlenderWork.cpp
   unit/utBVHImportExport.cpp
+  unit/utColladaExport.cpp
+  unit/utColladaImportExport.cpp
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
   unit/utNDOImportExport.cpp
@@ -183,18 +185,6 @@ SET( IMPORTERS
 if(ASSIMP_BUILD_USD_IMPORTER)
   list( APPEND IMPORTERS
     unit/utUSDImport.cpp
-  )
-endif()
-
-if(ASSIMP_BUILD_COLLADA_EXPORTER)
-  list( APPEND IMPORTERS
-    unit/utColladaExport.cpp
-  )
-endif()
-
-if(ASSIMP_BUILD_COLLADA_IMPORTER)
-  list( APPEND IMPORTERS
-    unit/utColladaImportExport.cpp
   )
 endif()
 

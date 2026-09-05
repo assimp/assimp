@@ -240,6 +240,190 @@ TEST_F(utColladaImportExport, importDaeFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+
+TEST_F(utColladaImportExport, importDaeAnims) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/anims_with_full_rotations_between_keys.DAE", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCameras) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCinema4D) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/Cinema4D.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCollada) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/COLLADA.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importTriangulate) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/COLLADA_triangulate.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importConcavePolygon) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/ConcavePolygon.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeEmptyTags) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_emptyTags.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeTriangulate) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_triangulate.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeTristrips) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_tristrips.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeUTF16) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_UTF16LE.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeUTF8) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_UTF8BOM.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCube2UVs) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_with_2UVs.DAE", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importCubeSpecialChars) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cube_xmlspecialchars.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importDuckTriangulate) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/duck_triangulate.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importEarthCylindrical) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/earthCylindrical.DAE", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importKwxport) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/kwxport_test_vcolors.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+#if 0
+// FIXME: disabled because it leaks memory
+
+
+TEST_F(utColladaImportExport, importAnimationLibrary) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/library_animation_clips.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+#endif  // 0
+
+
+TEST_F(utColladaImportExport, importLights) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importRegr01) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/regr01.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importSphere) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/sphere.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importSphereTriangulate) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/sphere_triangulate.dae", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
+TEST_F(utColladaImportExport, importTeapot) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/teapot_instancenodes.DAE", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+}
+
+
 unsigned int GetMeshUseCount(const aiNode *rootNode) {
     unsigned int result = rootNode->mNumMeshes;
     for (unsigned int i = 0; i < rootNode->mNumChildren; ++i) {

@@ -223,7 +223,7 @@ size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string &
 
     // Create format hint.
     constexpr char templateColor[] = "rgba0000";
-    memcpy(converted_texture.FormatHint, templateColor, 8);
+    memcpy(converted_texture.FormatHint, templateColor, sizeof(converted_texture.FormatHint));
     if (!r.empty()) converted_texture.FormatHint[4] = '8';
     if (!g.empty()) converted_texture.FormatHint[5] = '8';
     if (!b.empty()) converted_texture.FormatHint[6] = '8';

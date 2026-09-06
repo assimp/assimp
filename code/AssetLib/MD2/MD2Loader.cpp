@@ -323,7 +323,12 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
         const ai_uint32 MaxNameLength = AI_MAXLEN - 1; // one byte reserved for \0
-        ai_uint32 iLen = static_cast<ai_uint32>(::strlen(pcSkins->name));
+        // pcSkins->name is a fixed-size field copied straight out of the file
+        // buffer with no guarantee of a terminating NUL, so a plain strlen()
+        // can walk past the end of that buffer on a malformed file. Cap the
+        // scan at one less than the field's size, matching how MDCLoader
+        // handles the same kind of fixed-size name field.
+        ai_uint32 iLen = static_cast<ai_uint32>(::strnlen(pcSkins->name, sizeof(pcSkins->name) - 1));
         bool nameTooLong = iLen > MaxNameLength;
 
         if (pcSkins->name[0] && !nameTooLong)

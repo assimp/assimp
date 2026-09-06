@@ -1151,3 +1151,30 @@ TEST_F(utglTF2ImportExport, importMalformedSparseAccessor) {
     std::string errorString = importer.GetErrorString();
     EXPECT_NE(errorString.find("Invalid sparse accessor: missing required 'values' object."), std::string::npos);
 }
+
+TEST_F(utglTF2ImportExport, importMorphingMethodIsSet) {
+    // Issue #5303: glTF morph meshes came back aiMorphingMethod_UNKNOWN because
+    // the importer never assigned mMethod.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/glTF-Sample-Models/AnimatedMorphCube-glTF/AnimatedMorphCube.gltf",
+            aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_NE(0u, scene->mNumMeshes);
+
+    unsigned int meshesWithTargets = 0;
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+        const aiMesh *mesh = scene->mMeshes[i];
+        if (mesh->mNumAnimMeshes == 0) {
+            // A mesh without morph targets keeps the "not determined" value.
+            EXPECT_EQ(aiMorphingMethod_UNKNOWN, mesh->mMethod);
+            continue;
+        }
+        ++meshesWithTargets;
+        // The importer resolves each glTF target to absolute positions
+        // (aiCreateAnimMesh copies the base, then the target's delta is added),
+        // so the targets blend the way aiMorphingMethod_MORPH_NORMALIZED
+        // describes, not as relative offsets.
+        EXPECT_EQ(aiMorphingMethod_MORPH_NORMALIZED, mesh->mMethod);
+    }
+    EXPECT_GT(meshesWithTargets, 0u) << "fixture is expected to carry morph targets";
+}

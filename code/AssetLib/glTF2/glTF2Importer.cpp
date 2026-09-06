@@ -646,6 +646,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
             std::vector<Mesh::Primitive::Target> &targets = prim.targets;
             if (!targets.empty()) {
+                // Each target below is resolved to absolute positions: aiCreateAnimMesh
+                // copies the base mesh and the target's displacement is added on top.
+                // Blending those the way aiMorphingMethod_MORPH_NORMALIZED describes,
+                // base * (1 - sum(w)) + sum(w[i] * target[i]), reproduces glTF's
+                // base + sum(w[i] * displacement[i]) exactly.
+                aim->mMethod = aiMorphingMethod_MORPH_NORMALIZED;
                 aim->mNumAnimMeshes = (unsigned int)targets.size();
                 aim->mAnimMeshes = new aiAnimMesh *[aim->mNumAnimMeshes];
                 std::fill(aim->mAnimMeshes, aim->mAnimMeshes + aim->mNumAnimMeshes, nullptr);

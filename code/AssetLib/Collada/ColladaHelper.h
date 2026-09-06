@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -591,7 +592,7 @@ struct Animation {
     std::vector<AnimationChannel> mChannels;
 
     /// the sub-animations, if any
-    std::vector<Animation *> mSubAnims;
+    std::vector<std::unique_ptr<Animation>> mSubAnims;
 
     Animation() {}
 
@@ -603,9 +604,6 @@ struct Animation {
 
     /// Destructor
     ~Animation() {
-        for (auto it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
-            delete *it;
-        }
     }
 
     /// Collect all channels in the animation hierarchy into a single channel list.
@@ -613,7 +611,7 @@ struct Animation {
         channels.insert(channels.end(), mChannels.begin(), mChannels.end());
 
         for (auto it = mSubAnims.begin(); it != mSubAnims.end(); ++it) {
-            Animation *pAnim = (*it);
+            Animation *pAnim = it->get();
             pAnim->CollectChannelsRecursively(channels);
         }
     }
@@ -628,7 +626,7 @@ struct Animation {
         bool childrenAnimationsHaveDifferentChannels = true;
 
         for (auto it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
-            Animation *anim = *it;
+            Animation *anim = it->get();
             // Assign the first animation name to the parent if empty.
             // This prevents the animation name from being lost when animations are combined
             if (mName.empty()) {
@@ -649,7 +647,7 @@ struct Animation {
         // We only want to combine animations if they have different channels
         if (childrenAnimationsHaveDifferentChannels) {
             for (auto it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();) {
-                Animation *anim = *it;
+                Animation *anim = it->release();
 
                 pParent->mChannels.push_back(anim->mChannels[0]);
 

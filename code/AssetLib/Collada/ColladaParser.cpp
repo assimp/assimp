@@ -470,7 +470,6 @@ ColladaParser::ColladaParser(IOSystem *pIOHandler, const std::string &pFile) :
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 ColladaParser::~ColladaParser() {
-    // FIXME: some animations in mAnimationLibrary leak
     for (auto &it : mNodeLibrary) {
         delete it.second;
     }
@@ -727,11 +726,10 @@ void ColladaParser::PostProcessRootAnimations() {
     for (auto &it : mAnimationClipLibrary) {
         std::string clipName = it.first;
 
-        // FIXME: this leaks
         auto *clip = new Animation();
         clip->mName = clipName;
 
-        temp.mSubAnims.push_back(clip);
+        temp.mSubAnims.push_back(std::unique_ptr<Animation>(clip));
 
         for (const std::string &animationID : it.second) {
             auto animation = mAnimationLibrary.find(animationID);
@@ -793,7 +791,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             if (!anim) {
                 anim = new Animation;
                 anim->mName = animName;
-                pParent->mSubAnims.push_back(anim);
+                pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
             }
 
             // recurse into the sub-element
@@ -826,7 +824,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
         if (nullptr == anim) {
             anim = new Animation;
             anim->mName = animName;
-            pParent->mSubAnims.push_back(anim);
+            pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
         }
 
         for (const auto &channel : channels) {

@@ -369,19 +369,12 @@ TEST_F(utColladaImportExport, importKwxport) {
 }
 
 
-#if 0
-// FIXME: disabled because it leaks memory
-
-
 TEST_F(utColladaImportExport, importAnimationLibrary) {
     Importer importer;
 
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/library_animation_clips.dae", aiProcess_ValidateDataStructure);
     ASSERT_NE(scene, nullptr);
 }
-
-
-#endif  // 0
 
 
 TEST_F(utColladaImportExport, importLights) {

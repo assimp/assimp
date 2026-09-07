@@ -367,6 +367,15 @@ TEST_F(utColladaImportExport, parseInvalid4286) {
     EXPECT_EQ(nullptr, scene);
 }
 
+// This file is invalid, we just want to ensure that the importer is not crashing and not leaking.
+// This was reported as GH#6791. The skin controller references a nonexistent joints source, so
+// CreateMesh throws while BuildHierarchy is still building the node tree.
+TEST_F(utColladaImportExport, parseInvalid6791) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/invalid/cube_skin_controller_unresolved_joints_6791.dae", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
 #endif
 
 class utColladaZaeImportExport : public AbstractImportExportBase {

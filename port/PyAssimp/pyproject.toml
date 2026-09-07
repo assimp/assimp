@@ -17,6 +17,7 @@ dependencies = ["numpy"]
 
 [project.optional-dependencies]
 test = ["pytest>=9"]
+release = ["build", "twine"]
 
 [tool.setuptools]
 packages = ["pyassimp"]

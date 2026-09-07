@@ -334,8 +334,10 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                     // texture coord sets
                     for (unsigned int e = 0; e < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++e) {
                         if (mesh->HasTextureCoords(e)) {
-                            aiVector2D tex = sourceMesh->mTexCoords[e][pf.mIndices[d]];
-                            mesh->mTextureCoords[e][newIndex] = aiVector3D(tex.x, 1.0f - tex.y, 0.0f);
+                            if (pf.mIndices[d] < sourceMesh->mTexCoords[e].size()) {
+                                aiVector2D tex = sourceMesh->mTexCoords[e][pf.mIndices[d]];
+                                mesh->mTextureCoords[e][newIndex] = aiVector3D(tex.x, 1.0f - tex.y, 0.0f);
+                            }
                         }
                     }
                     // vertex color sets

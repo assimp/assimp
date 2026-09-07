@@ -73,12 +73,11 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
-
-// generate bi-tangents from normals and tangents according to spec
-struct Tangent {
-    aiVector3D xyz;
-    ai_real w;
-};
+    // generate bi-tangents from normals and tangents according to spec
+    struct Tangent {
+        aiVector3D xyz;
+        ai_real w;
+    };
 } // namespace
 
 //
@@ -759,9 +758,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
             }
 
-            aiFace *faces = nullptr;
-            aiFace *facePtr = nullptr;
-            size_t nFaces = 0;
+            aiFace *faces{nullptr};
+            aiFace *facePtr{nullptr};
+            size_t nFaces{0};
 
             if (useIndexBuffer) {
                 size_t count = indexBuffer.size();
@@ -1076,7 +1075,6 @@ static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
 }
 
 static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std::vector<aiVertexWeight>> &map, std::vector<unsigned int>* vertexRemappingTablePtr) {
-
     Mesh::Primitive::Attributes &attr = primitive.attributes;
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
@@ -1345,18 +1343,12 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 }
 
 struct AnimationSamplers {
-    AnimationSamplers() :
-            translation(nullptr),
-            rotation(nullptr),
-            scale(nullptr),
-            weight(nullptr) {
-        // empty
-    }
+    AnimationSamplers() = default;
 
-    Animation::Sampler *translation;
-    Animation::Sampler *rotation;
-    Animation::Sampler *scale;
-    Animation::Sampler *weight;
+    Animation::Sampler *translation = nullptr;
+    Animation::Sampler *rotation = nullptr;
+    Animation::Sampler *scale = nullptr;
+    Animation::Sampler *weight = nullptr;
 };
 
 struct vec4f {
@@ -1819,6 +1811,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         void *data = img.StealData();
 
         tex->mFilename = img.name;
+        if (img.name.empty() && img.bufferView) {
+            tex->mFilename = img.bufferView->name;
+        }
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel *>(data);

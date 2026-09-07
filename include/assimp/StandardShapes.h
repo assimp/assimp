@@ -177,7 +177,7 @@ public:
      *  @param radius1 First radius
      *  @param radius2 Second radius
      *  @param tess Number of triangles.
-     *  @param bOpened true for an open cone/cylinder. An open shape has
+     *  @param bOpen true for an open cone/cylinder. An open shape has
      *    no 'end caps'
      *  @param positions Receives output triangles
      */

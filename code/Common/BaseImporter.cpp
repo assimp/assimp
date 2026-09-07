@@ -60,36 +60,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 namespace {
-// Checks whether the passed string is a gcs version.
-bool IsGcsVersion(const std::string &s) {
-    if (s.empty()) return false;
-    return std::all_of(s.cbegin(), s.cend(), [](const char c) {
-        // gcs only permits numeric characters.
-        return std::isdigit(static_cast<int>(c));
-    });
-}
-
-// Removes a possible version hash from a filename, as found for example in
-// gcs uris (e.g. `gs://bucket/model.glb#1234`), see also
-// https://github.com/GoogleCloudPlatform/gsutil/blob/c80f329bc3c4011236c78ce8910988773b2606cb/gslib/storage_url.py#L39.
-std::string StripVersionHash(const std::string &filename) {
-    const std::string::size_type pos = filename.find_last_of('#');
-    // Only strip if the hash is behind a possible file extension and the part
-    // behind the hash is a version string.
-    if (pos != std::string::npos && pos > filename.find_last_of('.') &&
-        IsGcsVersion(filename.substr(pos + 1))) {
-        return filename.substr(0, pos);
+    // Checks whether the passed string is a gcs version.
+    bool IsGcsVersion(const std::string &s) {
+        if (s.empty()) return false;
+        return std::all_of(s.cbegin(), s.cend(), [](const char c) {
+            // gcs only permits numeric characters.
+            return std::isdigit(static_cast<int>(c));
+        });
     }
-    return filename;
-}
+
+    // Removes a possible version hash from a filename, as found for example in
+    // gcs uris (e.g. `gs://bucket/model.glb#1234`), see also
+    // https://github.com/GoogleCloudPlatform/gsutil/blob/c80f329bc3c4011236c78ce8910988773b2606cb/gslib/storage_url.py#L39.
+    std::string StripVersionHash(const std::string &filename) {
+        const std::string::size_type pos = filename.find_last_of('#');
+        // Only strip if the hash is behind a possible file extension and the part
+        // behind the hash is a version string.
+        if (pos != std::string::npos && pos > filename.find_last_of('.') &&
+            IsGcsVersion(filename.substr(pos + 1))) {
+            return filename.substr(0, pos);
+        }
+        return filename;
+    }
 }  // namespace
 
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BaseImporter::BaseImporter() AI_NO_EXCEPT
-        : m_progress() {
+BaseImporter::BaseImporter() AI_NO_EXCEPT : m_progress() {
     // empty
 }
 
@@ -109,13 +108,10 @@ void BaseImporter::UpdateImporterScale(Importer *pImp) {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file and returns the imported data.
 aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSystem *pIOHandler) {
-
     m_progress = pImp->GetProgressHandler();
-    if (nullptr == m_progress) {
+    if (m_progress == nullptr) {
         return nullptr;
     }
-
-    ai_assert(m_progress);
 
     // Gather configuration properties for this run
     SetupProperties(pImp);
@@ -133,7 +129,6 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
         // Calculate import scale hook - required because pImp not available anywhere else
         // passes scale into ScaleProcess
         UpdateImporterScale(pImp);
-
     } catch( const std::exception &err ) {
         // extract error description
         m_ErrorText = err.what();
@@ -495,6 +490,7 @@ struct LoadRequest {
             flags(_flags),
             refCnt(1),
             scene(nullptr),
+            sceneClaimed(false),
             loaded(false),
             id(_id) {
         if (_map) {
@@ -510,6 +506,7 @@ struct LoadRequest {
     unsigned int flags;
     unsigned int refCnt;
     aiScene *scene;
+    bool sceneClaimed;
     bool loaded;
     BatchLoader::PropertyMap map;
     unsigned int id;
@@ -564,7 +561,9 @@ BatchLoader::BatchLoader(IOSystem *pIO, bool validate) {
 BatchLoader::~BatchLoader() {
     // delete all scenes what have not been polled by the user
     for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
-        delete (*it).scene;
+        if (!(*it).sceneClaimed) {
+            delete (*it).scene;
+        }
     }
     delete m_data;
 }
@@ -611,6 +610,7 @@ aiScene *BatchLoader::GetImport(unsigned int which) {
     for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
         if ((*it).id == which && (*it).loaded) {
             aiScene *sc = (*it).scene;
+            (*it).sceneClaimed = true;
             if (!(--(*it).refCnt)) {
                 m_data->requests.erase(it);
             }
@@ -643,6 +643,7 @@ void BatchLoader::LoadAll() {
         }
         m_data->pImporter->ReadFile((*it).file, pp);
         (*it).scene = m_data->pImporter->GetOrphanedScene();
+        (*it).sceneClaimed = false;
         (*it).loaded = true;
 
         ASSIMP_LOG_INFO("%%% END EXTERNAL FILE %%%");

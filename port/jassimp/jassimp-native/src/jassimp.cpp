@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 // Maximum allowed allocation for direct buffers (1 GiB)
 static const size_t JASSIMP_MAX_DIRECT_ALLOC = (1ULL << 30);
@@ -386,21 +387,15 @@ static bool callStaticObject(JNIEnv *env, const char* typeName, const char* meth
 	return true;
 }
 
-static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void* cData, size_t size) {
+// checks that jBuffer is a direct buffer of exactly size bytes and copies cData into it
+static bool copyIntoDirectBuffer(JNIEnv *env, jobject jBuffer, const void* cData, size_t size) {
 	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
 		lprintf("requested buffer copy too large: %llu\n", (unsigned long long)size);
 		return false;
 	}
 
-	jobject jBuffer = nullptr;
-	SmartLocalRef bufferRef(env, jBuffer);
-
-	if (!getField(env, jMesh, jBufferName, "Ljava/nio/ByteBuffer;", jBuffer)) {
-		return false;
-	}
-
-	if (env->GetDirectBufferCapacity(jBuffer) != size) {
-		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
+	if (env->GetDirectBufferCapacity(jBuffer) != (jlong)size) {
+		lprintf("invalid direct buffer, expected %llu, got %lld\n", (unsigned long long)size, (long long)env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -416,9 +411,20 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 		return false;
 	}
 
-	std::copy((char*)cData, (char*)cData + size, (char*)jBufferPtr);
+	std::copy((const char*)cData, (const char*)cData + size, (char*)jBufferPtr);
 
 	return true;
+}
+
+static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void* cData, size_t size) {
+	jobject jBuffer = nullptr;
+	SmartLocalRef bufferRef(env, jBuffer);
+
+	if (!getField(env, jMesh, jBufferName, "Ljava/nio/ByteBuffer;", jBuffer)) {
+		return false;
+	}
+
+	return copyIntoDirectBuffer(env, jBuffer, cData, size);
 }
 
 static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName, int index, void* cData, size_t size) {
@@ -432,31 +438,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 	jobject jBuffer = env->GetObjectArrayElement((jobjectArray) jBufferArray, index);
 	SmartLocalRef bufferRef(env, jBuffer);
 
-	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
-		lprintf("requested buffer copyArray too large: %llu\n", (unsigned long long)size);
-		return false;
-	}
-
-	if (env->GetDirectBufferCapacity(jBuffer) != size) {
-		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
-		return false;
-	}
-
-	if (size == 0) {
-		// empty channel, nothing to copy
-		return true;
-	}
-
-	void* jBufferPtr = env->GetDirectBufferAddress(jBuffer);
-
-	if (jBufferPtr == nullptr) {
-		lprintf("could not access direct buffer\n");
-		return false;
-	}
-
-	std::copy((char*)cData, (char*)cData + size, (char*)jBufferPtr);
-
-	return true;
+	return copyIntoDirectBuffer(env, jBuffer, cData, size);
 }
 
 class JavaIOStream : public Assimp::IOStream {
@@ -595,11 +577,10 @@ public:
     }
     
 	void Close( Assimp::IOStream* pFile) {
-		JavaIOStream* stream = static_cast<JavaIOStream*>(pFile);
+		std::unique_ptr<JavaIOStream> stream(static_cast<JavaIOStream*>(pFile));
 		jvalue params[1];
 		params[0].l = stream->javaObject();
 		callv(mJniEnv, mJavaIOSystem, "jassimp/AiIOSystem", "close", "(Ljassimp/AiIOStream;)V", params);
-		delete stream;
     }
 
 private:

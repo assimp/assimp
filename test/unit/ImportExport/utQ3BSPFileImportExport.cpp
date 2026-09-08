@@ -59,3 +59,11 @@ public:
 TEST_F(utQ3BSPImportExport, importerTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utQ3BSPImportExport, importMalformedLumpOutOfBounds) {
+    // A lump whose iOffset + iSize extends past the loaded file must be rejected
+    // instead of reading off the end of the data buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/malformed_lump_oob.pk3", 0);
+    EXPECT_EQ(nullptr, scene);
+}

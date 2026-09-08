@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/ZipArchiveIOSystem.h>
+#include <assimp/Exceptional.h>
 #include <assimp/ai_assert.h>
 
 namespace Assimp {
@@ -68,9 +69,17 @@ Q3BSPFileParser::Q3BSPFileParser( const std::string &mapName, ZipArchiveIOSystem
 
     m_pModel = new Q3BSPModel;
     m_pModel->m_ModelName = mapName;
-    if ( !parseFile() ) {
+    try {
+        if ( !parseFile() ) {
+            delete m_pModel;
+            m_pModel = nullptr;
+        }
+    } catch ( ... ) {
+        // parseFile() may throw on a malformed file; the destructor does not run
+        // when the constructor exits via an exception, so free the model here.
         delete m_pModel;
         m_pModel = nullptr;
+        throw;
     }
 }
 
@@ -121,6 +130,9 @@ bool Q3BSPFileParser::parseFile() {
     // Imports the dictionary of the level
     getLumps();
 
+    // Reject any lump whose data range lies outside the loaded file
+    validateLumps();
+
     // Count data and prepare model data
     countLumps();
 
@@ -148,6 +160,12 @@ bool Q3BSPFileParser::parseFile() {
 // ------------------------------------------------------------------------------------------------
 bool Q3BSPFileParser::validateFormat()
 {
+    // The file must be large enough to hold the header and the full lump directory,
+    // both of which are read unconditionally below and in getLumps().
+    if ( m_Data.size() < sizeof( sQ3BSPHeader ) + static_cast<size_t>( kMaxLumps ) * sizeof( sQ3BSPLump ) ) {
+        return false;
+    }
+
     sQ3BSPHeader *pHeader = (sQ3BSPHeader*) &m_Data[ 0 ];
     m_sOffset += sizeof( sQ3BSPHeader );
 
@@ -172,6 +190,26 @@ void Q3BSPFileParser::getLumps()
         memcpy( pLump, &m_Data[ Offset ], sizeof( sQ3BSPLump ) );
         Offset += sizeof( sQ3BSPLump );
         m_pModel->m_Lumps[ idx ] = pLump;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void Q3BSPFileParser::validateLumps()
+{
+    ai_assert( nullptr != m_pModel );
+
+    // Lumps actually dereferenced while building the model. Each one's data range
+    // (iOffset .. iOffset + iSize) must stay within the loaded file.
+    static const eLumps usedLumps[] = {
+        kEntities, kTextures, kVertices, kMeshVerts, kFaces, kLightmaps
+    };
+    const size_t dataSize = m_Data.size();
+    for ( const eLumps idx : usedLumps ) {
+        const sQ3BSPLump *lump = m_pModel->m_Lumps[ idx ];
+        if ( lump->iOffset < 0 || lump->iSize < 0 ||
+                static_cast<size_t>( lump->iOffset ) + static_cast<size_t>( lump->iSize ) > dataSize ) {
+            throw DeadlyImportError( "Q3BSP: lump data is outside the file bounds" );
+        }
     }
 }
 
@@ -207,7 +245,9 @@ void Q3BSPFileParser::getIndices()
     size_t Offset = (size_t) lump->iOffset;
     const size_t nIndices = lump->iSize / sizeof( int );
     m_pModel->m_Indices.resize( nIndices );
-    memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], lump->iSize );
+    if ( nIndices > 0 ) {
+        memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], nIndices * sizeof( int ) );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

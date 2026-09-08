@@ -82,3 +82,13 @@ TEST(utMD2Importer, importMalformedZeroNumVertices) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_zero_numvertices.md2", 0);
     ASSERT_EQ(nullptr, scene);
 }
+
+TEST(utMD2Importer, importMalformedUnterminatedSkinName) {
+    // The skin name field is a fixed 64-byte buffer that isn't guaranteed to
+    // contain a NUL terminator. This file fills it entirely with non-NUL
+    // bytes right up against the end of the file's allocated buffer, so a
+    // plain strlen() on it would read past the buffer under ASan.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_unterminated_skin_name.md2", 0);
+    ASSERT_NE(nullptr, scene);
+}

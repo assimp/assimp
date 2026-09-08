@@ -233,6 +233,9 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collada::Node *pNode) {
     // create a node for it
     auto *node = new aiNode();
+    // take ownership while the hierarchy is built: if any of the steps below throws,
+    // the partially built hierarchy is destroyed instead of leaking it
+    std::unique_ptr<aiNode> nodeGuard(node);
 
     // find a name for the new node. It's more complicated than you might think
     node->mName.Set(FindNameForNode(pNode));
@@ -256,7 +259,9 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
     // add children. first the *real* ones
     node->mNumChildren = static_cast<unsigned int>(pNode->mChildren.size() + instances.size());
     if (node->mNumChildren != 0) {
-        node->mChildren = new aiNode * [node->mNumChildren];
+        // zero-initialize the slots: if building one of the children throws, the
+        // destructor must not see uninitialized pointers while deleting the node
+        node->mChildren = new aiNode * [node->mNumChildren]();
     }
 
     for (size_t a = 0; a < pNode->mChildren.size(); ++a) {
@@ -274,7 +279,7 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
     BuildCamerasForNode(pParser, pNode, node);
     BuildLightsForNode(pParser, pNode, node);
 
-    return node;
+    return nodeGuard.release();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -508,7 +513,7 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
 
             if (table && !table->mMap.empty()) {
                 if (matIdx < newMats.size()) {
-                    std::pair<Collada::Effect *, aiMaterial *> &mat = newMats[matIdx];
+                    auto &mat = newMats[matIdx];
 
                     // Iterate through all texture channels assigned to the effect and
                     // check whether we have mapping information for it.
@@ -938,7 +943,7 @@ void ColladaLoader::StoreSceneMaterials(aiScene *pScene) {
     }
     pScene->mMaterials = new aiMaterial *[newMats.size()];
     for (unsigned int i = 0; i < newMats.size(); ++i) {
-        pScene->mMaterials[i] = newMats[i].second;
+        pScene->mMaterials[i] = newMats[i].second.release();
     }
     newMats.clear();
 }
@@ -1670,7 +1675,7 @@ void ColladaLoader::BuildMaterials(ColladaParser &pParser, aiScene * /*pScene*/)
 
         // store the material
         mMaterialIndexByName[matIt->first] = newMats.size();
-        newMats.emplace_back(&effect, mat);
+        newMats.emplace_back(&effect, std::unique_ptr<aiMaterial>(mat));
     }
     // ScenePreprocessor generates a default material automatically if none is there.
     // All further code here in this loader works well without a valid material so

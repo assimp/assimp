@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include <assimp/BaseImporter.h>
 
+#include <memory>
+
 struct aiNode;
 struct aiCamera;
 struct aiLight;
@@ -212,7 +214,7 @@ private:
     std::vector<aiMesh *> mTargetMeshes;
 
     /** Temporary material list */
-    std::vector<std::pair<Collada::Effect *, aiMaterial *>> newMats;
+    std::vector<std::pair<Collada::Effect *, std::unique_ptr<aiMaterial>>> newMats;
 
     /** Temporary camera list */
     std::vector<aiCamera *> mCameras;

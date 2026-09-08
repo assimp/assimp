@@ -387,6 +387,11 @@ static bool callStaticObject(JNIEnv *env, const char* typeName, const char* meth
 }
 
 static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void* cData, size_t size) {
+	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
+		lprintf("requested buffer copy too large: %llu\n", (unsigned long long)size);
+		return false;
+	}
+
 	jobject jBuffer = nullptr;
 	SmartLocalRef bufferRef(env, jBuffer);
 
@@ -399,20 +404,15 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 		return false;
 	}
 
+	if (size == 0) {
+		// empty channel, nothing to copy
+		return true;
+	}
+
 	void* jBufferPtr = env->GetDirectBufferAddress(jBuffer);
 
 	if (jBufferPtr == nullptr) {
 		lprintf("could not access direct buffer\n");
-		return false;
-	}
-
-	if (size == 0) {
-		lprintf("refusing zero-length buffer copy\n");
-		return false;
-	}
-
-	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
-		lprintf("requested buffer copy too large: %llu\n", (unsigned long long)size);
 		return false;
 	}
 
@@ -432,11 +432,6 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 	jobject jBuffer = env->GetObjectArrayElement((jobjectArray) jBufferArray, index);
 	SmartLocalRef bufferRef(env, jBuffer);
 
-	if (size == 0) {
-		lprintf("refusing zero-length buffer copyArray\n");
-		return false;
-	}
-
 	if (size > JASSIMP_MAX_DIRECT_ALLOC) {
 		lprintf("requested buffer copyArray too large: %llu\n", (unsigned long long)size);
 		return false;
@@ -445,6 +440,11 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 	if (env->GetDirectBufferCapacity(jBuffer) != size) {
 		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
+	}
+
+	if (size == 0) {
+		// empty channel, nothing to copy
+		return true;
 	}
 
 	void* jBufferPtr = env->GetDirectBufferAddress(jBuffer);
@@ -464,21 +464,15 @@ public:
 	JavaIOStream(size_t size_, std::vector<char>&& buffer_, jobject jIOStream_) :
 			size(size_),
 			bufferVec(std::move(buffer_)),
-			buffer(bufferVec.data()),
 			jIOStream(jIOStream_) {
 		// empty
 	}
-
-
-    ~JavaIOStream() {
-    	// buffer owned by bufferVec, freed automatically
-    }
 
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount) {
     	const size_t cnt = std::min(pCount,(size - pos)/pSize);
 		const size_t ofs = pSize*cnt;
 
-		std::copy((char*)buffer + pos, (char*)buffer + pos + ofs, (char*)pvBuffer);
+		std::copy(bufferVec.data() + pos, bufferVec.data() + pos + ofs, (char*)pvBuffer);
 	    pos += ofs;
 
 	    return cnt;
@@ -527,9 +521,7 @@ public:
 private:
 	size_t pos{0};
 	size_t size{0};
-	// buffer owned as a std::vector<char>
 	std::vector<char> bufferVec;
-	char* buffer{nullptr};
 	jobject jIOStream;
 };
 
@@ -566,12 +558,12 @@ public:
 		int sizeInt = calli(mJniEnv, jStream, "jassimp/AiIOStream", "getFileSize", "()I");
 		if (sizeInt <= 0) {
 			lprintf("invalid or empty model file size: %d\n", sizeInt);
-			return NULL;
+			return nullptr;
 		}
 
 		if ((size_t)sizeInt > JASSIMP_MAX_DIRECT_ALLOC) {
 			lprintf("model file too large: %d\n", sizeInt);
-			return NULL;
+			return nullptr;
 		}
 
 		size_t size = (size_t) sizeInt;
@@ -587,6 +579,10 @@ public:
 		}
 
 		jobject javaBuffer = mJniEnv->NewDirectByteBuffer(bufferVec.data(), size);
+		if (javaBuffer == nullptr) {
+			lprintf("could not wrap model buffer for AiIOStream.read\n");
+			return nullptr;
+		}
 
 	    jvalue readParams[1];
 	    readParams[0].l = javaBuffer;
@@ -599,10 +595,11 @@ public:
     }
     
 	void Close( Assimp::IOStream* pFile) {
+		JavaIOStream* stream = static_cast<JavaIOStream*>(pFile);
 		jvalue params[1];
-		params[0].l = ((JavaIOStream*) pFile)->javaObject();
+		params[0].l = stream->javaObject();
 		callv(mJniEnv, mJavaIOSystem, "jassimp/AiIOSystem", "close", "(Ljassimp/AiIOStream;)V", params);
-    	delete pFile;
+		delete stream;
     }
 
 private:
@@ -700,8 +697,15 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 			}
 		}
 
-		if (faceBufferSize == 0 || faceBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
-			lprintf("invalid face buffer size: %zu\n", faceBufferSize);
+		if (faceBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+			lprintf("face buffer too large: %zu\n", faceBufferSize);
+			return false;
+		}
+
+		// validate the vertex buffer size before the java side allocates it
+		size_t vertBufferSize;
+		if (!SafeMultiply((size_t)cMesh->mNumVertices, sizeof(aiVector3D), vertBufferSize) || vertBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
+			lprintf("vertex buffer size overflow or too large\n");
 			return false;
 		}
 
@@ -717,12 +721,6 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 		if (cMesh->mNumVertices > 0) {
 			// push vertex data to java
-			size_t vertBufferSize;
-			if (!SafeMultiply((size_t)cMesh->mNumVertices, sizeof(aiVector3D), vertBufferSize) || vertBufferSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("vertex buffer size overflow or too large\n");
-				return false;
-			}
-
 			if (!copyBuffer(env, jMesh, "m_vertices", cMesh->mVertices, vertBufferSize)) {
 				lprintf("could not copy vertex data\n");
 				return false;
@@ -930,7 +928,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 				for (unsigned int v = 0; v < cMesh->mNumVertices; v++) {
 					float* dstf = reinterpret_cast<float*>(coordBuffer) + (coordBufferOffset / sizeof(float));
-					float* srcf = const_cast<float*>(&cMesh->mTextureCoords[c][v][0]);
+					const float* srcf = &cMesh->mTextureCoords[c][v][0];
 					size_t ncomp = (size_t)cMesh->mNumUVComponents[c];
 					std::copy(srcf, srcf + ncomp, dstf);
 					coordBufferOffset += ncomp * sizeof(float);
@@ -959,7 +957,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		for (unsigned int b = 0; b < cMesh->mNumBones; b++) {
 			aiBone *cBone = cMesh->mBones[b];
 
-			jobject jBone;
+			jobject jBone = nullptr;
 			SmartLocalRef refBone(env, jBone);
 			if (!createInstance(env, "jassimp/AiBone", jBone)) {
 				return false;
@@ -987,7 +985,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 			// add bone weights
 			for (unsigned int w = 0; w < cBone->mNumWeights; w++) {
-				jobject jBoneWeight;
+				jobject jBoneWeight = nullptr;
 				SmartLocalRef refBoneWeight(env, jBoneWeight);
 				if (!createInstance(env, "jassimp/AiBoneWeight", jBoneWeight)) {
 					return false;
@@ -1007,7 +1005,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 				jvalue wrapParams[1];
 				wrapParams[0].l = jMatrixArr;
-				jobject jMatrix;
+				jobject jMatrix = nullptr;
 				SmartLocalRef refMatrix(env, jMatrix);
 
 				if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix)) {
@@ -1200,7 +1198,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 
 	jvalue wrapMatParams[1];
 	wrapMatParams[0].l = jMatrixArr;
-	jobject jMatrix;
+	jobject jMatrix = nullptr;
 	SmartLocalRef refMatrix(env, jMatrix);
 
 	if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix)) {
@@ -1216,6 +1214,10 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 
 	jintArray jMeshrefArr = env->NewIntArray(cNode->mNumMeshes);
 	SmartLocalRef refMeshrefArr(env, jMeshrefArr);
+	if (jMeshrefArr == nullptr) {
+		lprintf("could not allocate mesh reference array\n");
+		return false;
+	}
 
 	std::vector<jint> tempVec(cNode->mNumMeshes);
 
@@ -1266,7 +1268,7 @@ static bool loadSceneGraph(JNIEnv *env, const aiScene* cScene, jobject& jScene) 
 	lprintf("converting scene graph ...\n");
 
 	if (cScene->mRootNode != nullptr) {
-		jobject jRoot;
+		jobject jRoot = nullptr;
 		SmartLocalRef refRoot(env, jRoot);
 
 		if (!loadSceneNode(env, cScene->mRootNode, nullptr, &jRoot)) {
@@ -1459,8 +1461,8 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 					return false;
 				}
 
-				if (cProperty->mDataLength == 0 || (size_t)cProperty->mDataLength > JASSIMP_MAX_DIRECT_ALLOC) {
-					lprintf("property data length invalid or too large: %u\n", cProperty->mDataLength);
+				if ((size_t)cProperty->mDataLength > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("property data too large: %u\n", cProperty->mDataLength);
 					return false;
 				}
 				std::copy((char*)cProperty->mData, (char*)cProperty->mData + cProperty->mDataLength, (char*)jBufferPtr);
@@ -1494,7 +1496,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene) 
 
 		lprintf("   converting animation %s ...\n", cAnimation->mName.C_Str());
 
-		jobject jAnimation;
+		jobject jAnimation = nullptr;
 		SmartLocalRef refAnimation(env, jAnimation);
 
 		jvalue newAnimParams[3];
@@ -1525,7 +1527,26 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene) 
 		for (unsigned int c = 0; c < cAnimation->mNumChannels; c++) {
 			const aiNodeAnim *cNodeAnim = cAnimation->mChannels[c];
 
-			jobject jNodeAnim;
+			// validate the key buffer sizes before the java side allocates them
+			size_t posKeysSize;
+			if (!SafeMultiply((size_t)cNodeAnim->mNumPositionKeys, sizeof(aiVectorKey), posKeysSize) || posKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("position keys buffer size overflow or too large\n");
+				return false;
+			}
+
+			size_t rotKeysSize;
+			if (!SafeMultiply((size_t)cNodeAnim->mNumRotationKeys, sizeof(aiQuatKey), rotKeysSize) || rotKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("rotation keys buffer size overflow or too large\n");
+				return false;
+			}
+
+			size_t scaleKeysSize;
+			if (!SafeMultiply((size_t)cNodeAnim->mNumScalingKeys, sizeof(aiVectorKey), scaleKeysSize) || scaleKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("scaling keys buffer size overflow or too large\n");
+				return false;
+			}
+
+			jobject jNodeAnim = nullptr;
 			SmartLocalRef refNodeAnim(env, jNodeAnim);
 
 			jvalue newNodeAnimParams[6];
@@ -1557,29 +1578,14 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene) 
 			}
 
 			// copy keys
-			size_t posKeysSize;
-			if (!SafeMultiply((size_t)cNodeAnim->mNumPositionKeys, sizeof(aiVectorKey), posKeysSize) || posKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("position keys buffer size overflow or too large\n");
-				return false;
-			}
 			if (!copyBuffer(env, jNodeAnim, "m_posKeys", cNodeAnim->mPositionKeys, posKeysSize)) {
 				return false;
 			}
 
-			size_t rotKeysSize;
-			if (!SafeMultiply((size_t)cNodeAnim->mNumRotationKeys, sizeof(aiQuatKey), rotKeysSize) || rotKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("rotation keys buffer size overflow or too large\n");
-				return false;
-			}
 			if (!copyBuffer(env, jNodeAnim, "m_rotKeys", cNodeAnim->mRotationKeys, rotKeysSize)) {
 				return false;
 			}
 
-			size_t scaleKeysSize;
-			if (!SafeMultiply((size_t)cNodeAnim->mNumScalingKeys, sizeof(aiVectorKey), scaleKeysSize) || scaleKeysSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("scaling keys buffer size overflow or too large\n");
-				return false;
-			}
 			if (!copyBuffer(env, jNodeAnim, "m_scaleKeys", cNodeAnim->mScalingKeys, scaleKeysSize)) {
 				return false;
 			}
@@ -1604,7 +1610,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapColorParams[0].f = cLight->mColorDiffuse.r;
 		wrapColorParams[1].f = cLight->mColorDiffuse.g;
 		wrapColorParams[2].f = cLight->mColorDiffuse.b;
-		jobject jDiffuse;
+		jobject jDiffuse = nullptr;
 		SmartLocalRef refDiffuse(env, jDiffuse);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse)) {
 			return false;
@@ -1613,7 +1619,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapColorParams[0].f = cLight->mColorSpecular.r;
 		wrapColorParams[1].f = cLight->mColorSpecular.g;
 		wrapColorParams[2].f = cLight->mColorSpecular.b;
-		jobject jSpecular;
+		jobject jSpecular = nullptr;
 		SmartLocalRef refSpecular(env, jSpecular);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular)) {
 			return false;
@@ -1622,7 +1628,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapColorParams[0].f = cLight->mColorAmbient.r;
 		wrapColorParams[1].f = cLight->mColorAmbient.g;
 		wrapColorParams[2].f = cLight->mColorAmbient.b;
-		jobject jAmbient;
+		jobject jAmbient = nullptr;
 		SmartLocalRef refAmbient(env, jAmbient);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient)) {
 			return false;
@@ -1633,7 +1639,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapVec3Params[0].f = cLight->mPosition.x;
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
-		jobject jPosition;
+		jobject jPosition = nullptr;
 		SmartLocalRef refPosition(env, jPosition);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition)) {
 			return false;
@@ -1642,13 +1648,13 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapVec3Params[0].f = cLight->mPosition.x;
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
-		jobject jDirection;
+		jobject jDirection = nullptr;
 		SmartLocalRef refDirection(env, jDirection);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection)) {
 			return false;
 		}
 
-		jobject jLight;
+		jobject jLight = nullptr;
 		SmartLocalRef refLight(env, jLight);
 		jvalue params[12];
 		jstring lightName = env->NewStringUTF(cLight->mName.C_Str());
@@ -1704,7 +1710,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapPositionParams[0].f = cCamera->mPosition.x;
 		wrapPositionParams[1].f = cCamera->mPosition.y;
 		wrapPositionParams[2].f = cCamera->mPosition.z;
-		jobject jPosition;
+		jobject jPosition = nullptr;
 		SmartLocalRef refPosition(env, jPosition);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition)) {
 			return false;
@@ -1713,7 +1719,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapPositionParams[0].f = cCamera->mUp.x;
 		wrapPositionParams[1].f = cCamera->mUp.y;
 		wrapPositionParams[2].f = cCamera->mUp.z;
-		jobject jUp;
+		jobject jUp = nullptr;
 		SmartLocalRef refUp(env, jUp);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp)) {
 			return false;
@@ -1722,13 +1728,13 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		wrapPositionParams[0].f = cCamera->mLookAt.x;
 		wrapPositionParams[1].f = cCamera->mLookAt.y;
 		wrapPositionParams[2].f = cCamera->mLookAt.z;
-		jobject jLookAt;
+		jobject jLookAt = nullptr;
 		SmartLocalRef refLookAt(env, jLookAt);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt)) {
 			return false;
 		}
 
-		jobject jCamera;
+		jobject jCamera = nullptr;
 		SmartLocalRef refCamera(env, jCamera);
 
 		jvalue params[8];
@@ -1845,31 +1851,38 @@ JNIEXPORT jobject JNICALL Java_jassimp_Jassimp_aiImportFile
 		goto error;
 	}
 
-	if (!createInstance(env, "jassimp/AiScene", jScene)) {
-		goto error;
-	}
+	// the conversion allocates native buffers, keep a failed allocation
+	// from unwinding through the JNI boundary
+	try {
+		if (!createInstance(env, "jassimp/AiScene", jScene)) {
+			goto error;
+		}
 
-	if (!loadMeshes(env, cScene, jScene)) {
-		goto error;
-	}
+		if (!loadMeshes(env, cScene, jScene)) {
+			goto error;
+		}
 
-	if (!loadMaterials(env, cScene, jScene)) {
-		goto error;
-	}
+		if (!loadMaterials(env, cScene, jScene)) {
+			goto error;
+		}
 
-	if (!loadAnimations(env, cScene, jScene)) {
-		goto error;
-	}
+		if (!loadAnimations(env, cScene, jScene)) {
+			goto error;
+		}
 
-	if (!loadLights(env, cScene, jScene)) {
-		goto error;
-	}
+		if (!loadLights(env, cScene, jScene)) {
+			goto error;
+		}
 
-	if (!loadCameras(env, cScene, jScene)) {
-		goto error;
-	}
+		if (!loadCameras(env, cScene, jScene)) {
+			goto error;
+		}
 
-	if (!loadSceneGraph(env, cScene, jScene)) {
+		if (!loadSceneGraph(env, cScene, jScene)) {
+			goto error;
+		}
+	} catch (const std::bad_alloc&) {
+		lprintf("out of memory while converting the scene\n");
 		goto error;
 	}
 

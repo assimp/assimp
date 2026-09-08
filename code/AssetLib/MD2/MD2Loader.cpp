@@ -308,8 +308,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     const int iMode = (int)aiShadingMode_Gouraud;
     pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
-    if (m_pcHeader->numTexCoords && m_pcHeader->numSkins)
-    {
+    if (m_pcHeader->numTexCoords && m_pcHeader->numSkins) {
         // navigate to the first texture associated with the mesh
         const MD2::Skin* pcSkins = (const MD2::Skin*) ((unsigned char*)m_pcHeader +
             m_pcHeader->offsetSkins);
@@ -328,26 +327,22 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         // can walk past the end of that buffer on a malformed file. Cap the
         // scan at one less than the field's size, matching how MDCLoader
         // handles the same kind of fixed-size name field.
-        ai_uint32 iLen = static_cast<ai_uint32>(::strnlen(pcSkins->name, sizeof(pcSkins->name) - 1));
+        auto iLen = static_cast<ai_uint32>(::strnlen(pcSkins->name, sizeof(pcSkins->name) - 1));
         bool nameTooLong = iLen > MaxNameLength;
 
-        if (pcSkins->name[0] && !nameTooLong)
-        {
+        if (pcSkins->name[0] && !nameTooLong) {
             aiString szString;
             ::memcpy(szString.data, pcSkins->name, iLen);
             szString.data[iLen] = '\0';
             szString.length = iLen;
 
             pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
-        }
-        else if (nameTooLong) {
+        } else if (nameTooLong) {
             ASSIMP_LOG_WARN("Texture file name is too long. It will be skipped.");
-        }
-        else{
+        } else{
             ASSIMP_LOG_WARN("Texture file name has zero length. It will be skipped.");
         }
-    }
-    else    {
+    } else {
         // apply a default material
         aiColor3D clr;
         clr.b = clr.g = clr.r = 0.6f;
@@ -369,11 +364,11 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         pcHelper->AddProperty(&sz,AI_MATKEY_TEXTURE_DIFFUSE(0));
     }
 
-
     // now read all triangles of the first frame, apply scaling and translation
     unsigned int iCurrent = 0;
 
-    float fDivisorU = 1.0f,fDivisorV = 1.0f;
+    float fDivisorU = 1.0f;
+	float fDivisorV = 1.0f;
     if (m_pcHeader->numTexCoords)   {
         // allocate storage for texture coordinates, too
         pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];

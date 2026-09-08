@@ -94,6 +94,10 @@ bool Q3BSPFileParser::readData( const std::string &rMapName ) {
         return false;
 
     const size_t size = pMapFile->FileSize();
+    if ( size == 0 ) {
+        m_pZipArchive->Close( pMapFile );
+        return false;
+    }
     m_Data.resize( size );
 
     const size_t readSize = pMapFile->Read( &m_Data[0], sizeof( char ), size );
@@ -120,6 +124,10 @@ bool Q3BSPFileParser::parseFile() {
 
     // Imports the dictionary of the level
     getLumps();
+
+    if ( !validateLumps() ) {
+        return false;
+    }
 
     // Count data and prepare model data
     countLumps();
@@ -148,6 +156,11 @@ bool Q3BSPFileParser::parseFile() {
 // ------------------------------------------------------------------------------------------------
 bool Q3BSPFileParser::validateFormat()
 {
+    const size_t directorySize = sizeof( sQ3BSPHeader ) + kMaxLumps * sizeof( sQ3BSPLump );
+    if ( m_Data.size() < directorySize ) {
+        return false;
+    }
+
     sQ3BSPHeader *pHeader = (sQ3BSPHeader*) &m_Data[ 0 ];
     m_sOffset += sizeof( sQ3BSPHeader );
 
@@ -159,6 +172,31 @@ bool Q3BSPFileParser::validateFormat()
     }
 
     return true;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool Q3BSPFileParser::validateLumps() const {
+    for ( const sQ3BSPLump *lump : m_pModel->m_Lumps ) {
+        if ( lump->iOffset < 0 || lump->iSize < 0 ) {
+            return false;
+        }
+
+        const size_t offset = static_cast<size_t>( lump->iOffset );
+        const size_t size = static_cast<size_t>( lump->iSize );
+        if ( offset > m_Data.size() || size > m_Data.size() - offset ) {
+            return false;
+        }
+    }
+
+    const auto hasAlignedSize = [this]( size_t index, size_t elementSize ) {
+        return static_cast<size_t>( m_pModel->m_Lumps[ index ]->iSize ) % elementSize == 0;
+    };
+
+    return hasAlignedSize( kVertices, sizeof( sQ3BSPVertex ) ) &&
+            hasAlignedSize( kMeshVerts, sizeof( int ) ) &&
+            hasAlignedSize( kFaces, sizeof( sQ3BSPFace ) ) &&
+            hasAlignedSize( kTextures, sizeof( sQ3BSPTexture ) ) &&
+            hasAlignedSize( kLightmaps, sizeof( sQ3BSPLightmap ) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -207,7 +245,9 @@ void Q3BSPFileParser::getIndices()
     size_t Offset = (size_t) lump->iOffset;
     const size_t nIndices = lump->iSize / sizeof( int );
     m_pModel->m_Indices.resize( nIndices );
-    memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], lump->iSize );
+    if ( lump->iSize > 0 ) {
+        memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], lump->iSize );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

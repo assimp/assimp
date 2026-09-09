@@ -918,9 +918,12 @@ void glTFExporter::ExportMetadata()
 // Fall back to treating ticks as seconds, the same way the FBX exporter does.
 static float GetSafeTicksPerSecond(const aiAnimation* anim)
 {
-    // Classify after the narrowing cast so a double that underflows to 0.0f is caught too.
+    // Compare after the narrowing cast so a double that underflows to 0.0f is caught too.
+    // isfinite() first rejects NaN and the infinities; <= 0 then rejects both zeroes AND
+    // negatives, which are finite and non-zero and would otherwise turn positive source
+    // key times into negative glTF timestamps.
     const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
-    if (FP_ZERO == std::fpclassify(ticksPerSecond) || !std::isfinite(ticksPerSecond)) {
+    if (!std::isfinite(ticksPerSecond) || ticksPerSecond <= 0.0f) {
         return 1.0f;
     }
 

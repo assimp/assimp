@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <array>
 #include <cmath>
+#include <memory>
 #include <fstream>
 #include <sstream>
 
@@ -797,6 +798,30 @@ TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
 }
 
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
+// Every exported key time must be finite AND non-negative. Source ticks are
+// non-negative, so a negative timestamp means the tick rate was applied with the
+// wrong sign rather than rejected.
+static void ExpectSaneKeyTimes(const aiScene *exported) {
+    for (unsigned int animIndex = 0; animIndex < exported->mNumAnimations; ++animIndex) {
+        const aiAnimation *anim = exported->mAnimations[animIndex];
+        for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
+            const aiNodeAnim *channel = anim->mChannels[channelIndex];
+            for (unsigned int i = 0; i < channel->mNumPositionKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mPositionKeys[i].mTime));
+                EXPECT_GE(channel->mPositionKeys[i].mTime, 0.0);
+            }
+            for (unsigned int i = 0; i < channel->mNumRotationKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mRotationKeys[i].mTime));
+                EXPECT_GE(channel->mRotationKeys[i].mTime, 0.0);
+            }
+            for (unsigned int i = 0; i < channel->mNumScalingKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mScalingKeys[i].mTime));
+                EXPECT_GE(channel->mScalingKeys[i].mTime, 0.0);
+            }
+        }
+    }
+}
+
 TEST_F(utglTF2ImportExport, export_animation_without_tick_rate) {
     // 3DS carries no tick rate, so aiAnimation::mTicksPerSecond stays at its default 0.
     // The exporter divides keyframe times by it to convert ticks to seconds, which used
@@ -816,21 +841,33 @@ TEST_F(utglTF2ImportExport, export_animation_without_tick_rate) {
     ASSERT_NE(nullptr, exported);
     ASSERT_NE(0u, exported->mNumAnimations);
 
-    for (unsigned int animIndex = 0; animIndex < exported->mNumAnimations; ++animIndex) {
-        const aiAnimation *anim = exported->mAnimations[animIndex];
-        for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
-            const aiNodeAnim *channel = anim->mChannels[channelIndex];
-            for (unsigned int i = 0; i < channel->mNumPositionKeys; ++i) {
-                EXPECT_TRUE(std::isfinite(channel->mPositionKeys[i].mTime));
-            }
-            for (unsigned int i = 0; i < channel->mNumRotationKeys; ++i) {
-                EXPECT_TRUE(std::isfinite(channel->mRotationKeys[i].mTime));
-            }
-            for (unsigned int i = 0; i < channel->mNumScalingKeys; ++i) {
-                EXPECT_TRUE(std::isfinite(channel->mScalingKeys[i].mTime));
-            }
-        }
-    }
+    ExpectSaneKeyTimes(exported);
+}
+
+TEST_F(utglTF2ImportExport, export_animation_with_negative_tick_rate) {
+    // A negative tick rate is finite and non-zero, so it slipped past a guard that
+    // only rejected zero and the non-finite values -- and turned positive source key
+    // times into negative glTF timestamps.
+    Assimp::Importer importer;
+    ASSERT_NE(nullptr, importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube.3DS",
+                                         aiProcess_ValidateDataStructure));
+    // GetOrphanedScene() hands over a mutable scene the caller owns, which is the only
+    // way to set a tick rate no importer in the tree produces.
+    std::unique_ptr<aiScene> scene(importer.GetOrphanedScene());
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    scene->mAnimations[0]->mTicksPerSecond = -30.0;
+
+    const char *outPath = ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube_negative_out.gltf";
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene.get(), "gltf2", outPath));
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFile(outPath, aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, exported);
+    ASSERT_NE(0u, exported->mNumAnimations);
+
+    ExpectSaneKeyTimes(exported);
 }
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 

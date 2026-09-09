@@ -729,7 +729,7 @@ void ColladaParser::PostProcessRootAnimations() {
         auto *clip = new Animation();
         clip->mName = clipName;
 
-        temp.mSubAnims.push_back(clip);
+        temp.mSubAnims.push_back(std::unique_ptr<Animation>(clip));
 
         for (const std::string &animationID : it.second) {
             auto animation = mAnimationLibrary.find(animationID);
@@ -741,10 +741,7 @@ void ColladaParser::PostProcessRootAnimations() {
         }
     }
 
-    mAnims = temp;
-
-    // Ensure no double deletes.
-    temp.mSubAnims.clear();
+    mAnims = std::move(temp);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -794,7 +791,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             if (!anim) {
                 anim = new Animation;
                 anim->mName = animName;
-                pParent->mSubAnims.push_back(anim);
+                pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
             }
 
             // recurse into the sub-element
@@ -827,7 +824,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
         if (nullptr == anim) {
             anim = new Animation;
             anim->mName = animName;
-            pParent->mSubAnims.push_back(anim);
+            pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
         }
 
         for (const auto &channel : channels) {

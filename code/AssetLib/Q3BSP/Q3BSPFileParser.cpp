@@ -121,6 +121,13 @@ bool Q3BSPFileParser::parseFile() {
     // Imports the dictionary of the level
     getLumps();
 
+    // Every lump region is read verbatim below, so reject the file if any of them
+    // does not fit into the data read from the archive.
+    if ( !validateLumps() )
+    {
+        return false;
+    }
+
     // Count data and prepare model data
     countLumps();
 
@@ -148,6 +155,11 @@ bool Q3BSPFileParser::parseFile() {
 // ------------------------------------------------------------------------------------------------
 bool Q3BSPFileParser::validateFormat()
 {
+    if ( m_Data.size() < sizeof( sQ3BSPHeader ) + kMaxLumps * sizeof( sQ3BSPLump ) )
+    {
+        return false;
+    }
+
     sQ3BSPHeader *pHeader = (sQ3BSPHeader*) &m_Data[ 0 ];
     m_sOffset += sizeof( sQ3BSPHeader );
 
@@ -173,6 +185,36 @@ void Q3BSPFileParser::getLumps()
         Offset += sizeof( sQ3BSPLump );
         m_pModel->m_Lumps[ idx ] = pLump;
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+bool Q3BSPFileParser::validateLumps()
+{
+    for ( size_t idx = 0; idx < kMaxLumps; idx++ )
+    {
+        const sQ3BSPLump *pLump = m_pModel->m_Lumps[ idx ];
+        if ( pLump->iOffset < 0 || pLump->iSize < 0 )
+        {
+            return false;
+        }
+
+        // Both members are signed ints taken from the file, widen them before adding.
+        const size_t offset = static_cast<size_t>( pLump->iOffset );
+        const size_t size = static_cast<size_t>( pLump->iSize );
+        if ( offset > m_Data.size() || size > m_Data.size() - offset )
+        {
+            return false;
+        }
+    }
+
+    // getIndices copies iSize bytes into a vector sized iSize / sizeof(int), so a
+    // mesh-vert lump whose length is not a whole number of ints would overrun it.
+    if ( m_pModel->m_Lumps[ kMeshVerts ]->iSize % sizeof( int ) != 0 )
+    {
+        return false;
+    }
+
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -207,6 +249,10 @@ void Q3BSPFileParser::getIndices()
     size_t Offset = (size_t) lump->iOffset;
     const size_t nIndices = lump->iSize / sizeof( int );
     m_pModel->m_Indices.resize( nIndices );
+    if ( nIndices == 0 )
+    {
+        return;
+    }
     memcpy( &m_pModel->m_Indices[ 0 ], &m_Data[ Offset ], lump->iSize );
 }
 

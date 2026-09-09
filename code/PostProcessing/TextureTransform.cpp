@@ -226,17 +226,30 @@ void TextureTransformStep::Execute( aiScene* pScene) {
                     }
 
                     if ( !::strcmp( prop2->mKey.data, "$tex.uvwsrc")) {
-                        info.uvIndex = *((int*)prop2->mData);
+                        if (prop2->mDataLength >= sizeof(unsigned int)) {
+                            info.uvIndex = *((int*)prop2->mData);
 
-                        // Store a direct pointer for later use
-                        update.directShortcut = (unsigned int*) prop2->mData;
+                            // Store a direct pointer for later use. Only safe while the
+                            // property is big enough to hold the index we write back.
+                            update.directShortcut = (unsigned int*) prop2->mData;
+                        } else {
+                            ASSIMP_LOG_WARN("Ignoring uv source property with insufficient data");
+                        }
                     }
 
                     else if ( !::strcmp( prop2->mKey.data, "$tex.mapmodeu")) {
-                        info.mapU = *((aiTextureMapMode*)prop2->mData);
+                        if (prop2->mDataLength >= sizeof(aiTextureMapMode)) {
+                            info.mapU = *((aiTextureMapMode*)prop2->mData);
+                        } else {
+                            ASSIMP_LOG_WARN("Ignoring u mapping mode property with insufficient data");
+                        }
                     }
                     else if ( !::strcmp( prop2->mKey.data, "$tex.mapmodev")) {
-                        info.mapV = *((aiTextureMapMode*)prop2->mData);
+                        if (prop2->mDataLength >= sizeof(aiTextureMapMode)) {
+                            info.mapV = *((aiTextureMapMode*)prop2->mData);
+                        } else {
+                            ASSIMP_LOG_WARN("Ignoring v mapping mode property with insufficient data");
+                        }
                     }
                     else if ( !::strcmp( prop2->mKey.data, "$tex.uvtrafo"))  {
                         if (prop2->mDataLength >= sizeof(aiUVTransform)) {

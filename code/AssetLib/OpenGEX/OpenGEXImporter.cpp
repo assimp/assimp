@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
+#include <limits>
 
 static constexpr aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -434,7 +435,7 @@ void OpenGEXImporter::handleMetricNode(DDLNode *node, aiScene * /*pScene*/) {
 
     Property *prop(node->getProperties());
     while (nullptr != prop) {
-        if (nullptr != prop->m_key) {
+        if (nullptr != prop->m_key && nullptr != prop->m_value) {
             if (Value::ValueType::ddl_string == prop->m_value->m_type) {
                 std::string valName((char *)prop->m_value->m_data);
                 int type(Grammar::isValidMetricType(valName.c_str()));
@@ -753,16 +754,22 @@ static MeshAttribute getAttributeByName(const char *attribName) {
 //------------------------------------------------------------------------------------------------
 static void fillVector3(aiVector3D *vec3, Value *vals) {
     ai_assert(nullptr != vec3);
-    ai_assert(nullptr != vals);
 
     float x(0.0f), y(0.0f), z(0.0f);
+    // A vector-array entry may carry fewer values than expected; missing
+    // components default to 0 instead of dereferencing a null Value. The
+    // previous code read y and z unconditionally and crashed on short input.
     Value *next(vals);
-    x = next->getFloat();
-    next = next->m_next;
-    y = next->getFloat();
-    next = next->m_next;
     if (nullptr != next) {
-        z = next->getFloat();
+        x = next->getFloat();
+        next = next->m_next;
+        if (nullptr != next) {
+            y = next->getFloat();
+            next = next->m_next;
+            if (nullptr != next) {
+                z = next->getFloat();
+            }
+        }
     }
 
     vec3->Set(x, y, z);
@@ -815,7 +822,7 @@ static size_t countDataArrayListItems(DataArrayList *vaList) {
 
 //------------------------------------------------------------------------------------------------
 static void copyVectorArray(size_t numItems, DataArrayList *vaList, aiVector3D *vectorArray) {
-    for (size_t i = 0; i < numItems; i++) {
+    for (size_t i = 0; i < numItems && nullptr != vaList; i++) {
         Value *next(vaList->m_dataList);
         fillVector3(&vectorArray[i], next);
         vaList = vaList->m_next;
@@ -911,28 +918,55 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
         aiFace &current(m_currentMesh->mFaces[i]);
         current.mNumIndices = 3;
         current.mIndices = new unsigned int[current.mNumIndices];
+        // The index array must supply one data entry per face.
+        if (nullptr == vaList) {
+            throw DeadlyImportError("OpenGEX: index array has fewer entries than the mesh has faces");
+        }
         Value *next(vaList->m_dataList);
         for (size_t indices = 0; indices < current.mNumIndices; indices++) {
-            int idx = -1;
-            if (next->m_type == Value::ValueType::ddl_unsigned_int16) {
+            // Each face needs three indices; a short entry must not walk off
+            // the value list.
+            if (nullptr == next) {
+                throw DeadlyImportError("OpenGEX: index array entry has fewer than three indices");
+            }
+            size_t idx = 0;
+            if (next->m_type == Value::ValueType::ddl_unsigned_int8) {
+                idx = next->getUnsignedInt8();
+            } else if (next->m_type == Value::ValueType::ddl_unsigned_int16) {
                 idx = next->getUnsignedInt16();
             } else if (next->m_type == Value::ValueType::ddl_unsigned_int32) {
                 idx = next->getUnsignedInt32();
+            } else if (next->m_type == Value::ValueType::ddl_unsigned_int64) {
+                const auto idx64 = next->getUnsignedInt64();
+                if (idx64 > static_cast<decltype(idx64)>(std::numeric_limits<size_t>::max())) {
+                    throw DeadlyImportError("OpenGEX: vertex index is too large");
+                }
+                idx = static_cast<size_t>(idx64);
+            } else {
+                throw DeadlyImportError("OpenGEX: index array uses an unsupported index type");
             }
-            
-            ai_assert(static_cast<size_t>(idx) <= m_currentVertices.m_vertices.size());
-            ai_assert(index < m_currentMesh->mNumVertices);
+
+            // idx comes straight from the file. Validate it (and the output
+            // cursor) at runtime -- the previous ai_assert()s are compiled out
+            // of release builds, so an out-of-range index read past the end of
+            // the vertex arrays (heap-buffer-overflow).
+            if (idx >= m_currentVertices.m_vertices.size()) {
+                throw DeadlyImportError("OpenGEX: vertex index is out of range");
+            }
+            if (index >= m_currentMesh->mNumVertices) {
+                throw DeadlyImportError("OpenGEX: index array references more vertices than declared");
+            }
             aiVector3D &pos = (m_currentVertices.m_vertices[idx]);
             m_currentMesh->mVertices[index].Set(pos.x, pos.y, pos.z);
             if (hasColors && static_cast<size_t>(idx) < m_currentVertices.m_numColors) {
                 aiColor4D &col = m_currentVertices.m_colors[idx];
                 m_currentMesh->mColors[0][index] = col;
             }
-            if (hasNormalCoords) {
+            if (hasNormalCoords && static_cast<size_t>(idx) < m_currentVertices.m_normals.size()) {
                 aiVector3D &normal = (m_currentVertices.m_normals[idx]);
                 m_currentMesh->mNormals[index].Set(normal.x, normal.y, normal.z);
             }
-            if (hasTexCoords) {
+            if (hasTexCoords && static_cast<size_t>(idx) < m_currentVertices.m_numUVComps[0]) {
                 aiVector3D &tex = (m_currentVertices.m_textureCoords[0][idx]);
                 m_currentMesh->mTextureCoords[0][index].Set(tex.x, tex.y, tex.z);
             }
@@ -951,12 +985,16 @@ static void getColorRGB3(aiColor3D *pColor, DataArrayList *colList) {
         return;
     }
 
-    ai_assert(3 == colList->m_numItems);
+    // The data list may be shorter than three entries on malformed input;
+    // stop instead of dereferencing a null Value.
     Value *val(colList->m_dataList);
+    if (nullptr == val) return;
     pColor->r = val->getFloat();
     val = val->getNext();
+    if (nullptr == val) return;
     pColor->g = val->getFloat();
     val = val->getNext();
+    if (nullptr == val) return;
     pColor->b = val->getFloat();
 }
 
@@ -966,14 +1004,19 @@ static void getColorRGB4(aiColor4D *pColor, DataArrayList *colList) {
         return;
     }
 
-    ai_assert(4 == colList->m_numItems);
+    // The data list may be shorter than four entries on malformed input;
+    // stop instead of dereferencing a null Value.
     Value *val(colList->m_dataList);
+    if (nullptr == val) return;
     pColor->r = val->getFloat();
     val = val->getNext();
+    if (nullptr == val) return;
     pColor->g = val->getFloat();
     val = val->getNext();
+    if (nullptr == val) return;
     pColor->b = val->getFloat();
     val = val->getNext();
+    if (nullptr == val) return;
     pColor->a = val->getFloat();
 }
 
@@ -1106,6 +1149,12 @@ void OpenGEXImporter::handleParamNode(ODDLParser::DDLNode *node, aiScene * /*pSc
     if (nullptr != prop->m_value) {
         Value *val(node->getValue());
         if (nullptr == val) {
+            return;
+        }
+        // A Param node carrying camera attributes can appear without a
+        // preceding CameraObject node, leaving m_currentCamera null. Skip it
+        // rather than dereferencing a null aiCamera.
+        if (nullptr == m_currentCamera) {
             return;
         }
         const float floatVal(val->getFloat());

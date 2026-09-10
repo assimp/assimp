@@ -1151,3 +1151,28 @@ TEST_F(utglTF2ImportExport, importMalformedSparseAccessor) {
     std::string errorString = importer.GetErrorString();
     EXPECT_NE(errorString.find("Invalid sparse accessor: missing required 'values' object."), std::string::npos);
 }
+
+TEST_F(utglTF2ImportExport, importMalformedNodeScaleIsRejected) {
+    // Issue #6190: ReadHelper<float[N]> skipped array entries that are not
+    // numbers but still returned true, so Nullable<vec3>::isPresent went true
+    // over a value whose skipped component was never written. Nullable leaves
+    // its value default-uninitialised, so the node took a scale with one
+    // indeterminate component.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/malformed_node_scale.gltf", 0);
+    ASSERT_NE(nullptr, scene);
+
+    const aiNode *bad = scene->mRootNode->FindNode("BadScale");
+    ASSERT_NE(nullptr, bad);
+
+    // A partially readable "scale" is not a scale. It has to be refused whole,
+    // the way a wrong-sized or non-array value already is, leaving the node at
+    // its default transform rather than at 2 on x and 3 on z with the y
+    // component never assigned.
+    aiVector3D scaling, position;
+    aiQuaternion rotation;
+    bad->mTransformation.Decompose(scaling, rotation, position);
+    EXPECT_FLOAT_EQ(1.0f, scaling.x);
+    EXPECT_FLOAT_EQ(1.0f, scaling.y);
+    EXPECT_FLOAT_EQ(1.0f, scaling.z);
+}

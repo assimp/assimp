@@ -46,6 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
+#include <sstream>
+#include <string>
+#include <vector>
+
 using namespace ::Assimp;
 
 class utPLYImportExport : public AbstractImportExportBase {
@@ -282,3 +286,103 @@ TEST_F(utPLYImportExport, parseInvalidDoubleCustomProperty) {
     const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+// A PLY header has to declare exactly the properties that each vertex row carries. Anything else is
+// unreadable for a conformant parser (ASCII) or silently misaligned (binary).
+static void expectBlobHeaderMatchesVertexRows(const aiExportDataBlob *blob, const char *model) {
+    std::istringstream ply(std::string(static_cast<const char *>(blob->data), blob->size));
+    std::string line, element;
+    unsigned int declared = 0, vertices = 0;
+    while (std::getline(ply, line)) {
+        std::istringstream words(line);
+        std::string first;
+        words >> first;
+        if (first == "element") {
+            words >> element >> vertices;
+        } else if (first == "property" && element == "vertex") {
+            ++declared;
+        } else if (first == "end_header") {
+            break;
+        }
+    }
+    ASSERT_GT(declared, 0u) << model;
+    ASSERT_GT(vertices, 0u) << model;
+
+    for (unsigned int i = 0; i < vertices; ++i) {
+        ASSERT_TRUE(std::getline(ply, line)) << model << ": vertex row " << i << " missing";
+        std::istringstream values(line);
+        unsigned int written = 0;
+        for (std::string value; values >> value;) {
+            ++written;
+        }
+        EXPECT_EQ(declared, written) << model << ": vertex row " << i
+                                     << " carries " << written << " values but the header declares "
+                                     << declared << " properties";
+    }
+}
+
+static void expectHeaderMatchesVertexRows(const char *model) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(model, aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene) << model;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "ply");
+    ASSERT_NE(nullptr, blob) << model;
+    expectBlobHeaderMatchesVertexRows(blob, model);
+}
+
+// Tests that the exported header describes the exported payload, for a mesh with neither texture
+// coordinates nor vertex colours, with texture coordinates, and with vertex colours.
+TEST_F(utPLYImportExport, exportedHeaderMatchesVertexRows) {
+    expectHeaderMatchesVertexRows(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply");
+    expectHeaderMatchesVertexRows(ASSIMP_TEST_MODELS_DIR "/PLY/cube_uv.ply");
+    expectHeaderMatchesVertexRows(ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply");
+}
+
+// Tests the same invariant for a 3-component (UVW) texture-coordinate channel, which is written with
+// one value more per vertex than the usual 2-component channel.
+TEST_F(utPLYImportExport, exportedHeaderMatchesVertexRowsForUVW) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_uv.ply", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_TRUE(scene->mMeshes[0]->HasTextureCoords(0));
+    scene->mMeshes[0]->mNumUVComponents[0] = 3;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "ply");
+    ASSERT_NE(nullptr, blob);
+    expectBlobHeaderMatchesVertexRows(blob, "cube_uv.ply as UVW");
+}
+
+// Tests that texture coordinates and vertex colours survive an export/import round trip.
+TEST_F(utPLYImportExport, exportImportRoundTripKeepsTexCoords) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_uv.ply", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_TRUE(scene->mMeshes[0]->HasTextureCoords(0));
+    const unsigned int numVertices = scene->mMeshes[0]->mNumVertices;
+    std::vector<aiVector3D> expected(scene->mMeshes[0]->mTextureCoords[0],
+            scene->mMeshes[0]->mTextureCoords[0] + numVertices);
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "ply");
+    ASSERT_NE(nullptr, blob);
+
+    Assimp::Importer reimporter;
+    const aiScene *roundTripped = reimporter.ReadFileFromMemory(blob->data, blob->size, 0, "ply");
+    ASSERT_NE(nullptr, roundTripped);
+    ASSERT_EQ(1u, roundTripped->mNumMeshes);
+    ASSERT_EQ(numVertices, roundTripped->mMeshes[0]->mNumVertices);
+    ASSERT_TRUE(roundTripped->mMeshes[0]->HasTextureCoords(0));
+    for (unsigned int i = 0; i < numVertices; ++i) {
+        EXPECT_NEAR(expected[i].x, roundTripped->mMeshes[0]->mTextureCoords[0][i].x, 1e-5) << "vertex " << i;
+        EXPECT_NEAR(expected[i].y, roundTripped->mMeshes[0]->mTextureCoords[0][i].y, 1e-5) << "vertex " << i;
+    }
+}
+
+#endif // ASSIMP_BUILD_NO_EXPORT

@@ -1151,3 +1151,40 @@ TEST_F(utglTF2ImportExport, importMalformedSparseAccessor) {
     std::string errorString = importer.GetErrorString();
     EXPECT_NE(errorString.find("Invalid sparse accessor: missing required 'values' object."), std::string::npos);
 }
+
+TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
+    // The sampler's interpolation mode reaches the keys (da281b7f added the
+    // field, #6543 taught glTF2 to fill it). Nothing covered it, so a
+    // regression here would have been silent: every mode still imports, and
+    // aiAnimInterpolation_Linear is also the default a key is constructed with.
+    struct Expectation {
+        const char *file;
+        aiAnimInterpolation interpolation;
+        unsigned int numPositionKeys;
+    };
+    // CUBICSPLINE stores in-tangent, value and out-tangent per keyframe, so two
+    // keyframes arrive as six keys.
+    const Expectation expectations[] = {
+        { "/glTF2/animation_interpolation_step.gltf", aiAnimInterpolation_Step, 2 },
+        { "/glTF2/animation_interpolation_linear.gltf", aiAnimInterpolation_Linear, 2 },
+        { "/glTF2/animation_interpolation_cubic.gltf", aiAnimInterpolation_Cubic_Spline, 6 },
+    };
+
+    for (const Expectation &expected : expectations) {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(std::string(ASSIMP_TEST_MODELS_DIR) + expected.file, 0);
+        ASSERT_NE(nullptr, scene) << expected.file << ": " << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumAnimations) << expected.file;
+
+        const aiAnimation *animation = scene->mAnimations[0];
+        ASSERT_EQ(1u, animation->mNumChannels) << expected.file;
+
+        const aiNodeAnim *channel = animation->mChannels[0];
+        EXPECT_STREQ("Mover", channel->mNodeName.C_Str()) << expected.file;
+        ASSERT_EQ(expected.numPositionKeys, channel->mNumPositionKeys) << expected.file;
+        for (unsigned int i = 0; i < channel->mNumPositionKeys; ++i) {
+            EXPECT_EQ(expected.interpolation, channel->mPositionKeys[i].mInterpolation)
+                    << expected.file << " key " << i;
+        }
+    }
+}

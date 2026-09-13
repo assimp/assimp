@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include "Tools/TestTools.h"
 #ifndef ASSIMP_BUILD_NO_EXPORT
-#include "AssetLib/glTF2/glTF2AssetWriter.h"
-#endif
+#   include "AssetLib/glTF2/glTF2AssetWriter.h"
+#endif // ASSIMP_BUILD_NO_EXPORT
 #include <assimp/commonMetaData.h>
 #include <assimp/postprocess.h>
 #include <assimp/config.h>
@@ -1164,7 +1164,7 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
     };
     // CUBICSPLINE stores in-tangent, value and out-tangent per keyframe, so two
     // keyframes arrive as six keys.
-    const Expectation expectations[] = {
+    const std::array<Expectation, 3> expectations = {
         { "/glTF2/animation_interpolation_step.gltf", aiAnimInterpolation_Step, 2 },
         { "/glTF2/animation_interpolation_linear.gltf", aiAnimInterpolation_Linear, 2 },
         { "/glTF2/animation_interpolation_cubic.gltf", aiAnimInterpolation_Cubic_Spline, 6 },

@@ -110,13 +110,14 @@ void D3MFImporter::InternReadFile(const std::string &filename, aiScene *pScene, 
         XmlSerializer xmlSerializer(xmlParser, &opcPackage);
         xmlSerializer.ImportXml(pScene);
 
-        const std::vector<aiTexture*> &tex =  opcPackage.GetEmbeddedTextures();
-        if (!tex.empty()) {
-            pScene->mNumTextures = static_cast<unsigned int>(tex.size());
-            pScene->mTextures = new aiTexture *[pScene->mNumTextures];
-            for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {
-                pScene->mTextures[i] = tex[i];
+        std::vector<std::unique_ptr<aiTexture>> embedded = opcPackage.TakeEmbeddedTextures();
+        if (!embedded.empty()) {
+            // embedded still owns the textures, so a throwing allocation here frees them.
+            pScene->mTextures = new aiTexture *[embedded.size()];
+            for (size_t i = 0; i < embedded.size(); ++i) {
+                pScene->mTextures[i] = embedded[i].release();
             }
+            pScene->mNumTextures = static_cast<unsigned int>(embedded.size());
         }
     }
 }

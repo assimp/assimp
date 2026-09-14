@@ -1164,11 +1164,11 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
     };
     // CUBICSPLINE stores in-tangent, value and out-tangent per keyframe, so two
     // keyframes arrive as six keys.
-    const std::array<Expectation, 3> expectations = {
+    const std::array<Expectation, 3> expectations = { {
         { "/glTF2/animation_interpolation_step.gltf", aiAnimInterpolation_Step, 2 },
         { "/glTF2/animation_interpolation_linear.gltf", aiAnimInterpolation_Linear, 2 },
         { "/glTF2/animation_interpolation_cubic.gltf", aiAnimInterpolation_Cubic_Spline, 6 },
-    };
+    } };
 
     for (const Expectation &expected : expectations) {
         Assimp::Importer importer;

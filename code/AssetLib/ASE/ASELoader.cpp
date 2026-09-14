@@ -742,11 +742,19 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
             // add texture coordinates
             for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c) {
                 if (mesh.amTexCoords[c].empty()) break;
-                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][(*i).amUVIndices[c][n]];
+                const uint32_t uvIndex = (*i).amUVIndices[c][n];
+                if (uvIndex >= mesh.amTexCoords[c].size()) {
+                    throw DeadlyImportError("ASE: Invalid UV index in face ", fi, ".");
+                }
+                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][uvIndex];
             }
             // add vertex colors
             if (!mesh.mVertexColors.empty()) {
-                mVertexColors[iCurrent] = mesh.mVertexColors[(*i).mColorIndices[n]];
+                const uint32_t colorIndex = (*i).mColorIndices[n];
+                if (colorIndex >= mesh.mVertexColors.size()) {
+                    throw DeadlyImportError("ASE: Invalid vertex color index in face ", fi, ".");
+                }
+                mVertexColors[iCurrent] = mesh.mVertexColors[colorIndex];
             }
             // add normal vectors
             if (!mesh.mNormals.empty()) {

@@ -165,7 +165,7 @@ struct STransformVecInfo : public aiUVTransform {
  * @brief Helper step to compute final UV coordinate sets if there are scalings
  *  or rotations in the original data read from the file.
  */
-class TextureTransformStep final : public BaseProcess {
+class ASSIMP_API TextureTransformStep final : public BaseProcess {
 public:
     // -------------------------------------------------------------------
     /// The default class constructor. / 

@@ -8,7 +8,7 @@
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 
-IDI_ASSIMP_CMD         ICON                    "../shared/assimp_tools_icon.ico"
+IDI_ASSIMP_CMD         ICON                    "../../shared/assimp_tools_icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VER_FILEVERSION

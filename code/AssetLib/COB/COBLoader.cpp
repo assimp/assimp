@@ -864,8 +864,13 @@ public:
             try {
                 reader.IncPtr(static_cast<int>(nfo.size) - reader.GetCurrentPos() + cur);
             } catch (const DeadlyImportError &) {
-                // out of limit so correct the value
-                reader.IncPtr(reader.GetReadLimit());
+                // The chunk size points past the end of the buffer; clamp to the
+                // read limit. This must not throw: a destructor is implicitly
+                // noexcept, and the previous code called IncPtr(GetReadLimit()),
+                // which interprets the absolute limit as a relative offset and
+                // seeks out of bounds again -- the escaping exception then
+                // terminated the process. SkipToReadLimit() clamps without throwing.
+                reader.SkipToReadLimit();
             }
         }
     }

@@ -172,8 +172,8 @@ void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface *pcSurf) {
             pcSurf->ulOffsetTriangles + pcSurf->ulNumTriangles * sizeof(MDC::Triangle) > iMax ||
             pcSurf->ulOffsetTexCoords + pcSurf->ulNumVertices * sizeof(MDC::TexturCoord) > iMax ||
             pcSurf->ulOffsetShaders + pcSurf->ulNumShaders * sizeof(MDC::Shader) > iMax ||
-            pcSurf->ulOffsetFrameBaseFrames + pcSurf->ulNumBaseFrames * 2 > iMax ||
-            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetFrameCompFrames + pcSurf->ulNumCompFrames * 2 > iMax) ||
+            pcSurf->ulOffsetFrameBaseFrames + pcSurf->ulNumBaseFrames * sizeof(int16_t) > iMax ||
+            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetFrameCompFrames + pcSurf->ulNumCompFrames * sizeof(int16_t) > iMax) ||
             pcSurf->ulOffsetEnd > iMax) {
         throw DeadlyImportError("Some of the offset values in the MDC surface header "
                                 "are invalid and point somewhere behind the file.");

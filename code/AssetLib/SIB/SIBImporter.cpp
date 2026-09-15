@@ -64,6 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 
 #include <map>
+#include <cmath>
 
 namespace Assimp {
 
@@ -119,14 +120,36 @@ struct SIB {
     std::vector<aiMesh *> meshes;
     std::vector<aiLight *> lights;
     std::vector<SIBObject> objs, insts;
+
+    SIB() = default;
+
+    // The lists above own their elements until they are handed over to the aiScene,
+    // so a copy would hand the same pointers to two destructors.
+    SIB(const SIB &) = delete;
+    SIB &operator=(const SIB &) = delete;
+
+    ~SIB() {
+        // Anything still held here was not handed over to the aiScene, which happens
+        // when parsing was aborted by an error.
+        for (aiMaterial *mtl : mtls) {
+            delete mtl;
+        }
+        for (aiMesh *mesh : meshes) {
+            delete mesh;
+        }
+        for (aiLight *light : lights) {
+            delete light;
+        }
+    }
 };
 
 // ------------------------------------------------------------------------------------------------
 static SIBEdge &GetEdge(SIBMesh *mesh, uint32_t posA, uint32_t posB) {
     SIBPair pair = (posA < posB) ? SIBPair(posA, posB) : SIBPair(posB, posA);
-    std::map<SIBPair, uint32_t>::iterator it = mesh->edgeMap.find(pair);
-    if (it != mesh->edgeMap.end())
+    auto it = mesh->edgeMap.find(pair);
+    if (it != mesh->edgeMap.end()) {
         return mesh->edges[it->second];
+    }
 
     SIBEdge edge;
     edge.creased = false;
@@ -145,8 +168,9 @@ static SIBChunk ReadChunk(StreamReaderLE *stream) {
     SIBChunk chunk;
     chunk.Tag = stream->GetU4();
     chunk.Size = stream->GetU4();
-    if (chunk.Size > stream->GetRemainingSizeToLimit())
+    if (chunk.Size > stream->GetRemainingSizeToLimit()) {
         ASSIMP_LOG_ERROR("SIB: Chunk overflow");
+    }
     ByteSwap::Swap4(&chunk.Tag);
     return chunk;
 }
@@ -228,7 +252,7 @@ static void ReadFaces(SIBMesh *mesh, StreamReaderLE *stream) {
         uint32_t numPoints = stream->GetU4();
 
         // Store room for the N index channels, plus the point count.
-        size_t pos = mesh->idx.size() + 1;
+        const size_t pos = mesh->idx.size() + 1;
         mesh->idx.resize(pos + numPoints * N);
         mesh->idx[pos - 1] = numPoints;
         uint32_t *idx = &mesh->idx[pos];
@@ -241,9 +265,10 @@ static void ReadFaces(SIBMesh *mesh, StreamReaderLE *stream) {
         // Positions are supplied indexed already, so we preserve that
         // mapping. UVs are supplied uniquely, so we allocate unique indices.
         for (uint32_t n = 0; n < numPoints; n++, idx += N, ptIdx++) {
-            uint32_t p = stream->GetU4();
-            if (p >= mesh->pos.size())
+            const uint32_t p = stream->GetU4();
+            if (p >= mesh->pos.size()) {
                 throw DeadlyImportError("Vertex index is out of range.");
+            }
             idx[POS] = p;
             idx[NRM] = ptIdx;
             idx[UV] = ptIdx;
@@ -260,13 +285,22 @@ static void ReadFaces(SIBMesh *mesh, StreamReaderLE *stream) {
 // ------------------------------------------------------------------------------------------------
 static void ReadUVs(SIBMesh *mesh, StreamReaderLE *stream) {
     while (stream->GetRemainingSizeToLimit() > 0) {
-        uint32_t faceIdx = stream->GetU4();
-        uint32_t numPoints = stream->GetU4();
+        const uint32_t faceIdx = stream->GetU4();
+        const uint32_t numPoints = stream->GetU4();
 
-        if (faceIdx >= mesh->faceStart.size())
+        if (faceIdx >= mesh->faceStart.size()) {
             throw DeadlyImportError("Invalid face index.");
+        }
 
-        uint32_t pos = mesh->faceStart[faceIdx];
+        const uint32_t pos = mesh->faceStart[faceIdx];
+
+        // mesh->idx[pos] holds the number of points the face was built with in ReadFaces(). A UV chunk that claims
+        // more points than that would walk idx past the end of the face's index data and off the end of 
+        // mesh->idx entirely, so reject it.
+        if (numPoints > mesh->idx[pos]) {
+            throw DeadlyImportError("SIB: UV point count exceeds face point count.");
+        }
+
         uint32_t *idx = &mesh->idx[pos + 1];
 
         for (uint32_t n = 0; n < numPoints; n++, idx += N) {
@@ -285,11 +319,12 @@ static void ReadMtls(SIBMesh *mesh, StreamReaderLE *stream) {
     uint32_t prevFace = stream->GetU4();
     uint32_t prevMtl = stream->GetU4() + 1;
     while (stream->GetRemainingSizeToLimit() > 0) {
-        uint32_t face = stream->GetU4();
-        uint32_t mtl = stream->GetU4() + 1;
+        const uint32_t face = stream->GetU4();
+        const uint32_t mtl = stream->GetU4() + 1;
         while (prevFace < face) {
-            if (prevFace >= mesh->mtls.size())
+            if (prevFace >= mesh->mtls.size()) {
                 throw DeadlyImportError("Invalid face index.");
+            }
             mesh->mtls[prevFace++] = prevMtl;
         }
 
@@ -297,8 +332,9 @@ static void ReadMtls(SIBMesh *mesh, StreamReaderLE *stream) {
         prevMtl = mtl;
     }
 
-    while (prevFace < mesh->mtls.size())
+    while (prevFace < mesh->mtls.size()) {
         mesh->mtls[prevFace++] = prevMtl;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -324,8 +360,8 @@ static void ReadAxis(aiMatrix4x4 &axis, StreamReaderLE *stream) {
 // ------------------------------------------------------------------------------------------------
 static void ReadEdges(SIBMesh *mesh, StreamReaderLE *stream) {
     while (stream->GetRemainingSizeToLimit() > 0) {
-        uint32_t posA = stream->GetU4();
-        uint32_t posB = stream->GetU4();
+        const uint32_t posA = stream->GetU4();
+        const uint32_t posB = stream->GetU4();
         GetEdge(mesh, posA, posB);
     }
 }
@@ -333,9 +369,10 @@ static void ReadEdges(SIBMesh *mesh, StreamReaderLE *stream) {
 // ------------------------------------------------------------------------------------------------
 static void ReadCreases(SIBMesh *mesh, StreamReaderLE *stream) {
     while (stream->GetRemainingSizeToLimit() > 0) {
-        uint32_t edge = stream->GetU4();
-        if (edge >= mesh->edges.size())
+        const uint32_t edge = stream->GetU4();
+        if (edge >= mesh->edges.size()) {
             throw DeadlyImportError("SIB: Invalid edge index.");
+        }
         mesh->edges[edge].creased = true;
     }
 }
@@ -343,10 +380,10 @@ static void ReadCreases(SIBMesh *mesh, StreamReaderLE *stream) {
 // ------------------------------------------------------------------------------------------------
 static void ConnectFaces(SIBMesh *mesh) {
     // Find faces connected to each edge.
-    size_t numFaces = mesh->faceStart.size();
+    const size_t numFaces = mesh->faceStart.size();
     for (size_t faceIdx = 0; faceIdx < numFaces; faceIdx++) {
         uint32_t *idx = &mesh->idx[mesh->faceStart[faceIdx]];
-        uint32_t numPoints = *idx++;
+        const uint32_t numPoints = *idx++;
         uint32_t prev = idx[(numPoints - 1) * N + POS];
 
         for (uint32_t i = 0; i < numPoints; i++, idx += N) {
@@ -358,11 +395,11 @@ static void ConnectFaces(SIBMesh *mesh) {
             // Link this face onto it.
             // This gives potentially undesirable normals when used
             // with non-2-manifold surfaces, but then so does Silo to begin with.
-            if (edge.faceA == 0xffffffff)
+            if (edge.faceA == 0xffffffff) {
                 edge.faceA = static_cast<uint32_t>(faceIdx);
-            else if (edge.faceB == 0xffffffff)
+            } else if (edge.faceB == 0xffffffff) {
                 edge.faceB = static_cast<uint32_t>(faceIdx);
-
+            }
             prev = next;
         }
     }
@@ -404,10 +441,11 @@ static aiVector3D CalculateVertexNormal(SIBMesh *mesh, uint32_t faceIdx, uint32_
                     if (edge.faceA == faceIdx || edge.faceB == faceIdx) {
                         // Move to whichever side we didn't just come from.
                         if (!edge.creased) {
-                            if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx && edge.faceA != 0xffffffff)
+                            if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx && edge.faceA != 0xffffffff) {
                                 nextFaceIdx = edge.faceA;
-                            else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx && edge.faceB != 0xffffffff)
+                            } else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx && edge.faceB != 0xffffffff) {
                                 nextFaceIdx = edge.faceB;
+                            }
                         }
                     }
                 }
@@ -417,8 +455,9 @@ static aiVector3D CalculateVertexNormal(SIBMesh *mesh, uint32_t faceIdx, uint32_
 
             // Stop once we hit either an creased/unconnected edge, or we
             // wrapped around and hit our start point.
-            if (nextFaceIdx == 0xffffffff || nextFaceIdx == startFaceIdx)
+            if (nextFaceIdx == 0xffffffff || nextFaceIdx == startFaceIdx) {
                 break;
+            }
 
             prevFaceIdx = faceIdx;
             faceIdx = nextFaceIdx;
@@ -426,21 +465,23 @@ static aiVector3D CalculateVertexNormal(SIBMesh *mesh, uint32_t faceIdx, uint32_
     }
 
     // Normalize it.
-    float len = vtxNormal.Length();
-    if (len > 0.000000001f)
+    const float len = vtxNormal.Length();
+    if (std::fpclassify(len) > FP_ZERO) {
         vtxNormal /= len;
+    }
+    
     return vtxNormal;
 }
 
 // ------------------------------------------------------------------------------------------------
 static void CalculateNormals(SIBMesh *mesh) {
-    size_t numFaces = mesh->faceStart.size();
+    const size_t numFaces = mesh->faceStart.size();
 
     // Calculate face normals.
     std::vector<aiVector3D> faceNormals(numFaces);
     for (size_t faceIdx = 0; faceIdx < numFaces; faceIdx++) {
         uint32_t *idx = &mesh->idx[mesh->faceStart[faceIdx]];
-        uint32_t numPoints = *idx++;
+        const uint32_t numPoints = *idx++;
 
         aiVector3D faceNormal(0, 0, 0);
 
@@ -459,7 +500,7 @@ static void CalculateNormals(SIBMesh *mesh) {
     // Calculate vertex normals.
     for (size_t faceIdx = 0; faceIdx < numFaces; faceIdx++) {
         uint32_t *idx = &mesh->idx[mesh->faceStart[faceIdx]];
-        uint32_t numPoints = *idx++;
+        const uint32_t numPoints = *idx++;
 
         for (uint32_t i = 0; i < numPoints; i++) {
             uint32_t pos = idx[i * N + POS];
@@ -487,23 +528,23 @@ static void ReadShape(SIB *sib, StreamReaderLE *stream) {
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
         switch (chunk.Tag) {
-        case TAG('M', 'I', 'R', 'P'): break; // mirror plane maybe?
-        case TAG('I', 'M', 'R', 'P'): break; // instance mirror? (not supported here yet)
-        case TAG('D', 'I', 'N', 'F'): break; // display info, not needed
-        case TAG('P', 'I', 'N', 'F'): break; // ?
-        case TAG('V', 'M', 'I', 'R'): break; // ?
-        case TAG('F', 'M', 'I', 'R'): break; // ?
-        case TAG('T', 'X', 'S', 'M'): break; // ?
-        case TAG('F', 'A', 'H', 'S'): break; // ?
-        case TAG('V', 'R', 'T', 'S'): ReadVerts(&smesh, stream, chunk.Size / 12); break;
-        case TAG('F', 'A', 'C', 'S'): ReadFaces(&smesh, stream); break;
-        case TAG('F', 'T', 'V', 'S'): ReadUVs(&smesh, stream); break;
-        case TAG('S', 'N', 'A', 'M'): name = ReadString(stream, chunk.Size / 2); break;
-        case TAG('F', 'A', 'M', 'A'): ReadMtls(&smesh, stream); break;
-        case TAG('A', 'X', 'I', 'S'): ReadAxis(smesh.axis, stream); break;
-        case TAG('E', 'D', 'G', 'S'): ReadEdges(&smesh, stream); break;
-        case TAG('E', 'C', 'R', 'S'): ReadCreases(&smesh, stream); break;
-        default: UnknownChunk(stream, chunk); break;
+            case TAG('M', 'I', 'R', 'P'): break; // mirror plane maybe?
+            case TAG('I', 'M', 'R', 'P'): break; // instance mirror? (not supported here yet)
+            case TAG('D', 'I', 'N', 'F'): break; // display info, not needed
+            case TAG('P', 'I', 'N', 'F'): break; // ?
+            case TAG('V', 'M', 'I', 'R'): break; // ?
+            case TAG('F', 'M', 'I', 'R'): break; // ?
+            case TAG('T', 'X', 'S', 'M'): break; // ?
+            case TAG('F', 'A', 'H', 'S'): break; // ?
+            case TAG('V', 'R', 'T', 'S'): ReadVerts(&smesh, stream, chunk.Size / 12); break;
+            case TAG('F', 'A', 'C', 'S'): ReadFaces(&smesh, stream); break;
+            case TAG('F', 'T', 'V', 'S'): ReadUVs(&smesh, stream); break;
+            case TAG('S', 'N', 'A', 'M'): name = ReadString(stream, chunk.Size / 2); break;
+            case TAG('F', 'A', 'M', 'A'): ReadMtls(&smesh, stream); break;
+            case TAG('A', 'X', 'I', 'S'): ReadAxis(smesh.axis, stream); break;
+            case TAG('E', 'D', 'G', 'S'): ReadEdges(&smesh, stream); break;
+            case TAG('E', 'C', 'R', 'S'): ReadCreases(&smesh, stream); break;
+            default: UnknownChunk(stream, chunk); break;
         }
 
         stream->SetCurrentPos(stream->GetReadLimit());
@@ -576,8 +617,9 @@ static void ReadShape(SIB *sib, StreamReaderLE *stream) {
     // we can build the final one-material-per-mesh data.
     for (size_t n = 0; n < meshes.size(); n++) {
         TempMesh &src = meshes[n];
-        if (src.faces.empty())
+        if (src.faces.empty()) {
             continue;
+        }
 
         aiMesh *mesh = new aiMesh;
         mesh->mName = name;
@@ -612,7 +654,7 @@ static void ReadMaterial(SIB *sib, StreamReaderLE *stream) {
     aiColor3D ambi = ReadColor(stream);
     aiColor3D spec = ReadColor(stream);
     aiColor3D emis = ReadColor(stream);
-    float shiny = (float)stream->GetU4();
+    float shiny = static_cast<float>(stream->GetU4());
 
     uint32_t nameLen = stream->GetU4();
     aiString name = ReadString(stream, nameLen / 2);
@@ -638,10 +680,10 @@ static void ReadMaterial(SIB *sib, StreamReaderLE *stream) {
 static void ReadLightInfo(aiLight *light, StreamReaderLE *stream) {
     uint32_t type = stream->GetU4();
     switch (type) {
-    case 0: light->mType = aiLightSource_POINT; break;
-    case 1: light->mType = aiLightSource_SPOT; break;
-    case 2: light->mType = aiLightSource_DIRECTIONAL; break;
-    default: light->mType = aiLightSource_UNDEFINED; break;
+        case 0: light->mType = aiLightSource_POINT; break;
+        case 1: light->mType = aiLightSource_SPOT; break;
+        case 2: light->mType = aiLightSource_DIRECTIONAL; break;
+        default: light->mType = aiLightSource_UNDEFINED; break;
     }
 
     light->mPosition.x = stream->GetF4();
@@ -684,9 +726,9 @@ static void ReadLight(SIB *sib, StreamReaderLE *stream) {
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
         switch (chunk.Tag) {
-        case TAG('L', 'N', 'F', 'O'): ReadLightInfo(light, stream); break;
-        case TAG('S', 'N', 'A', 'M'): light->mName = ReadString(stream, chunk.Size / 2); break;
-        default: UnknownChunk(stream, chunk); break;
+            case TAG('L', 'N', 'F', 'O'): ReadLightInfo(light, stream); break;
+            case TAG('S', 'N', 'A', 'M'): light->mName = ReadString(stream, chunk.Size / 2); break;
+            default: UnknownChunk(stream, chunk); break;
         }
 
         stream->SetCurrentPos(stream->GetReadLimit());
@@ -728,13 +770,13 @@ static void ReadInstance(SIB *sib, StreamReaderLE *stream) {
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
         switch (chunk.Tag) {
-        case TAG('D', 'I', 'N', 'F'): break; // display info, not needed
-        case TAG('P', 'I', 'N', 'F'): break; // ?
-        case TAG('A', 'X', 'I', 'S'): ReadAxis(inst.axis, stream); break;
-        case TAG('I', 'N', 'S', 'I'): shapeIndex = stream->GetU4(); break;
-        case TAG('S', 'M', 'T', 'X'): ReadScale(inst.axis, stream); break;
-        case TAG('S', 'N', 'A', 'M'): inst.name = ReadString(stream, chunk.Size / 2); break;
-        default: UnknownChunk(stream, chunk); break;
+            case TAG('D', 'I', 'N', 'F'): break; // display info, not needed
+            case TAG('P', 'I', 'N', 'F'): break; // ?
+            case TAG('A', 'X', 'I', 'S'): ReadAxis(inst.axis, stream); break;
+            case TAG('I', 'N', 'S', 'I'): shapeIndex = stream->GetU4(); break;
+            case TAG('S', 'M', 'T', 'X'): ReadScale(inst.axis, stream); break;
+            case TAG('S', 'N', 'A', 'M'): inst.name = ReadString(stream, chunk.Size / 2); break;
+            default: UnknownChunk(stream, chunk); break;
         }
 
         stream->SetCurrentPos(stream->GetReadLimit());
@@ -766,14 +808,14 @@ static void ReadScene(SIB *sib, StreamReaderLE *stream) {
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
         switch (chunk.Tag) {
-        case TAG('H', 'E', 'A', 'D'): CheckVersion(stream); break;
-        case TAG('S', 'H', 'A', 'P'): ReadShape(sib, stream); break;
-        case TAG('G', 'R', 'P', 'S'): break; // group assignment, we don't import this
-        case TAG('T', 'E', 'X', 'P'): break; // ?
-        case TAG('I', 'N', 'S', 'T'): ReadInstance(sib, stream); break;
-        case TAG('M', 'A', 'T', 'R'): ReadMaterial(sib, stream); break;
-        case TAG('L', 'G', 'H', 'T'): ReadLight(sib, stream); break;
-        default: UnknownChunk(stream, chunk); break;
+            case TAG('H', 'E', 'A', 'D'): CheckVersion(stream); break;
+            case TAG('S', 'H', 'A', 'P'): ReadShape(sib, stream); break;
+            case TAG('G', 'R', 'P', 'S'): break; // group assignment, we don't import this
+            case TAG('T', 'E', 'X', 'P'): break; // ?
+            case TAG('I', 'N', 'S', 'T'): ReadInstance(sib, stream); break;
+            case TAG('M', 'A', 'T', 'R'): ReadMaterial(sib, stream); break;
+            case TAG('L', 'G', 'H', 'T'): ReadLight(sib, stream); break;
+            default: UnknownChunk(stream, chunk); break;
         }
 
         stream->SetCurrentPos(stream->GetReadLimit());
@@ -783,18 +825,18 @@ static void ReadScene(SIB *sib, StreamReaderLE *stream) {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void SIBImporter::InternReadFile(const std::string &pFile,
-        aiScene *pScene, IOSystem *pIOHandler) {
-
+void SIBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     auto file = pIOHandler->Open(pFile, "rb");
-    if (!file)
+    if (!file) {
         throw DeadlyImportError("SIB: Could not open ", pFile);
+    }
 
     StreamReaderLE stream(file);
 
     // We should have at least one chunk
-    if (stream.GetRemainingSize() < 16)
+    if (stream.GetRemainingSize() < 16) {
         throw DeadlyImportError("SIB file is either empty or corrupt: ", pFile);
+    }
 
     SIB sib;
 
@@ -819,12 +861,20 @@ void SIBImporter::InternReadFile(const std::string &pFile,
     pScene->mMaterials = pScene->mNumMaterials ? new aiMaterial *[pScene->mNumMaterials] : nullptr;
     pScene->mMeshes = pScene->mNumMeshes ? new aiMesh *[pScene->mNumMeshes] : nullptr;
     pScene->mLights = pScene->mNumLights ? new aiLight *[pScene->mNumLights] : nullptr;
-    if (pScene->mNumMaterials)
+    if (pScene->mNumMaterials) {
         memcpy(pScene->mMaterials, &sib.mtls[0], sizeof(aiMaterial *) * pScene->mNumMaterials);
-    if (pScene->mNumMeshes)
+    }
+    if (pScene->mNumMeshes) {
         memcpy(pScene->mMeshes, &sib.meshes[0], sizeof(aiMesh *) * pScene->mNumMeshes);
-    if (pScene->mNumLights)
+    }
+    if (pScene->mNumLights) {
         memcpy(pScene->mLights, &sib.lights[0], sizeof(aiLight *) * pScene->mNumLights);
+    }
+
+    // The scene owns them now, so make sure they are not deleted twice. The light list
+    // is still needed below and is released after the nodes have been built.
+    sib.mtls.clear();
+    sib.meshes.clear();
 
     // Construct the root node.
     size_t childIdx = 0;
@@ -846,8 +896,9 @@ void SIBImporter::InternReadFile(const std::string &pFile,
 
         node->mNumMeshes = static_cast<unsigned int>(obj.meshCount);
         node->mMeshes = node->mNumMeshes ? new unsigned[node->mNumMeshes] : nullptr;
-        for (unsigned i = 0; i < node->mNumMeshes; i++)
+        for (unsigned i = 0; i < node->mNumMeshes; i++) {
             node->mMeshes[i] = static_cast<unsigned int>(obj.meshIdx + i);
+        }
 
         // Mark instanced objects as being so.
         if (n >= firstInst) {
@@ -868,6 +919,8 @@ void SIBImporter::InternReadFile(const std::string &pFile,
             node->mParent = root;
         }
     }
+
+    sib.lights.clear();
 }
 
 } // namespace Assimp

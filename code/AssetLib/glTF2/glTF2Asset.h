@@ -556,7 +556,7 @@ struct Accessor : public Object {
     std::vector<double> min; //!< Minimum value of each component in this attribute.
     std::unique_ptr<Sparse> sparse;
     std::unique_ptr<Buffer> decodedBuffer; // Packed decoded data, returned instead of original bufferView if present
-
+    bool normalized;
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();
     unsigned int GetElementSize();

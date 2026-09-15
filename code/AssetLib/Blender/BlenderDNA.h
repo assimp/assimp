@@ -615,16 +615,16 @@ public:
     ~Statistics() = default;
 
     /// total number of fields we read
-    unsigned int fields_read;
+    unsigned int fields_read = 0;
 
     /// total number of resolved pointers
-    unsigned int pointers_resolved;
+    unsigned int pointers_resolved = 0;
 
     /// number of pointers resolved from the cache
-    unsigned int cache_hits;
+    unsigned int cache_hits = 0;
 
     /// objects in FileData::cache
-    unsigned int cached_objects;
+    unsigned int cached_objects = 0;
 };
 
 #endif

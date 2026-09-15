@@ -245,8 +245,7 @@ public:
     /** Merges two or more bones
      *
      *  @param out Mesh to receive the output bone list
-     *  @param flags Currently no parameters
-     *  @param begin First mesh to be processed
+     *  @param it First mesh to be processed
      *  @param end Points to the mesh after the last mesh to be processed
      */
     static void MergeBones(aiMesh *out, std::vector<aiMesh *>::const_iterator it,
@@ -331,7 +330,7 @@ public:
      *    pointer doesn't point to nullptr when the function is called, the
      *    existing scene is cleared and refilled.
      *  @param dest Receives a pointer to the destination scene
-     *  @param src Source scene - remains unmodified.
+     *  @param source Source scene - remains unmodified.
      */
     static void CopySceneFlat(aiScene **dest, const aiScene *source);
 

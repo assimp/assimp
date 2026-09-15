@@ -55,7 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+
+#include <climits>
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #include <zlib.h>
@@ -149,16 +153,16 @@ aiQuaternion Read<aiQuaternion>(IOStream *stream) {
 template <>
 aiString Read<aiString>(IOStream *stream) {
     aiString s;
-    uint32_t len;
-    if (stream->Read(&len, 4, 1) != 1) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string length");
-    }
+    const ai_uint32 len = Read<ai_uint32>(stream);
     if (len >= AI_MAXLEN) {
         throw DeadlyImportError("ASSBIN: String length too large, potential buffer overflow attempt");
     }
     s.length = len;
-    if ((s.length > 0) && (stream->Read(s.data, s.length, 1) != 1)) {
-        throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+    if (s.length > 0) {
+        const size_t bytesRead = stream->Read(s.data, sizeof(char), s.length);
+        if (bytesRead != s.length) {
+            throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
+        }
     }
     s.data[s.length] = '\0';
 
@@ -228,7 +232,7 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
     /*uint32_t size =*/Read<uint32_t>(stream);
 
-    std::unique_ptr<aiNode> node(new aiNode());
+    auto node = std::make_unique<aiNode>();
 
     node->mName = Read<aiString>(stream);
     node->mTransformation = Read<aiMatrix4x4>(stream);
@@ -236,24 +240,32 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
     unsigned numMeshes = Read<unsigned int>(stream);
     unsigned int nb_metadata = Read<unsigned int>(stream);
 
+    if (numMeshes > AI_MAX_ALLOC(unsigned int)) {
+        throw DeadlyImportError("Assbin: Too many meshes in node, would overflow");
+    }
+    if (numChildren > AI_MAX_ALLOC(aiNode *)) {
+        throw DeadlyImportError("Assbin: Too many children in node, would overflow");
+    }
+    if (nb_metadata > AI_MAX_ALLOC(aiMetadataEntry)) {
+        throw DeadlyImportError("Assbin: Too many metadata properties, would overflow");
+    }
+
     if (parent) {
         node->mParent = parent;
     }
 
     if (numMeshes) {
         node->mMeshes = new unsigned int[numMeshes];
-        for (unsigned int i = 0; i < numMeshes; ++i) {
-            node->mMeshes[i] = Read<unsigned int>(stream);
-            node->mNumMeshes++;
-        }
+        ReadArray(stream, node->mMeshes, numMeshes);
+        node->mNumMeshes = numMeshes;
     }
 
     if (numChildren) {
-        node->mChildren = new aiNode *[numChildren];
+        node->mChildren = new aiNode *[numChildren]();
         for (unsigned int i = 0; i < numChildren; ++i) {
             ReadBinaryNode(stream, &node->mChildren[i], node.get());
-            node->mNumChildren++;
         }
+        node->mNumChildren = numChildren;
     }
 
     if (nb_metadata > 0) {
@@ -264,27 +276,34 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
             void *data = nullptr;
 
             switch (node->mMetaData->mValues[i].mType) {
-            case AI_BOOL:
+            case AI_BOOL: {
                 data = new bool(Read<bool>(stream));
                 break;
-            case AI_INT32:
+            }
+            case AI_INT32: {
                 data = new int32_t(Read<int32_t>(stream));
                 break;
-            case AI_UINT64:
+            }
+            case AI_UINT64: {
                 data = new uint64_t(Read<uint64_t>(stream));
                 break;
-            case AI_FLOAT:
+            }
+            case AI_FLOAT: {
                 data = new ai_real(Read<ai_real>(stream));
                 break;
-            case AI_DOUBLE:
+            }
+            case AI_DOUBLE: {
                 data = new double(Read<double>(stream));
                 break;
-            case AI_AISTRING:
+            }
+            case AI_AISTRING: {
                 data = new aiString(Read<aiString>(stream));
                 break;
-            case AI_AIVECTOR3D:
+            }
+            case AI_AIVECTOR3D: {
                 data = new aiVector3D(Read<aiVector3D>(stream));
                 break;
+            }
 #ifndef SWIG
             case FORCE_32BIT:
 #endif // SWIG
@@ -308,14 +327,17 @@ void AssbinImporter::ReadBinaryBone(IOStream *stream, aiBone *b) {
     b->mNumWeights = Read<unsigned int>(stream);
     b->mOffsetMatrix = Read<aiMatrix4x4>(stream);
 
+    if (b->mNumWeights > AI_MAX_ALLOC(aiVertexWeight) || (size_t)b->mNumWeights > SIZE_MAX / sizeof(aiVertexWeight)) {
+        throw DeadlyImportError("Assbin: Too many weights, would overflow");
+    }
+
     // for the moment we write dumb min/max values for the bones, too.
     // maybe I'll add a better, hash-like solution later
     if (shortened) {
         ReadBounds(stream, b->mWeights, b->mNumWeights);
     } else {
-        // else write as usual
         b->mWeights = new aiVertexWeight[b->mNumWeights];
-        ReadArray<aiVertexWeight>(stream, b->mWeights, b->mNumWeights);
+        ReadArray(stream, b->mWeights, b->mNumWeights);
     }
 }
 
@@ -336,6 +358,17 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
     mesh->mNumBones = Read<unsigned int>(stream);
     mesh->mMaterialIndex = Read<unsigned int>(stream);
 
+    if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiVector3D) ||
+        mesh->mNumVertices > AI_MAX_ALLOC(aiColor4D) || (size_t)mesh->mNumVertices > SIZE_MAX / sizeof(aiColor4D)) {
+        throw DeadlyImportError("Assbin: Too many vertices, would overflow");
+    }
+    if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace) || (size_t)mesh->mNumFaces > SIZE_MAX / sizeof(aiFace)) {
+        throw DeadlyImportError("Assbin: Too many faces, would overflow");
+    }
+    if (mesh->mNumBones > AI_MAX_ALLOC(aiBone *) || (size_t)mesh->mNumBones > SIZE_MAX / sizeof(aiBone *)) {
+        throw DeadlyImportError("Assbin: Too many bones, would overflow");
+    }
+
     // first of all, write bits for all existent vertex components
     unsigned int c = Read<unsigned int>(stream);
 
@@ -343,18 +376,16 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mVertices, mesh->mNumVertices);
         } else {
-            // else write as usual
             mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mVertices, mesh->mNumVertices);
+            ReadArray(stream, mesh->mVertices, mesh->mNumVertices);
         }
     }
     if (c & ASSBIN_MESH_HAS_NORMALS) {
         if (shortened) {
             ReadBounds(stream, mesh->mNormals, mesh->mNumVertices);
         } else {
-            // else write as usual
             mesh->mNormals = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mNormals, mesh->mNumVertices);
+            ReadArray(stream, mesh->mNormals, mesh->mNumVertices);
         }
     }
     if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS) {
@@ -362,11 +393,10 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
             ReadBounds(stream, mesh->mTangents, mesh->mNumVertices);
             ReadBounds(stream, mesh->mBitangents, mesh->mNumVertices);
         } else {
-            // else write as usual
             mesh->mTangents = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mTangents, mesh->mNumVertices);
+            ReadArray(stream, mesh->mTangents, mesh->mNumVertices);
             mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mBitangents, mesh->mNumVertices);
+            ReadArray(stream, mesh->mBitangents, mesh->mNumVertices);
         }
     }
     for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS; ++n) {
@@ -377,9 +407,8 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mColors[n], mesh->mNumVertices);
         } else {
-            // else write as usual
             mesh->mColors[n] = new aiColor4D[mesh->mNumVertices];
-            ReadArray<aiColor4D>(stream, mesh->mColors[n], mesh->mNumVertices);
+            ReadArray(stream, mesh->mColors[n], mesh->mNumVertices);
         }
     }
     for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++n) {
@@ -393,9 +422,8 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
         if (shortened) {
             ReadBounds(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
         } else {
-            // else write as usual
             mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
-            ReadArray<aiVector3D>(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
+            ReadArray(stream, mesh->mTextureCoords[n], mesh->mNumVertices);
         }
     }
 
@@ -414,6 +442,9 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
 
             static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
             f.mNumIndices = Read<uint16_t>(stream);
+            if (f.mNumIndices > AI_MAX_FACE_INDICES) {
+                throw DeadlyImportError("Assbin: Too many face indices, would overflow");
+            }
             f.mIndices = new unsigned int[f.mNumIndices];
 
             for (unsigned int a = 0; a < f.mNumIndices; ++a) {
@@ -449,8 +480,15 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream *stream, aiMaterialProp
 
     prop->mDataLength = Read<unsigned int>(stream);
     prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
+
+    if (prop->mDataLength > AI_MAX_ALLOC(char)) {
+        throw DeadlyImportError("Assbin: Material property data too large");
+    }
+
     prop->mData = new char[prop->mDataLength];
-    stream->Read(prop->mData, 1, prop->mDataLength);
+    if (stream->Read(prop->mData, 1, prop->mDataLength) != prop->mDataLength) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading material property data");
+    }
 }
 
 // -----------------------------------------------------------------------------------
@@ -485,34 +523,38 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream *stream, aiNodeAnim *nd) {
     nd->mPreState = (aiAnimBehaviour)Read<unsigned int>(stream);
     nd->mPostState = (aiAnimBehaviour)Read<unsigned int>(stream);
 
+    if (nd->mNumPositionKeys > AI_MAX_ALLOC(aiVectorKey) || (size_t)nd->mNumPositionKeys > SIZE_MAX / sizeof(aiVectorKey)) {
+        throw DeadlyImportError("Assbin: Too many position keys, would overflow");
+    }
+    if (nd->mNumRotationKeys > AI_MAX_ALLOC(aiQuatKey) || (size_t)nd->mNumRotationKeys > SIZE_MAX / sizeof(aiQuatKey)) {
+        throw DeadlyImportError("Assbin: Too many rotation keys, would overflow");
+    }
+    if (nd->mNumScalingKeys > AI_MAX_ALLOC(aiVectorKey) || (size_t)nd->mNumScalingKeys > SIZE_MAX / sizeof(aiVectorKey)) {
+        throw DeadlyImportError("Assbin: Too many scaling keys, would overflow");
+    }
+
     if (nd->mNumPositionKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mPositionKeys, nd->mNumPositionKeys);
-
-        } // else write as usual
-        else {
+        } else {
             nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
-            ReadArray<aiVectorKey>(stream, nd->mPositionKeys, nd->mNumPositionKeys);
+            ReadArray(stream, nd->mPositionKeys, nd->mNumPositionKeys);
         }
     }
     if (nd->mNumRotationKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mRotationKeys, nd->mNumRotationKeys);
-
         } else {
-            // else write as usual
             nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
-            ReadArray<aiQuatKey>(stream, nd->mRotationKeys, nd->mNumRotationKeys);
+            ReadArray(stream, nd->mRotationKeys, nd->mNumRotationKeys);
         }
     }
     if (nd->mNumScalingKeys) {
         if (shortened) {
             ReadBounds(stream, nd->mScalingKeys, nd->mNumScalingKeys);
-
         } else {
-            // else write as usual
             nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
-            ReadArray<aiVectorKey>(stream, nd->mScalingKeys, nd->mNumScalingKeys);
+            ReadArray(stream, nd->mScalingKeys, nd->mNumScalingKeys);
         }
     }
 }
@@ -528,6 +570,10 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
     anim->mTicksPerSecond = Read<double>(stream);
     anim->mNumChannels = Read<unsigned int>(stream);
 
+    if (anim->mNumChannels > AI_MAX_ALLOC(aiNodeAnim *) || (size_t)anim->mNumChannels > SIZE_MAX / sizeof(aiNodeAnim *)) {
+        throw DeadlyImportError("Assbin: Too many animation channels, would overflow");
+    }
+
     if (anim->mNumChannels) {
         anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
         for (unsigned int a = 0; a < anim->mNumChannels; ++a) {
@@ -539,9 +585,10 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
 
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
-    if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AITEXTURE)
+    if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AITEXTURE) {
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
-    /*uint32_t size =*/Read<uint32_t>(stream);
+    }
+    Read<uint32_t>(stream); // size
 
     tex->mWidth = Read<unsigned int>(stream);
     tex->mHeight = Read<unsigned int>(stream);
@@ -549,11 +596,26 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     if (!shortened) {
         if (!tex->mHeight) {
+            if (tex->mWidth > AI_MAX_ALLOC(aiTexel)) {
+                throw DeadlyImportError("Assbin: Texture width too large, would overflow");
+            }
             tex->pcData = new aiTexel[tex->mWidth];
-            stream->Read(tex->pcData, 1, tex->mWidth);
+            if (stream->Read(tex->pcData, 1, tex->mWidth) != tex->mWidth) {
+                throw DeadlyImportError("Assbin: Unexpected EOF reading compressed texture data");
+            }
         } else {
-            tex->pcData = new aiTexel[tex->mWidth * tex->mHeight];
-            stream->Read(tex->pcData, 1, tex->mWidth * tex->mHeight * 4);
+            if (tex->mWidth != 0 &&
+                static_cast<size_t>(tex->mHeight) >
+                    SIZE_MAX / sizeof(aiTexel) / static_cast<size_t>(tex->mWidth)) {
+                throw DeadlyImportError("Assbin: Texture dimensions too large");
+            }
+
+            const size_t pixelCount = static_cast<size_t>(tex->mWidth) * tex->mHeight;
+            const size_t byteCount = pixelCount * sizeof(aiTexel);
+            tex->pcData = new aiTexel[pixelCount];
+            if (stream->Read(tex->pcData, 1, byteCount) != byteCount) {
+                throw DeadlyImportError("Assbin: Unexpected EOF reading texture data");
+            }
         }
     }
 }
@@ -623,8 +685,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all meshes
     if (scene->mNumMeshes) {
-        scene->mMeshes = new aiMesh *[scene->mNumMeshes];
-        memset(scene->mMeshes, 0, scene->mNumMeshes * sizeof(aiMesh *));
+        scene->mMeshes = new aiMesh *[scene->mNumMeshes]();
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
             scene->mMeshes[i] = new aiMesh();
             ReadBinaryMesh(stream, scene->mMeshes[i]);
@@ -633,8 +694,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read materials
     if (scene->mNumMaterials) {
-        scene->mMaterials = new aiMaterial *[scene->mNumMaterials];
-        memset(scene->mMaterials, 0, scene->mNumMaterials * sizeof(aiMaterial *));
+        scene->mMaterials = new aiMaterial *[scene->mNumMaterials]();
         for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
             scene->mMaterials[i] = new aiMaterial();
             ReadBinaryMaterial(stream, scene->mMaterials[i]);
@@ -643,8 +703,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all animations
     if (scene->mNumAnimations) {
-        scene->mAnimations = new aiAnimation *[scene->mNumAnimations];
-        memset(scene->mAnimations, 0, scene->mNumAnimations * sizeof(aiAnimation *));
+        scene->mAnimations = new aiAnimation *[scene->mNumAnimations]();
         for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
             scene->mAnimations[i] = new aiAnimation();
             ReadBinaryAnim(stream, scene->mAnimations[i]);
@@ -653,8 +712,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read all textures
     if (scene->mNumTextures) {
-        scene->mTextures = new aiTexture *[scene->mNumTextures];
-        memset(scene->mTextures, 0, scene->mNumTextures * sizeof(aiTexture *));
+        scene->mTextures = new aiTexture *[scene->mNumTextures]();
         for (unsigned int i = 0; i < scene->mNumTextures; ++i) {
             scene->mTextures[i] = new aiTexture();
             ReadBinaryTexture(stream, scene->mTextures[i]);
@@ -663,8 +721,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read lights
     if (scene->mNumLights) {
-        scene->mLights = new aiLight *[scene->mNumLights];
-        memset(scene->mLights, 0, scene->mNumLights * sizeof(aiLight *));
+        scene->mLights = new aiLight *[scene->mNumLights]();
         for (unsigned int i = 0; i < scene->mNumLights; ++i) {
             scene->mLights[i] = new aiLight();
             ReadBinaryLight(stream, scene->mLights[i]);
@@ -673,8 +730,7 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
     // Read cameras
     if (scene->mNumCameras) {
-        scene->mCameras = new aiCamera *[scene->mNumCameras];
-        memset(scene->mCameras, 0, scene->mNumCameras * sizeof(aiCamera *));
+        scene->mCameras = new aiCamera *[scene->mNumCameras]();
         for (unsigned int i = 0; i < scene->mNumCameras; ++i) {
             scene->mCameras[i] = new aiCamera();
             ReadBinaryCamera(stream, scene->mCameras[i]);
@@ -684,7 +740,19 @@ void AssbinImporter::ReadBinaryScene(IOStream *stream, aiScene *scene) {
 
 // -----------------------------------------------------------------------------------
 void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
-    IOStream *stream = pIOHandler->Open(pFile, "rb");
+    struct IOStreamDeleter {
+        IOSystem* io;
+        void operator()(IOStream* s) const {
+            if (s) {
+                io->Close(s);
+            }
+        }
+    };
+
+    auto stream = std::unique_ptr<IOStream, IOStreamDeleter>(
+        pIOHandler->Open(pFile, "rb"),
+        IOStreamDeleter{pIOHandler}
+    );
     if (nullptr == stream) {
         throw DeadlyImportError("ASSBIN: Could not open ", pFile);
     }
@@ -692,21 +760,19 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     // signature
     stream->Seek(44, aiOrigin_CUR);
 
-    unsigned int versionMajor = Read<unsigned int>(stream);
-    unsigned int versionMinor = Read<unsigned int>(stream);
+    unsigned int versionMajor = Read<unsigned int>(stream.get());
+    unsigned int versionMinor = Read<unsigned int>(stream.get());
     if (versionMinor != ASSBIN_VERSION_MINOR || versionMajor != ASSBIN_VERSION_MAJOR) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Invalid version, data format not compatible!");
     }
 
-    /*unsigned int versionRevision =*/Read<unsigned int>(stream);
-    /*unsigned int compileFlags =*/Read<unsigned int>(stream);
+    /*unsigned int versionRevision =*/Read<unsigned int>(stream.get());
+    /*unsigned int compileFlags =*/Read<unsigned int>(stream.get());
 
-    shortened = Read<uint16_t>(stream) > 0;
-    compressed = Read<uint16_t>(stream) > 0;
+    shortened = Read<uint16_t>(stream.get()) > 0;
+    compressed = Read<uint16_t>(stream.get()) > 0;
 
     if (shortened) {
-        pIOHandler->Close(stream);
         throw DeadlyImportError("Shortened binaries are not supported!");
     }
 
@@ -715,34 +781,28 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
     stream->Seek(64, aiOrigin_CUR); // padding
 
     if (compressed) {
-        uLongf uncompressedSize = Read<uint32_t>(stream);
+        uLongf uncompressedSize = Read<uint32_t>(stream.get());
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
-        unsigned char *compressedData = new unsigned char[compressedSize];
-        size_t len = stream->Read(compressedData, 1, compressedSize);
-        ai_assert(len == compressedSize);
+        std::vector<unsigned char> compressedData(compressedSize);
+        const size_t len = stream->Read(compressedData.data(), 1, compressedSize);
+        if (len != compressedSize) {
+            throw DeadlyImportError("ASSBIN: Unexpected EOF while reading compressed data");
+        }
 
-        unsigned char *uncompressedData = new unsigned char[uncompressedSize];
+        std::vector<unsigned char> uncompressedData(uncompressedSize);
 
-        int res = uncompress(uncompressedData, &uncompressedSize, compressedData, (uLong)len);
+        const int res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
         if (res != Z_OK) {
-            delete[] uncompressedData;
-            delete[] compressedData;
-            pIOHandler->Close(stream);
             throw DeadlyImportError("Zlib decompression failed.");
         }
 
-        MemoryIOStream io(uncompressedData, uncompressedSize);
+        MemoryIOStream io(uncompressedData.data(), uncompressedSize);
 
         ReadBinaryScene(&io, pScene);
-
-        delete[] uncompressedData;
-        delete[] compressedData;
     } else {
-        ReadBinaryScene(stream, pScene);
+        ReadBinaryScene(stream.get(), pScene);
     }
-
-    pIOHandler->Close(stream);
 }
 
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

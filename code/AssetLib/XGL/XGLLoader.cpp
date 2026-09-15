@@ -291,9 +291,7 @@ aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 		throw;
 	}
 
-	// FIX: since we used std::multimap<> to keep meshes by id, mesh order now depends on the behaviour
-	// of the multimap implementation with respect to the ordering of entries with same values.
-	// C++11 gives the guarantee that it uses insertion order, before it is implementation-specific.
+	// FIX: since we used std::unordered_multimap<> to keep meshes by id, mesh order is essentially random
 	// Sort by material id to always guarantee a deterministic result.
 	std::sort(meshes.begin(), meshes.end(), SortMeshByMaterialId(scope));
 
@@ -442,7 +440,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 	TempMesh t;
     uint32_t matId = 99999;
     bool mesh_created = false;
-	std::map<unsigned int, TempMaterialMesh> bymat;
+	std::unordered_map<unsigned int, TempMaterialMesh> bymat;
     const unsigned int mesh_id = ReadIDAttr(node);
 	for (XmlNode &child : node.children()) {
         const std::string &s = ai_stdStrToLower(child.name());
@@ -533,7 +531,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 }
 
 // ----------------------------------------------------------------------------------------------
-void XGLImporter::AppendOutputMeshes(std::map<unsigned int, TempMaterialMesh> bymat, TempScope &scope,
+void XGLImporter::AppendOutputMeshes(std::unordered_map<unsigned int, TempMaterialMesh> bymat, TempScope &scope,
         const unsigned int mesh_id) {
     using pairt = std::pair<const unsigned int, TempMaterialMesh>;
     for (const pairt &p : bymat) {

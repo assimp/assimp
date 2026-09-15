@@ -115,6 +115,14 @@ TEST_F(utPLYImportExport, importPLYwithUV) {
     EXPECT_EQ(true, scene->mMeshes[0]->HasTextureCoords(0));
 }
 
+// A face whose texcoord list is longer than twice its vertex-index list must not
+// read past the face index array.
+TEST_F(utPLYImportExport, faceTexCoordOutOfBounds) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/malformed_face_texcoord_oob.ply", 0);
+    EXPECT_NE(nullptr, scene);
+}
+
 TEST_F(utPLYImportExport, importBinaryPLY) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube_binary.ply", aiProcess_ValidateDataStructure);

@@ -624,7 +624,11 @@ namespace Assimp {
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[a / 2];
+                            const unsigned int idx = a / 2;
+                            if (idx >= mGeneratedMesh->mFaces[pos].mNumIndices) {
+                                break;
+                            }
+                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[idx];
                             if (vindex < mGeneratedMesh->mNumVertices) {
                                 if (mGeneratedMesh->mTextureCoords[0] == nullptr) {
                                     mGeneratedMesh->mNumUVComponents[0] = 2;

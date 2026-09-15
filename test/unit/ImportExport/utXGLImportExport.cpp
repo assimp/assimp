@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
 
 using namespace Assimp;
 
@@ -49,46 +51,146 @@ TEST(utXGLImporter, importBCN_Epileptic) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/BCN_Epileptic.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 6u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 3u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 6108u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 2036u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumVertices, 3372u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumFaces, 1124u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumVertices, 5898u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumFaces, 1966u);
 }
 
 TEST(utXGLImporter, importCubesWithAlpha) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/cubes_with_alpha.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 6u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 5u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[1]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[2]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[3]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[3]->mNumFaces, 12u);
+    EXPECT_EQ(scene->mMeshes[4]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[4]->mNumFaces, 12u);
 }
 
 TEST(utXGLImporter, importSample_official) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official.xgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 1u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
 }
 
 TEST(utXGLImporter, importSample_official_asxml) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sample_official_asxml.xml", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 1u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 36u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 12u);
 }
 
 TEST(utXGLImporter, importSphereWithMatGloss) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/sphere_with_mat_gloss_10pc.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 3u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 1584u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 528u);
 }
 
 TEST(utXGLImporter, importSpiderASCII) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/Spider_ascii.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 1u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 3936u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 1312u);
 }
 
 TEST(utXGLImporter, importWuson) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/Wuson.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 2u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 11196u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 3732u);
 }
 
 TEST(utXGLImporter, importWusonDXF) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/wuson_dxf.zgl", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mFlags, 0u);
+    EXPECT_EQ(scene->mNumMaterials, 1u);
+    EXPECT_EQ(scene->mNumAnimations, 0u);
+    EXPECT_EQ(scene->mNumTextures, 0u);
+    EXPECT_EQ(scene->mNumLights, 0u);
+    EXPECT_EQ(scene->mNumCameras, 0u);
+
+    EXPECT_EQ(scene->mNumSkeletons, 0u);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 11196u);
+    EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 3732u);
 }

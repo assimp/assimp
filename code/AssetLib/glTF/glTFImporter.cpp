@@ -139,6 +139,10 @@ namespace {
                 continue;
             }
 
+            if (attr.texcoord[tc]->count < aim->mNumVertices) {
+                DefaultLogger::get()->warn("Texture coordinate accessor for set ", tc, " has fewer elements than the mesh has vertices in mesh \"", meshName, "\"");
+                continue;
+            }
             if (!attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc])) {
                 DefaultLogger::get()->warn("Failed to extract texture coordinate set ", tc, " in mesh \"", meshName, "\"");
                 continue;

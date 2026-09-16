@@ -290,7 +290,11 @@ bool STEP::StringToUTF8(std::string& s)
             // \S\X - cp1252 (X is the character remapped to [0,127])
             if (i+3 < s.size() && s[i+1] == 'S' && s[i+2] == '\\') {
                 // http://stackoverflow.com/questions/5586214/how-to-convert-char-from-iso-8859-1-to-utf-8-in-c-multiplatformly
-                ai_assert((uint8_t)s[i+3] < 0x80);
+                // \S\ escapes require the escaped byte to be < 0x80;
+                // reject malformed input instead of asserting on it
+                if ((uint8_t)s[i+3] >= 0x80) {
+                    return false;
+                }
                 const uint8_t ch = s[i+3] + 0x80;
 
                 s[i] = 0xc0 | (ch & 0xc0) >> 6;

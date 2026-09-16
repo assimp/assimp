@@ -916,8 +916,16 @@ inline void CreateNewEntry(T &chan, unsigned int srcIdx) {
     // The channel storage may be out of sync with the point list in
     // malformed files - grow it before duplicating the source entry.
     if (srcIdx >= chan.abAssigned.size() || static_cast<size_t>(srcIdx) * chan.dims + chan.dims > chan.rawData.size()) {
+        const size_t firstNew = chan.rawData.size() / chan.dims;
         chan.abAssigned.resize(srcIdx + 1, false);
         chan.rawData.resize(static_cast<size_t>(srcIdx + 1) * chan.dims, 0.f);
+        // Synthesized RGBA entries default to opaque alpha, matching the
+        // conversion fallback for channels without stored alpha.
+        if (chan.dims == 4) {
+            for (size_t i = firstNew; i <= srcIdx; ++i) {
+                chan.rawData[i * 4 + 3] = 1.f;
+            }
+        }
     }
 
     chan.abAssigned[srcIdx] = true;

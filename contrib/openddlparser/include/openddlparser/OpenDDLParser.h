@@ -158,6 +158,7 @@ public:
 public: // parser helpers
     char *parseNextNode(char *current, char *end);
     char *parseHeader(char *in, char *end);
+    char *parseStructureProperties(char *in, char *end, DDLNode *node);
     char *parseStructure(char *in, char *end);
     char *parseStructureBody(char *in, char *end, bool &error);
     void pushNode(DDLNode *node);

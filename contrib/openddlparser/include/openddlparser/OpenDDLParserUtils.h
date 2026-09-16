@@ -465,8 +465,7 @@ inline bool isComment(T *in, T *end) {
     if (in == end || *in != '/' || in + 1 == end || *(in + 1) != '/') {
         return false;
     }
-    char *drive((in + 2));
-    if (drive != end && (isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && drive + 1 != end && *(drive + 1) == '/') {
+    if (char *drive((in + 2)); drive != end && (isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && drive + 1 != end && *(drive + 1) == '/') {
         return false;
     }
     return true;

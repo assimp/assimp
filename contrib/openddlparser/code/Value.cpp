@@ -238,8 +238,10 @@ float Value::getFloat() const {
         ::memcpy(&v, m_data, m_size);
         return (float)v;
     } else {
-        float tmp;
-        ::memcpy(&tmp, m_data, 4);
+        float tmp(0.0f);
+        if (m_size) {
+            ::memcpy(&tmp, m_data, m_size < sizeof(tmp) ? m_size : sizeof(tmp));
+        }
         return (float)tmp;
     }
 }
@@ -255,8 +257,10 @@ double Value::getDouble() const {
         ::memcpy(&v, m_data, m_size);
         return (float)v;
     } else {
-        double tmp;
-        ::memcpy(&tmp, m_data, 4);
+        double tmp(0.0);
+        if (m_size) {
+            ::memcpy(&tmp, m_data, m_size < sizeof(tmp) ? m_size : sizeof(tmp));
+        }
         return (double)tmp;
     }
 }

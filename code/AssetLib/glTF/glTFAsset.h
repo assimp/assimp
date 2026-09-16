@@ -338,6 +338,9 @@ struct Accessor : public Object {
 
     inline uint8_t *GetPointer();
 
+    //! Returns true when the declared data range fits inside the bufferView.
+    inline bool CheckDataRange();
+
     template <class T>
     bool ExtractData(T *&outData);
 

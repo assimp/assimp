@@ -219,7 +219,7 @@ void glTFImporter::ImportMaterials(Asset &r) const {
 }
 
 void glTFImporter::ImportMeshes(Asset &r) {
-    std::vector<aiMesh *> meshes;
+    std::vector<std::unique_ptr<aiMesh>> meshes;
 
     unsigned int k = 0;
     meshOffsets.clear();
@@ -261,8 +261,9 @@ void glTFImporter::ImportMeshes(Asset &r) {
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             auto &[mode, attributes, indices, material] = mesh.primitives[p];
 
-            aiMesh *aim = new aiMesh();
-            meshes.push_back(aim);
+            auto aimOwner = std::make_unique<aiMesh>();
+            aiMesh *aim = aimOwner.get();
+            meshes.push_back(std::move(aimOwner));
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {

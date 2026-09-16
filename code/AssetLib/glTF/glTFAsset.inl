@@ -421,10 +421,26 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
+inline bool Accessor::CheckDataRange() {
+    if (!bufferView || !bufferView->buffer) return false;
+    if (!count) return true;
+
+    const size_t elemSize = GetElementSize();
+    const size_t stride = byteStride ? byteStride : elemSize;
+    if (!elemSize || stride < elemSize) return false;
+
+    if (byteOffset > bufferView->byteLength) return false;
+    const size_t avail = bufferView->byteLength - byteOffset;
+    if (avail < elemSize) return false;
+
+    // last touched byte must satisfy (count - 1) * stride + elemSize <= avail
+    return count - 1 <= (avail - elemSize) / stride;
+}
+
 template <class T>
 bool Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
-    if (!data) return false;
+    if (!data || !CheckDataRange()) return false;
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -432,18 +448,7 @@ bool Accessor::ExtractData(T *&outData) {
     const size_t stride = byteStride ? byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
-    if (elemSize == 0 || elemSize > targetElemSize) {
-        return false;
-    }
-
-    // Validate the source range in release builds as well: the readable
-    // span of this accessor is bufferView->byteLength - byteOffset, and a
-    // malformed file may declare a count that runs past the buffer view.
-    if (byteOffset >= bufferView->byteLength || elemSize > bufferView->byteLength - byteOffset) {
-        return false;
-    }
-    const size_t avail = bufferView->byteLength - byteOffset;
-    if (count > 1 && (count - 1) > (avail - elemSize) / stride) {
+    if (elemSize > targetElemSize) {
         return false;
     }
     if (count > std::numeric_limits<size_t>::max() / targetElemSize) {
@@ -476,14 +481,14 @@ inline void Accessor::WriteData(size_t cnt, const void *src_buffer, size_t src_s
 }
 
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.byteStride ? acc.byteStride : elemSize) {
+        accessor(acc), data(acc.CheckDataRange() ? acc.GetPointer() : nullptr), elemSize(acc.GetElementSize()), stride(acc.byteStride ? acc.byteStride : elemSize) {
 }
 
 //! Accesses the i-th value as defined by the accessor
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
     T value = T();
-    if (data == nullptr || i < 0) {
+    if (data == nullptr || i < 0 || static_cast<unsigned int>(i) >= accessor.count) {
         return value;
     }
     const size_t avail = accessor.byteOffset < accessor.bufferView->byteLength

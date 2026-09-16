@@ -1298,6 +1298,12 @@ void FBXExporter::WriteObjects () {
           // uvs, if any
           for (size_t uvi = 0; uvi < m->GetNumUVChannels(); uvi++) {
             const auto nc = m->mNumUVComponents[uvi];
+            if (nc == 0) {
+                // a UV channel without components carries no data; skipping it
+                // also avoids the division by zero below
+                ASSIMP_LOG_WARN("UV channel ", uvi, " in mesh ", mi, " has 0 components. Skipping.");
+                continue;
+            }
             if (nc > 2) {
                 // FBX only supports 2-channel UV maps...
                 // or at least i'm not sure how to indicate a different number

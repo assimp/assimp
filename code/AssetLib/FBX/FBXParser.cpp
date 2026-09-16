@@ -206,15 +206,21 @@ Scope::Scope(Parser& parser,bool topLevel)
 
             // Element() should stop at the next Key token (or right after a Close token)
             n = parser.CurrentToken();
-            if (n == nullptr) {
-                if (topLevel) {
-                    elements.insert(ElementMap::value_type(str, element));
-                    return;
-                }
+            if (n == nullptr && !topLevel) {
                 delete_Element(element);
                 ParseError("unexpected end of file",parser.LastToken());
-            } else {
+            }
+
+            try {
                 elements.insert(ElementMap::value_type(str, element));
+            } catch (...) {
+                // insertion failed: the map does not own the element yet
+                delete_Element(element);
+                throw;
+            }
+
+            if (n == nullptr) {
+                return;
             }
         }
     } catch (const std::exception &) {

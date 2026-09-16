@@ -346,15 +346,24 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                                 break;
                             }
                             aiVector3D *&pp = pvUV[w];
-                            const aiVector2D &src = ((aiVector2D *)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
-                            pp->x = src.x;
-                            pp->y = src.y;
+                            const LWO::UVChannel &uvChan = layer.mUVChannels[vUVChannelIndices[w]];
+                            if (idx * uvChan.dims + uvChan.dims <= uvChan.rawData.size()) {
+                                const aiVector2D &src = ((const aiVector2D *)&uvChan.rawData[0])[idx];
+                                pp->x = src.x;
+                                pp->y = src.y;
+                            } else {
+                                pp->x = pp->y = 0.f;
+                            }
                             pp++;
                         }
 
                         // process normals (MODO extension)
                         if (nrm) {
-                            *nrm = ((aiVector3D *)&layer.mNormals.rawData[0])[idx];
+                            if (idx * layer.mNormals.dims + layer.mNormals.dims <= layer.mNormals.rawData.size()) {
+                                *nrm = ((const aiVector3D *)&layer.mNormals.rawData[0])[idx];
+                            } else {
+                                *nrm = aiVector3D();
+                            }
                             nrm->z *= -1.f;
                             ++nrm;
                         }
@@ -364,7 +373,12 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                             if (UINT_MAX == vVColorIndices[w]) {
                                 break;
                             }
-                            *pvVC[w] = ((aiColor4D *)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
+                            const LWO::VColorChannel &vcChan = layer.mVColorChannels[vVColorIndices[w]];
+                            if (idx * vcChan.dims + vcChan.dims <= vcChan.rawData.size()) {
+                                *pvVC[w] = ((const aiColor4D *)&vcChan.rawData[0])[idx];
+                            } else {
+                                *pvVC[w] = aiColor4D(0.0, 0.0, 0.0, 1.0);
+                            }
 
                             // If a RGB color map is explicitly requested delete the
                             // alpha channel - it could theoretically be != 1.
@@ -896,8 +910,15 @@ VMapEntry *FindEntry(std::vector<T> &list, const std::string &name, bool perPoly
 // ------------------------------------------------------------------------------------------------
 template <class T>
 inline void CreateNewEntry(T &chan, unsigned int srcIdx) {
-    if (!chan.name.length())
+    if (chan.rawData.empty())
         return;
+
+    // The channel storage may be out of sync with the point list in
+    // malformed files - grow it before duplicating the source entry.
+    if (srcIdx >= chan.abAssigned.size() || static_cast<size_t>(srcIdx) * chan.dims + chan.dims > chan.rawData.size()) {
+        chan.abAssigned.resize(srcIdx + 1, false);
+        chan.rawData.resize(static_cast<size_t>(srcIdx + 1) * chan.dims, 0.f);
+    }
 
     chan.abAssigned[srcIdx] = true;
     chan.abAssigned.resize(chan.abAssigned.size() + 1, false);
@@ -921,7 +942,8 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry *base, unsigned int
     LWO::ReferrerList &refList = mCurLayer->mPointReferrers;
     unsigned int i;
 
-    if (idx >= base->abAssigned.size()) {
+    if (idx >= base->abAssigned.size() ||
+            static_cast<size_t>(idx) * base->dims + numRead > base->rawData.size()) {
         throw DeadlyImportError("Bad index");
     }
     base->abAssigned[idx] = true;

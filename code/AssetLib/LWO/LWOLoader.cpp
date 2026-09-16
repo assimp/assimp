@@ -1276,16 +1276,30 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length) {
                 break;
 
                 // precondition
-            case AI_LWO_PRE:
+            case AI_LWO_PRE: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, PRE, 2);
-                envelope.pre = (LWO::PrePostBehaviour)GetU2();
+                const uint16_t behaviour = GetU2();
+                if (behaviour > LWO::PrePostBehaviour_Linear) {
+                    ASSIMP_LOG_WARN("LWO: Unknown PRE behaviour, defaulting to constant");
+                    envelope.pre = LWO::PrePostBehaviour_Constant;
+                } else {
+                    envelope.pre = static_cast<LWO::PrePostBehaviour>(behaviour);
+                }
                 break;
+            }
 
                 // postcondition
-            case AI_LWO_POST:
+            case AI_LWO_POST: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, POST, 2);
-                envelope.post = (LWO::PrePostBehaviour)GetU2();
+                const uint16_t behaviour = GetU2();
+                if (behaviour > LWO::PrePostBehaviour_Linear) {
+                    ASSIMP_LOG_WARN("LWO: Unknown POST behaviour, defaulting to constant");
+                    envelope.post = LWO::PrePostBehaviour_Constant;
+                } else {
+                    envelope.post = static_cast<LWO::PrePostBehaviour>(behaviour);
+                }
                 break;
+            }
 
                 // keyframe
             case AI_LWO_KEY: {
@@ -1374,16 +1388,30 @@ void LWOImporter::LoadLWO3Envelope(unsigned int length) {
                 break;
 
                 // precondition
-            case AI_LWO_PRE:
+            case AI_LWO_PRE: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, PRE, 4);
-                envelope.pre = (LWO::PrePostBehaviour)GetU2();
+                const uint16_t behaviour = GetU2();
+                if (behaviour > LWO::PrePostBehaviour_Linear) {
+                    ASSIMP_LOG_WARN("LWO: Unknown PRE behaviour, defaulting to constant");
+                    envelope.pre = LWO::PrePostBehaviour_Constant;
+                } else {
+                    envelope.pre = static_cast<LWO::PrePostBehaviour>(behaviour);
+                }
                 break;
+            }
 
                 // postcondition
-            case AI_LWO_POST:
+            case AI_LWO_POST: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, POST, 4);
-                envelope.post = (LWO::PrePostBehaviour)GetU2();
+                const uint16_t behaviour = GetU2();
+                if (behaviour > LWO::PrePostBehaviour_Linear) {
+                    ASSIMP_LOG_WARN("LWO: Unknown POST behaviour, defaulting to constant");
+                    envelope.post = LWO::PrePostBehaviour_Constant;
+                } else {
+                    envelope.post = static_cast<LWO::PrePostBehaviour>(behaviour);
+                }
                 break;
+            }
 
                 // keyframe
             case AI_LWO_KEY: {

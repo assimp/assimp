@@ -144,15 +144,19 @@ Element::Element(const Token& key_token, Parser& parser) :
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            compound = new_Scope(parser);
+            Scope *scope = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
             ai_assert(n);
 
             if (n->Type() != TokenType_CLOSE_BRACKET) {
+                // free the fully built scope before propagating the error;
+                // the element dtor will not run for a partially constructed object
+                delete_Scope(scope);
                 ParseError("expected closing bracket",n);
             }
+            compound = scope;
 
             parser.AdvanceToNextToken();
             return;
@@ -187,30 +191,39 @@ Scope::Scope(Parser& parser,bool topLevel)
     }
 
     // note: empty scopes are allowed
-    while(n->Type() != TokenType_CLOSE_BRACKET) {
-        if (n->Type() != TokenType_KEY) {
-            ParseError("unexpected token, expected TOK_KEY",n);
-        }
-
-        const std::string& str = n->StringContents();
-        if (str.empty()) {
-            ParseError("unexpected content: empty string.");
-        }
-
-        auto *element = new_Element(*n, parser);
-
-        // Element() should stop at the next Key token (or right after a Close token)
-        n = parser.CurrentToken();
-        if (n == nullptr) {
-            if (topLevel) {
-                elements.insert(ElementMap::value_type(str, element));
-                return;
+    try {
+        while(n->Type() != TokenType_CLOSE_BRACKET) {
+            if (n->Type() != TokenType_KEY) {
+                ParseError("unexpected token, expected TOK_KEY",n);
             }
-            delete_Element(element);
-            ParseError("unexpected end of file",parser.LastToken());
-        } else {
-            elements.insert(ElementMap::value_type(str, element));
+
+            const std::string& str = n->StringContents();
+            if (str.empty()) {
+                ParseError("unexpected content: empty string.");
+            }
+
+            auto *element = new_Element(*n, parser);
+
+            // Element() should stop at the next Key token (or right after a Close token)
+            n = parser.CurrentToken();
+            if (n == nullptr) {
+                if (topLevel) {
+                    elements.insert(ElementMap::value_type(str, element));
+                    return;
+                }
+                delete_Element(element);
+                ParseError("unexpected end of file",parser.LastToken());
+            } else {
+                elements.insert(ElementMap::value_type(str, element));
+            }
         }
+    } catch (...) {
+        // run the destructors of the elements inserted so far; the scope dtor
+        // will not run because the constructor threw
+        for (ElementMap::value_type &v : elements) {
+            delete_Element(v.second);
+        }
+        throw;
     }
 }
 

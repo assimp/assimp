@@ -604,14 +604,17 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
     // which are only used for structures starting with an ID.
     // We don't need to make this distinction, our algorithm
     // works regardless where the data is stored.
-    vector<FileBlockHead>::const_iterator it = std::lower_bound(db.entries.begin(),db.entries.end(),ptrval);
-    if (it == db.entries.end()) {
+    // find the last file block starting at or before the pointer - this is
+    // the only block that may actually contain the pointed-to data.
+    vector<FileBlockHead>::const_iterator it = std::upper_bound(db.entries.begin(),db.entries.end(),ptrval);
+    if (it == db.entries.begin()) {
         // this is crucial, pointers may not be invalid.
         // this is either a corrupted file or an attempted attack.
         throw DeadlyImportError("Failure resolving pointer 0x",
             std::hex,ptrval.val,", no file block falls into this address range");
     }
-    if (ptrval.val >= (*it).address.val + (*it).size) {
+    --it;
+    if (ptrval.val - (*it).address.val >= (*it).size) {
         throw DeadlyImportError("Failure resolving pointer 0x",
             std::hex,ptrval.val,", nearest file block starting at 0x",
             (*it).address.val," ends at 0x",

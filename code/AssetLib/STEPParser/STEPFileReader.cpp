@@ -122,8 +122,11 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
                 if (list->GetSize() > 1)    {
                     ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported",line));
                 }
+                if (!list->GetSize()) {
+                    throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
+                }
                 const EXPRESS::STRING *string = dynamic_cast<const EXPRESS::STRING *>((*list)[0].get());
-                if (!list->GetSize() || nullptr == string ) {
+                if (nullptr == string ) {
                     throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
                 }
                 head.fileSchema =  *string;

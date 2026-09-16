@@ -80,6 +80,17 @@ static constexpr aiImporterDesc desc = {
 // Recursive parsing of LWS files
 namespace {
     constexpr int MAX_DEPTH = 1000; // Define the maximum depth allowed
+
+    // Validate a file-provided pre/post behaviour value before casting it to
+    // the enum; out-of-range values would otherwise produce an invalid enum.
+    LWO::PrePostBehaviour GetValidatedPrePostBehaviour(const char *&c) {
+        const unsigned int behaviour = strtoul10(c, &c);
+        if (behaviour > LWO::PrePostBehaviour_Linear) {
+            ASSIMP_LOG_WARN("LWS: Unknown pre/post behaviour, defaulting to constant");
+            return LWO::PrePostBehaviour_Constant;
+        }
+        return static_cast<LWO::PrePostBehaviour>(behaviour);
+    }
 }
 
 void LWS::Element::Parse(const char *&buffer, const char *end, int depth) {
@@ -246,9 +257,9 @@ void LWSImporter::ReadEnvelope(const LWS::Element &dad, LWO::Envelope &fill) {
             }
         } else if ((*it).tokens[0] == "Behaviors") {
             SkipSpaces(&c, end);
-            fill.pre = (LWO::PrePostBehaviour)strtoul10(c, &c);
+            fill.pre = GetValidatedPrePostBehaviour(c);
             SkipSpaces(&c, end);
-            fill.post = (LWO::PrePostBehaviour)strtoul10(c, &c);
+            fill.post = GetValidatedPrePostBehaviour(c);
         }
     }
 }
@@ -694,9 +705,9 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
                 for (std::list<LWO::Envelope>::iterator envelopeIt = nodes.back().channels.begin(); envelopeIt != nodes.back().channels.end(); ++envelopeIt) {
                     // two ints per envelope
                     LWO::Envelope &env = *envelopeIt;
-                    env.pre = (LWO::PrePostBehaviour)strtoul10(c, &c);
+                    env.pre = GetValidatedPrePostBehaviour(c);
                     SkipSpaces(&c, end);
-                    env.post = (LWO::PrePostBehaviour)strtoul10(c, &c);
+                    env.post = GetValidatedPrePostBehaviour(c);
                     SkipSpaces(&c, end);
                 }
             }

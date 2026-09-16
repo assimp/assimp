@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <algorithm>
 #include <memory>
 
 namespace Assimp {
@@ -524,14 +525,12 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
             }
             // only material buckets that actually received faces produce meshes;
             // counting them up-front would leave node->mMeshes entries uninitialized
-            for (const IntPair &bucket : needMat) {
-                if (bucket.first) {
-                    ++node->mNumMeshes;
-                }
-            }
+            node->mNumMeshes = static_cast<unsigned int>(std::count_if(needMat.begin(), needMat.end(),
+                    [](const IntPair &bucket) { return bucket.first != 0; }));
             unsigned int *pip = nullptr;
             if (node->mNumMeshes) {
-                pip = node->mMeshes = new unsigned int[node->mNumMeshes];
+                node->mMeshes = new unsigned int[node->mNumMeshes];
+                pip = node->mMeshes;
             }
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
@@ -719,8 +718,8 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
             // Now apply catmull clark subdivision if necessary. We split meshes into
             // materials which is not done by AC3D during smoothing, so we need to
             // collect all meshes using the same material group.
-            if (object.subDiv) {
-                if (configEvalSubdivision && meshes.size() != oldm) {
+            if (object.subDiv && meshes.size() != oldm) {
+                if (configEvalSubdivision) {
                     std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
                     ASSIMP_LOG_INFO("AC3D: Evaluating subdivision surface: ", object.name);
 

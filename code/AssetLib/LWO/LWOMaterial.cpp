@@ -580,14 +580,17 @@ void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture &tex) {
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2BlokChunk(unsigned int size) {
-    IFF::SubChunkHeader head2 = IFF::LoadSubChunk(mFileBuffer);
-
     // The inner sub-chunk header is never validated elsewhere:
     // it must fit into the BLOK data, otherwise the texture and
     // shader block loaders compute their end pointer past the
     // real end of the file. size is already known to be
     // in bounds, so head2.length <= size - 6 bounds it
     // by the file size transitively.
+    if (size < 6) {
+        throw DeadlyImportError("LWO2: Invalid texture block chunk length");
+    }
+
+    IFF::SubChunkHeader head2 = IFF::LoadSubChunk(mFileBuffer);
     if (head2.length > size - 6) {
         throw DeadlyImportError("LWO2: Invalid texture block chunk length");
     }

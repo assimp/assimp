@@ -163,108 +163,9 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
         char c = stream.GetI1();
         switch (c) {
             // Meshes chunk
-        case 'm': {
-            for (unsigned int quak = 0; quak < numMeshes; ++quak) {
-                meshes.emplace_back();
-                Mesh &mesh = meshes.back();
-
-                // read all vertices
-                unsigned int numVerts = (unsigned int)stream.GetI4();
-                if (!numVerts)
-                    throw DeadlyImportError("Quick3D: Found mesh with zero vertices");
-
-                // A vertex occupies 12 bytes in the file.
-                if (numVerts > stream.GetRemainingSize() / 12)
-                    throw DeadlyImportError("Quick3D: Vertex count exceeds file size");
-
-                std::vector<aiVector3D> &verts = mesh.verts;
-                verts.resize(numVerts);
-
-                for (unsigned int i = 0; i < numVerts; ++i) {
-                    verts[i].x = stream.GetF4();
-                    verts[i].y = stream.GetF4();
-                    verts[i].z = stream.GetF4();
-                }
-
-                // read all faces
-                numVerts = (unsigned int)stream.GetI4();
-                if (!numVerts)
-                    throw DeadlyImportError("Quick3D: Found mesh with zero faces");
-
-                // Each face occupies at least 2 bytes (its index count).
-                if (numVerts > stream.GetRemainingSize() / 2)
-                    throw DeadlyImportError("Quick3D: Face count exceeds file size");
-
-                std::vector<Face> &faces = mesh.faces;
-                faces.reserve(numVerts);
-
-                // number of indices
-                for (unsigned int i = 0; i < numVerts; ++i) {
-                    faces.emplace_back(stream.GetI2());
-                    if (faces.back().indices.empty())
-                        throw DeadlyImportError("Quick3D: Found face with zero indices");
-                }
-
-                // indices
-                for (unsigned int i = 0; i < numVerts; ++i) {
-                    Face &vec = faces[i];
-                    for (unsigned int a = 0; a < (unsigned int)vec.indices.size(); ++a)
-                        vec.indices[a] = stream.GetI4();
-                }
-
-                // material indices
-                for (unsigned int i = 0; i < numVerts; ++i) {
-                    faces[i].mat = (unsigned int)stream.GetI4();
-                }
-
-                // read all normals
-                numVerts = (unsigned int)stream.GetI4();
-                if (numVerts > stream.GetRemainingSize() / 12)
-                    throw DeadlyImportError("Quick3D: Normal count exceeds file size");
-
-                std::vector<aiVector3D> &normals = mesh.normals;
-                normals.resize(numVerts);
-
-                for (unsigned int i = 0; i < numVerts; ++i) {
-                    normals[i].x = stream.GetF4();
-                    normals[i].y = stream.GetF4();
-                    normals[i].z = stream.GetF4();
-                }
-
-                numVerts = (unsigned int)stream.GetI4();
-                if (numTextures && numVerts) {
-                    // A texture coordinate pair occupies 8 bytes in the file.
-                    if (numVerts > stream.GetRemainingSize() / 8)
-                        throw DeadlyImportError("Quick3D: Texture coordinate count exceeds file size");
-
-                    // read all texture coordinates
-                    std::vector<aiVector3D> &uv = mesh.uv;
-                    uv.resize(numVerts);
-
-                    for (unsigned int i = 0; i < numVerts; ++i) {
-                        uv[i].x = stream.GetF4();
-                        uv[i].y = stream.GetF4();
-                    }
-
-                    // UV indices
-                    for (unsigned int i = 0; i < (unsigned int)faces.size(); ++i) {
-                        Face &vec = faces[i];
-                        for (unsigned int a = 0; a < (unsigned int)vec.indices.size(); ++a) {
-                            vec.uvindices[a] = stream.GetI4();
-                            if (!i && !a)
-                                mesh.prevUVIdx = vec.uvindices[a];
-                            else if (vec.uvindices[a] != mesh.prevUVIdx)
-                                mesh.prevUVIdx = UINT_MAX;
-                        }
-                    }
-                }
-
-                // we don't need the rest, but we need to get to the next chunk
-                stream.IncPtr(36);
-                if (minor > '0' && major == '3')
-                    stream.IncPtr(mesh.faces.size());
-            }
-        } break;
+        case 'm':
+            ReadMeshes(stream, numMeshes, numTextures, major, minor, meshes);
+            break;
 
             // materials chunk
         case 'c':
@@ -617,6 +518,111 @@ outer:
         nd->mParent = pScene->mRootNode;
         nd->mName.Set("Q3DCamera");
         nd->mTransformation = pScene->mRootNode->mChildren[0]->mTransformation;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void Q3DImporter::ReadMeshes(StreamReaderLE &stream, unsigned int numMeshes, unsigned int numTextures,
+        char major, char minor, std::vector<Mesh> &meshes) {
+    for (unsigned int quak = 0; quak < numMeshes; ++quak) {
+        meshes.emplace_back();
+        Mesh &mesh = meshes.back();
+
+        // read all vertices
+        unsigned int numVerts = (unsigned int)stream.GetI4();
+        if (!numVerts)
+            throw DeadlyImportError("Quick3D: Found mesh with zero vertices");
+
+        // A vertex occupies 12 bytes in the file.
+        if (numVerts > stream.GetRemainingSize() / 12)
+            throw DeadlyImportError("Quick3D: Vertex count exceeds file size");
+
+        std::vector<aiVector3D> &verts = mesh.verts;
+        verts.resize(numVerts);
+
+        for (unsigned int i = 0; i < numVerts; ++i) {
+            verts[i].x = stream.GetF4();
+            verts[i].y = stream.GetF4();
+            verts[i].z = stream.GetF4();
+        }
+
+        // read all faces
+        numVerts = (unsigned int)stream.GetI4();
+        if (!numVerts)
+            throw DeadlyImportError("Quick3D: Found mesh with zero faces");
+
+        // Each face occupies at least 2 bytes (its index count).
+        if (numVerts > stream.GetRemainingSize() / 2)
+            throw DeadlyImportError("Quick3D: Face count exceeds file size");
+
+        std::vector<Face> &faces = mesh.faces;
+        faces.reserve(numVerts);
+
+        // number of indices
+        for (unsigned int i = 0; i < numVerts; ++i) {
+            faces.emplace_back(stream.GetI2());
+            if (faces.back().indices.empty())
+                throw DeadlyImportError("Quick3D: Found face with zero indices");
+        }
+
+        // indices
+        for (unsigned int i = 0; i < numVerts; ++i) {
+            Face &vec = faces[i];
+            for (unsigned int a = 0; a < (unsigned int)vec.indices.size(); ++a)
+                vec.indices[a] = stream.GetI4();
+        }
+
+        // material indices
+        for (unsigned int i = 0; i < numVerts; ++i) {
+            faces[i].mat = (unsigned int)stream.GetI4();
+        }
+
+        // read all normals
+        numVerts = (unsigned int)stream.GetI4();
+        if (numVerts > stream.GetRemainingSize() / 12)
+            throw DeadlyImportError("Quick3D: Normal count exceeds file size");
+
+        std::vector<aiVector3D> &normals = mesh.normals;
+        normals.resize(numVerts);
+
+        for (unsigned int i = 0; i < numVerts; ++i) {
+            normals[i].x = stream.GetF4();
+            normals[i].y = stream.GetF4();
+            normals[i].z = stream.GetF4();
+        }
+
+        numVerts = (unsigned int)stream.GetI4();
+        if (numTextures && numVerts) {
+            // A texture coordinate pair occupies 8 bytes in the file.
+            if (numVerts > stream.GetRemainingSize() / 8)
+                throw DeadlyImportError("Quick3D: Texture coordinate count exceeds file size");
+
+            // read all texture coordinates
+            std::vector<aiVector3D> &uv = mesh.uv;
+            uv.resize(numVerts);
+
+            for (unsigned int i = 0; i < numVerts; ++i) {
+                uv[i].x = stream.GetF4();
+                uv[i].y = stream.GetF4();
+            }
+
+            // UV indices
+            for (unsigned int i = 0; i < (unsigned int)faces.size(); ++i) {
+                Face &vec = faces[i];
+                for (unsigned int a = 0; a < (unsigned int)vec.indices.size(); ++a) {
+                    vec.uvindices[a] = stream.GetI4();
+                    if (!i && !a)
+                        mesh.prevUVIdx = vec.uvindices[a];
+                    else if (vec.uvindices[a] != mesh.prevUVIdx)
+                        mesh.prevUVIdx = UINT_MAX;
+                }
+            }
+        }
+
+        // we don't need the rest, but we need to get to the next chunk
+        stream.IncPtr(36);
+        if (minor > '0' && major == '3')
+            stream.IncPtr(mesh.faces.size());
     }
 }
 

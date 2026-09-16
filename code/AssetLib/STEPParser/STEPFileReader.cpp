@@ -81,6 +81,37 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity, uint64_t line)
 static constexpr char ISO_Token[]         = "ISO-10303-21;";
 static constexpr char FILE_SCHEMA_Token[] = "FILE_SCHEMA";
 // ------------------------------------------------------------------------------------------------
+namespace {
+
+// parse the FILE_SCHEMA list entity, throwing SyntaxError on malformed input
+void ParseFileSchema(const EXPRESS::DataType *schema, STEP::HeaderInfo &head, uint64_t line) {
+    // the file schema should be a regular list entity, although it usually contains exactly one entry
+    // since the list itself is contained in a regular parameter list, we actually have
+    // two nested lists.
+    const EXPRESS::LIST *list = dynamic_cast<const EXPRESS::LIST *>(schema);
+    if (!list || !list->GetSize()) {
+        return;
+    }
+    list = dynamic_cast<const EXPRESS::LIST *>((*list)[0].get());
+    if (!list) {
+        throw STEP::SyntaxError("expected FILE_SCHEMA to be a list", line);
+    }
+
+    // XXX need support for multiple schemas?
+    if (list->GetSize() > 1) {
+        ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported", line));
+    }
+    const EXPRESS::STRING *string = list->GetSize()
+            ? dynamic_cast<const EXPRESS::STRING *>((*list)[0].get())
+            : nullptr;
+    if (nullptr == string) {
+        throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal", line);
+    }
+    head.fileSchema = *string;
+}
+
+} // namespace
+
 STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
     std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(std::move(stream)));
     std::unique_ptr<STEP::DB> db = std::unique_ptr<STEP::DB>(new STEP::DB(reader));
@@ -107,29 +138,7 @@ STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream) {
             const char *end = s.c_str() + s.size();
             SkipSpaces(sz,&sz, end);
             std::shared_ptr< const EXPRESS::DataType > schema = EXPRESS::DataType::Parse(sz, end);
-
-            // the file schema should be a regular list entity, although it usually contains exactly one entry
-            // since the list itself is contained in a regular parameter list, we actually have
-            // two nested lists.
-            const EXPRESS::LIST* list = dynamic_cast<const EXPRESS::LIST*>(schema.get());
-            if (list && list->GetSize()) {
-                list = dynamic_cast<const EXPRESS::LIST*>( (*list)[0].get() );
-                if (!list) {
-                    throw STEP::SyntaxError("expected FILE_SCHEMA to be a list",line);
-                }
-
-                // XXX need support for multiple schemas?
-                if (list->GetSize() > 1)    {
-                    ASSIMP_LOG_WARN(AddLineNumber("multiple schemas currently not supported",line));
-                }
-                const EXPRESS::STRING *string = list->GetSize()
-                        ? dynamic_cast<const EXPRESS::STRING *>((*list)[0].get())
-                        : nullptr;
-                if (nullptr == string ) {
-                    throw STEP::SyntaxError("expected FILE_SCHEMA to contain a single string literal",line);
-                }
-                head.fileSchema =  *string;
-            }
+            ParseFileSchema(schema.get(), head, line);
         }
 
         // XXX handle more header fields

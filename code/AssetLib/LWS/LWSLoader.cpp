@@ -84,8 +84,9 @@ namespace {
     // Validate a file-provided pre/post behaviour value before casting it to
     // the enum; out-of-range values would otherwise produce an invalid enum.
     LWO::PrePostBehaviour GetValidatedPrePostBehaviour(const char *&c) {
+        const char *const before = c;
         const unsigned int behaviour = strtoul10(c, &c);
-        if (behaviour > LWO::PrePostBehaviour_Linear) {
+        if (c == before || behaviour > LWO::PrePostBehaviour_Linear) {
             ASSIMP_LOG_WARN("LWS: Unknown pre/post behaviour, defaulting to constant");
             return LWO::PrePostBehaviour_Constant;
         }

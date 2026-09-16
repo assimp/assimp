@@ -382,7 +382,12 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
             const auto t1 = stream.GetI4();
             const auto t2 = stream.GetI4();
             const int64_t prod = static_cast<int64_t>(t1) * static_cast<int64_t>(t2);
-            if (t1 < 0 || t2 < 0 || prod > static_cast<int64_t>((std::numeric_limits<unsigned int>::max() - 20u) / 3u)) {
+            // temp*3+20 is passed to IncPtr(intptr_t): bound prod so the result
+            // fits unsigned int and stays below INTPTR_MAX on 32-bit builds,
+            // where a larger value would convert to a negative backward seek.
+            if (t1 < 0 || t2 < 0 ||
+                    prod > static_cast<int64_t>((std::numeric_limits<unsigned int>::max() - 20u) / 3u) ||
+                    prod > static_cast<int64_t>((std::numeric_limits<intptr_t>::max() - 20) / 3)) {
                 throw DeadlyImportError("Quick3D: Overflow detected.");
             }
             const unsigned int temp = static_cast<unsigned int>(prod);

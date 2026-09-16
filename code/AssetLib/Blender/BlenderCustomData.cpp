@@ -162,9 +162,12 @@ bool readCustomData(std::shared_ptr<ElemBase> &out, const int cdtype, size_t cnt
         // corrupted - never trust it to be smaller than what actually fits
         // into the block's data size (as ResolvePointer() already does).
         const Structure &s = db.dna[cdtd.TypeName];
-        if (s.size != 0) {
-            cnt = std::min(cnt, dataSize / s.size);
+        if (s.size == 0) {
+            // A zero-sized DNA structure cannot bound cnt against the
+            // block size - refuse the allocation instead of trusting it.
+            return false;
         }
+        cnt = std::min(cnt, dataSize / s.size);
         if (cnt == 0) {
             return false;
         }

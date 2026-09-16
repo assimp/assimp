@@ -214,17 +214,11 @@ void AnimResolver::UpdateAnimRangeSetup() {
                 double cur_minus = delta;
                 unsigned int tt = 1;
                 for (const double tmp = delta * (num + 1); cur_minus <= tmp; cur_minus += delta, ++tt) {
-                    if (delta == tmp) {
-                        m = it->keys.begin();
-                    } else {
-                        ptrdiff_t dist = std::distance((*it).keys.begin(), n);
-                        if (dist <= static_cast<ptrdiff_t>(old_size)) {
-                            // clamp to begin to avoid seeking before begin
-                            m = (*it).keys.begin();
-                        } else {
-                            m = n - (old_size + 1);
-                        }
-                    }
+                    const ptrdiff_t dist = std::distance((*it).keys.begin(), n);
+                    // clamp to begin to avoid seeking before begin
+                    m = (delta == tmp || dist <= static_cast<ptrdiff_t>(old_size))
+                            ? (*it).keys.begin()
+                            : n - (old_size + 1);
                     for (auto it2 = m; it2 != n && it2 != (*it).keys.end(); ++it2) {
                         it2->time -= cur_minus;
                         if ((*it).pre == LWO::PrePostBehaviour_OffsetRepeat) {

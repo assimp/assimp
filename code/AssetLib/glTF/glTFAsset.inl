@@ -432,9 +432,23 @@ bool Accessor::ExtractData(T *&outData) {
     const size_t stride = byteStride ? byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
-    ai_assert(elemSize <= targetElemSize);
+    if (elemSize == 0 || elemSize > targetElemSize) {
+        return false;
+    }
 
-    ai_assert(count * stride <= bufferView->byteLength);
+    // Validate the source range in release builds as well: the readable
+    // span of this accessor is bufferView->byteLength - byteOffset, and a
+    // malformed file may declare a count that runs past the buffer view.
+    if (byteOffset >= bufferView->byteLength || elemSize > bufferView->byteLength - byteOffset) {
+        return false;
+    }
+    const size_t avail = bufferView->byteLength - byteOffset;
+    if (count > 1 && (count - 1) > (avail - elemSize) / stride) {
+        return false;
+    }
+    if (count > std::numeric_limits<size_t>::max() / targetElemSize) {
+        return false;
+    }
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {
@@ -468,10 +482,18 @@ inline Accessor::Indexer::Indexer(Accessor &acc) :
 //! Accesses the i-th value as defined by the accessor
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
-    ai_assert(data);
-    ai_assert(i * stride < accessor.bufferView->byteLength);
     T value = T();
-    memcpy(&value, data + i * stride, elemSize);
+    if (data == nullptr || i < 0) {
+        return value;
+    }
+    const size_t avail = accessor.byteOffset < accessor.bufferView->byteLength
+            ? accessor.bufferView->byteLength - accessor.byteOffset
+            : 0;
+    const size_t off = static_cast<size_t>(i) * stride;
+    if (off > avail || elemSize > avail - off) {
+        return value;
+    }
+    memcpy(&value, data + off, elemSize);
     //value >>= 8 * (sizeof(T) - elemSize);
     return value;
 }

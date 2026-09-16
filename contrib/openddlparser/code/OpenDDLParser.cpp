@@ -193,6 +193,7 @@ void OpenDDLParser::clear() {
     m_buffer.resize(0);
     delete m_context;
     m_context = nullptr;
+    m_stack.clear();
 }
 
 bool OpenDDLParser::validate() {
@@ -228,6 +229,7 @@ bool OpenDDLParser::parse() {
     while (pos < m_buffer.size()) {
         current = parseNextNode(current, end);
         if (current == nullptr) {
+            m_stack.clear();
             return false;
         }
         pos = current - &m_buffer[0];

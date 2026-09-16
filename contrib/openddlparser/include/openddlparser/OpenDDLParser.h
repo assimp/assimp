@@ -62,7 +62,7 @@ template <class T>
 inline T *getNextToken(T *in, T *end) {
     T *tmp(in);
     in = lookForNextToken(in, end);
-    if (tmp == in) {
+    if (tmp == in && in != end) {
         ++in;
     }
     return in;

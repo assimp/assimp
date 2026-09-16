@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #include <iostream>
+#include <new>
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -90,6 +91,29 @@ namespace {
             ParseError(message, *token);
         }
         ParseError(message);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // Destroy all elements currently held by a scope's element map. Used when
+    // the Scope constructor throws, because the destructor will not run.
+    void DestroyScopeElements(ElementMap& elements)
+    {
+        for (const auto &v : elements) {
+            delete_Element(v.second);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // Insert an element into a scope's element map. If the insertion throws,
+    // the element is destroyed because the map does not own it yet.
+    void InsertScopeElement(ElementMap& elements, const std::string& key, Element* element)
+    {
+        try {
+            elements.insert(ElementMap::value_type(key, element));
+        } catch (const std::bad_alloc &) {
+            delete_Element(element);
+            throw;
+        }
     }
 
     // Initially, we did reinterpret_cast, breaking strict aliasing rules.
@@ -211,24 +235,19 @@ Scope::Scope(Parser& parser,bool topLevel)
                 ParseError("unexpected end of file",parser.LastToken());
             }
 
-            try {
-                elements.insert(ElementMap::value_type(str, element));
-            } catch (...) {
-                // insertion failed: the map does not own the element yet
-                delete_Element(element);
-                throw;
-            }
+            InsertScopeElement(elements, str, element);
 
             if (n == nullptr) {
                 return;
             }
         }
-    } catch (const std::exception &) {
+    } catch (const DeadlyImportError &) {
         // run the destructors of the elements inserted so far; the scope dtor
         // will not run because the constructor threw
-        for (const auto &[key, element] : elements) {
-            delete_Element(element);
-        }
+        DestroyScopeElements(elements);
+        throw;
+    } catch (const std::bad_alloc &) {
+        DestroyScopeElements(elements);
         throw;
     }
 }

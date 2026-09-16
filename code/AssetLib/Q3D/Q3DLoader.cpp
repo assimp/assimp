@@ -129,10 +129,11 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     // Each mesh, material and texture record occupies at least a few bytes
     // in the file, so a count larger than the remaining size cannot be
     // satisfied and would only make the reserve() calls below try to
-    // allocate absurd amounts of memory.
-    if (numMeshes > stream.GetRemainingSize() / 4 ||
-            numMats > stream.GetRemainingSize() / 4 ||
-            numTextures > stream.GetRemainingSize() / 4) {
+    // allocate absurd amounts of memory. The counts share one byte budget:
+    // each individually satisfying remaining/4 could still claim 3x the
+    // file size in total.
+    if (static_cast<uint64_t>(numMeshes) + numMats + numTextures >
+            stream.GetRemainingSize() / 4) {
         throw DeadlyImportError("Invalid Quick3D-file: header element counts exceed file size");
     }
 
@@ -560,7 +561,12 @@ void Q3DImporter::ReadMeshes(StreamReaderLE &stream, unsigned int numMeshes, uns
 
         // number of indices
         for (unsigned int i = 0; i < numVerts; ++i) {
-            faces.emplace_back(stream.GetI2());
+            const int numIndices = stream.GetI2();
+            // GetI2() is signed - a negative value would wrap to a huge
+            // allocation in the Face ctor. Each index occupies 4 bytes.
+            if (numIndices < 0 || static_cast<unsigned int>(numIndices) > stream.GetRemainingSize() / 4)
+                throw DeadlyImportError("Quick3D: Invalid face index count");
+            faces.emplace_back(static_cast<unsigned int>(numIndices));
             if (faces.back().indices.empty())
                 throw DeadlyImportError("Quick3D: Found face with zero indices");
         }

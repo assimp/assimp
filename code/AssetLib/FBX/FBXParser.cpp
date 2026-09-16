@@ -144,7 +144,7 @@ Element::Element(const Token& key_token, Parser& parser) :
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            Scope *scope = new_Scope(parser);
+            auto *scope = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
@@ -217,11 +217,11 @@ Scope::Scope(Parser& parser,bool topLevel)
                 elements.insert(ElementMap::value_type(str, element));
             }
         }
-    } catch (...) {
+    } catch (const std::exception &) {
         // run the destructors of the elements inserted so far; the scope dtor
         // will not run because the constructor threw
-        for (ElementMap::value_type &v : elements) {
-            delete_Element(v.second);
+        for (const auto &[key, element] : elements) {
+            delete_Element(element);
         }
         throw;
     }

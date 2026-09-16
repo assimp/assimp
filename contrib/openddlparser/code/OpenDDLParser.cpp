@@ -104,11 +104,11 @@ static bool isUnsignedIntegerType(Value::ValueType integerType) {
 }
 
 static DDLNode *createDDLNode(Text *id, OpenDDLParser *parser) {
-    if (nullptr == id || nullptr == parser || id->m_buffer == nullptr) {
+    if (nullptr == id || nullptr == parser) {
         return nullptr;
     }
 
-    const std::string type(id->m_buffer);
+    const std::string type(id->m_buffer == nullptr ? "" : id->m_buffer);
     DDLNode *parent(parser->top());
     DDLNode *node = DDLNode::create(type, "", parent);
 
@@ -327,8 +327,12 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
         }
 
         // set the properties
-        if (nullptr != first && nullptr != node) {
-            node->setProperties(first);
+        if (nullptr != first) {
+            if (nullptr != node) {
+                node->setProperties(first);
+            } else {
+                delete first;
+            }
         }
     }
 
@@ -375,6 +379,8 @@ static void setNodeValues(DDLNode *currentNode, Value *values) {
     if (nullptr != values) {
         if (nullptr != currentNode) {
             currentNode->setValue(values);
+        } else {
+            delete values;
         }
     }
 }
@@ -383,6 +389,8 @@ static void setNodeReferences(DDLNode *currentNode, Reference *refs) {
     if (nullptr != refs) {
         if (nullptr != currentNode) {
             currentNode->setReferences(refs);
+        } else {
+            delete refs;
         }
     }
 }

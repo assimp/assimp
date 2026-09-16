@@ -778,10 +778,11 @@ private:
 *   @param[out] out memory ptr to set
 *   @param[in]  cdtype  to read
 *   @param[in]  cnt cnt of elements to read
+*   @param[in]  dataSize size in bytes of the file block the elements are read from
 *   @param[in]  db to read elements from
 *   @return true when ok
 */
-bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, const FileDatabase &db);
+bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, size_t dataSize, const FileDatabase &db);
 
 } // namespace Blender
 } // namespace Assimp

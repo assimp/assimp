@@ -1,5 +1,6 @@
 #include "BlenderCustomData.h"
 #include "BlenderDNA.h"
+#include <algorithm>
 #include <array>
 #include <functional>
 
@@ -72,9 +73,10 @@ struct CustomDataTypeDescription {
     PRead Read; ///< function to read one CustomData type element
     PCreate Create; ///< function to allocate n type elements
     PDestroy Destroy;
+    const char *TypeName; ///< name of the DNA structure read for each element
 
-    CustomDataTypeDescription(PRead read, PCreate create, PDestroy destroy) :
-            Read(read), Create(create), Destroy(destroy) {}
+    CustomDataTypeDescription(PRead read, PCreate create, PDestroy destroy, const char *typeName) :
+            Read(read), Create(create), Destroy(destroy), TypeName(typeName) {}
 };
 
 /**
@@ -82,13 +84,13 @@ struct CustomDataTypeDescription {
         *   @note   IMPL_STRUCT_READ for same ty must be used earlier to implement the typespecific read function
         */
 #define DECL_STRUCT_CUSTOMDATATYPEDESCRIPTION(ty) \
-    CustomDataTypeDescription { &read##ty, &create##ty, &destroy##ty }
+    CustomDataTypeDescription { &read##ty, &create##ty, &destroy##ty, #ty }
 
 /**
         *   @brief  helper macro to define CustomDataTypeDescription for UNSUPPORTED type
         */
 #define DECL_UNSUPPORTED_CUSTOMDATATYPEDESCRIPTION \
-    CustomDataTypeDescription { nullptr, nullptr, nullptr }
+    CustomDataTypeDescription { nullptr, nullptr, nullptr, nullptr }
 
 /**
         *   @brief  descriptors for data pointed to from CustomDataLayer.data
@@ -149,13 +151,24 @@ bool isValidCustomDataType(const int cdtype) {
     return cdtype >= 0 && cdtype < CD_NUMTYPES;
 }
 
-bool readCustomData(std::shared_ptr<ElemBase> &out, const int cdtype, const size_t cnt, const FileDatabase &db) {
+bool readCustomData(std::shared_ptr<ElemBase> &out, const int cdtype, size_t cnt, const size_t dataSize, const FileDatabase &db) {
     if (!isValidCustomDataType(cdtype)) {
         throw Error("CustomData.type ", cdtype, " out of index");
     }
 
     const CustomDataTypeDescription cdtd = customDataTypeDescriptions[cdtype];
     if (cdtd.Read && cdtd.Create && cdtd.Destroy && cnt > 0) {
+        // The element count is read from the file block header and may be
+        // corrupted - never trust it to be smaller than what actually fits
+        // into the block's data size (as ResolvePointer() already does).
+        const Structure &s = db.dna[cdtd.TypeName];
+        if (s.size != 0) {
+            cnt = std::min(cnt, dataSize / s.size);
+        }
+        if (cnt == 0) {
+            return false;
+        }
+
         // allocate cnt elements and parse them from file
         out.reset(cdtd.Create(cnt), cdtd.Destroy);
         return cdtd.Read(out.get(), cnt, db);

@@ -299,7 +299,9 @@ char *OpenDDLParser::parseHeader(char *in, char *end) {
             Property *prop(nullptr), *prev(nullptr);
             while (in != end && *in != Grammar::ClosePropertyToken[0]) {
                 in = OpenDDLParser::parseProperty(in, end, &prop);
-                in = lookForNextToken(in, end);
+                while (in != end && (isSpace(*in) || isNewLine(*in))) {
+                    ++in;
+                }
                 if(in == end) {
                     break;
                 }
@@ -574,7 +576,7 @@ char *OpenDDLParser::parseIdentifier(char *in, char *end, Text **id) {
     while ((in != end) && !isSeparator(*in) && !isNewLine(*in) &&
             *in != Grammar::OpenPropertyToken[0] &&
             *in != Grammar::ClosePropertyToken[0] &&
-            *in != '$') {
+            *in != '$' && *in != '=') {
         ++in;
         ++idLen;
     }
@@ -906,7 +908,7 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
         in = lookForNextToken(in, end);
         if (in != end && *in == '=') {
             ++in;
-            in = getNextToken(in, end);
+            in = lookForNextToken(in, end);
             Value *primData(nullptr);
             if (isInteger(in, end)) {
                 in = parseIntegerLiteral(in, end, &primData);

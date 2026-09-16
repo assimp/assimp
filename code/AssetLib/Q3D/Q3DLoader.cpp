@@ -126,6 +126,16 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
     unsigned int numMats = (unsigned int)stream.GetI4();
     unsigned int numTextures = (unsigned int)stream.GetI4();
 
+    // Each mesh, material and texture record occupies at least a few bytes
+    // in the file, so a count larger than the remaining size cannot be
+    // satisfied and would only make the reserve() calls below try to
+    // allocate absurd amounts of memory.
+    if (numMeshes > stream.GetRemainingSize() / 4 ||
+            numMats > stream.GetRemainingSize() / 4 ||
+            numTextures > stream.GetRemainingSize() / 4) {
+        throw DeadlyImportError("Invalid Quick3D-file: header element counts exceed file size");
+    }
+
     std::vector<Material> materials;
     try {
         materials.reserve(numMats);
@@ -163,6 +173,10 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 if (!numVerts)
                     throw DeadlyImportError("Quick3D: Found mesh with zero vertices");
 
+                // A vertex occupies 12 bytes in the file.
+                if (numVerts > stream.GetRemainingSize() / 12)
+                    throw DeadlyImportError("Quick3D: Vertex count exceeds file size");
+
                 std::vector<aiVector3D> &verts = mesh.verts;
                 verts.resize(numVerts);
 
@@ -176,6 +190,10 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
                 numVerts = (unsigned int)stream.GetI4();
                 if (!numVerts)
                     throw DeadlyImportError("Quick3D: Found mesh with zero faces");
+
+                // Each face occupies at least 2 bytes (its index count).
+                if (numVerts > stream.GetRemainingSize() / 2)
+                    throw DeadlyImportError("Quick3D: Face count exceeds file size");
 
                 std::vector<Face> &faces = mesh.faces;
                 faces.reserve(numVerts);
@@ -201,6 +219,9 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
                 // read all normals
                 numVerts = (unsigned int)stream.GetI4();
+                if (numVerts > stream.GetRemainingSize() / 12)
+                    throw DeadlyImportError("Quick3D: Normal count exceeds file size");
+
                 std::vector<aiVector3D> &normals = mesh.normals;
                 normals.resize(numVerts);
 
@@ -212,6 +233,10 @@ void Q3DImporter::InternReadFile(const std::string &pFile,
 
                 numVerts = (unsigned int)stream.GetI4();
                 if (numTextures && numVerts) {
+                    // A texture coordinate pair occupies 8 bytes in the file.
+                    if (numVerts > stream.GetRemainingSize() / 8)
+                        throw DeadlyImportError("Quick3D: Texture coordinate count exceeds file size");
+
                     // read all texture coordinates
                     std::vector<aiVector3D> &uv = mesh.uv;
                     uv.resize(numVerts);

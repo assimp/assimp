@@ -2071,7 +2071,7 @@ inline rapidjson::Document Asset::ReadDocument(IOStream &stream, bool isBinary, 
     // parse the JSON document
     ASSIMP_LOG_DEBUG("Parsing GLTF2 JSON");
     Document doc;
-    doc.ParseInsitu(&sceneData[0]);
+    doc.ParseInsitu<rapidjson::kParseIterativeFlag>(&sceneData[0]);
 
     if (doc.HasParseError()) {
         char buffer[32];

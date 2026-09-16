@@ -462,20 +462,14 @@ inline int hex2Decimal(char in) {
 
 template <class T>
 inline bool isComment(T *in, T *end) {
-    if (in != end && *in == '/') {
-        if (in + 1 != end) {
-            if (*(in + 1) == '/') {
-                char *drive((in + 2));
-                if (drive != end && (isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && drive + 1 != end && *(drive + 1) == '/') {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
+    if (in == end || *in != '/' || in + 1 == end || *(in + 1) != '/') {
+        return false;
     }
-
-    return false;
+    char *drive((in + 2));
+    if (drive != end && (isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && drive + 1 != end && *(drive + 1) == '/') {
+        return false;
+    }
+    return true;
 }
 
 template <class T>

@@ -529,9 +529,10 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     ++node->mNumMeshes;
                 }
             }
-            unsigned int *pip = node->mNumMeshes
-                    ? (node->mMeshes = new unsigned int[node->mNumMeshes])
-                    : nullptr;
+            unsigned int *pip = nullptr;
+            if (node->mNumMeshes) {
+                pip = node->mMeshes = new unsigned int[node->mNumMeshes];
+            }
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
             for (MatTable::const_iterator cit = needMat.begin(), cend = needMat.end();

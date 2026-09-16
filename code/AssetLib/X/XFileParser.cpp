@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
+#include <memory>
 
 using namespace Assimp;
 using namespace Assimp::XFile;
@@ -250,9 +251,9 @@ void XFileParser::ParseFile() {
             ParseDataObjectFrame(nullptr);
         } else if (objectName == "Mesh") {
             // some meshes have no frames at all
-            Mesh *mesh = new Mesh;
-            ParseDataObjectMesh(mesh);
-            mScene->mGlobalMeshes.push_back(mesh);
+            std::unique_ptr<Mesh> mesh(new Mesh);
+            ParseDataObjectMesh(mesh.get());
+            mScene->mGlobalMeshes.push_back(mesh.release());
         } else if (objectName == "AnimTicksPerSecond")
             ParseDataObjectAnimTicksPerSecond();
         else if (objectName == "AnimationSet")

@@ -292,7 +292,7 @@ bool STEP::StringToUTF8(std::string& s)
                 // http://stackoverflow.com/questions/5586214/how-to-convert-char-from-iso-8859-1-to-utf-8-in-c-multiplatformly
                 // \S\ escapes require the escaped byte to be < 0x80;
                 // reject malformed input instead of asserting on it
-                if ((uint8_t)s[i+3] >= 0x80) {
+                if (static_cast<uint8_t>(s[i+3]) >= 0x80) {
                     return false;
                 }
                 const uint8_t ch = s[i+3] + 0x80;

@@ -801,7 +801,8 @@ char *OpenDDLParser::parseStringLiteral(char *in, char *end, Value **stringData)
 
     in = lookForNextToken(in, end);
     size_t len(0);
-    if (char *start(in); start != end && *start == '\"') {
+    char *start(in);
+    if (start != end && *start == '\"') {
         ++start;
         ++in;
         while (in != end && *in != '\"') {

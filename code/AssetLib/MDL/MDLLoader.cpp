@@ -2071,7 +2071,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                         continue;
 
                     // seems we'll need this node
-                    aiBone *pcBone = pcMesh->mBones[iOutBone++] = new aiBone();
+                    std::unique_ptr<aiBone> pcBone(new aiBone());
                     pcBone->mName = aiString(shared.apcOutBones[iCurrent]->mName);
                     pcBone->mOffsetMatrix = shared.apcOutBones[iCurrent]->mOffsetMatrix;
 
@@ -2083,6 +2083,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                         pcBone->mWeights[weight].mVertexId = (*k)[weight];
                         pcBone->mWeights[weight].mWeight = 1.0f;
                     }
+                    pcMesh->mBones[iOutBone++] = pcBone.release();
                 }
             }
             // add the mesh to the list of output meshes

@@ -139,7 +139,8 @@ namespace {
                 continue;
             }
 
-            if (attr.texcoord[tc]->count < aim->mNumVertices) {
+            const size_t texcoordCount = attr.texcoord[tc]->count;
+            if (texcoordCount == 0 || texcoordCount < aim->mNumVertices) {
                 DefaultLogger::get()->warn("Texture coordinate accessor for set ", tc, " has fewer elements than the mesh has vertices in mesh \"", meshName, "\"");
                 continue;
             }
@@ -153,10 +154,7 @@ namespace {
             if (values == nullptr) {
                 continue;
             }
-            const size_t limit = attr.texcoord[tc]->count < aim->mNumVertices
-                    ? attr.texcoord[tc]->count
-                    : aim->mNumVertices;
-            for (size_t i = 0; i < limit; ++i) {
+            for (size_t i = 0; i < aim->mNumVertices; ++i) {
                 values[i].y = 1 - values[i].y; // Flip Y coords
             }
         }

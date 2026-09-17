@@ -150,7 +150,13 @@ namespace {
             aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
             aiVector3D *values = aim->mTextureCoords[tc];
-            for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
+            if (values == nullptr) {
+                continue;
+            }
+            const size_t limit = attr.texcoord[tc]->count < aim->mNumVertices
+                    ? attr.texcoord[tc]->count
+                    : aim->mNumVertices;
+            for (size_t i = 0; i < limit; ++i) {
                 values[i].y = 1 - values[i].y; // Flip Y coords
             }
         }

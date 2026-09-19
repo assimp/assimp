@@ -579,6 +579,38 @@ void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture &tex) {
 }
 
 // ------------------------------------------------------------------------------------------------
+void LWOImporter::LoadLWO2BlokChunk(unsigned int size) {
+    // The inner sub-chunk header is never validated elsewhere:
+    // it must fit into the BLOK data, otherwise the texture and
+    // shader block loaders compute their end pointer past the
+    // real end of the file. size is already known to be
+    // in bounds, so head2.length <= size - 6 bounds it
+    // by the file size transitively.
+    if (size < 6) {
+        throw DeadlyImportError("LWO2: Invalid texture block chunk length");
+    }
+
+    IFF::SubChunkHeader head2 = IFF::LoadSubChunk(mFileBuffer);
+    if (head2.length > size - 6) {
+        throw DeadlyImportError("LWO2: Invalid texture block chunk length");
+    }
+
+    switch (head2.type) {
+    case AI_LWO_PROC:
+    case AI_LWO_GRAD:
+    case AI_LWO_IMAP:
+        LoadLWO2TextureBlock(&head2, size);
+        break;
+    case AI_LWO_SHDR:
+        LoadLWO2ShaderBlock(&head2, size);
+        break;
+
+    default:
+        ASSIMP_LOG_WARN("LWO2: Found an unsupported surface BLOK");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader *head, unsigned int size) {
     ai_assert(!mSurfaces->empty());
     LWO::Surface &surf = mSurfaces->back();
@@ -1060,22 +1092,7 @@ void LWOImporter::LoadLWO2Surface(unsigned int size) {
                 // surface bock entry
             case AI_LWO_BLOK: {
                 AI_LWO_VALIDATE_CHUNK_LENGTH(head.length, BLOK, 4);
-                IFF::SubChunkHeader head2 = IFF::LoadSubChunk(mFileBuffer);
-
-                switch (head2.type) {
-                    case AI_LWO_PROC:
-                    case AI_LWO_GRAD:
-                    case AI_LWO_IMAP:
-                        LoadLWO2TextureBlock(&head2, head.length);
-                        break;
-                    case AI_LWO_SHDR:
-                        LoadLWO2ShaderBlock(&head2, head.length);
-                        break;
-
-                    default:
-                        ASSIMP_LOG_WARN("LWO2: Found an unsupported surface BLOK");
-                };
-
+                LoadLWO2BlokChunk(head.length);
                 break;
             }
         }

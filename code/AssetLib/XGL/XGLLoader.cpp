@@ -262,7 +262,7 @@ aiNode *XGLImporter::ReadObject(XmlNode &node, TempScope &scope) {
 			} else if (s == "meshref") {
 				const unsigned int id = static_cast<unsigned int>(ReadIndexFromText(child));
 
-				std::multimap<unsigned int, aiMesh *>::iterator it = scope.meshes.find(id), end = scope.meshes.end();
+				auto it = scope.meshes.find(id), end = scope.meshes.end();
 				if (it == end) {
 					ThrowException("<meshref> index out of range");
 				}
@@ -646,7 +646,7 @@ void XGLImporter::ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out
 		const std::string &s = ai_stdStrToLower(child.name());
 		if (s == "pref") {
 			const unsigned int id = ReadIndexFromText(child);
-			std::map<unsigned int, aiVector3D>::const_iterator it = t.points.find(id);
+			auto it = t.points.find(id);
 			if (it == t.points.end()) {
 				ThrowException("point index out of range");
 			}
@@ -655,7 +655,7 @@ void XGLImporter::ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out
 			havep = true;
 		} else if (s == "nref") {
 			const unsigned int id = ReadIndexFromText(child);
-			std::map<unsigned int, aiVector3D>::const_iterator it = t.normals.find(id);
+			auto it = t.normals.find(id);
 			if (it == t.normals.end()) {
 				ThrowException("normal index out of range");
 			}
@@ -664,7 +664,7 @@ void XGLImporter::ReadFaceVertex(XmlNode &node, const TempMesh &t, TempFace &out
 			out.has_normal = true;
 		} else if (s == "tcref") {
 			const unsigned int id = ReadIndexFromText(child);
-			std::map<unsigned int, aiVector2D>::const_iterator it = t.uvs.find(id);
+			auto it = t.uvs.find(id);
 			if (it == t.uvs.end()) {
 				ThrowException("uv index out of range");
 			}

@@ -395,6 +395,9 @@ void LWOImporter::FindUVChannels(LWO::Surface &surf,
             for (unsigned int n = 0; n < face.mNumIndices; ++n) {
                 unsigned int idx = face.mIndices[n];
 
+                if (idx >= uv.abAssigned.size() || idx * uv.dims + uv.dims > uv.rawData.size()) {
+                    continue;
+                }
                 if (uv.abAssigned[idx] && ((aiVector2D *)&uv.rawData[0])[idx] != aiVector2D()) {
 
                     if (extra >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
@@ -467,6 +470,9 @@ void LWOImporter::FindVCChannels(const LWO::Surface &surf, LWO::SortedRep &sorte
                 for (unsigned int n = 0; n < face.mNumIndices; ++n) {
                     unsigned int idx = face.mIndices[n];
 
+                    if (idx >= vc.abAssigned.size() || idx * vc.dims + vc.dims > vc.rawData.size()) {
+                        continue;
+                    }
                     if (vc.abAssigned[idx] && ((aiColor4D *)&vc.rawData[0])[idx] != aiColor4D(0.0, 0.0, 0.0, 1.0)) {
                         if (next >= AI_MAX_NUMBER_OF_COLOR_SETS) {
 

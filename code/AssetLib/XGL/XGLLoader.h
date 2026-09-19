@@ -183,7 +183,7 @@ private:
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope);
     bool ReadMesh(XmlNode &node, TempScope &scope);
-    void AppendOutputMeshes(std::unordered_map<unsigned int, TempMaterialMesh> bymat, TempScope &scope, const unsigned int mesh_id);
+    void AppendOutputMeshes(const std::unordered_map<unsigned int, TempMaterialMesh> &bymat, TempScope &scope, const unsigned int mesh_id);
     unsigned int ReadVertices(XmlNode &child, TempMesh t, TempFace *tf, bool *has, unsigned int mid, TempScope &scope);
     unsigned int ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);

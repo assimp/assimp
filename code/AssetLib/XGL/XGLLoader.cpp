@@ -531,7 +531,7 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 }
 
 // ----------------------------------------------------------------------------------------------
-void XGLImporter::AppendOutputMeshes(std::unordered_map<unsigned int, TempMaterialMesh> bymat, TempScope &scope,
+void XGLImporter::AppendOutputMeshes(const std::unordered_map<unsigned int, TempMaterialMesh> &bymat, TempScope &scope,
 		const unsigned int mesh_id) {
 	// ensure consistent iteration order
 	std::vector<std::pair<unsigned int, const TempMaterialMesh *> > sorted;

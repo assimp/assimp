@@ -153,3 +153,22 @@ TEST_F(utGEOImportExport, importBox3DG) {
     ASSERT_EQ(scene, nullptr);
 #endif
 }
+
+TEST_F(utGEOImportExport, import3DG2LampsIncomplete) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/GEO/two_lamps.3dg", aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
+    ASSERT_NE(scene, nullptr);
+    EXPECT_EQ(0u, scene->mNumMeshes);
+    EXPECT_TRUE(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE);
+    ASSERT_EQ(2u, scene->mNumLights);
+    EXPECT_EQ(aiLightSource_POINT, scene->mLights[0]->mType);
+    EXPECT_EQ(aiLightSource_SPOT, scene->mLights[1]->mType);
+    EXPECT_NEAR(-4.0f, scene->mLights[0]->mPosition.x, 1e-4f);
+    EXPECT_NEAR(45.0f * AI_MATH_PI_F / 180.f, scene->mLights[1]->mAngleOuterCone, 1e-4f);
+    ASSERT_NE(nullptr, scene->mRootNode);
+    EXPECT_EQ(2u, scene->mRootNode->mNumChildren);
+#else
+    ASSERT_EQ(scene, nullptr);
+#endif
+}

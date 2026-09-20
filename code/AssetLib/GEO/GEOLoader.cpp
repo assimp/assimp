@@ -58,8 +58,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
+#include <assimp/light.h>
 #include <assimp/scene.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <memory>
 
@@ -179,6 +181,21 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
     sz = line;
 
     const unsigned int numElementsToImport = strtoul10(sz, &sz);
+
+    // 3DG2 lamp files are lights-only: no mesh, mark incomplete so ValidateDS accepts
+    // mNumMeshes == 0 (Assimp is otherwise mesh-centric).
+    if (flav == Lamp) {
+        InternReadLamp(numElementsToImport);
+        m_progress->UpdateFileRead(4, 5);
+        InternReadFinish();
+        return;
+    }
+
+    if (flav == Gouraud_curves_or_NURBS_surfaces) {
+        InternReadFbS(numElementsToImport); // throws: not supported yet
+        return;
+    }
+
     const unsigned int numFaces = 32365 * 3; // TODO: find a dynamic way?
 
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes = 1];
@@ -188,10 +205,6 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 
     if (flav == Mesh_with_coloured_faces) {
         InternReadncV(numElementsToImport);
-    } else if (flav == Lamp) {
-        InternReadLamp(numElementsToImport);
-    } else if (flav == Gouraud_curves_or_NURBS_surfaces) {
-        InternReadFbS(numElementsToImport); // here numElementsToImport is the surface type !!!
     } else if (flav == Mesh_with_coloured_vertices) {
         InternReadcV(numElementsToImport);
     } else {
@@ -202,26 +215,24 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 
     const char *old = buffer;
 
-    if (flav == Mesh_with_coloured_faces || flav == Mesh_with_coloured_vertices) {
-        // First find out how many vertices we'll need
-        while (GetNextLine(buffer, line)) {
-            sz = line;
-            faces->mNumIndices = strtoul10(sz, &sz);
-            if (!faces->mNumIndices) {
-                ASSIMP_LOG_ERROR("GEO: Faces with zero indices aren't allowed");
-                continue;
-            }
-            mesh->mNumFaces++; // TODO: implement material stuff needs new mesh
-            mesh->mNumVertices += faces->mNumIndices;
-            faces++;
+    // First find out how many vertices we'll need
+    while (GetNextLine(buffer, line)) {
+        sz = line;
+        faces->mNumIndices = strtoul10(sz, &sz);
+        if (!faces->mNumIndices) {
+            ASSIMP_LOG_ERROR("GEO: Faces with zero indices aren't allowed");
+            continue;
         }
-
-        if (!mesh->mNumVertices) {
-            throw DeadlyImportError("GEO: There are no valid faces");
-        }
-
-        ASSIMP_LOG_DEBUG("GEO: face storage just needs ", mesh->mNumFaces, " faces, not ", numFaces);
+        mesh->mNumFaces++; // TODO: implement material stuff needs new mesh
+        mesh->mNumVertices += faces->mNumIndices;
+        faces++;
     }
+
+    if (!mesh->mNumVertices) {
+        throw DeadlyImportError("GEO: There are no valid faces");
+    }
+
+    ASSIMP_LOG_DEBUG("GEO: face storage just needs ", mesh->mNumFaces, " faces, not ", numFaces);
 
     // allocate storage for the output vertices
     verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
@@ -232,12 +243,10 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 
     m_progress->UpdateFileRead(3, 5);
 
-    if (flav != Lamp && flav != Gouraud_curves_or_NURBS_surfaces) {
-        if (flav == Mesh_with_coloured_faces) {
-            InternReadcF(mesh->mNumFaces); // mesh colored faces
-        } else {
-            InternReadncF(mesh->mNumFaces); // mesh colored vertices
-        }
+    if (flav == Mesh_with_coloured_faces) {
+        InternReadcF(mesh->mNumFaces); // mesh colored faces
+    } else {
+        InternReadncF(mesh->mNumFaces); // mesh colored vertices
     }
 
     m_progress->UpdateFileRead(4, 5);
@@ -249,41 +258,81 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 void GEOImporter::InternReadLamp(unsigned int count) {
     ASSIMP_LOG_DEBUG("GEO: Has to import ", count, " light(s)");
 
+    if (!count) {
+        throw DeadlyImportError("GEO: 3DG2 lamp file has zero lights");
+    }
+
     pScene->mLights = new aiLight *[count];
+    pScene->mNumLights = 0;
+    pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 
-    while (GetNextLine(buffer, line)) {
+    for (unsigned int i = 0; i < count; ++i) {
+        if (!GetNextLine(buffer, line)) {
+            throw DeadlyImportError("GEO: Unexpected EOF while reading lamps");
+        }
         sz = line;
-        unsigned int type = strtoul10(sz, &sz);
-        char name[16];
-        std::snprintf(name, sizeof(name), "Lamp%04d%04X", pScene->mNumLights + 1, type);
-        aiString tmpMatName;
-        tmpMatName.Set(name);
+        // Videoscape: 0 point, 1 spot, 2 sun — not Assimp's enum ordinals.
+        const unsigned int geoType = strtoul10(sz, &sz);
+        aiLightSourceType mapped = aiLightSource_POINT;
+        if (geoType == 1) {
+            mapped = aiLightSource_SPOT;
+        } else if (geoType == 2) {
+            mapped = aiLightSource_DIRECTIONAL;
+        } else if (geoType != 0) {
+            ASSIMP_LOG_WARN("GEO: unknown lamp type ", geoType, ", treating as point");
+        }
+
+        char name[24];
+        std::snprintf(name, sizeof(name), "Lamp%04u", i + 1);
         aiLight *tmpLight = new aiLight();
-        tmpLight->mName = tmpMatName;
+        tmpLight->mName.Set(name);
+        tmpLight->mType = mapped;
+        ASSIMP_LOG_DEBUG("GEO: Create light: ", name, " geoType=", geoType);
 
-        ASSIMP_LOG_DEBUG("GEO: Create light: ", tmpMatName.C_Str());
-
-        // type - lamp type (0 - point lamp, 1 - spot lamp, 2 - sun)
-        tmpLight->mType = static_cast<aiLightSourceType>(type);
-
-        GetNextLine(buffer, line);
+        if (!GetNextLine(buffer, line)) {
+            delete tmpLight;
+            throw DeadlyImportError("GEO: Unexpected EOF (spotsize/blend)");
+        }
         sz = line;
-        float &ic = tmpLight->mAngleInnerCone;
-        float &oc = tmpLight->mAngleOuterCone;
-        sz = fast_atoreal_move<float>(sz, (float &)ic);
+        float spotsizeDeg = 0.f;
+        float spotblend = 0.f;
+        sz = fast_atoreal_move<float>(sz, spotsizeDeg);
         SkipSpaces(&sz, line + sizeof(line));
-        fast_atoreal_move<float>(sz, (float &)oc);
+        fast_atoreal_move<float>(sz, spotblend);
+        // Assimp cones are radians; outer = beam size, inner shrinks with blend.
+        if (mapped == aiLightSource_SPOT) {
+            const float outer = spotsizeDeg * AI_MATH_PI_F / 180.f;
+            const float blend = std::max(0.f, std::min(spotblend, 1.f));
+            tmpLight->mAngleOuterCone = outer;
+            tmpLight->mAngleInnerCone = outer * (1.f - blend);
+        }
 
-        GetNextLine(buffer, line);
+        if (!GetNextLine(buffer, line)) {
+            delete tmpLight;
+            throw DeadlyImportError("GEO: Unexpected EOF (lamp color/energy)");
+        }
         sz = line;
+        float energy = 1.f;
         aiColor3D &c = tmpLight->mColorDiffuse;
         sz = fast_atoreal_move<float>(sz, (float &)c.r);
         SkipSpaces(&sz, line + sizeof(line));
         sz = fast_atoreal_move<float>(sz, (float &)c.g);
         SkipSpaces(&sz, line + sizeof(line));
-        fast_atoreal_move<float>(sz, (float &)c.b);
+        sz = fast_atoreal_move<float>(sz, (float &)c.b);
+        SkipSpaces(&sz, line + sizeof(line));
+        if (sz && *sz) {
+            fast_atoreal_move<float>(sz, energy);
+        }
+        c.r *= energy;
+        c.g *= energy;
+        c.b *= energy;
+        tmpLight->mColorSpecular = c;
+        tmpLight->mColorAmbient = aiColor3D(c.r * 0.1f, c.g * 0.1f, c.b * 0.1f);
 
-        GetNextLine(buffer, line);
+        if (!GetNextLine(buffer, line)) {
+            delete tmpLight;
+            throw DeadlyImportError("GEO: Unexpected EOF (lamp position)");
+        }
         sz = line;
         aiVector3D &p = tmpLight->mPosition;
         sz = fast_atoreal_move<float>(sz, (float &)p.x);
@@ -292,7 +341,10 @@ void GEOImporter::InternReadLamp(unsigned int count) {
         SkipSpaces(&sz, line + sizeof(line));
         fast_atoreal_move<float>(sz, (float &)p.z);
 
-        GetNextLine(buffer, line);
+        if (!GetNextLine(buffer, line)) {
+            delete tmpLight;
+            throw DeadlyImportError("GEO: Unexpected EOF (lamp direction)");
+        }
         sz = line;
         aiVector3D &d = tmpLight->mDirection;
         sz = fast_atoreal_move<float>(sz, (float &)d.x);
@@ -301,8 +353,14 @@ void GEOImporter::InternReadLamp(unsigned int count) {
         SkipSpaces(&sz, line + sizeof(line));
         fast_atoreal_move<float>(sz, (float &)d.z);
 
-        pScene->mLights[pScene->mNumLights] = tmpLight;
-        pScene->mNumLights++;
+        // Sensible defaults for point/spot attenuation (GEO has none).
+        if (mapped != aiLightSource_DIRECTIONAL) {
+            tmpLight->mAttenuationConstant = 1.f;
+            tmpLight->mAttenuationLinear = 0.f;
+            tmpLight->mAttenuationQuadratic = 0.f;
+        }
+
+        pScene->mLights[pScene->mNumLights++] = tmpLight;
     }
 }
 
@@ -443,11 +501,29 @@ void GEOImporter::InternReadFinish() {
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mName.Set("<GEORoot>");
 
-    pScene->mRootNode->mMeshes =
-            new unsigned int[pScene->mRootNode->mNumMeshes = pScene->mNumMeshes];
+    if (pScene->mNumMeshes) {
+        pScene->mRootNode->mMeshes =
+                new unsigned int[pScene->mRootNode->mNumMeshes = pScene->mNumMeshes];
+        for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+            pScene->mRootNode->mMeshes[i] = i;
+        }
+    }
 
-    for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
-        pScene->mRootNode->mMeshes[i] = i;
+    // Assimp expects a scene-graph node with the same name as each light.
+    if (pScene->mNumLights) {
+        pScene->mRootNode->mChildren = new aiNode *[pScene->mNumLights];
+        pScene->mRootNode->mNumChildren = pScene->mNumLights;
+        for (unsigned int i = 0; i < pScene->mNumLights; ++i) {
+            aiNode *n = new aiNode();
+            n->mName = pScene->mLights[i]->mName;
+            n->mParent = pScene->mRootNode;
+            // Bake light position into the node transform (identity otherwise).
+            const aiVector3D &lp = pScene->mLights[i]->mPosition;
+            n->mTransformation.a4 = lp.x;
+            n->mTransformation.b4 = lp.y;
+            n->mTransformation.c4 = lp.z;
+            pScene->mRootNode->mChildren[i] = n;
+        }
     }
 }
 

@@ -15,3 +15,4 @@ They intentionally cover the Videoscape flavours used by the importer:
 These are NOT copies of third-party sample downloads (Paul Bourke page
 examples, ewhac docs, X GB packs, etc.). Those live only in the local
 collection under ~/3D-Objekte/ and are not shipped in this repo.
+two_lamps.3dg — original 3DG2 lights-only fixture (point + spot)

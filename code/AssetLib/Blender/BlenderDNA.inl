@@ -611,14 +611,14 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
         // this is crucial, pointers may not be invalid.
         // this is either a corrupted file or an attempted attack.
         throw DeadlyImportError("Failure resolving pointer 0x",
-            std::hex,ptrval.val,", no file block falls into this address range");
+            std::hex, ptrval.val,", no file block falls into this address range");
     }
     --it;
-    if (ptrval.val - (*it).address.val >= (*it).size) {
+    if ((ptrval.val - (it->address.val) >= it->size) {
         throw DeadlyImportError("Failure resolving pointer 0x",
             std::hex,ptrval.val,", nearest file block starting at 0x",
-            (*it).address.val," ends at 0x",
-            (*it).address.val + (*it).size);
+            it->address.val," ends at 0x",
+            it->address.val + it->size);
     }
     return &*it;
 }

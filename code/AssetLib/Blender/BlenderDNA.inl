@@ -614,7 +614,7 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
             std::hex, ptrval.val,", no file block falls into this address range");
     }
     --it;
-    if ((ptrval.val - (it->address.val) >= it->size) {
+    if ((ptrval.val - it->address.val) >= it->size) {
         throw DeadlyImportError("Failure resolving pointer 0x",
             std::hex,ptrval.val,", nearest file block starting at 0x",
             it->address.val," ends at 0x",

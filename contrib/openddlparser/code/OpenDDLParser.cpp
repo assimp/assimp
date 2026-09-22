@@ -1021,7 +1021,7 @@ char *OpenDDLParser::parseDataArrayList(char *in, char *end, Value::ValueType ty
     }
 
     in = lookForNextToken(in, end);
-    if (*in == Grammar::OpenBracketToken[0]) {
+    if (in != end && *in == Grammar::OpenBracketToken[0]) {
         ++in;
         Value *currentValue(nullptr);
         Reference *refs(nullptr);
@@ -1043,9 +1043,11 @@ char *OpenDDLParser::parseDataArrayList(char *in, char *end, Value::ValueType ty
                     }
                 }
             }
-        } while (Grammar::CommaSeparator[0] == *in && in != end);
+        } while (in != end && Grammar::CommaSeparator[0] == *in);
         in = lookForNextToken(in, end);
-        ++in;
+        if (in != end) {
+            ++in;
+        }
     }
 
     return in;

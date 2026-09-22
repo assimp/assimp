@@ -157,6 +157,7 @@ SET( IMPORTERS
   unit/utB3DImportExport.cpp
   unit/utNDOImportExport.cpp
   #unit/utM3DImportExport.cpp
+  #unit/utSkpImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp

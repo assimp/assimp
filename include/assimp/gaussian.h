@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  scene-private storage and are reached via getters. Positions stay in
  *  aiMesh::mVertices (point cloud; 1-index faces per vertex).
  *
+ *  Does **not** bake splat attrs into aiMaterial (Kd/Ks/opacity/PBR, …):
+ *  values are per-point logits/SH coeffs; conversion is the renderer's job.
  *  See doc/PLY.md for the on-disk PLY convention (f_dc_*, f_rest_*, …).
  */
 #pragma once

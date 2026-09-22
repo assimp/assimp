@@ -364,6 +364,7 @@ namespace Assimp {
         }
 
         // Attach 3DGS side data (ABI-safe: scene-private, not aiMesh fields).
+        // Do not bake f_dc_/opacity/… into aiMaterial Kd/Ks/opacity — see doc/PLY.md.
         if (mGaussianActive && mGaussianSplat != nullptr) {
             const int32_t restCount = static_cast<int32_t>(mGaussianSplat->mNumRestCoeffs);
             AttachGaussianSplat(pScene, 0, mGaussianSplat);

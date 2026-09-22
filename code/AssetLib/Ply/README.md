@@ -17,3 +17,8 @@ const aiGaussianSplat *gs = aiGetGaussianSplat(scene, meshIndex);
 
 Positions remain on `aiMesh::mVertices`. Splat arrays are **not** fields of
 `aiMesh` (no public-struct ABI break).
+
+**No material baking:** the PLY loader does **not** invent `$clr.diffuse` /
+`$clr.specular` / opacity / PBR factors from `f_dc_*` / `opacity` / etc.
+Those stay only on `aiGaussianSplat` (raw file semantics). Decode and shade
+in the renderer — see `doc/PLY.md` (“Materials (intentional non-goal)”).

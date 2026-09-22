@@ -55,26 +55,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/ParsingUtils.h>
-#include <assimp/TinyFormatter.h>
+#include <assimp/StringUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
 #include <assimp/light.h>
 #include <assimp/scene.h>
 
 #include <algorithm>
-#include <cstdio>
 #include <memory>
+#include <vector>
 
 namespace Assimp {
+
+namespace {
+constexpr unsigned int kMaxGeoLamps = 100000u;
+} // namespace
 
 // *INDENT-OFF*
 static constexpr aiImporterDesc desc = {
         "Videoscape GEO Importer",
         "ZsoltTech.Com <arris@zsolttech.com>",
         "",
-        "http://paulbourke.net/dataformats/geo/ "
-        "color settings from: https://home.comcast.net/~erniew/getstuff/geo.html "
-        "calculation http://home.comcast.net/~erniew/lwsdk/sample/vidscape/surf.c",
+        "https://paulbourke.net/dataformats/geo/",
         aiImporterFlags_SupportTextFlavour |
                 aiImporterFlags_LimitedSupport |
                 aiImporterFlags_Experimental,
@@ -90,7 +92,7 @@ static constexpr aiImporterDesc desc = {
 GEOImporter::GEOImporter() :
         flav(Mesh_with_coloured_faces),
         rgbH(false),
-        pScene(nullptr),
+        mScene(nullptr),
         buffer(nullptr),
         sz(nullptr),
         mesh(nullptr),
@@ -134,7 +136,7 @@ void GEOImporter::SetupProperties(const Importer * /*pImp*/) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
+void GEOImporter::InternReadFile(const std::string &pFile, aiScene *_pScene,
         IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
@@ -142,7 +144,7 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
         throw DeadlyImportError("Failed to open GEO file ", pFile, ".");
     }
 
-    this->pScene = pScene;
+    mScene = _pScene;
 
     std::vector<char> mBuffer2;
     TextFileToBuffer(file.get(), mBuffer2);
@@ -193,20 +195,16 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 
     if (flav == Gouraud_curves_or_NURBS_surfaces) {
         InternReadFbS(numElementsToImport); // throws: not supported yet
-        return;
     }
 
-    const unsigned int numFaces = 32365 * 3; // TODO: find a dynamic way?
-
-    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes = 1];
-    mesh = pScene->mMeshes[0] = new aiMesh();
-    faces = mesh->mFaces = new aiFace[numFaces];
+    mScene->mMeshes = new aiMesh *[mScene->mNumMeshes = 1];
+    mesh = mScene->mMeshes[0] = new aiMesh();
     tempPositions.resize(numElementsToImport);
 
     if (flav == Mesh_with_coloured_faces) {
-        InternReadncV(numElementsToImport);
+        InternReadVertices(numElementsToImport, false);
     } else if (flav == Mesh_with_coloured_vertices) {
-        InternReadcV(numElementsToImport);
+        InternReadVertices(numElementsToImport, true);
     } else {
         throw DeadlyImportError("GEO: Never see me, bug in assimp's api design.");
     }
@@ -215,38 +213,38 @@ void GEOImporter::InternReadFile(const std::string &pFile, aiScene *pScene,
 
     const char *old = buffer;
 
-    // First find out how many vertices we'll need
+    // First pass: count faces / expanded vertices (exact allocation, no fixed cap).
+    unsigned int numFaces = 0;
+    unsigned int numVertices = 0;
     while (GetNextLine(buffer, line)) {
         sz = line;
-        faces->mNumIndices = strtoul10(sz, &sz);
-        if (!faces->mNumIndices) {
+        const unsigned int nidx = strtoul10(sz, &sz);
+        if (!nidx) {
             ASSIMP_LOG_ERROR("GEO: Faces with zero indices aren't allowed");
             continue;
         }
-        mesh->mNumFaces++; // TODO: implement material stuff needs new mesh
-        mesh->mNumVertices += faces->mNumIndices;
-        faces++;
+        ++numFaces;
+        numVertices += nidx;
     }
 
-    if (!mesh->mNumVertices) {
+    if (!numVertices) {
         throw DeadlyImportError("GEO: There are no valid faces");
     }
 
-    ASSIMP_LOG_DEBUG("GEO: face storage just needs ", mesh->mNumFaces, " faces, not ", numFaces);
+    ASSIMP_LOG_DEBUG("GEO: face storage needs ", numFaces, " faces / ", numVertices, " vertices");
 
-    // allocate storage for the output vertices
-    verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+    mesh->mNumFaces = numFaces;
+    mesh->mNumVertices = numVertices;
+    faces = mesh->mFaces = new aiFace[numFaces];
+    verts = mesh->mVertices = new aiVector3D[numVertices];
 
-    // second: now parse all face indices
     buffer = old;
-    faces = mesh->mFaces;
-
     m_progress->UpdateFileRead(3, 5);
 
     if (flav == Mesh_with_coloured_faces) {
-        InternReadcF(mesh->mNumFaces); // mesh colored faces
+        InternReadFaces(mesh->mNumFaces, true);
     } else {
-        InternReadncF(mesh->mNumFaces); // mesh colored vertices
+        InternReadFaces(mesh->mNumFaces, false);
     }
 
     m_progress->UpdateFileRead(4, 5);
@@ -261,10 +259,16 @@ void GEOImporter::InternReadLamp(unsigned int count) {
     if (!count) {
         throw DeadlyImportError("GEO: 3DG2 lamp file has zero lights");
     }
+    if (count > kMaxGeoLamps) {
+        throw DeadlyImportError("GEO: lamp count too large");
+    }
 
-    pScene->mLights = new aiLight *[count];
-    pScene->mNumLights = 0;
-    pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+    mScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+
+    // Own lights until the full set is parsed, then transfer to the scene.
+    // Avoids LeakSanitizer hits if a corrupt/fuzzed file throws mid-lamp.
+    std::vector<std::unique_ptr<aiLight>> lights;
+    lights.reserve(count);
 
     for (unsigned int i = 0; i < count; ++i) {
         if (!GetNextLine(buffer, line)) {
@@ -282,15 +286,13 @@ void GEOImporter::InternReadLamp(unsigned int count) {
             ASSIMP_LOG_WARN("GEO: unknown lamp type ", geoType, ", treating as point");
         }
 
-        char name[24];
-        std::snprintf(name, sizeof(name), "Lamp%04u", i + 1);
-        aiLight *tmpLight = new aiLight();
-        tmpLight->mName.Set(name);
+        auto tmpLight = std::make_unique<aiLight>();
+        tmpLight->mName.length = static_cast<ai_uint32>(
+                ::ai_snprintf(tmpLight->mName.data, AI_MAXLEN, "Lamp%04u", i + 1));
         tmpLight->mType = mapped;
-        ASSIMP_LOG_DEBUG("GEO: Create light: ", name, " geoType=", geoType);
+        ASSIMP_LOG_DEBUG("GEO: Create light: ", tmpLight->mName.C_Str(), " geoType=", geoType);
 
         if (!GetNextLine(buffer, line)) {
-            delete tmpLight;
             throw DeadlyImportError("GEO: Unexpected EOF (spotsize/blend)");
         }
         sz = line;
@@ -308,7 +310,6 @@ void GEOImporter::InternReadLamp(unsigned int count) {
         }
 
         if (!GetNextLine(buffer, line)) {
-            delete tmpLight;
             throw DeadlyImportError("GEO: Unexpected EOF (lamp color/energy)");
         }
         sz = line;
@@ -330,7 +331,6 @@ void GEOImporter::InternReadLamp(unsigned int count) {
         tmpLight->mColorAmbient = aiColor3D(c.r * 0.1f, c.g * 0.1f, c.b * 0.1f);
 
         if (!GetNextLine(buffer, line)) {
-            delete tmpLight;
             throw DeadlyImportError("GEO: Unexpected EOF (lamp position)");
         }
         sz = line;
@@ -342,7 +342,6 @@ void GEOImporter::InternReadLamp(unsigned int count) {
         fast_atoreal_move<float>(sz, (float &)p.z);
 
         if (!GetNextLine(buffer, line)) {
-            delete tmpLight;
             throw DeadlyImportError("GEO: Unexpected EOF (lamp direction)");
         }
         sz = line;
@@ -360,12 +359,18 @@ void GEOImporter::InternReadLamp(unsigned int count) {
             tmpLight->mAttenuationQuadratic = 0.f;
         }
 
-        pScene->mLights[pScene->mNumLights++] = tmpLight;
+        lights.push_back(std::move(tmpLight));
+    }
+
+    mScene->mNumLights = static_cast<unsigned int>(lights.size());
+    mScene->mLights = new aiLight *[mScene->mNumLights]();
+    for (unsigned int i = 0; i < mScene->mNumLights; ++i) {
+        mScene->mLights[i] = lights[i].release();
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadFbS(unsigned int count) {
+[[noreturn]] void GEOImporter::InternReadFbS(unsigned int count) {
     ASSIMP_LOG_DEBUG("GEO: Has to import type ", count, " form(s)");
     while (GetNextLine(buffer, line)) {
         sz = line;
@@ -374,10 +379,13 @@ void GEOImporter::InternReadFbS(unsigned int count) {
 }
 
 // ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadcV(unsigned int count) {
-    ASSIMP_LOG_DEBUG("GEO: Has to import ", count, " colored vertex/vertices");
+void GEOImporter::InternReadVertices(unsigned int count, bool colored) {
+    ASSIMP_LOG_DEBUG("GEO: Has to import ", count,
+            colored ? " colored vertex/vertices" : " not colored vertex/vertices");
 
-    tempColors.resize(count);
+    if (colored) {
+        tempColors.resize(count);
+    }
 
     for (unsigned int i = 0; i < count; i++) {
         if (!GetNextLine(buffer, line)) {
@@ -394,36 +402,20 @@ void GEOImporter::InternReadcV(unsigned int count) {
         SkipSpaces(&sz, line + sizeof(line));
         sz = fast_atoreal_move<float>(sz, (float &)v.z);
 
-        InternReadColor(i);
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadncV(unsigned int count) {
-    ASSIMP_LOG_DEBUG("GEO: Has to import ", count, " not colored vertex/vertices");
-
-    for (unsigned int i = 0; i < count; i++) {
-        if (!GetNextLine(buffer, line)) {
-            ASSIMP_LOG_ERROR("GEO: The number of verts in the header is incorrect");
-            break;
+        if (colored) {
+            InternReadColor(i);
         }
-
-        aiVector3D &v = tempPositions[i];
-
-        sz = line;
-        sz = fast_atoreal_move<float>(sz, (float &)v.x);
-        SkipSpaces(&sz, line + sizeof(line));
-        sz = fast_atoreal_move<float>(sz, (float &)v.y);
-        SkipSpaces(&sz, line + sizeof(line));
-        fast_atoreal_move<float>(sz, (float &)v.z);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadcF(unsigned int count) {
-    ASSIMP_LOG_DEBUG("GEO: Has to import ", count, " colored face(s)");
+void GEOImporter::InternReadFaces(unsigned int count, bool faceColors) {
+    ASSIMP_LOG_DEBUG("GEO: Has to import ", count,
+            faceColors ? " colored face(s)" : " not colored face(s)");
 
-    tempColors.resize(count);
+    if (faceColors) {
+        tempColors.resize(count);
+    }
 
     for (unsigned int i = 0, p = 0; i < count;) {
         if (!GetNextLine(buffer, line)) {
@@ -432,8 +424,8 @@ void GEOImporter::InternReadcF(unsigned int count) {
 
         sz = line;
 
-        unsigned int idx, pos;
-        if (!(idx = strtoul10(sz, &sz))) {
+        const unsigned int idx = strtoul10(sz, &sz);
+        if (!idx) {
             continue;
         }
 
@@ -444,85 +436,53 @@ void GEOImporter::InternReadcF(unsigned int count) {
         }
         for (unsigned int m = 0; m < faces->mNumIndices; m++) {
             SkipSpaces(&sz, line + sizeof(line));
-            pos = strtoul10(sz, &sz);
+            const unsigned int pos = strtoul10(sz, &sz);
             faces->mIndices[m] = p++;
             *verts++ = tempPositions[pos];
+            if (!faceColors) {
+                mesh->mColors[0][faces->mIndices[m]] = tempColors[pos];
+            }
         }
 
-        InternReadColor(i);
-
-        for (unsigned int l = 0; l < faces->mNumIndices; l++) {
-            aiColor4D &col = mesh->mColors[0][faces->mIndices[l]];
-            col = tempColors[i];
+        if (faceColors) {
+            InternReadColor(i);
+            for (unsigned int l = 0; l < faces->mNumIndices; l++) {
+                mesh->mColors[0][faces->mIndices[l]] = tempColors[i];
+            }
         }
-        i++;
-        faces++;
-        // TODO: face mesh material handling
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadncF(unsigned int count) {
-    ASSIMP_LOG_DEBUG("GEO: Has to import ", count, " not colored face(s)");
-    (void)count;
-
-    for (unsigned int i = 0, p = 0; i < mesh->mNumFaces;) {
-        if (!GetNextLine(buffer, line)) {
-            break;
-        }
-
-        sz = line;
-
-        unsigned int idx, pos;
-        if (!(idx = strtoul10(sz, &sz))) {
-            continue;
-        }
-
-        faces->mIndices = new unsigned int[faces->mNumIndices = idx];
-        if (!mesh->mColors[0]) {
-            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
-            ASSIMP_LOG_DEBUG("GEO: got new mesh");
-        }
-        for (unsigned int m = 0; m < faces->mNumIndices; m++) {
-            SkipSpaces(&sz, line + sizeof(line));
-            pos = strtoul10(sz, &sz);
-            faces->mIndices[m] = p++;
-            *verts++ = tempPositions[pos];
-            aiColor4D &col = mesh->mColors[0][faces->mIndices[m]];
-            col = tempColors[pos];
-        }
-        i++;
-        faces++;
+        // Face material splits from palette high-bits are not implemented yet.
+        ++i;
+        ++faces;
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 void GEOImporter::InternReadFinish() {
-    pScene->mRootNode = new aiNode();
-    pScene->mRootNode->mName.Set("<GEORoot>");
+    mScene->mRootNode = new aiNode();
+    mScene->mRootNode->mName.Set("<GEORoot>");
 
-    if (pScene->mNumMeshes) {
-        pScene->mRootNode->mMeshes =
-                new unsigned int[pScene->mRootNode->mNumMeshes = pScene->mNumMeshes];
-        for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
-            pScene->mRootNode->mMeshes[i] = i;
+    if (mScene->mNumMeshes) {
+        mScene->mRootNode->mMeshes =
+                new unsigned int[mScene->mRootNode->mNumMeshes = mScene->mNumMeshes];
+        for (unsigned int i = 0; i < mScene->mNumMeshes; i++) {
+            mScene->mRootNode->mMeshes[i] = i;
         }
     }
 
     // Assimp expects a scene-graph node with the same name as each light.
-    if (pScene->mNumLights) {
-        pScene->mRootNode->mChildren = new aiNode *[pScene->mNumLights];
-        pScene->mRootNode->mNumChildren = pScene->mNumLights;
-        for (unsigned int i = 0; i < pScene->mNumLights; ++i) {
+    if (mScene->mNumLights) {
+        mScene->mRootNode->mChildren = new aiNode *[mScene->mNumLights];
+        mScene->mRootNode->mNumChildren = mScene->mNumLights;
+        for (unsigned int i = 0; i < mScene->mNumLights; ++i) {
             aiNode *n = new aiNode();
-            n->mName = pScene->mLights[i]->mName;
-            n->mParent = pScene->mRootNode;
+            n->mName = mScene->mLights[i]->mName;
+            n->mParent = mScene->mRootNode;
             // Bake light position into the node transform (identity otherwise).
-            const aiVector3D &lp = pScene->mLights[i]->mPosition;
+            const aiVector3D &lp = mScene->mLights[i]->mPosition;
             n->mTransformation.a4 = lp.x;
             n->mTransformation.b4 = lp.y;
             n->mTransformation.c4 = lp.z;
-            pScene->mRootNode->mChildren[i] = n;
+            mScene->mRootNode->mChildren[i] = n;
         }
     }
 }

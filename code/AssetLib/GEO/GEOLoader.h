@@ -82,12 +82,10 @@ protected:
      */
     void InternReadFile(const std::string &pFile, aiScene *pScene,
             IOSystem *pIOHandler) override;
-    void InternReadcF(unsigned int count);
-    void InternReadncF(unsigned int count);
+    void InternReadVertices(unsigned int count, bool colored);
+    void InternReadFaces(unsigned int count, bool faceColors);
     void InternReadLamp(unsigned int count);
-    void InternReadFbS(unsigned int count);
-    void InternReadcV(unsigned int count);
-    void InternReadncV(unsigned int count);
+    [[noreturn]] void InternReadFbS(unsigned int count);
     void InternReadFinish();
     void InternReadColor(unsigned int pos);
     void LookupColor(long index, aiColor4D &cOut);
@@ -101,7 +99,7 @@ private:
     };
     Flavor flav;
     bool rgbH;
-    aiScene *pScene;
+    aiScene *mScene;
     const char *buffer;
     const char *sz;
     char line[4096];
@@ -109,7 +107,8 @@ private:
     std::vector<aiColor4D> tempColors;
     aiMesh *mesh;
     aiFace *faces;
-    long lastcolor = 0; // TODO: reserved to detect material change.
+    // Reserved for future per-face material splits when the palette high bits change.
+    long lastcolor = 0;
     long color = 0;
     aiVector3D *verts = nullptr;
     [[maybe_unused]] aiColor4D *colOut = nullptr;

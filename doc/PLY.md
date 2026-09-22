@@ -115,16 +115,38 @@ These describe **ecosystem practice**, not an ISO/Khronos “PLY 2.0” standard
 
 ## 3. Implications for Assimp
 
-| File kind | What Assimp PLY does today | Improve-importer direction |
-|---|---|---|
-| Mesh PLY (`vertex` + `face`) | Supported when `ASSIMP_BUILD_NO_PLY_IMPORTER` is off | Keep / harden mesh path (`Wuson.ply`, etc.) |
-| Point-only mesh PLY (vertices, no faces) | Partial / point-cloud style paths in loader | Clarify point clouds |
-| 3DGS PLY (`f_dc_*` / `f_rest_*`, no faces) | **Not** a Gaussian renderer; at best unknown extras on vertices | Optional: detect splat property set, expose as custom vertex attrs or dedicated metadata — **do not** pretend they are `aiFace` meshes |
+| File kind | Assimp behaviour |
+|---|---|
+| Mesh PLY (`vertex` + `face`) | Classic mesh path (`test/models/PLY/cube.ply`, `Wuson.ply`, …) |
+| Point-only PLY (vertices, no faces) | Point cloud (`aiPrimitiveType_POINT`) |
+| 3DGS PLY (`f_dc_*` / `opacity` / `scale_*` / `rot_*`) | Positions on `aiMesh`; splat attrs via **ABI-safe side API** |
 
-**Assimp is a mesh/scene importer.** Shipping `test/models/PLY/*.ply` proves
-**mesh PLY** support. It does **not** mean Assimp implements 3D Gaussian
-Splatting. Detecting `f_dc_*`/`f_rest_*` is an *interop/detection* problem on top
-of the classic format.
+### ABI-safe Gaussian side API (`include/assimp/gaussian.h`)
+
+**Does not** add fields to `aiMesh` / `aiScene` (avoids the ABI break of [PR #6593](https://github.com/assimp/assimp/pull/6593)).
+
+Detection (vertex properties): `f_dc_0..2`, `opacity`, `scale_0..2`, `rot_0..3` required; contiguous `f_rest_0..N-1` optional.
+
+```cpp
+#include <assimp/gaussian.h>
+
+// Point-only PLY has no faces (issue #623) — do not use ValidateDataStructure.
+const aiScene *scene = importer.ReadFile("splat.ply", 0);
+if (aiSceneHasGaussianSplat(scene)) {
+    const aiGaussianSplat *gs = aiGetGaussianSplat(scene, 0);
+    // gs->mDC / mRest / mScale / mRotation / mOpacity
+    // Positions: scene->mMeshes[0]->mVertices (same count as gs->mNumPoints)
+}
+```
+
+Metadata keys (also on root node):
+
+- `AI_METADATA_GAUSSIAN_SPLAT` (`bool`)
+- `AI_METADATA_GAUSSIAN_SH_REST_COUNT` (`int32`)
+
+Lifetime fixtures: `test/models/PLY/gaussian_dc_only.ply`, `gaussian_with_rest.ply`.
+
+Lifetime notes for renderers:** Assimp does not draw Gaussians. Feed `aiGaussianSplat` into your splat path (same field semantics as graphdeco / VVE `GaussianAssetLoader`). Lifetime = scene. Not copied by `aiCopyScene`.
 
 ---
 

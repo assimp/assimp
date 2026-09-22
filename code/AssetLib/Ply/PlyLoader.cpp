@@ -53,9 +53,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
+#include <assimp/metadata.h>
+#include <assimp/gaussian.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/LogAux.h>
+
+#include "Common/ScenePrivate.h"
 
 // other headers
 #include <memory>
+#include <cstdlib>
+#include <cstring>
 
 namespace Assimp {
 
@@ -171,6 +179,7 @@ namespace Assimp {
     // ------------------------------------------------------------------------------------------------
     PLYImporter::~PLYImporter() {
         delete mGeneratedMesh;
+        delete mGaussianSplat;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -188,6 +197,21 @@ namespace Assimp {
     // ------------------------------------------------------------------------------------------------
     // Imports the given file into the given scene structure.
     void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+        // Reset per-import Gaussian state (importer instances are reused).
+        mGaussianChecked = false;
+        mGaussianActive = false;
+        delete mGaussianSplat;
+        mGaussianSplat = nullptr;
+        mGsRest.clear();
+        mGsOpacity = -1;
+        for (int i = 0; i < 3; ++i) {
+            mGsDc[i] = -1;
+            mGsScale[i] = -1;
+        }
+        for (int i = 0; i < 4; ++i) {
+            mGsRot[i] = -1;
+        }
+
         const std::string mode = "rb";
         std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
         if (!fileStream) {
@@ -280,7 +304,9 @@ namespace Assimp {
         }
 
         // if no face list is existing we assume that the vertex
-        // list is containing a list of points
+        // list is containing a list of points (issue #623: do not invent faces).
+        // 3DGS PLY is the same layout; ValidateDataStructure will reject it —
+        // load with flags == 0 and read aiGetGaussianSplat().
         bool pointsOnly = mGeneratedMesh->mFaces == nullptr ? true : false;
         if (pointsOnly) {
             mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
@@ -314,11 +340,178 @@ namespace Assimp {
         for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes; ++i) {
             pScene->mRootNode->mMeshes[i] = i;
         }
+
+        // Attach 3DGS side data (ABI-safe: scene-private, not aiMesh fields).
+        if (mGaussianActive && mGaussianSplat != nullptr) {
+            const int32_t restCount = static_cast<int32_t>(mGaussianSplat->mNumRestCoeffs);
+            AttachGaussianSplat(pScene, 0, mGaussianSplat);
+            mGaussianSplat = nullptr; // ownership moved
+
+            if (pScene->mMetaData == nullptr) {
+                pScene->mMetaData = new aiMetadata();
+            }
+            pScene->mMetaData->Add(AI_METADATA_GAUSSIAN_SPLAT, true);
+            pScene->mMetaData->Add(AI_METADATA_GAUSSIAN_SH_REST_COUNT, restCount);
+
+            if (pScene->mRootNode->mMetaData == nullptr) {
+                pScene->mRootNode->mMetaData = new aiMetadata();
+            }
+            pScene->mRootNode->mMetaData->Add(AI_METADATA_GAUSSIAN_SPLAT, true);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    void PLYImporter::PrepareGaussianIfNeeded(const Element *pcElement) {
+        if (mGaussianChecked || pcElement == nullptr) {
+            return;
+        }
+        mGaussianChecked = true;
+
+        int dc[3] = { -1, -1, -1 };
+        int scale[3] = { -1, -1, -1 };
+        int rot[4] = { -1, -1, -1, -1 };
+        int opacity = -1;
+        int maxRest = -1;
+        std::vector<int> restSlots;
+
+        auto matchPrefixedIndex = [](const std::string &name, const char *prefix) -> int {
+            const size_t plen = std::strlen(prefix);
+            if (name.size() <= plen || name.compare(0, plen, prefix) != 0) {
+                return -1;
+            }
+            char *end = nullptr;
+            const long idx = std::strtol(name.c_str() + plen, &end, 10);
+            if (end == name.c_str() + plen || *end != '\0' || idx < 0 || idx > 64) {
+                return -1;
+            }
+            return static_cast<int>(idx);
+        };
+
+        unsigned int propIndex = 0;
+        for (const Property &prop : pcElement->alProperties) {
+            if (prop.bIsList) {
+                ++propIndex;
+                continue;
+            }
+
+            if (prop.Semantic == EST_Opacity || prop.szName == "opacity") {
+                opacity = static_cast<int>(propIndex);
+            } else if (!prop.szName.empty()) {
+                int idx = matchPrefixedIndex(prop.szName, "f_dc_");
+                if (idx >= 0 && idx < 3) {
+                    dc[idx] = static_cast<int>(propIndex);
+                }
+                idx = matchPrefixedIndex(prop.szName, "scale_");
+                if (idx >= 0 && idx < 3) {
+                    scale[idx] = static_cast<int>(propIndex);
+                }
+                idx = matchPrefixedIndex(prop.szName, "rot_");
+                if (idx >= 0 && idx < 4) {
+                    rot[idx] = static_cast<int>(propIndex);
+                }
+                idx = matchPrefixedIndex(prop.szName, "f_rest_");
+                if (idx >= 0) {
+                    if (idx > maxRest) {
+                        maxRest = idx;
+                        restSlots.resize(static_cast<size_t>(maxRest) + 1u, -1);
+                    }
+                    restSlots[static_cast<size_t>(idx)] = static_cast<int>(propIndex);
+                }
+            }
+            ++propIndex;
+        }
+
+        const bool haveCore =
+                dc[0] >= 0 && dc[1] >= 0 && dc[2] >= 0 &&
+                scale[0] >= 0 && scale[1] >= 0 && scale[2] >= 0 &&
+                rot[0] >= 0 && rot[1] >= 0 && rot[2] >= 0 && rot[3] >= 0 &&
+                opacity >= 0;
+
+        if (!haveCore) {
+            return;
+        }
+
+        // Require contiguous f_rest_0 .. f_rest_max when any rest is present.
+        const unsigned int restCount = (maxRest >= 0) ? static_cast<unsigned int>(maxRest + 1) : 0u;
+        for (unsigned int i = 0; i < restCount; ++i) {
+            if (restSlots[i] < 0) {
+                ASSIMP_LOG_WARN("PLY: incomplete f_rest_* set; skipping Gaussian side data");
+                return;
+            }
+        }
+
+        mGsDc[0] = dc[0];
+        mGsDc[1] = dc[1];
+        mGsDc[2] = dc[2];
+        mGsScale[0] = scale[0];
+        mGsScale[1] = scale[1];
+        mGsScale[2] = scale[2];
+        mGsRot[0] = rot[0];
+        mGsRot[1] = rot[1];
+        mGsRot[2] = rot[2];
+        mGsRot[3] = rot[3];
+        mGsOpacity = opacity;
+        mGsRest = std::move(restSlots);
+
+        mGaussianSplat = new aiGaussianSplat();
+        mGaussianSplat->mNumPoints = pcElement->NumOccur;
+        mGaussianSplat->mNumRestCoeffs = restCount;
+        mGaussianSplat->mDC = new aiVector3D[pcElement->NumOccur];
+        mGaussianSplat->mScale = new aiVector3D[pcElement->NumOccur];
+        mGaussianSplat->mRotation = new aiColor4D[pcElement->NumOccur];
+        mGaussianSplat->mOpacity = new ai_real[pcElement->NumOccur];
+        if (restCount > 0) {
+            const size_t restTotal = static_cast<size_t>(pcElement->NumOccur) * static_cast<size_t>(restCount);
+            mGaussianSplat->mRest = new ai_real[restTotal];
+        }
+
+        mGaussianActive = true;
+        ASSIMP_LOG_INFO("PLY: detected 3D Gaussian Splatting vertex layout");
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    void PLYImporter::LoadGaussianVertex(const ElementInstance *instElement, unsigned int pos) {
+        if (!mGaussianActive || mGaussianSplat == nullptr || instElement == nullptr) {
+            return;
+        }
+        if (pos >= mGaussianSplat->mNumPoints) {
+            throw DeadlyImportError("Invalid .ply file: Too many Gaussian vertices");
+        }
+
+        auto readFloat = [&](int propIndex) -> ai_real {
+            const PropertyInstance &pi = GetProperty(instElement->alProperties, propIndex);
+            return PropertyInstance::ConvertTo<ai_real>(pi.avList.front(), EDT_Float);
+        };
+
+        mGaussianSplat->mDC[pos].x = readFloat(mGsDc[0]);
+        mGaussianSplat->mDC[pos].y = readFloat(mGsDc[1]);
+        mGaussianSplat->mDC[pos].z = readFloat(mGsDc[2]);
+
+        mGaussianSplat->mScale[pos].x = readFloat(mGsScale[0]);
+        mGaussianSplat->mScale[pos].y = readFloat(mGsScale[1]);
+        mGaussianSplat->mScale[pos].z = readFloat(mGsScale[2]);
+
+        mGaussianSplat->mRotation[pos].r = readFloat(mGsRot[0]);
+        mGaussianSplat->mRotation[pos].g = readFloat(mGsRot[1]);
+        mGaussianSplat->mRotation[pos].b = readFloat(mGsRot[2]);
+        mGaussianSplat->mRotation[pos].a = readFloat(mGsRot[3]);
+
+        mGaussianSplat->mOpacity[pos] = readFloat(mGsOpacity);
+
+        if (mGaussianSplat->mNumRestCoeffs > 0 && mGaussianSplat->mRest != nullptr) {
+            ai_real *dst = mGaussianSplat->mRest +
+                           static_cast<size_t>(pos) * static_cast<size_t>(mGaussianSplat->mNumRestCoeffs);
+            for (unsigned int i = 0; i < mGaussianSplat->mNumRestCoeffs; ++i) {
+                dst[i] = readFloat(mGsRest[static_cast<size_t>(i)]);
+            }
+        }
     }
 
     void PLYImporter::LoadVertex(const Element *pcElement, const ElementInstance *instElement, unsigned int pos) {
         ai_assert(nullptr != pcElement);
         ai_assert(nullptr != instElement);
+
+        PrepareGaussianIfNeeded(pcElement);
 
         ai_uint aiPositions[3] = { NotSet, NotSet, NotSet };
         EDataType aiTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
@@ -524,6 +717,11 @@ namespace Assimp {
                 }
                 mGeneratedMesh->mTextureCoords[0][pos] = tOut;
             }
+
+            LoadGaussianVertex(instElement, pos);
+        } else if (mGaussianActive) {
+            // Positions missing but splat layout present — still fill side data if possible.
+            LoadGaussianVertex(instElement, pos);
         }
     }
 

@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file  PLYLoader.h
  *  @brief Declaration of the .ply importer class.
+ *
+ *  Format notes (mesh faces vs. 3DGS f_dc_*/f_rest_*): see doc/PLY.md
  */
 #pragma once
 #ifndef AI_PLYLOADER_H_INCLUDED

@@ -178,19 +178,21 @@ TEST_F(utPLYImportExport, vertexColorTest) {
     EXPECT_EQ(2u, first_face.mIndices[2]);
 }
 
-// Test issue #623, PLY importer should not automatically create faces
+// Point-only PLY (no element face): emit 1-index faces like OBJ/glTF/DXF.
 TEST_F(utPLYImportExport, pointcloudTest) {
     Assimp::Importer importer;
 
-    // Could not use aiProcess_ValidateDataStructure since it's missing faces.
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", 0);
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/PLY/issue623.ply", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 
     EXPECT_EQ(1u, scene->mNumMeshes);
     EXPECT_NE(nullptr, scene->mMeshes[0]);
     EXPECT_EQ(24u, scene->mMeshes[0]->mNumVertices);
     EXPECT_EQ(aiPrimitiveType::aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
-    EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(24u, scene->mMeshes[0]->mNumFaces);
+    ASSERT_EQ(1u, scene->mMeshes[0]->mFaces[0].mNumIndices);
+    EXPECT_EQ(0u, scene->mMeshes[0]->mFaces[0].mIndices[0]);
 }
 
 static const char *test_file =
@@ -287,16 +289,16 @@ TEST_F(utPLYImportExport, parseInvalidDoubleCustomProperty) {
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 // 3DGS PLY: side-channel aiGaussianSplat (no aiMesh ABI change).
-// Like pointcloudTest / issue #623: no invented faces → skip ValidateDataStructure.
+// Point faces are synthesized (1 index each) so Validate works, like other importers.
 TEST_F(utPLYImportExport, importGaussianPlyDcOnly) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(
-            ASSIMP_TEST_MODELS_DIR "/PLY/gaussian_dc_only.ply", 0);
+            ASSIMP_TEST_MODELS_DIR "/PLY/gaussian_dc_only.ply", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
     ASSERT_EQ(1u, scene->mNumMeshes);
     ASSERT_NE(nullptr, scene->mMeshes[0]);
     EXPECT_EQ(2u, scene->mMeshes[0]->mNumVertices);
-    EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mNumFaces);
     EXPECT_EQ(aiPrimitiveType_POINT, scene->mMeshes[0]->mPrimitiveTypes);
 
     EXPECT_TRUE(aiSceneHasGaussianSplat(scene));
@@ -337,7 +339,7 @@ TEST_F(utPLYImportExport, importGaussianPlyDcOnly) {
 TEST_F(utPLYImportExport, importGaussianPlyWithRest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(
-            ASSIMP_TEST_MODELS_DIR "/PLY/gaussian_with_rest.ply", 0);
+            ASSIMP_TEST_MODELS_DIR "/PLY/gaussian_with_rest.ply", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
     const aiGaussianSplat *gs = aiGetGaussianSplat(scene, 0);
     ASSERT_NE(nullptr, gs);

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *  Does **not** extend aiMesh / aiScene layout. Splat arrays live in
  *  scene-private storage and are reached via getters. Positions stay in
- *  aiMesh::mVertices (point cloud; typically no faces).
+ *  aiMesh::mVertices (point cloud; 1-index faces per vertex).
  *
  *  See doc/PLY.md for the on-disk PLY convention (f_dc_*, f_rest_*, …).
  */

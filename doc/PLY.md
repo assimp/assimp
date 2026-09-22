@@ -118,7 +118,7 @@ These describe **ecosystem practice**, not an ISO/Khronos “PLY 2.0” standard
 | File kind | Assimp behaviour |
 |---|---|
 | Mesh PLY (`vertex` + `face`) | Classic mesh path (`test/models/PLY/cube.ply`, `Wuson.ply`, …) |
-| Point-only PLY (vertices, no faces) | Point cloud (`aiPrimitiveType_POINT`) |
+| Point-only PLY (vertices, no faces) | Point cloud: `aiPrimitiveType_POINT` + one 1-index face per vertex (same as OBJ/glTF/DXF) |
 | 3DGS PLY (`f_dc_*` / `opacity` / `scale_*` / `rot_*`) | Positions on `aiMesh`; splat attrs via **ABI-safe side API** |
 
 ### ABI-safe Gaussian side API (`include/assimp/gaussian.h`)
@@ -130,8 +130,7 @@ Detection (vertex properties): `f_dc_0..2`, `opacity`, `scale_0..2`, `rot_0..3` 
 ```cpp
 #include <assimp/gaussian.h>
 
-// Point-only PLY has no faces (issue #623) — do not use ValidateDataStructure.
-const aiScene *scene = importer.ReadFile("splat.ply", 0);
+const aiScene *scene = importer.ReadFile("splat.ply", aiProcess_ValidateDataStructure);
 if (aiSceneHasGaussianSplat(scene)) {
     const aiGaussianSplat *gs = aiGetGaussianSplat(scene, 0);
     // gs->mDC / mRest / mScale / mRotation / mOpacity

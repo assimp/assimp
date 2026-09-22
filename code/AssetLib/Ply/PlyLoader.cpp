@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
+#include <assimp/material.h>
 #include <assimp/metadata.h>
 #include <assimp/gaussian.h>
 #include <assimp/DefaultLogger.hpp>
@@ -335,11 +336,26 @@ namespace Assimp {
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         pScene->mMeshes[0] = mGeneratedMesh;
 
+        // Name mesh from file stem (Assimp info / tooling); PLY has no mesh names.
+        {
+            std::string::size_type slash = pFile.find_last_of("/\\");
+            std::string stem = (slash == std::string::npos) ? pFile : pFile.substr(slash + 1);
+            const std::string::size_type dot = stem.find_last_of('.');
+            if (dot != std::string::npos) {
+                stem.resize(dot);
+            }
+            if (stem.empty()) {
+                stem = "PLY";
+            }
+            mGeneratedMesh->mName.Set(stem);
+        }
+
         // Move the mesh ownership into the scene instance
         mGeneratedMesh = nullptr;
 
         // generate a simple node structure
         pScene->mRootNode = new aiNode();
+        pScene->mRootNode->mName.Set("<PLYRoot>");
         pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
         pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
 
@@ -1066,6 +1082,16 @@ namespace Assimp {
                     pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
                 }
 
+                // BaseImporter: default / unnamed materials should use AI_DEFAULT_MATERIAL_NAME
+                {
+                    aiString matName(AI_DEFAULT_MATERIAL_NAME);
+                    if (pcList->alInstances.size() > 1) {
+                        const std::string n = "Material_" + std::to_string(pvOut->size());
+                        matName.Set(n);
+                    }
+                    pcHelper->AddProperty(&matName, AI_MATKEY_NAME);
+                }
+
                 // add the newly created material instance to the list
                 pvOut->push_back(pcHelper);
             }
@@ -1103,6 +1129,12 @@ namespace Assimp {
             if (pointsOnly) {
                 constexpr int wireframe = 1;
                 pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
+            }
+
+            // BaseImporter: generated defaults should be named AI_DEFAULT_MATERIAL_NAME
+            {
+                const aiString matName(AI_DEFAULT_MATERIAL_NAME);
+                pcHelper->AddProperty(&matName, AI_MATKEY_NAME);
             }
 
             pvOut->push_back(pcHelper);

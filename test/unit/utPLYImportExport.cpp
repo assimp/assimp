@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <assimp/material.h>
 #include <assimp/gaussian.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
@@ -80,6 +81,18 @@ public:
 
 TEST_F(utPLYImportExport, importTest_Success) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utPLYImportExport, defaultMaterialIsNamed) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_GE(scene->mNumMaterials, 1u);
+    aiString name;
+    EXPECT_EQ(AI_SUCCESS, scene->mMaterials[0]->Get(AI_MATKEY_NAME, name));
+    EXPECT_STREQ(AI_DEFAULT_MATERIAL_NAME, name.C_Str());
+    EXPECT_STREQ("cube", scene->mMeshes[0]->mName.C_Str());
+    EXPECT_STREQ("<PLYRoot>", scene->mRootNode->mName.C_Str());
 }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

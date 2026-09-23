@@ -823,7 +823,15 @@ ENDIF()
 if (ASSIMP_BUILD_SKP_IMPORTER)
     set(OPENSKP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(OPENSKP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    # OpenSkp is linked into assimp itself, not shipped as its own DLL/.so -
+    # force it static regardless of assimp's own BUILD_SHARED_LIBS setting,
+    # so importer executables don't need a second shared library alongside
+    # assimp's own to run.
+    set(_openskp_saved_build_shared_libs ${BUILD_SHARED_LIBS})
+    set(BUILD_SHARED_LIBS OFF)
     ADD_SUBDIRECTORY( "contrib/openskp" EXCLUDE_FROM_ALL )
+    set(BUILD_SHARED_LIBS ${_openskp_saved_build_shared_libs})
+    unset(_openskp_saved_build_shared_libs)
 endif () # if (ASSIMP_BUILD_SKP_IMPORTER)
 
 # Main assimp code

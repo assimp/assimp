@@ -106,8 +106,11 @@ InstancedScene build_instanced_scene_raw(RawParsed&& p, const ParseOptions& o) {
   std::size_t instance_counter = 0;
   std::set<EntityId> active;
 
-  // Textures deduplicated by bytes, exactly as the baked path does.
-  std::map<std::string, std::size_t> texture_index_by_key;
+  // Textures deduplicated by bytes, exactly as the baked path does (see
+  // scene.cpp's own identical comment on why the key is a bucket, not the
+  // final answer: same-size PNGs routinely share their signature/IHDR
+  // bytes, so two different images can share both size and prefix).
+  std::map<std::string, std::vector<std::size_t>> texture_indices_by_key;
   auto texture_index_for =
       [&](const std::shared_ptr<RawMaterial>& mat) -> std::optional<std::size_t> {
     if (!mat || !mat->texture || !mat->texture->data || mat->texture->data->empty()) {
@@ -122,11 +125,13 @@ InstancedScene build_instanced_scene_raw(RawParsed&& p, const ParseOptions& o) {
       key_stream << std::hex << static_cast<int>(data[i]);
     }
     const auto key = key_stream.str();
-    auto found = texture_index_by_key.find(key);
-    if (found != texture_index_by_key.end()) return found->second;
+    auto& candidates = texture_indices_by_key[key];
+    for (auto idx : candidates) {
+      if (scene.textures[idx].data == data) return idx;
+    }
     const auto idx = scene.textures.size();
     scene.textures.push_back(SceneTexture{data, *mime_type, mat->texture->filename});
-    texture_index_by_key.emplace(key, idx);
+    candidates.push_back(idx);
     return idx;
   };
 

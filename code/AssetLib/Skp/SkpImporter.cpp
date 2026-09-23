@@ -181,10 +181,22 @@ std::vector<int> SkpImporter::importMaterialsAndTextures(const openskp::Instance
         pScene->mTextures = new aiTexture *[pScene->mNumTextures];
         for (std::size_t i = 0; i < scene.textures.size(); ++i) {
             const openskp::SceneTexture &src = scene.textures[i];
+            if (src.data.size() > AI_MAX_ALLOC(aiTexel)) {
+                throw DeadlyImportError("SketchUp: embedded texture too large, would overflow");
+            }
             aiTexture *tex = new aiTexture();
             tex->mWidth = static_cast<unsigned int>(src.data.size());
             tex->mHeight = 0; // compressed (PNG/JPEG) payload, not raw texels - see aiTexture::mHeight's doc comment
-            tex->pcData = reinterpret_cast<aiTexel *>(new unsigned char[src.data.size()]);
+            // Allocated as aiTexel[] (not unsigned char[] cast to aiTexel*) so
+            // ~aiTexture()'s `delete[] pcData` matches the allocation type -
+            // same pattern AssbinLoader uses for its own compressed textures
+            // (`new aiTexel[tex->mWidth]`). mWidth stays the exact byte count
+            // per aiTexture::mWidth's own doc comment; since aiTexel is 4
+            // bytes, indexing mWidth aiTexel elements over-allocates up to 4x
+            // the real byte count - the same known inefficiency Assbin's own
+            // code accepts, harmless since only the first mWidth bytes are
+            // ever read back out.
+            tex->pcData = new aiTexel[tex->mWidth];
             std::memcpy(tex->pcData, src.data.data(), src.data.size());
             tex->mFilename.Set(src.filename.c_str());
 

@@ -157,7 +157,6 @@ SET( IMPORTERS
   unit/utB3DImportExport.cpp
   unit/utNDOImportExport.cpp
   #unit/utM3DImportExport.cpp
-  #unit/utSkpImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp
   unit/ImportExport/utAssjsonImportExport.cpp
@@ -186,6 +185,12 @@ SET( IMPORTERS
 if(ASSIMP_BUILD_USD_IMPORTER)
   list( APPEND IMPORTERS
     unit/utUSDImport.cpp
+  )
+endif()
+
+if(ASSIMP_BUILD_SKP_IMPORTER)
+  list( APPEND IMPORTERS
+    unit/utSkpImportExport.cpp
   )
 endif()
 

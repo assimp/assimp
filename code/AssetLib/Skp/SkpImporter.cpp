@@ -204,7 +204,8 @@ std::vector<int> SkpImporter::importMaterialsAndTextures(const openskp::Instance
             std::string hint = src.mime_type.rfind("image/", 0) == 0 ? src.mime_type.substr(6) : src.mime_type;
             if (hint == "jpeg") hint = "jpg";
             std::memset(tex->achFormatHint, 0, sizeof(tex->achFormatHint));
-            std::strncpy(tex->achFormatHint, hint.c_str(), sizeof(tex->achFormatHint) - 1);
+            const std::size_t hintLen = std::min(hint.size(), sizeof(tex->achFormatHint) - 1);
+            std::memcpy(tex->achFormatHint, hint.data(), hintLen);
 
             pScene->mTextures[i] = tex;
         }

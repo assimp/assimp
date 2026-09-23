@@ -58,7 +58,7 @@ Scene build_scene_raw(RawParsed&& p, const ParseOptions& o) {
   // Textures deduplicated by bytes: the same image routinely backs
   // several materials, and re-embedding it per material would multiply
   // the export size for nothing.
-  std::map<std::string, std::size_t> texture_index_by_key;
+  std::map<std::string, std::vector<std::size_t>> texture_indices_by_key;
   auto texture_index_for =
       [&](const std::shared_ptr<RawMaterial>& mat) -> std::optional<std::size_t> {
     if (!mat || !mat->texture || !mat->texture->data || mat->texture->data->empty()) {
@@ -67,19 +67,23 @@ Scene build_scene_raw(RawParsed&& p, const ParseOptions& o) {
     const auto& data = *mat->texture->data;
     auto mime_type = sniff_image_mime(data);
     if (!mime_type) return std::nullopt;  // a format glTF cannot carry
-    // length plus a short byte prefix is enough to tell real images apart
-    // without hashing megabytes on every face
+    // length plus a short byte prefix buckets candidates cheaply without
+    // hashing megabytes on every face, but two different images can share
+    // both (e.g. two PNGs share their signature/IHDR in the first 16
+    // bytes) - the full comparison below is what actually decides reuse.
     std::ostringstream key_stream;
     key_stream << data.size() << ':';
     for (std::size_t i = 0; i < data.size() && i < 16; ++i) {
       key_stream << std::hex << static_cast<int>(data[i]);
     }
     const auto key = key_stream.str();
-    auto found = texture_index_by_key.find(key);
-    if (found != texture_index_by_key.end()) return found->second;
+    auto& candidates = texture_indices_by_key[key];
+    for (auto idx : candidates) {
+      if (scene.textures[idx].data == data) return idx;
+    }
     const auto idx = scene.textures.size();
     scene.textures.push_back(SceneTexture{data, *mime_type, mat->texture->filename});
-    texture_index_by_key.emplace(key, idx);
+    candidates.push_back(idx);
     return idx;
   };
   std::function<std::vector<InstanceNode>(const GeometryBuilder&, const std::string&,
@@ -163,6 +167,15 @@ Scene build_scene_raw(RawParsed&& p, const ParseOptions& o) {
       scene.glb_primitives.push_back(std::move(prim));
     }
     std::vector<InstanceNode> children;
+    // Sibling instances can share the same inst_name (two placements of
+    // the same component, or two unnamed instances of the same
+    // definition), which would otherwise collide on the same child_path
+    // below - and since child_path is the key path_updates/meta.path use
+    // to backfill each mesh's real per-instance name/properties/attribute
+    // dictionaries, a collision would silently give some meshes another
+    // sibling's data instead of their own. Disambiguate repeats with a
+    // "#N" suffix so every sibling gets its own path.
+    std::map<std::string, int> child_path_occurrences;
     for (auto& i : b.instances) {
       std::string child_layer = layer;
       if (!i.layer.empty()) {
@@ -211,7 +224,11 @@ Scene build_scene_raw(RawParsed&& p, const ParseOptions& o) {
                              : ("Component_" + (i.ref_idx ? std::to_string(*i.ref_idx) : ""));
       const std::string display_name = name_override.value_or(inst_name);
 
-      auto child_path = path + " / " + inst_name;
+      const auto base_child_path = path + " / " + inst_name;
+      auto& occurrence = child_path_occurrences[base_child_path];
+      auto child_path = occurrence == 0 ? base_child_path
+                                        : base_child_path + "#" + std::to_string(occurrence + 1);
+      ++occurrence;
       auto mat = multiply_matrices(matrix, i.matrix);
       std::vector<InstanceNode> nested;
       if (i.ref_idx) {

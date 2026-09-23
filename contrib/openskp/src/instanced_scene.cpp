@@ -38,6 +38,12 @@ constexpr std::array<double, 16> kIdentityGltf{
 // converting the fully-composed SketchUp matrix. Translation is scaled to
 // metres; the rotation/scale block is unitless and is not.
 std::array<double, 16> to_gltf_matrix(const std::vector<double>& m) {
+  // A VFF `6419` instance record with no `6619` child, or a `6619` payload
+  // shorter than 104 bytes, leaves RawInstance::matrix empty - geometry.cpp
+  // guards exactly that case for the translation elements below, but a
+  // malformed/truncated .skp can still reach here with fewer than 9
+  // elements, which would read m[0]..m[8] out of bounds.
+  if (m.size() < 9) return kIdentityGltf;
   double a = m[0], b = m[1], c = m[2];
   double d = m[3], e = m[4], f = m[5];
   double g = m[6], h = m[7], i = m[8];

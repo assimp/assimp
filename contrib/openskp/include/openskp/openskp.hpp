@@ -1,21 +1,16 @@
 #pragma once
 
-#include <openskp/codegen.hpp>
-#include <openskp/create.hpp>
-#include <openskp/dxf_export.hpp>
-#include <openskp/edit.hpp>
+// This vendored copy carries only the *read* path (parsing a .skp file
+// into an InstancedScene) - what assimp's SkpImporter actually needs. The
+// upstream openskp repository also ships a writer, editor, and exporters to
+// OBJ/STL/PLY/DXF/IFC/GLB/Fragments; those aren't included here since they'd
+// otherwise pull in miniz-unrelated third-party deps (tinygltf, FlatBuffers)
+// this importer never touches. See ASSIMP_VENDORING.md.
+
 #include <openskp/errors.hpp>
-#include <openskp/fragments_export.hpp>
-#include <openskp/glb.hpp>
-#include <openskp/ifc_export.hpp>
-#include <openskp/instanced_glb.hpp>
 #include <openskp/instanced_scene.hpp>
-#include <openskp/json_export.hpp>
 #include <openskp/model.hpp>
-#include <openskp/obj_export.hpp>
 #include <openskp/observability.hpp>
 #include <openskp/parser.hpp>
-#include <openskp/ply_export.hpp>
 #include <openskp/scene.hpp>
-#include <openskp/stl_export.hpp>
 #include <openskp/triangulator.hpp>

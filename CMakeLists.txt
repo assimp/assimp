@@ -830,6 +830,11 @@ if (ASSIMP_BUILD_SKP_IMPORTER)
     set(_openskp_saved_build_shared_libs ${BUILD_SHARED_LIBS})
     set(BUILD_SHARED_LIBS OFF)
     ADD_SUBDIRECTORY( "contrib/openskp" EXCLUDE_FROM_ALL )
+    # ASSIMP_HUNTER_ENABLED's compiler setup skips
+    # CMAKE_POSITION_INDEPENDENT_CODE, so the static OpenSkp target above
+    # would otherwise not be PIC and could fail to link into a shared
+    # assimp on platforms that require it.
+    set_target_properties(OpenSkp PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set(BUILD_SHARED_LIBS ${_openskp_saved_build_shared_libs})
     unset(_openskp_saved_build_shared_libs)
 endif () # if (ASSIMP_BUILD_SKP_IMPORTER)

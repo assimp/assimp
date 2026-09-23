@@ -26,7 +26,6 @@ endif()
 
 option(OPENSKP_BUILD_TESTS "Build OpenSkp tests" ${_openskp_tests_default})
 option(OPENSKP_BUILD_EXAMPLES "Build OpenSkp examples" OFF)
-option(OPENSKP_BUILD_WASM "Build OpenSkp WebAssembly / Emscripten module" OFF)
 
 # Developer tooling
 
@@ -90,63 +89,31 @@ configure_file(
   COPYONLY
 )
 
-FetchContent_Declare(
-  tinygltf
-  GIT_REPOSITORY https://github.com/syoyo/tinygltf.git
-  GIT_TAG 488a70a3df62a4df1a736e9e56fb8836580c4888
-  GIT_SHALLOW FALSE
-)
-FetchContent_GetProperties(tinygltf)
-
-if(NOT tinygltf_POPULATED)
-  FetchContent_Populate(tinygltf)
-endif()
-
-# Header-only C++ runtime for reading/writing the vendored ThatOpen
-# Fragments (.frag) FlatBuffers schema (include/openskp/_fragments_fb/
-# index.fbs, generated via `flatc --cpp`) - same role Python's
-# `flatbuffers` pip package plays there. No sources to compile: this
-# pulls in only its `include/flatbuffers/*.h` headers.
-FetchContent_Declare(
-  flatbuffers
-  GIT_REPOSITORY https://github.com/google/flatbuffers.git
-  GIT_TAG v25.12.19
-  GIT_SHALLOW TRUE
-)
-FetchContent_GetProperties(flatbuffers)
-
-if(NOT flatbuffers_POPULATED)
-  FetchContent_Populate(flatbuffers)
-endif()
-
 # Library target
+#
+# This vendored copy is trimmed to openskp's *read* path only (see
+# openskp.hpp's own comment and ASSIMP_VENDORING.md): the upstream
+# repository also ships a writer/editor and exporters to OBJ/STL/PLY/DXF/
+# IFC/GLB/Fragments, which pull in tinygltf and FlatBuffers respectively.
+# SkpImporter never calls any of that, so neither those sources nor their
+# two extra third-party dependencies are vendored here - only miniz stays,
+# since core.cpp uses it to read the zip-based container modern .skp files
+# use.
 
 set(
   OPENSKP_SOURCES
-  src/codegen.cpp
   src/core.cpp
-  src/create.cpp
-  src/dxf_export.cpp
   src/earcut.cpp
-  src/edit.cpp
   src/errors.cpp
   src/face_groups.cpp
-  src/fragments_export.cpp
   src/geometry.cpp
-  src/glb.cpp
-  src/ifc_export.cpp
-  src/instanced_glb.cpp
   src/instanced_scene.cpp
-  src/json_export.cpp
   src/legacy.cpp
   src/model.cpp
-  src/obj_export.cpp
   src/observability.cpp
   src/pages_dimensions.cpp
   src/parser.cpp
-  src/ply_export.cpp
   src/scene.cpp
-  src/stl_export.cpp
   src/tlv.cpp
   src/transforms.cpp
   src/triangulator.cpp
@@ -174,8 +141,6 @@ target_include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${OPENSKP_MINIZ_INCLUDE_DIR}"
     "${miniz_SOURCE_DIR}"
-    "${tinygltf_SOURCE_DIR}"
-    "${flatbuffers_SOURCE_DIR}/include"
 )
 
 set_target_properties(
@@ -208,52 +173,10 @@ if(MSVC)
   target_compile_definitions(OpenSkp PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
-if(OPENSKP_BUILD_WASM AND NOT EMSCRIPTEN)
-  message(FATAL_ERROR "Building WebAssembly target (OPENSKP_BUILD_WASM) requires the Emscripten toolchain (emcmake cmake ...).")
-endif()
-
-if(EMSCRIPTEN OR OPENSKP_BUILD_WASM)
-  target_compile_options(OpenSkp PRIVATE -O3 -fexceptions)
-  add_executable(openskp_wasm src/wasm_api.cpp)
-  target_compile_options(openskp_wasm PRIVATE -O3 -fexceptions)
-  target_link_libraries(openskp_wasm PRIVATE OpenSkp)
-  target_include_directories(
-    openskp_wasm
-    PRIVATE
-      "${CMAKE_CURRENT_SOURCE_DIR}/src"
-      "${OPENSKP_MINIZ_INCLUDE_DIR}"
-      "${miniz_SOURCE_DIR}"
-      "${tinygltf_SOURCE_DIR}"
-      "${flatbuffers_SOURCE_DIR}/include"
-  )
-  set_target_properties(
-    openskp_wasm
-    PROPERTIES
-      OUTPUT_NAME "openskp"
-      SUFFIX ".js"
-  )
-  target_link_options(
-    openskp_wasm
-    PRIVATE
-      "--bind"
-      "-sWASM=1"
-      "-sALLOW_MEMORY_GROWTH=1"
-      # Without an explicit ceiling, the WASM heap hits an internal
-      # allocation failure - caught generically and surfaced as a
-      # misleading "legacy .skp parse failed" - at a MUCH lower size than
-      # the ~4GB a browser tab actually allows (openskp#305). A modest
-      # initial size avoids repeated grow-and-copy on any real file.
-      "-sMAXIMUM_MEMORY=4GB"
-      "-sINITIAL_MEMORY=268435456"
-      "-sMODULARIZE=1"
-      "-sEXPORT_ES6=1"
-      "-sEXPORT_NAME=OpenSkpModule"
-      "-sENVIRONMENT=web,worker,node"
-      "-sDYNAMIC_EXECUTION=0"
-      "-fexceptions"
-      "-O3"
-  )
-endif()
+# No WASM target: openskp_wasm (src/wasm_api.cpp) binds the full
+# read+write+export API surface this trimmed, read-only vendored copy
+# deliberately excludes (see openskp.hpp). Build the upstream package
+# directly for that.
 
 # Installation and CMake package
 

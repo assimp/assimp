@@ -826,6 +826,41 @@ struct aiMesh {
      */
     C_STRUCT aiString **mTextureCoordsNames;
 
+    /**
+     * Gaussian Splat Implementation
+     */
+
+    /** Spherical Harmonics coefficients(basic).
+     * This array is always present in a gaussian splat. The array is
+     * mNumVertices in size.
+     */
+     C_STRUCT aiVector3D* mGaussianDC;
+
+    /** Spherical Harmonics coefficients(full).
+     * This array is NOT always present in a gaussian splat. The array is
+     * mNumVertices * 45 in size.
+     */
+    ai_real* mGaussianRest;
+
+    /** Scale value(needed for the covariance).
+     * This array is always present in a gaussian splat. The array is
+     * mNumVertices in size.
+     */
+    C_STRUCT aiVector3D* mGaussianScal;
+
+    /** Rotation value(needed for the covariance).
+     * This array is always present in a gaussian splat. The array is
+     * mNumVertices in size.
+     */
+    C_STRUCT aiColor4D* mGaussianRot;
+
+    /** Opacity value.
+     * This array is always present in a gaussian splat. The array is
+     * mNumVertices in size.
+     */
+    ai_real* mGaussianOpacity;
+
+
 #ifdef __cplusplus
 
     //! The default class constructor.
@@ -848,7 +883,12 @@ struct aiMesh {
               mAnimMeshes(nullptr),
               mMethod(aiMorphingMethod_UNKNOWN),
               mAABB(),
-              mTextureCoordsNames(nullptr) {
+              mTextureCoordsNames(nullptr),
+              mGaussianDC(nullptr),
+              mGaussianRest(nullptr),
+              mGaussianScal(nullptr),
+              mGaussianRot(nullptr),
+              mGaussianOpacity(nullptr) {
         // empty
     }
 
@@ -858,6 +898,11 @@ struct aiMesh {
         delete[] mNormals;
         delete[] mTangents;
         delete[] mBitangents;
+        delete [] mGaussianDC;
+        delete [] mGaussianRest;
+        delete [] mGaussianScal;
+        delete [] mGaussianRot;
+        delete [] mGaussianOpacity;
         for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++) {
             delete[] mTextureCoords[a];
         }

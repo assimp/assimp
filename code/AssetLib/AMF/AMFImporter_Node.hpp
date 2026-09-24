@@ -279,7 +279,7 @@ struct AMFTexMap : public AMFNodeElementBase {
 
 /// Structure that define triangle node.
 struct AMFTriangle : public AMFNodeElementBase {
-	size_t V[3]; ///< Triangle vertices.
+	size_t V[3] = { 0, 0, 0 }; ///< Triangle vertices.
 
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.

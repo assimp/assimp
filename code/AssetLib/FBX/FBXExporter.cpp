@@ -221,8 +221,9 @@ void FBXExporter::WriteAsciiHeader()
     // basically just a comment at the top of the file
     std::stringstream head;
     head << "; FBX " << EXPORT_VERSION_STR << " project file\n";
-    head << "; File produced by Open Asset Import Library (Assimp)\n";
-    head << "; https://www.assimp.org\n";
+    head << "; File produced by Open Asset Import Library (https://www.assimp.org)\n";
+    head << "; (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
+         << aiGetVersionRevision() << ")\n";
     head << "; -------------------------------------------------\n";
     const std::string ascii_header = head.str();
     outfile->Write(ascii_header.c_str(), ascii_header.size(), 1);

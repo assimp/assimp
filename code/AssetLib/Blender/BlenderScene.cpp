@@ -53,6 +53,25 @@ namespace Assimp {
 namespace Blender {
 
 //--------------------------------------------------------------------------------
+/* The enums below are filled straight from file data, and a switch over an
+ * out-of-range value is undefined behaviour (a UBSan build traps on the load
+ * itself, before the switch is even reached).  Blender writes these fields as
+ * plain ints, so validate against the values the format defines and fall back to
+ * the first ("nothing"/default) member for anything else. */
+template <typename E, typename V>
+static E BlenderEnumOrDefault(std::initializer_list<E> values, V value, E fallback)
+{
+    for (const E &candidate : values)
+    {
+        if (static_cast<long long>(candidate) == static_cast<long long>(value))
+        {
+            return candidate;
+        }
+    }
+    return fallback;
+}
+
+//--------------------------------------------------------------------------------
 template <>
 void Structure ::Convert<Object>(
         Object &dest,
@@ -61,7 +80,11 @@ void Structure ::Convert<Object>(
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
     int temp = 0;
     ReadField<ErrorPolicy_Fail>(temp, "type", db);
-    dest.type = static_cast<Assimp::Blender::Object::Type>(temp);
+    dest.type = BlenderEnumOrDefault<Assimp::Blender::Object::Type>(
+            { Object::Type_EMPTY, Object::Type_MESH, Object::Type_CURVE, Object::Type_SURF,
+              Object::Type_FONT, Object::Type_MBALL, Object::Type_LAMP, Object::Type_CAMERA,
+              Object::Type_WAVE, Object::Type_LATTICE },
+            temp, Object::Type_EMPTY);
     ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat, "obmat", db);
     ReadFieldArray2<ErrorPolicy_Warn>(dest.parentinv, "parentinv", db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.parsubstr, "parsubstr", db);
@@ -147,16 +170,24 @@ void Structure ::Convert<MTex>(
     dest.mapto = static_cast<Assimp::Blender::MTex::MapType>(temp_short);
     int temp = 0;
     ReadField<ErrorPolicy_Igno>(temp, "blendtype", db);
-    dest.blendtype = static_cast<Assimp::Blender::MTex::BlendType>(temp);
+    dest.blendtype = BlenderEnumOrDefault<Assimp::Blender::MTex::BlendType>(
+            { MTex::BlendType_BLEND, MTex::BlendType_MUL, MTex::BlendType_ADD, MTex::BlendType_SUB,
+              MTex::BlendType_DIV, MTex::BlendType_DARK, MTex::BlendType_DIFF, MTex::BlendType_LIGHT,
+              MTex::BlendType_SCREEN, MTex::BlendType_OVERLAY, MTex::BlendType_BLEND_HUE,
+              MTex::BlendType_BLEND_SAT, MTex::BlendType_BLEND_VAL, MTex::BlendType_BLEND_COLOR },
+            temp, MTex::BlendType_BLEND);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.object, "*object", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tex, "*tex", db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.uvname, "uvname", db);
     ReadField<ErrorPolicy_Igno>(temp, "projx", db);
-    dest.projx = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    dest.projx = BlenderEnumOrDefault<Assimp::Blender::MTex::Projection>(
+            { MTex::Proj_N, MTex::Proj_X, MTex::Proj_Y, MTex::Proj_Z }, temp, MTex::Proj_N);
     ReadField<ErrorPolicy_Igno>(temp, "projy", db);
-    dest.projy = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    dest.projy = BlenderEnumOrDefault<Assimp::Blender::MTex::Projection>(
+            { MTex::Proj_N, MTex::Proj_X, MTex::Proj_Y, MTex::Proj_Z }, temp, MTex::Proj_N);
     ReadField<ErrorPolicy_Igno>(temp, "projz", db);
-    dest.projz = static_cast<Assimp::Blender::MTex::Projection>(temp);
+    dest.projz = BlenderEnumOrDefault<Assimp::Blender::MTex::Projection>(
+            { MTex::Proj_N, MTex::Proj_X, MTex::Proj_Y, MTex::Proj_Z }, temp, MTex::Proj_N);
     ReadField<ErrorPolicy_Igno>(dest.mapping, "mapping", db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.ofs, "ofs", db);
     ReadFieldArray<ErrorPolicy_Igno>(dest.size, "size", db);
@@ -237,7 +268,9 @@ void Structure ::Convert<Lamp>(
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
     int temp = 0;
     ReadField<ErrorPolicy_Fail>(temp, "type", db);
-    dest.type = static_cast<Assimp::Blender::Lamp::Type>(temp);
+    dest.type = BlenderEnumOrDefault<Assimp::Blender::Lamp::Type>(
+            { Lamp::Type_Local, Lamp::Type_Sun, Lamp::Type_Spot, Lamp::Type_Hemi, Lamp::Type_Area },
+            temp, Lamp::Type_Local);
     ReadField<ErrorPolicy_Igno>(dest.flags, "flag", db);
     ReadField<ErrorPolicy_Igno>(dest.colormodel, "colormodel", db);
     ReadField<ErrorPolicy_Igno>(dest.totex, "totex", db);
@@ -255,7 +288,9 @@ void Structure ::Convert<Lamp>(
     ReadField<ErrorPolicy_Igno>(dest.att1, "att1", db);
     ReadField<ErrorPolicy_Igno>(dest.att2, "att2", db);
     ReadField<ErrorPolicy_Igno>(temp, "falloff_type", db);
-    dest.falloff_type = static_cast<Assimp::Blender::Lamp::FalloffType>(temp);
+    dest.falloff_type = BlenderEnumOrDefault<Assimp::Blender::Lamp::FalloffType>(
+            { Lamp::FalloffType_Constant, Lamp::FalloffType_InvLinear, Lamp::FalloffType_InvSquare },
+            temp, Lamp::FalloffType_Constant);
     ReadField<ErrorPolicy_Igno>(dest.sun_brightness, "sun_brightness", db);
     ReadField<ErrorPolicy_Igno>(dest.area_size, "area_size", db);
     ReadField<ErrorPolicy_Igno>(dest.area_sizey, "area_sizey", db);
@@ -736,7 +771,12 @@ void Structure ::Convert<Tex>(
     dest.imaflag = static_cast<Assimp::Blender::Tex::ImageFlags>(temp_short);
     int temp = 0;
     ReadField<ErrorPolicy_Fail>(temp, "type", db);
-    dest.type = static_cast<Assimp::Blender::Tex::Type>(temp);
+    dest.type = BlenderEnumOrDefault<Assimp::Blender::Tex::Type>(
+            { Tex::Type_CLOUDS, Tex::Type_WOOD, Tex::Type_MARBLE, Tex::Type_MAGIC, Tex::Type_BLEND,
+              Tex::Type_STUCCI, Tex::Type_NOISE, Tex::Type_IMAGE, Tex::Type_PLUGIN, Tex::Type_ENVMAP,
+              Tex::Type_MUSGRAVE, Tex::Type_VORONOI, Tex::Type_DISTNOISE, Tex::Type_POINTDENSITY,
+              Tex::Type_VOXELDATA },
+            temp, Tex::Type_CLOUDS);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.ima, "*ima", db);
 
     db.reader->IncPtr(size);
@@ -751,9 +791,11 @@ void Structure ::Convert<Camera>(
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
     int temp = 0;
     ReadField<ErrorPolicy_Warn>(temp, "type", db);
-    dest.type = static_cast<Assimp::Blender::Camera::Type>(temp);
+    dest.type = BlenderEnumOrDefault<Assimp::Blender::Camera::Type>(
+            { Camera::Type_PERSP, Camera::Type_ORTHO }, temp, Camera::Type_PERSP);
     ReadField<ErrorPolicy_Warn>(temp, "flag", db);
-    dest.flag = static_cast<Assimp::Blender::Camera::Type>(temp);
+    dest.flag = BlenderEnumOrDefault<Assimp::Blender::Camera::Type>(
+            { Camera::Type_PERSP, Camera::Type_ORTHO }, temp, Camera::Type_PERSP);
     ReadField<ErrorPolicy_Warn>(dest.lens, "lens", db);
     ReadField<ErrorPolicy_Warn>(dest.sensor_x, "sensor_x", db);
     ReadField<ErrorPolicy_Igno>(dest.clipsta, "clipsta", db);

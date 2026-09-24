@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #include <iostream>
+#include <new>
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -90,6 +91,29 @@ namespace {
             ParseError(message, *token);
         }
         ParseError(message);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // Destroy all elements currently held by a scope's element map. Used when
+    // the Scope constructor throws, because the destructor will not run.
+    void DestroyScopeElements(ElementMap& elements)
+    {
+        for (const auto &v : elements) {
+            delete_Element(v.second);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // Insert an element into a scope's element map. If the insertion throws,
+    // the element is destroyed because the map does not own it yet.
+    void InsertScopeElement(ElementMap& elements, const std::string& key, Element* element)
+    {
+        try {
+            elements.insert(ElementMap::value_type(key, element));
+        } catch (const std::bad_alloc &) {
+            delete_Element(element);
+            throw;
+        }
     }
 
     // Initially, we did reinterpret_cast, breaking strict aliasing rules.
@@ -144,15 +168,19 @@ Element::Element(const Token& key_token, Parser& parser) :
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
-            compound = new_Scope(parser);
+            auto *scope = new_Scope(parser);
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
             ai_assert(n);
 
             if (n->Type() != TokenType_CLOSE_BRACKET) {
+                // free the fully built scope before propagating the error;
+                // the element dtor will not run for a partially constructed object
+                delete_Scope(scope);
                 ParseError("expected closing bracket",n);
             }
+            compound = scope;
 
             parser.AdvanceToNextToken();
             return;
@@ -187,30 +215,40 @@ Scope::Scope(Parser& parser,bool topLevel)
     }
 
     // note: empty scopes are allowed
-    while(n->Type() != TokenType_CLOSE_BRACKET) {
-        if (n->Type() != TokenType_KEY) {
-            ParseError("unexpected token, expected TOK_KEY",n);
-        }
+    try {
+        while(n->Type() != TokenType_CLOSE_BRACKET) {
+            if (n->Type() != TokenType_KEY) {
+                ParseError("unexpected token, expected TOK_KEY",n);
+            }
 
-        const std::string& str = n->StringContents();
-        if (str.empty()) {
-            ParseError("unexpected content: empty string.");
-        }
+            const std::string& str = n->StringContents();
+            if (str.empty()) {
+                ParseError("unexpected content: empty string.");
+            }
 
-        auto *element = new_Element(*n, parser);
+            auto *element = new_Element(*n, parser);
 
-        // Element() should stop at the next Key token (or right after a Close token)
-        n = parser.CurrentToken();
-        if (n == nullptr) {
-            if (topLevel) {
-                elements.insert(ElementMap::value_type(str, element));
+            // Element() should stop at the next Key token (or right after a Close token)
+            n = parser.CurrentToken();
+            if (n == nullptr && !topLevel) {
+                delete_Element(element);
+                ParseError("unexpected end of file",parser.LastToken());
+            }
+
+            InsertScopeElement(elements, str, element);
+
+            if (n == nullptr) {
                 return;
             }
-            delete_Element(element);
-            ParseError("unexpected end of file",parser.LastToken());
-        } else {
-            elements.insert(ElementMap::value_type(str, element));
         }
+    } catch (const DeadlyImportError &) {
+        // run the destructors of the elements inserted so far; the scope dtor
+        // will not run because the constructor threw
+        DestroyScopeElements(elements);
+        throw;
+    } catch (const std::bad_alloc &) {
+        DestroyScopeElements(elements);
+        throw;
     }
 }
 

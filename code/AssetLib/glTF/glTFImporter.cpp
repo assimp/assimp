@@ -132,6 +132,34 @@ namespace {
         return true;
     }
 
+    void ExtractPrimitiveTexcoords(Mesh::Primitive::Attributes &attr, aiMesh *aim, const std::string &meshName) {
+        for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+            if (!attr.texcoord[tc]) {
+                DefaultLogger::get()->warn("Texture coordinate accessor not found or non-contiguous texture coordinate sets.");
+                continue;
+            }
+
+            const size_t texcoordCount = attr.texcoord[tc]->count;
+            if (texcoordCount == 0 || texcoordCount < aim->mNumVertices) {
+                DefaultLogger::get()->warn("Texture coordinate accessor for set ", tc, " has fewer elements than the mesh has vertices in mesh \"", meshName, "\"");
+                continue;
+            }
+            if (!attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc])) {
+                DefaultLogger::get()->warn("Failed to extract texture coordinate set ", tc, " in mesh \"", meshName, "\"");
+                continue;
+            }
+            aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
+
+            aiVector3D *values = aim->mTextureCoords[tc];
+            if (values == nullptr) {
+                continue;
+            }
+            for (size_t i = 0; i < aim->mNumVertices; ++i) {
+                values[i].y = 1 - values[i].y; // Flip Y coords
+            }
+        }
+    }
+
     void createDefaultMaterial(aiScene *scene) {
         if (scene == nullptr) {
             return;
@@ -199,7 +227,7 @@ void glTFImporter::ImportMaterials(Asset &r) const {
 }
 
 void glTFImporter::ImportMeshes(Asset &r) {
-    std::vector<aiMesh *> meshes;
+    std::vector<std::unique_ptr<aiMesh>> meshes;
 
     unsigned int k = 0;
     meshOffsets.clear();
@@ -241,8 +269,9 @@ void glTFImporter::ImportMeshes(Asset &r) {
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             auto &[mode, attributes, indices, material] = mesh.primitives[p];
 
-            aiMesh *aim = new aiMesh();
-            meshes.push_back(aim);
+            auto aimOwner = std::make_unique<aiMesh>();
+            aiMesh *aim = aimOwner.get();
+            meshes.push_back(std::move(aimOwner));
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
@@ -271,31 +300,41 @@ void glTFImporter::ImportMeshes(Asset &r) {
 
             Mesh::Primitive::Attributes &attr = attributes;
 
-            if (attr.position.size() > 0 && attr.position[0]) {
+            const bool hasPositions = attr.position.size() > 0 && attr.position[0];
+            if (hasPositions && !attr.position[0]->ExtractData(aim->mVertices)) {
+                throw DeadlyImportError("GLTF: Failed to read vertex positions in mesh \"", mesh.name, "\"");
+            }
+            if (hasPositions) {
                 aim->mNumVertices = attr.position[0]->count;
-                attr.position[0]->ExtractData(aim->mVertices);
             }
 
             if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
-            for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
-                aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
-
-                aiVector3D *values = aim->mTextureCoords[tc];
-                for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
-                    values[i].y = 1 - values[i].y; // Flip Y coords
-                }
-            }
+            ExtractPrimitiveTexcoords(attr, aim, mesh.name);
 
             aiFace *faces = nullptr;
             unsigned int nFaces = 0;
+
+            // The LINE_*, TRIANGLE_STRIP and TRIANGLE_FAN cases below
+            // unconditionally dereference the first two or three indices and
+            // compute the face count by subtraction; with too few indices this
+            // would read out of bounds or underflow the face count.
+            const unsigned int numIndices = indices ? indices->count : aim->mNumVertices;
+            if ((mode == PrimitiveMode_LINE_LOOP || mode == PrimitiveMode_LINE_STRIP) && numIndices < 2) {
+                throw DeadlyImportError("GLTF: Primitive in mesh \"", mesh.name, "\" has too few indices");
+            }
+            if ((mode == PrimitiveMode_TRIANGLE_STRIP || mode == PrimitiveMode_TRIANGLE_FAN) && numIndices < 3) {
+                throw DeadlyImportError("GLTF: Primitive in mesh \"", mesh.name, "\" has too few indices");
+            }
+
+            if (indices && !indices->GetIndexer().IsValid()) {
+                throw DeadlyImportError("GLTF: Invalid accessor without data in mesh \"", mesh.name, "\"");
+            }
 
             if (indices) {
                 unsigned int count = indices->count;
 
                 Accessor::Indexer data = indices->GetIndexer();
-                ai_assert(data.IsValid());
 
                 switch (mode) {
                 case PrimitiveMode_POINTS: {

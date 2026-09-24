@@ -222,7 +222,7 @@ void FBXExporter::WriteAsciiHeader()
     std::stringstream head;
     head << "; FBX " << EXPORT_VERSION_STR << " project file\n";
     head << "; Created by the Open Asset Import Library (Assimp)\n";
-    head << "; http://assimp.org\n";
+    head << "; https://www.assimp.org\n";
     head << "; -------------------------------------------------\n";
     const std::string ascii_header = head.str();
     outfile->Write(ascii_header.c_str(), ascii_header.size(), 1);

@@ -134,7 +134,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     else {
         mOutput << "format ascii 1.0" << endl;
     }
-    mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
+    mOutput << "comment Created by Open Asset Import Library - https://www.assimp.org (v"
         << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl;
 

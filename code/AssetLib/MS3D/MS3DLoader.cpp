@@ -460,7 +460,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         aiMesh* m = pScene->mMeshes[i] = new aiMesh();
         const TempGroup& g = groups[i];
 
-        if (pScene->mNumMaterials && g.mat > pScene->mNumMaterials) {
+        if (pScene->mNumMaterials && g.mat >= pScene->mNumMaterials) {
             throw DeadlyImportError("MS3D: Encountered invalid material index, file is malformed");
         } // no error if no materials at all - scenepreprocessor adds one then
 

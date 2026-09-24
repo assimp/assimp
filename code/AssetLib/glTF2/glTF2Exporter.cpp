@@ -1708,7 +1708,9 @@ void glTF2Exporter::ExportAnimations() {
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation *anim = mScene->mAnimations[i];
-        const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+        // A zero ticks-per-second rate means "not specified" - treat key
+        // times as seconds instead of dividing by zero.
+        const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {

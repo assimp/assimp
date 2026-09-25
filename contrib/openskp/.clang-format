@@ -1,0 +1,17 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+Standard: c++17
+ColumnLimit: 100
+# clang-format preserves, but cannot create, one-declaration-per-member lines.
+# The C++ package requires each struct/class data member to be declared separately.
+SeparateDefinitionBlocks: Always
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<openskp/'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 1
+  - Regex: '.*'
+    Priority: 3
+...

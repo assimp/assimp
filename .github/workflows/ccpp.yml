@@ -88,6 +88,15 @@ jobs:
       id: hunter_extra_cmake_args
       run: echo "args=-DBUILD_SHARED_LIBS=OFF -DASSIMP_HUNTER_ENABLED=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/polly/${{ matrix.toolchain }}.cmake" >> $GITHUB_OUTPUT
 
+    - name: Set SKP importer CMake arguments
+      id: skp_extra_cmake_args
+      # Explicit shell: bash - the default shell on Windows runners is
+      # pwsh, where bare $GITHUB_OUTPUT (unlike $env:GITHUB_OUTPUT) isn't
+      # the runner's output file, silently no-oping the redirect and never
+      # actually setting ASSIMP_BUILD_SKP_IMPORTER=ON on Windows.
+      shell: bash
+      run: echo "args=-DASSIMP_BUILD_SKP_IMPORTER=ON" >> "$GITHUB_OUTPUT"
+
     - name: configure and build
       uses: lukka/run-cmake@v3
       env:
@@ -96,7 +105,7 @@ jobs:
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }}'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Release ${{ steps.windows_extra_cmake_args.outputs.args }} ${{ steps.hunter_extra_cmake_args.outputs.args }} ${{ steps.skp_extra_cmake_args.outputs.args }}'
         buildWithCMakeArgs: '--parallel 24 -v'
         buildDirectory: '${{ github.workspace }}/build/'
         

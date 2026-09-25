@@ -58,3 +58,13 @@ public:
 TEST_F(utHMPImportExport, importHMPFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utHMPImportExport, rejectsUnterminatedExternalTextureName) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/HMP/invalid_external_texture_name.hmp",
+            aiProcess_ValidateDataStructure);
+
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_STREQ("Invalid MDL file. External texture path is not null-terminated.", importer.GetErrorString());
+}

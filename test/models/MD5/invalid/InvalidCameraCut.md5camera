@@ -1,0 +1,14 @@
+MD5Version 10
+commandline ""
+
+numFrames 1
+frameRate 24
+numCuts 1
+
+cuts {
+8
+}
+
+camera {
+( 0 0 0 ) ( 0 0 0 ) 45
+}

@@ -60,6 +60,13 @@ TEST_F(utQ3BSPImportExport, importerTest) {
     EXPECT_TRUE(importerTest());
 }
 
+TEST_F(utQ3BSPImportExport, rejectMisalignedMeshVertsLump) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_NONBSD_DIR "/PK3/invalid_meshverts_size.pk3", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
 TEST_F(utQ3BSPImportExport, importMalformedLumpOutOfBounds) {
     // A lump whose iOffset + iSize extends past the loaded file must be rejected
     // instead of reading off the end of the data buffer.

@@ -64,3 +64,19 @@ TEST_F(utParsingUtils, parseFloatsStringTest) {
         EXPECT_FLOAT_EQ(value, i);
     }
 }
+
+TEST_F(utParsingUtils, tokenMatchIAtEndOfBufferTest) {
+    const std::string token = "rate";
+    const char *content = token.c_str();
+    EXPECT_TRUE(TokenMatchI(content, "rate", 4));
+    EXPECT_EQ(content, token.c_str() + 4);
+    EXPECT_EQ(*content, '\0');
+}
+
+TEST_F(utParsingUtils, tokenMatchIFollowedBySpaceTest) {
+    const std::string line = "rate 30";
+    const char *content = line.c_str();
+    EXPECT_TRUE(TokenMatchI(content, "rate", 4));
+    EXPECT_EQ(content, line.c_str() + 5);
+    EXPECT_STREQ(content, "30");
+}

@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 #include <memory>
+#include <climits>
 
 #include "M3DImporter.h"
 #include "M3DMaterials.h"
@@ -318,7 +319,6 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
 
     mScene->mTextures = new aiTexture *[m3d->numtexture];
     for (i = 0; i < m3d->numtexture; i++) {
-        unsigned int j, k;
         t = &m3d->texture[i];
         aiTexture *tx = new aiTexture;
         tx->mFilename = aiString(std::string(t->name) + ".png");
@@ -333,28 +333,34 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
             tx->mWidth = t->w;
             tx->mHeight = t->h;
             strncpy(tx->achFormatHint, formatHint[t->f - 1], 8);
-            tx->pcData = new aiTexel[tx->mWidth * tx->mHeight];
-            for (j = k = 0; j < tx->mWidth * tx->mHeight; j++) {
+            if (tx->mWidth != 0 && tx->mHeight > UINT_MAX / tx->mWidth) {
+                throw DeadlyImportError("M3D: Texture dimensions are too large: ",
+                        tx->mWidth, " x ", tx->mHeight);
+            }
+            const auto texelCount = static_cast<size_t>(tx->mWidth) * static_cast<size_t>(tx->mHeight);
+            auto data = std::make_unique<aiTexel[]>(texelCount);
+            for (size_t j = 0, k = 0; j < texelCount; j++) {
                 switch (t->f) {
-                    case 1: tx->pcData[j].g = t->d[k++]; break;
+                    case 1: data[j].g = t->d[k++]; break;
                     case 2:
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].a = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                     case 3:
-                        tx->pcData[j].r = t->d[k++];
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].b = t->d[k++];
-                        tx->pcData[j].a = 255;
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = 255;
                         break;
                     case 4:
-                        tx->pcData[j].r = t->d[k++];
-                        tx->pcData[j].g = t->d[k++];
-                        tx->pcData[j].b = t->d[k++];
-                        tx->pcData[j].a = t->d[k++];
+                        data[j].r = t->d[k++];
+                        data[j].g = t->d[k++];
+                        data[j].b = t->d[k++];
+                        data[j].a = t->d[k++];
                         break;
                 }
             }
+            tx->pcData = data.release();
         }
         mScene->mTextures[i] = tx;
     }

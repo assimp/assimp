@@ -839,6 +839,15 @@ class Camera(Structure):
             # 0 if the aspect ratio is not defined in the source file.
             # 0 is also the default value.
             ("mAspect", c_float),
+
+            # Half horizontal orthographic width, in scene units.
+            # The orthographic width specifies the half width of the
+            # orthographic view box. If non-zero the camera is
+            # orthographic and the mAspect should define the ratio
+            # between the orthographic width and height and
+            # mHorizontalFOV should be set to 0.
+            # The default value is 0 (not orthographic).
+            ("mOrthographicWidth", c_float),
         ]
 
 class VectorKey(Structure):

@@ -53,8 +53,7 @@ namespace Assimp {
 namespace Blender {
 
 //--------------------------------------------------------------------------------
-const Field& Structure :: operator [] (const std::string& ss) const
-{
+const Field& Structure::operator [] (const std::string& ss) const {
     std::map<std::string, size_t>::const_iterator it = indices.find(ss);
     if (it == indices.end()) {
         throw Error("BlendDNA: Did not find a field named `",ss,"` in structure `",name,"`");
@@ -64,15 +63,13 @@ const Field& Structure :: operator [] (const std::string& ss) const
 }
 
 //--------------------------------------------------------------------------------
-const Field* Structure :: Get (const std::string& ss) const
-{
+const Field* Structure::Get (const std::string& ss) const {
     std::map<std::string, size_t>::const_iterator it = indices.find(ss);
     return it == indices.end() ? nullptr : &fields[(*it).second];
 }
 
 //--------------------------------------------------------------------------------
-const Field& Structure :: operator [] (const size_t i) const
-{
+const Field& Structure::operator [] (const size_t i) const {
     if (i >= fields.size()) {
         throw Error("BlendDNA: There is no field with index `",i,"` in structure `",name,"`");
     }
@@ -81,23 +78,20 @@ const Field& Structure :: operator [] (const size_t i) const
 }
 
 //--------------------------------------------------------------------------------
-template <typename T> std::shared_ptr<ElemBase> Structure :: Allocate() const
-{
+template <typename T> 
+std::shared_ptr<ElemBase> Structure::Allocate() const {
     return std::shared_ptr<T>(new T());
 }
 
 //--------------------------------------------------------------------------------
-template <typename T> void Structure :: Convert(
-    std::shared_ptr<ElemBase> in,
-    const FileDatabase& db) const
-{
+template <typename T> 
+void Structure::Convert(std::shared_ptr<ElemBase> in, const FileDatabase& db) const {
     Convert<T> (*static_cast<T*> ( in.get() ),db);
 }
 
 //--------------------------------------------------------------------------------
 template <int error_policy, typename T, size_t M>
-void Structure :: ReadFieldArray(T (& out)[M], const char* name, const FileDatabase& db) const
-{
+void Structure :: ReadFieldArray(T (& out)[M], const char* name, const FileDatabase& db) const {
     const StreamReaderAny::pos old = db.reader->GetCurrentPos();
     try {
         const Field& f = (*this)[name];
@@ -118,8 +112,7 @@ void Structure :: ReadFieldArray(T (& out)[M], const char* name, const FileDatab
         for(; i < M; ++i) {
             _defaultInitializer<ErrorPolicy_Igno>()(out[i]);
         }
-    }
-    catch (const Error& e) {
+    } catch (const Error& e) {
         _defaultInitializer<error_policy>()(out,e.what());
     }
 
@@ -133,8 +126,7 @@ void Structure :: ReadFieldArray(T (& out)[M], const char* name, const FileDatab
 
 //--------------------------------------------------------------------------------
 template <int error_policy, typename T, size_t M, size_t N>
-void Structure :: ReadFieldArray2(T (& out)[M][N], const char* name, const FileDatabase& db) const
-{
+void Structure :: ReadFieldArray2(T (& out)[M][N], const char* name, const FileDatabase& db) const {
     const StreamReaderAny::pos old = db.reader->GetCurrentPos();
     try {
         const Field& f = (*this)[name];
@@ -179,8 +171,7 @@ void Structure :: ReadFieldArray2(T (& out)[M][N], const char* name, const FileD
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T>
 bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabase& db,
-    bool non_recursive /*= false*/) const
-{
+    	bool non_recursive /*= false*/) const {
     const StreamReaderAny::pos old = db.reader->GetCurrentPos();
     Pointer ptrval;
     const Field* f;
@@ -197,8 +188,7 @@ bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
         Convert(ptrval,db);
         // actually it is meaningless on which Structure the Convert is called
         // because the `Pointer` argument triggers a special implementation.
-    }
-    catch (const Error& e) {
+    } catch (const Error& e) {
         _defaultInitializer<error_policy>()(out,e.what());
 
         out.reset();
@@ -278,8 +268,7 @@ bool Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
 
 //--------------------------------------------------------------------------------
 template <int error_policy, typename T>
-void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) const
-{
+void Structure::ReadField(T& out, const char* name, const FileDatabase& db) const {
     const StreamReaderAny::pos old = db.reader->GetCurrentPos();
     try {
         const Field& f = (*this)[name];
@@ -324,8 +313,7 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<ElemBase>&out, int cdtype, con
 		Convert(ptrval, db);
 		// actually it is meaningless on which Structure the Convert is called
 		// because the `Pointer` argument triggers a special implementation.
-	}
-	catch (const Error& e) {
+	} catch (const Error& e) {
 		_defaultInitializer<error_policy>()(out, e.what());
 		out.reset();
 	}
@@ -378,7 +366,6 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 		return false;
 	}
 
-
 	if (ptrval.val)	{
 		// find the file block the pointer is pointing to
 		const FileBlockHead* block = LocateFileBlockForAddress(ptrval, db);
@@ -406,10 +393,8 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
-bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db,
-    const Field& f,
-    bool non_recursive /*= false*/) const
-{
+bool Structure::ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db,
+    	const Field& f, bool non_recursive /*= false*/) const {
     out.reset(); // ensure null pointers work
     if (!ptrval.val) {
         return false;
@@ -466,11 +451,10 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 
 
 //--------------------------------------------------------------------------------
-inline bool Structure :: ResolvePointer( std::shared_ptr< FileOffset >& out, const Pointer & ptrval,
+inline bool Structure::ResolvePointer(std::shared_ptr<FileOffset>& out, const Pointer & ptrval,
     const FileDatabase& db,
     const Field&,
-    bool) const
-{
+    bool) const {
     // Currently used exclusively by PackedFile::data to represent
     // a simple offset into the mapped BLEND file.
     out.reset();
@@ -489,10 +473,9 @@ inline bool Structure :: ResolvePointer( std::shared_ptr< FileOffset >& out, con
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
 bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
-    const FileDatabase& db,
-    const Field& f,
-    bool) const
-{
+    	const FileDatabase& db,
+    	const Field& f,
+    	bool) const {
     // This is a function overload, not a template specialization. According to
     // the partial ordering rules, it should be selected by the compiler
     // for array-of-pointer inputs, i.e. Object::mats.
@@ -531,8 +514,7 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
     const FileDatabase& db,
     const Field&,
     bool
-) const
-{
+) const {
     // Special case when the data type needs to be determined at runtime.
     // Less secure than in the `strongly-typed` case.
 
@@ -593,8 +575,8 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
 }
 
 //--------------------------------------------------------------------------------
-const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrval, const FileDatabase& db) const
-{
+const FileBlockHead* Structure::LocateFileBlockForAddress(const Pointer &ptrval, 
+		const FileDatabase &db) const {
     // the file blocks appear in list sorted by
     // with ascending base addresses so we can run a
     // binary search to locate the pointer quickly.
@@ -604,18 +586,21 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
     // which are only used for structures starting with an ID.
     // We don't need to make this distinction, our algorithm
     // works regardless where the data is stored.
-    vector<FileBlockHead>::const_iterator it = std::lower_bound(db.entries.begin(),db.entries.end(),ptrval);
-    if (it == db.entries.end()) {
+    // find the last file block starting at or before the pointer - this is
+    // the only block that may actually contain the pointed-to data.
+    auto it = std::upper_bound(db.entries.begin(),db.entries.end(),ptrval);
+    if (it == db.entries.begin()) {
         // this is crucial, pointers may not be invalid.
         // this is either a corrupted file or an attempted attack.
         throw DeadlyImportError("Failure resolving pointer 0x",
-            std::hex,ptrval.val,", no file block falls into this address range");
+            std::hex, ptrval.val,", no file block falls into this address range");
     }
-    if (ptrval.val >= (*it).address.val + (*it).size) {
+    --it;
+    if ((ptrval.val - it->address.val) >= it->size) {
         throw DeadlyImportError("Failure resolving pointer 0x",
             std::hex,ptrval.val,", nearest file block starting at 0x",
-            (*it).address.val," ends at 0x",
-            (*it).address.val + (*it).size);
+            it->address.val," ends at 0x",
+            it->address.val + it->size);
     }
     return &*it;
 }
@@ -623,7 +608,6 @@ const FileBlockHead* Structure :: LocateFileBlockForAddress(const Pointer & ptrv
 // ------------------------------------------------------------------------------------------------
 // NOTE: The MSVC debugger keeps showing up this annoying `a cast to a smaller data type has
 // caused a loss of data`-warning. Avoid this warning by a masking with an appropriate bitmask.
-
 template <typename T> struct signless;
 template <> struct signless<char> {typedef unsigned char type;};
 template <> struct signless<short> {typedef unsigned short type;};
@@ -637,50 +621,46 @@ struct static_cast_silent {
     }
 };
 
+//------------------------------------------------------------------------------------------------
 template <> struct static_cast_silent<float> {
     template <typename V> float  operator()(V in) {
         return static_cast<float> (in);
     }
 };
 
+//------------------------------------------------------------------------------------------------
 template <> struct static_cast_silent<double> {
     template <typename V> double operator()(V in) {
         return static_cast<double>(in);
     }
 };
 
-// ------------------------------------------------------------------------------------------------
-template <typename T> inline void ConvertDispatcher(T& out, const Structure& in,const FileDatabase& db)
-{
+//------------------------------------------------------------------------------------------------
+template <typename T> inline void ConvertDispatcher(T& out, const Structure& in,const FileDatabase& db) {
     if (in.name == "int") {
         out = static_cast_silent<T>()(db.reader->GetU4());
-    }
-    else if (in.name == "short") {
+    } else if (in.name == "short") {
         out = static_cast_silent<T>()(db.reader->GetU2());
-    }
-    else if (in.name == "char") {
+    } else if (in.name == "char") {
         out = static_cast_silent<T>()(db.reader->GetU1());
-    }
-    else if (in.name == "float") {
+    } else if (in.name == "float") {
         out = static_cast<T>(db.reader->GetF4());
-    }
-    else if (in.name == "double") {
+    } else if (in.name == "double") {
         out = static_cast<T>(db.reader->GetF8());
-    }
-    else {
+    } else {
         throw DeadlyImportError("Unknown source for conversion to primitive data type: ", in.name);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<int>    (int& dest,const FileDatabase& db) const
-{
+template <> 
+inline void Structure::Convert<int>(int& dest,const FileDatabase& db) const {
     ConvertDispatcher(dest,*this,db);
 }
 
 // ------------------------------------------------------------------------------------------------
-template<> inline void Structure :: Convert<short>  (short& dest,const FileDatabase& db) const
-{
+template<> 
+inline void Structure::Convert<short>(short& dest,const FileDatabase& db) const {
     // automatic rescaling from short to float and vice versa (seems to be used by normals)
     if (name == "float") {
         float f = db.reader->GetF4();
@@ -689,8 +669,7 @@ template<> inline void Structure :: Convert<short>  (short& dest,const FileDatab
         dest = static_cast<short>( f * 32767.f);
         //db.reader->IncPtr(-4);
         return;
-    }
-    else if (name == "double") {
+    } else if (name == "double") {
         dest = static_cast<short>(db.reader->GetF8() * 32767.);
         //db.reader->IncPtr(-8);
         return;
@@ -699,14 +678,13 @@ template<> inline void Structure :: Convert<short>  (short& dest,const FileDatab
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<char>   (char& dest,const FileDatabase& db) const
-{
+template<>
+inline void Structure::Convert<char>(char& dest,const FileDatabase& db) const {
     // automatic rescaling from char to float and vice versa (seems useful for RGB colors)
     if (name == "float") {
         dest = static_cast<char>(db.reader->GetF4() * 255.f);
         return;
-    }
-    else if (name == "double") {
+    } else if (name == "double") {
         dest = static_cast<char>(db.reader->GetF8() * 255.f);
         return;
     }
@@ -714,24 +692,22 @@ template <> inline void Structure :: Convert<char>   (char& dest,const FileDatab
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const
-{
+template <> 
+inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const {
 	// automatic rescaling from char to float and vice versa (seems useful for RGB colors)
 	if (name == "float") {
 		dest = static_cast<unsigned char>(db.reader->GetF4() * 255.f);
 		return;
-	}
-	else if (name == "double") {
+	} else if (name == "double") {
 		dest = static_cast<unsigned char>(db.reader->GetF8() * 255.f);
 		return;
 	}
 	ConvertDispatcher(dest, *this, db);
 }
 
-
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<float>  (float& dest,const FileDatabase& db) const
-{
+template<> 
+inline void Structure::Convert<float>(float& dest,const FileDatabase& db) const {
     // automatic rescaling from char to float and vice versa (seems useful for RGB colors)
     if (name == "char") {
         dest = db.reader->GetI1() / 255.f;
@@ -746,13 +722,12 @@ template <> inline void Structure :: Convert<float>  (float& dest,const FileData
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<double> (double& dest,const FileDatabase& db) const
-{
+template<> 
+inline void Structure::Convert<double> (double& dest,const FileDatabase& db) const {
     if (name == "char") {
         dest = db.reader->GetI1() / 255.;
         return;
-    }
-    else if (name == "short") {
+    } else if (name == "short") {
         dest = db.reader->GetI2() / 32767.;
         return;
     }
@@ -760,20 +735,18 @@ template <> inline void Structure :: Convert<double> (double& dest,const FileDat
 }
 
 // ------------------------------------------------------------------------------------------------
-template <> inline void Structure :: Convert<Pointer> (Pointer& dest,const FileDatabase& db) const
-{
+template<> 
+inline void Structure::Convert<Pointer>(Pointer& dest,const FileDatabase& db) const {
     if (db.i64bit) {
         dest.val = db.reader->GetU8();
         //db.reader->IncPtr(-8);
         return;
     }
     dest.val = db.reader->GetU4();
-    //db.reader->IncPtr(-4);
 }
 
 //--------------------------------------------------------------------------------
-const Structure& DNA :: operator [] (const std::string& ss) const
-{
+const Structure& DNA::operator [] (const std::string& ss) const {
     std::map<std::string, size_t>::const_iterator it = indices.find(ss);
     if (it == indices.end()) {
         throw Error("BlendDNA: Did not find a structure named `",ss,"`");
@@ -783,15 +756,13 @@ const Structure& DNA :: operator [] (const std::string& ss) const
 }
 
 //--------------------------------------------------------------------------------
-const Structure* DNA :: Get (const std::string& ss) const
-{
+const Structure* DNA::Get (const std::string& ss) const {
     std::map<std::string, size_t>::const_iterator it = indices.find(ss);
     return it == indices.end() ? nullptr : &structures[(*it).second];
 }
 
 //--------------------------------------------------------------------------------
-const Structure& DNA :: operator [] (const size_t i) const
-{
+const Structure& DNA::operator [] (const size_t i) const {
     if (i >= structures.size()) {
         throw Error("BlendDNA: There is no structure with index `",i,"`");
     }

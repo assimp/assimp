@@ -56,7 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
 
-#include <limits>
 #include <climits>
 #include <cstdint>
 #include <memory>
@@ -127,7 +126,7 @@ void ReadBytes(IOStream *stream, void *out, size_t size, const char *what) {
     if (stream == nullptr) {
         throw DeadlyImportError("ASSBIN: Invalid stream");
     }
-  
+
     if (size == 0) {
         return;
     }
@@ -136,15 +135,6 @@ void ReadBytes(IOStream *stream, void *out, size_t size, const char *what) {
     if (res != size) {
         throw DeadlyImportError("ASSBIN: Unexpected EOF reading ", what);
     }
-}
-
-// -----------------------------------------------------------------------------------
-size_t CheckedMultiply(size_t left, size_t right, const char *what) {
-    if (left != 0 && right > std::numeric_limits<size_t>::max() / left) {
-        throw DeadlyImportError("ASSBIN: ", what, " size overflows addressable memory");
-    }
-
-    return left * right;
 }
 
 // -----------------------------------------------------------------------------------
@@ -259,8 +249,8 @@ void ReadBounds(IOStream *stream, T * /*p*/, unsigned int n) {
 void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *parent) {
     if (stream == nullptr) {
         throw DeadlyImportError("ASSBIN: Invalid stream");
-    } 
-  
+    }
+
     if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AINODE) {
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
     }

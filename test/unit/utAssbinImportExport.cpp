@@ -131,7 +131,7 @@ TEST_F(utAssbinImportExport, rejectOverflowingEmbeddedTextureDimensions) {
     EXPECT_EQ(nullptr, scene);
     EXPECT_NE(std::string::npos,
             std::string(importer.GetErrorString())
-                    .find("texture"));
+                    .find("Texture dimensions too large"));
 }
 
 TEST_F(utAssbinImportExport, rejectOversizedNodeNameLengthInAssbin) {

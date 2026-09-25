@@ -1497,6 +1497,39 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     }
     char *aszGroupNameBuffer = new char[buffersize];
 
+    // Release the temporary group buffers, and any output meshes/materials that
+    // have not been handed over to the scene yet, if parsing throws.
+    struct InternTempBufferGuard {
+        std::vector<aiMesh *> *avOutList = nullptr;
+        unsigned int groups = 0;
+        char *groupNames = nullptr;
+        MDL::IntSharedData_MDL7 *shared = nullptr;
+        bool meshesOwnedByScene = false;
+        bool materialsOwnedByScene = false;
+
+        ~InternTempBufferGuard() {
+            if (avOutList) {
+                if (!meshesOwnedByScene) {
+                    for (unsigned int i = 0; i < groups; ++i) {
+                        for (aiMesh *pcMesh : avOutList[i])
+                            delete pcMesh;
+                    }
+                }
+                delete[] avOutList;
+            }
+            delete[] groupNames;
+            if (shared && !materialsOwnedByScene) {
+                for (aiMaterial *pcMat : shared->pcMats)
+                    delete pcMat;
+            }
+        }
+    };
+    InternTempBufferGuard bufferGuard;
+    bufferGuard.avOutList = avOutList;
+    bufferGuard.groups = pcHeader->groups_num;
+    bufferGuard.groupNames = aszGroupNameBuffer;
+    bufferGuard.shared = &sharedData;
+
     // read all groups
     for (unsigned int iGroup = 0; iGroup < (unsigned int)pcHeader->groups_num; ++iGroup) {
         MDL::IntGroupInfo_MDL7 groupInfo((BE_NCONST MDL::Group_MDL7 *)szCurrent, iGroup);
@@ -1720,6 +1753,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
             ++p;
         }
     }
+    // the scene now owns all output meshes
+    bufferGuard.meshesOwnedByScene = true;
 
     // if there is only one root node with a single child we can optimize it a bit ...
     if (1 == pScene->mRootNode->mNumChildren && !sharedData.apcOutBones) {
@@ -1731,13 +1766,10 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     } else
         pScene->mRootNode->mName.Set("<mesh_root>");
 
-    delete[] avOutList;
-    delete[] aszGroupNameBuffer;
-    AI_DEBUG_INVALIDATE_PTR(avOutList);
-    AI_DEBUG_INVALIDATE_PTR(aszGroupNameBuffer);
-
     // build a final material list.
     CopyMaterials_3DGS_MDL7(sharedData);
+    // the scene now owns all output materials
+    bufferGuard.materialsOwnedByScene = true;
     HandleMaterialReferences_3DGS_MDL7();
 
     // generate output bone animations and add all bones to the scenegraph

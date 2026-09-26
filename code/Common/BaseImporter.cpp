@@ -389,7 +389,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
         std::vector<char> output;
         auto *ptr = (uint32_t *)&data[0];
-        uint32_t *end = ptr + (data.size() / sizeof(uint32_t)) + 1;
+        uint32_t *end = ptr + (data.size() / sizeof(uint32_t));
         utf8::utf32to8(ptr, end, back_inserter(output));
         return;
     }

@@ -1500,30 +1500,33 @@ void MDLImporter::InternReadFile_3DGS_MDL7() {
     // Release the temporary group buffers, and any output meshes/materials that
     // have not been handed over to the scene yet, if parsing throws.
     struct InternTempBufferGuard {
-        std::vector<aiMesh *> *avOutList = nullptr;
-        unsigned int groups = 0;
-        char *groupNames = nullptr;
-        MDL::IntSharedData_MDL7 *shared = nullptr;
-        bool meshesOwnedByScene = false;
-        bool materialsOwnedByScene = false;
+        std::vector<aiMesh *> *avOutList{nullptr};
+        unsigned int groups{0};
+        char *groupNames{nullptr};
+        MDL::IntSharedData_MDL7 *shared{nullptr};
+        bool meshesOwnedByScene{false};
+        bool materialsOwnedByScene{false};
 
         ~InternTempBufferGuard() {
             if (avOutList) {
                 if (!meshesOwnedByScene) {
                     for (unsigned int i = 0; i < groups; ++i) {
-                        for (aiMesh *pcMesh : avOutList[i])
+                        for (aiMesh *pcMesh : avOutList[i]) {
                             delete pcMesh;
+                        }
                     }
                 }
                 delete[] avOutList;
             }
             delete[] groupNames;
             if (shared && !materialsOwnedByScene) {
-                for (aiMaterial *pcMat : shared->pcMats)
+                for (aiMaterial *pcMat : shared->pcMats) {
                     delete pcMat;
+                }
             }
         }
     };
+
     InternTempBufferGuard bufferGuard;
     bufferGuard.avOutList = avOutList;
     bufferGuard.groups = pcHeader->groups_num;

@@ -17,17 +17,35 @@ permissions:
 
 jobs:
   build-lib:
-    name: ubuntu-latest-build-libassimp
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }}-build-libassimp
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            lib: build/bin/libassimp.so*
+          - os: windows-latest
+            lib: build/bin/assimp*.dll
+          - os: windows-11-arm
+            arch: arm64
+            lib: build/bin/assimp*.dll
     steps:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-pyassimp
 
     - uses: actions/checkout@v7
       with:
         submodules: true
 
     - uses: lukka/get-cmake@latest
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: runner.os == 'Windows'
+      with:
+        arch: ${{ matrix.arch || 'x64' }}
 
     - name: configure and build
       run: |
@@ -37,18 +55,23 @@ jobs:
 
     - uses: actions/upload-artifact@v7
       with:
-        name: libassimp
-        path: build/bin/libassimp.so*
+        name: libassimp-${{ matrix.os }}
+        path: ${{ matrix.lib }}
         if-no-files-found: error
 
   test:
-    name: ubuntu-latest-python-${{ matrix.python-version }}
+    name: ${{ matrix.os }}-python-${{ matrix.python-version }}
     needs: build-lib
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, windows-11-arm]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        exclude:
+          # No official Windows ARM64 builds of Python before 3.11.
+          - os: windows-11-arm
+            python-version: "3.10"
     steps:
     - uses: actions/checkout@v7
 
@@ -58,15 +81,24 @@ jobs:
 
     - uses: actions/download-artifact@v8
       with:
-        name: libassimp
+        name: libassimp-${{ matrix.os }}
         path: build/bin
+
+    # pyassimp searches LD_LIBRARY_PATH on Linux and PATH on Windows for the library.
+    - name: add library to search path
+      run: |
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          cygpath -w "$GITHUB_WORKSPACE/build/bin" >> "$GITHUB_PATH"
+        else
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/build/bin" >> "$GITHUB_ENV"
+        fi
+      shell: bash
 
     - name: test
       working-directory: port/PyAssimp
-      env:
-        LD_LIBRARY_PATH: ${{ github.workspace }}/build/bin
       run: |
         python -m venv .venv
-        .venv/bin/pip install -e ".[test]"
-        .venv/bin/pytest -q
+        if [ "$RUNNER_OS" = "Windows" ]; then bin=.venv/Scripts; else bin=.venv/bin; fi
+        "$bin/pip" install -e ".[test]"
+        "$bin/pytest" -q
       shell: bash

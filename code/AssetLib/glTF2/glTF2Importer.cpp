@@ -790,6 +790,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("Not enough indices for a line primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1]);
@@ -818,6 +822,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("Not enough indices for a triangle primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -833,6 +841,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("Not enough indices for a triangle primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1], indexBuffer[2]);
@@ -871,6 +883,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("Not enough vertices for a line primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
@@ -896,6 +912,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("Not enough vertices for a triangle primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -911,6 +931,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("Not enough vertices for a triangle primitive; dropping it.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);

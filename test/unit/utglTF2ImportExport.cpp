@@ -1188,3 +1188,25 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
         }
     }
 }
+
+// An indexed primitive whose index count is smaller than the primitive mode
+// requires (a single index for a line, two for a triangle fan) must not read
+// past the end of the index buffer when the faces are assembled.
+TEST_F(utglTF2ImportExport, importglTF2PrimitiveModeTooFewIndices) {
+    const char *lineLoop =
+            R"({"asset":{"version":"2.0"},"scenes":[{"nodes":[0]}],"scene":0,"nodes":[{"mesh":0}],"meshes":[{"primitives":[{"attributes":{"POSITION":0},"indices":1,"mode":2}]}],"buffers":[{"byteLength":38,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAA="}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":2}],"accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]},{"bufferView":1,"componentType":5123,"count":1,"type":"SCALAR"}]})";
+    const char *lineStrip =
+            R"({"asset":{"version":"2.0"},"scenes":[{"nodes":[0]}],"scene":0,"nodes":[{"mesh":0}],"meshes":[{"primitives":[{"attributes":{"POSITION":0},"indices":1,"mode":3}]}],"buffers":[{"byteLength":38,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAA="}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":2}],"accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]},{"bufferView":1,"componentType":5123,"count":1,"type":"SCALAR"}]})";
+    const char *triangleFan =
+            R"({"asset":{"version":"2.0"},"scenes":[{"nodes":[0]}],"scene":0,"nodes":[{"mesh":0}],"meshes":[{"primitives":[{"attributes":{"POSITION":0},"indices":1,"mode":6}]}],"buffers":[{"byteLength":40,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAA=="}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":4}],"accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]},{"bufferView":1,"componentType":5123,"count":2,"type":"SCALAR"}]})";
+
+    for (const char *gltf : { lineLoop, lineStrip, triangleFan }) {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(gltf, strlen(gltf), 0, "gltf");
+        // The degenerate primitive is dropped, so the import still succeeds and
+        // produces a mesh with no faces instead of overrunning the index buffer.
+        ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+    }
+}

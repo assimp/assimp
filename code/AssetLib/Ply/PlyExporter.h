@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PLYEXPORTER_H_INC
 #define AI_PLYEXPORTER_H_INC
 
+#include <assimp/mesh.h>
+
 #include <sstream>
 
 struct aiScene;
@@ -79,6 +81,9 @@ private:
 private:
     const std::string filename;  // tHE FILENAME
     const std::string endl;      // obviously, this endl() doesn't flush() the stream
+    // Number of texture-coordinate components declared in the header for each channel. The header is
+    // written once for the whole scene, so this has to be the same for every mesh sharing a channel.
+    unsigned int mUVComponents[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {};
 };
 
 } // Namespace Assimp

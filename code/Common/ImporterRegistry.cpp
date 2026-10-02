@@ -208,6 +208,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
 #include "AssetLib/IQM/IQMImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_SKP_IMPORTER
+#include "AssetLib/Skp/SkpImporter.h"
+#endif
 
 namespace Assimp {
 
@@ -250,6 +253,9 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_M3D_IMPORTER)
     out.push_back(new M3DImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_SKP_IMPORTER)
+    out.push_back(new SkpImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_MD3_IMPORTER)
     out.push_back(new MD3Importer());

@@ -188,6 +188,12 @@ if(ASSIMP_BUILD_USD_IMPORTER)
   )
 endif()
 
+if(ASSIMP_BUILD_SKP_IMPORTER)
+  list( APPEND IMPORTERS
+    unit/utSkpImportExport.cpp
+  )
+endif()
+
 SET( MATERIAL
   unit/utMaterialSystem.cpp
 )

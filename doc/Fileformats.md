@@ -55,6 +55,7 @@ __Importers__:
 - RAW
 - SCN
 - SIB
+- [SKP](https://github.com/iamahsanmehmood/openskp) (native SketchUp, via OpenSKP - build with `-DASSIMP_BUILD_SKP_IMPORTER=ON`)
 - SMD
 - [STP](https://en.wikipedia.org/wiki/ISO_10303-21)
 - [STL](https://en.wikipedia.org/wiki/STL_(file_format))

@@ -26,7 +26,7 @@ jobs:
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_ASAN=ON'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_ASAN=ON -DASSIMP_BUILD_SKP_IMPORTER=ON'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
     
@@ -50,7 +50,7 @@ jobs:
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_UBSAN=ON'
+        cmakeAppendedArgs: '-GNinja -DCMAKE_BUILD_TYPE=Debug -DASSIMP_UBSAN=ON -DASSIMP_BUILD_SKP_IMPORTER=ON'
         buildWithCMakeArgs: '-- -v'
         buildDirectory: '${{ github.workspace }}/build/'
     

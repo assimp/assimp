@@ -1,0 +1,104 @@
+name: PyAssimp
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "port/PyAssimp/**"
+      - ".github/workflows/pyassimp.yml"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "port/PyAssimp/**"
+      - ".github/workflows/pyassimp.yml"
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  build-lib:
+    name: ${{ matrix.os }}-build-libassimp
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            lib: build/bin/libassimp.so*
+          - os: windows-latest
+            lib: build/bin/assimp*.dll
+          - os: windows-11-arm
+            arch: arm64
+            lib: build/bin/assimp*.dll
+    steps:
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.os }}-pyassimp
+
+    - uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - uses: lukka/get-cmake@latest
+
+    - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+      if: runner.os == 'Windows'
+      with:
+        arch: ${{ matrix.arch || 'x64' }}
+
+    - name: configure and build
+      run: |
+        cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF
+        cmake --build build --parallel --target assimp
+      shell: bash
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: libassimp-${{ matrix.os }}
+        path: ${{ matrix.lib }}
+        if-no-files-found: error
+
+  test:
+    name: ${{ matrix.os }}-python-${{ matrix.python-version }}
+    needs: build-lib
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, windows-11-arm]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        exclude:
+          # No official Windows ARM64 builds of Python before 3.11.
+          - os: windows-11-arm
+            python-version: "3.10"
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/download-artifact@v8
+      with:
+        name: libassimp-${{ matrix.os }}
+        path: build/bin
+
+    # pyassimp searches LD_LIBRARY_PATH on Linux and PATH on Windows for the library.
+    - name: add library to search path
+      run: |
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          cygpath -w "$GITHUB_WORKSPACE/build/bin" >> "$GITHUB_PATH"
+        else
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/build/bin" >> "$GITHUB_ENV"
+        fi
+      shell: bash
+
+    - name: test
+      working-directory: port/PyAssimp
+      run: |
+        python -m venv .venv
+        if [ "$RUNNER_OS" = "Windows" ]; then bin=.venv/Scripts; else bin=.venv/bin; fi
+        "$bin/pip" install -e ".[test]"
+        "$bin/pytest" -q
+      shell: bash

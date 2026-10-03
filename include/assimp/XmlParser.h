@@ -134,7 +134,7 @@ public:
     bool parse(IOStream *stream);
 
     /// @brief  Will parse an xml-file from a stringstream.
-    /// @param[in] str      The input istream (note: not "const" to match pugixml param)
+    /// @param[in] inStream The input istream (note: not "const" to match pugixml param)
     /// @return true, if the parsing was successful, false if not.
     bool parse(std::istream &inStream);
 
@@ -235,7 +235,7 @@ public:
 
     /// @brief Will try to get the value of the node as an integer.
     /// @param[in]  node    The node to search in.
-    /// @param[out] i       The value as a int.
+    /// @param[out] v       The value as a int.
     /// @return true, if the value can be read out.
     static inline bool getValueAsInt(XmlNode &node, int &v);
 

@@ -195,7 +195,7 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
                 AI_SWAP2(ofs);
                 mP += 4;
 
-                if (mP + ofs > mEnd + 2) {
+                if (mP + ofs > mEnd + 1) {
                     throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
                 }
                 out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);

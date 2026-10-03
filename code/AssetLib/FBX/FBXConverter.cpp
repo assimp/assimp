@@ -3592,7 +3592,14 @@ void FBXConverter::InterpolateKeys(aiVectorKey *valOut, const KeyTimeList &keys,
             const KeyTimeList::value_type timeA = std::get<0>(kfl)->at(id0);
             const KeyTimeList::value_type timeB = std::get<0>(kfl)->at(id1);
 
-            const ai_real factor = timeB == timeA ? ai_real(0.) : static_cast<ai_real>((time - timeA)) / (timeB - timeA);
+            // compute in double: file-controlled int64 keytimes can be extreme
+            // enough that time-timeA or timeB-timeA overflows int64_t. Distinct
+            // int64 times may also collapse to the same double, so re-check the
+            // converted delta before dividing.
+            const double timeDelta = static_cast<double>(timeB) - static_cast<double>(timeA);
+            const ai_real factor = (timeB == timeA || timeDelta == 0.0)
+                    ? ai_real(0.)
+                    : static_cast<ai_real>((static_cast<double>(time) - static_cast<double>(timeA)) / timeDelta);
             const ai_real interpValue = static_cast<ai_real>(valueA + (valueB - valueA) * factor);
 
             result[std::get<2>(kfl)] = interpValue;

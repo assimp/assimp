@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ::Assimp;
 
-class utMS3DImporter final : public AbstractImportExportBase {
+class utMS3DImporter : public AbstractImportExportBase {
 public:
     bool importerTest() override {
         Assimp::Importer importer;

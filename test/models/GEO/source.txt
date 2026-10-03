@@ -1,0 +1,18 @@
+GEO / Videoscape test fixtures
+------------------------------
+All meshes in this directory are original, minimal fixtures authored for
+Assimp GEO importer unit tests (ZsoltTech / Arris, 2026). They are intended
+to be redistributed with Assimp under the same terms as the rest of the
+test/models tree.
+
+They intentionally cover the Videoscape flavours used by the importer:
+  gray_plane.3dg          — 3DG1 face-colored quad (hex color)
+  colored_vertices.gour   — GOUR vertex-colored quad
+  colored_vertices.geo    — same GOUR payload, .geo extension
+  box.3dg                 — 3DG1 palette-colored box (6 quads)
+  pyramid.geo             — 3DG1 palette-colored pyramid
+
+These are NOT copies of third-party sample downloads (Paul Bourke page
+examples, ewhac docs, X GB packs, etc.). Those live only in the local
+collection under ~/3D-Objekte/ and are not shipped in this repo.
+two_lamps.3dg — original 3DG2 lights-only fixture (point + spot)

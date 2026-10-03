@@ -53,8 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 using namespace Util;
 
@@ -184,7 +183,6 @@ BlendShapeChannel::BlendShapeChannel(uint64_t id, const Element& element, const 
     }
 }
 
-} // namespace FBX
-} // Namespace Assimp
+} // namespace Assimp::FBX
 
 #endif // ASSIMP_BUILD_NO_FBX_IMPORTER

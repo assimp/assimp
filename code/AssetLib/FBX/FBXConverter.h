@@ -69,10 +69,10 @@ struct morphKeyData {
     std::vector<unsigned int> values;
     std::vector<float> weights;
 };
+
 using morphAnimData = std::map<int64_t, morphKeyData*> ;
 
-namespace Assimp {
-namespace FBX {
+namespace Assimp::FBX {
 
 class MeshGeometry;
 
@@ -94,7 +94,9 @@ class Document;
  */
 void ConvertToAssimpScene(aiScene* out, const Document& doc, bool removeEmptyBones);
 
-/** Dummy class to encapsulate the conversion process */
+/** 
+ * Dummy class to encapsulate the conversion process 
+ */
 class FBXConverter {
 public:
     /**
@@ -122,7 +124,6 @@ public:
         TransformationComp_MAXIMUM
     };
 
-public:
     FBXConverter(aiScene* out, const Document& doc, bool removeEmptyBones);
     ~FBXConverter();
 
@@ -482,7 +483,6 @@ private:
     static bool IsBoneNode(const aiString &bone_name, std::vector<aiBone *> &bones);
 };
 
-}
-}
+} // namespace Assimp::FBX
 
 #endif // INCLUDED_AI_FBX_CONVERTER_H

@@ -104,6 +104,15 @@ FBXExportProperty::FBXExportProperty(const char* c, bool raw)
 }
 
 // strings can either be saved as "raw" (R) data, or "string" (S) data
+FBXExportProperty::FBXExportProperty(const std::string_view& s, bool raw)
+: type(raw ? 'R' : 'S')
+, data(s.size()) {
+    for (size_t i = 0; i < s.size(); ++i) {
+        data[i] = uint8_t(s[i]);
+    }
+}
+
+// strings can either be saved as "raw" (R) data, or "string" (S) data
 FBXExportProperty::FBXExportProperty(const std::string& s, bool raw)
 : type(raw ? 'R' : 'S')
 , data(s.size()) {

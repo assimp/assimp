@@ -77,7 +77,6 @@ Token::Token(const char* sbegin, const char* send, TokenType type, size_t offset
     ai_assert(send >= sbegin);
 }
 
-
 namespace {
 
 // ------------------------------------------------------------------------------------------------
@@ -87,7 +86,6 @@ AI_WONT_RETURN void TokenizeError(const std::string& message, size_t offset)
 {
     throw DeadlyImportError("FBX-Tokenize", Util::GetOffsetText(offset), message);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 size_t Offset(const char* begin, const char* cursor) {

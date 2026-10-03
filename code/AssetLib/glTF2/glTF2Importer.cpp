@@ -762,6 +762,18 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             aiFace *facePtr{nullptr};
             size_t nFaces{0};
 
+            // The LINE_*, TRIANGLE_STRIP and TRIANGLE_FAN cases below
+            // unconditionally dereference the first two or three indices and
+            // compute the face count by subtraction; with too few indices this
+            // would read out of bounds or underflow the face count.
+            const size_t numIndices = useIndexBuffer ? indexBuffer.size() : aim->mNumVertices;
+            if ((prim.mode == PrimitiveMode_LINE_LOOP || prim.mode == PrimitiveMode_LINE_STRIP) && numIndices < 2) {
+                throw DeadlyImportError("Mesh \"", mesh.name, "\" has a primitive with too few indices");
+            }
+            if ((prim.mode == PrimitiveMode_TRIANGLE_STRIP || prim.mode == PrimitiveMode_TRIANGLE_FAN) && numIndices < 3) {
+                throw DeadlyImportError("Mesh \"", mesh.name, "\" has a primitive with too few indices");
+            }
+
             if (useIndexBuffer) {
                 size_t count = indexBuffer.size();
 

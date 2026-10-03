@@ -1,0 +1,5 @@
+# MCP Server Dependencies for Assimp
+# Python 3.8+ required
+
+mcp>=1.0.0
+pywin32>=300; platform_system == "Windows"

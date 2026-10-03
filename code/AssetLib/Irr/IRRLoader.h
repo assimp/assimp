@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/SceneCombiner.h>
 #include <assimp/StringUtils.h>
 #include <assimp/anim.h>
+#include <assimp/material.h>
 
 namespace Assimp {
 
@@ -164,7 +165,7 @@ private:
         std::string name;
 
         // List of all child nodes
-        std::vector<Node *> children;
+        std::vector<std::unique_ptr<Node> > children;
 
         // Parent node
         Node *parent;
@@ -179,7 +180,7 @@ private:
 
         // Meshes: List of materials to be assigned
         // along with their corresponding material flags
-        std::vector<std::pair<aiMaterial *, unsigned int>> materials;
+        std::vector<std::pair<std::unique_ptr<aiMaterial>, unsigned int>> materials;
 
         // Spheres: radius of the sphere to be generates
         ai_real sphereRadius;
@@ -211,7 +212,7 @@ private:
     // Parse <node> tag from XML file and extract child node
     // @param node XML node
     // @param guessedMeshesContained number of extra guessed meshes
-    IRRImporter::Node *ParseNode(pugi::xml_node &node, BatchLoader& batch);
+    std::unique_ptr<IRRImporter::Node> ParseNode(pugi::xml_node &node, BatchLoader& batch);
 
     // -------------------------------------------------------------------
     // Parse <attributes> tags within <node> tags and apply to scene node
@@ -232,7 +233,7 @@ private:
             std::vector<aiMesh *> &meshes,
             std::vector<aiNodeAnim *> &anims,
             std::vector<AttachmentInfo> &attach,
-            std::vector<aiMaterial *> &materials,
+            std::vector<std::unique_ptr<aiMaterial> > &materials,
             unsigned int &defaultMatIdx);
 
     // -------------------------------------------------------------------
@@ -249,7 +250,7 @@ private:
     /// @param materials The last 6 materials are assigned to the newly
     ///                  created meshes. The names of the materials are adjusted.
     void BuildSkybox(std::vector<aiMesh *> &meshes,
-            std::vector<aiMaterial *> materials);
+                     std::vector<std::unique_ptr<aiMaterial> > &materials);
 
     // -------------------------------------------------------------------
     /** Copy a material for a mesh to the output material list
@@ -259,8 +260,8 @@ private:
      *  @param defMatIdx Default material index - UINT_MAX if not present
      *  @param mesh Mesh to work on
      */
-    void CopyMaterial(std::vector<aiMaterial *> &materials,
-            std::vector<std::pair<aiMaterial *, unsigned int>> &inmaterials,
+    void CopyMaterial(std::vector<std::unique_ptr<aiMaterial> > &materials,
+            std::vector<std::pair<std::unique_ptr<aiMaterial>, unsigned int>> &inmaterials,
             unsigned int &defMatIdx,
             aiMesh *mesh);
 

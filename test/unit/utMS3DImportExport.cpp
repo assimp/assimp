@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ::Assimp;
 
-class utMS3DImporter : public AbstractImportExportBase {
+class utMS3DImporter final : public AbstractImportExportBase {
 public:
     bool importerTest() override {
         Assimp::Importer importer;
@@ -67,5 +67,9 @@ TEST_F(utMS3DImporter, importTest) {
 TEST_F(utMS3DImporter, importInvalidMaterialIndex) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MS3D/invalid/InvalidMaterialIndex.ms3d", 0);
+#ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
     EXPECT_EQ(nullptr, scene);
+#else
+    EXPECT_NE(nullptr, scene);
+#endif
 }

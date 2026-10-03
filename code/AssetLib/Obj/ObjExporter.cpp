@@ -166,7 +166,7 @@ std::string ObjExporter::GetMaterialLibFileName() {
 
 // ------------------------------------------------------------------------------------------------
 void ObjExporter::WriteHeader(std::ostringstream& out) {
-    out << "# File produced by Open Asset Import Library (http://www.assimp.sf.net)" << endl;
+    out << "# File produced by Open Asset Import Library (https://www.assimp.org)" << endl;
     out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl  << endl;
 }

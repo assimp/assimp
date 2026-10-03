@@ -78,6 +78,10 @@ PyAssimp requires a assimp dynamic library (`DLL` on windows,
   - the current directory
   - on linux additionally: `/usr/lib`, `/usr/local/lib`,
     `/usr/lib/x86_64-linux-gnu`
+  - on windows additionally: every directory in `PATH`
+
+The library must match the architecture of your Python interpreter
+(e.g. an ARM64 Python on Windows on ARM needs an ARM64 `assimp-*.dll`).
 
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./pyassimp/helper.py`.
@@ -90,3 +94,31 @@ TEST
 $ pip install -e ".[test]"
 $ LD_LIBRARY_PATH=/path/to/libassimp pytest
 ```
+
+On Windows (PowerShell), put the directory containing the assimp DLL on `PATH`:
+
+```console
+> pip install -e ".[test]"
+> $env:PATH = "C:\path\to\assimp\build\bin\Release;$env:PATH"
+> pytest
+```
+
+BUILD AND DEPLOY
+----------------
+
+PyAssimp is a pure-Python package. Wheels do not bundle `libassimp`; users still
+need a matching Assimp shared library at runtime.
+
+Bump `version` in `pyproject.toml` before a release. PyPI does not allow
+replacing an existing version; yank and ship a new version if a bad release
+goes out.
+
+```console
+$ pip install -e ".[release]"
+$ python -m build
+$ twine check dist/*
+$ twine upload dist/*
+```
+
+Upload requires PyPI maintainer access for the `pyassimp` project. Prefer
+Trusted Publishing from CI when that is set up.

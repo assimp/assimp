@@ -837,7 +837,7 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator &it,
                 face.mIndices[i] = ReadVSizedIntLWO2((uint8_t *&)cursor) + mCurLayer->mPointIDXOfs;
                 if (face.mIndices[i] >= mCurLayer->mTempPoints.size()) {
                     ASSIMP_LOG_WARN("LWO2: Failure evaluating face record, index is out of range");
-                    face.mIndices[i] = (unsigned int)mCurLayer->mTempPoints.size() - 1;
+                    face.mIndices[i] = mCurLayer->mTempPoints.empty() ? 0 : (unsigned int)(mCurLayer->mTempPoints.size() - 1);
                 }
             }
         } else

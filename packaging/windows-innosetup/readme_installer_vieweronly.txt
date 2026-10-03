@@ -4,7 +4,7 @@ Open Asset Import Library (Assimp) Viewer Installer
 Release Notes
 ------------------------------------------------------------------------------------
 
-http://assimp.sf.net
+https://www.assimp.org
 
 Known Bugs & Limitations
 ========================

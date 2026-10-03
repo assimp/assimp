@@ -1,0 +1,22 @@
+ply
+format ascii 1.0
+comment Assimp unit test: 3DGS PLY with two f_rest coeffs
+element vertex 1
+property float x
+property float y
+property float z
+property float f_dc_0
+property float f_dc_1
+property float f_dc_2
+property float f_rest_0
+property float f_rest_1
+property float opacity
+property float scale_0
+property float scale_1
+property float scale_2
+property float rot_0
+property float rot_1
+property float rot_2
+property float rot_3
+end_header
+4.0 5.0 6.0  0.1 0.2 0.3  7.0 8.0  -0.5  1.0 1.0 1.0  0.0 0.0 0.0 1.0

@@ -47,12 +47,16 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
 
   find_path(DirectX_INCLUDE_DIR NAMES d3d9.h HINTS ${DirectX_INC_SEARCH_PATH})
   # dlls are in DirectX_ROOT_DIR/Developer Runtime/x64|x86
-  # lib files are in DirectX_ROOT_DIR/Lib/x64|x86
-  if(CMAKE_CL_64)
+  # lib files are in DirectX_ROOT_DIR/Lib/x64|x86 (Windows Kits also provide arm64)
+  string(TOLOWER "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" _dx_arch)
+  if(_dx_arch MATCHES "^arm64")
+    set(DirectX_LIBPATH_SUFFIX "arm64")
+  elseif(_dx_arch STREQUAL "x64" OR (NOT _dx_arch AND CMAKE_SIZEOF_VOID_P EQUAL 8))
     set(DirectX_LIBPATH_SUFFIX "x64")
-  else(CMAKE_CL_64)
+  else()
     set(DirectX_LIBPATH_SUFFIX "x86")
-  endif(CMAKE_CL_64)
+  endif()
+  unset(_dx_arch)
   find_library(DirectX_LIBRARY NAMES d3d9 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
   find_library(DirectX_D3DX9_LIBRARY NAMES d3dx9 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
   find_library(DirectX_DXERR_LIBRARY NAMES DxErr DxErr9 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})

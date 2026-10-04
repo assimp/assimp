@@ -781,16 +781,16 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 		// push normals to java
 		if (cMesh->HasNormals()) {
+			size_t normalsSize;
+			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), normalsSize) || normalsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("normals buffer size overflow or too large\n");
+				return false;
+			}
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 0;
 			allocateDataChannelParams[1].i = 0;
 			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
 				lprintf("could not allocate normal data channel\n");
-				return false;
-			}
-			size_t normalsSize;
-			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), normalsSize) || normalsSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("normals buffer size overflow or too large\n");
 				return false;
 			}
 			if (!copyBuffer(env, jMesh, "m_normals", cMesh->mNormals, normalsSize)) {
@@ -803,16 +803,16 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 		// push tangents to java
 		if (cMesh->mTangents != nullptr) {
+			size_t tangentsSize;
+			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), tangentsSize) || tangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("tangents buffer size overflow or too large\n");
+				return false;
+			}
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 1;
 			allocateDataChannelParams[1].i = 0;
 			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
 				lprintf("could not allocate tangents data channel\n");
-				return false;
-			}
-			size_t tangentsSize;
-			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), tangentsSize) || tangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("tangents buffer size overflow or too large\n");
 				return false;
 			}
 			if (!copyBuffer(env, jMesh, "m_tangents", cMesh->mTangents, tangentsSize)) {
@@ -825,16 +825,16 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 
 		// push bitangents to java
 		if (cMesh->mBitangents != nullptr) {
+			size_t bitangentsSize;
+			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), bitangentsSize) || bitangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
+				lprintf("bitangents buffer size overflow or too large\n");
+				return false;
+			}
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 2;
 			allocateDataChannelParams[1].i = 0;
 			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
 				lprintf("could not allocate bitangents data channel\n");
-				return false;
-			}
-			size_t bitangentsSize;
-			if (!SafeMultiply((size_t)cMesh->mNumVertices, 3 * sizeof(float), bitangentsSize) || bitangentsSize > JASSIMP_MAX_DIRECT_ALLOC) {
-				lprintf("bitangents buffer size overflow or too large\n");
 				return false;
 			}
 			if (!copyBuffer(env, jMesh, "m_bitangents", cMesh->mBitangents, bitangentsSize)) {
@@ -848,16 +848,16 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 		// push color sets to java
 		for (int c = 0; c < AI_MAX_NUMBER_OF_COLOR_SETS; c++) {
 			if (cMesh->mColors[c] != nullptr) {
+				size_t colorsetSize;
+				if (!SafeMultiply((size_t)cMesh->mNumVertices, 4 * sizeof(float), colorsetSize) || colorsetSize > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("colorset buffer size overflow or too large\n");
+					return false;
+				}
 				jvalue allocateDataChannelParams[2];
 				allocateDataChannelParams[0].i = 3;
 				allocateDataChannelParams[1].i = c;
 				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
 					lprintf("could not allocate colorset data channel\n");
-					return false;
-				}
-				size_t colorsetSize;
-				if (!SafeMultiply((size_t)cMesh->mNumVertices, 4 * sizeof(float), colorsetSize) || colorsetSize > JASSIMP_MAX_DIRECT_ALLOC) {
-					lprintf("colorset buffer size overflow or too large\n");
 					return false;
 				}
 				if (!copyBufferArray(env, jMesh, "m_colorsets", c, cMesh->mColors[c], colorsetSize)) {
@@ -888,13 +888,6 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 						return false;
 				}
 
-				allocateDataChannelParams[1].i = c;
-				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
-					lprintf("could not allocate texture coordinates data channel\n");
-					return false;
-				}
-
-				// gather data
 				size_t coordBufferElems;
 				size_t coordBufferSize;
 				if (!SafeMultiply((size_t)cMesh->mNumVertices, (size_t)cMesh->mNumUVComponents[c], coordBufferElems) ||
@@ -903,6 +896,13 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 					return false;
 				}
 
+				allocateDataChannelParams[1].i = c;
+				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams)) {
+					lprintf("could not allocate texture coordinates data channel\n");
+					return false;
+				}
+
+				// gather data
 				std::vector<char> coordBufferVec(coordBufferSize);
 				char* coordBuffer = coordBufferVec.data();
 				size_t coordBufferOffset = 0;
@@ -1417,6 +1417,11 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 					return false;
 				}
 			} else {
+				if ((size_t)cProperty->mDataLength > JASSIMP_MAX_DIRECT_ALLOC) {
+					lprintf("property data too large: %u\n", cProperty->mDataLength);
+					return false;
+				}
+
 				constructorParams[4].i = cProperty->mDataLength;
 
 				// generic copy code, uses dump ByteBuffer on java side
@@ -1442,10 +1447,6 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene) {
 					return false;
 				}
 
-				if ((size_t)cProperty->mDataLength > JASSIMP_MAX_DIRECT_ALLOC) {
-					lprintf("property data too large: %u\n", cProperty->mDataLength);
-					return false;
-				}
 				std::copy((char*)cProperty->mData, (char*)cProperty->mData + cProperty->mDataLength, (char*)jBufferPtr);
 			}
 

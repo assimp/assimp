@@ -15,6 +15,7 @@ type ai_real = Single;
 type ai_int = Integer;
 type ai_uint = Cardinal;
 {$ENDIF}
+type Pai_real = ^ai_real;
 
 const AI_MATH_PI = 3.141592653589793238462643383279;
 const AI_MATH_TWO_PI = AI_MATH_PI * 2.0;

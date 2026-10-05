@@ -47,8 +47,9 @@ Code written for the previous version of these units needs these changes:
     assimp.dll rather than assimp32.dll
   - the C names TaiFace.mNumIndices and TaiMesh.mNumAnimMeshes and mAnimMeshes, for mNumIndicies,
     mNumAniMeshes and mAniMeshes
-  - TaiNode.mParent is a PaiNode, TaiMesh.mTangents and mBitangents are PTaiVector3DArray, and
-    pMax of aiGetMaterialFloatArray and aiGetMaterialIntegerArray is a PCardinal, so that it can be nil
+  - TaiNode.mParent is a PaiNode, and TaiMesh.mTangents and mBitangents are PTaiVector3DArray
+  - pMax of aiGetMaterialFloatArray and aiGetMaterialIntegerArray, and the outputs of
+    aiGetMaterialTexture after path, are pointers, so that they can be nil
 
 Units cannot refer to each other circularly, so the aiNode pointers in aiBone and aiSkeletonBone
 (aiMesh) are declared as Pointer; cast them to PaiNode from aiScene.

@@ -16,6 +16,7 @@ type TaiTextureOp = (
 	aiTextureOp_SmoothAdd = $4,
 	aiTextureOp_SignedAdd = $5
 );
+type PaiTextureOp = ^TaiTextureOp;
 
 type TaiTextureMapMode = (
     aiTextureMapMode_Wrap = $0,
@@ -23,6 +24,7 @@ type TaiTextureMapMode = (
     aiTextureMapMode_Decal = $3,
     aiTextureMapMode_Mirror = $2
 );
+type PaiTextureMapMode = ^TaiTextureMapMode;
 
 type TaiTextureMapping = (
     aiTextureMapping_UV = $0,
@@ -32,6 +34,7 @@ type TaiTextureMapping = (
     aiTextureMapping_PLANE = $4,
     aiTextureMapping_OTHER = $5
 );
+type PaiTextureMapping = ^TaiTextureMapping;
 
 type TaiTextureType = (
     aiTextureType_NONE = 0,
@@ -214,7 +217,7 @@ function aiGetMaterialColor(var pMat: TaiMaterial; pKey: PAnsiChar; nType: Cardi
 function aiGetMaterialUVTransform(var pMat: TaiMaterial; pKey: PAnsiChar; nType: Cardinal; nIndex: Cardinal; var pOut: TaiUVTransform): aiReturn; cdecl; external ASSIMP_DLL;
 function aiGetMaterialString(var pMat: TaiMaterial; pKey: PAnsiChar; nType: Cardinal; nIndex: Cardinal; var pOut: aiString): aiReturn; cdecl; external ASSIMP_DLL;
 function aiGetMaterialTextureCount(var pMat: TaiMaterial; nType: TaiTextureType): Cardinal; cdecl; external ASSIMP_DLL;
-function aiGetMaterialTexture(var mat: TaiMaterial; nType: TaiTextureType; nIndex: Cardinal; var path: aiString; var mapping: TaiTextureMapping; var uvindex: Cardinal; var blend: ai_real; var op: TaiTextureOp; var mapmode: TaiTextureMapMode; var flags: Cardinal): aiReturn; cdecl; external ASSIMP_DLL;
+function aiGetMaterialTexture(var mat: TaiMaterial; nType: TaiTextureType; nIndex: Cardinal; var path: aiString; mapping: PaiTextureMapping; uvindex: PCardinal; blend: Pai_real; op: PaiTextureOp; mapmode: PaiTextureMapMode; flags: PCardinal): aiReturn; cdecl; external ASSIMP_DLL;
 
 
 implementation

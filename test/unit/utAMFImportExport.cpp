@@ -114,10 +114,6 @@ TEST_F(utAMFImportExport, importTest7) {
 }
 
 
-#if 0
-// FIXME: these tests are disabled because they leak memory in AMFImporter_Postprocess.cpp
-
-
 TEST_F(utAMFImportExport, importTest8) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test8.amf", aiProcess_ValidateDataStructure);
@@ -130,9 +126,6 @@ TEST_F(utAMFImportExport, importTest9) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test9.amf", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
-
-
-#endif  // 0
 
 
 TEST_F(utAMFImportExport, importAMFWithMatFromFileTest) {

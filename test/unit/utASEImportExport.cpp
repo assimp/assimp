@@ -173,3 +173,11 @@ TEST_F(utASEImportExport, importUVTransform_ScaleUV2x_Rotate45) {
 
     ASSERT_NE(nullptr, scene);
 }
+
+
+TEST_F(utASEImportExport, importInvalidUVIndex) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/invalid/InvalidUVIndex.ase", aiProcess_ValidateDataStructure);
+
+    EXPECT_EQ(nullptr, scene);
+}

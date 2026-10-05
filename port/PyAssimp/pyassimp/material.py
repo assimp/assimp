@@ -2,7 +2,7 @@
 #
 #  No texture, but the value to be used as 'texture semantic'
 #  (#aiMaterialProperty::mSemantic) for all material properties
-# # not* related to textures.
+#  *not* related to textures.
 #
 aiTextureType_NONE = 0x0
 
@@ -80,10 +80,35 @@ aiTextureType_LIGHTMAP = 0xA
 #
 aiTextureType_REFLECTION = 0xB
 
+# PBR Materials
+aiTextureType_BASE_COLOR = 0xC
+aiTextureType_NORMAL_CAMERA = 0xD
+aiTextureType_EMISSION_COLOR = 0xE
+aiTextureType_METALNESS = 0xF
+aiTextureType_DIFFUSE_ROUGHNESS = 0x10
+aiTextureType_AMBIENT_OCCLUSION = 0x11
+
 # Unknown texture
 #
 #  A texture reference that does not match any of the definitions
 #  above is considered to be 'unknown'. It is still imported
 #  but is excluded from any further postprocessing.
 #
-aiTextureType_UNKNOWN = 0xC
+aiTextureType_UNKNOWN = 0x12
+
+# PBR Material Modifiers
+aiTextureType_SHEEN = 0x13
+aiTextureType_CLEARCOAT = 0x14
+aiTextureType_TRANSMISSION = 0x15
+
+# Maya material declarations
+aiTextureType_MAYA_BASE = 0x16
+aiTextureType_MAYA_SPECULAR = 0x17
+aiTextureType_MAYA_SPECULAR_COLOR = 0x18
+aiTextureType_MAYA_SPECULAR_ROUGHNESS = 0x19
+
+# Anisotropy
+aiTextureType_ANISOTROPY = 0x1A
+
+# glTF metallic-roughness packed texture
+aiTextureType_GLTF_METALLIC_ROUGHNESS = 0x1B

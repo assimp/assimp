@@ -1083,16 +1083,6 @@ namespace Assimp {
                     pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
                 }
 
-                // BaseImporter: default / unnamed materials should use AI_DEFAULT_MATERIAL_NAME
-                {
-                    aiString matName(AI_DEFAULT_MATERIAL_NAME);
-                    if (pcList->alInstances.size() > 1) {
-                        const std::string n = "Material_" + std::to_string(pvOut->size());
-                        matName.Set(n);
-                    }
-                    pcHelper->AddProperty(&matName, AI_MATKEY_NAME);
-                }
-
                 // add the newly created material instance to the list
                 pvOut->push_back(pcHelper);
             }
@@ -1133,12 +1123,6 @@ namespace Assimp {
             if (pointsOnly) {
                 constexpr int wireframe = 1;
                 pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
-            }
-
-            // BaseImporter: generated defaults should be named AI_DEFAULT_MATERIAL_NAME
-            {
-                const aiString matName(AI_DEFAULT_MATERIAL_NAME);
-                pcHelper->AddProperty(&matName, AI_MATKEY_NAME);
             }
 
             pvOut->push_back(pcHelper);

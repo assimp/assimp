@@ -1124,6 +1124,9 @@ namespace Assimp {
             if (!defaultTexture.empty()) {
                 const aiString name(defaultTexture.c_str());
                 pcHelper->AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0);
+            } else {
+                const aiString name(AI_DEFAULT_MATERIAL_NAME);
+                pcHelper->AddProperty(&name, AI_MATKEY_NAME);
             }
 
             // set to wireframe, so when using this material info we can switch to points rendering

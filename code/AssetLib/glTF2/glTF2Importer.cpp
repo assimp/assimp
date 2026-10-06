@@ -397,6 +397,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
+    defaultMaterial.name = AI_DEFAULT_MATERIAL_NAME;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
@@ -791,7 +792,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
                     if (count < 2) {
-                        ASSIMP_LOG_WARN("Not enough indices for a line primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
@@ -801,7 +802,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i - 1], indexBuffer[i]);
                     }
                     if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[static_cast<int>(count) - 1], faces[0].mIndices[0]);
+                        // Use the first index directly: the first face is dropped when its
+                        // indices are out of range, which would leave faces[0].mIndices null.
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[count - 1], indexBuffer[0]);
                     }
                     break;
                 }
@@ -823,7 +826,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
                     if (count < 3) {
-                        ASSIMP_LOG_WARN("Not enough indices for a triangle primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - 2;
@@ -842,7 +845,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
                     if (count < 3) {
-                        ASSIMP_LOG_WARN("Not enough indices for a triangle primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - 2;
@@ -884,7 +887,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
                     if (count < 2) {
-                        ASSIMP_LOG_WARN("Not enough vertices for a line primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
@@ -913,7 +916,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
                     if (count < 3) {
-                        ASSIMP_LOG_WARN("Not enough vertices for a triangle primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - 2;
@@ -932,7 +935,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
                     if (count < 3) {
-                        ASSIMP_LOG_WARN("Not enough vertices for a triangle primitive; dropping it.");
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
                         break;
                     }
                     nFaces = count - 2;

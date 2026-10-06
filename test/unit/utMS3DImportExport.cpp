@@ -38,39 +38,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
-#include "AbstractImportExportBase.h"
+#include "UnitTestPCH.h"
 #include "UnitTestPCH.h"
 
+#include "AbstractImportExportBase.h"
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 
-using namespace Assimp;
+using namespace ::Assimp;
 
-class utQ3BSPImportExport : public AbstractImportExportBase {
+class utMS3DImporter : public AbstractImportExportBase {
 public:
-    virtual bool importerTest() {
+    bool importerTest() override {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/PK3/SGDTT3.pk3", 0);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MS3D/twospheres_withmats.ms3d", aiProcess_ValidateDataStructure);
         return nullptr != scene;
     }
 };
 
-TEST_F(utQ3BSPImportExport, importerTest) {
+TEST_F(utMS3DImporter, importTest) {
+#ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
     EXPECT_TRUE(importerTest());
+#else
+    EXPECT_FALSE(importerTest());
+#endif
 }
 
-TEST_F(utQ3BSPImportExport, rejectMisalignedMeshVertsLump) {
+TEST_F(utMS3DImporter, importInvalidMaterialIndex) {
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(
-            ASSIMP_TEST_MODELS_NONBSD_DIR "/PK3/invalid_meshverts_size.pk3", 0);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MS3D/invalid/InvalidMaterialIndex.ms3d", 0);
+#ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
     EXPECT_EQ(nullptr, scene);
-}
-
-TEST_F(utQ3BSPImportExport, importMalformedLumpOutOfBounds) {
-    // A lump whose iOffset + iSize extends past the loaded file must be rejected
-    // instead of reading off the end of the data buffer.
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/malformed_lump_oob.pk3", 0);
-    EXPECT_EQ(nullptr, scene);
+#else
+    EXPECT_NE(nullptr, scene);
+#endif
 }

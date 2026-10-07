@@ -449,9 +449,16 @@ void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::vector<int32_t> &pCoordI
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
             aiVector3D tnorm;
 
+            if (tind[fi] >= norm_arr_copy.size()) {
+                throw DeadlyImportError("MeshGeometry_AddNormal. Normal idx is out of range.");
+            }
             tnorm = norm_arr_copy[tind[fi]];
-            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++)
+            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
+                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
+                    throw DeadlyImportError("MeshGeometry_AddNormal. Coordinate idx is out of range.");
+                }
                 pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = tnorm;
+            }
         }
     } // if(pNormalPerVertex) else
 }
@@ -474,8 +481,12 @@ void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::list<aiVector3D> &pNorma
         pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
             // apply color to all vertices of face
-            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++)
+            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
+                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
+                    throw DeadlyImportError("MeshGeometry_AddNormal. Coordinate idx is out of range.");
+                }
                 pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = *norm_it;
+            }
 
             ++norm_it;
         }
@@ -516,6 +527,9 @@ void X3DGeoHelper::add_tex_coord(aiMesh &pMesh, const std::vector<int32_t> &pCoo
             size_t vert_idx = pMesh.mFaces[fi].mIndices[ii];
             size_t tc_idx = faces.at(fi).mIndices[ii];
 
+            if (vert_idx >= pMesh.mNumVertices) {
+                throw DeadlyImportError("MeshGeometry_AddTexCoord. Coordinate idx is out of range.");
+            }
             pMesh.mTextureCoords[0][vert_idx] = texcoord_arr_copy.at(tc_idx);
         }
     } // for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)

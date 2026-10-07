@@ -301,8 +301,11 @@ const aiScene* ImportModel(
 
 	// do the actual import, measure time
 	const clock_t first = clock();
-    ConsoleProgressHandler *ph = new ConsoleProgressHandler;
-    globalImporter->SetProgressHandler(ph);
+	ConsoleProgressHandler *ph = new ConsoleProgressHandler;
+	globalImporter->SetProgressHandler(ph);
+
+	globalImporter->SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS,
+		imp.readAllMaterials);
 
 	const aiScene* scene = globalImporter->ReadFile(path,imp.ppFlags);
 
@@ -414,6 +417,7 @@ int ProcessStandardArguments(
 	// -db     --debone
 	// -sbc    --split-by-bone-count
 	// -gs	   --global-scale
+	// -ram    --read-all-materials
 	//
 	// -c<file> --config-file=<file>
 
@@ -504,6 +508,9 @@ int ProcessStandardArguments(
 		}
 		else if (!strcmp(param, "-gs") || ! strcmp(param, "--global-scale")) {
 			fill.ppFlags |= aiProcess_GlobalScale;
+		}
+		else if (! strcmp( param, "-ram") || ! strcmp( param, "--read-all-materials")) {
+			fill.readAllMaterials = true;
 		}
 		else if (! strncmp( param, "-c",2) || ! strncmp( param, "--config=",9)) {
 			const unsigned int ofs = (params[i][1] == '-' ? 9 : 2);

@@ -325,10 +325,10 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
                 if (*colidx_it == (-1)) {
                     continue; // skip faces delimiter
                 }
-                if ((unsigned int)(*coordidx_it) > pMesh.mNumVertices) {
+                if ((unsigned int)(*coordidx_it) >= pMesh.mNumVertices) {
                     throw DeadlyImportError("MeshGeometry_AddColor2. Coordinate idx is out of range.");
                 }
-                if ((unsigned int)*colidx_it > pMesh.mNumVertices) {
+                if ((unsigned int)*colidx_it >= col_arr_copy.size()) {
                     throw DeadlyImportError("MeshGeometry_AddColor2. Color idx is out of range.");
                 }
 
@@ -361,7 +361,7 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
 
             std::vector<int32_t>::const_iterator colidx_it = colorIdx.begin();
             for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
-                if ((unsigned int)*colidx_it > pMesh.mNumFaces) throw DeadlyImportError("MeshGeometry_AddColor2. Face idx is out of range.");
+                if ((unsigned int)*colidx_it >= col_arr_copy.size()) throw DeadlyImportError("MeshGeometry_AddColor2. Color idx is out of range.");
 
                 col_tgt_arr[fi] = col_arr_copy[*colidx_it++];
             }

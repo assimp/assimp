@@ -1238,3 +1238,30 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
         }
     }
 }
+
+// Without an index buffer the face count is derived from the vertex count. A
+// count below what the primitive mode needs (two vertices for a line, three for
+// a triangle) underflows the count - 2 of the triangle modes and makes the line
+// modes assemble faces from vertices that do not exist, so such a primitive has
+// to be dropped.
+TEST_F(utglTF2ImportExport, importglTF2NonIndexedPrimitiveModeTooFewVertices) {
+    // A single-vertex mesh without an index buffer, once per primitive mode
+    // that needs more than one vertex: LINE_LOOP, LINE_STRIP, TRIANGLE_STRIP
+    // and TRIANGLE_FAN.
+    const std::string before =
+            R"({"asset":{"version":"2.0"},"scenes":[{"nodes":[0]}],"scene":0,"nodes":[{"mesh":0}],"meshes":[{"primitives":[{"attributes":{"POSITION":0},"mode":)";
+    const std::string after =
+            R"(}]}],"buffers":[{"byteLength":12,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAA"}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":12}],"accessors":[{"bufferView":0,"componentType":5126,"count":1,"type":"VEC3","min":[0,0,0],"max":[0,0,0]}]})";
+
+    for (const char *mode : { "2", "3", "5", "6" }) {
+        const std::string gltf = before + mode + after;
+        SCOPED_TRACE(gltf);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(gltf.c_str(), gltf.size(), 0, "gltf");
+        // The degenerate primitive is dropped, so the import still succeeds and
+        // leaves a mesh with no faces instead of underflowing the face count.
+        ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(0u, scene->mMeshes[0]->mNumFaces);
+    }
+}

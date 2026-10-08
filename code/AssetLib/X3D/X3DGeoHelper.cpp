@@ -388,6 +388,17 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
     add_color(pMesh, col_tgt_list, pColorPerVertex);
 }
 
+// Assign a normal to every vertex of a face, validating each (file-controlled) vertex index.
+static void assignFaceNormal(aiMesh &pMesh, size_t faceIndex, const aiVector3D &normal) {
+    const aiFace &face = pMesh.mFaces[faceIndex];
+    for (size_t vi = 0, vi_e = face.mNumIndices; vi < vi_e; vi++) {
+        if (face.mIndices[vi] >= pMesh.mNumVertices) {
+            throw DeadlyImportError("MeshGeometry_AddNormal. Coordinate idx is out of range.");
+        }
+        pMesh.mNormals[face.mIndices[vi]] = normal;
+    }
+}
+
 void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::vector<int32_t> &pCoordIdx, const std::vector<int32_t> &pNormalIdx,
         const std::list<aiVector3D> &pNormals, const bool pNormalPerVertex) {
     std::vector<size_t> tind;
@@ -447,18 +458,10 @@ void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::vector<int32_t> &pCoordI
         // copy normals to mesh
         pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
-            aiVector3D tnorm;
-
             if (tind[fi] >= norm_arr_copy.size()) {
                 throw DeadlyImportError("MeshGeometry_AddNormal. Normal idx is out of range.");
             }
-            tnorm = norm_arr_copy[tind[fi]];
-            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
-                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
-                    throw DeadlyImportError("MeshGeometry_AddNormal. Coordinate idx is out of range.");
-                }
-                pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = tnorm;
-            }
+            assignFaceNormal(pMesh, fi, norm_arr_copy[tind[fi]]);
         }
     } // if(pNormalPerVertex) else
 }
@@ -480,14 +483,8 @@ void X3DGeoHelper::add_normal(aiMesh &pMesh, const std::list<aiVector3D> &pNorma
         // copy normals to mesh
         pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
-            // apply color to all vertices of face
-            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
-                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
-                    throw DeadlyImportError("MeshGeometry_AddNormal. Coordinate idx is out of range.");
-                }
-                pMesh.mNormals[pMesh.mFaces[fi].mIndices[vi]] = *norm_it;
-            }
-
+            // apply normal to all vertices of face
+            assignFaceNormal(pMesh, fi, *norm_it);
             ++norm_it;
         }
     } // if(pNormalPerVertex) else

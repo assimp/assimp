@@ -250,6 +250,28 @@ AI_FORCE_INLINE bool TokenMatch(char_t *&in, const char *token, unsigned int len
     return false;
 }
 // ---------------------------------------------------------------------------------
+/** @brief Only check part of the Token version of TokenMatch
+ *  @param in Input
+ *  @param token Token to check for
+ *  @param len Number of characters to check
+ *  @param real_len Real Number of characters in the Token
+ */
+template <class char_t>
+AI_FORCE_INLINE bool TokenMatchP(char_t*& in, const char* token, unsigned int len, unsigned int real_len)
+{
+    if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[real_len])) {
+        if (in[real_len] != '\0') {
+            in += real_len+1;
+        } else {
+            // If EOF after the token make sure we don't go past end of buffer
+            in += real_len;
+        }
+        return true;
+    }
+
+    return false;
+}
+// ---------------------------------------------------------------------------------
 /// @brief Case-ignoring version of TokenMatch
 /// @param in    Input
 /// @param token Token to check for

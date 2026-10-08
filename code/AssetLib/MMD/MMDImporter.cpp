@@ -163,18 +163,23 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
         }
     }
 
+    // Validate every material's index range BEFORE allocating the mesh array: a
+    // later invalid range must not throw after pScene->mMeshes is allocated, which
+    // would leave uninitialized aiMesh* entries for aiScene's destructor to delete.
+    // CreateMesh walks pModel->indices[indexStart .. indexStart + indexCount).
+    for (int i = 0, rangeStart = 0; i < pModel->material_count; ++i) {
+        const int indexCount = pModel->materials[i].index_count;
+        if (indexCount < 0 ||
+                static_cast<int64_t>(rangeStart) + indexCount > pModel->index_count) {
+            throw DeadlyImportError("MMD: material index range is out of bounds");
+        }
+        rangeStart += indexCount;
+    }
+
     pScene->mNumMeshes = pModel->material_count;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
     for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
-
-        // Per-material index ranges must stay within the global index list;
-        // CreateMesh walks pModel->indices[indexStart .. indexStart + indexCount).
-        if (indexCount < 0 ||
-                static_cast<int64_t>(indexStart) + indexCount > pModel->index_count) {
-            throw DeadlyImportError("MMD: material index range is out of bounds");
-        }
-
         pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
         pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
         pScene->mMeshes[i]->mMaterialIndex = i;

@@ -60,3 +60,9 @@ public:
 TEST_F( utPMXImporter, importTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+TEST_F( utPMXImporter, importInvalidUVCount ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/MMD/invalid/InvalidUVCount.pmx", 0 );
+    EXPECT_EQ( nullptr, scene );
+}

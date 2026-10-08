@@ -319,6 +319,10 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
                 throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + ai_to_string(colorIdx.size()) +
                                         ") can not be less than Coords indices count(" + ai_to_string(coordIdx.size()) + ").");
             }
+            if (colorIdx.size() > coordIdx.size()) {
+                throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + ai_to_string(colorIdx.size()) +
+                                        ") can not be greater than Coords indices count(" + ai_to_string(coordIdx.size()) + ").");
+            }
             // create list with colors for every vertex.
             col_tgt_arr.resize(pMesh.mNumVertices);
             for (std::vector<int32_t>::const_iterator colidx_it = colorIdx.begin(), coordidx_it = coordIdx.begin(); colidx_it != colorIdx.end(); ++colidx_it, ++coordidx_it) {

@@ -56,6 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include <memory>
+#include <vector>
+
 using namespace Assimp;
 using namespace glTF;
 
@@ -199,7 +202,10 @@ void glTFImporter::ImportMaterials(Asset &r) const {
 }
 
 void glTFImporter::ImportMeshes(Asset &r) {
-    std::vector<aiMesh *> meshes;
+    // Own the meshes through unique_ptr so that any exception thrown while
+    // importing frees the partially built meshes automatically (no manual
+    // delete needed). Ownership is transferred to the scene at the very end.
+    std::vector<std::unique_ptr<aiMesh>> meshes;
 
     unsigned int k = 0;
     meshOffsets.clear();
@@ -242,7 +248,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
             auto &[mode, attributes, indices, material] = mesh.primitives[p];
 
             aiMesh *aim = new aiMesh();
-            meshes.push_back(aim);
+            meshes.emplace_back(aim);
 
             aim->mName = mesh.id;
             if (mesh.primitives.size() > 1) {
@@ -279,7 +285,13 @@ void glTFImporter::ImportMeshes(Asset &r) {
             if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+                const bool extracted = attr.texcoord[tc] && attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+                if (!extracted) {
+                    // meshes owns the partially built aiMesh objects via unique_ptr,
+                    // so unwinding this exception frees them automatically.
+                    throw DeadlyImportError("Mesh \"", mesh.id, "\": failed to extract data for texcoord ", ai_to_string(tc));
+                }
+
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D *values = aim->mTextureCoords[tc];
@@ -456,7 +468,15 @@ void glTFImporter::ImportMeshes(Asset &r) {
 
     meshOffsets.push_back(k);
 
-    CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
+    // Release ownership to the scene: CopyVector takes ownership of the raw
+    // pointers, so hand them over only now that import has fully succeeded.
+    std::vector<aiMesh *> rawMeshes;
+    rawMeshes.reserve(meshes.size());
+    for (std::unique_ptr<aiMesh> &m : meshes) {
+        rawMeshes.push_back(m.release());
+    }
+
+    CopyVector(rawMeshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
 void glTFImporter::ImportCameras(Asset &r) const {

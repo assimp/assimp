@@ -1,0 +1,29 @@
+Metric (key = "distance") {float {1}}
+
+GeometryObject $geometry1
+{
+	Mesh (primitive = "triangles")
+	{
+		VertexArray (attrib = "position")
+		{
+			float[3]
+			{
+				{0x00000000, 0x00000000, 0x00000000}, {0x3F800000, 0x00000000, 0x00000000}, {0x00000000, 0x3F800000, 0x00000000}
+			}
+		}
+
+		IndexArray
+		{
+			unsigned_int32[3]
+			{
+				{0, 1, 4096}
+			}
+		}
+	}
+}
+
+GeometryNode $node1
+{
+	Name {string {"x"}}
+	ObjectRef {ref {$geometry1}}
+}

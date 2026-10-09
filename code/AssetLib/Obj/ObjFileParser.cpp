@@ -247,9 +247,14 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
                 goto pf_skip_line;
         } break;
 
-        case 'g': // Parse group name
+        case 'g': // Parse group name, or Wavefront `group` (reselect for late usemtl)
         {
-            getGroupName();
+            // "group foo" → reselect existing object; "g foo" → new/active group.
+            if ((mDataIt + 1) != mDataItEnd && *(mDataIt + 1) == 'r') {
+                reselectGroup();
+            } else {
+                getGroupName();
+            }
         } break;
 
         case 's': // Parse group number
@@ -592,10 +597,10 @@ void ObjFileParser::getMaterialDesc() {
 
     // If the current mesh has the same material, we will ignore that 'usemtl' command
     // There is no need to create another object or even mesh here
-    if (!skip) {
-        if (mModel->mCurrentMaterial && mModel->mCurrentMaterial->MaterialName == aiString(strName)) {
-            skip = true;
-        }
+    // (In reselect mode a trailing usemtl must still assign the material to the active group.)
+    if (!mReselectMode && mModel->mCurrentMaterial &&
+            mModel->mCurrentMaterial->MaterialName == aiString(strName)) {
+        skip = true;
     }
 
     if (!skip) {
@@ -616,12 +621,31 @@ void ObjFileParser::getMaterialDesc() {
             mModel->mCurrentMaterial = it->second;
         }
 
-        if (needsNewMesh(strName)) {
-            auto newMeshName = mModel->mActiveGroup.empty() ? strName : mModel->mActiveGroup;
-            createMesh(newMeshName);
-        }
+        if (mReselectMode) {
+            // Trailing `group name` / `usemtl name`: assign material to already-built meshes
+            // of the active group (no new geometry).
+            const int matIdx = getMaterialIndex(strName);
+            ASSIMP_LOG_DEBUG("OBJ RESELECT: set meshes in group '", mModel->mActiveGroup,
+                    "' to material '", strName, "'");
+            for (ObjFile::Object *obj : mModel->mObjects) {
+                if (obj == nullptr || obj->m_strObjName != mModel->mActiveGroup) {
+                    continue;
+                }
+                for (unsigned int meshId : obj->m_Meshes) {
+                    if (meshId < mModel->mMeshes.size() && mModel->mMeshes[meshId] != nullptr) {
+                        mModel->mMeshes[meshId]->m_uiMaterialIndex = matIdx;
+                        mModel->mMeshes[meshId]->m_pMaterial = mModel->mCurrentMaterial;
+                    }
+                }
+            }
+        } else {
+            if (needsNewMesh(strName)) {
+                auto newMeshName = mModel->mActiveGroup.empty() ? strName : mModel->mActiveGroup;
+                createMesh(newMeshName);
+            }
 
-        mModel->mCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
+            mModel->mCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
+        }
     }
 
     // Skip rest of line
@@ -769,6 +793,42 @@ void ObjFileParser::getGroupName() {
         }
         mModel->mActiveGroup = groupName;
     }
+    mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
+}
+
+// -------------------------------------------------------------------
+//  Reselect an existing group for late material assignment
+//  (trailing `group name` / `usemtl name` in Viewpoint OBJs).
+void ObjFileParser::reselectGroup() {
+    mDataIt = getNextToken<DataArrayIt>(mDataIt, mDataItEnd);
+    if (mDataIt == mDataItEnd) {
+        return;
+    }
+    char *pStart = &(*mDataIt);
+    while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt)) {
+        ++mDataIt;
+    }
+
+    std::string groupName(pStart, &(*mDataIt));
+    if (groupName.empty()) {
+        ASSIMP_LOG_ERROR("OBJ: fatal error: No GroupName to reselect");
+        mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
+        return;
+    }
+
+    // Object names are stored without a "g " / "group " prefix.
+    mModel->mCurrentObject = nullptr;
+    for (ObjFile::Object *obj : mModel->mObjects) {
+        if (obj != nullptr && obj->m_strObjName == groupName) {
+            mModel->mCurrentObject = obj;
+            break;
+        }
+    }
+
+    mModel->mActiveGroup = groupName;
+    mReselectMode = true;
+    ASSIMP_LOG_DEBUG("OBJ RESELECT: active group '", groupName, "'");
+
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
 }
 

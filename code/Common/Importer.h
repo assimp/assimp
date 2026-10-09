@@ -232,7 +232,8 @@ public:
      *
      *  @param which LRWC returned by AddLoadRequest().
      *  @return nullptr if there is no scene with this file name
-     *  in the queue of the scene hasn't been loaded yet. */
+     *  in the queue or the scene hasn't been loaded yet. The caller assumes
+     *  ownership of a non-null scene and must delete shared scenes only once. */
     aiScene* GetImport(
         unsigned int which
         );

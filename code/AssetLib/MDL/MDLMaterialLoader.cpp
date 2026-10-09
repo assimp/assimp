@@ -257,6 +257,14 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 
     // allocate storage for the texture image
     if (do_read) {
+        // a zero-height texture must be a compressed blob of mWidth bytes,
+        // but this path produces an mWidth*mHeight pixel array - the
+        // resulting object would violate the aiTexture contract and read
+        // out of bounds when the scene is copied (e.g. on export)
+        if (pcNew->mHeight == 0 && pcNew->mWidth != 0) {
+            throw DeadlyImportError("Invalid MDL file. A texture has zero height.");
+        }
+
         // check for max texture sizes
         if (pcNew->mWidth > MaxTextureSize || pcNew->mHeight > MaxTextureSize) {
             throw DeadlyImportError("Invalid MDL file. A texture is too big.");

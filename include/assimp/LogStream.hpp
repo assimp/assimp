@@ -88,7 +88,7 @@ public:
 
     // -------------------------------------------------------------------
     /** @brief Creates a default log stream
-     *  @param streams Type of the default stream
+     *  @param stream Type of the default stream
      *  @param name For aiDefaultLogStream_FILE: name of the output file
      *  @param io For aiDefaultLogStream_FILE: IOSystem to be used to open the output
      *   file. Pass nullptr for the default implementation.

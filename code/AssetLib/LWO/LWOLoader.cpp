@@ -346,16 +346,33 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                                 break;
                             }
                             aiVector3D *&pp = pvUV[w];
-                            const aiVector2D &src = ((aiVector2D *)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
-                            pp->x = src.x;
-                            pp->y = src.y;
+                            // idx is clamped only against mTempPoints.size(); a VMAP channel is
+                            // sized once (at VMAP-parse time) and is not resized if a later PNTS
+                            // chunk grows the point list, so idx can exceed this channel's entry
+                            // count. Bound it here to avoid an out-of-bounds read.
+                            if (const LWO::VMapEntry &uvChan = layer.mUVChannels[vUVChannelIndices[w]];
+                                    uvChan.dims >= 2 && idx < uvChan.rawData.size() / uvChan.dims) {
+                                const size_t base = static_cast<size_t>(idx) * uvChan.dims;
+                                pp->x = uvChan.rawData[base];
+                                pp->y = uvChan.rawData[base + 1];
+                            } else {
+                                pp->x = 0.f;
+                                pp->y = 0.f;
+                            }
                             pp++;
                         }
 
                         // process normals (MODO extension)
                         if (nrm) {
-                            *nrm = ((aiVector3D *)&layer.mNormals.rawData[0])[idx];
-                            nrm->z *= -1.f;
+                            // Same stale-channel-size guard as above (see UV read).
+                            if (layer.mNormals.dims >= 3 && idx < layer.mNormals.rawData.size() / layer.mNormals.dims) {
+                                const size_t base = static_cast<size_t>(idx) * layer.mNormals.dims;
+                                nrm->x = layer.mNormals.rawData[base];
+                                nrm->y = layer.mNormals.rawData[base + 1];
+                                nrm->z = -layer.mNormals.rawData[base + 2];
+                            } else {
+                                *nrm = aiVector3D();
+                            }
                             ++nrm;
                         }
 
@@ -364,7 +381,17 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                             if (UINT_MAX == vVColorIndices[w]) {
                                 break;
                             }
-                            *pvVC[w] = ((aiColor4D *)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
+                            // Same stale-channel-size guard as above (see UV read).
+                            if (const LWO::VMapEntry &vcChan = layer.mVColorChannels[vVColorIndices[w]];
+                                    vcChan.dims >= 3 && idx < vcChan.rawData.size() / vcChan.dims) {
+                                const size_t base = static_cast<size_t>(idx) * vcChan.dims;
+                                pvVC[w]->r = vcChan.rawData[base];
+                                pvVC[w]->g = vcChan.rawData[base + 1];
+                                pvVC[w]->b = vcChan.rawData[base + 2];
+                                pvVC[w]->a = (vcChan.dims >= 4) ? vcChan.rawData[base + 3] : 1.f;
+                            } else {
+                                *pvVC[w] = aiColor4D(0.f, 0.f, 0.f, 1.f);
+                            }
 
                             // If a RGB color map is explicitly requested delete the
                             // alpha channel - it could theoretically be != 1.

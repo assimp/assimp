@@ -54,6 +54,15 @@ TEST(utACImportExport, importClosedLine) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utACImportExport, importEmptyLineBeforePolygon) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/emptyLineBeforePolygon.ac", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mRootNode->mNumChildren);
+    EXPECT_EQ(1u, scene->mRootNode->mChildren[0]->mNumMeshes);
+    EXPECT_NE(nullptr, importer.ApplyPostProcessing(aiProcess_OptimizeGraph));
+}
+
 TEST(utACImportExport, importNoSurfaces) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/nosurfaces.ac", aiProcess_ValidateDataStructure);

@@ -997,7 +997,13 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                                                     blubb = mesh.mBoneVertices[iIndex2].mBoneWeights.begin();
                                             blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end(); ++blubb) {
 
-                                        // NOTE: illegal cases have already been filtered out
+                                        // The per-vertex bone index comes straight from the
+                                        // file and is only filtered for the -1 sentinel at parse
+                                        // time; bound it against the declared bone count before
+                                        // indexing avOutputBones to avoid an out-of-bounds write.
+                                        if ((*blubb).first < 0 || (*blubb).first >= (int)mesh.mBones.size()) {
+                                            continue;
+                                        }
                                         avOutputBones[(*blubb).first].emplace_back(
                                                 iBase, (*blubb).second);
                                     }
@@ -1153,6 +1159,13 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                 for (std::vector<std::pair<int, float>>::const_iterator
                                 ronaldweasley = (*harrypotter).mBoneWeights.begin();
                         ronaldweasley != (*harrypotter).mBoneWeights.end(); ++ronaldweasley) {
+                    // The per-vertex bone index comes straight from the file and is only
+                    // filtered for the -1 sentinel at parse time; bound it against the
+                    // declared bone count before indexing avBonesOut to avoid an
+                    // out-of-bounds write.
+                    if ((*ronaldweasley).first < 0 || (*ronaldweasley).first >= (int)mesh.mBones.size()) {
+                        continue;
+                    }
                     aiVertexWeight weight;
                     weight.mVertexId = quak;
                     weight.mWeight = (*ronaldweasley).second;

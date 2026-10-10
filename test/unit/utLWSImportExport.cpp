@@ -143,8 +143,9 @@ TEST_F(utLWSImportExport, importLWSmove_xz_spline) {
 TEST_F(utLWSImportExport, importMissingVersionFails) {
     // A header without a version line used to return an empty scene with
     // no root node, which later post-processing steps dereferenced. The
-    // trailing blank lines keep the input above the 8-byte minimum.
-    const std::array<std::string, 2> files = { "LWSC\n\n\n\n", "LWMO\r\n\r\n" };
+    // trailing blank lines keep the input above the 8-byte minimum, and the
+    // form feed makes a second line whose first token is empty.
+    const std::array<std::string, 3> files = { "LWSC\n\n\n\n", "LWMO\r\n\r\n", "LWSC\n\f\n\n" };
     for (const std::string &data : files) {
         ::Assimp::Importer importer;
         const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "lws");

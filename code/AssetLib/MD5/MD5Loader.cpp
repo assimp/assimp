@@ -614,6 +614,18 @@ void MD5Importer::LoadMD5MeshFile() {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Number of keyframe components a bone consumes: one float per set bit of iFlags (bits 0..5).
+static unsigned int CountAnimatedComponents(unsigned int iFlags) {
+    unsigned int count = 0;
+    for (unsigned int i = 0; i < 6; ++i) {
+        if (iFlags & (1u << i)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Load an MD5ANIM file
 void MD5Importer::LoadMD5AnimFile() {
     std::string pFile = mFile + "md5anim";
@@ -665,7 +677,13 @@ void MD5Importer::LoadMD5AnimFile() {
                 MD5::BaseFrameDesc *pcBaseFrame = &animParser.mBaseFrames[0];
                 for (AnimBoneArray::const_iterator iter2 = animParser.mAnimatedBones.begin(); iter2 != animParser.mAnimatedBones.end(); ++iter2,
                                                   ++pcAnimNode, ++pcBaseFrame) {
-                    if ((*iter2).iFirstKeyIndex >= (*iter).mValues.size()) {
+                    // Validate the full keyframe-component span, not just the start index: the bone
+                    // reads one float per set bit of iFlags (bits 0..5) starting at iFirstKeyIndex,
+                    // so iFirstKeyIndex + component-count must stay within mValues.
+                    const unsigned int iNumComponents = CountAnimatedComponents((*iter2).iFlags);
+                    if ((*iter2).iFirstKeyIndex >= (*iter).mValues.size() ||
+                        iNumComponents > (*iter).mValues.size() ||
+                        (*iter2).iFirstKeyIndex > (*iter).mValues.size() - iNumComponents) {
 
                         // Allow for empty frames
                         if ((*iter2).iFlags != 0) {

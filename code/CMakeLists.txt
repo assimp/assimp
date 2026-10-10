@@ -423,6 +423,28 @@ if (ASSIMP_BUILD_M3D_IMPORTER)
     )
 endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
 
+if (ASSIMP_BUILD_SKP_IMPORTER)
+    ADD_ASSIMP_IMPORTER( SKP
+            AssetLib/Skp/SkpImporter.h
+            AssetLib/Skp/SkpImporter.cpp
+    )
+    if (MSVC)
+        # OpenSKP exports (OPENSKP_EXPORT/dllexport) a few classes that derive
+        # from or contain std:: types (e.g. SkpParseError : std::runtime_error,
+        # InstancedScene's std::vector/std::string members) without exporting
+        # those std:: bases/members themselves - the standard, generally
+        # harmless MSVC C4275/C4251 pattern for any library that exports a
+        # custom exception or data-holding type on Windows. Scoped to this one
+        # translation unit rather than disabled project-wide.
+        # /WX- (not just /wdNNNN) because `assimp`'s /WX is added via
+        # target_compile_options as a raw AdditionalOptions flag - per-file
+        # AdditionalOptions are appended after the target-level ones in the
+        # generated command line, so only an explicit override flag (not a
+        # /wdNNNN alone) reliably wins here.
+        set_source_files_properties(AssetLib/Skp/SkpImporter.cpp PROPERTIES COMPILE_FLAGS "/wd4275 /wd4251 /WX-")
+    endif ()
+endif () # if (ASSIMP_BUILD_SKP_IMPORTER)
+
 ADD_ASSIMP_IMPORTER( MD2
   AssetLib/MD2/MD2FileData.h
   AssetLib/MD2/MD2Loader.cpp
@@ -1499,6 +1521,9 @@ IF(ASSIMP_HUNTER_ENABLED)
   if (ASSIMP_BUILD_DRACO)
     target_link_libraries(assimp PRIVATE ${draco_LIBRARIES})
   endif()
+  if (ASSIMP_BUILD_SKP_IMPORTER)
+    target_link_libraries(assimp PRIVATE OpenSkp::OpenSkp)
+  endif()
 ELSE()
   TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
   if (ASSIMP_BUILD_DRACO)
@@ -1506,6 +1531,11 @@ ELSE()
   endif()
   if(TARGET pugixml::pugixml)
     target_link_libraries(assimp pugixml::pugixml)
+  endif()
+  if (ASSIMP_BUILD_SKP_IMPORTER)
+    # Plain (non-keyword) signature to match this branch's own style - CMake
+    # refuses to mix plain and keyword target_link_libraries calls on one target.
+    target_link_libraries(assimp OpenSkp::OpenSkp)
   endif()
 ENDIF()
 

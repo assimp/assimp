@@ -181,3 +181,33 @@ TEST_F(utASEImportExport, importInvalidUVIndex) {
 
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utASEImportExport, importEmptyMeshWithNonZeroMaterialRef) {
+    // An object without faces is dropped by the importer. Its material
+    // index (here 1) must not be freed as if it were a color array.
+    static const char data[] =
+            "*3DSMAX_ASCIIEXPORT 200\n"
+            "*MATERIAL_LIST {\n"
+            "  *MATERIAL_COUNT 2\n"
+            "  *MATERIAL 0 {\n"
+            "    *MATERIAL_NAME \"a\"\n"
+            "  }\n"
+            "  *MATERIAL 1 {\n"
+            "    *MATERIAL_NAME \"b\"\n"
+            "  }\n"
+            "}\n"
+            "*GEOMOBJECT {\n"
+            "  *NODE_NAME \"empty\"\n"
+            "  *MESH {\n"
+            "    *MESH_NUMVERTEX 0\n"
+            "    *MESH_NUMFACES 0\n"
+            "  }\n"
+            "  *MATERIAL_REF 1\n"
+            "}\n";
+
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data) - 1, 0, "ase");
+    if (scene != nullptr) {
+        EXPECT_EQ(0u, scene->mNumMeshes);
+    }
+}

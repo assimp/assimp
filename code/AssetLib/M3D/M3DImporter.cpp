@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/IOStreamBuffer.h>
+#include <assimp/StringUtils.h>
 #include <assimp/ai_assert.h>
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
@@ -332,7 +333,7 @@ void M3DImporter::importTextures(const M3DWrapper &m3d) {
             /* if we have the texture loaded, set format hint and pcData too */
             tx->mWidth = t->w;
             tx->mHeight = t->h;
-            strncpy(tx->achFormatHint, formatHint[t->f - 1], 8);
+            ai_snprintf(tx->achFormatHint, HINTMAXTEXTURELEN, "%s", formatHint[t->f - 1]);
             if (tx->mWidth != 0 && tx->mHeight > UINT_MAX / tx->mWidth) {
                 throw DeadlyImportError("M3D: Texture dimensions are too large: ",
                         tx->mWidth, " x ", tx->mHeight);

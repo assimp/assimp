@@ -141,8 +141,9 @@ TEST_F(utLWSImportExport, importLWSmove_xz_spline) {
 
 TEST_F(utLWSImportExport, importMissingVersionFails) {
     // A header without a version line used to return an empty scene with
-    // no root node, which later post-processing steps dereferenced.
-    static const char *const files[] = { "LWSC\n", "LWMO\n" };
+    // no root node, which later post-processing steps dereferenced. The
+    // trailing blank lines keep the input above the 8-byte minimum.
+    static const char *const files[] = { "LWSC\n\n\n\n", "LWMO\r\n\r\n" };
     for (const char *data : files) {
         ::Assimp::Importer importer;
         const aiScene *scene = importer.ReadFileFromMemory(data, strlen(data), 0, "lws");

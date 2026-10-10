@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_Q3DLOADER_H_INCLUDED
 
 #include <assimp/BaseImporter.h>
+#include <assimp/StreamReader.h>
 #include <assimp/types.h>
 #include <vector>
 #include <cstdint>
@@ -109,6 +110,9 @@ private:
         std::vector<Face>       faces;
         uint32_t prevUVIdx;
     };
+
+    void ReadMeshes(StreamReaderLE &stream, unsigned int numMeshes, unsigned int numTextures,
+            char major, char minor, std::vector<Mesh> &meshes);
 };
 
 } // end of namespace Assimp

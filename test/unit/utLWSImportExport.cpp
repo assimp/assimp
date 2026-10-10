@@ -44,7 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 
-#include <cstring>
+#include <array>
+#include <string>
 
 using namespace Assimp;
 
@@ -143,10 +144,10 @@ TEST_F(utLWSImportExport, importMissingVersionFails) {
     // A header without a version line used to return an empty scene with
     // no root node, which later post-processing steps dereferenced. The
     // trailing blank lines keep the input above the 8-byte minimum.
-    static const char *const files[] = { "LWSC\n\n\n\n", "LWMO\r\n\r\n" };
-    for (const char *data : files) {
+    const std::array<std::string, 2> files = { "LWSC\n\n\n\n", "LWMO\r\n\r\n" };
+    for (const std::string &data : files) {
         ::Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFileFromMemory(data, strlen(data), 0, "lws");
+        const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "lws");
         EXPECT_EQ(nullptr, scene);
 
         importer.ApplyPostProcessing(aiProcess_OptimizeGraph | aiProcess_PopulateArmatureData);

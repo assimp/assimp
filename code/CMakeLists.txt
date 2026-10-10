@@ -67,6 +67,7 @@ SET( PUBLIC_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/../include/assimp/config.h
   ${HEADER_PATH}/ColladaMetaData.h
   ${HEADER_PATH}/commonMetaData.h
+  ${HEADER_PATH}/gaussian.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h
@@ -193,6 +194,7 @@ SET( Common_SRCS
   Common/SceneCombiner.cpp
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
+  Common/GaussianSplat.cpp
   Common/SkeletonMeshBuilder.cpp
   Common/StackAllocator.h
   Common/StackAllocator.inl

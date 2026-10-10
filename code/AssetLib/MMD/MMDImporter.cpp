@@ -152,11 +152,34 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
         pNode->mMeshes[index] = index;
     }
 
+    // Every triangle index read from the file must point at a real vertex: the
+    // indices and vertices arrays are sized from independent fields, so an
+    // unchecked index is an out-of-bounds read of pModel->vertices whose data
+    // is then copied into the output mesh (and whose skinning pointer is
+    // dereferenced) in CreateMesh.
+    for (int k = 0; k < pModel->index_count; ++k) {
+        if (pModel->indices[k] < 0 || pModel->indices[k] >= pModel->vertex_count) {
+            throw DeadlyImportError("MMD: vertex index is out of bounds");
+        }
+    }
+
+    // Validate every material's index range BEFORE allocating the mesh array: a
+    // later invalid range must not throw after pScene->mMeshes is allocated, which
+    // would leave uninitialized aiMesh* entries for aiScene's destructor to delete.
+    // CreateMesh walks pModel->indices[indexStart .. indexStart + indexCount).
+    for (int i = 0, rangeStart = 0; i < pModel->material_count; ++i) {
+        const int indexCount = pModel->materials[i].index_count;
+        if (indexCount < 0 ||
+                static_cast<int64_t>(rangeStart) + indexCount > pModel->index_count) {
+            throw DeadlyImportError("MMD: material index range is out of bounds");
+        }
+        rangeStart += indexCount;
+    }
+
     pScene->mNumMeshes = pModel->material_count;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
     for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
-
         pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
         pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
         pScene->mMeshes[i]->mMaterialIndex = i;
@@ -172,7 +195,11 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     for (auto i = 0; i < pModel->bone_count; i++) {
         const pmx::PmxBone &bone = pModel->bones[i];
 
-        if (bone.parent_index < 0) {
+        if (bone.parent_index < 0 || bone.parent_index >= pModel->bone_count) {
+            // No parent, or a parent index that is out of range. parent_index is
+            // read straight from the file and was previously only checked for
+            // < 0, so an out-of-range value indexed ppNode / pModel->bones out
+            // of bounds. Treat it as a root bone instead.
             pScene->mRootNode->addChildren(1, ppNode.get() + i);
         } else {
             ppNode[bone.parent_index]->addChildren(1, ppNode.get() + i);

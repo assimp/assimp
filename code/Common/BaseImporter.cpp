@@ -126,6 +126,12 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
     try {
         InternReadFile(pFile, sc.get(), &filter);
 
+        // Post-processing steps walk the node graph from the root, so a
+        // scene without one must not be reported as a successful import.
+        if (sc->mRootNode == nullptr) {
+            throw DeadlyImportError("Importer returned a scene without a root node");
+        }
+
         // Calculate import scale hook - required because pImp not available anywhere else
         // passes scale into ScaleProcess
         UpdateImporterScale(pImp);

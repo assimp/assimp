@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 
+#include <assimp/config.h>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -206,8 +207,9 @@ TEST_F(utASEImportExport, importEmptyMeshWithNonZeroMaterialRef) {
             "}\n";
 
     ::Assimp::Importer importer;
+    // Without this the importer adds a placeholder skeleton mesh.
+    importer.SetPropertyBool(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, true);
     const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data) - 1, 0, "ase");
-    if (scene != nullptr) {
-        EXPECT_EQ(0u, scene->mNumMeshes);
-    }
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(0u, scene->mNumMeshes);
 }

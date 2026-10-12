@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include <memory>
+
 using namespace Assimp;
 
 class utX3DImportExport : public AbstractImportExportBase {
@@ -102,10 +104,10 @@ TEST_F(utX3DImportExport, exportNodeWithoutMatchingLight) {
     // A named node that matches none of the lights used to run the light lookup
     // past the end of the light array.
     aiScene scene;
-    scene.mRootNode = new aiNode("root");
+    scene.mRootNode = std::make_unique<aiNode>("root").release();
     scene.mNumLights = 1;
-    scene.mLights = new aiLight *[1];
-    scene.mLights[0] = new aiLight();
+    scene.mLights = std::make_unique<aiLight *[]>(1).release();
+    scene.mLights[0] = std::make_unique<aiLight>().release();
     scene.mLights[0]->mName.Set("lamp");
 
     Assimp::Exporter exporter;

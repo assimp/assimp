@@ -897,7 +897,7 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
             } else if (isFloat(in, end)) {
                 in = parseFloatingLiteral(in, end, &primData);
                 createPropertyWithData(id, primData, prop);
-            } else if (isStringLiteral(*in)) { // string data
+            } else if (in != end && isStringLiteral(*in)) { // string data
                 in = parseStringLiteral(in, end, &primData);
                 createPropertyWithData(id, primData, prop);
             } else { // reference data

@@ -330,7 +330,8 @@ inline bool isNumeric(const T in) {
 
 template <class T>
 inline bool isNotEndOfToken(T *in, T *end) {
-    return ('}' != *in && ',' != *in && !isSpace(*in) && ')' != *in && in != end);
+    // Compare against end first: end is one past the buffer and must not be read.
+    return (in != end && '}' != *in && ',' != *in && !isSpace(*in) && ')' != *in);
 }
 
 template <class T>
@@ -376,7 +377,7 @@ inline bool isFloat(T *in, T *end) {
     }
 
     // check for 1<.>0f
-    if (*in == '.') {
+    if (in != end && *in == '.') {
         ++in;
     } else {
         return false;
@@ -406,7 +407,7 @@ inline bool isStringLiteral(const T in) {
 
 template <class T>
 inline bool isHexLiteral(T *in, T *end) {
-    if (*in == '0') {
+    if (in != end && *in == '0') {
         if (in + 1 != end) {
             if (*(in + 1) == 'x' || *(in + 1) == 'X') {
                 return true;
@@ -419,17 +420,7 @@ inline bool isHexLiteral(T *in, T *end) {
 
 template <class T>
 inline bool isReference(T *in, T *end) {
-    if (*in == 'r') {
-        if (*(in + 1) == 'e') {
-            if (*(in + 2) == 'f') {
-                if ((in + 2) != end) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
+    return end - in > 2 && in[0] == 'r' && in[1] == 'e' && in[2] == 'f';
 }
 
 template <class T>
@@ -464,11 +455,11 @@ inline int hex2Decimal(char in) {
 
 template <class T>
 inline bool isComment(T *in, T *end) {
-    if (*in == '/') {
+    if (in != end && *in == '/') {
         if (in + 1 != end) {
             if (*(in + 1) == '/') {
                 char *drive((in + 2));
-                if ((isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && *(drive + 1) == '/') {
+                if (end - drive > 1 && (isUpperCase<T>(*drive) || isLowerCase<T>(*drive)) && *(drive + 1) == '/') {
                     return false;
                 } else {
                     return true;
@@ -482,7 +473,7 @@ inline bool isComment(T *in, T *end) {
 
 template <class T>
 inline bool isCommentOpenTag(T *in, T *end) {
-    if (*in == '/') {
+    if (in != end && *in == '/') {
         if (in + 1 != end) {
             if (*(in + 1) == '*') {
                 return true;
@@ -495,7 +486,7 @@ inline bool isCommentOpenTag(T *in, T *end) {
 
 template <class T>
 inline bool isCommentCloseTag(T *in, T *end) {
-    if (*in == '*') {
+    if (in != end && *in == '*') {
         if (in + 1 != end) {
             if (*(in + 1) == '/') {
                 return true;

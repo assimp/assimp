@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 
 #include <cstdio>
+#include <string>
 
 #include "AssetLib/3MF/D3MFExporter.h"
 
@@ -131,29 +132,16 @@ TEST_F(utD3MFImporterExporter, roundtrip3MFtoMemTest) {
 TEST_F(utD3MFImporterExporter, exportSkipsNonTriangleFaces) {
     // A line face carries two indices, and the exporter used to read three from
     // every face.
-    aiScene scene;
-    scene.mRootNode = new aiNode("root");
-    aiNode *child = new aiNode("line");
-    scene.mRootNode->addChildren(1, &child);
-    child->mNumMeshes = 1;
-    child->mMeshes = new unsigned int[1]{ 0 };
-    scene.mNumMaterials = 1;
-    scene.mMaterials = new aiMaterial *[1]{ new aiMaterial() };
-    scene.mNumMeshes = 1;
-    scene.mMeshes = new aiMesh *[1]{ new aiMesh() };
-
-    aiMesh &mesh = *scene.mMeshes[0];
-    mesh.mPrimitiveTypes = aiPrimitiveType_LINE;
-    mesh.mNumVertices = 2;
-    mesh.mVertices = new aiVector3D[2]{ aiVector3D(0, 0, 0), aiVector3D(1, 0, 0) };
-    mesh.mNumFaces = 1;
-    mesh.mFaces = new aiFace[1];
-    mesh.mFaces[0].mNumIndices = 2;
-    mesh.mFaces[0].mIndices = new unsigned int[2]{ 0, 1 };
+    const std::string obj = "v 0 0 0\nv 1 0 0\nl 1 2\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(obj.data(), obj.size(), 0, "obj");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(2u, scene->mMeshes[0]->mFaces[0].mNumIndices);
 
     // The 3MF exporter writes its archive straight to disk, not through the IOSystem.
     Assimp::Exporter exporter;
-    EXPECT_EQ(AI_SUCCESS, exporter.Export(&scene, "3mf", "non_triangle_faces.3mf"));
+    EXPECT_EQ(AI_SUCCESS, exporter.Export(scene, "3mf", "non_triangle_faces.3mf"));
     std::remove("non_triangle_faces.3mf");
 }
 

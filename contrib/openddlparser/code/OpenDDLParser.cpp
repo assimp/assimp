@@ -909,7 +909,9 @@ char *OpenDDLParser::parseProperty(char *in, char *end, Property **prop) {
                     (*prop)->m_ref = ref;
                 }
             }
-        } else {
+        }
+        // A property takes ownership of the identifier; without one, nothing does.
+        if (nullptr == *prop) {
             delete id;
         }
     }

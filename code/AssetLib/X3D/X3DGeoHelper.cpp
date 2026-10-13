@@ -275,6 +275,9 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors,
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
             // apply color to all vertices of face
             for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
+                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
+                    throw DeadlyImportError("MeshGeometry_AddColor. Coordinate idx is out of range.");
+                }
                 pMesh.mColors[0][pMesh.mFaces[fi].mIndices[vi]] = *col_it;
             }
 

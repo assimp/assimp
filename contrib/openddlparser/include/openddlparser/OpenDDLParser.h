@@ -189,6 +189,7 @@ private:
     typedef std::vector<DDLNode *> DDLNodeStack;
     DDLNodeStack m_stack;
     Context *m_context;
+    size_t m_recursionDepth{0};
 
     ///	@brief  Callback for StdLogCallback(). Not meant to be called directly.
     static void logToStream (FILE *, LogSeverity, const std::string &);

@@ -212,6 +212,7 @@ bool OpenDDLParser::parse() {
         return false;
     }
 
+    m_recursionDepth = 0;
     normalizeBuffer(m_buffer);
     if (!validate()) {
         return false;
@@ -244,10 +245,20 @@ bool OpenDDLParser::exportContext(Context *ctx, const std::string &filename) {
     return myExporter.exportContext(ctx, filename);
 }
 
+// upper bound on parser recursion depth, to guard against stack exhaustion
+static constexpr size_t MaxRecursionDepth = 100;
+
 char *OpenDDLParser::parseNextNode(char *in, char *end) {
+    // guard against stack exhaustion from deeply nested or malformed input
+    if (++m_recursionDepth > MaxRecursionDepth) {
+        --m_recursionDepth;
+        return nullptr;
+    }
+
     in = parseHeader(in, end);
     in = parseStructure(in, end);
 
+    --m_recursionDepth;
     return in;
 }
 

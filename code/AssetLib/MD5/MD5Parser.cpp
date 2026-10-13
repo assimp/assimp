@@ -389,15 +389,19 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     ResizeForIndex(desc.mVertices, idx, elem.iLineNumber);
 
                     VertexDesc &vert = desc.mVertices[idx];
-                    if (sz == elem.end || '(' != *sz++)
+                    if (sz == elem.end || '(' != *sz)
                         MD5Parser::ReportWarning("Unexpected token: ( was expected", elem.iLineNumber);
+                    if (sz != elem.end)
+                        ++sz;
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     sz = fast_atoreal_move(sz, vert.mUV.x);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     sz = fast_atoreal_move(sz, vert.mUV.y);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    if (sz == elem.end || ')' != *sz++)
+                    if (sz == elem.end || ')' != *sz)
                         MD5Parser::ReportWarning("Unexpected token: ) was expected", elem.iLineNumber);
+                    if (sz != elem.end)
+                        ++sz;
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     vert.mFirstWeight = ::strtoul10(sz, &sz);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);

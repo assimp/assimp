@@ -179,8 +179,8 @@ ESemantic Property::ParseSemantic(std::vector<char> &buffer) {
     } else if (DOM::TokenMatch(buffer, "nz", 2)) {
         eOut = EST_ZNormal;
     } else {
+        // Leave the identifier in the buffer so ParseProperty can store szName.
         ASSIMP_LOG_INFO("Found unknown property semantic in file. This is ok");
-        DOM::SkipLine(buffer);
     }
     return eOut;
 }
@@ -236,8 +236,19 @@ bool PLY::Property::ParseProperty(std::vector<char> &buffer, PLY::Property *pOut
     pOut->Semantic = PLY::Property::ParseSemantic(buffer);
 
     if (PLY::EST_INVALID == pOut->Semantic) {
+        // Store the raw property name (e.g. f_dc_0, scale_0) for optional loaders.
         ASSIMP_LOG_INFO("Found unknown semantic in PLY file. This is OK");
-        std::string(&buffer[0], &buffer[0] + strlen(&buffer[0]));
+        if (!buffer.empty()) {
+            const char *start = &buffer[0];
+            const char *end = start + buffer.size();
+            const char *pCur = start;
+            while (pCur < end && *pCur != '\0' && !IsSpaceOrNewLine(*pCur)) {
+                ++pCur;
+            }
+            pOut->szName.assign(start, pCur);
+            const uintptr_t iDiff = static_cast<uintptr_t>(pCur - start);
+            buffer.erase(buffer.begin(), buffer.begin() + static_cast<std::ptrdiff_t>(iDiff));
+        }
     }
 
     PLY::DOM::SkipSpacesAndLineEnd(buffer);

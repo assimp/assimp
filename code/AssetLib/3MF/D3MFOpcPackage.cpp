@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cassert>
 #include <cstdlib>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Assimp {
@@ -128,64 +129,109 @@ static bool IsEmbeddedTexture( const std::string &filename ) {
 
     return false;
 }
+
+namespace {
+
+/// @brief Closes a stream taken from the archive on every exit path, exceptions included.
+struct ScopedArchiveStream {
+    ScopedArchiveStream(ZipArchiveIOSystem &archive, IOStream *stream) :
+            mArchive(archive), mStream(stream) {
+        // empty
+    }
+
+    ~ScopedArchiveStream() {
+        mArchive.Close(mStream);
+    }
+
+    ScopedArchiveStream(const ScopedArchiveStream &) = delete;
+    ScopedArchiveStream &operator=(const ScopedArchiveStream &) = delete;
+
+    IOStream *get() const {
+        return mStream;
+    }
+
+private:
+    ZipArchiveIOSystem &mArchive;
+    IOStream *mStream;
+};
+
+} // namespace
+
 // ------------------------------------------------------------------------------------------------
 D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
         mRootStream(nullptr),
         mRootPath(),
-        mZipArchive() {
+        mZipArchive(nullptr) {
     mZipArchive = new ZipArchiveIOSystem(pIOHandler, rFile);
-    if (!mZipArchive->isOpen()) {
-        throw DeadlyImportError("Failed to open file ", rFile, ".");
-    }
 
-    std::vector<std::string> fileList;
-    mZipArchive->getFileList(fileList);
-
-    for (auto &file : fileList) {
-        if (file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
-            if (!mZipArchive->Exists(file.c_str())) {
-                continue;
-            }
-
-            IOStream *fileStream = mZipArchive->Open(file.c_str());
-            if (nullptr == fileStream) {
-                ASSIMP_LOG_ERROR("Filestream is nullptr.");
-                continue;
-            }
-
-            std::string rootFile = NormalizePath(ReadPackageRootRelationship(fileStream));
-
-            ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
-
-            mZipArchive->Close(fileStream);
-
-            mRootPath = rootFile;
-            mRootStream = mZipArchive->Open(rootFile.c_str());
-            ai_assert(mRootStream != nullptr);
-            if (nullptr == mRootStream) {
-                throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
-            }
-        } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
-            ASSIMP_LOG_WARN("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES", file);
-        } else if (IsEmbeddedTexture(file)) {
-            IOStream *fileStream = mZipArchive->Open(file.c_str());
-            LoadEmbeddedTextures(fileStream, file);
-            mZipArchive->Close(fileStream);
-        } else if (BaseImporter::GetExtension(file) == "model") {
-            // Production-extension model parts are opened on demand via OpenPart().
-            ASSIMP_LOG_VERBOSE_DEBUG("Referenced model part: ", file);
-        } else if (BaseImporter::GetExtension(file) == "rels") {
-            // Relationship parts of referenced model files; resolved via path attributes.
-            ASSIMP_LOG_VERBOSE_DEBUG("Relationship part: ", file);
-        } else {
-            ASSIMP_LOG_WARN("Ignored file of unknown type: ", file);
+    // A constructor that throws never runs its destructor. Every throwing path below must free
+    // what the package already owns: the archive, the root stream, and the textures read so far.
+    try {
+        if (!mZipArchive->isOpen()) {
+            throw DeadlyImportError("Failed to open file ", rFile, ".");
         }
+
+        std::vector<std::string> fileList;
+        mZipArchive->getFileList(fileList);
+
+        for (auto &file : fileList) {
+            if (file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
+                if (!mZipArchive->Exists(file.c_str())) {
+                    continue;
+                }
+
+                IOStream *stream = mZipArchive->Open(file.c_str());
+                if (nullptr == stream) {
+                    ASSIMP_LOG_ERROR("Filestream is nullptr.");
+                    continue;
+                }
+                ScopedArchiveStream fileStream(*mZipArchive, stream);
+
+                const std::string rootFile = NormalizePath(ReadPackageRootRelationship(fileStream.get()));
+
+                ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
+
+                mRootPath = rootFile;
+                mRootStream = mZipArchive->Open(rootFile.c_str());
+                ai_assert(mRootStream != nullptr);
+                if (nullptr == mRootStream) {
+                    throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
+                }
+            } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
+                ASSIMP_LOG_WARN("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES", file);
+            } else if (IsEmbeddedTexture(file)) {
+                ScopedArchiveStream fileStream(*mZipArchive, mZipArchive->Open(file.c_str()));
+                LoadEmbeddedTextures(fileStream.get(), file);
+            } else if (BaseImporter::GetExtension(file) == "model") {
+                // Production-extension model parts are opened on demand via OpenPart().
+                ASSIMP_LOG_VERBOSE_DEBUG("Referenced model part: ", file);
+            } else if (BaseImporter::GetExtension(file) == "rels") {
+                // Relationship parts of referenced model files; resolved via path attributes.
+                ASSIMP_LOG_VERBOSE_DEBUG("Relationship part: ", file);
+            } else {
+                ASSIMP_LOG_WARN("Ignored file of unknown type: ", file);
+            }
+        }
+    } catch (...) {
+        FreeResources();
+        throw;
     }
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    mZipArchive->Close(mRootStream);
+    FreeResources();
+}
+
+void D3MFOpcPackage::FreeResources() noexcept {
+    mEmbeddedTextures.clear();
+
+    if (mRootStream != nullptr) {
+        mZipArchive->Close(mRootStream);
+        mRootStream = nullptr;
+    }
+
     delete mZipArchive;
+    mZipArchive = nullptr;
 }
 
 IOStream *D3MFOpcPackage::RootStream() const {
@@ -219,8 +265,15 @@ void D3MFOpcPackage::CloseStream(IOStream *stream) {
     }
 }
 
-const std::vector<aiTexture *> &D3MFOpcPackage::GetEmbeddedTextures() const {
+const std::vector<std::unique_ptr<aiTexture>> &D3MFOpcPackage::GetEmbeddedTextures() const {
     return mEmbeddedTextures;
+}
+
+std::vector<std::unique_ptr<aiTexture>> D3MFOpcPackage::TakeEmbeddedTextures() {
+    std::vector<std::unique_ptr<aiTexture>> textures;
+    textures.swap(mEmbeddedTextures);
+
+    return textures;
 }
 
 static const char *const ModelRef = "3D/3dmodel.model";
@@ -262,9 +315,12 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
         return;
     }
 
-    unsigned char *data = new unsigned char[size];
-    fileStream->Read(data, 1, size);
-    aiTexture *texture = new aiTexture;
+    // ~aiTexture frees pcData with delete[] as aiTexel*, so allocate that type, as the other
+    // importers do, and round the byte count up. The texture owns the buffer from here and the
+    // unique_ptr owns the texture, so anything that throws before the emplace_back frees both.
+    auto texture = std::make_unique<aiTexture>();
+    texture->pcData = new aiTexel[(size + sizeof(aiTexel) - 1) / sizeof(aiTexel)];
+    fileStream->Read(texture->pcData, 1, size);
     std::string embName = "*" + filename;
     texture->mFilename.Set(embName.c_str());
     texture->mWidth = static_cast<unsigned int>(size);
@@ -273,8 +329,7 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
     texture->achFormatHint[1] = 'n';
     texture->achFormatHint[2] = 'g';
     texture->achFormatHint[3] = '\0';
-    texture->pcData = (aiTexel*) data;
-    mEmbeddedTextures.emplace_back(texture);
+    mEmbeddedTextures.emplace_back(std::move(texture));
 }
 
 } // Namespace D3MF

@@ -208,7 +208,14 @@ void AnimResolver::UpdateAnimRangeSetup() {
             }
 
             // update time values
-            n = (*it).keys.end() - (old_size + 1);
+            // compute n without ever forming an iterator before begin() (that is
+            // undefined behavior); clamp to begin() when the key list is too small
+            // for this input, which is the case that overflowed in #6621
+            if ((*it).keys.size() < old_size + 1) {
+                n = (*it).keys.begin();
+            } else {
+                n = (*it).keys.end() - (old_size + 1);
+            }
             double cur_minus = delta;
             unsigned int tt = 1;
             for (const double tmp = delta * (num + 1); cur_minus <= tmp; cur_minus += delta, ++tt) {

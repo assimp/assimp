@@ -672,6 +672,14 @@ void MeshXml::ConvertToAssimpScene(aiScene *dest) {
     // Setup
     dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
     dest->mMeshes = new aiMesh *[dest->mNumMeshes];
+    // mNumMeshes is published before the per-mesh loop fills the slots, and
+    // ConvertToAssimpMesh() can throw (e.g. the new face vertex index bound, or
+    // the existing vertex-element validation). On such a throw the aiScene
+    // destructor walks mMeshes[0..mNumMeshes) and deletes each entry, so every
+    // slot must start as nullptr rather than an indeterminate pointer.
+    for (unsigned int meshIdx = 0; meshIdx < dest->mNumMeshes; ++meshIdx) {
+        dest->mMeshes[meshIdx] = nullptr;
+    }
 
     // Create root node
     dest->mRootNode = new aiNode();
@@ -778,6 +786,22 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent) {
 
             // Ogres vertex index to ref into the source buffers.
             const size_t ogreVertexIndex = ogreFace.mIndices[v];
+
+            // The face indices (v1/v2/v3) are read verbatim as uint32 from the
+            // <faces> section of the .mesh.xml, which is a different lump from the
+            // geometry that fills positions/normals/uvs. Nothing has validated that
+            // they stay within the vertex buffer, so an out-of-range index would be
+            // used below as an unchecked std::vector::operator[] subscript and read
+            // past the end of the heap allocation. positions, normals and every uv
+            // set are all sized to the same geometry vertexcount (enforced in
+            // OgreXmlSerializer::ReadGeometryVertexBuffer, which rejects the file
+            // unless positions.size()/normals.size()/uvs[i].size() each equal
+            // count), so this single bound guards the positions read plus the
+            // normals and uv sibling reads that follow.
+            if (ogreVertexIndex >= src->positions.size()) {
+                throw DeadlyImportError("OgreXML: face vertex index out of range");
+            }
+
             src->AddVertexMapping(static_cast<uint32_t>(ogreVertexIndex), static_cast<uint32_t>(newIndex));
 
             // Position

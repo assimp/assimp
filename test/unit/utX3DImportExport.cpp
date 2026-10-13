@@ -43,8 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+
+#include <memory>
 
 using namespace Assimp;
 
@@ -95,3 +98,19 @@ TEST_F(utX3DImportExport, importX3DChevyTahoe) {
     ASSERT_EQ(19u, scene->mNumMeshes); // Incorrect value from currently broken importer
     ASSERT_NE(20u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utX3DImportExport, exportNodeWithoutMatchingLight) {
+    // A named node that matches none of the lights used to run the light lookup
+    // past the end of the light array.
+    aiScene scene;
+    scene.mRootNode = std::make_unique<aiNode>("root").release();
+    scene.mNumLights = 1;
+    scene.mLights = std::make_unique<aiLight *[]>(1).release();
+    scene.mLights[0] = std::make_unique<aiLight>().release();
+    scene.mLights[0]->mName.Set("lamp");
+
+    Assimp::Exporter exporter;
+    EXPECT_NE(nullptr, exporter.ExportToBlob(&scene, "x3d"));
+}
+#endif // ASSIMP_BUILD_NO_EXPORT

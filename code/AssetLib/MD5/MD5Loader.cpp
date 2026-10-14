@@ -61,6 +61,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <memory>
 #include <vector>
+#if defined(__has_include) && __has_include(<bit>)
+#  include <bit> // std::popcount (C++20)
+#endif
 
 using namespace Assimp;
 
@@ -614,15 +617,23 @@ void MD5Importer::LoadMD5MeshFile() {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Number of keyframe components a bone consumes: one float per set bit of iFlags (bits 0..5).
+// Number of keyframe components a bone consumes: one float per set bit of iFlags in the
+// six valid component slots (bits 0..5).
 static unsigned int CountAnimatedComponents(unsigned int iFlags) {
+    const unsigned int components = iFlags & 0x3Fu; // mask to the six component bits
+#if defined(__cpp_lib_bitops) && __cpp_lib_bitops >= 201907L
+    return static_cast<unsigned int>(std::popcount(components));
+#elif defined(_MSC_VER)
+    return static_cast<unsigned int>(__popcnt(components));
+#elif defined(__GNUC__) || defined(__clang__)
+    return static_cast<unsigned int>(__builtin_popcount(components));
+#else
     unsigned int count = 0;
-    for (unsigned int i = 0; i < 6; ++i) {
-        if (iFlags & (1u << i)) {
-            ++count;
-        }
+    for (unsigned int v = components; v != 0; v >>= 1) {
+        count += v & 1u;
     }
     return count;
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------

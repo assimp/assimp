@@ -250,6 +250,17 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor3D> &pColors,
     add_color(pMesh, tcol, pColorPerVertex);
 }
 
+// Assign a color to every vertex of a face, validating each (file-controlled) vertex index.
+static void assignFaceColor(aiMesh &pMesh, size_t faceIndex, const aiColor4D &color) {
+    const aiFace &face = pMesh.mFaces[faceIndex];
+    for (size_t vi = 0, vi_e = face.mNumIndices; vi < vi_e; vi++) {
+        if (face.mIndices[vi] >= pMesh.mNumVertices) {
+            throw DeadlyImportError("MeshGeometry_AddColor. Coordinate idx is out of range.");
+        }
+        pMesh.mColors[0][face.mIndices[vi]] = color;
+    }
+}
+
 void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors, const bool pColorPerVertex) {
     std::list<aiColor4D>::const_iterator col_it = pColors.begin();
 
@@ -274,13 +285,7 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::list<aiColor4D> &pColors,
         pMesh.mColors[0] = new aiColor4D[pMesh.mNumVertices];
         for (size_t fi = 0; fi < pMesh.mNumFaces; fi++) {
             // apply color to all vertices of face
-            for (size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) {
-                if (pMesh.mFaces[fi].mIndices[vi] >= pMesh.mNumVertices) {
-                    throw DeadlyImportError("MeshGeometry_AddColor. Coordinate idx is out of range.");
-                }
-                pMesh.mColors[0][pMesh.mFaces[fi].mIndices[vi]] = *col_it;
-            }
-
+            assignFaceColor(pMesh, fi, *col_it);
             ++col_it;
         }
     } // if(pColorPerVertex) else

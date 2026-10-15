@@ -44,6 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 
+#include <array>
+#include <string>
+
 using namespace Assimp;
 
 class utLWSImportExport : public AbstractImportExportBase {
@@ -135,4 +138,19 @@ TEST_F(utLWSImportExport, importLWSmove_xz_spline) {
     ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWS/move_xz_spline.lws", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utLWSImportExport, importMissingVersionFails) {
+    // A header without a version line used to return an empty scene with
+    // no root node, which later post-processing steps dereferenced. The
+    // trailing blank lines keep the input above the 8-byte minimum, and the
+    // form feed makes a second line whose first token is empty.
+    const std::array<std::string, 3> files = { "LWSC\n\n\n\n", "LWMO\r\n\r\n", "LWSC\n\f\n\n" };
+    for (const std::string &data : files) {
+        ::Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "lws");
+        EXPECT_EQ(nullptr, scene);
+
+        importer.ApplyPostProcessing(aiProcess_OptimizeGraph | aiProcess_PopulateArmatureData);
+    }
 }

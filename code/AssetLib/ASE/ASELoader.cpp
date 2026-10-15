@@ -189,7 +189,10 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
+                // Channels 2 and 3 hold the source mesh pointer and the
+                // material index, not color arrays, so they must not be freed.
                 (*i)->mColors[2] = nullptr;
+                (*i)->mColors[3] = nullptr;
                 delete *i;
                 continue;
             }

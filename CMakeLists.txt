@@ -71,6 +71,13 @@ OPTION(ASSIMP_BUILD_USD_VERBOSE_LOGS "Enable verbose USD import debug logging" o
 # (Need to make this opt-in because 3rd party code triggers lots of CI code quality warnings)
 OPTION(ASSIMP_BUILD_VRML_IMPORTER "Enable VRML (.wrl/.x3dv) file import" off)
 
+# Native SketchUp (.skp) file import support via OpenSKP (MIT licensed,
+# https://github.com/iamahsanmehmood/openskp), a from-scratch, dependency-light
+# C++17 .skp reader requiring no Trimble SDK. Opt-in for the same reason M3D/
+# USD/VRML above are: it's 3rd party code with its own style conventions, not
+# written to assimp's own CI code-quality rules.
+OPTION(ASSIMP_BUILD_SKP_IMPORTER "Enable SketchUp (.skp) file import" off)
+
 #--------------------------------------------------------------------------------#
 #                  Internal impl for optional model formats
 #--------------------------------------------------------------------------------#
@@ -86,6 +93,15 @@ endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
 if (NOT ASSIMP_BUILD_VRML_IMPORTER)
     ADD_DEFINITIONS( -DASSIMP_BUILD_NO_VRML_IMPORTER)
 endif () # if (not ASSIMP_BUILD_VRML_IMPORTER)
+
+# Internal/private SKP logic. The actual `ADD_SUBDIRECTORY(contrib/openskp...)`
+# happens further down, after PROJECT() - see the SKP block near draco's own
+# ADD_SUBDIRECTORY, since a subdirectory that (unlike OpenSKP's own
+# self-contained CMakeLists.txt) relies on the parent scope's already-enabled
+# CXX compiler needs PROJECT() to have run first.
+if (NOT ASSIMP_BUILD_SKP_IMPORTER)
+    ADD_DEFINITIONS( -DASSIMP_BUILD_NO_SKP_IMPORTER)
+endif () # if (not ASSIMP_BUILD_SKP_IMPORTER)
 #================================================================================#
 
 option(ASSIMP_BUILD_USE_CCACHE "Use ccache to speed up compilation." on)
@@ -803,6 +819,25 @@ ELSE()
     ENDIF()
   ENDIF()
 ENDIF()
+
+if (ASSIMP_BUILD_SKP_IMPORTER)
+    set(OPENSKP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(OPENSKP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    # OpenSkp is linked into assimp itself, not shipped as its own DLL/.so -
+    # force it static regardless of assimp's own BUILD_SHARED_LIBS setting,
+    # so importer executables don't need a second shared library alongside
+    # assimp's own to run.
+    set(_openskp_saved_build_shared_libs ${BUILD_SHARED_LIBS})
+    set(BUILD_SHARED_LIBS OFF)
+    ADD_SUBDIRECTORY( "contrib/openskp" EXCLUDE_FROM_ALL )
+    # ASSIMP_HUNTER_ENABLED's compiler setup skips
+    # CMAKE_POSITION_INDEPENDENT_CODE, so the static OpenSkp target above
+    # would otherwise not be PIC and could fail to link into a shared
+    # assimp on platforms that require it.
+    set_target_properties(OpenSkp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set(BUILD_SHARED_LIBS ${_openskp_saved_build_shared_libs})
+    unset(_openskp_saved_build_shared_libs)
+endif () # if (ASSIMP_BUILD_SKP_IMPORTER)
 
 # Main assimp code
 ADD_SUBDIRECTORY( code/ )

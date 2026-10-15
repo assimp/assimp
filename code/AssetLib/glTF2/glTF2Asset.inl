@@ -870,16 +870,16 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
         }
 
         // Safely compute offset * elementSize to prevent integer overflow
-        size_t byteOffset;
-        if (!Assimp::Math::SafeMultiply(offset, static_cast<size_t>(elementSize), byteOffset)) {
+        size_t byteOffset_{0};
+        if (!Assimp::Math::SafeMultiply(offset, static_cast<size_t>(elementSize), byteOffset_)) {
             throw DeadlyImportError("Invalid sparse accessor. Integer overflow in byte offset calculation.");
         }
 
-        if (byteOffset + elementSize > data.size()) {
+        if ((byteOffset_ + elementSize) > data.size()) {
             throw DeadlyImportError("Invalid sparse accessor. Byte offset for patching points outside allocated memory.");
         }
 
-        std::memcpy(data.data() + byteOffset, pValues, elementSize);
+        std::memcpy(data.data() + byteOffset_, pValues, elementSize);
 
         pValues += elementSize;
         pIndices += indexSize;

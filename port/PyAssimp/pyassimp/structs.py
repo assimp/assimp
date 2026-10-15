@@ -861,6 +861,9 @@ class VectorKey(Structure):
 
             # The value of this key
             ("mValue", Vector3D),
+
+            # The interpolation setting of this key
+            ("mInterpolation", c_uint32)
         ]
 
 class QuatKey(Structure):

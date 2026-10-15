@@ -321,7 +321,7 @@ void X3DGeoHelper::add_color(aiMesh &pMesh, const std::vector<int32_t> &coordIdx
             }
             // create list with colors for every vertex.
             col_tgt_arr.resize(pMesh.mNumVertices);
-            for (std::vector<int32_t>::const_iterator colidx_it = colorIdx.begin(), coordidx_it = coordIdx.begin(); colidx_it != colorIdx.end(); ++colidx_it, ++coordidx_it) {
+            for (std::vector<int32_t>::const_iterator colidx_it = colorIdx.begin(), coordidx_it = coordIdx.begin(); colidx_it != colorIdx.end() && coordidx_it != coordIdx.end(); ++colidx_it, ++coordidx_it) {
                 if (*colidx_it == (-1)) {
                     continue; // skip faces delimiter
                 }

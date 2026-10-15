@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PostProcessing/ConvertToLHProcess.h"
 
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/DefaultLogger.hpp>
 #include <assimp/ai_assert.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
@@ -337,7 +338,15 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
     float shininess = pMat->specularlity;
     mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
 
-    if (pMat->diffuse_texture_index >= 0) {
+    // diffuse_texture_index is read straight from the file by ReadIndex and was only
+    // checked against the "no texture" sentinel. pModel->textures is sized from the
+    // independent texture_count field, so an out-of-range index read a std::string
+    // object past the end of that array and copied bytes from its garbage data
+    // pointer into the material. Treat it as a missing texture instead.
+    if (pMat->diffuse_texture_index >= pModel->texture_count) {
+        ASSIMP_LOG_WARN("MMD: diffuse texture index ", pMat->diffuse_texture_index,
+                " is out of range, ignoring the texture reference");
+    } else if (pMat->diffuse_texture_index >= 0) {
         aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
         mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
     }

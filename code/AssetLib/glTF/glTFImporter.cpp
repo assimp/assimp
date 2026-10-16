@@ -154,7 +154,7 @@ namespace {
             if (values == nullptr) {
                 continue;
             }
-            for (size_t i = 0; i < aim->mNumVertices; ++i) {
+            for (size_t i = 0; i < texcoordCount; ++i) {
                 values[i].y = 1 - values[i].y; // Flip Y coords
             }
         }

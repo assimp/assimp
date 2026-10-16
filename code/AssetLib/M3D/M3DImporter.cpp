@@ -743,8 +743,9 @@ void M3DImporter::populateMesh(const M3DWrapper &m3d, aiMesh *pMesh, std::vector
                         continue;
                     }
                     unsigned int s = m3d->vertex[vertexids->at(i)].skinid;
-                    if (s != M3D_UNDEF && s != M3D_INDEXMAX) {
+                    if (s != M3D_UNDEF && s != M3D_INDEXMAX && s < m3d->numskin) {
                         for (unsigned int k = 0; k < M3D_NUMBONE && m3d->skin[s].weight[k] > 0.0; k++) {
+                            if (m3d->skin[s].boneid[k] >= m3d->numbone) continue;
                             aiString name = aiString(std::string(m3d->bone[m3d->skin[s].boneid[k]].name));
                             for (j = 0; j < pMesh->mNumBones; j++) {
                                 if (pMesh->mBones[j]->mName == name) {

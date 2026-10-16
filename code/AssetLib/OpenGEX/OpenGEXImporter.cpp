@@ -301,10 +301,10 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
     myParser.setLogCallback(&logDDLParserMessage);
     myParser.setBuffer(&buffer[0], buffer.size());
     bool success(myParser.parse());
+    pScene->mRootNode = new aiNode;
+    pScene->mRootNode->mName.Set(filename);
     if (success) {
         m_ctx = myParser.getContext();
-        pScene->mRootNode = new aiNode;
-        pScene->mRootNode->mName.Set(filename);
         handleNodes(m_ctx->m_root, pScene);
     }
 

@@ -421,10 +421,26 @@ inline void CopyData(size_t count,
 }
 } // namespace
 
+inline bool Accessor::CheckDataRange() {
+    if (!bufferView || !bufferView->buffer) return false;
+    if (!count) return true;
+
+    const size_t elemSize = GetElementSize();
+    const size_t stride = byteStride ? byteStride : elemSize;
+    if (!elemSize || stride < elemSize) return false;
+
+    if (byteOffset > bufferView->byteLength) return false;
+    const size_t avail = bufferView->byteLength - byteOffset;
+    if (avail < elemSize) return false;
+
+    // last touched byte must satisfy (count - 1) * stride + elemSize <= avail
+    return count - 1 <= (avail - elemSize) / stride;
+}
+
 template <class T>
 bool Accessor::ExtractData(T *&outData) {
     uint8_t *data = GetPointer();
-    if (!data) return false;
+    if (!data || !CheckDataRange()) return false;
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -432,9 +448,12 @@ bool Accessor::ExtractData(T *&outData) {
     const size_t stride = byteStride ? byteStride : elemSize;
 
     const size_t targetElemSize = sizeof(T);
-    ai_assert(elemSize <= targetElemSize);
-
-    ai_assert(count * stride <= bufferView->byteLength);
+    if (elemSize > targetElemSize) {
+        return false;
+    }
+    if (count > std::numeric_limits<size_t>::max() / targetElemSize) {
+        return false;
+    }
 
     outData = new T[count];
     if (stride == elemSize && targetElemSize == elemSize) {
@@ -462,16 +481,24 @@ inline void Accessor::WriteData(size_t cnt, const void *src_buffer, size_t src_s
 }
 
 inline Accessor::Indexer::Indexer(Accessor &acc) :
-        accessor(acc), data(acc.GetPointer()), elemSize(acc.GetElementSize()), stride(acc.byteStride ? acc.byteStride : elemSize) {
+        accessor(acc), data(acc.CheckDataRange() ? acc.GetPointer() : nullptr), elemSize(acc.GetElementSize()), stride(acc.byteStride ? acc.byteStride : elemSize) {
 }
 
 //! Accesses the i-th value as defined by the accessor
 template <class T>
 T Accessor::Indexer::GetValue(int i) {
-    ai_assert(data);
-    ai_assert(i * stride < accessor.bufferView->byteLength);
     T value = T();
-    memcpy(&value, data + i * stride, elemSize);
+    if (data == nullptr || i < 0 || static_cast<unsigned int>(i) >= accessor.count) {
+        return value;
+    }
+    const size_t avail = accessor.byteOffset < accessor.bufferView->byteLength
+            ? accessor.bufferView->byteLength - accessor.byteOffset
+            : 0;
+    const size_t off = static_cast<size_t>(i) * stride;
+    if (off > avail || elemSize > avail - off) {
+        return value;
+    }
+    memcpy(&value, data + off, elemSize);
     //value >>= 8 * (sizeof(T) - elemSize);
     return value;
 }

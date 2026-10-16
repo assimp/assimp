@@ -78,3 +78,19 @@ TEST_F(utIFCImportExport, importComplextypeAsColor) {
     const aiScene *scene = importer.ReadFileFromMemory(asset.c_str(), asset.size(), 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utIFCImportExport, importEmptyFileSchemaFails) {
+    // FILE_SCHEMA(()) names no schema; the header reader used to read the first
+    // entry of the empty inner list.
+    const std::string asset =
+            "ISO-10303-21;\n"
+            "HEADER;\n"
+            "FILE_SCHEMA(());\n"
+            "ENDSEC;\n"
+            "DATA;\n"
+            "ENDSEC;\n"
+            "END-ISO-10303-21;\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(asset.c_str(), asset.size(), 0, "ifc");
+    EXPECT_EQ(nullptr, scene);
+}

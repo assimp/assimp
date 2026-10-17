@@ -154,3 +154,12 @@ TEST_F(utLWSImportExport, importMissingVersionFails) {
         importer.ApplyPostProcessing(aiProcess_OptimizeGraph | aiProcess_PopulateArmatureData);
     }
 }
+
+TEST_F(utLWSImportExport, importFileWithoutElementsFails) {
+    const std::string data(16, '\n'); // parses to an empty element list
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "lws");
+    ASSERT_EQ(nullptr, scene);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no elements"), std::string::npos);
+}

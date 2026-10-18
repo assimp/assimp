@@ -1655,7 +1655,14 @@ std::unordered_map<unsigned int, AnimationSamplers> GatherSamplers(Animation &an
             continue;
         }
 
-        if (animsampler.input->count > animsampler.output->count) {
+        // CUBICSPLINE stores three values (in-tangent, value, out-tangent) in the
+        // output accessor per logical key, so the loops in CreateNodeAnim() read
+        // output[0 .. 3*input-1]. A plain output>=input check is therefore not
+        // enough for cubic samplers: output>=3*input is required, otherwise the
+        // cubic read runs past the end of the output buffer (heap OOB read whose
+        // bytes end up in the returned aiScene).
+        if (const size_t requiredOutputCount = (animsampler.interpolation == Interpolation_CUBICSPLINE) ? animsampler.input->count * 3 : animsampler.input->count;
+                requiredOutputCount > animsampler.output->count) {
             ASSIMP_LOG_WARN("Animation ", anim.name, ": Number of keyframes in sampler input ", animsampler.input->count,
                             " exceeds number of keyframes in sampler output ", animsampler.output->count);
             continue;

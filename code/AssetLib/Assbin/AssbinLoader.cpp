@@ -460,7 +460,7 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
 
     // write bones
     if (mesh->mNumBones) {
-        mesh->mBones = new C_STRUCT aiBone *[mesh->mNumBones];
+        mesh->mBones = new C_STRUCT aiBone *[mesh->mNumBones]();
         for (unsigned int a = 0; a < mesh->mNumBones; ++a) {
             mesh->mBones[a] = new aiBone();
             ReadBinaryBone(stream, mesh->mBones[a]);
@@ -502,7 +502,7 @@ void AssbinImporter::ReadBinaryMaterial(IOStream *stream, aiMaterial *mat) {
         if (mat->mProperties) {
             delete[] mat->mProperties;
         }
-        mat->mProperties = new aiMaterialProperty *[mat->mNumProperties];
+        mat->mProperties = new aiMaterialProperty *[mat->mNumProperties]();
         for (unsigned int i = 0; i < mat->mNumProperties; ++i) {
             mat->mProperties[i] = new aiMaterialProperty();
             ReadBinaryMaterialProperty(stream, mat->mProperties[i]);
@@ -575,7 +575,7 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
     }
 
     if (anim->mNumChannels) {
-        anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
+        anim->mChannels = new aiNodeAnim *[anim->mNumChannels]();
         for (unsigned int a = 0; a < anim->mNumChannels; ++a) {
             anim->mChannels[a] = new aiNodeAnim();
             ReadBinaryNodeAnim(stream, anim->mChannels[a]);

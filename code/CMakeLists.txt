@@ -1232,6 +1232,11 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/external/miniz.c
                 ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
         )
+        if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+            set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-variable")
+        endif () # if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     endif () # if (ASSIMP_USD_BETA)
 
     set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")

@@ -47,13 +47,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 #define AI_USDLOADER_IMPL_TINYUSDZ_H_INCLUDED
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+#include "lightusd.hh"
+#else
 #include "tinyusdz.hh"
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 #include "tydra/render-data.hh"
 #include <assimp/BaseImporter.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
 #include <cstdint>
 #include <vector>
+
+#if !defined(ASSIMP_BUILD_USD_BETA)
+namespace lightusd = tinyusdz;
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 
 namespace Assimp {
 
@@ -74,83 +82,83 @@ public:
             IOSystem *pIOHandler);
 
     void animations(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene);
 
     void meshes(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     void verticesForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
 
     void facesForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
 
     void normalsForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
 
     void materialsForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
 
     void uvsForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
 
     void materials(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     void textures(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     void textureImages(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     void buffers(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     aiNode *nodesRecursive(
             aiNode *pNodeParent,
-            const tinyusdz::tydra::Node &node,
-            const std::vector<tinyusdz::tydra::SkelHierarchy> &skeletons);
+            const lightusd::tydra::Node &node,
+            const std::vector<lightusd::tydra::SkelHierarchy> &skeletons);
 
     aiNode *skeletonNodesRecursive(
             aiNode *pNodeParent,
-            const tinyusdz::tydra::SkelNode &joint);
+            const lightusd::tydra::SkelNode &joint);
 
     void sanityCheckNodesRecursive(
             aiNode *pNode);
 
     void setupBlendShapes(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             const std::string &nameWExt);
 
     void blendShapesForMesh(
-            const tinyusdz::tydra::RenderScene &render_scene,
+            const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);

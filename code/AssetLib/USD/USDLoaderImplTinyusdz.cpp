@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "USDLoaderImplTinyusdzHelper.h"
 #include "USDLoaderUtil.h"
 #include "USDPreprocessor.h"
-#include "io-util.hh" // namespace tinyusdz::io
+#include "io-util.hh" // namespace lightusd::io
 #include "tydra/scene-access.hh"
 #include "tydra/shader-network.hh"
 
@@ -82,8 +82,8 @@ namespace Assimp {
 
 using Assimp::tinyUsdzMat4ToAiMat4;
 using Assimp::tinyusdzNodeTypeFor;
-using tinyusdz::tydra::NodeType;
-using namespace tinyusdz::tydra;
+using lightusd::tydra::NodeType;
+using namespace lightusd::tydra;
 
 void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     // Grab filename for logging purposes
@@ -111,8 +111,8 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     }
 
     bool ret{ false };
-    tinyusdz::USDLoadOptions options;
-    tinyusdz::Stage stage;
+    lightusd::USDLoadOptions options;
+    lightusd::Stage stage;
     std::string warn, err;
     bool is_usdz{ false };
     if (isUsdc(pFile)) {
@@ -167,14 +167,14 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     RenderScene render_scene;
     RenderSceneConverter converter;
     RenderSceneConverterEnv env(stage);
-    std::string usd_basedir = tinyusdz::io::GetBaseDir(pFile);
+    std::string usd_basedir = lightusd::io::GetBaseDir(pFile);
     env.set_search_paths({ usd_basedir }); // {} needed to convert to vector of char
 
     // NOTE: Pointer address of usdz_asset must be valid until the call of RenderSceneConverter::ConvertToRenderScene.
-    tinyusdz::USDZAsset usdz_asset;
+    lightusd::USDZAsset usdz_asset;
     if (is_usdz) {
-        bool is_read_USDZ_asset = is_load_from_mem ? tinyusdz::ReadUSDZAssetInfoFromMemory(in_mem_data.data(), in_mem_data.size(), false, &usdz_asset, &warn, &err) :
-                                                     tinyusdz::ReadUSDZAssetInfoFromFile(pFile, &usdz_asset, &warn, &err);
+        bool is_read_USDZ_asset = is_load_from_mem ? lightusd::ReadUSDZAssetInfoFromMemory(in_mem_data.data(), in_mem_data.size(), false, &usdz_asset, &warn, &err) :
+                                                     lightusd::ReadUSDZAssetInfoFromFile(pFile, &usdz_asset, &warn, &err);
         if (!is_read_USDZ_asset) {
             if (!warn.empty()) {
                 ss.str("");
@@ -195,8 +195,8 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
             TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         }
 
-        tinyusdz::AssetResolutionResolver arr;
-        if (!tinyusdz::SetupUSDZAssetResolution(arr, &usdz_asset)) {
+        lightusd::AssetResolutionResolver arr;
+        if (!lightusd::SetupUSDZAssetResolution(arr, &usdz_asset)) {
             ss.str("");
             ss << "InternReadFile(): SetupUSDZAssetResolution: ERROR: load failed! ret: " << ret;
             TINYUSDZLOGE(TAG, "%s", ss.str().c_str());
@@ -228,7 +228,13 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     setupBlendShapes(render_scene, pScene, nameWExt);
 }
 
-void USDImporterImplTinyusdz::animations(const tinyusdz::tydra::RenderScene &render_scene, aiScene *pScene) {
+void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &render_scene, aiScene *pScene) {
+#if defined(ASSIMP_BUILD_USD_BETA)
+    // TODO: restore animation functionality
+    // Don't want to populate animations at all; dummy values will
+    // cause model import to fail entirely
+    return;
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
     if (render_scene.animations.empty()) {
         return;
     }
@@ -245,94 +251,111 @@ void USDImporterImplTinyusdz::animations(const tinyusdz::tydra::RenderScene &ren
 
         newAiAnimation->mName = animation.abs_path;
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+        if (animation.channels.empty()) {
+#else
         if (animation.channels_map.empty()) {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
             newAiAnimation->mNumChannels = 0;
             continue;
         }
 
         // each channel affects a node (joint)
         newAiAnimation->mTicksPerSecond = render_scene.meta.framesPerSecond;
+#if defined(ASSIMP_BUILD_USD_BETA)
+        newAiAnimation->mNumChannels = unsigned(animation.channels.size());
+#else
         newAiAnimation->mNumChannels = unsigned(animation.channels_map.size());
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
+#if defined(ASSIMP_BUILD_USD_BETA)
+        for (int channelIndex = 0; channelIndex < animation.channels.size(); ++channelIndex) {
+            auto &animationChannel = animation.channels[channelIndex];
+#else
         int channelIndex = 0;
         for (const auto &[jointName, animationChannelMap] : animation.channels_map) {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
             auto newAiNodeAnim = new aiNodeAnim();
             newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+#if !defined(ASSIMP_BUILD_USD_BETA)
             newAiNodeAnim->mNodeName = jointName;
+#endif //#if !defined(ASSIMP_BUILD_USD_BETA)
             newAiAnimation->mDuration = 0;
 
             std::vector<aiVectorKey> positionKeys;
             std::vector<aiQuatKey> rotationKeys;
             std::vector<aiVectorKey> scalingKeys;
 
+#if !defined(ASSIMP_BUILD_USD_BETA)
             for (const auto &[channelType, animChannel] : animationChannelMap) {
                 switch (channelType) {
-                case AnimationChannel::ChannelType::Rotation:
-                    if (animChannel.rotations.static_value.has_value()) {
-                        rotationKeys.emplace_back(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value()));
-                    }
-                    for (const auto &rotationAnimSampler : animChannel.rotations.samples) {
-                        if (rotationAnimSampler.t > newAiAnimation->mDuration) {
-                            newAiAnimation->mDuration = rotationAnimSampler.t;
+                    case AnimationChannel::ChannelType::Rotation:
+                        if (animChannel.rotations.static_value.has_value()) {
+                            rotationKeys.emplace_back(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value()));
                         }
+                        for (const auto &rotationAnimSampler: animChannel.rotations.samples) {
+                            if (rotationAnimSampler.t > newAiAnimation->mDuration) {
+                                newAiAnimation->mDuration = rotationAnimSampler.t;
+                            }
 
-                        rotationKeys.emplace_back(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value));
-                    }
-                    break;
-                case AnimationChannel::ChannelType::Scale:
-                    if (animChannel.scales.static_value.has_value()) {
-                        scalingKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value()));
-                    }
-                    for (const auto &scaleAnimSampler : animChannel.scales.samples) {
-                        if (scaleAnimSampler.t > newAiAnimation->mDuration) {
-                            newAiAnimation->mDuration = scaleAnimSampler.t;
+                            rotationKeys.emplace_back(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value));
                         }
-                        scalingKeys.emplace_back(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value));
-                    }
-                    break;
-                case AnimationChannel::ChannelType::Transform:
-                    if (animChannel.transforms.static_value.has_value()) {
-                        aiVector3D position;
-                        aiVector3D scale;
-                        aiQuaternion rotation;
-                        tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
-
-                        positionKeys.emplace_back(0, position);
-                        scalingKeys.emplace_back(0, scale);
-                        rotationKeys.emplace_back(0, rotation);
-                    }
-                    for (const auto &transformAnimSampler : animChannel.transforms.samples) {
-                        if (transformAnimSampler.t > newAiAnimation->mDuration) {
-                            newAiAnimation->mDuration = transformAnimSampler.t;
+                        break;
+                    case AnimationChannel::ChannelType::Scale:
+                        if (animChannel.scales.static_value.has_value()) {
+                            scalingKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value()));
                         }
-
-                        aiVector3D position;
-                        aiVector3D scale;
-                        aiQuaternion rotation;
-                        tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
-
-                        positionKeys.emplace_back(transformAnimSampler.t, position);
-                        scalingKeys.emplace_back(transformAnimSampler.t, scale);
-                        rotationKeys.emplace_back(transformAnimSampler.t, rotation);
-                    }
-                    break;
-                case AnimationChannel::ChannelType::Translation:
-                    if (animChannel.translations.static_value.has_value()) {
-                        positionKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value()));
-                    }
-                    for (const auto &translationAnimSampler : animChannel.translations.samples) {
-                        if (translationAnimSampler.t > newAiAnimation->mDuration) {
-                            newAiAnimation->mDuration = translationAnimSampler.t;
+                        for (const auto &scaleAnimSampler: animChannel.scales.samples) {
+                            if (scaleAnimSampler.t > newAiAnimation->mDuration) {
+                                newAiAnimation->mDuration = scaleAnimSampler.t;
+                            }
+                            scalingKeys.emplace_back(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value));
                         }
+                        break;
+                    case AnimationChannel::ChannelType::Transform:
+                        if (animChannel.transforms.static_value.has_value()) {
+                            aiVector3D position;
+                            aiVector3D scale;
+                            aiQuaternion rotation;
+                            tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
 
-                        positionKeys.emplace_back(translationAnimSampler.t, tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value));
-                    }
-                    break;
-                default:
-                    TINYUSDZLOGW(TAG, "Unsupported animation channel type (%s). Please update the USD importer to support this animation channel.", tinyusdzAnimChannelTypeFor(channelType).c_str());
+                            positionKeys.emplace_back(0, position);
+                            scalingKeys.emplace_back(0, scale);
+                            rotationKeys.emplace_back(0, rotation);
+                        }
+                        for (const auto &transformAnimSampler: animChannel.transforms.samples) {
+                            if (transformAnimSampler.t > newAiAnimation->mDuration) {
+                                newAiAnimation->mDuration = transformAnimSampler.t;
+                            }
+
+                            aiVector3D position;
+                            aiVector3D scale;
+                            aiQuaternion rotation;
+                            tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
+
+                            positionKeys.emplace_back(transformAnimSampler.t, position);
+                            scalingKeys.emplace_back(transformAnimSampler.t, scale);
+                            rotationKeys.emplace_back(transformAnimSampler.t, rotation);
+                        }
+                        break;
+                    case AnimationChannel::ChannelType::Translation:
+                        if (animChannel.translations.static_value.has_value()) {
+                            positionKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value()));
+                        }
+                        for (const auto &translationAnimSampler: animChannel.translations.samples) {
+                            if (translationAnimSampler.t > newAiAnimation->mDuration) {
+                                newAiAnimation->mDuration = translationAnimSampler.t;
+                            }
+
+                            positionKeys.emplace_back(translationAnimSampler.t,tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value));
+                        }
+                        break;
+                    default:
+                        TINYUSDZLOGW(TAG, "Unsupported animation channel type (%s). Please update the USD importer to support this animation channel.", tinyusdzAnimChannelTypeFor(channelType).c_str());
                 }
             }
+#endif //#if !defined(ASSIMP_BUILD_USD_BETA)
 
             newAiNodeAnim->mNumPositionKeys = unsigned(positionKeys.size());
             newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];
@@ -346,13 +369,15 @@ void USDImporterImplTinyusdz::animations(const tinyusdz::tydra::RenderScene &ren
             newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
             std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);
 
+#if !defined(ASSIMP_BUILD_USD_BETA)
             ++channelIndex;
+#endif //#if !defined(ASSIMP_BUILD_USD_BETA)
         }
     }
 }
 
 void USDImporterImplTinyusdz::meshes(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
     std::stringstream ss;
@@ -386,7 +411,7 @@ void USDImporterImplTinyusdz::meshes(
     }
 }
 
-void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene &render_scene, 
+void USDImporterImplTinyusdz::verticesForMesh(const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene, size_t meshIdx, const std::string &) {
     const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
     pScene->mMeshes[meshIdx]->mNumVertices = numVertices;
@@ -395,7 +420,7 @@ void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene
     // Check if this is a skinned mesh
     if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
         // Recursively iterate to collect all the joints in the hierarchy into a flattened array
-        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
+        std::vector<const lightusd::tydra::SkelNode *> skeletonNodes;
         skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
         for (int i = 0; i < skeletonNodes.size(); ++i) {
             for (const auto &child : skeletonNodes[i]->children) {
@@ -409,7 +434,7 @@ void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene
         pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
 
         for (unsigned int i = 0; i < numBones; ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
+            const lightusd::tydra::SkelNode *skeletonNode = skeletonNodes[i];
             const int boneIndex = skeletonNode->joint_id;
 
             // Sorted so that Assimp bone ids align with USD joint id
@@ -488,7 +513,7 @@ void USDImporterImplTinyusdz::materialsForMesh(const RenderScene&, aiScene*,
 }
 
 void USDImporterImplTinyusdz::uvsForMesh(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         size_t meshIdx,
         const std::string&) {
@@ -547,7 +572,7 @@ static void assignTexture(
 }
 
 void USDImporterImplTinyusdz::materials(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
     const size_t numMaterials{ render_scene.materials.size() };
@@ -571,6 +596,68 @@ void USDImporterImplTinyusdz::materials(
         materialName.Set(material.name);
         mat->AddProperty(&materialName, AI_MATKEY_NAME);
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+        mat->AddProperty(
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader->diffuseColor.value.data()),
+                1, AI_MATKEY_COLOR_DIFFUSE);
+        mat->AddProperty(
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader->specularColor.value.data()),
+                1, AI_MATKEY_COLOR_SPECULAR);
+        mat->AddProperty(
+                reinterpret_cast<const aiColor3D *>(material.surfaceShader->emissiveColor.value.data()),
+                1, AI_MATKEY_COLOR_EMISSIVE);
+
+        ss.str("");
+        if (material.surfaceShader->diffuseColor.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->diffuseColor.texture_id, aiTextureType_DIFFUSE);
+            ss << "    material[" << pScene->mNumMaterials << "]: diff tex id " << material.surfaceShader->diffuseColor.texture_id << "\n";
+        }
+        if (material.surfaceShader->specularColor.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->specularColor.texture_id, aiTextureType_SPECULAR);
+            ss << "    material[" << pScene->mNumMaterials << "]: spec tex id " << material.surfaceShader->specularColor.texture_id << "\n";
+        }
+        if (material.surfaceShader->normal.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->normal.texture_id, aiTextureType_NORMALS);
+            ss << "    material[" << pScene->mNumMaterials << "]: normal tex id " << material.surfaceShader->normal.texture_id << "\n";
+        }
+        if (material.surfaceShader->emissiveColor.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->emissiveColor.texture_id, aiTextureType_EMISSIVE);
+            ss << "    material[" << pScene->mNumMaterials << "]: emissive tex id " << material.surfaceShader->emissiveColor.texture_id << "\n";
+        }
+        if (material.surfaceShader->occlusion.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->occlusion.texture_id, aiTextureType_LIGHTMAP);
+            ss << "    material[" << pScene->mNumMaterials << "]: lightmap (occlusion) tex id " << material.surfaceShader->occlusion.texture_id << "\n";
+        }
+        if (material.surfaceShader->metallic.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->metallic.texture_id, aiTextureType_METALNESS);
+            ss << "    material[" << pScene->mNumMaterials << "]: metallic tex id " << material.surfaceShader->metallic.texture_id << "\n";
+        }
+        if (material.surfaceShader->roughness.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->roughness.texture_id, aiTextureType_DIFFUSE_ROUGHNESS);
+            ss << "    material[" << pScene->mNumMaterials << "]: roughness tex id " << material.surfaceShader->roughness.texture_id << "\n";
+        }
+        if (material.surfaceShader->clearcoat.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->clearcoat.texture_id, aiTextureType_CLEARCOAT);
+            ss << "    material[" << pScene->mNumMaterials << "]: clearcoat tex id " << material.surfaceShader->clearcoat.texture_id << "\n";
+        }
+        if (material.surfaceShader->opacity.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->opacity.texture_id, aiTextureType_OPACITY);
+            ss << "    material[" << pScene->mNumMaterials << "]: opacity tex id " << material.surfaceShader->opacity.texture_id << "\n";
+        }
+        if (material.surfaceShader->displacement.is_texture()) {
+            assignTexture(render_scene, material, mat, material.surfaceShader->displacement.texture_id, aiTextureType_DISPLACEMENT);
+            ss << "    material[" << pScene->mNumMaterials << "]: displacement tex id " << material.surfaceShader->displacement.texture_id << "\n";
+        }
+        if (material.surfaceShader->clearcoatRoughness.is_texture()) {
+            ss << "    material[" << pScene->mNumMaterials << "]: clearcoatRoughness tex id " << material.surfaceShader->clearcoatRoughness.texture_id << "\n";
+        }
+        if (material.surfaceShader->opacityThreshold.is_texture()) {
+            ss << "    material[" << pScene->mNumMaterials << "]: opacityThreshold tex id " << material.surfaceShader->opacityThreshold.texture_id << "\n";
+        }
+        if (material.surfaceShader->ior.is_texture()) {
+            ss << "    material[" << pScene->mNumMaterials << "]: ior tex id " << material.surfaceShader->ior.texture_id << "\n";
+        }
+#else
         mat->AddProperty(
                 reinterpret_cast<const aiColor3D *>(material.surfaceShader.diffuseColor.value.data()),
                 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -631,6 +718,7 @@ void USDImporterImplTinyusdz::materials(
         if (material.surfaceShader.ior.is_texture()) {
             ss << "    material[" << pScene->mNumMaterials << "]: ior tex id " << material.surfaceShader.ior.texture_id << "\n";
         }
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
         if (!ss.str().empty()) {
             TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         }
@@ -641,7 +729,7 @@ void USDImporterImplTinyusdz::materials(
 }
 
 void USDImporterImplTinyusdz::textures(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene*,
         const std::string &nameWExt) {
     const size_t numTextures{ render_scene.textures.size() };
@@ -759,7 +847,7 @@ void USDImporterImplTinyusdz::buffers(
     }
 }
 
-aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const tinyusdz::tydra::Node &node,
+aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const lightusd::tydra::Node &node,
         const std::vector<SkelHierarchy> &skeletons) {
     std::stringstream ss;
     aiNode *cNode = new aiNode();
@@ -790,7 +878,7 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const tinyu
 
     // Find any tinyusdz skeletons which might begin at this node
     // Add the skeleton bones as child nodes
-    const tinyusdz::tydra::SkelNode *skelNode = nullptr;
+    const lightusd::tydra::SkelNode *skelNode = nullptr;
     for (const auto &skeleton : skeletons) {
         if (skeleton.abs_path == node.abs_path) {
             // Add this skeleton's bones as child nodes
@@ -874,7 +962,7 @@ void USDImporterImplTinyusdz::setupBlendShapes(const RenderScene &render_scene, 
 }
 
 void USDImporterImplTinyusdz::blendShapesForMesh(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         size_t meshIdx,
         const std::string &) {
@@ -892,7 +980,7 @@ void USDImporterImplTinyusdz::blendShapesForMesh(
     size_t animMeshIdx{ 0 };
     for (; mapIter != render_scene.meshes[meshIdx].targets.end(); ++mapIter) {
         const std::string name{ mapIter->first };
-        const tinyusdz::tydra::ShapeTarget shapeTarget{ mapIter->second };
+        const lightusd::tydra::ShapeTarget shapeTarget{ mapIter->second };
         pScene->mMeshes[meshIdx]->mAnimMeshes[animMeshIdx] = aiCreateAnimMesh(pScene->mMeshes[meshIdx]);
         ss.str("");
         ss << "        mAnimMeshes[" << animMeshIdx << "]: mNumVertices: " << pScene->mMeshes[meshIdx]->mAnimMeshes[animMeshIdx]->mNumVertices << ", target: " << shapeTarget.pointIndices.size() << " pointIndices, " << shapeTarget.pointOffsets.size() << " pointOffsets, " << shapeTarget.normalOffsets.size() << " normalOffsets";

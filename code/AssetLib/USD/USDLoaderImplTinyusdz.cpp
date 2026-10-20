@@ -367,13 +367,30 @@ void USDImporterImplTinyusdz::meshes(
         pScene->mMeshes[meshIdx] = new aiMesh();
         pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].prim_name);
         ss.str("");
-        ss << "   mesh[" << meshIdx << "]: " << render_scene.meshes[meshIdx].joint_and_weights.jointIndices.size() << " jointIndices, " << render_scene.meshes[meshIdx].joint_and_weights.jointWeights.size() << " jointWeights, elementSize: " << render_scene.meshes[meshIdx].joint_and_weights.elementSize;
+        ss << "    mesh[" << meshIdx << "]:";
+        TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+        ss.str("");
+        ss << "        joints: " << render_scene.meshes[meshIdx].joint_and_weights.jointIndices.size() << " jointIndices, " << render_scene.meshes[meshIdx].joint_and_weights.jointWeights.size() << " jointWeights, elementSize: " << render_scene.meshes[meshIdx].joint_and_weights.elementSize;
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         ss.str("");
         ss << "        skel_id: " << render_scene.meshes[meshIdx].skel_id;
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         if (render_scene.meshes[meshIdx].material_id > -1) {
             pScene->mMeshes[meshIdx]->mMaterialIndex = render_scene.meshes[meshIdx].material_id;
+        } else {
+            if (render_scene.meshes[meshIdx].material_subsetMap.size() > 0) {
+                for (const auto &subset : render_scene.meshes[meshIdx].material_subsetMap) {
+                    pScene->mMeshes[meshIdx]->mMaterialIndex = subset.second.material_id;
+                    ss.str("");
+                    ss << "        meshes(): mesh[" << meshIdx << "] material_id now " << subset.second.material_id;
+                    TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+                    break;
+                }
+            } else {
+                ss.str("");
+                ss << "        meshes(): NOTICE: mesh[" << meshIdx << "] material_id " << render_scene.meshes[meshIdx].material_id << "!!!";
+                TINYUSDZLOGE(TAG, "%s", ss.str().c_str());
+            }
         }
         verticesForMesh(render_scene, pScene, meshIdx, nameWExt);
         facesForMesh(render_scene, pScene, meshIdx, nameWExt);

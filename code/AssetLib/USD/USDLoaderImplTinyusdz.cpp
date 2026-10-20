@@ -388,7 +388,7 @@ void USDImporterImplTinyusdz::meshes(
                         break;
                     } else {
                         ss.str("");
-                        ss << "        meshes(): mesh[" << meshIdx << "]: NOTICE: skipping invalid material_id " << render_scene.meshes[meshIdx].material_id << "...";
+                        ss << "        meshes(): mesh[" << meshIdx << "]: NOTICE: skipping invalid material_id " << subset.second.material_id << "...";
                         TINYUSDZLOGW(TAG, "%s", ss.str().c_str());
                     }
                 }

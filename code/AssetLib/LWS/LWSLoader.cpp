@@ -524,6 +524,10 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     bool motion_file = false;
     std::list<LWS::Element>::const_iterator it = root.children.begin();
 
+    if (it == root.children.end()) {
+        throw DeadlyImportError("LWS: Not a LightWave scene, no elements found");
+    }
+
     if ((*it).tokens[0] == "LWMO") {
         motion_file = true;
     }

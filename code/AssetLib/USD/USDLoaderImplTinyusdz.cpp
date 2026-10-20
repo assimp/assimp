@@ -380,11 +380,17 @@ void USDImporterImplTinyusdz::meshes(
         } else {
             if (render_scene.meshes[meshIdx].material_subsetMap.size() > 0) {
                 for (const auto &subset : render_scene.meshes[meshIdx].material_subsetMap) {
-                    pScene->mMeshes[meshIdx]->mMaterialIndex = subset.second.material_id;
-                    ss.str("");
-                    ss << "        meshes(): mesh[" << meshIdx << "] material_id now " << subset.second.material_id;
-                    TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
-                    break;
+                    if (subset.second.material_id > -1) {
+                        pScene->mMeshes[meshIdx]->mMaterialIndex = subset.second.material_id;
+                        ss.str("");
+                        ss << "        meshes(): mesh[" << meshIdx << "] material_id now " << subset.second.material_id;
+                        TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+                        break;
+                    } else {
+                        ss.str("");
+                        ss << "        meshes(): mesh[" << meshIdx << "]: NOTICE: skipping invalid material_id " << render_scene.meshes[meshIdx].material_id << "...";
+                        TINYUSDZLOGW(TAG, "%s", ss.str().c_str());
+                    }
                 }
             } else {
                 ss.str("");

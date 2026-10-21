@@ -68,18 +68,18 @@ namespace Assimp {
 /**
  * @brief USD Importer implementation using tinyusdz.
  */
-class USDImporterImplTinyusdz {
-public:
-    /// @brief The class constructor.
-    USDImporterImplTinyusdz() = default;
+    class USDImporterImplTinyusdz {
+    public:
+        /// @brief The class constructor.
+        USDImporterImplTinyusdz() = default;
 
-    /// @brief The class destructor.
-    ~USDImporterImplTinyusdz() = default;
+        /// @brief The class destructor.
+        ~USDImporterImplTinyusdz() = default;
 
-    void InternReadFile(
-            const std::string &pFile,
-            aiScene *pScene,
-            IOSystem *pIOHandler);
+        void InternReadFile(
+                const std::string &pFile,
+                aiScene *pScene,
+                IOSystem *pIOHandler);
 
     void animations(
             const lightusd::tydra::RenderScene &render_scene,
@@ -120,6 +120,17 @@ public:
             size_t meshIdx,
             const std::string &nameWExt);
 
+    void bones(
+            const lightusd::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            const std::string &nameWExt);
+
+    void bonesForMesh(
+            const lightusd::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx,
+            const std::string &nameWExt);
+
     void materials(
             const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
@@ -153,16 +164,16 @@ public:
             aiNode *pNode);
 
     void setupBlendShapes(
-            const lightusd::tydra::RenderScene &render_scene,
-            aiScene *pScene,
-            const std::string &nameWExt);
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        const std::string &nameWExt);
 
     void blendShapesForMesh(
             const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,
             size_t meshIdx,
             const std::string &nameWExt);
-};
+    };
 
 } // namespace Assimp
 

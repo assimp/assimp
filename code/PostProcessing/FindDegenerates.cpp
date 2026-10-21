@@ -146,59 +146,58 @@ bool FindDegeneratesProcess::ExecuteOnMesh(aiMesh *mesh) {
         auto vertex_in_range = [numVertices = mesh->mNumVertices](unsigned int vertex_idx) { return vertex_idx < numVertices; };
 
         // check whether the face contains degenerated entries
-        if (!std::all_of(face.mIndices, face.mIndices + face.mNumIndices, vertex_in_range))
-            continue;
+        if (std::all_of(face.mIndices, face.mIndices + face.mNumIndices, vertex_in_range)) {
+            for (unsigned int i = 0; i < face.mNumIndices; ++i) {
 
-        for (unsigned int i = 0; i < face.mNumIndices; ++i) {
+                // Polygons with more than 4 points are allowed to have double points, that is
+                // simulating polygons with holes just with concave polygons. However,
+                // double points may not come directly after another.
+                limit = face.mNumIndices;
+                if (face.mNumIndices > 4) {
+                    limit = std::min(limit, i + 2);
+                }
 
-            // Polygons with more than 4 points are allowed to have double points, that is
-            // simulating polygons with holes just with concave polygons. However,
-            // double points may not come directly after another.
-            limit = face.mNumIndices;
-            if (face.mNumIndices > 4) {
-                limit = std::min(limit, i + 2);
-            }
+                for (unsigned int t = i + 1; t < limit; ++t) {
+                    if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]]) {
+                        // we have found a matching vertex position
+                        // remove the corresponding index from the array
+                        --face.mNumIndices;
+                        --limit;
+                        for (unsigned int m = t; m < face.mNumIndices; ++m) {
+                            face.mIndices[m] = face.mIndices[m + 1];
+                        }
+                        --t;
 
-            for (unsigned int t = i + 1; t < limit; ++t) {
-                if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]]) {
-                    // we have found a matching vertex position
-                    // remove the corresponding index from the array
-                    --face.mNumIndices;
-                    --limit;
-                    for (unsigned int m = t; m < face.mNumIndices; ++m) {
-                        face.mIndices[m] = face.mIndices[m + 1];
-                    }
-                    --t;
+                        // NOTE: we set the removed vertex index to an unique value
+                        // to make sure the developer gets notified when his
+                        // application attempts to access this data.
+                        face.mIndices[face.mNumIndices] = 0xdeadbeef;
 
-                    // NOTE: we set the removed vertex index to an unique value
-                    // to make sure the developer gets notified when his
-                    // application attempts to access this data.
-                    face.mIndices[face.mNumIndices] = 0xdeadbeef;
+                        if (first) {
+                            ++deg;
+                            first = false;
+                        }
 
-                    if (first) {
-                        ++deg;
-                        first = false;
-                    }
-
-                    if (mConfigRemoveDegenerates) {
-                        remove_me[a] = true;
-                        goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
+                        if (mConfigRemoveDegenerates) {
+                            remove_me[a] = true;
+                            goto evil_jump_outside; // hrhrhrh ... yeah, this rocks baby!
+                        }
                     }
                 }
             }
-        }
 
-        if (mConfigCheckAreaOfTriangle) {
-            if (face.mNumIndices == 3) {
-                ai_real area = GeometryUtils::calculateAreaOfTriangle(face, mesh);
-                if (area < ai_epsilon) {
-                    if (mConfigRemoveDegenerates) {
-                        remove_me[a] = true;
-                        ++deg;
-                        goto evil_jump_outside;
+            if (mConfigCheckAreaOfTriangle) {
+                if (face.mNumIndices == 3) {
+                    ai_real area = GeometryUtils::calculateAreaOfTriangle(face, mesh);
+                    if (area < ai_epsilon) {
+                        if (mConfigRemoveDegenerates) {
+                            remove_me[a] = true;
+                            ++deg;
+                            goto evil_jump_outside;
+                        }
+
+                        // todo: check for index which is corrupt.
                     }
-
-                    // todo: check for index which is corrupt.
                 }
             }
         }

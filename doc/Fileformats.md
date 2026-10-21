@@ -47,7 +47,7 @@ __Importers__:
 - [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 - [OFF](https://en.wikipedia.org/wiki/OFF_(file_format))
 - [OGEX](https://en.wikipedia.org/wiki/Open_Game_Engine_Exchange)
-- [PLY](https://en.wikipedia.org/wiki/PLY_(file_format))
+- [PLY](https://en.wikipedia.org/wiki/PLY_(file_format)) — see also [PLY.md](PLY.md) (mesh vs. 3DGS `f_dc_*` / `f_rest_*`)
 - PMX
 - PRJ
 - Q3O

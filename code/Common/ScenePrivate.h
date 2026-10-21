@@ -46,7 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_SCENEPRIVATE_H_INCLUDED
 
 #include <assimp/ai_assert.h>
+#include <assimp/gaussian.h>
 #include <assimp/scene.h>
+
+#include <vector>
 
 namespace Assimp {
 
@@ -54,12 +57,13 @@ namespace Assimp {
 class Importer;
 
 struct ScenePrivateData {
-    //  The struct constructor.
     ScenePrivateData() AI_NO_EXCEPT;
+
+    ~ScenePrivateData();
 
     // Importer that originally loaded the scene though the C-API
     // If set, this object is owned by this private data instance.
-    Assimp::Importer* mOrigImporter;
+    Assimp::Importer *mOrigImporter;
 
     // List of post-processing steps already applied to the scene.
     unsigned int mPPStepsApplied;
@@ -70,33 +74,42 @@ struct ScenePrivateData {
     // and mOrigImporter are no longer safe to rely on and only
     // serve informative purposes.
     bool mIsCopy;
+
+    // Optional 3DGS side data, indexed by mesh index (nullptr = no splat).
+    // Does not change public aiMesh / aiScene ABI.
+    std::vector<aiGaussianSplat *> mGaussianSplats;
 };
 
-inline
-ScenePrivateData::ScenePrivateData() AI_NO_EXCEPT
-: mOrigImporter( nullptr )
-, mPPStepsApplied( 0 )
-, mIsCopy( false ) {
+inline ScenePrivateData::ScenePrivateData() AI_NO_EXCEPT
+        : mOrigImporter(nullptr),
+          mPPStepsApplied(0),
+          mIsCopy(false),
+          mGaussianSplats() {
     // empty
 }
 
-// Access private data stored in the scene
-inline
-ScenePrivateData* ScenePriv(aiScene* in) {
-    ai_assert( nullptr != in );
-    if ( nullptr == in ) {
-        return nullptr;
+inline ScenePrivateData::~ScenePrivateData() {
+    for (aiGaussianSplat *g : mGaussianSplats) {
+        delete g;
     }
-    return static_cast<ScenePrivateData*>(in->mPrivate);
+    mGaussianSplats.clear();
 }
 
-inline
-const ScenePrivateData* ScenePriv(const aiScene* in) {
-    ai_assert( nullptr != in );
-    if ( nullptr == in ) {
+// Access private data stored in the scene
+inline ScenePrivateData *ScenePriv(aiScene *in) {
+    ai_assert(nullptr != in);
+    if (nullptr == in) {
         return nullptr;
     }
-    return static_cast<const ScenePrivateData*>(in->mPrivate);
+    return static_cast<ScenePrivateData *>(in->mPrivate);
+}
+
+inline const ScenePrivateData *ScenePriv(const aiScene *in) {
+    ai_assert(nullptr != in);
+    if (nullptr == in) {
+        return nullptr;
+    }
+    return static_cast<const ScenePrivateData *>(in->mPrivate);
 }
 
 } // Namespace Assimp

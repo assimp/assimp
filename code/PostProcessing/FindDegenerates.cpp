@@ -146,9 +146,10 @@ bool FindDegeneratesProcess::ExecuteOnMesh(aiMesh *mesh) {
         auto vertex_in_range = [numVertices = mesh->mNumVertices](unsigned int vertex_idx) { return vertex_idx < numVertices; };
 
         // check whether the face contains degenerated entries
+        if (!std::all_of(face.mIndices, face.mIndices + face.mNumIndices, vertex_in_range))
+            continue;
+
         for (unsigned int i = 0; i < face.mNumIndices; ++i) {
-            if (!std::all_of(face.mIndices, face.mIndices + face.mNumIndices, vertex_in_range))
-                continue;
 
             // Polygons with more than 4 points are allowed to have double points, that is
             // simulating polygons with holes just with concave polygons. However,
@@ -185,19 +186,19 @@ bool FindDegeneratesProcess::ExecuteOnMesh(aiMesh *mesh) {
                     }
                 }
             }
+        }
 
-            if (mConfigCheckAreaOfTriangle) {
-                if (face.mNumIndices == 3) {
-                    ai_real area = GeometryUtils::calculateAreaOfTriangle(face, mesh);
-                    if (area < ai_epsilon) {
-                        if (mConfigRemoveDegenerates) {
-                            remove_me[a] = true;
-                            ++deg;
-                            goto evil_jump_outside;
-                        }
-
-                        // todo: check for index which is corrupt.
+        if (mConfigCheckAreaOfTriangle) {
+            if (face.mNumIndices == 3) {
+                ai_real area = GeometryUtils::calculateAreaOfTriangle(face, mesh);
+                if (area < ai_epsilon) {
+                    if (mConfigRemoveDegenerates) {
+                        remove_me[a] = true;
+                        ++deg;
+                        goto evil_jump_outside;
                     }
+
+                    // todo: check for index which is corrupt.
                 }
             }
         }

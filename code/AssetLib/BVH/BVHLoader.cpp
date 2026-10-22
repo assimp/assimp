@@ -184,7 +184,9 @@ aiNode *BVHLoader::ReadNode() {
 
     // and create an bone entry for it
     mNodes.emplace_back(node);
-    Node &internNode = mNodes.back();
+    // Store the index, not a reference: a JOINT child recurses into this
+    // function and grows mNodes, which would leave the reference dangling.
+    const size_t internNodeIndex = mNodes.size() - 1;
 
     // now read the node's contents
     std::string siteToken;
@@ -195,7 +197,7 @@ aiNode *BVHLoader::ReadNode() {
         if (token == "OFFSET")
             ReadNodeOffset(node);
         else if (token == "CHANNELS")
-            ReadNodeChannels(internNode);
+            ReadNodeChannels(mNodes[internNodeIndex]);
         else if (token == "JOINT") {
             // child node follows
             aiNode *child = ReadNode();

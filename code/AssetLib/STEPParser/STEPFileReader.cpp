@@ -88,8 +88,8 @@ void ParseFileSchema(const EXPRESS::DataType *schema, STEP::HeaderInfo &head, ui
     // the file schema should be a regular list entity, although it usually contains exactly one entry
     // since the list itself is contained in a regular parameter list, we actually have
     // two nested lists.
-    const EXPRESS::LIST *list = dynamic_cast<const EXPRESS::LIST *>(schema);
-    if (!list || !list->GetSize()) {
+    const auto *list = dynamic_cast<const EXPRESS::LIST *>(schema);
+    if (list == nullptr || !list->GetSize()) {
         return;
     }
     list = dynamic_cast<const EXPRESS::LIST *>((*list)[0].get());

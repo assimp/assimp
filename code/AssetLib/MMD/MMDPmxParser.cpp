@@ -145,6 +145,14 @@ namespace pmx
 		}
 		stream->read((char*) &encoding, sizeof(uint8_t));
 		stream->read((char*) &uv, sizeof(uint8_t));
+		// A vertex carries at most four additional UV channels (uva is
+		// float[4][4] in PmxVertex), and the importer maps channel i onto
+		// mTextureCoords[1 + i]. Anything larger runs off both arrays, so
+		// reject it here instead of writing out of bounds later.
+		if (uv > 4)
+		{
+			throw DeadlyImportError("MMD: invalid additional UV count (must be 0..4): ", ai_to_string(static_cast<int>(uv)));
+		}
 		stream->read((char*) &vertex_index_size, sizeof(uint8_t));
 		stream->read((char*) &texture_index_size, sizeof(uint8_t));
 		stream->read((char*) &material_index_size, sizeof(uint8_t));

@@ -588,6 +588,16 @@ namespace pmx
 		{
 			this->bones[i].Read(stream, &setting);
 		}
+		// The parent index is used to index the bone table (both for the node
+		// hierarchy and for parent positions); anything outside it would read
+		// out of bounds in the importer, and -1 means no parent.
+		for (int i = 0; i < this->bone_count; i++)
+		{
+			if (this->bones[i].parent_index >= this->bone_count)
+			{
+				throw DeadlyImportError("MMD: bone ", i, " has an invalid parent index");
+			}
+		}
 
 		// read morphs
 		stream->read((char*) &this->morph_count, sizeof(int));

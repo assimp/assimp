@@ -170,15 +170,25 @@ void MD2Importer::ValidateHeader( )
         throw DeadlyImportError("Invalid MD2 header: Too many frames, would overflow");
     }
 
-    // -1 because Frame already contains one
-    unsigned int frameSize = sizeof (MD2::Frame) + (m_pcHeader->numVertices - 1) * sizeof(MD2::Vertex);
+    // -1 because Frame already contains one. numVertices and numFrames are
+    // 32-bit values straight from the file, so the product below has to be
+    // evaluated in 64 bits: in 32 bits it can wrap around to a small value
+    // and let the frame offset check below pass for a file that is far too
+    // small to hold the frame data.
+    const size_t frameSize = sizeof (MD2::Frame) +
+            (static_cast<size_t>(m_pcHeader->numVertices) - 1) * sizeof(MD2::Vertex);
 
-    if (m_pcHeader->offsetSkins     + m_pcHeader->numSkins * sizeof (MD2::Skin)         >= fileSize ||
-        m_pcHeader->offsetTexCoords + m_pcHeader->numTexCoords * sizeof (MD2::TexCoord) >= fileSize ||
-        m_pcHeader->offsetTriangles + m_pcHeader->numTriangles * sizeof (MD2::Triangle) >= fileSize ||
-        m_pcHeader->offsetFrames    + m_pcHeader->numFrames * frameSize                 >= fileSize ||
-        m_pcHeader->offsetEnd           > fileSize)
-    {
+    // The sums are evaluated in 64 bits; offset* alone cannot overflow, but
+    // adding a lump size that was scaled by a 32-bit count could.
+    if (static_cast<size_t>(m_pcHeader->offsetSkins) +
+                static_cast<size_t>(m_pcHeader->numSkins) * sizeof (MD2::Skin) >= fileSize ||
+            static_cast<size_t>(m_pcHeader->offsetTexCoords) +
+                static_cast<size_t>(m_pcHeader->numTexCoords) * sizeof (MD2::TexCoord) >= fileSize ||
+            static_cast<size_t>(m_pcHeader->offsetTriangles) +
+                static_cast<size_t>(m_pcHeader->numTriangles) * sizeof (MD2::Triangle) >= fileSize ||
+            static_cast<size_t>(m_pcHeader->offsetFrames) +
+                static_cast<size_t>(m_pcHeader->numFrames) * frameSize >= fileSize ||
+            m_pcHeader->offsetEnd > fileSize) {
         throw DeadlyImportError("Invalid MD2 header: Some offsets are outside the file");
     }
 
@@ -257,8 +267,12 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
     // navigate to the begin of the current frame data
+    // The stride is the computed frame size (the one the offset check in
+    // ValidateHeader validated), not the unvalidated copy in the file header.
+    const size_t frameStride = sizeof(MD2::Frame) +
+            (static_cast<size_t>(m_pcHeader->numVertices) - 1) * sizeof(MD2::Vertex);
 	BE_NCONST MD2::Frame* pcFrame = (BE_NCONST MD2::Frame*) ((uint8_t*)
-		m_pcHeader + m_pcHeader->offsetFrames + (m_pcHeader->frameSize * configFrameID));
+		m_pcHeader + m_pcHeader->offsetFrames + frameStride * configFrameID);
 
     // navigate to the begin of the triangle data
     MD2::Triangle* pcTriangles = (MD2::Triangle*) ((uint8_t*)

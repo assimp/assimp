@@ -189,7 +189,10 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
+                // Channels 2 and 3 hold the source mesh pointer and the
+                // material index, not color arrays, so they must not be freed.
                 (*i)->mColors[2] = nullptr;
+                (*i)->mColors[3] = nullptr;
                 delete *i;
                 continue;
             }
@@ -742,11 +745,19 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
             // add texture coordinates
             for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c) {
                 if (mesh.amTexCoords[c].empty()) break;
-                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][(*i).amUVIndices[c][n]];
+                const uint32_t uvIndex = (*i).amUVIndices[c][n];
+                if (uvIndex >= mesh.amTexCoords[c].size()) {
+                    throw DeadlyImportError("ASE: Invalid UV index in face ", fi, ".");
+                }
+                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][uvIndex];
             }
             // add vertex colors
             if (!mesh.mVertexColors.empty()) {
-                mVertexColors[iCurrent] = mesh.mVertexColors[(*i).mColorIndices[n]];
+                const uint32_t colorIndex = (*i).mColorIndices[n];
+                if (colorIndex >= mesh.mVertexColors.size()) {
+                    throw DeadlyImportError("ASE: Invalid vertex color index in face ", fi, ".");
+                }
+                mVertexColors[iCurrent] = mesh.mVertexColors[colorIndex];
             }
             // add normal vectors
             if (!mesh.mNormals.empty()) {

@@ -75,3 +75,54 @@ TEST_F(utSceneCombiner, CopySceneWithNullptr_AI_NO_EXCEPTion) {
     EXPECT_NO_THROW(SceneCombiner::CopyScene(nullptr, nullptr));
     EXPECT_NO_THROW(SceneCombiner::CopySceneFlat(nullptr, nullptr));
 }
+
+// Copying a mesh must give the copy its own UV and color buffers for every
+// populated channel, even when the channel is not the first one or when the
+// mesh reports zero vertices. Otherwise the copy aliases the source arrays and
+// destroying both double-frees them (assimp/assimp#6620).
+TEST_F(utSceneCombiner, CopyMeshDoesNotAliasSparseOrEmptyChannels) {
+    auto makeMesh = []() {
+        aiMesh *mesh = new aiMesh;
+        // A populated UV channel that is not channel 0.
+        mesh->mNumVertices = 2;
+        mesh->mVertices = new aiVector3D[2];
+        mesh->mTextureCoords[1] = new aiVector3D[2]{};
+        mesh->mNumUVComponents[1] = 2;
+        // A populated color channel that is not channel 0.
+        mesh->mColors[1] = new aiColor4D[2]{};
+        return mesh;
+    };
+
+    // Non-contiguous channels: HasTextureCoords(0) is false, so the old loop
+    // stopped before copying channel 1.
+    {
+        aiMesh *src = makeMesh();
+        aiMesh *dst = nullptr;
+        SceneCombiner::Copy(&dst, src);
+        ASSERT_NE(dst, nullptr);
+        EXPECT_NE(dst->mTextureCoords[1], src->mTextureCoords[1]);
+        EXPECT_NE(dst->mColors[1], src->mColors[1]);
+        delete dst;
+        delete src;
+    }
+
+    // A populated channel on a zero-vertex mesh: HasTextureCoords() requires
+    // mNumVertices > 0, so the old loop skipped it.
+    {
+        aiMesh *src = makeMesh();
+        src->mNumVertices = 0;
+        delete[] src->mVertices;
+        src->mVertices = nullptr;
+        // Move the populated channels to index 0 to exercise the mNumVertices
+        // guard specifically.
+        std::swap(src->mTextureCoords[0], src->mTextureCoords[1]);
+        std::swap(src->mColors[0], src->mColors[1]);
+        aiMesh *dst = nullptr;
+        SceneCombiner::Copy(&dst, src);
+        ASSERT_NE(dst, nullptr);
+        EXPECT_NE(dst->mTextureCoords[0], src->mTextureCoords[0]);
+        EXPECT_NE(dst->mColors[0], src->mColors[0]);
+        delete dst;
+        delete src;
+    }
+}

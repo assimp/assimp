@@ -473,16 +473,11 @@ aiProcess_ForceGenNormals = 0x20000000
 #  #aiProcess_JoinIdenticalVertices is *senseless* then.
 #  This process gives sense back to aiProcess_JoinIdenticalVertices
 #
-aiProcess_DropNormals = 0x40000000,
+aiProcess_DropNormals = 0x40000000
 
 ##
 #
 aiProcess_GenBoundingBoxes = 0x80000000
-
-aiProcess_GenEntityMeshes = 0x100000
-aiProcess_OptimizeAnimations = 0x200000
-aiProcess_FixTexturePaths = 0x200000
-aiProcess_EmbedTextures  = 0x10000000,
 
 ## @def aiProcess_ConvertToLeftHanded
  #  @brief Shortcut flag for Direct3D-based applications. 

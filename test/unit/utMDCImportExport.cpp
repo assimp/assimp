@@ -60,3 +60,9 @@ public:
 TEST_F(utMDCImportExport, importMDCFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utMDCImportExport, importInvalidFrameBaseOffset) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/invalid/InvalidFrameBaseOffset.mdc", 0);
+    EXPECT_EQ(nullptr, scene);
+}

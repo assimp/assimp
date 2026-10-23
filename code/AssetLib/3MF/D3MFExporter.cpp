@@ -346,6 +346,11 @@ void D3MFExporter::writeFaces(aiMesh *mesh, unsigned int matIdx) {
                  << "\n";
     for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
         aiFace &currentFace = mesh->mFaces[i];
+        // A 3MF triangle has exactly three vertices; points and lines have no
+        // representation in it, and reading three indices from them overruns.
+        if (currentFace.mNumIndices != 3) {
+            continue;
+        }
         mModelOutput << "<" << XmlTag::triangle << " v1=\"" << currentFace.mIndices[0] << "\" v2=\""
                      << currentFace.mIndices[1] << "\" v3=\"" << currentFace.mIndices[2]
                      << "\" pid=\"1\" p1=\"" + ai_to_string(matIdx) + "\" />";

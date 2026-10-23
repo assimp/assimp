@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MathFunctions.h>
 
 // Header files, stdlib.
 #include <set>
@@ -99,8 +100,8 @@ namespace Assimp {
 ///
 class AMFImporter final : public BaseImporter {
     using AMFMetaDataArray = std::vector<AMFMetadata *>;
-    using MeshArray = std::vector<aiMesh *>;
-    using NodeArray = std::vector<aiNode *>;
+    using MeshArray = std::vector<std::unique_ptr<aiMesh> >;
+    using NodeArray = std::vector<std::unique_ptr<aiNode> >;
 
 public:
     struct SPP_Material;

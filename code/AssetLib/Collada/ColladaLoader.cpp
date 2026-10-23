@@ -1261,8 +1261,20 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             }
         }
 
+        // Only build node-transform keys when at least one channel maps to a node
+        // transform. Channels that don't (mTransformIndex == SIZE_MAX, e.g. morph-weight
+        // channels handled separately below) must not drive the transform chain or emit a
+        // dummy node animation.
+        bool hasNodeTransformChannel = false;
+        for (const ChannelEntry &e : entries) {
+            if (e.mTransformIndex != SIZE_MAX && e.mTransformIndex < srcNode->mTransforms.size()) {
+                hasNodeTransformChannel = true;
+                break;
+            }
+        }
+
         std::vector<aiMatrix4x4> resultTrafos;
-        if (!entries.empty() && entries.front().mTimeAccessor->mCount > 0) {
+        if (hasNodeTransformChannel && !entries.empty() && entries.front().mTimeAccessor->mCount > 0) {
             // create a local transformation chain of the node's transforms
             std::vector<Collada::Transform> transforms = srcNode->mTransforms;
 

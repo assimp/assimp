@@ -1047,10 +1047,12 @@ std::string XFileParser::GetNextToken() {
         }
         case 3:
             // integer token
+            if (mEnd - mP < 4) return s;
             mP += 4;
             return "<integer>";
         case 5:
             // GUID token
+            if (mEnd - mP < 16) return s;
             mP += 16;
             return "<guid>";
         case 6:

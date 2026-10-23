@@ -188,21 +188,25 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         Compression compression;
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
-                Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
-            while (mP + 3 < mEnd) {
-                uint16_t ofs = *((uint16_t *)mP);
-                AI_SWAP2(ofs);
-                mP += 4;
-
-                if (mP + ofs > mEnd + 2) {
-                    throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
-                }
-                out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
-                mP += ofs;
-            }
-            compression.close();
+        if (!compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
+                    Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
+            throw DeadlyImportError("X: Failed to open the MSZIP decompression stream");
         }
+        while (mP + 3 < mEnd) {
+            uint16_t ofs = *((uint16_t *)mP);
+            AI_SWAP2(ofs);
+            mP += 4;
+
+            // mEnd points at the last valid byte of the buffer, so the
+            // final byte the block read may touch is mEnd itself; one
+            // past that would read out of bounds.
+            if (mP + ofs > mEnd + 1) {
+                throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+            }
+            out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
+            mP += ofs;
+        }
+        compression.close();
 
         // ok, update pointers to point to the uncompressed file data
         mP = &uncompressed[0];
@@ -407,7 +411,7 @@ void XFileParser::ParseDataObjectMesh(Mesh *pMesh) {
         Face &face = pMesh->mPosFaces[a];
         for (unsigned int b = 0; b < numIndices; ++b) {
             const int idx(ReadInt());
-            if (static_cast<unsigned int>(idx) <= numVertices) {
+            if (static_cast<unsigned int>(idx) < numVertices) {
                 face.mIndices.push_back(idx);
             }
         }

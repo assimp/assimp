@@ -82,7 +82,7 @@ void ExportScene3MF(const char *pFile, IOSystem *pIOSystem, const aiScene *pScen
 namespace D3MF {
 
 D3MFExporter::D3MFExporter(const char *pFile, const aiScene *pScene) :
-        mArchiveName(pFile), m_zipArchive(nullptr), mScene(pScene) {
+        mArchiveName(pFile), mScene(pScene) {
     // empty
 }
 
@@ -108,8 +108,8 @@ bool D3MFExporter::validate() const {
 bool D3MFExporter::exportArchive(const char *file) {
     bool ok(true);
 
-    m_zipArchive = zip_open(file, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
-    if (nullptr == m_zipArchive) {
+    mZipArchive = zip_open(file, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+    if (nullptr == mZipArchive) {
         return false;
     }
 
@@ -117,8 +117,8 @@ bool D3MFExporter::exportArchive(const char *file) {
     ok |= export3DModel();
     ok |= exportRelations();
 
-    zip_close(m_zipArchive);
-    m_zipArchive = nullptr;
+    zip_close(mZipArchive);
+    mZipArchive = nullptr;
 
     return ok;
 }
@@ -391,13 +391,13 @@ void D3MFExporter::zipRelInfo(const std::string &folder, const std::string &relN
 }
 
 void D3MFExporter::addFileInZip(const std::string& entry, const std::string& content) {
-    if (nullptr == m_zipArchive) {
+    if (nullptr == mZipArchive) {
         throw DeadlyExportError("3MF-Export: Zip archive not valid, nullptr.");
     }
 
-    zip_entry_open(m_zipArchive, entry.c_str());
-    zip_entry_write(m_zipArchive, content.c_str(), content.size());
-    zip_entry_close(m_zipArchive);
+    zip_entry_open(mZipArchive, entry.c_str());
+    zip_entry_write(mZipArchive, content.c_str(), content.size());
+    zip_entry_close(mZipArchive);
 }
 
 } // Namespace D3MF

@@ -920,7 +920,9 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
                 idx = next->getUnsignedInt32();
             }
             
-            ai_assert(static_cast<size_t>(idx) <= m_currentVertices.m_vertices.size());
+            if (idx < 0 || static_cast<size_t>(idx) >= m_currentVertices.m_vertices.size()) {
+                throw DeadlyImportError("OpenGEX: index in IndexArray is out of range.");
+            }
             ai_assert(index < m_currentMesh->mNumVertices);
             aiVector3D &pos = (m_currentVertices.m_vertices[idx]);
             m_currentMesh->mVertices[index].Set(pos.x, pos.y, pos.z);
@@ -928,11 +930,11 @@ void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * 
                 aiColor4D &col = m_currentVertices.m_colors[idx];
                 m_currentMesh->mColors[0][index] = col;
             }
-            if (hasNormalCoords) {
+            if (hasNormalCoords && static_cast<size_t>(idx) < m_currentVertices.m_normals.size()) {
                 aiVector3D &normal = (m_currentVertices.m_normals[idx]);
                 m_currentMesh->mNormals[index].Set(normal.x, normal.y, normal.z);
             }
-            if (hasTexCoords) {
+            if (hasTexCoords && static_cast<size_t>(idx) < m_currentVertices.m_numUVComps[0]) {
                 aiVector3D &tex = (m_currentVertices.m_textureCoords[0][idx]);
                 m_currentMesh->mTextureCoords[0][index].Set(tex.x, tex.y, tex.z);
             }

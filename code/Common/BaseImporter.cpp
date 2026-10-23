@@ -60,36 +60,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 namespace {
-// Checks whether the passed string is a gcs version.
-bool IsGcsVersion(const std::string &s) {
-    if (s.empty()) return false;
-    return std::all_of(s.cbegin(), s.cend(), [](const char c) {
-        // gcs only permits numeric characters.
-        return std::isdigit(static_cast<int>(c));
-    });
-}
-
-// Removes a possible version hash from a filename, as found for example in
-// gcs uris (e.g. `gs://bucket/model.glb#1234`), see also
-// https://github.com/GoogleCloudPlatform/gsutil/blob/c80f329bc3c4011236c78ce8910988773b2606cb/gslib/storage_url.py#L39.
-std::string StripVersionHash(const std::string &filename) {
-    const std::string::size_type pos = filename.find_last_of('#');
-    // Only strip if the hash is behind a possible file extension and the part
-    // behind the hash is a version string.
-    if (pos != std::string::npos && pos > filename.find_last_of('.') &&
-        IsGcsVersion(filename.substr(pos + 1))) {
-        return filename.substr(0, pos);
+    // Checks whether the passed string is a gcs version.
+    bool IsGcsVersion(const std::string &s) {
+        if (s.empty()) return false;
+        return std::all_of(s.cbegin(), s.cend(), [](const char c) {
+            // gcs only permits numeric characters.
+            return std::isdigit(static_cast<int>(c));
+        });
     }
-    return filename;
-}
+
+    // Removes a possible version hash from a filename, as found for example in
+    // gcs uris (e.g. `gs://bucket/model.glb#1234`), see also
+    // https://github.com/GoogleCloudPlatform/gsutil/blob/c80f329bc3c4011236c78ce8910988773b2606cb/gslib/storage_url.py#L39.
+    std::string StripVersionHash(const std::string &filename) {
+        const std::string::size_type pos = filename.find_last_of('#');
+        // Only strip if the hash is behind a possible file extension and the part
+        // behind the hash is a version string.
+        if (pos != std::string::npos && pos > filename.find_last_of('.') &&
+            IsGcsVersion(filename.substr(pos + 1))) {
+            return filename.substr(0, pos);
+        }
+        return filename;
+    }
 }  // namespace
 
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-BaseImporter::BaseImporter() AI_NO_EXCEPT
-        : m_progress() {
+BaseImporter::BaseImporter() AI_NO_EXCEPT : m_progress() {
     // empty
 }
 
@@ -109,13 +108,10 @@ void BaseImporter::UpdateImporterScale(Importer *pImp) {
 // ------------------------------------------------------------------------------------------------
 // Imports the given file and returns the imported data.
 aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSystem *pIOHandler) {
-
     m_progress = pImp->GetProgressHandler();
     if (nullptr == m_progress) {
         return nullptr;
     }
-
-    ai_assert(m_progress);
 
     // Gather configuration properties for this run
     SetupProperties(pImp);
@@ -133,7 +129,6 @@ aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSyst
         // Calculate import scale hook - required because pImp not available anywhere else
         // passes scale into ScaleProcess
         UpdateImporterScale(pImp);
-
     } catch( const std::exception &err ) {
         // extract error description
         m_ErrorText = err.what();
@@ -173,7 +168,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 }
 
 // ------------------------------------------------------------------------------------------------
-/*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
+bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
         const std::string &pFile,
         const char **tokens,
         std::size_t numTokens,
@@ -247,7 +242,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 
 // ------------------------------------------------------------------------------------------------
 // Simple check for file extension
-/*static*/ bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
+bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
         const char *ext0,
         const char *ext1,
         const char *ext2,
@@ -557,26 +552,26 @@ typedef std::list<LoadRequest>::iterator LoadReqIt;
 BatchLoader::BatchLoader(IOSystem *pIO, bool validate) {
     ai_assert(nullptr != pIO);
 
-    m_data = new BatchData(pIO, validate);
+    mData = new BatchData(pIO, validate);
 }
 
 // ------------------------------------------------------------------------------------------------
 BatchLoader::~BatchLoader() {
     // delete all scenes what have not been polled by the user
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         delete (*it).scene;
     }
-    delete m_data;
+    delete mData;
 }
 
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::setValidation(bool enabled) {
-    m_data->validate = enabled;
+    mData->validate = enabled;
 }
 
 // ------------------------------------------------------------------------------------------------
 bool BatchLoader::getValidation() const {
-    return m_data->validate;
+    return mData->validate;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -585,34 +580,34 @@ unsigned int BatchLoader::AddLoadRequest(const std::string &file,
     ai_assert(!file.empty());
 
     // check whether we have this loading request already
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         // Call IOSystem's path comparison function here
-        if (m_data->pIOSystem->ComparePaths((*it).file, file)) {
+        if (mData->pIOSystem->ComparePaths(it->file, file)) {
             if (map) {
-                if (!((*it).map == *map)) {
+                if (!(it->map == *map)) {
                     continue;
                 }
-            } else if (!(*it).map.empty()) {
+            } else if (!it->map.empty()) {
                 continue;
             }
 
-            (*it).refCnt++;
-            return (*it).id;
+            it->refCnt++;
+            return it->id;
         }
     }
 
     // no, we don't have it. So add it to the queue ...
-    m_data->requests.emplace_back(file, steps, map, m_data->next_id);
-    return m_data->next_id++;
+    mData->requests.emplace_back(file, steps, map, mData->next_id);
+    return mData->next_id++;
 }
 
 // ------------------------------------------------------------------------------------------------
 aiScene *BatchLoader::GetImport(unsigned int which) {
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         if ((*it).id == which && (*it).loaded) {
             aiScene *sc = (*it).scene;
             if (!(--(*it).refCnt)) {
-                m_data->requests.erase(it);
+                mData->requests.erase(it);
             }
             return sc;
         }
@@ -623,27 +618,27 @@ aiScene *BatchLoader::GetImport(unsigned int which) {
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::LoadAll() {
     // no threaded implementation for the moment
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         // force validation in debug builds
-        unsigned int pp = (*it).flags;
-        if (m_data->validate) {
+        unsigned int pp = it->flags;
+        if (mData->validate) {
             pp |= aiProcess_ValidateDataStructure;
         }
 
         // setup config properties if necessary
-        ImporterPimpl *pimpl = m_data->pImporter->Pimpl();
-        pimpl->mFloatProperties = (*it).map.floats;
-        pimpl->mIntProperties = (*it).map.ints;
-        pimpl->mStringProperties = (*it).map.strings;
-        pimpl->mMatrixProperties = (*it).map.matrices;
+        ImporterPimpl *pimpl = mData->pImporter->Pimpl();
+        pimpl->mFloatProperties = it->map.floats;
+        pimpl->mIntProperties = it->map.ints;
+        pimpl->mStringProperties = it->map.strings;
+        pimpl->mMatrixProperties = it->map.matrices;
 
         if (!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_INFO("%%% BEGIN EXTERNAL FILE %%%");
-            ASSIMP_LOG_INFO("File: ", (*it).file);
+            ASSIMP_LOG_INFO("File: ", it->file);
         }
-        m_data->pImporter->ReadFile((*it).file, pp);
-        (*it).scene = m_data->pImporter->GetOrphanedScene();
-        (*it).loaded = true;
+        mData->pImporter->ReadFile(it->file, pp);
+        it->scene = mData->pImporter->GetOrphanedScene();
+        it->loaded = true;
 
         ASSIMP_LOG_INFO("%%% END EXTERNAL FILE %%%");
     }

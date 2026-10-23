@@ -153,9 +153,12 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     }
 
     pScene->mNumMeshes = pModel->material_count;
-    // value-initialize so the pointers are null: if a later CreateMesh throws (e.g. on a
-    // malformed index), the scene destructor would otherwise delete uninitialized pointers.
-    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes]();
+    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
+    // Null the pointer array: if a later CreateMesh throws (e.g. on a malformed index),
+    // the scene destructor would otherwise delete uninitialized pointers.
+    for (unsigned int mi = 0; mi < pScene->mNumMeshes; ++mi) {
+        pScene->mMeshes[mi] = nullptr;
+    }
     for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
 

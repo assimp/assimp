@@ -408,10 +408,12 @@ void Mesh::ConvertToAssimpScene(aiScene *dest) {
 
     // Setup
     dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
-    // value-initialize so the pointers are null: if a later ConvertToAssimpMesh throws
-    // (e.g. on a malformed face index), the scene destructor would otherwise delete
-    // uninitialized pointers while cleaning up.
-    dest->mMeshes = new aiMesh *[dest->mNumMeshes]();
+    dest->mMeshes = new aiMesh *[dest->mNumMeshes];
+    // Null the pointer array: if a later ConvertToAssimpMesh throws (e.g. on a malformed
+    // face index), the scene destructor would otherwise delete uninitialized pointers.
+    for (unsigned int mi = 0; mi < dest->mNumMeshes; ++mi) {
+        dest->mMeshes[mi] = nullptr;
+    }
 
     // Create root node
     dest->mRootNode = new aiNode();
@@ -674,10 +676,12 @@ SubMeshXml *MeshXml::GetSubMesh(uint16_t index) const {
 void MeshXml::ConvertToAssimpScene(aiScene *dest) {
     // Setup
     dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
-    // value-initialize so the pointers are null: if a later ConvertToAssimpMesh throws
-    // (e.g. on a malformed face index), the scene destructor would otherwise delete
-    // uninitialized pointers while cleaning up.
-    dest->mMeshes = new aiMesh *[dest->mNumMeshes]();
+    dest->mMeshes = new aiMesh *[dest->mNumMeshes];
+    // Null the pointer array: if a later ConvertToAssimpMesh throws (e.g. on a malformed
+    // face index), the scene destructor would otherwise delete uninitialized pointers.
+    for (unsigned int mi = 0; mi < dest->mNumMeshes; ++mi) {
+        dest->mMeshes[mi] = nullptr;
+    }
 
     // Create root node
     dest->mRootNode = new aiNode();

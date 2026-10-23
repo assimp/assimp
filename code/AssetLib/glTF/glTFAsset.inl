@@ -495,6 +495,12 @@ inline void Image::Read(Value &obj, Asset &r) {
                 if (ReadMember(*ext, "bufferView", bufferViewId)) {
                     Ref<BufferView> bv = r.bufferViews.Get(bufferViewId);
                     if (bv) {
+                        // byteOffset/byteLength come straight from the JSON and are not
+                        // bounded against the buffer; reject a view that runs past it so the
+                        // memcpy below cannot read out of bounds.
+                        if (!bv->buffer || static_cast<size_t>(bv->byteOffset) + static_cast<size_t>(bv->byteLength) > bv->buffer->byteLength) {
+                            throw DeadlyImportError("GLTF: image KHR_binary_glTF bufferView is out of range of its buffer");
+                        }
                         mDataLength = bv->byteLength;
                         mData.reset(new uint8_t[mDataLength]);
                         memcpy(mData.get(), bv->buffer->GetPointer() + bv->byteOffset, mDataLength);

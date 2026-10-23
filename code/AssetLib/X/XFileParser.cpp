@@ -642,6 +642,13 @@ void XFileParser::ParseDataObjectMeshVertexColors(Mesh *pMesh) {
 void XFileParser::ParseDataObjectMeshMaterialList(Mesh *pMesh) {
     readHeadOfDataObject();
 
+    // A mesh has a single material list. mFaceMaterials is padded to one entry per
+    // face below, so a second MeshMaterialList would append past the face count and
+    // later be indexed against mPosFaces out of bounds in CreateMeshes().
+    if (!pMesh->mFaceMaterials.empty()) {
+        ThrowException("Multiple MeshMaterialList sections in a single mesh.");
+    }
+
     // read material count
     /*unsigned int numMaterials =*/ReadInt();
     // read non triangulated face material index count

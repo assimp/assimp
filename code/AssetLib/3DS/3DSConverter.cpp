@@ -384,7 +384,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
                     meshOut->mVertices[base] = i->mPositions[idx];
                     meshOut->mNormals[base] = i->mNormals[idx];
 
-                    if ((*i).mTexCoords.size()) {
+                    if (i->mTexCoords.size()) {
                         meshOut->mTextureCoords[0][base] = i->mTexCoords[idx];
                     }
 

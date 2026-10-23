@@ -642,13 +642,6 @@ void XFileParser::ParseDataObjectMeshVertexColors(Mesh *pMesh) {
 void XFileParser::ParseDataObjectMeshMaterialList(Mesh *pMesh) {
     readHeadOfDataObject();
 
-    // A mesh has a single material list. mFaceMaterials is padded to one entry per
-    // face below, so a second MeshMaterialList would append past the face count and
-    // later be indexed against mPosFaces out of bounds in CreateMeshes().
-    if (!pMesh->mFaceMaterials.empty()) {
-        ThrowException("Multiple MeshMaterialList sections in a single mesh.");
-    }
-
     // read material count
     /*unsigned int numMaterials =*/ReadInt();
     // read non triangulated face material index count
@@ -674,6 +667,13 @@ void XFileParser::ParseDataObjectMeshMaterialList(Mesh *pMesh) {
     // if there was only a single material index, replicate it on all faces
     while (pMesh->mFaceMaterials.size() < pMesh->mPosFaces.size())
         pMesh->mFaceMaterials.push_back(pMesh->mFaceMaterials.front());
+
+    // mFaceMaterials is indexed against mPosFaces (one material per face) in
+    // CreateMeshes(); any count that does not match the face count would be read out
+    // of bounds there -- e.g. a second MeshMaterialList section appending more entries,
+    // or a list on a mesh that declares no faces.
+    if (pMesh->mFaceMaterials.size() != pMesh->mPosFaces.size())
+        ThrowException("Per-face material index count does not match the face count.");
 
     // read following data objects
     bool running = true;

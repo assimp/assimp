@@ -997,7 +997,12 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                                                     blubb = mesh.mBoneVertices[iIndex2].mBoneWeights.begin();
                                             blubb != mesh.mBoneVertices[iIndex2].mBoneWeights.end(); ++blubb) {
 
-                                        // NOTE: illegal cases have already been filtered out
+                                        // The bone index is file-controlled and only the -1
+                                        // sentinel is filtered at parse time; bound it against
+                                        // the bone count before indexing avOutputBones.
+                                        if ((*blubb).first < 0 || (*blubb).first >= (int)mesh.mBones.size()) {
+                                            continue;
+                                        }
                                         avOutputBones[(*blubb).first].emplace_back(
                                                 iBase, (*blubb).second);
                                     }
@@ -1153,6 +1158,12 @@ void ASEImporter::ConvertMeshes(ASE::Mesh &mesh, std::vector<aiMesh *> &avOutMes
                 for (std::vector<std::pair<int, float>>::const_iterator
                                 ronaldweasley = (*harrypotter).mBoneWeights.begin();
                         ronaldweasley != (*harrypotter).mBoneWeights.end(); ++ronaldweasley) {
+                    // The bone index comes straight from the file and is only filtered
+                    // for the -1 sentinel at parse time, never bounded against the declared
+                    // bone count; skip out-of-range indices instead of writing past avBonesOut.
+                    if ((*ronaldweasley).first < 0 || (*ronaldweasley).first >= (int)mesh.mBones.size()) {
+                        continue;
+                    }
                     aiVertexWeight weight;
                     weight.mVertexId = quak;
                     weight.mWeight = (*ronaldweasley).second;

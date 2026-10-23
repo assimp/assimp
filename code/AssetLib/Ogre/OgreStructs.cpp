@@ -408,7 +408,10 @@ void Mesh::ConvertToAssimpScene(aiScene *dest) {
 
     // Setup
     dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
-    dest->mMeshes = new aiMesh *[dest->mNumMeshes];
+    // value-initialize so the pointers are null: if a later ConvertToAssimpMesh throws
+    // (e.g. on a malformed face index), the scene destructor would otherwise delete
+    // uninitialized pointers while cleaning up.
+    dest->mMeshes = new aiMesh *[dest->mNumMeshes]();
 
     // Create root node
     dest->mRootNode = new aiNode();
@@ -671,7 +674,10 @@ SubMeshXml *MeshXml::GetSubMesh(uint16_t index) const {
 void MeshXml::ConvertToAssimpScene(aiScene *dest) {
     // Setup
     dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
-    dest->mMeshes = new aiMesh *[dest->mNumMeshes];
+    // value-initialize so the pointers are null: if a later ConvertToAssimpMesh throws
+    // (e.g. on a malformed face index), the scene destructor would otherwise delete
+    // uninitialized pointers while cleaning up.
+    dest->mMeshes = new aiMesh *[dest->mNumMeshes]();
 
     // Create root node
     dest->mRootNode = new aiNode();
@@ -778,6 +784,15 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent) {
 
             // Ogres vertex index to ref into the source buffers.
             const size_t ogreVertexIndex = ogreFace.mIndices[v];
+
+            // Face indices come straight from the file and are not bounded against the
+            // vertex count; src->positions/normals/uvs are sized by <geometry vertexcount>,
+            // so an out-of-range index would read past those buffers.
+            if (ogreVertexIndex >= src->positions.size()) {
+                throw DeadlyImportError("OgreXml: face references vertex index ",
+                        ogreVertexIndex, " but the submesh only has ", src->positions.size(), " vertices.");
+            }
+
             src->AddVertexMapping(static_cast<uint32_t>(ogreVertexIndex), static_cast<uint32_t>(newIndex));
 
             // Position

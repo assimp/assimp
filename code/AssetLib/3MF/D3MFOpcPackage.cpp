@@ -179,7 +179,7 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) {
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    if (nullptr == mZipArchive) {
+    if (mZipArchive != nullptr)  {
         mZipArchive->Close(mRootStream);
         delete mZipArchive;
     }

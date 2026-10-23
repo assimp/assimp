@@ -511,7 +511,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
             for (auto cit = needMat.begin(), cend = needMat.end(); cit != cend; ++cit, ++mat) {
-                if (cit->first) {
+                if (!cit->first) {
                     continue;
                 }
 

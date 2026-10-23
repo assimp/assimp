@@ -118,6 +118,8 @@ protected:
     void skipGroupNumber();
     /// Gets the group number and resolution from file.
     void skipGroupNumberAndResolution();
+    /// Reselect an existing group (Wavefront `group` keyword) for late material assignment.
+    void reselectGroup();
     /// Returns the index of the material. Is -1 if not material was found.
     int getMaterialIndex(const std::string &strMaterialName);
     /// Parse object name
@@ -140,6 +142,8 @@ protected:
     DataArrayIt mDataItEnd{};
     //! Pointer to model instance
     std::unique_ptr<ObjFile::Model> mModel{};
+    //! When true, trailing `group`/`usemtl` assigns materials to already-built meshes (Viewpoint OBJs).
+    bool mReselectMode{ false };
     //! Current line (for debugging)
     unsigned int mLine{ 0 };
     //! Helper buffer (safe)

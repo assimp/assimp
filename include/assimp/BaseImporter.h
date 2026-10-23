@@ -79,7 +79,8 @@ using UByteBuffer = std::vector<uint8_t>;
 using ByteBuffer = std::vector<int8_t>;
 
 // ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
+/** 
+ *  @brief FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
  *  for all importer worker classes.
  *
  * The interface defines two functions: CanRead() is used to check if the
@@ -87,6 +88,7 @@ using ByteBuffer = std::vector<int8_t>;
  * this function returns true, the importer then calls ReadFile() which
  * imports the given file. ReadFile is not overridable, it just calls
  * InternReadFile() and catches any ImportErrorException that might occur.
+ * The instance of the scene must be release manually!
  */
 class ASSIMP_API BaseImporter {
     friend class Importer;

@@ -1,4 +1,4 @@
-D bindings for the Assimp library (http://assimp.sf.net).
+D bindings for the Assimp library (https://www.assimp.org).
 ---
 
 These bindings provide access to Assimp's C API. They were directly created

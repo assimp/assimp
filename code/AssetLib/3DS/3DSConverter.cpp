@@ -112,7 +112,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial() {
     }
     if (cnt && idx == mScene->mMaterials.size()) {
         // We need to create our own default material
-        Material sMat("%%%DEFAULT");
+        Material sMat(AI_DEFAULT_MATERIAL_NAME);
         sMat.mDiffuse = aiColor3D(0.3f, 0.3f, 0.3f);
         mScene->mMaterials.push_back(sMat);
 

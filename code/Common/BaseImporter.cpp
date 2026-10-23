@@ -109,7 +109,7 @@ void BaseImporter::UpdateImporterScale(Importer *pImp) {
 // Imports the given file and returns the imported data.
 aiScene *BaseImporter::ReadFile(Importer *pImp, const std::string &pFile, IOSystem *pIOHandler) {
     m_progress = pImp->GetProgressHandler();
-    if (nullptr == m_progress) {
+    if (m_progress == nullptr) {
         return nullptr;
     }
 
@@ -389,7 +389,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char> &data) {
 
         std::vector<char> output;
         auto *ptr = (uint32_t *)&data[0];
-        uint32_t *end = ptr + (data.size() / sizeof(uint32_t)) + 1;
+        uint32_t *end = ptr + (data.size() / sizeof(uint32_t));
         utf8::utf32to8(ptr, end, back_inserter(output));
         return;
     }
@@ -490,6 +490,7 @@ struct LoadRequest {
             flags(_flags),
             refCnt(1),
             scene(nullptr),
+            sceneClaimed(false),
             loaded(false),
             id(_id) {
         if (_map) {
@@ -505,6 +506,7 @@ struct LoadRequest {
     unsigned int flags;
     unsigned int refCnt;
     aiScene *scene;
+    bool sceneClaimed;
     bool loaded;
     BatchLoader::PropertyMap map;
     unsigned int id;
@@ -558,8 +560,10 @@ BatchLoader::BatchLoader(IOSystem *pIO, bool validate) {
 // ------------------------------------------------------------------------------------------------
 BatchLoader::~BatchLoader() {
     // delete all scenes what have not been polled by the user
-    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
-        delete (*it).scene;
+    for (auto it = mData->requests.begin(); it != mData->requests.end(); ++it) {
+        if (!it->sceneClaimed) {
+            delete it->scene;
+        }
     }
     delete mData;
 }
@@ -606,6 +610,7 @@ aiScene *BatchLoader::GetImport(unsigned int which) {
     for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         if ((*it).id == which && (*it).loaded) {
             aiScene *sc = (*it).scene;
+            (*it).sceneClaimed = true;
             if (!(--(*it).refCnt)) {
                 mData->requests.erase(it);
             }

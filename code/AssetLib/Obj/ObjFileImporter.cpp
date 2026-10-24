@@ -184,7 +184,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
         for (auto object : pModel->mObjects) {
             if (object) {
                 ++childCount;
-                meshCount += (unsigned int)object->m_Meshes.size();
+                meshCount += (unsigned int)object->mMeshes.size();
             }
         }
 
@@ -265,14 +265,14 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
     const size_t oldMeshSize = MeshArray.size();
     aiNode *pNode = new aiNode;
 
-    pNode->mName = pObject->m_strObjName;
+    pNode->mName = pObject->mObjName;
 
     // If we have a parent node, store it
     ai_assert(nullptr != pParent);
     appendChildToParentNode(pParent, pNode);
 
-    for (size_t i = 0; i < pObject->m_Meshes.size(); ++i) {
-        unsigned int meshId = pObject->m_Meshes[i];
+    for (size_t i = 0; i < pObject->mMeshes.size(); ++i) {
+        unsigned int meshId = pObject->mMeshes[i];
         std::unique_ptr<aiMesh> pMesh = createTopology(pModel, pObject, meshId);
         if (pMesh != nullptr) {
             if (pMesh->mNumFaces > 0) {
@@ -282,8 +282,8 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
     }
 
     // Create all nodes from the sub-objects stored in the current object
-    if (!pObject->m_SubObjects.empty()) {
-        size_t numChilds = pObject->m_SubObjects.size();
+    if (!pObject->mSubObjects.empty()) {
+        size_t numChilds = pObject->mSubObjects.size();
         pNode->mNumChildren = static_cast<unsigned int>(numChilds);
         pNode->mChildren = new aiNode *[numChilds];
         pNode->mNumMeshes = 1;
@@ -319,30 +319,30 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
         return nullptr;
     }
 
-    if (pObjMesh->m_Faces.empty()) {
+    if (pObjMesh->mFaces.empty()) {
         return nullptr;
     }
 
     std::unique_ptr<aiMesh> pMesh(new aiMesh);
-    if (!pObjMesh->m_name.empty()) {
-        pMesh->mName.Set(pObjMesh->m_name);
+    if (!pObjMesh->mName.empty()) {
+        pMesh->mName.Set(pObjMesh->mName);
     }
 
-    for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
-        const ObjFile::Face *inp = pObjMesh->m_Faces[index];
+    for (size_t index = 0; index < pObjMesh->mFaces.size(); index++) {
+        const ObjFile::Face *inp = pObjMesh->mFaces[index];
         if (inp == nullptr) {
             continue;
         }
 
         if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
-            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->mVertices.size() - 1);
             pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
         } else if (inp->mPrimitiveType == aiPrimitiveType_POINT) {
-            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size());
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->mVertices.size());
             pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
         } else {
             ++pMesh->mNumFaces;
-            if (inp->m_vertices.size() > 3) {
+            if (inp->mVertices.size() > 3) {
                 pMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
             } else {
                 pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
@@ -353,24 +353,26 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
     unsigned int uiIdxCount = 0u;
     if (pMesh->mNumFaces > 0) {
         pMesh->mFaces = new aiFace[pMesh->mNumFaces];
-        if (pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial) {
-            pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
+        if (pObjMesh->mMaterialIndex != ObjFile::Mesh::NoMaterial) {
+            pMesh->mMaterialIndex = pObjMesh->mMaterialIndex;
         }
 
         unsigned int outIndex = 0u;
 
         // Copy all data from all stored meshes
-        for (auto &face : pObjMesh->m_Faces) {
+        for (auto &face : pObjMesh->mFaces) {
             const ObjFile::Face *inp = face;
             if (inp->mPrimitiveType == aiPrimitiveType_LINE) {
-                for (size_t i = 0; i < inp->m_vertices.size() - 1; ++i) {
+                for (size_t i = 0; i < inp->mVertices.size() - 1; ++i) {
                     aiFace &f = pMesh->mFaces[outIndex++];
                     uiIdxCount += f.mNumIndices = 2;
                     f.mIndices = new unsigned int[2];
                 }
                 continue;
-            } else if (inp->mPrimitiveType == aiPrimitiveType_POINT) {
-                for (size_t i = 0; i < inp->m_vertices.size(); ++i) {
+            }
+
+            if (inp->mPrimitiveType == aiPrimitiveType_POINT) {
+                for (size_t i = 0; i < inp->mVertices.size(); ++i) {
                     aiFace &f = pMesh->mFaces[outIndex++];
                     uiIdxCount += f.mNumIndices = 1;
                     f.mIndices = new unsigned int[1];
@@ -379,8 +381,8 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
             }
 
             aiFace *pFace = &pMesh->mFaces[outIndex++];
-            const unsigned int uiNumIndices = (unsigned int)face->m_vertices.size();
-            uiIdxCount += pFace->mNumIndices = (unsigned int)uiNumIndices;
+            const unsigned int uiNumIndices = static_cast<unsigned int>(face->mVertices.size());
+            uiIdxCount += pFace->mNumIndices = static_cast<unsigned int>(uiNumIndices);
             if (pFace->mNumIndices > 0) {
                 pFace->mIndices = new unsigned int[uiNumIndices];
             }
@@ -406,13 +408,13 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
     }
 
     // Break, if no faces are stored in object
-    if (pCurrentObject->m_Meshes.empty()) {
+    if (pCurrentObject->mMeshes.empty()) {
         return;
     }
 
     // Get current mesh
     ObjFile::Mesh *pObjMesh = pModel->mMeshes[uiMeshIndex];
-    if (nullptr == pObjMesh || pObjMesh->m_uiNumIndices < 1) {
+    if (nullptr == pObjMesh || pObjMesh->mNumIndices < 1) {
         return;
     }
 
@@ -426,7 +428,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
     pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
 
     // Allocate buffer for normal vectors
-    if (!pModel->mNormals.empty() && pObjMesh->m_hasNormals)
+    if (!pModel->mNormals.empty() && pObjMesh->mHasNormals)
         pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
     // Allocate buffer for vertex-color vectors
@@ -434,7 +436,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
         pMesh->mColors[0] = new aiColor4D[pMesh->mNumVertices];
 
     // Allocate buffer for texture coordinates
-    if (!pModel->mTextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0]) {
+    if (!pModel->mTextureCoord.empty() && pObjMesh->mUVCoordinates[0]) {
         pMesh->mNumUVComponents[0] = pModel->mTextureCoordDim;
         pMesh->mTextureCoords[0] = new aiVector3D[pMesh->mNumVertices];
     }
@@ -442,10 +444,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
     // Copy vertices, normals and textures into aiMesh instance
     bool normalsok = true, uvok = true;
     unsigned int newIndex = 0, outIndex = 0;
-    for (auto sourceFace : pObjMesh->m_Faces) {
+    for (auto sourceFace : pObjMesh->mFaces) {
         // Copy all index arrays
-        for (size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < sourceFace->m_vertices.size(); vertexIndex++) {
-            const unsigned int vertex = sourceFace->m_vertices.at(vertexIndex);
+        for (size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < sourceFace->mVertices.size(); vertexIndex++) {
+            const unsigned int vertex = sourceFace->mVertices.at(vertexIndex);
             if (vertex >= pModel->mVertices.size()) {
                 throw DeadlyImportError("OBJ: vertex index out of range");
             }
@@ -457,8 +459,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
             pMesh->mVertices[newIndex] = pModel->mVertices[vertex];
 
             // Copy all normals
-            if (normalsok && !pModel->mNormals.empty() && vertexIndex < sourceFace->m_normals.size()) {
-                const unsigned int normal = sourceFace->m_normals.at(vertexIndex);
+            if (normalsok && !pModel->mNormals.empty() && vertexIndex < sourceFace->mNormals.size()) {
+                const unsigned int normal = sourceFace->mNormals.at(vertexIndex);
                 if (normal >= pModel->mNormals.size()) {
                     normalsok = false;
                 } else {
@@ -473,8 +475,8 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
             }
 
             // Copy all texture coordinates
-            if (uvok && !pModel->mTextureCoord.empty() && vertexIndex < sourceFace->m_texturCoords.size()) {
-                const unsigned int tex = sourceFace->m_texturCoords.at(vertexIndex);
+            if (uvok && !pModel->mTextureCoord.empty() && vertexIndex < sourceFace->mTextureCoords.size()) {
+                const unsigned int tex = sourceFace->mTextureCoords.at(vertexIndex);
 
                 if (tex >= pModel->mTextureCoord.size()) {
                     uvok = false;
@@ -487,7 +489,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
             // Get destination face
             aiFace *pDestFace = &pMesh->mFaces[outIndex];
 
-            const bool last = (vertexIndex == sourceFace->m_vertices.size() - 1);
+            const bool last = (vertexIndex == sourceFace->mVertices.size() - 1);
             if (sourceFace->mPrimitiveType != aiPrimitiveType_LINE || !last) {
                 pDestFace->mIndices[outVertexIndex] = newIndex;
                 outVertexIndex++;
@@ -509,7 +511,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
                         }
 
                         pMesh->mVertices[newIndex + 1] = pMesh->mVertices[newIndex];
-                        if (!sourceFace->m_normals.empty() && !pModel->mNormals.empty()) {
+                        if (!sourceFace->mNormals.empty() && !pModel->mNormals.empty()) {
                             pMesh->mNormals[newIndex + 1] = pMesh->mNormals[newIndex];
                         }
                         if (!pModel->mTextureCoord.empty()) {
@@ -549,8 +551,8 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object *> &rObject
 
     iNumMeshes += static_cast<unsigned int>(rObjects.size());
     for (auto object : rObjects) {
-        if (!object->m_SubObjects.empty()) {
-            countObjects(object->m_SubObjects, iNumMeshes);
+        if (!object->mSubObjects.empty()) {
+            countObjects(object->mSubObjects, iNumMeshes);
         }
     }
 }

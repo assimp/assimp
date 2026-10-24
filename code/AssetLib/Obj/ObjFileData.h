@@ -57,36 +57,36 @@ struct Face;
 struct Material;
 
 // ------------------------------------------------------------------------------------------------
-//! \struct Face
-//! \brief  Data structure for a simple obj-face, describes discredit,l.ation and materials
+//! @struct Face
+//! @brief  Data structure for a simple obj-face, describes discredit,l.ation and materials
 // ------------------------------------------------------------------------------------------------
 struct Face {
     using IndexArray = std::vector<unsigned int>;
 
-    //! Primitive type
+    /// Primitive type
     aiPrimitiveType mPrimitiveType;
-    //! Vertex indices
-    IndexArray m_vertices;
-    //! Normal indices
-    IndexArray m_normals;
-    //! Texture coordinates indices
-    IndexArray m_texturCoords;
-    //! Pointer to assigned material
-    Material *m_pMaterial;
+    /// Vertex indices
+    IndexArray mVertices;
+    /// Normal indices
+    IndexArray mNormals;
+    /// Texture coordinates indices
+    IndexArray mTextureCoords;
+    /// Pointer to assigned material
+    Material *mMaterial{nullptr};
 
-    //! \brief  Default constructor
+    /// @brief  Default constructor with default primitive type.
+    /// @param [in] pt  Primitive type.
     Face(aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
-            mPrimitiveType(pt), m_vertices(), m_normals(), m_texturCoords(), m_pMaterial(nullptr) {
+            mPrimitiveType(pt) {
         // empty
     }
 
-    //! \brief  Destructor
     ~Face() = default;
 };
 
 // ------------------------------------------------------------------------------------------------
-//! \struct Object
-//! \brief  Stores all objects of an obj-file object definition
+/// @struct Object
+/// @brief  Stores all objects of an obj-file object definition
 // ------------------------------------------------------------------------------------------------
 struct Object {
     enum ObjectType {
@@ -94,36 +94,31 @@ struct Object {
         GroupType
     };
 
-    //! Object name
-    std::string m_strObjName;
-    //! Transformation matrix, stored in OpenGL format
-    aiMatrix4x4 m_Transformation;
-    //! All sub-objects referenced by this object
-    std::vector<Object *> m_SubObjects;
+    /// Object name
+    std::string mObjName;
+    /// Transformation matrix, stored in OpenGL format
+    aiMatrix4x4 mTransformation;
+    /// All sub-objects referenced by this object
+    std::vector<Object *> mSubObjects;
     /// Assigned meshes
-    std::vector<unsigned int> m_Meshes;
+    std::vector<unsigned int> mMeshes;
 
-    //! \brief  Default constructor
     Object() = default;
-
-    //! \brief  Destructor
     ~Object() {
-        for (std::vector<Object *>::iterator it = m_SubObjects.begin(); it != m_SubObjects.end(); ++it) {
+        for (auto it = mSubObjects.begin(); it != mSubObjects.end(); ++it) {
             delete *it;
         }
     }
 };
 
 // ------------------------------------------------------------------------------------------------
-//! \struct Material
-//! \brief  Data structure to store all material specific data
+/// @struct Material
+/// @brief  Data structure to store all material specific data
 // ------------------------------------------------------------------------------------------------
 struct Material {
-    //! Name of material description
-    aiString MaterialName;
-    //! Texture names
-    aiString texture;
-    aiString textureSpecular;
+    aiString MaterialName;          ///< Name of material description
+    aiString texture;               ///< Texture names
+    aiString textureSpecular;       ///< Specular texture name
     aiString textureAmbient;
     aiString textureEmissive;
     aiString textureBump;
@@ -171,7 +166,7 @@ struct Material {
     //! Emissive color
     aiColor3D emissive;
     //! Alpha value
-    ai_real alpha = ai_real(1.0);
+    ai_real alpha{1};
     //! Shineness factor
     ai_real shineness = ai_real(0.0);
     //! Illumination model
@@ -182,7 +177,6 @@ struct Material {
     aiColor3D transparent = aiColor3D(1.0f, 1.0f, 1.0f);
     //! Ambient occlusion
     Maybe<ai_real> ambient_occlusion;
-
     //! PBR Roughness
     Maybe<ai_real> roughness;
     //! PBR Metallic
@@ -224,40 +218,34 @@ struct Material {
 };
 
 // ------------------------------------------------------------------------------------------------
-//! \struct Mesh
-//! \brief  Data structure to store a mesh
+/// @struct Mesh
+/// @brief  Data structure to store a mesh
 // ------------------------------------------------------------------------------------------------
 struct Mesh {
-    static const unsigned int NoMaterial = ~0u;
+    static constexpr unsigned int NoMaterial = ~0u;
     /// The name for the mesh
-    std::string m_name;
+    std::string mName;
     /// Array with pointer to all stored faces
-    std::vector<Face*> m_Faces;
+    std::vector<Face*> mFaces;
     /// Assigned material
-    Material *m_pMaterial;
+    Material *mMaterial{nullptr};
     /// Number of stored indices.
-    unsigned int m_uiNumIndices;
+    unsigned int mNumIndices{0};
     /// Number of UV
-    unsigned int m_uiUVCoordinates[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+    unsigned int mUVCoordinates[AI_MAX_NUMBER_OF_TEXTURECOORDS]{};
     /// Material index.
-    unsigned int m_uiMaterialIndex;
+    unsigned int mMaterialIndex{NoMaterial};
     /// True, if normals are stored.
-    bool m_hasNormals;
+    bool mHasNormals{false};
 
     /// Constructor
-    explicit Mesh(const std::string &name) :
-            m_name(name),
-            m_pMaterial(nullptr),
-            m_uiNumIndices(0),
-            m_uiMaterialIndex(NoMaterial),
-            m_hasNormals(false) {
-        memset(m_uiUVCoordinates, 0, sizeof(unsigned int) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
+    explicit Mesh(const std::string &name) : mName(name) {
+        memset(mUVCoordinates, 0, sizeof(unsigned int) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
     }
 
     /// Destructor
     ~Mesh() {
-        for (std::vector<Face *>::iterator it = m_Faces.begin();
-                it != m_Faces.end(); ++it) {
+        for (auto it = mFaces.begin(); it != mFaces.end(); ++it) {
             delete *it;
         }
     }
@@ -273,52 +261,42 @@ struct Model {
     using ConstGroupMapIt = std::map<std::string, std::vector<unsigned int> *>::const_iterator;
 
     //! Model name
-    std::string mModelName;
+    std::string mModelName{};
     //! List ob assigned objects
-    std::vector<Object *> mObjects;
-    //! Pointer to current object
-    ObjFile::Object *mCurrentObject;
-    //! Pointer to current material
-    ObjFile::Material *mCurrentMaterial;
+    std::vector<Object *> mObjects{};
+    //! Pointer to the current object
+    ObjFile::Object *mCurrentObject{nullptr};
+    //! Pointer to the current material
+    ObjFile::Material *mCurrentMaterial{nullptr};
     //! Pointer to default material
-    ObjFile::Material *mDefaultMaterial;
+    ObjFile::Material *mDefaultMaterial{nullptr};
     //! Vector with all generated materials
-    std::vector<std::string> mMaterialLib;
+    std::vector<std::string> mMaterialLib{};
     //! Vector with all generated vertices
-    std::vector<aiVector3D> mVertices;
+    std::vector<aiVector3D> mVertices{};
     //! vector with all generated normals
-    std::vector<aiVector3D> mNormals;
+    std::vector<aiVector3D> mNormals{};
     //! vector with all vertex colors
-    std::vector<aiVector3D> mVertexColors;
+    std::vector<aiVector3D> mVertexColors{};
     //! Group map
-    GroupMap mGroups;
+    GroupMap mGroups{};
     //! Group to face id assignment
-    std::vector<unsigned int> *mGroupFaceIDs;
+    std::vector<unsigned int> *mGroupFaceIDs{nullptr};
     //! Active group
-    std::string mActiveGroup;
+    std::string mActiveGroup{};
     //! Vector with generated texture coordinates
-    std::vector<aiVector3D> mTextureCoord;
+    std::vector<aiVector3D> mTextureCoord{};
     //! Maximum dimension of texture coordinates
-    unsigned int mTextureCoordDim;
+    unsigned int mTextureCoordDim{0};
     //! Current mesh instance
-    Mesh *mCurrentMesh;
+    Mesh *mCurrentMesh{nullptr};
     //! Vector with stored meshes
-    std::vector<Mesh *> mMeshes;
+    std::vector<Mesh *> mMeshes{};
     //! Material map
-    std::map<std::string, Material*> mMaterialMap;
+    std::map<std::string, Material*> mMaterialMap{};
 
     //! \brief  The default class constructor
-    Model() :
-            mModelName(),
-            mCurrentObject(nullptr),
-            mCurrentMaterial(nullptr),
-            mDefaultMaterial(nullptr),
-            mGroupFaceIDs(nullptr),
-            mActiveGroup(),
-            mTextureCoordDim(0),
-            mCurrentMesh(nullptr) {
-        // empty
-    }
+    Model() = default;
 
     //! \brief  The class destructor
     ~Model() {

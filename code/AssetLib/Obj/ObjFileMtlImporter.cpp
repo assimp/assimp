@@ -492,7 +492,7 @@ void ObjFileMtlImporter::createMaterial() {
         m_pModel->mMaterialMap[name] = m_pModel->mCurrentMaterial;
 
         if (m_pModel->mCurrentMesh) {
-            m_pModel->mCurrentMesh->m_uiMaterialIndex = static_cast<unsigned int>(m_pModel->mMaterialLib.size() - 1);
+            m_pModel->mCurrentMesh->mMaterialIndex = static_cast<unsigned int>(m_pModel->mMaterialLib.size() - 1);
         }
     } else {
         // Use older material

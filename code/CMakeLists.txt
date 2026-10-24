@@ -1232,10 +1232,24 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/external/miniz.c
                 ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
         )
+        # For convenience of users following best practices and treating
+        # warnings-as-errors, surgically prevent known warnings from breaking build
         if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
             set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/lightusd.cc
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-const-variable")
+            set_source_files_properties(
                     ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
-                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-variable")
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-function;-Wno-error=unused-variable")
+            set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-accessors.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-b.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-b.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-b.cc
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=user-defined-warnings")
         endif () # if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     endif () # if (ASSIMP_USD_BETA)
 

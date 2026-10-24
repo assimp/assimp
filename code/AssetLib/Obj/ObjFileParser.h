@@ -122,15 +122,15 @@ protected:
     /// Reselect an existing group (Wavefront `group` keyword) for late material assignment.
     void reselectGroup();
     /// Returns the index of the material. Is -1 if not material was found.
-    int getMaterialIndex(const std::string &strMaterialName);
+    int getMaterialIndex(std::string_view strMaterialName);
     /// Parse object name
     void getObjectName();
     /// Creates a new object.
-    void createObject(const std::string &strObjectName);
+    void createObject(std::string_view strObjectName);
     /// Creates a new mesh.
-    void createMesh(const std::string &meshName);
+    void createMesh(std::string_view meshName);
     /// Returns true, if a new mesh instance must be created.
-    bool needsNewMesh(const std::string &rMaterialName);
+    bool needsNewMesh(std::string_view rMaterialName);
     /// Error report in token
     void reportErrorTokenInFace();
 

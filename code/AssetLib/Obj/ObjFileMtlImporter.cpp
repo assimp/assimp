@@ -266,14 +266,14 @@ void ObjFileMtlImporter::load() {
                 auto tokenStart = m_DataIt;  // points to 'm'
                 auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd); // move iterator to end of token
 
-                std::string keyword(tokenStart, tokenEnd);
+                std::string_view svKeyword(&(*tokenStart), static_cast<size_t>(&(*tokenEnd) - &(*tokenStart)));
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd); // advance iterator
 
-                if (keyword.compare(0, 3, "map") == 0) {
+                if (svKeyword.size() >= 3 && svKeyword.compare(0, 3, "map") == 0) {
                     // starts with "map", treat as texture map
                     m_DataIt = tokenStart;
                     getTexture();
-                } else if (keyword == "metallic" || keyword == "metal" || keyword == "metalness") {
+                } else if (svKeyword == "metallic" || svKeyword == "metal" || svKeyword == "metalness") {
                     // parse metallic float value instead of texture
                     getFloatIfMaterialValid(&ObjFile::Material::metallic);
                 }
@@ -291,12 +291,12 @@ void ObjFileMtlImporter::load() {
             {
                 auto tokenStart = m_DataIt;  // points to 'r'
                 auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
-                std::string keyword(tokenStart, tokenEnd);
+                std::string_view svKeyword(&(*tokenStart), static_cast<size_t>(&(*tokenEnd) - &(*tokenStart)));
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
-                if (keyword == "roughness" || keyword == "rough") {
+                if (svKeyword == "roughness" || svKeyword == "rough") {
                     getFloatIfMaterialValid(&ObjFile::Material::roughness);
-                } else if (keyword == "refl" || keyword == "reflection") {
+                } else if (svKeyword == "refl" || svKeyword == "reflection") {
                     m_DataIt = tokenStart;
                     getTexture();
                 }
@@ -316,17 +316,17 @@ void ObjFileMtlImporter::load() {
             case 'a': {
                 auto tokenStart = m_DataIt;
                 auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
-                std::string keyword(tokenStart, tokenEnd);
+                std::string_view svKeyword(&(*tokenStart), static_cast<size_t>(&(*tokenEnd) - &(*tokenStart)));
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
-                if (keyword == "aniso" || keyword == "anisotropy") {
+                if (svKeyword == "aniso" || svKeyword == "anisotropy") {
                     getFloatIfMaterialValid(&ObjFile::Material::anisotropy);
-                } else if (keyword == "ao") {
+                } else if (svKeyword == "ao") {
                     getFloatIfMaterialValid(&ObjFile::Material::ambient_occlusion);
-                } else if (keyword == "anisor" || ai_stdStrToLower(keyword) == "anisotropicrotation") {
+                } else if (svKeyword == "anisor" || svKeyword == "anisotropicrotation") {
                     getFloatIfMaterialValid(&ObjFile::Material::anisotropy_rotation);
                 } else {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", svKeyword);
                 }
 
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -335,19 +335,19 @@ void ObjFileMtlImporter::load() {
             case 's': {
                 auto tokenStart = m_DataIt;
                 auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
-                std::string keyword(tokenStart, tokenEnd);
-                m_DataIt = getNextWord(tokenEnd,m_DataItEnd);
+                std::string_view svKeyword(&(*tokenStart), static_cast<size_t>(&(*tokenEnd) - &(*tokenStart)));
+                m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
-                if (keyword == "subsurface" || keyword == "scattering") {
+                if (svKeyword == "subsurface" || svKeyword == "scattering") {
                     getFloatIfMaterialValid(&ObjFile::Material::subsurface_scattering);
-                } else if (ai_stdStrToLower(keyword) == "speculartint") {
+                } else if (svKeyword == "speculartint") {
                     getFloatIfMaterialValid(&ObjFile::Material::specular_tint);
-                } else if (keyword == "sheen") {
+                } else if (svKeyword == "sheen") {
                     getFloatIfMaterialValid(&ObjFile::Material::sheen_grazing);
-                } else if (ai_stdStrToLower(keyword) == "sheentint") {
+                } else if (svKeyword == "sheentint") {
                     getFloatIfMaterialValid(&ObjFile::Material::sheen_tint);
                 } else {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", svKeyword);
                 }
 
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -356,15 +356,15 @@ void ObjFileMtlImporter::load() {
             case 'c': {
                 auto tokenStart = m_DataIt;
                 auto tokenEnd = getNextDelimiter(m_DataIt, m_DataItEnd);
-                std::string keyword(tokenStart, tokenEnd);
+                std::string_view svKeyword(&(*tokenStart), static_cast<size_t>(&(*tokenEnd) - &(*tokenStart)));
                 m_DataIt = getNextWord(tokenEnd, m_DataItEnd);
 
-                if (ai_stdStrToLower(keyword) == "clearcoat") {
+                if (svKeyword == "clearcoat") {
                     getFloatIfMaterialValid(&ObjFile::Material::clearcoat);
-                } else if (ai_stdStrToLower(keyword) == "clearcoatgloss") {
+                } else if (svKeyword == "clearcoatgloss") {
                     getFloatIfMaterialValid(&ObjFile::Material::clearcoat_gloss);
                 } else {
-                    ASSIMP_LOG_WARN("Unhandled keyword: ", keyword );
+                    ASSIMP_LOG_WARN("Unhandled keyword: ", svKeyword);
                 }
 
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -454,23 +454,30 @@ void ObjFileMtlImporter::getFloatIfMaterialValid(Maybe<ai_real> ObjFile::Materia
 // -------------------------------------------------------------------
 //  Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial() {
-    std::string line;
+    // Parse the line directly without creating a temporary string
+    auto lineStart = m_DataIt;
     while (!IsLineEnd(*m_DataIt)) {
-        line += *m_DataIt;
         ++m_DataIt;
     }
-
-    std::vector<std::string> token;
-    const unsigned int numToken = tokenize<std::string>(line, token, " \t");
+    
+    // Get the line as string_view
+    std::string_view svLine(&(*lineStart), static_cast<size_t>(&(*m_DataIt) - &(*lineStart)));
+    svLine = trimStringView(svLine);
+    
     std::string name;
-    if (numToken == 1) {
+    if (svLine.empty() || svLine == "newmtl") {
         name = AI_DEFAULT_MATERIAL_NAME;
     } else {
         // skip newmtl and all following white spaces
-        std::size_t first_ws_pos = line.find_first_of(" \t");
-        std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
-        if (first_non_ws_pos != std::string::npos) {
-            name = line.substr(first_non_ws_pos);
+        size_t first_ws_pos = svLine.find_first_of(" \t");
+        size_t first_non_ws_pos = std::string_view::npos;
+        if (first_ws_pos != std::string_view::npos) {
+            first_non_ws_pos = svLine.find_first_not_of(" \t", first_ws_pos);
+        }
+        if (first_non_ws_pos != std::string_view::npos) {
+            name = std::string(svLine.substr(first_non_ws_pos));
+        } else {
+            name = AI_DEFAULT_MATERIAL_NAME;
         }
     }
 

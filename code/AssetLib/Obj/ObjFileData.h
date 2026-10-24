@@ -70,7 +70,7 @@ struct Face {
 
     /// @brief  Default constructor with default primitive type.
     /// @param [in] pt  Primitive type.
-    Face(aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
+    explicit Face(aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
             mPrimitiveType(pt) {
         // empty
     }
@@ -223,12 +223,13 @@ struct Mesh {
     unsigned int mMaterialIndex{NoMaterial};                        ///< Material index.
     bool mHasNormals{false};                                        ///< True, if normals are stored.
 
-    /// Constructor
+    /// @brief Constructor
+    /// @paran [in] name    The mesh name
     explicit Mesh(const std::string &name) : mName(name) {
         memset(mUVCoordinates, 0, sizeof(unsigned int) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
     }
 
-    /// Destructor
+    /// @brief Destructor
     ~Mesh() {
         for (auto it = mFaces.begin(); it != mFaces.end(); ++it) {
             delete *it;

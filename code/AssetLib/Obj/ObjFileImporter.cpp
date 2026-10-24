@@ -252,15 +252,14 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model *pModel, aiScene
 // ------------------------------------------------------------------------------------------------
 //  Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile::Object *pObject,
-        aiNode *pParent, aiScene *pScene,
-        std::vector<std::unique_ptr<aiMesh>> &MeshArray) {
+        aiNode *pParent, aiScene *pScene,  std::vector<std::unique_ptr<aiMesh>> &MeshArray) {
     if (nullptr == pObject || pModel == nullptr) {
         return nullptr;
     }
 
     // Store older mesh size to be able to computes mesh offsets for new mesh instances
     const size_t oldMeshSize = MeshArray.size();
-    aiNode *pNode = new aiNode;
+    auto *pNode = new aiNode;
 
     pNode->mName = pObject->mObjName;
 
@@ -305,7 +304,8 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model *pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
-std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const ObjFile::Object *pData, unsigned int meshIndex) {
+std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pModel, const
+        ObjFile::Object *pData, unsigned int meshIndex) {
     if (nullptr == pData || pModel == nullptr) {
         return nullptr;
     }
@@ -394,97 +394,95 @@ std::unique_ptr<aiMesh> ObjFileImporter::createTopology(const ObjFile::Model *pM
 
 // ------------------------------------------------------------------------------------------------
 //  Creates a vertex array
-void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
-        const ObjFile::Object *pCurrentObject,
-        unsigned int uiMeshIndex,
-        aiMesh *pMesh,
-        unsigned int numIndices) {
-    // Checking preconditions
-    if (pCurrentObject == nullptr || pModel == nullptr || pMesh == nullptr) {
+void ObjFileImporter::createVertexArray(const ObjFile::Model *model, const ObjFile::Object *currentObject,
+        unsigned int meshIndex, aiMesh *mesh, unsigned int numIndices) {
+    if (currentObject == nullptr || model == nullptr || mesh == nullptr) {
         return;
     }
 
-    // Break, if no faces are stored in object
-    if (pCurrentObject->mMeshes.empty()) {
+    // Break if no faces are stored in the object
+    if (currentObject->mMeshes.empty()) {
         return;
     }
 
-    // Get current mesh
-    ObjFile::Mesh *pObjMesh = pModel->mMeshes[uiMeshIndex];
-    if (nullptr == pObjMesh || pObjMesh->mNumIndices < 1) {
+    // Get the current mesh
+    ObjFile::Mesh *objMesh = model->mMeshes[meshIndex];
+    if (nullptr == objMesh || objMesh->mNumIndices < 1) {
         return;
     }
 
     // Copy vertices of this mesh instance
-    pMesh->mNumVertices = numIndices;
-    if (pMesh->mNumVertices == 0) {
+    mesh->mNumVertices = numIndices;
+    if (mesh->mNumVertices == 0) {
         throw DeadlyImportError("OBJ: no vertices");
-    } else if (pMesh->mNumVertices > AI_MAX_VERTICES) {
+    }
+
+    if (mesh->mNumVertices > AI_MAX_VERTICES) {
         throw DeadlyImportError("OBJ: Too many vertices");
     }
-    pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+
+    mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 
     // Allocate buffer for normal vectors
-    if (!pModel->mNormals.empty() && pObjMesh->mHasNormals)
-        pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    if (!model->mNormals.empty() && objMesh->mHasNormals)
+        mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 
     // Allocate buffer for vertex-color vectors
-    if (!pModel->mVertexColors.empty())
-        pMesh->mColors[0] = new aiColor4D[pMesh->mNumVertices];
+    if (!model->mVertexColors.empty())
+        mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
 
     // Allocate buffer for texture coordinates
-    if (!pModel->mTextureCoord.empty() && pObjMesh->mUVCoordinates[0]) {
-        pMesh->mNumUVComponents[0] = pModel->mTextureCoordDim;
-        pMesh->mTextureCoords[0] = new aiVector3D[pMesh->mNumVertices];
+    if (!model->mTextureCoord.empty() && objMesh->mUVCoordinates[0]) {
+        mesh->mNumUVComponents[0] = model->mTextureCoordDim;
+        mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
     }
 
     // Copy vertices, normals and textures into aiMesh instance
     bool normalsok = true, uvok = true;
     unsigned int newIndex = 0, outIndex = 0;
-    for (auto sourceFace : pObjMesh->mFaces) {
+    for (auto sourceFace : objMesh->mFaces) {
         // Copy all index arrays
         for (size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < sourceFace->mVertices.size(); vertexIndex++) {
             const unsigned int vertex = sourceFace->mVertices.at(vertexIndex);
-            if (vertex >= pModel->mVertices.size()) {
+            if (vertex >= model->mVertices.size()) {
                 throw DeadlyImportError("OBJ: vertex index out of range");
             }
 
-            if (pMesh->mNumVertices <= newIndex) {
+            if (mesh->mNumVertices <= newIndex) {
                 throw DeadlyImportError("OBJ: bad vertex index");
             }
 
-            pMesh->mVertices[newIndex] = pModel->mVertices[vertex];
+            mesh->mVertices[newIndex] = model->mVertices[vertex];
 
             // Copy all normals
-            if (normalsok && !pModel->mNormals.empty() && vertexIndex < sourceFace->mNormals.size()) {
+            if (normalsok && !model->mNormals.empty() && vertexIndex < sourceFace->mNormals.size()) {
                 const unsigned int normal = sourceFace->mNormals.at(vertexIndex);
-                if (normal >= pModel->mNormals.size()) {
+                if (normal >= model->mNormals.size()) {
                     normalsok = false;
                 } else {
-                    pMesh->mNormals[newIndex] = pModel->mNormals[normal];
+                    mesh->mNormals[newIndex] = model->mNormals[normal];
                 }
             }
 
             // Copy all vertex colors
-            if (vertex < pModel->mVertexColors.size()) {
-                const aiVector3D &color = pModel->mVertexColors[vertex];
-                pMesh->mColors[0][newIndex] = aiColor4D(color.x, color.y, color.z, 1.0);
+            if (vertex < model->mVertexColors.size()) {
+                const aiVector3D &color = model->mVertexColors[vertex];
+                mesh->mColors[0][newIndex] = aiColor4D(color.x, color.y, color.z, 1.0);
             }
 
             // Copy all texture coordinates
-            if (uvok && !pModel->mTextureCoord.empty() && vertexIndex < sourceFace->mTextureCoords.size()) {
+            if (uvok && !model->mTextureCoord.empty() && vertexIndex < sourceFace->mTextureCoords.size()) {
                 const unsigned int tex = sourceFace->mTextureCoords.at(vertexIndex);
-
-                if (tex >= pModel->mTextureCoord.size()) {
+                if (tex >= model->mTextureCoord.size()) {
                     uvok = false;
                 } else {
-                    const aiVector3D &coord3d = pModel->mTextureCoord[tex];
-                    pMesh->mTextureCoords[0][newIndex] = aiVector3D(coord3d.x, coord3d.y, coord3d.z);
+                    const aiVector3D &coord3d = model->mTextureCoord[tex];
+                    mesh->mTextureCoords[0][newIndex] = aiVector3D(coord3d.x, coord3d.y, coord3d.z);
                 }
             }
 
             // Get destination face
-            aiFace *pDestFace = &pMesh->mFaces[outIndex];
+            aiFace *pDestFace = &mesh->mFaces[outIndex];
 
             const bool last = (vertexIndex == sourceFace->mVertices.size() - 1);
             if (sourceFace->mPrimitiveType != aiPrimitiveType_LINE || !last) {
@@ -503,17 +501,17 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
 
                 if (vertexIndex) {
                     if (!last) {
-                        if (pMesh->mNumVertices <= newIndex + 1) {
+                        if (mesh->mNumVertices <= newIndex + 1) {
                             throw DeadlyImportError("OBJ: bad vertex index");
                         }
 
-                        pMesh->mVertices[newIndex + 1] = pMesh->mVertices[newIndex];
-                        if (!sourceFace->mNormals.empty() && !pModel->mNormals.empty()) {
-                            pMesh->mNormals[newIndex + 1] = pMesh->mNormals[newIndex];
+                        mesh->mVertices[newIndex + 1] = mesh->mVertices[newIndex];
+                        if (!sourceFace->mNormals.empty() && !model->mNormals.empty()) {
+                            mesh->mNormals[newIndex + 1] = mesh->mNormals[newIndex];
                         }
-                        if (!pModel->mTextureCoord.empty()) {
-                            for (size_t i = 0; i < pMesh->GetNumUVChannels(); i++) {
-                                pMesh->mTextureCoords[i][newIndex + 1] = pMesh->mTextureCoords[i][newIndex];
+                        if (!model->mTextureCoord.empty()) {
+                            for (size_t i = 0; i < mesh->GetNumUVChannels(); i++) {
+                                mesh->mTextureCoords[i][newIndex + 1] = mesh->mTextureCoords[i][newIndex];
                             }
                         }
                         ++newIndex;
@@ -529,13 +527,13 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *pModel,
     }
 
     if (!normalsok) {
-        delete[] pMesh->mNormals;
-        pMesh->mNormals = nullptr;
+        delete[] mesh->mNormals;
+        mesh->mNormals = nullptr;
     }
 
     if (!uvok) {
-        delete[] pMesh->mTextureCoords[0];
-        pMesh->mTextureCoords[0] = nullptr;
+        delete[] mesh->mTextureCoords[0];
+        mesh->mTextureCoords[0] = nullptr;
     }
 }
 

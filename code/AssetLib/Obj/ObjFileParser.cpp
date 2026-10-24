@@ -121,9 +121,6 @@ ObjFile::Model *ObjFileParser::GetModel() const {
 }
 
 // -------------------------------------------------------------------
-// Zero-copy parsing helper functions
-// -------------------------------------------------------------------
-
 void ObjFileParser::parseNextToken() {
     // Skip whitespace
     while (mDataIt != mDataItEnd && IsSpaceOrNewLine(*mDataIt)) {
@@ -365,15 +362,17 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
             getNameNoSpace(mDataIt, mDataItEnd, name);
 
             size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos)
+            if (nextSpace != std::string::npos) {
                 name = name.substr(0, nextSpace);
+            }
 
-            if (name == "mg")
+            if (name == "mg") {
                 skipGroupNumberAndResolution();
-            else if (name == "mtllib")
+            } else if (name == "mtllib") {
                 getMaterialLib();
-            else
+            } else {
                 goto pf_skip_line;
+            }
         } break;
 
         case 'g': // Parse group name, or Wavefront `group` (reselect for late usemtl)
@@ -450,7 +449,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
-        const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
+        const bool isNum = IsNumeric(*tmp) || isNanOrInf(tmp);
         SkipToken(tmp, mEnd);
         if (isNum) {
             ++numComponents;
@@ -465,7 +464,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
 
 // -------------------------------------------------------------------
 size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) {
-    size_t numComponents = getNumComponentsInDataDefinition();
+    const size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if (2 == numComponents) {
         x = parseFloatDirect();
@@ -480,14 +479,17 @@ size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) 
     }
 
     // Coerce nan and inf to 0 as is the OBJ default value
-    if (!std::isfinite(x))
+    if (!std::isfinite(x)) {
         x = 0;
+    }
 
-    if (!std::isfinite(y))
+    if (!std::isfinite(y)) {
         y = 0;
+    }
 
-    if (!std::isfinite(z))
+    if (!std::isfinite(z)) {
         z = 0;
+    }
 
     point3d_array.emplace_back(x, y, z);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -511,8 +513,9 @@ void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array
     ai_real z = parseFloatDirect();
     ai_real w = parseFloatDirect();
 
-    if (w == 0)
+    if (w == 0) {
         throw DeadlyImportError("OBJ: Invalid component in homogeneous vector (Division by zero)");
+    }
 
     point3d_array.emplace_back(x / w, y / w, z / w);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);

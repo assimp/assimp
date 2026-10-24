@@ -144,7 +144,7 @@ protected:
 
 protected:
     /// Default material name
-    static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
+    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
     DataArrayIt mDataIt{};
     //! Iterator to end position of buffer
@@ -173,8 +173,6 @@ protected:
     const char* mTokenStart{ nullptr };
     /// End pointer of the current token
     const char* mTokenEnd{ nullptr };
-
-private:
 };
 
 } // Namespace Assimp

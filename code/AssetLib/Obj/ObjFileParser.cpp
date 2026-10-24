@@ -132,13 +132,13 @@ void ObjFileParser::parseNextToken() {
         mCurrentToken = std::string_view();
         return;
     }
-    mTokenStart = &(*mDataIt);
+    mTokenStart = &*mDataIt;
 
     // Find end of token
     while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt) && !IsLineEnd(*mDataIt)) {
         ++mDataIt;
     }
-    mTokenEnd = &(*mDataIt);
+    mTokenEnd = &*mDataIt;
     mCurrentToken = std::string_view(mTokenStart, static_cast<size_t>(mTokenEnd - mTokenStart));
 }
 
@@ -359,11 +359,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         case 'm': // Parse a material library or merging group ('mg')
         {
             std::string name;
-
             getNameNoSpace(mDataIt, mDataItEnd, name);
-
-            size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos) {
+            if (const size_t nextSpace = name.find(' '); nextSpace != std::string::npos) {
                 name = name.substr(0, nextSpace);
             }
 

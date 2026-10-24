@@ -83,6 +83,7 @@ inline const char *AcSkipToNextToken(const char *buffer, const char *end) {
     if (!SkipSpaces(&buffer, end)) {
         ASSIMP_LOG_ERROR("AC3D: Unexpected EOF/EOL");
     }
+
     return buffer;
 }
 
@@ -105,7 +106,7 @@ inline const char *AcGetString(const char *buffer, const char *end, std::string 
     if (IsLineEnd(*buffer)) {
         return buffer;
     }
-    out = std::string(sz, (unsigned int)(buffer - sz));
+    out = std::string(sz, static_cast<unsigned int>(buffer - sz));
     ++buffer;
 
     return buffer;
@@ -114,7 +115,7 @@ inline const char *AcGetString(const char *buffer, const char *end, std::string 
 // ------------------------------------------------------------------------------------------------
 // read 1 to n floats prefixed with an optional predefined identifier
 template <class T>
-inline const char *TAcCheckedLoadFloatArray(const char *buffer, const char *end, const char *name, size_t name_length, size_t num, T *out) {
+const char *TAcCheckedLoadFloatArray(const char *buffer, const char *end, const char *name, size_t name_length, size_t num, T *out) {
     buffer = AcSkipToNextToken(buffer, end);
     if (0 != name_length) {
         if (0 != strncmp(buffer, name, name_length) || !IsSpace(buffer[name_length])) {
@@ -153,21 +154,6 @@ static void buildBacksideOfFace(const aiFace &origFace, aiFace *&outFaces, aiVec
         }
         newFace.mIndices[f] = curIdx++;
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-AC3DImporter::AC3DImporter() :
-        mBuffer(),
-        configSplitBFCull(),
-        configEvalSubdivision(),
-        mNumMeshes(),
-        mLights(),
-        mLightsCounter(0),
-        mGroupsCounter(0),
-        mPolysCounter(0),
-        mWorldsCounter(0) {
-    // nothing to be done here
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -422,7 +408,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
         std::vector<aiMaterial *> &outMaterials,
         const std::vector<Material> &materials,
         aiNode *parent) {
-    aiNode *node = new aiNode();
+    auto *node = new aiNode();
     node->mParent = parent;
     if (object.vertices.size()) {
         if (!object.surfaces.size() || !object.numRefs) {
@@ -481,12 +467,10 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 const int doubleSidedFactor = isDoubleSided ? 2 : 1;
 
                 // validate all vertex indices to make sure we won't crash here
-                for (it2 = (*it).entries.begin(),
-                    end2 = (*it).entries.end();
-                        it2 != end2; ++it2) {
-                    if ((*it2).first >= object.vertices.size()) {
+                for (it2 = it->entries.begin(), end2 = it->entries.end(); it2 != end2; ++it2) {
+                    if (it2->first >= object.vertices.size()) {
                         ASSIMP_LOG_WARN("AC3D: Invalid vertex reference");
-                        (*it2).first = 0;
+                        it2->first = 0;
                     }
                 }
 
@@ -494,20 +478,18 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     ++node->mNumMeshes;
                 }
 
-                switch ((*it).GetType()) {
+                switch (it->GetType()) {
                 case Surface::ClosedLine: // closed line
-                    needMat[idx].first += static_cast<unsigned int>((*it).entries.size());
-                    needMat[idx].second += static_cast<unsigned int>((*it).entries.size() << 1u);
+                    needMat[idx].first += static_cast<unsigned int>(it->entries.size());
+                    needMat[idx].second += static_cast<unsigned int>(it->entries.size() << 1u);
                     break;
 
-                    // unclosed line
-                case Surface::OpenLine:
-                    needMat[idx].first += static_cast<unsigned int>((*it).entries.size() - 1);
-                    needMat[idx].second += static_cast<unsigned int>(((*it).entries.size() - 1) << 1u);
+                case Surface::OpenLine: // unclosed line
+                    needMat[idx].first += static_cast<unsigned int>(it->entries.size() - 1);
+                    needMat[idx].second += static_cast<unsigned int>((it->entries.size() - 1) << 1u);
                     break;
 
-                    // triangle strip
-                case Surface::TriangleStrip:
+                case Surface::TriangleStrip: // triangle strip
                     needMat[idx].first += static_cast<unsigned int>(it->entries.size() - 2) * doubleSidedFactor;
                     needMat[idx].second += static_cast<unsigned int>(it->entries.size() - 2) * 3 * doubleSidedFactor;
                     break;
@@ -515,29 +497,27 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 default:
                     // Coerce unknowns to a polygon and warn
                     ASSIMP_LOG_WARN("AC3D: The type flag of a surface is unknown: ", (*it).flags);
-                    (*it).flags &= ~(Surface::Mask);
+                    it->flags &= ~(Surface::Mask);
                     // fallthrough
 
-                    // polygon
-                case Surface::Polygon:
+                case Surface::Polygon: // polygon
                     // the number of faces increments by one, the number
                     // of vertices by surface.numref.
                     needMat[idx].first += doubleSidedFactor;
                     needMat[idx].second += static_cast<unsigned int>(it->entries.size()) * doubleSidedFactor;
                 };
             }
-            unsigned int *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
+            auto *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
-            for (MatTable::const_iterator cit = needMat.begin(), cend = needMat.end();
-                    cit != cend; ++cit, ++mat) {
-                if (!(*cit).first) {
+            for (auto cit = needMat.begin(), cend = needMat.end(); cit != cend; ++cit, ++mat) {
+                if (!cit->first) {
                     continue;
                 }
 
                 // allocate a new aiMesh object
-                *pip++ = (unsigned int)meshes.size();
-                aiMesh *mesh = new aiMesh();
+                *pip++ = static_cast<unsigned int>(meshes.size());
+                auto *mesh = new aiMesh();
                 meshes.push_back(mesh);
 
                 mesh->mMaterialIndex = static_cast<unsigned int>(outMaterials.size());
@@ -545,21 +525,26 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 ConvertMaterial(object, materials[mat], *outMaterials.back());
 
                 // allocate storage for vertices and normals
-                mesh->mNumFaces = (*cit).first;
+                mesh->mNumFaces = cit->first;
                 if (mesh->mNumFaces == 0) {
                     throw DeadlyImportError("AC3D: No faces");
-                } else if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace)) {
+                }
+
+                if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace)) {
                     throw DeadlyImportError("AC3D: Too many faces, would run out of memory");
                 }
-                aiFace *faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
 
-                mesh->mNumVertices = (*cit).second;
+                auto *faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
+                mesh->mNumVertices = cit->second;
                 if (mesh->mNumVertices == 0) {
                     throw DeadlyImportError("AC3D: No vertices");
-                } else if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D)) {
+                }
+
+                if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D)) {
                     throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
                 }
-                aiVector3D *vertices = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+
+                auto *vertices = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
                 unsigned int cur = 0;
 
                 // allocate UV coordinates, but only if the texture name for the
@@ -571,15 +556,15 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                 }
 
                 for (it = object.surfaces.begin(); it != end; ++it) {
-                    if (mat == (*it).mat) {
+                    if (mat == it->mat) {
                         const Surface &src = *it;
                         const bool isDoubleSided = ACDoubleSidedFlag == (src.flags & ACDoubleSidedFlag);
 
                         // closed polygon
-                        uint8_t type = (*it).GetType();
+                        uint8_t type = it->GetType();
                         if (type == Surface::Polygon) {
                             aiFace &face = *faces++;
-                            face.mNumIndices = (unsigned int)src.entries.size();
+                            face.mNumIndices = static_cast<unsigned int>(src.entries.size());
                             if (0 != face.mNumIndices) {
                                 face.mIndices = new unsigned int[face.mNumIndices];
                                 for (unsigned int i = 0; i < face.mNumIndices; ++i, ++vertices) {
@@ -685,23 +670,23 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
 
                                 // copy texture coordinates
                                 if (uv) {
-                                    uv->x = (*it2).second.x;
-                                    uv->y = (*it2).second.y;
+                                    uv->x = it2->second.x;
+                                    uv->y = it2->second.y;
                                     ++uv;
                                 }
 
                                 if (Surface::ClosedLine == type && tmp - 1 == m) {
                                     // if this is a closed line repeat its beginning now
-                                    it2 = (*it).entries.begin();
+                                    it2 = it->entries.begin();
                                 } else
                                     ++it2;
 
                                 // second point
-                                *vertices++ = object.vertices[(*it2).first];
+                                *vertices++ = object.vertices[it2->first];
 
                                 if (uv) {
-                                    uv->x = (*it2).second.x;
-                                    uv->y = (*it2).second.y;
+                                    uv->x = it2->second.x;
+                                    uv->y = it2->second.y;
                                     ++uv;
                                 }
                             }
@@ -764,7 +749,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
 
     // add children to the object
     if (object.children.size()) {
-        node->mNumChildren = (unsigned int)object.children.size();
+        node->mNumChildren = static_cast<unsigned int>(object.children.size());
         node->mChildren = new aiNode *[node->mNumChildren];
         for (unsigned int i = 0; i < node->mNumChildren; ++i) {
             node->mChildren[i] = ConvertObjectSection(object.children[i], meshes, outMaterials, materials, node);
@@ -782,18 +767,15 @@ void AC3DImporter::SetupProperties(const Importer *pImp) {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void AC3DImporter::InternReadFile(const std::string &pFile,
-        aiScene *pScene, IOSystem *pIOHandler) {
-    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
-
-    // Check whether we can read from the file
-    if (file == nullptr) {
-        throw DeadlyImportError("Failed to open AC3D file ", pFile, ".");
+void AC3DImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
+    std::unique_ptr<IOStream> fileStream(pIOHandler->Open(file, "rb"));
+    if (fileStream == nullptr) {
+        throw DeadlyImportError("Failed to open AC3D file ", file, ".");
     }
 
     // allocate storage and copy the contents of the file to a memory buffer
     std::vector<char> mBuffer2;
-    TextFileToBuffer(file.get(), mBuffer2);
+    TextFileToBuffer(fileStream.get(), mBuffer2);
 
     mBuffer.data = &mBuffer2[0];
     mBuffer.end = &mBuffer2[0] + mBuffer2.size();
@@ -806,7 +788,7 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     }
 
     // print the file format version to the console
-    unsigned int version = HexDigitToDecimal(mBuffer.data[4]);
+    const unsigned int version = HexDigitToDecimal(mBuffer.data[4]);
     char msg[3];
     ASSIMP_itoa10(msg, 3, version);
     ASSIMP_LOG_INFO("AC3D file format version: ", msg);
@@ -887,12 +869,12 @@ void AC3DImporter::InternReadFile(const std::string &pFile,
     ::memcpy(pScene->mMeshes, &meshes[0], pScene->mNumMeshes * sizeof(void *));
 
     // copy materials
-    pScene->mNumMaterials = (unsigned int)omaterials.size();
+    pScene->mNumMaterials = static_cast<unsigned int>(omaterials.size());
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
     ::memcpy(pScene->mMaterials, &omaterials[0], pScene->mNumMaterials * sizeof(void *));
 
     // copy lights
-    pScene->mNumLights = (unsigned int)lights.size();
+    pScene->mNumLights = static_cast<unsigned int>(lights.size());
     if (!lights.empty()) {
         pScene->mLights = new aiLight *[lights.size()];
         ::memcpy(pScene->mLights, &lights[0], lights.size() * sizeof(void *));

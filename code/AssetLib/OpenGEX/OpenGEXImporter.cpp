@@ -235,12 +235,6 @@ static void logDDLParserMessage (LogSeverity severity, const std::string &rawmsg
 }
 
 //------------------------------------------------------------------------------------------------
-OpenGEXImporter::VertexContainer::VertexContainer() :
-        m_numColors(0), m_colors(nullptr), m_numUVComps(), m_textureCoords() {
-    // empty
-}
-
-//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_colors;
 
@@ -556,7 +550,7 @@ void OpenGEXImporter::handleGeometryNode(DDLNode *node, aiScene *pScene) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleCameraNode(DDLNode *node, aiScene *pScene) {
-    aiCamera *camera(new aiCamera);
+    aiCamera *camera = new aiCamera;
     m_cameraCache.push_back(camera);
     m_currentCamera = camera;
 
@@ -574,7 +568,7 @@ void OpenGEXImporter::handleCameraNode(DDLNode *node, aiScene *pScene) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleLightNode(ODDLParser::DDLNode *node, aiScene *pScene) {
-    aiLight *light(new aiLight);
+    aiLight *light = new aiLight;
     m_lightCache.push_back(light);
     m_currentLight = light;
 
@@ -613,7 +607,7 @@ void OpenGEXImporter::handleLightObject(ODDLParser::DDLNode *node, aiScene *pSce
     }
     m_currentLight = light;
 
-    Property *prop(node->findPropertyByName("type"));
+    Property *prop = node->findPropertyByName("type");
     if (nullptr != prop) {
         if (nullptr != prop->m_value) {
             std::string typeStr(prop->m_value->getString());

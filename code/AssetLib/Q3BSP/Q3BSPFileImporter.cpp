@@ -378,6 +378,9 @@ void Q3BSPFileImporter::createTriangleTopology(const Q3BSP::Q3BSPModel *pModel, 
 
     size_t idx(0);
     for (size_t i = 0; i < (size_t)pQ3BSPFace->iNumOfFaceVerts; ++i) {
+        if (pQ3BSPFace->iFaceVertexIndex < 0 || (size_t)pQ3BSPFace->iFaceVertexIndex + i >= pModel->m_Indices.size()) {
+            continue;
+        }
         const size_t index = pQ3BSPFace->iVertexIndex + pModel->m_Indices[pQ3BSPFace->iFaceVertexIndex + i];
         if (index >= pModel->m_Vertices.size()) {
             continue;

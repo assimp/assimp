@@ -127,7 +127,8 @@ void ObjFileParser::parseNextToken() {
         ++mDataIt;
     }
     if (mDataIt == mDataItEnd) {
-        mTokenStart = mTokenEnd = nullptr;
+        mTokenStart = nullptr;
+        mTokenEnd = nullptr;
         mCurrentToken = std::string_view();
         return;
     }
@@ -560,9 +561,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     ObjFile::Face *face = new ObjFile::Face(type);
     bool hasNormal = false;
 
-    const int vSize = static_cast<int>(mModel->mVertices.size());
-    const int vtSize = static_cast<int>(mModel->mTextureCoord.size());
-    const int vnSize = static_cast<int>(mModel->mNormals.size());
+    const auto vSize = static_cast<int>(mModel->mVertices.size());
+    const auto vtSize = static_cast<int>(mModel->mTextureCoord.size());
+    const auto vnSize = static_cast<int>(mModel->mNormals.size());
 
     const bool vt = (!mModel->mTextureCoord.empty());
     const bool vn = (!mModel->mNormals.empty());

@@ -63,21 +63,15 @@ struct Model;
 // ------------------------------------------------------------------------------------------------
 class ObjFileImporter final : public BaseImporter {
 public:
-    /// \brief  Default constructor
+    /// @brief  Default constructor
     ObjFileImporter();
 
-    /// \brief  Destructor
+    /// @brief  Destructor
     ~ObjFileImporter() override;
-
-    /// \brief  Returns whether the class can handle the format of the given file.
-    /// \remark See BaseImporter::CanRead() for details.
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
 
 protected:
-    //! \brief  Appends the supported extension.
     const aiImporterDesc *GetInfo() const override;
-
-    //! \brief  File import implementation.
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
     //! \brief  Create the data from imported content.
@@ -109,11 +103,11 @@ protected:
 
 private:
     //! Data buffer
-    std::vector<char> m_Buffer;
+    std::vector<char> mBuffer;
     //! Pointer to root object instance
-    ObjFile::Object *m_pRootObject;
+    ObjFile::Object *mRootObject{nullptr};
     //! Absolute pathname of model in file system
-    std::string m_strAbsPath;
+    std::string mAbsPath{};
 };
 
 // ------------------------------------------------------------------------------------------------

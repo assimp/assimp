@@ -75,17 +75,14 @@ using namespace std;
 
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
-ObjFileImporter::ObjFileImporter() :
-        m_Buffer(),
-        m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
+ObjFileImporter::ObjFileImporter() : mAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
     // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 ObjFileImporter::~ObjFileImporter() {
-    delete m_pRootObject;
+    delete mRootObject;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -103,9 +100,9 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
-    if (m_pRootObject != nullptr) {
-        delete m_pRootObject;
-        m_pRootObject = nullptr;
+    if (mRootObject != nullptr) {
+        delete mRootObject;
+        mRootObject = nullptr;
     }
 
     // Read file into memory
@@ -119,7 +116,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
     }
 
     // Get the file-size and validate it, throwing an exception when fails
-    size_t fileSize = fileStream->FileSize();
+    const size_t fileSize = fileStream->FileSize();
     if (fileSize < ObjMinSize) {
         throw DeadlyImportError("OBJ-file is too small.");
     }
@@ -152,7 +149,7 @@ void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, I
     streamedBuffer.close();
 
     // Clean up allocated storage for the next import
-    m_Buffer.clear();
+    mBuffer.clear();
 
     // Pop directory stack
     if (pIOHandler->StackSize() > 0) {

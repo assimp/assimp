@@ -1241,6 +1241,8 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
             set_source_files_properties(
                     ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
                     PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-function;-Wno-error=unused-variable")
+        endif () # if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        if (CMAKE_C_COMPILER_ID MATCHES "Clang")
             set_source_files_properties(
                     ${Tinyusdz_SRC_ABSPATH}/usdGeom-accessors.cc
                     ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-a.cc
@@ -1250,7 +1252,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                     ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-a.cc
                     ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-b.cc
                     PROPERTIES COMPILE_OPTIONS "-Wno-error=user-defined-warnings")
-        endif () # if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        endif () # if (CMAKE_C_COMPILER_ID MATCHES "Clang")
     endif () # if (ASSIMP_USD_BETA)
 
     set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")

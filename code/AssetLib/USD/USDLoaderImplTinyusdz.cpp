@@ -272,7 +272,7 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
 #if defined(ASSIMP_BUILD_USD_BETA)
         for (int channelIndex = 0; channelIndex < animation.channels.size(); ++channelIndex) {
-            auto &animationChannel = animation.channels[channelIndex];
+//            auto &animationChannel = animation.channels[channelIndex];
 #else
         int channelIndex = 0;
         for (const auto &[jointName, animationChannelMap] : animation.channels_map) {

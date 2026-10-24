@@ -388,6 +388,14 @@ void LWOImporter::FindUVChannels(LWO::Surface &surf,
     for (unsigned int i = 0; i < layer.mUVChannels.size(); ++i) {
         LWO::UVChannel &uv = layer.mUVChannels[i];
 
+        // A VMAP channel is sized once, when its VMAP chunk is parsed, and is not resized if a
+        // later PNTS chunk grows the point list. Face indices are clamped only against the point
+        // list, so they can run past this channel's storage - bound them by the channel instead.
+        const size_t uvEntries = uv.dims >= 2 ? std::min(uv.abAssigned.size(), uv.rawData.size() / uv.dims) : 0;
+        if (uvEntries < layer.mTempPoints.size()) {
+            ASSIMP_LOG_WARN("LWO2: UV channel \'", uv.name, "\' is smaller than the point list, ignoring the extra points");
+        }
+
         for (LWO::SortedRep::const_iterator it = sorted.begin(); it != sorted.end(); ++it) {
 
             LWO::Face &face = layer.mFaces[*it];
@@ -395,7 +403,13 @@ void LWOImporter::FindUVChannels(LWO::Surface &surf,
             for (unsigned int n = 0; n < face.mNumIndices; ++n) {
                 unsigned int idx = face.mIndices[n];
 
-                if (uv.abAssigned[idx] && ((aiVector2D *)&uv.rawData[0])[idx] != aiVector2D()) {
+                if (idx >= uvEntries) {
+                    continue;
+                }
+                // rawData is float storage; index it as such rather than casting to aiVector2D,
+                // whose ai_real width does not match it in ASSIMP_DOUBLE_PRECISION builds.
+                const size_t uvBase = static_cast<size_t>(idx) * uv.dims;
+                if (uv.abAssigned[idx] && (uv.rawData[uvBase] != 0.f || uv.rawData[uvBase + 1] != 0.f)) {
 
                     if (extra >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
@@ -452,6 +466,12 @@ void LWOImporter::FindVCChannels(const LWO::Surface &surf, LWO::SortedRep &sorte
     for (unsigned int i = 0; i < layer.mVColorChannels.size(); ++i) {
         const LWO::VColorChannel &vc = layer.mVColorChannels[i];
 
+        // Same stale-channel bound as in FindUVChannels above.
+        const size_t vcEntries = vc.dims >= 4 ? std::min(vc.abAssigned.size(), vc.rawData.size() / vc.dims) : 0;
+        if (vcEntries < layer.mTempPoints.size()) {
+            ASSIMP_LOG_WARN("LWO2: Vertex colour channel \'", vc.name, "\' is smaller than the point list, ignoring the extra points");
+        }
+
         if (surf.mVCMap == vc.name) {
             // The vertex color map is explicitly requested by the surface so we need to take special care of it
             for (unsigned int a = 0; a < std::min(next, AI_MAX_NUMBER_OF_COLOR_SETS - 1u); ++a) {
@@ -467,6 +487,9 @@ void LWOImporter::FindVCChannels(const LWO::Surface &surf, LWO::SortedRep &sorte
                 for (unsigned int n = 0; n < face.mNumIndices; ++n) {
                     unsigned int idx = face.mIndices[n];
 
+                    if (idx >= vcEntries) {
+                        continue;
+                    }
                     if (vc.abAssigned[idx] && ((aiColor4D *)&vc.rawData[0])[idx] != aiColor4D(0.0, 0.0, 0.0, 1.0)) {
                         if (next >= AI_MAX_NUMBER_OF_COLOR_SETS) {
 

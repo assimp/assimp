@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Assimp {
@@ -133,9 +134,17 @@ protected:
     /// Error report in token
     void reportErrorTokenInFace();
 
+    // --- Zero-copy parsing helper functions ---
+    /// Parse next token from current position, sets mCurrentToken, mTokenStart, mTokenEnd
+    void parseNextToken();
+    /// Parse float directly from current token position (uses mTokenStart)
+    ai_real parseFloatDirect();
+    /// Parse int directly from current token position (uses mTokenStart)
+    int parseIntDirect();
+
 protected:
     /// Default material name
-    static constexpr const char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
+    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
     //! Iterator to current position in buffer
     DataArrayIt mDataIt{};
     //! Iterator to end position of buffer
@@ -146,7 +155,7 @@ protected:
     bool mReselectMode{ false };
     //! Current line (for debugging)
     unsigned int mLine{ 0 };
-    //! Helper buffer (safe)
+    //! Helper buffer (safe) - kept for backward compatibility
     std::string mBuffer;
 	/// End of buffer
     const char *mEnd{ nullptr };
@@ -157,7 +166,13 @@ protected:
     /// Path to the current model, name of the obj file where the buffer comes from
     const std::string mOriginalObjFileName{};
 
-private:
+    // --- Zero-copy parsing members ---
+    /// Current token as string_view (avoids string allocations)
+    std::string_view mCurrentToken;
+    /// Start pointer of the current token
+    const char* mTokenStart{ nullptr };
+    /// End pointer of the current token
+    const char* mTokenEnd{ nullptr };
 };
 
 } // Namespace Assimp

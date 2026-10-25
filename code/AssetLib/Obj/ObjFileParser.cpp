@@ -121,6 +121,133 @@ ObjFile::Model *ObjFileParser::GetModel() const {
 }
 
 // -------------------------------------------------------------------
+void ObjFileParser::parseNextToken() {
+    // Skip whitespace
+    while (mDataIt != mDataItEnd && IsSpaceOrNewLine(*mDataIt)) {
+        ++mDataIt;
+    }
+    if (mDataIt == mDataItEnd) {
+        mTokenStart = nullptr;
+        mTokenEnd = nullptr;
+        mCurrentToken = std::string_view();
+        return;
+    }
+    mTokenStart = &*mDataIt;
+
+    // Find end of token
+    while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt) && !IsLineEnd(*mDataIt)) {
+        ++mDataIt;
+    }
+    mTokenEnd = &*mDataIt;
+    mCurrentToken = std::string_view(mTokenStart, static_cast<size_t>(mTokenEnd - mTokenStart));
+}
+
+// -------------------------------------------------------------------
+// Parse integer directly from current iterator position, advances iterator
+// Returns the parsed integer value and advances mDataIt past the parsed number
+int ObjFileParser::parseIntDirect() {
+    // Skip any whitespace first
+    while (mDataIt != mDataItEnd && IsSpaceOrNewLine(*mDataIt)) {
+        ++mDataIt;
+    }
+    if (mDataIt == mDataItEnd) {
+        return 0;
+    }
+
+    int result = 0;
+    bool negative = false;
+
+    // Handle sign
+    if (*mDataIt == '-') {
+        negative = true;
+        ++mDataIt;
+    } else if (*mDataIt == '+') {
+        ++mDataIt;
+    }
+
+    // Check if we have digits
+    if (mDataIt == mDataItEnd || !isdigit(static_cast<unsigned char>(*mDataIt))) {
+        // No valid digits - this is an error for face indices
+        return 0;
+    }
+
+    // Parse digits
+    while (mDataIt != mDataItEnd && isdigit(static_cast<unsigned char>(*mDataIt))) {
+        result = result * 10 + (*mDataIt - '0');
+        ++mDataIt;
+    }
+
+    return negative ? -result : result;
+}
+
+// -------------------------------------------------------------------
+ai_real ObjFileParser::parseFloatDirect() {
+    parseNextToken();
+    if (mTokenStart == mTokenEnd || mTokenStart == nullptr) {
+        return 0.0f;
+    }
+
+    const char* ptr = mTokenStart;
+    ai_real result = 0.0f;
+    bool negative = false;
+
+    // Handle sign
+    if (*ptr == '-') {
+        negative = true;
+        ++ptr;
+    } else if (*ptr == '+') {
+        ++ptr;
+    }
+
+    // Integer part
+    while (ptr < mTokenEnd && isdigit(static_cast<unsigned char>(*ptr))) {
+        result = result * 10.0f + (*ptr - '0');
+        ++ptr;
+    }
+
+    // Fractional part
+    if (ptr < mTokenEnd && *ptr == '.') {
+        ++ptr;
+        ai_real frac = 0.0f;
+        ai_real scale = 0.1f;
+        while (ptr < mTokenEnd && isdigit(static_cast<unsigned char>(*ptr))) {
+            frac += (*ptr - '0') * scale;
+            scale *= 0.1f;
+            ++ptr;
+        }
+        result += frac;
+    }
+
+    // Exponent (optional - OBJ files rarely use scientific notation)
+    if (ptr < mTokenEnd && (*ptr == 'e' || *ptr == 'E')) {
+        ++ptr;
+        int exponent = 0;
+        bool expNegative = false;
+        if (ptr < mTokenEnd && *ptr == '-') {
+            expNegative = true;
+            ++ptr;
+        } else if (ptr < mTokenEnd && *ptr == '+') {
+            ++ptr;
+        }
+        while (ptr < mTokenEnd && isdigit(static_cast<unsigned char>(*ptr))) {
+            exponent = exponent * 10 + (*ptr - '0');
+            ++ptr;
+        }
+        if (expNegative) {
+            exponent = -exponent;
+        }
+        // Simple pow10 approximation for common exponents
+        if (exponent > 0) {
+            result *= static_cast<ai_real>(pow(10.0, exponent));
+        } else if (exponent < 0) {
+            result /= static_cast<ai_real>(pow(10.0, -exponent));
+        }
+    }
+
+    return negative ? -result : result;
+}
+
+// -------------------------------------------------------------------
 void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
     // only update every 100KB or it'll be too slow
     // const unsigned int updateProgressEveryBytes = 100 * 1024;
@@ -232,19 +359,18 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         case 'm': // Parse a material library or merging group ('mg')
         {
             std::string name;
-
             getNameNoSpace(mDataIt, mDataItEnd, name);
-
-            size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos)
+            if (const size_t nextSpace = name.find(' '); nextSpace != std::string::npos) {
                 name = name.substr(0, nextSpace);
+            }
 
-            if (name == "mg")
+            if (name == "mg") {
                 skipGroupNumberAndResolution();
-            else if (name == "mtllib")
+            } else if (name == "mtllib") {
                 getMaterialLib();
-            else
+            } else {
                 goto pf_skip_line;
+            }
         } break;
 
         case 'g': // Parse group name, or Wavefront `group` (reselect for late usemtl)
@@ -321,7 +447,7 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
         if (!SkipSpaces(&tmp, mEnd) || *tmp == '#') {
             break;
         }
-        const bool isNum(IsNumeric(*tmp) || isNanOrInf(tmp));
+        const bool isNum = IsNumeric(*tmp) || isNanOrInf(tmp);
         SkipToken(tmp, mEnd);
         if (isNum) {
             ++numComponents;
@@ -336,37 +462,32 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
 
 // -------------------------------------------------------------------
 size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) {
-    size_t numComponents = getNumComponentsInDataDefinition();
+    const size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if (2 == numComponents) {
-        copyNextWord();
-        x = fast_atof(mBuffer.c_str());
-
-        copyNextWord();
-        y = fast_atof(mBuffer.c_str());
+        x = parseFloatDirect();
+        y = parseFloatDirect();
         z = 0.0;
     } else if (3 == numComponents) {
-        copyNextWord();
-        x = fast_atof(mBuffer.c_str());
-
-        copyNextWord();
-        y = fast_atof(mBuffer.c_str());
-
-        copyNextWord();
-        z = fast_atof(mBuffer.c_str());
+        x = parseFloatDirect();
+        y = parseFloatDirect();
+        z = parseFloatDirect();
     } else {
         throw DeadlyImportError("OBJ: Invalid number of components");
     }
 
     // Coerce nan and inf to 0 as is the OBJ default value
-    if (!std::isfinite(x))
+    if (!std::isfinite(x)) {
         x = 0;
+    }
 
-    if (!std::isfinite(y))
+    if (!std::isfinite(y)) {
         y = 0;
+    }
 
-    if (!std::isfinite(z))
+    if (!std::isfinite(z)) {
         z = 0;
+    }
 
     point3d_array.emplace_back(x, y, z);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -375,15 +496,9 @@ size_t ObjFileParser::getTexCoordVector(std::vector<aiVector3D> &point3d_array) 
 
 // -------------------------------------------------------------------
 void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
-    ai_real x, y, z;
-    copyNextWord();
-    x = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    y = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    z = fast_atof(mBuffer.c_str());
+    ai_real x = parseFloatDirect();
+    ai_real y = parseFloatDirect();
+    ai_real z = parseFloatDirect();
 
     point3d_array.emplace_back(x, y, z);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -391,21 +506,14 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
 
 // -------------------------------------------------------------------
 void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array) {
-    ai_real x, y, z, w;
-    copyNextWord();
-    x = fast_atof(mBuffer.c_str());
+    ai_real x = parseFloatDirect();
+    ai_real y = parseFloatDirect();
+    ai_real z = parseFloatDirect();
+    ai_real w = parseFloatDirect();
 
-    copyNextWord();
-    y = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    z = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    w = fast_atof(mBuffer.c_str());
-
-    if (w == 0)
+    if (w == 0) {
         throw DeadlyImportError("OBJ: Invalid component in homogeneous vector (Division by zero)");
+    }
 
     point3d_array.emplace_back(x / w, y / w, z / w);
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -413,26 +521,15 @@ void ObjFileParser::getHomogeneousVector3(std::vector<aiVector3D> &point3d_array
 
 // -------------------------------------------------------------------
 void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b) {
-    ai_real x, y, z;
-    copyNextWord();
-    x = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    y = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    z = fast_atof(mBuffer.c_str());
+    ai_real x = parseFloatDirect();
+    ai_real y = parseFloatDirect();
+    ai_real z = parseFloatDirect();
 
     point3d_array_a.emplace_back(x, y, z);
 
-    copyNextWord();
-    x = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    y = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    z = fast_atof(mBuffer.c_str());
+    x = parseFloatDirect();
+    y = parseFloatDirect();
+    z = parseFloatDirect();
 
     point3d_array_b.emplace_back(x, y, z);
 
@@ -441,12 +538,8 @@ void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std
 
 // -------------------------------------------------------------------
 void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
-    ai_real x, y;
-    copyNextWord();
-    x = fast_atof(mBuffer.c_str());
-
-    copyNextWord();
-    y = fast_atof(mBuffer.c_str());
+    ai_real x = parseFloatDirect();
+    ai_real y = parseFloatDirect();
 
     point2d_array.emplace_back(x, y);
 
@@ -465,16 +558,20 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     ObjFile::Face *face = new ObjFile::Face(type);
     bool hasNormal = false;
 
-    const int vSize = static_cast<unsigned int>(mModel->mVertices.size());
-    const int vtSize = static_cast<unsigned int>(mModel->mTextureCoord.size());
-    const int vnSize = static_cast<unsigned int>(mModel->mNormals.size());
+    const auto vSize = static_cast<int>(mModel->mVertices.size());
+    const auto vtSize = static_cast<int>(mModel->mTextureCoord.size());
+    const auto vnSize = static_cast<int>(mModel->mNormals.size());
 
     const bool vt = (!mModel->mTextureCoord.empty());
     const bool vn = (!mModel->mNormals.empty());
     int iPos = 0;
+    
+    // Pre-allocate for typical face sizes (3-4 vertices)
+    face->m_vertices.reserve(4);
+    face->m_texturCoords.reserve(4);
+    face->m_normals.reserve(4);
+    
     while (mDataIt < mDataItEnd) {
-        int iStep = 1;
-
         if (IsLineEnd(*mDataIt) || *mDataIt == '#') {
             break;
         }
@@ -484,19 +581,20 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 ASSIMP_LOG_ERROR("Obj: Separator unexpected in point statement");
             }
             ++iPos;
+            ++mDataIt;
         } else if (IsSpaceOrNewLine(*mDataIt) || *mDataIt == '\v') {
             iPos = 0;
+            ++mDataIt;
         } else {
-            //OBJ USES 1 Base ARRAYS!!!!
-            const int iVal = ::atoi(&(*mDataIt));
-
-            // increment iStep position based off of the sign and # of digits
-            int tmp = iVal;
-            if (iVal < 0) {
-                ++iStep;
-            }
-            while ((tmp = tmp / 10) != 0) {
-                ++iStep;
+            // Parse integer directly from current position
+            // Save current position
+            DataArrayIt startIt = mDataIt;
+            int iVal = parseIntDirect();
+            
+            // If no digits were consumed, it's an error
+            if (startIt == mDataIt) {
+                delete face;
+                throw DeadlyImportError("OBJ: Invalid face index.");
             }
 
             if (iPos == 1 && !vt && vn) {
@@ -506,11 +604,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             if (iVal > 0) {
                 // Store parsed index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(iVal - 1);
+                    face->m_vertices.push_back(static_cast<unsigned int>(iVal - 1));
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(iVal - 1);
+                    face->m_texturCoords.push_back(static_cast<unsigned int>(iVal - 1));
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(iVal - 1);
+                    face->m_normals.push_back(static_cast<unsigned int>(iVal - 1));
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -518,22 +616,21 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             } else if (iVal < 0) {
                 // Store relatively index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(vSize + iVal);
+                    face->m_vertices.push_back(static_cast<unsigned int>(vSize + iVal));
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(vtSize + iVal);
+                    face->m_texturCoords.push_back(static_cast<unsigned int>(vtSize + iVal));
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(vnSize + iVal);
+                    face->m_normals.push_back(static_cast<unsigned int>(vnSize + iVal));
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
                 }
             } else {
-                //On error, std::atoi will return 0 which is not a valid value
+                // 0 is not a valid index in OBJ files
                 delete face;
                 throw DeadlyImportError("OBJ: Invalid face index.");
             }
         }
-        mDataIt += iStep;
     }
 
     if (face->m_vertices.empty()) {

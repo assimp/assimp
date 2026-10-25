@@ -25,6 +25,9 @@ Hex BGR vs RGB probes (Videoscape stores hex as BGR per Bourke):
   bourke_gour_example.gour — Paul Bourke GOUR example (retyped from
                             https://paulbourke.net/dataformats/geo/).
                             First vertex 0x0000ff must be red under BGR.
+  hex_top_blue_bot_red.3dg — 3DG1 two strips: top 0xff0000 (blue), bottom
+                            0x0000ff (red) under BGR; Y-up screenshot check.
+  hex_top_blue_bot_red.gour — same tokens as GOUR vertex colors.
 
 These are NOT copies of third-party binary sample packs (ewhac, X GB, etc.).
 Bourke's example above is the documented ASCII sample from his format page;

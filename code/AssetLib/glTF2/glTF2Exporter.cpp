@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/config.h>
+#include <assimp/StringUtils.h>
 
 // Header files, standard library.
 #include <cinttypes>
@@ -72,6 +73,19 @@ using namespace rapidjson;
 
 using namespace Assimp;
 using namespace glTF2;
+
+namespace {
+
+std::string BasisUniversalMimeType(const std::string &path) {
+    if (const std::string lower_path = ai_tolower(path);
+        lower_path.size() >= 5 &&
+        lower_path.compare(lower_path.size() - 5, 5, ".ktx2") == 0) {
+        return "image/ktx2";
+    }
+    return {};
+}
+
+}  // namespace
 
 namespace Assimp {
 
@@ -616,8 +630,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
                     texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                 } else {
                     texture->source->uri = path;
-                    if (texture->source->uri.find(".ktx") != std::string::npos ||
-                            texture->source->uri.find(".basis") != std::string::npos) {
+                    texture->source->mimeType = BasisUniversalMimeType(path);
+                    if (!texture->source->mimeType.empty()) {
                         useBasisUniversal = true;
                     }
                 }
@@ -1694,7 +1708,9 @@ void glTF2Exporter::ExportAnimations() {
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation *anim = mScene->mAnimations[i];
-        const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+        // A zero ticks-per-second rate means "not specified" - treat key
+        // times as seconds instead of dividing by zero.
+        const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {

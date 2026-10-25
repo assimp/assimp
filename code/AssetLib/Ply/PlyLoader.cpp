@@ -624,7 +624,15 @@ namespace Assimp {
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[a / 2];
+                            // The texture-coordinate list length is independent of the
+                            // vertex-index list length, so a / 2 may run past the face's
+                            // index array (which may even be absent). Bound it before use.
+                            const unsigned int faceIndexPos = a / 2;
+                            if (mGeneratedMesh->mFaces[pos].mIndices == nullptr ||
+                                    faceIndexPos >= mGeneratedMesh->mFaces[pos].mNumIndices) {
+                                continue;
+                            }
+                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[faceIndexPos];
                             if (vindex < mGeneratedMesh->mNumVertices) {
                                 if (mGeneratedMesh->mTextureCoords[0] == nullptr) {
                                     mGeneratedMesh->mNumUVComponents[0] = 2;
@@ -893,6 +901,9 @@ namespace Assimp {
             if (!defaultTexture.empty()) {
                 const aiString name(defaultTexture.c_str());
                 pcHelper->AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0);
+            } else {
+                const aiString name(AI_DEFAULT_MATERIAL_NAME);
+                pcHelper->AddProperty(&name, AI_MATKEY_NAME);
             }
 
             // set to wireframe, so when using this material info we can switch to points rendering

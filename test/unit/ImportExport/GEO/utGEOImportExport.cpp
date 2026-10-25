@@ -81,7 +81,7 @@ TEST_F(utGEOImportExport, import3DGFaceColors) {
     EXPECT_EQ(4u, mesh->mNumVertices);
     EXPECT_EQ(1u, mesh->mNumFaces);
     ASSERT_NE(nullptr, mesh->mColors[0]);
-    // 0x808080 hex path -> RGB (128/255)
+    // 0x808080 hex path (BGR == RGB for gray)
     EXPECT_NEAR(128.0f / 255.0f, mesh->mColors[0][0].r, 1e-4f);
     EXPECT_NEAR(128.0f / 255.0f, mesh->mColors[0][0].g, 1e-4f);
     EXPECT_NEAR(128.0f / 255.0f, mesh->mColors[0][0].b, 1e-4f);
@@ -102,10 +102,17 @@ TEST_F(utGEOImportExport, importGOURVertexColors) {
     EXPECT_EQ(4u, mesh->mNumVertices);
     EXPECT_EQ(1u, mesh->mNumFaces);
     ASSERT_NE(nullptr, mesh->mColors[0]);
-    // First vertex color token 0xff0000 is decoded as (1,0,0) by LookupColor(rgbH)
+    // Videoscape hex is BGR: token 0x0000ff -> red
     EXPECT_NEAR(1.0f, mesh->mColors[0][0].r, 1e-4f);
     EXPECT_NEAR(0.0f, mesh->mColors[0][0].g, 1e-4f);
     EXPECT_NEAR(0.0f, mesh->mColors[0][0].b, 1e-4f);
+    // 0xff0000 -> blue, 0x00ff00 -> green
+    EXPECT_NEAR(0.0f, mesh->mColors[0][1].r, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][1].g, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][1].b, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][2].r, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][2].g, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][2].b, 1e-4f);
 #else
     ASSERT_EQ(scene, nullptr);
 #endif
@@ -149,6 +156,62 @@ TEST_F(utGEOImportExport, importBox3DG) {
     ASSERT_NE(nullptr, mesh);
     EXPECT_EQ(24u, mesh->mNumVertices); // 6 quads * 4
     EXPECT_EQ(6u, mesh->mNumFaces);
+#else
+    ASSERT_EQ(scene, nullptr);
+#endif
+}
+
+TEST_F(utGEOImportExport, importHexBgrProbeGour) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/GEO/hex_bgr_probe.gour", aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
+    ASSERT_NE(scene, nullptr);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_NE(nullptr, mesh->mColors[0]);
+    // TL 0x0000ff red, TR 0x00ff00 green, BR 0xff0000 blue, BL white
+    EXPECT_NEAR(1.0f, mesh->mColors[0][0].r, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][0].b, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][1].g, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][2].b, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][2].r, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][3].r, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][3].g, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][3].b, 1e-4f);
+#else
+    ASSERT_EQ(scene, nullptr);
+#endif
+}
+
+TEST_F(utGEOImportExport, importHexBgrProbe3DG) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/GEO/hex_bgr_probe.3dg", aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
+    ASSERT_NE(scene, nullptr);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_NE(nullptr, mesh->mColors[0]);
+    ASSERT_EQ(12u, mesh->mNumVertices);
+    // left face 0x0000ff -> red, mid 0x00ff00 -> green, right 0xff0000 -> blue
+    EXPECT_NEAR(1.0f, mesh->mColors[0][0].r, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][0].b, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][4].g, 1e-4f);
+    EXPECT_NEAR(1.0f, mesh->mColors[0][8].b, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][8].r, 1e-4f);
+#else
+    ASSERT_EQ(scene, nullptr);
+#endif
+}
+
+TEST_F(utGEOImportExport, importBourkeGourExampleBgr) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/GEO/bourke_gour_example.gour", aiProcess_ValidateDataStructure);
+#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
+    ASSERT_NE(scene, nullptr);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_NE(nullptr, mesh->mColors[0]);
+    // Face winding 0 3 2 1: expanded[0] is file vertex 0 (0x0000ff) -> red
+    EXPECT_NEAR(1.0f, mesh->mColors[0][0].r, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][0].g, 1e-4f);
+    EXPECT_NEAR(0.0f, mesh->mColors[0][0].b, 1e-4f);
 #else
     ASSERT_EQ(scene, nullptr);
 #endif

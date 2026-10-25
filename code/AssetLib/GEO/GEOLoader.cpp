@@ -509,9 +509,10 @@ void GEOImporter::InternReadColor(unsigned int pos) {
 // ------------------------------------------------------------------------------------------------
 void GEOImporter::LookupColor(long iColorIndex, aiColor4D &cOut) {
     if (rgbH) {
-        cOut[0] = ((iColorIndex & 0x00ff0000) >> 16) / 255.0f;
+        // Videoscape hex colors are BGR (Paul Bourke): red is 0x0000FF.
+        cOut[0] = (iColorIndex & 0x000000ff) / 255.0f;
         cOut[1] = ((iColorIndex & 0x0000ff00) >> 8) / 255.0f;
-        cOut[2] = (iColorIndex & 0x000000ff) / 255.0f;
+        cOut[2] = ((iColorIndex & 0x00ff0000) >> 16) / 255.0f;
         cOut[3] = 1.0f;
     } else {
         const int index = static_cast<int>(iColorIndex & 0x0f);

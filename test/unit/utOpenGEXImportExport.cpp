@@ -73,3 +73,9 @@ TEST_F(utOpenGEXImportExport, Importissue1340_EmptyCameraObject) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/empty_camera.ogex", 0);
     EXPECT_NE(nullptr, scene);
 }
+
+TEST_F(utOpenGEXImportExport, IndexArrayOutOfRange_NoCrash) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/invalid/index_out_of_range.ogex", 0);
+    EXPECT_EQ(nullptr, scene);
+}

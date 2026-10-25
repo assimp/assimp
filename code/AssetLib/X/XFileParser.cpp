@@ -668,6 +668,13 @@ void XFileParser::ParseDataObjectMeshMaterialList(Mesh *pMesh) {
     while (pMesh->mFaceMaterials.size() < pMesh->mPosFaces.size())
         pMesh->mFaceMaterials.push_back(pMesh->mFaceMaterials.front());
 
+    // mFaceMaterials is indexed against mPosFaces (one material per face) in
+    // CreateMeshes(); any count that does not match the face count would be read out
+    // of bounds there -- e.g. a second MeshMaterialList section appending more entries,
+    // or a list on a mesh that declares no faces.
+    if (pMesh->mFaceMaterials.size() != pMesh->mPosFaces.size())
+        ThrowException("Per-face material index count does not match the face count.");
+
     // read following data objects
     bool running = true;
     while (running) {

@@ -279,19 +279,11 @@ namespace Assimp {
             throw DeadlyImportError("Invalid .ply file: Unable to extract mesh data ");
         }
 
-        // No face element -> point cloud (same as OBJ/glTF/DXF: one 1-index face
-        // per vertex so ValidateDataStructure / default postprocess accept it).
+        // if no face list is existing we assume that the vertex
+        // list is containing a list of points
         bool pointsOnly = mGeneratedMesh->mFaces == nullptr ? true : false;
         if (pointsOnly) {
             mGeneratedMesh->mPrimitiveTypes = aiPrimitiveType::aiPrimitiveType_POINT;
-            const unsigned int n = mGeneratedMesh->mNumVertices;
-            mGeneratedMesh->mNumFaces = n;
-            mGeneratedMesh->mFaces = new aiFace[n];
-            for (unsigned int i = 0; i < n; ++i) {
-                mGeneratedMesh->mFaces[i].mNumIndices = 1;
-                mGeneratedMesh->mFaces[i].mIndices = new unsigned int[1];
-                mGeneratedMesh->mFaces[i].mIndices[0] = i;
-            }
         }
 
         // now load a list of all materials
